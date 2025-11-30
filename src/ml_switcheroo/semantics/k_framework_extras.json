@@ -1,0 +1,157 @@
+{
+  "DataLoader": {
+    "description": "Foundational PyTorch Data Loader. Explicitly unmapped to trigger Escape Hatch.",
+    "std_args": [
+      "dataset",
+      "batch_size",
+      "shuffle",
+      "sampler"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.utils.data.DataLoader",
+        "args": {
+          "dataset": "dataset",
+          "batch_size": "batch_size",
+          "shuffle": "shuffle",
+          "sampler": "sampler"
+        }
+      },
+      "jax": null
+    }
+  },
+  "TensorDataset": {
+    "description": "Simple dataset wrapping tensors.",
+    "std_args": [
+      "tensors"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.utils.data.TensorDataset",
+        "args": {
+          "tensors": "tensors"
+        }
+      },
+      "jax": null
+    }
+  },
+  "no_grad": {
+    "description": "Context manager to disable gradient calculation.",
+    "std_args": [],
+    "variants": {
+      "torch": {
+        "api": "torch.no_grad"
+      },
+      "jax": {
+        "api": "jax.lax.stop_gradient",
+        "requires_plugin": "context_to_function_wrap"
+      }
+    }
+  },
+  "save": {
+    "description": "Serialization utility. IO is often framework specific.",
+    "std_args": [
+      "obj",
+      "f"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.save"
+      },
+      "jax": {
+        "api": "orbax.checkpoint.save",
+        "requires_plugin": "io_handler"
+      }
+    }
+  },
+  "load": {
+    "description": "Deserialization utility.",
+    "std_args": [
+      "f"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.load"
+      },
+      "jax": {
+        "api": "orbax.checkpoint.restore",
+        "requires_plugin": "io_handler"
+      }
+    }
+  },
+  "manual_seed": {
+    "description": "Seeding RNG. Maps to standard numpy seed often.",
+    "std_args": [
+      "seed"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.manual_seed"
+      },
+      "jax": {
+        "api": "numpy.random.seed",
+        "args": {
+          "seed": "seed"
+        }
+      }
+    }
+  },
+  "device": {
+    "description": "Device placement object.",
+    "std_args": [
+      "type"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.device"
+      },
+      "jax": {
+        "api": "jax.devices",
+        "requires_plugin": "device_allocator"
+      }
+    }
+  },
+  "is_tensor": {
+    "description": "Type check helper.",
+    "std_args": [
+      "obj"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.is_tensor"
+      },
+      "jax": {
+        "api": "lambda x: hasattr(x, '__array__')",
+        "transformation_type": "inline_lambda"
+      }
+    }
+  },
+  "set_printoptions": {
+    "description": "Formatting utility for printing tensors.",
+    "std_args": [
+      "precision"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.set_printoptions"
+      },
+      "jax": {
+        "api": "numpy.set_printoptions"
+      }
+    }
+  },
+  "init_process_group": {
+    "description": "Distributed Training initialization.",
+    "std_args": [
+      "backend",
+      "rank",
+      "world_size"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.distributed.init_process_group"
+      },
+      "jax": null
+    }
+  }
+}

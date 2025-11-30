@@ -1,0 +1,347 @@
+"""
+Base Rewriter Implementation with Alias and Scope Resolution.
+
+This module provides the `BaseRewriter` class, which serves as the foundation for
+the `PivotRewriter`. It handles:
+1.  **State Management**: Tracking the current scope (global vs class vs function)
+    to handle stateful variable detection.
+2.  **Alias Resolution**: Tracking `import as` statements to resolve `t.abs` back
+    to `torch.abs` or `np.sum` to `numpy.sum`.
+3.  **Error Reporting**: Collecting failures during the AST walk to be bubbled
+    up to the `ASTEngine`.
+4.  **Hook Infrastructure**: initializing the `HookContext` used by plugins.
+"""
+
+from typing import Optional, List, Dict, Any, Union, Set
+import libcst as cst
+
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.rewriter.types import SignatureContext
+from ml_switcheroo.enums import SupportedEngine
+
+
+class BaseRewriter(cst.CSTTransformer):
+  """
+  The base class for AST transformation traversal.
+
+  It maintains the state required to navigate Python's scoping rules and
+  import systems, providing helper methods for the specific Mixins (Calls,
+  Structure, Attributes) to resolve names and report issues.
+
+  Attributes:
+      semantics (SemanticsManager): The loaded knowledge base of API mappings.
+      config (RuntimeConfig): Configuration for the current run (strict mode, etc).
+      source_fw (str): The string identifier of the source framework (e.g., 'torch').
+      target_fw (str): The string identifier of the target framework (e.g., 'jax').
+      strict_mode (bool): If True, unknown APIs trigger failure markers instead of pass-through.
+      ctx (HookContext): The context object passed to plugins.
+      _scope_stack (List[Set[str]]): A stack of scopes, tracking variables identified
+          as stateful (e.g., neural network layers assigned to `self`).
+      _signature_stack (List[SignatureContext]): Stack tracking function signature details
+          to support argument injection (like `rng`).
+      _alias_map (Dict[str, str]): Map of local names to fully qualified paths
+          (e.g., `{'nn': 'torch.nn', 'F': 'torch.nn.functional'}`).
+  """
+
+  def __init__(self, semantics: SemanticsManager, config: RuntimeConfig):
+    """
+    Initializes the rewriter.
+
+    Args:
+        semantics: The SemanticsManager instance containing the knowledge graph.
+        config: The runtime configuration object.
+    """
+    self.semantics = semantics
+    self.config = config
+
+    # Robust handling of source_fw field (str vs Enum validation)
+    if isinstance(config.source_framework, SupportedEngine):
+      self.source_fw = config.source_framework.value
+    else:
+      self.source_fw = str(config.source_framework)
+
+    if isinstance(config.target_framework, SupportedEngine):
+      self.target_fw = config.target_framework.value
+    else:
+      self.target_fw = str(config.target_framework)
+
+    self.strict_mode = config.strict_mode
+
+    self.ctx = HookContext(
+      semantics,
+      config,
+      arg_injector=self._callback_inject_arg,
+      preamble_injector=self._callback_inject_preamble,
+    )
+    self._current_stmt_errors: List[str] = []
+    self._current_stmt_warnings: List[str] = []
+
+    # Stack of scopes. Each scope is a set of variable names considered "stateful".
+    # Index -1 is the current scope.
+    self._scope_stack: List[Set[str]] = [set()]
+    self._signature_stack: List[SignatureContext] = []
+    self._in_module_class = False
+    self._alias_map: Dict[str, str] = {}
+
+  def _callback_inject_arg(self, name: str, annotation: Optional[str] = None) -> None:
+    """
+    Callback for plugins to inject arguments into the current function signature.
+
+    Args:
+        name: The argument name (e.g. 'rng').
+        annotation: Optional type hint string.
+    """
+    if not self._signature_stack:
+      return
+
+    ctx = self._signature_stack[-1]
+    if name not in ctx.existing_args:
+      found = any(existing_name == name for existing_name, _ in ctx.injected_args)
+      if not found:
+        ctx.injected_args.append((name, annotation))
+
+  def _callback_inject_preamble(self, code_str: str) -> None:
+    """
+    Callback for plugins to inject statements at the start of the current function.
+
+    Args:
+        code_str: The code to inject (e.g. 'rng, key = jax.random.split(rng)').
+    """
+    if not self._signature_stack:
+      return
+    ctx = self._signature_stack[-1]
+    if code_str not in ctx.preamble_stmts:
+      ctx.preamble_stmts.append(code_str)
+
+  def _enter_scope(self) -> None:
+    """Push a new scope onto the stack (e.g. entering a class or function)."""
+    self._scope_stack.append(set())
+
+  def _exit_scope(self) -> None:
+    """Pop the current scope from the stack."""
+    if len(self._scope_stack) > 1:
+      self._scope_stack.pop()
+
+  def _mark_stateful(self, var_name: str) -> None:
+    """
+    Marks a variable name as stateful in the current scope.
+    Used for tracking Neural Layers to determine if calls should be rewritten
+    as stateful invocations.
+
+    Args:
+        var_name: The variable identifier (e.g., 'self.conv1').
+    """
+    self._scope_stack[-1].add(var_name)
+
+  def _is_stateful(self, var_name: str) -> bool:
+    """
+    Checks if a variable is marked as stateful in any active scope.
+
+    Args:
+        var_name: The variable identifier.
+
+    Returns:
+        True if the variable was previously marked as stateful.
+    """
+    for scope in reversed(self._scope_stack):
+      if var_name in scope:
+        return True
+    return False
+
+  def _report_failure(self, reason: str) -> None:
+    """
+    Records a fatal translation error for the current statement.
+    This will trigger the Escape Hatch wrapper.
+
+    Args:
+        reason: Human-readable error message.
+    """
+    self._current_stmt_errors.append(reason)
+
+  def _report_warning(self, reason: str) -> None:
+    """
+    Records a non-fatal warning for the current statement.
+    This wraps the statement in comments but preserves the transformed code.
+
+    Args:
+        reason: Human-readable warning message.
+    """
+    self._current_stmt_warnings.append(reason)
+
+  def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
+    """
+    Resolves a CST node to its fully qualified name using import aliases.
+
+    Example:
+        If `import torch.nn as nn` exists, `nn.Linear` resolves to `torch.nn.Linear`.
+
+    Args:
+        node: The CST expression (Name or Attribute).
+
+    Returns:
+        The resolved string (e.g. 'torch.abs') or None if unresolvable.
+    """
+    full_str = self._cst_to_string(node)
+    if not full_str:
+      return None
+
+    parts = full_str.split(".")
+    root = parts[0]
+
+    if root in self._alias_map:
+      canonical_root = self._alias_map[root]
+      if len(parts) > 1:
+        # e.g. root='nn' -> 'torch.nn', parts=['nn', 'Linear'] -> 'torch.nn.Linear'
+        return f"{canonical_root}.{'.'.join(parts[1:])}"
+      return canonical_root
+
+    return full_str
+
+  def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
+    """Helper to flatten Attribute chains into strings."""
+    if isinstance(node, cst.Name):
+      return node.value
+    elif isinstance(node, cst.Attribute):
+      base = self._cst_to_string(node.value)
+      if base:
+        return f"{base}.{node.attr.value}"
+    return None
+
+  def _create_name_node(self, api_path: str) -> cst.BaseExpression:
+    """Creates a LibCST node structure from a dotted string."""
+    parts = api_path.split(".")
+    node = cst.Name(parts[0])
+    for part in parts[1:]:
+      node = cst.Attribute(value=node, attr=cst.Name(part))
+    return node
+
+  def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
+    """Alias for _create_name_node."""
+    return self._create_name_node(name_str)
+
+  def _get_mapping(self, name: str) -> Optional[Dict[str, Any]]:
+    """
+    Queries the SemanticsManager for the target framework's variant.
+
+    Performs strict-mode checks. If strict mode is on and the API is missing,
+    it reports a failure.
+
+    Args:
+        name: The fully qualified API name (e.g. 'torch.abs').
+
+    Returns:
+        The variant dictionary (e.g. `{"api": "jax.numpy.abs", ...}`) or None.
+    """
+    lookup = self.semantics.get_definition(name)
+    if not lookup:
+      if self.strict_mode and name.startswith(f"{self.source_fw}."):
+        self._report_failure(f"API '{name}' not found in semantics.")
+      return None
+
+    abstract_id, details = lookup
+
+    # Check Verification Gating
+    if not self.semantics.is_verified(abstract_id):
+      self._report_failure(f"Skipped '{name}': Marked unsafe by verification report.")
+      return None
+
+    # Retrieve Target Implementation
+    target_impl = details.get("variants", {}).get(self.target_fw)
+
+    if not target_impl:
+      # If the key exists but is None (explicit block) or just missing
+      if self.target_fw in details.get("variants", {}) or target_impl is None:
+        self._report_failure(f"No mapping defined for '{name}' -> '{self.target_fw}'")
+      else:
+        # Implicitly missing (maybe just not in the JSON yet)
+        if self.strict_mode:
+          self._report_failure(f"No mapping available for '{name}'")
+      return None
+
+    return target_impl
+
+  def visit_Import(self, node: cst.Import) -> Optional[bool]:
+    """
+    Scans `import ...` statements to populate the alias map.
+    Example: `import torch.nn as nn` -> `_alias_map['nn'] = 'torch.nn'`.
+    """
+    for alias in node.names:
+      full_name = self._cst_to_string(alias.name)
+      if not full_name:
+        continue
+
+      if alias.asname:
+        local_name = alias.asname.name.value
+        self._alias_map[local_name] = full_name
+      else:
+        root = full_name.split(".")[0]
+        self._alias_map[root] = root
+    return False
+
+  def visit_ImportFrom(self, node: cst.ImportFrom) -> Optional[bool]:
+    """
+    Scans `from ... import ...` statements to populate the alias map.
+    Example: `from torch import nn` -> `_alias_map['nn'] = 'torch.nn'`.
+    """
+    if node.relative:
+      return False
+
+    module_name = self._cst_to_string(node.module) if node.module else ""
+    if not module_name:
+      return False
+
+    if isinstance(node.names, cst.ImportStar):
+      return False
+
+    for alias in node.names:
+      if not isinstance(alias, cst.ImportAlias):
+        continue
+
+      imported_name = alias.name.value
+      canonical_source = f"{module_name}.{imported_name}"
+
+      if alias.asname:
+        local_name = alias.asname.name.value
+      else:
+        local_name = imported_name
+
+      self._alias_map[local_name] = canonical_source
+
+    return False
+
+  def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
+    """
+    Resets error tracking at the start of each line.
+    Errors bubble up from children (Expressions) to this Statement handler.
+    """
+    self._current_stmt_errors = []
+    self._current_stmt_warnings = []
+    return True
+
+  def leave_SimpleStatementLine(
+    self,
+    original_node: cst.SimpleStatementLine,
+    updated_node: cst.SimpleStatementLine,
+  ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel]:
+    """
+    If errors occurred during processing of this line's children (e.g. failing
+    to rewrite a function call), wrap the line in an `EscapeHatch`.
+
+    Prioritizes errors (reverting to original code) over warnings (using updated code).
+    """
+    if self._current_stmt_errors:
+      unique_errors = list(dict.fromkeys(self._current_stmt_errors))
+      message = "; ".join(unique_errors)
+      # Revert to ORIGINAL node to ensure no partial mutations exist
+      return EscapeHatch.mark_failure(original_node, message)
+
+    if self._current_stmt_warnings:
+      unique_warnings = list(dict.fromkeys(self._current_stmt_warnings))
+      message = "; ".join(unique_warnings)
+      # Warnings apply to UPDATED node
+      return EscapeHatch.mark_failure(updated_node, message)
+
+    return updated_node

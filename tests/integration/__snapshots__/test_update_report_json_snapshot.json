@@ -1,0 +1,10 @@
+{
+  "torch.new_thing": {
+    "detected_sig": [
+      "a",
+      "b"
+    ],
+    "doc_summary": "Brand new feature.",
+    "suggested_tier": "k_array_api.json"
+  }
+}

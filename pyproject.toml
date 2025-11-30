@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ml_switcheroo"
+version = "0.0.1"
+description = "Deterministic AST Transpiler for PyTorch <-> JAX"
+requires-python = ">=3.9"
+dependencies = [
+    "libcst>=1.0.0",
+    "rich>=13.0.0",
+    "griffe>=0.30.0",
+    "numpy>=2.0.2",
+    "pydantic>=2.0.0",
+    "flax>=0.8.5",
+    "coverage>=7.10.7",
+    "sphinx>=7.0.0",
+    "sphinx-material>=0.0.36",
+    "sphinx-autoapi>=3.6.1",
+    "myst-parser>=3.0.1",
+    "sphinx-copybutton>=0.5.2",
+    "linkify-it-py>=2.0.3",
+    "sphinxcontrib-mermaid>=1.2.3",
+]
+# Note: argparse is built-in, no install needed.
+
+[project.optional-dependencies]
+test = ["pytest>=7.0.0"]
+
+[project.scripts]
+ml_switcheroo = "ml_switcheroo.cli.__main__:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+exclude = [
+    ".eggs",
+    ".git",
+    ".ipynb_checkpoints",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "_build",
+    "build",
+    "dist",
+    "site-packages",
+    "venv",
+]
+line-length = 122
+indent-width = 2
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+
+indent-style = "space"
+
+skip-magic-trailing-comma = false
+
+line-ending = "auto"
+
+docstring-code-format = false
+docstring-code-line-length = "dynamic"

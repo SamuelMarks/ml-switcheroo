@@ -1,0 +1,1616 @@
+{
+  "__array_namespace_info__": {
+    "description": "Returns a namespace with Array API namespace inspection utilities.",
+    "from": "_2024_12/info.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "__eq__": {
+    "description": "Computes the truth value of ``self == other`` in order to test for data type object equality.",
+    "from": "_2024_12/data_types.py",
+    "std_args": [
+      "self",
+      "other"
+    ],
+    "variants": {}
+  },
+  "abs": {
+    "description": "Calculates the absolute value for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "acos": {
+    "description": "Calculates an implementation-dependent approximation of the principal value of the inverse cosine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "acosh": {
+    "description": "Calculates an implementation-dependent approximation to the inverse hyperbolic cosine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "add": {
+    "description": "Calculates the sum for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "all": {
+    "description": "Tests whether all input array elements evaluate to ``True`` along a specified axis.",
+    "from": "_2024_12/utility_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "any": {
+    "description": "Tests whether any input array element evaluates to ``True`` along a specified axis.",
+    "from": "_2024_12/utility_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "arange": {
+    "description": "Returns evenly spaced values within the half-open interval ``[start, stop)`` as a one-dimensional array.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "start",
+      "stop",
+      "step",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "argmax": {
+    "description": "Returns the indices of the maximum values along a specified axis.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "argmin": {
+    "description": "Returns the indices of the minimum values along a specified axis.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "argsort": {
+    "description": "Returns the indices that sort an array ``x`` along a specified axis.",
+    "from": "_2024_12/sorting_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "descending",
+      "stable"
+    ],
+    "variants": {}
+  },
+  "array": {
+    "description": "Constant: array",
+    "from": "_2024_12/array_object.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "asarray": {
+    "description": "Convert the input to an array.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "obj",
+      "dtype",
+      "device",
+      "copy"
+    ],
+    "variants": {}
+  },
+  "asin": {
+    "description": "Calculates an implementation-dependent approximation of the principal value of the inverse sine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "asinh": {
+    "description": "Calculates an implementation-dependent approximation to the inverse hyperbolic sine for each element ``x_i`` in the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "astype": {
+    "description": "Copies an array to a specified data type irrespective of :ref:`type-promotion` rules.",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [
+      "x",
+      "dtype",
+      "copy",
+      "device"
+    ],
+    "variants": {}
+  },
+  "atan": {
+    "description": "Calculates an implementation-dependent approximation of the principal value of the inverse tangent for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "atan2": {
+    "description": "Calculates an implementation-dependent approximation of the inverse tangent of the quotient ``x1/x2``, having domain ``[-infinity, +infinity] x [-infinity, +infinity]`` (where the ``x`` notation denotes the set of ordered pairs of elements ``(x1_i, x2_i)``) and codomain ``[-\u03c0, +\u03c0]``, for each pair of elements ``(x1_i, x2_i)`` of the input arrays ``x1`` and ``x2``, respectively. Each element-wise result is expressed in radians.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "atanh": {
+    "description": "Calculates an implementation-dependent approximation to the inverse hyperbolic tangent for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "bitwise_and": {
+    "description": "Computes the bitwise AND of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "bitwise_invert": {
+    "description": "Inverts (flips) each bit for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "bitwise_left_shift": {
+    "description": "Shifts the bits of each element ``x1_i`` of the input array ``x1`` to the left by appending ``x2_i`` (i.e., the respective element in the input array ``x2``) zeros to the right of ``x1_i``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "bitwise_or": {
+    "description": "Computes the bitwise OR of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "bitwise_right_shift": {
+    "description": "Shifts the bits of each element ``x1_i`` of the input array ``x1`` to the right according to the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "bitwise_xor": {
+    "description": "Computes the bitwise XOR of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "broadcast_arrays": {
+    "description": "Broadcasts one or more arrays against one another.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "broadcast_to": {
+    "description": "Broadcasts an array to a specified shape.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "shape"
+    ],
+    "variants": {}
+  },
+  "can_cast": {
+    "description": "Determines if one data type can be cast to another data type according to type promotion rules (see :ref:`type-promotion`).",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [
+      "from_",
+      "to"
+    ],
+    "variants": {}
+  },
+  "capabilities": {
+    "description": "Returns a dictionary of array library capabilities.",
+    "from": "_2024_12/info.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "ceil": {
+    "description": "Rounds each element ``x_i`` of the input array ``x`` to the smallest (i.e., closest to ``-infinity``) integer-valued number that is not less than ``x_i``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "cholesky": {
+    "description": "Returns the lower (upper) Cholesky decomposition of a complex Hermitian or real symmetric positive-definite matrix ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "upper"
+    ],
+    "variants": {}
+  },
+  "clip": {
+    "description": "Clamps each element ``x_i`` of the input array ``x`` to the range ``[min, max]``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x",
+      "min",
+      "max"
+    ],
+    "variants": {}
+  },
+  "concat": {
+    "description": "Joins a sequence of arrays along an existing axis.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "arrays",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "conj": {
+    "description": "Returns the complex conjugate for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "copysign": {
+    "description": "Composes a floating-point value with the magnitude of ``x1_i`` and the sign of ``x2_i`` for each element of the input array ``x1``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "cos": {
+    "description": "Calculates an implementation-dependent approximation to the cosine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "cosh": {
+    "description": "Calculates an implementation-dependent approximation to the hyperbolic cosine for each element ``x_i`` in the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "count_nonzero": {
+    "description": "Counts the number of array elements which are non-zero.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "cross": {
+    "description": "Returns the cross product of 3-element vectors.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x1",
+      "x2",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "cumulative_prod": {
+    "description": "Calculates the cumulative product of elements in the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "dtype",
+      "include_initial"
+    ],
+    "variants": {}
+  },
+  "cumulative_sum": {
+    "description": "Calculates the cumulative sum of elements in the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "dtype",
+      "include_initial"
+    ],
+    "variants": {}
+  },
+  "default_device": {
+    "description": "Returns the default device.",
+    "from": "_2024_12/info.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "default_dtypes": {
+    "description": "Returns a dictionary containing default data types.",
+    "from": "_2024_12/info.py",
+    "std_args": [
+      "device"
+    ],
+    "variants": {}
+  },
+  "det": {
+    "description": "Returns the determinant of a square matrix (or a stack of square matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "devices": {
+    "description": "Returns a list of supported devices which are available at runtime.",
+    "from": "_2024_12/info.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "diagonal": {
+    "description": "Returns the specified diagonals of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "offset"
+    ],
+    "variants": {}
+  },
+  "diff": {
+    "description": "Calculates the n-th discrete forward difference along a specified axis.",
+    "from": "_2024_12/utility_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "n",
+      "prepend",
+      "append"
+    ],
+    "variants": {}
+  },
+  "divide": {
+    "description": "Calculates the division of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "dtypes": {
+    "description": "Returns a dictionary of supported *Array API* data types.",
+    "from": "_2024_12/info.py",
+    "std_args": [
+      "device",
+      "kind"
+    ],
+    "variants": {}
+  },
+  "e": {
+    "description": "IEEE 754 floating-point representation of Euler's constant.",
+    "from": "_2024_12/constants.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "eigh": {
+    "description": "Returns an eigenvalue decomposition of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "eigvalsh": {
+    "description": "Returns the eigenvalues of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "empty": {
+    "description": "Returns an uninitialized array having a specified `shape`.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "shape",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "empty_like": {
+    "description": "Returns an uninitialized array with the same ``shape`` as an input array ``x``.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "x",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "equal": {
+    "description": "Computes the truth value of ``x1_i == x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "exp": {
+    "description": "Calculates an implementation-dependent approximation to the exponential function for each element ``x_i`` of the input array ``x`` (``e`` raised to the power of ``x_i``, where ``e`` is the base of the natural logarithm).",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "expand_dims": {
+    "description": "Expands the shape of an array by inserting a new axis (dimension) of size one at the position specified by ``axis``.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "expm1": {
+    "description": "Calculates an implementation-dependent approximation to ``exp(x)-1`` for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "eye": {
+    "description": "Returns a two-dimensional array with ones on the ``k``\\th diagonal and zeros elsewhere.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "n_rows",
+      "n_cols",
+      "k",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "fft": {
+    "description": "Computes the one-dimensional discrete Fourier transform.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "n",
+      "axis",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "fftfreq": {
+    "description": "Computes the discrete Fourier transform sample frequencies.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "n",
+      "d",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "fftn": {
+    "description": "Computes the n-dimensional discrete Fourier transform.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "s",
+      "axes",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "fftshift": {
+    "description": "Shifts the zero-frequency component to the center of the spectrum.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "axes"
+    ],
+    "variants": {}
+  },
+  "finfo": {
+    "description": "Machine limits for floating-point data types.",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [
+      "type"
+    ],
+    "variants": {}
+  },
+  "flip": {
+    "description": "Reverses the order of elements in an array along the given axis. The shape of the array must be preserved.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "floor": {
+    "description": "Rounds each element ``x_i`` of the input array ``x`` to the greatest (i.e., closest to ``+infinity``) integer-valued number that is not greater than ``x_i``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "floor_divide": {
+    "description": "Rounds the result of dividing each element ``x1_i`` of the input array ``x1`` by the respective element ``x2_i`` of the input array ``x2`` to the greatest (i.e., closest to `+infinity`) integer-value number that is not greater than the division result.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "from_dlpack": {
+    "description": "Returns a new array containing the data from another (array) object with a ``__dlpack__`` method.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "x",
+      "device",
+      "copy"
+    ],
+    "variants": {}
+  },
+  "full": {
+    "description": "Returns a new array having a specified ``shape`` and filled with ``fill_value``.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "shape",
+      "fill_value",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "full_like": {
+    "description": "Returns a new array filled with ``fill_value`` and having the same ``shape`` as an input array ``x``.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "x",
+      "fill_value",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "greater": {
+    "description": "Computes the truth value of ``x1_i > x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "greater_equal": {
+    "description": "Computes the truth value of ``x1_i >= x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "hfft": {
+    "description": "Computes the one-dimensional discrete Fourier transform of a signal with Hermitian symmetry.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "n",
+      "axis",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "hypot": {
+    "description": "Computes the square root of the sum of squares for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "ifft": {
+    "description": "Computes the one-dimensional inverse discrete Fourier transform.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "n",
+      "axis",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "ifftn": {
+    "description": "Computes the n-dimensional inverse discrete Fourier transform.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "s",
+      "axes",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "ifftshift": {
+    "description": "Inverse of ``fftshift``.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "axes"
+    ],
+    "variants": {}
+  },
+  "ihfft": {
+    "description": "Computes the one-dimensional inverse discrete Fourier transform of a signal with Hermitian symmetry.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "n",
+      "axis",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "iinfo": {
+    "description": "Machine limits for integer data types.",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [
+      "type"
+    ],
+    "variants": {}
+  },
+  "imag": {
+    "description": "Returns the imaginary component of a complex number for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "inf": {
+    "description": "IEEE 754 floating-point representation of (positive) infinity.",
+    "from": "_2024_12/constants.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "inv": {
+    "description": "Returns the multiplicative inverse of a square matrix (or a stack of square matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "irfft": {
+    "description": "Computes the one-dimensional inverse of ``rfft`` for complex-valued input.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "n",
+      "axis",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "irfftn": {
+    "description": "Computes the n-dimensional inverse of ``rfftn`` for complex-valued input.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "s",
+      "axes",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "isdtype": {
+    "description": "Returns a boolean indicating whether a provided dtype is of a specified data type \"kind\".",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [
+      "dtype",
+      "kind"
+    ],
+    "variants": {}
+  },
+  "isfinite": {
+    "description": "Tests each element ``x_i`` of the input array ``x`` to determine if finite.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "isinf": {
+    "description": "Tests each element ``x_i`` of the input array ``x`` to determine if equal to positive or negative infinity.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "isnan": {
+    "description": "Tests each element ``x_i`` of the input array ``x`` to determine whether the element is ``NaN``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "less": {
+    "description": "Computes the truth value of ``x1_i < x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "less_equal": {
+    "description": "Computes the truth value of ``x1_i <= x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "linspace": {
+    "description": "Returns evenly spaced numbers over a specified interval.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "start",
+      "stop",
+      "num",
+      "dtype",
+      "device",
+      "endpoint"
+    ],
+    "variants": {}
+  },
+  "log": {
+    "description": "Calculates an implementation-dependent approximation to the natural (base ``e``) logarithm for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "log10": {
+    "description": "Calculates an implementation-dependent approximation to the base ``10`` logarithm for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "log1p": {
+    "description": "Calculates an implementation-dependent approximation to ``log(1+x)``, where ``log`` refers to the natural (base ``e``) logarithm, for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "log2": {
+    "description": "Calculates an implementation-dependent approximation to the base ``2`` logarithm for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "logaddexp": {
+    "description": "Calculates the logarithm of the sum of exponentiations ``log(exp(x1) + exp(x2))`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "logical_and": {
+    "description": "Computes the logical AND for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "logical_not": {
+    "description": "Computes the logical NOT for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "logical_or": {
+    "description": "Computes the logical OR for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "logical_xor": {
+    "description": "Computes the logical XOR for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "matmul": {
+    "description": "Computes the matrix product.",
+    "from": "_2024_12/linear_algebra_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "matrix_norm": {
+    "description": "Computes the matrix norm of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "keepdims",
+      "ord"
+    ],
+    "variants": {}
+  },
+  "matrix_power": {
+    "description": "Raises a square matrix (or a stack of square matrices) ``x`` to an integer power ``n``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "n"
+    ],
+    "variants": {}
+  },
+  "matrix_rank": {
+    "description": "Returns the rank (i.e., number of non-zero singular values) of a matrix (or a stack of matrices).",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "rtol"
+    ],
+    "variants": {}
+  },
+  "matrix_transpose": {
+    "description": "Transposes a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linear_algebra_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "max": {
+    "description": "Calculates the maximum value of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "maximum": {
+    "description": "Computes the maximum value for each element ``x1_i`` of the input array ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "mean": {
+    "description": "Calculates the arithmetic mean of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "meshgrid": {
+    "description": "Returns coordinate matrices from coordinate vectors.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "indexing"
+    ],
+    "variants": {}
+  },
+  "min": {
+    "description": "Calculates the minimum value of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "minimum": {
+    "description": "Computes the minimum value for each element ``x1_i`` of the input array ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "moveaxis": {
+    "description": "Moves array axes (dimensions) to new positions, while leaving other axes in their original positions.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "source",
+      "destination"
+    ],
+    "variants": {}
+  },
+  "multiply": {
+    "description": "Calculates the product for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "nan": {
+    "description": "IEEE 754 floating-point representation of Not a Number (``NaN``).",
+    "from": "_2024_12/constants.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "negative": {
+    "description": "Computes the numerical negative of each element ``x_i`` (i.e., ``y_i = -x_i``) of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "newaxis": {
+    "description": "An alias for ``None`` which is useful for indexing arrays.",
+    "from": "_2024_12/constants.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "nextafter": {
+    "description": "Returns the next representable floating-point value for each element ``x1_i`` of the input array ``x1`` in the direction of the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "nonzero": {
+    "description": "Returns the indices of the array elements which are non-zero.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "not_equal": {
+    "description": "Computes the truth value of ``x1_i != x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "ones": {
+    "description": "Returns a new array having a specified ``shape`` and filled with ones.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "shape",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "ones_like": {
+    "description": "Returns a new array filled with ones and having the same ``shape`` as an input array ``x``.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "x",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "outer": {
+    "description": "Returns the outer product of two vectors ``x1`` and ``x2``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "permute_dims": {
+    "description": "Permutes the axes (dimensions) of an array ``x``.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "axes"
+    ],
+    "variants": {}
+  },
+  "pi": {
+    "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
+    "from": "_2024_12/constants.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "pinv": {
+    "description": "Returns the (Moore-Penrose) pseudo-inverse of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "rtol"
+    ],
+    "variants": {}
+  },
+  "positive": {
+    "description": "Computes the numerical positive of each element ``x_i`` (i.e., ``y_i = +x_i``) of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "pow": {
+    "description": "Calculates an implementation-dependent approximation of exponentiation by raising each element ``x1_i`` (the base) of the input array ``x1`` to the power of ``x2_i`` (the exponent), where ``x2_i`` is the corresponding element of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "prod": {
+    "description": "Calculates the product of input array ``x`` elements.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "dtype",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "qr": {
+    "description": "Returns the QR decomposition of a full column rank matrix (or a stack of matrices).",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "mode"
+    ],
+    "variants": {}
+  },
+  "real": {
+    "description": "Returns the real component of a complex number for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "reciprocal": {
+    "description": "Returns the reciprocal for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "remainder": {
+    "description": "Returns the remainder of division for each element ``x1_i`` of the input array ``x1`` and the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "repeat": {
+    "description": "Repeats each element of an array a specified number of times on a per-element basis.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "repeats",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "reshape": {
+    "description": "Reshapes an array without changing its data.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "shape",
+      "copy"
+    ],
+    "variants": {}
+  },
+  "result_type": {
+    "description": "Returns the dtype that results from applying type promotion rules (see :ref:`type-promotion`) to the arguments.",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "rfft": {
+    "description": "Computes the one-dimensional discrete Fourier transform for real-valued input.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "n",
+      "axis",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "rfftfreq": {
+    "description": "Computes the discrete Fourier transform sample frequencies (for ``rfft`` and ``irfft``).",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "n",
+      "d",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "rfftn": {
+    "description": "Computes the n-dimensional discrete Fourier transform for real-valued input.",
+    "from": "_2024_12/fft.py",
+    "std_args": [
+      "x",
+      "s",
+      "axes",
+      "norm"
+    ],
+    "variants": {}
+  },
+  "roll": {
+    "description": "Rolls array elements along a specified axis. Array elements that roll beyond the last position are re-introduced at the first position. Array elements that roll beyond the first position are re-introduced at the last position.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "shift",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "round": {
+    "description": "Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "searchsorted": {
+    "description": "Finds the indices into ``x1`` such that, if the corresponding elements in ``x2`` were inserted before the indices, the order of ``x1``, when sorted in ascending order, would be preserved.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      "x1",
+      "x2",
+      "side",
+      "sorter"
+    ],
+    "variants": {}
+  },
+  "sign": {
+    "description": "Returns an indication of the sign of a number for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "signbit": {
+    "description": "Determines whether the sign bit is set for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "sin": {
+    "description": "Calculates an implementation-dependent approximation to the sine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "sinh": {
+    "description": "Calculates an implementation-dependent approximation to the hyperbolic sine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "slogdet": {
+    "description": "Returns the sign and the natural logarithm of the absolute value of the determinant of a square matrix (or a stack of square matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "solve": {
+    "description": "Returns the solution of a square system of linear equations with a unique solution.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "sort": {
+    "description": "Returns a sorted copy of an input array ``x``.",
+    "from": "_2024_12/sorting_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "descending",
+      "stable"
+    ],
+    "variants": {}
+  },
+  "sqrt": {
+    "description": "Calculates the principal square root for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "square": {
+    "description": "Squares each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "squeeze": {
+    "description": "Removes singleton dimensions (axes) from ``x``.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "stack": {
+    "description": "Joins a sequence of arrays along a new axis.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "arrays",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "std": {
+    "description": "Calculates the standard deviation of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "correction",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "subtract": {
+    "description": "Calculates the difference for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "sum": {
+    "description": "Calculates the sum of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "dtype",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "svd": {
+    "description": "Returns a singular value decomposition (SVD) of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "full_matrices"
+    ],
+    "variants": {}
+  },
+  "svdvals": {
+    "description": "Returns the singular values of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "take": {
+    "description": "Returns elements of an array along an axis.",
+    "from": "_2024_12/indexing_functions.py",
+    "std_args": [
+      "x",
+      "indices",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "take_along_axis": {
+    "description": "Returns elements from an array at the one-dimensional indices specified by ``indices`` along a provided ``axis``.",
+    "from": "_2024_12/indexing_functions.py",
+    "std_args": [
+      "x",
+      "indices",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "tan": {
+    "description": "Calculates an implementation-dependent approximation to the tangent for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "tanh": {
+    "description": "Calculates an implementation-dependent approximation to the hyperbolic tangent for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "tensordot": {
+    "description": "Returns a tensor contraction of ``x1`` and ``x2`` over specific axes.",
+    "from": "_2024_12/linear_algebra_functions.py",
+    "std_args": [
+      "x1",
+      "x2",
+      "axes"
+    ],
+    "variants": {}
+  },
+  "tile": {
+    "description": "Constructs an array by tiling an input array.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "repetitions"
+    ],
+    "variants": {}
+  },
+  "trace": {
+    "description": "Returns the sum along the specified diagonals of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "offset",
+      "dtype"
+    ],
+    "variants": {}
+  },
+  "tril": {
+    "description": "Returns the lower triangular part of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "x",
+      "k"
+    ],
+    "variants": {}
+  },
+  "triu": {
+    "description": "Returns the upper triangular part of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "x",
+      "k"
+    ],
+    "variants": {}
+  },
+  "trunc": {
+    "description": "Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number that is closer to zero than ``x_i``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "unique_all": {
+    "description": "Returns the unique elements of an input array ``x``, the first occurring indices for each unique element in ``x``, the indices from the set of unique elements that reconstruct ``x``, and the corresponding counts for each unique element in ``x``.",
+    "from": "_2024_12/set_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "unique_counts": {
+    "description": "Returns the unique elements of an input array ``x`` and the corresponding counts for each unique element in ``x``.",
+    "from": "_2024_12/set_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "unique_inverse": {
+    "description": "Returns the unique elements of an input array ``x`` and the indices from the set of unique elements that reconstruct ``x``.",
+    "from": "_2024_12/set_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "unique_values": {
+    "description": "Returns the unique elements of an input array ``x``.",
+    "from": "_2024_12/set_functions.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {}
+  },
+  "unstack": {
+    "description": "Splits an array into a sequence of arrays along the given axis.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      "x",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "var": {
+    "description": "Calculates the variance of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      "x",
+      "axis",
+      "correction",
+      "keepdims"
+    ],
+    "variants": {}
+  },
+  "vecdot": {
+    "description": "Computes the (vector) dot product of two arrays.",
+    "from": "_2024_12/linear_algebra_functions.py",
+    "std_args": [
+      "x1",
+      "x2",
+      "axis"
+    ],
+    "variants": {}
+  },
+  "vector_norm": {
+    "description": "Computes the vector norm of a vector (or batch of vectors) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      "x",
+      "axis",
+      "keepdims",
+      "ord"
+    ],
+    "variants": {}
+  },
+  "where": {
+    "description": "Returns elements chosen from ``x1`` or ``x2`` depending on ``condition``.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      "condition",
+      "x1",
+      "x2"
+    ],
+    "variants": {}
+  },
+  "zeros": {
+    "description": "Returns a new array having a specified ``shape`` and filled with zeros.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "shape",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  },
+  "zeros_like": {
+    "description": "Returns a new array filled with zeros and having the same ``shape`` as an input array ``x``.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      "x",
+      "dtype",
+      "device"
+    ],
+    "variants": {}
+  }
+}

@@ -1,0 +1,7 @@
+sphinx>=7.0.0
+sphinx-material
+sphinx-autoapi
+myst-parser
+sphinx-copybutton
+linkify-it-py
+sphinxcontrib-mermaid

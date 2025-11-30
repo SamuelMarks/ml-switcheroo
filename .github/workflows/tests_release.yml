@@ -1,0 +1,88 @@
+name: Tests
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Pytest (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Based on your TOML requiring >=3.9
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+
+    env:
+      # Configure uv to use the system Python if we wanted,
+      # but here we will create a dedicated venv for isolation.
+      UV_SYSTEM_PYTHON: 0
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Create virtual environment
+        run: uv venv
+
+      - name: Install dependencies
+        # Activates venv, installs the package in editable mode with [test] extras
+        run: |
+          source .venv/bin/activate
+          uv pip install -e ".[test]"
+
+      - name: Run Pytest
+        run: |
+          source .venv/bin/activate
+          pytest tests
+
+      - name: Doc build
+        run: |
+          source .venv/bin/activate
+          uv pip install -r docs/requirements.txt
+          python3 scripts/build_docs.py
+
+      - name: Doc build
+        run: |
+          source .venv/bin/activate
+          uv pip install -r docs/requirements.txt
+          python3 scripts/build_docs.py
+          cp -r docs/_build/html ${GITHUB_WORKSPACE}/ml-switcheroo-docs
+
+      - name: Checkout source code
+        uses: actions/checkout@v6
+        with:
+          repository: 'SamuelMarks/samuelmarks.github.io'
+          path: 'samuelmarks.github.io'
+
+      - name: Release docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        run: |
+          cd "${GITHUB_WORKSPACE}"'/samuelmarks.github.io'
+          rm -rf 'ml-switcheroo'
+          cp -r "${GITHUB_WORKSPACE}"'/ml-switcheroo-docs' 'ml-switcheroo'
+
+          email_author="$(git log -1 --pretty=format:'%an <%ce>')"
+          author="${email_author% *}"
+          git config --global user.name "${author}"
+          email="${email_author#*<}"; email="${email::-1}"
+          git config --global user.email "${email}"
+
+          git add 'ml-switcheroo'
+          git commit -m '[ml-switcheroo] Add/update docs'
+          git push origin master
