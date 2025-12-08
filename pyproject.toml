@@ -1,41 +1,24 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-requirements-txt"]
+build-backend = "hatchling.build"
 
 [project]
 name = "ml_switcheroo"
 version = "0.0.1"
 description = "Deterministic AST Transpiler for PyTorch <-> JAX"
 requires-python = ">=3.9"
-dependencies = [
-    "libcst>=1.0.0",
-    "rich>=13.0.0",
-    "griffe>=0.30.0",
-    "numpy>=2.0.2",
-    "pydantic>=2.0.0",
-    "flax>=0.8.5",
-    "coverage>=7.10.7",
-    "sphinx>=7.0.0",
-    "sphinx-material>=0.0.36",
-    "sphinx-autoapi>=3.6.1",
-    "myst-parser>=3.0.1",
-    "sphinx-copybutton>=0.5.2",
-    "linkify-it-py>=2.0.3",
-    "sphinxcontrib-mermaid>=1.2.3",
-]
-# Note: argparse is built-in, no install needed.
+dynamic = ["dependencies", "optional-dependencies"]
 
-[project.optional-dependencies]
-test = ["pytest>=7.0.0"]
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.hatch.metadata.hooks.requirements_txt.optional-dependencies]
+test = ["test-requirements.txt"]
+docs = ["docs/requirements.txt"]
 
 [project.scripts]
 ml_switcheroo = "ml_switcheroo.cli.__main__:main"
-
-[tool.setuptools]
-include-package-data = true
-
-[tool.setuptools.packages.find]
-where = ["src"]
+"🔄🦘" = "ml_switcheroo.cli.__main__:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

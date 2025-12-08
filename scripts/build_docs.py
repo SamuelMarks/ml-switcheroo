@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import shutil
 import subprocess
 import sys
@@ -49,14 +48,45 @@ def copy_root_files():
       print(f"⚠️  Warning: {fname} not found in root.")
 
 
+def build_wheel():
+  """
+  Builds the pure python wheel for the WASM demo.
+  It delegates to 'python -m build' (generic frontend) or 'hatch build'.
+  """
+  print("📦 Building Python Wheel for WASM...")
+
+  # Ensure 'dist' is clean to avoid grabbing old versions
+  dist_dir = PROJECT_ROOT / "dist"
+  if dist_dir.exists():
+    shutil.rmtree(dist_dir)
+
+  try:
+    # Standard PEP 517 build
+    cmd = [sys.executable, "-m", "build", ".", "--wheel"]
+    subprocess.run(cmd, cwd=PROJECT_ROOT, check=True, capture_output=True)
+    print("✅ Wheel built successfully in dist/")
+  except subprocess.CalledProcessError as e:
+    print("❌ Failed to build wheel.")
+    print("STDERR:", e.stderr.decode())
+    print("\n💡 Tip: Ensure 'build' is installed: pip install build")
+    sys.exit(1)
+
+
 def build():
   """Runs sphinx-build."""
+
+  # 1. Build the wheel first so the sphinx extension can find it
+  build_wheel()
+
   print("🏗️  Building Sphinx documentation...")
   cmd = [
-    sys.executable, "-m", "sphinx",
-    "-b", "html",
+    sys.executable,
+    "-m",
+    "sphinx",
+    "-b",
+    "html",
     str(DOCS_DIR),
-    str(BUILD_DIR / "html")
+    str(BUILD_DIR / "html"),
   ]
 
   result = subprocess.run(cmd)
@@ -71,11 +101,10 @@ def main():
 
     if ret == 0:
       index_path = BUILD_DIR / "html" / "index.html"
-      print(f"\n✨ Documentation built successfully!")
+      print("\n✨ Documentation built successfully!")
       print(f"🌍 Open index at: {index_path.resolve()}")
   finally:
     # Optional: cleanup copied files after build
-    # Comment this out if you want to inspect what was built
     for fname in ROOT_FILES:
       dest = DOCS_DIR / fname
       if dest.exists():

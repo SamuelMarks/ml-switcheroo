@@ -462,6 +462,27 @@
     ],
     "variants": {}
   },
+  "einsum": {
+    "description": "Evaluates the Einstein summation convention on the operands.",
+    "from": "_2024_12/linear_algebra_functions.py",
+    "std_args": [
+      "equation",
+      "operands"
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.einsum",
+        "requires_plugin": "einsum_normalizer"
+      },
+      "numpy": {
+        "api": "numpy.einsum",
+        "requires_plugin": "einsum_normalizer"
+      },
+      "torch": {
+        "api": "torch.einsum"
+      }
+    }
+  },
   "empty": {
     "description": "Returns an uninitialized array having a specified `shape`.",
     "from": "_2024_12/creation_functions.py",
@@ -1110,7 +1131,15 @@
       "x",
       "axes"
     ],
-    "variants": {}
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.transpose",
+        "requires_plugin": "pack_varargs"
+      },
+      "torch": {
+        "api": "torch.permute"
+      }
+    }
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
@@ -1308,6 +1337,26 @@
       "x"
     ],
     "variants": {}
+  },
+  "size": {
+    "description": "Returns the number of elements in the array or along a specified axis.",
+    "from": "_2024_12/array_object.py",
+    "std_args": [
+      "x"
+    ],
+    "variants": {
+      "jax": {
+        "api": "shape",
+        "requires_plugin": "method_to_property"
+      },
+      "numpy": {
+        "api": "shape",
+        "requires_plugin": "method_to_property"
+      },
+      "torch": {
+        "api": "torch.Tensor.size"
+      }
+    }
   },
   "slogdet": {
     "description": "Returns the sign and the natural logarithm of the absolute value of the determinant of a square matrix (or a stack of square matrices) ``x``.",
@@ -1582,6 +1631,30 @@
       "ord"
     ],
     "variants": {}
+  },
+  "vmap": {
+    "description": "Vectorizing map transform.",
+    "from": "manual_entry",
+    "std_args": [
+      "func",
+      "in_axes",
+      "out_axes"
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.vmap",
+        "args": {
+          "func": "fun"
+        }
+      },
+      "torch": {
+        "api": "torch.vmap",
+        "args": {
+          "in_axes": "in_dims",
+          "out_axes": "out_dims"
+        }
+      }
+    }
   },
   "where": {
     "description": "Returns elements chosen from ``x1`` or ``x2`` depending on ``condition``.",

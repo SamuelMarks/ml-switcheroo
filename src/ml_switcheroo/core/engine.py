@@ -18,6 +18,7 @@ from ml_switcheroo.core.import_fixer import ImportFixer
 from ml_switcheroo.core.scanners import UsageScanner
 from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.analysis.dependencies import DependencyScanner
+from ml_switcheroo.analysis.lifecycle import InitializationTracker
 from ml_switcheroo.config import RuntimeConfig
 
 
@@ -108,7 +109,8 @@ class ASTEngine:
 
     Steps:
     0a. Purity Analysis (if targeting JAX): Flag unsafe side-effects.
-    0b. Dependency Analysis: Flag unmapped 3rd party libraries.
+    0b. Lifecycle Analysis: Detect dynamic attribute definition.
+    0c. Dependency Analysis: Flag unmapped 3rd party libraries.
     1. Rewrite Call usages (Semantic Pivot).
     2. Scan for lingering source references.
     3. Feature-driven Import Fixing.
@@ -131,7 +133,16 @@ class ASTEngine:
       purity_scanner = PurityScanner()
       tree = tree.visit(purity_scanner)
 
-    # Pass 0b: Dependency Analysis (Validation)
+    # Pass 0b: Lifecycle Analysis (Detect dynamic state definition)
+    # This is critical for converting Pythonic PyTorch to Static Graph JAX/Flax
+    lifecycle_tracker = InitializationTracker()
+    tree.visit(lifecycle_tracker)
+
+    if lifecycle_tracker.warnings:
+      for warning in lifecycle_tracker.warnings:
+        errors_log.append(f"Lifecycle Warning: {warning}")
+
+    # Pass 0c: Dependency Analysis (Validation)
     # Identifies imports like 'pandas', 'cv2' that aren't mapped in semantics.
     dep_scanner = DependencyScanner(self.semantics, self.source)
     tree.visit(dep_scanner)
@@ -154,14 +165,16 @@ class ASTEngine:
       tree.visit(scanner)
       should_preserve = scanner.get_result()
 
-      # Sub-step 2b: Retrieve Data-Driven Import Maps
+      # Sub-step 2b: Retrieve Data-Driven Import Maps & Alias Config
       submodule_map = self.semantics.get_import_map(self.config.target_framework)
+      alias_map = self.semantics.get_framework_aliases()
 
       # Sub-step 2c: Fix imports
       fixer = ImportFixer(
         self.config.source_framework,
         self.config.target_framework,
         submodule_map=submodule_map,
+        alias_map=alias_map,
         preserve_source=should_preserve,
       )
       tree = tree.visit(fixer)

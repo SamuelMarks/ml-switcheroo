@@ -23,17 +23,17 @@ from ml_switcheroo.plugins.decompositions import transform_alpha_add, transform_
 class E2EMockSemantics(SemanticsManager):
   def __init__(self):
     # Skip super init to avoid file loading
-    self.data = {
-      "add": {
-        "std_args": ["x", "y"],
-        "variants": {
-          "torch": {"api": "torch.add", "requires_plugin": "recompose_alpha"},
-          "jax": {"api": "jax.numpy.add", "requires_plugin": "decompose_alpha"},
-        },
-      }
-    }
+    self.data = {}
     self.import_data = {}
+    self.framework_configs = {}  # Required by ASTEngine alias checker
     # Simple reverse index
+    self.data["add"] = {
+      "std_args": ["x", "y"],
+      "variants": {
+        "torch": {"api": "torch.add", "requires_plugin": "recompose_alpha"},
+        "jax": {"api": "jax.numpy.add", "requires_plugin": "decompose_alpha"},
+      },
+    }
     self._reverse_index = {
       "torch.add": ("add", self.data["add"]),
       "jax.numpy.add": ("add", self.data["add"]),

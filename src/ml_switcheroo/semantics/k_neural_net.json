@@ -1,0 +1,82 @@
+{
+  "Linear": {
+    "description": "Applies a linear transformation to the incoming data: y = xA^T + b.",
+    "std_args": [
+      "in_features",
+      "out_features",
+      "bias"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.Linear",
+        "args": {
+          "bias": "bias"
+        }
+      },
+      "jax": {
+        "api": "flax.nnx.Linear",
+        "args": {
+          "bias": "use_bias"
+        }
+      },
+      "tensorflow": {
+        "api": "keras.layers.Dense",
+        "args": {
+          "in_features": "input_dim",
+          "out_features": "units",
+          "bias": "use_bias"
+        }
+      }
+    }
+  },
+  "Sequential": {
+    "description": "A sequential container. Modules will be added to it in the order they are passed in the constructor.",
+    "std_args": [],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.Sequential"
+      },
+      "jax": {
+        "api": "flax.nnx.Sequential"
+      },
+      "tensorflow": {
+        "api": "keras.Sequential"
+      }
+    }
+  },
+  "Flatten": {
+    "description": "Flattens a contiguous range of dims into a tensor.",
+    "std_args": [
+      "start_dim",
+      "end_dim"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.Flatten"
+      },
+      "jax": {
+        "api": "flax.nnx.Flatten"
+      },
+      "tensorflow": {
+        "api": "keras.layers.Flatten"
+      }
+    }
+  },
+  "ReLU": {
+    "description": "Applies the rectified linear unit function element-wise.",
+    "std_args": [
+      "inplace"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.ReLU"
+      },
+      "jax": {
+        "api": "flax.nnx.relu"
+      },
+      "tensorflow": {
+        "api": "keras.layers.ReLU"
+      }
+    }
+  }
+}

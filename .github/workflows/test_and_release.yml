@@ -1,4 +1,4 @@
-name: Tests
+name: Test and release
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    name: Pytest (Python ${{ matrix.python-version }})
+    name: Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -85,4 +85,4 @@ jobs:
 
           git add 'ml-switcheroo'
           git commit -m '[ml-switcheroo] Add/update docs'
-          git push origin master
+          # git push origin master # TODO

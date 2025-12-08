@@ -2,7 +2,8 @@
 Tests for RNG/State Threading Plugin.
 
 Verifies that stochastic operations (like dropout) are effectively rewritten
-to use explicit PRNG key passing (JAX style).
+to use explicit PRNG key passing (JAX style), and that configuration options
+for variable naming are respected.
 """
 
 import pytest
@@ -56,12 +57,12 @@ def rewriter():
 
 def test_rng_basic_injection(rewriter):
   """
-  Scenario: Single stochastic call.
+  Scenario: Single stochastic call with default settings.
   """
-  code = """
+  code = """ 
 import torch
-def forward(x):
-    return torch.dropout(x, 0.5)
+def forward(x): 
+    return torch.dropout(x, 0.5) 
 """
   result = rewrite_code(rewriter, code)
 
@@ -75,16 +76,45 @@ def forward(x):
   assert "key=key" in result
 
 
+def test_rng_custom_configuration(rewriter):
+  """
+  Scenario: User overrides variable names via config.
+  rng_arg_name="master_seed"
+  key_var_name="k"
+  """
+  # Inject Config
+  rewriter.ctx._runtime_config.plugin_settings["rng_arg_name"] = "master_seed"
+  rewriter.ctx._runtime_config.plugin_settings["key_var_name"] = "k"
+
+  code = """ 
+import torch
+def forward(x): 
+    return torch.dropout(x, 0.5) 
+"""
+  result = rewrite_code(rewriter, code)
+
+  # 1. Signature Injection uses custom name
+  assert "def forward(master_seed, x):" in result or "def forward(x, master_seed):" in result
+
+  # 2. Preamble uses custom names
+  # "master_seed, k = jax.random.split(master_seed)"
+  assert "master_seed, k = jax.random.split(master_seed)" in result
+
+  # 3. Call uses custom variable for key value
+  # jax.random.bernoulli(..., key=k)
+  assert "key=k" in result
+
+
 def test_rng_deduplication(rewriter):
   """
   Scenario: Two stochastic calls in one function.
   Expect: Only ONE 'rng' argument, ONE split line.
   """
-  code = """
+  code = """ 
 import torch
-def forward(x):
-    a = torch.dropout(x, 0.1)
-    b = torch.dropout(x, 0.2)
+def forward(x): 
+    a = torch.dropout(x, 0.1) 
+    b = torch.dropout(x, 0.2) 
     return a + b
 """
   result = rewrite_code(rewriter, code)
@@ -99,10 +129,10 @@ def test_rng_existing_argument_preserved(rewriter):
   Scenario: Function already has 'rng'.
   Expect: No duplicate argument injected.
   """
-  code = """
+  code = """ 
 import torch
-def forward(x, rng):
-    return torch.dropout(x, 0.5)
+def forward(x, rng): 
+    return torch.dropout(x, 0.5) 
 """
   result = rewrite_code(rewriter, code)
 

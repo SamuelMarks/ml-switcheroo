@@ -7,16 +7,25 @@ to handle specific aspects of the AST transformation:
 - Calls: Function invocations and operator overloading.
 - Attributes: Attribute access and assignment tracking.
 - Normalization: Argument mapping and infix rewriting.
+- Decorators: Decorator replacement and removal.
 """
 
 from ml_switcheroo.core.rewriter.calls import CallMixin
 from ml_switcheroo.core.rewriter.normalization import NormalizationMixin
 from ml_switcheroo.core.rewriter.attributes import AttributeMixin
 from ml_switcheroo.core.rewriter.structure import StructureMixin
+from ml_switcheroo.core.rewriter.decorators import DecoratorMixin
 from ml_switcheroo.core.rewriter.base import BaseRewriter
 
 
-class PivotRewriter(CallMixin, NormalizationMixin, AttributeMixin, StructureMixin, BaseRewriter):
+class PivotRewriter(
+  DecoratorMixin,
+  CallMixin,
+  NormalizationMixin,
+  AttributeMixin,
+  StructureMixin,
+  BaseRewriter,
+):
   """
   The main AST transformer for ml-switcheroo.
 

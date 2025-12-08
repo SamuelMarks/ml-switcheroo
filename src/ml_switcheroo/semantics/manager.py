@@ -11,6 +11,7 @@ import sys
 import warnings
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Any
+from pydantic import ValidationError
 
 if sys.version_info >= (3, 9):
   from importlib.resources import files
@@ -19,6 +20,7 @@ else:
 
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.testing.registry_sync import TemplateGenerator
+from ml_switcheroo.semantics.schema import OpDefinition
 
 
 def resolve_semantics_dir() -> Path:
@@ -28,6 +30,8 @@ def resolve_semantics_dir() -> Path:
 
 
 # Standard Fallback Templates (Bootstrap)
+# Note: These are now also defined in k_test_templates.json.
+# We keep them here for safe fallback if the JSON is missing or corrupt.
 _DEFAULT_TEMPLATES = {
   "torch": {
     "import": "import torch",
@@ -57,6 +61,14 @@ _DEFAULT_TEMPLATES = {
   },
 }
 
+# Default import conventions (if not overridden by JSON)
+_DEFAULT_ALIASES = {
+  "jax": {"module": "jax.numpy", "alias": "jnp"},
+  "tensorflow": {"module": "tensorflow", "alias": "tf"},
+  "mlx": {"module": "mlx.core", "alias": "mx"},
+  "numpy": {"module": "numpy", "alias": "np"},
+}
+
 
 class SemanticsManager:
   """
@@ -68,22 +80,25 @@ class SemanticsManager:
     self.import_data: Dict[str, Dict] = {}
     self.framework_configs: Dict[str, Dict] = {}
 
-    # Initialize with hardcoded defaults, but allow overwriting
+    # 1. Initialize with hardcoded defaults
     self.test_templates: Dict[str, Dict] = _DEFAULT_TEMPLATES.copy()
 
     self._reverse_index: Dict[str, Tuple[str, Dict]] = {}
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
-    self._load_knowledge_graph()
-
-    # Sync code-defined logic on top of defaults/JSON
+    # 2. Sync code-defined logic (Registry Adapters)
+    # We do this BEFORE loading JSON so the file on disk acts as the final override.
     code_templates = TemplateGenerator.generate_templates(self.test_templates)
     for fw, tpl in code_templates.items():
       if fw in self.test_templates:
         self.test_templates[fw].update(tpl)
       else:
         self.test_templates[fw] = tpl
+
+    # 3. Load Knowledge Graph (JSON files)
+    # This merges k_test_templates.json on top of the code/defaults.
+    self._load_knowledge_graph()
 
   def load_validation_report(self, report_path: Path) -> None:
     if not report_path.exists():
@@ -109,12 +124,20 @@ class SemanticsManager:
     return self.data.get(abstract_id)
 
   def update_definition(self, abstract_id: str, new_data: Dict[str, Any]) -> None:
-    self.data[abstract_id] = new_data
+    # Attempt to validate update before applying
+    try:
+      validated = OpDefinition.model_validate(new_data)
+      final_data = validated.model_dump(by_alias=True, exclude_unset=True)
+    except ValidationError as e:
+      print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")
+      return
 
-    variants = new_data.get("variants", {})
+    self.data[abstract_id] = final_data
+
+    variants = final_data.get("variants", {})
     for _, impl in variants.items():
       if isinstance(impl, dict) and "api" in impl:
-        self._reverse_index[impl["api"]] = (abstract_id, new_data)
+        self._reverse_index[impl["api"]] = (abstract_id, final_data)
 
     tier_str = self._key_origins.get(abstract_id, SemanticTier.ARRAY_API.value)
     filename = "k_array_api.json"
@@ -130,7 +153,7 @@ class SemanticsManager:
         with open(file_path, "r", encoding="utf-8") as f:
           file_content = json.load(f)
 
-        file_content[abstract_id] = new_data
+        file_content[abstract_id] = final_data
 
         with open(file_path, "w", encoding="utf-8") as f:
           json.dump(file_content, f, indent=2, sort_keys=True)
@@ -191,8 +214,16 @@ class SemanticsManager:
             UserWarning,
           )
 
-      self.data[op_name] = details
-      self._key_origins[op_name] = tier.value
+      # Feature 093: Schema Validation
+      try:
+        validated_op = OpDefinition.model_validate(details)
+        # Convert back to dict for internal storage to maintain dict-access API compatibility
+        stored_dict = validated_op.model_dump(by_alias=True, exclude_unset=True)
+        self.data[op_name] = stored_dict
+        self._key_origins[op_name] = tier.value
+      except ValidationError as e:
+        print(f"⚠️  Skipping invalid definition '{op_name}' in {tier.value}: {e}")
+        continue
 
   def _merge_imports(self, new_imports: Dict[str, Any]) -> None:
     for src_mod, details in new_imports.items():
@@ -260,3 +291,21 @@ class SemanticsManager:
 
     # Fallback to Hardcoded Defaults (important for tests verifying fallback)
     return _DEFAULT_TEMPLATES.get(framework)
+
+  def get_framework_aliases(self) -> Dict[str, Tuple[str, str]]:
+    # Start with defaults
+    result: Dict[str, Tuple[str, str]] = {}
+    for fw, conf in _DEFAULT_ALIASES.items():
+      result[fw] = (conf["module"], conf["alias"])
+
+    # Override with loaded configs
+    config_source = getattr(self, "framework_configs", {})
+    for fw, config in config_source.items():
+      alias_conf = config.get("alias")
+      if alias_conf and isinstance(alias_conf, dict):
+        mod = alias_conf.get("module")
+        alias = alias_conf.get("name")
+        if mod and alias:
+          result[fw] = (mod, alias)
+
+    return result

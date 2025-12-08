@@ -27,6 +27,7 @@ from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 from ml_switcheroo.importers.spec_reader import ArrayApiSpecImporter
 from ml_switcheroo.discovery.syncer import FrameworkSyncer
 from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.core.hooks import load_plugins
 from ml_switcheroo.utils.console import (
   console,
   log_info,
@@ -141,6 +142,16 @@ def handle_harvest(path: Path, target: str, dry_run: bool) -> int:
 
 def handle_ci(update_readme: bool, readme_path: Path, json_report: Optional[Path]) -> int:
   """Handles 'ci' command."""
+  # 1. Load Config to discover plugins (Adapters)
+  try:
+    config = RuntimeConfig.load()
+    if config.plugin_paths:
+      loaded = load_plugins(extra_dirs=config.plugin_paths)
+      if loaded > 0:
+        log_info(f"Loaded {loaded} external extensions for CI environment.")
+  except Exception as e:
+    log_warning(f"Could not load project config: {e}")
+
   semantics = SemanticsManager()
   log_info("Running Verification Suite...")
   validator = BatchValidator(semantics)

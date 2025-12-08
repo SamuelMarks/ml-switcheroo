@@ -3,7 +3,8 @@ ml-switcheroo 🔄🦘
 
 **A Deterministic, Specification-Driven Transpiler for Deep Learning Frameworks.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/license-Apache%202.0-blue)](https://opensource.org/licenses/)
+[![Tests](https://github.com/SamuelMarks/ml-switcheroo/actions/workflows/tests_release.yml/badge.svg)](https://github.com/SamuelMarks/ml-switcheroo/actions/workflows/tests_release.yml)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
@@ -219,4 +220,4 @@ Supported Frameworks via Adapters:
 
 ## License
 
-[MIT License](LICENSE)
+[Apache-2.0 License](LICENSE)

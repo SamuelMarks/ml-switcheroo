@@ -17,12 +17,20 @@ TEST_MAP = {
   "torch.optim": ("optax", None, "optim"),
 }
 
+# Mimic the defaults provided by SemanticsManager
+DEFAULT_ALIASES = {
+  "jax": ("jax.numpy", "jnp"),
+  "tensorflow": ("tensorflow", "tf"),
+  "mlx": ("mlx.core", "mx"),
+  "numpy": ("numpy", "np"),
+}
+
 
 def apply_fixer(code: str, target="jax", d=None) -> str:
   """Run ImportFixer with default settings."""
   tree = cst.parse_module(code)
   m = d if d is not None else TEST_MAP
-  fixer = ImportFixer("torch", target, submodule_map=m)
+  fixer = ImportFixer("torch", target, submodule_map=m, alias_map=DEFAULT_ALIASES)
   new_tree = tree.visit(fixer)
   return new_tree.code
 

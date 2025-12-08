@@ -9,6 +9,7 @@ Includes functionality for:
 - Standard API pivots.
 - Plugin dispatch.
 - Constructor logic injection (RNG management).
+- **Output Normalization**: Adapting return values to match the Abstract Standard.
 """
 
 from typing import Union, Set, Dict
@@ -141,7 +142,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         self._report_failure("Could not resolve function name")
       return updated
 
-    # 2. Standard API Rewrite
+    # 2. Standard API Rewrite Setup
     mapping = self._get_mapping(func_name)
     if not mapping:
       return updated
@@ -151,13 +152,13 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       return updated
 
     abstract_id, details = lookup
+    result_node = updated
 
-    # Infix / Prefix Transformation
+    # 2a. Infix / Prefix Transformation
     if mapping.get("transformation_type") == "infix":
       try:
-        # Pass both original (structure/keys) and updated (values) for correct recursion
         norm_args = self._normalize_arguments(original, updated, details, mapping)
-        return self._rewrite_as_infix(
+        result_node = self._rewrite_as_infix(
           original,
           norm_args,
           mapping.get("operator"),
@@ -165,42 +166,107 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         )
       except (ValueError, IndexError) as e:
         self._report_failure(f"Infix/Prefix transformation failed: {e}")
+        return updated  # Abort normalization
+
+    # 2b. Inline Lambda Transformation
+    elif mapping.get("transformation_type") == "inline_lambda":
+      try:
+        norm_args = self._normalize_arguments(original, updated, details, mapping)
+        result_node = self._rewrite_as_inline_lambda(mapping["api"], norm_args)
+      except Exception as e:
+        self._report_failure(f"Inline lambda transformation failed: {e}")
         return updated
 
-    # Plugin Dispatch
-    if "requires_plugin" in mapping:
+    # 2c. Plugin Dispatch
+    elif "requires_plugin" in mapping:
       plugin_name = mapping["requires_plugin"]
       hook = get_hook(plugin_name)
       if hook:
-        # Plugins receive the updated node, so they see previous rewrites in children
-        return hook(updated, self.ctx)
+        result_node = hook(updated, self.ctx)
+      else:
+        self._report_failure(f"Missing required plugin: '{plugin_name}'")
+        return updated
 
-      self._report_failure(f"Missing required plugin: '{plugin_name}'")
-      return updated
+    # 2d. Standard Function Rewrite
+    else:
+      try:
+        norm_args = self._normalize_arguments(original, updated, details, mapping)
+        new_func = self._create_name_node(mapping["api"])
+        result_node = updated.with_changes(func=new_func, args=norm_args)
+      except ValueError:
+        self._report_failure("Argument normalization failed")
+        return updated
 
-    # Standard Rewrite
-    try:
-      # Pass both original (structure) and updated (values)
-      norm_args = self._normalize_arguments(original, updated, details, mapping)
-      new_func = self._create_name_node(mapping["api"])
-      updated = updated.with_changes(func=new_func, args=norm_args)
-    except ValueError:
-      self._report_failure("Argument normalization failed")
-      return updated
+    # 3. Output Normalization (Post-Processing)
+    # Check if target framework returns mismatched output (e.g. extra tuple args)
+    if "output_adapter" in mapping and mapping["output_adapter"]:
+      try:
+        result_node = self._apply_output_adapter(result_node, mapping["output_adapter"])
+      except Exception as e:
+        self._report_failure(f"Output adapter failed: {e}")
+        return updated
 
-    # 3. Class Construction Logic (init/call within init)
+    # 4. Class Construction Logic (init/call within init)
     if self._signature_stack and self._signature_stack[-1].is_init and self._signature_stack[-1].is_module_method:
       origins = getattr(self.semantics, "_key_origins", {})
       tier = origins.get(abstract_id)
       if tier == SemanticTier.NEURAL.value:
-        # JAX (NNX) Direction: Inject 'rngs=rngs'
-        if self.target_fw == "jax":
-          updated = self._inject_rngs_kwarg(updated)
-        # Torch Direction: Remove 'rngs=...' kwarg
-        elif self.target_fw == "torch":
-          updated = self._strip_kwarg(updated, "rngs")
+        # Note: We must check if result_node is still a Call to append kwargs.
+        # If it became an Expression (via infix or plugin), we skip.
+        if isinstance(result_node, cst.Call):
+          if self.target_fw == "jax":
+            result_node = self._inject_rngs_kwarg(result_node)
+          elif self.target_fw == "torch":
+            result_node = self._strip_kwarg(result_node, "rngs")
 
-    return updated
+    return result_node
+
+  def _apply_output_adapter(self, inner_node: cst.CSTNode, adapter_str: str) -> cst.Call:
+    """
+    Wraps a node with a lambda adapter to normalize output.
+    Transform: `node` -> `(adapter_str)(node)`
+    Example: `max(x)` -> `(lambda x: x[0])(max(x))`
+    """
+    try:
+      # Parse the lambda expression
+      # "lambda x: x[0]" -> Lambda Node
+      lambda_node = cst.parse_expression(adapter_str)
+
+      # Wrap lambda in parens for immediate invocation: (lambda...)(arg)
+      parenthesized = lambda_node.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
+
+      # Construct wrapper Call
+      # Argument passed is determining by the inner_node expression
+      # We assume inner_node is an Expression (Call, Name, etc.)
+      return cst.Call(func=parenthesized, args=[cst.Arg(value=inner_node)])
+    except cst.ParserSyntaxError:
+      raise ValueError(f"Invalid syntax in output_adapter: {adapter_str}")
+
+  def _rewrite_as_inline_lambda(self, lambda_str: str, args: list[cst.Arg]) -> cst.Call:
+    """
+    Wraps arguments in an Immediately Invoked Lambda Expression (IIFE).
+
+    Transforms:
+        `api(args)` -> `(lambda x: ...)(args)`
+
+    Args:
+        lambda_str: The lambda definition code (e.g. "lambda x: hasattr(x, '__array__')").
+        args: The normalized list of arguments to pass to the lambda.
+
+    Returns:
+        A CST Call node where the function is a parenthesized lambda expression.
+    """
+    try:
+      # Parse the lambda string into a CST node
+      # We parse it as an expression to get the Lambda node
+      parsed_expr = cst.parse_expression(lambda_str)
+
+      # Wrap it in parentheses to ensure valid calling syntax: (lambda...)(args)
+      parenthesized_lambda = parsed_expr.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
+
+      return cst.Call(func=parenthesized_lambda, args=args)
+    except cst.ParserSyntaxError:
+      raise ValueError(f"Invalid lambda syntax in semantics: {lambda_str}")
 
   def _is_functional_apply(self, node: cst.Call) -> bool:
     """
@@ -242,7 +308,6 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         continue
       filtered.append(arg)
 
-    # Cleanup trailing comma on new last element
     if filtered and filtered[-1].comma != cst.MaybeSentinel.DEFAULT:
       last = filtered[-1]
       filtered[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)

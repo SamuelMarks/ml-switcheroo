@@ -6,9 +6,12 @@ Verifies that:
 2. Scaffolder waives arity penalties when `has_varargs` is True.
 """
 
+import pytest
+import json
 from unittest.mock import MagicMock
 from ml_switcheroo.discovery.inspector import ApiInspector
 from ml_switcheroo.discovery.scaffolder import Scaffolder
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 # --- Mocks for Inspector Test ---
 
@@ -95,7 +98,16 @@ class MockVarargsInspector(ApiInspector):
     return {}
 
 
-def test_scaffolder_skips_penalty_for_varargs(tmp_path):
+@pytest.fixture
+def clean_semantics():
+  """Returns a manager with no pre-loaded data."""
+  mgr = SemanticsManager()
+  mgr.data = {}
+  mgr._key_origins = {}
+  return mgr
+
+
+def test_scaffolder_skips_penalty_for_varargs(tmp_path, clean_semantics):
   """
   Scenario:
       Source: add(x, y) [Arity 2]
@@ -107,17 +119,16 @@ def test_scaffolder_skips_penalty_for_varargs(tmp_path):
       - poly_add is NOT penalized (Varargs waives mismatch) -> Score > Threshold
       - poly_add is chosen.
   """
-  scaffolder = Scaffolder(similarity_threshold=0.8, arity_penalty=0.5)
+  scaffolder = Scaffolder(semantics=clean_semantics, similarity_threshold=0.8, arity_penalty=0.5)
   scaffolder.inspector = MockVarargsInspector()
 
   scaffolder.scaffold(["source_fw", "target_fw"], tmp_path)
-
-  import json
 
   out_file = tmp_path / "k_array_api.json"
   with open(out_file, "rt", encoding="utf-8") as f:
     data = json.load(f)
 
+  # Because semantics are clean, 'add' defaults to Array API tier
   assert "add" in data
   variants = data["add"]["variants"]
 

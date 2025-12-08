@@ -13,6 +13,11 @@ This plugin automates the transition by:
 
 This ensures standard PyTorch calls like `torch.randn(..., generator=g)` become
 `jax.random.normal(..., key=key)`.
+
+**Configuration**:
+Users can customize the variable naming via `pyproject.toml` or CLI args:
+- `rng_arg_name`: Name of the argument injected into signature (default: "rng").
+- `key_var_name`: Name of the local key variable split from rng (default: "key").
 """
 
 import libcst as cst
@@ -44,7 +49,8 @@ def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Args:
       node: The original CST Call node (e.g., `torch.dropout(x, 0.5)`).
-      ctx: The HookContext used to request global scope changes (signature/preamble).
+      ctx: The HookContext used to request global scope changes (signature/preamble)
+           and read configuration.
 
   Returns:
       The transformed CST Call node with the 'key' keyword argument appended
@@ -55,35 +61,37 @@ def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
   if ctx.target_fw != "jax":
     return node
 
-  # 1. Request Signature Injection
-  # We ask the context to ensure 'rng' is present in the function definition.
-  # The Rewrite Engine is responsible for checking if 'rng' already exists
-  # to avoid duplication.
-  ctx.inject_signature_arg("rng")
+  # 1. Configuration
+  # Read variable name preferences from user config
+  rng_arg = ctx.raw_config("rng_arg_name", default="rng")
+  key_var = ctx.raw_config("key_var_name", default="key")
 
-  # 2. Request Preamble Injection
+  # 2. Request Signature Injection
+  # We ask the context to ensure 'rng' (or custom name) is present in the function definition.
+  # The Rewrite Engine is responsible for checking if it already exists to avoid duplication.
+  ctx.inject_signature_arg(rng_arg)
+
+  # 3. Request Preamble Injection
   # We inject the splitting logic at the top of the function body.
-  # This creates a fresh 'key' for use in the current scope.
-  # The Rewrite Engine ensures this line is only added once per function.
-  ctx.inject_preamble("rng, key = jax.random.split(rng)")
+  # Example: "rng, key = jax.random.split(rng)"
+  split_stmt = f"{rng_arg}, {key_var} = jax.random.split({rng_arg})"
+  ctx.inject_preamble(split_stmt)
 
-  # 3. Clean Arguments
+  # 4. Clean Arguments
   # Remove Torch-specific legacy RNG arguments like 'generator'
   cleaned_args = _remove_generator_arg(list(node.args))
 
-  # 4. Modify the Call
-  # Create the `key=key` argument node.
+  # 5. Modify the Call
+  # Create the `key=key_var` argument node.
+  # Note: The keyword "key" matches standard JAX API (e.g. random.normal(key=...)).
+  # The value matches the local variable we split in the preamble.
   key_arg = cst.Arg(
-    keyword=cst.Name("key"),  # FIXED: was 'kword', correct is 'keyword'
-    value=cst.Name("key"),
+    keyword=cst.Name("key"),
+    value=cst.Name(key_var),
     equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
   )
 
   # Append our new key argument to the cleaned list
   new_args = cleaned_args + [key_arg]
 
-  # Return the modified node.
-  # Note: The API name mapping (e.g., swapping torch.dropout -> jax.random.bernoulli)
-  # is handled by the standard semantic mapping logic within the Rewriter
-  # either before or after this hook runs, preserving the structure we build here.
   return node.with_changes(args=new_args)

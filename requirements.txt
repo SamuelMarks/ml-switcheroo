@@ -1,0 +1,6 @@
+griffe>=0.48
+libcst==1.6.0
+numpy==2.2.5
+pydantic==2.10.6
+pydantic_core==2.27.2
+rich>=13.0

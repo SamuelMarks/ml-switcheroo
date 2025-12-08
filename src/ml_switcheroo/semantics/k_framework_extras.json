@@ -153,5 +153,114 @@
       },
       "jax": null
     }
+  },
+  "eval": {
+    "description": "Sets the module in evaluation mode.",
+    "std_args": [],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.Module.eval"
+      },
+      "jax": {
+        "api": "None",
+        "requires_plugin": "capture_eval_state"
+      }
+    }
+  },
+  "train": {
+    "description": "Sets the module in training mode.",
+    "std_args": [
+      "mode"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.Module.train"
+      },
+      "jax": {
+        "api": "None",
+        "requires_plugin": "capture_eval_state"
+      }
+    }
+  },
+  "add_": {
+    "description": "In-place addition.",
+    "std_args": [
+      "x",
+      "other",
+      "alpha"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.Tensor.add_"
+      },
+      "jax": {
+        "api": "jax.numpy.add",
+        "requires_plugin": "unroll_inplace_ops"
+      }
+    }
+  },
+  "nnx_Param": {
+    "description": "Flax NNX Parameter definition.",
+    "std_args": [
+      "value"
+    ],
+    "variants": {
+      "jax": {
+        "api": "flax.nnx.Param"
+      },
+      "torch": {
+        "api": "torch.nn.Parameter",
+        "requires_plugin": "nnx_param_to_torch"
+      }
+    }
+  },
+  "dropout": {
+    "description": "Stochastic Dropout.",
+    "std_args": [
+      "input",
+      "p",
+      "training",
+      "inplace"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.functional.dropout"
+      },
+      "jax": {
+        "api": "jax.random.bernoulli",
+        "requires_plugin": "inject_prng"
+      }
+    }
+  },
+  "add": {
+    "description": "Add with Alpha scaling support.",
+    "std_args": [
+      "x",
+      "y",
+      "alpha"
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.add",
+        "requires_plugin": "recompose_alpha"
+      },
+      "jax": {
+        "api": "jax.numpy.add",
+        "requires_plugin": "decompose_alpha"
+      }
+    }
+  },
+  "cuda_is_available": {
+    "description": "Checks if a CUDA device is available.",
+    "std_args": [],
+    "variants": {
+      "torch": {
+        "api": "torch.cuda.is_available"
+      },
+      "jax": {
+        "api": "jax.devices",
+        "requires_plugin": "cuda_is_available"
+      }
+    }
   }
 }

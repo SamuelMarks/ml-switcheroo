@@ -19,16 +19,6 @@ from typing import Union, Optional, Tuple, Dict, Set, List
 import libcst as cst
 from ml_switcheroo.core.scanners import SimpleNameScanner, get_full_name
 
-# Standard conventions for framework aliases
-# key: target_framework_name
-# value: (module_to_import, alias_name)
-FRAMEWORK_ALIAS_MAP = {
-  "jax": ("jax.numpy", "jnp"),
-  "tensorflow": ("tensorflow", "tf"),
-  "mlx": ("mlx.core", "mx"),
-  "numpy": ("numpy", "np"),
-}
-
 
 class ImportFixer(cst.CSTTransformer):
   """
@@ -38,6 +28,7 @@ class ImportFixer(cst.CSTTransformer):
       source_fw (str): The root package name to remove (e.g., "torch").
       target_fw (str): The root package name to ensure exists (e.g., "jax").
       submodule_map (Dict): Map of "source.mod" -> (target_root, target_sub, alias).
+      alias_map (Dict): Map of "fw_name" -> (module_to_import, local_alias).
       preserve_source (bool): If True, prevents automatic removal of source_fw imports.
       _target_found (bool): Result tracker for idempotency.
       _defined_names (Set[str]): Tracks names explicitly defined by imports to prevent re-injection.
@@ -48,6 +39,7 @@ class ImportFixer(cst.CSTTransformer):
     source_fw: str,
     target_fw: str,
     submodule_map: Dict[str, Tuple[str, Optional[str], Optional[str]]],
+    alias_map: Optional[Dict[str, Tuple[str, str]]] = None,
     preserve_source: bool = False,
   ):
     """
@@ -57,11 +49,14 @@ class ImportFixer(cst.CSTTransformer):
         source_fw: The framework string to strip.
         target_fw: The framework string to inject.
         submodule_map: Data-driven remapping dictionary from SemanticsManager.
+        alias_map: Configuration for standard framework aliases (e.g. jax->(jax.numpy, jnp)).
+                   Added in Feature 07 to replace hardcoded map.
         preserve_source: Whether to keep source imports even if matched.
     """
     self.source_fw = source_fw
     self.target_fw = target_fw
     self.submodule_map = submodule_map
+    self.alias_map = alias_map or {}
     self.preserve_source = preserve_source
     self._target_found = False
     self._defined_names: Set[str] = set()
@@ -197,7 +192,7 @@ class ImportFixer(cst.CSTTransformer):
     Logic:
     1. Identifies insertion point (after __future__ and docstrings).
     2. Injects 'import target' only if needed (not found AND used).
-    3. Injects aliases (e.g. 'jnp', 'tf', 'mx') if detected in usage.
+    3. Injects aliases (e.g. 'jnp', 'tf', 'mx') if detected in usage via `alias_map`.
     4. Injects submodule mappings (e.g., from flax import linen) if usage requires it.
 
     Args:
@@ -219,8 +214,9 @@ class ImportFixer(cst.CSTTransformer):
         )
 
     # -- Step 2: Check Usage of Framework Standard Aliases (e.g. 'jnp', 'tf', 'mx') --
-    if self.target_fw in FRAMEWORK_ALIAS_MAP:
-      module_path, alias_name = FRAMEWORK_ALIAS_MAP[self.target_fw]
+    # Logic driven by self.alias_map loaded from SemanticsManager (default or custom)
+    if self.target_fw in self.alias_map:
+      module_path, alias_name = self.alias_map[self.target_fw]
 
       scanner = SimpleNameScanner(alias_name)
       updated_node.visit(scanner)

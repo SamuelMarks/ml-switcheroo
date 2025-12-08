@@ -9,11 +9,9 @@ It prioritizes matching discovered APIs against ingested Specs (ONNX, Array API)
 before falling back to structural heuristics.
 
 Major Updates:
-- Feature: Signature Analysis during Fuzzy Matching. The discovery process now
-  penalizes or rejects matches if argument counts (arity) diverge significantly,
-  preventing false positives like linking unary `min(x)` to multi-arg `min(x, y)`.
-- Feature 07: Robust Varargs Support. If a function accepts `*args`, it is treated
-  as having flexible arity, skipping penalties for count mismatches.
+- Feature: Signature Analysis during Fuzzy Matching.
+- Feature 07: Robust Varargs Support.
+- Feature 03: Tier C (Extras) Discovery and Serialization.
 """
 
 import json
@@ -81,6 +79,8 @@ class Scaffolder:
     # Pre-load known specs to drive categorization
     known_neural_ops = self._get_ops_by_tier(SemanticTier.NEURAL)
     known_math_ops = self._get_ops_by_tier(SemanticTier.ARRAY_API)
+    # Tier C Knowledge (if present in semantics)
+    known_extras_ops = self._get_ops_by_tier(SemanticTier.EXTRAS)
 
     catalogs = {}
     for fw in frameworks:
@@ -101,28 +101,17 @@ class Scaffolder:
       # Check if this name matches a known Abstract Op from the specs
       neural_match = self._match_spec_op(name, known_neural_ops)
       if neural_match:
-        # Link to existing Neural definition
-        self._update_entry(
-          self.tier_b_neural,
-          neural_match,
-          primary_fw,
-          api_path,
-          details,
-          catalogs,
-        )
+        self._update_entry(self.tier_b_neural, neural_match, primary_fw, api_path, details, catalogs)
         continue
 
       math_match = self._match_spec_op(name, known_math_ops)
       if math_match:
-        # Link to existing Math definition
-        self._update_entry(
-          self.tier_a_math,
-          math_match,
-          primary_fw,
-          api_path,
-          details,
-          catalogs,
-        )
+        self._update_entry(self.tier_a_math, math_match, primary_fw, api_path, details, catalogs)
+        continue
+
+      extras_match = self._match_spec_op(name, known_extras_ops)
+      if extras_match:
+        self._update_entry(self.tier_c_extras, extras_match, primary_fw, api_path, details, catalogs)
         continue
 
       # --- Strategy 2: Heuristic Fallback ---
@@ -134,6 +123,11 @@ class Scaffolder:
         self._update_entry(self.tier_b_neural, name, primary_fw, api_path, details, catalogs)
         continue
 
+      # Heuristic: Extras Tier
+      if self._is_structurally_extra(api_path, name):
+        self._update_entry(self.tier_c_extras, name, primary_fw, api_path, details, catalogs)
+        continue
+
       # Heuristic: Math Tier (Default)
       self._update_entry(self.tier_a_math, name, primary_fw, api_path, details, catalogs)
 
@@ -142,7 +136,7 @@ class Scaffolder:
 
     self._write_json(output_dir / "k_array_api.json", self.tier_a_math)
     self._write_json(output_dir / "k_neural_net.json", self.tier_b_neural)
-    # Extras are typically manually curated, but could be populated here too.
+    self._write_json(output_dir / "k_framework_extras.json", self.tier_c_extras)
 
   def _get_ops_by_tier(self, tier: SemanticTier) -> Set[str]:
     """Retrieves listing of known abstract operations for a given tier."""
@@ -180,6 +174,25 @@ class Scaffolder:
       return True
     if kind == "class" and ("Layer" in api_path or "Module" in api_path):
       return True
+    return False
+
+  def _is_structurally_extra(self, api_path: str, name: str) -> bool:
+    """Determines if API is likely a Framework Utility (Tier C)."""
+    name_lower = name.lower()
+    path_lower = api_path.lower()
+
+    # Common utility keywords
+    if any(k in name_lower for k in ["seed", "save", "load", "device", "print", "info", "check"]):
+      return True
+
+    # Context managers / grad control
+    if "grad" in name_lower and ("no_" in name_lower or "enable_" in name_lower or "set_" in name_lower):
+      return True
+
+    # Submodules usually associated with utilities
+    if ".utils." in path_lower or ".distributed." in path_lower or ".autograd." in path_lower:
+      return True
+
     return False
 
   def _update_entry(

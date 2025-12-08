@@ -24,6 +24,7 @@ class MockSemantics(SemanticsManager):
     # We skip super().__init__ to avoid loading real JSON files
     self.data = {}
     self.import_data = {}  # Required by ASTEngine since Feature 024
+    self.framework_configs = {}  # Required by ASTEngine since Feature 07
     self._reverse_index = {}
 
     # 1. Tier A: Fully Supported

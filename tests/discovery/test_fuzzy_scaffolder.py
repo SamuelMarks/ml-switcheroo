@@ -8,8 +8,10 @@ Verifies that:
 """
 
 import json
+import pytest
 from ml_switcheroo.discovery.scaffolder import Scaffolder
 from ml_switcheroo.discovery.inspector import ApiInspector
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector(ApiInspector):
@@ -60,12 +62,21 @@ class MockInspector(ApiInspector):
     return {}
 
 
-def test_fuzzy_match_success(tmp_path):
+@pytest.fixture
+def clean_semantics():
+  """Returns a manager with no pre-loaded data to ensure tests rely on heuristics."""
+  mgr = SemanticsManager()
+  mgr.data = {}
+  mgr._key_origins = {}
+  return mgr
+
+
+def test_fuzzy_match_success(tmp_path, clean_semantics):
   """
   Verify that 'absolute' (Source) matches 'abs' (Target)
   because names are similar AND arity matches (1 param vs 1 param).
   """
-  scaffolder = Scaffolder(similarity_threshold=0.6)  # 'abs' vs 'absolute' ratio ~0.55 + boost
+  scaffolder = Scaffolder(semantics=clean_semantics, similarity_threshold=0.6)
   scaffolder.inspector = MockInspector()
 
   scaffolder.scaffold(["source_fw", "target_fw"], tmp_path)
@@ -85,14 +96,14 @@ def test_fuzzy_match_success(tmp_path):
   assert variants["target_fw"]["api"] == "target.abs"
 
 
-def test_signature_analysis_rejection(tmp_path):
+def test_signature_analysis_rejection(tmp_path, clean_semantics):
   """
   Verify that signature mismatch prevents linking even if names are identical.
 
   Scenario: Source `unary_op(x)` vs Target `unary_op(a, b, c)`.
   Expectation: The target variant is NOT added due to arity penalty.
   """
-  scaffolder = Scaffolder(similarity_threshold=0.8, arity_penalty=0.5)  # High penalty
+  scaffolder = Scaffolder(semantics=clean_semantics, similarity_threshold=0.8, arity_penalty=0.5)
   scaffolder.inspector = MockInspector()
 
   scaffolder.scaffold(["source_fw", "target_fw"], tmp_path)
@@ -110,11 +121,11 @@ def test_signature_analysis_rejection(tmp_path):
   assert "target_fw" not in variants
 
 
-def test_exact_match_priority(tmp_path):
+def test_exact_match_priority(tmp_path, clean_semantics):
   """
   Verify that if an exact name exists with correct arity, it is accepted.
   """
-  scaffolder = Scaffolder()
+  scaffolder = Scaffolder(semantics=clean_semantics)
   scaffolder.inspector = MockInspector()
 
   scaffolder.scaffold(["source_fw", "target_fw"], tmp_path)
