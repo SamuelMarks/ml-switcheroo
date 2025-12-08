@@ -46,6 +46,7 @@ def handle_convert(
   verify: bool,
   strict: Optional[bool],
   plugin_settings: Dict[str, Any],
+  json_trace_path: Optional[Path] = None,
 ) -> int:
   """Handles the 'convert' command."""
   if not input_path.exists():
@@ -64,7 +65,7 @@ def handle_convert(
   batch_results: Dict[str, ConversionResult] = {}
 
   if input_path.is_file():
-    result = _convert_single_file(input_path, output_path, semantics, verify, config)
+    result = _convert_single_file(input_path, output_path, semantics, verify, config, json_trace_path)
     batch_results[input_path.name] = result
     if not result.success:
       return 1
@@ -85,7 +86,19 @@ def handle_convert(
       rel_path = src_file.relative_to(input_path)
       dest_file = output_path / rel_path
 
-      result = _convert_single_file(src_file, dest_file, semantics, verify, config)
+      # Handle trace naming for batch - create a dedicated trace per file or skip
+      # If user passed --json-trace trace.json, we can't write all to one file easily yet
+      # Basic implementation: trace only enabled for single file, or append?
+      # For now, we only pass trace path if it's a single file, OR if it's a directory
+      # we create sibling JSONs.
+
+      batch_trace = None
+      if json_trace_path:
+        # If outputting to directory, make trace side-by-side
+        if output_path:
+          batch_trace = (output_path / rel_path).with_suffix(".trace.json")
+
+      result = _convert_single_file(src_file, dest_file, semantics, verify, config, batch_trace)
       batch_results[str(rel_path)] = result
 
   _print_batch_summary(batch_results)
@@ -272,6 +285,7 @@ def _convert_single_file(
   semantics: SemanticsManager,
   verify: bool,
   config: RuntimeConfig,
+  json_trace_path: Optional[Path] = None,
 ) -> ConversionResult:
   """Helper for converting a specific file."""
   try:
@@ -279,6 +293,16 @@ def _convert_single_file(
       code = f.read()
     engine = ASTEngine(semantics, config=config)
     result = engine.run(code)
+
+    # --- Feature 05: Export Trace ---
+    if json_trace_path and result.trace_events:
+      try:
+        json_trace_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(json_trace_path, "wt", encoding="utf-8") as f:
+          json.dump(result.trace_events, f, indent=2)
+        log_info(f"Trace saved to [path]{json_trace_path}[/path]")
+      except Exception as e:
+        log_error(f"Failed to write trace: {e}")
 
     if not result.success:
       return result

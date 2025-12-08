@@ -65,15 +65,24 @@ def rewriter():
 def test_strip_inplace_underscore(rewriter):
   """
   Scenario: `x.add_(y)`
-  Expectation: `x.add(y)` (Functional form that CAN be mapped to JAX).
+  Expectation: `x + y` (Infix operator for JAX compatibility).
   """
   code = "res = x.add_(y)"
   result = rewrite_code(rewriter, code)
 
-  # Plugin strips '_', then Rewriter might map 'add' to 'jax.numpy.add' if defined,
-  # or keep 'x.add' if not. Our plugin just strips.
-  assert "x.add(y)" in result
-  assert "add_" not in result
+  # Plugin transforms add_ to +
+  assert result == "res = x + y"
+
+
+def test_fallback_non_math_unroll(rewriter):
+  """
+  Scenario: `x.custom_(y)` (Unknown op)
+  Expectation: `x.custom(y)` (Method strip fallback).
+  """
+  code = "res = x.custom_(y)"
+  result = rewrite_code(rewriter, code)
+
+  assert "x.custom(y)" in result
 
 
 def test_ignore_standard_calls(rewriter):

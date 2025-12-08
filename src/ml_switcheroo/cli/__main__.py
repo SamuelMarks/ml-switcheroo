@@ -51,6 +51,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     help="Fail on unknown APIs instead of passing them through (Overrides config)",
   )
   cmd_conv.add_argument(
+    "--json-trace", type=Path, default=None, help="Dump full execution trace (events, diffs) to a JSON file."
+  )
+  cmd_conv.add_argument(
     "--config",
     nargs="*",
     help="Plugin configuration flags in key=value format (e.g. epsilon=1e-5 use_custom=True)",
@@ -141,13 +144,7 @@ def main(argv: Optional[List[str]] = None) -> int:
   if args.command == "convert":
     settings = parse_cli_key_values(args.config)
     return commands.handle_convert(
-      args.path,
-      args.out,
-      args.source,
-      args.target,
-      args.verify,
-      args.strict,
-      settings,
+      args.path, args.out, args.source, args.target, args.verify, args.strict, settings, args.json_trace
     )
 
   elif args.command == "matrix":

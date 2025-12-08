@@ -4,12 +4,12 @@ Call Rewriting Logic.
 Handles function invocation usage (`leave_Call`) and Assignment Unwrapping.
 Includes functionality for:
 - Lifecycle method stripping (e.g. `.to()`, `.cpu()`).
-- Functional -> OOP Unwrapping (removing `.apply` and tuple unpacking).
+- Functional -> OOP Unwrapping.
 - Stateful object management.
 - Standard API pivots.
 - Plugin dispatch.
-- Constructor logic injection (RNG management).
-- **Output Normalization**: Adapting return values to match the Abstract Standard.
+- Output Normalization.
+- **Trace Instrumention** for visibility.
 """
 
 from typing import Union, Set, Dict
@@ -19,6 +19,8 @@ from ml_switcheroo.core.hooks import get_hook
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.rewriter.base import BaseRewriter
 from ml_switcheroo.core.rewriter.normalization import NormalizationMixin
+from ml_switcheroo.core.tracer import get_tracer
+from ml_switcheroo.utils.node_diff import capture_node_source, diff_nodes
 
 
 class CallMixin(NormalizationMixin, BaseRewriter):
@@ -26,26 +28,9 @@ class CallMixin(NormalizationMixin, BaseRewriter):
   Mixin for transforming Call nodes and unpacking Assignments.
   """
 
-  # Methods to strip completely (return receiver object)
-  _LIFECYCLE_STRIP: Set[str] = {
-    "to",
-    "cpu",
-    "cuda",
-    "detach",
-    "clone",
-    "requires_grad_",
-    "share_memory_",
-  }
+  _LIFECYCLE_STRIP: Set[str] = {"to", "cpu", "cuda", "detach", "clone", "requires_grad_", "share_memory_"}
 
-  # Methods to strip but warn about state implications.
-  _LIFECYCLE_WARN: Set[str] = {
-    "eval",
-    "train",
-    "half",
-    "float",
-    "double",
-    "type",
-  }
+  _LIFECYCLE_WARN: Set[str] = {"eval", "train", "half", "float", "double", "type"}
 
   def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
     """
@@ -53,89 +38,91 @@ class CallMixin(NormalizationMixin, BaseRewriter):
 
     Scenario: `y, updates = layer.apply(vars, x)`
     Target:   `y = layer(x)` (NNX/Torch style)
-
-    If we detected that a call was rewritten from a functional pattern
-    returning multiple values (outputs + state) to an OOP pattern
-    returning a single value, we must also simplify the assignment targets.
     """
-    # 1. Check if we are assigning from a Call
     if not isinstance(original_node.value, cst.Call):
       return super().leave_Assign(original_node, updated_node)
 
-    # 2. Check if the original call was '.apply' (The functional signature)
-    # We look at the ORIGINAL node to see what the source code intended.
     if self._is_functional_apply(original_node.value):
-      # Check if we have multiple targets (y, updates = ...)
-      # cst.Assign.targets contains a list of AssignTarget.
-      # Usually one AssignTarget which wraps a Tuple/List if destructuring.
       if len(updated_node.targets) == 1:
         target = updated_node.targets[0].target
         if isinstance(target, (cst.Tuple, cst.List)):
-          # Destructuring detected: y, updates = ...
-          # We assume index 0 is the prediction/output we care about in OOP.
           elements = target.elements
           if len(elements) > 0:
             primary_target = elements[0].value
-
-            # Create new single target
             new_target = cst.AssignTarget(target=primary_target)
-            return updated_node.with_changes(targets=[new_target])
 
-    # Delegate to MRO (likely AttributeMixin)
+            new_node = updated_node.with_changes(targets=[new_target])
+            get_tracer().log_mutation(
+              "Assignment Unwrapping", capture_node_source(original_node), capture_node_source(new_node)
+            )
+            return new_node
+
     return super().leave_Assign(original_node, updated_node)
 
   def leave_Call(
     self, original: cst.Call, updated: cst.Call
   ) -> Union[cst.Call, cst.BinaryOperation, cst.UnaryOperation, cst.CSTNode]:
-    """Rewrites function calls."""
+    """Rewrites function calls with detailed Trace Logging."""
+
+    result_node = updated
     func_name = self._get_qualified_name(original.func)
 
-    # 0a. Functional 'apply' unwrapping (Linen -> NNX/Torch)
-    # Check against pure .apply calls on objects
+    # 0a. Functional 'apply' unwrapping
     if self._is_functional_apply(original):
-      # Transform: obj.apply(vars, x) -> obj(x)
-      # 1. Remove '.apply' from function name
-      # original.func is Attribute(value=obj, attr='apply')
-      # new func is just 'obj' (the value)
       if isinstance(updated.func, cst.Attribute):
         receiver = updated.func.value
-
-        # 2. Remove first argument 'vars' (state dictionary)
-        # Arguments: [vars, x, y...] -> [x, y...]
         new_args = updated.args[1:] if len(updated.args) > 0 else []
+        result_node = updated.with_changes(func=receiver, args=new_args)
+        self._log_diff("Functional Unwrap", original, result_node)
+        return result_node
 
-        return updated.with_changes(func=receiver, args=new_args)
-
-    # 0b. Check for Plugin First! (Override Lifecycle logic)
+    # 0b. Plugin Check
     plugin_claim = False
     if func_name:
       mapping = self._get_mapping(func_name)
       if mapping and "requires_plugin" in mapping:
         plugin_claim = True
 
+    # 0b.2 Heuristic: In-Place Unrolling
+    # If no mapping was found but method ends in '_' (e.g. x.add_), try to unroll it.
+    if not plugin_claim and func_name and func_name.endswith("_") and not func_name.startswith("__"):
+      hook = get_hook("unroll_inplace_ops")
+      if hook:
+        new_node = hook(updated, self.ctx)
+        if new_node != updated:
+          self._log_diff("In-place Unroll (Heuristic)", updated, new_node)
+          # Adopt changes and update name resolution for subsequent passes
+          updated = new_node
+          func_name = self._get_qualified_name(
+            updated.operator if isinstance(updated, cst.BinaryOperation) else updated.func
+          )
+
     # 0c. Lifecycle Method Handling
     if not plugin_claim and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
       method_name = original.func.attr.value
 
-      # Case A: Strip (x.to() -> x)
       if method_name in self._LIFECYCLE_STRIP:
         if isinstance(updated.func, cst.Attribute):
           self._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
-          return updated.func.value
+          result_node = updated.func.value
+          self._log_diff("Lifecycle Strip", original, result_node)
+          return result_node
 
-      # Case B: Warn/Stub
       if method_name in self._LIFECYCLE_WARN:
         if isinstance(updated.func, cst.Attribute):
           self._report_warning(f"Ignored model state method '.{method_name}()'.")
-          return updated.func.value
+          result_node = updated.func.value
+          self._log_diff("Lifecycle Warn", original, result_node)
+          return result_node
 
     # 1. Stateful Object Usage
-    # If converting TO functional (not relevant for NNX target, but kept for logic safety)
     if func_name and self._is_stateful(func_name):
       fw_config = self.semantics.get_framework_config(self.target_fw)
       stateful_spec = fw_config.get("stateful_call")
       if stateful_spec:
-        return self._rewrite_stateful_call(updated, func_name, stateful_spec)
+        result_node = self._rewrite_stateful_call(updated, func_name, stateful_spec)
+        self._log_diff("State Mechanism", original, result_node)
+        return result_node
 
     if not func_name:
       if self.strict_mode:
@@ -145,6 +132,11 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     # 2. Standard API Rewrite Setup
     mapping = self._get_mapping(func_name)
     if not mapping:
+      # --- TRACE: Detailed Decision Log ---
+      # If we resolved a name but found no mapping, log it to show user we TRIED.
+      # This fixes the "Silent Failure" visibility issue.
+      if not self._is_builtin(func_name):
+        get_tracer().log_inspection(node_str=func_name, outcome="Skipped", detail="No Entry in Semantics Knowledge Base")
       return updated
 
     lookup = self.semantics.get_definition(func_name)
@@ -152,8 +144,6 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       return updated
 
     abstract_id, details = lookup
-    result_node = updated
-
     # 2a. Infix / Prefix Transformation
     if mapping.get("transformation_type") == "infix":
       try:
@@ -166,7 +156,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         )
       except (ValueError, IndexError) as e:
         self._report_failure(f"Infix/Prefix transformation failed: {e}")
-        return updated  # Abort normalization
+        return updated
 
     # 2b. Inline Lambda Transformation
     elif mapping.get("transformation_type") == "inline_lambda":
@@ -198,7 +188,6 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         return updated
 
     # 3. Output Normalization (Post-Processing)
-    # Check if target framework returns mismatched output (e.g. extra tuple args)
     if "output_adapter" in mapping and mapping["output_adapter"]:
       try:
         result_node = self._apply_output_adapter(result_node, mapping["output_adapter"])
@@ -206,38 +195,39 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         self._report_failure(f"Output adapter failed: {e}")
         return updated
 
-    # 4. Class Construction Logic (init/call within init)
+    # 4. Class Construction Logic
     if self._signature_stack and self._signature_stack[-1].is_init and self._signature_stack[-1].is_module_method:
       origins = getattr(self.semantics, "_key_origins", {})
       tier = origins.get(abstract_id)
       if tier == SemanticTier.NEURAL.value:
-        # Note: We must check if result_node is still a Call to append kwargs.
-        # If it became an Expression (via infix or plugin), we skip.
         if isinstance(result_node, cst.Call):
           if self.target_fw == "jax":
             result_node = self._inject_rngs_kwarg(result_node)
           elif self.target_fw == "torch":
             result_node = self._strip_kwarg(result_node, "rngs")
 
+    self._log_diff(f"Operation ({abstract_id})", original, result_node)
+
     return result_node
+
+  def _is_builtin(self, name: str) -> bool:
+    """Avoid spamming logs for standard python builtins unless mapped."""
+    return name in {"print", "len", "range", "super", "enumerate", "zip", "int", "float", "str"}
+
+  def _log_diff(self, label: str, original: cst.CSTNode, modified: cst.CSTNode) -> None:
+    """Helper to compute diff and log if changed."""
+    src_before, src_after, is_changed = diff_nodes(original, modified)
+    if is_changed:
+      get_tracer().log_mutation(label, src_before, src_after)
 
   def _apply_output_adapter(self, inner_node: cst.CSTNode, adapter_str: str) -> cst.Call:
     """
     Wraps a node with a lambda adapter to normalize output.
     Transform: `node` -> `(adapter_str)(node)`
-    Example: `max(x)` -> `(lambda x: x[0])(max(x))`
     """
     try:
-      # Parse the lambda expression
-      # "lambda x: x[0]" -> Lambda Node
       lambda_node = cst.parse_expression(adapter_str)
-
-      # Wrap lambda in parens for immediate invocation: (lambda...)(arg)
       parenthesized = lambda_node.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
-
-      # Construct wrapper Call
-      # Argument passed is determining by the inner_node expression
-      # We assume inner_node is an Expression (Call, Name, etc.)
       return cst.Call(func=parenthesized, args=[cst.Arg(value=inner_node)])
     except cst.ParserSyntaxError:
       raise ValueError(f"Invalid syntax in output_adapter: {adapter_str}")
@@ -245,25 +235,10 @@ class CallMixin(NormalizationMixin, BaseRewriter):
   def _rewrite_as_inline_lambda(self, lambda_str: str, args: list[cst.Arg]) -> cst.Call:
     """
     Wraps arguments in an Immediately Invoked Lambda Expression (IIFE).
-
-    Transforms:
-        `api(args)` -> `(lambda x: ...)(args)`
-
-    Args:
-        lambda_str: The lambda definition code (e.g. "lambda x: hasattr(x, '__array__')").
-        args: The normalized list of arguments to pass to the lambda.
-
-    Returns:
-        A CST Call node where the function is a parenthesized lambda expression.
     """
     try:
-      # Parse the lambda string into a CST node
-      # We parse it as an expression to get the Lambda node
       parsed_expr = cst.parse_expression(lambda_str)
-
-      # Wrap it in parentheses to ensure valid calling syntax: (lambda...)(args)
       parenthesized_lambda = parsed_expr.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
-
       return cst.Call(func=parenthesized_lambda, args=args)
     except cst.ParserSyntaxError:
       raise ValueError(f"Invalid lambda syntax in semantics: {lambda_str}")
@@ -271,7 +246,6 @@ class CallMixin(NormalizationMixin, BaseRewriter):
   def _is_functional_apply(self, node: cst.Call) -> bool:
     """
     Detects if a call node matches the `obj.apply` pattern used in Flax Linen.
-    We check if the attribute name is 'apply'.
     """
     if isinstance(node.func, cst.Attribute):
       if node.func.attr.value == "apply":

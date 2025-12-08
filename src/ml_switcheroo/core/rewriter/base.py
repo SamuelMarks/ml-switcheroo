@@ -15,6 +15,7 @@ the `PivotRewriter`. It handles:
 from typing import Optional, List, Dict, Any, Union, Set
 import libcst as cst
 
+from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -204,6 +205,8 @@ class BaseRewriter(cst.CSTTransformer):
     """Helper to flatten Attribute chains into strings."""
     if isinstance(node, cst.Name):
       return node.value
+    elif isinstance(node, cst.BinaryOperation):
+      return type(node.operator).__name__
     elif isinstance(node, cst.Attribute):
       base = self._cst_to_string(node.value)
       if base:
@@ -251,7 +254,9 @@ class BaseRewriter(cst.CSTTransformer):
     # Retrieve Target Implementation
     target_impl = details.get("variants", {}).get(self.target_fw)
 
-    if not target_impl:
+    if target_impl:
+      get_tracer().log_match(source_api=name, target_api=target_impl.get("api", "Plugin Logic"), abstract_op=abstract_id)
+    else:
       # If the key exists but is None (explicit block) or just missing
       if self.target_fw in details.get("variants", {}) or target_impl is None:
         self._report_failure(f"No mapping defined for '{name}' -> '{self.target_fw}'")

@@ -12,6 +12,7 @@ import libcst as cst
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 
+from ml_switcheroo.core.tracer import reset_tracer, get_tracer
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.core.import_fixer import ImportFixer
@@ -35,6 +36,7 @@ class ConversionResult(BaseModel):
   code: str = ""
   errors: List[str] = Field(default_factory=list)
   success: bool = True
+  trace_events: List[Dict[str, Any]] = Field(default_factory=list)
 
   @property
   def has_errors(self) -> bool:
@@ -121,17 +123,24 @@ class ASTEngine:
     Returns:
         ConversionResult: Object containing transformed code and error logs.
     """
+    reset_tracer()
+    tracer = get_tracer()
+    root_phase = tracer.start_phase("Transpilation Pipeline", "Full Process")
     try:
+      tracer.start_phase("Preprocessing", "Parsing & Analysis")
       tree = self.parse(code)
+      tracer.log_mutation("Module", "(Raw Source)", "(AST Parsed)")
     except Exception as e:
-      return ConversionResult(code=code, errors=[f"Parse Error: {e}"], success=False)
+      return ConversionResult(code=code, errors=[f"Parse Error: {e}"], success=False, trace_events=tracer.export())
 
     errors_log = []
 
     # Pass 0a: Purity Analysis (Specific to Functional Frameworks like JAX)
     if self.target == "jax":
+      tracer.start_phase("Purity Check", "Scanning for side-effects")
       purity_scanner = PurityScanner()
       tree = tree.visit(purity_scanner)
+      tracer.end_phase()
 
     # Pass 0b: Lifecycle Analysis (Detect dynamic state definition)
     # This is critical for converting Pythonic PyTorch to Static Graph JAX/Flax
@@ -153,12 +162,17 @@ class ASTEngine:
       msg = f"Warning: Unmapped 3rd-party dependencies detected: {', '.join(sorted_deps)}"
       errors_log.append(msg)
 
+    tracer.end_phase()
+
     # Pass 1: Semantic Pivot (Change usage)
+    tracer.start_phase("Rewrite Engine", "Visitor Traversal")
     rewriter = PivotRewriter(self.semantics, self.config)
     tree = tree.visit(rewriter)
+    tracer.end_phase()
 
     # Pass 2: Import Scaffolding (Change imports)
     if self.config.source_framework != self.config.target_framework:
+      tracer.start_phase("Import Fixer", "Resolving Dependencies")
       # Sub-step 2a: Check for lingering usages
       # Checks if source framework symbols remain after rewriting (e.g. Escape Hatches)
       scanner = UsageScanner(self.config.source_framework)
@@ -178,6 +192,7 @@ class ASTEngine:
         preserve_source=should_preserve,
       )
       tree = tree.visit(fixer)
+      tracer.end_phase()
 
     final_code = self.to_source(tree)
 
@@ -186,4 +201,5 @@ class ASTEngine:
       count = final_code.count("# <SWITCHEROO_FAILED_TO_TRANS>")
       errors_log.append(f"{count} block(s) marked for manual review (Escape Hatch).")
 
-    return ConversionResult(code=final_code, errors=errors_log, success=True)
+    tracer.end_phase()
+    return ConversionResult(code=final_code, errors=errors_log, success=True, trace_events=tracer.export())

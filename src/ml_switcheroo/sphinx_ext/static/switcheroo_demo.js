@@ -60,18 +60,21 @@ try:
     engine = ASTEngine(semantics=GLOBAL_SEMANTICS, config=config) 
     result = engine.run(js_source_code) 
 
+    # Serialize Result including Trace Data
     response = { 
         "code": result.code, 
         "logs": process_log.export_text(), 
         "is_success": result.success, 
-        "errors": result.errors 
+        "errors": result.errors,
+        "trace_events": result.trace_events
     } 
 except Exception as e: 
     response = { 
         "code": "", 
         "logs": f"{process_log.export_text()}\\nCRITICAL ERROR: {str(e)}\\n{traceback.format_exc()}", 
         "is_success": False, 
-        "errors": [str(e)] 
+        "errors": [str(e)],
+        "trace_events": []
     } 
 
 json_output = json.dumps(response) 
@@ -293,11 +296,19 @@ async function runTranspilation() {
             consoleEl.innerText += "\n[System] Errors detected.";
         }
 
+        // --- Feature 05: Visualizer Integration ---
+        // Pass trace events to helper class if present
+        if (result.trace_events && window.TraceGraph) {
+            console.log("[WASM] Rendering Trace Graph...");
+            const vis = new TraceGraph('trace-visualizer');
+            vis.render(result.trace_events);
+        }
+
     } catch (err) {
         consoleEl.innerText = `❌ Python Runtime Error:\n${err}`;
     } finally {
         btn.disabled = false;
-        btn.innerText = "Run Translation";
+        btn.innerText = "🔄🦘Run Translation";
     }
 }
 

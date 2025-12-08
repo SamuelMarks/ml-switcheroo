@@ -91,6 +91,15 @@ class Model(nn.Module):
                 <div class="controls-bar">
                     <button id="btn-convert" class="md-btn md-btn-accent" disabled>Run Translation</button>
                 </div>
+
+                <!-- Trace Visualization Container -->
+                <div id="trace-visualizer" class="trace-container" style="display:none;">
+                    <div class="trace-row placeholder">
+                        <div class="trace-content" style="text-align:center;color:#999;padding:20px;">
+                            Trace events will appear here after conversion...
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Moved Console Group OUTSIDE demo-interface so it can be shown standalone on error -->
@@ -107,15 +116,20 @@ class Model(nn.Module):
 def setup(app):
   app.add_directive("switcheroo_demo", SwitcherooDemo)
 
-  # -- Feature 0: Syntax Highlighting dependencies --
+  # -- Syntax Highlighting dependencies --
   app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")
   app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")
   app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js")
 
   app.add_css_file("switcheroo_demo.css")
+  app.add_css_file("trace_graph.css")
+
+  # Crucial Order: Load Graph Renderer Logic BEFORE Logic Logic that uses it
+  app.add_js_file("trace_render.js")
   app.add_js_file("switcheroo_demo.js")
+
   app.connect("build-finished", copy_assets_and_wheel)
-  return {"version": "0.5", "parallel_read_safe": True, "parallel_write_safe": True}
+  return {"version": "0.8", "parallel_read_safe": True, "parallel_write_safe": True}
 
 
 def copy_assets_and_wheel(app, exception):
@@ -132,7 +146,6 @@ def copy_assets_and_wheel(app, exception):
     copy_asset(str(f), str(static_dst))
 
     # 2. Copy requirements.txt explicitly so JS can Fetch it
-  # This fulfills "install dependencies from the txt files"
   reqs_file = root_dir / "requirements.txt"
   if reqs_file.exists():
     shutil.copy2(reqs_file, static_dst / "requirements.txt")

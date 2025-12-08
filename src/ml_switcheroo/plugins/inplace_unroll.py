@@ -49,7 +49,9 @@ def _get_method_name(node: cst.Call) -> Optional[str]:
 
 
 @register_hook("unroll_inplace_ops")
-def unroll_inplace_ops(node: Union[cst.Call, cst.Expr], ctx: HookContext) -> Union[cst.Call, cst.Assign, cst.Expr]:
+def unroll_inplace_ops(
+  node: Union[cst.Call, cst.Expr], ctx: HookContext
+) -> Union[cst.Call, cst.Assign, cst.Expr, cst.BinaryOperation]:
   """
   Plugin Hook: Transforms in-place method calls to functional assignments.
 
@@ -113,8 +115,24 @@ def unroll_inplace_ops(node: Union[cst.Call, cst.Expr], ctx: HookContext) -> Uni
   # 3. Strip Suffix
   clean_name = method_name[:-1]
 
-  # 4. Construct Functional Call
-  # x.add(y)
+  # 4. Strategy A: Map to Infix Operator (Best for JAX/NumPy compatibility)
+  # JAX arrays don't have .add(), .sub() methods, so we convert to x + y
+  infix_map = {
+    "add": cst.Add(),
+    "sub": cst.Subtract(),
+    "mul": cst.Multiply(),
+    "div": cst.Divide(),
+    "pow": cst.Power(),
+  }
+
+  if clean_name in infix_map and len(node.args) == 1:
+    # x.add_(y) -> x + y
+    # Ensure arg is clean (remove comma if present)
+    right_operand = node.args[0].value
+    return cst.BinaryOperation(left=receiver, operator=infix_map[clean_name], right=right_operand)
+
+  # 5. Strategy B: Construct Functional Method Call (Fallback)
+  # x.unknown_(y) -> x.unknown(y)
   new_func = node.func.with_changes(attr=cst.Name(clean_name))
   functional_call = node.with_changes(func=new_func)
 
