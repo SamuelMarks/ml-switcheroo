@@ -1,4 +1,4 @@
-let pyodide = null; 
+let pyodide = null;
 let srcEditor = null;
 let tgtEditor = null;
 
@@ -190,10 +190,11 @@ function initExampleSelector() {
     // Avoid double population
     if (sel.options.length > 1) return;
 
-    // Clear default HTML placeholder (except title)
-    sel.innerHTML = '<option value="" disabled selected>-- Select a Pattern --</option>';
+    // Clear default HTML placeholder (except title), remove selected attribute from it
+    sel.innerHTML = '<option value="" disabled>-- Select a Pattern --</option>';
 
     const DEFAULT_KEY = "neural_net";
+    let defaultFound = false;
 
     // Populate
     for (const [key, details] of Object.entries(EXAMPLES)) {
@@ -203,10 +204,18 @@ function initExampleSelector() {
         sel.appendChild(opt);
 
         if (key === DEFAULT_KEY) {
-            // We set the value but don't force load immediately unless requested
-            // But we can pre-select in UI
-            // opt.selected = true;
+            opt.selected = true;
+            defaultFound = true;
         }
+    }
+
+    // Force load default if present to ensure Editor matches Dropdown
+    if (defaultFound) {
+        // Fallback or ensure first item selected if no default logic
+        loadExample(DEFAULT_KEY);
+    } else {
+        // Fallback: select placeholder if default key is invalid
+        sel.querySelector('option[value=""]').selected = true;
     }
 
     // Listener

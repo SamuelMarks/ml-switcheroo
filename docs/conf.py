@@ -10,13 +10,15 @@ version = "0.0.1"
 release = version
 
 # -- Path setup --------------------------------------------------------------
-sys.path.insert(0, os.path.abspath("../src"))
+# Updated: Use __file__ anchors to ensure we find 'src' regardless of CWD.
+# We insert at 0 to prioritize local code over site-packages (fixing potential Split Brain).
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 # -- General configuration ---------------------------------------------------
 extensions = [
   "sphinx.ext.autodoc",
   "sphinx.ext.napoleon",
-  "sphinx.ext.viewcode",
+  # "sphinx.ext.viewcode",  <-- REMOVED: Causing IndexError due to AST line number mismatch
   "sphinx.ext.intersphinx",
   "autoapi.extension",
   "myst_parser",
@@ -42,8 +44,8 @@ autoapi_options = [
   "special-members",
   "imported-members",
 ]
-# Strict ignore patterns to allow 'src/ml_switcheroo/testing' but exclude 'tests/'
-autoapi_ignore = ["*migrations*", "*/tests/*", "*test_*.py"]
+# Strict ignore patterns
+autoapi_ignore = ["*migrations*", "*/tests/*", "*test_*.py", "*/sphinx_ext/*"]
 
 # -- Mermaid Configuration ---------------------------------------------------
 # Optional: Explicitly set the CDN version if rendering fails locally
