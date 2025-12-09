@@ -8,6 +8,7 @@ Verifies that:
 
 import json
 import pytest
+from typing import Set
 from unittest.mock import patch
 from ml_switcheroo.cli.__main__ import main
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -24,10 +25,14 @@ class MockTraceSemantics(SemanticsManager):
     self._reverse_index = {}
     self._key_origins = {}
     self._validation_status = {}
+    self._known_rng_methods = set()
 
     # Inject torch.abs definition
     self.data["abs"] = {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}, "std_args": ["x"]}
     self._reverse_index["torch.abs"] = ("abs", self.data["abs"])
+
+  def get_all_rng_methods(self) -> Set[str]:
+    return self._known_rng_methods
 
 
 def test_cli_trace_output_generation(tmp_path, capsys):

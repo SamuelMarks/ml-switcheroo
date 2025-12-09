@@ -3,7 +3,7 @@ Call Rewriting Logic.
 
 Handles function invocation usage (`leave_Call`) and Assignment Unwrapping.
 Includes functionality for:
-- Lifecycle method stripping (e.g. `.to()`, `.cpu()`).
+- Lifecycle method stripping (Data-Driven via Source Framework Traits).
 - Functional -> OOP Unwrapping.
 - Stateful object management.
 - Standard API pivots.
@@ -12,7 +12,7 @@ Includes functionality for:
 - **Trace Instrumention** for visibility.
 """
 
-from typing import Union, Set, Dict
+from typing import Union, Set, Dict, Tuple
 import libcst as cst
 
 from ml_switcheroo.core.hooks import get_hook
@@ -20,6 +20,7 @@ from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.rewriter.base import BaseRewriter
 from ml_switcheroo.core.rewriter.normalization import NormalizationMixin
 from ml_switcheroo.core.tracer import get_tracer
+from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.utils.node_diff import capture_node_source, diff_nodes
 
 
@@ -28,9 +29,31 @@ class CallMixin(NormalizationMixin, BaseRewriter):
   Mixin for transforming Call nodes and unpacking Assignments.
   """
 
-  _LIFECYCLE_STRIP: Set[str] = {"to", "cpu", "cuda", "detach", "clone", "requires_grad_", "share_memory_"}
+  # Internal cache for traits to avoid lookup overhead per call
+  _cached_source_traits: StructuralTraits = None
 
-  _LIFECYCLE_WARN: Set[str] = {"eval", "train", "half", "float", "double", "type"}
+  def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
+    """
+    Lazily loads the lifecycle strip/warn lists from the SOURCE framework config.
+    """
+    if self._cached_source_traits:
+      return (
+        set(self._cached_source_traits.lifecycle_strip_methods),
+        set(self._cached_source_traits.lifecycle_warn_methods),
+      )
+
+    # Look up config for the Source Framework (e.g. 'torch')
+    config_dict = self.semantics.get_framework_config(self.source_fw)
+
+    if config_dict and "traits" in config_dict:
+      self._cached_source_traits = StructuralTraits.model_validate(config_dict["traits"])
+    else:
+      self._cached_source_traits = StructuralTraits()
+
+    return (
+      set(self._cached_source_traits.lifecycle_strip_methods),
+      set(self._cached_source_traits.lifecycle_warn_methods),
+    )
 
   def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
     """
@@ -97,18 +120,20 @@ class CallMixin(NormalizationMixin, BaseRewriter):
             updated.operator if isinstance(updated, cst.BinaryOperation) else updated.func
           )
 
-    # 0c. Lifecycle Method Handling
+    # 0c. Lifecycle Method Handling (Data-Driven via Source Framework Traits)
+    strip_set, warn_set = self._get_source_lifecycle_lists()
+
     if not plugin_claim and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
       method_name = original.func.attr.value
 
-      if method_name in self._LIFECYCLE_STRIP:
+      if method_name in strip_set:
         if isinstance(updated.func, cst.Attribute):
           self._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
           result_node = updated.func.value
           self._log_diff("Lifecycle Strip", original, result_node)
           return result_node
 
-      if method_name in self._LIFECYCLE_WARN:
+      if method_name in warn_set:
         if isinstance(updated.func, cst.Attribute):
           self._report_warning(f"Ignored model state method '.{method_name}()'.")
           result_node = updated.func.value
@@ -133,8 +158,6 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     mapping = self._get_mapping(func_name)
     if not mapping:
       # --- TRACE: Detailed Decision Log ---
-      # If we resolved a name but found no mapping, log it to show user we TRIED.
-      # This fixes the "Silent Failure" visibility issue.
       if not self._is_builtin(func_name):
         get_tracer().log_inspection(node_str=func_name, outcome="Skipped", detail="No Entry in Semantics Knowledge Base")
       return updated

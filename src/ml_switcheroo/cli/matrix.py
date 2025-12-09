@@ -5,6 +5,8 @@ This module is responsible for generating the visual comparison table between
 supported frameworks. It extracts operation mapping statuses from the
 `SemanticsManager` and presents them either as a formatted Rich table (CLI)
 or structured JSON data (Web Interface).
+
+Refactor: Uses `get_framework_priority_order()` for fully dynamic sorting.
 """
 
 from typing import Any, Dict, List, Optional
@@ -13,7 +15,7 @@ from rich.console import Console
 from rich.table import Table
 
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.enums import SupportedEngine
+from ml_switcheroo.config import get_framework_priority_order
 
 
 class CompatibilityMatrix:
@@ -38,6 +40,13 @@ class CompatibilityMatrix:
     self.semantics = semantics
     self.console = Console()
 
+  def _get_sorted_engines(self) -> List[str]:
+    """
+    Returns list of frameworks sorted for UI consistency.
+    Delegates to central config logic which queries adapters.
+    """
+    return get_framework_priority_order()
+
   def get_json(self) -> List[Dict[str, str]]:
     """
     Returns the compatibility matrix as structured data.
@@ -53,7 +62,7 @@ class CompatibilityMatrix:
             - '{engine}': The status icon for that engine (e.g. 'torch': '✅').
     """
     rows = []
-    engines = [e.value for e in SupportedEngine]
+    engines = self._get_sorted_engines()
     data = self.semantics.get_known_apis()
     sorted_keys = sorted(data.keys())
 
@@ -89,7 +98,7 @@ class CompatibilityMatrix:
     table.add_column("Operation", style="cyan", no_wrap=True)
     table.add_column("Tier", style="magenta")
 
-    engines = [e.value for e in SupportedEngine]
+    engines = self._get_sorted_engines()
     for engine in engines:
       table.add_column(engine.upper(), justify="center")
 

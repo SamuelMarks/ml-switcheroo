@@ -9,117 +9,155 @@ ml-switcheroo 🔄🦘
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Interactive docs](https://img.shields.io/badge/interactive-docs-silver)](https://samuelmarks.github.io/ml-switcheroo/)
 
-**ml-switcheroo** converts Deep Learning models between frameworks (primarily **PyTorch** ↔ **JAX/Flax**) using strict
-Abstract Syntax Tree (AST) / Concrete Syntax Tree (CST) manipulation.
+**ml-switcheroo** is a rigorous AST-based transpiler designed to convert Deep Learning code between frameworks (PyTorch,
+JAX/Flax, TensorFlow, etc.) without hallucination.
 
-Unlike LLM-based coding assistants which "guess" output, ml-switcheroo uses a **Knowledge Base** derived from official
-specifications ([ONNX](https://github.com/onnx/onnx), [Python Array API]((https://data-apis.org/array-api/latest/))) to perform mathematically guaranteed translations. If a translation is
-ambiguous, it protects your code with an "Escape Hatch" rather than generating broken logic.
+Unlike LLM-based assistants, it uses a strict **Semantic Knowledge Base** derived from official
+specifications ([ONNX](https://github.com/onnx/onnx), [Python Array API](https://data-apis.org/array-api/latest/)) to
+perform mathematically guaranteed translations. It solves the $O(N^2)$ translation problem using a Hub-and-Spoke model:
+all frameworks map to an **Abstract Standard**, which then maps to the target.
 
 ---
 
-Here is a diagram visualizing the flow from Specifications/Code → Discovery → The Knowledge Base → The
-Transpilation Engine.
+### 🏗️ Architecture
+
+Code is parsed into an Abstract Syntax Tree (AST), analyzed for safety, pivoted through the Abstract Standard, and
+reconstructed for the target framework.
 
 <!-- prettier-ignore -->
 
 ```mermaid
 graph TD
-%% =================================================================================
-%% STYLE DEFINITIONS
-%% =================================================================================
-    classDef source fill: #ea4335, stroke: #20344b, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Medium', rx: 5px, ry: 5px;
-    classDef semantics fill: #f9ab00, stroke: #20344b, stroke-width: 2px, color: #20344b, font-family: 'Google Sans Medium', rx: 5px, ry: 5px;
-    classDef engine fill: #4285f4, stroke: #20344b, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Medium', rx: 5px, ry: 5px;
-    classDef plugin fill: #57caff, stroke: #20344b, stroke-width: 2px, color: #20344b, font-family: 'Google Sans Medium', rx: 5px, ry: 5px;
-    classDef target fill: #34a853, stroke: #20344b, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Medium', rx: 5px, ry: 5px;
-    classDef codeBlock fill: #ffffff, stroke: #20344b, stroke-width: 1px, color: #20344b, font-family: 'Roboto Mono Normal', text-align: left;
+    %% =================================================================================
+    %% THEME CONFIGURATION
+    %% Colors: Blue 500 (#4285f4), Green 500 (#34a853), Yellow 600 (#f9ab00), Red 500 (#ea4335)
+    %% Navy (#20344b), White (#ffffff)
+    %% =================================================================================
+    classDef default font-family:'Google Sans Normal',color:#20344b,stroke:#20344b,stroke-width:1px;
+    
+    %% Input: Red 500
+    classDef source fill:#ea4335,stroke:#20344b,stroke-width:2px,color:#ffffff,font-family:'Google Sans Medium',rx:5px;
+    
+    %% Processing: Blue 500
+    classDef engine fill:#4285f4,stroke:#20344b,stroke-width:2px,color:#ffffff,font-family:'Google Sans Medium',rx:5px;
+    
+    %% Data/KB: Yellow 600
+    classDef kb fill:#f9ab00,stroke:#20344b,stroke-width:2px,color:#20344b,font-family:'Google Sans Medium',rx:5px;
+    
+    %% Output: Green 500
+    classDef target fill:#34a853,stroke:#20344b,stroke-width:2px,color:#ffffff,font-family:'Google Sans Medium',rx:5px;
+    
+    %% Extensions: Halftone Blue
+    classDef plugin fill:#57caff,stroke:#20344b,stroke-width:2px,color:#20344b,font-family:'Google Sans Medium',rx:5px;
+    
+    %% Verification: Halftone Green
+    classDef verify fill:#5cdb6d,stroke:#20344b,stroke-width:2px,color:#20344b,font-family:'Google Sans Medium',rx:5px;
 
-%% =================================================================================
-%% 1. INPUT LAYER
-%% =================================================================================
-    subgraph Inputs [" Phase 1: Inputs "]
-        direction TB
-        style Inputs fill: #ffffff, stroke: #20344b, stroke-width: 0px, color: #20344b
-        SRC_FILE("<b>📄 Input Source (PyTorch)</b>"):::source
-        SRC_CODE("import torch.nn as nn<br/>import torch<br/><br/>class Model(<b>nn.Module</b>):<br/>&nbsp;&nbsp;def <b>forward</b>(self, x):<br/>&nbsp;&nbsp;&nbsp;&nbsp;return <b>torch.abs</b>(x)"):::codeBlock
-        SRC_FILE --- SRC_CODE
-    end
+    %% Code Blocks: White with Monospace
+    classDef codeBlock fill:#ffffff,stroke:#20344b,stroke-width:1px,font-family:'Roboto Mono Normal',text-align:left,font-size:12px;
 
-    SRC_CODE -->|" Parse AST "| PARSER
-%% =================================================================================
-%% 2. ENGINE LAYER
-%% =================================================================================
-    subgraph Core [" ml-switcheroo Engine "]
-        direction TB
-        style Core fill: #edf2fa, stroke: #20344b, stroke-width: 2px, color: #20344b, font-family: 'Google Sans Medium'
-        PARSER(AST Parser):::engine
-        ANALYSIS("<b>🔍 Analysis</b><br/>Purity, Lifecycle & Deps"):::engine
-    %% Semantic Lookup
-        KB_HEADER("<b>📚 Knowledge Base</b>"):::semantics
-        KB_DATA("{<br/>&nbsp;'abs': {'jax': 'jax.numpy.abs'},<br/>&nbsp;'Linear': {'jax': 'flax.nnx.Linear'}<br/>}"):::codeBlock
-    %% Transformation logic
-        REWRITER("<b>🔄 Pivot Rewriter</b><br/>Maps 'torch' to Abstract Spec<br/>Lowers to 'jax'"):::engine
-        PLUGIN("<b>🔌 Structural Plugins</b><br/>nn.Module → nnx.Module<br/>IO & Device Abstraction"):::plugin
-        FIXER("<b>🧹 Import Fixer</b><br/>Prune 'torch'<br/>Inject 'jax.numpy'"):::engine
-    %% Connections
-        PARSER --> ANALYSIS
-        ANALYSIS --> REWRITER
-        KB_HEADER --- KB_DATA
-        KB_DATA -.->|" Map API "| REWRITER
-        REWRITER --> PLUGIN
-        PLUGIN --> FIXER
-    end
+    %% =================================================================================
+    %% 0. INPUT PHASE
+    %% =================================================================================
+    SRC_HEADER("<b>0. Input Source (PyTorch)</b>"):::source
+    SRC_CODE("class Model(<b>nn.Module</b>):<br/>&nbsp;&nbsp;def <b>forward</b>(self, x):<br/>&nbsp;&nbsp;&nbsp;&nbsp;return <b>torch.abs</b>(x)"):::codeBlock
+    
+    SRC_HEADER --- SRC_CODE
+    SRC_CODE --> PARSER
 
-%% =================================================================================
-%% 3. OUTPUT LAYER
-%% =================================================================================
-    FIXER -->|" Emit Code "| TGT_FILE
+    %% =================================================================================
+    %% 1. ANALYSIS PHASE
+    %% =================================================================================
+    PARSER("<b>1. AST Analysis</b><br/>Purity & Lifecycle Scanners"):::engine
+    
+    PARSER --> REWRITER
 
-    subgraph Outputs [" Phase 3: Outputs "]
-        direction TB
-        style Outputs fill: #ffffff, stroke: #20344b, stroke-width: 0px
-        TGT_FILE("<b>🚀 Output Target (JAX/Flax)</b>"):::target
-        TGT_CODE("from flax import nnx<br/>import jax.numpy as jnp<br/><br/>class Model(<b>nnx.Module</b>):<br/>&nbsp;&nbsp;def <b>__call__</b>(self, x):<br/>&nbsp;&nbsp;&nbsp;&nbsp;return <b>jnp.abs</b>(x)"):::codeBlock
-        TGT_FILE --- TGT_CODE
-    end
+    %% =================================================================================
+    %% 2. REWRITE PHASE (The Hub)
+    %% =================================================================================
+    
+    %% Knowledge Base Side-Car
+    KB[("<b>Knowledge Base</b><br/>semantics/*.json<br/>(Specs + Adapters)")]:::kb
+    
+    REWRITER("<b>2. Pivot Rewriter</b><br/><i>Semantic Translation</i>"):::engine
+    
+    KB -.->|" Map IDs "| REWRITER
+    
+    %% Logic Visualization inside Rewriter
+    PIVOT_LOGIC("<b>1. Ingest:</b> torch.abs(x)<br/><b>2. Pivot:</b> Abs(x) [Standard]<br/><b>3. Project:</b> jnp.abs(x)"):::codeBlock
+    REWRITER --- PIVOT_LOGIC
+    
+    PIVOT_LOGIC --> FIXER
+
+    %% =================================================================================
+    %% 3. REFINEMENT
+    %% =================================================================================
+    FIXER("<b>3. Import Fixer</b><br/>Injects 'jax.numpy'"):::engine
+    
+    FIXER --> TGT_HEADER
+
+    %% =================================================================================
+    %% 4. OUTPUT PHASE
+    %% =================================================================================
+    TGT_HEADER("<b>4. Output Target (JAX)</b>"):::target
+    TGT_CODE("class Model(<b>nnx.Module</b>):<br/>&nbsp;&nbsp;def <b>__call__</b>(self, x):<br/>&nbsp;&nbsp;&nbsp;&nbsp;return <b>jnp.abs</b>(x)"):::codeBlock
+    
+    TGT_HEADER --- TGT_CODE
+    TGT_CODE --> VERIFY
+
+    %% =================================================================================
+    %% 5. VERIFICATION LOOP
+    %% =================================================================================
+    VERIFY("<b>5. Verification Engine</b><br/>Symbolic Fuzzer & Harness"):::verify
+    
+    RESULT("<b>✅ Equivalence Confirmed</b><br/>Input: Array['B', 'C'] (f32)<br/>Diff: 0.000"):::codeBlock
+    
+    VERIFY --- RESULT
 ```
 
 ---
 
-## ⚡ Key Features
+## ⚡ Core Capabilities
 
-### 1. The Semantic Pivot (AST Engine)
+### 1. The Semantic Pivot
 
-The core engine does not map `torch` directly to `jax`. It maps `torch` to an **Abstract Operation** (e.g., "Math.Abs", "Neural.Conv2d"), then lowers that abstract operation to the target framework.
+The engine maps source code to **Abstract Operations** (e.g., `Math.Abs`, `Neural.Conv2d`), then projects them to the
+target framework.
 
-*   **Renaming:** `torch.sum(input, dim)` → `jax.numpy.sum(a, axis)`.
-*   **Unwrapping:** Converts Functional calls (`layer.apply(vars, x)`) to OOP styles or vice-versa.
-*   **Infix/Prefix rewriting:** Transforms function calls like `torch.add(a, b)` into operators like `a + b` or `torch.neg(x)` into `-x`.
-*   **Context Managers:** Rewrites global states like `torch.no_grad()` into JAX-compatible shims (`nullcontext`) or functional transformations.
+* **Argument Normalization:** Pivots arguments via the spec standard (e.g., `torch.sum(input, dim)` $\rightarrow$
+  `Standard(x, axis)` $\rightarrow$ `jax.sum(a, axis)`).
+* **Logic Swaps:** Handles In-place unrolling (`x.add_(y)` $\rightarrow$ `x = x + y`), Decomposition (
+  `torch.add(alpha=2)` $\rightarrow$ `x + y * 2`), and Infix/Prefix operators.
 
 ### 2. Structural & State Rewriting
 
-Deep learning isn't just about math operations; it's about state and type management.
+Deep Learning isn't just math; it's state management.
 
-*   **Class Transpilation:** Converts `torch.nn.Module` ↔ `flax.nnx.Module` ↔ `keras.Layer`, handling `super().__init__` injection and method renaming (`forward` ↔ `__call__`).
-*   **RNG Threading:** Detects stateful Torch randomness (`dropout`) and injects explicit PRNG keys (`rng`) into signatures and function bodies for JAX compliance.
-*   **Type Hint Rectification:** Parses and rewrites type annotations (e.g., `x: torch.Tensor` → `x: jax.Array`).
-*   **IO & Devices:** Plugins automatically map serialization (`torch.save` → `orbax.checkpoint`) and device placement (`torch.device('cuda')` → `jax.devices('gpu')[0]`).
+* **Class Transpilation:** Converts `torch.nn.Module` $\leftrightarrow$ `flax.nnx.Module` $\leftrightarrow$
+  `praxis.base_layer.BaseLayer`. Handles `super().__init__` stripping/injection and method renaming (
+  `forward` $\leftrightarrow$ `__call__`).
+* **RNG Threading (The "JAX Pointer"):** Detects stochastic operations (`dropout`) and injects explicit PRNG variables (
+  `rng`, `key`) into signatures and function bodies.
+* **Lifecycle Management:** Strips framework-specific idioms (`.to(device)`, `.detach()`, `.cpu()`) while preserving
+  logic. Flags imperative state changes like `.eval()` or `.train()`.
 
 ### 3. Safety & Analysis
 
-*   **Purity Scanning:** Static analysis detects side effects unsafe for JAX JIT (I/O, Global mutation, List appends).
-*   **Lifecycle Analysis:** specifically detects if class attributes are defined dynamically in `forward` rather than `__init__`, ensuring valid static graph compilation.
-*   **Dependency Scanning:** Flags 3rd-party imports (`pandas`, `cv2`) not covered by the translation map.
-*   **Smart Imports:** The `ImportFixer` intelligently injects imports (`import jax.numpy as jnp`) *only* if the translated code actually uses them.
-*   **The Escape Hatch:** Code that cannot be safely translated is passed through verbatim, wrapped in error markers (`# <SWITCHEROO_FAILED_TO_TRANS>`) for easy manual review.
+* **Purity Scanning:** Static analysis detects side effects (I/O, global mutation, list appends) unsafe for JIT
+  compilation.
+* **Dependency Scanning:** Flags 3rd-party imports (`pandas`, `cv2`) not covered by the semantic map to prevent runtime
+  crashes.
+* **Lifecycle Tracking:** Ensures class members used in `forward` are validly initialized in `__init__`, critical for
+  static graph compilation (XLA).
+* **Smart Imports:** The `ImportFixer` intelligently injects imports (`import jax.numpy as jnp`) *only* if the
+  translated code actually uses them.
 
-### 4. Discovery & Verification
+### 4. Verification Engine
 
-*   **Automated Discovery:** The `Scaffolder` utilizes **Griffe** to inspect installed libraries and align them against Standards (ONNX/Array API) using fuzzy matching and signature analysis.
-*   **Semantic Harvester:** "Human-in-the-Loop" learning. It scans your manually fixed test files to reverse-engineer valid mappings and update the Knowledge Base automatically.
-*   **Fuzzing Engine:** Includes `InputFuzzer` (with symbolic shape constraints) and `HarnessGenerator`. It validates translations by running random inputs through both Source and Target code in isolated subprocesses.
+* **Symbolic Fuzzing:** The `InputFuzzer` generates valid inputs based on Type Hints extracted from specs (support for
+  `Tensor['B', 'C']` symbolic shapes).
+* **Harness Generator:** Produces standalone verification scripts that run Source vs Target logic side-by-side to prove
+  equivalence.
 
 ---
 
@@ -137,31 +175,31 @@ pip install -e ".[test]"
 
 ### Transpilation
 
-Convert a file or directory.
+Convert files or entire directories. Defaults to **PyTorch $\rightarrow$ JAX**.
 
 ```bash
-# Basic conversion (PyTorch -> JAX)
-ml_switcheroo convert ./models/resnet.py --out ./models_jax/ --source torch --target jax
+# Basic conversion
+ml_switcheroo convert ./models/resnet.py --out ./models_jax/
+
+# Specify Frameworks manually
+ml_switcheroo convert ./src --source torch --target tensorflow --out ./dst
 
 # Strict Mode: Fails/Marks unknown APIs instead of passing them through
-ml_switcheroo convert ./src --strict --out ./out
-
-# Verify immediately after converting (generates a harness)
-ml_switcheroo convert ./math_lib.py --out ./out_lib.py --verify
+ml_switcheroo convert ./src --strict --out ./out --json-trace trace.json
 ```
 
-### Knowledge Base Management
+### Discovery & Learning
 
-Build mappings without writing JSON manually.
+Populate the Knowledge Base automatically.
 
 ```bash
-# 1. View current support matrix
-ml_switcheroo matrix
+# 1. Scaffold: Scan installed libs (e.g. torch, jax) and align against Standards
+ml_switcheroo scaffold --frameworks torch jax
 
-# 2. Interactive Wizard: Categorize missing APIs in a package
+# 2. Wizard: Interactive tool to categorize unmapped APIs and assign plugins
 ml_switcheroo wizard torch
 
-# 3. Harvest rules from a manual test file (Learn from humans)
+# 3. Harvest: Learn mappings from your manually written test cases
 ml_switcheroo harvest tests/examples/test_custom_layer.py --target jax
 ```
 
@@ -171,46 +209,39 @@ ml_switcheroo harvest tests/examples/test_custom_layer.py --target jax
 # Run validation suite on all known mappings
 ml_switcheroo ci
 
-# Generate a standalone lockfile of valid operations
+# Generate a standalone lockfile of verified operations
 ml_switcheroo ci --json-report verified_ops.json
 ```
 
 ---
 
-## 🏗 Architecture
-
-The system is split into **Core Logic** (the engine) and **Semantics** (the data).
-
-1.  **Semantics (`src/ml_switcheroo/semantics`):** JSON files defining standards.
-    *   `k_array_api.json`: Math operations (abs, sum, matmul).
-    *   `k_neural_net.json`: Stateful layers (Linear, Conv2d).
-    *   `k_framework_extras.json`: Utilities (DataLoader, seeds, devices).
-2.  **Importers:** Ingests upstream specs (ONNX Markdown, Array API Stubs).
-3.  **Core:** `PivotRewriter` visits the AST, looks up the Semantics, applies `Plugins` (Hook system), and emits code.
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed data flow.
-
----
-
 ## ✅ Compatibility Matrix
 
-Supported Frameworks via Adapters & Scanners:
+Supported Frameworks via **Zero-Edit Adapters**:
 
-| Framework      | Status                   | Role                  |
-|:---------------|:-------------------------|:----------------------|
-| **PyTorch**    | 🟢 Primary               | Source / Target       |
-| **JAX / Flax** | 🟢 Primary               | Source / Target (NNX) |
-| **NumPy**      | 🟡 Supported             | Fallback / Inputs     |
-| **TensorFlow** | 🔵 Experimental          | Adapter / Spec Sync   |
-| **Apple MLX**  | 🔵 Experimental          | Adapter / Spec Sync   |
+| Framework          | Adapter Status  | Features Supported                      |
+|:-------------------|:---------------:|:----------------------------------------|
+| **PyTorch**        |   🟢 Primary    | Source / Target, NN Modules, Lifecycle  |
+| **JAX / Flax**     |   🟢 Primary    | Source / Target (NNX), RNG Threading    |
+| **NumPy**          |  🟡 Supported   | Fallback Target, Verification Backend   |
+| **TensorFlow**     |     🔵 Beta     | Keras Layers, IO, Device Placements     |
+| **Apple MLX**      | 🔵 Experimental | Basic Array Ops, Device Abstraction     |
+| **PaxML / Praxis** | 🔵 Experimental | Layer Setup Migration, Context Patterns |
 
 ---
 
-## Contributing
+## 🔌 Extensibility
 
-1.  Check definitions in `src/ml_switcheroo/semantics/*.json`.
-2.  Missing an OP? Run `ml_switcheroo wizard torch` to add it interactively.
-3.  Need complex logic? Add a hook in `src/ml_switcheroo/plugins/`.
+ml-switcheroo is designed to be extended without modifying the core engine.
+
+1. **New Frameworks:** Add a file to `src/ml_switcheroo/frameworks/` implementing the `FrameworkAdapter` protocol.
+2. **New Logic:** Add a hook to `src/ml_switcheroo/plugins/` (e.g. `register_hook("my_custom_pattern")`) and link it in
+   the semantics JSON.
+3. **New Mappings:** Use `ml_switcheroo wizard` or edit `semantics/*.json` directly.
+
+See [EXTENDING.md](EXTENDING.md) for a detailed guide.
+
+---
 
 ## License
 

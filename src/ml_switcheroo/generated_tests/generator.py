@@ -11,14 +11,6 @@ it looks up a configuration dictionary that defines how to:
 3.  Convert the library's tensor format back to a NumPy array.
 4.  Optionally wrap execution in JIT compilation (for JAX correctness).
 
-Template Schema:
-    {
-      "import": "str"         # e.g., "import torch"
-      "convert_input": "str"  # e.g., "torch.from_numpy({np_var})"
-      "to_numpy": "str"       # e.g., "{res_var}.numpy()"
-      "jit_wrap": "bool/str"  # Optional: "True" enables JAX JIT shim
-    }
-
 It emits:
 1.  **Imports**: Only for frameworks actually used in the generated batch.
 2.  **Input Generation**: NumPy seeded random data, using Type Hints from the Spec.
@@ -30,20 +22,7 @@ from pathlib import Path
 from typing import Dict, Any, List, Set, Tuple, Optional
 
 from ml_switcheroo.semantics.manager import SemanticsManager
-
-# Arguments that usually require static compilation in JAX-like frameworks
-# Specifying these as static_argnums prevents JIT recompilation errors.
-STATIC_KEYWORDS = {
-  "axis",
-  "axes",
-  "dim",
-  "dims",
-  "keepdim",
-  "keepdims",
-  "ord",
-  "mode",
-  "dtype",
-}
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class TestGenerator:
@@ -64,6 +43,27 @@ class TestGenerator:
     """
     self.semantics_mgr = semantics_mgr or SemanticsManager()
     self._processed_fws: Set[str] = set()
+    self._jit_static_cache: Dict[str, Set[str]] = {}
+
+  def _get_static_args_for_framework(self, fw_name: str) -> Set[str]:
+    """
+    Lazily loads static argument keywords (like 'axis') from the framework config.
+    """
+    if fw_name in self._jit_static_cache:
+      return self._jit_static_cache[fw_name]
+
+    config_dict = self.semantics_mgr.get_framework_config(fw_name)
+    static_set = set()
+
+    if config_dict and "traits" in config_dict:
+      try:
+        traits = StructuralTraits.model_validate(config_dict["traits"])
+        static_set = set(traits.jit_static_args)
+      except Exception:
+        pass
+
+    self._jit_static_cache[fw_name] = static_set
+    return static_set
 
   def generate(self, semantics: Dict[str, Any], output_path: Path) -> None:
     """
@@ -206,14 +206,18 @@ class TestGenerator:
 
       if should_jit:
         lines.append("        # JIT Compilation Check")
+
+        # Load Static Keywords specifically for this framework
+        static_keywords = self._get_static_args_for_framework(fw)
+
         # Creating a lambda to wrap the call `lambda a0, a1: api(a0, a1)`
         lambda_args = ", ".join([f"a{k}" for k in range(len(arg_names))])
         lambda_call = ", ".join([f"a{k}" for k in range(len(arg_names))])
 
-        # Detect Static Args indices based on heuristic keywords
+        # Detect Static Args indices based on dynamic keywords
         static_indices = []
         for idx, name in enumerate(arg_names):
-          if name in STATIC_KEYWORDS:
+          if name in static_keywords:
             static_indices.append(str(idx))
 
         jit_kwargs = ""

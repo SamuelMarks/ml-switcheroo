@@ -26,6 +26,14 @@
           "out_features": "units",
           "bias": "use_bias"
         }
+      },
+      "paxml": {
+        "api": "praxis.layers.Linear",
+        "args": {
+          "in_features": "input_dims",
+          "out_features": "output_dims",
+          "bias": "use_bias"
+        }
       }
     }
   },
@@ -41,6 +49,9 @@
       },
       "tensorflow": {
         "api": "keras.Sequential"
+      },
+      "paxml": {
+        "api": "praxis.layers.Sequential"
       }
     }
   },
@@ -59,6 +70,9 @@
       },
       "tensorflow": {
         "api": "keras.layers.Flatten"
+      },
+      "paxml": {
+        "api": "praxis.layers.Flatten"
       }
     }
   },
@@ -76,6 +90,28 @@
       },
       "tensorflow": {
         "api": "keras.layers.ReLU"
+      },
+      "paxml": {
+        "api": "praxis.layers.ReLU"
+      }
+    }
+  },
+  "Module": {
+    "description": "Base class for all neural network modules.",
+    "std_args": [],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.Module"
+      },
+      "jax": {
+        "api": "flax.nnx.Module"
+      },
+      "tensorflow": {
+        "api": "keras.Model"
+      },
+      "paxml": {
+        "api": "praxis.base_layer.BaseLayer",
+        "requires_plugin": "pax_setup_migration"
       }
     }
   }

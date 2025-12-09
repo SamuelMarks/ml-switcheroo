@@ -6,6 +6,7 @@ Verifies that the engine produces trace events with populated
 """
 
 import pytest
+from typing import Set, Dict, Any
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.core.tracer import TraceEventType, TraceLogger
 from ml_switcheroo.config import RuntimeConfig
@@ -20,10 +21,27 @@ class MockSemantics(SemanticsManager):
     self.framework_configs = {}
     self._validation_status = {}
     self._key_origins = {}
+    self._known_rng_methods = set()
 
     # Inject "torch.abs" -> "jax.numpy.abs"
     self.data["abs"] = {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}, "std_args": ["x"]}
     self._reverse_index["torch.abs"] = ("abs", self.data["abs"])
+
+    # --- FIX: Populate Source Traits for Lifecycle ---
+    self.framework_configs = {
+      "torch": {
+        "traits": {
+          "lifecycle_strip_methods": ["to", "cpu", "cuda", "detach"],
+          "lifecycle_warn_methods": ["eval", "train"],
+        }
+      }
+    }
+
+  def get_all_rng_methods(self) -> Set[str]:
+    return self._known_rng_methods
+
+  def get_framework_config(self, framework: str) -> Dict[str, Any]:
+    return self.framework_configs.get(framework, {})
 
 
 def test_conversion_trace_contains_diffs():
@@ -39,15 +57,11 @@ def test_conversion_trace_contains_diffs():
   # Filter for AST Mutations
   mutations = [e for e in result.trace_events if e["type"] == TraceEventType.AST_MUTATION]
 
-  # Debug: Print found descriptions if assertion fails
-  found_descriptions = [m["description"] for m in mutations]
-
   # Locate the specific operation event
   # We look for "Operation (abs)" which is logged by CallMixin
   op_event = next((e for e in mutations if "Operation (abs)" in e["description"]), None)
 
-  assert op_event is not None, f"Could not find 'Operation (abs)' in events: {found_descriptions}"
-
+  assert op_event is not None
   assert op_event["metadata"]["before"].strip() == "torch.abs(x)"
   assert op_event["metadata"]["after"].strip() == "jax.numpy.abs(x)"
 

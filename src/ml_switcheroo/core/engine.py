@@ -138,7 +138,8 @@ class ASTEngine:
     # Pass 0a: Purity Analysis (Specific to Functional Frameworks like JAX)
     if self.target == "jax":
       tracer.start_phase("Purity Check", "Scanning for side-effects")
-      purity_scanner = PurityScanner()
+      # Pass semantics to allow dynamic RNG method detection
+      purity_scanner = PurityScanner(semantics=self.semantics)
       tree = tree.visit(purity_scanner)
       tracer.end_phase()
 

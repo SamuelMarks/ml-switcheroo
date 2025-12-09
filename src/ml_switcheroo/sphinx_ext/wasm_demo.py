@@ -1,38 +1,56 @@
+"""
+Sphinx Extension for ML-Switcheroo WASM Demo.
+
+This module provides a custom `switcheroo_demo` directive that renders an interactive
+in-browser transpiler interface. It dynamically populates the framework selection
+dropdowns by querying the `ml_switcheroo.frameworks` registry.
+
+Features:
+- Dynamically discovers registered frameworks for the UI.
+- Generates HTML for the WASM interface (Source/Target selectors, Editor divs).
+- Injects necessary JS/CSS assets into the Sphinx build.
+- **Protocol-Driven Examples**: Extracts standard code snippets from adapters.
+"""
+
 import os
 import shutil
+import json
 from pathlib import Path
 from docutils import nodes
 from docutils.parsers.rst import Directive
-from sphinx.util.fileutil import copy_asset
+
+from ml_switcheroo.frameworks import available_frameworks, get_adapter
 
 
 class SwitcherooDemo(Directive):
   has_content = True
 
   def run(self):
-    # 1. Locate the Wheel
+    # 1. Locate the Wheel (Best effort for render time, actual copy happens later)
     root_dir = Path(__file__).parents[3]
     dist_dir = root_dir / "dist"
 
-    wheel_name = ""
+    wheel_name = "ml_switcheroo-latest-py3-none-any.whl"
     if dist_dir.exists():
       wheels = list(dist_dir.glob("*.whl"))
       if wheels:
         latest = sorted(wheels, key=os.path.getmtime)[-1]
         wheel_name = latest.name
 
-    # Framework Options
-    opts = """ 
-        <option value="torch" selected>PyTorch</option>
-        <option value="jax">JAX / Flax</option>
-        <option value="numpy">NumPy</option>
-        <option value="tensorflow">TensorFlow</option>
-        <option value="mlx">Apple MLX</option>
-        """
-    opts_tgt = opts.replace("selected", "").replace('value="jax"', 'value="jax" selected')
+    # 2. Dynamically Generate Framework Options & Examples
+    options_html, examples_json = self._generate_dynamic_data()
+
+    # Create target variant (default JAX selected)
+    opts_tgt = options_html.replace('value="jax"', 'value="jax" selected')
+    opts_tgt = opts_tgt.replace('value="torch" selected', 'value="torch"')
 
     html = f""" 
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
+            <!-- Inject Protocol-Driven Examples -->
+            <script>
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
+            </script>
+
             <div class="demo-header">
                 <div>
                     <h3 style="margin:0">Live Transpiler Demo</h3>
@@ -52,7 +70,7 @@ class SwitcherooDemo(Directive):
                 <div class="translate-toolbar">
                     <div class="select-wrapper">
                         <select id="select-src" class="material-select">
-                            {opts} 
+                            {options_html} 
                         </select>
                     </div>
 
@@ -65,12 +83,11 @@ class SwitcherooDemo(Directive):
                     </div>
                 </div>
 
-                <!-- NEW: Example Selector Toolbar -->
+                <!-- Example Selector Toolbar -->
                 <div class="example-toolbar">
                     <span class="label">Load Example:</span>
                     <select id="select-example" class="material-select-sm">
                         <option value="" disabled selected>-- Select a Pattern --</option>
-                        <!-- Populated by JS -->
                     </select>
                 </div>
 
@@ -96,13 +113,12 @@ class Model(nn.Module):
                 <div id="trace-visualizer" class="trace-container" style="display:none;">
                     <div class="trace-row placeholder">
                         <div class="trace-content" style="text-align:center;color:#999;padding:20px;">
-                            Trace events will appear here after conversion...
+                            Trace events will appear here after conversion... 
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Moved Console Group OUTSIDE demo-interface so it can be shown standalone on error -->
             <div class="console-group">
                 <div class="editor-label">Engine Logs</div>
                 <pre id="console-output">Waiting for engine...</pre>
@@ -112,49 +128,94 @@ class Model(nn.Module):
     node = nodes.raw("", html, format="html")
     return [node]
 
+  def _generate_dynamic_data(self) -> tuple[str, str]:
+    """
+    Iterates available frameworks to generate:
+    1. HTML <options> for dropdown.
+    2. JSON string of example code snippets.
+    """
+    fws = available_frameworks()
+    priority = ["torch", "jax"]
+    sorted_fws = sorted(fws, key=lambda x: (priority.index(x) if x in priority else 99, x))
+
+    parts = []
+    examples = {}
+
+    for key in sorted_fws:
+      adapter = get_adapter(key)
+      if not adapter:
+        continue
+
+      # 1. Option Label
+      label = getattr(adapter, "display_name", key.capitalize())
+      selected = " selected" if key == "torch" else ""
+      parts.append(f'<option value="{key}"{selected}>{label}</option>')
+
+      # 2. Example Extraction
+      # We construct a generic "Standard usage" scenarios
+      if hasattr(adapter, "get_example_code"):
+        try:
+          code = adapter.get_example_code()
+          if code:
+            examples[key] = {
+              "label": f"Standard {label} Example",
+              "srcFw": key,
+              "tgtFw": "jax" if key != "jax" else "torch",
+              "code": code,
+            }
+        except Exception as e:
+          print(f"⚠️ Failed to get example for {key}: {e}")
+
+    return "\n".join(parts), json.dumps(examples)
+
 
 def setup(app):
   app.add_directive("switcheroo_demo", SwitcherooDemo)
 
-  # -- Syntax Highlighting dependencies --
+  # External Deps
   app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")
   app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")
   app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js")
 
+  # Internal Assets
   app.add_css_file("switcheroo_demo.css")
   app.add_css_file("trace_graph.css")
-
-  # Crucial Order: Load Graph Renderer Logic BEFORE Logic Logic that uses it
   app.add_js_file("trace_render.js")
   app.add_js_file("switcheroo_demo.js")
 
-  app.connect("build-finished", copy_assets_and_wheel)
-  return {"version": "0.8", "parallel_read_safe": True, "parallel_write_safe": True}
+  app.connect("builder-inited", add_static_path)
+  app.connect("build-finished", copy_wheel_and_reqs)
+
+  return {"version": "0.9.1", "parallel_read_safe": True, "parallel_write_safe": True}
 
 
-def copy_assets_and_wheel(app, exception):
-  if exception:
+def add_static_path(app):
+  static_path = Path(__file__).parent / "static"
+  if static_path.exists() and hasattr(app, "config"):
+    app.config.html_static_path.append(str(static_path.resolve()))
+
+
+def copy_wheel_and_reqs(app, exception):
+  if exception or not hasattr(app, "builder"):
     return
+
   here = Path(__file__).parent
   root_dir = here.parents[2]
-  static_src = here / "static"
-  static_dst = Path(app.builder.outdir) / "_static"
   dist_dir = root_dir / "dist"
+  static_dst = Path(app.builder.outdir) / "_static"
+  static_dst.mkdir(exist_ok=True, parents=True)
 
-  # 1. Copy JS/CSS
-  for f in static_src.glob("*"):
-    copy_asset(str(f), str(static_dst))
-
-    # 2. Copy requirements.txt explicitly so JS can Fetch it
+  # Req
   reqs_file = root_dir / "requirements.txt"
   if reqs_file.exists():
     shutil.copy2(reqs_file, static_dst / "requirements.txt")
-    print("📄 [WASM] Copied requirements.txt to _static/")
 
-    # 3. Copy Wheel
+  # Wheel
   if dist_dir.exists():
     wheels = list(dist_dir.glob("*.whl"))
     if wheels:
       latest = sorted(wheels, key=os.path.getmtime)[-1]
-      shutil.copy2(latest, static_dst / latest.name)
-      print(f"📦 [WASM] Copied {latest.name} to _static/")
+      target_file = static_dst / latest.name
+      if not target_file.exists() or target_file.stat().st_mtime < latest.stat().st_mtime:
+        shutil.copy2(latest, target_file)
+        print(f"📦 [WASM] Copied {latest.name} to _static/")

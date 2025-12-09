@@ -3,35 +3,26 @@ Discovery Tool for linking Framework implementations to Standards.
 
 This module scans installed libraries (e.g., Torch, JAX, TensorFlow, MLX) for
 functions that match the names defined in the Semantic Knowledge Base.
-It performs signature verification to ensure the found function is compatible
-with the abstract specification.
+
+Refactor Note:
+    Hardcoded search paths have been removed. This module now queries the
+    `ml_switcheroo.frameworks` registry to determine which submodules to scan
+    for a given framework. This enables "Zero-Edit" support for new frameworks.
 """
 
 import importlib
 import inspect
-from typing import Dict, Any, List, Tuple, Union
-from ml_switcheroo.utils.console import console, log_info, log_success
+from typing import Dict, Any, List, Tuple, Union, Optional
 
-# Expanded priority search paths for Array API compliance across supported engines.
-SEARCH_PATHS = {
-  "torch": ["torch", "torch.linalg", "torch.special", "torch.fft"],
-  "jax": ["jax.numpy", "jax.numpy.linalg", "jax.numpy.fft"],
-  "tensorflow": [
-    "tensorflow",
-    "tensorflow.math",
-    "tensorflow.linalg",
-    "tensorflow.signal",
-  ],
-  "mlx": ["mlx.core", "mlx.nn", "mlx.core.fft", "mlx.core.linalg"],
-  "numpy": ["numpy", "numpy.linalg", "numpy.fft"],
-}
+from ml_switcheroo.utils.console import console, log_info, log_success, log_warning
+from ml_switcheroo.frameworks import get_adapter
 
 
 class FrameworkSyncer:
   """
   Links abstract operations to concrete framework implementations.
 
-  This class iterates through known modules of a target framework, looking for
+  This class iterates through registered modules of a target framework, looking for
   callables that match the operation names defined in the Semantic Knowledge Base.
   It verifies that potential matches have compatible signatures before linking them.
 
@@ -47,7 +38,9 @@ class FrameworkSyncer:
     """
     Updates the 'variants' dict in tier_data by hunting for ops in the target framework.
 
-    It attempts to import modules defined in `SEARCH_PATHS` for the given framework.
+    It resolves the `FrameworkAdapter` for the requested framework to determine
+    the list of python submodules to scan (e.g. `['jax.numpy', 'jax.numpy.fft']`).
+
     If a function with a matching name and compatible signature is found, it is
     recorded in the `tier_data` dictionary under the `variants` key.
 
@@ -58,11 +51,20 @@ class FrameworkSyncer:
     """
     log_info(f"Syncing [code]{framework}[/code] against Array API Standard...")
 
-    # Pre-load modules based on the lookup table
-    libs = []
-    # Fallback to just the framework name if no specific paths defined
-    paths_to_search = SEARCH_PATHS.get(framework, [framework])
+    # 1. Resolve Search Paths via Registry
+    adapter = get_adapter(framework)
+    paths_to_search = []
 
+    if adapter and hasattr(adapter, "search_modules"):
+      # Use configuration from the adapter file
+      paths_to_search = adapter.search_modules
+    else:
+      # Fallback: Just try scanning the root package
+      # This handles cases where an adapter might not be fully implemented yet
+      paths_to_search = [framework]
+
+    # 2. Pre-load modules
+    libs = []
     for mod_name in paths_to_search:
       try:
         libs.append(importlib.import_module(mod_name))
@@ -75,6 +77,7 @@ class FrameworkSyncer:
       self.console.print(f"⚠️  Could not import any modules for {framework}. Is it installed?")
       return
 
+    # 3. Discovery Loop
     count = 0
     skipped = 0
 
@@ -89,14 +92,14 @@ class FrameworkSyncer:
 
       found_path = None
 
-      # 1. Search modules for matching name
-      # We iterate in order of SEARCH_PATHS, so earlier modules take precedence.
+      # Search modules for matching name
+      # We iterate in order of search_modules, so earlier modules take precedence.
       for lib in libs:
         if hasattr(lib, op_name):
           obj = getattr(lib, op_name)
 
           if callable(obj):
-            # 2. Verify Signature Compatibility
+            # Verify Signature Compatibility
             if self._is_compatible(obj, std_arg_names):
               found_path = f"{lib.__name__}.{op_name}"
               break
@@ -172,10 +175,12 @@ class FrameworkSyncer:
 
     if len(mandatory_params) > len(std_args):
       # Candidate requires more args than Spec provides
+      # e.g. Candidate(a, b), Spec(x) -> Failure, 'b' would be missing
       return False
 
     # 3. Check Capacity
     # Candidate function must be able to accept at least as many positional args as Spec
+    # e.g. Candidate(a), Spec(x, y) -> Failure, 'y' would be lost
     if len(pos_params) < len(std_args):
       return False
 

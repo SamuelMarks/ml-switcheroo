@@ -1,14 +1,5 @@
 """
 Tests for Class Structure Rewriting: PyTorch -> Flax NNX.
-
-This module verifies the structural transformation logic required to convert
-PyTorch Object-Oriented models into Flax NNX models.
-
-Verifies:
-    1.  Inheritance: `torch.nn.Module` -> `flax.nnx.Module`.
-    2.  State Injection: `rngs` added to `__init__` signature.
-    3.  State Propagation: `rngs` passed to sub-layer definitions.
-    4.  Method Renaming: `forward` -> `__call__`.
 """
 
 import pytest
@@ -30,7 +21,20 @@ class MockTorchToFlaxSemantics(SemanticsManager):
     self._reverse_index = {}
     self._key_origins = {}
     self.import_data = {}
-    self.framework_configs = {}
+
+    # Configure Traits for JAX (Flax NNX)
+    self.framework_configs = {
+      "jax": {
+        "traits": {
+          "module_base": "flax.nnx.Module",
+          "forward_method": "__call__",
+          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+          "requires_super_init": False,
+        }
+      },
+      # FIX: Source Trait
+      "torch": {"traits": {"module_base": "torch.nn.Module", "forward_method": "forward"}},
+    }
 
     # Define 'Linear' (Neural)
     self._inject(
@@ -41,6 +45,9 @@ class MockTorchToFlaxSemantics(SemanticsManager):
       "jax",
       "flax.nnx.Linear",
     )
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
   def _inject(
     self,
@@ -73,14 +80,8 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 def test_inheritance_rewrite(rewriter: PivotRewriter) -> None:
-  """
-  Verifies module inheritance swap.
-
-  Input: `class MyModel(torch.nn.Module):`
-  Output: `class MyModel(flax.nnx.Module):`
-  """
-  code = """
-class MyModel(torch.nn.Module):
+  code = """ 
+class MyModel(torch.nn.Module): 
     pass
 """
   result = rewrite_code(rewriter, code)
@@ -90,46 +91,31 @@ class MyModel(torch.nn.Module):
 def test_init_signature_injection(rewriter: PivotRewriter) -> None:
   """
   Verifies `rngs` injection into constructor.
-
-  Input: `def __init__(self, features):`
-  Output: `def __init__(self, rngs: flax.nnx.Rngs, features):`
+  Expects result to contain `rngs: flax.nnx.Rngs`.
   """
-  code = """
-class MyModel(torch.nn.Module):
-    def __init__(self, features):
+  code = """ 
+class MyModel(torch.nn.Module): 
+    def __init__(self, features): 
         pass
 """
   result = rewrite_code(rewriter, code)
-  # Loose check for argument existence at position 1
   assert "def __init__(self, rngs: flax.nnx.Rngs, features):" in result
 
 
 def test_init_layer_instantiation(rewriter: PivotRewriter) -> None:
-  """
-  Verifies `rngs` propagation to layers in `__init__`.
-
-  Input: `self.dense = torch.nn.Linear(10, 20)`
-  Output: `self.dense = flax.nnx.Linear(10, 20, rngs=rngs)`
-  """
-  code = """
-class MyModel(torch.nn.Module):
-    def __init__(self):
-        self.dense = torch.nn.Linear(10, 20)
+  code = """ 
+class MyModel(torch.nn.Module): 
+    def __init__(self): 
+        self.dense = torch.nn.Linear(10, 20) 
 """
   result = rewrite_code(rewriter, code)
   assert "flax.nnx.Linear(10, 20, rngs=rngs)" in result
 
 
 def test_forward_renaming(rewriter: PivotRewriter) -> None:
-  """
-  Verifies `forward` to `__call__` renaming.
-
-  Input: `def forward(self, x):`
-  Output: `def __call__(self, x):`
-  """
-  code = """
-class MyModel(torch.nn.Module):
-    def forward(self, x):
+  code = """ 
+class MyModel(torch.nn.Module): 
+    def forward(self, x): 
         return x
 """
   result = rewrite_code(rewriter, code)
@@ -138,17 +124,29 @@ class MyModel(torch.nn.Module):
 
 
 def test_non_module_classes_ignored(rewriter: PivotRewriter) -> None:
-  """
-  Verifies that classes NOT inheriting from torch.nn.Module are untouched.
-  """
-  code = """
-class DataContainer:
-    def __init__(self, x):
+  code = """ 
+class DataContainer: 
+    def __init__(self, x): 
         self.x = x
-    def forward(self):
+    def forward(self): 
         pass
 """
   result = rewrite_code(rewriter, code)
   assert "class DataContainer:" in result
   assert "def __init__(self, x):" in result  # No rngs injected
   assert "def forward(self):" in result  # No rename
+
+
+def test_call_site_args_commas(rewriter: PivotRewriter) -> None:
+  code = """ 
+class M(torch.nn.Module): 
+    def __init__(self): 
+        # No trailing comma
+        self.l1 = torch.nn.Linear(1, 2) 
+        # Trailing comma
+        self.l2 = torch.nn.Linear(3, 4,) 
+"""
+  result = rewrite_code(rewriter, code)
+
+  assert "flax.nnx.Linear(1, 2, rngs=rngs)" in result
+  assert "flax.nnx.Linear(3, 4, rngs=rngs)" in result

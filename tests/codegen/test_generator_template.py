@@ -2,7 +2,7 @@
 Tests for Template-Based Test Generation.
 
 Verifies:
-1. Generator uses default templates when no external JSON is provided.
+1. Generator uses default templates (from Registry) when no external JSON is provided.
 2. Generator loads templates from `SemanticsManager`.
 3. Generated code reflects custom backend configs (e.g. TinyGrad).
 """
@@ -13,13 +13,15 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockTemplateSemantics(SemanticsManager):
-  """Mocks SemanticsManager with custom templates."""
+  """Mocks SemanticsManager with custom templates provided at init."""
 
   def __init__(self, templates=None):
-    super().__init__()
-    # Ensure clean state, though __init__ calls load
-    if templates:
-      self.test_templates = templates
+    # We purposely skip the real init to avoid loading files or registry defaults
+    # for controlled unit testing.
+    self.test_templates = templates or {}
+    # Ensure minimal state for other methods if called
+    self.data = {}
+    self.framework_configs = {}
 
   def get_test_template(self, framework):
     return self.test_templates.get(framework)
@@ -41,18 +43,15 @@ def semantics_data():
 
 def test_default_template_fallback(tmp_path, semantics_data):
   """
-  Scenario: Use default 'torch' template (hardcoded fallback).
+  Scenario: Use default 'torch' template (sourced from Adapter Registry).
   """
+  # NOTE: We use the REAL SemanticsManager here to verify registry integration
   mgr = SemanticsManager()
-  mgr.test_templates = {}  # Clear any loaded stuff to force fallback check
 
   gen = TestGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "test_defaults.py"
 
-  # Only torch matches default templates in our mocked semantics_data setup?
-  # No, we provided 'tinygrad' which is unknown initially.
-  # Generator invalid_variants check filters out unknown frameworks.
-  # So we need at least 2 valid ones. Let's add 'jax' to data.
+  # Must add a valid second one (JAX) to force generation logic (needs >=2 variants)
   semantics_data["abs"]["variants"]["jax"] = {"api": "jnp.abs"}
 
   gen.generate(semantics_data, out_file)
@@ -133,8 +132,6 @@ def test_jit_config_via_template(tmp_path):
 
   assert "Framework: custom_jit" in content
   assert "jax.jit(fn" in content  # Currently hardcoded to use jax.jit if flag is true
-  # Ideally, the template might define the jit wrapper syntax too,
-  # but the requirement was framework-specific config loading.
 
 
 def test_invalid_framework_skipped(tmp_path, semantics_data):
@@ -146,7 +143,8 @@ def test_invalid_framework_skipped(tmp_path, semantics_data):
   # Must add a valid second one to force generation at all
   semantics_data["abs"]["variants"]["jax"] = {"api": "jnp.abs"}
 
-  mgr = SemanticsManager()  # defaults only
+  # Use Real Manager to ensure default behavior (missing ghost)
+  mgr = SemanticsManager()
   gen = TestGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "test_skip.py"
 

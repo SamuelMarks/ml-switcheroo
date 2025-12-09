@@ -7,11 +7,30 @@ Verifies:
 3. Other frameworks (Torch) do NOT contain `jax.jit`.
 4. Lambda wrapping structure is syntactically valid for mulit-argument calls.
 5. JIT flags are case-insensitive.
+6. (New) Static keywords are loaded dynamically from Framework Config.
 """
 
 from ml_switcheroo.generated_tests.generator import TestGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 from unittest.mock import MagicMock
+
+
+class MockTraitSemantics(SemanticsManager):
+  """Ensures get_framework_config returns static args."""
+
+  def get_framework_config(self, framework: str):
+    if framework == "jax":
+      return {"traits": {"jit_static_args": ["axis", "keepdims"]}}
+    return {}
+
+  # Also need to mock template retrieval if we use TestGenerator logic
+  def get_test_template(self, fw):
+    # Default behavior for tests
+    if fw == "jax":
+      return {"import": "import jax", "jit_wrap": "True"}
+    if fw == "torch":
+      return {"import": "import torch"}
+    return None
 
 
 def test_jax_block_has_jit(tmp_path):
@@ -21,8 +40,11 @@ def test_jax_block_has_jit(tmp_path):
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
 
+  # Inject mock manager
+  mgr = MockTraitSemantics()
+
   out_file = tmp_path / "test_jit.py"
-  gen = TestGenerator()
+  gen = TestGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -49,14 +71,15 @@ def test_jit_static_argnums_detection(tmp_path):
     }
   }
 
+  mgr = MockTraitSemantics()
   out_file = tmp_path / "test_jit_static.py"
-  gen = TestGenerator()
+  gen = TestGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
   jax_section = content.split("Framework: jax")[1].split("except")[0]
 
-  # Verify static argnums injected
+  # Verify static argnums injected because "axis" is in MockJAX static_args
   # x is index 0, axis is index 1.
   assert "static_argnums=(1,)" in jax_section
 
@@ -73,8 +96,9 @@ def test_jit_multiple_static_args(tmp_path):
     }
   }
 
+  mgr = MockTraitSemantics()
   out_file = tmp_path / "test_jit_multi_static.py"
-  gen = TestGenerator()
+  gen = TestGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -90,8 +114,9 @@ def test_torch_block_no_jit(tmp_path):
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
 
+  mgr = MockTraitSemantics()
   out_file = tmp_path / "test_jit_torch.py"
-  gen = TestGenerator()
+  gen = TestGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -115,6 +140,8 @@ def test_jit_flag_case_insensitivity(tmp_path):
     "to_numpy": "{res_var}",
     "jit_wrap": "true",  # Lowercase string
   }
+  # Ensure no crash on config lookup
+  mgr.get_framework_config.return_value = {}
 
   semantics = {
     "op": {
@@ -139,8 +166,10 @@ def test_jit_import_generation(tmp_path):
   Expectation: File header should contain `import jax` even if only
   used implicitly by the JIT wrapper generator.
   """
-  # Default SemanticsManager includes jax with jit_wrap=True
-  gen = TestGenerator()
+  # We use MockTraitSemantics which defines JAX templates
+  mgr = MockTraitSemantics()
+  gen = TestGenerator(semantics_mgr=mgr)
+
   semantics = {
     "sum": {
       "variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}},
@@ -156,13 +185,16 @@ def test_jit_import_generation(tmp_path):
 
 def test_jit_static_args_missing(tmp_path):
   """
-  Scenario: Spec has 'axis', but it's not marked in STATIC_KEYWORDS?
-  Actually no, test that if spec has vars NOT in STATIC_KEYWORDS,
-  no argnums get added.
+  Scenario: Spec has 'dim' but config only lists 'axis'.
+  Expect: No argnums added.
   """
-  semantics = {"add": {"std_args": ["x", "y"], "variants": {"jax": {"api": "jnp.add"}, "torch": {"api": "t.add"}}}}
+  semantics = {"add": {"std_args": ["x", "dim"], "variants": {"jax": {"api": "jnp.add"}, "torch": {"api": "t.add"}}}}
+
+  mgr = MockTraitSemantics()
+  # Mock's get_framework_config returns ['axis', 'keepdims'] but NOT 'dim'
+
   out = tmp_path / "test_no_static.py"
-  gen = TestGenerator()
+  gen = TestGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out)
 
   content = out.read_text()

@@ -10,6 +10,8 @@ Target Scenarios:
 """
 
 import pytest
+from typing import Set
+
 from ml_switcheroo.cli.__main__ import main
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.hooks import _HOOKS
@@ -26,6 +28,7 @@ class E2EMockSemantics(SemanticsManager):
     self.data = {}
     self.import_data = {}
     self.framework_configs = {}  # Required by ASTEngine alias checker
+    self._known_rng_methods = set()
     # Simple reverse index
     self.data["add"] = {
       "std_args": ["x", "y"],
@@ -38,6 +41,9 @@ class E2EMockSemantics(SemanticsManager):
       "torch.add": ("add", self.data["add"]),
       "jax.numpy.add": ("add", self.data["add"]),
     }
+
+  def get_all_rng_methods(self) -> Set[str]:
+    return self._known_rng_methods
 
   def get_definition(self, name):
     return self._reverse_index.get(name)

@@ -9,15 +9,37 @@ import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.schema import StructuralTraits
+
+
+class TestSemantics(SemanticsManager):
+  """
+  Overrides framework configs for testing to ensure traits are available
+  without relying on external files or registry defaults that might be missing
+  in isolated test environments.
+  """
+
+  def __init__(self):
+    super().__init__()
+    # Explicitly set traits for 'jax' (Flax NNX)
+    self.framework_configs["jax"] = {
+      "traits": {
+        "module_base": "flax.nnx.Module",
+        "forward_method": "__call__",
+        "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+      }
+    }
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
 
 @pytest.fixture
 def semantics_manager():
   """
-  Loads the real semantics including the newly created k_neural_net.json.
-  Notes: We ensure the manager is fresh.
+  Loads the semantics manager.
   """
-  return SemanticsManager()
+  return TestSemantics()
 
 
 def test_sequential_container_transpilation(semantics_manager):
@@ -68,7 +90,6 @@ class MLP(nn.Module):
   # 1. Imports
   # ImportFixer might convert 'import torch.nn as nn' to 'from flax import nnx as nn'
   # or preserve 'import flax.nnx' if used directly.
-  # Pivots map to 'flax.nnx.Sequential'.
 
   # 2. Class Definition
   assert "class MLP(flax.nnx.Module):" in code

@@ -14,6 +14,7 @@ from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class MockNNXSemantics(SemanticsManager):
@@ -28,11 +29,28 @@ class MockNNXSemantics(SemanticsManager):
     self._key_origins = {}
     self.import_data = {}
 
+    # Configure Traits for JAX to ensure consistent NNX behavior
+    self.framework_configs = {
+      "jax": {
+        "traits": {
+          "module_base": "flax.nnx.Module",
+          "forward_method": "__call__",
+          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+          "requires_super_init": False,
+        }
+      },
+      # FIX: Source framework MUST declare traits so 'torch.nn.Module' is detected
+      "torch": {"traits": {"module_base": "torch.nn.Module", "forward_method": "forward"}},
+    }
+
     # 1. Define 'Linear' (Neural)
     self._inject("Linear", SemanticTier.NEURAL, "torch", "torch.nn.Linear", "jax", "flax.nnx.Linear")
 
     # 2. Define 'relu' (Math/Functional)
     self._inject("relu", SemanticTier.ARRAY_API, "torch", "torch.relu", "jax", "flax.nnx.relu")
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
   def _inject(self, name, tier, s_fw, s_api, t_fw, t_api):
     variants = {s_fw: {"api": s_api}, t_fw: {"api": t_api}}
@@ -60,8 +78,8 @@ def test_inheritance_rewrite(rewriter):
   Input: class MyModel(torch.nn.Module):
   Output: class MyModel(flax.nnx.Module):
   """
-  code = """
-class MyModel(torch.nn.Module):
+  code = """ 
+class MyModel(torch.nn.Module): 
     pass
 """
   result = rewrite_code(rewriter, code)
@@ -74,9 +92,9 @@ def test_init_signature_injection(rewriter):
   Output: def __init__(self, rngs: flax.nnx.Rngs, features):
   (Argument 1 after self).
   """
-  code = """
-class MyModel(torch.nn.Module):
-    def __init__(self, features):
+  code = """ 
+class MyModel(torch.nn.Module): 
+    def __init__(self, features): 
         pass
 """
   result = rewrite_code(rewriter, code)
@@ -92,10 +110,10 @@ def test_init_layer_instantiation(rewriter):
   Input: self.dense = torch.nn.Linear(10, 20)
   Output: self.dense = flax.nnx.Linear(10, 20, rngs=rngs)
   """
-  code = """
-class MyModel(torch.nn.Module):
-    def __init__(self):
-        self.dense = torch.nn.Linear(10, 20)
+  code = """ 
+class MyModel(torch.nn.Module): 
+    def __init__(self): 
+        self.dense = torch.nn.Linear(10, 20) 
 """
   result = rewrite_code(rewriter, code)
 
@@ -108,9 +126,9 @@ def test_forward_renaming(rewriter):
   Input: def forward(self, x):
   Output: def __call__(self, x):
   """
-  code = """
-class MyModel(torch.nn.Module):
-    def forward(self, x):
+  code = """ 
+class MyModel(torch.nn.Module): 
+    def forward(self, x): 
         return x
 """
   result = rewrite_code(rewriter, code)
@@ -123,11 +141,11 @@ def test_non_module_classes_ignored(rewriter):
   """
   Verify that classes NOT inheriting from torch.nn.Module are untouched.
   """
-  code = """
-class DataContainer:
-    def __init__(self, x):
+  code = """ 
+class DataContainer: 
+    def __init__(self, x): 
         self.x = x
-    def forward(self):
+    def forward(self): 
         pass
 """
   result = rewrite_code(rewriter, code)
@@ -142,13 +160,13 @@ def test_call_site_args_commas(rewriter):
   """
   Ensure comma handling is correct when appending rngs.
   """
-  code = """
-class M(torch.nn.Module):
-    def __init__(self):
+  code = """ 
+class M(torch.nn.Module): 
+    def __init__(self): 
         # No trailing comma
-        self.l1 = torch.nn.Linear(1, 2)
+        self.l1 = torch.nn.Linear(1, 2) 
         # Trailing comma
-        self.l2 = torch.nn.Linear(3, 4,)
+        self.l2 = torch.nn.Linear(3, 4,) 
 """
   result = rewrite_code(rewriter, code)
 

@@ -1,17 +1,8 @@
 from enum import Enum
 
-
-class SupportedEngine(str, Enum):
-  """
-  Backends supported by the ml_switcheroo transpiler.
-  Values match the library names used in semantic JSONs.
-  """
-
-  TORCH = "torch"
-  JAX = "jax"
-  NUMPY = "numpy"
-  TENSORFLOW = "tensorflow"
-  MLX = "mlx"
+# NOTE: SupportedEngine Enum has been removed in favor of dynamic discovery.
+# Frameworks are now registered via src/ml_switcheroo/frameworks/*.py
+# and queried using `ml_switcheroo.frameworks.available_frameworks()`.
 
 
 class SemanticTier(str, Enum):

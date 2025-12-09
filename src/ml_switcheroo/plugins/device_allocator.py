@@ -1,119 +1,76 @@
 """
 Plugin for translating Device Allocation logic.
 
-This module provides AST transformations to map PyTorch device object construction
-to target framework semantics (JAX, MLX, TensorFlow).
+Delegates syntax generation to the target FrameworkAdapter to ensure logic
+remains decoupled from the core transpiler.
 
-Supported Mappings:
-- JAX: `jax.devices('gpu')[0]`
-- MLX: `mx.Device(mx.gpu, 0)`
-- TF: `tf.device('GPU:0')`
+Supported:
+- Extracts device type and index from `torch.device(...)`.
+- Handles `cuda:0` string parsing.
+- Calls `adapter.get_device_syntax()` for target code generation.
 """
 
 import libcst as cst
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.frameworks import get_adapter
+from ml_switcheroo.utils.node_diff import capture_node_source
 
 
 @register_hook("device_allocator")
 def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpression:
   """
-  Plugin Hook: Transforms device construction calls.
+  Plugin Hook: Transforms device construction calls via Adapter delegation.
 
   Triggers:
       Operations marked with `requires_plugin: "device_allocator"` (e.g., `torch.device`).
 
   Args:
       node: The original CST Call node.
-      ctx: HookContext for config access.
+      ctx: HookContext for target framework access.
 
   Returns:
       A CST Expression representing the target device access.
   """
-  # 1. Parse Arguments to extract Type and Index
-  dev_type, dev_index = _parse_device_args(node)
+  # 1. Parse Arguments to extract Type and Index CST Nodes
+  dev_type_node, dev_index_node = _parse_device_args(node)
 
-  # 2. Dispatch based on Target Framework
-  target = ctx.target_fw
+  # 2. Convert Nodes to Source Strings
+  # We pass python source code strings to the adapter to keep adapter unaware of LibCST
+  s_type = capture_node_source(dev_type_node) if dev_type_node else "'cpu'"
+  s_index = capture_node_source(dev_index_node) if dev_index_node else None
 
-  if target == "jax":
-    return _generate_jax(dev_type, dev_index)
-  elif target == "mlx":
-    return _generate_mlx(dev_type, dev_index)
-  elif target == "tensorflow":
-    return _generate_tf(dev_type, dev_index)
+  # 3. Retrieve Target Adapter
+  target_fw = ctx.target_fw
+  adapter = get_adapter(target_fw)
 
-  return node
+  if not adapter:
+    # Fallback to original node if adapter not found (safety)
+    return node
 
+  # 4. Generate Target Syntax
+  try:
+    new_code = adapter.get_device_syntax(s_type, s_index)
+  except Exception:
+    # If adapter doesn't implement or errors, return original
+    return node
 
-def _generate_jax(dev_type, dev_index):
-  """Maps to jax.devices('gpu')[i]."""
-  jax_backend = _map_backend_str(dev_type)
-
-  new_func = cst.Attribute(value=cst.Name("jax"), attr=cst.Name("devices"))
-
-  args = []
-  if jax_backend:
-    val_node = cst.SimpleString(f"'{jax_backend}'") if isinstance(jax_backend, str) else jax_backend
-    args.append(cst.Arg(value=val_node))
-
-  devices_call = cst.Call(func=new_func, args=args)
-
-  # Indexing
-  idx_val = dev_index if dev_index is not None else cst.Integer("0")
-
-  return cst.Subscript(
-    value=devices_call,
-    slice=[cst.SubscriptElement(slice=cst.Index(value=idx_val))],
-  )
+  # 5. Parse back to CST
+  try:
+    return cst.parse_expression(new_code)
+  except cst.ParserSyntaxError:
+    return node
 
 
-def _generate_mlx(dev_type, dev_index):
-  """Maps to mx.Device(mx.gpu, i)."""
-  if isinstance(dev_type, str):
-    attr_name = "cpu"
-    s = dev_type.lower()
-    if s in ["cuda", "gpu", "mps"]:
-      attr_name = "gpu"
-    type_node = cst.Attribute(value=cst.Name("mx"), attr=cst.Name(attr_name))
-  else:
-    # Fallback for dynamic variable: default to mx.cpu if unknown, or pass valid expr
-    type_node = dev_type if dev_type else cst.Attribute(value=cst.Name("mx"), attr=cst.Name("cpu"))
-
-  args = [cst.Arg(value=type_node)]
-  if dev_index:
-    args.append(cst.Arg(value=dev_index))
-
-  return cst.Call(func=cst.Attribute(value=cst.Name("mx"), attr=cst.Name("Device")), args=args)
-
-
-def _generate_tf(dev_type, dev_index):
-  """Maps to tf.device('GPU:0')."""
-  type_str = "CPU"
-  idx_str = "0"
-
-  if isinstance(dev_type, str):
-    s = dev_type.lower()
-    if s in ["cuda", "gpu", "mps"]:
-      type_str = "GPU"
-
-  if dev_index and isinstance(dev_index, cst.Integer):
-    idx_str = dev_index.value
-
-  # Note: Does not currently handle dynamic expression index concatenation for brevity
-  device_string = f"{type_str}:{idx_str}"
-
-  return cst.Call(
-    func=cst.Attribute(value=cst.Name("tf"), attr=cst.Name("device")),
-    args=[cst.Arg(value=cst.SimpleString(f"'{device_string}'"))],
-  )
-
-
-def _parse_device_args(node: cst.Call) -> Tuple[Union[str, cst.BaseExpression, None], Optional[cst.BaseExpression]]:
+def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Optional[cst.BaseExpression]]:
   """
-  Extracts (device_type, index) from arguments.
-  Handles string parsing for 'type:index' syntax.
+  Extracts (device_type_node, index_node) from `torch.device` call arguments.
+
+  Handles:
+  - `torch.device('cuda')`
+  - `torch.device('cuda', 0)`
+  - `torch.device('cuda:0')` -> splits literal string into type 'cuda' and index '0' nodes.
   """
   if not node.args:
     return None, None
@@ -121,33 +78,32 @@ def _parse_device_args(node: cst.Call) -> Tuple[Union[str, cst.BaseExpression, N
   # Heuristic: Argument 0 is the device specification
   arg0 = node.args[0].value
 
-  dev_type = arg0
-  dev_index = None
+  dev_type_node = arg0
+  dev_index_node = None
 
-  # Handle "cuda:0" string literal case
+  # Handle "cuda:0" string literal case decomposition
   if isinstance(arg0, cst.SimpleString):
-    # Strip quotes
+    # Strip quotes for inspection, but reconstruct valid nodes
+    raw_quote = arg0.value[0]
     raw_str = arg0.value[1:-1]
+
     if ":" in raw_str:
       parts = raw_str.split(":")
       raw_type = parts[0]
+
       try:
-        raw_idx = int(parts[1])
-        dev_index = cst.Integer(str(raw_idx))
+        raw_idx = parts[1]
+        # Verify it's an int index before splitting
+        int(raw_idx)
+
+        # Reconstruct nodes
+        dev_type_node = cst.SimpleString(f"{raw_quote}{raw_type}{raw_quote}")
+        dev_index_node = cst.Integer(raw_idx)
       except ValueError:
-        pass
-      dev_type = raw_type  # Return raw string
-    else:
-      dev_type = raw_str
+        pass  # Not a simple int index, keep original string
 
   # Handle explicit index argument (torch.device('cuda', 1))
   if len(node.args) > 1:
-    dev_index = node.args[1].value
+    dev_index_node = node.args[1].value
 
-  return dev_type, dev_index
-
-
-def _map_backend_str(source_type: Union[str, cst.BaseExpression, None]) -> Union[str, cst.BaseExpression, None]:
-  if isinstance(source_type, str) and source_type.lower() in ("cuda", "mps"):
-    return "gpu"
-  return source_type
+  return dev_type_node, dev_index_node

@@ -3,24 +3,12 @@
 These tests verify the complete transpilation pipeline using the files in
 `tests/examples/` as inputs. They act as the primary acceptance criteria for
 structural and semantic correctness.
-
-Testing Strategy:
-    1.  **Isolation**: Instead of relying on external JSON files (which may change),
-        we use `E2ESemantics` (a Mock Manager). This creates a deterministic
-        truth for mapping "Torch" to "JAX" specifically for these tests.
-    2.  **Structural Verification**: We assert that key AST transformations
-        (Class Inheritance, Import Swapping, Argument Injection) occur.
-    3.  **Stability**: We ensure the engine creates valid, parseable Python code.
-
-Coverage:
-    - ex01: Simple Math Functions (Torch <-> JAX).
-    - ex02: Neural Network Classes (Torch <-> Flax NNX).
-    - ex03: Argument Renaming logic.
-    - ex04/05: Partial failure modes (Escape Hatches).
 """
 
 import pytest
 from pathlib import Path
+from typing import Set
+
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -43,8 +31,7 @@ class E2ESemantics(SemanticsManager):
   """Deterministic Semantics Manager for E2E Tests.
 
   This class bypasses filesystem JSON loading to provide a stable,
-  code-defined Knowledge Base. It mirrors the structure of the real JSON files
-  but guarantees that `test_ex01` will not break if `k_array_api.json` is modified.
+  code-defined Knowledge Base.
   """
 
   def __init__(self):
@@ -52,13 +39,30 @@ class E2ESemantics(SemanticsManager):
     # Initialize empty stores manually to bypass file loading
     self.data = {}
     self.import_data = {}
-    # NOTE: We do not configure 'stateful_call' for JAX here because we are targeting
-    # Flax NNX (Graph-based state), which allows PyTorch-like OOP direct calls.
-    self.framework_configs = {}
+
+    # Mock Framework Configs to support Trait-Based Rewriting
+    self.framework_configs = {
+      "jax": {
+        "traits": {
+          "module_base": "flax.nnx.Module",
+          "forward_method": "__call__",
+          "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
+        }
+      },
+      "torch": {
+        "traits": {
+          "module_base": "torch.nn.Module",
+          "forward_method": "forward",
+          "strip_magic_args": ["rngs"],
+          "requires_super_init": True,
+        }
+      },
+    }
 
     self._reverse_index = {}
     self._key_origins = {}
     self._validation_status = {}
+    self._known_rng_methods = set()
 
     # --- 1. Math Operations (ex01) ---
     self._add_op("abs", ["x"], torch="torch.abs", jax="jax.numpy.abs")
@@ -100,6 +104,12 @@ class E2ESemantics(SemanticsManager):
     self._alias("nn.Module", "Module")
     self._alias("nn.Linear", "Linear")
 
+  def get_all_rng_methods(self) -> Set[str]:
+    return self._known_rng_methods
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
+
   def _add_op(self, name, args, torch, jax, tier=None):
     """Helper to define a bidirectional operation mapping."""
     self.data[name] = {
@@ -140,12 +150,7 @@ def engine_factory():
 
 
 def test_ex01_math_ops_torch_to_jax(engine_factory):
-  """Verifies simple function mapping (torch -> jax).
-
-  Checks:
-      1. Import replacement (`import jax`).
-      2. API renaming (`torch.abs` -> `jax.numpy.abs`).
-  """
+  """Verifies simple function mapping (torch -> jax)."""
   code = _read_code("ex01_math_ops.torch.py")
   engine = engine_factory("torch", "jax")
   result = engine.run(code)
@@ -156,12 +161,7 @@ def test_ex01_math_ops_torch_to_jax(engine_factory):
 
 
 def test_ex01_math_ops_jax_to_torch(engine_factory):
-  """Verifies reverse function mapping (jax -> torch).
-
-  Checks:
-      1. Import replacement (`import torch`).
-      2. API renaming (`jnp.abs` -> `torch.abs`).
-  """
+  """Verifies reverse function mapping (jax -> torch)."""
   code = _read_code("ex01_math_ops.jax.py")
   engine = engine_factory("jax", "torch")
   result = engine.run(code)
@@ -179,13 +179,11 @@ def test_ex01_math_ops_jax_to_torch(engine_factory):
 def test_ex02_neural_net_torch_to_jax(engine_factory):
   """Verifies Class transformation (Torch -> Flax NNX).
 
-  This determines if the `StructureMixin` and `CallMixin` in the rewriter
-  are correctly identifying Neural Layers and injecting state.
-
   Checks:
       1. Inheritance swap (`torch.nn.Module` -> `flax.nnx.Module`).
       2. Layer instantiation.
       3. RNG state injection (`rngs=rngs`) in constructors.
+      4. Method rename: forward -> __call__
   """
   code = _read_code("ex02_neural_net.torch.py")
   engine = engine_factory("torch", "jax")
@@ -206,9 +204,6 @@ def test_ex02_neural_net_torch_to_jax(engine_factory):
 
 def test_ex02_neural_net_jax_to_torch(engine_factory):
   """Verifies Reverse Class transformation (Flax NNX -> Torch).
-
-  This checks the complex logic of converting explicit state management
-  back to implicit state.
 
   Checks:
       1. Inheritance swap (`flax.nnx.Module` -> `nn.Module`).
@@ -240,12 +235,7 @@ def test_ex02_neural_net_jax_to_torch(engine_factory):
 
 
 def test_ex03_array_manip_torch_to_jax(engine_factory):
-  """Verifies argument-aware translation.
-
-  Checks:
-      1. API swap (`permute` -> `transpose`).
-      2. Basic syntax validity.
-  """
+  """Verifies argument-aware translation."""
   code = _read_code("ex03_array_manip.torch.py")
   engine = engine_factory("torch", "jax")
   result = engine.run(code)
@@ -270,16 +260,7 @@ def test_ex03_array_manip_jax_to_torch(engine_factory):
 
 
 def test_ex04_mixed_checkpointing_torch_to_jax(engine_factory):
-  """Verifies Strict Mode failure boundaries (Tier C).
-
-  Scenario:
-      Source contains `torch.abs` (Convertible) AND
-      `torch.utils.checkpoint` (Not mapped in E2ESemantics).
-
-  Expectation:
-      - `abs` is converted.
-      - `checkpoint` is wrapped in Escape Hatch markers.
-  """
+  """Verifies Strict Mode failure boundaries (Tier C)."""
   code = _read_code("ex04_mixed_checkpointing.torch.py")
   engine = engine_factory("torch", "jax", strict=True)
   result = engine.run(code)
@@ -305,15 +286,7 @@ def test_ex04_mixed_checkpointing_torch_to_jax(engine_factory):
 
 
 def test_ex05_mixed_parallelism_jax_to_torch(engine_factory):
-  """Verifies Strict Mode failure boundaries for JAX specific features.
-
-  Scenario:
-      Source contains `jax.pmap` (Not mapped to Torch).
-
-  Expectation:
-      - `pmap` call is wrapped.
-      - Other logic preserved or converted.
-  """
+  """Verifies Strict Mode failure boundaries for JAX specific features."""
   code = _read_code("ex05_mixed_parallelism.jax.py")
   engine = engine_factory("jax", "torch", strict=True)
   result = engine.run(code)

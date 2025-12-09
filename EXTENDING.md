@@ -1,268 +1,227 @@
-Extending
-=========
+Extending ml-switcheroo
+=======================
 
-Welcome! ml-switcheroo is designed as a modular platform. We strictly separate **Core Logic** (AST parsing via `LibCST`)
-from **Knowledge** (API Mappings). This architecture allows you to add support for new operators, obscure libraries, or
-even entirely new backends (like Apple MLX or TinyGrad) without rewriting the compiler engine.
+ml-switcheroo is built on a modular "Zero-Edit" architecture. You can add support for new Machine Learning frameworks (like Keras, TinyGrad, or generic NumPy wrappers), new backends, or custom patterns without modifying the core engine logic.
 
 This guide covers:
 
-1. **Semantic Taxonomy:** Where to store mappings.
-2. **Automated Discovery:** Using the CLI to write JSON for you.
-3. **Writing Plugins:** Creating AST transformations for complex behaviors.
-4. **Extending Validation:** Adding new backends to the Fuzzer.
+1.  **Adding a New Framework**: Using the `FrameworkAdapter` protocol.
+2.  **Mapping APIs**: Populating the Semantic Knowledge Base.
+3.  **Complex Logic**: Handling Data Loaders and Custom Patterns via Plugins.
+4.  **Verification**: Validating your new backend against the standard.
 
 ---
 
-## 1. The Semantic Taxonomy (Where does data go?)
+## 1. Adding a New Framework or Backend
 
-Before writing code, understand where the data lives. We categorize mappings into three distinct JSON "Tiers" in
-`src/ml_switcheroo/semantics/`.
+To support a new library (e.g., `my_framework`), you must define an **Adapter**. This tells the system how to import the library, how to construct tensors for testing, and how its classes (Layers/Modules) are structured.
 
-### Tier A: The Math Standard (`k_array_api.json`)
+### Step 1: Create the Adapter File
 
-* **Scope:** Raw tensor manipulations (`sum`, `matmul`, `reshape`, `cos`, `abs`).
-* **Source of Truth:** [Python Array API Standard](https://data-apis.org/array-api/latest/).
-* **Rule:** Standard argument names are strict (e.g., `x`, `axis`, `keepdims`).
+Create a new file in `src/ml_switcheroo/frameworks/` (e.g., `my_framework.py`).
 
-### Tier B: The Neural Standard (`k_neural_net.json`)
+Implement a class decorated with `@register_framework` that satisfies the `FrameworkAdapter` protocol.
 
-* **Scope:** Deep Learning Layers and stateful objects (`Conv2d`, `Linear`, `MultiHeadAttention`).
-* **Source of Truth:** [ONNX Operators](https://onnx.ai/onnx/operators/).
-* **Rule:** If it has learnable weights (`self.weight`) or training state (`self.running_mean`), it belongs here.
+```python
+from typing import List, Tuple, Dict, Any, Optional
+import numpy as np
+from .base import register_framework, StructuralTraits
 
-### Tier C: The Extras Bin (`k_framework_extras.json`)
+@register_framework("my_framework")  # Unique key used in CLI (e.g. --target my_framework)
+class MyFrameworkAdapter:
+    # --- UI & Metadata ---
+    display_name: str = "My Framework"
+    ui_priority: int = 100  # Order in the Compatibility Matrix
 
-* **Scope:** Framework-specific utilities that fall outside general standards.
-* **Examples:** Gradient transforms (`no_grad`), Data Loaders (`DataLoader`), Distributions (`Bernoulli`), System (
-  `manual_seed`).
-* **Rule:** Use this for "glue code" that requires framework-specific shims.
+    # --- Discovery Configuration ---
+    # Modules to scan when running `ml_switcheroo sync my_framework`
+    @property
+    def search_modules(self) -> List[str]:
+        return ["my_framework", "my_framework.nn", "my_framework.ops"]
 
----
+    # Default import alias handling (e.g. 'import my_framework as mf')
+    @property
+    def import_alias(self) -> Tuple[str, str]:
+        return ("my_framework", "mf")
 
-## 2. Workflow: Automated Discovery
+    # Regex patterns to help the Scaffolder categorize APIs automatically
+    @property
+    def discovery_heuristics(self) -> Dict[str, List[str]]:
+        return {
+            "neural": [r"\.layers\.", r"Module$"],
+            "extras": [r"\.data\.", r"\.io\."]
+        }
 
-**Stop!** Do not write JSON by hand unless absolutely necessary. Use the CLI tools to generate standardized entries.
+    # --- Structural Traits (The "Zero-Edit" Rewriter Config) ---
+    # Defines how Classes and Functions should be transformed.
+    @property
+    def structural_traits(self) -> StructuralTraits:
+        return StructuralTraits(
+            module_base="my_framework.Module",  # Base class for layers
+            forward_method="call",              # Method name for inference (forward/call)
+            requires_super_init=True,           # Does __init__ require super().__init__()?
+            init_method_name="__init__",        # Constructor name (usually __init__, sometimes setup)
+            # Arguments to inject into signatures (e.g. rngs for JAX)
+            inject_magic_args=[],
+            # Methods to strip from chains during conversion (e.g. .cuda(), .detach())
+            lifecycle_strip_methods=["to_gpu", "detach"],
+            # In-place methods that violate purity
+            impurity_methods=["add_", "copy_"] 
+        )
 
-### A. The Interactive Wizard (Recommended)
+    @property
+    def rng_seed_methods(self) -> List[str]:
+        return ["seed", "set_seed"]
 
-This tool guides you through categorizing functions and renaming arguments.
+    # --- Test Harness Generation Support ---
+    
+    @classmethod
+    def get_import_stmts(cls) -> str:
+        return "import my_framework as mf"
 
-```bash
-# Start the wizard for the 'torch' package
-ml_switcheroo wizard torch
+    @classmethod
+    def get_creation_syntax(cls, var_name: str) -> str:
+        # Code to convert numpy array `var_name` to tensor
+        return f"mf.tensor({var_name})"
+
+    @classmethod
+    def get_numpy_conversion_syntax(cls, var_name: str) -> str:
+        # Code to convert tensor back to numpy
+        return f"{var_name}.numpy()"
+
+    # --- Device & IO Support ---
+    
+    def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+        return f"mf.device('{device_type}')"
+
+    def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+        if op == "save":
+            return f"mf.save({object_arg}, {file_arg})"
+        return f"mf.load({file_arg})"
+        
+    def get_serialization_imports(self) -> List[str]:
+        return ["import my_framework as mf"]
+
+    # --- Runtime Conversion (for Fuzzer) ---
+    def convert(self, data: Any) -> Any:
+        # Runtime logic to convert data to this framework (used during `ml_switcheroo ci`)
+        try:
+            import my_framework
+            return my_framework.tensor(data)
+        except ImportError:
+            return data
 ```
 
-1. It scans the library for APIs missing from our Knowledge Base.
-2. It asks you to bucket them (`[M]ath`, `[N]eural`, `[E]xtras`).
-3. It asks you to map implementation arguments (e.g., `input`, `dim`) to standard arguments (`x`, `axis`).
-4. It saves the valid JSON to the correct file.
+See `src/ml_switcheroo/frameworks/base.py` for the full protocol definition.
 
-### B. The Semantic Harvester (Advanced)
+### Step 2: Register Dependencies
 
-If you have written a manual test case that passes, ml-switcheroo can reverse-engineer the mapping rules from your test
-code.
-
-1. Write a passing test in `tests/examples/my_custom_op.py`.
-2. Run the harvester:
-   ```bash
-   ml_switcheroo harvest tests/examples/my_custom_op.py --target jax
-   ```
-3. The tool detects `jax.numpy.op(a=x, b=y)` calls and automatically updates `k_array_api.json` to map `x->a` and
-   `y->b`.
+If your new adapter requires third-party libraries (like `tinygrad` or `keras`), ensure they are installed in your environment. The adapter file itself is lazy-loaded, but methods like `convert` will run inside the verification harness.
 
 ---
 
-## 3. Advanced: Writing AST Plugins
+## 2. Mapping Semantic Operations
 
-JSON mappings handle 1:1 name swaps (`torch.abs` -> `jnp.abs`) and argument renaming (`dim` -> `axis`). However,
-real-world deep learning code often requires structural changes.
+After creating the adapter, the system knows *how* to write code for your framework, but it doesn't know *which* functions map to the standard operations (e.g., `abs`, `conv2d`).
 
-**Plugins** allow you to write Python functions that manipulate the Abstract Syntax Tree (AST) directly using `LibCST`.
+You must populate the Knowledge Base (`src/ml_switcheroo/semantics/*.json`).
 
-### The Hook Registry
+### Automated Discovery (Recommended)
 
-Plugins are located in `src/ml_switcheroo/plugins/`. You register a transformation using the `@register_hook` decorator.
+1.  **Sync**: Scans your installed library for functions that match standard names (e.g., if you have `my_framework.add` and the standard has `add`).
+    ```bash
+    ml_switcheroo sync my_framework
+    ```
+
+2.  **Scaffold**: Uses the regex heuristics in your adapter to find and categorize new APIs that aren't in the standard yet.
+    ```bash
+    ml_switcheroo scaffold --frameworks my_framework
+    ```
+
+### Interactive Mapping (The Wizard)
+
+For APIs that don't match standard names (e.g., `my_framework.reduction_sum` vs `sum`), use the wizard:
+
+```bash
+ml_switcheroo wizard my_framework
+```
+
+This will prompt you to categorize functions and map arguments (e.g., map `input_tensor` to standard `x`).
+
+---
+
+## 3. Extending Support (Data Loaders & Custom Patterns)
+
+Some features, like Data Loaders or Distributed Contexts, don't map 1:1 between frameworks. You can handle these using **Plugins**.
+
+### Step 1: Write a Plugin Hook
+
+Create a file in `src/ml_switcheroo/plugins/` (e.g., `custom_patterns.py`).
 
 ```python
 import libcst as cst
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
-
-@register_hook("my_custom_logic")
-def transform_node(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-    # ... modification logic ...
-    return node
-```
-
-### The `HookContext`
-
-The `ctx` object passed to your hook provides powerful helpers to modify the surrounding scope:
-
-* `ctx.inject_signature_arg(name, annotation)`: Adds a new argument to the function definition (e.g., adding `rng` to
-  `forward`).
-* `ctx.inject_preamble(statement)`: Inserts code at the very top of the function body.
-* `ctx.lookup_api("add")`: Finds the target API path for "add" based on the current configuration.
-* `ctx.raw_config(key)`: Reads settings from `pyproject.toml`.
-
-### Example 1: Argument Decomposition (`decompose_alpha`)
-
-**Problem:** `torch.add(x, y, alpha=2)` exists, but JAX `add` has no `alpha`. We must rewrite it to `add(x, y * 2)`.
-
-```python
-# src/ml_switcheroo/plugins/decompositions.py
-
-@register_hook("decompose_alpha")
-def transform_alpha_add(node: cst.Call, ctx: HookContext) -> cst.Call:
-    # 1. Check for alpha argument
-    alpha_arg = None
-    clean_args = []
-    for arg in node.args:
-        if arg.keyword and arg.keyword.value == "alpha":
-            alpha_arg = arg
-        else:
-            clean_args.append(arg)
-
-    if not alpha_arg:
+@register_hook("convert_my_dataloader")
+def transform_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
+    """
+    Transforms torch.utils.data.DataLoader(...) into my_framework.Dataset(...)
+    """
+    # 1. Check target
+    if ctx.target_fw != "my_framework":
         return node
 
-        # 2. Create Multiplication AST Node: (y * alpha)
-    # We assume the second argument is the one being scaled
-    target_val = clean_args[1].value
-    mult_expr = cst.BinaryOperation(
-        left=target_val,
-        operator=cst.Multiply(),
-        right=alpha_arg.value
-    )
+    # 2. Inject helper imports if needed
+    ctx.inject_preamble("from my_framework import Dataset")
 
-    # 3. Update args list with the new expression
-    clean_args[1] = clean_args[1].with_changes(value=mult_expr)
+    # 3. Modify valid arguments
+    new_args = []
+    for arg in node.args:
+        if arg.keyword and arg.keyword.value == "batch_size":
+            new_args.append(arg)
+        # Filter out incompatible args like 'num_workers' if not supported
 
-    # 4. Return new call (Function renaming happens automatically via Semantics)
-    return node.with_changes(args=clean_args)
+    # 4. Rewrite function name
+    new_func = cst.Name("Dataset")
+    
+    return node.with_changes(func=new_func, args=new_args)
 ```
 
-**Linking the Plugin:**
-In `k_array_api.json`:
+### Step 2: Link the Plugin in Semantics
+
+Add an entry to `src/ml_switcheroo/semantics/k_framework_extras.json`.
 
 ```json
-{
-  "add": {
-    "variants": {
-      "torch": {
-        "api": "torch.add"
-      },
-      "jax": {
-        "api": "jax.numpy.add",
-        "requires_plugin": "decompose_alpha"
-      }
+"DataLoader": {
+  "description": "Abstract Data Loader",
+  "std_args": ["dataset", "batch_size"],
+  "variants": {
+    "torch": { "api": "torch.utils.data.DataLoader" },
+    "my_framework": {
+      "api": "my_framework.Dataset",
+      "requires_plugin": "convert_my_dataloader"
     }
   }
 }
 ```
 
-### Example 2: State Injection (`inject_prng`)
-
-**Problem:** PyTorch relies on global RNG. JAX requires stateless explicit key passing.
-**Goal:** Transform `dropout(x)` inside `forward(x)` into `bernoulli(key, x)` inside `forward(rng, x)`.
-
-```python
-# src/ml_switcheroo/plugins/rng_threading.py
-import libcst as cst
-
-from ml_switcheroo.core.hooks import register_hook, HookContext
-
-@register_hook("inject_prng")
-def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
-    if ctx.target_fw != "jax":
-        return node
-
-    # 1. Modify Function Signature
-    # Changes `def forward(self, x)` to `def forward(self, rng, x)`
-    ctx.inject_signature_arg("rng", annotation="jax.Array")
-
-    # 2. Add Key Splitting Preamble
-    # Inserts `rng, key = jax.random.split(rng)` at start of function
-    ctx.inject_preamble("rng, key = jax.random.split(rng)")
-
-    # 3. Modify the Call Site
-    # Adds `key=key` to the function call arguments
-    key_arg = cst.Arg(keyword=cst.Name("key"), value=cst.Name("key"))
-    new_args = list(node.args) + [key_arg]
-
-    return node.with_changes(args=new_args)
-```
+Now, when converting *to* `my_framework`, any `DataLoader` call will trigger your plugin.
 
 ---
 
-## 4. Extending Validation (New Frameworks)
+## 4. Verification
 
-ml-switcheroo includes a fuzzing engine that verifies translations by running inputs through both frameworks. If you want
-to add support for a new backend (e.g., **TinyGrad** or a custom internal library), you must write a `FrameworkAdapter`.
-
-### Step 1: Create the Adapter in `ml_switcheroo.testing.adapters`
-
-An adapter simply tells the fuzzer how to convert a NumPy array into the target framework's tensor format.
-
-```python
-# src/ml_switcheroo/testing/adapters.py
-from typing import Any
-
-class TinyGradAdapter:
-    @staticmethod
-    def convert(data: Any) -> Any:
-        try:
-            from tinygrad.tensor import Tensor
-            return Tensor(data)
-        except ImportError:
-            return data
-```
-
-### Step 2: Register the Adapter
-
-Updates `_ADAPTER_REGISTRY` in the same file.
-
-```python
-from ml_switcheroo.testing.adapters import register_adapter
-
-register_adapter("tinygrad", TinyGradAdapter)
-```
-
-### Step 3: Run Verification
-
-Now you can validate mappings against this new backend.
+Once your Adapter and Semantics are in place, you can verify the integration using the built-in fuzzer.
 
 ```bash
-# Update PyProject.toml or use flags
-ml_switcheroo ci --target tinygrad
+# Run the CI suite targeting your new framework
+ml_switcheroo ci --target my_framework
 ```
 
----
+This process:
+1.  Reads the Semantics Knowledge Base.
+2.  Generates Python test files using the template strings from your Adapter (`get_creation_syntax`, etc.).
+3.  Executes the tests, fuzzing inputs and comparing the output of `my_framework` against the inputs/reference.
 
-## 5. Configuration
+If tests pass, your extension is fully integrated!
 
-Plugins can read arbitrary configuration values from `pyproject.toml`.
-
-**User's `pyproject.toml`:**
-
-```toml
-[tool.ml_switcheroo]
-# ... standard settings ...
-
-[tool.ml_switcheroo.plugin_settings]
-my_plugin_threshold = 0.85
-enable_experimental_rewrites = true
-```
-
-**Accessing within a Plugin:**
-
-```python
-from ml_switcheroo.core.hooks import register_hook
-
-@register_hook("my_plugin")
-def my_hook(node, ctx):
-    threshold = ctx.raw_config("my_plugin_threshold", default=0.5)
-    if ctx.raw_config("enable_experimental_rewrites"):
-        return apply_complex_logic(node, threshold)
-    return node
-```

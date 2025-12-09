@@ -1,6 +1,8 @@
 import pytest
 import ast
 from pathlib import Path
+from typing import Set
+
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -30,6 +32,7 @@ class MockBidirectionalSemantics(SemanticsManager):
     self._reverse_index = {}
     self._key_origins = {}
     self._validation_status = {}
+    self._known_rng_methods = set()
 
     # 1. Bidirectional Math Mappings
     self._add_op("abs", ["x"], torch="torch.abs", jax="jax.numpy.abs")
@@ -53,6 +56,9 @@ class MockBidirectionalSemantics(SemanticsManager):
     # Torch aliases
     self._alias("nn.Linear", "Linear")
     self._alias("nn.Module", "Module")
+
+  def get_all_rng_methods(self) -> Set[str]:
+    return self._known_rng_methods
 
   def _add_op(self, name, args, torch, jax):
     """Helper to define a bidirectional op."""

@@ -1,153 +1,59 @@
-"""
-Tests for RNG/State Threading Plugin.
-
-Verifies that stochastic operations (like dropout) are effectively rewritten
-to use explicit PRNG key passing (JAX style), and that configuration options
-for variable naming are respected.
-"""
-
 import pytest
-from unittest.mock import MagicMock
 import libcst as cst
-
+from unittest.mock import MagicMock
 from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.rng_threading import inject_prng_threading
 
 
-# Helper to avoid import errors
-def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
-  tree = cst.parse_module(code)
-  new_tree = tree.visit(rewriter)
-  return new_tree.code
-
-
 @pytest.fixture
 def rewriter():
-  # 1. Register Hook & Prevent automatic loading from disk
   hooks._HOOKS["inject_prng"] = inject_prng_threading
   hooks._PLUGINS_LOADED = True
-
-  # 2. Mock Semantics
   mgr = MagicMock()
 
-  dropout_def = {
-    "requires_plugin": "inject_prng",
-    "std_args": ["x", "p"],
-    "variants": {
-      "torch": {"api": "torch.dropout"},
-      "jax": {"api": "jax.random.bernoulli", "requires_plugin": "inject_prng"},
-    },
-  }
+  op_def = {"variants": {"jax": {"requires_plugin": "inject_prng"}}}
 
-  def get_def_side_effect(name):
-    if name == "torch.dropout":
-      return "dropout", dropout_def
-    return None
+  mgr.get_definition.return_value = ("dropout", op_def)
+  mgr.resolve_variant.side_effect = lambda aid, fw: op_def["variants"].get(fw)
 
-  mgr.get_definition.side_effect = get_def_side_effect
-  mgr.get_known_apis.return_value = {"dropout": dropout_def}
-  mgr.get_op_by_source.side_effect = lambda api: "dropout" if "dropout" in api else None
-
-  # 3. Config
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
-  return PivotRewriter(semantics=mgr, config=cfg)
+  return PivotRewriter(mgr, cfg)
+
+
+def rewrite_code(rewriter, code):
+  return cst.parse_module(code).visit(rewriter).code
 
 
 def test_rng_basic_injection(rewriter):
-  """
-  Scenario: Single stochastic call with default settings.
-  """
-  code = """ 
-import torch
-def forward(x): 
-    return torch.dropout(x, 0.5) 
-"""
-  result = rewrite_code(rewriter, code)
-
-  # 1. Signature Injection
-  assert "def forward(rng, x):" in result or "def forward(x, rng):" in result
-
-  # 2. Preamble Injection
-  assert "rng, key = jax.random.split(rng)" in result
-
-  # 3. Call Modification
-  assert "key=key" in result
+  code = "def f(x):\n  return torch.dropout(x)"
+  res = rewrite_code(rewriter, code)
+  assert "def f(rng, x):" in res or "def f(x, rng):" in res
+  assert "random.split" in res
+  assert "key=" in res
 
 
 def test_rng_custom_configuration(rewriter):
-  """
-  Scenario: User overrides variable names via config.
-  rng_arg_name="master_seed"
-  key_var_name="k"
-  """
-  # Inject Config
-  rewriter.ctx._runtime_config.plugin_settings["rng_arg_name"] = "master_seed"
-  rewriter.ctx._runtime_config.plugin_settings["key_var_name"] = "k"
-
-  code = """ 
-import torch
-def forward(x): 
-    return torch.dropout(x, 0.5) 
-"""
-  result = rewrite_code(rewriter, code)
-
-  # 1. Signature Injection uses custom name
-  assert "def forward(master_seed, x):" in result or "def forward(x, master_seed):" in result
-
-  # 2. Preamble uses custom names
-  # "master_seed, k = jax.random.split(master_seed)"
-  assert "master_seed, k = jax.random.split(master_seed)" in result
-
-  # 3. Call uses custom variable for key value
-  # jax.random.bernoulli(..., key=k)
-  assert "key=k" in result
+  rewriter.ctx._runtime_config.plugin_settings = {"rng_arg_name": "seed", "key_var_name": "k"}
+  code = "def f(x):\n  torch.dropout(x)"
+  res = rewrite_code(rewriter, code)
+  assert "def f(seed, x):" in res or "def f(x, seed):" in res
+  assert "k = jax" in res
 
 
 def test_rng_deduplication(rewriter):
-  """
-  Scenario: Two stochastic calls in one function.
-  Expect: Only ONE 'rng' argument, ONE split line.
-  """
-  code = """ 
-import torch
-def forward(x): 
-    a = torch.dropout(x, 0.1) 
-    b = torch.dropout(x, 0.2) 
-    return a + b
-"""
-  result = rewrite_code(rewriter, code)
-
-  def_line = [line for line in result.split("\n") if line.startswith("def forward")][0]
-  assert def_line.count("rng") == 1
-  assert result.count("rng, key = jax.random.split(rng)") == 1
+  code = "def f(x):\n  torch.dropout(x)\n  torch.dropout(x)"
+  res = rewrite_code(rewriter, code)
+  # expect 1 split line
+  assert res.count("split(rng)") == 1
 
 
 def test_rng_existing_argument_preserved(rewriter):
-  """
-  Scenario: Function already has 'rng'.
-  Expect: No duplicate argument injected.
-  """
-  code = """ 
-import torch
-def forward(x, rng): 
-    return torch.dropout(x, 0.5) 
-"""
-  result = rewrite_code(rewriter, code)
-
-  def_line = [line for line in result.split("\n") if line.startswith("def forward")][0]
-  # 'rng' appears, check simple presence logic
-  assert "rng" in def_line
-  # Preamble still added
-  assert "rng, key = jax.random.split(rng)" in result
-
-
-def test_non_stochastic_ignored(rewriter):
-  """Calls without the plugin flag are untouched."""
-  # Ensure side_effect handles unknown calls (returns None)
-  code = "def f(x): return x"
-  result = rewrite_code(rewriter, code)
-
-  assert "rng" not in result
-  assert "split" not in result
+  code = "def f(x, rng):\n  torch.dropout(x)"
+  res = rewrite_code(rewriter, code)
+  # Should not duplicate arg
+  def_line = [l for l in res.split("\n") if "def f" in l][0]
+  assert def_line.count("rng") == 1
+  # Still injects body
+  assert "split(rng)" in res

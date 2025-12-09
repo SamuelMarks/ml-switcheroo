@@ -6,16 +6,12 @@ libraries (Torch, JAX, etc.) and aligns them against the Specification-Guided
 Knowledge Base.
 
 It prioritizes matching discovered APIs against ingested Specs (ONNX, Array API)
-before falling back to structural heuristics.
-
-Major Updates:
-- Feature: Signature Analysis during Fuzzy Matching.
-- Feature 07: Robust Varargs Support.
-- Feature 03: Tier C (Extras) Discovery and Serialization.
+before falling back to structural heuristics provided by Framework Adapters.
 """
 
 import json
 import difflib
+import re
 from pathlib import Path
 from typing import Dict, Any, List, Set, Optional, Tuple
 
@@ -23,6 +19,7 @@ from ml_switcheroo.discovery.inspector import ApiInspector
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.utils.console import console, log_info, log_success
+from ml_switcheroo.frameworks import available_frameworks, get_adapter
 
 
 class Scaffolder:
@@ -35,6 +32,7 @@ class Scaffolder:
       semantics (SemanticsManager): The knowledge base manager.
       similarity_threshold (float): Cutoff for fuzzy matching (0.0 - 1.0).
       arity_penalty (float): Penalty subtracted from similarity score for mismatched arity.
+      _cached_heuristics (Dict[str, List[re.Pattern]]): Compiled regexes for categorization.
   """
 
   def __init__(
@@ -62,6 +60,40 @@ class Scaffolder:
     self.tier_b_neural: Dict[str, Any] = {}  # Neural Net (ONNX)
     self.tier_c_extras: Dict[str, Any] = {}  # Framework Extras
 
+    self._cached_heuristics: Optional[Dict[str, List[re.Pattern]]] = None
+
+  def _lazy_load_heuristics(self) -> Dict[str, List[re.Pattern]]:
+    """
+    Aggregates discovery regexes from all registered framework adapters.
+    Uses result caching for performance.
+    """
+    if self._cached_heuristics is not None:
+      return self._cached_heuristics
+
+    compiled: Dict[str, List[re.Pattern]] = {"neural": [], "extras": []}
+
+    # Loop through every registered framework and pull its rules
+    for fw_name in available_frameworks():
+      adapter = get_adapter(fw_name)
+      if not adapter:
+        continue
+
+      # Check if adapter supports the new property (duck typing for backward compat)
+      if hasattr(adapter, "discovery_heuristics") and adapter.discovery_heuristics:
+        heuristics = adapter.discovery_heuristics
+
+        for tier, patterns in heuristics.items():
+          if tier in compiled:
+            for pat in patterns:
+              try:
+                # Case insensitive matching allows matching "Linear" or "linear"
+                compiled[tier].append(re.compile(pat, re.IGNORECASE))
+              except re.error as e:
+                print(f"⚠️ Invalid regex pattern in {fw_name} adapter: '{pat}' - {e}")
+
+    self._cached_heuristics = compiled
+    return compiled
+
   def scaffold(self, frameworks: List[str], output_dir: Path):
     """
     Main entry point. Scans frameworks and builds/updates JSON mappings.
@@ -69,8 +101,8 @@ class Scaffolder:
     Discovery Strategy:
     1. **Spec Validation**: Checks if discovered API matches a specific
        Abstract Operator already defined in the Knowledge Base (e.g., from ONNX).
-    2. **Heuristic Fallback**: If no spec match, uses naming/path conventions
-       (e.g., `.nn.` path implies Neural).
+    2. **Heuristic Fallback**: If no spec match, checks Framework Adapters
+       for regex conventions (e.g. `.nn` -> Neural).
 
     Args:
         frameworks: List of package names (e.g. ['torch', 'jax']).
@@ -114,16 +146,13 @@ class Scaffolder:
         self._update_entry(self.tier_c_extras, extras_match, primary_fw, api_path, details, catalogs)
         continue
 
-      # --- Strategy 2: Heuristic Fallback ---
-      # If not in specs, we guess based on structure.
+      # --- Strategy 2: Heuristic Fallback (Dynamic) ---
+      # If not in specs, we guess based on structure using aggregated regex rules.
 
-      # Heuristic: Neural Tier
-      # Classes in '.nn' are usually Layers. Explicit 'class' type helps here.
       if self._is_structurally_neural(api_path, kind):
         self._update_entry(self.tier_b_neural, name, primary_fw, api_path, details, catalogs)
         continue
 
-      # Heuristic: Extras Tier
       if self._is_structurally_extra(api_path, name):
         self._update_entry(self.tier_c_extras, name, primary_fw, api_path, details, catalogs)
         continue
@@ -169,28 +198,40 @@ class Scaffolder:
     return None
 
   def _is_structurally_neural(self, api_path: str, kind: str) -> bool:
-    """Determines if API is likely Neural based on path heuristics."""
-    if ".nn." in api_path or ".linen." in api_path:
-      return True
+    """
+    Determines if API is likely Neural based on regex patterns registered via adapters.
+    """
+    heuristics = self._lazy_load_heuristics()
+    patterns = heuristics.get("neural", [])
+
+    # Check RegEx matches against the full path
+    for pat in patterns:
+      if pat.search(api_path):
+        return True
+
+    # Core Fallback for Classes containing 'Layer' or 'Module' even if no adapter
+    # explicitly claimed them (safety net for bootstrapping)
     if kind == "class" and ("Layer" in api_path or "Module" in api_path):
       return True
+
     return False
 
   def _is_structurally_extra(self, api_path: str, name: str) -> bool:
-    """Determines if API is likely a Framework Utility (Tier C)."""
-    name_lower = name.lower()
-    path_lower = api_path.lower()
+    """
+    Determines if API is likely a Framework Utility (Tier C) based on patterns.
+    """
+    heuristics = self._lazy_load_heuristics()
+    patterns = heuristics.get("extras", [])
 
+    # 1. Check Regex
+    for pat in patterns:
+      if pat.search(api_path):
+        return True
+
+    # 2. Fallbacks for unregistered frameworks (Bootstrapping)
+    name_lower = name.lower()
     # Common utility keywords
     if any(k in name_lower for k in ["seed", "save", "load", "device", "print", "info", "check"]):
-      return True
-
-    # Context managers / grad control
-    if "grad" in name_lower and ("no_" in name_lower or "enable_" in name_lower or "set_" in name_lower):
-      return True
-
-    # Submodules usually associated with utilities
-    if ".utils." in path_lower or ".distributed." in path_lower or ".autograd." in path_lower:
       return True
 
     return False
@@ -206,14 +247,6 @@ class Scaffolder:
   ):
     """
     Creates or updates the mapping entry in the staging dict.
-
-    Args:
-        target_dict: The category dict (tier_a or tier_b).
-        op_name: Abstract name of the operation (e.g. 'Relu').
-        primary_fw: The framework driving this discovery.
-        primary_path: Full path (torch.nn.ReLU).
-        details: Metadata (params, docstring, type).
-        catalogs: All scanned catalogs for cross-referencing.
     """
     # If the entry exists (maybe loaded from spec), preserve description/args
     # If new, create skeleton.
@@ -235,16 +268,12 @@ class Scaffolder:
     }
 
     # Primary Params context for fuzzy matching
-    # Used to reject false positives in other frameworks
     primary_params = details.get("params", [])
 
     # Hunt for variants in other frameworks
     for other_fw, other_cat in catalogs.items():
       if other_fw == primary_fw:
         continue
-
-      # Try to match based on the Abstract Operator Name (op_name)
-      # This aligns JAX 'relu' to ONNX 'Relu' even if Torch was 'ReLU'.
 
       # 1. Exact Path Match (Rare across frameworks)
       if primary_path in other_cat:
@@ -267,21 +296,6 @@ class Scaffolder:
   def _find_fuzzy_match(self, catalog: Dict, target_name: str, reference_params: List[str]) -> Optional[Tuple[str, Dict]]:
     """
     Finds the best API match using name similarity AND signature compatibility.
-
-    The core logic:
-    Score = Name_Similarity - Arity_Penalty
-
-    Arity Penality is applied if the candidate function's parameter count differs
-    too much from the reference function (primary framework's implementation).
-    Feature 07: If `has_varargs` is True for the candidate, penalties are skipped.
-
-    Args:
-        catalog: { "pkg.func": details }
-        target_name: The name to look for (e.g. "absolute").
-        reference_params: List of params from the source function (e.g. ['x', 'y']).
-
-    Returns:
-        (full_path, details) or None if no match exceeds threshold.
     """
     best_score = 0.0
     best_match = None
@@ -309,15 +323,10 @@ class Scaffolder:
       raw_score = name_ratio + base_boost
 
       # --- 2. Sanity Check: Arity (Signature Analysis) ---
-      # We strictly penalize mismatching argument counts to avoid linking
-      # unary `min(x)` to reducing `min(x, dim)`.
-
       arity_diff = abs(ref_arity - cand_arity)
       final_penalty = 0.0
 
       if arity_diff > 0:
-        # If function accepts *args, it can technically accept any count.
-        # So we waive the arity penalty to allow matching wrappers.
         if has_varargs:
           final_penalty = 0.0
         elif arity_diff == 1:
@@ -327,8 +336,6 @@ class Scaffolder:
 
       final_score = raw_score - final_penalty
 
-      # Optimization: Early exit on near-perfect match
-      # requires score > 1.0 (perfect name + boost - no penalty)
       if final_score >= 1.25 and final_penalty == 0:
         return path, details
 
@@ -346,7 +353,6 @@ class Scaffolder:
       try:
         with open(path, "rt", encoding="utf-8") as f:
           existing = json.load(f)
-        # Merge: Update with new findings
         existing.update(new_data)
         final_data = existing
       except json.JSONDecodeError:

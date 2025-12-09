@@ -1,4 +1,43 @@
 {
+  "__frameworks__": {
+    "torch": {
+      "alias": {
+        "module": "torch",
+        "name": "torch"
+      }
+    },
+    "jax": {
+      "alias": {
+        "module": "jax.numpy",
+        "name": "jnp"
+      }
+    },
+    "tensorflow": {
+      "alias": {
+        "module": "tensorflow",
+        "name": "tf"
+      }
+    },
+    "mlx": {
+      "alias": {
+        "module": "mlx.core",
+        "name": "mx"
+      }
+    },
+    "numpy": {
+      "alias": {
+        "module": "numpy",
+        "name": "np"
+      }
+    },
+    "paxml": {
+      "extends": "jax",
+      "alias": {
+        "module": "praxis.layers",
+        "name": "pl"
+      }
+    }
+  },
   "DataLoader": {
     "description": "Foundational PyTorch Data Loader. Explicitly unmapped to trigger Escape Hatch.",
     "std_args": [
@@ -107,6 +146,14 @@
       },
       "jax": {
         "api": "jax.devices",
+        "requires_plugin": "device_allocator"
+      },
+      "mlx": {
+        "api": "mx.Device",
+        "requires_plugin": "device_allocator"
+      },
+      "tensorflow": {
+        "api": "tf.device",
         "requires_plugin": "device_allocator"
       }
     }

@@ -1,10 +1,5 @@
 """
 Tests for Type-Aware Test Generation logic.
-
-Verifies:
-1. `generate` correctly parses `std_args` tuples (name, type).
-2. `_build_function` produces correct input generation code based on type hints.
-3. Fallback logic preserves heuristic behavior for unknown types.
 """
 
 import pytest
@@ -17,12 +12,25 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 def gen(tmp_path):
   """Fixture with a generator pointing to temp path."""
   mgr = MagicMock(spec=SemanticsManager)
-  # Default template for torch to ensure validity check passes
-  mgr.get_test_template.return_value = {
-    "import": "import torch",
-    "convert_input": "torch.tensor({np_var})",
-    "to_numpy": "{res_var}.numpy()",
-  }
+
+  # Mock templates for both torch and jax to allow multi-backend generation tests
+  def mock_get_template(fw):
+    if fw == "torch":
+      return {
+        "import": "import torch",
+        "convert_input": "torch.tensor({np_var})",
+        "to_numpy": "{res_var}.numpy()",
+      }
+    if fw == "jax":
+      return {
+        "import": "import jax",
+        "convert_input": "jnp.array({np_var})",
+        "to_numpy": "np.array({res_var})",
+      }
+    return None
+
+  mgr.get_test_template.side_effect = mock_get_template
+
   return TestGenerator(semantics_mgr=mgr)
 
 
@@ -94,6 +102,7 @@ def test_generate_integration_typed_args(gen, tmp_path):
   and emits the typed code into the file.
   """
   # Mock Semantics with typed arguments
+  # Must provide at least 2 variants (torch, jax) for the generator to run
   semantics = {
     "randint_op": {
       # Tuple format: (name, type)

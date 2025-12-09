@@ -2,12 +2,12 @@
 Tests for Tier C (Extras) Discovery Logic.
 
 Verifies that:
-1. Heuristics correctly identify utility functions (save, load, seed, no_grad).
+1. Dynamic Heuristics identify utility functions (custom_util, save).
 2. These artifacts are routed to `k_framework_extras.json` by the Scaffolder.
-3. Logic works even with empty Semantics (bootstrapping mode).
 """
 
 import json
+from unittest.mock import MagicMock, patch
 from ml_switcheroo.discovery.scaffolder import Scaffolder
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -16,72 +16,65 @@ class MockInspectorExtras:
   def inspect(self, fw):
     if fw == "torch":
       return {
-        # Should go to Extras (Keyword Heuristic)
-        "torch.manual_seed": {"name": "manual_seed", "params": ["seed"], "type": "function"},
-        "torch.save": {"name": "save", "params": ["obj", "f"], "type": "function"},
-        # Should go to Extras (Submodule Heuristic)
-        "torch.utils.data.DataLoader": {"name": "DataLoader", "params": ["dataset"], "type": "class"},
-        # Should go to Extras (Context/Grad Heuristic)
-        "torch.no_grad": {"name": "no_grad", "params": [], "type": "class"},
+        # Should go to Extras (via dynamic regex)
+        "torch.custom_util.func": {"name": "func", "params": [], "type": "function"},
+        "torch.my_hub.save": {"name": "save", "params": ["obj"], "type": "function"},
         # Should go to Math (Default)
         "torch.abs": {"name": "abs", "params": ["x"], "type": "function"},
       }
     return {}
 
 
-def test_extras_scaffolding_writes_to_correct_file(tmp_path):
+def test_extras_scaffolding_dynamic(tmp_path):
   """
-  Scenario: Scaffold 'torch' with utilities.
-  Expectation: k_framework_extras.json is created and populated.
+  Scenario: Scaffold 'torch' with utilities matching custom regex.
+  Expectation: k_framework_extras.json is created.
   """
-  # Use empty semantics to force heuristic path
   semantics = SemanticsManager()
   semantics.data = {}
 
   scaffolder = Scaffolder(semantics=semantics)
   scaffolder.inspector = MockInspectorExtras()
 
-  scaffolder.scaffold(["torch"], tmp_path)
+  # Mock framework discovery
+  with patch("ml_switcheroo.discovery.scaffolder.available_frameworks", return_value=["torch"]):
+    mock_adapter = MagicMock()
+    mock_adapter.discovery_heuristics = {"extras": [r"\.custom_util\.", r"\.my_hub\."]}
+    with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
+      scaffolder.scaffold(["torch"], tmp_path)
 
   extras_file = tmp_path / "k_framework_extras.json"
   math_file = tmp_path / "k_array_api.json"
 
-  assert extras_file.exists(), "Extras file not created"
-  assert math_file.exists(), "Math file not created"
+  assert extras_file.exists()
+  assert math_file.exists()
 
   extras_data = json.loads(extras_file.read_text())
   math_data = json.loads(math_file.read_text())
 
   # Check Routing
-  assert "manual_seed" in extras_data
-  assert "save" in extras_data
-  assert "DataLoader" in extras_data
-  assert "no_grad" in extras_data
+  assert "func" in extras_data  # Matches .custom_util.
+  assert "save" in extras_data  # Matches .my_hub.
 
   # Check Isolation
   assert "abs" in math_data
   assert "abs" not in extras_data
-  assert "manual_seed" not in math_data
 
 
-def test_structurally_extra_logic():
-  """Unit test for the _is_structurally_extra helper."""
+def test_structurally_extra_logic_dynamic():
+  """Unit test for the _is_structurally_extra helper with dynamic patterns."""
   scaffolder = Scaffolder()
 
-  # Keywords
-  assert scaffolder._is_structurally_extra("pkg.manual_seed", "manual_seed")
-  assert scaffolder._is_structurally_extra("pkg.load", "load_model")
-  assert scaffolder._is_structurally_extra("pkg.device", "device")
+  with patch("ml_switcheroo.discovery.scaffolder.available_frameworks", return_value=["test_fw"]):
+    adapter = MagicMock()
+    adapter.discovery_heuristics = {"extras": [r"banana"]}
 
-  # Contexts
-  assert scaffolder._is_structurally_extra("pkg.no_grad", "no_grad")
-  assert scaffolder._is_structurally_extra("pkg.set_grad_enabled", "set_grad_enabled")
+    with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=adapter):
+      # Matches regex
+      assert scaffolder._is_structurally_extra("pkg.banana.split", "split")
 
-  # Submodules
-  assert scaffolder._is_structurally_extra("pkg.utils.data.stuff", "stuff")
-  assert scaffolder._is_structurally_extra("pkg.distributed.init", "init")
+      # Misses regex, Hits Fallback
+      assert scaffolder._is_structurally_extra("pkg.load", "load_model")
 
-  # Negatives (Math/Neural)
-  assert not scaffolder._is_structurally_extra("pkg.abs", "abs")
-  assert not scaffolder._is_structurally_extra("pkg.nn.Linear", "Linear")
-  assert not scaffolder._is_structurally_extra("pkg.conv2d", "conv2d")
+      # Misses all
+      assert not scaffolder._is_structurally_extra("pkg.apple", "apple")

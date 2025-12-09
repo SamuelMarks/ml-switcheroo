@@ -2,17 +2,17 @@
 Tests for FrameworkSyncer Import and Linking Flow.
 
 Verifies that:
-1. The Syncer correctly utilizes the expanded SEARCH_PATHS (TensorFlow, MLX).
+1. The Syncer resolves modules dynamicalls via `get_adapter`.
 2. Modules are imported via importlib.
 3. Matching functions are linked into the semantics dictionary.
-4. Frameworks that fail to import don't crash the syncer.
+4. Fallback behavior (if no adapter exists) works safely.
 """
 
 import types
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import pytest
 
-from ml_switcheroo.discovery.syncer import FrameworkSyncer, SEARCH_PATHS
+from ml_switcheroo.discovery.syncer import FrameworkSyncer
 
 
 def mock_module(name: str, functions: dict) -> types.ModuleType:
@@ -29,21 +29,15 @@ def syncer():
   return FrameworkSyncer()
 
 
-def test_search_paths_completeness():
+def test_linking_via_adapter_registry(syncer):
   """
-  Verify `SEARCH_PATHS` contains entries for new engines (TF, MLX).
-  """
-  assert "tensorflow" in SEARCH_PATHS
-  assert "tensorflow.math" in SEARCH_PATHS["tensorflow"]
-  assert "mlx" in SEARCH_PATHS
-  assert "mlx.core" in SEARCH_PATHS["mlx"]
-
-
-def test_tensorflow_linking_flow(syncer):
-  """
-  Scenario: User syncs 'tensorflow'.
-  Action: Syncer should check `tensorflow` and `tensorflow.math`.
-  Result: `tf.math.abs` should be linked to `abs`.
+  Scenario: User syncs 'custom_fw'.
+  Action:
+      1. Queries registry for 'custom_fw'.
+      2. Configures search paths: ['custom', 'custom.math'].
+  Result:
+      - `custom.math.abs` matches `abs`.
+      - `custom.add` is ignored if not in search paths (but here custom is root).
   """
   # 1. Setup Data
   semantics = {
@@ -51,68 +45,78 @@ def test_tensorflow_linking_flow(syncer):
     "unknown_op": {"std_args": ["x"], "variants": {}},
   }
 
-  # 2. Mock TensorFlow Modules
-  # Define a compatible function
-  def tf_abs(_x):
+  # 2. Mock Adapter
+  mock_adapter = MagicMock()
+  mock_adapter.search_modules = ["custom_fw.math", "custom_fw"]
+
+  # 3. Mock Modules
+  def c_abs(_x):
     pass
 
-  # Create Mocks
-  mock_tf_mod = mock_module("tensorflow", {})
-  mock_tf_math = mock_module("tensorflow.math", {"abs": tf_abs})
+  mock_mod_math = mock_module("custom_fw.math", {"abs": c_abs})
+  mock_mod_root = mock_module("custom_fw", {})
 
-  # 3. Patch importlib to return our mocks
-  with patch("importlib.import_module") as mock_import:
+  with patch("ml_switcheroo.discovery.syncer.get_adapter", return_value=mock_adapter) as mock_get:
+    with patch("importlib.import_module") as mock_import:
+      # Setup import logic
+      def import_side_effect(name):
+        if name == "custom_fw.math":
+          return mock_mod_math
+        if name == "custom_fw":
+          return mock_mod_root
+        raise ImportError(name)
 
-    def side_effect(name):
-      if name == "tensorflow":
-        return mock_tf_mod
-      if name == "tensorflow.math":
-        return mock_tf_math
-      raise ImportError(f"No module named {name}")
+      mock_import.side_effect = import_side_effect
 
-    mock_import.side_effect = side_effect
+      # 4. Run Sync
+      syncer.sync(semantics, "custom_fw")
 
-    # 4. Run Sync
-    syncer.sync(semantics, "tensorflow")
+      # Verify adapter was queried
+      mock_get.assert_called_with("custom_fw")
 
   # 5. Verify Results
-  # 'abs' should be found in tensorflow.math
-  assert "tensorflow" in semantics["abs"]["variants"]
-  # We expect the module name from the mocked module object
-  assert semantics["abs"]["variants"]["tensorflow"]["api"] == "tensorflow.math.abs"
-
-  # 'unknown_op' should remain unmapped
-  assert "tensorflow" not in semantics["unknown_op"]["variants"]
+  assert "custom_fw" in semantics["abs"]["variants"]
+  # Path should come from .math because it was first in search_modules
+  assert semantics["abs"]["variants"]["custom_fw"]["api"] == "custom_fw.math.abs"
 
 
-def test_mlx_linking_flow(syncer):
+def test_fallback_no_adapter(syncer):
   """
-  Scenario: User syncs 'mlx'.
-  Action: Syncer should check `mlx.core`.
-  Result: `mlx.core.add` should match match standard `add`.
+  Scenario: User syncs 'legacy_lib' which has no adapter defined.
+  Action: Should fallback to searching default module 'legacy_lib'.
   """
-  semantics = {"add": {"std_args": ["x", "y"], "variants": {}}}
+  semantics = {"relu": {"std_args": ["x"], "variants": {}}}
 
-  def mlx_add(_a, _b):  # Signature matches (2 args)
+  def l_relu(_x):
     pass
 
-  mock_mlx_core = mock_module("mlx.core", {"add": mlx_add})
+  mock_lib = mock_module("legacy_lib", {"relu": l_relu})
 
-  with patch("importlib.import_module") as mock_import:
+  # Return None for adapter
+  with patch("ml_switcheroo.discovery.syncer.get_adapter", return_value=None):
+    with patch("importlib.import_module", return_value=mock_lib) as mock_import:
+      syncer.sync(semantics, "legacy_lib")
 
-    def side_effect(name):
-      # FrameworkSyncer looks for mlx.core, mlx.nn, etc.
-      if name == "mlx.core":
-        return mock_mlx_core
-      # We can allow others to fail import
-      raise ImportError(f"No module named {name}")
+      # Assert tried to import the framework name itself
+      mock_import.assert_called_with("legacy_lib")
 
-    mock_import.side_effect = side_effect
+  assert semantics["relu"]["variants"]["legacy_lib"]["api"] == "legacy_lib.relu"
 
-    syncer.sync(semantics, "mlx")
 
-  assert "mlx" in semantics["add"]["variants"]
-  assert semantics["add"]["variants"]["mlx"]["api"] == "mlx.core.add"
+def test_adapter_missing_search_modules_property(syncer):
+  """
+  Scenario: Adapter exists but relies on older interface (no search_modules).
+  Action: Handle gracefully (fallback to default name).
+  """
+  semantics = {"op": {"std_args": ["x"], "variants": {}}}
+
+  # Adapter object exists but is empty/legacy
+  mock_adapter = MagicMock(spec=[])
+
+  with patch("ml_switcheroo.discovery.syncer.get_adapter", return_value=mock_adapter):
+    with patch("importlib.import_module", side_effect=ImportError):
+      # Just ensure it doesn't crash on attribute access
+      syncer.sync(semantics, "partial_fw")
 
 
 def test_sync_skips_incompatible_signatures(syncer):
@@ -128,8 +132,11 @@ def test_sync_skips_incompatible_signatures(syncer):
 
   mock_mod = mock_module("my_lib", {"matmul": bad_matmul})
 
-  # Hook the SEARCH_PATHS temporarily to test generic logic
-  with patch.dict(SEARCH_PATHS, {"my_lib": ["my_lib"]}):
+  # Mock adapter to force search path
+  adapter = MagicMock()
+  adapter.search_modules = ["my_lib"]
+
+  with patch("ml_switcheroo.discovery.syncer.get_adapter", return_value=adapter):
     with patch("importlib.import_module", return_value=mock_mod):
       syncer.sync(semantics, "my_lib")
 
@@ -137,21 +144,22 @@ def test_sync_skips_incompatible_signatures(syncer):
   assert "my_lib" not in semantics["matmul"]["variants"]
 
 
-def test_fails_gracefully_on_import_error(syncer, capsys):
+def test_fails_gracefully_on_import_error(syncer):
   """
   Scenario: User asks to sync a framework that is not installed.
   Result: Error message logged, no crash.
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {}}}
 
-  with patch("importlib.import_module", side_effect=ImportError("Not installed")):
-    syncer.sync(semantics, "ghost_framework")
+  # Adapter says search "ghost", importlib raises Error
+  adapter = MagicMock()
+  adapter.search_modules = ["ghost"]
 
-  # Check that console printed warning
-  # Note: Rich output capture is tricky with capsys unless console is injected.
-  # FrameworkSyncer uses the global console.
-  # We rely on the fact it didn't raise exception.
-  assert "ghost_framework" not in semantics["abs"]["variants"]
+  with patch("ml_switcheroo.discovery.syncer.get_adapter", return_value=adapter):
+    with patch("importlib.import_module", side_effect=ImportError("Not installed")):
+      syncer.sync(semantics, "ghost")
+
+  assert "ghost" not in semantics["abs"]["variants"]
 
 
 def test_sync_preserves_existing_mappings(syncer):
@@ -161,14 +169,18 @@ def test_sync_preserves_existing_mappings(syncer):
   """
   semantics = {"abs": {"std_args": ["x"], "variants": {"torch": {"api": "manual.override.abs"}}}}
 
-  # Even if we provide a "real" torch.abs in the mock
+  # Even if we provide a "real" scan result
   def real_abs(_x):
     pass
 
   mock_torch = mock_module("torch", {"abs": real_abs})
 
-  with patch("importlib.import_module", return_value=mock_torch):
-    syncer.sync(semantics, "torch")
+  adapter = MagicMock()
+  adapter.search_modules = ["torch"]
+
+  with patch("ml_switcheroo.discovery.syncer.get_adapter", return_value=adapter):
+    with patch("importlib.import_module", return_value=mock_torch):
+      syncer.sync(semantics, "torch")
 
   # Should remain the manual override
   assert semantics["abs"]["variants"]["torch"]["api"] == "manual.override.abs"

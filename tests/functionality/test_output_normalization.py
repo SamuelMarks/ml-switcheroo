@@ -38,6 +38,7 @@ class MockOutputSemantics(SemanticsManager):
     self._reverse_index = {}
     self._key_origins = {}
     self.import_data = {}
+    self.framework_configs = {}
 
     # Scenario 1: 'max'
     # Torch `max` returns (values, indices) named tuple.
@@ -71,6 +72,9 @@ class MockOutputSemantics(SemanticsManager):
       transform_type="infix",
       operator="@",
     )
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
   def _inject(self, name, s_api, t_api, adapter=None, transform_type=None, operator=None):
     variants = {"torch": {"api": s_api}, "jax": {"api": t_api}}

@@ -20,6 +20,7 @@ class MockSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
+    self.framework_configs = {}
 
     # 1. Constant: float32 -> float32
     self._inject_const("float32", {"torch": "torch.float32", "jax": "jax.numpy.float32"})
@@ -31,6 +32,9 @@ class MockSemantics(SemanticsManager):
     # Let's map torch.device to jax.devices() function call?
     # For this test, just map to another constant pattern for simplicity.
     self._inject_const("cpu", {"torch": "torch.cpu", "jax": "jax.devices('cpu')[0]"})
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
   def _inject_const(self, name, mapping):
     # Constants have no std_args

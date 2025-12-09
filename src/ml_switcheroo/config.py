@@ -1,11 +1,10 @@
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
-from pydantic import BaseModel, Field, ValidationError
+from typing import Any, Dict, List, Optional, Type, TypeVar
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
-from ml_switcheroo.enums import SupportedEngine
+from ml_switcheroo.frameworks import available_frameworks, get_adapter
 
-# Python 3.11+ has tomllib built-in.
 if sys.version_info >= (3, 11):
   import tomllib
 else:
@@ -17,22 +16,58 @@ else:
 T = TypeVar("T", bound=BaseModel)
 
 
+def get_framework_priority_order() -> List[str]:
+  """
+  Returns a list of framework keys sorted by UI Priority.
+
+  Logic:
+  1. Retrieve registered frameworks.
+  2. Instantiate adapter to read 'ui_priority'.
+  3. Sort by priority (asc), then by name (asc) for stability.
+  4. Frameworks without adapters sort to the end (priority 999).
+  """
+  frameworks = available_frameworks()
+
+  def sort_key(name: str):
+    adapter = get_adapter(name)
+    priority = 999
+    if adapter and hasattr(adapter, "ui_priority"):
+      try:
+        priority = int(adapter.ui_priority)
+      except (ValueError, TypeError):
+        pass
+    return (priority, name)
+
+  return sorted(frameworks, key=sort_key)
+
+
 class RuntimeConfig(BaseModel):
   """
   Global configuration container for the translation engine.
   """
 
-  source_framework: SupportedEngine = SupportedEngine.TORCH
-  target_framework: SupportedEngine = SupportedEngine.JAX
+  # Accept string inputs, validated dynamically against the registry
+  source_framework: str = "torch"
+  target_framework: str = "jax"
   strict_mode: bool = False
   plugin_settings: Dict[str, Any] = Field(default_factory=dict)
   plugin_paths: List[Path] = Field(default_factory=list)
   validation_report: Optional[Path] = None
 
-  class Config:
-    # We DO NOT use use_enum_values=True here to ensure we keep the Enum object properties.
-    # However, Pydantic V2 validates string inputs against Enum values automatically.
-    pass
+  @field_validator("source_framework", "target_framework")
+  @classmethod
+  def validate_framework(cls, v: str) -> str:
+    """Ensures the framework is registered in the system."""
+    # Normalize input
+    v_clean = v.lower().strip()
+
+    # Allow bypassing if no frameworks loaded (bootstrap/test enviroments)
+    known = available_frameworks()
+    if known and v_clean not in known:
+      raise ValueError(
+        f"Unknown framework '{v}'. Available: {known}. Add {v}.py to src/ml_switcheroo/frameworks/ to enable support."
+      )
+    return v_clean
 
   def parse_plugin_settings(self, schema: Type[T]) -> T:
     try:
@@ -43,8 +78,8 @@ class RuntimeConfig(BaseModel):
   @classmethod
   def load(
     cls,
-    source: Optional[Union[str, SupportedEngine]] = None,
-    target: Optional[Union[str, SupportedEngine]] = None,
+    source: Optional[str] = None,
+    target: Optional[str] = None,
     strict_mode: Optional[bool] = None,
     plugin_settings: Optional[Dict[str, Any]] = None,
     validation_report: Optional[Path] = None,
@@ -54,9 +89,8 @@ class RuntimeConfig(BaseModel):
     toml_config, toml_dir = _load_toml_settings(start_dir)
 
     # 1. Framework Defaults
-    # We respect CLI if present, else TOML, else Enum Default.
-    final_source = source or toml_config.get("source_framework", SupportedEngine.TORCH)
-    final_target = target or toml_config.get("target_framework", SupportedEngine.JAX)
+    final_source = source or toml_config.get("source_framework", "torch")
+    final_target = target or toml_config.get("target_framework", "jax")
 
     # 2. Strict Mode
     if strict_mode is not None:
@@ -64,7 +98,7 @@ class RuntimeConfig(BaseModel):
     else:
       final_strict = toml_config.get("strict_mode", False)
 
-    # 3. Plugin Settings
+      # 3. Plugin Settings
     toml_plugins = toml_config.get("plugin_settings", {})
     cli_plugins = plugin_settings or {}
     final_plugins = {**toml_plugins, **cli_plugins}
@@ -74,7 +108,7 @@ class RuntimeConfig(BaseModel):
     if not final_report and "validation_report" in toml_config:
       final_report = Path(toml_config["validation_report"])
 
-    # 5. External Plugins
+      # 5. External Plugins
     raw_paths = toml_config.get("plugin_paths", [])
     final_plugin_paths = []
     if toml_dir:

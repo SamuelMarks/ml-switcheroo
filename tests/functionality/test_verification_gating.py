@@ -10,6 +10,7 @@ Verifies that:
 
 import json
 import pytest
+from typing import Set
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -28,12 +29,16 @@ class MockSemantics(SemanticsManager):
     self.import_data = {}
     self.framework_configs = {}
     self._reverse_index = {}
+    self._known_rng_methods = set()
 
     # 1. 'good_op': Valid mapping, will pass verification
     self._inject("good_op", "torch.good", "jax.good")
 
     # 2. 'bad_op': Valid mapping structurally, but functionally FAIL
     self._inject("bad_op", "torch.bad", "jax.bad")
+
+  def get_all_rng_methods(self) -> Set[str]:
+    return self._known_rng_methods
 
   def _inject(self, name, s_api, t_api):
     self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}
@@ -63,13 +68,7 @@ def test_validation_gating_logic(mock_report):
   config = RuntimeConfig(source_framework="torch", target_framework="jax", validation_report=mock_report)
 
   # 2. Initialize Engine (which loads semantics and report)
-  # We patch the SemanticsManager resolution to keep it clean,
-  # but use our MockSemantics class for logic.
-
-  # However, ASTEngine() initializes SemanticsManager().
-  # We want to inject our MockSemantics instance.
   semantics = MockSemantics()
-
   engine = ASTEngine(semantics=semantics, config=config)
 
   # 3. Verify Report Loading
@@ -77,9 +76,9 @@ def test_validation_gating_logic(mock_report):
   assert semantics.is_verified("bad_op") is False
 
   # 4. Run Transformation
-  code = """
-y1 = torch.good(x)
-y2 = torch.bad(x)
+  code = """ 
+y1 = torch.good(x) 
+y2 = torch.bad(x) 
 """
   result = engine.run(code)
 

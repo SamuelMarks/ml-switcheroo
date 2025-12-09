@@ -2,9 +2,9 @@
 Tests for SemanticsManager Architecture Compliance.
 
 Verifies that:
-1. The Manager contains zero knowledge when initialized without JSON files.
-2. It strictly relies on `_load_knowledge_graph` (and thus file I/O).
-3. No hardcoded 'bootstrap' methods inject data secretly.
+1. The Manager populates defaults from Registry (Adapters).
+2. It correctly consumes Structural Traits from the Adapter Protocol.
+3. It stays clean of JSON data when files are missing.
 """
 
 import pytest
@@ -12,6 +12,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.testing.adapters import register_adapter
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 @pytest.fixture
@@ -20,60 +22,80 @@ def empty_semantics_dir(tmp_path):
   return tmp_path
 
 
-def test_clean_slate_initialization(empty_semantics_dir):
+def test_initialization_populates_from_registry(empty_semantics_dir):
   """
-  Scenario: Manager starts in an environment with no semantics files.
-  Expectation: Internal data structures are completely empty.
-
-  This confirms removal of methods like `_load_defaults` or `_bootstrap`.
+  Scenario: Environment with no JSON files, but Adapters are registered.
+  Expectation: Manager has templates/aliases for registered frameworks (e.g. torch).
   """
-  # Patch the resolution to point to our empty temp dir
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=empty_semantics_dir):
     mgr = SemanticsManager()
 
-    # 1. Assert Operations are empty
-    assert len(mgr.data) == 0, "Manager should be empty if no JSONs found"
+    # Should have data from TorchAdapter (registered by default)
+    assert "torch" in mgr.test_templates
+    assert "import torch" in mgr.test_templates["torch"]["import"]
 
-    # 2. Assert Imports are empty (Crucial check for previous hardcoded defaults)
-    assert len(mgr.import_data) == 0, "Imports contained data not sourced from files"
+    # Should have aliases
+    aliases = mgr.get_framework_aliases()
+    assert "torch" in aliases
+    assert aliases["torch"] == ("torch", "torch")
 
-    # 3. Assert Index is empty
-    assert len(mgr._reverse_index) == 0
 
-
-def test_load_order_respected(empty_semantics_dir):
+def test_traits_hydration_from_adapter(empty_semantics_dir):
   """
-  Verify that the manager looks for specific files in specific order.
-  We'll mock `open` to verify the sequence of file accesses.
+  Scenario: A new custom adapter is registered with 'structural_traits'.
+  Expectation: SemanticsManager populates framework_configs with these traits.
   """
+
+  # 1. Register a dynamic adapter with Structural Traits
+  @register_adapter("fastnet")
+  class FastNetAdapter:
+    import_alias = ("fastnet", "fn")
+
+    @property
+    def structural_traits(self) -> StructuralTraits:
+      return StructuralTraits(module_base="fastnet.Module", forward_method="run", requires_super_init=True)
+
+    # Required stubs
+    def convert(self, x):
+      return x
+
+  # 2. Initialize Manager (this triggers _hydrate_defaults_from_registry)
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=empty_semantics_dir):
-    # We need to spy on the Path.exists and open calls, but
-    # manager checks .exists() before open().
-
-    # Let's create dummy empty files
-    (empty_semantics_dir / "k_array_api.json").touch()
-    (empty_semantics_dir / "k_neural_net.json").touch()
-
-    # Initialize
     mgr = SemanticsManager()
 
-    # Since files are empty/invalid JSON, it catches JSONDecodeError inside loop
-    # and prints error, but should proceed.
-    # We just want to ensure it didn't crash.
-    assert len(mgr.data) == 0
+  # 3. Verify Traits were loaded into config
+  config = mgr.get_framework_config("fastnet")
+  assert "traits" in config
+  traits = config["traits"]
+
+  assert traits["module_base"] == "fastnet.Module"
+  assert traits["forward_method"] == "run"
+  assert traits["requires_super_init"] is True
+
+
+def test_clean_slate_if_registry_empty(empty_semantics_dir):
+  """
+  Scenario: No JSONs and No Adapters.
+  Expectation: Manager is truly empty.
+  """
+  with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=empty_semantics_dir):
+    # Mock available_frameworks to return nothing
+    with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
+      mgr = SemanticsManager()
+
+      assert len(mgr.test_templates) == 0
+      assert len(mgr.framework_configs) == 0
+      assert len(mgr.data) == 0
 
 
 def test_test_alpha_add_removed():
   """
-  Specifically safeguards against the regression of
-  re-introducing 'test_alpha_add' hardcodes for testing convenience.
+  Safeguard against regressions of hardcoded operations.
   """
-  # We patch resolve to empty to bypass local real files
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir") as mock_resolve:
     mock_resolve.return_value = Path("/non/existent/path")
     with patch.object(Path, "exists", return_value=False):
-      mgr = SemanticsManager()
-
-      # This specific op was hardcoded in the previous "shortcoming"
-      # We assert it is GONE.
-      assert "test_alpha_add" not in mgr.data
+      # Also mock empty registry to ensure total isolation
+      with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
+        mgr = SemanticsManager()
+        assert "test_alpha_add" not in mgr.data

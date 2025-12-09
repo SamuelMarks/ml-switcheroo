@@ -1,13 +1,5 @@
 """
 Tests for Class Structure Rewriting: Keras Support.
-
-This module verifies the Tri-directional class translation logic including Keras.
-
-Verifies:
-    1.  Torch -> Keras: `nn.Module` -> `keras.Layer`, `forward` -> `call`.
-    2.  Keras -> Torch: `keras.Layer` -> `nn.Module`, `call` -> `forward`.
-    3.  Keras -> JAX: `keras.Layer` -> `flax.nnx.Module`, `call` -> `__call__`.
-    4.  JAX -> Keras: `flax.nnx.Module` -> `keras.Layer`, `__call__` -> `call`.
 """
 
 import pytest
@@ -27,11 +19,23 @@ class MockKerasSemantics(SemanticsManager):
     self._reverse_index = {}
     self._key_origins = {}
     self.import_data = {}
-    self.framework_configs = {}
 
-    # Define common ops if needed, but StructureMixin mainly relies on
-    # hardcoded class patterns and generic method renaming logic.
-    pass
+    # Configure Traits for targets AND SOURCES
+    self.framework_configs = {
+      "tensorflow": {
+        "traits": {
+          "module_base": "keras.Model",
+          "forward_method": "call",
+          "requires_super_init": True,
+          "strip_magic_args": ["rngs"],
+        }
+      },
+      "torch": {"traits": {"module_base": "torch.nn.Module", "forward_method": "forward", "requires_super_init": True}},
+      "jax": {"traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__"}},
+    }
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
 
 @pytest.fixture
@@ -40,8 +44,6 @@ def rewriter_factory():
   semantics = MockKerasSemantics()
 
   def create(source, target):
-    # Warning: target_framework logic inside RuntimeConfig casts to Enum string
-    # We use "tensorflow" to represent the Keras target as per SupportedEngine
     config = RuntimeConfig(source_framework=source, target_framework=target, strict_mode=False)
     return PivotRewriter(semantics, config)
 
@@ -59,11 +61,6 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 
 def test_torch_to_keras(rewriter_factory):
-  """
-  Scenario: Convert PyTorch Module to Keras Layer.
-  Inheritance: torch.nn.Module -> keras.Layer
-  Method: forward -> call
-  """
   rewriter = rewriter_factory("torch", "tensorflow")
   code = """ 
 class MyLayer(torch.nn.Module): 
@@ -75,21 +72,15 @@ class MyLayer(torch.nn.Module):
 """
   result = rewrite_code(rewriter, code)
 
-  assert "class MyLayer(keras.Layer):" in result
+  assert "class MyLayer(keras.Model):" in result
   assert "def call(self, x):" in result
   assert "forward" not in result
 
 
 def test_keras_to_torch(rewriter_factory):
-  """
-  Scenario: Convert Keras Layer to PyTorch Module.
-  Inheritance: keras.Layer -> torch.nn.Module
-  Method: call -> forward
-  Init: Ensure super().__init__() is present (Keras may or may not have it)
-  """
   rewriter = rewriter_factory("tensorflow", "torch")
   code = """ 
-class MyLayer(keras.Layer): 
+class MyLayer(keras.Model): 
     def __init__(self): 
         pass
 
@@ -104,14 +95,9 @@ class MyLayer(keras.Layer):
 
 
 def test_keras_to_jax(rewriter_factory):
-  """
-  Scenario: Convert Keras Layer to Flax NNX Module.
-  Inheritance: keras.Layer -> flax.nnx.Module
-  Method: call -> __call__
-  """
   rewriter = rewriter_factory("tensorflow", "jax")
   code = """ 
-class MyLayer(keras.Layer): 
+class MyLayer(keras.Model): 
     def call(self, x): 
         return x
 """
@@ -122,12 +108,6 @@ class MyLayer(keras.Layer):
 
 
 def test_jax_to_keras(rewriter_factory):
-  """
-  Scenario: Convert Flax NNX Module to Keras Layer.
-  Inheritance: flax.nnx.Module -> keras.Layer
-  Method: __call__ -> call
-  Init: Strip rngs (if present in input)
-  """
   rewriter = rewriter_factory("jax", "tensorflow")
   code = """ 
 class MyLayer(flax.nnx.Module): 
@@ -139,7 +119,7 @@ class MyLayer(flax.nnx.Module):
 """
   result = rewrite_code(rewriter, code)
 
-  assert "class MyLayer(keras.Layer):" in result
+  assert "class MyLayer(keras.Model):" in result
   assert "def call(self, x):" in result
 
   # Verify stripping rngs
@@ -151,9 +131,6 @@ class MyLayer(flax.nnx.Module):
 
 
 def test_tf_keras_prefix_support(rewriter_factory):
-  """
-  Verify `tf.keras.layers.Layer` is detected as a Keras class.
-  """
   rewriter = rewriter_factory("tensorflow", "torch")
   code = """ 
 class MyModel(tf.keras.Model): 

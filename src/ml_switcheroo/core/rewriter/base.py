@@ -21,20 +21,15 @@ from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.rewriter.types import SignatureContext
-from ml_switcheroo.enums import SupportedEngine
 
 
 class BaseRewriter(cst.CSTTransformer):
   """
   The base class for AST transformation traversal.
 
-  It maintains the state required to navigate Python's scoping rules and
-  import systems, providing helper methods for the specific Mixins (Calls,
-  Structure, Attributes) to resolve names and report issues.
-
   Attributes:
       semantics (SemanticsManager): The loaded knowledge base of API mappings.
-      config (RuntimeConfig): Configuration for the current run (strict mode, etc).
+      config (RuntimeConfig): Configuration for the current run.
       source_fw (str): The string identifier of the source framework (e.g., 'torch').
       target_fw (str): The string identifier of the target framework (e.g., 'jax').
       strict_mode (bool): If True, unknown APIs trigger failure markers instead of pass-through.
@@ -58,16 +53,9 @@ class BaseRewriter(cst.CSTTransformer):
     self.semantics = semantics
     self.config = config
 
-    # Robust handling of source_fw field (str vs Enum validation)
-    if isinstance(config.source_framework, SupportedEngine):
-      self.source_fw = config.source_framework.value
-    else:
-      self.source_fw = str(config.source_framework)
-
-    if isinstance(config.target_framework, SupportedEngine):
-      self.target_fw = config.target_framework.value
-    else:
-      self.target_fw = str(config.target_framework)
+    # Directly use strings, as config validation guarantees valid strings via Registry
+    self.source_fw = str(config.source_framework)
+    self.target_fw = str(config.target_framework)
 
     self.strict_mode = config.strict_mode
 
@@ -228,15 +216,7 @@ class BaseRewriter(cst.CSTTransformer):
   def _get_mapping(self, name: str) -> Optional[Dict[str, Any]]:
     """
     Queries the SemanticsManager for the target framework's variant.
-
-    Performs strict-mode checks. If strict mode is on and the API is missing,
-    it reports a failure.
-
-    Args:
-        name: The fully qualified API name (e.g. 'torch.abs').
-
-    Returns:
-        The variant dictionary (e.g. `{"api": "jax.numpy.abs", ...}`) or None.
+    Uses resolve_variant to handle framework inheritance (e.g. Pax -> JAX).
     """
     lookup = self.semantics.get_definition(name)
     if not lookup:
@@ -251,19 +231,21 @@ class BaseRewriter(cst.CSTTransformer):
       self._report_failure(f"Skipped '{name}': Marked unsafe by verification report.")
       return None
 
-    # Retrieve Target Implementation
-    target_impl = details.get("variants", {}).get(self.target_fw)
+    # Retrieve Target Implementation via Inheritance aware resolver
+    target_impl = self.semantics.resolve_variant(abstract_id, self.target_fw)
 
     if target_impl:
       get_tracer().log_match(source_api=name, target_api=target_impl.get("api", "Plugin Logic"), abstract_op=abstract_id)
     else:
       # If the key exists but is None (explicit block) or just missing
-      if self.target_fw in details.get("variants", {}) or target_impl is None:
-        self._report_failure(f"No mapping defined for '{name}' -> '{self.target_fw}'")
-      else:
-        # Implicitly missing (maybe just not in the JSON yet)
-        if self.strict_mode:
-          self._report_failure(f"No mapping available for '{name}'")
+      # Note: direct variants check is still useful for explicit blocking?
+      # variants = details.get("variants", {})
+      # if self.target_fw in variants and variants[self.target_fw] is None:
+      #    ... (Already handled by resolve_variant returning None/Explicit rules?)
+
+      # Simple missing logic
+      if self.strict_mode:
+        self._report_failure(f"No mapping available for '{name}' -> '{self.target_fw}'")
       return None
 
     return target_impl

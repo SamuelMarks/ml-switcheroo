@@ -6,37 +6,36 @@ operations unsafe for functional frameworks (like JAX). JAX transformation
 (JIT, VMap, Grad) requires pure functions with no side effects.
 
 Operations flagged:
-1.  **I/O**: `print`, `input`, `open`, `write`.
+1.  **I/O**: `print`, `input`, `open`, `write` (Standard Python).
 2.  **Global State**: `global` keyword usage.
 3.  **Closure State**: `nonlocal` keyword usage (Feature 05).
-4.  **Structure Mutation**: List methods `append`, `extend`, `pop`, etc.
-5.  **Global RNG**: Seeding operations like `random.seed`, `torch.manual_seed`.
+4.  **Structure Mutation**: List methods `append`, `extend`, etc.
+5.  **Global RNG**: Seeding operations (dynamically loaded from semantic config).
+6.  **Framework Impurities**: Methods like `add_`, `copy_` loaded from source framework config.
 
-Violations are marked via the `EscapeHatch` mechanism, wrapping the code
-with warning comments without altering the logic.
+Violations are marked via the `EscapeHatch` mechanism.
 """
 
-from typing import List, Optional, Set, Union
+from typing import List, Optional, Set, Union, Any
 import libcst as cst
 
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class PurityScanner(cst.CSTTransformer):
   """
   Scans CST for impurities and wraps violations in EscapeHatch markers.
 
-  This transformer operates at the statement level. If a statement contains
-  unsafe expressions (like `print()` or `list.append()`), the entire statement
-  is wrapped in failure markers with a specific reason.
-
   Attributes:
       _current_violations (List[str]): Accumulator of errors for the current statement.
-      _IO_FUNCTIONS (Set[str]): Set of function names considered I/O side effects.
-      _MUTATION_METHODS (Set[str]): Set of method names considered in-place mutation.
-      _GLOBAL_RNG_METHODS (Set[str]): Set of method names that mutate global random state.
+      _IO_FUNCTIONS (Set[str]): Standard Python I/O function names.
+      _MUTATION_METHODS (Set[str]): Standard Python container mutation methods.
+      _dynamic_impurity_methods (Set[str]): Methods loaded from framework configs (e.g. `add_`).
+      _global_rng_methods (Set[str]): Methods loaded from framework configs (e.g. `manual_seed`).
   """
 
+  # Standard Python Language Impurities (Constant across frameworks)
   _IO_FUNCTIONS: Set[str] = {"print", "input", "open", "write"}
 
   _MUTATION_METHODS: Set[str] = {
@@ -50,25 +49,41 @@ class PurityScanner(cst.CSTTransformer):
     "reverse",
   }
 
-  _GLOBAL_RNG_METHODS: Set[str] = {
-    "seed",  # random.seed, numpy.random.seed
-    "manual_seed",  # torch.manual_seed
-    "set_seed",  # tensorflow.random.set_seed
-  }
+  # Fallback only if semantics not provided
+  _DEFAULT_RNG_METHODS: Set[str] = {"seed"}
 
-  def __init__(self):
-    """Initializes the PurityScanner."""
+  def __init__(self, semantics: Any = None, source_fw: str = "torch"):
+    """
+    Initializes the PurityScanner.
+
+    Args:
+        semantics: SemanticsManager instance to load dynamic configs.
+        source_fw: The framework being analyzed (to load specific impure methods).
+                   Use legacy 'torch' default if not provided for safety.
+    """
     self._current_violations: List[str] = []
+    self.source_fw = source_fw
+
+    # Initialize sets
+    self._global_rng_methods = set(self._DEFAULT_RNG_METHODS)
+    self._dynamic_impurity_methods = set()
+
+    # Dynamic Loading
+    if semantics:
+      # A. Global RNG Methods
+      if hasattr(semantics, "get_all_rng_methods"):
+        self._global_rng_methods.update(semantics.get_all_rng_methods())
+
+      # B. Source Framework Specific Impurities (e.g. add_, copy_)
+      if hasattr(semantics, "get_framework_config"):
+        conf = semantics.get_framework_config(source_fw)
+        if conf and "traits" in conf:
+          traits = StructuralTraits.model_validate(conf["traits"])
+          self._dynamic_impurity_methods.update(traits.impurity_methods)
 
   def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
     """
     Enters a statement line. Resets violation tracking.
-
-    Args:
-        node: The statement line node being visited.
-
-    Returns:
-        True to verify children.
     """
     self._current_violations = []
     return True
@@ -81,54 +96,23 @@ class PurityScanner(cst.CSTTransformer):
     """
     Exits a statement line.
     If violations were found within this statement, wraps it in the EscapeHatch.
-
-    Args:
-        original_node: The node before transformations.
-        updated_node: The node after internal transformations.
-
-    Returns:
-        The original/updated node, potentially wrapped in an EscapeHatch if impure.
     """
     if self._current_violations:
       # Deduplicate reasons
       unique_reasons = sorted(list(set(self._current_violations)))
       reason_msg = f"Side-effect unsafe for JAX: {', '.join(unique_reasons)}"
 
-      # We wrap the *updated_node*. Even if we don't change inner content,
-      # using updated_node is standard practice in Transformers.
+      # We wrap the *updated_node*.
       return EscapeHatch.mark_failure(updated_node, reason_msg)
 
     return updated_node
 
   def visit_Global(self, node: cst.Global) -> Optional[bool]:
-    """
-    Detects `global` keyword usage.
-
-    Global variables break functional purity assumptions.
-
-    Args:
-        node: The Global statement node.
-
-    Returns:
-        False to stop traversing children.
-    """
     names = [n.name.value for n in node.names]
     self._current_violations.append(f"Global mutation ({', '.join(names)})")
-    return False  # structural checking done
+    return False
 
   def visit_Nonlocal(self, node: cst.Nonlocal) -> Optional[bool]:
-    """
-    Detects `nonlocal` keyword usage.
-
-    Modifying closure variables (nonlocal state) breaks JAX JIT tracers which
-    assume stateless functions or explicit argument passing.
-
-    Args:
-        node: The Nonlocal statement node.
-
-    Returns:
-        False to stop traversing children.
-    """
     names = [n.name.value for n in node.names]
     self._current_violations.append(f"Nonlocal mutation ({', '.join(names)})")
     return False
@@ -136,12 +120,6 @@ class PurityScanner(cst.CSTTransformer):
   def visit_Call(self, node: cst.Call) -> Optional[bool]:
     """
     Inspects calls for I/O functions, list mutations, or global RNG seeding.
-
-    Args:
-        node: The Call node.
-
-    Returns:
-        True to traverse arguments.
     """
     # 1. Check Function Name (e.g., print())
     if isinstance(node.func, cst.Name):
@@ -149,7 +127,7 @@ class PurityScanner(cst.CSTTransformer):
       if func_name in self._IO_FUNCTIONS:
         self._current_violations.append(f"I/O Call ({func_name})")
 
-    # 2. Check Method Call (e.g., x.append(), random.seed())
+    # 2. Check Method Call (e.g., x.append(), random.seed(), x.add_())
     elif isinstance(node.func, cst.Attribute):
       attr_name = node.func.attr.value
 
@@ -157,12 +135,15 @@ class PurityScanner(cst.CSTTransformer):
       if attr_name in self._MUTATION_METHODS:
         self._current_violations.append(f"In-place Mutation (. {attr_name})")
 
-      # 2b. Global Random Seeding
-      elif attr_name in self._GLOBAL_RNG_METHODS:
+      # 2b. Global Random Seeding (Dynamic)
+      elif attr_name in self._global_rng_methods:
         self._current_violations.append(f"Global RNG State (. {attr_name})")
 
-      # 2c. Specific I/O (File objects)
-      # Catch file.write() specifically if we missed 'write' in generic check
+      # 2c. Framework Specific Impurity (New)
+      elif attr_name in self._dynamic_impurity_methods:
+        self._current_violations.append(f"State Mutation (. {attr_name})")
+
+      # 2d. Specific I/O (File objects)
       elif attr_name == "write":
         self._current_violations.append("I/O Call (.write)")
 

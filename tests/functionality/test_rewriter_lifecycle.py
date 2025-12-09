@@ -16,18 +16,32 @@ from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 class MockSemantics(SemanticsManager):
-  """Minimal semantics manager for rewriter tests."""
+  """Minimal semantics manager with Trait Support."""
 
   def __init__(self):
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
     self.import_data = {}
+    self._known_rng_methods = set()
 
     # Add a basic op to ensure standard rewrites still work alongside stripping
     self._inject("abs", "torch.abs", "jax.numpy.abs")
     # Add basic types to prevent Attribute lookup failures in strict mode
     self._inject("float32", "torch.float32", "jax.numpy.float32")
+
+    # --- FIX: Populate framework configs for SOURCE traits ---
+    self.framework_configs = {
+      "torch": {
+        "traits": {
+          "lifecycle_strip_methods": ["to", "cpu", "cuda", "detach"],
+          "lifecycle_warn_methods": ["eval", "train"],
+        }
+      }
+    }
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
   def _inject(self, name, s_api, t_api):
     self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}

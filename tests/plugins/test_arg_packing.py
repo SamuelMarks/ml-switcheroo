@@ -1,13 +1,3 @@
-"""
-Tests for Varargs Packing Plugin.
-
-Verifies that:
-1. Positional varargs are identified (after the first argument).
-2. Packed into a tuple node.
-3. Assigned to a keyword argument (axes).
-4. `permute(x, 0, 1)` -> `transpose(x, axes=(0, 1))`.
-"""
-
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
@@ -18,7 +8,6 @@ import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.arg_packing import pack_varargs
 
 
-# Helper to avoid import errors
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   tree = cst.parse_module(code)
   try:
@@ -30,14 +19,10 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter():
-  # 1. Register Hook & ensure plugins loaded state is set
   hooks._HOOKS["pack_varargs"] = pack_varargs
   hooks._PLUGINS_LOADED = True
-
-  # 2. Mock Semantics
   mgr = MagicMock()
 
-  # Define 'permute_dims' which is the abstract op for permute/transpose
   permute_def = {
     "requires_plugin": "pack_varargs",
     "std_args": ["x", "axes"],
@@ -56,66 +41,47 @@ def rewriter():
   mgr.get_known_apis.return_value = {"permute_dims": permute_def}
   mgr.is_verified.return_value = True
 
-  # 3. Config
+  def resolve_variant(abstract_id, target_fw):
+    if abstract_id == "permute_dims" and target_fw == "jax":
+      return permute_def["variants"]["jax"]
+    return None
+
+  mgr.resolve_variant.side_effect = resolve_variant
+
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(semantics=mgr, config=cfg)
 
 
 def test_pack_permute_vars(rewriter):
-  """
-  Scenario: `torch.permute(x, 2, 0, 1)`
-  Expect: `jax.numpy.transpose(x, axes=(2, 0, 1))`
-  """
   code = "y = torch.permute(x, 2, 0, 1)"
   result = rewrite_code(rewriter, code)
-
-  # Check function swap
   assert "jax.numpy.transpose" in result
 
-  # Check packing structure
+  # Assert string exactness carefully with whitespace
   clean = result.replace(" ", "")
+  # "y=jax.numpy.transpose(x,axes=(2,0,1))"
   assert "axes=(2,0,1)" in clean
 
 
 def test_pack_single_dim(rewriter):
-  """
-  Scenario: `torch.permute(x, 0)` (Trivial)
-  Expect: `jax.numpy.transpose(x, axes=(0,))`
-  """
   code = "y = torch.permute(x, 0)"
   result = rewrite_code(rewriter, code)
-
-  # Note: LibCST Tuple with 1 element includes comma
   clean = result.replace(" ", "")
   assert "axes=(0,)" in clean
 
 
 def test_preserve_input(rewriter):
-  """
-  Scenario: `torch.permute(my_tensor, 1, 0)`
-  Expect: `jax.numpy.transpose(my_tensor, axes=(1, 0))`
-  """
   code = "y = torch.permute(my_tensor, 1, 0)"
   result = rewrite_code(rewriter, code)
-
   assert "jax.numpy.transpose(my_tensor" in result
 
 
 def test_ignore_wrong_fw(rewriter):
-  """
-  Scenario: Target is 'numpy' (if numpy variant doesn't use plugin).
-  """
-  # Force context target to numpy
   rewriter.ctx._runtime_config.target_framework = "numpy"
   rewriter.ctx.target_fw = "numpy"
+  # Ensure ignore via resolver
+  rewriter.semantics.resolve_variant.side_effect = lambda aid, fw: None
 
-  # Even if semantics says plugin is required, if plugin logic checks target_fw...
-  # The plugin itself relies on ctx.lookup_api. If numpy variant has different setup ok.
-  # But current pack_varargs implementation falls back to numpy.transpose if generic.
-  # Let's override context manually.
-
-  # We need to simulate that numpy variant DOES NOT have the plugin in the semantics response
-  # to really test skip mechanism in rewriter, but here we test the hook logic itself.
-  # If called, does it proceed? Yes, if target_fw is numpy it defaults to numpy.transpose.
-
-  pass  # Hook logic handles numpy target too by default.
+  code = "y = torch.permute(x, 1, 0)"
+  result = rewrite_code(rewriter, code)
+  assert "torch.permute" in result

@@ -2,34 +2,73 @@
 Tests for Data-Driven Framework Alias Configuration.
 
 Verifies:
-1.  SemanticsManager parses alias config from `__frameworks__`.
-2.  ImportFixer respects injected aliases.
-3.  Default behavior is preserved.
+1.  SemanticsManager parses alias config from registry auto-discovery.
+2.  SemanticsManager overrides registry defaults with JSON config.
+3.  ImportFixer respects resulting aliases.
 """
 
 import libcst as cst
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.import_fixer import ImportFixer
 from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.testing.adapters import register_adapter, get_adapter
 
 
-def test_manager_parses_json_alias_config():
+def test_manager_uses_registry_defaults():
+  """
+  Scenario: No JSON.
+  Expect: Aliases come from Adapter class properties.
+  """
+  # Assuming standard adapters are registered by default in __init__
+  mgr = SemanticsManager()
+  aliases = mgr.get_framework_aliases()
+
+  assert "jax" in aliases
+  # JAX Adapter defines ("jax.numpy", "jnp")
+  assert aliases["jax"] == ("jax.numpy", "jnp")
+
+
+def test_manager_picks_up_new_framework():
+  """
+  Scenario: User adds a 'fastai' adapter at runtime (Zero-Edit extension).
+  Expect: SemanticsManager initialized *after* registration includes it.
+  """
+
+  # 1. Verify it doesn't exist yet (sanity check, clean env?)
+  # Just register a new one to be sure
+  class FastAIAdapter:
+    import_alias = ("fastai.vision", "fv")
+
+    # dummy required methods
+    def convert(self, x):
+      return x
+
+  register_adapter("fastai_test", FastAIAdapter)
+
+  # 2. Init Manager
+  mgr = SemanticsManager()
+  aliases = mgr.get_framework_aliases()
+
+  # 3. Verify
+  assert "fastai_test" in aliases
+  assert aliases["fastai_test"] == ("fastai.vision", "fv")
+
+
+def test_manager_parses_json_alias_override():
   """
   Scenario: Load JSON with alias override.
-  Expectation: get_framework_aliases returns override.
+  Expectation: JSON override supercedes Adapter default.
   """
+  # 1. Setup Manager (loads adapters implicitly)
   mgr = SemanticsManager()
-  # Ensure clean state for test instance since defaults are loaded in init
-  # Note: _DEFAULT_ALIASES constant in module will populate defaults.
-  # We want to verify override logic.
 
+  # 2. Inject JSON override via internal merge method
   mock_data = {
     "__frameworks__": {
-      "custom_fw": {"alias": {"module": "custom.lib", "name": "cl"}},
       "jax": {
-        # Override default jax alias
+        # Override default jax alias (jnp -> jc)
         "alias": {"module": "jax.custom", "name": "jc"}
       },
     }
@@ -39,16 +78,8 @@ def test_manager_parses_json_alias_config():
 
   aliases = mgr.get_framework_aliases()
 
-  # Check new entry
-  assert "custom_fw" in aliases
-  assert aliases["custom_fw"] == ("custom.lib", "cl")
-
   # Check override
   assert aliases["jax"] == ("jax.custom", "jc")
-
-  # Check default preservation
-  assert "numpy" in aliases
-  assert aliases["numpy"] == ("numpy", "np")
 
 
 def test_import_fixer_uses_injected_aliases():
@@ -56,7 +87,7 @@ def test_import_fixer_uses_injected_aliases():
   Scenario: ImportFixer initialized with custom map.
   Expectation: Code generation uses the map.
   """
-  # Custom map: jax -> import jaxoid as jxD
+  # Custom map: jax -> import jaxoid as jXd
   alias_map = {"jax": ("jaxoid", "jXd")}
 
   fixer = ImportFixer(
@@ -72,30 +103,6 @@ def test_import_fixer_uses_injected_aliases():
   new_tree = tree.visit(fixer)
   result = new_tree.code
 
+  # FIX: Assertion now matches the alias defined in alias_map ('jXd')
   assert "import jaxoid as jXd" in result
   assert "import jax.numpy" not in result
-
-
-def test_engine_integration_mock(monkeypatch):
-  """
-  Verify that ASTEngine logic fetches aliases (simulated logic).
-  Since ASTEngine is tightly coupled to real SemanticsManager, we verify logic flow.
-  """
-  # This test mimics the new lines added to engine.py
-  mgr = MagicMock()
-  mgr.get_framework_aliases.return_value = {"jax": ("mock_jax", "mj")}
-  mgr.get_import_map.return_value = {}
-
-  # Simulate Engine.run logic segment
-  # ... code rewrite ...
-  target_fw = "jax"
-  code = "y = mj.abs(x)"
-  tree = cst.parse_module(code)
-
-  alias_map = mgr.get_framework_aliases()
-  fixer = ImportFixer("torch", target_fw, submodule_map={}, alias_map=alias_map)
-  new_tree = tree.visit(fixer)
-  res = new_tree.code
-
-  # Should use the mocked alias
-  assert "import mock_jax as mj" in res

@@ -1,11 +1,5 @@
 """
 Tests for Decorator Rewriting Logic.
-
-Verifies:
-1.  Basic Renaming: `@torch.jit.script` -> `@jax.jit`.
-2.  Removal: `@torch.no_grad` -> Removed (if mapped to None in variants).
-3.  Call-Style Decorators: `@foo(a=1)` -> `@bar(a=1)`.
-4.  Preservation: Unmapped decorators work as expected.
 """
 
 import pytest
@@ -26,6 +20,7 @@ class MockDecoratorSemantics(SemanticsManager):
     self._reverse_index = {}
     self._key_origins = {}
     self.import_data = {}
+    self.framework_configs = {}  # Clean config
 
     # 1. Rename: torch.jit.script -> jax.jit
     self._inject("jit", "torch.jit.script", "jax.jit")
@@ -35,6 +30,9 @@ class MockDecoratorSemantics(SemanticsManager):
 
     # 3. Call-style: torch.compile -> jax.jit (with args preserved implicitly)
     self._inject("compile", "torch.compile", "jax.jit")
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
   def _inject(self, name, s_api, t_api):
     variants = {"torch": {"api": s_api}}
@@ -56,19 +54,14 @@ def rewriter():
 
 def rewrite(rewriter, code):
   tree = cst.parse_module(code)
-  # DecoratorMixin handles leave_Decorator
   new_tree = tree.visit(rewriter)
   return new_tree.code
 
 
 def test_decorator_renaming(rewriter):
-  """
-  Input: @torch.jit.script
-  Output: @jax.jit
-  """
-  code = """
+  code = """ 
 @torch.jit.script
-def func(x):
+def func(x): 
     return x
 """
   result = rewrite(rewriter, code)
@@ -77,51 +70,32 @@ def func(x):
 
 
 def test_decorator_removal(rewriter):
-  """
-  Input: @torch.inference_mode
-  Output: (Decorator removed)
-  """
-  code = """
+  code = """ 
 @torch.inference_mode
-def func(x):
+def func(x): 
     return x
 """
   result = rewrite(rewriter, code)
   assert "@torch.inference_mode" not in result
-  # Function body should remain
   assert "def func(x):" in result
 
 
 def test_call_decorator_renaming(rewriter):
-  """
-  Input: @torch.compile(fullgraph=True)
-  Output: @jax.jit(fullgraph=True)
-  """
-  code = """
-@torch.compile(fullgraph=True)
-def func(x):
+  code = """ 
+@torch.compile(fullgraph=True) 
+def func(x): 
     pass
 """
-  # Note: args passed through unless Argument Mapping defined in mock.
   result = rewrite(rewriter, code)
   assert "@jax.jit(fullgraph=True)" in result
   assert "torch.compile" not in result
 
 
 def test_multiple_decorators_mixed(rewriter):
-  """
-  Input:
-      @torch.jit.script
-      @torch.inference_mode
-      def f(): ...
-  Output:
-      @jax.jit
-      def f(): ...
-  """
-  code = """
+  code = """ 
 @torch.jit.script
 @torch.inference_mode
-def f():
+def f(): 
     pass
 """
   result = rewrite(rewriter, code)
@@ -131,11 +105,7 @@ def f():
 
 
 def test_unmapped_decorator_preserved(rewriter):
-  """
-  Input: @unknown.decorator
-  Output: @unknown.decorator
-  """
-  code = """
+  code = """ 
 @unknown.decorator
 def f(): pass
 """

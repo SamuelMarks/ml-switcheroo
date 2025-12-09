@@ -4,6 +4,7 @@ Pytest Configuration and Fixtures.
 Includes:
 - Syspath patching for local imports.
 - Snapshot testing fixture for visual verification.
+- Global registry isolation to prevent tests with custom adapters from leaking.
 """
 
 import sys
@@ -14,6 +15,15 @@ from typing import Callable, Optional
 # Add src to path so we can import 'ml_switcheroo' without installing it
 src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
+
+# Force load of default adapters so they provide the "clean state" baseline
+# This ensures that standard frameworks (Torch, JAX, etc.) are present in the
+# snapshot we take for isolation, so they remain available after restoration.
+try:
+  import ml_switcheroo.frameworks
+  from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY
+except ImportError:
+  _ADAPTER_REGISTRY = {}
 
 
 class SnapshotAssert:
@@ -74,6 +84,20 @@ class SnapshotAssert:
 def snapshot(request):
   """Fixture to assert text matches a stored snapshot."""
   return SnapshotAssert(request)
+
+
+@pytest.fixture(autouse=True)
+def isolate_framework_registry():
+  """
+  Ensures that modifications to the framework adapter registry
+  (adding custom frameworks for tests) do not leak between tests.
+  """
+  # Capture the state (which ideally contains torch, jax, etc. loaded via imports above)
+  original_registry = _ADAPTER_REGISTRY.copy()
+  yield
+  # Restore state after test completion
+  _ADAPTER_REGISTRY.clear()
+  _ADAPTER_REGISTRY.update(original_registry)
 
 
 def pytest_addoption(parser):

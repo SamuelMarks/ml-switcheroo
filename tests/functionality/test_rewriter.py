@@ -28,6 +28,7 @@ class MockSemantics(SemanticsManager):
     self.import_data = {}
     self._reverse_index = {}
     self._key_origins = {}
+    self.framework_configs = {}
 
     # 1. Simple Swap: abs
     # torch.abs(x) -> jax.numpy.abs(x)
@@ -42,6 +43,9 @@ class MockSemantics(SemanticsManager):
 
     # 4. Binary Op: add
     self._inject("add", ["x", "y"], "torch.add", "jax.numpy.add")
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
   def _inject(self, name, std_args, s_api, t_api, s_args=None, t_args=None):
     s_def = {"api": s_api}
@@ -178,9 +182,9 @@ def test_aliased_usage(rewriter):
       ...
       y = jax.numpy.abs(x)
   """
-  code = """
+  code = """ 
 import torch as t
-y = t.abs(x)
+y = t.abs(x) 
 """
   result = rewrite(rewriter, code)
   assert "jax.numpy.abs(x)" in result

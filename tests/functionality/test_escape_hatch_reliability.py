@@ -28,12 +28,16 @@ class MockSemantics(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self.import_data = {}  # Required by ASTEngine
+    self.framework_configs = {}
 
     # Good Op: torch.good -> jax.good
     self._inject("good_op", "torch.good", "jax.good")
 
     # Bad Op: torch.bad -> None (triggers failure)
     self._inject("bad_op", "torch.bad", None)
+
+  def get_framework_config(self, framework: str):
+    return self.framework_configs.get(framework, {})
 
   def _inject(self, name, s_api, t_api):
     variants = {"torch": {"api": s_api}}
@@ -120,9 +124,9 @@ def test_multiple_statements_handled_independently(rewriter):
   """
   Verify that a failure in one line doesn't affect the next line.
   """
-  code = """
-y = torch.bad(x)
-z = torch.good(x)
+  code = """ 
+y = torch.bad(x) 
+z = torch.good(x) 
 """
   result = rewrite_code(rewriter, code)
 
