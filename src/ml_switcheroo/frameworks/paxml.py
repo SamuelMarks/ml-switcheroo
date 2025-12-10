@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Optional, Dict, Any
 from .base import register_framework, StructuralTraits
 
 
@@ -13,7 +13,17 @@ class PaxmlAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    return ["praxis", "praxis.layers", "praxis.base_layer"]
+    # CRITICAL: Ensure all relevant modules are scanned for neural layers
+    return [
+      "praxis",
+      "praxis.layers",
+      "praxis.base_layer",
+      "praxis.layers.reshaping",  # <--- contains Flatten
+      "praxis.layers.pooling",
+      "praxis.layers.attentions",
+      "praxis.layers.normalizations",
+      "praxis.layers.activations",
+    ]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -21,7 +31,7 @@ class PaxmlAdapter:
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    return {"neural": [r"\.praxis\."], "extras": []}
+    return {"neural": [r"\.praxis\.", r"\.layers\."], "extras": []}
 
   @property
   def structural_traits(self) -> StructuralTraits:
@@ -58,9 +68,9 @@ class PaxmlAdapter:
       return f"orbax.checkpoint.PyTreeCheckpointer().restore({file_arg})"
     return ""
 
-    # --- Verification ---
+  # --- Verification ---
 
-  def convert(self, data):
+  def convert(self, data: Any) -> Any:
     try:
       import jax.numpy as jnp
     except ImportError:

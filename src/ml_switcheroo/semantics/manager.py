@@ -27,9 +27,29 @@ from ml_switcheroo.frameworks import available_frameworks, get_adapter
 
 
 def resolve_semantics_dir() -> Path:
+  """
+  Locates the directory containing semantic JSON definitions.
+
+  Prioritizes the local file system (relative to this file) to ensure
+  tests and editable installs find the source of truth correctly.
+  Falls back to package resources for installed distributions.
+  """
+  # 1. Local Source Priority (Dev/Test/Editable)
+  local_path = Path(__file__).parent
+  # Simple check: does the main neural file exist here?
+  if (local_path / "k_neural_net.json").exists():
+    return local_path
+
+  # 2. Installed Package Fallback
   if sys.version_info >= (3, 9) and files:
-    return Path(str(files("ml_switcheroo.semantics")))
-  return Path(__file__).parent
+    try:
+      # Note: wrapping in Path(str(...)) can be brittle with zipped eggs,
+      # but standard pip installs extract data or return a path-like object.
+      return Path(str(files("ml_switcheroo.semantics")))
+    except Exception:
+      pass
+
+  return local_path
 
 
 class SemanticsManager:

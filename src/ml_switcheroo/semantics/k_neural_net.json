@@ -1,32 +1,5003 @@
 {
-  "Linear": {
-    "description": "Applies a linear transformation to the incoming data: y = xA^T + b.",
+  "Abs": {
+    "description": "Absolute takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where absolute value, y = abs(x), is applied to the tensor elementwise.",
+    "from": "Operators.md",
     "std_args": [
-      "in_features",
-      "out_features",
-      "bias"
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.abs"
+      },
+      "keras": {
+        "api": "keras.ops.abs"
+      },
+      "tensorflow": {
+        "api": "tensorflow.abs"
+      },
+      "torch": {
+        "api": "torch.abs"
+      }
+    }
+  },
+  "Acos": {
+    "description": "Calculates the arccosine (inverse of cosine) of the given input tensor, element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.acos"
+      },
+      "tensorflow": {
+        "api": "tensorflow.acos"
+      },
+      "torch": {
+        "api": "torch.acos"
+      }
+    }
+  },
+  "Acosh": {
+    "description": "Calculates the hyperbolic arccosine of the given input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.acosh"
+      },
+      "tensorflow": {
+        "api": "tensorflow.acosh"
+      },
+      "torch": {
+        "api": "torch.acosh"
+      }
+    }
+  },
+  "Add": {
+    "description": "Performs element-wise binary addition (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md). (Opset 14 change): Extend supported types to include uint8, int8, uint16, and int16.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.add"
+      },
+      "keras": {
+        "api": "keras.ops.add"
+      },
+      "tensorflow": {
+        "api": "tensorflow.add"
+      },
+      "torch": {
+        "api": "torch.add"
+      }
+    }
+  },
+  "AffineGrid": {
+    "description": "Generates a 2D or 3D flow field (sampling grid), given a batch of affine matrices theta (https://pytorch.org/docs/stable/generated/torch.nn.functional.affine_grid.html). An affine matrix `theta` is applied to a position tensor represented in its homogeneous expression. Here is an example in 3D: ``` ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "theta",
+        "Any"
+      ],
+      [
+        "size",
+        "Any"
+      ],
+      [
+        "align_corners",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "And": {
+    "description": "Returns the tensor resulted from performing the `and` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "ArgMax": {
+    "description": "Computes the indices of the max elements of the input tensor's element along the provided axis. The resulting tensor has the same rank as the input if keepdims equals 1. If keepdims equals 0, then the resulting tensor has the reduced dimension pruned. If select_last_index is True (default False), th...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "select_last_index",
+        "int"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.argmax"
+      },
+      "tensorflow": {
+        "api": "tensorflow.argmax"
+      },
+      "torch": {
+        "api": "torch.argmax"
+      }
+    }
+  },
+  "ArgMin": {
+    "description": "Computes the indices of the min elements of the input tensor's element along the provided axis. The resulting tensor has the same rank as the input if keepdims equals 1. If keepdims equals 0, then the resulting tensor has the reduced dimension pruned. If select_last_index is True (default False), th...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "select_last_index",
+        "int"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.argmin"
+      },
+      "tensorflow": {
+        "api": "tensorflow.argmin"
+      },
+      "torch": {
+        "api": "torch.argmin"
+      }
+    }
+  },
+  "Asin": {
+    "description": "Calculates the arcsine (inverse of sine) of the given input tensor, element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.asin"
+      },
+      "tensorflow": {
+        "api": "tensorflow.asin"
+      },
+      "torch": {
+        "api": "torch.asin"
+      }
+    }
+  },
+  "Asinh": {
+    "description": "Calculates the hyperbolic arcsine of the given input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.asinh"
+      },
+      "tensorflow": {
+        "api": "tensorflow.asinh"
+      },
+      "torch": {
+        "api": "torch.asinh"
+      }
+    }
+  },
+  "Atan": {
+    "description": "Calculates the arctangent (inverse of tangent) of the given input tensor, element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.atan"
+      },
+      "tensorflow": {
+        "api": "tensorflow.atan"
+      },
+      "torch": {
+        "api": "torch.atan"
+      }
+    }
+  },
+  "Atanh": {
+    "description": "Calculates the hyperbolic arctangent of the given input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.atanh"
+      },
+      "tensorflow": {
+        "api": "tensorflow.atanh"
+      },
+      "torch": {
+        "api": "torch.atanh"
+      }
+    }
+  },
+  "Attention": {
+    "description": "Computes scaled dot product attention on query, key and value tensors, using an optional attention mask if passed. This operator covers self and cross variants of the attention operation based on sequence lengths of K, Q and V. For self attention, `kv_sequence_length` equals to `q_sequence_length`. ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "Q",
+        "Any"
+      ],
+      [
+        "K",
+        "Any"
+      ],
+      [
+        "V",
+        "Any"
+      ],
+      [
+        "attn_mask",
+        "Any"
+      ],
+      [
+        "past_key",
+        "Any"
+      ],
+      [
+        "past_value",
+        "Any"
+      ],
+      [
+        "nonpad_kv_seqlen",
+        "int"
+      ],
+      [
+        "is_causal",
+        "int"
+      ],
+      [
+        "kv_num_heads",
+        "int"
+      ],
+      [
+        "q_num_heads",
+        "int"
+      ],
+      [
+        "qk_matmul_output_mode",
+        "int"
+      ],
+      [
+        "scale",
+        "float"
+      ],
+      [
+        "softcap",
+        "float"
+      ],
+      [
+        "softmax_precision",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.Attention"
+      }
+    }
+  },
+  "AveragePool": {
+    "description": "AveragePool consumes an input tensor X and applies average pooling across the tensor according to kernel sizes, stride sizes, and pad lengths. average pooling consisting of computing the average on all values of a subset of the input tensor according to the kernel size and downsampling the data into...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "auto_pad",
+        "str"
+      ],
+      [
+        "ceil_mode",
+        "int"
+      ],
+      [
+        "count_include_pad",
+        "int"
+      ],
+      [
+        "dilations",
+        "List[int]"
+      ],
+      [
+        "kernel_shape",
+        "List[int]"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "BatchNormalization": {
+    "description": "Carries out batch normalization as described in the paper https://arxiv.org/abs/1502.03167. Depending on the mode it is being run, There are five required inputs 'X', 'scale', 'B', 'input_mean' and 'input_var'. Note that 'input_mean' and 'input_var' are expected to be the estimated statistics in inf...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "scale",
+        "Any"
+      ],
+      [
+        "B",
+        "Any"
+      ],
+      [
+        "input_mean",
+        "Any"
+      ],
+      [
+        "input_var",
+        "Any"
+      ],
+      [
+        "epsilon",
+        "float"
+      ],
+      [
+        "momentum",
+        "float"
+      ],
+      [
+        "training_mode",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.BatchNormalization"
+      }
+    }
+  },
+  "Bernoulli": {
+    "description": "Draws binary random numbers (0 or 1) from a Bernoulli distribution. The input tensor should be a tensor containing probabilities p (a value in the range [0,1]) to be used for drawing the binary random number, where an output of 1 is produced with probability p and an output of 0 is produced with pro...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "dtype",
+        "int"
+      ],
+      [
+        "seed",
+        "float"
+      ]
     ],
     "variants": {
       "torch": {
-        "api": "torch.nn.Linear",
-        "args": {
-          "bias": "bias"
-        }
-      },
+        "api": "torch.bernoulli"
+      }
+    }
+  },
+  "BitShift": {
+    "description": "Bitwise shift operator performs element-wise operation. For each input element, if the attribute \"direction\" is \"RIGHT\", this operator moves its binary representation toward the right side so that the input value is effectively decreased. If the attribute \"direction\" is \"LEFT\", bits of binary repres...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "Y",
+        "Tensor"
+      ],
+      [
+        "direction",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "BitwiseAnd": {
+    "description": "Returns the tensor resulting from performing the bitwise `and` operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "BitwiseNot": {
+    "description": "Returns the bitwise not of the input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "BitwiseOr": {
+    "description": "Returns the tensor resulting from performing the bitwise `or` operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "BitwiseXor": {
+    "description": "Returns the tensor resulting from performing the bitwise `xor` operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "BlackmanWindow": {
+    "description": "Generates a Blackman window as described in the paper https://ieeexplore.ieee.org/document/1455106.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "size",
+        "Any"
+      ],
+      [
+        "output_datatype",
+        "int"
+      ],
+      [
+        "periodic",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Cast": {
+    "description": "The operator casts the elements of a given input tensor to a data type specified by the 'to' argument and returns an output tensor of the same size in the converted type. The 'to' argument must be one of the data types specified in the 'DataType' enum field in the TensorProto message. Casting from s...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "round_mode",
+        "str"
+      ],
+      [
+        "saturate",
+        "int"
+      ],
+      [
+        "to",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "CastLike": {
+    "description": "The operator casts the elements of a given input tensor (the first input) to the same data type as the elements of the second input tensor. See documentation of the Cast operator for further details.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "target_type",
+        "Any"
+      ],
+      [
+        "round_mode",
+        "str"
+      ],
+      [
+        "saturate",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Ceil": {
+    "description": "Ceil takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the ceil is, y = ceil(x), is applied to the tensor elementwise. If x is integral, +0, -0, NaN,  or infinite, x itself is returned.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
       "jax": {
-        "api": "flax.nnx.Linear",
-        "args": {
-          "bias": "use_bias"
-        }
+        "api": "jax.numpy.ceil"
+      },
+      "keras": {
+        "api": "keras.ops.ceil"
       },
       "tensorflow": {
-        "api": "keras.layers.Dense",
-        "args": {
-          "in_features": "input_dim",
-          "out_features": "units",
-          "bias": "use_bias"
-        }
+        "api": "tensorflow.math.ceil"
       },
+      "torch": {
+        "api": "torch.ceil"
+      }
+    }
+  },
+  "Celu": {
+    "description": "Continuously Differentiable Exponential Linear Units: Perform the linear unit element-wise on the input tensor X using formula: ``` max(0,x) + min(0,alpha*(exp(x/alpha)-1)) ```",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "alpha",
+        "float"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.celu"
+      },
+      "torch": {
+        "api": "torch.celu"
+      }
+    }
+  },
+  "CenterCropPad": {
+    "description": "Center crop or pad an input to given dimensions. The crop/pad dimensions can be specified for a subset of the `axes`; unspecified dimensions will remain unchanged. If the input dimensions are larger than the target crop dimensions, a centered cropping window will be extracted from the input. The sta...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input_data",
+        "Tensor"
+      ],
+      [
+        "shape",
+        "Any"
+      ],
+      [
+        "axes",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "Clip": {
+    "description": "Clip operator limits the given input within an interval. The interval is specified by the inputs 'min' and 'max'. They default to numeric_limits::lowest() and numeric_limits::max(), respectively. When 'min' is greater than 'max', the clip operator sets all the 'input' values to the value of 'max'. T...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "min",
+        "Tensor"
+      ],
+      [
+        "max",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.clip"
+      },
+      "keras": {
+        "api": "keras.ops.clip"
+      },
+      "torch": {
+        "api": "torch.clip"
+      }
+    }
+  },
+  "Col2Im": {
+    "description": "The operator rearranges column blocks back into a multidimensional image Col2Im behaves similarly to PyTorch's fold https://pytorch.org/docs/stable/generated/torch.nn.Fold.html, but it only supports *batched* multi-dimensional image tensors. Another implementation in Python with N-dimension support ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "image_shape",
+        "int"
+      ],
+      [
+        "block_shape",
+        "int"
+      ],
+      [
+        "dilations",
+        "List[int]"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "Compress": {
+    "description": "Selects slices from an input tensor along a given axis where condition evaluates to True for each axis index. In case axis is not provided, input is flattened before elements are selected. Compress behaves like numpy.compress: https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "condition",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.compress"
+      }
+    }
+  },
+  "Concat": {
+    "description": "Concatenate a list of tensors into a single tensor. All input tensors must have the same shape, except for the dimension size of the axis to concatenate on.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "inputs",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "variants": {
+      "tensorflow": {
+        "api": "tensorflow.concat"
+      },
+      "torch": {
+        "api": "torch.concat"
+      }
+    }
+  },
+  "ConcatFromSequence": {
+    "description": "Concatenate a sequence of tensors into a single tensor. All input tensors must have the same shape, except for the dimension size of the axis to concatenate on. By default 'new_axis' is 0, the behavior is similar to numpy.concatenate. When 'new_axis' is 1, the behavior is similar to numpy.stack.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input_sequence",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "new_axis",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Constant": {
+    "description": "This operator produces a constant tensor. Exactly one of the provided attributes, either value, sparse_value, or value_* must be specified.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "sparse_value",
+        "Tensor"
+      ],
+      [
+        "value",
+        "Tensor"
+      ],
+      [
+        "value_float",
+        "float"
+      ],
+      [
+        "value_floats",
+        "List[float]"
+      ],
+      [
+        "value_int",
+        "int"
+      ],
+      [
+        "value_ints",
+        "List[int]"
+      ],
+      [
+        "value_string",
+        "str"
+      ],
+      [
+        "value_strings",
+        "List[str]"
+      ]
+    ],
+    "variants": {}
+  },
+  "ConstantOfShape": {
+    "description": "Generate a tensor with given value and shape.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "value",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "Conv": {
+    "description": "The convolution operator consumes an input tensor and a filter, and computes the output.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "W",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "auto_pad",
+        "str"
+      ],
+      [
+        "dilations",
+        "List[int]"
+      ],
+      [
+        "group",
+        "int"
+      ],
+      [
+        "kernel_shape",
+        "List[int]"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {
+      "tensorflow": {
+        "api": "tensorflow.conv"
+      }
+    }
+  },
+  "ConvInteger": {
+    "description": "The integer convolution operator consumes an input tensor, its zero-point, a filter, and its zero-point, and computes the output. The production MUST never overflow. The accumulation may overflow if and only if in 32 bits.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "x",
+        "Any"
+      ],
+      [
+        "w",
+        "Any"
+      ],
+      [
+        "x_zero_point",
+        "Any"
+      ],
+      [
+        "w_zero_point",
+        "Any"
+      ],
+      [
+        "auto_pad",
+        "str"
+      ],
+      [
+        "dilations",
+        "List[int]"
+      ],
+      [
+        "group",
+        "int"
+      ],
+      [
+        "kernel_shape",
+        "List[int]"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "ConvTranspose": {
+    "description": "The convolution transpose operator consumes an input tensor and a filter, and computes the output. If the pads parameter is provided the shape of the output is calculated via the following equation: output_shape[i] = stride[i] * (input_size[i] - 1) + output_padding[i] + ((kernel_shape[i] - 1) * dila...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "W",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "auto_pad",
+        "str"
+      ],
+      [
+        "dilations",
+        "List[int]"
+      ],
+      [
+        "group",
+        "int"
+      ],
+      [
+        "kernel_shape",
+        "List[int]"
+      ],
+      [
+        "output_padding",
+        "List[int]"
+      ],
+      [
+        "output_shape",
+        "List[int]"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "Cos": {
+    "description": "Calculates the cosine of the given input tensor, element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.cos"
+      },
+      "keras": {
+        "api": "keras.ops.cos"
+      },
+      "tensorflow": {
+        "api": "tensorflow.cos"
+      },
+      "torch": {
+        "api": "torch.cos"
+      }
+    }
+  },
+  "Cosh": {
+    "description": "Calculates the hyperbolic cosine of the given input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.cosh"
+      },
+      "keras": {
+        "api": "keras.ops.cosh"
+      },
+      "tensorflow": {
+        "api": "tensorflow.cosh"
+      },
+      "torch": {
+        "api": "torch.cosh"
+      }
+    }
+  },
+  "CumSum": {
+    "description": "Performs cumulative sum of the input elements along the given axis. By default, it will do the sum inclusively meaning the first element is copied as is. Through an `exclusive` attribute, this behavior can change to exclude the first element. It can also perform summation in the opposite direction o...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "x",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "Any"
+      ],
+      [
+        "exclusive",
+        "int"
+      ],
+      [
+        "reverse",
+        "int"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.cumsum"
+      },
+      "tensorflow": {
+        "api": "tensorflow.cumsum"
+      },
+      "torch": {
+        "api": "torch.cumsum"
+      }
+    }
+  },
+  "DFT": {
+    "description": "Computes the discrete Fourier Transform (DFT) of the input. Assuming the input has shape `[M, N]`, where `N` is the dimension over which the DFT is computed and `M` denotes the conceptual \"all other dimensions,\" the DFT `y[m, k]` of shape `[M, N]` is defined as $$y[m, k] = \\sum_{n=0}^{N-1} e^{-2 \\pi...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "dft_length",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "inverse",
+        "int"
+      ],
+      [
+        "onesided",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "DeformConv": {
+    "description": "Performs deformable convolution as described in https://arxiv.org/abs/1703.06211 and https://arxiv.org/abs/1811.11168. This operator specification supports the general N-D case. Note that most common use cases have 2D or 3D data.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "W",
+        "Tensor"
+      ],
+      [
+        "offset",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "mask",
+        "Tensor"
+      ],
+      [
+        "dilations",
+        "List[int]"
+      ],
+      [
+        "group",
+        "int"
+      ],
+      [
+        "kernel_shape",
+        "List[int]"
+      ],
+      [
+        "offset_group",
+        "int"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "DepthToSpace": {
+    "description": "DepthToSpace rearranges (permutes) data from depth into blocks of spatial data. This is the reverse transformation of SpaceToDepth. More specifically, this op outputs a copy of the input tensor where values from the depth dimension are moved in spatial blocks to the height and width dimensions. By d...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "blocksize",
+        "int"
+      ],
+      [
+        "mode",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "DequantizeLinear": {
+    "description": "The linear dequantization operator. It consumes a quantized tensor, a scale, and a zero point to compute the full-precision tensor. The dequantization formula is `y = (x - x_zero_point) * x_scale`. `x_scale` and `x_zero_point` must have the same shape, determining the quantization's granularity: a s...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "x",
+        "Any"
+      ],
+      [
+        "x_scale",
+        "Any"
+      ],
+      [
+        "x_zero_point",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "block_size",
+        "int"
+      ],
+      [
+        "output_dtype",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Det": {
+    "description": "Det calculates determinant of a square matrix or batches of square matrices. Det takes one input tensor of shape `[*, M, M]`, where `*` is zero or more batch dimensions, and the inner-most 2 dimensions form square matrices. The output is a tensor of shape `[*]`, containing the determinants of all in...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.linalg.det"
+      },
+      "keras": {
+        "api": "keras.ops.det"
+      },
+      "tensorflow": {
+        "api": "tensorflow.linalg.det"
+      },
+      "torch": {
+        "api": "torch.det"
+      }
+    }
+  },
+  "Div": {
+    "description": "Performs element-wise binary division (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md). (Opset 14 change): Extend supported types to include uint8, int8, uint16, and int16.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.div"
+      }
+    }
+  },
+  "Dropout": {
+    "description": "Dropout takes an input floating-point tensor, an optional input ratio (floating-point scalar) and an optional input training_mode (boolean scalar). It produces two tensor outputs, output (floating-point tensor) and mask (optional `Tensor<bool>`). If `training_mode` is true then the output Y will be ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "ratio",
+        "Any"
+      ],
+      [
+        "training_mode",
+        "Any"
+      ],
+      [
+        "seed",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.Dropout"
+      },
+      "paxml": {
+        "api": "praxis.layers.Dropout"
+      },
+      "torch": {
+        "api": "torch.dropout"
+      }
+    }
+  },
+  "DynamicQuantizeLinear": {
+    "description": "A Function to fuse calculation for Scale, Zero Point and FP32->8Bit conversion of FP32 Input data. Outputs Scale, ZeroPoint and Quantized Input for a given FP32 Input. Scale is calculated as: ``` y_scale = (maximum(0, max(x)) - minimum(0, min(x))) / (qmax - qmin) ``` * where qmax and qmin are max an...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "x",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "Einsum": {
+    "description": "An einsum of the form `term1, term2 -> output-term` produces an output tensor using the following equation ``` output[output-term] = reduce-sum( input1[term1] * input2[term2] ) ``` where the reduce-sum performs a summation over all the indices occurring in the input terms (term1, term2) that do not ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "Inputs",
+        "Tensor"
+      ],
+      [
+        "equation",
+        "str"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.einsum"
+      },
+      "keras": {
+        "api": "keras.ops.einsum"
+      },
+      "paxml": {
+        "api": "praxis.layers.Einsum"
+      },
+      "tensorflow": {
+        "api": "tensorflow.einsum"
+      },
+      "torch": {
+        "api": "torch.einsum"
+      }
+    }
+  },
+  "Elu": {
+    "description": "Elu takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the function `f(x) = alpha * (exp(x) - 1.) for x < 0`, `f(x) = x for x >= 0`., is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "alpha",
+        "float"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.elu"
+      },
+      "paxml": {
+        "api": "praxis.layers.ELU"
+      },
+      "torch": {
+        "api": "torch.nn.ELU"
+      }
+    }
+  },
+  "Equal": {
+    "description": "Returns the tensor resulted from performing the `equal` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.equal"
+      },
+      "keras": {
+        "api": "keras.ops.equal"
+      },
+      "tensorflow": {
+        "api": "tensorflow.equal"
+      },
+      "torch": {
+        "api": "torch.equal"
+      }
+    }
+  },
+  "Erf": {
+    "description": "Computes the error function of the given input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.erf"
+      },
+      "tensorflow": {
+        "api": "tensorflow.math.erf"
+      },
+      "torch": {
+        "api": "torch.erf"
+      }
+    }
+  },
+  "Exp": {
+    "description": "Calculates the exponential of the given input tensor, element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.exp"
+      },
+      "keras": {
+        "api": "keras.ops.exp"
+      },
+      "tensorflow": {
+        "api": "tensorflow.exp"
+      },
+      "torch": {
+        "api": "torch.exp"
+      }
+    }
+  },
+  "Expand": {
+    "description": "Broadcast the input tensor following the given shape and the broadcast rule. The broadcast rule is similar to numpy.array(input) * numpy.ones(shape): Dimensions are right alignment; Two corresponding dimensions must have the same value, or one of them is equal to 1. Also, this operator is similar to...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "shape",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "EyeLike": {
+    "description": "Generate a 2D tensor (matrix) with ones on the diagonal and zeros everywhere else. Only 2D tensors are supported, i.e. input T1 must be of rank 2. The shape of the output tensor is the same as the input tensor. The data type can be specified by the 'dtype' argument. If 'dtype' is not specified, then...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "dtype",
+        "int"
+      ],
+      [
+        "k",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Flatten": {
+    "description": "Flattens the input tensor into a 2D matrix. If input tensor has shape (d_0, d_1, ... d_n) then the output will have shape (d_0 X d_1 ... d_(axis-1), d_axis X d_(axis+1) ... X dn).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.Flatten"
+      },
+      "torch": {
+        "api": "torch.flatten"
+      },
+      "paxml": {
+        "api": "praxis.layers.Flatten"
+      }
+    }
+  },
+  "Floor": {
+    "description": "Floor takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the floor is, y = floor(x), is applied to the tensor elementwise. If x is integral, +0, -0, NaN,  or infinite, x itself is returned.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.floor"
+      },
+      "keras": {
+        "api": "keras.ops.floor"
+      },
+      "tensorflow": {
+        "api": "tensorflow.floor"
+      },
+      "torch": {
+        "api": "torch.floor"
+      }
+    }
+  },
+  "GRU": {
+    "description": "Computes an one-layer GRU. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `z` - update gate * `r` - reset gate * `h` - hidden gate * `t` - time step (t-1 means previous time step) * `W[zrh]` - W parameter weight matrix for update, r...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "W",
+        "Tensor"
+      ],
+      [
+        "R",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "sequence_lens",
+        "Any"
+      ],
+      [
+        "initial_h",
+        "Tensor"
+      ],
+      [
+        "activation_alpha",
+        "List[float]"
+      ],
+      [
+        "activation_beta",
+        "List[float]"
+      ],
+      [
+        "activations",
+        "List[str]"
+      ],
+      [
+        "clip",
+        "float"
+      ],
+      [
+        "direction",
+        "str"
+      ],
+      [
+        "hidden_size",
+        "int"
+      ],
+      [
+        "layout",
+        "int"
+      ],
+      [
+        "linear_before_reset",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.GRU"
+      },
+      "torch": {
+        "api": "torch.gru"
+      }
+    }
+  },
+  "Gather": {
+    "description": "Given `data` tensor of rank r >= 1, and `indices` tensor of rank q, gather entries of the axis dimension of `data` (by default outer-most one as axis=0) indexed by `indices`, and concatenates them in an output tensor of rank q + (r - 1). It is an indexing operation that indexes into the input `data`...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "indices",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "variants": {
+      "tensorflow": {
+        "api": "tensorflow.gather"
+      },
+      "torch": {
+        "api": "torch.gather"
+      }
+    }
+  },
+  "GatherElements": {
+    "description": "GatherElements takes two inputs `data` and `indices` of the same rank r >= 1 and an optional attribute `axis` that identifies an axis of `data` (by default, the outer-most axis, that is axis 0). It is an indexing operation that produces its output by indexing into the input data tensor at index posi...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "indices",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "GatherND": {
+    "description": "Given `data` tensor of rank `r` >= 1, `indices` tensor of rank `q` >= 1, and `batch_dims` integer `b`, this operator gathers slices of `data` into an output tensor of rank `q + r - indices_shape[-1] - 1 - b`. `indices` is an q-dimensional integer tensor, best thought of as a `(q-1)`-dimensional tens...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "indices",
+        "int"
+      ],
+      [
+        "batch_dims",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Gelu": {
+    "description": "Gelu takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the gaussian error linear units function, $y = 0.5 * x * (1 + erf(x/sqrt(2)))$ is applied to the tensor elementwise. If the attribute \"approximate\" is set to \"tanh\", the function estimation, $y = 0.5 * x * (1 + Tanh...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "approximate",
+        "str"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.gelu"
+      },
+      "paxml": {
+        "api": "praxis.layers.GELU"
+      },
+      "torch": {
+        "api": "torch.nn.GELU"
+      }
+    }
+  },
+  "Gemm": {
+    "description": "General Matrix multiplication: https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms#Level_3 * A' = transpose(A) if transA else A * B' = transpose(B) if transB else B Compute Y = alpha * A' * B' + beta * C, where input tensor A has shape (M, K) or (K, M), input tensor B has shape (K, N) or ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "C",
+        "Tensor"
+      ],
+      [
+        "alpha",
+        "float"
+      ],
+      [
+        "beta",
+        "float"
+      ],
+      [
+        "transA",
+        "int"
+      ],
+      [
+        "transB",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "GlobalAveragePool": {
+    "description": "GlobalAveragePool consumes an input tensor X and applies average pooling across the values in the same channel. This is equivalent to AveragePool with kernel size equal to the spatial dimension of input tensor.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "GlobalLpPool": {
+    "description": "GlobalLpPool consumes an input tensor X and applies lp pool pooling across the values in the same channel. This is equivalent to LpPool with kernel size equal to the spatial dimension of input tensor.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "p",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "GlobalMaxPool": {
+    "description": "GlobalMaxPool consumes an input tensor X and applies max pooling across the values in the same channel. This is equivalent to MaxPool with kernel size equal to the spatial dimension of input tensor.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "Greater": {
+    "description": "Returns the tensor resulted from performing the `greater` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.greater"
+      },
+      "keras": {
+        "api": "keras.ops.greater"
+      },
+      "tensorflow": {
+        "api": "tensorflow.greater"
+      },
+      "torch": {
+        "api": "torch.greater"
+      }
+    }
+  },
+  "GreaterOrEqual": {
+    "description": "Returns the tensor resulted from performing the `greater_equal` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.m...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "GridSample": {
+    "description": "Given an input `X` and a flow-field `grid`, computes the output `Y` using `X` values and pixel locations from the `grid`. For spatial input `X` with shape (N, C, H, W), the `grid` will have shape (N, H_out, W_out, 2), the output `Y` will have shape (N, C, H_out, W_out). For volumetric input `X` with...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Any"
+      ],
+      [
+        "grid",
+        "Any"
+      ],
+      [
+        "align_corners",
+        "int"
+      ],
+      [
+        "mode",
+        "str"
+      ],
+      [
+        "padding_mode",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "GroupNormalization": {
+    "description": "A GroupNormalization function. Carries out group normalization as described in the paper https://arxiv.org/abs/1803.08494 This operator transforms input according to ``` y = scale * (x - mean) / sqrt(variance + epsilon) + bias, ``` where the mean and variance are computed per instance per group of c...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "scale",
+        "Tensor"
+      ],
+      [
+        "bias",
+        "Tensor"
+      ],
+      [
+        "epsilon",
+        "float"
+      ],
+      [
+        "num_groups",
+        "int"
+      ],
+      [
+        "stash_type",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.GroupNormalization"
+      }
+    }
+  },
+  "HammingWindow": {
+    "description": "Generates a Hamming window as described in the paper https://ieeexplore.ieee.org/document/1455106.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "size",
+        "Any"
+      ],
+      [
+        "output_datatype",
+        "int"
+      ],
+      [
+        "periodic",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "HannWindow": {
+    "description": "Generates a Hann window as described in the paper https://ieeexplore.ieee.org/document/1455106.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "size",
+        "Any"
+      ],
+      [
+        "output_datatype",
+        "int"
+      ],
+      [
+        "periodic",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "HardSigmoid": {
+    "description": "HardSigmoid takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the HardSigmoid function, y = max(0, min(1, alpha * x + beta)), is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "alpha",
+        "float"
+      ],
+      [
+        "beta",
+        "float"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.Hardsigmoid"
+      }
+    }
+  },
+  "HardSwish": {
+    "description": "HardSwish takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the HardSwish function, y = x * max(0, min(1, alpha * x + beta)) = x * HardSigmoid<alpha, beta>(x), where alpha = 1/6 and beta = 0.5, is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.Hardswish"
+      }
+    }
+  },
+  "Hardmax": {
+    "description": "The operator computes the hardmax values for the given input: Hardmax(element in input, axis) = 1 if the element is the first maximum value along the specified axis, 0 otherwise The \"axis\" attribute indicates the dimension along which Hardmax will be performed. The output tensor has the same shape a...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Identity": {
+    "description": "Identity operator",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.identity"
+      },
+      "keras": {
+        "api": "keras.ops.identity"
+      },
+      "paxml": {
+        "api": "praxis.layers.Identity"
+      },
+      "tensorflow": {
+        "api": "tensorflow.identity"
+      },
+      "torch": {
+        "api": "torch.nn.Identity"
+      }
+    }
+  },
+  "If": {
+    "description": "If conditional",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "cond",
+        "Any"
+      ],
+      [
+        "else_branch",
+        "Any"
+      ],
+      [
+        "then_branch",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "ImageDecoder": {
+    "description": "Loads and decodes and image from a file. If it can't decode for any reason (e.g. corrupted encoded stream, invalid format, it will return an empty matrix). The following image formats are supported: * BMP * JPEG (note: Lossless JPEG support is optional) * JPEG2000 * TIFF * PNG * WebP * Portable imag...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "encoded_stream",
+        "Any"
+      ],
+      [
+        "pixel_format",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "InstanceNormalization": {
+    "description": "Carries out instance normalization as described in the paper https://arxiv.org/abs/1607.08022. y = scale * (x - mean) / sqrt(variance + epsilon) + B, where mean and variance are computed per instance per channel.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "scale",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "epsilon",
+        "float"
+      ]
+    ],
+    "variants": {}
+  },
+  "IsInf": {
+    "description": "Map infinity to true and other values to false.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Any"
+      ],
+      [
+        "detect_negative",
+        "int"
+      ],
+      [
+        "detect_positive",
+        "int"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.isinf"
+      }
+    }
+  },
+  "IsNaN": {
+    "description": "Returns which elements of the input are NaN.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Any"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.isnan"
+      },
+      "keras": {
+        "api": "keras.ops.isnan"
+      },
+      "torch": {
+        "api": "torch.isnan"
+      }
+    }
+  },
+  "LRN": {
+    "description": "Local Response Normalization proposed in the [AlexNet paper](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf). It normalizes over local input regions. The local region is defined across the channels. For an element `X[n, c, d1, ..., dk]` in a ten...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "alpha",
+        "float"
+      ],
+      [
+        "beta",
+        "float"
+      ],
+      [
+        "bias",
+        "float"
+      ],
+      [
+        "size",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "LSTM": {
+    "description": "Computes an one-layer LSTM. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `i` - input gate * `o` - output gate * `f` - forget gate * `c` - cell gate * `t` - time step (t-1 means previous time step) * `W[iofc]` - W parameter weight ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "W",
+        "Tensor"
+      ],
+      [
+        "R",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "sequence_lens",
+        "Any"
+      ],
+      [
+        "initial_h",
+        "Tensor"
+      ],
+      [
+        "initial_c",
+        "Tensor"
+      ],
+      [
+        "P",
+        "Tensor"
+      ],
+      [
+        "activation_alpha",
+        "List[float]"
+      ],
+      [
+        "activation_beta",
+        "List[float]"
+      ],
+      [
+        "activations",
+        "List[str]"
+      ],
+      [
+        "clip",
+        "float"
+      ],
+      [
+        "direction",
+        "str"
+      ],
+      [
+        "hidden_size",
+        "int"
+      ],
+      [
+        "input_forget",
+        "int"
+      ],
+      [
+        "layout",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.LSTM"
+      },
+      "torch": {
+        "api": "torch.lstm"
+      }
+    }
+  },
+  "LayerNormalization": {
+    "description": "This is layer normalization defined in ONNX as function. The overall computation can be split into two stages. The first stage is standardization, which makes the normalized elements have zero mean and unit variances. The computation required by standardization can be described by the following equa...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "Scale",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "epsilon",
+        "float"
+      ],
+      [
+        "stash_type",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.LayerNormalization"
+      }
+    }
+  },
+  "LeakyRelu": {
+    "description": "LeakyRelu takes input data (Tensor<T>) and an argument alpha, and produces one output data (Tensor<T>) where the function `f(x) = alpha * x for x < 0`, `f(x) = x for x >= 0`, is applied to the data tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "alpha",
+        "float"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.LeakyReLU"
+      },
+      "paxml": {
+        "api": "praxis.layers.LeakyReLU"
+      },
+      "torch": {
+        "api": "torch.nn.LeakyReLU"
+      }
+    }
+  },
+  "Less": {
+    "description": "Returns the tensor resulted from performing the `less` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.less"
+      },
+      "keras": {
+        "api": "keras.ops.less"
+      },
+      "tensorflow": {
+        "api": "tensorflow.less"
+      },
+      "torch": {
+        "api": "torch.less"
+      }
+    }
+  },
+  "LessOrEqual": {
+    "description": "Returns the tensor resulted from performing the `less_equal` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "Log": {
+    "description": "Calculates the natural log of the given input tensor, element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.log"
+      },
+      "keras": {
+        "api": "keras.ops.log"
+      },
+      "tensorflow": {
+        "api": "tensorflow.math.log"
+      },
+      "torch": {
+        "api": "torch.log"
+      }
+    }
+  },
+  "LogSoftmax": {
+    "description": "The operator computes the log of softmax values for the given input: LogSoftmax(input, axis) = Log(Softmax(input, axis=axis)) The \"axis\" attribute indicates the dimension along which LogSoftmax will be performed. The output tensor has the same shape and contains the LogSoftmax values of the correspo...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.LogSoftmax"
+      }
+    }
+  },
+  "Loop": {
+    "description": "Generic Looping construct. This loop has multiple termination conditions: 1) Trip count. Iteration count specified at runtime. Set by specifying the input M. Optional. Set to empty string to omit. Note that a static trip count (specified at graph construction time) can be specified by passing in a c...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "M",
+        "Any"
+      ],
+      [
+        "cond",
+        "Any"
+      ],
+      [
+        "v_initial",
+        "Any"
+      ],
+      [
+        "body",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "LpNormalization": {
+    "description": "Given a matrix, apply Lp-normalization along the provided axis.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "p",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "LpPool": {
+    "description": "LpPool consumes an input tensor X and applies Lp pooling across the tensor according to kernel sizes, stride sizes, and pad lengths. Lp pooling consisting of computing the Lp norm on all values of a subset of the input tensor according to the kernel size and downsampling the data into the output ten...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "auto_pad",
+        "str"
+      ],
+      [
+        "ceil_mode",
+        "int"
+      ],
+      [
+        "dilations",
+        "List[int]"
+      ],
+      [
+        "kernel_shape",
+        "List[int]"
+      ],
+      [
+        "p",
+        "int"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "MatMul": {
+    "description": "Matrix product that behaves like [numpy.matmul](https://numpy.org/doc/stable/reference/generated/numpy.matmul.html).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.matmul"
+      },
+      "keras": {
+        "api": "keras.ops.matmul"
+      },
+      "tensorflow": {
+        "api": "tensorflow.matmul"
+      },
+      "torch": {
+        "api": "torch.matmul"
+      }
+    }
+  },
+  "MatMulInteger": {
+    "description": "Matrix product that behaves like [numpy.matmul](https://numpy.org/doc/stable/reference/generated/numpy.matmul.html). The production MUST never overflow. The accumulation may overflow if and only if in 32 bits.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Any"
+      ],
+      [
+        "B",
+        "Any"
+      ],
+      [
+        "a_zero_point",
+        "Any"
+      ],
+      [
+        "b_zero_point",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "Max": {
+    "description": "Element-wise max of each of the input tensors (with Numpy-style broadcasting support). All inputs and outputs must have the same data type. This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data_0",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.max"
+      },
+      "keras": {
+        "api": "keras.ops.max"
+      },
+      "torch": {
+        "api": "torch.max"
+      }
+    }
+  },
+  "MaxPool": {
+    "description": "MaxPool consumes an input tensor X and applies max pooling across the tensor according to kernel sizes, stride sizes, and pad lengths. max pooling consisting of computing the max on all values of a subset of the input tensor according to the kernel size and downsampling the data into the output tens...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "auto_pad",
+        "str"
+      ],
+      [
+        "ceil_mode",
+        "int"
+      ],
+      [
+        "dilations",
+        "List[int]"
+      ],
+      [
+        "kernel_shape",
+        "List[int]"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "storage_order",
+        "int"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "MaxRoiPool": {
+    "description": "ROI max pool consumes an input tensor X and region of interests (RoIs) to apply max pooling across each RoI, to produce output 4-D tensor of shape (num_rois, channels, pooled_shape[0], pooled_shape[1]).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "rois",
+        "Tensor"
+      ],
+      [
+        "pooled_shape",
+        "List[int]"
+      ],
+      [
+        "spatial_scale",
+        "float"
+      ]
+    ],
+    "variants": {}
+  },
+  "MaxUnpool": {
+    "description": "MaxUnpool essentially computes the partial inverse of the MaxPool op. The input information to this op is typically the output information from a MaxPool op. The first input tensor X is the tensor that needs to be unpooled, which is typically the pooled tensor (first output) from MaxPool. The second...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Any"
+      ],
+      [
+        "I",
+        "Any"
+      ],
+      [
+        "output_shape",
+        "Any"
+      ],
+      [
+        "kernel_shape",
+        "List[int]"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "Mean": {
+    "description": "Element-wise mean of each of the input tensors (with Numpy-style broadcasting support). All inputs and outputs must have the same data type. This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data_0",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.mean"
+      },
+      "keras": {
+        "api": "keras.ops.mean"
+      },
+      "torch": {
+        "api": "torch.mean"
+      }
+    }
+  },
+  "MeanVarianceNormalization": {
+    "description": "A MeanVarianceNormalization Function: Perform mean variance normalization on the input tensor X using formula: `(X-EX)/sqrt(E(X-EX)^2)`",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "MelWeightMatrix": {
+    "description": "Generate a MelWeightMatrix that can be used to re-weight a Tensor containing a linearly sampled frequency spectra (from DFT or STFT) into num_mel_bins frequency information based on the [lower_edge_hertz, upper_edge_hertz] range on the mel scale. This function defines the mel scale in terms of a fre...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "num_mel_bins",
+        "Any"
+      ],
+      [
+        "dft_length",
+        "Any"
+      ],
+      [
+        "sample_rate",
+        "Any"
+      ],
+      [
+        "lower_edge_hertz",
+        "Any"
+      ],
+      [
+        "upper_edge_hertz",
+        "Any"
+      ],
+      [
+        "output_datatype",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Min": {
+    "description": "Element-wise min of each of the input tensors (with Numpy-style broadcasting support). All inputs and outputs must have the same data type. This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data_0",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.min"
+      },
+      "keras": {
+        "api": "keras.ops.min"
+      },
+      "torch": {
+        "api": "torch.min"
+      }
+    }
+  },
+  "Mish": {
+    "description": "Mish: A Self Regularized Non-Monotonic Neural Activation Function. Perform the linear unit element-wise on the input tensor X using formula: ``` mish(x) = x * tanh(softplus(x)) = x * tanh(ln(1 + e^{x})) ```",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.activations.mish"
+      },
+      "torch": {
+        "api": "torch.nn.Mish"
+      }
+    }
+  },
+  "Mod": {
+    "description": "Performs an element-wise binary modulo operation. The semantics and supported data types depend on the value of the `fmod` attribute which must be `0` (default), or `1`. If the `fmod` attribute is set to `0`, `T` is constrained to integer data types and the semantics follow that of the Python `%`-op...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "fmod",
+        "int"
+      ]
+    ],
+    "variants": {
+      "tensorflow": {
+        "api": "tensorflow.math.mod"
+      }
+    }
+  },
+  "Mul": {
+    "description": "Performs element-wise binary multiplication (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md). (Opset 14 change): Extend supported types to include uint8, int8, uint16, and i...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.mul"
+      }
+    }
+  },
+  "Multinomial": {
+    "description": "Generate a tensor of samples from a multinomial distribution according to the probabilities of each of the possible outcomes.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "dtype",
+        "int"
+      ],
+      [
+        "sample_size",
+        "int"
+      ],
+      [
+        "seed",
+        "float"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.multinomial"
+      }
+    }
+  },
+  "Neg": {
+    "description": "Neg takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where each element flipped sign, y = -x, is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.neg"
+      }
+    }
+  },
+  "NegativeLogLikelihoodLoss": {
+    "description": "A NegativeLogLikelihoodLoss operator computes (weighted) negative log likelihood loss. Its \"input\" tensor has the shape of (N, C, d1, d2, ..., dk) where k >= 0. The \"input\" tensor contains log-probabilities for input[n, :, d_1, d_2,..., d_k] being in a class of [0, C). The operator's \"target\" input ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "target",
+        "Any"
+      ],
+      [
+        "weight",
+        "Tensor"
+      ],
+      [
+        "ignore_index",
+        "int"
+      ],
+      [
+        "reduction",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "NonMaxSuppression": {
+    "description": "Filter out boxes that have high intersection-over-union (IOU) overlap with previously selected boxes. Bounding boxes with score less than score_threshold are removed. Bounding box format is indicated by attribute center_point_box. Note that this algorithm is agnostic to where the origin is in the co...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "boxes",
+        "float"
+      ],
+      [
+        "scores",
+        "float"
+      ],
+      [
+        "max_output_boxes_per_class",
+        "int"
+      ],
+      [
+        "iou_threshold",
+        "float"
+      ],
+      [
+        "score_threshold",
+        "float"
+      ],
+      [
+        "center_point_box",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "NonZero": {
+    "description": "Returns the indices of the elements that are non-zero (in row-major order - by dimension). NonZero behaves similar to numpy.nonzero: https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html, but for scalar input, NonZero produces output shape (0, N) instead of (1, N), which is differe...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.nonzero"
+      },
+      "keras": {
+        "api": "keras.ops.nonzero"
+      },
+      "torch": {
+        "api": "torch.nonzero"
+      }
+    }
+  },
+  "Not": {
+    "description": "Returns the negation of the input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "OneHot": {
+    "description": "Produces a one-hot tensor based on inputs. The locations represented by the index values in the 'indices' input tensor will have 'on_value' and the other locations will have 'off_value' in the output tensor, where 'on_value' and 'off_value' are specified as part of required input argument 'values', ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "indices",
+        "Any"
+      ],
+      [
+        "depth",
+        "Any"
+      ],
+      [
+        "values",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Optional": {
+    "description": "Constructs an optional-type value containing either an empty optional of a certain type specified by the attribute, or a non-empty value containing the input element.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "type",
+        "Any"
+      ]
+    ],
+    "variants": {
+      "paxml": {
+        "api": "praxis.base_layer.Optional"
+      }
+    }
+  },
+  "OptionalGetElement": {
+    "description": "If the input is a tensor or sequence type, it returns the input. If the input is an optional type, it outputs the element in the input. It is an error if the input is an empty optional-type (i.e. does not have an element) and the behavior is undefined in this case.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "OptionalHasElement": {
+    "description": "Returns true if (1) the input is an optional-type and contains an element, or, (2) the input is a tensor or sequence type. If the input is not provided or is an empty optional-type, this op returns false.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "Or": {
+    "description": "Returns the tensor resulted from performing the `or` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "PRelu": {
+    "description": "PRelu takes input data (Tensor<T>) and slope tensor as input, and produces one output data (Tensor<T>) where the function `f(x) = slope * x for x < 0`, `f(x) = x for x >= 0`., is applied to the data tensor elementwise. This operator supports **unidirectional broadcasting** (tensor slope should be un...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "slope",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.PReLU"
+      },
+      "torch": {
+        "api": "torch.prelu"
+      }
+    }
+  },
+  "Pad": {
+    "description": "Given a tensor containing the data to be padded (`data`), a tensor containing the number of start and end pad values for axis (`pads`), (optionally) a `mode`, and (optionally) `constant_value`, a padded tensor (`output`) is generated. The three supported `modes` are (similar to corresponding modes s...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "pads",
+        "int"
+      ],
+      [
+        "constant_value",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "Any"
+      ],
+      [
+        "mode",
+        "str"
+      ]
+    ],
+    "variants": {
+      "tensorflow": {
+        "api": "tensorflow.pad"
+      }
+    }
+  },
+  "Pow": {
+    "description": "Pow takes input data (Tensor<T>) and exponent Tensor, and produces one output data (Tensor<T>) where the function `f(x) = x^exponent`, is applied to the data tensor elementwise. This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broa...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "Y",
+        "Any"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.pow"
+      },
+      "tensorflow": {
+        "api": "tensorflow.pow"
+      },
+      "torch": {
+        "api": "torch.pow"
+      }
+    }
+  },
+  "QLinearConv": {
+    "description": "The convolution operator consumes a quantized input tensor, its scale and zero point, a quantized filter, its scale and zero point, and output's scale and zero point, and computes the quantized output. Each scale and zero-point pair must have same shape. It means they must be either scalars (per ten...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "x",
+        "Any"
+      ],
+      [
+        "x_scale",
+        "float"
+      ],
+      [
+        "x_zero_point",
+        "Any"
+      ],
+      [
+        "w",
+        "Any"
+      ],
+      [
+        "w_scale",
+        "float"
+      ],
+      [
+        "w_zero_point",
+        "Any"
+      ],
+      [
+        "y_scale",
+        "float"
+      ],
+      [
+        "y_zero_point",
+        "Any"
+      ],
+      [
+        "B",
+        "Any"
+      ],
+      [
+        "auto_pad",
+        "str"
+      ],
+      [
+        "dilations",
+        "List[int]"
+      ],
+      [
+        "group",
+        "int"
+      ],
+      [
+        "kernel_shape",
+        "List[int]"
+      ],
+      [
+        "pads",
+        "List[int]"
+      ],
+      [
+        "strides",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "QLinearMatMul": {
+    "description": "Matrix product that behaves like [numpy.matmul](https://numpy.org/doc/stable/reference/generated/numpy.matmul.html). It consumes two quantized input tensors, their scales and zero points, scale and zero point of output, and computes the quantized output. The quantization formula is y = saturate((x /...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "a",
+        "Any"
+      ],
+      [
+        "a_scale",
+        "Any"
+      ],
+      [
+        "a_zero_point",
+        "Any"
+      ],
+      [
+        "b",
+        "Any"
+      ],
+      [
+        "b_scale",
+        "Any"
+      ],
+      [
+        "b_zero_point",
+        "Any"
+      ],
+      [
+        "y_scale",
+        "Any"
+      ],
+      [
+        "y_zero_point",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "QuantizeLinear": {
+    "description": "The linear quantization operator consumes a high-precision tensor, a scale, and a zero point to compute the low-precision/quantized tensor. The scale factor and zero point must have the same shape, determining the quantization granularity. The quantization formula is `y = saturate((x / y_scale) + y_...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "x",
+        "Any"
+      ],
+      [
+        "y_scale",
+        "Any"
+      ],
+      [
+        "y_zero_point",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "block_size",
+        "int"
+      ],
+      [
+        "output_dtype",
+        "int"
+      ],
+      [
+        "precision",
+        "int"
+      ],
+      [
+        "saturate",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "RMSNormalization": {
+    "description": "This is RMS normalization defined in ONNX as function as described in the paper https://arxiv.org/pdf/1910.07467. The overall computation can be split into two stages. The root mean squared norm is taken over the last D dimensions, where D is the dimension of normalized_shape. For example, if normal...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "scale",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "epsilon",
+        "float"
+      ],
+      [
+        "stash_type",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.RMSNormalization"
+      }
+    }
+  },
+  "RNN": {
+    "description": "Computes an one-layer simple RNN. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `i` - input gate * `t` - time step (t-1 means previous time step) * `Wi` - W parameter weight matrix for input gate * `Ri` - R recurrence weight matrix...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "W",
+        "Tensor"
+      ],
+      [
+        "R",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "sequence_lens",
+        "Any"
+      ],
+      [
+        "initial_h",
+        "Tensor"
+      ],
+      [
+        "activation_alpha",
+        "List[float]"
+      ],
+      [
+        "activation_beta",
+        "List[float]"
+      ],
+      [
+        "activations",
+        "List[str]"
+      ],
+      [
+        "clip",
+        "float"
+      ],
+      [
+        "direction",
+        "str"
+      ],
+      [
+        "hidden_size",
+        "int"
+      ],
+      [
+        "layout",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.layers.RNN"
+      },
+      "torch": {
+        "api": "torch.nn.RNN"
+      }
+    }
+  },
+  "RandomNormal": {
+    "description": "Generate a tensor with random values drawn from a normal distribution. The shape of the tensor is specified by the `shape` argument and the parameter of the normal distribution specified by `mean` and `scale`. The data type is specified by the 'dtype' argument. The 'dtype' argument must be one of th...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "dtype",
+        "int"
+      ],
+      [
+        "mean",
+        "float"
+      ],
+      [
+        "scale",
+        "float"
+      ],
+      [
+        "seed",
+        "float"
+      ],
+      [
+        "shape",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "RandomNormalLike": {
+    "description": "Generate a tensor with random values drawn from a normal distribution. The shape of the output tensor is copied from the shape of the input tensor, and the parameters of the normal distribution are specified by `mean` and `scale`. The data type is specified by the 'dtype' argument, or copied from th...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "dtype",
+        "int"
+      ],
+      [
+        "mean",
+        "float"
+      ],
+      [
+        "scale",
+        "float"
+      ],
+      [
+        "seed",
+        "float"
+      ]
+    ],
+    "variants": {}
+  },
+  "RandomUniform": {
+    "description": "Generate a tensor with random values drawn from a uniform distribution. The shape of the tensor is specified by the `shape` argument and the range by `low` and `high`. The data type is specified by the 'dtype' argument. The 'dtype' argument must be one of the data types specified in the 'DataType' e...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "dtype",
+        "int"
+      ],
+      [
+        "high",
+        "float"
+      ],
+      [
+        "low",
+        "float"
+      ],
+      [
+        "seed",
+        "float"
+      ],
+      [
+        "shape",
+        "List[int]"
+      ]
+    ],
+    "variants": {}
+  },
+  "RandomUniformLike": {
+    "description": "Generate a tensor with random values drawn from a uniform distribution. The shape of the output tensor is copied from the shape of the input tensor, and the parameters of the uniform distribution are specified by `low` and `high`. The data type is specified by the 'dtype' argument, or copied from th...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Any"
+      ],
+      [
+        "dtype",
+        "int"
+      ],
+      [
+        "high",
+        "float"
+      ],
+      [
+        "low",
+        "float"
+      ],
+      [
+        "seed",
+        "float"
+      ]
+    ],
+    "variants": {}
+  },
+  "Range": {
+    "description": "Generate a tensor containing a sequence of numbers that begin at `start` and extends by increments of `delta` up to `limit` (exclusive). The number of elements in the output of range is computed as below: ``` number_of_elements = max( ceil( (limit - start) / delta ) , 0 ) ``` The pseudocode determin...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "start",
+        "Tensor"
+      ],
+      [
+        "limit",
+        "Tensor"
+      ],
+      [
+        "delta",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "tensorflow": {
+        "api": "tensorflow.range"
+      },
+      "torch": {
+        "api": "torch.range"
+      }
+    }
+  },
+  "Reciprocal": {
+    "description": "Reciprocal takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the reciprocal is, y = 1/x, is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.reciprocal"
+      },
+      "keras": {
+        "api": "keras.ops.reciprocal"
+      },
+      "tensorflow": {
+        "api": "tensorflow.math.reciprocal"
+      },
+      "torch": {
+        "api": "torch.reciprocal"
+      }
+    }
+  },
+  "ReduceL1": {
+    "description": "Computes the L1 norm of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over an empty s...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReduceL2": {
+    "description": "Computes the L2 norm of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over an empty s...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReduceLogSum": {
+    "description": "Computes the log sum of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over an empty s...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReduceLogSumExp": {
+    "description": "Computes the log sum exponent of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over a...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReduceMax": {
+    "description": "Computes the max of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over an empty set o...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReduceMean": {
+    "description": "Computes the mean of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over an empty set ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReduceMin": {
+    "description": "Computes the min of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over an empty set o...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReduceProd": {
+    "description": "Computes the product of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over an empty s...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReduceSum": {
+    "description": "Computes the sum of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over an empty set o...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReduceSumSquare": {
+    "description": "Computes the sum square of the input tensor's elements along the provided axes. The resulting tensor has the same rank as the input if `keepdims` equals 1. If `keepdims` equals 0, then the resulting tensor has the reduced dimension pruned. Input tensors of rank zero are valid. Reduction over an empt...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ],
+      [
+        "noop_with_empty_axes",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "RegexFullMatch": {
+    "description": "RegexFullMatch performs a full regex match on each element of the input tensor. If an element fully matches the regex pattern specified as an attribute, the corresponding element in the output is True and it is False otherwise. [RE2](https://github.com/google/re2/wiki/Syntax) regex syntax is used.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Any"
+      ],
+      [
+        "pattern",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "Relu": {
+    "description": "Relu takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the rectified linear function, y = max(0, x), is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.relu"
+      },
+      "paxml": {
+        "api": "praxis.layers.ReLU"
+      },
+      "torch": {
+        "api": "torch.relu"
+      }
+    }
+  },
+  "Reshape": {
+    "description": "Reshape the input tensor similar to numpy.reshape. First input is the data tensor, second input is a shape tensor which specifies the output shape. It outputs the reshaped tensor. At most one dimension of the new shape can be -1. In this case, the value is inferred from the size of the tensor and th...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "shape",
+        "int"
+      ],
+      [
+        "allowzero",
+        "int"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.reshape"
+      },
+      "keras": {
+        "api": "keras.layers.Reshape"
+      },
+      "tensorflow": {
+        "api": "tensorflow.reshape"
+      },
+      "torch": {
+        "api": "torch.reshape"
+      }
+    }
+  },
+  "Resize": {
+    "description": "Resize the input tensor. In general, it calculates every value in the output tensor as a weighted average of neighborhood (a.k.a. sampling locations) in the input tensor. Each dimension value of the output tensor is: ``` output_dimension = floor(input_dimension * (roi_end - roi_start) * scale) ``` i...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Any"
+      ],
+      [
+        "roi",
+        "Any"
+      ],
+      [
+        "scales",
+        "float"
+      ],
+      [
+        "sizes",
+        "int"
+      ],
+      [
+        "antialias",
+        "int"
+      ],
+      [
+        "axes",
+        "List[int]"
+      ],
+      [
+        "coordinate_transformation_mode",
+        "str"
+      ],
+      [
+        "cubic_coeff_a",
+        "float"
+      ],
+      [
+        "exclude_outside",
+        "int"
+      ],
+      [
+        "extrapolation_value",
+        "float"
+      ],
+      [
+        "keep_aspect_ratio_policy",
+        "str"
+      ],
+      [
+        "mode",
+        "str"
+      ],
+      [
+        "nearest_mode",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "ReverseSequence": {
+    "description": "Reverse batch of sequences having different lengths specified by `sequence_lens`. For each slice i iterating on batch axis, the operator reverses the first sequence_lens[i] elements on time axis, and copies elements whose index's beyond sequence_lens[i] to the output. So the output slice i contains ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "sequence_lens",
+        "int"
+      ],
+      [
+        "batch_axis",
+        "int"
+      ],
+      [
+        "time_axis",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "RoiAlign": {
+    "description": "Region of Interest (RoI) align operation described in the [Mask R-CNN paper](https://arxiv.org/abs/1703.06870). RoiAlign consumes an input tensor X and region of interests (rois) to apply pooling across each RoI; it produces a 4-D tensor of shape (num_rois, C, output_height, output_width). RoiAlign ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Any"
+      ],
+      [
+        "rois",
+        "Any"
+      ],
+      [
+        "batch_indices",
+        "Any"
+      ],
+      [
+        "coordinate_transformation_mode",
+        "str"
+      ],
+      [
+        "mode",
+        "str"
+      ],
+      [
+        "output_height",
+        "int"
+      ],
+      [
+        "output_width",
+        "int"
+      ],
+      [
+        "sampling_ratio",
+        "int"
+      ],
+      [
+        "spatial_scale",
+        "float"
+      ]
+    ],
+    "variants": {}
+  },
+  "RotaryEmbedding": {
+    "description": "RotaryEmbedding is the implementation of rotary positional embeddings (RoPE) based on the paper https://arxiv.org/pdf/2104.09864. The key advantage of RoPE is that it allows the model to understand both the absolute position of a token and the relative distances between tokens. This is achieved thro...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "cos_cache",
+        "Tensor"
+      ],
+      [
+        "sin_cache",
+        "Tensor"
+      ],
+      [
+        "position_ids",
+        "Any"
+      ],
+      [
+        "interleaved",
+        "int"
+      ],
+      [
+        "num_heads",
+        "int"
+      ],
+      [
+        "rotary_embedding_dim",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Round": {
+    "description": "Round takes one input Tensor and rounds the values, element-wise, meaning it finds the nearest integer for each value. In case of halves, the rule is to round them to the nearest even integer. If input x is integral, +0, -0, NaN,  or infinite, x itself is returned. The output tensor has the same sha...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.round"
+      },
+      "keras": {
+        "api": "keras.ops.round"
+      },
+      "tensorflow": {
+        "api": "tensorflow.round"
+      },
+      "torch": {
+        "api": "torch.round"
+      }
+    }
+  },
+  "STFT": {
+    "description": "Computes the Short-time Fourier Transform of the signal.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "signal",
+        "Any"
+      ],
+      [
+        "frame_step",
+        "Any"
+      ],
+      [
+        "window",
+        "Any"
+      ],
+      [
+        "frame_length",
+        "Any"
+      ],
+      [
+        "onesided",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.stft"
+      },
+      "tensorflow": {
+        "api": "tensorflow.signal.stft"
+      },
+      "torch": {
+        "api": "torch.stft"
+      }
+    }
+  },
+  "Scan": {
+    "description": "Scan can be used to iterate over one or more scan_input tensors, constructing zero or more scan_output tensors. It combines ideas from general recurrences, functional programming constructs such as scan, fold, map, and zip, and is intended to enable generalizations of RNN-like constructs for sequenc...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "initial_state_and_scan_inputs",
+        "Any"
+      ],
+      [
+        "body",
+        "Any"
+      ],
+      [
+        "num_scan_inputs",
+        "int"
+      ],
+      [
+        "scan_input_axes",
+        "List[int]"
+      ],
+      [
+        "scan_input_directions",
+        "List[int]"
+      ],
+      [
+        "scan_output_axes",
+        "List[int]"
+      ],
+      [
+        "scan_output_directions",
+        "List[int]"
+      ]
+    ],
+    "variants": {
+      "tensorflow": {
+        "api": "tensorflow.scan"
+      }
+    }
+  },
+  "Scatter": {
+    "description": "This operator is deprecated. Please use ScatterElements, which provides the same functionality. Scatter takes three inputs `data`, `updates`, and `indices` of the same rank r >= 1 and an optional attribute axis that identifies an axis of `data` (by default, the outer-most axis, that is axis 0). The ...",
+    "from": "Operators.md",
+    "std_args": [],
+    "variants": {
+      "torch": {
+        "api": "torch.scatter"
+      }
+    }
+  },
+  "ScatterElements": {
+    "description": "ScatterElements takes three inputs `data`, `updates`, and `indices` of the same rank r >= 1 and an optional attribute axis that identifies an axis of `data` (by default, the outer-most axis, that is axis 0). The output of the operation is produced by creating a copy of the input `data`, and then upd...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "indices",
+        "Any"
+      ],
+      [
+        "updates",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "reduction",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "ScatterND": {
+    "description": "ScatterND takes three inputs `data` tensor of rank r >= 1, `indices` tensor of rank q >= 1, and `updates` tensor of rank q + r - indices.shape[-1] - 1. The output of the operation is produced by creating a copy of the input `data`, and then updating its value to values specified by `updates` at spec...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "indices",
+        "int"
+      ],
+      [
+        "updates",
+        "Tensor"
+      ],
+      [
+        "reduction",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "Selu": {
+    "description": "Selu takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the scaled exponential linear unit function, `y = gamma * (alpha * e^x - alpha) for x <= 0`, `y = gamma * x for x > 0`, is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "alpha",
+        "float"
+      ],
+      [
+        "gamma",
+        "float"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.selu"
+      }
+    }
+  },
+  "SequenceAt": {
+    "description": "Outputs a tensor copy from the tensor at 'position' in 'input_sequence'. Accepted range for 'position' is in `[-n, n - 1]`, where `n` is the number of tensors in 'input_sequence'. Negative value means counting positions from the back.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input_sequence",
+        "Any"
+      ],
+      [
+        "position",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "SequenceConstruct": {
+    "description": "Construct a tensor sequence containing 'inputs' tensors. All tensors in 'inputs' must have the same data type.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "inputs",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "SequenceEmpty": {
+    "description": "Construct an empty tensor sequence, with given data type.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "dtype",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "SequenceErase": {
+    "description": "Outputs a tensor sequence that removes the tensor at 'position' from 'input_sequence'. Accepted range for 'position' is in `[-n, n - 1]`, where `n` is the number of tensors in 'input_sequence'. Negative value means counting positions from the back. 'position' is optional, by default it erases the la...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input_sequence",
+        "Any"
+      ],
+      [
+        "position",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "SequenceInsert": {
+    "description": "Outputs a tensor sequence that inserts 'tensor' into 'input_sequence' at 'position'. 'tensor' must have the same data type as 'input_sequence'. Accepted range for 'position' is in `[-n, n]`, where `n` is the number of tensors in 'input_sequence'. Negative value means counting positions from the back...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input_sequence",
+        "Any"
+      ],
+      [
+        "tensor",
+        "Tensor"
+      ],
+      [
+        "position",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "SequenceLength": {
+    "description": "Produces a scalar(tensor of empty shape) containing the number of tensors in 'input_sequence'.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input_sequence",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "SequenceMap": {
+    "description": "Applies a sub-graph to each sample in the input sequence(s). Inputs can be either tensors or sequences, with the exception of the first input which must be a sequence. The length of the first input sequence will determine the number of samples in the outputs. Any other sequence inputs should have th...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input_sequence",
+        "Any"
+      ],
+      [
+        "additional_inputs",
+        "Any"
+      ],
+      [
+        "body",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "Shape": {
+    "description": "Takes a tensor as input and outputs an 1D int64 tensor containing the shape of the input tensor. Optional attributes start and end can be used to compute a slice of the input tensor's shape. If start axis is omitted, the slice starts from axis 0. The end axis, if specified, is exclusive (and the ret...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "end",
+        "int"
+      ],
+      [
+        "start",
+        "int"
+      ]
+    ],
+    "variants": {
+      "tensorflow": {
+        "api": "tensorflow.shape"
+      }
+    }
+  },
+  "Shrink": {
+    "description": "Shrink takes one input data (Tensor<numeric>) and produces one Tensor output, having same datatype and shape with input. It has two attributes, lambd and bias. The formula of this operator is: If x < -lambd, y = x + bias; If x > lambd, y = x - bias; Otherwise, y = 0.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "bias",
+        "float"
+      ],
+      [
+        "lambd",
+        "float"
+      ]
+    ],
+    "variants": {}
+  },
+  "Sigmoid": {
+    "description": "Sigmoid takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the sigmoid function, y = 1 / (1 + exp(-x)), is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.sigmoid"
+      },
+      "paxml": {
+        "api": "praxis.layers.Sigmoid"
+      },
+      "tensorflow": {
+        "api": "tensorflow.sigmoid"
+      },
+      "torch": {
+        "api": "torch.sigmoid"
+      }
+    }
+  },
+  "Sign": {
+    "description": "Calculate the sign of the given input tensor element-wise. If input > 0, output 1. if input < 0, output -1. if input == 0, output 0.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.sign"
+      },
+      "keras": {
+        "api": "keras.ops.sign"
+      },
+      "tensorflow": {
+        "api": "tensorflow.sign"
+      },
+      "torch": {
+        "api": "torch.sign"
+      }
+    }
+  },
+  "Sin": {
+    "description": "Calculates the sine of the given input tensor, element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.sin"
+      },
+      "keras": {
+        "api": "keras.ops.sin"
+      },
+      "tensorflow": {
+        "api": "tensorflow.sin"
+      },
+      "torch": {
+        "api": "torch.sin"
+      }
+    }
+  },
+  "Sinh": {
+    "description": "Calculates the hyperbolic sine of the given input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.sinh"
+      },
+      "keras": {
+        "api": "keras.ops.sinh"
+      },
+      "tensorflow": {
+        "api": "tensorflow.sinh"
+      },
+      "torch": {
+        "api": "torch.sinh"
+      }
+    }
+  },
+  "Size": {
+    "description": "Takes a tensor as input and outputs a int64 scalar that equals to the total number of elements of the input tensor.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.size"
+      },
+      "keras": {
+        "api": "keras.ops.size"
+      },
+      "tensorflow": {
+        "api": "tensorflow.size"
+      },
+      "torch": {
+        "api": "torch.Size"
+      }
+    }
+  },
+  "Slice": {
+    "description": "Produces a slice of the input tensor along multiple axes. Similar to numpy: https://numpy.org/doc/stable/user/basics.indexing.html?highlight=slice#slicing-and-striding Slice uses the `starts`, `ends`, `axes` and `steps` inputs to select a sub-tensor of its input `data` tensor. An effective `starts[i...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "starts",
+        "Any"
+      ],
+      [
+        "ends",
+        "Any"
+      ],
+      [
+        "axes",
+        "Any"
+      ],
+      [
+        "steps",
+        "Any"
+      ]
+    ],
+    "variants": {}
+  },
+  "Softmax": {
+    "description": "The operator computes the normalized exponential values for the given input: Softmax(input, axis) = Exp(input) / ReduceSum(Exp(input), axis=axis, keepdims=1) The \"axis\" attribute indicates the dimension along which Softmax will be performed. The output tensor has the same shape and contains the Soft...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.softmax"
+      },
+      "tensorflow": {
+        "api": "tensorflow.math.softmax"
+      },
+      "torch": {
+        "api": "torch.softmax"
+      }
+    }
+  },
+  "SoftmaxCrossEntropyLoss": {
+    "description": "Loss function that measures the softmax cross entropy between 'scores' and 'labels'. This operator first computes a loss tensor whose shape is identical to the labels input. If the input is 2-D with shape (N, C), the loss tensor may be a N-element vector L = (l_1, l_2, ..., l_N). If the input is N-D...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "scores",
+        "Tensor"
+      ],
+      [
+        "labels",
+        "Any"
+      ],
+      [
+        "weights",
+        "Tensor"
+      ],
+      [
+        "ignore_index",
+        "int"
+      ],
+      [
+        "reduction",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "Softplus": {
+    "description": "Softplus takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the softplus function, y = ln(exp(x) + 1), is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.softplus"
+      },
+      "tensorflow": {
+        "api": "tensorflow.math.softplus"
+      },
+      "torch": {
+        "api": "torch.nn.Softplus"
+      }
+    }
+  },
+  "Softsign": {
+    "description": "Calculates the softsign (x/(1+|x|)) of the given input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "keras": {
+        "api": "keras.ops.softsign"
+      },
+      "tensorflow": {
+        "api": "tensorflow.math.softsign"
+      },
+      "torch": {
+        "api": "torch.nn.Softsign"
+      }
+    }
+  },
+  "SpaceToDepth": {
+    "description": "SpaceToDepth rearranges blocks of spatial data into depth. More specifically, this op outputs a copy of the input tensor where values from the height and width dimensions are moved to the depth dimension.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "blocksize",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Split": {
+    "description": "Split a tensor into a list of tensors, along the specified 'axis'. Either input 'split' or the attribute 'num_outputs' should be specified, but not both. If the attribute 'num_outputs' is specified, then the tensor is split into equal sized parts. If the tensor is not evenly splittable into `num_out...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "split",
+        "int"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "num_outputs",
+        "int"
+      ]
+    ],
+    "variants": {
+      "tensorflow": {
+        "api": "tensorflow.split"
+      }
+    }
+  },
+  "SplitToSequence": {
+    "description": "Split a tensor into a sequence of tensors, along the specified 'axis'. Lengths of the parts can be specified using the optional argument 'split'. If the argument `split' is not specified, a default scalar value of 1 is used as the value of `split'. 'split' must contain only positive numbers. 'split'...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "split",
+        "Any"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "keepdims",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Sqrt": {
+    "description": "Square root takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the square root is, y = x^0.5, is applied to the tensor elementwise. If x is negative, then it will return NaN.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.sqrt"
+      },
+      "keras": {
+        "api": "keras.ops.sqrt"
+      },
+      "tensorflow": {
+        "api": "tensorflow.sqrt"
+      },
+      "torch": {
+        "api": "torch.sqrt"
+      }
+    }
+  },
+  "Squeeze": {
+    "description": "Remove single-dimensional entries from the shape of a tensor. Takes an input `axes` with a list of axes to squeeze. If `axes` is not provided, all the single dimensions will be removed from the shape. If an axis is selected with shape entry not equal to one, an error is raised.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.squeeze"
+      },
+      "keras": {
+        "api": "keras.ops.squeeze"
+      },
+      "tensorflow": {
+        "api": "tensorflow.squeeze"
+      },
+      "torch": {
+        "api": "torch.squeeze"
+      }
+    }
+  },
+  "StringConcat": {
+    "description": "StringConcat concatenates string tensors elementwise (with NumPy-style broadcasting support)",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "Y",
+        "Tensor"
+      ]
+    ],
+    "variants": {}
+  },
+  "StringNormalizer": {
+    "description": "StringNormalization performs string operations for basic cleaning. This operator has only one input (denoted by X) and only one output (denoted by Y). This operator first examines the elements in the X, and removes elements specified in \"stopwords\" attribute. After removing stop words, the intermedi...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "str"
+      ],
+      [
+        "case_change_action",
+        "str"
+      ],
+      [
+        "is_case_sensitive",
+        "int"
+      ],
+      [
+        "locale",
+        "str"
+      ],
+      [
+        "stopwords",
+        "List[str]"
+      ]
+    ],
+    "variants": {}
+  },
+  "StringSplit": {
+    "description": "StringSplit splits a string tensor's elements into substrings based on a delimiter attribute and a maxsplit attribute. The first output of this operator is a tensor of strings representing the substrings from splitting each input string on the `delimiter` substring. This tensor has one additional ra...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Any"
+      ],
+      [
+        "delimiter",
+        "str"
+      ],
+      [
+        "maxsplit",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Sub": {
+    "description": "Performs element-wise binary subtraction (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md). (Opset 14 change): Extend supported types to include uint8, int8, uint16, and int1...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.sub"
+      }
+    }
+  },
+  "Sum": {
+    "description": "Element-wise sum of each of the input tensors (with Numpy-style broadcasting support). All inputs and outputs must have the same data type. This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data_0",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.sum"
+      },
+      "keras": {
+        "api": "keras.ops.sum"
+      }
+    }
+  },
+  "Swish": {
+    "description": "Swish function takes one input data (Tensor<T>) and produces one output data (Tensor<T>) of the same shape, where $Swish(x) = x * sigmoid(alpha * x)$.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "alpha",
+        "float"
+      ]
+    ],
+    "variants": {
+      "paxml": {
+        "api": "praxis.layers.Swish"
+      }
+    }
+  },
+  "Tan": {
+    "description": "Calculates the tangent of the given input tensor, element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.tan"
+      },
+      "keras": {
+        "api": "keras.ops.tan"
+      },
+      "tensorflow": {
+        "api": "tensorflow.tan"
+      },
+      "torch": {
+        "api": "torch.tan"
+      }
+    }
+  },
+  "Tanh": {
+    "description": "Calculates the hyperbolic tangent of the given input tensor element-wise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.tanh"
+      },
+      "keras": {
+        "api": "keras.ops.tanh"
+      },
+      "paxml": {
+        "api": "praxis.layers.Tanh"
+      },
+      "tensorflow": {
+        "api": "tensorflow.tanh"
+      },
+      "torch": {
+        "api": "torch.tanh"
+      }
+    }
+  },
+  "TensorScatter": {
+    "description": "TensorScatter is a generic tensor update operation, motivated by the requirements for KV cache updates for Attention ops commonly found in LLMs. It is a functional operation that models an in-place update to a KV cache buffer. The past and present cache tensors have the same shape (batch_size, D1, D...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "past_cache",
+        "Tensor"
+      ],
+      [
+        "update",
+        "Tensor"
+      ],
+      [
+        "write_indices",
+        "int"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "mode",
+        "str"
+      ]
+    ],
+    "variants": {}
+  },
+  "TfIdfVectorizer": {
+    "description": "This transform extracts n-grams from the input sequence and save them as a vector. Input can be either a 1-D or 2-D tensor. For 1-D input, output is the n-gram representation of that input. For 2-D input, the output is also a  2-D tensor whose i-th row is the n-gram representation of the i-th input ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "max_gram_length",
+        "int"
+      ],
+      [
+        "max_skip_count",
+        "int"
+      ],
+      [
+        "min_gram_length",
+        "int"
+      ],
+      [
+        "mode",
+        "str"
+      ],
+      [
+        "ngram_counts",
+        "List[int]"
+      ],
+      [
+        "ngram_indexes",
+        "List[int]"
+      ],
+      [
+        "pool_int64s",
+        "List[int]"
+      ],
+      [
+        "pool_strings",
+        "List[str]"
+      ],
+      [
+        "weights",
+        "List[float]"
+      ]
+    ],
+    "variants": {}
+  },
+  "ThresholdedRelu": {
+    "description": "ThresholdedRelu takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the rectified linear function, y = x for x > alpha, y = 0 otherwise, is applied to the tensor elementwise.",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "alpha",
+        "float"
+      ]
+    ],
+    "variants": {}
+  },
+  "Tile": {
+    "description": "Constructs a tensor by tiling a given tensor. This is the same as function `tile` in Numpy, but no broadcast. For example A = [[1, 2], [3, 4]], B = [1, 2], tile(A, B) = [[1, 2, 1, 2], [3, 4, 3, 4]]",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "repeats",
+        "Any"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.tile"
+      },
+      "keras": {
+        "api": "keras.ops.tile"
+      },
+      "tensorflow": {
+        "api": "tensorflow.tile"
+      },
+      "torch": {
+        "api": "torch.tile"
+      }
+    }
+  },
+  "TopK": {
+    "description": "Retrieve the top-K largest or smallest elements along a specified axis. Given an input tensor of shape [a_0, a_1, ..., a_{n-1}] and integer argument k, return two outputs: * Value tensor of shape [a_0, a_1, ..., a_{axis-1}, k, a_{axis+1}, ... a_{n-1}] which contains the values of the top k elements ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "K",
+        "int"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "largest",
+        "int"
+      ],
+      [
+        "sorted",
+        "int"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.topk"
+      }
+    }
+  },
+  "Transpose": {
+    "description": "Returns a transpose of the input tensor. (Similar to `numpy.transpose`). The optional attribute `perm` must be a permutation of the dimensions of the input tensor. Axis `i` of the output tensor corresponds to the axis `perm[i]` of the input tensor. For example, when perm=(1, 0, 2), given an input te...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "perm",
+        "List[int]"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.transpose"
+      },
+      "keras": {
+        "api": "keras.ops.transpose"
+      },
+      "tensorflow": {
+        "api": "tensorflow.transpose"
+      },
+      "torch": {
+        "api": "torch.transpose"
+      }
+    }
+  },
+  "Trilu": {
+    "description": "Given a 2-D matrix or batches of 2-D matrices, returns the upper or lower triangular part of the tensor(s). The attribute \"upper\" determines whether the upper or lower part is retained. If set to true, the upper triangular matrix is retained. Lower triangular matrix is retained otherwise. Default va...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "input",
+        "Tensor"
+      ],
+      [
+        "k",
+        "int"
+      ],
+      [
+        "upper",
+        "int"
+      ]
+    ],
+    "variants": {}
+  },
+  "Unique": {
+    "description": "Find the unique elements of a tensor. When an optional attribute 'axis' is provided, unique subtensors sliced along the 'axis' are returned. Otherwise the input tensor is flattened and unique values of the flattened tensor are returned. This operator returns the unique values or sliced unique subten...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "sorted",
+        "int"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.unique"
+      },
+      "tensorflow": {
+        "api": "tensorflow.unique"
+      },
+      "torch": {
+        "api": "torch.unique"
+      }
+    }
+  },
+  "Unsqueeze": {
+    "description": "Insert single-dimensional entries to the shape of an input tensor (`data`). Takes one required input `axes` - which contains a list of dimension indices and this operator will insert a dimension of value `1` into the corresponding index of the output tensor (`expanded`). For example, given an input ...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "data",
+        "Tensor"
+      ],
+      [
+        "axes",
+        "int"
+      ]
+    ],
+    "variants": {
+      "torch": {
+        "api": "torch.unsqueeze"
+      }
+    }
+  },
+  "Upsample": {
+    "description": "Upsample the input tensor. Each dimension value of the output tensor is: output_dimension = floor(input_dimension * scale).",
+    "from": "Operators.md",
+    "std_args": [],
+    "variants": {
+      "torch": {
+        "api": "torch.nn.Upsample"
+      }
+    }
+  },
+  "Where": {
+    "description": "Return elements, either from X or Y, depending on condition. Where behaves like [numpy.where](https://docs.scipy.org/doc/numpy/reference/generated/numpy.where.html) with three parameters. This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the...",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "condition",
+        "Any"
+      ],
+      [
+        "X",
+        "Tensor"
+      ],
+      [
+        "Y",
+        "Tensor"
+      ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.where"
+      },
+      "keras": {
+        "api": "keras.ops.where"
+      },
+      "tensorflow": {
+        "api": "tensorflow.where"
+      },
+      "torch": {
+        "api": "torch.where"
+      }
+    }
+  },
+  "Xor": {
+    "description": "Returns the tensor resulted from performing the `xor` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
+    "from": "Operators.md",
+    "std_args": [
+      [
+        "A",
+        "Tensor"
+      ],
+      [
+        "B",
+        "Tensor"
+      ],
+      [
+        "decay_factor",
+        "float"
+      ],
+      [
+        "epsilon",
+        "float"
+      ],
+      [
+        "norm_coefficient",
+        "float"
+      ]
+    ],
+    "variants": {}
+  },
+  "Linear": {
+    "variants": {
       "paxml": {
         "api": "praxis.layers.Linear",
         "args": {
@@ -38,80 +5009,16 @@
     }
   },
   "Sequential": {
-    "description": "A sequential container. Modules will be added to it in the order they are passed in the constructor.",
-    "std_args": [],
     "variants": {
-      "torch": {
-        "api": "torch.nn.Sequential"
-      },
-      "jax": {
-        "api": "flax.nnx.Sequential"
-      },
-      "tensorflow": {
-        "api": "keras.Sequential"
-      },
       "paxml": {
         "api": "praxis.layers.Sequential"
       }
     }
   },
-  "Flatten": {
-    "description": "Flattens a contiguous range of dims into a tensor.",
-    "std_args": [
-      "start_dim",
-      "end_dim"
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.nn.Flatten"
-      },
-      "jax": {
-        "api": "flax.nnx.Flatten"
-      },
-      "tensorflow": {
-        "api": "keras.layers.Flatten"
-      },
-      "paxml": {
-        "api": "praxis.layers.Flatten"
-      }
-    }
-  },
   "ReLU": {
-    "description": "Applies the rectified linear unit function element-wise.",
-    "std_args": [
-      "inplace"
-    ],
     "variants": {
-      "torch": {
-        "api": "torch.nn.ReLU"
-      },
-      "jax": {
-        "api": "flax.nnx.relu"
-      },
-      "tensorflow": {
-        "api": "keras.layers.ReLU"
-      },
       "paxml": {
         "api": "praxis.layers.ReLU"
-      }
-    }
-  },
-  "Module": {
-    "description": "Base class for all neural network modules.",
-    "std_args": [],
-    "variants": {
-      "torch": {
-        "api": "torch.nn.Module"
-      },
-      "jax": {
-        "api": "flax.nnx.Module"
-      },
-      "tensorflow": {
-        "api": "keras.Model"
-      },
-      "paxml": {
-        "api": "praxis.base_layer.BaseLayer",
-        "requires_plugin": "pax_setup_migration"
       }
     }
   }

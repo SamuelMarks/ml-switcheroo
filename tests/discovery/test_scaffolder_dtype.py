@@ -4,6 +4,7 @@ Tests for Scaffolder Dtype support.
 
 import json
 from ml_switcheroo.discovery.scaffolder import Scaffolder
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 # Mock Inspector returning Attributes
@@ -27,7 +28,11 @@ def test_scaffolder_propagates_type_field(tmp_path):
   """
   Ensure the JSON output includes "type": "attribute" or "function".
   """
-  scaffolder = Scaffolder()
+  clean_semantics = SemanticsManager()
+  clean_semantics.data = {}
+  clean_semantics._key_origins = {}
+
+  scaffolder = Scaffolder(semantics=clean_semantics)
   scaffolder.inspector = MockAttributeInspector()
 
   scaffolder.scaffold(["torch", "jax"], tmp_path)

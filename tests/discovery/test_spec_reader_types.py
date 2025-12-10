@@ -8,8 +8,10 @@ Verifies that:
 """
 
 import ast
+
 import pytest
-from ml_switcheroo.importers.spec_reader import ArrayApiSpecImporter
+
+from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
 
 
 @pytest.fixture

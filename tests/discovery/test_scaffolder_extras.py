@@ -32,6 +32,7 @@ def test_extras_scaffolding_dynamic(tmp_path):
   """
   semantics = SemanticsManager()
   semantics.data = {}
+  semantics._key_origins = {}
 
   scaffolder = Scaffolder(semantics=semantics)
   scaffolder.inspector = MockInspectorExtras()

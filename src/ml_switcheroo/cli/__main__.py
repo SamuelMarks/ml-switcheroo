@@ -28,7 +28,7 @@ def main(argv: Optional[List[str]] = None) -> int:
   Returns:
       int: Exit code (0 for success, non-zero for failure).
   """
-  parser = argparse.ArgumentParser(description="ml-switcheroo: Deterministic AST Transpiler (Torch <-> JAX)")
+  parser = argparse.ArgumentParser(description="ml-switcheroo: Deterministic AST Transpiler")
   parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
 
   subparsers = parser.add_subparsers(dest="command", required=True)
@@ -36,8 +36,8 @@ def main(argv: Optional[List[str]] = None) -> int:
   # --- Command: CONVERT ---
   cmd_conv = subparsers.add_parser("convert", help="Transpile a Python file or directory")
   cmd_conv.add_argument("path", type=Path, help="Input source file or directory")
-  cmd_conv.add_argument("--source", default=None, help="Source framework (default: torch or from toml)")
-  cmd_conv.add_argument("--target", default=None, help="Target framework (default: jax or from toml)")
+  cmd_conv.add_argument("--source", default=None, help="Source framework (default: from toml)")
+  cmd_conv.add_argument("--target", default=None, help="Target framework (default: from toml)")
   cmd_conv.add_argument("--out", type=Path, help="Output destination (file or dir)")
   cmd_conv.add_argument(
     "--verify",
@@ -133,7 +133,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   # --- Command: SYNC ---
   cmd_sync = subparsers.add_parser("sync", help="Link a framework to the Spec")
-  cmd_sync.add_argument("framework", choices=["torch", "jax"], help="Framework to sync")
+  cmd_sync.add_argument("framework", help="Framework to sync (e.g. torch, jax, keras)")
 
   # --- Command: GEN TESTS ---
   cmd_gen = subparsers.add_parser("gen-tests", help="Generate physical Python test files")

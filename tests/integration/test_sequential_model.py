@@ -10,6 +10,7 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import StructuralTraits
+from ml_switcheroo.enums import SemanticTier
 
 
 class TestSemantics(SemanticsManager):
@@ -29,6 +30,34 @@ class TestSemantics(SemanticsManager):
         "inject_magic_args": [("rngs", "flax.nnx.Rngs")],
       }
     }
+
+    # Inject mappings necessary for this test
+    # This ensures that even if JSON files are empty or incomplete in the test env,
+    # the rewriter knows about these operations.
+
+    # Sequential: torch.nn.Sequential -> flax.nnx.Sequential
+    self._inject_op("Sequential", ["layers"], "torch.nn.Sequential", "flax.nnx.Sequential", SemanticTier.NEURAL)
+
+    # Linear: torch.nn.Linear -> flax.nnx.Linear
+    self._inject_op("Linear", ["in_features", "out_features"], "torch.nn.Linear", "flax.nnx.Linear", SemanticTier.NEURAL)
+
+    # Flatten: torch.nn.Flatten -> flax.nnx.Flatten
+    self._inject_op("Flatten", ["start_dim", "end_dim"], "torch.nn.Flatten", "flax.nnx.Flatten", SemanticTier.NEURAL)
+
+    # ReLU: torch.nn.ReLU -> flax.nnx.relu (Functional in NNX often used as layer?)
+    # or flax.nnx.relu if it's a valid layer? Assuming flax.nnx.relu
+    self._inject_op("ReLU", [], "torch.nn.ReLU", "flax.nnx.relu", SemanticTier.ARRAY_API)
+
+  def _inject_op(self, name, std_args, s_api, t_api, tier):
+    if name not in self.data:
+      self.data[name] = {"std_args": std_args, "variants": {}}
+
+    self.data[name]["variants"]["torch"] = {"api": s_api}
+    self.data[name]["variants"]["jax"] = {"api": t_api}
+
+    self._reverse_index[s_api] = (name, self.data[name])
+    # Key origins required for state injection logic
+    self._key_origins[name] = tier.value
 
   def get_framework_config(self, framework: str):
     return self.framework_configs.get(framework, {})

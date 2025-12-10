@@ -24,7 +24,7 @@ from ml_switcheroo.utils.readme_editor import ReadmeEditor
 from ml_switcheroo.discovery.scaffolder import Scaffolder
 from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
-from ml_switcheroo.importers.spec_reader import ArrayApiSpecImporter
+from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
 from ml_switcheroo.discovery.syncer import FrameworkSyncer
 from ml_switcheroo.generated_tests.generator import TestGenerator
 from ml_switcheroo.core.hooks import load_plugins
@@ -86,15 +86,8 @@ def handle_convert(
       rel_path = src_file.relative_to(input_path)
       dest_file = output_path / rel_path
 
-      # Handle trace naming for batch - create a dedicated trace per file or skip
-      # If user passed --json-trace trace.json, we can't write all to one file easily yet
-      # Basic implementation: trace only enabled for single file, or append?
-      # For now, we only pass trace path if it's a single file, OR if it's a directory
-      # we create sibling JSONs.
-
       batch_trace = None
       if json_trace_path:
-        # If outputting to directory, make trace side-by-side
         if output_path:
           batch_trace = (output_path / rel_path).with_suffix(".trace.json")
 
@@ -155,7 +148,6 @@ def handle_harvest(path: Path, target: str, dry_run: bool) -> int:
 
 def handle_ci(update_readme: bool, readme_path: Path, json_report: Optional[Path]) -> int:
   """Handles 'ci' command."""
-  # 1. Load Config to discover plugins (Adapters)
   try:
     config = RuntimeConfig.load()
     if config.plugin_paths:
@@ -222,8 +214,8 @@ def handle_import_spec(target: Path) -> int:
     data = importer.parse_file(target)
     out_json = "k_neural_net.json"
 
-  elif target.is_dir() and list(target.glob("*.py")):
-    log_info("Detected Array API Stubs")
+  elif target.is_dir():
+    log_info("Detected Array API Stubs Directory")
     importer = ArrayApiSpecImporter()
     data = importer.parse_folder(target)
     out_json = "k_array_api.json"
@@ -252,20 +244,32 @@ def handle_import_spec(target: Path) -> int:
 def handle_sync(framework: str) -> int:
   """Handles 'sync' command."""
   out_dir = resolve_semantics_dir()
-  json_p = out_dir / "k_array_api.json"
-
-  if not json_p.exists():
-    log_error("Semantics file not found. Run import-spec first.")
-    return 1
-
-  with open(json_p, "rt", encoding="utf-8") as f:
-    data = json.load(f)
-
   syncer = FrameworkSyncer()
-  syncer.sync(data, framework)
 
-  with open(json_p, "wt", encoding="utf-8") as f:
-    json.dump(data, f, indent=2, sort_keys=True)
+  # Update: Explicitly list all tier files to sync
+  tiers = ["k_array_api.json", "k_neural_net.json", "k_framework_extras.json"]
+
+  for filename in tiers:
+    json_p = out_dir / filename
+
+    if not json_p.exists():
+      continue
+
+    try:
+      with open(json_p, "rt", encoding="utf-8") as f:
+        data = json.load(f)
+
+      friendly_name = filename.replace("k_", "").replace(".json", "")
+      log_info(f"Syncing [{friendly_name}] tier for {framework}...")
+
+      syncer.sync(data, framework)
+
+      with open(json_p, "wt", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, sort_keys=True)
+
+    except Exception as e:
+      log_warning(f"Failed to sync {filename}: {e}")
+
   return 0
 
 
@@ -294,7 +298,6 @@ def _convert_single_file(
     engine = ASTEngine(semantics, config=config)
     result = engine.run(code)
 
-    # --- Feature 05: Export Trace ---
     if json_trace_path and result.trace_events:
       try:
         json_trace_path.parent.mkdir(parents=True, exist_ok=True)

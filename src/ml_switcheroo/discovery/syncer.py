@@ -4,10 +4,13 @@ Discovery Tool for linking Framework implementations to Standards.
 This module scans installed libraries (e.g., Torch, JAX, TensorFlow, MLX) for
 functions that match the names defined in the Semantic Knowledge Base.
 
-Refactor Note:
-    Hardcoded search paths have been removed. This module now queries the
-    `ml_switcheroo.frameworks` registry to determine which submodules to scan
-    for a given framework. This enables "Zero-Edit" support for new frameworks.
+It handles:
+1. Module Discovery via FrameworkAdapters.
+2. Name Matching (`torch.abs` matches `Abs`).
+3. Signature Compatibility Verification.
+   - Supports Functions.
+   - **Fix**: Supports Classes (Layers) by checking `__call__`/`forward` signatures
+     and relaxing argument count requirements (assuming extras are in `__init__`/`setup`).
 """
 
 import importlib
@@ -49,7 +52,7 @@ class FrameworkSyncer:
             This dictionary is modified in-place.
         framework: The target framework name (e.g., 'torch', 'tensorflow', 'mlx').
     """
-    log_info(f"Syncing [code]{framework}[/code] against Array API Standard...")
+    log_info(f"Syncing [code]{framework}[/code] against Standard...")
 
     # 1. Resolve Search Paths via Registry
     adapter = get_adapter(framework)
@@ -60,7 +63,6 @@ class FrameworkSyncer:
       paths_to_search = adapter.search_modules
     else:
       # Fallback: Just try scanning the root package
-      # This handles cases where an adapter might not be fully implemented yet
       paths_to_search = [framework]
 
     # 2. Pre-load modules
@@ -69,8 +71,6 @@ class FrameworkSyncer:
       try:
         libs.append(importlib.import_module(mod_name))
       except ImportError:
-        # This is expected if the user doesn't have the full stack installed,
-        # or if the submodule doesn't exist in that specific version.
         pass
 
     if not libs:
@@ -86,22 +86,32 @@ class FrameworkSyncer:
       if framework in details.get("variants", {}):
         continue
 
-      # std_args is List[Tuple[str, str]] or List[str] (legacy compat)
       std_args_raw = details.get("std_args", [])
       std_arg_names = self._extract_names(std_args_raw)
 
       found_path = None
 
-      # Search modules for matching name
-      # We iterate in order of search_modules, so earlier modules take precedence.
+      # Iterate modules
       for lib in libs:
+        # Case-insensitive name match loop
+        candidate_name = None
         if hasattr(lib, op_name):
-          obj = getattr(lib, op_name)
+          candidate_name = op_name
+        else:
+          # Fallback: Scan dir() for case-insensitive match
+          for member_name in dir(lib):
+            if member_name.lower() == op_name.lower():
+              candidate_name = member_name
+              break
 
+        if candidate_name:
+          obj = getattr(lib, candidate_name)
+
+          # Must be callable (Function or Class)
           if callable(obj):
             # Verify Signature Compatibility
             if self._is_compatible(obj, std_arg_names):
-              found_path = f"{lib.__name__}.{op_name}"
+              found_path = f"{lib.__name__}.{candidate_name}"
               break
             else:
               skipped += 1
@@ -118,13 +128,6 @@ class FrameworkSyncer:
   def _extract_names(self, args: List[Union[str, Tuple[str, str]]]) -> List[str]:
     """
     Unpacks argument definitions into a flat list of names.
-
-    Args:
-        args: A list of arguments. Elements can be strings (legacy) or
-              tuples of (name, type_annotation).
-
-    Returns:
-        List[str]: A list of argument names.
     """
     out = []
     for item in args:
@@ -134,30 +137,38 @@ class FrameworkSyncer:
         out.append(item)
     return out
 
-  def _is_compatible(self, func: Any, std_args: List[str]) -> bool:
+  def _is_compatible(self, obj: Any, std_args: List[str]) -> bool:
     """
-    Verifies if the candidate function signature can accept the standard arguments.
-
-    It checks:
-    1. If the function accepts variable positional arguments (*args) -> Pass.
-    2. If the function has too many mandatory arguments -> Fail.
-    3. If the function cannot accept enough positional arguments -> Fail.
-
-    Args:
-        func: The Python function object to inspect.
-        std_args: List of argument names from the spec (e.g. ['x', 'axis']).
-
-    Returns:
-        bool: True if compatible, False otherwise.
+    Verifies if the candidate signature can accept the standard arguments.
     """
+    target_func = obj
+    is_class_obj = inspect.isclass(obj)
+    found_method = False
+
+    # Handle Classes: Inspect the inference method, not the constructor
+    if is_class_obj:
+      # Priority: __call__ (JAX/Pax), forward (Torch), call (Keras)
+      for method_name in ["__call__", "forward", "call"]:
+        if hasattr(obj, method_name):
+          target_func = getattr(obj, method_name)
+          found_method = True
+          break
+      # If no inference method found, fallback to constructor (function-like class)
+
     try:
-      sig = inspect.signature(func)
+      sig = inspect.signature(target_func)
     except (ValueError, TypeError):
       # Built-ins (C-extensions) or some ufuncs might not support signature inspection.
-      # We default to True (Fail-Open) to avoid finding valid C-funcs incompatible.
       return True
 
     params = list(sig.parameters.values())
+
+    # Aggressive self stripping: If we found a method on a class, assume arg 0 is self
+    # and strip it regardless of name (handles 'self', 'cls', 'this', implicit C++ bindings, etc)
+    if is_class_obj and found_method and params:
+      # Check if the function is actually bound or unbound.
+      # getattr(Class, 'func') returns unbound in Py3, so signature includes self.
+      params = params[1:]
 
     # 1. Check for var_positional (*args)
     has_var_args = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in params)
@@ -170,18 +181,15 @@ class FrameworkSyncer:
     ]
 
     # 2. Check Mandatory count
-    # A parameter is mandatory if it has no default value
     mandatory_params = [p for p in pos_params if p.default == inspect.Parameter.empty]
 
     if len(mandatory_params) > len(std_args):
-      # Candidate requires more args than Spec provides
-      # e.g. Candidate(a, b), Spec(x) -> Failure, 'b' would be missing
       return False
 
     # 3. Check Capacity
-    # Candidate function must be able to accept at least as many positional args as Spec
-    # e.g. Candidate(a), Spec(x, y) -> Failure, 'y' would be lost
-    if len(pos_params) < len(std_args):
-      return False
+    # If class, we assume extras handled in init, so we skip exact capacity check
+    if not is_class_obj:
+      if len(pos_params) < len(std_args):
+        return False
 
     return True

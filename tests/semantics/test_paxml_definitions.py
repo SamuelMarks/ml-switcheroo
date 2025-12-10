@@ -66,10 +66,17 @@ def test_relu_paxml_mapping(semantics):
 def test_flatten_paxml_mapping(semantics):
   """
   Verify 'Flatten' maps to 'praxis.layers.Flatten'.
+
+  Note: This test relies on 'ml_switcheroo sync paxml' having successfully
+  identified 'praxis.layers.Flatten' using the updated FrameworkSyncer class-aware logic.
   """
   defn = semantics.get_definition_by_id("Flatten")
   assert defn is not None
 
   pax_variant = defn["variants"].get("paxml")
+
+  # This assertion validates the syncer fix.
+  # If syncer.py logic is correct, finding 'praxis.layers.Flatten' works,
+  # and this test passes after a sync run.
   assert pax_variant is not None
   assert pax_variant["api"] == "praxis.layers.Flatten"

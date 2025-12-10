@@ -13,7 +13,7 @@ class TorchAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    return ["torch", "torch.linalg", "torch.special", "torch.fft"]
+    return ["torch", "torch.nn", "torch.linalg", "torch.special", "torch.fft"]
 
   @property
   def import_alias(self) -> Tuple[str, str]:

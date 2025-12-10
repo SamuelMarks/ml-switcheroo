@@ -6,6 +6,9 @@ onnx
 .idea
 .vscode
 
+# venvs
+*venv*
+
 # Compiled
 __pycache__/
 *.py[cod]

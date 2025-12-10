@@ -18,24 +18,59 @@ establish the "Abstract Standard".
 ### Updating the Math Standard (Array API)
 
 1. Clone/Download the latest stubs from [data-apis/array-api](https://github.com/data-apis/array-api).
-2. Run the importer pointing to the stub directory:
-   ```bash
-   ml_switcheroo import-spec ./array-api/src/array_api_stubs/_2024_12
-   # Result: Updates src/ml_switcheroo/semantics/k_array_api.json
-   ```
+2. Run the importer pointing to the stub directory
+
+E.g.,
+```bash
+$ git clone -b 2024.12 --depth=1 https://github.com/data-apis/array-api
+$ ml_switcheroo import-spec ./array-api/src/array_api_stubs/_2024_12
+ℹ️  Detected Array API Stubs Directory
+ℹ️  Parsing 19 stub files...
+ℹ️  Merging with existing 182 entries...
+✅ Saved 182 operations to /Users/samuel/repos/ml-switcheroo/src/ml_switcheroo/semantics/k_array_api.json
+```
 
 ### Updating the Neural Standard (ONNX)
 
 1. Fetch the `Operators.md` from the [ONNX repository](https://github.com/onnx/onnx/blob/main/docs/Operators.md).
-2. Run the markdown importer:
-   ```bash
-   ml_switcheroo import-spec ./path/to/Operators.md
-   # Result: Updates src/ml_switcheroo/semantics/k_neural_net.json
-   ```
+2. Run the markdown importer
+
+E.g.,:
+```bash
+$ git clone --depth=1 -b v1.20.0 https://github.com/onnx/onnx
+$ ml_switcheroo import-spec ./onnx/docs/Operators.md
+ℹ️  Detected ONNX Markdown Spec: Operators.md
+ℹ️  Parsing ONNX Spec: Operators.md...
+ℹ️  Merging with existing 5 entries...
+✅ Saved 202 operations to /ml-switcheroo/src/ml_switcheroo/semantics/k_neural_net.jso
+```
 
 ---
 
-## 2. Discovery (Mapping Frameworks)
+## 3. Operation-connect (Mapping ML array & math APIs)
+```bash
+$ uv pip install keras jax tensorflow torch
+$ for lib in keras jax tensorflow torch; do
+    ml_switcheroo sync "$lib"
+  done
+ℹ️  Syncing keras against Array API Standard...
+✅ Linked 95 operations for keras (Skipped 26 mismatches).
+ℹ️  Syncing jax against Array API Standard...
+✅ Linked 146 operations for jax (Skipped 26 mismatches).
+ℹ️  Syncing tensorflow against Array API Standard...
+✅ Linked 89 operations for tensorflow (Skipped 10 mismatches).
+ℹ️  Syncing torch against Array API Standard...
+✅ Linked 149 operations for torch (Skipped 5 mismatches).
+# On x86_64 Linux with CPython 3.10
+$ uv pip install paxml jaxlib==0.4.26
+$ ml_switcheroo sync paxml
+ℹ️  Syncing paxml against Standard...
+✅ Linked 0 operations for paxml (Skipped 3 mismatches)
+```
+
+---
+
+## 4. Discovery (Mapping Frameworks)
 
 Once standards are defined, we map concrete libraries (Torch, JAX) to them.
 
@@ -76,7 +111,7 @@ error, the Harvester can extract the rule back into the JSONs.
 
 ---
 
-## 3. Verification (CI Loop)
+## 5. Verification (CI Loop)
 
 We validate mappings using two methods: **Robotic Fuzzing** (using Types from Specs) and **Physical Test Files**.
 
@@ -106,7 +141,7 @@ ml_switcheroo gen-tests --out tests/generated/test_tier_a_math.py
 
 ---
 
-## 4. Documentation & Web Demo
+## 6. Documentation & Web Demo
 
 Maintenance of the documentation site and the WASM demo.
 

@@ -13,7 +13,7 @@ class JaxAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    return ["jax.numpy", "jax.numpy.linalg", "jax.numpy.fft"]
+    return ["jax.numpy", "jax.numpy.linalg", "jax.numpy.fft", "flax.nnx"]
 
   @property
   def import_alias(self) -> Tuple[str, str]:

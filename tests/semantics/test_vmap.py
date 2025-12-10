@@ -14,10 +14,37 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
+class MockVmapSemantics(SemanticsManager):
+  """Mock semantics manager containing vmap definitions."""
+
+  def __init__(self):
+    # Skip file loading to stay isolated
+    self.data = {}
+    self.import_data = {}
+    self.framework_configs = {}
+    self._reverse_index = {}
+    self._key_origins = {}
+    self._validation_status = {}
+    self.test_templates = {}
+    self._known_rng_methods = set()
+
+    # Inject vmap definition
+    vmap_def = {
+      "std_args": ["func", "in_axes", "out_axes"],
+      "variants": {
+        "torch": {"api": "torch.vmap", "args": {"func": "func", "in_axes": "in_dims", "out_axes": "out_dims"}},
+        "jax": {"api": "jax.vmap", "args": {"func": "fun", "in_axes": "in_axes", "out_axes": "out_axes"}},
+      },
+    }
+    self.data["vmap"] = vmap_def
+    self._reverse_index["torch.vmap"] = ("vmap", vmap_def)
+    self._reverse_index["jax.vmap"] = ("vmap", vmap_def)
+
+
 @pytest.fixture
 def semantics():
-  """Returns a real semantics manager to verify the JSON integration."""
-  return SemanticsManager()
+  """Returns a mock semantics manager with vmap data."""
+  return MockVmapSemantics()
 
 
 def test_vmap_torch_to_jax_basic(semantics):
