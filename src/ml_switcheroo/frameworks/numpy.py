@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Tuple, Optional, Dict
-from .base import register_framework, StructuralTraits
+from ml_switcheroo.core.ghost import GhostRef
+from .base import register_framework, StructuralTraits, StandardCategory
 
 
 @register_framework("numpy")
@@ -31,6 +32,10 @@ class NumpyAdapter:
   def rng_seed_methods(self) -> List[str]:
     return ["seed"]
 
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    # NumPy doesn't implement Layers/Losses structurally
+    return []
+
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     return "'cpu'"
 
@@ -44,7 +49,8 @@ class NumpyAdapter:
       return f"np.load(file={file_arg})"
     return ""
 
-  # --- Verification ---
+    # --- Verification ---
+
   def convert(self, data):
     if isinstance(data, (list, tuple)):
       return type(data)(self.convert(x) for x in data)

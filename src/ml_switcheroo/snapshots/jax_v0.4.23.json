@@ -1,0 +1,540 @@
+{
+  "version": "0.4.23",
+  "categories": {
+    "loss": [
+      {
+        "name": "huber_loss",
+        "api_path": "optax.huber_loss",
+        "kind": "function",
+        "params": [
+          {
+            "name": "predictions",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "targets",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "delta",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1.0",
+            "annotation": "float"
+          }
+        ],
+        "docstring": "Huber loss."
+      },
+      {
+        "name": "l2_loss",
+        "api_path": "optax.l2_loss",
+        "kind": "function",
+        "params": [
+          {
+            "name": "predictions",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "targets",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Optional[Array]"
+          }
+        ],
+        "docstring": "L2 loss (half mean squared error)."
+      },
+      {
+        "name": "smooth_l1_loss",
+        "api_path": "optax.smooth_l1_loss",
+        "kind": "function",
+        "params": [
+          {
+            "name": "predictions",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "targets",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "beta",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1.0",
+            "annotation": "float"
+          }
+        ],
+        "docstring": "Smooth L1 loss."
+      },
+      {
+        "name": "softmax_cross_entropy",
+        "api_path": "optax.softmax_cross_entropy",
+        "kind": "function",
+        "params": [
+          {
+            "name": "logits",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "labels",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          }
+        ],
+        "docstring": "Computes the softmax cross entropy between sets of logits and labels."
+      },
+      {
+        "name": "sigmoid_binary_cross_entropy",
+        "api_path": "optax.sigmoid_binary_cross_entropy",
+        "kind": "function",
+        "params": [
+          {
+            "name": "logits",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "labels",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          }
+        ],
+        "docstring": "Computes sigmoid cross entropy given logits and labels."
+      }
+    ],
+    "optimizer": [
+      {
+        "name": "adam",
+        "api_path": "optax.adam",
+        "kind": "function",
+        "params": [
+          {
+            "name": "learning_rate",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "ScalarOrSchedule"
+          },
+          {
+            "name": "b1",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.9",
+            "annotation": "float"
+          },
+          {
+            "name": "b2",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.999",
+            "annotation": "float"
+          },
+          {
+            "name": "eps",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-08",
+            "annotation": "float"
+          },
+          {
+            "name": "eps_root",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.0",
+            "annotation": "float"
+          },
+          {
+            "name": "mu_dtype",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Optional[Any]"
+          }
+        ],
+        "docstring": "The Adam optimizer."
+      },
+      {
+        "name": "adamw",
+        "api_path": "optax.adamw",
+        "kind": "function",
+        "params": [
+          {
+            "name": "learning_rate",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "ScalarOrSchedule"
+          },
+          {
+            "name": "b1",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.9",
+            "annotation": "float"
+          },
+          {
+            "name": "b2",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.999",
+            "annotation": "float"
+          },
+          {
+            "name": "eps",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-08",
+            "annotation": "float"
+          },
+          {
+            "name": "weight_decay",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.0001",
+            "annotation": "float"
+          }
+        ],
+        "docstring": "AdamW optimizer."
+      },
+      {
+        "name": "sgd",
+        "api_path": "optax.sgd",
+        "kind": "function",
+        "params": [
+          {
+            "name": "learning_rate",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "ScalarOrSchedule"
+          },
+          {
+            "name": "momentum",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Optional[float]"
+          },
+          {
+            "name": "nesterov",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Stochastic Gradient Descent optimizer."
+      },
+      {
+        "name": "rmsprop",
+        "api_path": "optax.rmsprop",
+        "kind": "function",
+        "params": [
+          {
+            "name": "learning_rate",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "ScalarOrSchedule"
+          },
+          {
+            "name": "decay",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.9",
+            "annotation": "float"
+          },
+          {
+            "name": "eps",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-08",
+            "annotation": "float"
+          }
+        ],
+        "docstring": "RMSProp optimizer."
+      },
+      {
+        "name": "adagrad",
+        "api_path": "optax.adagrad",
+        "kind": "function",
+        "params": [
+          {
+            "name": "learning_rate",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "ScalarOrSchedule"
+          },
+          {
+            "name": "initial_accumulator_value",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.1",
+            "annotation": "float"
+          },
+          {
+            "name": "eps",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-07",
+            "annotation": "float"
+          }
+        ],
+        "docstring": "Adagrad optimizer."
+      }
+    ],
+    "layer": [
+      {
+        "name": "Dense",
+        "api_path": "flax.linen.Dense",
+        "kind": "class",
+        "params": [
+          {
+            "name": "features",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "use_bias",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          },
+          {
+            "name": "dtype",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Optional[Dtype]"
+          },
+          {
+            "name": "param_dtype",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "float32",
+            "annotation": "Dtype"
+          },
+          {
+            "name": "kernel_init",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "default_kernel_init",
+            "annotation": "Initializer"
+          },
+          {
+            "name": "bias_init",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "zeros",
+            "annotation": "Initializer"
+          }
+        ],
+        "docstring": "A linear transformation applied over the last dimension of the input."
+      },
+      {
+        "name": "Conv",
+        "api_path": "flax.linen.Conv",
+        "kind": "class",
+        "params": [
+          {
+            "name": "features",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "kernel_size",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Union[int, Sequence[int]]"
+          },
+          {
+            "name": "strides",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1",
+            "annotation": "Union[int, Sequence[int]]"
+          },
+          {
+            "name": "padding",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "'SAME'",
+            "annotation": "PaddingLike"
+          },
+          {
+            "name": "use_bias",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Convolutional layer."
+      },
+      {
+        "name": "BatchNorm",
+        "api_path": "flax.linen.BatchNorm",
+        "kind": "class",
+        "params": [
+          {
+            "name": "use_running_average",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Optional[bool]"
+          },
+          {
+            "name": "axis",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "-1",
+            "annotation": "int"
+          },
+          {
+            "name": "momentum",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.99",
+            "annotation": "float"
+          },
+          {
+            "name": "epsilon",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-05",
+            "annotation": "float"
+          }
+        ],
+        "docstring": "Batch normalization layer."
+      },
+      {
+        "name": "LayerNorm",
+        "api_path": "flax.linen.LayerNorm",
+        "kind": "class",
+        "params": [
+          {
+            "name": "epsilon",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-06",
+            "annotation": "float"
+          },
+          {
+            "name": "use_bias",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          },
+          {
+            "name": "use_scale",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Layer normalization layer."
+      },
+      {
+        "name": "Dropout",
+        "api_path": "flax.linen.Dropout",
+        "kind": "class",
+        "params": [
+          {
+            "name": "rate",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "float"
+          },
+          {
+            "name": "broadcast_dims",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "()",
+            "annotation": "Iterable[int]"
+          },
+          {
+            "name": "deterministic",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Optional[bool]"
+          }
+        ],
+        "docstring": "Create a dropout layer."
+      },
+      {
+        "name": "Embed",
+        "api_path": "flax.linen.Embed",
+        "kind": "class",
+        "params": [
+          {
+            "name": "num_embeddings",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "features",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "embedding_init",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "default_embed_init",
+            "annotation": "Initializer"
+          }
+        ],
+        "docstring": "Embedding layer."
+      }
+    ],
+    "activation": [
+      {
+        "name": "relu",
+        "api_path": "jax.nn.relu",
+        "kind": "function",
+        "params": [
+          {
+            "name": "x",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          }
+        ],
+        "docstring": "Rectified Linear Unit activation function."
+      },
+      {
+        "name": "gelu",
+        "api_path": "jax.nn.gelu",
+        "kind": "function",
+        "params": [
+          {
+            "name": "x",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "approximate",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Gaussian Error Linear Unit activation function."
+      },
+      {
+        "name": "sigmoid",
+        "api_path": "jax.nn.sigmoid",
+        "kind": "function",
+        "params": [
+          {
+            "name": "x",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          }
+        ],
+        "docstring": "Sigmoid activation function."
+      },
+      {
+        "name": "log_softmax",
+        "api_path": "jax.nn.log_softmax",
+        "kind": "function",
+        "params": [
+          {
+            "name": "x",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "axis",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "-1",
+            "annotation": "Union[int, Sequence[int], None]"
+          }
+        ],
+        "docstring": "Log-Softmax activation function."
+      },
+      {
+        "name": "softmax",
+        "api_path": "jax.nn.softmax",
+        "kind": "function",
+        "params": [
+          {
+            "name": "x",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Array"
+          },
+          {
+            "name": "axis",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "-1",
+            "annotation": "Union[int, Sequence[int], None]"
+          }
+        ],
+        "docstring": "Softmax activation function."
+      }
+    ]
+  }
+}

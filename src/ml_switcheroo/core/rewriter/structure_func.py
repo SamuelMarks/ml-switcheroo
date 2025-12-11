@@ -106,8 +106,11 @@ class FuncStructureMixin(BaseRewriter):
       new_stmts = []
       for stmt_code in sig_ctx.preamble_stmts:
         try:
-          parsed_stmt = cst.parse_statement(stmt_code)
-          new_stmts.append(parsed_stmt)
+          # Robust Parsing: Handle blocks (classes/funcs) and single lines
+          # cst.parse_statement fails on multi-line blocks like classes sometimes or sequences.
+          # We use parse_module and extract body to handle multi-statement injection.
+          parsed_mod = cst.parse_module(stmt_code)
+          new_stmts.extend(parsed_mod.body)
         except cst.ParserSyntaxError:
           self._report_failure(f"Failed to inject preamble: {stmt_code}")
 

@@ -7,6 +7,11 @@ Knowledge Base.
 
 It prioritizes matching discovered APIs against ingested Specs (ONNX, Array API)
 before falling back to structural heuristics provided by Framework Adapters.
+
+Updates:
+- Now injects static semantic defaults (like DataLoader shim configuration)
+  from `ml_switcheroo.frameworks.common.data` to ensuring canonical features
+  are present in the generated JSON.
 """
 
 import json
@@ -20,6 +25,9 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.utils.console import console, log_info, log_success
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
+
+# Access static definitions for common utilities
+from ml_switcheroo.frameworks.common.data import get_dataloader_semantics
 
 
 class Scaffolder:
@@ -103,6 +111,8 @@ class Scaffolder:
        Abstract Operator already defined in the Knowledge Base (e.g., from ONNX).
     2. **Heuristic Fallback**: If no spec match, checks Framework Adapters
        for regex conventions (e.g. `.nn` -> Neural).
+    3. **Static Injection**: Merges hardcoded complex definitions (like DataLoader)
+       that cannot be easily autodiscovered but are critical for the engine.
 
     Args:
         frameworks: List of package names (e.g. ['torch', 'jax']).
@@ -159,6 +169,15 @@ class Scaffolder:
 
       # Heuristic: Math Tier (Default)
       self._update_entry(self.tier_a_math, name, primary_fw, api_path, details, catalogs)
+
+    # --- Strategy 3: Static Injection (Manual Defaults via Code) ---
+    # Explicitly inject the DataLoader logic which needs special plugin handling
+    # and cannot be reliably scaffolded by simple inspection.
+    dataloader_defaults = get_dataloader_semantics()
+    for op, defn in dataloader_defaults.items():
+      # Merge into Tier C (Extras) if not already present or force update?
+      # We force update (or init) to ensure valid plugin wiring.
+      self.tier_c_extras[op] = defn
 
     if not output_dir.exists():
       output_dir.mkdir(parents=True)

@@ -6,6 +6,8 @@ sphinx-material>=0.0.36
 sphinx>=8,<9
 sphinxcontrib-mermaid>=1.2
 
+build
+
 griffe>=0.48
 libcst==1.6.0
 numpy==2.2.5

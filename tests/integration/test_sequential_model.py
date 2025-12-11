@@ -44,9 +44,9 @@ class TestSemantics(SemanticsManager):
     # Flatten: torch.nn.Flatten -> flax.nnx.Flatten
     self._inject_op("Flatten", ["start_dim", "end_dim"], "torch.nn.Flatten", "flax.nnx.Flatten", SemanticTier.NEURAL)
 
-    # ReLU: torch.nn.ReLU -> flax.nnx.relu (Functional in NNX often used as layer?)
-    # or flax.nnx.relu if it's a valid layer? Assuming flax.nnx.relu
-    self._inject_op("ReLU", [], "torch.nn.ReLU", "flax.nnx.relu", SemanticTier.ARRAY_API)
+    # ReLU: torch.nn.ReLU -> flax.nnx.relu
+    # Mapped as NEURAL to verify uniform rngs injection for layer instantiation inside __init__
+    self._inject_op("ReLU", [], "torch.nn.ReLU", "flax.nnx.relu", SemanticTier.NEURAL)
 
   def _inject_op(self, name, std_args, s_api, t_api, tier):
     if name not in self.data:

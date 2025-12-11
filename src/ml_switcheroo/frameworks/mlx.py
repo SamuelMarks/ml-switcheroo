@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Tuple, Optional, Dict
-from .base import register_framework, StructuralTraits
+from ml_switcheroo.core.ghost import GhostRef
+from .base import register_framework, StructuralTraits, StandardCategory
 
 
 @register_framework("mlx")
@@ -30,6 +31,9 @@ class MLXAdapter:
   @property
   def rng_seed_methods(self) -> List[str]:
     return ["seed"]
+
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    return []
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     clean_type = device_type.strip("'\"").lower()

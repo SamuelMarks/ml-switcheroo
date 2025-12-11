@@ -1,5 +1,7 @@
+import sys
 from typing import List, Tuple, Optional, Dict
-from .base import register_framework, StructuralTraits
+from ml_switcheroo.core.ghost import GhostRef
+from .base import register_framework, StructuralTraits, StandardCategory
 
 
 @register_framework("tensorflow")
@@ -31,6 +33,11 @@ class TensorFlowAdapter:
   @property
   def rng_seed_methods(self) -> List[str]:
     return ["set_seed", "random.set_seed"]
+
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    # TensorFlow usually delegates Layers/Losses to Keras adapter
+    # If using pure TF ops, can implement here later.
+    return []
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     clean_type = device_type.strip("'\"").lower()

@@ -8,11 +8,13 @@ It decouples argument handling from execution logic.
 import sys
 import json
 import subprocess
+import importlib.metadata
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.frameworks import available_frameworks
 from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
@@ -28,6 +30,15 @@ from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
 from ml_switcheroo.discovery.syncer import FrameworkSyncer
 from ml_switcheroo.generated_tests.generator import TestGenerator
 from ml_switcheroo.core.hooks import load_plugins
+from ml_switcheroo.discovery.consensus import ConsensusEngine
+from ml_switcheroo.semantics.autogen import SemanticPersister
+from ml_switcheroo.frameworks.base import (
+  StandardCategory,
+  get_adapter,
+  GhostRef,
+  FrameworkAdapter,
+  SNAPSHOT_DIR as DEFAULT_SNAP_DIR,
+)
 from ml_switcheroo.utils.console import (
   console,
   log_info,
@@ -186,6 +197,36 @@ def handle_ci(update_readme: bool, readme_path: Path, json_report: Optional[Path
   return 0
 
 
+def handle_snapshot(out_dir: Optional[Path]) -> int:
+  """
+  Handles 'snapshot' command.
+  Scans installed frameworks and dumps API signatures to JSON.
+  """
+  target_dir = out_dir or DEFAULT_SNAP_DIR
+
+  log_info(f"Starting Snapshot Capture to {target_dir}")
+
+  frameworks = available_frameworks()
+
+  if not frameworks:
+    log_error("No frameworks registered in ml-switcheroo. Check installation.")
+    return 1
+
+  processed = 0
+  for fw in frameworks:
+    data = _capture_framework(fw)
+    if data:
+      _save_snapshot(fw, data, target_dir)
+      processed += 1
+
+  if processed == 0:
+    log_warning("No snapshots were generated. Are Torch/Keras/JAX installed?")
+    return 1
+
+  log_success(f"Capture complete. Generated {processed} snapshot headers.")
+  return 0
+
+
 def handle_scaffold(frameworks: list[str], out_dir: Path) -> int:
   """Handles 'scaffold' command."""
   semantics = SemanticsManager()
@@ -273,6 +314,90 @@ def handle_sync(framework: str) -> int:
   return 0
 
 
+def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]], dry_run: bool) -> int:
+  """
+  Handles 'sync-standards' command.
+  Invokes Consensus Engine to discover new abstract operations from framework APIs.
+  """
+  console.print("[bold blue]Starting Consensus Engine...[/bold blue]")
+
+  # 1. Resolve Frameworks
+  if not frameworks:
+    frameworks = available_frameworks()
+
+  # 2. Resolve Categories
+  valid_categories = []
+  for c in categories:
+    try:
+      valid_categories.append(StandardCategory(c.lower()))
+    except ValueError:
+      log_warning(f"Skipping unknown category: {c}")
+
+  if not valid_categories:
+    log_error("No valid categories to scan.")
+    return 1
+
+  engine = ConsensusEngine()
+  persister = SemanticPersister()
+  out_dir = resolve_semantics_dir()
+
+  # We use k_framework_extras.json as the persistent store for self-repaired standards.
+  target_file = out_dir / "k_framework_extras.json"
+
+  total_persisted = 0
+
+  for cat in valid_categories:
+    log_info(f"Scanning category: [cyan]{cat.value}[/cyan]")
+    framework_inputs: Dict[str, List[GhostRef]] = {}
+
+    # A. Collect API surfaces
+    for fw in frameworks:
+      adapter = get_adapter(fw)
+      if not adapter:
+        continue
+
+      try:
+        refs = adapter.collect_api(cat)
+        if refs:
+          framework_inputs[fw] = refs
+          console.print(f"  - {fw}: Found {len(refs)} items")
+      except Exception as e:
+        log_warning(f"Failed to collect {cat} from {fw}: {e}")
+
+    if len(framework_inputs) < 2:
+      console.print("  [dim]Skipping consensus (need input from at least 2 frameworks)[/dim]")
+      continue
+
+    # B. Cluster & Align
+    candidates = engine.cluster(framework_inputs)
+    # Filter: Must be present in at least 2 frameworks to form a consensus standard
+    common = engine.filter_common(candidates, min_support=2)
+
+    if not common:
+      continue
+
+    # Augment signatures
+    engine.align_signatures(common)
+
+    console.print(f"  => Discovered {len(common)} candidates (e.g. {common[0].name})")
+
+    # C. Persist
+    if dry_run:
+      for c in common:
+        console.print(f"    [Dry] {c.name} (std_args={c.std_args})")
+    else:
+      persister.persist(common, target_file)
+      total_persisted += len(common)
+
+  if not dry_run:
+    if total_persisted > 0:
+      log_success(f"Sync complete. Persisted {total_persisted} standards to {target_file.name}")
+    else:
+      log_info("Sync complete. No new standards found.")
+
+  return 0
+
+
 def handle_gen_tests(out: Path) -> int:
   """Handles 'gen-tests' command."""
   mgr = SemanticsManager()
@@ -281,6 +406,74 @@ def handle_gen_tests(out: Path) -> int:
   gen = TestGenerator()
   gen.generate(semantics, out)
   return 0
+
+
+# --- Helpers (Moved from Scripts) ---
+
+
+def _get_pkg_version(package_name: str) -> str:
+  """Retrieves installed package version string safely."""
+  try:
+    if package_name == "torch":
+      import torch
+
+      return torch.__version__
+    return importlib.metadata.version(package_name)
+  except Exception:
+    return "unknown"
+
+
+def _capture_framework(fw_name: str) -> Dict[str, Any]:
+  """Runs API collection for a single framework."""
+  adapter: FrameworkAdapter = get_adapter(fw_name)
+  if not adapter:
+    log_warning(f"Skipping {fw_name}: No adapter found.")
+    return {}
+
+  version = _get_pkg_version(fw_name)
+  if version == "unknown":
+    log_warning(f"Skipping {fw_name}: Library not installed in this environment.")
+    return {}
+
+  log_info(f"Scanning {fw_name} v{version}...")
+
+  snapshot_data = {"version": version, "categories": {}}
+  found_any = False
+
+  # Iterate all standard categories defined in the Protocol
+  for category in StandardCategory:
+    try:
+      # Polymorphic call to the adapter's implementation
+      refs = adapter.collect_api(category)
+
+      if refs:
+        found_any = True
+        snapshot_data["categories"][category.value] = [ref.model_dump(exclude_unset=True) for ref in refs]
+        print(f"  - Found {len(refs)} {category.value} definitions.")
+    except Exception as e:
+      log_error(f"  FAILED collecting {category.value}: {e}")
+
+  if not found_any:
+    return {}
+
+  return snapshot_data
+
+
+def _save_snapshot(fw_name: str, data: Dict[str, Any], target_dir: Path):
+  """Writes the snapshot data to JSON."""
+  if not data:
+    return
+
+  safe_ver = data["version"].replace("+", "_").replace(" ", "_")
+  filename = f"{fw_name}_v{safe_ver}.json"
+  out_path = target_dir / filename
+
+  target_dir.mkdir(parents=True, exist_ok=True)
+
+  with open(out_path, "w", encoding="utf_8") as f:
+    json.dump(data, f, indent=2)
+
+  log_success(f"Saved snapshot: [path]{out_path}[/path]")
 
 
 def _convert_single_file(

@@ -1,0 +1,710 @@
+{
+  "version": "2.2.0",
+  "categories": {
+    "loss": [
+      {
+        "name": "MSELoss",
+        "api_path": "torch.nn.MSELoss",
+        "kind": "class",
+        "params": [
+          {
+            "name": "size_average",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "bool"
+          },
+          {
+            "name": "reduce",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "bool"
+          },
+          {
+            "name": "reduction",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "'mean'",
+            "annotation": "str"
+          }
+        ],
+        "docstring": "Creates a criterion that measures the mean squared error (squared L2 norm)."
+      },
+      {
+        "name": "L1Loss",
+        "api_path": "torch.nn.L1Loss",
+        "kind": "class",
+        "params": [
+          {
+            "name": "size_average",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "bool"
+          },
+          {
+            "name": "reduce",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "bool"
+          },
+          {
+            "name": "reduction",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "'mean'",
+            "annotation": "str"
+          }
+        ],
+        "docstring": "Creates a criterion that measures the mean absolute error (MAE)."
+      },
+      {
+        "name": "CrossEntropyLoss",
+        "api_path": "torch.nn.CrossEntropyLoss",
+        "kind": "class",
+        "params": [
+          {
+            "name": "weight",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Tensor"
+          },
+          {
+            "name": "size_average",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "bool"
+          },
+          {
+            "name": "ignore_index",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "-100",
+            "annotation": "int"
+          },
+          {
+            "name": "reduce",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "bool"
+          },
+          {
+            "name": "reduction",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "'mean'",
+            "annotation": "str"
+          },
+          {
+            "name": "label_smoothing",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.0",
+            "annotation": "float"
+          }
+        ],
+        "docstring": "This criterion computes the cross entropy loss between input and target."
+      },
+      {
+        "name": "HuberLoss",
+        "api_path": "torch.nn.HuberLoss",
+        "kind": "class",
+        "params": [
+          {
+            "name": "reduction",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "'mean'",
+            "annotation": "str"
+          },
+          {
+            "name": "delta",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1.0",
+            "annotation": "float"
+          }
+        ],
+        "docstring": "Creates a criterion that uses a squared term if the absolute error falls below delta."
+      },
+      {
+        "name": "BCELoss",
+        "api_path": "torch.nn.BCELoss",
+        "kind": "class",
+        "params": [
+          {
+            "name": "weight",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Tensor"
+          },
+          {
+            "name": "size_average",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "bool"
+          },
+          {
+            "name": "reduce",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "bool"
+          },
+          {
+            "name": "reduction",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "'mean'",
+            "annotation": "str"
+          }
+        ],
+        "docstring": "Creates a criterion that measures the Binary Cross Entropy."
+      }
+    ],
+    "optimizer": [
+      {
+        "name": "Adam",
+        "api_path": "torch.optim.Adam",
+        "kind": "class",
+        "params": [
+          {
+            "name": "params",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Any"
+          },
+          {
+            "name": "lr",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.001",
+            "annotation": "float"
+          },
+          {
+            "name": "betas",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "(0.9, 0.999)",
+            "annotation": "Tuple[float, float]"
+          },
+          {
+            "name": "eps",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-08",
+            "annotation": "float"
+          },
+          {
+            "name": "weight_decay",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "float"
+          },
+          {
+            "name": "amsgrad",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Implements Adam algorithm."
+      },
+      {
+        "name": "SGD",
+        "api_path": "torch.optim.SGD",
+        "kind": "class",
+        "params": [
+          {
+            "name": "params",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Any"
+          },
+          {
+            "name": "lr",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "none",
+            "annotation": "float"
+          },
+          {
+            "name": "momentum",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "float"
+          },
+          {
+            "name": "dampening",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "float"
+          },
+          {
+            "name": "weight_decay",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "float"
+          },
+          {
+            "name": "nesterov",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Implements stochastic gradient descent (optionally with momentum)."
+      },
+      {
+        "name": "RMSprop",
+        "api_path": "torch.optim.RMSprop",
+        "kind": "class",
+        "params": [
+          {
+            "name": "params",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Any"
+          },
+          {
+            "name": "lr",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.01",
+            "annotation": "float"
+          },
+          {
+            "name": "alpha",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.99",
+            "annotation": "float"
+          },
+          {
+            "name": "eps",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-08",
+            "annotation": "float"
+          },
+          {
+            "name": "weight_decay",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "float"
+          },
+          {
+            "name": "momentum",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "float"
+          },
+          {
+            "name": "centered",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Implements RMSprop algorithm."
+      },
+      {
+        "name": "Adagrad",
+        "api_path": "torch.optim.Adagrad",
+        "kind": "class",
+        "params": [
+          {
+            "name": "params",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Any"
+          },
+          {
+            "name": "lr",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.01",
+            "annotation": "float"
+          },
+          {
+            "name": "lr_decay",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "float"
+          },
+          {
+            "name": "weight_decay",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "float"
+          },
+          {
+            "name": "initial_accumulator_value",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "float"
+          },
+          {
+            "name": "eps",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-10",
+            "annotation": "float"
+          }
+        ],
+        "docstring": "Implements Adagrad algorithm."
+      }
+    ],
+    "layer": [
+      {
+        "name": "Linear",
+        "api_path": "torch.nn.Linear",
+        "kind": "class",
+        "params": [
+          {
+            "name": "in_features",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "out_features",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "bias",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Applies a linear transformation to the incoming data: y = xA^T + b."
+      },
+      {
+        "name": "Conv2d",
+        "api_path": "torch.nn.Conv2d",
+        "kind": "class",
+        "params": [
+          {
+            "name": "in_channels",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "out_channels",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "kernel_size",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "stride",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1",
+            "annotation": "int"
+          },
+          {
+            "name": "padding",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0",
+            "annotation": "int"
+          },
+          {
+            "name": "dilation",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1",
+            "annotation": "int"
+          },
+          {
+            "name": "groups",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1",
+            "annotation": "int"
+          },
+          {
+            "name": "bias",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          },
+          {
+            "name": "padding_mode",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "'zeros'",
+            "annotation": "str"
+          }
+        ],
+        "docstring": "Applies a 2D convolution over an input signal composed of several input planes."
+      },
+      {
+        "name": "BatchNorm2d",
+        "api_path": "torch.nn.BatchNorm2d",
+        "kind": "class",
+        "params": [
+          {
+            "name": "num_features",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "eps",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-05",
+            "annotation": "float"
+          },
+          {
+            "name": "momentum",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.1",
+            "annotation": "float"
+          },
+          {
+            "name": "affine",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          },
+          {
+            "name": "track_running_stats",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Applies Batch Normalization over a 4D input (a mini-batch of 2D inputs)."
+      },
+      {
+        "name": "LayerNorm",
+        "api_path": "torch.nn.LayerNorm",
+        "kind": "class",
+        "params": [
+          {
+            "name": "normalized_shape",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Any"
+          },
+          {
+            "name": "eps",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1e-05",
+            "annotation": "float"
+          },
+          {
+            "name": "elementwise_affine",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Applies Layer Normalization over a mini-batch of inputs."
+      },
+      {
+        "name": "LSTM",
+        "api_path": "torch.nn.LSTM",
+        "kind": "class",
+        "params": [
+          {
+            "name": "input_size",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "hidden_size",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "num_layers",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1",
+            "annotation": "int"
+          },
+          {
+            "name": "bias",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "True",
+            "annotation": "bool"
+          },
+          {
+            "name": "batch_first",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          },
+          {
+            "name": "dropout",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.0",
+            "annotation": "float"
+          },
+          {
+            "name": "bidirectional",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Applies a multi-layer long short-term memory (LSTM) RNN to an input sequence."
+      },
+      {
+        "name": "Embedding",
+        "api_path": "torch.nn.Embedding",
+        "kind": "class",
+        "params": [
+          {
+            "name": "num_embeddings",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "embedding_dim",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int"
+          },
+          {
+            "name": "padding_idx",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Optional[int]"
+          },
+          {
+            "name": "max_norm",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "Optional[float]"
+          },
+          {
+            "name": "norm_type",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "2.0",
+            "annotation": "float"
+          },
+          {
+            "name": "scale_grad_by_freq",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          },
+          {
+            "name": "sparse",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "A simple lookup table that stores embeddings of a fixed dictionary and size."
+      },
+      {
+        "name": "Dropout",
+        "api_path": "torch.nn.Dropout",
+        "kind": "class",
+        "params": [
+          {
+            "name": "p",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.5",
+            "annotation": "float"
+          },
+          {
+            "name": "inplace",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "During training, randomly zeroes some of the elements of the input tensor with probability p."
+      }
+    ],
+    "activation": [
+      {
+        "name": "ReLU",
+        "api_path": "torch.nn.ReLU",
+        "kind": "class",
+        "params": [
+          {
+            "name": "inplace",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Applies the rectified linear unit function element-wise."
+      },
+      {
+        "name": "GELU",
+        "api_path": "torch.nn.GELU",
+        "kind": "class",
+        "params": [
+          {
+            "name": "approximate",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "'none'",
+            "annotation": "str"
+          }
+        ],
+        "docstring": "Applies the Gaussian Error Linear Units function."
+      },
+      {
+        "name": "Sigmoid",
+        "api_path": "torch.nn.Sigmoid",
+        "kind": "class",
+        "params": [],
+        "docstring": "Applies the element-wise function: Sigmoid(x) = 1 / (1 + exp(-x))."
+      },
+      {
+        "name": "Tanh",
+        "api_path": "torch.nn.Tanh",
+        "kind": "class",
+        "params": [],
+        "docstring": "Applies the Hyperbolic Tangent (Tanh) function element-wise."
+      },
+      {
+        "name": "Softmax",
+        "api_path": "torch.nn.Softmax",
+        "kind": "class",
+        "params": [
+          {
+            "name": "dim",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "int"
+          }
+        ],
+        "docstring": "Applies the Softmax function to an n-dimensional input Tensor."
+      },
+      {
+        "name": "LogSoftmax",
+        "api_path": "torch.nn.LogSoftmax",
+        "kind": "class",
+        "params": [
+          {
+            "name": "dim",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "int"
+          }
+        ],
+        "docstring": "Applies the LogSoftmax function to an n-dimensional input Tensor."
+      },
+      {
+        "name": "ELU",
+        "api_path": "torch.nn.ELU",
+        "kind": "class",
+        "params": [
+          {
+            "name": "alpha",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "1.0",
+            "annotation": "float"
+          },
+          {
+            "name": "inplace",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Applies the Exponential Linear Unit (ELU) function."
+      },
+      {
+        "name": "LeakyReLU",
+        "api_path": "torch.nn.LeakyReLU",
+        "kind": "class",
+        "params": [
+          {
+            "name": "negative_slope",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "0.01",
+            "annotation": "float"
+          },
+          {
+            "name": "inplace",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "False",
+            "annotation": "bool"
+          }
+        ],
+        "docstring": "Applies the Leaky ReLU activation."
+      }
+    ]
+  }
+}

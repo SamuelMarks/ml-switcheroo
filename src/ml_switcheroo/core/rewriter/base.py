@@ -10,6 +10,7 @@ the `PivotRewriter`. It handles:
 3.  **Error Reporting**: Collecting failures during the AST walk to be bubbled
     up to the `ASTEngine`.
 4.  **Hook Infrastructure**: initializing the `HookContext` used by plugins.
+5.  **Global Injection**: Handling file-level preamble injection (`leave_Module`).
 """
 
 from typing import Optional, List, Dict, Any, Union, Set
@@ -40,6 +41,7 @@ class BaseRewriter(cst.CSTTransformer):
           to support argument injection (like `rng`).
       _alias_map (Dict[str, str]): Map of local names to fully qualified paths
           (e.g., `{'nn': 'torch.nn', 'F': 'torch.nn.functional'}`).
+      _module_preamble (List[str]): Code statements to inject at the top of the file (module level).
   """
 
   def __init__(self, semantics: SemanticsManager, config: RuntimeConfig):
@@ -75,6 +77,9 @@ class BaseRewriter(cst.CSTTransformer):
     self._in_module_class = False
     self._alias_map: Dict[str, str] = {}
 
+    # Store for global injections
+    self._module_preamble: List[str] = []
+
   def _callback_inject_arg(self, name: str, annotation: Optional[str] = None) -> None:
     """
     Callback for plugins to inject arguments into the current function signature.
@@ -94,13 +99,20 @@ class BaseRewriter(cst.CSTTransformer):
 
   def _callback_inject_preamble(self, code_str: str) -> None:
     """
-    Callback for plugins to inject statements at the start of the current function.
+    Callback for plugins to inject statements.
+    If inside a function, injects at the start of the function body.
+    If at module level (no active function stack), injects at the top of the file.
 
     Args:
-        code_str: The code to inject (e.g. 'rng, key = jax.random.split(rng)').
+        code_str: The code to inject (e.g. 'import foo', 'class Shim...').
     """
     if not self._signature_stack:
+      # Module level injection
+      if code_str not in self._module_preamble:
+        self._module_preamble.append(code_str)
       return
+
+    # Function level injection
     ctx = self._signature_stack[-1]
     if code_str not in ctx.preamble_stmts:
       ctx.preamble_stmts.append(code_str)
@@ -249,6 +261,50 @@ class BaseRewriter(cst.CSTTransformer):
       return None
 
     return target_impl
+
+  def _is_docstring_node(self, node: cst.CSTNode, idx: int) -> bool:
+    """Helper to detect module docstrings to ensure injection happens after."""
+    if idx != 0:
+      return False
+    if isinstance(node, cst.SimpleStatementLine) and len(node.body) == 1 and isinstance(node.body[0], cst.Expr):
+      expr = node.body[0].value
+      if isinstance(expr, (cst.SimpleString, cst.ConcatenatedString)):
+        return True
+    return False
+
+  def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
+    """
+    Injects module-level preambles (e.g. Shim classes) requested by plugins.
+    """
+    if not self._module_preamble:
+      return updated_node
+
+    # Parse injection strings into CST nodes
+    new_stmts = []
+    for stmt_code in self._module_preamble:
+      try:
+        parsed_mod = cst.parse_module(stmt_code)
+        new_stmts.extend(parsed_mod.body)
+      except cst.ParserSyntaxError:
+        self._report_failure(f"Failed to inject module preamble: {stmt_code}")
+
+    if not new_stmts:
+      return updated_node
+
+    # Determine insertion point (after docstring)
+    body = list(updated_node.body)
+    insert_idx = 0
+
+    if body and self._is_docstring_node(body[0], 0):
+      insert_idx = 1
+
+    # We insert shim classes before other code but often after imports.
+    # Since ImportFixer runs AFTER this, standard imports aren't here yet?
+    # No, standard imports are in `body` if they were in source.
+    # It is safer to insert after docstring. ImportFixer will handle import sorting/deduping later.
+
+    updated_body = body[:insert_idx] + new_stmts + body[insert_idx:]
+    return updated_node.with_changes(body=updated_body)
 
   def visit_Import(self, node: cst.Import) -> Optional[bool]:
     """

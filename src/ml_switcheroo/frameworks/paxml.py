@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any
-from .base import register_framework, StructuralTraits
+from ml_switcheroo.core.ghost import GhostRef
+from .base import register_framework, StructuralTraits, StandardCategory
 
 
 @register_framework("paxml")
@@ -46,6 +47,11 @@ class PaxmlAdapter:
   def rng_seed_methods(self) -> List[str]:
     return []
 
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    # PaxML is mostly layers over JAX, often uses Optax for optimization.
+    # Could scan praxis.layers here eventually.
+    return []
+
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     # Use JAX logic
     clean_type = device_type.strip("'\"").lower()
@@ -68,7 +74,7 @@ class PaxmlAdapter:
       return f"orbax.checkpoint.PyTreeCheckpointer().restore({file_arg})"
     return ""
 
-  # --- Verification ---
+    # --- Verification ---
 
   def convert(self, data: Any) -> Any:
     try:

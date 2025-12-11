@@ -106,6 +106,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     help="Save verification results to a JSON file (Lockfile)",
   )
 
+  # --- Command: SNAPSHOT (Ghost Protocol) ---
+  cmd_snap = subparsers.add_parser("snapshot", help="Capture API surfaces for Ghost Mode support")
+  cmd_snap.add_argument(
+    "--out-dir",
+    type=Path,
+    default=None,
+    help="Output directory (Defaults to src/ml_switcheroo/snapshots)",
+  )
+
   # --- Command: Scaffold ---
   cmd_scaf = subparsers.add_parser("scaffold", help="Auto-generate mappings for frameworks")
   cmd_scaf.add_argument("--frameworks", nargs="+", default=["torch", "jax"], help="List of frameworks")
@@ -135,6 +144,21 @@ def main(argv: Optional[List[str]] = None) -> int:
   cmd_sync = subparsers.add_parser("sync", help="Link a framework to the Spec")
   cmd_sync.add_argument("framework", help="Framework to sync (e.g. torch, jax, keras)")
 
+  # --- Command: SYNC-STANDARDS (Consensus Engine) ---
+  cmd_cons = subparsers.add_parser("sync-standards", help="Discovers and amends Abstract Standards via Consensus")
+  cmd_cons.add_argument("--frameworks", nargs="+", help="Frameworks to scan (default: all installed)")
+  cmd_cons.add_argument(
+    "--categories",
+    nargs="+",
+    default=["loss", "optimizer", "layer", "activation"],
+    help="API Categories to scan (enum values)",
+  )
+  cmd_cons.add_argument(
+    "--dry-run",
+    action="store_true",
+    help="Print candidates without writing to disk",
+  )
+
   # --- Command: GEN TESTS ---
   cmd_gen = subparsers.add_parser("gen-tests", help="Generate physical Python test files")
   cmd_gen.add_argument("--out", type=Path, default=Path("tests", "generated", "test_tier_a_math.py"))
@@ -162,6 +186,9 @@ def main(argv: Optional[List[str]] = None) -> int:
   elif args.command == "ci":
     return commands.handle_ci(args.update_readme, args.readme_path, args.json_report)
 
+  elif args.command == "snapshot":
+    return commands.handle_snapshot(args.out_dir)
+
   elif args.command == "scaffold":
     return commands.handle_scaffold(args.frameworks, args.out_dir)
 
@@ -173,6 +200,9 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   elif args.command == "sync":
     return commands.handle_sync(args.framework)
+
+  elif args.command == "sync-standards":
+    return commands.handle_sync_standards(args.categories, args.frameworks, args.dry_run)
 
   elif args.command == "gen-tests":
     return commands.handle_gen_tests(args.out)
