@@ -1,0 +1,443 @@
+{
+  "__framework__": "tensorflow",
+  "mappings": {
+    "Abs": {
+      "api": "tensorflow.abs"
+    },
+    "Acos": {
+      "api": "tensorflow.acos"
+    },
+    "Acosh": {
+      "api": "tensorflow.acosh"
+    },
+    "Add": {
+      "api": "tensorflow.add"
+    },
+    "ArgMax": {
+      "api": "tensorflow.argmax"
+    },
+    "ArgMin": {
+      "api": "tensorflow.argmin"
+    },
+    "Asin": {
+      "api": "tensorflow.asin"
+    },
+    "Asinh": {
+      "api": "tensorflow.asinh"
+    },
+    "Atan": {
+      "api": "tensorflow.atan"
+    },
+    "Atanh": {
+      "api": "tensorflow.atanh"
+    },
+    "Ceil": {
+      "api": "tensorflow.math.ceil"
+    },
+    "Concat": {
+      "api": "tensorflow.concat"
+    },
+    "Conv": {
+      "api": "tensorflow.conv"
+    },
+    "Cos": {
+      "api": "tensorflow.cos"
+    },
+    "Cosh": {
+      "api": "tensorflow.cosh"
+    },
+    "CumSum": {
+      "api": "tensorflow.cumsum"
+    },
+    "Det": {
+      "api": "tensorflow.linalg.det"
+    },
+    "Einsum": {
+      "api": "tensorflow.einsum"
+    },
+    "Equal": {
+      "api": "tensorflow.equal"
+    },
+    "Erf": {
+      "api": "tensorflow.math.erf"
+    },
+    "Exp": {
+      "api": "tensorflow.exp"
+    },
+    "Floor": {
+      "api": "tensorflow.floor"
+    },
+    "Gather": {
+      "api": "tensorflow.gather"
+    },
+    "Greater": {
+      "api": "tensorflow.greater"
+    },
+    "Identity": {
+      "api": "tensorflow.identity"
+    },
+    "Less": {
+      "api": "tensorflow.less"
+    },
+    "Log": {
+      "api": "tensorflow.math.log"
+    },
+    "MatMul": {
+      "api": "tensorflow.matmul"
+    },
+    "Mod": {
+      "api": "tensorflow.math.mod"
+    },
+    "Pad": {
+      "api": "tensorflow.pad"
+    },
+    "Pow": {
+      "api": "tensorflow.pow"
+    },
+    "Range": {
+      "api": "tensorflow.range"
+    },
+    "Reciprocal": {
+      "api": "tensorflow.math.reciprocal"
+    },
+    "Reshape": {
+      "api": "tensorflow.reshape"
+    },
+    "Round": {
+      "api": "tensorflow.round"
+    },
+    "STFT": {
+      "api": "tensorflow.signal.stft"
+    },
+    "Scan": {
+      "api": "tensorflow.scan"
+    },
+    "Shape": {
+      "api": "tensorflow.shape"
+    },
+    "Sigmoid": {
+      "api": "tensorflow.sigmoid"
+    },
+    "Sign": {
+      "api": "tensorflow.sign"
+    },
+    "Sin": {
+      "api": "tensorflow.sin"
+    },
+    "Sinh": {
+      "api": "tensorflow.sinh"
+    },
+    "Size": {
+      "api": "tensorflow.size"
+    },
+    "Softmax": {
+      "api": "tensorflow.math.softmax"
+    },
+    "Softplus": {
+      "api": "tensorflow.math.softplus"
+    },
+    "Softsign": {
+      "api": "tensorflow.math.softsign"
+    },
+    "Split": {
+      "api": "tensorflow.split"
+    },
+    "Sqrt": {
+      "api": "tensorflow.sqrt"
+    },
+    "Squeeze": {
+      "api": "tensorflow.squeeze"
+    },
+    "Tan": {
+      "api": "tensorflow.tan"
+    },
+    "Tanh": {
+      "api": "tensorflow.tanh"
+    },
+    "Tile": {
+      "api": "tensorflow.tile"
+    },
+    "Transpose": {
+      "api": "tensorflow.transpose"
+    },
+    "Unique": {
+      "api": "tensorflow.unique"
+    },
+    "Where": {
+      "api": "tensorflow.where"
+    },
+    "abs": {
+      "api": "tensorflow.abs"
+    },
+    "acos": {
+      "api": "tensorflow.acos"
+    },
+    "acosh": {
+      "api": "tensorflow.acosh"
+    },
+    "add": {
+      "api": "tensorflow.add"
+    },
+    "argmax": {
+      "api": "tensorflow.argmax"
+    },
+    "argmin": {
+      "api": "tensorflow.argmin"
+    },
+    "argsort": {
+      "api": "tensorflow.argsort"
+    },
+    "asin": {
+      "api": "tensorflow.asin"
+    },
+    "asinh": {
+      "api": "tensorflow.asinh"
+    },
+    "atan": {
+      "api": "tensorflow.atan"
+    },
+    "atan2": {
+      "api": "tensorflow.atan2"
+    },
+    "atanh": {
+      "api": "tensorflow.atanh"
+    },
+    "broadcast_to": {
+      "api": "tensorflow.broadcast_to"
+    },
+    "ceil": {
+      "api": "tensorflow.math.ceil"
+    },
+    "cholesky": {
+      "api": "tensorflow.linalg.cholesky"
+    },
+    "concat": {
+      "api": "tensorflow.concat"
+    },
+    "conj": {
+      "api": "tensorflow.math.conj"
+    },
+    "cos": {
+      "api": "tensorflow.cos"
+    },
+    "cosh": {
+      "api": "tensorflow.cosh"
+    },
+    "count_nonzero": {
+      "api": "tensorflow.math.count_nonzero"
+    },
+    "cross": {
+      "api": "tensorflow.linalg.cross"
+    },
+    "det": {
+      "api": "tensorflow.linalg.det"
+    },
+    "device": {
+      "api": "tf.device",
+      "requires_plugin": "device_allocator"
+    },
+    "divide": {
+      "api": "tensorflow.divide"
+    },
+    "eigh": {
+      "api": "tensorflow.linalg.eigh"
+    },
+    "eigvalsh": {
+      "api": "tensorflow.linalg.eigvalsh"
+    },
+    "equal": {
+      "api": "tensorflow.equal"
+    },
+    "exp": {
+      "api": "tensorflow.exp"
+    },
+    "expand_dims": {
+      "api": "tensorflow.expand_dims"
+    },
+    "expm1": {
+      "api": "tensorflow.math.expm1"
+    },
+    "eye": {
+      "api": "tensorflow.eye"
+    },
+    "fftshift": {
+      "api": "tensorflow.signal.fftshift"
+    },
+    "floor": {
+      "api": "tensorflow.floor"
+    },
+    "greater": {
+      "api": "tensorflow.greater"
+    },
+    "greater_equal": {
+      "api": "tensorflow.greater_equal"
+    },
+    "ifftshift": {
+      "api": "tensorflow.signal.ifftshift"
+    },
+    "imag": {
+      "api": "tensorflow.math.imag"
+    },
+    "inv": {
+      "api": "tensorflow.linalg.inv"
+    },
+    "is_tensor": {
+      "api": "tensorflow.is_tensor"
+    },
+    "less": {
+      "api": "tensorflow.less"
+    },
+    "less_equal": {
+      "api": "tensorflow.less_equal"
+    },
+    "log": {
+      "api": "tensorflow.math.log"
+    },
+    "log1p": {
+      "api": "tensorflow.math.log1p"
+    },
+    "logical_and": {
+      "api": "tensorflow.logical_and"
+    },
+    "logical_not": {
+      "api": "tensorflow.logical_not"
+    },
+    "logical_or": {
+      "api": "tensorflow.logical_or"
+    },
+    "logical_xor": {
+      "api": "tensorflow.math.logical_xor"
+    },
+    "matmul": {
+      "api": "tensorflow.matmul"
+    },
+    "matrix_rank": {
+      "api": "tensorflow.linalg.matrix_rank"
+    },
+    "matrix_transpose": {
+      "api": "tensorflow.linalg.matrix_transpose"
+    },
+    "maximum": {
+      "api": "tensorflow.maximum"
+    },
+    "meshgrid": {
+      "api": "tensorflow.meshgrid"
+    },
+    "minimum": {
+      "api": "tensorflow.minimum"
+    },
+    "multiply": {
+      "api": "tensorflow.multiply"
+    },
+    "negative": {
+      "api": "tensorflow.negative"
+    },
+    "nextafter": {
+      "api": "tensorflow.math.nextafter"
+    },
+    "not_equal": {
+      "api": "tensorflow.not_equal"
+    },
+    "ones": {
+      "api": "tensorflow.ones"
+    },
+    "ones_like": {
+      "api": "tensorflow.ones_like"
+    },
+    "pinv": {
+      "api": "tensorflow.linalg.pinv"
+    },
+    "pow": {
+      "api": "tensorflow.pow"
+    },
+    "qr": {
+      "api": "tensorflow.linalg.qr"
+    },
+    "real": {
+      "api": "tensorflow.math.real"
+    },
+    "reciprocal": {
+      "api": "tensorflow.math.reciprocal"
+    },
+    "repeat": {
+      "api": "tensorflow.repeat"
+    },
+    "reshape": {
+      "api": "tensorflow.reshape"
+    },
+    "roll": {
+      "api": "tensorflow.roll"
+    },
+    "round": {
+      "api": "tensorflow.round"
+    },
+    "searchsorted": {
+      "api": "tensorflow.searchsorted"
+    },
+    "sign": {
+      "api": "tensorflow.sign"
+    },
+    "sin": {
+      "api": "tensorflow.sin"
+    },
+    "sinh": {
+      "api": "tensorflow.sinh"
+    },
+    "slogdet": {
+      "api": "tensorflow.linalg.slogdet"
+    },
+    "solve": {
+      "api": "tensorflow.linalg.solve"
+    },
+    "sort": {
+      "api": "tensorflow.sort"
+    },
+    "sqrt": {
+      "api": "tensorflow.sqrt"
+    },
+    "square": {
+      "api": "tensorflow.square"
+    },
+    "squeeze": {
+      "api": "tensorflow.squeeze"
+    },
+    "stack": {
+      "api": "tensorflow.stack"
+    },
+    "subtract": {
+      "api": "tensorflow.subtract"
+    },
+    "svd": {
+      "api": "tensorflow.linalg.svd"
+    },
+    "tan": {
+      "api": "tensorflow.tan"
+    },
+    "tanh": {
+      "api": "tensorflow.tanh"
+    },
+    "tensordot": {
+      "api": "tensorflow.tensordot"
+    },
+    "tile": {
+      "api": "tensorflow.tile"
+    },
+    "unstack": {
+      "api": "tensorflow.unstack"
+    },
+    "where": {
+      "api": "tensorflow.where"
+    },
+    "zeros": {
+      "api": "tensorflow.zeros"
+    },
+    "zeros_like": {
+      "api": "tensorflow.zeros_like"
+    }
+  },
+  "templates": {
+    "convert_input": "tf.convert_to_tensor({np_var})",
+    "import": "import tensorflow as tf",
+    "to_numpy": "{res_var}.numpy()"
+  }
+}

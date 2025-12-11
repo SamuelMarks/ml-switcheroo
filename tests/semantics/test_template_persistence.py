@@ -30,6 +30,7 @@ def test_json_template_overrides_registry(tmp_path):
   # 2. Patch resolution to point to our temp dir
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=tmp_path):
     mgr = SemanticsManager()
+    mgr._reverse_index = {}
 
     # 3. Assert Override
     torch_tmpl = mgr.test_templates["torch"]
@@ -49,6 +50,7 @@ def test_registry_provides_defaults(tmp_path):
   # Point to empty dir
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=tmp_path):
     mgr = SemanticsManager()
+    mgr._reverse_index = {}
 
     assert "torch" in mgr.test_templates
     assert "import torch" in mgr.test_templates["torch"]["import"]

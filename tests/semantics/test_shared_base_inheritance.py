@@ -20,6 +20,7 @@ class MockAdapterWithParent:
 def manager():
   # Initialize with clean state
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
   mgr.data = {}
   return mgr
 

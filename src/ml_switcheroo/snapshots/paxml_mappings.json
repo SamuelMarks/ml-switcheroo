@@ -1,0 +1,72 @@
+{
+  "__framework__": "paxml",
+  "mappings": {
+    "Dropout": {
+      "api": "praxis.layers.Dropout"
+    },
+    "Einsum": {
+      "api": "praxis.layers.Einsum"
+    },
+    "Elu": {
+      "api": "praxis.layers.ELU"
+    },
+    "Flatten": {
+      "api": "praxis.layers.Flatten"
+    },
+    "Gelu": {
+      "api": "praxis.layers.GELU"
+    },
+    "Identity": {
+      "api": "praxis.layers.Identity"
+    },
+    "LeakyRelu": {
+      "api": "praxis.layers.LeakyReLU"
+    },
+    "Linear": {
+      "api": "praxis.layers.Linear",
+      "args": {
+        "bias": "use_bias",
+        "in_features": "input_dims",
+        "out_features": "output_dims"
+      }
+    },
+    "Optional": {
+      "api": "praxis.base_layer.Optional"
+    },
+    "ReLU": {
+      "api": "praxis.layers.ReLU"
+    },
+    "Relu": {
+      "api": "praxis.layers.ReLU"
+    },
+    "Sequential": {
+      "api": "praxis.layers.Sequential"
+    },
+    "Sigmoid": {
+      "api": "praxis.layers.Sigmoid"
+    },
+    "Swish": {
+      "api": "praxis.layers.Swish"
+    },
+    "Tanh": {
+      "api": "praxis.layers.Tanh"
+    },
+    "any": {
+      "api": "praxis.base_layer.Any"
+    },
+    "dropout": {
+      "api": "praxis.layers.Dropout"
+    },
+    "repeat": {
+      "api": "praxis.layers.Repeat"
+    },
+    "tanh": {
+      "api": "praxis.layers.Tanh"
+    }
+  },
+  "templates": {
+    "convert_input": "jnp.array({np_var})",
+    "import": "import jax.numpy as jnp\nimport praxis",
+    "to_numpy": "np.array({res_var})"
+  }
+}

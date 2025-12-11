@@ -10,6 +10,7 @@ Features:
 - Generates HTML for the WASM interface (Source/Target selectors, Editor divs).
 - Injects necessary JS/CSS assets into the Sphinx build.
 - **Protocol-Driven Examples**: Extracts standard code snippets from adapters.
+- **Strict Mode Toggle**: UI element to enabling strict API validation.
 """
 
 import os
@@ -106,6 +107,15 @@ class Model(nn.Module):
                 </div>
 
                 <div class="controls-bar">
+                    <!-- Strict Mode Toggle -->
+                    <label class="md-switch" title="Strict Mode: Fail if an API cannot be mapped instead of passing it through.">
+                        <input type="checkbox" id="chk-strict-mode">
+                        <span class="md-switch-track">
+                            <span class="md-switch-thumb"></span>
+                        </span>
+                        <span class="md-switch-text">Strict Mode</span>
+                    </label>
+
                     <button id="btn-convert" class="md-btn md-btn-accent" disabled>Run Translation</button>
                 </div>
 

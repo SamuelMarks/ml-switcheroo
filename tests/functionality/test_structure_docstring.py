@@ -31,6 +31,7 @@ class MockRewriter(StructureMixin, BaseRewriter):
 @pytest.fixture
 def rewriter():
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
   # Use bare semantics
   mgr.data = {}
   config = RuntimeConfig(source_framework="torch", target_framework="jax")

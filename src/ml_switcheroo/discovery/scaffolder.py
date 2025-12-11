@@ -8,10 +8,9 @@ Knowledge Base.
 It prioritizes matching discovered APIs against ingested Specs (ONNX, Array API)
 before falling back to structural heuristics provided by Framework Adapters.
 
-Updates:
-- Now injects static semantic defaults (like DataLoader shim configuration)
-  from `ml_switcheroo.frameworks.common.data` to ensuring canonical features
-  are present in the generated JSON.
+Updates for Distributed Semantics:
+- Writes Abstract Operation Definitions (Specs) to `semantics/*.json`.
+- Writes Implementation Details (Variants) to `snapshots/{framework}_mappings.json`.
 """
 
 import json
@@ -19,11 +18,12 @@ import difflib
 import re
 from pathlib import Path
 from typing import Dict, Any, List, Set, Optional, Tuple
+from collections import defaultdict
 
 from ml_switcheroo.discovery.inspector import ApiInspector
-from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.utils.console import console, log_info, log_success
+from ml_switcheroo.utils.console import console, log_info, log_success, log_warning
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
 
 # Access static definitions for common utilities
@@ -49,44 +49,32 @@ class Scaffolder:
     similarity_threshold: float = 0.8,
     arity_penalty: float = 0.3,
   ):
-    """
-    Initializes the Scaffolder.
-
-    Args:
-        semantics: Pre-loaded SemanticsManager (optional).
-        similarity_threshold: Min ratio to consider a fuzzy match (default 0.8).
-        arity_penalty: Score reduction if parameter counts mismatch (default 0.3).
-    """
     self.inspector = ApiInspector()
     self.console = console
     self.semantics = semantics or SemanticsManager()
     self.similarity_threshold = similarity_threshold
     self.arity_penalty = arity_penalty
 
-    # Staging areas for the 3 Tiers
-    self.tier_a_math: Dict[str, Any] = {}  # Array API
-    self.tier_b_neural: Dict[str, Any] = {}  # Neural Net (ONNX)
-    self.tier_c_extras: Dict[str, Any] = {}  # Framework Extras
-
+    # Staging areas
+    self.staged_specs: Dict[str, Dict[str, Any]] = {
+      "k_array_api.json": {},
+      "k_neural_net.json": {},
+      "k_framework_extras.json": {},
+    }
+    self.staged_mappings: Dict[str, Dict[str, Any]] = defaultdict(dict)
     self._cached_heuristics: Optional[Dict[str, List[re.Pattern]]] = None
 
   def _lazy_load_heuristics(self) -> Dict[str, List[re.Pattern]]:
-    """
-    Aggregates discovery regexes from all registered framework adapters.
-    Uses result caching for performance.
-    """
     if self._cached_heuristics is not None:
       return self._cached_heuristics
 
     compiled: Dict[str, List[re.Pattern]] = {"neural": [], "extras": []}
 
-    # Loop through every registered framework and pull its rules
     for fw_name in available_frameworks():
       adapter = get_adapter(fw_name)
       if not adapter:
         continue
 
-      # Check if adapter supports the new property (duck typing for backward compat)
       if hasattr(adapter, "discovery_heuristics") and adapter.discovery_heuristics:
         heuristics = adapter.discovery_heuristics
 
@@ -94,7 +82,6 @@ class Scaffolder:
           if tier in compiled:
             for pat in patterns:
               try:
-                # Case insensitive matching allows matching "Linear" or "linear"
                 compiled[tier].append(re.compile(pat, re.IGNORECASE))
               except re.error as e:
                 print(f"⚠️ Invalid regex pattern in {fw_name} adapter: '{pat}' - {e}")
@@ -102,26 +89,35 @@ class Scaffolder:
     self._cached_heuristics = compiled
     return compiled
 
-  def scaffold(self, frameworks: List[str], output_dir: Path):
+  def scaffold(self, frameworks: List[str], output_dir: Path = None):
     """
     Main entry point. Scans frameworks and builds/updates JSON mappings.
 
-    Discovery Strategy:
-    1. **Spec Validation**: Checks if discovered API matches a specific
-       Abstract Operator already defined in the Knowledge Base (e.g., from ONNX).
-    2. **Heuristic Fallback**: If no spec match, checks Framework Adapters
-       for regex conventions (e.g. `.nn` -> Neural).
-    3. **Static Injection**: Merges hardcoded complex definitions (like DataLoader)
-       that cannot be easily autodiscovered but are critical for the engine.
-
     Args:
         frameworks: List of package names (e.g. ['torch', 'jax']).
-        output_dir: Directory to save generated JSON files.
+        output_dir: Directory for semantics (Specs).
+                    The snapshots dir is resolved as the sibling 'snapshots' directory.
     """
+    semantics_path = output_dir or resolve_semantics_dir()
+
+    # Ensure snapshots path is correctly resolved relative to the actual output target
+    if output_dir:
+      # Assuming standard layouts: parent/semantics and parent/snapshots
+      snapshots_path = output_dir.parent / "snapshots"
+    else:
+      snapshots_path = resolve_snapshots_dir()
+
+      # Check if we need to create the snapshots dir manually if logic derived from output_dir
+    # tests often create them but real usage implies they might not exist
+    if not snapshots_path.exists():
+      try:
+        snapshots_path.mkdir(parents=True, exist_ok=True)
+      except OSError:
+        pass  # Keep going, might fail on write if perms issue
+
     # Pre-load known specs to drive categorization
     known_neural_ops = self._get_ops_by_tier(SemanticTier.NEURAL)
     known_math_ops = self._get_ops_by_tier(SemanticTier.ARRAY_API)
-    # Tier C Knowledge (if present in semantics)
     known_extras_ops = self._get_ops_by_tier(SemanticTier.EXTRAS)
 
     catalogs = {}
@@ -139,198 +135,143 @@ class Scaffolder:
       name = details["name"]
       kind = details.get("type", "function")
 
-      # --- Strategy 1: Spec Validation (Priority) ---
-      # Check if this name matches a known Abstract Op from the specs
+      # Strategy 1: Spec Validation (Priority)
       neural_match = self._match_spec_op(name, known_neural_ops)
       if neural_match:
-        self._update_entry(self.tier_b_neural, neural_match, primary_fw, api_path, details, catalogs)
+        self._register_entry("k_neural_net.json", neural_match, primary_fw, api_path, details, catalogs)
         continue
 
       math_match = self._match_spec_op(name, known_math_ops)
       if math_match:
-        self._update_entry(self.tier_a_math, math_match, primary_fw, api_path, details, catalogs)
+        self._register_entry("k_array_api.json", math_match, primary_fw, api_path, details, catalogs)
         continue
 
       extras_match = self._match_spec_op(name, known_extras_ops)
       if extras_match:
-        self._update_entry(self.tier_c_extras, extras_match, primary_fw, api_path, details, catalogs)
+        self._register_entry("k_framework_extras.json", extras_match, primary_fw, api_path, details, catalogs)
         continue
 
-      # --- Strategy 2: Heuristic Fallback (Dynamic) ---
-      # If not in specs, we guess based on structure using aggregated regex rules.
-
+      # Strategy 2: Heuristic Fallback (Dynamic)
       if self._is_structurally_neural(api_path, kind):
-        self._update_entry(self.tier_b_neural, name, primary_fw, api_path, details, catalogs)
+        self._register_entry("k_neural_net.json", name, primary_fw, api_path, details, catalogs)
         continue
 
       if self._is_structurally_extra(api_path, name):
-        self._update_entry(self.tier_c_extras, name, primary_fw, api_path, details, catalogs)
+        self._register_entry("k_framework_extras.json", name, primary_fw, api_path, details, catalogs)
         continue
 
       # Heuristic: Math Tier (Default)
-      self._update_entry(self.tier_a_math, name, primary_fw, api_path, details, catalogs)
+      self._register_entry("k_array_api.json", name, primary_fw, api_path, details, catalogs)
 
-    # --- Strategy 3: Static Injection (Manual Defaults via Code) ---
-    # Explicitly inject the DataLoader logic which needs special plugin handling
-    # and cannot be reliably scaffolded by simple inspection.
+    # Strategy 3: Static Injection
     dataloader_defaults = get_dataloader_semantics()
     for op, defn in dataloader_defaults.items():
-      # Merge into Tier C (Extras) if not already present or force update?
-      # We force update (or init) to ensure valid plugin wiring.
-      self.tier_c_extras[op] = defn
+      self.staged_specs["k_framework_extras.json"][op] = {
+        "description": defn.get("description"),
+        "std_args": defn.get("std_args"),
+      }
+      if "variants" in defn:
+        for fw, variant in defn["variants"].items():
+          if variant is not None:
+            self.staged_mappings[fw][op] = variant
 
-    if not output_dir.exists():
-      output_dir.mkdir(parents=True)
+    # 4. Write to Disk
+    if not semantics_path.exists():
+      semantics_path.mkdir(parents=True, exist_ok=True)
 
-    self._write_json(output_dir / "k_array_api.json", self.tier_a_math)
-    self._write_json(output_dir / "k_neural_net.json", self.tier_b_neural)
-    self._write_json(output_dir / "k_framework_extras.json", self.tier_c_extras)
+    if not snapshots_path.exists():
+      snapshots_path.mkdir(parents=True, exist_ok=True)
+
+    for filename, content in self.staged_specs.items():
+      if content:
+        self._write_json(semantics_path / filename, content, merge=True)
+
+    for fw, mapping_data in self.staged_mappings.items():
+      if mapping_data:
+        file_data = {"__framework__": fw, "mappings": mapping_data}
+        self._write_json(snapshots_path / f"{fw}_mappings.json", file_data, merge=True)
 
   def _get_ops_by_tier(self, tier: SemanticTier) -> Set[str]:
-    """Retrieves listing of known abstract operations for a given tier."""
-    # Access internal storage of sources to determine tier.
-    # Fallback to empty if using a manager that hasn't indexed origins.
     if not hasattr(self.semantics, "_key_origins"):
       return set()
-
     return {k for k, v in self.semantics._key_origins.items() if v == tier.value}
 
   def _match_spec_op(self, api_name: str, spec_ops: Set[str]) -> Optional[str]:
-    """
-    Attempts to find a matching Abstract Op ID in the spec set.
-    Performs exact match, case-insensitive match, and fuzzy match.
-    """
-    # 1. Exact Match
     if api_name in spec_ops:
       return api_name
-
-    # 2. Case Insensitive (e.g. ReLU vs Relu)
     lower_map = {k.lower(): k for k in spec_ops}
     if api_name.lower() in lower_map:
       return lower_map[api_name.lower()]
-
-    # 3. Fuzzy Match (High Strictness for Spec alignment)
     matches = difflib.get_close_matches(api_name, spec_ops, n=1, cutoff=0.95)
     if matches:
       return matches[0]
-
     return None
 
   def _is_structurally_neural(self, api_path: str, kind: str) -> bool:
-    """
-    Determines if API is likely Neural based on regex patterns registered via adapters.
-    """
     heuristics = self._lazy_load_heuristics()
     patterns = heuristics.get("neural", [])
-
-    # Check RegEx matches against the full path
     for pat in patterns:
       if pat.search(api_path):
         return True
-
-    # Core Fallback for Classes containing 'Layer' or 'Module' even if no adapter
-    # explicitly claimed them (safety net for bootstrapping)
     if kind == "class" and ("Layer" in api_path or "Module" in api_path):
       return True
-
     return False
 
   def _is_structurally_extra(self, api_path: str, name: str) -> bool:
-    """
-    Determines if API is likely a Framework Utility (Tier C) based on patterns.
-    """
     heuristics = self._lazy_load_heuristics()
     patterns = heuristics.get("extras", [])
-
-    # 1. Check Regex
     for pat in patterns:
       if pat.search(api_path):
         return True
-
-    # 2. Fallbacks for unregistered frameworks (Bootstrapping)
     name_lower = name.lower()
-    # Common utility keywords
     if any(k in name_lower for k in ["seed", "save", "load", "device", "print", "info", "check"]):
       return True
-
     return False
 
-  def _update_entry(
-    self,
-    target_dict: Dict,
-    op_name: str,
-    primary_fw: str,
-    primary_path: str,
-    details: Dict,
-    catalogs: Dict[str, Dict],
+  def _register_entry(
+    self, target_filename: str, op_name: str, primary_fw: str, primary_path: str, details: Dict, catalogs: Dict[str, Dict]
   ):
-    """
-    Creates or updates the mapping entry in the staging dict.
-    """
-    # If the entry exists (maybe loaded from spec), preserve description/args
-    # If new, create skeleton.
-    if op_name not in target_dict:
-      # We check if SemanticsManager already has data for this op (from Spec)
-      existing_def = self.semantics.data.get(op_name, {})
+    existing_def = self.semantics.data.get(op_name, {})
 
-      target_dict[op_name] = {
-        "description": existing_def.get("description", details.get("docstring_summary", "")),
-        "type": details.get("type", "function"),
-        "std_args": existing_def.get("std_args", details.get("params", [])),
-        "variants": existing_def.get("variants", {}),
-      }
-
-    # Update Primary Variant
-    target_dict[op_name]["variants"][primary_fw] = {
-      "api": primary_path,
-      "args": {p: p for p in details.get("params", [])},
+    spec_entry = {
+      "description": existing_def.get("description", details.get("docstring_summary", "")),
+      "type": details.get("type", "function"),
+      "std_args": existing_def.get("std_args", details.get("params", [])),
     }
 
-    # Primary Params context for fuzzy matching
+    self.staged_specs[target_filename][op_name] = spec_entry
+
+    self.staged_mappings[primary_fw][op_name] = {"api": primary_path, "args": {p: p for p in details.get("params", [])}}
+
     primary_params = details.get("params", [])
 
-    # Hunt for variants in other frameworks
     for other_fw, other_cat in catalogs.items():
       if other_fw == primary_fw:
         continue
 
-      # 1. Exact Path Match (Rare across frameworks)
       if primary_path in other_cat:
-        self._register_match(target_dict[op_name], other_fw, primary_path, other_cat[primary_path])
+        self._register_mapping(op_name, other_fw, primary_path, other_cat[primary_path])
         continue
 
-      # 2. Match against Abstract Name (op_name) with Signature Awareness
       fuzzy_match = self._find_fuzzy_match(other_cat, op_name, primary_params)
       if fuzzy_match:
         path, d = fuzzy_match
-        self._register_match(target_dict[op_name], other_fw, path, d)
+        self._register_mapping(op_name, other_fw, path, d)
 
-  def _register_match(self, entry: Dict, fw: str, path: str, details: Dict):
-    """Helper to write the variant dict."""
-    entry["variants"][fw] = {
-      "api": path,
-      "args": {p: p for p in details.get("params", [])},
-    }
+  def _register_mapping(self, op_name: str, fw: str, path: str, details: Dict):
+    self.staged_mappings[fw][op_name] = {"api": path, "args": {p: p for p in details.get("params", [])}}
 
   def _find_fuzzy_match(self, catalog: Dict, target_name: str, reference_params: List[str]) -> Optional[Tuple[str, Dict]]:
-    """
-    Finds the best API match using name similarity AND signature compatibility.
-    """
     best_score = 0.0
     best_match = None
-
     ref_arity = len(reference_params)
 
     for path, details in catalog.items():
       leaf_name = path.split(".")[-1]
       candidate_params = details.get("params", [])
       cand_arity = len(candidate_params)
-
-      # Feature 07: Check for varargs
       has_varargs = details.get("has_varargs", False)
 
-      # --- 1. Calculate Name Similarity ---
-      # Boost exact substring matches
       base_boost = 0.0
       if target_name.lower() == leaf_name.lower():
         base_boost = 0.3
@@ -338,13 +279,10 @@ class Scaffolder:
         base_boost = 0.1
 
       name_ratio = difflib.SequenceMatcher(None, target_name.lower(), leaf_name.lower()).ratio()
-
       raw_score = name_ratio + base_boost
 
-      # --- 2. Sanity Check: Arity (Signature Analysis) ---
       arity_diff = abs(ref_arity - cand_arity)
       final_penalty = 0.0
-
       if arity_diff > 0:
         if has_varargs:
           final_penalty = 0.0
@@ -366,14 +304,18 @@ class Scaffolder:
       return best_match
     return None
 
-  def _write_json(self, path: Path, new_data: Dict):
-    """Writes data to JSON, merging with existing on disk if present."""
-    if path.exists():
+  def _write_json(self, path: Path, new_data: Dict, merge: bool = False):
+    if merge and path.exists():
       try:
         with open(path, "rt", encoding="utf-8") as f:
           existing = json.load(f)
-        existing.update(new_data)
-        final_data = existing
+        if "mappings" in new_data and "mappings" in existing:
+          existing["mappings"].update(new_data["mappings"])
+          existing.update({k: v for k, v in new_data.items() if k != "mappings"})
+          final_data = existing
+        else:
+          existing.update(new_data)
+          final_data = existing
       except json.JSONDecodeError:
         final_data = new_data
     else:
@@ -382,4 +324,4 @@ class Scaffolder:
     with open(path, "wt", encoding="utf-8") as f:
       json.dump(final_data, f, indent=2, sort_keys=True)
 
-    log_success(f"Written {len(final_data)} entries to [path]{path}[/path]")
+    log_success(f"Updated [path]{path.name}[/path] ({len(new_data.get('mappings', new_data))} entries generated)")

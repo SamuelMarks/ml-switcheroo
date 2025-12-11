@@ -11,7 +11,7 @@ Verifies that:
 import json
 import pytest
 
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from ml_switcheroo.cli.wizard import MappingWizard
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -32,11 +32,22 @@ class MockInspector:
 
 @pytest.fixture
 def wizard(tmp_path):
-  # Patch directory resolution
-  with patch("ml_switcheroo.cli.wizard.resolve_semantics_dir", return_value=tmp_path):
-    mgr = SemanticsManager()
-    w = MappingWizard(mgr)
-    yield w
+  # Patch file resolution to use tmp_path
+  sem_dir = tmp_path / "semantics"
+  snap_dir = tmp_path / "snapshots"
+
+  # Ensure Dirs Mocked
+  sem_dir.mkdir()
+  snap_dir.mkdir()
+
+  with patch("ml_switcheroo.cli.wizard.resolve_semantics_dir", return_value=sem_dir):
+    with patch("ml_switcheroo.cli.wizard.resolve_snapshots_dir", return_value=snap_dir):
+      mgr = SemanticsManager()
+      mgr._reverse_index = {}
+      w = MappingWizard(mgr)
+      mgr.data = {}
+      mgr._reverse_index = {}
+      yield w
 
 
 def test_arg_normalization_flow(wizard, tmp_path):
@@ -64,8 +75,8 @@ def test_arg_normalization_flow(wizard, tmp_path):
       with patch("rich.prompt.Confirm.ask", return_value=False):  # No target map
         wizard.start("torch")
 
-  # Verify JSON
-  fpath = tmp_path / "k_array_api.json"
+  # Verify Spec JSON
+  fpath = tmp_path / "semantics" / "k_array_api.json"
   assert fpath.exists()
 
   data = json.loads(fpath.read_text())
@@ -75,8 +86,12 @@ def test_arg_normalization_flow(wizard, tmp_path):
   # Check Standards
   assert entry["std_args"] == ["x", "axis"]
 
-  # Check Source Mapping
-  torch_var = entry["variants"]["torch"]
+  # Verify Snapshot Mapping
+  snap_path = tmp_path / "snapshots" / "torch_mappings.json"
+  assert snap_path.exists()
+  snap_data = json.loads(snap_path.read_text())
+
+  torch_var = snap_data["mappings"]["full_op"]
   assert torch_var["api"] == "torch.full_op"
   assert torch_var["args"] == {"x": "input", "axis": "dim"}
 
@@ -124,13 +139,12 @@ def test_full_bidirectional_flow(wizard, tmp_path):
       with patch("rich.prompt.Confirm.ask", side_effect=confirm_side_effect):
         wizard.start("torch")
 
-  fpath = tmp_path / "k_array_api.json"
-  data = json.loads(fpath.read_text())
-  entry = data["full_op"]
+  # Check JAX Overlay exists
+  jax_file = tmp_path / "snapshots" / "jax_mappings.json"
+  assert jax_file.exists()
 
-  # Robustness check: JAX variant created
-  assert "jax" in entry["variants"]
-  jax_var = entry["variants"]["jax"]
+  data = json.loads(jax_file.read_text())
+  jax_var = data["mappings"]["full_op"]
 
   assert jax_var["api"] == "jax.numpy.op"
   assert jax_var.get("requires_plugin") is None  # Should be absent
@@ -182,9 +196,9 @@ def test_wizard_plugin_assignment(wizard, tmp_path):
       with patch("rich.prompt.Confirm.ask", side_effect=confirm_side_effect):
         wizard.start("torch")
 
-  fpath = tmp_path / "k_array_api.json"
-  data = json.loads(fpath.read_text())
-  jax_var = data["full_op"]["variants"]["jax"]
+  jax_file = tmp_path / "snapshots" / "jax_mappings.json"
+  data = json.loads(jax_file.read_text())
+  jax_var = data["mappings"]["full_op"]
 
   assert jax_var.get("requires_plugin") == "decompose_alpha"
 
@@ -195,5 +209,5 @@ def test_skipping_logic_preserved(wizard, tmp_path):
     with patch("rich.prompt.Prompt.ask", return_value="s"):  # Skip
       wizard.start("torch")
 
-  # No file
-  assert not (tmp_path / "k_array_api.json").exists()
+  # No Spec file
+  assert not (tmp_path / "semantics" / "k_array_api.json").exists()

@@ -1,0 +1,9 @@
+{
+  "__framework__": "numpy",
+  "mappings": {},
+  "templates": {
+    "convert_input": "{np_var}",
+    "import": "import numpy as np",
+    "to_numpy": "{res_var}"
+  }
+}

@@ -3,8 +3,8 @@ Discovery Module for updating Semantic Knowledge Base.
 
 This module scans installed packages (like 'torch') for APIs that are NOT present
 in the current Semantic Knowledge Base. It generates a gap analysis report and,
-optionally, automatically merges these missing definitions into the appropriate
-JSON tier files (`k_array_api.json` vs `k_neural_net.json`).
+optionally, automatically merges these missing definitions into the distributed
+Knowledge Graph (Specs in `semantics/`, Mappings in `snapshots/`).
 
 Includes Rich-based reporting for better developer experience.
 """
@@ -12,11 +12,12 @@ Includes Rich-based reporting for better developer experience.
 import json
 from pathlib import Path
 from typing import Dict, Any, Optional
+from collections import defaultdict
 
 from rich.table import Table
 from rich import box
 
-from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir
+from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.discovery.inspector import ApiInspector
 from ml_switcheroo.utils.console import console, log_info, log_success, log_warning
 
@@ -51,7 +52,7 @@ class MappingsUpdater:
 
     Args:
         package_name: The library to scan (e.g., 'torch').
-        auto_merge: If True, writes new entries directly to k_*.json files.
+        auto_merge: If True, writes new entries directly to json files.
         report_path: If provided, writes the raw missing dict to this JSON path.
 
     Returns:
@@ -73,7 +74,7 @@ class MappingsUpdater:
 
     # 4. Handle Output (Merge or Report)
     if auto_merge:
-      self._merge_to_disk(missing)
+      self._merge_to_disk(missing, package_name)
 
     if report_path:
       self._write_report(missing, report_path)
@@ -83,9 +84,6 @@ class MappingsUpdater:
   def _find_unmapped_apis(self, catalog: Dict[str, Any]) -> Dict[str, Any]:
     """
     Diffs the inspected catalog against the loaded semantics.
-
-    Args:
-        catalog: Result from ApiInspector.inspect().
 
     Returns:
         Dict of APIs that are not in the SemanticsManager.
@@ -125,7 +123,6 @@ class MappingsUpdater:
       return "k_neural_net.json"
 
     # Heuristic 2: Constants/Classes often look like PascalCase in Torch
-    # (ignoring the .nn check above which catches most layers)
     if name[0].isupper() and "_" not in name:
       return "k_neural_net.json"
 
@@ -141,11 +138,11 @@ class MappingsUpdater:
     table.add_column("Tier Suggestion", style="magenta")
     table.add_column("Status", style=color)
 
-    # Limit rows for sanity if huge
+    # Limit rows for sanity
     shown_count = 0
     limit = 50
 
-    for api, details in missing.items():
+    for api, details in sorted(missing.items()):
       if shown_count < limit:
         table.add_row(api, details["suggested_tier"], f"[{color}]{action}[/{color}]")
       shown_count += 1
@@ -155,72 +152,106 @@ class MappingsUpdater:
 
     console.print(table)
 
-  def _merge_to_disk(self, missing: Dict[str, Any]):
+  def _merge_to_disk(self, missing: Dict[str, Any], package_name: str):
     """
-    Writes the missing APIs into the actual source JSON files.
+    Writes the missing APIs to the distributed knowledge base.
+    Specs -> semantics/
+    Mappings -> snapshots/{fw}_mappings.json
     """
-    output_dir = resolve_semantics_dir()
-    if not output_dir.exists():
-      output_dir.mkdir(parents=True, exist_ok=True)
+    semantics_dir = resolve_semantics_dir()
+    snapshots_dir = resolve_snapshots_dir()
 
-    # Group by Target File
-    grouped: Dict[str, Dict[str, Any]] = {
-      "k_array_api.json": {},
-      "k_neural_net.json": {},
-    }
+    if not semantics_dir.exists():
+      semantics_dir.mkdir(parents=True, exist_ok=True)
+    if not snapshots_dir.exists():
+      snapshots_dir.mkdir(parents=True, exist_ok=True)
 
-    for api_path, details in missing.items():
-      target_file = details["suggested_tier"]
-      # Fallback if guess is weird
-      if target_file not in grouped:
-        target_file = "k_array_api.json"
+    # Infer framework key from package name (e.g. torch -> torch)
+    fw_key = package_name.split(".")[0].lower()
 
+    # Data Structures
+    spec_updates: Dict[str, Dict[str, Any]] = defaultdict(dict)  # filename -> ops
+    mapping_updates: Dict[str, Dict[str, Any]] = defaultdict(dict)  # fw_key -> ops
+
+    for api_path, details in sorted(missing.items()):
+      target_spec_file = details["suggested_tier"]
       # Use leaf name as Abstract ID (e.g. torch.abs -> 'abs')
       abstract_id = api_path.split(".")[-1]
 
-      # Create the entry skeleton
-      entry = {
-        "description": details["doc_summary"],
-        "std_args": details["detected_sig"],
-        "variants": {
-          # We assume the package name from the api path start is the framework
-          api_path.split(".")[0]: {"api": api_path}
-        },
+      # 1. Prepare Spec Entry (Description + Args)
+      spec_entry = {"description": details["doc_summary"], "std_args": details["detected_sig"]}
+      # Note: We rely on file loading logic to merge this safely later
+      spec_updates[target_spec_file][abstract_id] = spec_entry
+
+      # 2. Prepare Mapping Entry (Api + Args)
+      mapping_entry = {
+        "api": api_path,
+        # Default mapping assumes framework arg name == std arg name
+        "args": {p: p for p in details["detected_sig"]},
       }
+      mapping_updates[fw_key][abstract_id] = mapping_entry
 
-      grouped[target_file][abstract_id] = entry
+    # --- Write Specs ---
+    for filename, new_defs in spec_updates.items():
+      self._update_json_file(semantics_dir / filename, new_defs)
 
-    # Write to files
-    for filename, new_entries in grouped.items():
-      if not new_entries:
-        continue
+    # --- Write Mappings ---
+    for fw, mappings in mapping_updates.items():
+      mapping_file = snapshots_dir / f"{fw}_mappings.json"
+      # Structure for overlay file
+      overlay_content = {"__framework__": fw, "mappings": mappings}
+      # Specialized merge for overlays
+      self._update_overlay_file(mapping_file, overlay_content)
 
-      file_path = output_dir / filename
-      current_data = {}
+  def _update_json_file(self, path: Path, new_entries: Dict[str, Any]):
+    """Standard merge for Spec files."""
+    current_data = {}
+    if path.exists():
+      try:
+        with open(path, "rt", encoding="utf-8") as f:
+          current_data = json.load(f)
+      except Exception as e:
+        log_warning(f"Could not read {path.name}: {e}")
 
-      if file_path.exists():
-        try:
-          with open(file_path, "rt", encoding="utf-8") as f:
-            current_data = json.load(f)
-        except json.JSONDecodeError:
-          log_warning(f"Could not read existing {filename}, starting fresh.")
+    # Merge: favor existing if present (manual curation wins)
+    added = 0
+    for key, val in new_entries.items():
+      if key not in current_data:
+        current_data[key] = val
+        added += 1
 
-      # Update - respect manual overrides by only adding new keys
-      added_count = 0
-      for key, val in new_entries.items():
-        if key not in current_data:
-          current_data[key] = val
-          added_count += 1
-        else:
-          # Key exists: assume manual curation is better, skip overwrite
-          pass
+    if added > 0:
+      with open(path, "wt", encoding="utf-8") as f:
+        json.dump(current_data, f, indent=2, sort_keys=True)
+      log_success(f"Added {added} specs to [path]{path.name}[/path]")
 
-      if added_count > 0:
-        with open(file_path, "w", encoding="utf-8") as f:
-          json.dump(current_data, f, indent=2, sort_keys=True)
-        log_success(f"Added {added_count} new entries to [path]{filename}[/path]")
-      else:
-        log_info(f"No new unique entries for {filename} (Updates skipped).")
+  def _update_overlay_file(self, path: Path, new_content: Dict[str, Any]):
+    """Merges content into an overlay file."""
+    current_data = {"__framework__": new_content["__framework__"], "mappings": {}}
+
+    if path.exists():
+      try:
+        with open(path, "rt", encoding="utf-8") as f:
+          current_data = json.load(f)
+      except Exception:
+        pass
+
+    # Merge mappings
+    new_mappings = new_content.get("mappings", {})
+    # Use update to overwrite or add. For discovery, usually we want to add.
+    # If the key exists, existing discovery might likely be same or better?
+    # Let's use setdefault logic to be safe for overlays too.
+
+    added = 0
+    for op, details in new_mappings.items():
+      if op not in current_data["mappings"]:
+        current_data["mappings"][op] = details
+        added += 1
+
+    if added > 0:
+      with open(path, "wt", encoding="utf-8") as f:
+        json.dump(current_data, f, indent=2, sort_keys=True)
+      log_success(f"Added {added} mappings to [path]{path.name}[/path]")
 
   def _write_report(self, missing: Dict[str, Any], path: Path):
     """Dumps validation report to JSON."""

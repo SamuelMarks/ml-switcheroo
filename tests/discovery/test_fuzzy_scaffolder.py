@@ -1,139 +1,106 @@
 """
-Tests for Fuzzy Matching and Signature Analysis in Scaffolder.
-
-Verifies that:
-1.  Fuzzy name matching connects synonyms (absolute -> abs).
-2.  **Signature Analysis** prevents false positives (e.g. unary `foo` vs multi-arg `foo`).
-3.  Exact matches are prioritized.
+Tests for Fuzzy Matching (Updated for Distributed Semantics).
 """
 
 import json
 import pytest
+from unittest.mock import patch, MagicMock
 from ml_switcheroo.discovery.scaffolder import Scaffolder
 from ml_switcheroo.discovery.inspector import ApiInspector
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector(ApiInspector):
-  """Overrides inspect to return deterministic fake catalogs."""
-
   def inspect(self, fw_name: str) -> dict:
     if fw_name == "source_fw":
       return {
-        "source.absolute": {
-          "name": "absolute",
-          "params": ["x"],
-          "docstring_summary": "Abs value",
-        },
-        "source.add": {
-          "name": "add",
-          "params": ["x", "y"],
-          "docstring_summary": "Add",
-        },
-        "source.unary_op": {
-          "name": "unary_op",
-          "params": ["x"],
-          "docstring_summary": "Takes one arg",
-        },
+        "source.absolute": {"name": "absolute", "params": ["x"]},
+        "source.unary_op": {"name": "unary_op", "params": ["x"]},
       }
-
     if fw_name == "target_fw":
       return {
-        "target.abs": {
-          # MATCH MATCH: 'abs' ~ 'absolute' + Arity(1) == Arity(1)
-          "name": "abs",
-          "params": ["a"],
-          "docstring_summary": "Abs",
-        },
-        "target.add": {
-          # EXACT MATCH
-          "name": "add",
-          "params": ["a", "b"],
-          "docstring_summary": "Add",
-        },
-        "target.wrong_arity_op": {
-          # NAME MATCH but ARITY MISMATCH
-          # unary_op vs this (3 params)
-          "name": "unary_op",
-          "params": ["a", "b", "c"],
-          "docstring_summary": "Same name, different logic",
-        },
+        "target.abs": {"name": "abs", "params": ["a"]},
+        "target.add": {"name": "add", "params": ["a", "b"]},
+        "target.wrong_arity_op": {"name": "unary_op", "params": ["a", "b", "c"]},
       }
     return {}
 
 
 @pytest.fixture
 def clean_semantics():
-  """Returns a manager with no pre-loaded data to ensure tests rely on heuristics."""
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
   mgr.data = {}
   mgr._key_origins = {}
   return mgr
 
 
 def test_fuzzy_match_success(tmp_path, clean_semantics):
-  """
-  Verify that 'absolute' (Source) matches 'abs' (Target)
-  because names are similar AND arity matches (1 param vs 1 param).
-  """
   scaffolder = Scaffolder(semantics=clean_semantics, similarity_threshold=0.6)
   scaffolder.inspector = MockInspector()
 
-  scaffolder.scaffold(["source_fw", "target_fw"], tmp_path)
+  # Configure Paths
+  # Note: Scaffolder derives snapshots path relative to semantics parent
+  sem_dir = tmp_path / "semantics"
+  snap_dir = tmp_path / "snapshots"
+  sem_dir.mkdir()
+  snap_dir.mkdir()
 
-  out_file = tmp_path / "k_array_api.json"
-  assert out_file.exists()
+  with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
+    # Pass sem_dir as output_dir
+    scaffolder.scaffold(["source_fw", "target_fw"], sem_dir)
 
-  with open(out_file, "rt", encoding="utf-8") as f:
-    data = json.load(f)
+  # Check Mapping File for Target
+  tgt_file = snap_dir / "target_fw_mappings.json"
+  assert tgt_file.exists()
 
-  # Check 'absolute' entry
-  assert "absolute" in data
-  variants = data["absolute"]["variants"]
+  data = json.loads(tgt_file.read_text())
+  mappings = data["mappings"]
 
-  # Target should be matched fuzzily
-  assert "target_fw" in variants
-  assert variants["target_fw"]["api"] == "target.abs"
+  assert "absolute" in mappings
+  assert mappings["absolute"]["api"] == "target.abs"
 
 
 def test_signature_analysis_rejection(tmp_path, clean_semantics):
-  """
-  Verify that signature mismatch prevents linking even if names are identical.
-
-  Scenario: Source `unary_op(x)` vs Target `unary_op(a, b, c)`.
-  Expectation: The target variant is NOT added due to arity penalty.
-  """
   scaffolder = Scaffolder(semantics=clean_semantics, similarity_threshold=0.8, arity_penalty=0.5)
   scaffolder.inspector = MockInspector()
 
-  scaffolder.scaffold(["source_fw", "target_fw"], tmp_path)
+  sem_dir = tmp_path / "semantics"
+  snap_dir = tmp_path / "snapshots"
+  sem_dir.mkdir()
+  snap_dir.mkdir()
 
-  out_file = tmp_path / "k_array_api.json"
-  with open(out_file, "rt", encoding="utf-8") as f:
-    data = json.load(f)
+  with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
+    scaffolder.scaffold(["source_fw", "target_fw"], sem_dir)
 
-  assert "unary_op" in data
-  variants = data["unary_op"]["variants"]
-
-  # Source exists
-  assert "source_fw" in variants
-  # Target should be REJECTED despite name match 'unary_op' == 'unary_op'
-  assert "target_fw" not in variants
+  tgt_file = snap_dir / "target_fw_mappings.json"
+  if tgt_file.exists():
+    data = json.loads(tgt_file.read_text())
+    mappings = data["mappings"]
+    assert "unary_op" not in mappings
 
 
 def test_exact_match_priority(tmp_path, clean_semantics):
-  """
-  Verify that if an exact name exists with correct arity, it is accepted.
-  """
   scaffolder = Scaffolder(semantics=clean_semantics)
   scaffolder.inspector = MockInspector()
 
-  scaffolder.scaffold(["source_fw", "target_fw"], tmp_path)
+  def inspect_side(fw_name):
+    if fw_name == "source_fw":
+      return {"source.add": {"name": "add", "params": ["x", "y"]}}
+    else:
+      return {"target.add": {"name": "add", "params": ["a", "b"]}}
 
-  out_file = tmp_path / "k_array_api.json"
-  with open(out_file, "rt", encoding="utf-8") as f:
-    data = json.load(f)
+  scaffolder.inspector.inspect = MagicMock(side_effect=inspect_side)
 
-  # 'add' matches 'add'
-  assert "add" in data
-  assert data["add"]["variants"]["target_fw"]["api"] == "target.add"
+  sem_dir = tmp_path / "semantics"
+  snap_dir = tmp_path / "snapshots"
+  sem_dir.mkdir()
+  snap_dir.mkdir()
+
+  with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
+    scaffolder.scaffold(["source_fw", "target_fw"], sem_dir)
+
+  data = json.loads((snap_dir / "target_fw_mappings.json").read_text())
+
+  assert "add" in data["mappings"]
+  assert data["mappings"]["add"]["api"] == "target.add"

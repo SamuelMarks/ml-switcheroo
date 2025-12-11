@@ -1,0 +1,14 @@
+{
+  "__framework__": "mlx",
+  "mappings": {
+    "device": {
+      "api": "mx.Device",
+      "requires_plugin": "device_allocator"
+    }
+  },
+  "templates": {
+    "convert_input": "mx.array({np_var})",
+    "import": "import mlx.core as mx",
+    "to_numpy": "np.array({res_var})"
+  }
+}

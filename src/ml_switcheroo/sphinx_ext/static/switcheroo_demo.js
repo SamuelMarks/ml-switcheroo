@@ -39,7 +39,8 @@ try:
     if 'GLOBAL_SEMANTICS' not in globals(): 
         GLOBAL_SEMANTICS = SemanticsManager() 
     
-    config = RuntimeConfig(source_framework=js_src_fw, target_framework=js_tgt_fw, strict_mode=False) 
+    # Updated: Passed 'js_strict_mode' from JS context
+    config = RuntimeConfig(source_framework=js_src_fw, target_framework=js_tgt_fw, strict_mode=js_strict_mode) 
     engine = ASTEngine(semantics=GLOBAL_SEMANTICS, config=config) 
     result = engine.run(js_source_code) 
 
@@ -275,14 +276,20 @@ async function runTranspilation() {
     const srcFw = document.getElementById("select-src").value;
     const tgtFw = document.getElementById("select-tgt").value;
 
+    // Strict Mode: Check the toggle state
+    // Coerce to boolean just in case
+    const strictMode = !!document.getElementById("chk-strict-mode").checked;
+
     btn.disabled = true;
     btn.innerText = "Running...";
-    consoleEl.innerText = `Translating ${srcFw} -> ${tgtFw}...`;
+    consoleEl.innerText = `Translating ${srcFw} -> ${tgtFw} (Strict: ${strictMode})...`;
 
     try {
         pyodide.globals.set("js_source_code", sourceCode);
         pyodide.globals.set("js_src_fw", srcFw);
         pyodide.globals.set("js_tgt_fw", tgtFw);
+        // Pass strict mode flag to Python
+        pyodide.globals.set("js_strict_mode", strictMode);
 
         await pyodide.runPythonAsync(PYTHON_BRIDGE);
 
@@ -291,11 +298,18 @@ async function runTranspilation() {
 
         // Write to CodeMirror
         tgtEditor.setValue(result.code);
-        consoleEl.innerText = result.logs;
 
+        let logs = result.logs;
         if(!result.is_success) {
-            consoleEl.innerText += "\n[System] Errors detected.";
+            logs += "\n[System] Errors detected during ast conversion.";
         }
+
+        // Append lifecycle or engine errors if present, even if success flag is true (warnings)
+        if (result.errors && result.errors.length > 0) {
+             logs += `\n\n[Warning/Error Logic]:\n${result.errors.join('\n')}`;
+        }
+
+        consoleEl.innerText = logs;
 
         // --- Feature 05: Visualizer Integration ---
         if (result.trace_events && window.TraceGraph) {

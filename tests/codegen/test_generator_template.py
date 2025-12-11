@@ -47,6 +47,7 @@ def test_default_template_fallback(tmp_path, semantics_data):
   """
   # NOTE: We use the REAL SemanticsManager here to verify registry integration
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
 
   gen = TestGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "test_defaults.py"
@@ -145,6 +146,7 @@ def test_invalid_framework_skipped(tmp_path, semantics_data):
 
   # Use Real Manager to ensure default behavior (missing ghost)
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
   gen = TestGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "test_skip.py"
 

@@ -1,0 +1,24 @@
+{
+  "__framework__": "source_fw",
+  "mappings": {
+    "absolute": {
+      "api": "source.absolute",
+      "args": {
+        "x": "x"
+      }
+    },
+    "add": {
+      "api": "source.add",
+      "args": {
+        "x": "x",
+        "y": "y"
+      }
+    },
+    "unary_op": {
+      "api": "source.unary_op",
+      "args": {
+        "x": "x"
+      }
+    }
+  }
+}

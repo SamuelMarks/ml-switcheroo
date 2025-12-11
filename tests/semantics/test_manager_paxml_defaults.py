@@ -16,6 +16,7 @@ def test_paxml_alias_loaded_from_adapter():
   Verify SemanticsManager gets alias from PaxmlAdapter.
   """
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
   aliases = mgr.get_framework_aliases()
 
   assert "paxml" in aliases
@@ -33,6 +34,7 @@ def test_import_fixer_injects_pl_alias():
 
   # 1. Setup Manager & Aliases
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
   alias_map = mgr.get_framework_aliases()
 
   # ensure we have empty map, no submodule overrides

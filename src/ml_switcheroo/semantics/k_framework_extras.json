@@ -5,49 +5,13 @@
       "lr",
       "rho",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.Adadelta",
-        "args": {
-          "eps": "epsilon",
-          "lr": "learning_rate",
-          "rho": "rho",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.Adadelta",
-        "args": {
-          "eps": "eps",
-          "lr": "lr",
-          "rho": "rho",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Adafactor": {
     "std_args": [
       "lr",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.Adafactor",
-        "args": {
-          "lr": "learning_rate",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.Adafactor",
-        "args": {
-          "lr": "lr",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Adagrad": {
     "std_args": [
@@ -55,27 +19,7 @@
       "initial_accumulator_value",
       "lr",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.Adagrad",
-        "args": {
-          "eps": "epsilon",
-          "initial_accumulator_value": "initial_accumulator_value",
-          "lr": "learning_rate",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.Adagrad",
-        "args": {
-          "eps": "eps",
-          "initial_accumulator_value": "initial_accumulator_value",
-          "lr": "lr",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Adam": {
     "std_args": [
@@ -83,52 +27,14 @@
       "eps",
       "lr",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.Adam",
-        "args": {
-          "amsgrad": "amsgrad",
-          "eps": "epsilon",
-          "lr": "learning_rate",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.Adam",
-        "args": {
-          "amsgrad": "amsgrad",
-          "eps": "eps",
-          "lr": "lr",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Adamax": {
     "std_args": [
       "eps",
       "lr",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.Adamax",
-        "args": {
-          "eps": "epsilon",
-          "lr": "learning_rate",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.Adamax",
-        "args": {
-          "eps": "eps",
-          "lr": "lr",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Adamw": {
     "std_args": [
@@ -136,65 +42,17 @@
       "eps",
       "lr",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.AdamW",
-        "args": {
-          "amsgrad": "amsgrad",
-          "eps": "epsilon",
-          "lr": "learning_rate",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.AdamW",
-        "args": {
-          "amsgrad": "amsgrad",
-          "eps": "eps",
-          "lr": "lr",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Celu": {
     "std_args": [
       "alpha"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.celu",
-        "args": {
-          "alpha": "alpha"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.CELU",
-        "args": {
-          "alpha": "alpha"
-        }
-      }
-    }
+    ]
   },
   "Ctc": {
     "std_args": [
       "reduction"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.losses.CTC",
-        "args": {
-          "reduction": "reduction"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.CTCLoss",
-        "args": {
-          "reduction": "reduction"
-        }
-      }
-    }
+    ]
   },
   "DataLoader": {
     "description": "Foundational PyTorch Data Loader. Explicitly unmapped to trigger Escape Hatch.",
@@ -203,200 +61,54 @@
       "batch_size",
       "shuffle",
       "sampler"
-    ],
-    "variants": {
-      "jax": null,
-      "torch": {
-        "api": "torch.utils.data.DataLoader",
-        "args": {
-          "batch_size": "batch_size",
-          "dataset": "dataset",
-          "sampler": "sampler",
-          "shuffle": "shuffle"
-        }
-      }
-    }
+    ]
   },
   "Elu": {
     "std_args": [
       "alpha"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.elu",
-        "args": {
-          "alpha": "alpha"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.ELU",
-        "args": {
-          "alpha": "alpha"
-        }
-      }
-    }
+    ]
   },
   "Gelu": {
     "std_args": [
       "approximate",
       "x"
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.nn.gelu",
-        "args": {
-          "approximate": "approximate",
-          "x": "x"
-        }
-      },
-      "keras": {
-        "api": "keras.activations.gelu",
-        "args": {
-          "approximate": "approximate",
-          "x": "x"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.GELU",
-        "args": {
-          "approximate": "approximate"
-        }
-      }
-    }
+    ]
   },
   "Glu": {
     "std_args": [
       "dim"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.glu",
-        "args": {
-          "dim": "axis"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.GLU",
-        "args": {
-          "dim": "dim"
-        }
-      }
-    }
+    ]
   },
   "Hardshrink": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.hard_shrink"
-      },
-      "torch": {
-        "api": "torch.nn.Hardshrink"
-      }
-    }
+    "std_args": []
   },
   "Hardsigmoid": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.hard_sigmoid"
-      },
-      "torch": {
-        "api": "torch.nn.Hardsigmoid"
-      }
-    }
+    "std_args": []
   },
   "Hardtanh": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.hard_tanh"
-      },
-      "torch": {
-        "api": "torch.nn.Hardtanh"
-      }
-    }
+    "std_args": []
   },
   "Huber": {
     "std_args": [
       "delta",
       "reduction"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.losses.Huber",
-        "args": {
-          "delta": "delta",
-          "reduction": "reduction"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.HuberLoss",
-        "args": {
-          "delta": "delta",
-          "reduction": "reduction"
-        }
-      }
-    }
+    ]
   },
   "Leakyrelu": {
     "std_args": [
       "negative_slope"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.leaky_relu",
-        "args": {
-          "negative_slope": "negative_slope"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.LeakyReLU",
-        "args": {
-          "negative_slope": "negative_slope"
-        }
-      }
-    }
+    ]
   },
   "Logsigmoid": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.log_sigmoid"
-      },
-      "torch": {
-        "api": "torch.nn.LogSigmoid"
-      }
-    }
+    "std_args": []
   },
   "Logsoftmax": {
     "std_args": [
       "dim"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.log_softmax",
-        "args": {
-          "dim": "axis"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.LogSoftmax",
-        "args": {
-          "dim": "dim"
-        }
-      }
-    }
+    ]
   },
   "Mish": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.mish"
-      },
-      "torch": {
-        "api": "torch.nn.Mish"
-      }
-    }
+    "std_args": []
   },
   "Muon": {
     "std_args": [
@@ -406,78 +118,20 @@
       "nesterov",
       "ns_steps",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.Muon",
-        "args": {
-          "eps": "epsilon",
-          "lr": "learning_rate",
-          "momentum": "momentum",
-          "nesterov": "nesterov",
-          "ns_steps": "ns_steps",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.Muon",
-        "args": {
-          "eps": "eps",
-          "lr": "lr",
-          "momentum": "momentum",
-          "nesterov": "nesterov",
-          "ns_steps": "ns_steps",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Nadam": {
     "std_args": [
       "eps",
       "lr",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.Nadam",
-        "args": {
-          "eps": "epsilon",
-          "lr": "learning_rate",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.NAdam",
-        "args": {
-          "eps": "eps",
-          "lr": "lr",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Relu": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.relu"
-      },
-      "torch": {
-        "api": "torch.nn.ReLU"
-      }
-    }
+    "std_args": []
   },
   "Relu6": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.relu6"
-      },
-      "torch": {
-        "api": "torch.nn.ReLU6"
-      }
-    }
+    "std_args": []
   },
   "Rmsprop": {
     "std_args": [
@@ -486,40 +140,10 @@
       "lr",
       "momentum",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.RMSprop",
-        "args": {
-          "centered": "centered",
-          "eps": "epsilon",
-          "lr": "learning_rate",
-          "momentum": "momentum",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.RMSprop",
-        "args": {
-          "centered": "centered",
-          "eps": "eps",
-          "lr": "lr",
-          "momentum": "momentum",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Selu": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.selu"
-      },
-      "torch": {
-        "api": "torch.nn.SELU"
-      }
-    }
+    "std_args": []
   },
   "Sgd": {
     "std_args": [
@@ -527,163 +151,45 @@
       "momentum",
       "nesterov",
       "weight_decay"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.optimizers.SGD",
-        "args": {
-          "lr": "learning_rate",
-          "momentum": "momentum",
-          "nesterov": "nesterov",
-          "weight_decay": "weight_decay"
-        }
-      },
-      "torch": {
-        "api": "torch.optim.SGD",
-        "args": {
-          "lr": "lr",
-          "momentum": "momentum",
-          "nesterov": "nesterov",
-          "weight_decay": "weight_decay"
-        }
-      }
-    }
+    ]
   },
   "Sigmoid": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.sigmoid"
-      },
-      "torch": {
-        "api": "torch.nn.Sigmoid"
-      }
-    }
+    "std_args": []
   },
   "Silu": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.swish"
-      },
-      "torch": {
-        "api": "torch.nn.SiLU"
-      }
-    }
+    "std_args": []
   },
   "Softmax": {
     "std_args": [
       "dim",
       "x"
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.nn.softmax",
-        "args": {
-          "dim": "axis",
-          "x": "x"
-        }
-      },
-      "keras": {
-        "api": "keras.activations.softmax",
-        "args": {
-          "dim": "axis",
-          "x": "x"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.Softmax2d"
-      }
-    }
+    ]
   },
   "Softplus": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.softplus"
-      },
-      "torch": {
-        "api": "torch.nn.Softplus"
-      }
-    }
+    "std_args": []
   },
   "Softshrink": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.soft_shrink"
-      },
-      "torch": {
-        "api": "torch.nn.Softshrink"
-      }
-    }
+    "std_args": []
   },
   "Softsign": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.softsign"
-      },
-      "torch": {
-        "api": "torch.nn.Softsign"
-      }
-    }
+    "std_args": []
   },
   "Tanh": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.tanh"
-      },
-      "torch": {
-        "api": "torch.nn.Tanh"
-      }
-    }
+    "std_args": []
   },
   "Tanhshrink": {
-    "std_args": [],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.tanh_shrink"
-      },
-      "torch": {
-        "api": "torch.nn.Tanhshrink"
-      }
-    }
+    "std_args": []
   },
   "TensorDataset": {
     "description": "Simple dataset wrapping tensors.",
     "std_args": [
       "tensors"
-    ],
-    "variants": {
-      "jax": null,
-      "torch": {
-        "api": "torch.utils.data.TensorDataset",
-        "args": {
-          "tensors": "tensors"
-        }
-      }
-    }
+    ]
   },
   "Threshold": {
     "std_args": [
       "threshold"
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.activations.threshold",
-        "args": {
-          "threshold": "threshold"
-        }
-      },
-      "torch": {
-        "api": "torch.nn.Threshold",
-        "args": {
-          "threshold": "threshold"
-        }
-      }
-    }
+    ]
   },
   "__frameworks__": {
     "jax": {
@@ -730,23 +236,7 @@
       "x",
       "y",
       "alpha"
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.add",
-        "requires_plugin": "decompose_alpha"
-      },
-      "keras": {
-        "api": "keras.layers.Add"
-      },
-      "tensorflow": {
-        "api": "tensorflow.add"
-      },
-      "torch": {
-        "api": "torch.add",
-        "requires_plugin": "recompose_alpha"
-      }
-    }
+    ]
   },
   "add_": {
     "description": "In-place addition.",
@@ -754,52 +244,17 @@
       "x",
       "other",
       "alpha"
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.add",
-        "requires_plugin": "unroll_inplace_ops"
-      },
-      "torch": {
-        "api": "torch.Tensor.add_"
-      }
-    }
+    ]
   },
   "cuda_is_available": {
     "description": "Checks if a CUDA device is available.",
-    "std_args": [],
-    "variants": {
-      "jax": {
-        "api": "jax.devices",
-        "requires_plugin": "cuda_is_available"
-      },
-      "torch": {
-        "api": "torch.cuda.is_available"
-      }
-    }
+    "std_args": []
   },
   "device": {
     "description": "Device placement object.",
     "std_args": [
       "type"
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.devices",
-        "requires_plugin": "device_allocator"
-      },
-      "mlx": {
-        "api": "mx.Device",
-        "requires_plugin": "device_allocator"
-      },
-      "tensorflow": {
-        "api": "tf.device",
-        "requires_plugin": "device_allocator"
-      },
-      "torch": {
-        "api": "torch.device"
-      }
-    }
+    ]
   },
   "dropout": {
     "description": "Stochastic Dropout.",
@@ -808,35 +263,11 @@
       "p",
       "training",
       "inplace"
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.random.bernoulli",
-        "requires_plugin": "inject_prng"
-      },
-      "keras": {
-        "api": "keras.random.dropout"
-      },
-      "paxml": {
-        "api": "praxis.layers.Dropout"
-      },
-      "torch": {
-        "api": "torch.nn.functional.dropout"
-      }
-    }
+    ]
   },
   "eval": {
     "description": "Sets the module in evaluation mode.",
-    "std_args": [],
-    "variants": {
-      "jax": {
-        "api": "None",
-        "requires_plugin": "capture_eval_state"
-      },
-      "torch": {
-        "api": "torch.nn.Module.eval"
-      }
-    }
+    "std_args": []
   },
   "init_process_group": {
     "description": "Distributed Training initialization.",
@@ -844,138 +275,53 @@
       "backend",
       "rank",
       "world_size"
-    ],
-    "variants": {
-      "jax": null,
-      "torch": {
-        "api": "torch.distributed.init_process_group"
-      }
-    }
+    ]
   },
   "is_tensor": {
     "description": "Type check helper.",
     "std_args": [
       "obj"
-    ],
-    "variants": {
-      "jax": {
-        "api": "lambda x: hasattr(x, '__array__')",
-        "transformation_type": "inline_lambda"
-      },
-      "keras": {
-        "api": "keras.ops.is_tensor"
-      },
-      "tensorflow": {
-        "api": "tensorflow.is_tensor"
-      },
-      "torch": {
-        "api": "torch.is_tensor"
-      }
-    }
+    ]
   },
   "load": {
     "description": "Deserialization utility.",
     "std_args": [
       "f"
-    ],
-    "variants": {
-      "jax": {
-        "api": "orbax.checkpoint.restore",
-        "requires_plugin": "io_handler"
-      },
-      "torch": {
-        "api": "torch.load"
-      }
-    }
+    ]
   },
   "manual_seed": {
     "description": "Seeding RNG. Maps to standard numpy seed often.",
     "std_args": [
       "seed"
-    ],
-    "variants": {
-      "jax": {
-        "api": "numpy.random.seed",
-        "args": {
-          "seed": "seed"
-        }
-      },
-      "torch": {
-        "api": "torch.manual_seed"
-      }
-    }
+    ]
   },
   "nnx_Param": {
     "description": "Flax NNX Parameter definition.",
     "std_args": [
       "value"
-    ],
-    "variants": {
-      "jax": {
-        "api": "flax.nnx.Param"
-      },
-      "torch": {
-        "api": "torch.nn.Parameter",
-        "requires_plugin": "nnx_param_to_torch"
-      }
-    }
+    ]
   },
   "no_grad": {
     "description": "Context manager to disable gradient calculation.",
-    "std_args": [],
-    "variants": {
-      "jax": {
-        "api": "jax.lax.stop_gradient",
-        "requires_plugin": "context_to_function_wrap"
-      },
-      "torch": {
-        "api": "torch.no_grad"
-      }
-    }
+    "std_args": []
   },
   "save": {
     "description": "Serialization utility. IO is often framework specific.",
     "std_args": [
       "obj",
       "f"
-    ],
-    "variants": {
-      "jax": {
-        "api": "orbax.checkpoint.save",
-        "requires_plugin": "io_handler"
-      },
-      "torch": {
-        "api": "torch.save"
-      }
-    }
+    ]
   },
   "set_printoptions": {
     "description": "Formatting utility for printing tensors.",
     "std_args": [
       "precision"
-    ],
-    "variants": {
-      "jax": {
-        "api": "numpy.set_printoptions"
-      },
-      "torch": {
-        "api": "torch.set_printoptions"
-      }
-    }
+    ]
   },
   "train": {
     "description": "Sets the module in training mode.",
     "std_args": [
       "mode"
-    ],
-    "variants": {
-      "jax": {
-        "api": "None",
-        "requires_plugin": "capture_eval_state"
-      },
-      "torch": {
-        "api": "torch.nn.Module.train"
-      }
-    }
+    ]
   }
 }

@@ -16,6 +16,10 @@ It emits:
 2.  **Input Generation**: NumPy seeded random data, using Type Hints from the Spec.
 3.  **Execution Blocks**: Try/Except blocks for each backend found.
 4.  **Comparison Logic**: A generic loop to compare all successful outputs.
+
+**Update for Distributed Semantics**:
+Templates are now retrieved from the unified SemanticsManager, which aggregates
+templates from Registry (Code) and Overlays (Snapshots).
 """
 
 from pathlib import Path
@@ -88,7 +92,7 @@ class TestGenerator:
       # Only generate blocks for frameworks we have templates for
       valid_variants = {}
       for fw, info in variants_map.items():
-        if info and "api" in info:
+        if info and ("api" in info or "requires_plugin" in info):
           template = self.semantics_mgr.get_test_template(fw)
           if template:
             valid_variants[fw] = info
@@ -182,7 +186,7 @@ class TestGenerator:
     # 2. Execution Blocks
     for fw, info in variants.items():
       self._processed_fws.add(fw)
-      api_call = info["api"]
+      api_call = info.get("api", f"plugin_required_{op_name}")
       template = self.semantics_mgr.get_test_template(fw)
       if not template:
         continue
@@ -191,7 +195,6 @@ class TestGenerator:
       lines.append("    try:")
 
       # Convert Inputs
-      # Template might be `torch.from_numpy({np_var})`
       call_args = []
       for i, _ in enumerate(arg_names):
         input_var = input_vars[i]
@@ -268,32 +271,20 @@ class TestGenerator:
     Strategies:
     1.  **Semantic Type Hint**: If `type_hint` is "int", "bool", "Array", etc.,
         it maps directly to a random generator.
-    2.  **Name Heuristic**: If type is "Any", it guesses based on name
-        (e.g., "axis" -> 1, "size" -> shape tuple).
+    2.  **Name Heuristic**: If type is "Any", it guesses based on name e.g. "axis".
     3.  **Fallback**: Defaults to `np.random.randn(...)` Float32 Array.
-
-    Args:
-        name: Argument name (e.g. 'axis').
-        type_hint: Type string from spec (e.g. 'int | None').
-
-    Returns:
-        Python code string (e.g. '1', 'np.random.randn(...)').
     """
     t = type_hint.lower()
 
-    # --- Strategy 1: Explicit Type Hints (Semantic Richness) ---
-
-    # Arrays / Tensors
+    # --- Strategy 1: Explicit Type Hints ---
     if "array" in t or "tensor" in t:
       return "np.random.randn(2, 2, 2).astype(np.float32)"
 
-    # Collections
     if "list" in t and "int" in t:
-      return "[1, 2]"  # Simple stub for list[int]
+      return "[1, 2]"
     if "tuple" in t and "int" in t:
       return "(1, 2)"
 
-    # Primitives
     if "bool" in t:
       return "bool(random.getrandbits(1))"
     if "int" in t:
@@ -303,9 +294,9 @@ class TestGenerator:
     if "str" in t or "string" in t:
       return "'test_string'"
 
-    # --- Strategy 2: Heuristics based on Name (Fallback) ---
+    # --- Strategy 2: Heuristics ---
     if name in ["axis", "dim"]:
-      return "1"  # Valid for rank 3 tensor (2,2,2)
+      return "1"
     if name in ["keepdims", "keepdim"]:
       return "True"
     if "shape" in name or "size" in name:

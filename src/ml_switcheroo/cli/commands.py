@@ -15,7 +15,7 @@ from typing import Optional, Dict, Any, List
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.frameworks import available_frameworks
-from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir
+from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.discovery.updater import MappingsUpdater
@@ -283,33 +283,85 @@ def handle_import_spec(target: Path) -> int:
 
 
 def handle_sync(framework: str) -> int:
-  """Handles 'sync' command."""
-  out_dir = resolve_semantics_dir()
-  syncer = FrameworkSyncer()
+  """
+  Handles 'sync' command.
 
-  # Update: Explicitly list all tier files to sync
+  Reads Abstract Specs from semantics/, scans target framework,
+  and writes discovered implementation details to snapshots/{fw}_mappings.json.
+  """
+  # Resolve paths relative to package
+  sem_dir = resolve_semantics_dir()
+  snap_dir = resolve_snapshots_dir()
+
+  # 1. Load or Initialize current Snapshot (to preserve other mappings)
+  snap_path = snap_dir / f"{framework}_mappings.json"
+  snapshot_data = {"__framework__": framework, "mappings": {}}
+
+  if snap_path.exists():
+    try:
+      with open(snap_path, "r", encoding="utf-8") as f:
+        loaded = json.load(f)
+        if loaded.get("__framework__") == framework:
+          snapshot_data = loaded
+    except Exception as e:
+      log_warning(f"Could not read existing snapshot at {snap_path}: {e}")
+
+  # Existing entries we want to preserve/respect
+  existing_mappings = snapshot_data.get("mappings", {})
+
+  # 2. Run Syncer on Spec data
+  syncer = FrameworkSyncer()
   tiers = ["k_array_api.json", "k_neural_net.json", "k_framework_extras.json"]
 
-  for filename in tiers:
-    json_p = out_dir / filename
+  total_found = 0
 
-    if not json_p.exists():
+  for filename in tiers:
+    spec_path = sem_dir / filename
+    if not spec_path.exists():
       continue
 
     try:
-      with open(json_p, "rt", encoding="utf-8") as f:
-        data = json.load(f)
+      with open(spec_path, "r", encoding="utf-8") as f:
+        tier_data = json.load(f)
 
-      friendly_name = filename.replace("k_", "").replace(".json", "")
-      log_info(f"Syncing [{friendly_name}] tier for {framework}...")
+      # Inject existing mappings into tier_data so Syncer can see them (and skip if needed)
+      # syncer.sync only skips if `framework` is in `variants` keys
+      for op_name, details in tier_data.items():
+        if op_name in existing_mappings:
+          if "variants" not in details:
+            details["variants"] = {}
+          details["variants"][framework] = existing_mappings[op_name]
 
-      syncer.sync(data, framework)
+      # Execute Discovery (Modifies tier_data in-place)
+      syncer.sync(tier_data, framework)
 
-      with open(json_p, "wt", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, sort_keys=True)
+      # Extract results
+      count_in_tier = 0
+      for op_name, details in tier_data.items():
+        variants = details.get("variants", {})
+        if framework in variants:
+          # Update snapshot mapping definition
+          snapshot_data["mappings"][op_name] = variants[framework]
+          count_in_tier += 1
+
+      if count_in_tier > 0:
+        log_info(f"Scanned {filename}: Found {count_in_tier} entries.")
+        total_found += count_in_tier
 
     except Exception as e:
-      log_warning(f"Failed to sync {filename}: {e}")
+      log_warning(f"Error processing {filename}: {e}")
+
+  # 3. Write Snapshot
+  if total_found > 0 or snap_path.exists():
+    if not snap_dir.exists():
+      snap_dir.mkdir(parents=True, exist_ok=True)
+
+    with open(snap_path, "w", encoding="utf-8") as f:
+      json.dump(snapshot_data, f, indent=2, sort_keys=True)
+
+    log_success(f"Synced complete. Overlay updated at [path]{snap_path.name}[/path]")
+  else:
+    log_info(f"No mappings found/updated for {framework}.")
 
   return 0
 

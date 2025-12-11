@@ -32,6 +32,7 @@ def test_paxml_code_generation(tmp_path):
   # It should have loaded 'paxml' templates from k_test_templates.json
   # or synchronized them from PaxmlAdapter in code.
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
 
   # Sanity check: Ensure template is actually loaded before generating
   # If this fails, the issue is in Manager loading, not Generator logic.

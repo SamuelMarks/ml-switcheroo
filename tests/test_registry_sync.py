@@ -93,6 +93,7 @@ def test_semantics_manager_auto_load(clean_registry):
   register_adapter("auto_sync_fw", MockAdapterWithTemplates)
 
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
 
   # Should be present in manager.test_templates
   assert "auto_sync_fw" in mgr.test_templates

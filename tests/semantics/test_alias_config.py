@@ -23,6 +23,8 @@ def test_manager_uses_registry_defaults():
   """
   # Assuming standard adapters are registered by default in __init__
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
+
   aliases = mgr.get_framework_aliases()
 
   assert "jax" in aliases
@@ -49,6 +51,8 @@ def test_manager_picks_up_new_framework():
 
   # 2. Init Manager
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
+
   aliases = mgr.get_framework_aliases()
 
   # 3. Verify
@@ -63,6 +67,7 @@ def test_manager_parses_json_alias_override():
   """
   # 1. Setup Manager (loads adapters implicitly)
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
 
   # 2. Inject JSON override via internal merge method
   mock_data = {

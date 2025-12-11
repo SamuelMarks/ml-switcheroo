@@ -23,6 +23,7 @@ def test_no_hardcoded_defaults():
   """
   # Create the manager without loading properties
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
 
   # We manually clear data that might have been loaded from real files
   # during __init__ to verify the *code* doesn't verify defaults.
@@ -45,6 +46,7 @@ def test_merged_json_data():
   This proves we can re-create the 'defaults' purely via data injection.
   """
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
   # Ensure clean state for test
   mgr.import_data = {}
 
@@ -73,6 +75,7 @@ def test_get_import_map_structure():
   Format: Dict[str, Tuple[root, sub, alias]]
   """
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
   mgr.import_data = {}
 
   # Inject data that matches the old hardcoded defaults
@@ -104,6 +107,7 @@ def test_get_import_map_structure():
 def test_get_import_map_ignoring_irrelevant_targets():
   """Verify we filter out imports not matching the target framework."""
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
   mgr.import_data = {}
 
   # Inject a TensorFlow mapping

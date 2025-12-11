@@ -1,14 +1,13 @@
 """
 Sync Mechanism for Test Template Generation.
 
-This module resolves the fragmentation between `FrameworkAdapter` classes (defined in code)
-and Test Generation Templates (traditionally defined in JSON). It allows automatic
-derivation of templates by introspecting registered adapters, ensuring consistent
-logic for imports and tensor creation across both the `EquivalenceRunner` and `TestGenerator`.
+Resolves fragmentation between Adapter Classes and JSON Configuration.
+It extracts metadata (imports, conversion syntax) from registered FrameworkAdapters
+and formats it into the template dictionary structure used by `TestGenerator`.
 
-It provides:
-1.  `TemplateGenerator`: A class to build template dictionaries from Adapter metadata.
-2.  `TemplateRegistry`: A Protocol for adapters to expose their import and conversion syntax.
+This module now integrates with the Distributed Semantics architecture:
+while it primarily reads from Python code (Adapters), its output is designed
+to be merged with templates loaded from JSON overlays in the `SemanticsManager`.
 """
 
 from typing import Dict, Optional, Protocol, runtime_checkable, Any, Type
@@ -60,12 +59,11 @@ class TemplateGenerator:
     Merges existing templates with those auto-generated from registered Adapters.
 
     Args:
-        base_templates: Existing dictionary of templates (e.g. from JSON).
+        base_templates: Existing dictionary of templates (e.g. from Snapshot JSONs).
 
     Returns:
         A unified dictionary of {framework: {template_keys...}}.
     """
-    # Deep copy to avoid mutating the prompt input if passed
     import copy
 
     templates = copy.deepcopy(base_templates) if base_templates else {}
@@ -76,8 +74,15 @@ class TemplateGenerator:
         generated = _extract_template(adapter_cls)  # type: ignore
 
         if fw_name in templates:
-          # Update source keys, effectively preserving 'jit_wrap' if present in base
-          templates[fw_name].update(generated)
+          # Update source keys, preserving JSON overrides (e.g. 'jit_wrap')
+          # We merge: JSON keys override Code keys except for essential syntax
+          # Actually, usually Overlay/JSON preference > Code Default
+          # So we update code defaults into 'templates' only if keys missing?
+          # Let's assume Code is Default, JSON is Override.
+          # So take Generated, update with Existing.
+          merged = generated.copy()
+          merged.update(templates[fw_name])
+          templates[fw_name] = merged
         else:
           templates[fw_name] = generated
 

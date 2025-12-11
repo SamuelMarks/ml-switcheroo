@@ -32,21 +32,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.abs"
-      },
-      "keras": {
-        "api": "keras.ops.abs"
-      },
-      "tensorflow": {
-        "api": "tensorflow.abs"
-      },
-      "torch": {
-        "api": "torch.abs"
-      }
-    }
+    ]
   },
   "acos": {
     "description": "Calculates an implementation-dependent approximation of the principal value of the inverse cosine for each element ``x_i`` of the input array ``x``.",
@@ -56,18 +42,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.acos"
-      },
-      "tensorflow": {
-        "api": "tensorflow.acos"
-      },
-      "torch": {
-        "api": "torch.acos"
-      }
-    }
+    ]
   },
   "acosh": {
     "description": "Calculates an implementation-dependent approximation to the inverse hyperbolic cosine for each element ``x_i`` of the input array ``x``.",
@@ -77,18 +52,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.acosh"
-      },
-      "tensorflow": {
-        "api": "tensorflow.acosh"
-      },
-      "torch": {
-        "api": "torch.acosh"
-      }
-    }
+    ]
   },
   "add": {
     "description": "Calculates the sum for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -102,21 +66,7 @@
         "x2",
         "Union[array, int, float, complex]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.add"
-      },
-      "keras": {
-        "api": "keras.ops.add"
-      },
-      "tensorflow": {
-        "api": "tensorflow.add"
-      },
-      "torch": {
-        "api": "torch.add"
-      }
-    }
+    ]
   },
   "all": {
     "description": "Tests whether all input array elements evaluate to ``True`` along a specified axis.",
@@ -134,18 +84,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.all"
-      },
-      "keras": {
-        "api": "keras.ops.all"
-      },
-      "torch": {
-        "api": "torch.all"
-      }
-    }
+    ]
   },
   "any": {
     "description": "Tests whether any input array element evaluates to ``True`` along a specified axis.",
@@ -163,21 +102,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.any"
-      },
-      "keras": {
-        "api": "keras.ops.any"
-      },
-      "paxml": {
-        "api": "praxis.base_layer.Any"
-      },
-      "torch": {
-        "api": "torch.any"
-      }
-    }
+    ]
   },
   "arange": {
     "description": "Returns evenly spaced values within the half-open interval ``[start, stop)`` as a one-dimensional array.",
@@ -203,12 +128,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.arange"
-      }
-    }
+    ]
   },
   "argmax": {
     "description": "Returns the indices of the maximum values along a specified axis.",
@@ -226,21 +146,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.argmax"
-      },
-      "keras": {
-        "api": "keras.ops.argmax"
-      },
-      "tensorflow": {
-        "api": "tensorflow.argmax"
-      },
-      "torch": {
-        "api": "torch.argmax"
-      }
-    }
+    ]
   },
   "argmin": {
     "description": "Returns the indices of the minimum values along a specified axis.",
@@ -258,21 +164,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.argmin"
-      },
-      "keras": {
-        "api": "keras.ops.argmin"
-      },
-      "tensorflow": {
-        "api": "tensorflow.argmin"
-      },
-      "torch": {
-        "api": "torch.argmin"
-      }
-    }
+    ]
   },
   "argsort": {
     "description": "Returns the indices that sort an array ``x`` along a specified axis.",
@@ -294,21 +186,12 @@
         "stable",
         "bool"
       ]
-    ],
-    "variants": {
-      "tensorflow": {
-        "api": "tensorflow.argsort"
-      },
-      "torch": {
-        "api": "torch.argsort"
-      }
-    }
+    ]
   },
   "array": {
     "description": "Constant: array",
     "from": "_2024_12/array_object.py",
-    "std_args": [],
-    "variants": {}
+    "std_args": []
   },
   "asarray": {
     "description": "Convert the input to an array.",
@@ -330,12 +213,7 @@
         "copy",
         "Optional[bool]"
       ]
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.asarray"
-      }
-    }
+    ]
   },
   "asin": {
     "description": "Calculates an implementation-dependent approximation of the principal value of the inverse sine for each element ``x_i`` of the input array ``x``.",
@@ -345,18 +223,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.asin"
-      },
-      "tensorflow": {
-        "api": "tensorflow.asin"
-      },
-      "torch": {
-        "api": "torch.asin"
-      }
-    }
+    ]
   },
   "asinh": {
     "description": "Calculates an implementation-dependent approximation to the inverse hyperbolic sine for each element ``x_i`` in the input array ``x``.",
@@ -366,18 +233,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.asinh"
-      },
-      "tensorflow": {
-        "api": "tensorflow.asinh"
-      },
-      "torch": {
-        "api": "torch.asinh"
-      }
-    }
+    ]
   },
   "astype": {
     "description": "Copies an array to a specified data type irrespective of :ref:`type-promotion` rules.",
@@ -399,8 +255,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {}
+    ]
   },
   "atan": {
     "description": "Calculates an implementation-dependent approximation of the principal value of the inverse tangent for each element ``x_i`` of the input array ``x``.",
@@ -410,18 +265,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.atan"
-      },
-      "tensorflow": {
-        "api": "tensorflow.atan"
-      },
-      "torch": {
-        "api": "torch.atan"
-      }
-    }
+    ]
   },
   "atan2": {
     "description": "Calculates an implementation-dependent approximation of the inverse tangent of the quotient ``x1/x2``, having domain ``[-infinity, +infinity] x [-infinity, +infinity]`` (where the ``x`` notation denotes the set of ordered pairs of elements ``(x1_i, x2_i)``) and codomain ``[-\u03c0, +\u03c0]``, for each pair of elements ``(x1_i, x2_i)`` of the input arrays ``x1`` and ``x2``, respectively. Each element-wise result is expressed in radians.",
@@ -435,18 +279,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.atan2"
-      },
-      "tensorflow": {
-        "api": "tensorflow.atan2"
-      },
-      "torch": {
-        "api": "torch.atan2"
-      }
-    }
+    ]
   },
   "atanh": {
     "description": "Calculates an implementation-dependent approximation to the inverse hyperbolic tangent for each element ``x_i`` of the input array ``x``.",
@@ -456,18 +289,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.atanh"
-      },
-      "tensorflow": {
-        "api": "tensorflow.atanh"
-      },
-      "torch": {
-        "api": "torch.atanh"
-      }
-    }
+    ]
   },
   "bitwise_and": {
     "description": "Computes the bitwise AND of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -481,18 +303,7 @@
         "x2",
         "Union[array, int, bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.bitwise_and"
-      },
-      "keras": {
-        "api": "keras.ops.bitwise_and"
-      },
-      "torch": {
-        "api": "torch.bitwise_and"
-      }
-    }
+    ]
   },
   "bitwise_invert": {
     "description": "Inverts (flips) each bit for each element ``x_i`` of the input array ``x``.",
@@ -502,15 +313,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.bitwise_invert"
-      },
-      "keras": {
-        "api": "keras.ops.bitwise_invert"
-      }
-    }
+    ]
   },
   "bitwise_left_shift": {
     "description": "Shifts the bits of each element ``x1_i`` of the input array ``x1`` to the left by appending ``x2_i`` (i.e., the respective element in the input array ``x2``) zeros to the right of ``x1_i``.",
@@ -524,18 +327,7 @@
         "x2",
         "Union[array, int]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.bitwise_left_shift"
-      },
-      "keras": {
-        "api": "keras.ops.bitwise_left_shift"
-      },
-      "torch": {
-        "api": "torch.bitwise_left_shift"
-      }
-    }
+    ]
   },
   "bitwise_or": {
     "description": "Computes the bitwise OR of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -549,18 +341,7 @@
         "x2",
         "Union[array, int, bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.bitwise_or"
-      },
-      "keras": {
-        "api": "keras.ops.bitwise_or"
-      },
-      "torch": {
-        "api": "torch.bitwise_or"
-      }
-    }
+    ]
   },
   "bitwise_right_shift": {
     "description": "Shifts the bits of each element ``x1_i`` of the input array ``x1`` to the right according to the respective element ``x2_i`` of the input array ``x2``.",
@@ -574,18 +355,7 @@
         "x2",
         "Union[array, int]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.bitwise_right_shift"
-      },
-      "keras": {
-        "api": "keras.ops.bitwise_right_shift"
-      },
-      "torch": {
-        "api": "torch.bitwise_right_shift"
-      }
-    }
+    ]
   },
   "bitwise_xor": {
     "description": "Computes the bitwise XOR of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -599,28 +369,12 @@
         "x2",
         "Union[array, int, bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.bitwise_xor"
-      },
-      "keras": {
-        "api": "keras.ops.bitwise_xor"
-      },
-      "torch": {
-        "api": "torch.bitwise_xor"
-      }
-    }
+    ]
   },
   "broadcast_arrays": {
     "description": "Broadcasts one or more arrays against one another.",
     "from": "_2024_12/manipulation_functions.py",
-    "std_args": [],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.broadcast_arrays"
-      }
-    }
+    "std_args": []
   },
   "broadcast_to": {
     "description": "Broadcasts an array to a specified shape.",
@@ -634,21 +388,7 @@
         "shape",
         "Tuple[int, Ellipsis]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.broadcast_to"
-      },
-      "keras": {
-        "api": "keras.ops.broadcast_to"
-      },
-      "tensorflow": {
-        "api": "tensorflow.broadcast_to"
-      },
-      "torch": {
-        "api": "torch.broadcast_to"
-      }
-    }
+    ]
   },
   "can_cast": {
     "description": "Determines if one data type can be cast to another data type according to type promotion rules (see :ref:`type-promotion`).",
@@ -662,21 +402,12 @@
         "to",
         "dtype"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.can_cast"
-      },
-      "torch": {
-        "api": "torch.can_cast"
-      }
-    }
+    ]
   },
   "capabilities": {
     "description": "Returns a dictionary of array library capabilities.",
     "from": "_2024_12/info.py",
-    "std_args": [],
-    "variants": {}
+    "std_args": []
   },
   "ceil": {
     "description": "Rounds each element ``x_i`` of the input array ``x`` to the smallest (i.e., closest to ``-infinity``) integer-valued number that is not less than ``x_i``.",
@@ -686,21 +417,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.ceil"
-      },
-      "keras": {
-        "api": "keras.ops.ceil"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.ceil"
-      },
-      "torch": {
-        "api": "torch.ceil"
-      }
-    }
+    ]
   },
   "cholesky": {
     "description": "Returns the lower (upper) Cholesky decomposition of a complex Hermitian or real symmetric positive-definite matrix ``x``.",
@@ -714,18 +431,7 @@
         "upper",
         "bool"
       ]
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.ops.cholesky"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.cholesky"
-      },
-      "torch": {
-        "api": "torch.cholesky"
-      }
-    }
+    ]
   },
   "clip": {
     "description": "Clamps each element ``x_i`` of the input array ``x`` to the range ``[min, max]``.",
@@ -743,18 +449,7 @@
         "max",
         "Optional[Union[int, float, array]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.clip"
-      },
-      "keras": {
-        "api": "keras.ops.clip"
-      },
-      "torch": {
-        "api": "torch.clip"
-      }
-    }
+    ]
   },
   "concat": {
     "description": "Joins a sequence of arrays along an existing axis.",
@@ -768,15 +463,7 @@
         "axis",
         "Optional[int]"
       ]
-    ],
-    "variants": {
-      "tensorflow": {
-        "api": "tensorflow.concat"
-      },
-      "torch": {
-        "api": "torch.concat"
-      }
-    }
+    ]
   },
   "conj": {
     "description": "Returns the complex conjugate for each element ``x_i`` of the input array ``x``.",
@@ -786,21 +473,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.conj"
-      },
-      "keras": {
-        "api": "keras.ops.conj"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.conj"
-      },
-      "torch": {
-        "api": "torch.conj"
-      }
-    }
+    ]
   },
   "copysign": {
     "description": "Composes a floating-point value with the magnitude of ``x1_i`` and the sign of ``x2_i`` for each element of the input array ``x1``.",
@@ -814,15 +487,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.copysign"
-      },
-      "torch": {
-        "api": "torch.copysign"
-      }
-    }
+    ]
   },
   "cos": {
     "description": "Calculates an implementation-dependent approximation to the cosine for each element ``x_i`` of the input array ``x``.",
@@ -832,21 +497,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.cos"
-      },
-      "keras": {
-        "api": "keras.ops.cos"
-      },
-      "tensorflow": {
-        "api": "tensorflow.cos"
-      },
-      "torch": {
-        "api": "torch.cos"
-      }
-    }
+    ]
   },
   "cosh": {
     "description": "Calculates an implementation-dependent approximation to the hyperbolic cosine for each element ``x_i`` in the input array ``x``.",
@@ -856,21 +507,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.cosh"
-      },
-      "keras": {
-        "api": "keras.ops.cosh"
-      },
-      "tensorflow": {
-        "api": "tensorflow.cosh"
-      },
-      "torch": {
-        "api": "torch.cosh"
-      }
-    }
+    ]
   },
   "count_nonzero": {
     "description": "Counts the number of array elements which are non-zero.",
@@ -888,18 +525,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.count_nonzero"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.count_nonzero"
-      },
-      "torch": {
-        "api": "torch.count_nonzero"
-      }
-    }
+    ]
   },
   "cross": {
     "description": "Returns the cross product of 3-element vectors.",
@@ -917,21 +543,7 @@
         "axis",
         "int"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.cross"
-      },
-      "keras": {
-        "api": "keras.ops.cross"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.cross"
-      },
-      "torch": {
-        "api": "torch.cross"
-      }
-    }
+    ]
   },
   "cumulative_prod": {
     "description": "Calculates the cumulative product of elements in the input array ``x``.",
@@ -953,8 +565,7 @@
         "include_initial",
         "bool"
       ]
-    ],
-    "variants": {}
+    ]
   },
   "cumulative_sum": {
     "description": "Calculates the cumulative sum of elements in the input array ``x``.",
@@ -976,14 +587,12 @@
         "include_initial",
         "bool"
       ]
-    ],
-    "variants": {}
+    ]
   },
   "default_device": {
     "description": "Returns the default device.",
     "from": "_2024_12/info.py",
-    "std_args": [],
-    "variants": {}
+    "std_args": []
   },
   "default_dtypes": {
     "description": "Returns a dictionary containing default data types.",
@@ -993,8 +602,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {}
+    ]
   },
   "det": {
     "description": "Returns the determinant of a square matrix (or a stack of square matrices) ``x``.",
@@ -1004,27 +612,12 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.det"
-      },
-      "keras": {
-        "api": "keras.ops.det"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.det"
-      },
-      "torch": {
-        "api": "torch.det"
-      }
-    }
+    ]
   },
   "devices": {
     "description": "Returns a list of supported devices which are available at runtime.",
     "from": "_2024_12/info.py",
-    "std_args": [],
-    "variants": {}
+    "std_args": []
   },
   "diagonal": {
     "description": "Returns the specified diagonals of a matrix (or a stack of matrices) ``x``.",
@@ -1038,18 +631,7 @@
         "offset",
         "int"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.diagonal"
-      },
-      "keras": {
-        "api": "keras.ops.diagonal"
-      },
-      "torch": {
-        "api": "torch.diagonal"
-      }
-    }
+    ]
   },
   "diff": {
     "description": "Calculates the n-th discrete forward difference along a specified axis.",
@@ -1075,15 +657,7 @@
         "append",
         "Optional[array]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.diff"
-      },
-      "torch": {
-        "api": "torch.diff"
-      }
-    }
+    ]
   },
   "divide": {
     "description": "Calculates the division of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -1097,21 +671,7 @@
         "x2",
         "Union[array, int, float, complex]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.divide"
-      },
-      "keras": {
-        "api": "keras.ops.divide"
-      },
-      "tensorflow": {
-        "api": "tensorflow.divide"
-      },
-      "torch": {
-        "api": "torch.divide"
-      }
-    }
+    ]
   },
   "dtypes": {
     "description": "Returns a dictionary of supported *Array API* data types.",
@@ -1125,14 +685,12 @@
         "kind",
         "Optional[Union[str, Tuple[str, Ellipsis]]]"
       ]
-    ],
-    "variants": {}
+    ]
   },
   "e": {
     "description": "IEEE 754 floating-point representation of Euler's constant.",
     "from": "_2024_12/constants.py",
-    "std_args": [],
-    "variants": {}
+    "std_args": []
   },
   "eigh": {
     "description": "Returns an eigenvalue decomposition of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.",
@@ -1142,21 +700,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.eigh"
-      },
-      "keras": {
-        "api": "keras.ops.eigh"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.eigh"
-      },
-      "torch": {
-        "api": "torch.linalg.eigh"
-      }
-    }
+    ]
   },
   "eigvalsh": {
     "description": "Returns the eigenvalues of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.",
@@ -1166,18 +710,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.eigvalsh"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.eigvalsh"
-      },
-      "torch": {
-        "api": "torch.linalg.eigvalsh"
-      }
-    }
+    ]
   },
   "empty": {
     "description": "Returns an uninitialized array having a specified `shape`.",
@@ -1195,12 +728,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.empty"
-      }
-    }
+    ]
   },
   "empty_like": {
     "description": "Returns an uninitialized array with the same ``shape`` as an input array ``x``.",
@@ -1218,15 +746,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.empty_like"
-      },
-      "torch": {
-        "api": "torch.empty_like"
-      }
-    }
+    ]
   },
   "equal": {
     "description": "Computes the truth value of ``x1_i == x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -1240,21 +760,7 @@
         "x2",
         "Union[array, int, float, complex, bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.equal"
-      },
-      "keras": {
-        "api": "keras.ops.equal"
-      },
-      "tensorflow": {
-        "api": "tensorflow.equal"
-      },
-      "torch": {
-        "api": "torch.equal"
-      }
-    }
+    ]
   },
   "exp": {
     "description": "Calculates an implementation-dependent approximation to the exponential function for each element ``x_i`` of the input array ``x`` (``e`` raised to the power of ``x_i``, where ``e`` is the base of the natural logarithm).",
@@ -1264,21 +770,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.exp"
-      },
-      "keras": {
-        "api": "keras.ops.exp"
-      },
-      "tensorflow": {
-        "api": "tensorflow.exp"
-      },
-      "torch": {
-        "api": "torch.exp"
-      }
-    }
+    ]
   },
   "expand_dims": {
     "description": "Expands the shape of an array by inserting a new axis (dimension) of size one at the position specified by ``axis``.",
@@ -1292,18 +784,7 @@
         "axis",
         "int"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.expand_dims"
-      },
-      "keras": {
-        "api": "keras.ops.expand_dims"
-      },
-      "tensorflow": {
-        "api": "tensorflow.expand_dims"
-      }
-    }
+    ]
   },
   "expm1": {
     "description": "Calculates an implementation-dependent approximation to ``exp(x)-1`` for each element ``x_i`` of the input array ``x``.",
@@ -1313,21 +794,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.expm1"
-      },
-      "keras": {
-        "api": "keras.ops.expm1"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.expm1"
-      },
-      "torch": {
-        "api": "torch.expm1"
-      }
-    }
+    ]
   },
   "eye": {
     "description": "Returns a two-dimensional array with ones on the ``k``\\th diagonal and zeros elsewhere.",
@@ -1353,15 +820,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "tensorflow": {
-        "api": "tensorflow.eye"
-      },
-      "torch": {
-        "api": "torch.eye"
-      }
-    }
+    ]
   },
   "fft": {
     "description": "Computes the one-dimensional discrete Fourier transform.",
@@ -1383,15 +842,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.fft"
-      },
-      "torch": {
-        "api": "torch.fft.fft"
-      }
-    }
+    ]
   },
   "fftfreq": {
     "description": "Computes the discrete Fourier transform sample frequencies.",
@@ -1413,12 +864,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.fft.fftfreq"
-      }
-    }
+    ]
   },
   "fftn": {
     "description": "Computes the n-dimensional discrete Fourier transform.",
@@ -1440,15 +886,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.fftn"
-      },
-      "torch": {
-        "api": "torch.fft.fftn"
-      }
-    }
+    ]
   },
   "fftshift": {
     "description": "Shifts the zero-frequency component to the center of the spectrum.",
@@ -1462,18 +900,7 @@
         "axes",
         "Optional[Union[int, Sequence[int]]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.fftshift"
-      },
-      "tensorflow": {
-        "api": "tensorflow.signal.fftshift"
-      },
-      "torch": {
-        "api": "torch.fft.fftshift"
-      }
-    }
+    ]
   },
   "finfo": {
     "description": "Machine limits for floating-point data types.",
@@ -1483,15 +910,7 @@
         "type",
         "Union[dtype, array]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.finfo"
-      },
-      "torch": {
-        "api": "torch.finfo"
-      }
-    }
+    ]
   },
   "flip": {
     "description": "Reverses the order of elements in an array along the given axis. The shape of the array must be preserved.",
@@ -1505,18 +924,7 @@
         "axis",
         "Optional[Union[int, Tuple[int, Ellipsis]]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.flip"
-      },
-      "keras": {
-        "api": "keras.ops.flip"
-      },
-      "torch": {
-        "api": "torch.flip"
-      }
-    }
+    ]
   },
   "floor": {
     "description": "Rounds each element ``x_i`` of the input array ``x`` to the greatest (i.e., closest to ``+infinity``) integer-valued number that is not greater than ``x_i``.",
@@ -1526,21 +934,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.floor"
-      },
-      "keras": {
-        "api": "keras.ops.floor"
-      },
-      "tensorflow": {
-        "api": "tensorflow.floor"
-      },
-      "torch": {
-        "api": "torch.floor"
-      }
-    }
+    ]
   },
   "floor_divide": {
     "description": "Rounds the result of dividing each element ``x1_i`` of the input array ``x1`` by the respective element ``x2_i`` of the input array ``x2`` to the greatest (i.e., closest to `+infinity`) integer-value number that is not greater than the division result.",
@@ -1554,18 +948,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.floor_divide"
-      },
-      "keras": {
-        "api": "keras.ops.floor_divide"
-      },
-      "torch": {
-        "api": "torch.floor_divide"
-      }
-    }
+    ]
   },
   "from_dlpack": {
     "description": "Returns a new array containing the data from another (array) object with a ``__dlpack__`` method.",
@@ -1583,8 +966,7 @@
         "copy",
         "Optional[bool]"
       ]
-    ],
-    "variants": {}
+    ]
   },
   "full": {
     "description": "Returns a new array having a specified ``shape`` and filled with ``fill_value``.",
@@ -1606,12 +988,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.full"
-      }
-    }
+    ]
   },
   "full_like": {
     "description": "Returns a new array filled with ``fill_value`` and having the same ``shape`` as an input array ``x``.",
@@ -1633,15 +1010,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.full_like"
-      },
-      "torch": {
-        "api": "torch.full_like"
-      }
-    }
+    ]
   },
   "greater": {
     "description": "Computes the truth value of ``x1_i > x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -1655,21 +1024,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.greater"
-      },
-      "keras": {
-        "api": "keras.ops.greater"
-      },
-      "tensorflow": {
-        "api": "tensorflow.greater"
-      },
-      "torch": {
-        "api": "torch.greater"
-      }
-    }
+    ]
   },
   "greater_equal": {
     "description": "Computes the truth value of ``x1_i >= x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -1683,21 +1038,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.greater_equal"
-      },
-      "keras": {
-        "api": "keras.ops.greater_equal"
-      },
-      "tensorflow": {
-        "api": "tensorflow.greater_equal"
-      },
-      "torch": {
-        "api": "torch.greater_equal"
-      }
-    }
+    ]
   },
   "hfft": {
     "description": "Computes the one-dimensional discrete Fourier transform of a signal with Hermitian symmetry.",
@@ -1719,15 +1060,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.hfft"
-      },
-      "torch": {
-        "api": "torch.fft.hfft"
-      }
-    }
+    ]
   },
   "hypot": {
     "description": "Computes the square root of the sum of squares for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -1741,18 +1074,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.hypot"
-      },
-      "keras": {
-        "api": "keras.ops.hypot"
-      },
-      "torch": {
-        "api": "torch.hypot"
-      }
-    }
+    ]
   },
   "ifft": {
     "description": "Computes the one-dimensional inverse discrete Fourier transform.",
@@ -1774,15 +1096,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.ifft"
-      },
-      "torch": {
-        "api": "torch.fft.ifft"
-      }
-    }
+    ]
   },
   "ifftn": {
     "description": "Computes the n-dimensional inverse discrete Fourier transform.",
@@ -1804,15 +1118,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.ifftn"
-      },
-      "torch": {
-        "api": "torch.fft.ifftn"
-      }
-    }
+    ]
   },
   "ifftshift": {
     "description": "Inverse of ``fftshift``.",
@@ -1826,18 +1132,7 @@
         "axes",
         "Optional[Union[int, Sequence[int]]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.ifftshift"
-      },
-      "tensorflow": {
-        "api": "tensorflow.signal.ifftshift"
-      },
-      "torch": {
-        "api": "torch.fft.ifftshift"
-      }
-    }
+    ]
   },
   "ihfft": {
     "description": "Computes the one-dimensional inverse discrete Fourier transform of a signal with Hermitian symmetry.",
@@ -1859,15 +1154,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.ihfft"
-      },
-      "torch": {
-        "api": "torch.fft.ihfft"
-      }
-    }
+    ]
   },
   "iinfo": {
     "description": "Machine limits for integer data types.",
@@ -1877,15 +1164,7 @@
         "type",
         "Union[dtype, array]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.iinfo"
-      },
-      "torch": {
-        "api": "torch.iinfo"
-      }
-    }
+    ]
   },
   "imag": {
     "description": "Returns the imaginary component of a complex number for each element ``x_i`` of the input array ``x``.",
@@ -1895,27 +1174,12 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.imag"
-      },
-      "keras": {
-        "api": "keras.ops.imag"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.imag"
-      },
-      "torch": {
-        "api": "torch.imag"
-      }
-    }
+    ]
   },
   "inf": {
     "description": "IEEE 754 floating-point representation of (positive) infinity.",
     "from": "_2024_12/constants.py",
-    "std_args": [],
-    "variants": {}
+    "std_args": []
   },
   "inv": {
     "description": "Returns the multiplicative inverse of a square matrix (or a stack of square matrices) ``x``.",
@@ -1925,21 +1189,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.inv"
-      },
-      "keras": {
-        "api": "keras.ops.inv"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.inv"
-      },
-      "torch": {
-        "api": "torch.linalg.inv"
-      }
-    }
+    ]
   },
   "irfft": {
     "description": "Computes the one-dimensional inverse of ``rfft`` for complex-valued input.",
@@ -1961,15 +1211,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.irfft"
-      },
-      "torch": {
-        "api": "torch.fft.irfft"
-      }
-    }
+    ]
   },
   "irfftn": {
     "description": "Computes the n-dimensional inverse of ``rfftn`` for complex-valued input.",
@@ -1991,15 +1233,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.irfftn"
-      },
-      "torch": {
-        "api": "torch.fft.irfftn"
-      }
-    }
+    ]
   },
   "isdtype": {
     "description": "Returns a boolean indicating whether a provided dtype is of a specified data type \"kind\".",
@@ -2013,12 +1247,7 @@
         "kind",
         "Union[dtype, str, Tuple[Union[dtype, str], Ellipsis]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.isdtype"
-      }
-    }
+    ]
   },
   "isfinite": {
     "description": "Tests each element ``x_i`` of the input array ``x`` to determine if finite.",
@@ -2028,18 +1257,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.isfinite"
-      },
-      "keras": {
-        "api": "keras.ops.isfinite"
-      },
-      "torch": {
-        "api": "torch.isfinite"
-      }
-    }
+    ]
   },
   "isinf": {
     "description": "Tests each element ``x_i`` of the input array ``x`` to determine if equal to positive or negative infinity.",
@@ -2049,18 +1267,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.isinf"
-      },
-      "keras": {
-        "api": "keras.ops.isinf"
-      },
-      "torch": {
-        "api": "torch.isinf"
-      }
-    }
+    ]
   },
   "isnan": {
     "description": "Tests each element ``x_i`` of the input array ``x`` to determine whether the element is ``NaN``.",
@@ -2070,18 +1277,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.isnan"
-      },
-      "keras": {
-        "api": "keras.ops.isnan"
-      },
-      "torch": {
-        "api": "torch.isnan"
-      }
-    }
+    ]
   },
   "less": {
     "description": "Computes the truth value of ``x1_i < x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2095,21 +1291,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.less"
-      },
-      "keras": {
-        "api": "keras.ops.less"
-      },
-      "tensorflow": {
-        "api": "tensorflow.less"
-      },
-      "torch": {
-        "api": "torch.less"
-      }
-    }
+    ]
   },
   "less_equal": {
     "description": "Computes the truth value of ``x1_i <= x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2123,21 +1305,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.less_equal"
-      },
-      "keras": {
-        "api": "keras.ops.less_equal"
-      },
-      "tensorflow": {
-        "api": "tensorflow.less_equal"
-      },
-      "torch": {
-        "api": "torch.less_equal"
-      }
-    }
+    ]
   },
   "linspace": {
     "description": "Returns evenly spaced numbers over a specified interval.",
@@ -2167,18 +1335,7 @@
         "endpoint",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linspace"
-      },
-      "keras": {
-        "api": "keras.ops.linspace"
-      },
-      "torch": {
-        "api": "torch.linspace"
-      }
-    }
+    ]
   },
   "log": {
     "description": "Calculates an implementation-dependent approximation to the natural (base ``e``) logarithm for each element ``x_i`` of the input array ``x``.",
@@ -2188,21 +1345,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.log"
-      },
-      "keras": {
-        "api": "keras.ops.log"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.log"
-      },
-      "torch": {
-        "api": "torch.log"
-      }
-    }
+    ]
   },
   "log10": {
     "description": "Calculates an implementation-dependent approximation to the base ``10`` logarithm for each element ``x_i`` of the input array ``x``.",
@@ -2212,18 +1355,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.log10"
-      },
-      "keras": {
-        "api": "keras.ops.log10"
-      },
-      "torch": {
-        "api": "torch.log10"
-      }
-    }
+    ]
   },
   "log1p": {
     "description": "Calculates an implementation-dependent approximation to ``log(1+x)``, where ``log`` refers to the natural (base ``e``) logarithm, for each element ``x_i`` of the input array ``x``.",
@@ -2233,21 +1365,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.log1p"
-      },
-      "keras": {
-        "api": "keras.ops.log1p"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.log1p"
-      },
-      "torch": {
-        "api": "torch.log1p"
-      }
-    }
+    ]
   },
   "log2": {
     "description": "Calculates an implementation-dependent approximation to the base ``2`` logarithm for each element ``x_i`` of the input array ``x``.",
@@ -2257,18 +1375,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.log2"
-      },
-      "keras": {
-        "api": "keras.ops.log2"
-      },
-      "torch": {
-        "api": "torch.log2"
-      }
-    }
+    ]
   },
   "logaddexp": {
     "description": "Calculates the logarithm of the sum of exponentiations ``log(exp(x1) + exp(x2))`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2282,18 +1389,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.logaddexp"
-      },
-      "keras": {
-        "api": "keras.ops.logaddexp"
-      },
-      "torch": {
-        "api": "torch.logaddexp"
-      }
-    }
+    ]
   },
   "logical_and": {
     "description": "Computes the logical AND for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2307,21 +1403,7 @@
         "x2",
         "Union[array, bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.logical_and"
-      },
-      "keras": {
-        "api": "keras.ops.logical_and"
-      },
-      "tensorflow": {
-        "api": "tensorflow.logical_and"
-      },
-      "torch": {
-        "api": "torch.logical_and"
-      }
-    }
+    ]
   },
   "logical_not": {
     "description": "Computes the logical NOT for each element ``x_i`` of the input array ``x``.",
@@ -2331,21 +1413,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.logical_not"
-      },
-      "keras": {
-        "api": "keras.ops.logical_not"
-      },
-      "tensorflow": {
-        "api": "tensorflow.logical_not"
-      },
-      "torch": {
-        "api": "torch.logical_not"
-      }
-    }
+    ]
   },
   "logical_or": {
     "description": "Computes the logical OR for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2359,21 +1427,7 @@
         "x2",
         "Union[array, bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.logical_or"
-      },
-      "keras": {
-        "api": "keras.ops.logical_or"
-      },
-      "tensorflow": {
-        "api": "tensorflow.logical_or"
-      },
-      "torch": {
-        "api": "torch.logical_or"
-      }
-    }
+    ]
   },
   "logical_xor": {
     "description": "Computes the logical XOR for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2387,21 +1441,7 @@
         "x2",
         "Union[array, bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.logical_xor"
-      },
-      "keras": {
-        "api": "keras.ops.logical_xor"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.logical_xor"
-      },
-      "torch": {
-        "api": "torch.logical_xor"
-      }
-    }
+    ]
   },
   "matmul": {
     "description": "Alias for :func:`~array_api.matmul`.",
@@ -2415,21 +1455,7 @@
         "x2",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.matmul"
-      },
-      "keras": {
-        "api": "keras.ops.matmul"
-      },
-      "tensorflow": {
-        "api": "tensorflow.matmul"
-      },
-      "torch": {
-        "api": "torch.matmul"
-      }
-    }
+    ]
   },
   "matrix_norm": {
     "description": "Computes the matrix norm of a matrix (or a stack of matrices) ``x``.",
@@ -2447,12 +1473,7 @@
         "ord",
         "Optional[Union[int, float, Literal[inf, Any, fro, nuc]]]"
       ]
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.linalg.matrix_norm"
-      }
-    }
+    ]
   },
   "matrix_power": {
     "description": "Raises a square matrix (or a stack of square matrices) ``x`` to an integer power ``n``.",
@@ -2466,15 +1487,7 @@
         "n",
         "int"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.matrix_power"
-      },
-      "torch": {
-        "api": "torch.matrix_power"
-      }
-    }
+    ]
   },
   "matrix_rank": {
     "description": "Returns the rank (i.e., number of non-zero singular values) of a matrix (or a stack of matrices).",
@@ -2488,18 +1501,7 @@
         "rtol",
         "Optional[Union[float, array]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.matrix_rank"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.matrix_rank"
-      },
-      "torch": {
-        "api": "torch.matrix_rank"
-      }
-    }
+    ]
   },
   "matrix_transpose": {
     "description": "Alias for :func:`~array_api.matrix_transpose`.",
@@ -2509,15 +1511,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.matrix_transpose"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.matrix_transpose"
-      }
-    }
+    ]
   },
   "max": {
     "description": "Calculates the maximum value of the input array ``x``.",
@@ -2535,18 +1529,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.max"
-      },
-      "keras": {
-        "api": "keras.ops.max"
-      },
-      "torch": {
-        "api": "torch.max"
-      }
-    }
+    ]
   },
   "maximum": {
     "description": "Computes the maximum value for each element ``x1_i`` of the input array ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.",
@@ -2560,21 +1543,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.maximum"
-      },
-      "keras": {
-        "api": "keras.ops.maximum"
-      },
-      "tensorflow": {
-        "api": "tensorflow.maximum"
-      },
-      "torch": {
-        "api": "torch.maximum"
-      }
-    }
+    ]
   },
   "mean": {
     "description": "Calculates the arithmetic mean of the input array ``x``.",
@@ -2592,18 +1561,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.mean"
-      },
-      "keras": {
-        "api": "keras.ops.mean"
-      },
-      "torch": {
-        "api": "torch.mean"
-      }
-    }
+    ]
   },
   "meshgrid": {
     "description": "Returns coordinate matrices from coordinate vectors.",
@@ -2613,21 +1571,7 @@
         "indexing",
         "str"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.meshgrid"
-      },
-      "keras": {
-        "api": "keras.ops.meshgrid"
-      },
-      "tensorflow": {
-        "api": "tensorflow.meshgrid"
-      },
-      "torch": {
-        "api": "torch.meshgrid"
-      }
-    }
+    ]
   },
   "min": {
     "description": "Calculates the minimum value of the input array ``x``.",
@@ -2645,18 +1589,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.min"
-      },
-      "keras": {
-        "api": "keras.ops.min"
-      },
-      "torch": {
-        "api": "torch.min"
-      }
-    }
+    ]
   },
   "minimum": {
     "description": "Computes the minimum value for each element ``x1_i`` of the input array ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.",
@@ -2670,21 +1603,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.minimum"
-      },
-      "keras": {
-        "api": "keras.ops.minimum"
-      },
-      "tensorflow": {
-        "api": "tensorflow.minimum"
-      },
-      "torch": {
-        "api": "torch.minimum"
-      }
-    }
+    ]
   },
   "moveaxis": {
     "description": "Moves array axes (dimensions) to new positions, while leaving other axes in their original positions.",
@@ -2702,18 +1621,7 @@
         "destination",
         "Union[int, Tuple[int, Ellipsis]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.moveaxis"
-      },
-      "keras": {
-        "api": "keras.ops.moveaxis"
-      },
-      "torch": {
-        "api": "torch.moveaxis"
-      }
-    }
+    ]
   },
   "multiply": {
     "description": "Calculates the product for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2727,27 +1635,12 @@
         "x2",
         "Union[array, int, float, complex]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.multiply"
-      },
-      "keras": {
-        "api": "keras.ops.multiply"
-      },
-      "tensorflow": {
-        "api": "tensorflow.multiply"
-      },
-      "torch": {
-        "api": "torch.multiply"
-      }
-    }
+    ]
   },
   "nan": {
     "description": "IEEE 754 floating-point representation of Not a Number (``NaN``).",
     "from": "_2024_12/constants.py",
-    "std_args": [],
-    "variants": {}
+    "std_args": []
   },
   "negative": {
     "description": "Computes the numerical negative of each element ``x_i`` (i.e., ``y_i = -x_i``) of the input array ``x``.",
@@ -2757,27 +1650,12 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.negative"
-      },
-      "keras": {
-        "api": "keras.ops.negative"
-      },
-      "tensorflow": {
-        "api": "tensorflow.negative"
-      },
-      "torch": {
-        "api": "torch.negative"
-      }
-    }
+    ]
   },
   "newaxis": {
     "description": "An alias for ``None`` which is useful for indexing arrays.",
     "from": "_2024_12/constants.py",
-    "std_args": [],
-    "variants": {}
+    "std_args": []
   },
   "nextafter": {
     "description": "Returns the next representable floating-point value for each element ``x1_i`` of the input array ``x1`` in the direction of the respective element ``x2_i`` of the input array ``x2``.",
@@ -2791,18 +1669,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.nextafter"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.nextafter"
-      },
-      "torch": {
-        "api": "torch.nextafter"
-      }
-    }
+    ]
   },
   "nonzero": {
     "description": "Returns the indices of the array elements which are non-zero.",
@@ -2812,18 +1679,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.nonzero"
-      },
-      "keras": {
-        "api": "keras.ops.nonzero"
-      },
-      "torch": {
-        "api": "torch.nonzero"
-      }
-    }
+    ]
   },
   "not_equal": {
     "description": "Computes the truth value of ``x1_i != x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2837,21 +1693,7 @@
         "x2",
         "Union[array, int, float, complex, bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.not_equal"
-      },
-      "keras": {
-        "api": "keras.ops.not_equal"
-      },
-      "tensorflow": {
-        "api": "tensorflow.not_equal"
-      },
-      "torch": {
-        "api": "torch.not_equal"
-      }
-    }
+    ]
   },
   "ones": {
     "description": "Returns a new array having a specified ``shape`` and filled with ones.",
@@ -2869,15 +1711,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "tensorflow": {
-        "api": "tensorflow.ones"
-      },
-      "torch": {
-        "api": "torch.ones"
-      }
-    }
+    ]
   },
   "ones_like": {
     "description": "Returns a new array filled with ones and having the same ``shape`` as an input array ``x``.",
@@ -2895,18 +1729,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.ones_like"
-      },
-      "tensorflow": {
-        "api": "tensorflow.ones_like"
-      },
-      "torch": {
-        "api": "torch.ones_like"
-      }
-    }
+    ]
   },
   "outer": {
     "description": "Returns the outer product of two vectors ``x1`` and ``x2``.",
@@ -2920,18 +1743,7 @@
         "x2",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.outer"
-      },
-      "keras": {
-        "api": "keras.ops.outer"
-      },
-      "torch": {
-        "api": "torch.outer"
-      }
-    }
+    ]
   },
   "permute_dims": {
     "description": "Permutes the axes (dimensions) of an array ``x``.",
@@ -2945,18 +1757,12 @@
         "axes",
         "Tuple[int, Ellipsis]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.permute_dims"
-      }
-    }
+    ]
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
     "from": "_2024_12/constants.py",
-    "std_args": [],
-    "variants": {}
+    "std_args": []
   },
   "pinv": {
     "description": "Returns the (Moore-Penrose) pseudo-inverse of a matrix (or a stack of matrices) ``x``.",
@@ -2970,18 +1776,7 @@
         "rtol",
         "Optional[Union[float, array]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.pinv"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.pinv"
-      },
-      "torch": {
-        "api": "torch.linalg.pinv"
-      }
-    }
+    ]
   },
   "positive": {
     "description": "Computes the numerical positive of each element ``x_i`` (i.e., ``y_i = +x_i``) of the input array ``x``.",
@@ -2991,15 +1786,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.positive"
-      },
-      "torch": {
-        "api": "torch.positive"
-      }
-    }
+    ]
   },
   "pow": {
     "description": "Calculates an implementation-dependent approximation of exponentiation by raising each element ``x1_i`` (the base) of the input array ``x1`` to the power of ``x2_i`` (the exponent), where ``x2_i`` is the corresponding element of the input array ``x2``.",
@@ -3013,18 +1800,7 @@
         "x2",
         "Union[array, int, float, complex]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.pow"
-      },
-      "tensorflow": {
-        "api": "tensorflow.pow"
-      },
-      "torch": {
-        "api": "torch.pow"
-      }
-    }
+    ]
   },
   "prod": {
     "description": "Calculates the product of input array ``x`` elements.",
@@ -3046,18 +1822,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.prod"
-      },
-      "keras": {
-        "api": "keras.ops.prod"
-      },
-      "torch": {
-        "api": "torch.prod"
-      }
-    }
+    ]
   },
   "qr": {
     "description": "Returns the QR decomposition of a full column rank matrix (or a stack of matrices).",
@@ -3071,21 +1836,7 @@
         "mode",
         "Literal[reduced, complete]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.qr"
-      },
-      "keras": {
-        "api": "keras.ops.qr"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.qr"
-      },
-      "torch": {
-        "api": "torch.qr"
-      }
-    }
+    ]
   },
   "real": {
     "description": "Returns the real component of a complex number for each element ``x_i`` of the input array ``x``.",
@@ -3095,21 +1846,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.real"
-      },
-      "keras": {
-        "api": "keras.ops.real"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.real"
-      },
-      "torch": {
-        "api": "torch.real"
-      }
-    }
+    ]
   },
   "reciprocal": {
     "description": "Returns the reciprocal for each element ``x_i`` of the input array ``x``.",
@@ -3119,21 +1856,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.reciprocal"
-      },
-      "keras": {
-        "api": "keras.ops.reciprocal"
-      },
-      "tensorflow": {
-        "api": "tensorflow.math.reciprocal"
-      },
-      "torch": {
-        "api": "torch.reciprocal"
-      }
-    }
+    ]
   },
   "remainder": {
     "description": "Returns the remainder of division for each element ``x1_i`` of the input array ``x1`` and the respective element ``x2_i`` of the input array ``x2``.",
@@ -3147,15 +1870,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.remainder"
-      },
-      "torch": {
-        "api": "torch.remainder"
-      }
-    }
+    ]
   },
   "repeat": {
     "description": "Repeats each element of an array a specified number of times on a per-element basis.",
@@ -3173,21 +1888,7 @@
         "axis",
         "Optional[int]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.repeat"
-      },
-      "keras": {
-        "api": "keras.ops.repeat"
-      },
-      "paxml": {
-        "api": "praxis.layers.Repeat"
-      },
-      "tensorflow": {
-        "api": "tensorflow.repeat"
-      }
-    }
+    ]
   },
   "reshape": {
     "description": "Reshapes an array without changing its data.",
@@ -3205,34 +1906,12 @@
         "copy",
         "Optional[bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.reshape"
-      },
-      "keras": {
-        "api": "keras.layers.Reshape"
-      },
-      "tensorflow": {
-        "api": "tensorflow.reshape"
-      },
-      "torch": {
-        "api": "torch.reshape"
-      }
-    }
+    ]
   },
   "result_type": {
     "description": "Returns the dtype that results from applying type promotion rules (see :ref:`type-promotion`) to the arguments.",
     "from": "_2024_12/data_type_functions.py",
-    "std_args": [],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.result_type"
-      },
-      "torch": {
-        "api": "torch.result_type"
-      }
-    }
+    "std_args": []
   },
   "rfft": {
     "description": "Computes the one-dimensional discrete Fourier transform for real-valued input.",
@@ -3254,15 +1933,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.rfft"
-      },
-      "torch": {
-        "api": "torch.fft.rfft"
-      }
-    }
+    ]
   },
   "rfftfreq": {
     "description": "Computes the discrete Fourier transform sample frequencies (for ``rfft`` and ``irfft``).",
@@ -3284,12 +1955,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.fft.rfftfreq"
-      }
-    }
+    ]
   },
   "rfftn": {
     "description": "Computes the n-dimensional discrete Fourier transform for real-valued input.",
@@ -3311,15 +1977,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.fft.rfftn"
-      },
-      "torch": {
-        "api": "torch.fft.rfftn"
-      }
-    }
+    ]
   },
   "roll": {
     "description": "Rolls array elements along a specified axis. Array elements that roll beyond the last position are re-introduced at the first position. Array elements that roll beyond the first position are re-introduced at the last position.",
@@ -3337,21 +1995,7 @@
         "axis",
         "Optional[Union[int, Tuple[int, Ellipsis]]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.roll"
-      },
-      "keras": {
-        "api": "keras.ops.roll"
-      },
-      "tensorflow": {
-        "api": "tensorflow.roll"
-      },
-      "torch": {
-        "api": "torch.roll"
-      }
-    }
+    ]
   },
   "round": {
     "description": "Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number.",
@@ -3361,21 +2005,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.round"
-      },
-      "keras": {
-        "api": "keras.ops.round"
-      },
-      "tensorflow": {
-        "api": "tensorflow.round"
-      },
-      "torch": {
-        "api": "torch.round"
-      }
-    }
+    ]
   },
   "searchsorted": {
     "description": "Finds the indices into ``x1`` such that, if the corresponding elements in ``x2`` were inserted before the indices, the order of ``x1``, when sorted in ascending order, would be preserved.",
@@ -3397,18 +2027,7 @@
         "sorter",
         "Optional[array]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.searchsorted"
-      },
-      "tensorflow": {
-        "api": "tensorflow.searchsorted"
-      },
-      "torch": {
-        "api": "torch.searchsorted"
-      }
-    }
+    ]
   },
   "sign": {
     "description": "Returns an indication of the sign of a number for each element ``x_i`` of the input array ``x``.",
@@ -3418,21 +2037,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.sign"
-      },
-      "keras": {
-        "api": "keras.ops.sign"
-      },
-      "tensorflow": {
-        "api": "tensorflow.sign"
-      },
-      "torch": {
-        "api": "torch.sign"
-      }
-    }
+    ]
   },
   "signbit": {
     "description": "Determines whether the sign bit is set for each element ``x_i`` of the input array ``x``.",
@@ -3442,18 +2047,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.signbit"
-      },
-      "keras": {
-        "api": "keras.ops.signbit"
-      },
-      "torch": {
-        "api": "torch.signbit"
-      }
-    }
+    ]
   },
   "sin": {
     "description": "Calculates an implementation-dependent approximation to the sine for each element ``x_i`` of the input array ``x``.",
@@ -3463,21 +2057,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.sin"
-      },
-      "keras": {
-        "api": "keras.ops.sin"
-      },
-      "tensorflow": {
-        "api": "tensorflow.sin"
-      },
-      "torch": {
-        "api": "torch.sin"
-      }
-    }
+    ]
   },
   "sinh": {
     "description": "Calculates an implementation-dependent approximation to the hyperbolic sine for each element ``x_i`` of the input array ``x``.",
@@ -3487,21 +2067,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.sinh"
-      },
-      "keras": {
-        "api": "keras.ops.sinh"
-      },
-      "tensorflow": {
-        "api": "tensorflow.sinh"
-      },
-      "torch": {
-        "api": "torch.sinh"
-      }
-    }
+    ]
   },
   "slogdet": {
     "description": "Returns the sign and the natural logarithm of the absolute value of the determinant of a square matrix (or a stack of square matrices) ``x``.",
@@ -3511,21 +2077,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.slogdet"
-      },
-      "keras": {
-        "api": "keras.ops.slogdet"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.slogdet"
-      },
-      "torch": {
-        "api": "torch.slogdet"
-      }
-    }
+    ]
   },
   "solve": {
     "description": "Returns the solution of a square system of linear equations with a unique solution.",
@@ -3539,21 +2091,7 @@
         "x2",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.solve"
-      },
-      "keras": {
-        "api": "keras.ops.solve"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.solve"
-      },
-      "torch": {
-        "api": "torch.solve"
-      }
-    }
+    ]
   },
   "sort": {
     "description": "Returns a sorted copy of an input array ``x``.",
@@ -3575,15 +2113,7 @@
         "stable",
         "bool"
       ]
-    ],
-    "variants": {
-      "tensorflow": {
-        "api": "tensorflow.sort"
-      },
-      "torch": {
-        "api": "torch.sort"
-      }
-    }
+    ]
   },
   "sqrt": {
     "description": "Calculates the principal square root for each element ``x_i`` of the input array ``x``.",
@@ -3593,21 +2123,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.sqrt"
-      },
-      "keras": {
-        "api": "keras.ops.sqrt"
-      },
-      "tensorflow": {
-        "api": "tensorflow.sqrt"
-      },
-      "torch": {
-        "api": "torch.sqrt"
-      }
-    }
+    ]
   },
   "square": {
     "description": "Squares each element ``x_i`` of the input array ``x``.",
@@ -3617,21 +2133,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.square"
-      },
-      "keras": {
-        "api": "keras.ops.square"
-      },
-      "tensorflow": {
-        "api": "tensorflow.square"
-      },
-      "torch": {
-        "api": "torch.square"
-      }
-    }
+    ]
   },
   "squeeze": {
     "description": "Removes singleton dimensions (axes) from ``x``.",
@@ -3645,21 +2147,7 @@
         "axis",
         "Union[int, Tuple[int, Ellipsis]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.squeeze"
-      },
-      "keras": {
-        "api": "keras.ops.squeeze"
-      },
-      "tensorflow": {
-        "api": "tensorflow.squeeze"
-      },
-      "torch": {
-        "api": "torch.squeeze"
-      }
-    }
+    ]
   },
   "stack": {
     "description": "Joins a sequence of arrays along a new axis.",
@@ -3673,21 +2161,7 @@
         "axis",
         "int"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.stack"
-      },
-      "keras": {
-        "api": "keras.ops.stack"
-      },
-      "tensorflow": {
-        "api": "tensorflow.stack"
-      },
-      "torch": {
-        "api": "torch.stack"
-      }
-    }
+    ]
   },
   "std": {
     "description": "Calculates the standard deviation of the input array ``x``.",
@@ -3709,15 +2183,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.std"
-      },
-      "torch": {
-        "api": "torch.std"
-      }
-    }
+    ]
   },
   "subtract": {
     "description": "Calculates the difference for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -3731,21 +2197,7 @@
         "x2",
         "Union[array, int, float, complex]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.subtract"
-      },
-      "keras": {
-        "api": "keras.ops.subtract"
-      },
-      "tensorflow": {
-        "api": "tensorflow.subtract"
-      },
-      "torch": {
-        "api": "torch.subtract"
-      }
-    }
+    ]
   },
   "sum": {
     "description": "Calculates the sum of the input array ``x``.",
@@ -3767,15 +2219,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.sum"
-      },
-      "torch": {
-        "api": "torch.sum"
-      }
-    }
+    ]
   },
   "svd": {
     "description": "Returns a singular value decomposition (SVD) of a matrix (or a stack of matrices) ``x``.",
@@ -3789,21 +2233,7 @@
         "full_matrices",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.svd"
-      },
-      "keras": {
-        "api": "keras.ops.svd"
-      },
-      "tensorflow": {
-        "api": "tensorflow.linalg.svd"
-      },
-      "torch": {
-        "api": "torch.svd"
-      }
-    }
+    ]
   },
   "svdvals": {
     "description": "Returns the singular values of a matrix (or a stack of matrices) ``x``.",
@@ -3813,15 +2243,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.linalg.svdvals"
-      },
-      "torch": {
-        "api": "torch.linalg.svdvals"
-      }
-    }
+    ]
   },
   "take": {
     "description": "Returns elements of an array along an axis.",
@@ -3839,18 +2261,7 @@
         "axis",
         "Optional[int]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.take"
-      },
-      "keras": {
-        "api": "keras.ops.take"
-      },
-      "torch": {
-        "api": "torch.take"
-      }
-    }
+    ]
   },
   "take_along_axis": {
     "description": "Returns elements from an array at the one-dimensional indices specified by ``indices`` along a provided ``axis``.",
@@ -3868,15 +2279,7 @@
         "axis",
         "int"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.take_along_axis"
-      },
-      "keras": {
-        "api": "keras.ops.take_along_axis"
-      }
-    }
+    ]
   },
   "tan": {
     "description": "Calculates an implementation-dependent approximation to the tangent for each element ``x_i`` of the input array ``x``.",
@@ -3886,21 +2289,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.tan"
-      },
-      "keras": {
-        "api": "keras.ops.tan"
-      },
-      "tensorflow": {
-        "api": "tensorflow.tan"
-      },
-      "torch": {
-        "api": "torch.tan"
-      }
-    }
+    ]
   },
   "tanh": {
     "description": "Calculates an implementation-dependent approximation to the hyperbolic tangent for each element ``x_i`` of the input array ``x``.",
@@ -3910,24 +2299,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.tanh"
-      },
-      "keras": {
-        "api": "keras.ops.tanh"
-      },
-      "paxml": {
-        "api": "praxis.layers.Tanh"
-      },
-      "tensorflow": {
-        "api": "tensorflow.tanh"
-      },
-      "torch": {
-        "api": "torch.tanh"
-      }
-    }
+    ]
   },
   "tensordot": {
     "description": "Alias for :func:`~array_api.tensordot`.",
@@ -3945,21 +2317,7 @@
         "axes",
         "Union[int, Tuple[Sequence[int], Sequence[int]]]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.tensordot"
-      },
-      "keras": {
-        "api": "keras.ops.tensordot"
-      },
-      "tensorflow": {
-        "api": "tensorflow.tensordot"
-      },
-      "torch": {
-        "api": "torch.tensordot"
-      }
-    }
+    ]
   },
   "tile": {
     "description": "Constructs an array by tiling an input array.",
@@ -3973,21 +2331,7 @@
         "repetitions",
         "Tuple[int, Ellipsis]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.tile"
-      },
-      "keras": {
-        "api": "keras.ops.tile"
-      },
-      "tensorflow": {
-        "api": "tensorflow.tile"
-      },
-      "torch": {
-        "api": "torch.tile"
-      }
-    }
+    ]
   },
   "trace": {
     "description": "Returns the sum along the specified diagonals of a matrix (or a stack of matrices) ``x``.",
@@ -4005,18 +2349,7 @@
         "dtype",
         "Optional[dtype]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.trace"
-      },
-      "keras": {
-        "api": "keras.ops.trace"
-      },
-      "torch": {
-        "api": "torch.trace"
-      }
-    }
+    ]
   },
   "tril": {
     "description": "Returns the lower triangular part of a matrix (or a stack of matrices) ``x``.",
@@ -4030,18 +2363,7 @@
         "k",
         "int"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.tril"
-      },
-      "keras": {
-        "api": "keras.ops.tril"
-      },
-      "torch": {
-        "api": "torch.tril"
-      }
-    }
+    ]
   },
   "triu": {
     "description": "Returns the upper triangular part of a matrix (or a stack of matrices) ``x``.",
@@ -4055,18 +2377,7 @@
         "k",
         "int"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.triu"
-      },
-      "keras": {
-        "api": "keras.ops.triu"
-      },
-      "torch": {
-        "api": "torch.triu"
-      }
-    }
+    ]
   },
   "trunc": {
     "description": "Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number that is closer to zero than ``x_i``.",
@@ -4076,18 +2387,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.trunc"
-      },
-      "keras": {
-        "api": "keras.ops.trunc"
-      },
-      "torch": {
-        "api": "torch.trunc"
-      }
-    }
+    ]
   },
   "unique_all": {
     "description": "Returns the unique elements of an input array ``x``, the first occurring indices for each unique element in ``x``, the indices from the set of unique elements that reconstruct ``x``, and the corresponding counts for each unique element in ``x``.",
@@ -4097,12 +2397,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.unique_all"
-      }
-    }
+    ]
   },
   "unique_counts": {
     "description": "Returns the unique elements of an input array ``x`` and the corresponding counts for each unique element in ``x``.",
@@ -4112,12 +2407,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.unique_counts"
-      }
-    }
+    ]
   },
   "unique_inverse": {
     "description": "Returns the unique elements of an input array ``x`` and the indices from the set of unique elements that reconstruct ``x``.",
@@ -4127,12 +2417,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.unique_inverse"
-      }
-    }
+    ]
   },
   "unique_values": {
     "description": "Returns the unique elements of an input array ``x``.",
@@ -4142,12 +2427,7 @@
         "x",
         "array"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.unique_values"
-      }
-    }
+    ]
   },
   "unstack": {
     "description": "Splits an array into a sequence of arrays along the given axis.",
@@ -4161,15 +2441,7 @@
         "axis",
         "int"
       ]
-    ],
-    "variants": {
-      "keras": {
-        "api": "keras.ops.unstack"
-      },
-      "tensorflow": {
-        "api": "tensorflow.unstack"
-      }
-    }
+    ]
   },
   "var": {
     "description": "Calculates the variance of the input array ``x``.",
@@ -4191,15 +2463,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.var"
-      },
-      "torch": {
-        "api": "torch.var"
-      }
-    }
+    ]
   },
   "vecdot": {
     "description": "Alias for :func:`~array_api.vecdot`.",
@@ -4217,12 +2481,7 @@
         "axis",
         "int"
       ]
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.linalg.vecdot"
-      }
-    }
+    ]
   },
   "vector_norm": {
     "description": "Computes the vector norm of a vector (or batch of vectors) ``x``.",
@@ -4244,12 +2503,7 @@
         "ord",
         "Union[int, float, Literal[inf, Any]]"
       ]
-    ],
-    "variants": {
-      "torch": {
-        "api": "torch.linalg.vector_norm"
-      }
-    }
+    ]
   },
   "where": {
     "description": "Returns elements chosen from ``x1`` or ``x2`` depending on ``condition``.",
@@ -4267,21 +2521,7 @@
         "x2",
         "Union[array, int, float, complex, bool]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.where"
-      },
-      "keras": {
-        "api": "keras.ops.where"
-      },
-      "tensorflow": {
-        "api": "tensorflow.where"
-      },
-      "torch": {
-        "api": "torch.where"
-      }
-    }
+    ]
   },
   "zeros": {
     "description": "Returns a new array having a specified ``shape`` and filled with zeros.",
@@ -4299,15 +2539,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "tensorflow": {
-        "api": "tensorflow.zeros"
-      },
-      "torch": {
-        "api": "torch.zeros"
-      }
-    }
+    ]
   },
   "zeros_like": {
     "description": "Returns a new array filled with zeros and having the same ``shape`` as an input array ``x``.",
@@ -4325,17 +2557,6 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.zeros_like"
-      },
-      "tensorflow": {
-        "api": "tensorflow.zeros_like"
-      },
-      "torch": {
-        "api": "torch.zeros_like"
-      }
-    }
+    ]
   }
 }

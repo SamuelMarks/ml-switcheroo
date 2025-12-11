@@ -4,16 +4,21 @@ SemanticsManager for Knowledge Base Loading and Updating.
 This module is responsible for locating, loading, and merging semantic
 specification files (JSONs) into a unified Knowledge Graph.
 
-It supports **Distributed Semantics**, allowing definitions to be split across
-multiple files and directories (e.g., `semantics/extensions/*.json`).
-Files are loaded recursively and merged with a tier-based priority system.
+It implements a "Hub-and-Spoke" loading strategy:
+1.  **Hub (Specs)**: Loads Abstract Operation definitions from `semantics/*.json`
+    (e.g., `k_array_api.json`). These define the "Standard" (args, description).
+2.  **Spokes (Overlays)**: Scans `snapshots/*_mappings.json` to inject
+    framework-specific implementation details (variants) into the abstract definitions.
+
+This separation allows the Specs to remain stable while Framework implementations
+evolve rapidly in the snapshots directory.
 """
 
 import json
 import sys
 import warnings
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Any, List, Set
+from typing import Dict, Optional, Tuple, Any, List, Set, Union
 from pydantic import ValidationError
 
 if sys.version_info >= (3, 9):
@@ -52,17 +57,22 @@ def resolve_semantics_dir() -> Path:
   return local_path
 
 
+def resolve_snapshots_dir() -> Path:
+  """
+  Locates the directory containing framework snapshots and mapping overlays.
+  Defaults to the sibling 'snapshots' directory relative to 'semantics'.
+  """
+  return resolve_semantics_dir().parent / "snapshots"
+
+
 class SemanticsManager:
   """
   Central database for semantic mappings and configuration.
 
   Data Source Priority:
   1. Registry Defaults (Code-defined in FrameworkAdapters).
-  2. JSON Files (User/System defined in `semantics/**/*.json`).
-     Files are loaded in the following order of precedence (Lowest to Highest):
-     - Array API (Math)
-     - Neural Net (Layers)
-     - Extensions/Extras (Patches & New Frameworks)
+  2. Spec Files (`semantics/*.json`): Defines the Abstract Standards.
+  3. Overlay Files (`snapshots/*_mappings.json`): Injects Framework Variants.
   """
 
   def __init__(self):
@@ -290,55 +300,138 @@ class SemanticsManager:
   def _load_knowledge_graph(self) -> None:
     """
     Loads, sorts, and merges all semantic definition files.
-    Supports distributed semantics via recursive globbing.
+    Phase 1: Loads Specs from `semantics/`.
+    Phase 2: Loads Framework Overlays from `snapshots/`.
     """
     base_path = resolve_semantics_dir()
-    if not base_path.exists():
+
+    # --- Phase 1: Load Specs ---
+    if base_path.exists():
+      # 1. Discover all JSONs
+      all_files = list(base_path.rglob("*.json"))
+
+      # 2. Assign Priorities based on Tier Heuristics
+      prioritized_files: List[Tuple[int, Path]] = []
+      for fpath in all_files:
+        fname = fpath.name
+        priority = 30  # Default (Extras / Extensions)
+        if "array" in fname:
+          priority = 10
+        elif "neural" in fname:
+          priority = 20
+        elif "templates" in fname:
+          priority = 99  # Templates handled separately
+        prioritized_files.append((priority, fpath))
+
+      prioritized_files.sort(key=lambda x: (x[0], x[1].name))
+
+      for priority, fpath in prioritized_files:
+        # Separate handling for test templates
+        if "test_templates" in fpath.name:
+          self._load_templates_file(fpath)
+          continue
+
+        try:
+          with open(fpath, "r", encoding="utf-8") as f:
+            content = json.load(f)
+
+          tier = self._infer_tier(priority)
+          self._merge_tier(content, tier)
+        except json.JSONDecodeError as e:
+          print(f"❌ Error decoding {fpath.name}: {e}")
+        except Exception as e:
+          print(f"⚠️ Error loading {fpath.name}: {e}")
+
+    # --- Phase 2: Load Overlays ---
+    self._load_overlays()
+
+    # --- Phase 3: Final Indexing ---
+    self._build_index()
+
+  def _load_overlays(self) -> None:
+    """
+    Scans the snapshots directory for `*_mappings.json` files and injects
+    implementation details into the Loaded Specs.
+    """
+    snap_dir = resolve_snapshots_dir()
+    if not snap_dir.exists():
       return
 
-    # 1. Discover all JSONs
-    all_files = list(base_path.rglob("*.json"))
+    # Pattern convention: only load explicit mapping files to key framework-specific moves
+    # E.g. torch_mappings.json, jax_mappings.json
+    mapping_files = list(snap_dir.glob("*_mappings.json"))
 
-    # 2. Assign Priorities based on Tier Heuristics
-    # Lower priority loads first, Higher priority overrides.
-    # Standard Order: Array (10) -> Neural (20) -> Extras/Extensions (30)
-    prioritized_files: List[Tuple[int, Path]] = []
-
-    for fpath in all_files:
-      fname = fpath.name
-      priority = 30  # Default (Extras / Extensions)
-
-      if "array" in fname:
-        priority = 10
-      elif "neural" in fname:
-        priority = 20
-      elif "templates" in fname:
-        priority = 99  # Templates handled separately
-
-      prioritized_files.append((priority, fpath))
-
-    # 3. Sort by Priority then Alphabetically
-    prioritized_files.sort(key=lambda x: (x[0], x[1].name))
-
-    # 4. Load Loop
-    for priority, fpath in prioritized_files:
-      # Separate handling for test templates
-      if "test_templates" in fpath.name:
-        self._load_templates_file(fpath)
-        continue
-
+    for fpath in mapping_files:
       try:
         with open(fpath, "r", encoding="utf-8") as f:
           content = json.load(f)
-
-        tier = self._infer_tier(priority)
-        self._merge_tier(content, tier)
-      except json.JSONDecodeError as e:
-        print(f"❌ Error decoding {fpath.name}: {e}")
+        self._merge_overlay(content, fpath.name)
       except Exception as e:
-        print(f"⚠️ Error loading {fpath.name}: {e}")
+        print(f"⚠️ Error loading overlay {fpath.name}: {e}")
 
-    self._build_index()
+  def _merge_overlay(self, content: Dict[str, Any], filename: str) -> None:
+    """
+    Merges a mapping overlay file into the main data.
+
+    Expected JSON Structure:
+    {
+        "__framework__": "torch",
+        "mappings": {
+           "Abs": { "api": "torch.abs" },
+           "Conv2d": { "api": "torch.nn.Conv2d", "args": {"filters": "out_channels"} }
+        },
+        "templates": { ... }
+    }
+    """
+    target_fw = content.get("__framework__")
+
+    if not target_fw:
+      # Fallback: try to guess from filename 'torch_mappings.json' -> 'torch'
+      parts = filename.split("_")
+      if len(parts) > 1:
+        target_fw = parts[0]
+      else:
+        return  # Cannot determine target framework
+
+    # 1. Merge Template Config if present
+    if "templates" in content:
+      self.test_templates[target_fw] = content["templates"]
+
+    # 2. Merge Mappings
+    mappings = content.get("mappings", {})
+    for op_name, implementation in mappings.items():
+      # A. Check if Op exists in Spec
+      if op_name not in self.data:
+        # If not in spec, we can treat it as an extra or create a skeleton.
+        # For now, we create a skeleton Extra.
+        self.data[op_name] = {
+          "description": f"Auto-generated from {filename}",
+          "std_args": [],  # Unknown if not in Spec
+          "variants": {},
+        }
+        self._key_origins[op_name] = SemanticTier.EXTRAS.value
+
+      # B. Ensure 'variants' dict exists (Fix for KeyError bug)
+      if "variants" not in self.data[op_name]:
+        self.data[op_name]["variants"] = {}
+
+      # C. Inject Variant
+      # If implementation is explicitly null, it means 'Not Supported'
+      # merge logic handles replacing existing variant data
+      if implementation is None:
+        self.data[op_name]["variants"][target_fw] = None
+      else:
+        # Merge dictionary to allow augmenting existing data
+        if target_fw not in self.data[op_name]["variants"]:
+          self.data[op_name]["variants"][target_fw] = {}
+
+        current_variant = self.data[op_name]["variants"][target_fw]
+        # Handle case where current_variant might be None (from previous explicit disable)
+        if current_variant is None:
+          current_variant = {}
+          self.data[op_name]["variants"][target_fw] = current_variant
+
+        current_variant.update(implementation)
 
   def _load_templates_file(self, fpath: Path) -> None:
     try:
@@ -424,6 +517,7 @@ class SemanticsManager:
     for abstract_id, details in self.data.items():
       variants = details.get("variants", {})
       for _engine, impl in variants.items():
+        # Check if impl is valid (not None)
         if not impl:
           continue
         api_name = impl.get("api")

@@ -33,6 +33,7 @@ def test_semantics_manager_uses_resolved_path(tmp_path, monkeypatch):
   monkeypatch.setattr("ml_switcheroo.semantics.manager.resolve_semantics_dir", mock_resolve)
 
   mgr = SemanticsManager()
+  mgr._reverse_index = {}
 
   # 3. Verify it loaded the file we put there
   assert "mock_op" in mgr.data

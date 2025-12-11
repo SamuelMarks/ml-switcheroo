@@ -68,6 +68,7 @@ def test_recursive_discovery(mock_semantics_tree):
     # Prevent loading default templates to simplify assertion
     with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
       mgr = SemanticsManager()
+      mgr._reverse_index = {}
 
       # Check Root file load
       assert "abs" in mgr.data
@@ -93,6 +94,7 @@ def test_tier_priority_override(mock_semantics_tree):
   """
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=mock_semantics_tree):
     mgr = SemanticsManager()
+    mgr._reverse_index = {}
 
     # k_neural_net defined: "Standard Linear"
     # neural_patch defined: "Patched Linear"
@@ -118,6 +120,7 @@ def test_framework_config_merging(mock_semantics_tree):
   """
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=mock_semantics_tree):
     mgr = SemanticsManager()
+    mgr._reverse_index = {}
 
     # xgboost config was in extensions/xgboost_maps.json
     assert "xgboost" in mgr.framework_configs
@@ -137,6 +140,7 @@ def test_test_templates_globbing(tmp_path):
 
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=tmp_path):
     mgr = SemanticsManager()
+    mgr._reverse_index = {}
 
     assert "custom_fw" in mgr.test_templates
     assert mgr.test_templates["custom_fw"]["import"] == "import custom"

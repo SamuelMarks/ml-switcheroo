@@ -1,0 +1,676 @@
+{
+  "__framework__": "jax",
+  "mappings": {
+    "Abs": {
+      "api": "jax.numpy.abs"
+    },
+    "Acos": {
+      "api": "jax.numpy.acos"
+    },
+    "Acosh": {
+      "api": "jax.numpy.acosh"
+    },
+    "Add": {
+      "api": "jax.numpy.add"
+    },
+    "ArgMax": {
+      "api": "jax.numpy.argmax"
+    },
+    "ArgMin": {
+      "api": "jax.numpy.argmin"
+    },
+    "Asin": {
+      "api": "jax.numpy.asin"
+    },
+    "Asinh": {
+      "api": "jax.numpy.asinh"
+    },
+    "Atan": {
+      "api": "jax.numpy.atan"
+    },
+    "Atanh": {
+      "api": "jax.numpy.atanh"
+    },
+    "Ceil": {
+      "api": "jax.numpy.ceil"
+    },
+    "Clip": {
+      "api": "jax.numpy.clip"
+    },
+    "Compress": {
+      "api": "jax.numpy.compress"
+    },
+    "Cos": {
+      "api": "jax.numpy.cos"
+    },
+    "Cosh": {
+      "api": "jax.numpy.cosh"
+    },
+    "CumSum": {
+      "api": "jax.numpy.cumsum"
+    },
+    "DataLoader": {
+      "api": "GenericDataLoader",
+      "requires_plugin": "convert_dataloader"
+    },
+    "Det": {
+      "api": "jax.numpy.linalg.det"
+    },
+    "Einsum": {
+      "api": "jax.numpy.einsum"
+    },
+    "Equal": {
+      "api": "jax.numpy.equal"
+    },
+    "Exp": {
+      "api": "jax.numpy.exp"
+    },
+    "Floor": {
+      "api": "jax.numpy.floor"
+    },
+    "Gelu": {
+      "api": "jax.nn.gelu",
+      "args": {
+        "approximate": "approximate",
+        "x": "x"
+      }
+    },
+    "Greater": {
+      "api": "jax.numpy.greater"
+    },
+    "Identity": {
+      "api": "jax.numpy.identity"
+    },
+    "IsNaN": {
+      "api": "jax.numpy.isnan"
+    },
+    "Less": {
+      "api": "jax.numpy.less"
+    },
+    "Log": {
+      "api": "jax.numpy.log"
+    },
+    "MatMul": {
+      "api": "jax.numpy.matmul"
+    },
+    "Max": {
+      "api": "jax.numpy.max"
+    },
+    "Mean": {
+      "api": "jax.numpy.mean"
+    },
+    "Min": {
+      "api": "jax.numpy.min"
+    },
+    "NonZero": {
+      "api": "jax.numpy.nonzero"
+    },
+    "Pow": {
+      "api": "jax.numpy.pow"
+    },
+    "Reciprocal": {
+      "api": "jax.numpy.reciprocal"
+    },
+    "Reshape": {
+      "api": "jax.numpy.reshape"
+    },
+    "Round": {
+      "api": "jax.numpy.round"
+    },
+    "Sign": {
+      "api": "jax.numpy.sign"
+    },
+    "Sin": {
+      "api": "jax.numpy.sin"
+    },
+    "Sinh": {
+      "api": "jax.numpy.sinh"
+    },
+    "Size": {
+      "api": "jax.numpy.size"
+    },
+    "Softmax": {
+      "api": "jax.nn.softmax",
+      "args": {
+        "dim": "axis",
+        "x": "x"
+      }
+    },
+    "Sqrt": {
+      "api": "jax.numpy.sqrt"
+    },
+    "Squeeze": {
+      "api": "jax.numpy.squeeze"
+    },
+    "Sum": {
+      "api": "jax.numpy.sum"
+    },
+    "Tan": {
+      "api": "jax.numpy.tan"
+    },
+    "Tanh": {
+      "api": "jax.numpy.tanh"
+    },
+    "TensorDataset": null,
+    "Tile": {
+      "api": "jax.numpy.tile"
+    },
+    "Transpose": {
+      "api": "jax.numpy.transpose"
+    },
+    "Unique": {
+      "api": "jax.numpy.unique"
+    },
+    "Where": {
+      "api": "jax.numpy.where"
+    },
+    "abs": {
+      "api": "jax.numpy.abs",
+      "args": {
+        "a": "a"
+      }
+    },
+    "acos": {
+      "api": "jax.numpy.acos"
+    },
+    "acosh": {
+      "api": "jax.numpy.acosh"
+    },
+    "add": {
+      "api": "jax.numpy.add",
+      "requires_plugin": "decompose_alpha"
+    },
+    "add_": {
+      "api": "jax.numpy.add",
+      "requires_plugin": "unroll_inplace_ops"
+    },
+    "all": {
+      "api": "jax.numpy.all"
+    },
+    "any": {
+      "api": "jax.numpy.any"
+    },
+    "argmax": {
+      "api": "jax.numpy.argmax"
+    },
+    "argmin": {
+      "api": "jax.numpy.argmin"
+    },
+    "asin": {
+      "api": "jax.numpy.asin"
+    },
+    "asinh": {
+      "api": "jax.numpy.asinh"
+    },
+    "atan": {
+      "api": "jax.numpy.atan"
+    },
+    "atan2": {
+      "api": "jax.numpy.atan2"
+    },
+    "atanh": {
+      "api": "jax.numpy.atanh"
+    },
+    "bitwise_and": {
+      "api": "jax.numpy.bitwise_and"
+    },
+    "bitwise_invert": {
+      "api": "jax.numpy.bitwise_invert"
+    },
+    "bitwise_left_shift": {
+      "api": "jax.numpy.bitwise_left_shift"
+    },
+    "bitwise_or": {
+      "api": "jax.numpy.bitwise_or"
+    },
+    "bitwise_right_shift": {
+      "api": "jax.numpy.bitwise_right_shift"
+    },
+    "bitwise_xor": {
+      "api": "jax.numpy.bitwise_xor"
+    },
+    "broadcast_arrays": {
+      "api": "jax.numpy.broadcast_arrays"
+    },
+    "broadcast_to": {
+      "api": "jax.numpy.broadcast_to"
+    },
+    "can_cast": {
+      "api": "jax.numpy.can_cast"
+    },
+    "ceil": {
+      "api": "jax.numpy.ceil"
+    },
+    "clip": {
+      "api": "jax.numpy.clip"
+    },
+    "conj": {
+      "api": "jax.numpy.conj"
+    },
+    "copysign": {
+      "api": "jax.numpy.copysign"
+    },
+    "cos": {
+      "api": "jax.numpy.cos"
+    },
+    "cosh": {
+      "api": "jax.numpy.cosh"
+    },
+    "count_nonzero": {
+      "api": "jax.numpy.count_nonzero"
+    },
+    "cross": {
+      "api": "jax.numpy.cross"
+    },
+    "cuda_is_available": {
+      "api": "jax.devices",
+      "requires_plugin": "cuda_is_available"
+    },
+    "det": {
+      "api": "jax.numpy.linalg.det"
+    },
+    "device": {
+      "api": "jax.devices",
+      "requires_plugin": "device_allocator"
+    },
+    "diagonal": {
+      "api": "jax.numpy.diagonal"
+    },
+    "diff": {
+      "api": "jax.numpy.diff"
+    },
+    "divide": {
+      "api": "jax.numpy.divide"
+    },
+    "dropout": {
+      "api": "jax.random.bernoulli",
+      "requires_plugin": "inject_prng"
+    },
+    "eigh": {
+      "api": "jax.numpy.linalg.eigh"
+    },
+    "eigvalsh": {
+      "api": "jax.numpy.linalg.eigvalsh"
+    },
+    "empty_like": {
+      "api": "jax.numpy.empty_like"
+    },
+    "equal": {
+      "api": "jax.numpy.equal"
+    },
+    "eval": {
+      "api": "None",
+      "requires_plugin": "capture_eval_state"
+    },
+    "exp": {
+      "api": "jax.numpy.exp"
+    },
+    "expand_dims": {
+      "api": "jax.numpy.expand_dims"
+    },
+    "expm1": {
+      "api": "jax.numpy.expm1"
+    },
+    "fft": {
+      "api": "jax.numpy.fft.fft"
+    },
+    "fftn": {
+      "api": "jax.numpy.fft.fftn"
+    },
+    "fftshift": {
+      "api": "jax.numpy.fft.fftshift"
+    },
+    "finfo": {
+      "api": "jax.numpy.finfo"
+    },
+    "flip": {
+      "api": "jax.numpy.flip"
+    },
+    "float32": {
+      "api": "jax.numpy.float32",
+      "args": {}
+    },
+    "floor": {
+      "api": "jax.numpy.floor"
+    },
+    "floor_divide": {
+      "api": "jax.numpy.floor_divide"
+    },
+    "full_like": {
+      "api": "jax.numpy.full_like"
+    },
+    "greater": {
+      "api": "jax.numpy.greater"
+    },
+    "greater_equal": {
+      "api": "jax.numpy.greater_equal"
+    },
+    "hfft": {
+      "api": "jax.numpy.fft.hfft"
+    },
+    "hypot": {
+      "api": "jax.numpy.hypot"
+    },
+    "ifft": {
+      "api": "jax.numpy.fft.ifft"
+    },
+    "ifftn": {
+      "api": "jax.numpy.fft.ifftn"
+    },
+    "ifftshift": {
+      "api": "jax.numpy.fft.ifftshift"
+    },
+    "ihfft": {
+      "api": "jax.numpy.fft.ihfft"
+    },
+    "iinfo": {
+      "api": "jax.numpy.iinfo"
+    },
+    "imag": {
+      "api": "jax.numpy.imag"
+    },
+    "init_process_group": null,
+    "inv": {
+      "api": "jax.numpy.linalg.inv"
+    },
+    "irfft": {
+      "api": "jax.numpy.fft.irfft"
+    },
+    "irfftn": {
+      "api": "jax.numpy.fft.irfftn"
+    },
+    "is_tensor": {
+      "api": "lambda x: hasattr(x, '__array__')",
+      "transformation_type": "inline_lambda"
+    },
+    "isdtype": {
+      "api": "jax.numpy.isdtype"
+    },
+    "isfinite": {
+      "api": "jax.numpy.isfinite"
+    },
+    "isinf": {
+      "api": "jax.numpy.isinf"
+    },
+    "isnan": {
+      "api": "jax.numpy.isnan"
+    },
+    "less": {
+      "api": "jax.numpy.less"
+    },
+    "less_equal": {
+      "api": "jax.numpy.less_equal"
+    },
+    "linspace": {
+      "api": "jax.numpy.linspace"
+    },
+    "load": {
+      "api": "orbax.checkpoint.restore",
+      "requires_plugin": "io_handler"
+    },
+    "log": {
+      "api": "jax.numpy.log"
+    },
+    "log10": {
+      "api": "jax.numpy.log10"
+    },
+    "log1p": {
+      "api": "jax.numpy.log1p"
+    },
+    "log2": {
+      "api": "jax.numpy.log2"
+    },
+    "logaddexp": {
+      "api": "jax.numpy.logaddexp"
+    },
+    "logical_and": {
+      "api": "jax.numpy.logical_and"
+    },
+    "logical_not": {
+      "api": "jax.numpy.logical_not"
+    },
+    "logical_or": {
+      "api": "jax.numpy.logical_or"
+    },
+    "logical_xor": {
+      "api": "jax.numpy.logical_xor"
+    },
+    "manual_seed": {
+      "api": "numpy.random.seed",
+      "args": {
+        "seed": "seed"
+      }
+    },
+    "matmul": {
+      "api": "jax.numpy.matmul"
+    },
+    "matrix_power": {
+      "api": "jax.numpy.linalg.matrix_power"
+    },
+    "matrix_rank": {
+      "api": "jax.numpy.linalg.matrix_rank"
+    },
+    "matrix_transpose": {
+      "api": "jax.numpy.matrix_transpose"
+    },
+    "max": {
+      "api": "jax.numpy.max"
+    },
+    "maximum": {
+      "api": "jax.numpy.maximum"
+    },
+    "mean": {
+      "api": "jax.numpy.mean"
+    },
+    "meshgrid": {
+      "api": "jax.numpy.meshgrid"
+    },
+    "min": {
+      "api": "jax.numpy.min"
+    },
+    "minimum": {
+      "api": "jax.numpy.minimum"
+    },
+    "moveaxis": {
+      "api": "jax.numpy.moveaxis"
+    },
+    "multiply": {
+      "api": "jax.numpy.multiply"
+    },
+    "negative": {
+      "api": "jax.numpy.negative"
+    },
+    "nextafter": {
+      "api": "jax.numpy.nextafter"
+    },
+    "nnx_Param": {
+      "api": "flax.nnx.Param"
+    },
+    "no_grad": {
+      "api": "jax.lax.stop_gradient",
+      "requires_plugin": "context_to_function_wrap"
+    },
+    "nonzero": {
+      "api": "jax.numpy.nonzero"
+    },
+    "not_equal": {
+      "api": "jax.numpy.not_equal"
+    },
+    "ones_like": {
+      "api": "jax.numpy.ones_like"
+    },
+    "outer": {
+      "api": "jax.numpy.outer"
+    },
+    "permute_dims": {
+      "api": "jax.numpy.permute_dims"
+    },
+    "pinv": {
+      "api": "jax.numpy.linalg.pinv"
+    },
+    "positive": {
+      "api": "jax.numpy.positive"
+    },
+    "pow": {
+      "api": "jax.numpy.pow"
+    },
+    "prod": {
+      "api": "jax.numpy.prod"
+    },
+    "qr": {
+      "api": "jax.numpy.linalg.qr"
+    },
+    "real": {
+      "api": "jax.numpy.real"
+    },
+    "reciprocal": {
+      "api": "jax.numpy.reciprocal"
+    },
+    "remainder": {
+      "api": "jax.numpy.remainder"
+    },
+    "repeat": {
+      "api": "jax.numpy.repeat"
+    },
+    "reshape": {
+      "api": "jax.numpy.reshape"
+    },
+    "result_type": {
+      "api": "jax.numpy.result_type"
+    },
+    "rfft": {
+      "api": "jax.numpy.fft.rfft"
+    },
+    "rfftn": {
+      "api": "jax.numpy.fft.rfftn"
+    },
+    "roll": {
+      "api": "jax.numpy.roll"
+    },
+    "round": {
+      "api": "jax.numpy.round"
+    },
+    "save": {
+      "api": "orbax.checkpoint.save",
+      "requires_plugin": "io_handler"
+    },
+    "searchsorted": {
+      "api": "jax.numpy.searchsorted"
+    },
+    "set_printoptions": {
+      "api": "numpy.set_printoptions"
+    },
+    "sign": {
+      "api": "jax.numpy.sign"
+    },
+    "signbit": {
+      "api": "jax.numpy.signbit"
+    },
+    "sin": {
+      "api": "jax.numpy.sin"
+    },
+    "sinh": {
+      "api": "jax.numpy.sinh"
+    },
+    "slogdet": {
+      "api": "jax.numpy.linalg.slogdet"
+    },
+    "solve": {
+      "api": "jax.numpy.linalg.solve"
+    },
+    "sqrt": {
+      "api": "jax.numpy.sqrt"
+    },
+    "square": {
+      "api": "jax.numpy.square"
+    },
+    "squeeze": {
+      "api": "jax.numpy.squeeze"
+    },
+    "stack": {
+      "api": "jax.numpy.stack"
+    },
+    "std": {
+      "api": "jax.numpy.std"
+    },
+    "subtract": {
+      "api": "jax.numpy.subtract"
+    },
+    "sum": {
+      "api": "jax.numpy.sum"
+    },
+    "svd": {
+      "api": "jax.numpy.linalg.svd"
+    },
+    "svdvals": {
+      "api": "jax.numpy.linalg.svdvals"
+    },
+    "take": {
+      "api": "jax.numpy.take"
+    },
+    "take_along_axis": {
+      "api": "jax.numpy.take_along_axis"
+    },
+    "tan": {
+      "api": "jax.numpy.tan"
+    },
+    "tanh": {
+      "api": "jax.numpy.tanh"
+    },
+    "tensordot": {
+      "api": "jax.numpy.tensordot"
+    },
+    "tile": {
+      "api": "jax.numpy.tile"
+    },
+    "torch.utils": {
+      "api": "torch.utils"
+    },
+    "torch.utils.data": {
+      "api": "torch.utils.data"
+    },
+    "trace": {
+      "api": "jax.numpy.trace"
+    },
+    "train": {
+      "api": "None",
+      "requires_plugin": "capture_eval_state"
+    },
+    "tril": {
+      "api": "jax.numpy.tril"
+    },
+    "triu": {
+      "api": "jax.numpy.triu"
+    },
+    "trunc": {
+      "api": "jax.numpy.trunc"
+    },
+    "unique_all": {
+      "api": "jax.numpy.unique_all"
+    },
+    "unique_counts": {
+      "api": "jax.numpy.unique_counts"
+    },
+    "unique_inverse": {
+      "api": "jax.numpy.unique_inverse"
+    },
+    "unique_values": {
+      "api": "jax.numpy.unique_values"
+    },
+    "var": {
+      "api": "jax.numpy.var"
+    },
+    "where": {
+      "api": "jax.numpy.where"
+    },
+    "zeros_like": {
+      "api": "jax.numpy.zeros_like"
+    }
+  },
+  "templates": {
+    "convert_input": "jnp.array({np_var})",
+    "import": "import jax\nimport jax.numpy as jnp",
+    "jit_wrap": "True",
+    "to_numpy": "np.array({res_var})"
+  }
+}
