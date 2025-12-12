@@ -76,7 +76,7 @@ class ArrayApiSpecImporter:
           # Extract typed arguments (name, type_str)
           args = self._extract_args(node.args)
 
-          semantics[op_name] = {"from": rel_path, "description": summary, "std_args": args, "variants": {}}
+          semantics[op_name] = {"from": rel_path, "description": summary, "std_args": args}
 
         # --- CASE 2: CONSTANTS (e.g., e = 2.718) ---
         elif isinstance(node, (ast.Assign, ast.AnnAssign)):

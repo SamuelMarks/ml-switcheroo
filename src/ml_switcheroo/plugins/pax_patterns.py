@@ -1,92 +1,67 @@
 """
-Plugin for handling PaxML / Praxis specific state patterns.
+Plugin hooks for PaxML patterns.
 
-PaxML uses HParam-based configuration and a `setup()` method for layer
-initialization, differing from PyTorch's `__init__` constructor pattern.
-
-This plugin aims to:
-1.  Map standard PyTorch constructor logic to `setup()`.
-2.  Provide functional pass-through for layer calls, aligning with JAX/Flax semantics.
+Handles:
+1. Renaming `__init__` to `setup`.
+2. Stripping `super().__init__()` calls (which are invalid in Praxis setup).
 """
 
 import libcst as cst
-from typing import Optional, List
+from typing import Union
 
-from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.core.hooks import HookContext
 
 
-@register_hook("pax_setup_migration")
 def migrate_init_to_setup(node: cst.FunctionDef, ctx: HookContext) -> cst.FunctionDef:
   """
-  Plugin Hook: Rename `__init__` to `setup` for Praxis Layer definitions.
-
-  Triggers:
-      Operations marked with `requires_plugin: "pax_setup_migration"`.
-      Currently intended for `torch.nn.Module` -> `praxis.base_layer.BaseLayer` transformations.
-
-  Action:
-      - Renames `__init__` to `setup`.
-      - Strips `super().__init__()` calls (Praxis BaseLayer handles this implicitly or differently).
+  Hook to transform __init__ methods for PaxML targets.
 
   Args:
-      node: The function definition node (expected to be `__init__`).
-      ctx: The hook context.
+      node: The FunctionDef node.
+      ctx: Hook execution context.
 
   Returns:
-      The transformed FunctionDef node.
+      Transformed FunctionDef (renamed to setup, super init removed).
   """
-  # Safety: Only apply if targeting PaxML
+  # Guard: Only apply for PaxML
   if ctx.target_fw != "paxml":
     return node
 
-  # Ensure we are modifying __init__
+  # Guard: Only apply to __init__
   if node.name.value != "__init__":
     return node
 
-  # 1. Rename Method -> 'setup'
-  # This aligns with Praxis lifecycle where layers define components in setup()
+  # 1. Rename to 'setup'
   new_node = node.with_changes(name=cst.Name("setup"))
 
-  # 2. Strip super().__init__() calls
-  # Praxis layers generally do not require explicit super init in setup()
-  new_body = _strip_super_init(new_node.body)
-  new_node = new_node.with_changes(body=new_body)
+  # 2. Strip super().__init__()
+  # We filter the body statements
+  if isinstance(new_node.body, cst.IndentedBlock):
+    new_body_stmts = []
+    for stmt in new_node.body.body:
+      # Check if stmt is expr -> call -> super.__init__
+      if _is_super_init(stmt):
+        continue
+      new_body_stmts.append(stmt)
+
+    new_block = new_node.body.with_changes(body=new_body_stmts)
+    new_node = new_node.with_changes(body=new_block)
 
   return new_node
 
 
-def _strip_super_init(body: cst.IndentedBlock) -> cst.IndentedBlock:
-  """
-  Removes `super().__init__()` statements from the function body.
-  """
-  new_stmts = []
-  for stmt in body.body:
-    if _is_super_init_call(stmt):
-      continue
-    new_stmts.append(stmt)
-
-  # If body becomes empty, insert 'pass' to maintain validity
-  if not new_stmts:
-    new_stmts = [cst.SimpleStatementLine(body=[cst.Expr(value=cst.Pass())])]
-
-  return body.with_changes(body=new_stmts)
-
-
-def _is_super_init_call(stmt: cst.BaseStatement) -> bool:
-  """
-  Detects `super().__init__(...)` calls.
-  """
-  if not isinstance(stmt, cst.SimpleStatementLine):
-    return False
-
-  for small_stmt in stmt.body:
-    if isinstance(small_stmt, cst.Expr) and isinstance(small_stmt.value, cst.Call):
-      call = small_stmt.value
-      # Check: super().__init__
-      if isinstance(call.func, cst.Attribute) and call.func.attr.value == "__init__":
-        # Check receiver: super()
-        receiver = call.func.value
-        if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
-          if receiver.func.value == "super":
-            return True
+def _is_super_init(stmt: cst.BaseStatement) -> bool:
+  """Helper to detect `super().__init__()` statement."""
+  if isinstance(stmt, cst.SimpleStatementLine):
+    if len(stmt.body) == 1 and isinstance(stmt.body[0], cst.Expr):
+      expr = stmt.body[0]
+      if isinstance(expr.value, cst.Call):
+        call = expr.value
+        # Check func is attribute (super().init)
+        if isinstance(call.func, cst.Attribute) and call.func.attr.value == "__init__":
+          # Check receiver is super()
+          receiver = call.func.value
+          if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
+            if receiver.func.value == "super":
+              return True
   return False

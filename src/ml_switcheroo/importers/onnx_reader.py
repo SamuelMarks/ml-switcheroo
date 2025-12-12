@@ -82,12 +82,7 @@ class OnnxSpecImporter:
       inputs = self._extract_section_keys(body_text, "Inputs")
       attrs = self._extract_section_keys(body_text, "Attributes")
 
-      semantics[op_name] = {
-        "from": fpath.name,
-        "description": summary,
-        "std_args": inputs + attrs,
-        "variants": {},
-      }
+      semantics[op_name] = {"from": fpath.name, "description": summary, "std_args": inputs + attrs}
 
     return semantics
 

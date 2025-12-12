@@ -4,7 +4,7 @@ Data Loader Standard & Runtime Shim.
 This module defines the **Generic Data Loader Shim** used when transpiling
 PyTorch `DataLoader` code to frameworks that lack a direct equivalent (like JAX or NumPy).
 It also provides the Semantic Configuration injection to ensure the engine detects
-the DataLoader API and applies the conversion plugin.
+the DataLoader API.
 
 Capabilities handled by the Shim:
 1. Batching (`batch_size`).
@@ -19,48 +19,24 @@ from typing import Dict, Any
 
 def get_dataloader_semantics() -> Dict[str, Any]:
   """
-  Returns the Semantic Definition for the DataLoader and its namespace
-  to be injected into the Knowledge Base (Static Injection).
+  Returns the Semantic Definition for the DataLoader to be injected into the Knowledge Base.
 
-  This ensures that Scaffolding operations automatically generate the correct
-  wiring for the Data Loader plugin, connecting the 'DataLoader' abstract operation
-  to the 'convert_dataloader' plugin hook for JAX.
-
-  It also includes definitions for `torch.utils` and `torch.utils.data` to prevent
-  Strict Mode attribute traversal checks from failing on the intermediate namespace nodes.
+  Updated Architecture compliance:
+  - Contains strictly **Abstract Standard** definitions (description, std_args).
+  - Implementation variants (API paths, plugins) are removed and must be
+    provided by the JSON snapshots (hub-and-spoke model).
   """
   return {
     "DataLoader": {
-      "description": "Foundational PyTorch Data Loader. Mapped to GenericDataLoader shim for JAX via Plugin.",
+      "description": "Foundational PyTorch Data Loader. Mapped to GenericDataLoader shim via Plugin.",
       "std_args": ["dataset", "batch_size", "shuffle", "drop_last"],
-      "variants": {
-        "jax": {"api": "GenericDataLoader", "requires_plugin": "convert_dataloader"},
-        "torch": {
-          "api": "torch.utils.data.DataLoader",
-          "args": {
-            "batch_size": "batch_size",
-            "dataset": "dataset",
-            "drop_last": "drop_last",
-            "shuffle": "shuffle",
-          },
-        },
-      },
     },
-    # Namespace definitions are required for Strict Mode to pass attribute traversal
-    # without triggering "API not found" errors on 'torch.utils' etc.
+    # Namespace definitions for attribute traversal
     "torch.utils": {
       "description": "Torch Utilities Namespace",
-      "variants": {
-        "torch": {"api": "torch.utils"},
-        "jax": {"api": "torch.utils"},
-      },
     },
     "torch.utils.data": {
       "description": "Torch Data Utilities Namespace",
-      "variants": {
-        "torch": {"api": "torch.utils.data"},
-        "jax": {"api": "torch.utils.data"},
-      },
     },
   }
 

@@ -397,7 +397,24 @@ class SemanticsManager:
     if "templates" in content:
       self.test_templates[target_fw] = content["templates"]
 
-    # 2. Merge Mappings
+    # 2. Merge Framework Traits (Aliases)
+    if "framework" in content:
+      if target_fw not in self.framework_configs:
+        self.framework_configs[target_fw] = content["framework"]
+      else:
+        self.framework_configs[target_fw].update(content["framework"])
+
+    # 3. Merge Import Maps
+    if "imports" in content:
+      # Handle inversion: Snapshot has { "torch.nn": { "root": "flax", ... } }
+      # Manager structure is { "torch.nn": { "variants": { "jax": { ... } } } }
+      for src_mod, details in content["imports"].items():
+        if src_mod not in self.import_data:
+          self.import_data[src_mod] = {"variants": {}}
+
+        self.import_data[src_mod]["variants"][target_fw] = details
+
+    # 4. Merge Mappings
     mappings = content.get("mappings", {})
     for op_name, implementation in mappings.items():
       # A. Check if Op exists in Spec

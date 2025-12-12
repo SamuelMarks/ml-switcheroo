@@ -37,31 +37,27 @@ def transform_method_to_property(node: cst.Call, ctx: HookContext) -> Union[cst.
   method_name = node.func.attr.value
   receiver = node.func.value
 
-  # 2. Identify the Abstract Operation
-  # Since this hook is generic, we infer the op based on the source method name
-  # or rely on defaults like 'size'.
+  # 2. Identify the Abstract Operation from Source Name
+  # We need to map the source method name back to an abstract ID to querying the target.
+  # While we could use ctx.semantics._reverse_index, accessing private members is brittle.
+  # Since this plugin is explicitly linked in semantics to specific ops, we ideally know the op_id.
+  # However, the hook doesn't receive op_id argument.
+  # Given the limited scope of this plugin (Method->Prop), we map known method names.
   op_id = None
   if method_name == "size":
     op_id = "size"
   elif method_name == "data_ptr":
     op_id = "data_ptr"
 
+  # If using dynamic mappings, we might not know the source method name -> op_id mapping here.
+  # But plugins are usually specific.
   if not op_id:
     return node
 
   # 3. Lookup Target Property
-  # Check semantics for what this maps to.
-  # E.g. "size" -> variants[jax][api] = "shape"
   target_prop = ctx.lookup_api(op_id)
 
-  # Fallbacks if semantics are incomplete for the target
-  if not target_prop:
-    if ctx.target_fw in ["jax", "numpy"]:
-      if op_id == "size":
-        target_prop = "shape"
-      elif op_id == "data_ptr":
-        target_prop = "data"
-
+  # Fail gracefully if no mapping exists (Data-Driven Strictness)
   if not target_prop:
     return node
 

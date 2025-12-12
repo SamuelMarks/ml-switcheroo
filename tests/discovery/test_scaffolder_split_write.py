@@ -32,10 +32,12 @@ def env_paths(tmp_path):
 def test_scaffold_splits_data(env_paths):
   sem_dir, snap_dir = env_paths
 
-  mgr = SemanticsManager()
-  mgr._reverse_index = {}
-  mgr.data = {}
-  mgr._key_origins = {}
+  # Prevent file loading during init for speed and isolation
+  with patch("ml_switcheroo.semantics.manager.SemanticsManager._load_knowledge_graph"):
+    mgr = SemanticsManager()
+    mgr._reverse_index = {}
+    mgr.data = {}
+    mgr._key_origins = {}
 
   scaffolder = Scaffolder(semantics=mgr)
   scaffolder.inspector = MockInspector()
@@ -74,11 +76,12 @@ def test_scaffolder_caches_existing_specs(env_paths):
   existing_spec = {"abs": {"description": "Manual", "std_args": ["x"]}}
   (sem_dir / "k_array_api.json").write_text(json.dumps(existing_spec))
 
-  mgr = SemanticsManager()
-  mgr._reverse_index = {}
-  mgr.data = existing_spec
-  # Fix: Populate origins
-  mgr._key_origins = {"abs": "array"}
+  with patch("ml_switcheroo.semantics.manager.SemanticsManager._load_knowledge_graph"):
+    mgr = SemanticsManager()
+    mgr._reverse_index = {}
+    mgr.data = existing_spec
+    # Fix: Populate origins
+    mgr._key_origins = {"abs": "array"}
 
   scaffolder = Scaffolder(semantics=mgr)
   scaffolder.inspector = MockInspector()
@@ -99,22 +102,39 @@ def test_scaffolder_caches_existing_specs(env_paths):
 
 
 def test_static_injection_dataloader_split(env_paths):
+  """
+  Verifies that Scaffolder injects Abstract Definitions from python defaults,
+  BUT does NOT create implementation mappings (variants) because they have been purged.
+  """
   sem_dir, snap_dir = env_paths
 
-  mgr = SemanticsManager()
-  mgr._reverse_index = {}
-  mgr.data = {}
-  mgr._key_origins = {}
+  with patch("ml_switcheroo.semantics.manager.SemanticsManager._load_knowledge_graph"):
+    mgr = SemanticsManager()
+    mgr._reverse_index = {}
+    mgr.data = {}
+    mgr._key_origins = {}
 
   scaffolder = Scaffolder(semantics=mgr)
+  # Ensure no live inspection findings
   scaffolder.inspector.inspect = MagicMock(return_value={})
 
   with patch("ml_switcheroo.discovery.scaffolder.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
       scaffolder.scaffold(["torch"], sem_dir)
 
-  extras = json.loads((sem_dir / "k_framework_extras.json").read_text())
-  assert "DataLoader" in extras
+  # 1. Verify Abstract Spec IS created
+  extras_spec = sem_dir / "k_framework_extras.json"
+  assert extras_spec.exists()
 
-  torch_snap = json.loads((snap_dir / "torch_mappings.json").read_text())
-  assert "DataLoader" in torch_snap["mappings"]
+  extras_data = json.loads(extras_spec.read_text())
+  assert "DataLoader" in extras_data
+  # It should contain std_args from the python default
+  assert "dataset" in extras_data["DataLoader"]["std_args"]
+  # It should NOT contain variants
+  assert "variants" not in extras_data["DataLoader"]
+
+  # 2. Verify Mapping File is NOT created
+  # With variants purged from python code, Scaffolder has nothing to write to the snapshot
+  # unless inspecting a live framework, which is mocked to empty here.
+  torch_snap = snap_dir / "torch_mappings.json"
+  assert not torch_snap.exists()

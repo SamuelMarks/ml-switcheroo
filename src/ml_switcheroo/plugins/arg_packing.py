@@ -33,33 +33,27 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Triggers:
       Operations marked with `requires_plugin: "pack_varargs"`.
-      Designed for `permute_dims` (torch.permute -> jax.numpy.transpose).
+      Designed for abstract operations like `permute_dims`.
 
   Transformation:
       Input:  `torch.permute(x, 0, 2, 1)`
-      Output: `jax.numpy.transpose(x, axes=(0, 2, 1))`
+      Output: `jax.numpy.transpose(x, axes=(0, 2, 1))` (if mapped)
 
   Args:
       node: The original CST Call node.
-      ctx: HookContext for API lookup.
+      ctx: HookContext for API lookup directly from Semantics.
 
   Returns:
-      The transformed CST Call node.
+      The transformed CST Call node, or original if target mapping is missing.
   """
   # 1. Determine Target API
   # We infer the abstract op is 'permute_dims' based on this plugin's primary use case.
-  # Ideally, we'd lookup based on the source function, but that context is complex to retrieve here.
-  # We try to lookup 'permute_dims' configuration for the target framework.
   op_id = "permute_dims"
   target_api = ctx.lookup_api(op_id)
 
-  # Fallback if semantics missing (e.g. mapping not loaded in test environment)
+  # If we don't know the target logic via JSON, return unmodified.
   if not target_api:
-    if ctx.target_fw in ["jax", "numpy"]:
-      target_api = "jax.numpy.transpose" if ctx.target_fw == "jax" else "numpy.transpose"
-    else:
-      # If we don't know the target logic, return unmodified
-      return node
+    return node
 
   # 2. Extract Arguments
   # We assume signature `func(input, *dims)`.
@@ -73,12 +67,10 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
   dims_args = all_args[1:]
 
   # If no dims provided, or if existing dims are keyword args, the logic might differ.
-  # `torch.permute` requires positional dims.
-  # We filter out any keyword matches just in case user did something weird,
-  # but strictly `*dims` consumes remaining positionals.
+  # We filter out any keyword matches just in case user did something weird.
   packed_elements = []
   for arg in dims_args:
-    # If we hit a keyword arg, packing stops (invalid syntax for permute usually, or explicit kwarg)
+    # If we hit a keyword arg, packing stops
     if arg.keyword:
       continue
     # Clean the argument (remove trailing comma style from original position)

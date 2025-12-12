@@ -81,9 +81,6 @@ class SemanticPersister:
 
     Output Format:
     {
-        "variants": {
-            "torch": { "api": "torch.nn.MSELoss", "args": {"reduction": "reduction"} }
-        },
         "std_args": ["reduction"]
     }
     """

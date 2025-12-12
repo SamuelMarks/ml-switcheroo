@@ -5,8 +5,7 @@ Standardizes `einsum` arguments so the equation string is always the first argum
 This is required because JAX enforces `einsum(equation, *operands)`, whereas
 PyTorch historically allowed `einsum(operand, operand, equation)`.
 
-This plugin handles both the argument shuffling AND the API renaming (since plugins
-override the default renaming logic in the Rewriter).
+This plugin handles both the argument shuffling AND the API renaming.
 """
 
 import libcst as cst
@@ -45,14 +44,7 @@ def normalize_einsum(node: cst.Call, ctx: HookContext) -> cst.Call:
   # 1. Determine Target API Name
   target_api = ctx.lookup_api("einsum")
 
-  # Fallback if lookup fails (e.g. generic context or missing semantics)
-  if not target_api:
-    if ctx.target_fw == "jax":
-      target_api = "jax.numpy.einsum"
-    elif ctx.target_fw == "numpy":
-      target_api = "numpy.einsum"
-    # Else keep original name if unknown
-
+  # If lookup fails, keep original name (Removal of Hardcoded Fallback)
   new_func = _create_dotted_name(target_api) if target_api else node.func
 
   # 2. Argument Analysis

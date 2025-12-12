@@ -191,45 +191,6 @@
       "threshold"
     ]
   },
-  "__frameworks__": {
-    "jax": {
-      "alias": {
-        "module": "jax.numpy",
-        "name": "jnp"
-      }
-    },
-    "mlx": {
-      "alias": {
-        "module": "mlx.core",
-        "name": "mx"
-      }
-    },
-    "numpy": {
-      "alias": {
-        "module": "numpy",
-        "name": "np"
-      }
-    },
-    "paxml": {
-      "alias": {
-        "module": "praxis.layers",
-        "name": "pl"
-      },
-      "extends": "jax"
-    },
-    "tensorflow": {
-      "alias": {
-        "module": "tensorflow",
-        "name": "tf"
-      }
-    },
-    "torch": {
-      "alias": {
-        "module": "torch",
-        "name": "torch"
-      }
-    }
-  },
   "add": {
     "description": "Add with Alpha scaling support.",
     "std_args": [

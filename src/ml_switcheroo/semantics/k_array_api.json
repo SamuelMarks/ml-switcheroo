@@ -2,12 +2,7 @@
   "__array_namespace_info__": {
     "description": "Returns a namespace with Array API namespace inspection utilities.",
     "from": "_2024_12/info.py",
-    "std_args": [],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.__array_namespace_info__"
-      }
-    }
+    "std_args": []
   },
   "__eq__": {
     "description": "Computes the truth value of ``self == other`` in order to test for data type object equality.",
@@ -22,7 +17,6 @@
         "dtype"
       ]
     ],
-    "variants": {}
   },
   "abs": {
     "description": "Calculates the absolute value for each element ``x_i`` of the input array ``x``.",

@@ -63,19 +63,10 @@ def _resolve_target_name(node: cst.Call, ctx: HookContext, op_name: str) -> cst.
   """
   target_api = ctx.lookup_api(op_name)
 
-  # Fallback to defaults to prevent breakage if user JSONs are incomplete
-  if not target_api:
-    if ctx.target_fw == "jax":
-      target_api = "jax.numpy.add"
-    elif ctx.target_fw == "numpy":
-      target_api = "numpy.add"
-    elif ctx.target_fw == "torch":
-      target_api = "torch.add"
-
   if target_api:
     return _create_dotted_name(target_api)
 
-  # Final Fallback: keep original name if resolution fails
+  # Final Fallback: keep original name if resolution fails (Data-Driven Strictness)
   return node.func
 
 
@@ -84,11 +75,11 @@ def transform_alpha_add(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Transforms an `add` call with an `alpha` parameter into a multiplication.
 
-  Used for converting Torch `add` to JAX/Numpy `add`.
+  For example, converting `torch.add(x, y, alpha=a)` to `jax.numpy.add(x, y * a)`.
 
   Transformation:
       Input:  add(x, y, alpha=a)
-      Output: jax.numpy.add(x, y * a)
+      Output: target_api(x, y * a)
 
   Args:
       node: The CST Call node to transform.
@@ -103,9 +94,7 @@ def transform_alpha_add(node: cst.Call, ctx: HookContext) -> cst.Call:
   std_sig = ctx.lookup_signature("add")
 
   # If standard signature is known but has < 2 args, this decomposition is invalid.
-  # If list is empty (unknown op), we proceed boldly (fallback logic).
   if std_sig and len(std_sig) < 2:
-    # Cannot decompose to binary add if target only supports unary
     return node
 
   # 1. Filter and Identify Args
@@ -118,12 +107,14 @@ def transform_alpha_add(node: cst.Call, ctx: HookContext) -> cst.Call:
     else:
       cleaned_args.append(arg)
 
-  # If no alpha found, we still perform the name swap (identity transform + rename)
+  # 2. Resolve Name (must happen to perform rename even if alpha missing)
+  new_func = _resolve_target_name(node, ctx, "add")
+
+  # If no alpha found, or args invalid, just perform name swap
   if not alpha_val or len(cleaned_args) < 2:
-    new_func = _resolve_target_name(node, ctx, "add")
     return node.with_changes(func=new_func, args=cleaned_args)
 
-  # 2. Modify the target argument (the second one)
+  # 3. Modify the target argument (the second one)
   # We assume binary add(x, y), so second arg is being scaled.
   target_arg = cleaned_args[-1]
 
@@ -134,11 +125,8 @@ def transform_alpha_add(node: cst.Call, ctx: HookContext) -> cst.Call:
   # Update the arg with the new expression
   cleaned_args[-1] = target_arg.with_changes(value=scaled_expr)
 
-  # 3. Clean Syntax (Remove trailing commas)
+  # 4. Clean Syntax (Remove trailing commas)
   final_args = _strip_trailing_comma(cleaned_args)
-
-  # 4. SWAP FUNCTION NAME
-  new_func = _resolve_target_name(node, ctx, "add")
 
   return node.with_changes(func=new_func, args=final_args)
 
@@ -148,11 +136,9 @@ def transform_alpha_add_reverse(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Transforms a multiplication-nested `add` call into an `add` with `alpha`.
 
-  Used for converting JAX/Numpy `add` to Torch `add`.
-
   Transformation:
-      Input:  add(x, y * a)
-      Output: torch.add(x, y, alpha=a)
+      Input:  target_api(x, y * a)
+      Output: torch.add(x, y, alpha=a) [via mapping]
 
   Args:
       node: The CST Call node to transform.
@@ -161,7 +147,7 @@ def transform_alpha_add_reverse(node: cst.Call, ctx: HookContext) -> cst.Call:
   Returns:
       The transformed CST Call node.
   """
-  # 1. Resolve basic name swap first (in case we don't find the pattern)
+  # 1. Resolve basic name swap first
   new_func = _resolve_target_name(node, ctx, "add")
 
   # 2. Check strict argument count (must have exactly 2 args to be a candidate)
