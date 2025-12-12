@@ -435,6 +435,9 @@
       "api": "tensorflow.zeros_like"
     }
   },
+  "metadata": {
+    "demo_example": "import tensorflow as tf\n\nval = tf.abs(tf.constant([-1.0, 2.0]))"
+  },
   "templates": {
     "convert_input": "tf.convert_to_tensor({np_var})",
     "import": "import tensorflow as tf",

@@ -178,18 +178,6 @@ class KerasAdapter:
     except (ImportError, AttributeError):
       return data
 
-  @classmethod
-  def get_import_stmts(cls) -> str:
-    return "import keras\nfrom keras import ops"
-
-  @classmethod
-  def get_creation_syntax(cls, var_name: str) -> str:
-    return f"ops.convert_to_tensor({var_name})"
-
-  @classmethod
-  def get_numpy_conversion_syntax(cls, var_name: str) -> str:
-    return f"ops.convert_to_numpy({var_name})"
-
   # --- IO ---
 
   def get_serialization_imports(self) -> List[str]:
@@ -205,16 +193,3 @@ class KerasAdapter:
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     d_type = "gpu" if "cuda" in device_type.lower() else "cpu"
     return f"keras.name_scope('{d_type}')"
-
-  @classmethod
-  def get_example_code(cls) -> str:
-    return (
-      "import keras\n"
-      "from keras import ops\n\n"
-      "class M(keras.Layer):\n"
-      "    def __init__(self):\n"
-      "        super().__init__()\n"
-      "        self.d = keras.layers.Dense(10)\n\n"
-      "    def call(self, x):\n"
-      "        return self.d(x)"
-    )

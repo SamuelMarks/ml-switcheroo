@@ -51,17 +51,19 @@ def mock_syncer():
 def test_sync_creates_new_snapshot(sync_env, mock_syncer):
   """
   Scenario: No existing snapshot.
-  Expectation: snapshots/mockfw_mappings.json is created with found items.
+  Expectation: snapshots/mockfw_vlatest_map.json is created with found items.
   """
   sem_dir, snap_dir = sync_env
 
   with patch("ml_switcheroo.cli.commands.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.cli.commands.resolve_snapshots_dir", return_value=snap_dir):
-      ret = handle_sync("mockfw")
+      # Patch version to force 'latest' instead of 'unknown'
+      with patch("ml_switcheroo.cli.commands._get_pkg_version", return_value="latest"):
+        ret = handle_sync("mockfw")
 
   assert ret == 0
 
-  snap_file = snap_dir / "mockfw_mappings.json"
+  snap_file = snap_dir / "mockfw_vlatest_map.json"
   assert snap_file.exists()
 
   data = json.loads(snap_file.read_text())
@@ -80,13 +82,15 @@ def test_sync_updates_existing_snapshot(sync_env, mock_syncer):
   # Create existing snapshot with override for Add
   # Add isn't "found" by our mock syncer logic above, but let's assume it was manually set
   existing = {"__framework__": "mockfw", "mappings": {"Add": {"api": "mockfw.manual_add"}}}
-  (snap_dir / "mockfw_mappings.json").write_text(json.dumps(existing))
+  (snap_dir / "mockfw_vlatest_map.json").write_text(json.dumps(existing))
 
   with patch("ml_switcheroo.cli.commands.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.cli.commands.resolve_snapshots_dir", return_value=snap_dir):
-      handle_sync("mockfw")
+      # Patch version to ensure it hits the 'vlatest' file name
+      with patch("ml_switcheroo.cli.commands._get_pkg_version", return_value="latest"):
+        handle_sync("mockfw")
 
-  data = json.loads((snap_dir / "mockfw_mappings.json").read_text())
+  data = json.loads((snap_dir / "mockfw_vlatest_map.json").read_text())
 
   # Abs should be added (found by mock syncer)
   assert "Abs" in data["mappings"]
@@ -114,4 +118,4 @@ def test_sync_handles_unknown_tier_files_gracefully(tmp_path):
 
   assert ret == 0
   # No snapshot created
-  assert not (snap_dir / "ghostfw_mappings.json").exists()
+  assert not (snap_dir / "ghostfw_vlatest_map.json").exists()

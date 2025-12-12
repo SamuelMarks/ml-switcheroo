@@ -12,8 +12,7 @@ from rich.panel import Panel
 
 from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.discovery.inspector import ApiInspector
-from ml_switcheroo.discovery.updater import MappingsUpdater
-from ml_switcheroo.utils.console import console, log_info, log_success, log_warning
+from ml_switcheroo.utils.console import console, log_info, log_success
 
 
 class MappingWizard:
@@ -24,7 +23,6 @@ class MappingWizard:
   def __init__(self, semantics: SemanticsManager):
     self.semantics = semantics
     self.console = console
-    self._updater = MappingsUpdater(semantics)
 
   def start(self, package_name: str) -> None:
     log_info(f"Scanning [code]{package_name}[/code] for unmapped APIs...")
@@ -32,7 +30,7 @@ class MappingWizard:
     inspector = ApiInspector()
     catalog = inspector.inspect(package_name)
 
-    missing = self._updater._find_unmapped_apis(catalog)
+    missing = self._find_unmapped_apis(catalog)
     total = len(missing)
 
     if total == 0:
@@ -84,6 +82,19 @@ class MappingWizard:
       self.console.print("\n[yellow]Wizard interrupted by user.[/yellow]")
 
     log_success(f"Session Complete. Mapped {completed} APIs (Skipped {skipped}).")
+
+  def _find_unmapped_apis(self, catalog: Dict[str, Any]) -> Dict[str, Any]:
+    """filters the catalog for items not present in the semantics."""
+    known_apis = set()
+    # Reverse index maps API paths (src) to abstracts
+    if hasattr(self.semantics, "_reverse_index"):
+      known_apis = set(self.semantics._reverse_index.keys())
+
+    missing = {}
+    for api_path, details in catalog.items():
+      if api_path not in known_apis:
+        missing[api_path] = details
+    return missing
 
   def _render_card(self, api_path: str, details: Dict[str, Any], idx: int, total: int):
     sig = str(details.get("detected_sig", details.get("params", [])))
@@ -223,7 +234,7 @@ class MappingWizard:
       json.dump(current, f, indent=2, sort_keys=True)
 
   def _write_to_snapshot(self, snap_dir: Path, fw: str, key: str, data: Dict):
-    path = snap_dir / f"{fw}_mappings.json"
+    path = snap_dir / f"{fw}_vlatest_map.json"
     current = {"__framework__": fw, "mappings": {}}
 
     if path.exists():
@@ -232,6 +243,9 @@ class MappingWizard:
           current = json.load(f)
       except Exception:
         pass
+
+    if "mappings" not in current:
+      current["mappings"] = {}
 
     current["mappings"][key] = data
 

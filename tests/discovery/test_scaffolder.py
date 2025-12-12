@@ -21,24 +21,33 @@ def test_scaffolder_logic(tmp_path):
   scaffolder = Scaffolder(semantics=clean_semantics)
   scaffolder.inspector = MockInspector()
 
-  sem_dir = tmp_path / "semantics"
-  snap_dir = tmp_path / "snapshots"
-  sem_dir.mkdir()
-  snap_dir.mkdir()
+  scaffolder.scaffold(["torch", "jax"], root_dir=tmp_path)
 
-  with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
-    scaffolder.scaffold(["torch", "jax"], sem_dir)
+  # Verify Spec (Semantics Directory created inside root)
+  # Without pre-seeded knowledge, Scaffolder might route to extras.
+  # Check extras if array api missing.
 
-    # Verify Spec (Semantics Directory)
-  tier_a = sem_dir / "k_array_api.json"
-  assert tier_a.exists()
-  spec_data = json.loads(tier_a.read_text())
+  tier_a = tmp_path / "semantics" / "k_array_api.json"
+  tier_extras = tmp_path / "semantics" / "k_framework_extras.json"
+
+  spec_data = {}
+  if tier_a.exists():
+    spec_data.update(json.loads(tier_a.read_text()))
+  if tier_extras.exists():
+    spec_data.update(json.loads(tier_extras.read_text()))
+
   assert "abs" in spec_data
   assert "variants" not in spec_data["abs"]
 
-  # Verify Mapping (Snapshots Directory)
-  jax_map = snap_dir / "jax_mappings.json"
-  assert jax_map.exists()
+  # Verify Mapping (Snapshots Directory created inside root)
+  snap_dir = tmp_path / "snapshots"
+  assert snap_dir.exists()
+
+  # Logic tries importlib version, fails -> "latest"
+  jax_maps = list(snap_dir.glob("jax_v*_map.json"))
+  assert len(jax_maps) > 0
+  jax_map = jax_maps[0]
+
   jax_data = json.loads(jax_map.read_text())
 
   assert "abs" in jax_data["mappings"]

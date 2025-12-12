@@ -18,7 +18,6 @@ from ml_switcheroo.frameworks import available_frameworks
 from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
-from ml_switcheroo.discovery.updater import MappingsUpdater
 from ml_switcheroo.cli.wizard import MappingWizard
 from ml_switcheroo.discovery.harvester import SemanticHarvester
 from ml_switcheroo.testing.batch_runner import BatchValidator
@@ -231,7 +230,7 @@ def handle_scaffold(frameworks: list[str], out_dir: Path) -> int:
   """Handles 'scaffold' command."""
   semantics = SemanticsManager()
   scaffolder = Scaffolder(semantics=semantics)
-  scaffolder.scaffold(frameworks, out_dir)
+  scaffolder.scaffold(frameworks, root_dir=out_dir)
   return 0
 
 
@@ -294,7 +293,8 @@ def handle_sync(framework: str) -> int:
   snap_dir = resolve_snapshots_dir()
 
   # 1. Load or Initialize current Snapshot (to preserve other mappings)
-  snap_path = snap_dir / f"{framework}_mappings.json"
+  ver = _get_pkg_version(framework)
+  snap_path = snap_dir / f"{framework}_v{ver}_map.json"
   snapshot_data = {"__framework__": framework, "mappings": {}}
 
   if snap_path.exists():
@@ -393,8 +393,8 @@ def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]]
   persister = SemanticPersister()
   out_dir = resolve_semantics_dir()
 
-  # We use k_framework_extras.json as the persistent store for self-repaired standards.
-  target_file = out_dir / "k_framework_extras.json"
+  # We use pending_standards.json as the persistent store for self-repaired standards, forcing manual review.
+  target_file = out_dir / "pending_standards.json"
 
   total_persisted = 0
 

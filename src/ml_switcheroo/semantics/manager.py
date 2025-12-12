@@ -125,19 +125,6 @@ class SemanticsManager:
         except Exception as e:
           # Log but do not crash initialization if an adapter is malformed
           print(f"⚠️ Failed to load structural traits for {fw_name}: {e}")
-
-      # C. Populate Test Templates
-      if (
-        hasattr(adapter, "get_import_stmts")
-        and hasattr(adapter, "get_creation_syntax")
-        and hasattr(adapter, "get_numpy_conversion_syntax")
-      ):
-        self.test_templates[fw_name] = {
-          "import": adapter.get_import_stmts(),
-          "convert_input": adapter.get_creation_syntax("{np_var}"),
-          "to_numpy": adapter.get_numpy_conversion_syntax("{res_var}"),
-        }
-
       # D. Populate RNG Methods (Purity Analysis)
       if hasattr(adapter, "rng_seed_methods"):
         methods = adapter.rng_seed_methods
@@ -326,11 +313,6 @@ class SemanticsManager:
       prioritized_files.sort(key=lambda x: (x[0], x[1].name))
 
       for priority, fpath in prioritized_files:
-        # Separate handling for test templates
-        if "test_templates" in fpath.name:
-          self._load_templates_file(fpath)
-          continue
-
         try:
           with open(fpath, "r", encoding="utf-8") as f:
             content = json.load(f)
@@ -359,7 +341,7 @@ class SemanticsManager:
 
     # Pattern convention: only load explicit mapping files to key framework-specific moves
     # E.g. torch_mappings.json, jax_mappings.json
-    mapping_files = list(snap_dir.glob("*_mappings.json"))
+    mapping_files = list(snap_dir.glob("*_map.json"))
 
     for fpath in mapping_files:
       try:
@@ -387,7 +369,7 @@ class SemanticsManager:
 
     if not target_fw:
       # Fallback: try to guess from filename 'torch_mappings.json' -> 'torch'
-      parts = filename.split("_")
+      parts = filename.split("_v")
       if len(parts) > 1:
         target_fw = parts[0]
       else:
@@ -450,14 +432,6 @@ class SemanticsManager:
 
         current_variant.update(implementation)
 
-  def _load_templates_file(self, fpath: Path) -> None:
-    try:
-      with open(fpath, "r", encoding="utf-8") as f:
-        content = json.load(f)
-      self._merge_templates(content)
-    except Exception as e:
-      print(f"⚠️ Failed to load templates from {fpath.name}: {e}")
-
   def _infer_tier(self, priority: int) -> SemanticTier:
     if priority == 10:
       return SemanticTier.ARRAY_API
@@ -473,9 +447,6 @@ class SemanticsManager:
 
     if "__frameworks__" in data_copy:
       self._merge_frameworks(data_copy.pop("__frameworks__"))
-
-    if "__templates__" in data_copy:
-      self._merge_templates(data_copy.pop("__templates__"))
 
     for op_name, details in data_copy.items():
       if op_name in self.data:
@@ -521,13 +492,6 @@ class SemanticsManager:
           current["traits"] = traits["traits"]
         else:
           current.update(traits)
-
-  def _merge_templates(self, new_templates: Dict[str, Any]) -> None:
-    for fw_name, traits in new_templates.items():
-      if fw_name not in self.test_templates:
-        self.test_templates[fw_name] = traits
-      else:
-        self.test_templates[fw_name].update(traits)
 
   def _build_index(self) -> None:
     self._reverse_index.clear()

@@ -228,27 +228,3 @@ class TorchAdapter:
       except Exception:
         return torch.tensor(data)
     return data
-
-  @classmethod
-  def get_import_stmts(cls) -> str:
-    return "import torch"
-
-  @classmethod
-  def get_creation_syntax(cls, var_name: str) -> str:
-    return f"torch.from_numpy({var_name})"
-
-  @classmethod
-  def get_numpy_conversion_syntax(cls, var_name: str) -> str:
-    return f"{var_name}.detach().cpu().numpy()"
-
-  @classmethod
-  def get_example_code(cls) -> str:
-    return (
-      "import torch.nn as nn\n\n"
-      "class Simple(nn.Module):\n"
-      "    def __init__(self):\n"
-      "        super().__init__()\n"
-      "        self.l = nn.Linear(10, 10)\n\n"
-      "    def forward(self, x):\n"
-      "        return self.l(x)"
-    )

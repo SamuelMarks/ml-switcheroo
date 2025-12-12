@@ -88,21 +88,6 @@ class FrameworkAdapter(Protocol):
     """Converts input data (usually array-like) to this framework's tensor type."""
     ...
 
-  @classmethod
-  def get_import_stmts(cls) -> str:
-    """Returns import statements needed for generated test harness."""
-    ...
-
-  @classmethod
-  def get_creation_syntax(cls, var_name: str) -> str:
-    """Returns python code to create a tensor from a numpy variable."""
-    ...
-
-  @classmethod
-  def get_numpy_conversion_syntax(cls, var_name: str) -> str:
-    """Returns python code to convert a tensor back to a numpy array."""
-    ...
-
   # --- 2. Discovery Metadata ---
   @property
   def search_modules(self) -> List[str]:

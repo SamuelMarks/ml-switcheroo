@@ -4,20 +4,7 @@ let tgtEditor = null;
 
 // --- Feature 1 & 2: Examples Configuration ---
 // Default Hardcoded Fallbacks (for dev/test without build pipeline)
-let EXAMPLES = {
-    "math_ops": {
-        label: "Math Operations (Torch ↔ JAX)",
-        srcFw: "torch",
-        tgtFw: "jax",
-        code: `import torch\n\ndef compute_loss(prediction, target):\n    """Calculates Mean Absolute Error."""\n    diff = torch.abs(prediction - target)\n    loss = torch.mean(diff)\n    return loss`
-    },
-    "neural_net": {
-        label: "Neural Network (Torch ↔ NNX)",
-        srcFw: "torch",
-        tgtFw: "jax",
-        code: `import torch.nn as nn\n\nclass SimplePerceptron(nn.Module):\n    """Basic Single-Layer Perceptron."""\n    def __init__(self, in_features, out_features):\n        super().__init__() \n        self.layer = nn.Linear(in_features, out_features)\n\n    def forward(self, x):\n        return self.layer(x)`
-    }
-};
+let EXAMPLES = {};
 
 const PYTHON_BRIDGE = `
 import json

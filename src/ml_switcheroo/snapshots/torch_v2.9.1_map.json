@@ -949,6 +949,9 @@
       "api": "torch.zeros_like"
     }
   },
+  "metadata": {
+    "demo_example": "import torch.nn as nn\n\nclass Simple(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.l = nn.Linear(10, 10)\n\n    def forward(self, x):\n        return self.l(x)"
+  },
   "templates": {
     "convert_input": "torch.from_numpy({np_var})",
     "import": "import torch",

@@ -7,7 +7,6 @@ import json
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.discovery.updater import MappingsUpdater
 from rich.console import Console
 
 
@@ -43,7 +42,7 @@ class MockInspector:
     }
 
 
-def test_matrix_visual_snapshot(snapshot):
+def test_matrix_visual_snapshot(snapshot, tmp_path):
   """
   Verifies the ASCII output of the Compatibility Matrix table.
   Captures Rich Console output into a string.
@@ -60,8 +59,17 @@ def test_matrix_visual_snapshot(snapshot):
   # This ensures we control the columns. Removed Keras to match snapshot.
   mock_fws = ["torch", "jax", "numpy", "tensorflow", "mlx", "paxml"]
 
+  # FIX: We need to ensure that get_adapter returns mocks with 'ui_priority' attributes
+  # to match the sort order defined in the snapshot (Torch=0, Jax=10, etc.)
+  def mock_adapter_factory(name):
+    m = MagicMock()
+    priorities = {"torch": 0, "jax": 10, "numpy": 20, "tensorflow": 30, "mlx": 50, "paxml": 60}
+    m.ui_priority = priorities.get(name, 999)
+    return m
+
   with patch("ml_switcheroo.config.available_frameworks", return_value=mock_fws):
-    matrix.render()
+    with patch("ml_switcheroo.config.get_adapter", side_effect=mock_adapter_factory):
+      matrix.render()
 
   output = console.export_text()
 
@@ -73,23 +81,3 @@ def test_matrix_visual_snapshot(snapshot):
     return "\n".join(lines) + "\n"
 
   snapshot.assert_match(output, normalizer=header_insensitive)
-
-
-def test_update_report_json_snapshot(snapshot, tmp_path):
-  """
-  Verifies the 'missing_mappings.json' report structure correctly identifies
-  missing APIs and formats the suggestion dict properly.
-  """
-  semantics = StableMockSemantics()
-  updater = MappingsUpdater(semantics)
-  updater.inspector = MockInspector()
-
-  report_path = tmp_path / "report_snapshot.json"
-
-  updater.update_package("torch", auto_merge=False, report_path=report_path)
-
-  with open(report_path, "rt", encoding="utf-8") as f:
-    data = json.load(f)
-
-  formatted_json = json.dumps(data, indent=2, sort_keys=True)
-  snapshot.assert_match(formatted_json, extension="json")

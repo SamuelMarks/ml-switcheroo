@@ -66,19 +66,3 @@ class MLXAdapter:
     if isinstance(data, (np.ndarray, list, tuple, np.generic)):
       return mx.array(data)
     return data
-
-  @classmethod
-  def get_import_stmts(cls) -> str:
-    return "import mlx.core as mx"
-
-  @classmethod
-  def get_creation_syntax(cls, var_name: str) -> str:
-    return f"mx.array({var_name})"
-
-  @classmethod
-  def get_numpy_conversion_syntax(cls, var_name: str) -> str:
-    return f"np.array({var_name})"
-
-  @classmethod
-  def get_example_code(cls) -> str:
-    return "import mlx.core as mx\n\nval = mx.abs(mx.array([-1, 2]))"

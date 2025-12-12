@@ -73,19 +73,3 @@ class NumpyAdapter:
       except:
         pass
     return data
-
-  @classmethod
-  def get_import_stmts(cls) -> str:
-    return "import numpy as np"
-
-  @classmethod
-  def get_creation_syntax(cls, var_name: str) -> str:
-    return var_name
-
-  @classmethod
-  def get_numpy_conversion_syntax(cls, var_name: str) -> str:
-    return var_name
-
-  @classmethod
-  def get_example_code(cls) -> str:
-    return "import numpy as np\n\nval = np.abs([-1, 2])"

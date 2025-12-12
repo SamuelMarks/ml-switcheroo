@@ -667,6 +667,9 @@
       "api": "jax.numpy.zeros_like"
     }
   },
+  "metadata": {
+    "demo_example": "from flax import nnx\n\nclass Simple(nnx.Module):\n    def __init__(self, rngs: nnx.Rngs):\n        self.l = nnx.Linear(10, 10, rngs=rngs)\n\n    def __call__(self, x):\n        return self.l(x)"
+  },
   "templates": {
     "convert_input": "jnp.array({np_var})",
     "import": "import jax\nimport jax.numpy as jnp",

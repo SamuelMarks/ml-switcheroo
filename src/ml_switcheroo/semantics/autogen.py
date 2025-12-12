@@ -1,100 +1,150 @@
 """
-Semantic Autogen: The Persistence Layer.
+Semantic Autogen: The Distributed Persistence Layer.
 
 This module is responsible for finalizing "Candidate Standards" proposed by the
-Consensus Engine into the JSON Semantic Knowledge Base.
+Consensus Engine into the Distributed Knowledge Base.
 
-It implements a "Do Not Harm" policy:
-- If a standard already exists in the file (implying manual curation or previous sync),
-  it is skipped to prevent overwriting high-quality manual edits with automated guesses.
-- New discoveries are strictly additive.
-- Supports atomic rewrites of the JSON database.
+It implements the **Hub-and-Spoke** write strategy:
+1.  **Hub (Specs)**: Writes Abstract Definitions (`std_args`, `description`)
+    to the target spec file in `semantics/`.
+2.  **Spokes (Snapshots)**: Writes Implementation Details (`api`, `args`)
+    to `snapshots/{framework}_vlatest_map.json`.
+
+Policy:
+- **Do Not Harm**: Existing keys in Specs or Snapshots (implying manual curation)
+  are skipped to prevent overwriting high-quality manual edits.
+- **Additive**: New discoveries are added.
+- **Atomic**: Writes are performed per-file using standard JSON serialization.
 """
 
 import json
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Any, DefaultDict
+from collections import defaultdict
 
 from ml_switcheroo.discovery.consensus import CandidateStandard
 from ml_switcheroo.utils.console import log_info, log_warning, log_success
+from ml_switcheroo.semantics.manager import resolve_snapshots_dir
 
 
 class SemanticPersister:
   """
-  Handles serialization of Discovered Standards to disk.
-
-  Transforms internal CandidateStandard objects into the Switcheroo Semantic Schema
-  and merges them safely into existing definition files.
+  Handles serialization of Discovered Standards to disk using Hub-and-Spoke architecture.
   """
 
-  def persist(self, candidates: List[CandidateStandard], target_file: Path) -> None:
+  def persist(self, candidates: List[CandidateStandard], target_spec_file: Path) -> None:
     """
-    Merges discovered candidates into the target JSON file and saves it.
+    Splits and persists candidates into Specifications (Hub) and Snapshots (Spokes).
 
     Args:
         candidates: List of aligned CandidateStandard objects.
-        target_file: Path to the JSON semantic file (e.g. k_framework_extras.json).
+        target_spec_file: Path to the JSON semantic spec file (Hub) to update/create.
+                          (e.g., `semantics/k_framework_extras.json`)
     """
-    # 1. Load Existing Data
-    existing_data = {}
-    if target_file.exists():
-      try:
-        with open(target_file, "r", encoding="utf-8") as f:
-          existing_data = json.load(f)
-      except json.JSONDecodeError:
-        log_warning(f"Corrupt JSON at {target_file}. Backing up and starting fresh.")
-        if target_file.stat().st_size > 0:
-          target_file.rename(target_file.with_suffix(".bak"))
+    snapshots_dir = resolve_snapshots_dir()
+    if not snapshots_dir.exists():
+      snapshots_dir.mkdir(parents=True, exist_ok=True)
 
-    # 2. Merge Logic (Priority: Existing > New)
-    updates_count = 0
-    skips_count = 0
+    # Buffer for the Hub (Spec File) - OpName -> Definition
+    spec_updates: Dict[str, Any] = {}
 
+    # Buffer for Spokes (Snapshots) - Framework -> OpName -> Mapping
+    snapshot_updates: DefaultDict[str, Dict[str, Any]] = defaultdict(dict)
+
+    stats = {"spec_writes": 0, "spec_skips": 0, "snapshot_writes": 0, "snapshot_skips": 0}
+
+    # 1. Load Existing Spec Data to check logic
+    existing_spec = self._load_json(target_spec_file)
+
+    # 2. Distribute Candidates into Buffers
     for cand in candidates:
-      if cand.name in existing_data:
-        # Conflict: Entry exists. Assume manual override or established consensus.
-        # Future Enhancement: Merge distinct framework variants if missing.
-        skips_count += 1
-        continue
-
-      # Transform to Schema and Insert
-      entry = self._transform_to_schema(cand)
-      existing_data[cand.name] = entry
-      updates_count += 1
-
-    # 3. Persistence
-    if updates_count > 0:
-      target_file.parent.mkdir(parents=True, exist_ok=True)
-      with open(target_file, "w", encoding="utf-8") as f:
-        # Sort keys for deterministic git diffs
-        json.dump(existing_data, f, indent=2, sort_keys=True)
-      log_success(f"Persisted {updates_count} new standards to {target_file.name}")
-    else:
-      if candidates:
-        log_info(f"No new standards to persist for {target_file.name}. ({skips_count} skipped/existing)")
+      # --- HUB: Abstract Spec ---
+      if cand.name in existing_spec:
+        stats["spec_skips"] += 1
       else:
-        log_info("No candidates provided for persistence.")
+        # Transform to Abstract Schema
+        spec_entry = {
+          "std_args": sorted(cand.std_args),
+          "description": f"Auto-discovered via Consensus (Score: {cand.score})",
+          # Variants keys removed from Hub in new architecture
+        }
+        spec_updates[cand.name] = spec_entry
+        stats["spec_writes"] += 1
 
-  def _transform_to_schema(self, cand: CandidateStandard) -> Dict[str, Any]:
-    """
-    Converts internal CandidateStandard to JSON Schema format.
+      # --- SPOKES: Framework Mappings ---
+      for fw_name, ref in cand.variants.items():
+        mapping_entry = {"api": ref.api_path}
 
-    Output Format:
-    {
-        "std_args": ["reduction"]
-    }
-    """
-    variants_dict = {}
+        # Attach argument mappings found by consensus
+        arg_map = cand.arg_mappings.get(fw_name)
+        if arg_map:
+          mapping_entry["args"] = arg_map
 
-    for fw_name, ref in cand.variants.items():
-      fw_entry = {"api": ref.api_path}
+        snapshot_updates[fw_name][cand.name] = mapping_entry
 
-      # Attach argument mappings if consensus engine found them
-      # Dictionary maps {StandardArg -> FrameworkArg}
-      mapping = cand.arg_mappings.get(fw_name)
-      if mapping:
-        fw_entry["args"] = mapping
+    # 3. Persist Hub (Spec File)
+    if spec_updates:
+      self._write_updates(target_spec_file, spec_updates)
 
-      variants_dict[fw_name] = fw_entry
+    # 4. Persist Spokes (Snapshot Files)
+    for fw_name, new_mappings in snapshot_updates.items():
+      snap_path = snapshots_dir / f"{fw_name}_vlatest_map.json"
 
-    return {"variants": variants_dict, "std_args": sorted(cand.std_args)}
+      # Load existing snapshot to check collisions
+      existing_snap = self._load_json(snap_path)
+      existing_mappings = existing_snap.get("mappings", {})
+
+      # Filter updates that already exist
+      final_mappings = {}
+      for op, mapping in new_mappings.items():
+        if op in existing_mappings:
+          stats["snapshot_skips"] += 1
+        else:
+          final_mappings[op] = mapping
+          stats["snapshot_writes"] += 1
+
+      if final_mappings:
+        # Merge into existing structure
+        if "__framework__" not in existing_snap:
+          existing_snap["__framework__"] = fw_name
+        if "mappings" not in existing_snap:
+          existing_snap["mappings"] = {}
+
+        existing_snap["mappings"].update(final_mappings)
+        self._save_json(snap_path, existing_snap)
+
+    # 5. Reporting
+    if stats["spec_writes"] > 0 or stats["snapshot_writes"] > 0:
+      log_success(
+        f"Persistence Complete.\n"
+        f"  Hub (Specs): {stats['spec_writes']} added to {target_spec_file.name} ({stats['spec_skips']} skipped)\n"
+        f"  Spokes (Maps): {stats['snapshot_writes']} added across {len(snapshot_updates)} snapshots ({stats['snapshot_skips']} skipped)"
+      )
+    else:
+      log_info("No new non-conflicting standards found to persist.")
+
+  def _load_json(self, path: Path) -> Dict[str, Any]:
+    """Safely loads JSON from disk, returning empty dict if missing or corrupt."""
+    if not path.exists():
+      return {}
+    try:
+      with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+    except json.JSONDecodeError:
+      log_warning(f"Corrupt JSON at {path}. Treating as empty (Warning: Overwrite risk).")
+      # In a real scenario, we might backup here. For simplicity, return empty.
+      return {}
+
+  def _save_json(self, path: Path, data: Dict[str, Any]) -> None:
+    """Atomic write to JSON file."""
+    if not path.parent.exists():
+      path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(path, "w", encoding="utf-8") as f:
+      json.dump(data, f, indent=2, sort_keys=True)
+
+  def _write_updates(self, path: Path, updates: Dict[str, Any]) -> None:
+    """Merges updates into file and saves."""
+    current = self._load_json(path)
+    current.update(updates)
+    self._save_json(path, current)

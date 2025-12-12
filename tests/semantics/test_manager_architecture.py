@@ -1,10 +1,5 @@
 """
 Tests for SemanticsManager Architecture Compliance.
-
-Verifies that:
-1. The Manager populates defaults from Registry (Adapters).
-2. It correctly consumes Structural Traits from the Adapter Protocol.
-3. It stays clean of JSON data when files are missing.
 """
 
 import pytest
@@ -24,28 +19,27 @@ def empty_directories(tmp_path):
   return tmp_path
 
 
-def test_initialization_populates_from_registry(empty_directories):
+def test_initialization_traits_from_registry(empty_directories):
   """
   Scenario: Environment with no JSON files, but Adapters are registered.
-  Expectation: Manager has templates/aliases for registered frameworks (e.g. torch).
+  Expectation: Manager populates Structural Traits (Aliases, Base Classes) from Code.
   """
   sem = empty_directories / "semantics"
   snap = empty_directories / "snapshots"
 
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=sem):
-    # Note: Manager implicitly uses resolve_snapshots_dir too
     with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=snap):
       mgr = SemanticsManager()
       mgr._reverse_index = {}
 
-      # Should have data from TorchAdapter (registered by default)
-      assert "torch" in mgr.test_templates
-      assert "import torch" in mgr.test_templates["torch"]["import"]
-
-      # Should have aliases
+      # Should have aliases from registry (e.g. torch -> (torch, torch))
       aliases = mgr.get_framework_aliases()
       assert "torch" in aliases
       assert aliases["torch"] == ("torch", "torch")
+
+      # Should have traits
+      conf = mgr.get_framework_config("torch")
+      assert "traits" in conf
 
 
 def test_traits_hydration_from_adapter(empty_directories):
@@ -104,8 +98,6 @@ def test_clean_slate_if_registry_empty(empty_directories):
         assert len(mgr.framework_configs) == 0
 
         # Assert Data is empty.
-        # Note: Static Injection (DataLoader) happens in Scaffolder, not Manager init.
-        # So manager data should be empty here.
         assert len(mgr.data) == 0
 
 

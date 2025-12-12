@@ -25,7 +25,7 @@ def test_generation_and_execution_flow(tmp_path):
     "__framework__": "jax",
     "mappings": {"DataLoader": {"api": "GenericDataLoader", "requires_plugin": "convert_dataloader"}},
   }
-  (snap_dir / "jax_mappings.json").write_text(json.dumps(jax_snapshot_content), encoding="utf-8")
+  (snap_dir / "jax_vlatest_map.json").write_text(json.dumps(jax_snapshot_content), encoding="utf-8")
 
   # 2. Setup Scaffolder
   empty_mgr = SemanticsManager()
@@ -38,10 +38,8 @@ def test_generation_and_execution_flow(tmp_path):
   scaffolder.inspector.inspect = MagicMock(return_value={})
 
   # 3. Execution
-  with patch("ml_switcheroo.discovery.scaffolder.resolve_semantics_dir", return_value=sem_dir):
-    with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
-      # Run scaffold targeting 'torch'
-      scaffolder.scaffold(["torch"], sem_dir)
+  # Pass tmp_path as root
+  scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
   # 4. Verify Abstract Spec Creation (semantics/k_framework_extras.json)
   # This comes from the python file (common/data.py)
@@ -54,9 +52,9 @@ def test_generation_and_execution_flow(tmp_path):
   assert "variants" not in spec_data["DataLoader"]
   assert "std_args" in spec_data["DataLoader"]
 
-  # 5. Verify Implementation Persistence (snapshots/jax_mappings.json)
-  # Ensure the pre-seeded mapping was preserved/merged
-  jax_map = snap_dir / "jax_mappings.json"
+  # 5. Verify Implementation Persistence (snapshots/jax_vlatest_map.json)
+  # Ensure the pre-seeded mapping was preserved
+  jax_map = snap_dir / "jax_vlatest_map.json"
   assert jax_map.exists()
   jax_data = json.loads(jax_map.read_text())
 

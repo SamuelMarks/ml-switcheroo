@@ -3,7 +3,7 @@ Tests for Segmented Semantics Loading (Overlay Strategy).
 
 Verifies that:
 1. `SemanticsManager` loads base specs from `semantics/`.
-2. `SemanticsManager` scans `snapshots/` for `*_mappings.json` files.
+2. `SemanticsManager` scans `snapshots/` for `*_vlatest_map.json` files.
 3. Variants in overlay files are merged into the main knowledge definition.
 4. New operations in overlays (not in specs) are created as Extras.
 5. Metadata (`__framework__`) in overlays is respected to assign variants.
@@ -27,8 +27,8 @@ def mock_root_tree(tmp_path):
     /semantics
       k_array_api.json      <-- Spec Definitions
     /snapshots
-      torch_mappings.json   <-- Framework Overlay
-      jax_mappings.json     <-- Framework Overlay
+      torch_vlatest_map.json   <-- Framework Overlay
+      jax_vlatest_map.json     <-- Framework Overlay
   """
   semantics_dir = tmp_path / "semantics"
   semantics_dir.mkdir()
@@ -54,12 +54,12 @@ def mock_root_tree(tmp_path):
       "TorchOnlyOp": {"api": "torch.special"},
     },
   }
-  (snapshots_dir / "torch_mappings.json").write_text(json.dumps(torch_map))
+  (snapshots_dir / "torch_vlatest_map.json").write_text(json.dumps(torch_map))
 
   # 3. Create JAX Overlay
   # Uses filename inference if __framework__ missing? No, we enforce explicit struct test first.
   jax_map = {"__framework__": "jax", "mappings": {"Abs": {"api": "jax.numpy.abs"}, "Add": {"api": "jax.numpy.add"}}}
-  (snapshots_dir / "jax_mappings.json").write_text(json.dumps(jax_map))
+  (snapshots_dir / "jax_vlatest_map.json").write_text(json.dumps(jax_map))
 
   return semantics_dir
 
@@ -113,7 +113,7 @@ def test_overlay_missing_op_handling(manager):
 def test_filename_framework_inference(tmp_path):
   """
   Scenario: Overlay file lacks "__framework__" key.
-  Expectation: Logic infers framework from filename 'numpy_mappings.json' -> 'numpy'.
+  Expectation: Logic infers framework from filename 'numpy_vlatest_map.json' -> 'numpy'.
   """
   sem_dir = tmp_path / "semantics"
   sem_dir.mkdir()
@@ -125,7 +125,7 @@ def test_filename_framework_inference(tmp_path):
 
   # Overlay (No __framework__ key)
   numpy_map = {"mappings": {"Sin": {"api": "numpy.sin"}}}
-  (snap_dir / "numpy_mappings.json").write_text(json.dumps(numpy_map))
+  (snap_dir / "numpy_vlatest_map.json").write_text(json.dumps(numpy_map))
 
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):

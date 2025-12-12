@@ -58,7 +58,7 @@ def test_wizard_save_logic(wizard, tmp_path):
   assert "variants" not in content
 
   # Check Mapping
-  map_file = tmp_path / "snapshots" / "pkg_mappings.json"
+  map_file = tmp_path / "snapshots" / "pkg_vlatest_map.json"
   assert map_file.exists()
   map_data = json.loads(map_file.read_text())
   assert map_data["mappings"]["new_math_op"]["api"] == "pkg.new_math_op"
@@ -100,7 +100,7 @@ def test_wizard_full_flow(wizard, tmp_path):
 
   # Verify Mapping Files
   snap_dir = tmp_path / "snapshots"
-  snap_file = snap_dir / "pkg_mappings.json"
+  snap_file = snap_dir / "pkg_vlatest_map.json"
   assert snap_file.exists()
   mappings = json.loads(snap_file.read_text())["mappings"]
   assert "new_math_op" in mappings

@@ -73,19 +73,3 @@ class TensorFlowAdapter:
       return tf.convert_to_tensor(data)
     except (ImportError, ValueError, TypeError, Exception):
       return data
-
-  @classmethod
-  def get_import_stmts(cls) -> str:
-    return "import tensorflow as tf"
-
-  @classmethod
-  def get_creation_syntax(cls, var_name: str) -> str:
-    return f"tf.convert_to_tensor({var_name})"
-
-  @classmethod
-  def get_numpy_conversion_syntax(cls, var_name: str) -> str:
-    return f"{var_name}.numpy()"
-
-  @classmethod
-  def get_example_code(cls) -> str:
-    return "import tensorflow as tf\n\nval = tf.abs(tf.constant([-1.0, 2.0]))"

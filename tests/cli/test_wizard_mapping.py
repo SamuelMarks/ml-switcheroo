@@ -87,7 +87,7 @@ def test_arg_normalization_flow(wizard, tmp_path):
   assert entry["std_args"] == ["x", "axis"]
 
   # Verify Snapshot Mapping
-  snap_path = tmp_path / "snapshots" / "torch_mappings.json"
+  snap_path = tmp_path / "snapshots" / "torch_vlatest_map.json"
   assert snap_path.exists()
   snap_data = json.loads(snap_path.read_text())
 
@@ -140,7 +140,7 @@ def test_full_bidirectional_flow(wizard, tmp_path):
         wizard.start("torch")
 
   # Check JAX Overlay exists
-  jax_file = tmp_path / "snapshots" / "jax_mappings.json"
+  jax_file = tmp_path / "snapshots" / "jax_vlatest_map.json"
   assert jax_file.exists()
 
   data = json.loads(jax_file.read_text())
@@ -196,7 +196,7 @@ def test_wizard_plugin_assignment(wizard, tmp_path):
       with patch("rich.prompt.Confirm.ask", side_effect=confirm_side_effect):
         wizard.start("torch")
 
-  jax_file = tmp_path / "snapshots" / "jax_mappings.json"
+  jax_file = tmp_path / "snapshots" / "jax_vlatest_map.json"
   data = json.loads(jax_file.read_text())
   jax_var = data["mappings"]["full_op"]
 

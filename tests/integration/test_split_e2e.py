@@ -19,8 +19,6 @@ LEGACY_MATH_JSON = {
   }
 }
 
-LEGACY_TEMPLATES_JSON = {"torch": {"import": "import torch"}, "jax": {"import": "import jax"}}
-
 
 @pytest.fixture
 def legacy_env(tmp_path):
@@ -31,6 +29,5 @@ def legacy_env(tmp_path):
   sem_dir.mkdir(parents=True)
 
   (sem_dir / "k_array_api.json").write_text(json.dumps(LEGACY_MATH_JSON))
-  (sem_dir / "k_test_templates.json").write_text(json.dumps(LEGACY_TEMPLATES_JSON))
 
   return sem_dir, snap_dir

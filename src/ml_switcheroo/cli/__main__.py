@@ -62,21 +62,6 @@ def main(argv: Optional[List[str]] = None) -> int:
   # --- Command: MATRIX ---
   subparsers.add_parser("matrix", help="Show compatibility table")
 
-  # --- Command: UPDATE (Discovery) ---
-  cmd_upd = subparsers.add_parser("update", help="Scan installed package for missing mappings (Batch Mode)")
-  cmd_upd.add_argument("package", help="Package to scan (e.g. torch)")
-  cmd_upd.add_argument(
-    "--report",
-    type=Path,
-    default="missing_mappings.json",
-    help="Output report file",
-  )
-  cmd_upd.add_argument(
-    "--merge",
-    action="store_true",
-    help="Automatically merge found mappings into semantics JSONs",
-  )
-
   # --- Command: WIZARD (Interactive Discovery) ---
   cmd_wiz = subparsers.add_parser("wizard", help="Interactively categorize missing mappings")
   cmd_wiz.add_argument("package", help="Package to scan (e.g. torch)")
@@ -121,8 +106,8 @@ def main(argv: Optional[List[str]] = None) -> int:
   cmd_scaf.add_argument(
     "--out-dir",
     type=Path,
-    default=resolve_semantics_dir(),
-    help="Where to save JSONs (Defaults to package installation dir)",
+    default=None,
+    help="Root directory for Knowledge Base. Must contain/create 'semantics' and 'snapshots' subdirs. Default: Package source.",
   )
 
   # --- Command: GEN DOCS (Migration Guide) ---
@@ -173,9 +158,6 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   elif args.command == "matrix":
     return commands.handle_matrix()
-
-  elif args.command == "update":
-    return commands.handle_update(args.package, args.merge, args.report)
 
   elif args.command == "wizard":
     return commands.handle_wizard(args.package)

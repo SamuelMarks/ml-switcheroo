@@ -64,6 +64,9 @@
       "api": "praxis.layers.Tanh"
     }
   },
+  "metadata": {
+    "demo_example": "import praxis.layers as pl\nfrom praxis import base_layer\n\nclass Simple(base_layer.BaseLayer):\n    def setup(self):\n        self.l = pl.Linear(10, 10)\n\n    def __call__(self, x):\n        return self.l(x)"
+  },
   "templates": {
     "convert_input": "jnp.array({np_var})",
     "import": "import jax.numpy as jnp\nimport praxis",

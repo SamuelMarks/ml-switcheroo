@@ -32,13 +32,12 @@ def test_spec_driven_categorization(tmp_path):
   sem_dir.mkdir()
   snap_dir.mkdir()
 
-  with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
-    scaffolder.scaffold(["torch"], sem_dir)
+  scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
   neural_spec = json.loads((sem_dir / "k_neural_net.json").read_text())
   assert "Relu" in neural_spec
 
-  torch_map = json.loads((snap_dir / "torch_mappings.json").read_text())
+  torch_map = json.loads((snap_dir / "torch_vlatest_map.json").read_text())
   assert torch_map["mappings"]["Relu"]["api"] == "torch.nn.ReLU"
 
 
@@ -56,11 +55,10 @@ def test_heuristic_fallback_dynamic(tmp_path):
   mock_adapter = MagicMock()
   mock_adapter.discovery_heuristics = {"neural": [r"\.custom\."]}
 
-  with patch("ml_switcheroo.discovery.scaffolder.available_frameworks", return_value=["torch"]):
+  with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
-      with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
-        scaffolder.scaffold(["torch"], sem_dir)
+      scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
-  torch_map = json.loads((snap_dir / "torch_mappings.json").read_text())
+  torch_map = json.loads((snap_dir / "torch_vlatest_map.json").read_text())
   assert "UnknownLayer" in torch_map["mappings"]
   assert torch_map["mappings"]["UnknownLayer"]["api"] == "torch.custom.Unknown"

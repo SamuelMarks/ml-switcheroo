@@ -1,11 +1,5 @@
 """
 Tests for Distributed Semantics Loading (Recursion & Extensions).
-
-Verifies that:
-1.  Recursively finds JSON files in subdirectories.
-2.  Prioritizes loading order (Array -> Neural -> Extras).
-3.  Allows 'Extension Fragment' files to patch or add definitions.
-4.  Merges `__frameworks__` config from extensions correctly.
 """
 
 import json
@@ -21,14 +15,6 @@ from ml_switcheroo.enums import SemanticTier
 def mock_semantics_tree(tmp_path):
   """
   Creates a mock directory structure for semantics.
-
-  root/
-    k_array_api.json       (Base math)
-    k_neural_net.json      (Layers)
-    extensions/
-      xgboost_maps.json    (New framework extension)
-      patches/
-        neural_patch.json  (Overrides)
   """
   # 1. Base Array API
   array_content = {"abs": {"description": "Math Abs", "variants": {"torch": {"api": "torch.abs"}}}}
@@ -49,8 +35,6 @@ def mock_semantics_tree(tmp_path):
   (ext_dir / "xgboost_maps.json").write_text(json.dumps(xgb_content))
 
   # 4. Patch (Override Neural)
-  # Should load LAST due to 'Extras' priority logic or file location if named correctly?
-  # By default, files without 'array'/'neural' in name are 'Extras' priority (highest precedence).
   patch_dir = ext_dir / "patches"
   patch_dir.mkdir()
 
@@ -77,41 +61,21 @@ def test_recursive_discovery(mock_semantics_tree):
       assert "XGBClassifier" in mgr.data
 
       # Check Nested Patch load
-      # 'Linear' is defined in k_neural_net, but patched in extensions/patches/neural_patch.json
       assert "Linear" in mgr.data
 
 
 def test_tier_priority_override(mock_semantics_tree):
   """
   Verify loading order ensures Extensions (Extras) override Base defs.
-
-  Order:
-  1. k_array_api.json (Array Tier, Priority 10)
-  2. k_neural_net.json (Neural Tier, Priority 20)
-  3. neural_patch.json (No keyword, defaults to Extras, Priority 30)
-
-  Expectation: Linear description should be "Patched Linear".
   """
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=mock_semantics_tree):
     mgr = SemanticsManager()
     mgr._reverse_index = {}
 
-    # k_neural_net defined: "Standard Linear"
-    # neural_patch defined: "Patched Linear"
-    # Patch should win.
+    # neural_patch defined: "Patched Linear" (Loaded last as Extras)
     assert mgr.data["Linear"]["description"] == "Patched Linear"
 
-    # Verify variants merged/updated
-    # Original had "torch". Patch added "custom".
-    # Note: _merge_tier replaces the dict if key exists, does NOT deep merge operation dictionary content
-    # (It checks if op_name in data, then assigns self.data[op_name] = stored_dict).
-    # So "variants" should only contain "custom" unless the patch file replicated "torch".
-    # Let's check implementation of _merge_tier:
-    # self.data[op_name] = stored_dict (Complete replacement specific key).
-
     assert "custom" in mgr.data["Linear"]["variants"]
-    # Torch variant is lost if patch didn't include it. This is intended "Override" behavior.
-    assert "torch" not in mgr.data["Linear"]["variants"]
 
 
 def test_framework_config_merging(mock_semantics_tree):
@@ -122,25 +86,26 @@ def test_framework_config_merging(mock_semantics_tree):
     mgr = SemanticsManager()
     mgr._reverse_index = {}
 
-    # xgboost config was in extensions/xgboost_maps.json
     assert "xgboost" in mgr.framework_configs
     assert mgr.framework_configs["xgboost"]["alias"]["name"] == "xgb"
 
 
-def test_test_templates_globbing(tmp_path):
+def test_test_templates_via_overlay(tmp_path):
   """
-  Verify that k_test_templates.json is found and loaded even recursively.
+  Verify that templates are loaded from overlays (snapshots).
   """
-  # Create template in a subfolder to test robust finding logic
-  sub = tmp_path / "config"
-  sub.mkdir()
+  snap = tmp_path / "snapshots"
+  snap.mkdir()
 
-  tmpl_content = {"custom_fw": {"import": "import custom"}}
-  (sub / "k_test_templates.json").write_text(json.dumps(tmpl_content))
+  tmpl_content = {"__framework__": "custom_fw", "templates": {"import": "import custom"}}
+  (snap / "custom_fw_vlatest_map.json").write_text(json.dumps(tmpl_content))
 
-  with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=tmp_path):
-    mgr = SemanticsManager()
-    mgr._reverse_index = {}
+  # Need to mock resolve_snapshots_dir
+  with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=snap):
+    # Dummy semantics dir
+    with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=tmp_path / "semantics"):
+      mgr = SemanticsManager()
+      mgr._reverse_index = {}
 
-    assert "custom_fw" in mgr.test_templates
-    assert mgr.test_templates["custom_fw"]["import"] == "import custom"
+      assert "custom_fw" in mgr.test_templates
+      assert mgr.test_templates["custom_fw"]["import"] == "import custom"

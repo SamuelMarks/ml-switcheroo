@@ -40,18 +40,22 @@ def test_fuzzy_match_success(tmp_path, clean_semantics):
   scaffolder.inspector = MockInspector()
 
   # Configure Paths
-  # Note: Scaffolder derives snapshots path relative to semantics parent
   sem_dir = tmp_path / "semantics"
   snap_dir = tmp_path / "snapshots"
   sem_dir.mkdir()
   snap_dir.mkdir()
 
-  with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
-    # Pass sem_dir as output_dir
-    scaffolder.scaffold(["source_fw", "target_fw"], sem_dir)
+  # Explicitly path resolving isn't needed if we pass root_dir=tmp_path
+  # because Scaffolder appends /semantics and /snapshots automatically.
+  # Using tmp_path as root ensures files land in tmp_path/semantics and tmp_path/snapshots.
+
+  # Scaffolder.scaffold writes to importlib.metadata.version or 'latest'
+  # We need to expect 'latest' since frameworks aren't installed.
+
+  scaffolder.scaffold(["source_fw", "target_fw"], root_dir=tmp_path)
 
   # Check Mapping File for Target
-  tgt_file = snap_dir / "target_fw_mappings.json"
+  tgt_file = snap_dir / "target_fw_vlatest_map.json"
   assert tgt_file.exists()
 
   data = json.loads(tgt_file.read_text())
@@ -70,10 +74,9 @@ def test_signature_analysis_rejection(tmp_path, clean_semantics):
   sem_dir.mkdir()
   snap_dir.mkdir()
 
-  with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
-    scaffolder.scaffold(["source_fw", "target_fw"], sem_dir)
+  scaffolder.scaffold(["source_fw", "target_fw"], root_dir=tmp_path)
 
-  tgt_file = snap_dir / "target_fw_mappings.json"
+  tgt_file = snap_dir / "target_fw_vlatest_map.json"
   if tgt_file.exists():
     data = json.loads(tgt_file.read_text())
     mappings = data["mappings"]
@@ -97,10 +100,9 @@ def test_exact_match_priority(tmp_path, clean_semantics):
   sem_dir.mkdir()
   snap_dir.mkdir()
 
-  with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
-    scaffolder.scaffold(["source_fw", "target_fw"], sem_dir)
+  scaffolder.scaffold(["source_fw", "target_fw"], root_dir=tmp_path)
 
-  data = json.loads((snap_dir / "target_fw_mappings.json").read_text())
+  data = json.loads((snap_dir / "target_fw_vlatest_map.json").read_text())
 
   assert "add" in data["mappings"]
   assert data["mappings"]["add"]["api"] == "target.add"

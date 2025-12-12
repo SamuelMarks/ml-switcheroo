@@ -1,22 +1,20 @@
 """
-Tests for Semantic Persistence (Autogen).
+Tests for Semantic Persistence (Autogen) with Hub-and-Spoke Split Architecture.
 
 Verifies:
-1. File Creation: New files are created if missing.
-2. Format Compliance: CandidateStandard is correctly mapped to JSON schema.
-3. Conflict Resolution: Existing keys (Manual Overrides) are protected.
-4. IO Safety: Handle corrupt JSON gracefully.
+1.  **Split Writes**: Abstract Definitions go to `semantics/`, Mappings go to `snapshots/`.
+2.  **File Creation**: New snapshot files are created if missing.
+3.  **Conflict Resolution**: Existing keys (Manual Overrides) are protected in both Hub and Spokes.
 """
 
 import json
 import pytest
 from pathlib import Path
+from unittest.mock import patch
+
 from ml_switcheroo.semantics.autogen import SemanticPersister
 from ml_switcheroo.discovery.consensus import CandidateStandard
 from ml_switcheroo.core.ghost import GhostRef
-
-
-# --- Fixtures ---
 
 
 @pytest.fixture
@@ -35,88 +33,131 @@ def sample_candidate():
       "jax": GhostRef(name="huber_loss", api_path="optax.huber_loss", kind="function"),
     },
     arg_mappings={"torch": {"reduction": "reduction"}, "jax": {"reduction": "reduction_mode"}},
+    score=1.0,
   )
   return c
 
 
-# --- Tests ---
+@pytest.fixture
+def mock_fs(tmp_path):
+  """Creates a mock filesystem structure."""
+  sem_dir = tmp_path / "semantics"
+  snap_dir = tmp_path / "snapshots"
+  sem_dir.mkdir(parents=True)
+  snap_dir.mkdir(parents=True)
+  return sem_dir, snap_dir
 
 
-def test_persist_new_file_creation(persister, sample_candidate, tmp_path):
-  """Scenario: target file does not exist."""
-  target = tmp_path / "k_generated.json"
+def test_persist_hub_creation(persister, sample_candidate, mock_fs):
+  """
+  Scenario: Target spec file does not exist.
+  Expectation:
+      1. Spec file created in semantics/
+      2. Contains "std_args" and "description".
+      3. Does NOT contain "variants".
+  """
+  sem_dir, snap_dir = mock_fs
+  target_spec = sem_dir / "k_generated.json"
 
-  persister.persist([sample_candidate], target)
+  with patch("ml_switcheroo.semantics.autogen.resolve_snapshots_dir", return_value=snap_dir):
+    persister.persist([sample_candidate], target_spec)
 
-  assert target.exists()
+  assert target_spec.exists()
+  data = json.loads(target_spec.read_text("utf-8"))
 
-  data = json.loads(target.read_text("utf-8"))
-
-  # Check Structure
   assert "Huber" in data
   entry = data["Huber"]
 
-  assert "variants" in entry
-  assert "std_args" in entry
+  # Hub Requirements
   assert entry["std_args"] == ["reduction"]
+  assert "Auto-discovered" in entry["description"]
 
-  # Check Variants
-  assert entry["variants"]["torch"]["api"] == "torch.nn.HuberLoss"
-  assert entry["variants"]["jax"]["args"]["reduction"] == "reduction_mode"
+  # Split Requirement: Variants should NOT be here
+  assert "variants" not in entry
 
 
-def test_persist_protects_manual_overrides(persister, sample_candidate, tmp_path):
+def test_persist_spoke_creation(persister, sample_candidate, mock_fs):
   """
-  Scenario: target file exists and contains 'Huber'.
-  Expectation: The existing 'Huber' entry is NOT touched.
+  Scenario: Snapshots directory is empty.
+  Expectation:
+      1. `torch_vlatest_map.json` created.
+      2. `jax_vlatest_map.json` created.
+      3. Mappings contain `api` and `args`.
   """
-  target = tmp_path / "k_overrides.json"
+  sem_dir, snap_dir = mock_fs
+  target_spec = sem_dir / "k_generated.json"
 
-  # Simulate a Manual Override (different from auto)
-  manual_data = {"Huber": {"variants": {}, "std_args": ["manual_flag"], "doc": "Manually Curated"}}
-  target.write_text(json.dumps(manual_data), encoding="utf-8")
+  with patch("ml_switcheroo.semantics.autogen.resolve_snapshots_dir", return_value=snap_dir):
+    persister.persist([sample_candidate], target_spec)
 
-  persister.persist([sample_candidate], target)
+  # Check Torch Spoke
+  torch_snap = snap_dir / "torch_vlatest_map.json"
+  assert torch_snap.exists()
 
-  # Reload and Verify
-  data = json.loads(target.read_text("utf-8"))
+  t_data = json.loads(torch_snap.read_text())
+  assert t_data["__framework__"] == "torch"
+  assert "Huber" in t_data["mappings"]
+  assert t_data["mappings"]["Huber"]["api"] == "torch.nn.HuberLoss"
+  assert t_data["mappings"]["Huber"]["args"]["reduction"] == "reduction"
 
-  assert data["Huber"]["doc"] == "Manually Curated"
-  assert "torch" not in data["Huber"]["variants"]
-  assert "manual_flag" in data["Huber"]["std_args"]
+  # Check JAX Spoke
+  jax_snap = snap_dir / "jax_vlatest_map.json"
+  assert jax_snap.exists()
+  j_data = json.loads(jax_snap.read_text())
+  assert "Huber" in j_data["mappings"]
+  assert j_data["mappings"]["Huber"]["args"]["reduction"] == "reduction_mode"
 
 
-def test_persist_merges_disjoint_sets(persister, sample_candidate, tmp_path):
+def test_manual_override_protection(persister, sample_candidate, mock_fs):
   """
-  Scenario: File exists with 'MSE', new candidate is 'Huber'.
-  Expectation: 'MSE' preserved, 'Huber' added.
+  Scenario: 'Huber' exists in Spec (Hub) and Torch Snapshot (Spoke).
+  Expectation:
+      1. Hub entry is NOT updated.
+      2. Torch Spoke entry is NOT updated.
+      3. JAX Spoke entry IS created (it was missing).
   """
-  target = tmp_path / "k_mixed.json"
+  sem_dir, snap_dir = mock_fs
+  target_spec = sem_dir / "k_mixed.json"
 
-  existing = {"MSE": {"variants": {"f": "v"}}}
-  target.write_text(json.dumps(existing), encoding="utf-8")
+  # Pre-seed Hub with manual edit
+  hub_data = {"Huber": {"std_args": ["manual"], "description": "Manual Edit"}}
+  target_spec.write_text(json.dumps(hub_data))
 
-  persister.persist([sample_candidate], target)
+  # Pre-seed Torch Spoke with manual edit
+  torch_snap = snap_dir / "torch_vlatest_map.json"
+  torch_data = {"__framework__": "torch", "mappings": {"Huber": {"api": "manual.api"}}}
+  torch_snap.write_text(json.dumps(torch_data))
 
-  data = json.loads(target.read_text("utf-8"))
+  with patch("ml_switcheroo.semantics.autogen.resolve_snapshots_dir", return_value=snap_dir):
+    persister.persist([sample_candidate], target_spec)
 
-  assert "MSE" in data
-  assert "Huber" in data
+  # Verify Hub Protection
+  new_hub = json.loads(target_spec.read_text())
+  assert new_hub["Huber"]["std_args"] == ["manual"]  # Not ["reduction"]
+
+  # Verify Torch Spoke Protection
+  new_torch = json.loads(torch_snap.read_text())
+  assert new_torch["mappings"]["Huber"]["api"] == "manual.api"  # Not "torch.nn.HuberLoss"
+
+  # Verify JAX Spoke Creation (Additive)
+  jax_snap = snap_dir / "jax_vlatest_map.json"
+  assert jax_snap.exists()
+  new_jax = json.loads(jax_snap.read_text())
+  assert "Huber" in new_jax["mappings"]
 
 
-def test_handle_corrupt_json(persister, sample_candidate, tmp_path):
+def test_corrupt_file_handling(persister, sample_candidate, mock_fs):
   """
-  Scenario: Target file contains garbage.
-  Expectation: File is backed up, logic starts fresh/overwrites to recover.
+  Verify empty-dict fallback on corrupt JSON (robustness).
   """
-  target = tmp_path / "corrupt.json"
-  target.write_text("{NOT VALID JSON", encoding="utf-8")
+  sem_dir, snap_dir = mock_fs
+  target_spec = sem_dir / "corrupt.json"
+  target_spec.write_text("{bad json")
 
-  persister.persist([sample_candidate], target)
+  with patch("ml_switcheroo.semantics.autogen.resolve_snapshots_dir", return_value=snap_dir):
+    # Should warning but not crash, then overwrite/repair
+    persister.persist([sample_candidate], target_spec)
 
-  # Should have created .bak
-  assert (target.with_suffix(".bak")).exists()
-
-  # Should have written valid new file
-  data = json.loads(target.read_text("utf-8"))
+  assert target_spec.exists()
+  data = json.loads(target_spec.read_text())
   assert "Huber" in data

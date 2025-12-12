@@ -84,27 +84,3 @@ class PaxmlAdapter:
     if isinstance(data, (np.ndarray, list, tuple, np.generic)):
       return jnp.array(data)
     return data
-
-  @classmethod
-  def get_import_stmts(cls) -> str:
-    return "import jax.numpy as jnp\nimport praxis"
-
-  @classmethod
-  def get_creation_syntax(cls, var_name: str) -> str:
-    return f"jnp.array({var_name})"
-
-  @classmethod
-  def get_numpy_conversion_syntax(cls, var_name: str) -> str:
-    return f"np.array({var_name})"
-
-  @classmethod
-  def get_example_code(cls) -> str:
-    return (
-      "import praxis.layers as pl\n"
-      "from praxis import base_layer\n\n"
-      "class Simple(base_layer.BaseLayer):\n"
-      "    def setup(self):\n"
-      "        self.l = pl.Linear(10, 10)\n\n"
-      "    def __call__(self, x):\n"
-      "        return self.l(x)"
-    )

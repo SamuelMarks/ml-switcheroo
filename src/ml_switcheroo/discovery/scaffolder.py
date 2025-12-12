@@ -9,11 +9,12 @@ It prioritizes matching discovered APIs against ingested Specs (ONNX, Array API)
 before falling back to structural heuristics provided by Framework Adapters.
 
 Updates for Distributed Semantics:
-- Writes Abstract Operation Definitions (Specs) to `semantics/*.json`.
-- Writes Implementation Details (Variants) to `snapshots/{framework}_mappings.json`.
+- Writes Abstract Operation Definitions (Specs) to `semantics/*.json` (Hub).
+- Writes Implementation Details (Variants) to `snapshots/*.json` (Spokes).
 """
 
 import json
+import importlib.metadata
 import difflib
 import re
 from pathlib import Path
@@ -23,8 +24,8 @@ from collections import defaultdict
 from ml_switcheroo.discovery.inspector import ApiInspector
 from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.utils.console import console, log_info, log_success, log_warning
-from ml_switcheroo.frameworks import available_frameworks, get_adapter
+from ml_switcheroo.utils.console import console, log_info, log_success
+from ml_switcheroo.frameworks import get_adapter
 
 # Access static definitions for common utilities
 from ml_switcheroo.frameworks.common.data import get_dataloader_semantics
@@ -70,6 +71,9 @@ class Scaffolder:
 
     compiled: Dict[str, List[re.Pattern]] = {"neural": [], "extras": []}
 
+    # We need a way to iterate available frameworks, importing from manager or frameworks package
+    from ml_switcheroo.frameworks import available_frameworks
+
     for fw_name in available_frameworks():
       adapter = get_adapter(fw_name)
       if not adapter:
@@ -89,31 +93,22 @@ class Scaffolder:
     self._cached_heuristics = compiled
     return compiled
 
-  def scaffold(self, frameworks: List[str], output_dir: Path = None):
+  def scaffold(self, frameworks: List[str], root_dir: Optional[Path] = None):
     """
     Main entry point. Scans frameworks and builds/updates JSON mappings.
 
     Args:
         frameworks: List of package names (e.g. ['torch', 'jax']).
-        output_dir: Directory for semantics (Specs).
-                    The snapshots dir is resolved as the sibling 'snapshots' directory.
+        root_dir: Root directory of the Knowledge Base (Hub & Spokes).
+                  If provided, 'semantics/' and 'snapshots/' subdirs are used relative to this.
+                  If None, defaults to package location.
     """
-    semantics_path = output_dir or resolve_semantics_dir()
-
-    # Ensure snapshots path is correctly resolved relative to the actual output target
-    if output_dir:
-      # Assuming standard layouts: parent/semantics and parent/snapshots
-      snapshots_path = output_dir.parent / "snapshots"
+    if root_dir:
+      semantics_path = root_dir / "semantics"
+      snapshots_path = root_dir / "snapshots"
     else:
+      semantics_path = resolve_semantics_dir()
       snapshots_path = resolve_snapshots_dir()
-
-      # Check if we need to create the snapshots dir manually if logic derived from output_dir
-    # tests often create them but real usage implies they might not exist
-    if not snapshots_path.exists():
-      try:
-        snapshots_path.mkdir(parents=True, exist_ok=True)
-      except OSError:
-        pass  # Keep going, might fail on write if perms issue
 
     # Pre-load known specs to drive categorization
     known_neural_ops = self._get_ops_by_tier(SemanticTier.NEURAL)
@@ -153,6 +148,7 @@ class Scaffolder:
 
       # Strategy 2: Heuristic Fallback (Dynamic)
       if self._is_structurally_neural(api_path, kind):
+        # FIX: Ensure neural heuristic routes to neural spec, not extras
         self._register_entry("k_neural_net.json", name, primary_fw, api_path, details, catalogs)
         continue
 
@@ -161,7 +157,7 @@ class Scaffolder:
         continue
 
       # Heuristic: Math Tier (Default)
-      self._register_entry("k_array_api.json", name, primary_fw, api_path, details, catalogs)
+      self._register_entry("k_framework_extras.json", name, primary_fw, api_path, details, catalogs)
 
     # Strategy 3: Static Injection
     dataloader_defaults = get_dataloader_semantics()
@@ -182,14 +178,26 @@ class Scaffolder:
     if not snapshots_path.exists():
       snapshots_path.mkdir(parents=True, exist_ok=True)
 
+    # Write Hub (Specs)
     for filename, content in self.staged_specs.items():
       if content:
         self._write_json(semantics_path / filename, content, merge=True)
 
+    # Write Spokes (Snapshots)
     for fw, mapping_data in self.staged_mappings.items():
       if mapping_data:
+        try:
+          if fw == "torch":
+            import torch
+
+            ver = torch.__version__
+          else:
+            ver = importlib.metadata.version(fw)
+        except Exception:
+          ver = "latest"
+
         file_data = {"__framework__": fw, "mappings": mapping_data}
-        self._write_json(snapshots_path / f"{fw}_mappings.json", file_data, merge=True)
+        self._write_json(snapshots_path / f"{fw}_v{ver}_map.json", file_data, merge=True)
 
   def _get_ops_by_tier(self, tier: SemanticTier) -> Set[str]:
     if not hasattr(self.semantics, "_key_origins"):

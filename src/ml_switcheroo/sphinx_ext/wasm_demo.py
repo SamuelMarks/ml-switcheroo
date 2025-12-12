@@ -3,24 +3,27 @@ Sphinx Extension for ML-Switcheroo WASM Demo.
 
 This module provides a custom `switcheroo_demo` directive that renders an interactive
 in-browser transpiler interface. It dynamically populates the framework selection
-dropdowns by querying the `ml_switcheroo.frameworks` registry.
+dropdowns by querying the `ml_switcheroo.frameworks` registry and reading metadata
+from JSON Snapshots.
 
 Features:
 - Dynamically discovers registered frameworks for the UI.
 - Generates HTML for the WASM interface (Source/Target selectors, Editor divs).
 - Injects necessary JS/CSS assets into the Sphinx build.
-- **Protocol-Driven Examples**: Extracts standard code snippets from adapters.
+- **Protocol-Driven Examples**: Extracts code snippets from `snapshots/*.json`.
 - **Strict Mode Toggle**: UI element to enabling strict API validation.
 """
 
 import os
 import shutil
 import json
+import glob
 from pathlib import Path
 from docutils import nodes
 from docutils.parsers.rst import Directive
 
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
+from ml_switcheroo.semantics.manager import resolve_snapshots_dir
 
 
 class SwitcherooDemo(Directive):
@@ -42,14 +45,18 @@ class SwitcherooDemo(Directive):
     options_html, examples_json = self._generate_dynamic_data()
 
     # Create target variant (default JAX selected)
+    opts_src = options_html
     opts_tgt = options_html.replace('value="jax"', 'value="jax" selected')
-    opts_tgt = opts_tgt.replace('value="torch" selected', 'value="torch"')
+    # Ensure Torch is default source if present
+    if 'value="torch"' in opts_src:
+      opts_src = opts_src.replace(" selected", "")  # clear others
+      opts_src = opts_src.replace('value="torch"', 'value="torch" selected')
 
-    html = f""" 
+    html = f"""
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
-            <!-- Inject Protocol-Driven Examples -->
+            <!-- Inject Data-Driven Examples -->
             <script>
-                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json};
             </script>
 
             <div class="demo-header">
@@ -71,7 +78,7 @@ class SwitcherooDemo(Directive):
                 <div class="translate-toolbar">
                     <div class="select-wrapper">
                         <select id="select-src" class="material-select">
-                            {options_html} 
+                            {opts_src}
                         </select>
                     </div>
 
@@ -79,7 +86,7 @@ class SwitcherooDemo(Directive):
 
                     <div class="select-wrapper">
                         <select id="select-tgt" class="material-select">
-                            {opts_tgt} 
+                            {opts_tgt}
                         </select>
                     </div>
                 </div>
@@ -97,8 +104,8 @@ class SwitcherooDemo(Directive):
                         <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Paste source code here...">import torch
 import torch.nn as nn
 
-class Model(nn.Module): 
-    def forward(self, x): 
+class Model(nn.Module):
+    def forward(self, x):
         return torch.abs(x)</textarea>
                     </div>
                     <div class="editor-group target-group">
@@ -123,7 +130,7 @@ class Model(nn.Module):
                 <div id="trace-visualizer" class="trace-container" style="display:none;">
                     <div class="trace-row placeholder">
                         <div class="trace-content" style="text-align:center;color:#999;padding:20px;">
-                            Trace events will appear here after conversion... 
+                            Trace events will appear here after conversion...
                         </div>
                     </div>
                 </div>
@@ -141,8 +148,8 @@ class Model(nn.Module):
   def _generate_dynamic_data(self) -> tuple[str, str]:
     """
     Iterates available frameworks to generate:
-    1. HTML <options> for dropdown.
-    2. JSON string of example code snippets.
+    1. HTML <options> for dropdown (using Adapter for Name).
+    2. JSON string of example code snippets (using Snapshots).
     """
     fws = available_frameworks()
     priority = ["torch", "jax"]
@@ -151,6 +158,9 @@ class Model(nn.Module):
     parts = []
     examples = {}
 
+    # Load Snapshots Metadata
+    examples_map = self._load_examples_from_snapshots()
+
     for key in sorted_fws:
       adapter = get_adapter(key)
       if not adapter:
@@ -158,25 +168,57 @@ class Model(nn.Module):
 
       # 1. Option Label
       label = getattr(adapter, "display_name", key.capitalize())
-      selected = " selected" if key == "torch" else ""
-      parts.append(f'<option value="{key}"{selected}>{label}</option>')
+      parts.append(f'<option value="{key}">{label}</option>')
 
-      # 2. Example Extraction
-      # We construct a generic "Standard usage" scenarios
-      if hasattr(adapter, "get_example_code"):
+      # 2. Example Extraction (From JSON Metadata)
+      code = examples_map.get(key)
+
+      # Fallback (deprecated but safe)
+      if not code and hasattr(adapter, "get_example_code"):
         try:
           code = adapter.get_example_code()
-          if code:
-            examples[key] = {
-              "label": f"Standard {label} Example",
-              "srcFw": key,
-              "tgtFw": "jax" if key != "jax" else "torch",
-              "code": code,
-            }
-        except Exception as e:
-          print(f"⚠️ Failed to get example for {key}: {e}")
+        except Exception:
+          pass
+
+      if code:
+        examples[key] = {
+          "label": f"Standard {label} Example",
+          "srcFw": key,
+          "tgtFw": "jax" if key != "jax" else "torch",
+          "code": code,
+        }
 
     return "\n".join(parts), json.dumps(examples)
+
+  def _load_examples_from_snapshots(self) -> dict:
+    """Helper to scan snapshot directory and extract 'demo_example' metadata."""
+    snap_dir = resolve_snapshots_dir()
+    if not snap_dir.exists():
+      return {}
+
+    results = {}
+    # Find all JSONs
+    for fpath in snap_dir.glob("*.json"):
+      try:
+        content = json.loads(fpath.read_text(encoding="utf-8"))
+
+        # Identify Framework
+        fw = content.get("__framework__")
+        if not fw:
+          # Fallback to filename: 'torch_v1.0.json' -> 'torch'
+          fw = fpath.name.split("_")[0]
+
+        # Identify Example
+        ex = content.get("metadata", {}).get("demo_example")
+        if fw and ex:
+          # Overwrite if we find multiple; assume FS order or specific pattern isn't critical
+          # unless versioning matters. Latest likely overwrites older.
+          results[fw] = ex
+
+      except Exception:
+        continue
+
+    return results
 
 
 def setup(app):
@@ -196,7 +238,7 @@ def setup(app):
   app.connect("builder-inited", add_static_path)
   app.connect("build-finished", copy_wheel_and_reqs)
 
-  return {"version": "0.9.1", "parallel_read_safe": True, "parallel_write_safe": True}
+  return {"version": "0.9.2", "parallel_read_safe": True, "parallel_write_safe": True}
 
 
 def add_static_path(app):

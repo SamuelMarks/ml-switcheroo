@@ -639,5 +639,8 @@
     "where": {
       "api": "keras.ops.where"
     }
+  },
+  "metadata": {
+    "demo_example": "import keras\nfrom keras import ops\n\nclass M(keras.Layer):\n    def __init__(self):\n        super().__init__()\n        self.d = keras.layers.Dense(10)\n\n    def call(self, x):\n        return self.d(x)"
   }
 }

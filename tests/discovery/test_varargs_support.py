@@ -33,10 +33,9 @@ def test_scaffolder_skips_penalty_for_varargs(tmp_path):
   sem_dir.mkdir()
   snap_dir.mkdir()
 
-  with patch("ml_switcheroo.discovery.scaffolder.resolve_snapshots_dir", return_value=snap_dir):
-    scaffolder.scaffold(["source_fw", "target_fw"], sem_dir)
+  scaffolder.scaffold(["source_fw", "target_fw"], root_dir=tmp_path)
 
-  target_map = json.loads((snap_dir / "target_fw_mappings.json").read_text())
+  target_map = json.loads((snap_dir / "target_fw_vlatest_map.json").read_text())
 
   assert "add" in target_map["mappings"]
   assert target_map["mappings"]["add"]["api"] == "target.poly.add"

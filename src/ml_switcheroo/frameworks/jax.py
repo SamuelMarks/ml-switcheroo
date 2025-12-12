@@ -179,26 +179,3 @@ class JaxAdapter:
     if isinstance(data, (np.ndarray, list, tuple, np.generic)):
       return jnp.array(data)
     return data
-
-  @classmethod
-  def get_import_stmts(cls) -> str:
-    return "import jax\nimport jax.numpy as jnp"
-
-  @classmethod
-  def get_creation_syntax(cls, var_name: str) -> str:
-    return f"jnp.array({var_name})"
-
-  @classmethod
-  def get_numpy_conversion_syntax(cls, var_name: str) -> str:
-    return f"np.array({var_name})"
-
-  @classmethod
-  def get_example_code(cls) -> str:
-    return (
-      "from flax import nnx\n\n"
-      "class Simple(nnx.Module):\n"
-      "    def __init__(self, rngs: nnx.Rngs):\n"
-      "        self.l = nnx.Linear(10, 10, rngs=rngs)\n\n"
-      "    def __call__(self, x):\n"
-      "        return self.l(x)"
-    )

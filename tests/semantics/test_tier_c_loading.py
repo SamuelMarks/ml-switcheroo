@@ -28,7 +28,7 @@ def mock_specs(tmp_path):
       "MagicContext": {"api": "torch.magic"},
     },
   }
-  (tmp_path / "snapshots" / "torch_mappings.json").write_text(json.dumps(torch_map))
+  (tmp_path / "snapshots" / "torch_vlatest_map.json").write_text(json.dumps(torch_map))
 
   jax_map = {
     "__framework__": "jax",
@@ -38,7 +38,7 @@ def mock_specs(tmp_path):
       "DataLoader": {"api": "GenericDataLoader", "requires_plugin": "convert_dataloader"},
     },
   }
-  (tmp_path / "snapshots" / "jax_mappings.json").write_text(json.dumps(jax_map))
+  (tmp_path / "snapshots" / "jax_vlatest_map.json").write_text(json.dumps(jax_map))
 
   return tmp_path
 
