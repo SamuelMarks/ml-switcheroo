@@ -4,10 +4,11 @@ AST Scanners for Symbol Usage Detection.
 This module provides LibCST visitors that analyze code to determine if specific
 names, frameworks, or aliases are actively referenced in the source body.
 
-These scanners are critical for the `ImportFixer` logic:
-1.  If a framework alias (e.g., `jnp`) is injected, `SimpleNameScanner` verifies
+These scanners are critical for the ``ImportFixer`` logic:
+
+1.  If a framework alias (e.g., ``jnp``) is injected, ``SimpleNameScanner`` verifies
     it is actually used before committing the import.
-2.  If a source import (e.g., `import torch`) is slated for removal, `UsageScanner`
+2.  If a source import (e.g., ``import torch``) is slated for removal, ``UsageScanner``
     checks if it persists in the code (e.g., inside an Escape Hatch) to prevent
     breaking valid code.
 """
@@ -26,15 +27,11 @@ def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
 
   Args:
     node: The CST node representing the identifier.
-      Typically a `cst.Name` (e.g., `x`) or `cst.Attribute` (e.g., `x.y`).
+      Typically a ``cst.Name`` (e.g., ``x``) or ``cst.Attribute`` (e.g., ``x.y``).
 
   Returns:
     str: The fully qualified string representation (e.g., "torch.nn.functional").
     Returns an empty string if the node structure is not a supported Name/Attribute chain.
-
-  Example:
-    >>> get_full_name(cst.Attribute(value=cst.Name("torch"), attr=cst.Name("abs")))
-    'torch.abs'
   """
   if isinstance(node, cst.Name):
     return node.value
@@ -48,14 +45,8 @@ class SimpleNameScanner(cst.CSTVisitor):
   Scans for the usage of a specific identifier in the code body.
 
   This visitor is designed to check for the presence of variables or aliases
-  (like `jnp`, `tf`, `mx`) *outside* of import statements. It is used to
+  (like ``jnp``, ``tf``, ``mx``) *outside* of import statements. It is used to
   determine if a speculative import injection is actually required.
-
-  Attributes:
-    target_name (str): The identifier string to search for (e.g., "jnp").
-    found (bool): State flag, set to True immediately upon finding a match.
-    _in_import (bool): Internal state tracking if traversal is currently
-      inside an Import/ImportFrom node.
   """
 
   def __init__(self, target_name: str) -> None:
@@ -71,31 +62,31 @@ class SimpleNameScanner(cst.CSTVisitor):
 
   def visit_Import(self, node: cst.Import) -> None:
     """
-    Flags entry into an `import ...` statement.
+    Flags entry into an ``import ...`` statement.
     Names appearing here are definitions, not usages.
     """
     self._in_import = True
 
   def leave_Import(self, node: cst.Import) -> None:
-    """Flags exit from an `import ...` statement."""
+    """Flags exit from an ``import ...`` statement."""
     self._in_import = False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
     """
-    Flags entry into a `from ... import ...` statement.
+    Flags entry into a ``from ... import ...`` statement.
     """
     self._in_import = True
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """Flags exit from a `from ... import ...` statement."""
+    """Flags exit from a ``from ... import ...`` statement."""
     self._in_import = False
 
   def visit_Name(self, node: cst.Name) -> None:
     """
     Checks if the visited name matches the target.
 
-    If the name matches `target_name` and we are NOT currently inside an import
-    definition, we mark `found = True`.
+    If the name matches ``target_name`` and we are NOT currently inside an import
+    definition, we mark ``found = True``.
 
     Args:
       node: The name node being visited.
@@ -120,21 +111,15 @@ class UsageScanner(cst.CSTVisitor):
   Scans the AST for usages of a specific framework root or its local aliases.
 
   This class implements a multi-pass logic during a single traversal:
-  1.  **Cataloging**: It identifies all aliases bound to the `source_fw`
-      (e.g., `import torch as t` -> `t` is an alias).
-  2.  **Detection**: It checks if any of these cataloged aliases are used
-      in the code body (e.g., `t.abs(x)`).
 
-  This is primarily used by the `ImportFixer` to decide whether to prune the
+  1.  **Cataloging**: It identifies all aliases bound to the ``source_fw``
+      (e.g., ``import torch as t`` -> ``t`` is an alias).
+  2.  **Detection**: It checks if any of these cataloged aliases are used
+      in the code body (e.g., ``t.abs(x)``).
+
+  This is primarily used by the ``ImportFixer`` to decide whether to prune the
   original import statement. If usages persist (e.g., via the Escape Hatch),
   the import MUST be preserved to keep the code valid.
-
-  Attributes:
-    source_fw (str): The root framework name to scan for (e.g., 'torch').
-    found_usages (Set[str]): A set of specific aliases that were visibly used.
-    _tracked_aliases (Set[str]): Internal registry of names that resolve to
-      the source framework. Initialized with `[source_fw]`.
-    _in_import (bool): Internal state tracking import block context.
   """
 
   def __init__(self, source_fw: str) -> None:
@@ -145,6 +130,7 @@ class UsageScanner(cst.CSTVisitor):
       source_fw: The framework string (e.g., 'torch').
     """
     self.source_fw = source_fw
+    # A set of specific aliases that were visibly used.
     self.found_usages: Set[str] = set()
 
     # We track the root name itself, plus any aliases found during visit_Import
@@ -162,12 +148,12 @@ class UsageScanner(cst.CSTVisitor):
 
   def visit_Import(self, node: cst.Import) -> None:
     """
-    Catalogs names bound by `import ...`.
+    Catalogs names bound by ``import ...``.
 
     Logic:
-      - `import torch` -> tracks 'torch'.
-      - `import torch as t` -> tracks 't'.
-      - `import torch.nn as nn` -> tracks 'nn' (because it stems from torch).
+      - ``import torch`` -> tracks 'torch'.
+      - ``import torch as t`` -> tracks 't'.
+      - ``import torch.nn as nn`` -> tracks 'nn' (because it stems from torch).
 
     Args:
       node: The import node.
@@ -194,11 +180,11 @@ class UsageScanner(cst.CSTVisitor):
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
     """
-    Catalogs names bound by `from ... import ...`.
+    Catalogs names bound by ``from ... import ...``.
 
     Logic:
-      - `from torch import nn` -> tracks 'nn'.
-      - `from torch.nn import Linear` -> tracks 'Linear'.
+      - ``from torch import nn`` -> tracks 'nn'.
+      - ``from torch.nn import Linear`` -> tracks 'Linear'.
 
     Args:
       node: The import-from node.
@@ -227,7 +213,7 @@ class UsageScanner(cst.CSTVisitor):
     """
     Checks if a name in the body matches one of our tracked aliases.
 
-    If found, it is recorded in `found_usages`.
+    If found, it is recorded in ``found_usages``.
 
     Args:
       node: The name node.

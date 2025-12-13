@@ -1,15 +1,15 @@
 """
 Semantic Harvester for extracting knowledge from manual tests.
 
-This module provides the `SemanticHarvester`, which inspects Python test files
+This module provides the ``SemanticHarvester``, which inspects Python test files
 written by developers (Human Override Workflow). It analyzes successful test
 calls to reverse-engineer valid argument mappings for the Knowledge Base.
 
 Logic:
     1. Parse a test file's AST.
-    2. Scan for imports to resolve aliases (e.g. `import jax.numpy as jnp`).
-    3. Identify test functions (e.g., `test_matmul`).
-    4. Find calls to the target framework (e.g., `jax.numpy.matmul`).
+    2. Scan for imports to resolve aliases (e.g. ``import jax.numpy as jnp``).
+    3. Identify test functions (e.g., ``test_matmul``).
+    4. Find calls to the target framework (e.g., ``jax.numpy.matmul``).
     5. Correlate input arguments to target parameters using:
        - **Naming Convention**: `np_x` matches standard arg `x`.
        - **Explicit Keywords**: `kwargs` match standard arg names directly.
@@ -29,14 +29,11 @@ from ml_switcheroo.utils.console import log_info, log_success, log_warning
 class ImportScanner(ast.NodeVisitor):
   """
   Scans AST for imports relevant to the target framework to build an alias map.
-
-  Attributes:
-      root_fw (str): Framework root to track (e.g. 'jax').
-      aliases (Dict[str, str]): Map of alias -> full_path (e.g. 'jnp' -> 'jax.numpy').
   """
 
   def __init__(self, root_fw: str):
     self.root_fw = root_fw
+    # Map of alias -> full_path (e.g. 'jnp' -> 'jax.numpy').
     self.aliases = {}
 
   def visit_Import(self, node: ast.Import) -> Any:
@@ -58,10 +55,6 @@ class ImportScanner(ast.NodeVisitor):
 class SemanticHarvester:
   """
   Analyzes Python source code to extract valid API signatures from usage.
-
-  Attributes:
-      semantics (SemanticsManager): The manager to retrieve and update definitions.
-      target_fw (str): The framework being targeted in tests (e.g., 'jax').
   """
 
   def __init__(self, semantics: SemanticsManager, target_fw: str = "jax"):
@@ -224,14 +217,8 @@ class TargetCallVisitor(ast.NodeVisitor):
   Helper AST walker to find specific API calls and extract arguments.
 
   Implements **Value-Based Inference**:
-  - Matches naming conventions (`np_x`).
-  - Matches literal types (e.g. `1` is `int`) to Semantic Types (`axis: int`).
-
-  Attributes:
-      target_api (str): The fully qualified API to look for (e.g. 'jax.numpy.sum').
-      aliases (Dict[str, str]): Map of alias -> full_path (e.g. 'jnp' -> 'jax.numpy').
-      std_args_info (List[Tuple[str, str]]): List of (name, type) from Semantics.
-      mappings (Optional[Dict]): The result dictionary if a call is found.
+  - Matches naming conventions (``np_x``).
+  - Matches literal types (e.g. ``1`` is ``int``) to Semantic Types (``axis: int``).
   """
 
   def __init__(

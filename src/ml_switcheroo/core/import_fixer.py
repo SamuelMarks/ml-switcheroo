@@ -5,13 +5,11 @@ This module is responsible for reading the AST's import references and remapping
 based on the data provided by SemanticsManager (Feature 024).
 
 It performs:
-1.  **Pruning**: Removes source framework imports (e.g. `import torch`) unless preserved.
-2.  **Remapping**: Maps submodules (e.g. `from torch import nn` -> `from flax import linen as nn`).
-3.  **Smart Injection**: Dynamically injects target framework imports and standard aliases
-    (e.g., `import tensorflow as tf`, `import mlx.core as mx`) only when used in the code body.
 
-Dependencies:
-    Uses `ml_switcheroo.core.scanners` to detect name usage in the code body.
+1.  **Pruning**: Removes source framework imports (e.g. ``import torch``) unless preserved.
+2.  **Remapping**: Maps submodules (e.g. ``from torch import nn`` -> ``from flax import linen as nn``).
+3.  **Smart Injection**: Dynamically injects target framework imports and standard aliases
+    (e.g., ``import tensorflow as tf``, ``import mlx.core as mx``) only when used in the code body.
 """
 
 from typing import Union, Optional, Tuple, Dict, Set, List
@@ -23,15 +21,6 @@ from ml_switcheroo.core.scanners import SimpleNameScanner, get_full_name
 class ImportFixer(cst.CSTTransformer):
   """
   LibCST Transformer that manages top-level imports.
-
-  Attributes:
-      source_fw (str): The root package name to remove (e.g., "torch").
-      target_fw (str): The root package name to ensure exists (e.g., "jax").
-      submodule_map (Dict): Map of "source.mod" -> (target_root, target_sub, alias).
-      alias_map (Dict): Map of "fw_name" -> (module_to_import, local_alias).
-      preserve_source (bool): If True, prevents automatic removal of source_fw imports.
-      _target_found (bool): Result tracker for idempotency.
-      _defined_names (Set[str]): Tracks names explicitly defined by imports to prevent re-injection.
   """
 
   def __init__(
@@ -63,7 +52,7 @@ class ImportFixer(cst.CSTTransformer):
 
   def leave_Import(self, original_node: cst.Import, updated_node: cst.Import) -> Union[cst.Import, cst.RemovalSentinel]:
     """
-    Inspects 'import ...' statements.
+    Inspects ``import ...`` statements.
     Checks aliases against submodule_map or prunes matches to source_fw.
 
     Args:
@@ -124,7 +113,7 @@ class ImportFixer(cst.CSTTransformer):
     self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
   ) -> Union[cst.ImportFrom, cst.RemovalSentinel]:
     """
-    Inspects 'from ... import ...' statements.
+    Inspects ``from ... import ...`` statements.
     Checks module+name against submodule_map.
 
     Args:
@@ -192,7 +181,7 @@ class ImportFixer(cst.CSTTransformer):
     Logic:
     1. Identifies insertion point (after __future__ and docstrings).
     2. Injects 'import target' only if needed (not found AND used).
-    3. Injects aliases (e.g. 'jnp', 'tf', 'mx') if detected in usage via `alias_map`.
+    3. Injects aliases (e.g. 'jnp', 'tf', 'mx') if detected in usage via ``alias_map``.
     4. Injects submodule mappings (e.g., from flax import linen) if usage requires it.
 
     Args:

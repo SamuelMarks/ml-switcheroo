@@ -7,10 +7,10 @@ these definitions into the Semantic Knowledge Base format.
 
 Key Features:
 - **Markdown Splitting**: Identifies operators via specific HTML anchors.
-- **Input & Attribute Parsing**: Extracts definitions lists (`<dl>`).
-- **Type Extraction**: Parses HTML type signatures (e.g., `<dt>x : T</dt>`)
-  and maps them to ml-switcheroo/Fuzzer compatible type hints (e.g., `Tensor`, `int`).
-- **Sanitization**: Cleans HTML tags like `<tt>`, `<b>` from names.
+- **Input & Attribute Parsing**: Extracts definitions lists (``<dl>``).
+- **Type Extraction**: Parses HTML type signatures (e.g., ``<dt>x : T</dt>``)
+  and maps them to ml-switcheroo/Fuzzer compatible type hints (e.g., ``Tensor``, ``int``).
+- **Sanitization**: Cleans HTML tags like ``<tt>``, ``<b>`` from names.
 """
 
 import re

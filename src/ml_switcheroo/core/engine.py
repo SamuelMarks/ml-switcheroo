@@ -1,11 +1,11 @@
 """
 Orchestration Engine for AST Transformations.
 
-This module provides the high-level `ASTEngine` class which parses source code,
+This module provides the ``ASTEngine`` class which parses source code,
 applies the sequence of Transformer passes (Purity Analysis, Dependency Scan,
 Rewriting, Import Fixing), and emits the final source code.
 
-It returns structured `ConversionResult` objects to enable rich reporting.
+It returns structured ``ConversionResult`` objects to enable rich reporting.
 """
 
 import libcst as cst
@@ -26,11 +26,6 @@ from ml_switcheroo.config import RuntimeConfig
 class ConversionResult(BaseModel):
   """
   Structured result of a single file conversion.
-
-  Attributes:
-      code: The transpiled source code string.
-      errors: List of error messages or warnings encountered (e.g. from Escape Hatch).
-      success: True if the AST was parseable and processed without critical crashes.
   """
 
   code: str = ""
@@ -47,10 +42,6 @@ class ConversionResult(BaseModel):
 class ASTEngine:
   """
   The main compilation unit.
-
-  Attributes:
-      semantics (SemanticsManager): Database of mappings.
-      config (RuntimeConfig): The full configuration container (Frameworks, Strict Mode, Plugin Settings).
   """
 
   def __init__(

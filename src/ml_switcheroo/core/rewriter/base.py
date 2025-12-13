@@ -1,16 +1,17 @@
 """
 Base Rewriter Implementation with Alias and Scope Resolution.
 
-This module provides the `BaseRewriter` class, which serves as the foundation for
-the `PivotRewriter`. It handles:
+This module provides the ``BaseRewriter`` class, which serves as the foundation for
+the ``PivotRewriter``. It handles:
+
 1.  **State Management**: Tracking the current scope (global vs class vs function)
     to handle stateful variable detection.
-2.  **Alias Resolution**: Tracking `import as` statements to resolve `t.abs` back
-    to `torch.abs` or `np.sum` to `numpy.sum`.
+2.  **Alias Resolution**: Tracking ``import as`` statements to resolve ``t.abs`` back
+    to ``torch.abs`` or ``np.sum`` to ``numpy.sum``.
 3.  **Error Reporting**: Collecting failures during the AST walk to be bubbled
-    up to the `ASTEngine`.
-4.  **Hook Infrastructure**: initializing the `HookContext` used by plugins.
-5.  **Global Injection**: Handling file-level preamble injection (`leave_Module`).
+    up to the ``ASTEngine``.
+4.  **Hook Infrastructure**: initializing the ``HookContext`` used by plugins.
+5.  **Global Injection**: Handling file-level preamble injection (``leave_Module``).
 """
 
 from typing import Optional, List, Dict, Any, Union, Set
@@ -27,21 +28,6 @@ from ml_switcheroo.core.rewriter.types import SignatureContext
 class BaseRewriter(cst.CSTTransformer):
   """
   The base class for AST transformation traversal.
-
-  Attributes:
-      semantics (SemanticsManager): The loaded knowledge base of API mappings.
-      config (RuntimeConfig): Configuration for the current run.
-      source_fw (str): The string identifier of the source framework (e.g., 'torch').
-      target_fw (str): The string identifier of the target framework (e.g., 'jax').
-      strict_mode (bool): If True, unknown APIs trigger failure markers instead of pass-through.
-      ctx (HookContext): The context object passed to plugins.
-      _scope_stack (List[Set[str]]): A stack of scopes, tracking variables identified
-          as stateful (e.g., neural network layers assigned to `self`).
-      _signature_stack (List[SignatureContext]): Stack tracking function signature details
-          to support argument injection (like `rng`).
-      _alias_map (Dict[str, str]): Map of local names to fully qualified paths
-          (e.g., `{'nn': 'torch.nn', 'F': 'torch.nn.functional'}`).
-      _module_preamble (List[str]): Code statements to inject at the top of the file (module level).
   """
 
   def __init__(self, semantics: SemanticsManager, config: RuntimeConfig):
@@ -177,7 +163,7 @@ class BaseRewriter(cst.CSTTransformer):
     Resolves a CST node to its fully qualified name using import aliases.
 
     Example:
-        If `import torch.nn as nn` exists, `nn.Linear` resolves to `torch.nn.Linear`.
+        If ``import torch.nn as nn`` exists, ``nn.Linear`` resolves to ``torch.nn.Linear``.
 
     Args:
         node: The CST expression (Name or Attribute).
@@ -308,8 +294,8 @@ class BaseRewriter(cst.CSTTransformer):
 
   def visit_Import(self, node: cst.Import) -> Optional[bool]:
     """
-    Scans `import ...` statements to populate the alias map.
-    Example: `import torch.nn as nn` -> `_alias_map['nn'] = 'torch.nn'`.
+    Scans ``import ...`` statements to populate the alias map.
+    Example: ``import torch.nn as nn`` -> ``_alias_map['nn'] = 'torch.nn'``.
     """
     for alias in node.names:
       full_name = self._cst_to_string(alias.name)
@@ -326,8 +312,8 @@ class BaseRewriter(cst.CSTTransformer):
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> Optional[bool]:
     """
-    Scans `from ... import ...` statements to populate the alias map.
-    Example: `from torch import nn` -> `_alias_map['nn'] = 'torch.nn'`.
+    Scans ``from ... import ...`` statements to populate the alias map.
+    Example: ``from torch import nn`` -> ``_alias_map['nn'] = 'torch.nn'``.
     """
     if node.relative:
       return False
@@ -371,7 +357,7 @@ class BaseRewriter(cst.CSTTransformer):
   ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel]:
     """
     If errors occurred during processing of this line's children (e.g. failing
-    to rewrite a function call), wrap the line in an `EscapeHatch`.
+    to rewrite a function call), wrap the line in an ``EscapeHatch``.
 
     Prioritizes errors (reverting to original code) over warnings (using updated code).
     """

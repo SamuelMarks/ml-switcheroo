@@ -6,7 +6,7 @@ extracting function signatures, type hints, and docstrings to build the
 Semantic Knowledge Base.
 
 Feature 027 Update:
-Now extracts type hints (e.g. 'x: Array', 'axis: int') to support Better Fuzzing.
+Now extracts type hints (e.g. ``x: Array``, ``axis: int``) to support Better Fuzzing.
 """
 
 import ast
@@ -17,15 +17,15 @@ from ml_switcheroo.utils.console import log_info, log_warning
 
 class ArrayApiSpecImporter:
   """
-  Parses Python stub files (*.py) using the built-in `ast` module.
+  Parses Python stub files (``*.py``) using the built-in ``ast`` module.
   """
 
   def parse_folder(self, root_dir: Path) -> Dict[str, Any]:
     """
-    Parses Array API Python Stubs (*.py) in the target directory.
+    Parses Array API Python Stubs (``*.py``) in the target directory.
 
     Args:
-        root_dir: Path to the folder containing .py stubs (e.g. `src/array_api_stubs/_2023_12`).
+        root_dir: Path to the folder containing .py stubs (e.g. ``src/array_api_stubs/_2023_12``).
 
     Returns:
         Dict mapping function/constant names to their definitions.
@@ -106,7 +106,7 @@ class ArrayApiSpecImporter:
     Combines Positional-Only, Standard, and Keyword-Only args alongside their type hints.
 
     Returns:
-        List of tuples: [("x", "Array"), ("axis", "int | None"), ...]
+        List of tuples: ``[("x", "Array"), ("axis", "int | None"), ...]``
     """
     out = []
 
@@ -128,8 +128,8 @@ class ArrayApiSpecImporter:
   def _parse_annotation(self, annotation: Optional[ast.AST]) -> str:
     """
     Recursively resolves AST type annotations to a readable string string.
-    e.g. Name('int') -> 'int'
-         BinOp(Subscript('Optional'), 'int') -> 'Optional[int]'  (simplified)
+    e.g. ``Name('int')`` -> 'int'
+         ``BinOp(Subscript('Optional'), 'int')`` -> 'Optional[int]'  (simplified)
     """
     if annotation is None:
       return "Any"

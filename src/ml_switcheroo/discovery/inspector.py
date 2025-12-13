@@ -1,9 +1,9 @@
 """
 Inspection Engine for Python Packages.
 
-This module uses `griffe` to perform static analysis on installed packages,
+This module uses ``griffe`` to perform static analysis on installed packages,
 extracting function signatures, docstrings, and identifying attributes (constants/types).
-It provides robust detection of variable arguments (*args) to aid fuzzy matching.
+It provides robust detection of variable arguments (``*args``) to aid fuzzy matching.
 """
 
 from typing import Dict, Any
@@ -13,9 +13,6 @@ import griffe
 class ApiInspector:
   """
   Static Analysis tool for Python packages.
-
-  Attributes:
-      _package_cache (Dict): Cache of loaded griffe modules to speed up repeated inspection.
   """
 
   def __init__(self):
@@ -31,7 +28,7 @@ class ApiInspector:
 
     Returns:
         Dict[str, Any]: Catalog of API members.
-        Format: { "pkg.sub.func": { "name": "func", "has_varargs": True, ... } }
+        Format: ``{ "pkg.sub.func": { "name": "func", "has_varargs": True, ... } }``
     """
     try:
       # Griffe loads the package tree
@@ -103,7 +100,7 @@ class ApiInspector:
     """
     Serializes a Function or Class signature.
 
-    Detects standard parameters and varargs (*args).
+    Detects standard parameters and varargs (``*args``).
 
     Args:
         func: The Griffe function/class object.

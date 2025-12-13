@@ -16,6 +16,7 @@ ROOT_FILES = [
   "EXTENDING.md",
   "IDEAS.md",
   "MAINTENANCE.md",
+  "LICENSE",  # Added to fix cross-reference warning
 ]
 
 

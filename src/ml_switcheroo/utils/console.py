@@ -5,15 +5,13 @@ This module unifies the application's output mechanism using the Python standard
 `logging` library, backed by `rich` for formatting.
 
 It serves two primary purposes:
+
 1.  **Standard Logging Integration**: Provides a configured `logging.Logger` and
     adapter functions (`log_success`, `log_warning`) that route to standard logging channels.
 2.  **Environment Injection**: Implements a Proxy pattern for the Rich Console.
     This allows the output destination (stdout, file, or in-memory buffer) to be
     swapped at runtime via `set_console`. This is critical for WebAssembly (WASM)
     integration, where logs must be captured and returned to the browser context.
-
-Attributes:
-    console (_ConsoleProxy): A global, stable reference to the active Rich Console.
 """
 
 import logging
@@ -56,19 +54,16 @@ _THEME = Theme(
 
 class _ConsoleProxy:
   """
-  A Proxy wrapper around `rich.console.Console`.
+  A Proxy wrapper around ``rich.console.Console``.
 
   This class maintains a reference to a 'backend' Console instance.
   All printing operations are forwarded to this backend. This allows the
-  backend to be swapped at runtime (e.g., swapping `stdout` for `io.StringIO`)
-  while maintaining the module-level `console` object reference imported
+  backend to be swapped at runtime (e.g., swapping ``stdout`` for ``io.StringIO``)
+  while maintaining the module-level ``console`` object reference imported
   by other modules.
 
-  When the backend changes, this proxy also reconfigures the Python `logging`
-  handlers to ensure that `logging.info(...)` writes to the new destination.
-
-  Attributes:
-      _backend (Console): The active Rich Console instance.
+  When the backend changes, this proxy also reconfigures the Python ``logging``
+  handlers to ensure that ``logging.info(...)`` writes to the new destination.
   """
 
   def __init__(self) -> None:
@@ -130,7 +125,7 @@ class _ConsoleProxy:
 
   def print(self, *args: Any, **kwargs: Any) -> None:
     """
-    Forwards `print` calls to the active backend.
+    Forwards ``print`` calls to the active backend.
 
     Args:
         *args: Positional arguments for Rich print.
@@ -140,7 +135,7 @@ class _ConsoleProxy:
 
   def get_style(self, name: str) -> Style:
     """
-    Forwards `get_style` calls to the active backend.
+    Forwards ``get_style`` calls to the active backend.
 
     Args:
         name (str): The name of the style to look up.
@@ -152,7 +147,7 @@ class _ConsoleProxy:
 
   def export_text(self, **kwargs: Any) -> str:
     """
-    Forwards `export_text` (useful for log capturing).
+    Forwards ``export_text`` (useful for log capturing).
 
     Args:
         **kwargs: Options passed to console.export_text.
@@ -164,7 +159,7 @@ class _ConsoleProxy:
 
   def export_html(self, **kwargs: Any) -> str:
     """
-    Forwards `export_html` (useful for web rendering).
+    Forwards ``export_html`` (useful for web rendering).
 
     Args:
         **kwargs: Options passed to console.export_html.
@@ -197,7 +192,7 @@ def set_console(new_console: Console) -> None:
   """
   Global helper to inject a specific console instance.
 
-  This updates both the `console` proxy object and the standard `logging`
+  This updates both the ``console`` proxy object and the standard ``logging``
   handlers to write to the new instance. Use this in Web/WASM contexts to
   redirect output to a capture buffer.
 

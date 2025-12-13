@@ -1,17 +1,18 @@
 """
 Static Dependency Analysis for Transpilation Safety.
 
-This module provides the `DependencyScanner`, a LibCST visitor that identifies
+This module provides the ``DependencyScanner``, a LibCST visitor that identifies
 third-party dependencies imported in the source code.
 
 It serves as a safety check during transpilation:
-1.  Identifies imports (e.g., `import pandas`, `from sklearn import metrics`).
-2.  Filters out **Standard Library** modules (e.g., `os`, `sys`, `json`).
-3.  Filters out the **Source Framework** (e.g., `torch`), as these are handled
-    by the core `ImportFixer` and `PivotRewriter`.
+
+1.  Identifies imports (e.g., ``import pandas``, ``from sklearn import metrics``).
+2.  Filters out **Standard Library** modules (e.g., ``os``, ``sys``, ``json``).
+3.  Filters out the **Source Framework** (e.g., ``torch``), as these are handled
+    by the core ``ImportFixer`` and ``PivotRewriter``.
 4.  Validates the remaining imports against the **Semantics Manager**.
 
-If a third-party import (e.g., `cv2`) is found but not mapped in the
+If a third-party import (e.g., ``cv2``) is found but not mapped in the
 semantics (Import Map), it warns the user that the target environment
 might lack the equivalent library or that the mapping logic is missing.
 """
@@ -26,11 +27,6 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class DependencyScanner(cst.CSTVisitor):
   """
   Scans for 3rd-party imports not covered by the Semantic Knowledge Base.
-
-  Attributes:
-      semantics (SemanticsManager): The loaded semantics database.
-      source_fw (str): The name of the source framework (e.g., 'torch') to ignore.
-      unknown_imports (Set[str]): Accumulated list of unmapped 3rd-party root packages.
   """
 
   def __init__(self, semantics: SemanticsManager, source_fw: str):
@@ -43,6 +39,7 @@ class DependencyScanner(cst.CSTVisitor):
     """
     self.semantics = semantics
     self.source_fw = source_fw
+    # Accumulated list of unmapped 3rd-party root packages.
     self.unknown_imports: Set[str] = set()
 
     # Build local cache of known mapped roots to avoid repeated deep lookups.
@@ -55,7 +52,7 @@ class DependencyScanner(cst.CSTVisitor):
 
   def visit_Import(self, node: cst.Import) -> None:
     """
-    Visits `import x`, `import x.y`.
+    Visits ``import x``, ``import x.y``.
     Checks the root package name.
     """
     for alias in node.names:
@@ -64,7 +61,7 @@ class DependencyScanner(cst.CSTVisitor):
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
     """
-    Visits `from x import y`.
+    Visits ``from x import y``.
     Checks the module root package name.
     """
     # Ignore relative imports (starting with dots like `from . import utils`)
@@ -78,7 +75,7 @@ class DependencyScanner(cst.CSTVisitor):
   def _get_root_package(self, node: cst.BaseExpression) -> str:
     """
     Extracts the root package string from a CST node.
-    e.g., `Attribute(Name(os), Name(path))` -> "os".
+    e.g., ``Attribute(Name(os), Name(path))`` -> "os".
     """
     # Unwrap Attribute chains to find the leftmost Name
     curr = node
@@ -116,7 +113,7 @@ class DependencyScanner(cst.CSTVisitor):
   def _is_stdlib(self, name: str) -> bool:
     """
     Determines if a package is part of the Python Standard Library.
-    Uses `sys.stdlib_module_names` on Python 3.10+, falls back to known list.
+    Uses ``sys.stdlib_module_names`` on Python 3.10+, falls back to known list.
     """
     # Python 3.10+
     if sys.version_info >= (3, 10):

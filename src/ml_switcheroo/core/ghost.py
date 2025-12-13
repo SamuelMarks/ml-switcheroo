@@ -20,12 +20,6 @@ from pydantic import BaseModel, Field
 class GhostParam(BaseModel):
   """
   Serializable representation of a function parameter.
-
-  Attributes:
-      name: Parameter name (e.g., 'kernel_size').
-      kind: Kind of parameter (e.g., 'POSITIONAL_OR_KEYWORD', 'VAR_KEYWORD').
-      default: Stringified representation of default value, or None if required.
-      annotation: Stringified type hint, or None.
   """
 
   name: str
@@ -40,13 +34,6 @@ class GhostRef(BaseModel):
 
   Used by the Consensus Engine to align concepts (e.g. 'HuberLoss' vs 'Huber')
   without needing the framework installed at runtime.
-
-  Attributes:
-      name: The object name (e.g., 'Conv2d').
-      api_path: Fully qualified import path (e.g., 'torch.nn.Conv2d').
-      kind: 'class' or 'function'.
-      params: List of parameters for __init__ or the function itself.
-      docstring: Summary of the docstring for semantic context.
   """
 
   name: str
@@ -65,9 +52,9 @@ class GhostInspector:
   Facade for API Inspection.
 
   Handles the complexity of:
-  1.  Live Introspection: Using `inspect.signature` on installed libraries.
+  1.  Live Introspection: Using ``inspect.signature`` on installed libraries.
   2.  Ghost Hydration: wrapper for Pydantic loading (used for future caching interactions).
-  3.  Normalization: Converting classes (inspecting `__init__`) transparently.
+  3.  Normalization: Converting classes (inspecting ``__init__``) transparently.
   """
 
   @staticmethod

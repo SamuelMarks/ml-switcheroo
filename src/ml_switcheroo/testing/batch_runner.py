@@ -19,10 +19,6 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 class BatchValidator:
   """
   Orchestrates the validation of the entire knowledge base.
-
-  Attributes:
-      semantics (SemanticsManager): Knowledge base to validate.
-      runner (EquivalenceRunner): The fuzzing engine.
   """
 
   def __init__(self, semantics: SemanticsManager):
@@ -40,12 +36,13 @@ class BatchValidator:
     Runs verification for all known APIs.
 
     Validation Hierarchy:
-    1. **Manual Test Priority**: If a file contains `def test_<op_name>():`,
+
+    1. **Manual Test Priority**: If a file contains ``def test_<op_name>():``,
        we assume the developer has manually verified this operation. It is
        marked as Passing.
     2. **Automated Fuzzing**: If no manual test exists, we unpack the
        arguments and type hints from the spec, generate random inputs, and
-       check equivalence using `EquivalenceRunner`.
+       check equivalence using ``EquivalenceRunner``.
 
     Args:
         verbose: Show progress bar using Rich.
@@ -94,7 +91,7 @@ class BatchValidator:
     Handles legacy list-of-strings AND new list-of-tuples formats.
 
     Args:
-        raw_args: List like `["x", "axis"]` or `[("x", "Array"), ("axis", "int")]`.
+        raw_args: List like ``["x", "axis"]`` or ``[("x", "Array"), ("axis", "int")]``.
 
     Returns:
         A tuple containing:
@@ -119,7 +116,7 @@ class BatchValidator:
     """
     Scans python files in root for test functions matching op names.
 
-    Looks for: `def test_<op_name>():` in non-generated files.
+    Looks for: ``def test_<op_name>():`` in non-generated files.
 
     Args:
         root: Directory to search recursively.

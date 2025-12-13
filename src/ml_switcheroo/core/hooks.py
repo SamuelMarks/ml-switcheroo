@@ -5,20 +5,21 @@ This module provides the infrastructure for extending ml-switcheroo via plugins.
 It enables developers to intercept and modify the Abstract Syntax Tree (AST)
 during the conversion process using a hook-based system.
 
-## How to write a Plugin
+How to write a Plugin
+---------------------
 
-A plugin is a simple Python function decorated with `@register_hook`. It receives
-the current AST node (typically `cst.Call`, but can be others like `cst.For`)
+A plugin is a simple Python function decorated with ``@register_hook``. It receives
+the current AST node (typically ``cst.Call``, but can be others like ``cst.For``)
 and a context object.
 
-### Usage
+Usage
+-----
+.. code-block:: python
 
-```python
-@register_hook("my_custom_trigger")
-def transform_node(node: cst.CSTNode, ctx: HookContext) -> cst.CSTNode:
-    # Logic
-    return node
-```
+    @register_hook("my_custom_trigger")
+    def transform_node(node: cst.CSTNode, ctx: HookContext) -> cst.CSTNode:
+        # Logic
+        return node
 """
 
 import importlib
@@ -47,13 +48,6 @@ class HookContext:
 
   Provides read-only access to global state and write access
   to specific injection points (signature args, function body preambles).
-
-  Attributes:
-      semantics (SemanticsManager): The active knowledge base manager.
-      source_fw (str): The import name of the source framework (e.g., 'torch').
-      target_fw (str): The import name of the target framework (e.g., 'jax').
-      metadata (Dict[str, Any]): A shared dictionary for plugins to store state.
-      _runtime_config (RuntimeConfig): The full Pydantic configuration object.
   """
 
   def __init__(
