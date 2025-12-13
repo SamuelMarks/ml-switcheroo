@@ -211,6 +211,22 @@ class JaxAdapter:
     mappings["load_state_dict"] = {"requires_plugin": "torch_load_state_dict_to_nnx"}
     mappings["parameters"] = {"requires_plugin": "torch_parameters_to_nnx"}
 
-    # 6. Loop Templates (Hints for Escape Hatches or Plugins)
+    # 6. Optimizer Wiring (Torch -> Optax Translation)
+    # Hooks defined in ml_switcheroo.plugins.optimizer_step
+    mappings["step"] = {"requires_plugin": "optimizer_step"}
+    mappings["zero_grad"] = {"requires_plugin": "optimizer_zero_grad"}
+
+    # Wire common Optimizers to the constructor stripping hook
+    # Note: Target API usually 'optax.<name>' but JAX discovery handles the API string.
+    # Here we enforce the hook.
+    for opt_name in ["Adam", "SGD", "RMSprop", "AdamW", "Adagrad", "LBFGS"]:
+      if opt_name not in mappings:
+        mappings[opt_name] = {}
+      mappings[opt_name]["requires_plugin"] = "optimizer_constructor"
+      # Ensure basic mapping if discovery missed it (case insensitive optax fallback)
+      if "api" not in mappings[opt_name]:
+        mappings[opt_name]["api"] = f"optax.{opt_name.lower()}"
+
+    # 7. Loop Templates (Hints for Escape Hatches or Plugins)
     templates["fori_loop"] = "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})"
     templates["scan"] = "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})"

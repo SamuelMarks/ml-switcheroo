@@ -1,13 +1,8 @@
 """
 Class Structure Rewriting Logic.
 
-Handles transformations relative to class definitions, specifically:
-1.  Inheritance Warping: Swapping base classes (e.g. `torch.nn.Module` -> `flax.nnx.Module`).
-2.  Context Tracking: Setting flags for nested methods (neural vs generic).
-
-Refactor Note:
-    Logic is now fully dynamic. It queries the SemanticsManager for registered
-    framework traits to identify module bases, rather than using hardcoded literals.
+Handles transformation of Class Definitions.
+Logic 1: Swaps Module Base (e.g. `torch.nn.Module` -> `flax.nnx.Module`).
 """
 
 from typing import Optional, Set
@@ -19,112 +14,84 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 class ClassStructureMixin(BaseRewriter):
   """
-  Mixin for transforming ClassDef nodes.
-
-  Attributes:
-      _known_module_bases (Optional[Set[str]]): A cached set of fully qualified
-          class names that act as Neural Module bases (e.g., 'torch.nn.Module').
-          Populated based on registered adapters and JSON config.
+  Mixin for transforming ClassDef nodes (Logic 1).
   """
 
+  # Cache of all known 'Module' base classes from every registered framework.
+  # e.g. {"torch.nn.Module", "flax.nnx.Module", "keras.Model", "fastai.Learner"}
   _known_module_bases: Optional[Set[str]] = None
 
-  def _get_traits(self) -> StructuralTraits:
-    """Retrieves structural traits for the current target framework."""
+  def _get_target_traits(self) -> StructuralTraits:
+    """Retrieves structural config for the user-selected TARGET framework."""
     try:
+      # Access config populated from Target Adapter (e.g. src/ml_switcheroo/frameworks/jax.py)
       if hasattr(self.semantics, "get_framework_config"):
         config_dict = self.semantics.get_framework_config(self.target_fw)
         if config_dict and "traits" in config_dict:
           return StructuralTraits.model_validate(config_dict["traits"])
     except Exception:
       pass
-
-    # No defaults. If adapter/json is missing, framework has no structural rules.
     return StructuralTraits()
 
-  def _lazy_load_bases(self):
+  def _lazy_load_source_bases(self):
     """
-    Populates the cache of known framework bases from the Semantics Manager.
-    This ensures that new frameworks (added via adapters/JSON) are automatically detected.
+    Dynamically Populates _known_module_bases from the Registry.
+
+    This ensures that adding a new framework file (e.g. `frameworks/new_lib.py`)
+    automatically allows the engine to recognize 'new_lib' classes as modules
+    without editing this rewriter.
     """
     if self._known_module_bases is not None:
       return
 
     self._known_module_bases = set()
 
-    # Iterate over all frameworks configured in the system
-    # (Checking SemanticsManager.framework_configs)
+    # Iterate over all frameworks loaded into SemanticsManager (Hub & Spoke)
     if hasattr(self.semantics, "framework_configs"):
       for _, config in self.semantics.framework_configs.items():
-        # config can be a Pydantic model or a Dict depending on loading source
-        # (JSON loader uses dicts, Adapter hydration uses pydantic/dicts mix)
-
-        # Path A: Pydantic Object
+        # Extract 'module_base' from Pydantic models or Dicts
         if hasattr(config, "traits") and config.traits:
           base = getattr(config.traits, "module_base", None)
           if base:
             self._known_module_bases.add(base)
-
-        # Path B: Dictionary
         elif isinstance(config, dict):
           traits = config.get("traits")
           if traits:
-            if isinstance(traits, dict):
-              base = traits.get("module_base")
-            else:
-              # Handle object fallback if nested object
-              base = getattr(traits, "module_base", None)
-
+            # Handle nested dict structure from JSON
+            base = traits.get("module_base") if isinstance(traits, dict) else getattr(traits, "module_base", None)
             if base:
               self._known_module_bases.add(base)
 
   def _is_framework_base(self, name: str) -> bool:
     """
-    Checks if a class name corresponds to a known Deep Learning Module base.
-
-    Args:
-        name: The qualified name of the base class (e.g., 'torch.nn.Module').
-
-    Returns:
-        bool: True if the name matches a registered framework's module_base.
+    Checks if a class name corresponds to ANY known Deep Learning Module base.
     """
     if not name:
       return False
 
-    # Ensure cache is populated
-    self._lazy_load_bases()
+    self._lazy_load_source_bases()
 
-    # 1. Exact Match (e.g. 'torch.nn.Module' matches 'torch.nn.Module')
+    # 1. Exact Match via Qualified Name (e.g. 'torch.nn.Module')
     if name in self._known_module_bases:
       return True
 
-    # 2. Relaxed Matching for common aliases
-    # If the user has 'nn.Module' but config says 'torch.nn.Module',
-    # we check if the suffix matches to handle imperfect alias resolution.
+    # 2. Suffix Heuristic
+    # Handles cases where strict alias resolution might fail but the class is obvious.
+    # e.g. known='flax.nnx.Module', name='nnx.Module' -> Match
     for known_base in self._known_module_bases:
-      if name == known_base or name.endswith(f".{known_base}") or known_base.endswith(f".{name}"):
+      if known_base.endswith(f".{name}") or name.endswith(f".{known_base}"):
         return True
-
-      # Special check for common "nn.Module" shorthand if the root (torch/flax) is implicit
-      if known_base.endswith(".Module") and name.endswith(".Module"):
-        # e.g., known="flax.nnx.Module", provided="nnx.Module" -> Match
-        known_parts = known_base.split(".")
-        name_parts = name.split(".")
-        if len(name_parts) >= 2 and len(known_parts) >= 2:
-          # Matches if the submodule matches (e.g. nnx vs nnx)
-          if name_parts[-2] == known_parts[-2]:
-            return True
 
     return False
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+    """Detects if we are entering a generic ML Module class."""
     self._enter_scope()
 
     is_module = False
     for base in node.bases:
+      # Resolve aliases (e.g. 'nn.Module' -> 'torch.nn.Module')
       name = self._get_qualified_name(base.value)
-      if not name:
-        continue
 
       if self._is_framework_base(name):
         is_module = True
@@ -136,27 +103,28 @@ class ClassStructureMixin(BaseRewriter):
     return True
 
   def leave_ClassDef(self, _original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
+    """Performs the Base Class Swap logic."""
     self._exit_scope()
 
     if self._in_module_class:
       self._in_module_class = False
 
-      traits = self._get_traits()
+      # 1. Read Traits from Target Adapter (e.g. 'flax.nnx.Module')
+      traits = self._get_target_traits()
       target_base = traits.module_base
 
       new_bases = []
       for base in updated_node.bases:
         name = self._get_qualified_name(base.value)
 
-        # If it is a known framework base AND we have a target replacement, swap it.
-        # If we have no target_base (empty traits), we preserve the original.
-        if self._is_framework_base(name):
-          if target_base:
-            new_base_node = cst.Arg(value=self._create_dotted_name(target_base))
-            new_bases.append(new_base_node)
-            continue
-
-        new_bases.append(base)
+        # 2. Swap Logic
+        if self._is_framework_base(name) and target_base:
+          # Create new CST Node for target base
+          new_base_node = cst.Arg(value=self._create_dotted_name(target_base))
+          new_bases.append(new_base_node)
+        else:
+          # Preserve non-framework inheritance (Mixins, Object, etc.)
+          new_bases.append(base)
 
       updated_node = updated_node.with_changes(bases=new_bases)
 

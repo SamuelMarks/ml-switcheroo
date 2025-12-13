@@ -9,6 +9,7 @@ Includes functionality for:
 - Standard API pivots.
 - Plugin dispatch.
 - Output Normalization.
+- **Logc 4: Layer Init State Threading** (Neural Tier detection & rngs injection).
 - **Trace Instrumention** for visibility.
 """
 
@@ -31,6 +32,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
 
   # Internal cache for traits to avoid lookup overhead per call
   _cached_source_traits: StructuralTraits = None
+  _cached_target_traits: StructuralTraits = None
 
   def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
     """
@@ -54,6 +56,19 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       set(self._cached_source_traits.lifecycle_strip_methods),
       set(self._cached_source_traits.lifecycle_warn_methods),
     )
+
+  def _get_target_traits(self) -> StructuralTraits:
+    """Lazily loads properties of the TARGET framework."""
+    if self._cached_target_traits:
+      return self._cached_target_traits
+
+    config_dict = self.semantics.get_framework_config(self.target_fw)
+    if config_dict and "traits" in config_dict:
+      self._cached_target_traits = StructuralTraits.model_validate(config_dict["traits"])
+    else:
+      self._cached_target_traits = StructuralTraits()
+
+    return self._cached_target_traits
 
   def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
     """
@@ -85,7 +100,10 @@ class CallMixin(NormalizationMixin, BaseRewriter):
   def leave_Call(
     self, original: cst.Call, updated: cst.Call
   ) -> Union[cst.Call, cst.BinaryOperation, cst.UnaryOperation, cst.CSTNode]:
-    """Rewrites function calls with detailed Trace Logging."""
+    """
+    Rewrites function calls with detailed Trace Logging.
+    Implements Logic 4: Layer Init State Threading.
+    """
 
     result_node = updated
     func_name = self._get_qualified_name(original.func)
@@ -218,15 +236,23 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         self._report_failure(f"Output adapter failed: {e}")
         return updated
 
-    # 4. Class Construction Logic
+    # 4. Class Construction Logic (Logic 4 implementation)
     if self._signature_stack and self._signature_stack[-1].is_init and self._signature_stack[-1].is_module_method:
       origins = getattr(self.semantics, "_key_origins", {})
       tier = origins.get(abstract_id)
+
+      # If this call is to a Neural Semantic Operation (e.g. Linear, Conv2d)
       if tier == SemanticTier.NEURAL.value:
-        if isinstance(result_node, cst.Call):
-          if self.target_fw == "jax":
+        traits = self._get_target_traits()
+
+        # Injection: If target requires 'rngs' (like Flax NNX) and defines it in magic args
+        if any(name == "rngs" for name, _ in traits.inject_magic_args):
+          if isinstance(result_node, cst.Call):
             result_node = self._inject_rngs_kwarg(result_node)
-          elif self.target_fw == "torch":
+
+        # Stripping: If target explicitly strips 'rngs' (like Torch)
+        elif "rngs" in traits.strip_magic_args:
+          if isinstance(result_node, cst.Call):
             result_node = self._strip_kwarg(result_node, "rngs")
 
     self._log_diff(f"Operation ({abstract_id})", original, result_node)
@@ -277,12 +303,17 @@ class CallMixin(NormalizationMixin, BaseRewriter):
 
   def _inject_rngs_kwarg(self, node: cst.Call) -> cst.Call:
     """Injects `rngs=rngs` into a constructor call."""
+    # Duplicate check
     for arg in node.args:
       if arg.keyword and arg.keyword.value == "rngs":
         return node
+
     new_args = list(node.args)
+
+    # Ensure comma on previous arg
     if len(new_args) > 0:
       last = new_args[-1]
+      # Always force whitespace after the comma, replacing potentially dense trailing commas
       new_args[-1] = last.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
     new_args.append(
@@ -305,6 +336,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         continue
       filtered.append(arg)
 
+    # Clean trailing comma on new last arg
     if filtered and filtered[-1].comma != cst.MaybeSentinel.DEFAULT:
       last = filtered[-1]
       filtered[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)

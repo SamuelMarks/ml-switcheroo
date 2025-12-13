@@ -17,7 +17,7 @@ Attributes:
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from rich.console import Console
 from rich.logging import RichHandler

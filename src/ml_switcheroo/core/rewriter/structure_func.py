@@ -2,8 +2,8 @@
 Function Structure Rewriting Logic.
 
 Handles transformations relative to function definitions, specifically:
-1.  Method Renaming: Mapping `forward` <-> `__call__` <-> `call` using Configuration Traits.
-2.  Signature Modification: Injecting hooks or state arguments defined in Configuration.
+1.  **Logic 5: Method Renaming**: Mapping `forward` <-> `__call__` <-> `call` using Configuration Traits.
+2.  Signature Modification: Injecting hooks or state arguments (Logic 2).
 3.  Body Injection: Preamble handling (super init, rng splitting).
 4.  Docstring Updating.
 """
@@ -64,20 +64,23 @@ class FuncStructureMixin(BaseRewriter):
     sig_ctx = self._signature_stack.pop()
     traits = self._get_traits()
 
-    # 1. Rename Methods
+    # --- Logic 5: Method Renaming ---
     if sig_ctx.is_module_method:
       curr_name = updated_node.name.value
+      # Read the desired inference method name from target config (e.g. "__call__" or "call")
       target_name = traits.forward_method
+
+      # Set of standard inference method names to look for
       known_methods = {"forward", "__call__", "call"}
 
       if target_name and curr_name in known_methods and curr_name != target_name:
         updated_node = updated_node.with_changes(name=cst.Name(target_name))
 
-      # Init renaming triggers if context was originally init
+      # Init Renaming (e.g. __init__ -> setup for Pax)
       if sig_ctx.is_init and traits.init_method_name and traits.init_method_name != "__init__":
         updated_node = updated_node.with_changes(name=cst.Name(traits.init_method_name))
 
-    # 2. Modify __init__ (or equivalent) signature & body
+    # --- Logic 2 & 3: Constructor Modification (Injection/Stripping) ---
     if sig_ctx.is_init and sig_ctx.is_module_method:
       for arg_name, arg_type in traits.inject_magic_args:
         if arg_name not in sig_ctx.existing_args:
@@ -92,50 +95,17 @@ class FuncStructureMixin(BaseRewriter):
       if traits.requires_super_init:
         updated_node = self._ensure_super_init(updated_node)
       else:
-        # If target dictates NO super init (e.g. PaxML setup or JAX NNX), remove it if present.
-        # Note: If requires_super_init is False (default), we aggressively strip it
-        # to ensure clean JAX/Pax code which often errors on super().__init__ calls on basic objects.
+        # Logic 3: Strip super() if not required
         updated_node = self._strip_super_init(updated_node)
 
-    # 3. Apply Injected Arguments
+    # --- Apply Pending Injections ---
     for name, annotation in sig_ctx.injected_args:
       updated_node = self._inject_argument_to_signature(updated_node, name, annotation)
 
-    # 4. Apply Preamble
+    # --- Preamble and Docstrings ---
     if sig_ctx.preamble_stmts:
-      new_stmts = []
-      for stmt_code in sig_ctx.preamble_stmts:
-        try:
-          # Robust Parsing: Handle blocks (classes/funcs) and single lines
-          # cst.parse_statement fails on multi-line blocks like classes sometimes or sequences.
-          # We use parse_module and extract body to handle multi-statement injection.
-          parsed_mod = cst.parse_module(stmt_code)
-          new_stmts.extend(parsed_mod.body)
-        except cst.ParserSyntaxError:
-          self._report_failure(f"Failed to inject preamble: {stmt_code}")
+      updated_node = self._apply_preamble(updated_node, sig_ctx.preamble_stmts)
 
-      if not self._is_body_accessible(updated_node.body):
-        updated_node = self._convert_to_indented_block(updated_node)
-
-      original_body_stmts = list(updated_node.body.body)
-      insert_idx = 0
-      if (
-        original_body_stmts
-        and isinstance(original_body_stmts[0], cst.SimpleStatementLine)
-        and isinstance(original_body_stmts[0].body[0], cst.Expr)
-        and isinstance(
-          original_body_stmts[0].body[0].value,
-          (cst.SimpleString, cst.ConcatenatedString),
-        )
-      ):
-        insert_idx = 1
-
-      updated_body = updated_node.body.with_changes(
-        body=original_body_stmts[:insert_idx] + new_stmts + original_body_stmts[insert_idx:]
-      )
-      updated_node = updated_node.with_changes(body=updated_body)
-
-    # 5. Update Docstring
     if sig_ctx.injected_args:
       updated_node = self._update_docstring(updated_node, sig_ctx.injected_args)
 
@@ -172,12 +142,10 @@ class FuncStructureMixin(BaseRewriter):
 
     params.insert(insert_idx, new_param)
 
-    # Ensure all but last have commas
     for i in range(len(params) - 1):
       if params[i].comma == cst.MaybeSentinel.DEFAULT:
         params[i] = params[i].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
-    # Remove comma from last param if it exists
     if len(params) > 0:
       last = params[-1]
       if last.comma != cst.MaybeSentinel.DEFAULT:
@@ -204,16 +172,8 @@ class FuncStructureMixin(BaseRewriter):
     if isinstance(node.body, SimpleStatementSuite):
       node = self._convert_to_indented_block(node)
 
-    for stmt in node.body.body:
-      if isinstance(stmt, cst.SimpleStatementLine):
-        for small in stmt.body:
-          if isinstance(small, cst.Expr) and isinstance(small.value, cst.Call):
-            call = small.value
-            if isinstance(call.func, cst.Attribute) and call.func.attr.value == "__init__":
-              receiver = call.func.value
-              if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
-                if receiver.func.value == "super":
-                  return node
+    if self._has_super_init(node):
+      return node
 
     super_stmt = cst.SimpleStatementLine(
       body=[
@@ -242,9 +202,7 @@ class FuncStructureMixin(BaseRewriter):
     return node.with_changes(body=node.body.with_changes(body=stmts))
 
   def _strip_super_init(self, node: cst.FunctionDef) -> cst.FunctionDef:
-    """Removes `super().__init__()` call if present."""
     if isinstance(node.body, SimpleStatementSuite):
-      # Skipping inline removals for safety; unlikely to occur in real codebases for super init
       return node
 
     if not hasattr(node.body, "body"):
@@ -252,23 +210,57 @@ class FuncStructureMixin(BaseRewriter):
 
     new_body_stmts = []
     for stmt in node.body.body:
-      keep = True
-      if isinstance(stmt, cst.SimpleStatementLine):
-        # Check if this statement is JUST super().__init__()
-        if len(stmt.body) == 1:
-          small = stmt.body[0]
-          if isinstance(small, cst.Expr) and isinstance(small.value, cst.Call):
-            call = small.value
-            if isinstance(call.func, cst.Attribute) and call.func.attr.value == "__init__":
-              receiver = call.func.value
-              # Handle super() case
-              if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
-                if receiver.func.value == "super":
-                  keep = False
-      if keep:
+      if not self._is_super_init_stmt(stmt):
         new_body_stmts.append(stmt)
 
     return node.with_changes(body=node.body.with_changes(body=new_body_stmts))
+
+  def _has_super_init(self, node: cst.FunctionDef) -> bool:
+    if hasattr(node.body, "body"):
+      for stmt in node.body.body:
+        if self._is_super_init_stmt(stmt):
+          return True
+    return False
+
+  def _is_super_init_stmt(self, stmt: cst.CSTNode) -> bool:
+    if isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) == 1:
+      small = stmt.body[0]
+      if isinstance(small, cst.Expr) and isinstance(small.value, cst.Call):
+        call = small.value
+        if isinstance(call.func, cst.Attribute) and call.func.attr.value == "__init__":
+          receiver = call.func.value
+          if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
+            if receiver.func.value == "super":
+              return True
+    return False
+
+  def _apply_preamble(self, node: cst.FunctionDef, stmts_code: List[str]) -> cst.FunctionDef:
+    new_stmts = []
+    for code in stmts_code:
+      try:
+        mod = cst.parse_module(code)
+        new_stmts.extend(mod.body)
+      except Exception:
+        pass
+
+    if isinstance(node.body, SimpleStatementSuite):
+      # Convert to indented block first
+      node = self._convert_to_indented_block(node)
+
+    existing = list(node.body.body)
+    idx = (
+      1
+      if (
+        existing
+        and isinstance(existing[0], cst.SimpleStatementLine)
+        and isinstance(existing[0].body[0], cst.Expr)
+        and isinstance(existing[0].body[0].value, (cst.SimpleString, cst.ConcatenatedString))
+      )
+      else 0
+    )
+
+    final_body = existing[:idx] + new_stmts + existing[idx:]
+    return node.with_changes(body=node.body.with_changes(body=final_body))
 
   def _update_docstring(self, node: cst.FunctionDef, injected_args: List[Tuple[str, Optional[str]]]) -> cst.FunctionDef:
     body = node.body
@@ -359,7 +351,7 @@ class FuncStructureMixin(BaseRewriter):
       block = "\n".join(new_entries)
       return text[:split_idx] + block + "\n" + text[split_idx:]
 
-    if len(lines) > 0:
+    if lines:
       final_indent = re.match(r"^\s*", lines[-1]).group(0) if lines[-1].strip() == "" else indent
       header = f"\n\n{final_indent}Args:\n"
       block = "\n".join([f"{final_indent}    {e.strip()}" for e in new_entries])
