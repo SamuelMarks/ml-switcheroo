@@ -40,6 +40,7 @@ def wizard(tmp_path):
   sem_dir.mkdir()
   snap_dir.mkdir()
 
+  # FIX: Patch where it is used (cli.wizard)
   with patch("ml_switcheroo.cli.wizard.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.cli.wizard.resolve_snapshots_dir", return_value=snap_dir):
       mgr = SemanticsManager()

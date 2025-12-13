@@ -171,6 +171,23 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
+    # --- 11. Manual Wiring (The "Last Mile" Fix) ---
+    def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+      """
+      Applies hardcoded semantic wiring rules to the snapshot dictionary.
+
+      This method allows the adapter to inject:
+      1. Plugin associations (e.g. requires_plugin="pack_varargs").
+      2. Code templates (e.g. fori_loop syntax).
+      3. Manual API mappings that automated discovery cannot find.
+
+      Args:
+          snapshot: The mutable dictionary representing the framework's snapshot.
+                    (Structure: {"__framework__": "...", "mappings": {...}, "templates": {...}})
+      """
+      # Default implementation does nothing
+      pass
+
 
 # --- Helper for Implementation Reuse ---
 

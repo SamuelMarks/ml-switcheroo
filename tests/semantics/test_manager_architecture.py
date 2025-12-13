@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from ml_switcheroo.semantics.manager import SemanticsManager, resolve_snapshots_dir
-from ml_switcheroo.testing.adapters import register_adapter
+from ml_switcheroo.frameworks import register_framework
 from ml_switcheroo.semantics.schema import StructuralTraits
 
 
@@ -51,7 +51,7 @@ def test_traits_hydration_from_adapter(empty_directories):
   snap = empty_directories / "snapshots"
 
   # 1. Register a dynamic adapter with Structural Traits
-  @register_adapter("fastnet")
+  @register_framework("fastnet")
   class FastNetAdapter:
     import_alias = ("fastnet", "fn")
 

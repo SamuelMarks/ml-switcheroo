@@ -1,28 +1,53 @@
 """
 Framework Adapters Package.
 
-Automatically discovers and registers framework adapters defined in this directory.
-To add support for a new framework, simply add a .py file here with a class
-decorated via @register_framework("name").
+Automatically discovers and registers framework adapters.
+Exposes concrete Adapter classes for testing/typing convenience.
 """
 
 import importlib
 import pkgutil
 from pathlib import Path
-from typing import Dict, Type, List
+from typing import List, Optional
 
 from .base import FrameworkAdapter, _ADAPTER_REGISTRY, register_framework, get_adapter
 
-# Dynamic Discovery
-# 1. Iterate over all files in this package directory
-_pkg_dir = Path(__file__).parent
+# Concrete Imports (Lazy access pattern could be better, but explicit for API surface)
+try:
+  from .torch import TorchAdapter
+except ImportError:
+  TorchAdapter = None
 
+try:
+  from .jax import JaxAdapter
+except ImportError:
+  JaxAdapter = None
+
+try:
+  from .numpy import NumpyAdapter
+except ImportError:
+  NumpyAdapter = None
+
+try:
+  from .tensorflow import TensorFlowAdapter
+except ImportError:
+  TensorFlowAdapter = None
+
+try:
+  from .mlx import MLXAdapter
+except ImportError:
+  MLXAdapter = None
+
+try:
+  from .paxml import PaxmlAdapter
+except ImportError:
+  PaxmlAdapter = None
+
+# Dynamic Discovery for Side Effects (Registration)
+_pkg_dir = Path(__file__).parent
 for _, module_name, _ in pkgutil.iter_modules([str(_pkg_dir)]):
-  # 2. Skip base/special files
   if module_name in ("base", "__init__"):
     continue
-
-  # 3. Import the module (Executing the @register_framework decorators inside)
   try:
     importlib.import_module(f".{module_name}", package=__name__)
   except Exception as e:
@@ -34,4 +59,15 @@ def available_frameworks() -> List[str]:
   return list(_ADAPTER_REGISTRY.keys())
 
 
-__all__ = ["get_adapter", "_ADAPTER_REGISTRY", "register_framework", "FrameworkAdapter", "available_frameworks"]
+__all__ = [
+  "get_adapter",
+  "register_framework",
+  "FrameworkAdapter",
+  "available_frameworks",
+  "TorchAdapter",
+  "JaxAdapter",
+  "NumpyAdapter",
+  "TensorFlowAdapter",
+  "MLXAdapter",
+  "PaxmlAdapter",
+]

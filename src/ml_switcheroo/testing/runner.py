@@ -19,7 +19,7 @@ from typing import Dict, Any, Tuple, Optional, List
 import numpy as np
 
 from ml_switcheroo.testing.fuzzer import InputFuzzer
-from ml_switcheroo.testing.adapters import get_adapter
+from ml_switcheroo.frameworks import get_adapter
 
 
 class EquivalenceRunner:

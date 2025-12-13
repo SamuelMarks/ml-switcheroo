@@ -38,7 +38,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from ml_switcheroo.testing.adapters import get_adapter
+from ml_switcheroo.frameworks import get_adapter
 
 
 class InputFuzzer:

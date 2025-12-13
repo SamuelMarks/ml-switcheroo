@@ -250,6 +250,13 @@
       "f"
     ]
   },
+  "load_state_dict": {
+    "description": "Copies parameters and buffers from state_dict into this module.",
+    "std_args": [
+      "state_dict",
+      "strict"
+    ]
+  },
   "manual_seed": {
     "description": "Seeding RNG. Maps to standard numpy seed often.",
     "std_args": [
@@ -266,6 +273,27 @@
     "description": "Context manager to disable gradient calculation.",
     "std_args": []
   },
+  "parameters": {
+    "description": "Returns an iterator over module parameters.",
+    "std_args": [
+      "recurse"
+    ]
+  },
+  "register_buffer": {
+    "description": "Registers a persistent buffer (non-parameter state).",
+    "std_args": [
+      "name",
+      "tensor",
+      "persistent"
+    ]
+  },
+  "register_parameter": {
+    "description": "Registers a learnable parameter.",
+    "std_args": [
+      "name",
+      "param"
+    ]
+  },
   "save": {
     "description": "Serialization utility. IO is often framework specific.",
     "std_args": [
@@ -277,6 +305,14 @@
     "description": "Formatting utility for printing tensors.",
     "std_args": [
       "precision"
+    ]
+  },
+  "state_dict": {
+    "description": "Returns a dictionary containing a whole state of the module.",
+    "std_args": [
+      "destination",
+      "prefix",
+      "keep_vars"
     ]
   },
   "train": {

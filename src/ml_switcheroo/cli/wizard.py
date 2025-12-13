@@ -10,7 +10,8 @@ from pathlib import Path
 from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
 
-from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir, resolve_snapshots_dir
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.discovery.inspector import ApiInspector
 from ml_switcheroo.utils.console import console, log_info, log_success
 

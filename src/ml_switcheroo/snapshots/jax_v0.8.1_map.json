@@ -266,6 +266,10 @@
       "api": "jax.devices",
       "requires_plugin": "cuda_is_available"
     },
+    "data_ptr": {
+      "api": "data",
+      "requires_plugin": "method_to_property"
+    },
     "det": {
       "api": "jax.numpy.linalg.det"
     },
@@ -571,6 +575,10 @@
     },
     "sinh": {
       "api": "jax.numpy.sinh"
+    },
+    "size": {
+      "api": "shape",
+      "requires_plugin": "method_to_property"
     },
     "slogdet": {
       "api": "jax.numpy.linalg.slogdet"

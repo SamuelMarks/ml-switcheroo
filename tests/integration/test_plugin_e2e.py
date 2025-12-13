@@ -59,7 +59,7 @@ class E2EMockSemantics(SemanticsManager):
 def mock_cli_semantics(monkeypatch):
   """Patches the SemanticsManager used in the CLI handler."""
   # Updated path to point to 'commands' module
-  monkeypatch.setattr("ml_switcheroo.cli.commands.SemanticsManager", E2EMockSemantics)
+  monkeypatch.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", E2EMockSemantics)
 
 
 @pytest.fixture(autouse=True)

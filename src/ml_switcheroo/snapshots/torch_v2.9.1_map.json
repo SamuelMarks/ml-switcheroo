@@ -417,10 +417,6 @@
     "Unique": {
       "api": "torch.unique"
     },
-    "UnknownLayer": {
-      "api": "torch.custom_n.UnknownLayer",
-      "args": {}
-    },
     "Unsqueeze": {
       "api": "torch.unsqueeze"
     },

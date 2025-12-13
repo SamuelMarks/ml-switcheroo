@@ -14,7 +14,7 @@ import pytest
 import numpy as np
 
 from ml_switcheroo.testing.runner import EquivalenceRunner
-from ml_switcheroo.testing.adapters import NumpyAdapter
+from ml_switcheroo.frameworks import NumpyAdapter
 
 
 @pytest.fixture

@@ -6,7 +6,8 @@ import pytest
 from pathlib import Path
 from pydantic import BaseModel, ValidationError
 
-from ml_switcheroo.semantics.manager import resolve_semantics_dir, SemanticsManager
+from ml_switcheroo.semantics.paths import resolve_semantics_dir
+from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig, parse_cli_key_values
 from ml_switcheroo.core.hooks import HookContext
 

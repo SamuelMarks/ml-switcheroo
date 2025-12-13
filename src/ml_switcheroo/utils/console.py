@@ -1,24 +1,49 @@
 """
 Central Logging and Console Utilities.
 
-This module provides a singleton interface to `rich.console.Console` configured
-for the ml-switcheroo theme. It replaces standard print statements across
-the application to ensure consistent, colored output.
+This module unifies the application's output mechanism using the Python standard
+`logging` library, backed by `rich` for formatting.
 
-It implements a Proxy pattern to allow the underlying Console instance to be
-swapped (injected) at runtime. This "Injectable Console" architecture is crucial
-for Web and WASM integration, allowing the application to redirect logs to
-HTTP strings or browser capture buffers without modifying business logic.
+It serves two primary purposes:
+1.  **Standard Logging Integration**: Provides a configured `logging.Logger` and
+    adapter functions (`log_success`, `log_warning`) that route to standard logging channels.
+2.  **Environment Injection**: Implements a Proxy pattern for the Rich Console.
+    This allows the output destination (stdout, file, or in-memory buffer) to be
+    swapped at runtime via `set_console`. This is critical for WebAssembly (WASM)
+    integration, where logs must be captured and returned to the browser context.
+
+Attributes:
+    console (_ConsoleProxy): A global, stable reference to the active Rich Console.
 """
 
-from typing import Any
+import logging
+from typing import Any, Optional
+
 from rich.console import Console
-from rich.theme import Theme
+from rich.logging import RichHandler
 from rich.style import Style
+from rich.theme import Theme
+
+# --- Constants & Configuration ---
+
+# Define custom logging level for Success (higher than INFO, lower than WARNING)
+SUCCESS_LEVEL_NUM = 25
+logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
+
+
+def _success(self, message, *args, **kwargs):
+  """Method injected into Logger to support logger.success()."""
+  if self.isEnabledFor(SUCCESS_LEVEL_NUM):
+    self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)
+
+
+# Patch basic Logger class
+logging.Logger.success = _success
 
 # Define standard semantic colors for the CLI
 _THEME = Theme(
   {
+    "logging.level.success": "green",
     "info": "dim cyan",
     "warning": "yellow",
     "error": "bold red",
@@ -39,6 +64,9 @@ class _ConsoleProxy:
   while maintaining the module-level `console` object reference imported
   by other modules.
 
+  When the backend changes, this proxy also reconfigures the Python `logging`
+  handlers to ensure that `logging.info(...)` writes to the new destination.
+
   Attributes:
       _backend (Console): The active Rich Console instance.
   """
@@ -46,21 +74,24 @@ class _ConsoleProxy:
   def __init__(self) -> None:
     """Initializes the proxy with a default Standard Output console."""
     self._backend: Console = Console(theme=_THEME)
+    self._configure_logging()
 
   def set_backend(self, new_console: Console) -> None:
     """
-    Injects a new Console backend.
+    Injects a new Console backend and updates logging handlers.
 
     Args:
         new_console (Console): The new Rich Console instance to use.
     """
     self._backend = new_console
+    self._configure_logging()
 
   def reset(self) -> None:
     """
     Resets the proxy to use a fresh standard output console.
     """
     self._backend = Console(theme=_THEME)
+    self._configure_logging()
 
   @property
   def backend(self) -> Console:
@@ -71,6 +102,31 @@ class _ConsoleProxy:
         Console: The currently active implementation.
     """
     return self._backend
+
+  def _configure_logging(self) -> None:
+    """
+    Configures or re-configures the standard python logging library
+    to direct output to the current backend console.
+    """
+    # Remove existing RichHandlers to prevent duplicate logs/wrong destinations
+    root_logger = logging.getLogger()
+    for handler in list(root_logger.handlers):
+      if isinstance(handler, RichHandler):
+        root_logger.removeHandler(handler)
+
+    # Create new handler coupled to the active console backend
+    rich_handler = RichHandler(
+      console=self._backend,
+      show_time=False,
+      omit_repeated_times=False,
+      show_path=False,
+      markup=True,
+      rich_tracebacks=True,
+    )
+
+    # Ensure we capture everything INFO and above by default
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(rich_handler)
 
   def print(self, *args: Any, **kwargs: Any) -> None:
     """
@@ -141,7 +197,9 @@ def set_console(new_console: Console) -> None:
   """
   Global helper to inject a specific console instance.
 
-  Use this in Web/WASM contexts to redirect output to a capturing console.
+  This updates both the `console` proxy object and the standard `logging`
+  handlers to write to the new instance. Use this in Web/WASM contexts to
+  redirect output to a capture buffer.
 
   Args:
       new_console (Console): The configured Rich console to use globally.
@@ -151,7 +209,7 @@ def set_console(new_console: Console) -> None:
 
 def reset_console() -> None:
   """
-  Global helper to reset logging to standard output.
+  Global helper to reset logging and console to standard output.
   """
   console.reset()
 
@@ -168,39 +226,39 @@ def get_console() -> Console:
 
 def log_info(msg: str) -> None:
   """
-  Prints an informational message (prefixed with ℹ️).
+  Logs an informational message via standard logging.
 
   Args:
-      msg (str): The text content will be formatted with [info] style.
+      msg (str): The message content. Can include rich markup like [bold].
   """
-  console.print(f"ℹ️  [info]{msg}[/info]")
+  logging.info(f"ℹ️  {msg}", extra={"markup": True})
 
 
 def log_success(msg: str) -> None:
   """
-  Prints a success message (prefixed with ✅).
+  Logs a success message via standard logging.
 
   Args:
-      msg (str): The text content will be formatted with [success] style.
+      msg (str): The message content.
   """
-  console.print(f"✅ [success]{msg}[/success]")
+  logging.log(SUCCESS_LEVEL_NUM, f"✅ {msg}", extra={"markup": True})
 
 
 def log_warning(msg: str) -> None:
   """
-  Prints a warning message (prefixed with ⚠️).
+  Logs a warning message via standard logging.
 
   Args:
-      msg (str): The text content will be formatted with [warning] style.
+      msg (str): The message content.
   """
-  console.print(f"⚠️  [warning]{msg}[/warning]")
+  logging.warning(f"⚠️  {msg}", extra={"markup": True})
 
 
 def log_error(msg: str) -> None:
   """
-  Prints an error message (prefixed with ❌).
+  Logs an error message via standard logging.
 
   Args:
-      msg (str): The text content will be formatted with [error] style.
+      msg (str): The message content.
   """
-  console.print(f"❌ [error]{msg}[/error]")
+  logging.error(f"❌ {msg}", extra={"markup": True})

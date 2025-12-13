@@ -122,8 +122,8 @@ This will find functions that match standard names (e.g. `abs`, `sum`) and popul
 Once your Adapter and Snapshot are present, verify integration:
 
 ```bash
-# 1. Run fuzzer targeting your framework
-ml_switcheroo ci --target my_framework
+# 1. Run fuzzer
+ml_switcheroo ci
 ```
 
 This command:

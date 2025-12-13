@@ -49,14 +49,16 @@ def mock_adapters():
 
 @pytest.fixture
 def mock_persister():
-  with patch("ml_switcheroo.cli.commands.SemanticPersister") as mock:
+  # FIX: Patch in discovery handler
+  with patch("ml_switcheroo.cli.handlers.discovery.SemanticPersister") as mock:
     yield mock
 
 
 @pytest.fixture
 def mock_consensus_engine():
   """Mocks the engine to control clustering output."""
-  with patch("ml_switcheroo.cli.commands.ConsensusEngine") as mock:
+  # FIX: Patch in discovery handler
+  with patch("ml_switcheroo.cli.handlers.discovery.ConsensusEngine") as mock:
     # Setup default behavior
     engine = mock.return_value
 
@@ -75,9 +77,10 @@ def mock_consensus_engine():
     yield engine
 
 
-@patch("ml_switcheroo.cli.commands.resolve_semantics_dir")
-@patch("ml_switcheroo.cli.commands.get_adapter")
-@patch("ml_switcheroo.cli.commands.available_frameworks")
+# FIX: Patch paths/utils in discovery handler
+@patch("ml_switcheroo.cli.handlers.discovery.resolve_semantics_dir")
+@patch("ml_switcheroo.cli.handlers.discovery.get_adapter")
+@patch("ml_switcheroo.cli.handlers.discovery.available_frameworks")
 def test_sync_standards_happy_path(
   mock_avail, mock_get_adapter, mock_resolve, mock_adapters, mock_persister, mock_consensus_engine
 ):
@@ -119,9 +122,9 @@ def test_sync_standards_happy_path(
   assert candidates[0].name == "Huber"
 
 
-@patch("ml_switcheroo.cli.commands.resolve_semantics_dir")
-@patch("ml_switcheroo.cli.commands.get_adapter")
-@patch("ml_switcheroo.cli.commands.available_frameworks")
+@patch("ml_switcheroo.cli.handlers.discovery.resolve_semantics_dir")
+@patch("ml_switcheroo.cli.handlers.discovery.get_adapter")
+@patch("ml_switcheroo.cli.handlers.discovery.available_frameworks")
 def test_sync_standards_not_enough_data(mock_avail, mock_get_adapter, mock_resolve, mock_persister):
   """
   Scenario: Only 1 framework returns data.
@@ -146,11 +149,8 @@ def test_invalid_category_handled_gracefully():
   Scenario: User passes invalid category string 'magic'.
   Expectation: Log warning, iterate only valid ones.
   """
-  # Patch internal calls via with context if we want integration,
-  # or check logic directly.
-  # Here we just verify it doesn't crash.
-
-  with patch("ml_switcheroo.cli.commands.available_frameworks", return_value=[]):
+  # FIX: Patch available_frameworks in discovery handler
+  with patch("ml_switcheroo.cli.handlers.discovery.available_frameworks", return_value=[]):
     ret = commands.handle_sync_standards(
       categories=["magic"],  # Invalid
       frameworks=[],

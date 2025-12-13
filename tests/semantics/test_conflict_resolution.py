@@ -22,6 +22,9 @@ class TestSemanticsManager(SemanticsManager):
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
+    # FIX: Initialize required attributes for merge_tier_data
+    self.import_data = {}
+    self.framework_configs = {}
 
 
 def test_merge_clean_insert():

@@ -23,7 +23,7 @@ class MockSemantics(SemanticsManager):
 
 
 def test_recursive_directory_mirroring(tmp_path, capsys, monkeypatch):
-  monkeypatch.setattr("ml_switcheroo.cli.commands.SemanticsManager", MockSemantics)
+  monkeypatch.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", MockSemantics)
 
   in_root = tmp_path / "src"
   in_root.mkdir()

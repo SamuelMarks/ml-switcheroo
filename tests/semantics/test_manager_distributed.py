@@ -48,6 +48,9 @@ def test_recursive_discovery(mock_semantics_tree):
   """
   Verify that files in root, subfolders, and nested subfolders are all loaded.
   """
+  # Note: resolve_snapshots_dir defaults to parent/snapshots, which doesn't exist in tmp_path unless we make it.
+  # We should patch it to avoid warnings or unexpected IO, but for this test we only care about Semantics recursion.
+
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=mock_semantics_tree):
     # Prevent loading default templates to simplify assertion
     with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
@@ -100,7 +103,6 @@ def test_test_templates_via_overlay(tmp_path):
   tmpl_content = {"__framework__": "custom_fw", "templates": {"import": "import custom"}}
   (snap / "custom_fw_vlatest_map.json").write_text(json.dumps(tmpl_content))
 
-  # Need to mock resolve_snapshots_dir
   with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=snap):
     # Dummy semantics dir
     with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=tmp_path / "semantics"):

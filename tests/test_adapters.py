@@ -11,8 +11,8 @@ import sys
 import numpy as np
 from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.testing.adapters import (
-  register_adapter,
+from ml_switcheroo.frameworks import (
+  register_framework,
   get_adapter,
   TensorFlowAdapter,
   MLXAdapter,
@@ -54,7 +54,7 @@ def test_paxml_metadata_inheritance():
 def test_custom_adapter_properties():
   """Verify that a newly registered adapter can define properties."""
 
-  @register_adapter("fastai")
+  @register_framework("fastai")
   class FastAIAdapter:
     display_name = "FastAI"
     inherits_from = "torch"
@@ -128,7 +128,7 @@ def test_fuzzer_delegates_to_adapter():
     def convert(self, _data):
       return "converted"
 
-  register_adapter("mock_fw", MockAdapter)
+  register_framework("mock_fw")(MockAdapter)
   fuzzer = InputFuzzer()
   raw_data = {"x": np.array([1, 2])}
   result = fuzzer.adapt_to_framework(raw_data, "mock_fw")

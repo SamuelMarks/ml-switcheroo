@@ -13,12 +13,13 @@ Strategy:
 """
 
 import libcst as cst
+from typing import List
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """Creates a CST attribute chain from a string string."""
+  """Creates a CST attribute chain from a dotted string."""
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -46,16 +47,18 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
   Returns:
       The transformed CST Call node, or original if target mapping is missing.
   """
-  # 1. Determine Target API
-  # We infer the abstract op is 'permute_dims' based on this plugin's primary use case.
+  # 1. Determine Target API via Abstract ID
+  # We infer the abstract op is 'permute_dims' based on this plugin's explicit association.
+  # In a more generic version, we might inspect `node` to deduce the op, but for plugins
+  # wired via `requires_plugin`, the association is defined in the JSON.
   op_id = "permute_dims"
   target_api = ctx.lookup_api(op_id)
 
-  # If we don't know the target logic via JSON, return unmodified.
+  # If we don't know the target logic via JSON (Semantics), return unmodified.
   if not target_api:
     return node
 
-  # 2. Extract Arguments
+  # 2. Extract Arguments from Source Call
   # We assume signature `func(input, *dims)`.
   # Arg 0 is the Tensor/Array input.
   # Args 1..N are the dimensions to pack.
@@ -67,23 +70,29 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
   dims_args = all_args[1:]
 
   # If no dims provided, or if existing dims are keyword args, the logic might differ.
-  # We filter out any keyword matches just in case user did something weird.
-  packed_elements = []
+  # We filter out any keyword matches just in case user did something explicitly named,
+  # though varargs are usually positional.
+  packed_elements: List[cst.BaseElement] = []
   for arg in dims_args:
-    # If we hit a keyword arg, packing stops
+    # If we hit a keyword arg, we assume packing should stop or ignore it
     if arg.keyword:
       continue
-    # Clean the argument (remove trailing comma style from original position)
+
+    # Clean the argument values (e.g. remove trailing comma style from original position)
     clean_val = arg.value
     packed_elements.append(cst.Element(value=clean_val))
 
-  # 3. Create Tuple Node
+  # 3. Create Tuple Node for the packed sequence
   # (d0, d1, d2)
   tuple_node = cst.Tuple(elements=packed_elements)
 
   # 4. Construct New Arguments List
-  # [input_arg, axes=tuple_node]
-  new_args = [input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))]
+  # Format: [input_arg, axes=tuple_node]
+
+  # Ensure input_arg has a comma if it's followed by keyword args
+  input_arg_clean = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+
+  new_args = [input_arg_clean]
 
   if packed_elements:
     axes_arg = cst.Arg(
@@ -93,7 +102,7 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
     )
     new_args.append(axes_arg)
 
-  # 5. Construct New Function Name
+  # 5. Construct New Function Name (e.g. jax.numpy.transpose)
   new_func = _create_dotted_name(target_api)
 
   return node.with_changes(func=new_func, args=new_args)

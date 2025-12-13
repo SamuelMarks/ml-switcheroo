@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from ml_switcheroo.config import parse_cli_key_values
-from ml_switcheroo.semantics.manager import resolve_semantics_dir
+from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.cli import commands
 from ml_switcheroo import __version__
 

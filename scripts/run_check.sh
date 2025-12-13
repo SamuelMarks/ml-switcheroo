@@ -11,9 +11,8 @@ echo "📝 Generating Demo Input..."
 mkdir -p examples
 
 # Create a demo file showing different tier capabilities
-# Note: We use 'torch.test_alpha_add' which maps to the 'decompose_alpha' plugin
-# in the SemanticsManager defaults, ensuring predictable behavior without
-# relying on external JSON files being present/correct in every environment.
+# Note: We use 'torch.add' with alpha, which is a standard op mapped
+# to the 'decompose_alpha' plugin in the semantics.
 cat <<EOF > examples/demo.py
 import torch
 
@@ -23,7 +22,7 @@ def model_forward(x, y):
 
     # Tier B (Neural): Complex rewrite via Plugin (alpha decomposition)
     # torch.add with alpha isn't in JAX, so we rewrite to math
-    scaled = torch.test_alpha_add(val, y, alpha=0.5)
+    scaled = torch.add(val, y, alpha=0.5)
 
     # Tier C (Extras): Unknown function -> Escape Hatch
     res = torch.unknown_magic(scaled)

@@ -7,7 +7,7 @@ import libcst as cst
 from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.testing.adapters import register_adapter
+from ml_switcheroo.frameworks import register_framework
 
 
 class MockTraitSemantics(SemanticsManager):
@@ -59,9 +59,9 @@ def rewriter_factory():
     def convert(self, x):
       return x
 
-  register_adapter("custom_nn", CustomNNAdapter)
-  register_adapter("vanilla", CustomNNAdapter)  # For fallback test
-  register_adapter("ghost_fw", CustomNNAdapter)  # For dynamic detection test
+  register_framework("custom_nn")(CustomNNAdapter)
+  register_framework("vanilla")(CustomNNAdapter)  # For fallback test
+  register_framework("ghost_fw")(CustomNNAdapter)  # For dynamic detection test
 
   # sematics setup
   semantics = MockTraitSemantics()

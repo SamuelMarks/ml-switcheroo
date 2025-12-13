@@ -16,8 +16,8 @@ from ml_switcheroo.cli.__main__ import main
 @pytest.fixture
 def mock_validator_cls():
   """Patches BatchValidator class to avoid real execution."""
-  # Updated to patch in commands module
-  with patch("ml_switcheroo.cli.commands.BatchValidator") as mock_cls:
+  # FIX: Patch in verify handler
+  with patch("ml_switcheroo.cli.handlers.verify.BatchValidator") as mock_cls:
     # Defaults for the instance
     mock_instance = MagicMock()
     mock_instance.run_all.return_value = {"abs": True, "broken_op": False, "untested": False}
@@ -95,8 +95,8 @@ def test_ci_update_readme_flag(mock_validator_cls, tmp_path):
   readme_path = tmp_path / "README.md"
   readme_path.touch()  # Create dummy
 
-  # Patch ReadmeEditor in commands module
-  with patch("ml_switcheroo.cli.commands.ReadmeEditor") as mock_editor_cls:
+  # FIX: Patch ReadmeEditor in verify handler
+  with patch("ml_switcheroo.cli.handlers.verify.ReadmeEditor") as mock_editor_cls:
     args = ["ci", "--update-readme", "--readme-path", str(readme_path)]
 
     main(args)

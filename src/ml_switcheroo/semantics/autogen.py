@@ -24,7 +24,7 @@ from collections import defaultdict
 
 from ml_switcheroo.discovery.consensus import CandidateStandard
 from ml_switcheroo.utils.console import log_info, log_warning, log_success
-from ml_switcheroo.semantics.manager import resolve_snapshots_dir
+from ml_switcheroo.semantics.paths import resolve_snapshots_dir
 
 
 class SemanticPersister:

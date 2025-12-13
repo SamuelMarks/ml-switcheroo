@@ -33,7 +33,8 @@ def sync_env(tmp_path):
 @pytest.fixture
 def mock_syncer():
   """Mocks FrameworkSyncer to avoid real imports."""
-  with patch("ml_switcheroo.cli.commands.FrameworkSyncer") as mock:
+  # FIX: Patch in discovery handler
+  with patch("ml_switcheroo.cli.handlers.discovery.FrameworkSyncer") as mock:
     instance = mock.return_value
 
     def side_effect(tier_data, fw):
@@ -55,10 +56,11 @@ def test_sync_creates_new_snapshot(sync_env, mock_syncer):
   """
   sem_dir, snap_dir = sync_env
 
-  with patch("ml_switcheroo.cli.commands.resolve_semantics_dir", return_value=sem_dir):
-    with patch("ml_switcheroo.cli.commands.resolve_snapshots_dir", return_value=snap_dir):
+  # FIX: Patch paths in discovery handler
+  with patch("ml_switcheroo.cli.handlers.discovery.resolve_semantics_dir", return_value=sem_dir):
+    with patch("ml_switcheroo.cli.handlers.discovery.resolve_snapshots_dir", return_value=snap_dir):
       # Patch version to force 'latest' instead of 'unknown'
-      with patch("ml_switcheroo.cli.commands._get_pkg_version", return_value="latest"):
+      with patch("ml_switcheroo.cli.handlers.discovery._get_pkg_version", return_value="latest"):
         ret = handle_sync("mockfw")
 
   assert ret == 0
@@ -84,10 +86,10 @@ def test_sync_updates_existing_snapshot(sync_env, mock_syncer):
   existing = {"__framework__": "mockfw", "mappings": {"Add": {"api": "mockfw.manual_add"}}}
   (snap_dir / "mockfw_vlatest_map.json").write_text(json.dumps(existing))
 
-  with patch("ml_switcheroo.cli.commands.resolve_semantics_dir", return_value=sem_dir):
-    with patch("ml_switcheroo.cli.commands.resolve_snapshots_dir", return_value=snap_dir):
+  with patch("ml_switcheroo.cli.handlers.discovery.resolve_semantics_dir", return_value=sem_dir):
+    with patch("ml_switcheroo.cli.handlers.discovery.resolve_snapshots_dir", return_value=snap_dir):
       # Patch version to ensure it hits the 'vlatest' file name
-      with patch("ml_switcheroo.cli.commands._get_pkg_version", return_value="latest"):
+      with patch("ml_switcheroo.cli.handlers.discovery._get_pkg_version", return_value="latest"):
         handle_sync("mockfw")
 
   data = json.loads((snap_dir / "mockfw_vlatest_map.json").read_text())
@@ -110,10 +112,11 @@ def test_sync_handles_unknown_tier_files_gracefully(tmp_path):
   snap_dir = tmp_path / "snapshots"
   sem_dir.mkdir()
 
-  with patch("ml_switcheroo.cli.commands.resolve_semantics_dir", return_value=sem_dir):
-    with patch("ml_switcheroo.cli.commands.resolve_snapshots_dir", return_value=snap_dir):
+  # FIX: Patch paths in discovery handler
+  with patch("ml_switcheroo.cli.handlers.discovery.resolve_semantics_dir", return_value=sem_dir):
+    with patch("ml_switcheroo.cli.handlers.discovery.resolve_snapshots_dir", return_value=snap_dir):
       # Mock syncer to do nothing
-      with patch("ml_switcheroo.cli.commands.FrameworkSyncer"):
+      with patch("ml_switcheroo.cli.handlers.discovery.FrameworkSyncer"):
         ret = handle_sync("ghostfw")
 
   assert ret == 0

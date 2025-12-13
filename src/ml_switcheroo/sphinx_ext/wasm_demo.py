@@ -23,7 +23,7 @@ from docutils import nodes
 from docutils.parsers.rst import Directive
 
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
-from ml_switcheroo.semantics.manager import resolve_snapshots_dir
+from ml_switcheroo.semantics.paths import resolve_snapshots_dir
 
 
 class SwitcherooDemo(Directive):

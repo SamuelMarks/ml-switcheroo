@@ -68,10 +68,14 @@ def mock_root_tree(tmp_path):
 def manager(mock_root_tree):
   """Initializes manager with patched path resolution."""
 
+  # FIX: Patch both semantics dir AND snapshots dir to ensure coherent loading
+  # SemanticsManager._load_knowledge_graph calls resolve_semantics_dir
+  # SemanticsManager._load_overlays calls resolve_snapshots_dir
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=mock_root_tree):
-    # Must patch available_frameworks to prevent loading defaults from real code registry
-    with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
-      yield SemanticsManager()
+    with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=mock_root_tree.parent / "snapshots"):
+      # Must patch available_frameworks to prevent loading defaults from real registry
+      with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
+        yield SemanticsManager()
 
 
 def test_overlay_merging_logic(manager):
@@ -128,13 +132,14 @@ def test_filename_framework_inference(tmp_path):
   (snap_dir / "numpy_vlatest_map.json").write_text(json.dumps(numpy_map))
 
   with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=sem_dir):
-    with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
-      mgr = SemanticsManager()
-      mgr._reverse_index = {}
+    with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=snap_dir):
+      with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
+        mgr = SemanticsManager()
+        mgr._reverse_index = {}
 
-      assert "Sin" in mgr.data
-      assert "numpy" in mgr.data["Sin"]["variants"]
-      assert mgr.data["Sin"]["variants"]["numpy"]["api"] == "numpy.sin"
+        assert "Sin" in mgr.data
+        assert "numpy" in mgr.data["Sin"]["variants"]
+        assert mgr.data["Sin"]["variants"]["numpy"]["api"] == "numpy.sin"
 
 
 def test_reverse_index_integrity(manager):

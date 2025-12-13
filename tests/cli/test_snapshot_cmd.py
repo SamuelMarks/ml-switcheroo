@@ -14,7 +14,6 @@ from unittest.mock import patch, MagicMock, call
 from ml_switcheroo.cli.commands import handle_snapshot
 from ml_switcheroo.frameworks.base import GhostRef
 
-
 # --- Fixtures & Mocks ---
 
 
@@ -53,9 +52,10 @@ def mock_get_pkg_version(name):
 # --- Tests ---
 
 
-@patch("ml_switcheroo.cli.commands.available_frameworks", return_value=["torch", "keras"])
-@patch("ml_switcheroo.cli.commands.get_adapter", side_effect=mock_get_adapter)
-@patch("ml_switcheroo.cli.commands._get_pkg_version", side_effect=mock_get_pkg_version)
+# FIX: Patch handlers.discovery where the code lives
+@patch("ml_switcheroo.cli.handlers.discovery.available_frameworks", return_value=["torch", "keras"])
+@patch("ml_switcheroo.cli.handlers.discovery.get_adapter", side_effect=mock_get_adapter)
+@patch("ml_switcheroo.cli.handlers.discovery._get_pkg_version", side_effect=mock_get_pkg_version)
 def test_snapshot_command_flow(mock_ver, mock_get_adp, mock_avail, mock_snapshot_dir):
   """
   Verify standard execution flow:
@@ -84,7 +84,7 @@ def test_snapshot_command_flow(mock_ver, mock_get_adp, mock_avail, mock_snapshot
   assert not keras_file.exists()
 
 
-@patch("ml_switcheroo.cli.commands.available_frameworks", return_value=[])
+@patch("ml_switcheroo.cli.handlers.discovery.available_frameworks", return_value=[])
 def test_snapshot_no_frameworks(mock_avail):
   """Verify error code when no frameworks registry found."""
   ret = handle_snapshot(out_dir=Path("."))

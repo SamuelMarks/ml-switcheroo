@@ -60,7 +60,7 @@ def test_cli_trace_output_generation(tmp_path, capsys):
   ]
 
   # Patch the SemanticsManager used in the CLI commands module
-  with patch("ml_switcheroo.cli.commands.SemanticsManager", MockTraceSemantics):
+  with patch("ml_switcheroo.cli.handlers.convert.SemanticsManager", MockTraceSemantics):
     try:
       main(args)
     except SystemExit as e:

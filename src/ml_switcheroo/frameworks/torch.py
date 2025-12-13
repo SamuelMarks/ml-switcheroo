@@ -228,3 +228,15 @@ class TorchAdapter:
       except Exception:
         return torch.tensor(data)
     return data
+
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """Injects PyTorch specific manual mapping hooks."""
+    mappings = snapshot.setdefault("mappings", {})
+
+    # Map Abstract Ops to internal Torch API paths to ensure detection
+    # Logic from wire_state_container.py
+    mappings["register_buffer"] = {"api": "torch.nn.Module.register_buffer"}
+    mappings["register_parameter"] = {"api": "torch.nn.Module.register_parameter"}
+    mappings["state_dict"] = {"api": "torch.nn.Module.state_dict"}
+    mappings["load_state_dict"] = {"api": "torch.nn.Module.load_state_dict"}
+    mappings["parameters"] = {"api": "torch.nn.Module.parameters"}

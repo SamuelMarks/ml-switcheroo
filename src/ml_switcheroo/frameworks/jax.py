@@ -179,3 +179,38 @@ class JaxAdapter:
     if isinstance(data, (np.ndarray, list, tuple, np.generic)):
       return jnp.array(data)
     return data
+
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """Injects JAX/Flax specific plugin hooks and templates."""
+    mappings = snapshot.setdefault("mappings", {})
+    templates = snapshot.setdefault("templates", {})
+
+    # 1. Argument Packing (permute_dims -> transpose with tuple)
+    mappings["permute_dims"] = {"api": "jax.numpy.transpose", "requires_plugin": "pack_varargs"}
+
+    # 2. Einsum Normalization
+    if "Einsum" in mappings:
+      mappings["Einsum"]["requires_plugin"] = "einsum_normalizer"
+      if "api" not in mappings["Einsum"]:
+        mappings["Einsum"]["api"] = "jax.numpy.einsum"
+
+    # 3. Method -> Property Swaps
+    mappings["size"] = {"api": "shape", "requires_plugin": "method_to_property"}
+    mappings["data_ptr"] = {"api": "data", "requires_plugin": "method_to_property"}
+
+    # 4. State Flag Injection (Training/Eval modes)
+    for op in ["forward", "__call__", "call"]:
+      # Only wire if not overridden by a specific discovery result
+      if op not in mappings or "api" not in mappings[op]:
+        mappings[op] = {"requires_plugin": "inject_training_flag"}
+
+    # 5. State Container Plugins (Torch -> Flax NNX mapping)
+    mappings["register_buffer"] = {"requires_plugin": "torch_register_buffer_to_nnx"}
+    mappings["register_parameter"] = {"requires_plugin": "torch_register_parameter_to_nnx"}
+    mappings["state_dict"] = {"requires_plugin": "torch_state_dict_to_nnx"}
+    mappings["load_state_dict"] = {"requires_plugin": "torch_load_state_dict_to_nnx"}
+    mappings["parameters"] = {"requires_plugin": "torch_parameters_to_nnx"}
+
+    # 6. Loop Templates (Hints for Escape Hatches or Plugins)
+    templates["fori_loop"] = "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})"
+    templates["scan"] = "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})"

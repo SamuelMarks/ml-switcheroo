@@ -13,7 +13,7 @@ from unittest.mock import MagicMock, patch
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.import_fixer import ImportFixer
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.testing.adapters import register_adapter, get_adapter
+from ml_switcheroo.frameworks import register_framework, get_adapter
 
 
 def test_manager_uses_registry_defaults():
@@ -47,7 +47,7 @@ def test_manager_picks_up_new_framework():
     def convert(self, x):
       return x
 
-  register_adapter("fastai_test", FastAIAdapter)
+  register_framework("fastai_test")(FastAIAdapter)
 
   # 2. Init Manager
   mgr = SemanticsManager()

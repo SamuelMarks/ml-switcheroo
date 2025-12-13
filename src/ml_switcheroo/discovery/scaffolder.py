@@ -22,7 +22,8 @@ from typing import Dict, Any, List, Set, Optional, Tuple
 from collections import defaultdict
 
 from ml_switcheroo.discovery.inspector import ApiInspector
-from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir, resolve_snapshots_dir
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.utils.console import console, log_info, log_success
 from ml_switcheroo.frameworks import get_adapter

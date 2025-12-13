@@ -1,16 +1,16 @@
 """
-Plugin for injecting state flags (e.g., training=False).
+Plugin for injecting state flags (e.g., training=True/False) based on context.
 
-This module handles the translation of imperative state mutations (like `model.eval()`)
-into functional arguments passed to subsequent calls.
+This module handles the impedance mismatch between Object-Oriented state management
+(PyTorch's `model.eval()`, `model.train()`) and Functional statelessness (JAX, Keras functional).
 
-Logic:
-1. Detects `model.eval()` or `model.train()` statements in the current scope.
-2. Tracks the state of specific variables (e.g. `model` is in evaluation mode)
-   inside the `HookContext` metadata.
-3. Intercepts calls to those variables (e.g. `model(x)`).
-4. Injects a keyword argument (e.g. `model(x, training=False)`).
-5. Strips the original mutation statement to avoid runtime errors in stateless frameworks.
+The plugin consists of two cooperating hooks:
+1.  `capture_eval_state`: Intercepts `model.eval()`/`train()` calls, records the state
+    change in the `HookContext`, and removes the imperative call from the AST.
+2.  `inject_training_flag`: Intercepts calls to the model (e.g. `model(x)`), checks if
+    state was recorded, and injects the generic `training=...` keyword argument.
+
+State is tracked via a metadata dictionary in `HookContext` keyed by the object name.
 """
 
 from typing import Dict, Optional, Any
@@ -18,52 +18,98 @@ import libcst as cst
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
+# unique key for storing state in context metadata
 _PLUGIN_KEY = "state_flag_injection"
+
+
+def _get_func_name(node: cst.BaseExpression) -> Optional[str]:
+  """
+  Refines a CST expression node into a string identifier.
+
+  Args:
+      node: CST node (Name or Attribute).
+
+  Returns:
+      String representation (e.g. "model" or "self.layer") or None.
+  """
+  if isinstance(node, cst.Name):
+    return node.value
+  if isinstance(node, cst.Attribute):
+    # We recursively flatten attributes to support 'self.layer.sublayer'
+    base = _get_func_name(node.value)
+    if base:
+      return f"{base}.{node.attr.value}"
+  return None
 
 
 @register_hook("inject_training_flag")
 def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
-  Rewrites a call site to inject state flags if the object was previously mutated.
+  Hook: Injects `training=True/False` kwargs into function calls.
 
-  Triggers:
-      Operations marked with `requires_plugin: "inject_training_flag"`.
-      Typically attached to the `__call__` or `forward` definition of a neural module.
+  This hook is triggered on function calls (like `model(x)` or `model.forward(x)`) if
+  they map to an abstract operation configured with `requires_plugin="inject_training_flag"`.
+
+  Logic:
+  1. Resolve the name of the object being called (the Receiver).
+     It robustly checks both the full callable name (e.g. `self.layer` in `self.layer(x)`)
+     and the parent object (e.g. `model` in `model.forward(x)`).
+  2. Check `ctx.metadata` to see if `capture_eval_state` previously recorded a state.
+  3. If state exists, execute the injection of the `training` argument.
 
   Args:
-      node: The function call (e.g. `model(x)`).
-      ctx: Hook Context containing metadata.
+      node: The original CST Call node.
+      ctx: HookContext containing global metadata state.
 
   Returns:
-      Modified call with injected kwargs (e.g. `model(x, training=False)`).
+      The modified Call node with injected arguments, or the original if no state found.
   """
-  # 1. Identify the object being called
-  obj_name = _get_func_name(node.func)
-  if not obj_name:
+  store = ctx.metadata.get(_PLUGIN_KEY, {})
+  if not store:
     return node
 
-  # 2. Check if this object has accumulated state in the current scope metadata
-  store = ctx.metadata.setdefault(_PLUGIN_KEY, {})
-  if obj_name not in store:
+  # 1. Identify the potential state-holding object keys
+  candidate_keys = []
+
+  # Case A: Implicit Call `obj(x)` -> func is Name('obj') or Attribute('self.obj')
+  full_name = _get_func_name(node.func)
+  if full_name:
+    candidate_keys.append(full_name)
+
+  # Case B: Explicit Method `obj.method(x)` -> func is Attribute('obj', 'method')
+  # We want to check 'obj'
+  if isinstance(node.func, cst.Attribute):
+    parent_name = _get_func_name(node.func.value)
+    if parent_name:
+      candidate_keys.append(parent_name)
+
+  # 2. Check Store for any match (Priority to full name match)
+  flags = None
+  for key in candidate_keys:
+    if key in store:
+      flags = store[key]
+      break
+
+  if not flags:
     return node
 
-  flags = store[obj_name]  # e.g. {'training': cst.Name("False")}
+  # 3. Inject Arguments
   new_args = list(node.args)
 
-  # 3. Inject Flags
   for arg_name, val_node in flags.items():
-    # Avoid duplication if user manually passed it
+    # Avoid duplication if user manually passed the argument
     if any(a.keyword and a.keyword.value == arg_name for a in new_args):
       continue
 
-    # Add `training=False`
+    # Prepare formatting: Ensure previous arg has a comma
+    if new_args and new_args[-1].comma == cst.MaybeSentinel.DEFAULT:
+      new_args[-1] = new_args[-1].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+
+    # Create new keyword argument
     arg = cst.Arg(
       keyword=cst.Name(arg_name),
       value=val_node,
-      equal=cst.AssignEqual(
-        whitespace_before=cst.SimpleWhitespace(""),
-        whitespace_after=cst.SimpleWhitespace(""),
-      ),
+      equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
     )
     new_args.append(arg)
 
@@ -71,79 +117,58 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 
 @register_hook("capture_eval_state")
-def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.Call:
+def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
-  Intercepts `model.eval()` or `model.train()` to track state in Context.
-
-  Triggers:
-      Operations mapping `torch.nn.Module.eval` etc.
+  Hook: Intercepts `eval()`/`train()` calls to track state removal.
 
   Action:
-      1. Identifies the receiver object (`model`).
-      2. Updates `ctx.metadata` with `training=False/True`.
-      3. Returns a no-op/null call to strip the operation from output code.
+  1. Identifies the receiver object (`model`).
+  2. Determines mode (`training=True` for .train(), `False` for .eval()).
+  3. Updates `ctx.metadata` with this knowledge.
+  4. Returns a No-Op node to strip the imperative call from the output code.
 
   Args:
       node: The call node (e.g. `model.eval()`).
-      ctx: Hook Context providing metadata storage.
+      ctx: Hook Context.
 
   Returns:
-      A no-op CST node (so the statement effectively disappears or becomes harmless).
+      cst.Name("None") effectively replacing the statement with a no-op `None`,
+      which is valid Python expression statement (does nothing).
   """
-  # 1. Identify Receiver
+  # 1. Validation: Must be an attribute call (obj.method())
   if not isinstance(node.func, cst.Attribute):
     return node
 
-  receiver_node = node.func.value
   method_name = node.func.attr.value
-  obj_name = _extract_name(receiver_node)
+  receiver_node = node.func.value
+  obj_name = _get_func_name(receiver_node)
 
   if not obj_name:
     return node
 
-  # 2. Determine State
-  state_args: Dict[str, Any] = {}
+  # 2. Determine State Value
+  state_updates: Dict[str, Any] = {}
+
   if method_name == "eval":
-    state_args["training"] = cst.Name("False")
+    state_updates["training"] = cst.Name("False")
+
   elif method_name == "train":
-    # Check args for train(mode=bool)
+    # Check args for train(mode=bool). Default is True.
     val = cst.Name("True")
     if node.args:
+      # Simple heuristic: grab first arg.
+      # If it's a literal 'False' or 'True', we use it.
+      # For variables, we just passthrough the variable name node.
       val = node.args[0].value
-    state_args["training"] = val
+    state_updates["training"] = val
 
-  # 3. Store State in Context Metadata
+  # 3. persist State in Context
   store = ctx.metadata.setdefault(_PLUGIN_KEY, {})
   if obj_name not in store:
     store[obj_name] = {}
 
-  # Typed ignore logic: store is Dict[str, Any], sub-dict is Dict[str, CSTNode]
-  store[obj_name].update(state_args)
+  store[obj_name].update(state_updates)
 
-  # 4. Return No-Op
-  # We replace `model.eval()` with `None` so the line becomes `None`,
-  # which is eliminated by Python compilers or harmless.
+  # 4. Strip the call (Return None)
+  # This transforms `model.eval()` into `None`.
   return node.with_changes(func=cst.Name("None"), args=[])
-
-
-def _get_func_name(node: cst.BaseExpression) -> Optional[str]:
-  """Helper to get string name of a function call target."""
-  if isinstance(node, cst.Name):
-    return node.value
-  if isinstance(node, cst.Attribute):
-    # Only support simple attributes for state tracking (self.layer)
-    base = _extract_name(node.value)
-    if base:
-      return f"{base}.{node.attr.value}"
-  return None
-
-
-def _extract_name(node: cst.BaseExpression) -> Optional[str]:
-  """Recursively resolves name."""
-  if isinstance(node, cst.Name):
-    return node.value
-  if isinstance(node, cst.Attribute):
-    base = _extract_name(node.value)
-    if base:
-      return f"{base}.{node.attr.value}"
-  return None
