@@ -92,7 +92,8 @@ def test_matrix_get_json_structure() -> None:
         return mock_jax
       return None
 
-    with patch("ml_switcheroo.config.get_adapter", side_effect=mock_get):
+    # Patch the source definition used by config.py
+    with patch("ml_switcheroo.frameworks.get_adapter", side_effect=mock_get):
       result = matrix.get_json()
 
   assert isinstance(result, list)
@@ -167,7 +168,8 @@ def test_sorting_logic_priorities():
     return None  # Beta
 
   with patch("ml_switcheroo.config.available_frameworks", return_value=fws):
-    with patch("ml_switcheroo.config.get_adapter", side_effect=mock_get):
+    # Patch the source definition used by config.py
+    with patch("ml_switcheroo.frameworks.get_adapter", side_effect=mock_get):
       sorted_list = matrix._get_sorted_engines()
 
   # Expected: torch (0), jax (10), alpha (50), beta (999)

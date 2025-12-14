@@ -41,9 +41,10 @@ class BaseRewriter(cst.CSTTransformer):
     self.semantics = semantics
     self.config = config
 
-    # Directly use strings, as config validation guarantees valid strings via Registry
-    self.source_fw = str(config.source_framework)
-    self.target_fw = str(config.target_framework)
+    # Directly use strings from config properties
+    # FIX: Use effective properties to respecting Flavour overrides (e.g. flax_nnx)
+    self.source_fw = str(config.effective_source)
+    self.target_fw = str(config.effective_target)
 
     self.strict_mode = config.strict_mode
 

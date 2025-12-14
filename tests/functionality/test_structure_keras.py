@@ -31,7 +31,7 @@ class MockKerasSemantics(SemanticsManager):
         }
       },
       "torch": {"traits": {"module_base": "torch.nn.Module", "forward_method": "forward", "requires_super_init": True}},
-      "jax": {"traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__"}},
+      "flax_nnx": {"traits": {"module_base": "flax.nnx.Module", "forward_method": "__call__"}},
     }
 
   def get_framework_config(self, framework: str):
@@ -95,7 +95,7 @@ class MyLayer(keras.Model):
 
 
 def test_keras_to_jax(rewriter_factory):
-  rewriter = rewriter_factory("tensorflow", "jax")
+  rewriter = rewriter_factory("tensorflow", "flax_nnx")
   code = """ 
 class MyLayer(keras.Model): 
     def call(self, x): 
@@ -108,7 +108,7 @@ class MyLayer(keras.Model):
 
 
 def test_jax_to_keras(rewriter_factory):
-  rewriter = rewriter_factory("jax", "tensorflow")
+  rewriter = rewriter_factory("flax_nnx", "tensorflow")
   code = """ 
 class MyLayer(flax.nnx.Module): 
     def __init__(self, rngs: nnx.Rngs): 

@@ -30,6 +30,8 @@ class PaxE2ESemantics(SemanticsManager):
     self.import_data = {}
     self._reverse_index = {}
     self._key_origins = {}
+    # Fix: Initialize required RNG set
+    self._known_rng_methods = set()
 
     # Configure Traits for PaxML
     self.framework_configs = {
@@ -75,6 +77,10 @@ class PaxE2ESemantics(SemanticsManager):
     self._alias("nn.Module", "Module")
     self._alias("nn.Linear", "Linear")
     self._alias("nn.ReLU", "ReLU")
+
+  # Fix: Implement required method for PurityScanner
+  def get_all_rng_methods(self):
+    return self._known_rng_methods
 
   def get_framework_config(self, framework: str):
     return self.framework_configs.get(framework, {})

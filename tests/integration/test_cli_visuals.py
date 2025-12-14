@@ -68,7 +68,8 @@ def test_matrix_visual_snapshot(snapshot, tmp_path):
     return m
 
   with patch("ml_switcheroo.config.available_frameworks", return_value=mock_fws):
-    with patch("ml_switcheroo.config.get_adapter", side_effect=mock_adapter_factory):
+    # Patched updated location
+    with patch("ml_switcheroo.frameworks.get_adapter", side_effect=mock_adapter_factory):
       matrix.render()
 
   output = console.export_text()

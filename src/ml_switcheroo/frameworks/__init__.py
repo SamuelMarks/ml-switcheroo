@@ -8,20 +8,32 @@ Exposes concrete Adapter classes for testing/typing convenience.
 import importlib
 import pkgutil
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 from .base import FrameworkAdapter, _ADAPTER_REGISTRY, register_framework, get_adapter
 
-# Concrete Imports (Lazy access pattern could be better, but explicit for API surface)
+# --- Concrete Imports (Updated for JAX Hierarchy) ---
+
 try:
   from .torch import TorchAdapter
 except ImportError:
   TorchAdapter = None
 
 try:
-  from .jax import JaxAdapter
+  # Maps generic 'jax' requests to the Core adapter
+  from .jax import JaxCoreAdapter as JaxAdapter
 except ImportError:
   JaxAdapter = None
+
+try:
+  from .flax_nnx import FlaxNNXAdapter
+except ImportError:
+  FlaxNNXAdapter = None
+
+try:
+  from .paxml import PaxmlAdapter
+except ImportError:
+  PaxmlAdapter = None
 
 try:
   from .numpy import NumpyAdapter
@@ -38,12 +50,9 @@ try:
 except ImportError:
   MLXAdapter = None
 
-try:
-  from .paxml import PaxmlAdapter
-except ImportError:
-  PaxmlAdapter = None
-
-# Dynamic Discovery for Side Effects (Registration)
+# --- Dynamic Discovery ---
+# Scans the directory for new .py files (e.g. 'my_framework.py')
+# and imports them to trigger the @register_framework decorator.
 _pkg_dir = Path(__file__).parent
 for _, module_name, _ in pkgutil.iter_modules([str(_pkg_dir)]):
   if module_name in ("base", "__init__"):
@@ -66,6 +75,7 @@ __all__ = [
   "available_frameworks",
   "TorchAdapter",
   "JaxAdapter",
+  "FlaxNNXAdapter",
   "NumpyAdapter",
   "TensorFlowAdapter",
   "MLXAdapter",

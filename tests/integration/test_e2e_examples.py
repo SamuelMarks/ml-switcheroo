@@ -42,7 +42,7 @@ class E2ESemantics(SemanticsManager):
 
     # Mock Framework Configs to support Trait-Based Rewriting
     self.framework_configs = {
-      "jax": {
+      "flax_nnx": {
         "traits": {
           "module_base": "flax.nnx.Module",
           "forward_method": "__call__",
@@ -86,7 +86,7 @@ class E2ESemantics(SemanticsManager):
     )
 
     # Import Remapping setup for ImportFixer
-    self.import_data["torch.nn"] = {"variants": {"jax": {"root": "flax", "sub": "nnx", "alias": "nnx"}}}
+    self.import_data["torch.nn"] = {"variants": {"flax_nnx": {"root": "flax", "sub": "nnx", "alias": "nnx"}}}
     self.import_data["flax.nnx"] = {"variants": {"torch": {"root": "torch", "sub": "nn", "alias": "nn"}}}
 
     # --- 3. Array Manipulation (ex03) ---
@@ -186,7 +186,7 @@ def test_ex02_neural_net_torch_to_jax(engine_factory):
       4. Method rename: forward -> __call__
   """
   code = _read_code("ex02_neural_net.torch.py")
-  engine = engine_factory("torch", "jax")
+  engine = engine_factory("torch", "flax_nnx")
   result = engine.run(code)
 
   if not result.success or result.has_errors:
@@ -211,8 +211,8 @@ def test_ex02_neural_net_jax_to_torch(engine_factory):
       3. Stripping `rngs` arguments from `__init__`.
       4. Injecting `super().__init__()` (Mandatory for PyTorch).
   """
-  code = _read_code("ex02_neural_net.jax.py")
-  engine = engine_factory("jax", "torch")
+  code = _read_code("ex02_neural_net.flax_nnx.py")
+  engine = engine_factory("flax_nnx", "torch")
   result = engine.run(code)
 
   if not result.success or result.has_errors:

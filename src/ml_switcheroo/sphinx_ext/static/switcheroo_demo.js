@@ -1,30 +1,52 @@
+/**
+ * switcheroo_demo.js
+ * 
+ * Client-side logic for the ML-Switcheroo WebAssembly Demo.
+ * Handles Pyodide initialization, CodeMirror editor state, and the
+ * UI interaction for running transpilation purely in the browser.
+ *
+ * Update V2:
+ * - Supports Hierarchical Framework Selection (Flavour Dropdown).
+ * - Dynamically shows/hides sub-framework options when 'jax' is selected.
+ */
+
 let pyodide = null;
 let srcEditor = null;
 let tgtEditor = null;
 
 // --- Feature 1 & 2: Examples Configuration ---
-// Define robust defaults here so the dropdown never renders empty
-// even if the Python build pipeline fails to inject dynamic examples.
+// Updated to support Flax NNX as the primary JAX flavour in examples.
 let EXAMPLES = {
-    "torch": {
-        "label": "Standard PyTorch Example",
+    "torch_nn": {
+        "label": "PyTorch -> JAX (Flax NNX)",
         "srcFw": "torch",
         "tgtFw": "jax",
+        "tgtFlavour": "flax_nnx", // Default flavour
         "code": `import torch
 import torch.nn as nn
 
-class Model(nn.Module): 
-    def forward(self, x): 
-        return torch.abs(x)`
-    },
-    "jax": {
-        "label": "Standard JAX Example",
-        "srcFw": "jax",
-        "tgtFw": "torch",
-        "code": `import jax.numpy as jnp
+class Model(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear = nn.Linear(10, 10)
 
-def compute(x):
-    return jnp.abs(x)`
+    def forward(self, x):
+        return self.linear(x)`
+    },
+    "jax_nnx": {
+        "label": "JAX (Flax NNX) -> PyTorch",
+        "srcFw": "jax",
+        "srcFlavour": "flax_nnx",
+        "tgtFw": "torch",
+        "code": `from flax import nnx
+import jax.numpy as jnp
+
+class Model(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        self.linear = nnx.Linear(10, 10, rngs=rngs)
+
+    def __call__(self, x):
+        return self.linear(x)`
     }
 };
 
@@ -46,10 +68,24 @@ response = {}
 try: 
     # 1. Load Inputs
     if 'GLOBAL_SEMANTICS' not in globals(): 
+        # Pre-load semantics once to speed up subsequent runs
         GLOBAL_SEMANTICS = SemanticsManager() 
     
+    # 2. Determine Effective Target Framework
+    # If the user selected a "Flavour" (e.g. 'flax_nnx'), that becomes the 
+    # structural target for the Rewriter, overriding the generic 'jax'.
+    # Level 0/1 logic (arrays/optax) is handled by inheritance in the adapter.
+    
+    real_source = js_src_flavour if js_src_flavour else js_src_fw
+    real_target = js_tgt_flavour if js_tgt_flavour else js_tgt_fw
+    
     # Updated: Passed 'js_strict_mode' from JS context
-    config = RuntimeConfig(source_framework=js_src_fw, target_framework=js_tgt_fw, strict_mode=js_strict_mode) 
+    config = RuntimeConfig(
+        source_framework=real_source, 
+        target_framework=real_target, 
+        strict_mode=js_strict_mode
+    )
+    
     engine = ASTEngine(semantics=GLOBAL_SEMANTICS, config=config) 
     result = engine.run(js_source_code) 
 
@@ -73,6 +109,10 @@ except Exception as e:
 json_output = json.dumps(response) 
 `;
 
+/**
+ * Initializes the Python VM (Pyodide), installs requirements, and prepares the UI.
+ * This is triggered by the "Initialize Engine" button.
+ */
 async function initEngine() {
     const rootEl = document.getElementById("switcheroo-wasm-root");
     const statusEl = document.getElementById("engine-status");
@@ -99,7 +139,7 @@ async function initEngine() {
             pyodide = await loadPyodide();
         }
 
-        // 3. Guard: Check if package already loaded (for idompotency)
+        // 3. Guard: Check if package already loaded (for idempotency)
         const isInstalled = pyodide.runPython(`
 import importlib.util
 importlib.util.find_spec("ml_switcheroo") is not None
@@ -131,32 +171,25 @@ importlib.util.find_spec("ml_switcheroo") is not None
             await micropip.install(wheelUrl);
         }
 
-        // 4. Reveal Interface (MUST be visible before Init Editor)
+        // 4. Reveal Interface
         splashEl.style.display = "none";
         interfaceEl.style.display = "block";
 
-        // --- Feature 0: Init CodeMirror ---
-        // Initialize editors now that elements are visible in DOM
         initEditors();
 
-        // --- Merge Dynamic Examples ---
-        // If Python injected extra examples, merge them.
-        // If not, our hardcoded defaults in EXAMPLES ensure the UI isn't broken.
+        // Merge Dynamic Examples
         if (window.SWITCHEROO_PRELOADED_EXAMPLES) {
             console.log("[WASM] Merging protocol-driven examples.");
-            // Merge logic: Dynamic overwrites default if keys collide, but we keep defaults
-            EXAMPLES = { ...EXAMPLES, ...window.SWITCHEROO_PRELOADED_EXAMPLES };
+            EXAMPLES = window.SWITCHEROO_PRELOADED_EXAMPLES;
         }
 
         initExampleSelector();
+        initFlavourListeners(); // Bind new hierarchy listeners
 
         statusEl.innerText = "Ready";
         statusEl.className = "status-badge status-ready";
 
-        // Ensure buttons reactivated
         document.getElementById("btn-convert").disabled = false;
-
-        // Append status
         logBox.innerText += "\nEngine initialized successfully.";
 
     } catch (err) {
@@ -172,7 +205,6 @@ importlib.util.find_spec("ml_switcheroo") is not None
 
 function initEditors() {
     if (srcEditor) {
-        // If re-initializing or unhiding, refresh layout
         srcEditor.refresh();
         if (tgtEditor) tgtEditor.refresh();
         return;
@@ -200,52 +232,63 @@ function initExampleSelector() {
     const sel = document.getElementById("select-example");
     if (!sel) return;
 
-    // Reset Dropdown completely to prevent stale states
     sel.innerHTML = '<option value="" disabled>-- Select a Pattern --</option>';
 
-    // Determine Logic for Default Selection
-    // Priority:
-    // 1. "torch" (Generic Python-injected matches key defined in TorchAdapter)
-    let targetKey = "torch";
-
-    // Fallback: If torch not found, pick first avaliable
-    if (!EXAMPLES[targetKey]) {
-        const keys = Object.keys(EXAMPLES);
-        if (keys.length > 0) targetKey = keys[0];
-        else targetKey = null;
-    }
-
-    let defaultFound = false;
-
     // Populate
-    for (const [key, details] of Object.entries(EXAMPLES)) {
+    const sortedKeys = Object.keys(EXAMPLES).sort();
+    let firstValid = null;
+
+    for (const key of sortedKeys) {
+        if (!firstValid) firstValid = key;
+        const details = EXAMPLES[key];
         const opt = document.createElement("option");
         opt.value = key;
         opt.innerText = details.label;
         sel.appendChild(opt);
-
-        // Mark selected property
-        if (key === targetKey) {
-            opt.selected = true;
-            defaultFound = true;
-        }
     }
 
-    // Trigger Load if we found a valid target
-    if (defaultFound && targetKey) {
-        // We load the example into the editor, ensuring editor state matches dropdown
-        loadExample(targetKey);
+    // Default Selection
+    if (firstValid) {
+        loadExample(firstValid);
     } else {
-        // Fallback selection of placeholder
         sel.querySelector('option[value=""]').selected = true;
     }
 
-    // Re-attach listener (clearing innerHTML removes old listeners on options)
-    // We attach onchange only if not already attached?
-    // Ideally we should just use onclick, but change is standard for Select.
     sel.onchange = (e) => {
         loadExample(e.target.value);
     };
+}
+
+// --- Updates for Hierarchical UI ---
+
+/**
+ * Initializes listeners to show/hide the Flavour dropdowns
+ * when 'jax' (or other hierarchical roots) are selected.
+ */
+function initFlavourListeners() {
+    const srcSel = document.getElementById("select-src");
+    const tgtSel = document.getElementById("select-tgt");
+
+    const handler = (type) => {
+        const sel = type === 'src' ? srcSel : tgtSel;
+        const region = document.getElementById(`${type}-flavour-region`);
+
+        // Logic: If selected framework has flavours defined in the DOM, show them.
+        // We check if value is 'jax' as hardcoded default for hierarchy,
+        // but robustly we should verify if the region actually has valid options.
+        if (sel.value === 'jax') {
+            region.style.display = 'inline-block';
+        } else {
+            region.style.display = 'none';
+        }
+    };
+
+    srcSel.addEventListener("change", () => handler('src'));
+    tgtSel.addEventListener("change", () => handler('tgt'));
+
+    // Initial triggering
+    handler('src');
+    handler('tgt');
 }
 
 function loadExample(key) {
@@ -253,30 +296,73 @@ function loadExample(key) {
     if (!details) return;
 
     if (srcEditor) srcEditor.setValue(details.code);
-    if (tgtEditor) tgtEditor.setValue(""); // clear old Output
+    if (tgtEditor) tgtEditor.setValue("");
 
-    // Update Dropdowns if IDs exist
+    // Update Main Frameworks
     const srcEl = document.getElementById("select-src");
     const tgtEl = document.getElementById("select-tgt");
 
-    if (srcEl && details.srcFw) srcEl.value = details.srcFw;
-    if (tgtEl && details.tgtFw) tgtEl.value = details.tgtFw;
+    if (srcEl && details.srcFw) {
+         setSelectValue(srcEl, details.srcFw);
+         // Trigger flavour check
+         srcEl.dispatchEvent(new Event('change'));
+    }
+
+    if (tgtEl && details.tgtFw) {
+         setSelectValue(tgtEl, details.tgtFw);
+         tgtEl.dispatchEvent(new Event('change'));
+    }
+
+    // Update Flavours if provided
+    const srcFlavourEl = document.getElementById("src-flavour");
+    const tgtFlavourEl = document.getElementById("tgt-flavour");
+
+    if (srcFlavourEl && details.srcFlavour) {
+        setSelectValue(srcFlavourEl, details.srcFlavour);
+    }
+
+    if (tgtFlavourEl && details.tgtFlavour) {
+        setSelectValue(tgtFlavourEl, details.tgtFlavour);
+    }
 
     const cons = document.getElementById("console-output");
     if(cons) cons.innerText = `Loaded example: ${details.label}`;
 }
 
+function setSelectValue(selectEl, value) {
+    let found = false;
+    for(let i=0; i<selectEl.options.length; i++) {
+        if(selectEl.options[i].value === value) {
+            selectEl.selectedIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if(!found) {
+        console.warn(`[WASM] Warning: Option '${value}' not found in dropdown.`);
+    }
+}
+
 function swapContext() {
-    // HTML elements
     const srcSel = document.getElementById("select-src");
     const tgtSel = document.getElementById("select-tgt");
+    const srcFlavour = document.getElementById("src-flavour");
+    const tgtFlavour = document.getElementById("tgt-flavour");
 
-    // Swap Dropdowns
+    // Swap Main
     const tmpFw = srcSel.value;
     srcSel.value = tgtSel.value;
     tgtSel.value = tmpFw;
 
-    // Swap Code via Editors
+    // Swap Flavours if applicable
+    const tmpFlavour = srcFlavour.value;
+    srcFlavour.value = tgtFlavour.value;
+    tgtFlavour.value = tmpFlavour;
+
+    // Trigger visibility update
+    srcSel.dispatchEvent(new Event("change"));
+    tgtSel.dispatchEvent(new Event("change"));
+
     if (!srcEditor || !tgtEditor) return;
 
     const srcCode = srcEditor.getValue();
@@ -285,13 +371,12 @@ function swapContext() {
     srcEditor.setValue(tgtCode);
     tgtEditor.setValue(srcCode);
 
-    document.getElementById("console-output").innerText = "Context swapped. Ready to translate.";
+    document.getElementById("console-output").innerText = "Context swapped.";
 }
 
 async function runTranspilation() {
     if (!pyodide || !srcEditor) return;
 
-    // Read from CodeMirror
     const sourceCode = srcEditor.getValue();
     if (!sourceCode.trim()) {
         document.getElementById("console-output").innerText = "Source code is empty.";
@@ -304,18 +389,37 @@ async function runTranspilation() {
     const srcFw = document.getElementById("select-src").value;
     const tgtFw = document.getElementById("select-tgt").value;
 
-    // Strict Mode: Check the toggle state
+    // Hierarchical Inputs
+    const srcRegion = document.getElementById("src-flavour-region");
+    const tgtRegion = document.getElementById("tgt-flavour-region");
+
+    // Only send flavour if the region is actually visible (meaning hierarchy is active)
+    let srcFlavour = "";
+    let tgtFlavour = "";
+
+    if (srcRegion && srcRegion.style.display !== "none") {
+        srcFlavour = document.getElementById("src-flavour").value;
+    }
+
+    if (tgtRegion && tgtRegion.style.display !== "none") {
+        tgtFlavour = document.getElementById("tgt-flavour").value;
+    }
+
     const strictMode = !!document.getElementById("chk-strict-mode").checked;
 
     btn.disabled = true;
     btn.innerText = "Running...";
-    consoleEl.innerText = `Translating ${srcFw} -> ${tgtFw} (Strict: ${strictMode})...`;
+    consoleEl.innerText = `Translating ${srcFw}${srcFlavour ? '('+srcFlavour+')' : ''} -> ${tgtFw}${tgtFlavour ? '('+tgtFlavour+')' : ''}...`;
 
     try {
         pyodide.globals.set("js_source_code", sourceCode);
         pyodide.globals.set("js_src_fw", srcFw);
         pyodide.globals.set("js_tgt_fw", tgtFw);
-        // Pass strict mode flag to Python
+
+        // Pass flavours (empty string if standard)
+        pyodide.globals.set("js_src_flavour", srcFlavour);
+        pyodide.globals.set("js_tgt_flavour", tgtFlavour);
+
         pyodide.globals.set("js_strict_mode", strictMode);
 
         await pyodide.runPythonAsync(PYTHON_BRIDGE);
@@ -323,33 +427,28 @@ async function runTranspilation() {
         const rawJson = pyodide.globals.get("json_output");
         const result = JSON.parse(rawJson);
 
-        // Write to CodeMirror
         tgtEditor.setValue(result.code);
 
         let logs = result.logs;
         if(!result.is_success) {
-            logs += "\n[System] Errors detected during ast conversion.";
+            logs += "\n[System] Errors detected.";
         }
-
-        // Append lifecycle or engine errors if present, even if success flag is true (warnings)
         if (result.errors && result.errors.length > 0) {
-             logs += `\n\n[Warning/Error Logic]:\n${result.errors.join('\n')}`;
+             logs += `\n\n[Issues]:\n${result.errors.join('\n')}`;
         }
 
         consoleEl.innerText = logs;
 
-        // --- Feature 05: Visualizer Integration ---
         if (result.trace_events && window.TraceGraph) {
-            console.log("[WASM] Rendering Trace Graph...");
             const vis = new TraceGraph('trace-visualizer');
             vis.render(result.trace_events);
         }
 
     } catch (err) {
-        consoleEl.innerText = `❌ Python Runtime Error:\n${err}`;
+        consoleEl.innerText = `❌ Runtime Error:\n${err}`;
     } finally {
         btn.disabled = false;
-        btn.innerText = "🔄🦘Run Translation";
+        btn.innerText = "Running Translation";
     }
 }
 

@@ -191,6 +191,9 @@ def test_transpile_generates_valid_code(example_file):
   if filename.endswith(".torch.py"):
     source_fw, target_fw = "torch", "jax"
     target_indicators = ["jax", "jnp", "flax"]
+  elif filename.endswith(".flax_nnx.py"):
+    source_fw, target_fw = "flax_nnx", "torch"
+    target_indicators = ["torch", "nn"]
   elif filename.endswith(".jax.py"):
     source_fw, target_fw = "jax", "torch"
     target_indicators = ["torch", "nn"]

@@ -1,3 +1,8 @@
+"""
+Runtime Configuration Store.
+Updated to support Framework Flavours (Hierarchical Selection).
+"""
+
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, TypeVar
@@ -24,18 +29,30 @@ def get_framework_priority_order() -> List[str]:
   1. Retrieve registered frameworks.
   2. Instantiate adapter to read 'ui_priority'.
   3. Sort by priority (asc), then by name (asc) for stability.
-  4. Frameworks without adapters sort to the end (priority 999).
+  4. Filter out 'Child' frameworks (flavours) if they declare inheritance,
+     keeping the UI list clean (root frameworks only).
   """
   frameworks = available_frameworks()
 
   def sort_key(name: str):
     adapter = get_adapter(name)
     priority = 999
-    if adapter and hasattr(adapter, "ui_priority"):
-      try:
-        priority = int(adapter.ui_priority)
-      except (ValueError, TypeError):
-        pass
+    is_child = False
+
+    if adapter:
+      if hasattr(adapter, "inherits_from") and adapter.inherits_from:
+        is_child = True
+
+      if hasattr(adapter, "ui_priority"):
+        try:
+          priority = int(adapter.ui_priority)
+        except (ValueError, TypeError):
+          pass
+
+    # Move children to the very end (9999) or filter them out in UI logic
+    if is_child:
+      priority = 9999
+
     return (priority, name)
 
   return sorted(frameworks, key=sort_key)
@@ -46,9 +63,14 @@ class RuntimeConfig(BaseModel):
   Global configuration container for the translation engine.
   """
 
-  # Accept string inputs, validated dynamically against the registry
   source_framework: str = "torch"
   target_framework: str = "jax"
+
+  # Feature 06: Framework Flavours
+  # Used to specify sub-frameworks (e.g. 'flax_nnx') when the main selection is generic ('jax').
+  source_flavour: Optional[str] = None
+  target_flavour: Optional[str] = None
+
   strict_mode: bool = False
   plugin_settings: Dict[str, Any] = Field(default_factory=dict)
   plugin_paths: List[Path] = Field(default_factory=list)
@@ -58,16 +80,27 @@ class RuntimeConfig(BaseModel):
   @classmethod
   def validate_framework(cls, v: str) -> str:
     """Ensures the framework is registered in the system."""
-    # Normalize input
     v_clean = v.lower().strip()
-
-    # Allow bypassing if no frameworks loaded (bootstrap/test enviroments)
     known = available_frameworks()
+    # We allow unregistered frameworks if the registry is empty (bootstrap/test mode)
     if known and v_clean not in known:
-      raise ValueError(
-        f"Unknown framework '{v}'. Available: {known}. Add {v}.py to src/ml_switcheroo/frameworks/ to enable support."
-      )
+      raise ValueError(f"Unknown framework: '{v_clean}'. Supported frameworks: {known}")
     return v_clean
+
+  @property
+  def effective_source(self) -> str:
+    """
+    Resolves the specific framework key to use for source logic.
+    If a flavour (e.g. 'flax_nnx') is provided, it overrides the general framework ('jax').
+    """
+    return self.source_flavour if self.source_flavour else self.source_framework
+
+  @property
+  def effective_target(self) -> str:
+    """
+    Resolves the specific framework key to use for target logic.
+    """
+    return self.target_flavour if self.target_flavour else self.target_framework
 
   def parse_plugin_settings(self, schema: Type[T]) -> T:
     try:
@@ -80,11 +113,16 @@ class RuntimeConfig(BaseModel):
     cls,
     source: Optional[str] = None,
     target: Optional[str] = None,
+    source_flavour: Optional[str] = None,
+    target_flavour: Optional[str] = None,
     strict_mode: Optional[bool] = None,
     plugin_settings: Optional[Dict[str, Any]] = None,
     validation_report: Optional[Path] = None,
     search_path: Optional[Path] = None,
   ) -> "RuntimeConfig":
+    """
+    Loads configuration from pyproject.toml and overrides with CLI arguments.
+    """
     start_dir = search_path or Path.cwd()
     toml_config, toml_dir = _load_toml_settings(start_dir)
 
@@ -92,13 +130,17 @@ class RuntimeConfig(BaseModel):
     final_source = source or toml_config.get("source_framework", "torch")
     final_target = target or toml_config.get("target_framework", "jax")
 
+    # 1b. Flavours
+    final_src_flavour = source_flavour or toml_config.get("source_flavour")
+    final_tgt_flavour = target_flavour or toml_config.get("target_flavour")
+
     # 2. Strict Mode
     if strict_mode is not None:
       final_strict = strict_mode
     else:
       final_strict = toml_config.get("strict_mode", False)
 
-      # 3. Plugin Settings
+    # 3. Plugin Settings
     toml_plugins = toml_config.get("plugin_settings", {})
     cli_plugins = plugin_settings or {}
     final_plugins = {**toml_plugins, **cli_plugins}
@@ -108,7 +150,7 @@ class RuntimeConfig(BaseModel):
     if not final_report and "validation_report" in toml_config:
       final_report = Path(toml_config["validation_report"])
 
-      # 5. External Plugins
+    # 5. External Plugins
     raw_paths = toml_config.get("plugin_paths", [])
     final_plugin_paths = []
     if toml_dir:
@@ -121,6 +163,8 @@ class RuntimeConfig(BaseModel):
     return cls(
       source_framework=final_source,
       target_framework=final_target,
+      source_flavour=final_src_flavour,
+      target_flavour=final_tgt_flavour,
       strict_mode=final_strict,
       plugin_settings=final_plugins,
       plugin_paths=final_plugin_paths,

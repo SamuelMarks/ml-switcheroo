@@ -23,7 +23,7 @@ class TestSemantics(SemanticsManager):
   def __init__(self):
     super().__init__()
     # Explicitly set traits for 'jax' (Flax NNX)
-    self.framework_configs["jax"] = {
+    self.framework_configs["flax_nnx"] = {
       "traits": {
         "module_base": "flax.nnx.Module",
         "forward_method": "__call__",
@@ -56,7 +56,7 @@ class TestSemantics(SemanticsManager):
       self.data[name]["variants"] = {}
 
     self.data[name]["variants"]["torch"] = {"api": s_api}
-    self.data[name]["variants"]["jax"] = {"api": t_api}
+    self.data[name]["variants"]["flax_nnx"] = {"api": t_api}
 
     self._reverse_index[s_api] = (name, self.data[name])
     # Key origins required for state injection logic
@@ -107,7 +107,7 @@ class MLP(nn.Module):
 
   config = RuntimeConfig(
     source_framework="torch",
-    target_framework="jax",
+    target_framework="flax_nnx",
     strict_mode=False,  # Disabled to handle super() which fails strict resolution
   )
 
@@ -167,7 +167,7 @@ class Model(torch.nn.Module):
         layers = [torch.nn.Linear(10, 10), torch.nn.ReLU()] 
         self.seq = torch.nn.Sequential(*layers) 
 """
-  config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
+  config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=semantics_manager, config=config)
   result = engine.run(source_code)
 

@@ -24,7 +24,7 @@ class MockTorchToFlaxSemantics(SemanticsManager):
 
     # Configure Traits for JAX (Flax NNX)
     self.framework_configs = {
-      "jax": {
+      "flax_nnx": {
         "traits": {
           "module_base": "flax.nnx.Module",
           "forward_method": "__call__",
@@ -68,7 +68,7 @@ class MockTorchToFlaxSemantics(SemanticsManager):
 def rewriter() -> PivotRewriter:
   """Creates a Rewriter configured for Torch -> JAX translation."""
   semantics = MockTorchToFlaxSemantics()
-  config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
+  config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   return PivotRewriter(semantics, config)
 
 

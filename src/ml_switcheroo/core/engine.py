@@ -1,11 +1,9 @@
 """
 Orchestration Engine for AST Transformations.
 
-This module provides the ``ASTEngine`` class which parses source code,
-applies the sequence of Transformer passes (Purity Analysis, Dependency Scan,
-Rewriting, Import Fixing), and emits the final source code.
-
-It returns structured ``ConversionResult`` objects to enable rich reporting.
+This module uses the configured `effective_target` to drive the compilation process.
+By resolving 'Flavours' (e.g. `flax_nnx`), it ensures specific structural traits
+are loaded by the `PivotRewriter` and `Analysis` passes.
 """
 
 import libcst as cst
@@ -57,16 +55,8 @@ class ASTEngine:
     """
     Initializes the Engine.
 
-    If a validation report is specified in the config, it is loaded into the
-    semantics manager to gate rewrites.
-
-    Args:
-        semantics: The loaded SemanticsManager instance.
-        config: A populated RuntimeConfig Pydantic model.
-        source: Source framework name (legacy fallback).
-        target: Target framework name (legacy fallback).
-        strict_mode: Warning vs Silence flag (legacy fallback).
-        plugin_config: Dict of plugin settings (legacy fallback).
+    Populates `self.source` and `self.target` with the effective (flavour-resolved)
+    framework keys to ensure specialized adapters are used.
     """
     self.semantics = semantics or SemanticsManager()
 
@@ -84,8 +74,10 @@ class ASTEngine:
     if self.config.validation_report:
       self.semantics.load_validation_report(self.config.validation_report)
 
-    self.source = self.config.source_framework
-    self.target = self.config.target_framework
+    # Flavour Support: Use 'flow-specific' keys
+    # If target_flavour is set (e.g. 'paxml'), we drive rewrites using that adapter.
+    self.source = self.config.effective_source
+    self.target = self.config.effective_target
     self.strict_mode = self.config.strict_mode
 
   def parse(self, code: str) -> cst.Module:
@@ -100,14 +92,6 @@ class ASTEngine:
     """
     Executes the full transpilation pipeline.
 
-    Steps:
-    0a. Purity Analysis (if targeting JAX): Flag unsafe side-effects.
-    0b. Lifecycle Analysis: Detect dynamic attribute definition.
-    0c. Dependency Analysis: Flag unmapped 3rd party libraries.
-    1. Rewrite Call usages (Semantic Pivot).
-    2. Scan for lingering source references.
-    3. Feature-driven Import Fixing.
-
     Args:
         code: The input source string.
 
@@ -116,7 +100,10 @@ class ASTEngine:
     """
     reset_tracer()
     tracer = get_tracer()
-    root_phase = tracer.start_phase("Transpilation Pipeline", "Full Process")
+
+    # Log the effective translation path (e.g. torch -> flax_nnx)
+    root_phase = tracer.start_phase("Transpilation Pipeline", f"{self.source} -> {self.target}")
+
     try:
       tracer.start_phase("Preprocessing", "Parsing & Analysis")
       tree = self.parse(code)
@@ -126,16 +113,15 @@ class ASTEngine:
 
     errors_log = []
 
-    # Pass 0a: Purity Analysis (Specific to Functional Frameworks like JAX)
-    if self.target == "jax":
+    # Pass 0a: Purity Analysis
+    # Check against JAX-like targets (jax, flax_nnx, paxml)
+    if "jax" in self.target or "flax" in self.target or "pax" in self.target:
       tracer.start_phase("Purity Check", "Scanning for side-effects")
-      # Pass semantics to allow dynamic RNG method detection
-      purity_scanner = PurityScanner(semantics=self.semantics)
+      purity_scanner = PurityScanner(semantics=self.semantics, source_fw=self.source)
       tree = tree.visit(purity_scanner)
       tracer.end_phase()
 
-    # Pass 0b: Lifecycle Analysis (Detect dynamic state definition)
-    # This is critical for converting Pythonic PyTorch to Static Graph JAX/Flax
+    # Pass 0b: Lifecycle Analysis
     lifecycle_tracker = InitializationTracker()
     tree.visit(lifecycle_tracker)
 
@@ -143,42 +129,43 @@ class ASTEngine:
       for warning in lifecycle_tracker.warnings:
         errors_log.append(f"Lifecycle Warning: {warning}")
 
-    # Pass 0c: Dependency Analysis (Validation)
-    # Identifies imports like 'pandas', 'cv2' that aren't mapped in semantics.
+    # Pass 0c: Dependency Analysis
+    # Use effective source to ignore framework imports correctly
     dep_scanner = DependencyScanner(self.semantics, self.source)
     tree.visit(dep_scanner)
-
     if dep_scanner.unknown_imports:
-      # We treat these as warnings, not compilation failures, as the code might still run e.g. in eager mode
       sorted_deps = sorted(list(dep_scanner.unknown_imports))
       msg = f"Warning: Unmapped 3rd-party dependencies detected: {', '.join(sorted_deps)}"
       errors_log.append(msg)
 
     tracer.end_phase()
 
-    # Pass 1: Semantic Pivot (Change usage)
+    # Pass 1: Semantic Pivot (Rewriter)
     tracer.start_phase("Rewrite Engine", "Visitor Traversal")
+    # PivotRewriter receives the full config, so it can access effective_target
     rewriter = PivotRewriter(self.semantics, self.config)
     tree = tree.visit(rewriter)
     tracer.end_phase()
 
-    # Pass 2: Import Scaffolding (Change imports)
-    if self.config.source_framework != self.config.target_framework:
+    # Pass 2: Import Scaffolding
+    # If effective root differs, we run fixer.
+    # e.g., torch (src) != flax_nnx (tgt)
+    if self.source != self.target:
       tracer.start_phase("Import Fixer", "Resolving Dependencies")
-      # Sub-step 2a: Check for lingering usages
-      # Checks if source framework symbols remain after rewriting (e.g. Escape Hatches)
-      scanner = UsageScanner(self.config.source_framework)
+
+      # Sub-step 2a: Check usage of effective source
+      scanner = UsageScanner(self.source)
       tree.visit(scanner)
       should_preserve = scanner.get_result()
 
-      # Sub-step 2b: Retrieve Data-Driven Import Maps & Alias Config
-      submodule_map = self.semantics.get_import_map(self.config.target_framework)
+      # Sub-step 2b: Retrieve import maps for effective target
+      submodule_map = self.semantics.get_import_map(self.target)
       alias_map = self.semantics.get_framework_aliases()
 
       # Sub-step 2c: Fix imports
       fixer = ImportFixer(
-        self.config.source_framework,
-        self.config.target_framework,
+        self.source,
+        self.target,
         submodule_map=submodule_map,
         alias_map=alias_map,
         preserve_source=should_preserve,

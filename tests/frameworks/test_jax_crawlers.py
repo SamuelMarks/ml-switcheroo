@@ -8,6 +8,9 @@ import pytest
 import importlib
 from unittest.mock import MagicMock, patch
 
+# Fix: Import specific adapter that handles layers
+from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
+
 
 def create_mock_module(name):
   return types.ModuleType(name)
@@ -30,14 +33,12 @@ def mock_jax_env():
 
   mock_linen = create_mock_module("flax.linen")
 
-  # FIX: Define Module class for issubclass check
   class Module:
     pass
 
   Module.__name__ = "Module"
   mock_linen.Module = Module
 
-  # FIX: Inherit from Module
   class Dense(Module):
     pass
 
@@ -46,6 +47,8 @@ def mock_jax_env():
 
   mock_flax = create_mock_module("flax")
   mock_flax.linen = mock_linen
+  # We also mock flax.nnx as checking for it is part of FlaxNNXAdapter logic
+  mock_flax.nnx = create_mock_module("flax.nnx")
 
   mock_jax = create_mock_module("jax")
   mock_jax.nn = create_mock_module("jax.nn")
@@ -62,16 +65,17 @@ def mock_jax_env():
     "optax.losses": mock_losses_mod,
     "flax": mock_flax,
     "flax.linen": mock_linen,
+    "flax.nnx": mock_flax.nnx,
     "jax": mock_jax,
     "jax.nn": mock_jax.nn,
     "jax.numpy": mock_jax.numpy,
   }
 
   with patch.dict(sys.modules, overrides):
-    # Fix reload order
-    import ml_switcheroo.frameworks.jax
+    # Force reload modules
     import ml_switcheroo.frameworks.optax_shim
     import ml_switcheroo.frameworks.flax_shim
+    import ml_switcheroo.frameworks.jax
 
     importlib.reload(ml_switcheroo.frameworks.optax_shim)
     importlib.reload(ml_switcheroo.frameworks.flax_shim)
@@ -90,20 +94,21 @@ def mock_jax_env():
         return []
 
       mock_members.side_effect = get_members
-      yield ml_switcheroo.frameworks.jax.JaxAdapter()
+      # We explicitly use FlaxNNXAdapter which is capable of scanning layers
+      yield FlaxNNXAdapter()
 
 
 def test_jax_adapter_integration(mock_jax_env):
-  """Verify JaxAdapter calls shims."""
+  """Verify FlaxNNXAdapter calls shims correctly."""
   adapter = mock_jax_env
   from ml_switcheroo.frameworks.base import StandardCategory
 
-  # LOSS -> Optax
+  # LOSS -> Optax (inherited from core logic)
   losses = adapter.collect_api(StandardCategory.LOSS)
   names = [r.name for r in losses]
   assert "l2_loss" in names, f"Expected l2_loss, found {names}"
 
-  # LAYER -> Flax
+  # LAYER -> Flax (specific to Flax adapter)
   layers = adapter.collect_api(StandardCategory.LAYER)
   layer_names = [r.name for r in layers]
   assert "Dense" in layer_names

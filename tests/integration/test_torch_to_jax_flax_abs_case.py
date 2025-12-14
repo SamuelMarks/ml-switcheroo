@@ -11,7 +11,9 @@ Verifies:
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.frameworks.jax import JaxAdapter
+
+# Fix: Import specific adapter for Neural traits
+from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
 
 # We use a SemanticsManager pointing to mocks to simulate the fix
@@ -19,9 +21,8 @@ from ml_switcheroo.frameworks.jax import JaxAdapter
 class FixedSemantics(SemanticsManager):
   def __init__(self):
     super().__init__()
-    # Apply the logic from the corrected Adapter directly to memory
-    # to prove the fix works given the snapshot structure we expect
-    adapter = JaxAdapter()
+    # Use FlaxNNXAdapter traits for 'jax' key to enable structure rewrites
+    adapter = FlaxNNXAdapter()
 
     # Simulate a snapshot that has run apply_wiring
     snapshot = {"__framework__": "jax", "mappings": {}, "imports": {}}
@@ -41,7 +42,7 @@ class FixedSemantics(SemanticsManager):
     # Neural Module Definition
     self.data["Module"] = {"std_args": [], "variants": {"torch": {"api": "torch.nn.Module"}}}
 
-    # Override configurations
+    # Override configurations for 'jax' to use Flax NNX traits
     self.framework_configs["jax"] = {"traits": adapter.structural_traits.model_dump(exclude_unset=True)}
 
     # Mock Aliases from Adapter
@@ -55,21 +56,21 @@ class FixedSemantics(SemanticsManager):
 
 
 def test_specific_abs_conversion():
-  input_torch = """
+  input_torch = """ 
 import torch
 import torch.nn as nn
 
-class Model(nn.Module):
-    def forward(self, x):
-        return torch.abs(x)
+class Model(nn.Module): 
+    def forward(self, x): 
+        return torch.abs(x) 
 """
-  output_jax_flax = """
+  output_jax_flax = """ 
 import jax.numpy as jnp
 from flax import nnx
 
-class Model(nnx.Module):
-    def __call__(self, x):
-        return jnp.abs(x)
+class Model(nnx.Module): 
+    def __call__(self, x): 
+        return jnp.abs(x) 
 """
 
   semantics = FixedSemantics()

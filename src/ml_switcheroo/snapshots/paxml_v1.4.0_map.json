@@ -1,11 +1,38 @@
 {
   "__framework__": "paxml",
+  "imports": {
+    "praxis.layers": {
+      "alias": "pl",
+      "root": "praxis",
+      "sub": "layers"
+    }
+  },
   "mappings": {
+    "Abs": {
+      "api": "jnp.abs"
+    },
+    "AdaBelief": {
+      "api": "optax.adabelief",
+      "requires_plugin": "optimizer_constructor"
+    },
+    "Adagrad": {
+      "api": "optax.adagrad",
+      "requires_plugin": "optimizer_constructor"
+    },
+    "Adam": {
+      "api": "optax.adam",
+      "requires_plugin": "optimizer_constructor"
+    },
+    "AdamW": {
+      "api": "optax.adamw",
+      "requires_plugin": "optimizer_constructor"
+    },
     "Dropout": {
       "api": "praxis.layers.Dropout"
     },
     "Einsum": {
-      "api": "praxis.layers.Einsum"
+      "api": "jnp.einsum",
+      "requires_plugin": "einsum_normalizer"
     },
     "Elu": {
       "api": "praxis.layers.ELU"
@@ -19,14 +46,37 @@
     "Identity": {
       "api": "praxis.layers.Identity"
     },
+    "LBFGS": {
+      "api": "optax.lbfgs",
+      "requires_plugin": "optimizer_constructor"
+    },
     "LeakyRelu": {
       "api": "praxis.layers.LeakyReLU"
+    },
+    "Linear": {
+      "api": "praxis.layers.Linear",
+      "args": {
+        "bias": "use_bias",
+        "in_features": "input_dims",
+        "out_features": "output_dims"
+      }
     },
     "Optional": {
       "api": "praxis.base_layer.Optional"
     },
+    "RMSprop": {
+      "api": "optax.rmsprop",
+      "requires_plugin": "optimizer_constructor"
+    },
     "Relu": {
       "api": "praxis.layers.ReLU"
+    },
+    "SGD": {
+      "api": "optax.sgd",
+      "requires_plugin": "optimizer_constructor"
+    },
+    "Sequential": {
+      "api": "praxis.layers.Sequential"
     },
     "Sigmoid": {
       "api": "praxis.layers.Sigmoid"
@@ -40,17 +90,49 @@
     "Tanh": {
       "api": "praxis.layers.Tanh"
     },
+    "Yogi": {
+      "api": "optax.yogi",
+      "requires_plugin": "optimizer_constructor"
+    },
+    "abs": {
+      "api": "jnp.abs"
+    },
     "any": {
       "api": "praxis.base_layer.Any"
+    },
+    "data_ptr": {
+      "api": "data",
+      "requires_plugin": "method_to_property"
     },
     "exp": {
       "api": "praxis.layers.activations.Exp"
     },
+    "permute_dims": {
+      "api": "jnp.transpose",
+      "requires_plugin": "pack_varargs"
+    },
     "repeat": {
       "api": "praxis.layers.Repeat"
     },
+    "size": {
+      "api": "shape",
+      "requires_plugin": "method_to_property"
+    },
+    "step": {
+      "requires_plugin": "optimizer_step"
+    },
     "tanh": {
       "api": "praxis.layers.Tanh"
+    },
+    "trace": {
+      "api": "optax.trace"
+    },
+    "zero_grad": {
+      "requires_plugin": "optimizer_zero_grad"
     }
+  },
+  "templates": {
+    "fori_loop": "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})",
+    "scan": "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})"
   }
 }
