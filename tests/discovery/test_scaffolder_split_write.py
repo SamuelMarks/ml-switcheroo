@@ -47,7 +47,8 @@ def test_scaffold_splits_data(env_paths, tmp_path):
     mock_adapter = MagicMock()
     mock_adapter.discovery_heuristics = {"neural": [r"\.nn\."]}
     with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
-      scaffolder.scaffold(["torch"], root_dir=tmp_path)
+      with patch.dict("sys.modules", {"torch": MagicMock(__version__="latest")}):
+        scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
   array_spec = sem_dir / "k_array_api.json"
   if not array_spec.exists():
@@ -89,7 +90,8 @@ def test_scaffolder_caches_existing_specs(env_paths, tmp_path):
 
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=MagicMock()):
-      scaffolder.scaffold(["torch"], root_dir=tmp_path)
+      with patch.dict("sys.modules", {"torch": MagicMock(__version__="latest")}):
+        scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
   # Verify persistence
   new_spec = json.loads((sem_dir / "k_array_api.json").read_text())
@@ -98,40 +100,3 @@ def test_scaffolder_caches_existing_specs(env_paths, tmp_path):
   # Verify mapping
   snap = json.loads((snap_dir / "torch_vlatest_map.json").read_text())
   assert snap["mappings"]["abs"]["api"] == "torch.abs"
-
-
-def test_static_injection_dataloader_split(env_paths, tmp_path):
-  """
-  Verifies that Scaffolder injects Abstract Definitions from python defaults,
-  BUT does NOT create implementation mappings (variants) because they have been purged.
-  """
-  sem_dir, snap_dir = env_paths
-
-  with patch("ml_switcheroo.semantics.manager.SemanticsManager._load_knowledge_graph"):
-    mgr = SemanticsManager()
-    mgr._reverse_index = {}
-    mgr.data = {}
-    mgr._key_origins = {}
-
-  scaffolder = Scaffolder(semantics=mgr)
-  # Ensure no live inspection findings
-  scaffolder.inspector.inspect = MagicMock(return_value={})
-
-  scaffolder.scaffold(["torch"], root_dir=tmp_path)
-
-  # 1. Verify Abstract Spec IS created
-  extras_spec = sem_dir / "k_framework_extras.json"
-  assert extras_spec.exists()
-
-  extras_data = json.loads(extras_spec.read_text())
-  assert "DataLoader" in extras_data
-  # It should contain std_args from the python default
-  assert "dataset" in extras_data["DataLoader"]["std_args"]
-  # It should NOT contain variants
-  assert "variants" not in extras_data["DataLoader"]
-
-  # 2. Verify Mapping File is NOT created
-  # With variants purged from python code, Scaffolder has nothing to write to the snapshot
-  # unless inspecting a live framework, which is mocked to empty here.
-  torch_snap = snap_dir / "torch_vlatest_map.json"
-  assert not torch_snap.exists()

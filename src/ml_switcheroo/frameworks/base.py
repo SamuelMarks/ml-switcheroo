@@ -149,7 +149,14 @@ class FrameworkAdapter(Protocol):
   # --- 8. Documentation & Demo ---
   @classmethod
   def get_example_code(cls) -> str:
-    """Returns a Python code snippet demonstrating a typical operation."""
+    """Returns the standard demo example."""
+    ...
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """
+    Returns a dictionary of categorized examples.
+    Expected keys: 'tier1_math', 'tier2_neural', 'tier3_extras'.
+    """
     ...
 
   # --- 9. Distributed Semantics (The Middle Layer) ---
@@ -205,7 +212,7 @@ def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
     logging.warning(f"Snapshot directory missing: {SNAPSHOT_DIR}")
     return {}
 
-  # Find files matching pattern {fw_key}_v*.json
+  # Find files matching pattern {fw}_v*.json
   # We pick the lexicographically last one assuming it's the latest version
   candidates = sorted(list(SNAPSHOT_DIR.glob(f"{fw_key}_v*.json")))
 

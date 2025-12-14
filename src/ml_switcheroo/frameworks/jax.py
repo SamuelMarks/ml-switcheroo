@@ -55,6 +55,42 @@ class JaxAdapter:
       if not self._snapshot_data:
         logging.warning("JAX not installed and no snapshot found. Scanning unavailable.")
 
+    @classmethod
+    def get_example_code(cls) -> str:
+      return cls().get_tiered_examples()["tier1_math"]
+
+    def get_tiered_examples(self) -> Dict[str, str]:
+      return {
+        "tier1_math": """import jax.numpy as jnp
+
+def math_ops(x, y):
+  # Tier 1: Array API Standard
+  a = jnp.abs(x)
+  b = jnp.add(a, y)
+  return jnp.mean(b)""",
+        "tier2_neural": """from flax import nnx
+import jax.numpy as jnp
+
+class Net(nnx.Module):
+  # Tier 2: Neural State & Layers
+  def __init__(self, rngs: nnx.Rngs):
+    self.linear = nnx.Linear(10, 10, rngs=rngs)
+
+  def __call__(self, x):
+    x = self.linear(x)
+    return nnx.relu(x)""",
+        "tier3_extras": """import jax
+from jax import random
+
+def stochastic_step(x, seed):
+  # Tier 3: Extras (Random State)
+  rng = random.PRNGKey(seed)
+  rng, key = random.split(rng)
+
+  # Explicit RNG passing
+  return random.normal(key, x.shape)""",
+      }
+
   # --- Discovery ---
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:

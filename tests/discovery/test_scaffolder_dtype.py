@@ -34,7 +34,13 @@ def test_scaffolder_propagates_type_field(tmp_path):
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     # Patch adapter to avoid real torch lookup
     with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=MagicMock()):
-      scaffolder.scaffold(["torch"], root_dir=tmp_path)
+      # Patch importlib.metadata.version to return 'latest' directly for deterministic filenames
+      with patch("importlib.metadata.version", return_value="latest"):
+        # Also need to patch torch.__version__ if torch is importable
+        with patch("ml_switcheroo.discovery.scaffolder.importlib.metadata.version", return_value="latest"):
+          # Force version inside the logic block if try/except falls through
+          with patch.dict("sys.modules", {"torch": MagicMock(__version__="latest")}):
+            scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
   # Check Spec (might be in extras if type not matched, but let's check both)
   spec_path = sem_dir / "k_array_api.json"
@@ -45,5 +51,6 @@ def test_scaffolder_propagates_type_field(tmp_path):
   assert spec["float32"]["type"] == "attribute"
 
   # Check Mapping
+  # Now guaranteed to be vlatest because we mocked the version retrieval
   snap = json.loads((snap_dir / "torch_vlatest_map.json").read_text())
   assert snap["mappings"]["float32"]["api"] == "torch.float32"

@@ -58,6 +58,39 @@ class KerasAdapter:
       if not self._snapshot_data:
         logging.warning("Keras not installed and no snapshot found. Scanning unavailable.")
 
+    @classmethod
+    def get_example_code(cls) -> str:
+      return cls().get_tiered_examples()["tier2_neural"]
+
+    def get_tiered_examples(self) -> Dict[str, str]:
+      return {
+        "tier1_math": """import keras
+from keras import ops
+
+def math_ops(x, y):
+  # Tier 1: Using keras.ops for backend-agnostic math
+  a = ops.abs(x)
+  b = ops.add(a, y)
+  return ops.mean(b)""",
+        "tier2_neural": """import keras
+from keras import layers
+
+def build_model(input_shape):
+  # Tier 2: Functional Model API
+  inputs = keras.Input(shape=input_shape)
+  x = layers.Conv2D(32, 3, activation="relu")(inputs)
+  x = layers.Flatten()(x)
+  outputs = layers.Dense(10)(x)
+  return keras.Model(inputs, outputs)""",
+        "tier3_extras": """import keras
+import keras.random
+
+def logic(x):
+  # Tier 3: Framework Extras (Random)
+  seed = keras.random.SeedGenerator(42)
+  return keras.random.normal(x.shape, seed=seed)""",
+      }
+
   # --- Discovery Configuration ---
   # Used by `ml_switcheroo sync keras` to find math/layer implementations
   @property

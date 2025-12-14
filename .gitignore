@@ -1,6 +1,7 @@
 # If you clone ONNX and array-api to inside this repo
 array-api
 onnx
+_bootstrap_temp
 
 # IDEs
 .idea

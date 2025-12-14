@@ -101,12 +101,44 @@ class TorchAdapter:
   @classmethod
   def get_example_code(cls) -> str:
     """Returns the standard demo example."""
-    return """import torch
-import torch.nn as nn
+    return cls().get_tiered_examples()["tier2_neural"]
 
-class Model(nn.Module): 
-    def forward(self, x): 
-        return torch.abs(x)"""
+  def get_tiered_examples(self) -> Dict[str, str]:
+    return {
+      "tier1_math": """import torch
+
+def math_ops(x, y):
+  # Tier 1: Array API Standard
+  # Examples: abs, add, mean
+  a = torch.abs(x)
+  b = torch.add(a, y)
+  return torch.mean(b)""",
+      "tier2_neural": """import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class Net(nn.Module):
+  # Tier 2: Neural State & Layers
+  def __init__(self):
+    super().__init__()
+    self.conv1 = nn.Conv2d(1, 32, 3, 1)
+    self.fc1 = nn.Linear(5408, 10)
+
+  def forward(self, x):
+    x = self.conv1(x)
+    x = F.relu(x)
+    x = torch.flatten(x, 1)
+    return self.fc1(x)""",
+      "tier3_extras": """import torch
+from torch.utils.data import DataLoader
+
+def process_data(ds):
+  # Tier 3: Framework Extras
+  # DataLoaders and Device placement
+  dl = DataLoader(ds, batch_size=32, shuffle=True)
+  device = torch.device('cuda')
+  return dl""",
+    }
 
   # --- Ghost Protocol Implementation ---
 
