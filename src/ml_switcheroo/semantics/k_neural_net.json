@@ -1665,12 +1665,6 @@
       ]
     ]
   },
-  "Layer": {
-    "description": "",
-    "std_args": [
-      "x"
-    ]
-  },
   "LayerNormalization": {
     "description": "This is layer normalization defined in ONNX as function. The overall computation can be split into two stages. The first stage is standardization, which makes the normalized elements have zero mean and unit variances. The computation required by standardization can be described by the following equa...",
     "from": "Operators.md",
@@ -1743,7 +1737,6 @@
       ]
     ]
   },
-  "Linear": {},
   "Log": {
     "description": "Calculates the natural log of the given input tensor, element-wise.",
     "from": "Operators.md",
@@ -2668,7 +2661,6 @@
       ]
     ]
   },
-  "ReLU": {},
   "Reciprocal": {
     "description": "Reciprocal takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the reciprocal is, y = 1/x, is applied to the tensor elementwise.",
     "from": "Operators.md",
@@ -3332,7 +3324,6 @@
       ]
     ]
   },
-  "Sequential": {},
   "Shape": {
     "description": "Takes a tensor as input and outputs an 1D int64 tensor containing the shape of the input tensor. Optional attributes start and end can be used to compute a slice of the input tensor's shape. If start axis is omitted, the slice starts from axis 0. The end axis, if specified, is exclusive (and the ret...",
     "from": "Operators.md",

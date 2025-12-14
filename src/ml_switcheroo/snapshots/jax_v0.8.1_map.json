@@ -1,687 +1,665 @@
 {
   "__framework__": "jax",
+  "imports": {
+    "flax.nnx": {
+      "alias": "nnx",
+      "root": "flax",
+      "sub": "nnx"
+    }
+  },
   "mappings": {
     "Abs": {
-      "api": "jax.numpy.abs"
+      "api": "jnp.abs"
     },
     "Acos": {
-      "api": "jax.numpy.acos"
+      "api": "jnp.acos"
     },
     "Acosh": {
-      "api": "jax.numpy.acosh"
+      "api": "jnp.acosh"
+    },
+    "Adagrad": {
+      "api": "optax.adagrad",
+      "requires_plugin": "optimizer_constructor"
+    },
+    "Adam": {
+      "api": "optax.adam",
+      "requires_plugin": "optimizer_constructor"
+    },
+    "AdamW": {
+      "api": "optax.adamw",
+      "requires_plugin": "optimizer_constructor"
     },
     "Add": {
-      "api": "jax.numpy.add"
+      "api": "jnp.add"
     },
     "ArgMax": {
-      "api": "jax.numpy.argmax"
+      "api": "jnp.argmax"
     },
     "ArgMin": {
-      "api": "jax.numpy.argmin"
+      "api": "jnp.argmin"
     },
     "Asin": {
-      "api": "jax.numpy.asin"
+      "api": "jnp.asin"
     },
     "Asinh": {
-      "api": "jax.numpy.asinh"
+      "api": "jnp.asinh"
     },
     "Atan": {
-      "api": "jax.numpy.atan"
+      "api": "jnp.atan"
     },
     "Atanh": {
-      "api": "jax.numpy.atanh"
+      "api": "jnp.atanh"
     },
     "Ceil": {
-      "api": "jax.numpy.ceil"
+      "api": "jnp.ceil"
     },
     "Clip": {
-      "api": "jax.numpy.clip"
+      "api": "jnp.clip"
     },
     "Compress": {
-      "api": "jax.numpy.compress"
+      "api": "jnp.compress"
     },
     "Cos": {
-      "api": "jax.numpy.cos"
+      "api": "jnp.cos"
     },
     "Cosh": {
-      "api": "jax.numpy.cosh"
+      "api": "jnp.cosh"
     },
     "CumSum": {
-      "api": "jax.numpy.cumsum"
-    },
-    "DataLoader": {
-      "api": "GenericDataLoader",
-      "requires_plugin": "convert_dataloader"
+      "api": "jnp.cumsum"
     },
     "Det": {
-      "api": "jax.numpy.linalg.det"
+      "api": "jnp.linalg.det"
     },
     "Einsum": {
-      "api": "jax.numpy.einsum"
+      "api": "jnp.einsum",
+      "requires_plugin": "einsum_normalizer"
     },
     "Equal": {
-      "api": "jax.numpy.equal"
+      "api": "jnp.equal"
     },
     "Exp": {
-      "api": "jax.numpy.exp"
+      "api": "jnp.exp"
     },
     "Floor": {
-      "api": "jax.numpy.floor"
-    },
-    "Gelu": {
-      "api": "jax.nn.gelu",
-      "args": {
-        "approximate": "approximate",
-        "x": "x"
-      }
+      "api": "jnp.floor"
     },
     "Greater": {
-      "api": "jax.numpy.greater"
+      "api": "jnp.greater"
     },
     "Identity": {
-      "api": "jax.numpy.identity"
+      "api": "jnp.identity"
     },
     "IsNaN": {
-      "api": "jax.numpy.isnan"
+      "api": "jnp.isnan"
+    },
+    "LBFGS": {
+      "api": "optax.lbfgs",
+      "requires_plugin": "optimizer_constructor"
     },
     "Less": {
-      "api": "jax.numpy.less"
+      "api": "jnp.less"
     },
     "Log": {
-      "api": "jax.numpy.log"
+      "api": "jnp.log"
     },
     "MatMul": {
-      "api": "jax.numpy.matmul"
+      "api": "jnp.matmul"
     },
     "Max": {
-      "api": "jax.numpy.max"
+      "api": "jnp.max"
     },
     "Mean": {
-      "api": "jax.numpy.mean"
+      "api": "jnp.mean"
     },
     "Min": {
-      "api": "jax.numpy.min"
+      "api": "jnp.min"
     },
     "NonZero": {
-      "api": "jax.numpy.nonzero"
+      "api": "jnp.nonzero"
+    },
+    "Pad": {
+      "api": "jnp.pad"
     },
     "Pow": {
-      "api": "jax.numpy.pow"
+      "api": "jnp.pow"
+    },
+    "RMSprop": {
+      "api": "optax.rmsprop",
+      "requires_plugin": "optimizer_constructor"
     },
     "Reciprocal": {
-      "api": "jax.numpy.reciprocal"
+      "api": "jnp.reciprocal"
     },
     "Reshape": {
-      "api": "jax.numpy.reshape"
+      "api": "jnp.reshape"
     },
     "Round": {
-      "api": "jax.numpy.round"
+      "api": "jnp.round"
+    },
+    "SGD": {
+      "api": "optax.sgd",
+      "requires_plugin": "optimizer_constructor"
     },
     "Sign": {
-      "api": "jax.numpy.sign"
+      "api": "jnp.sign"
     },
     "Sin": {
-      "api": "jax.numpy.sin"
+      "api": "jnp.sin"
     },
     "Sinh": {
-      "api": "jax.numpy.sinh"
+      "api": "jnp.sinh"
     },
     "Size": {
-      "api": "jax.numpy.size"
-    },
-    "Softmax": {
-      "api": "jax.nn.softmax",
-      "args": {
-        "dim": "axis",
-        "x": "x"
-      }
+      "api": "jnp.size"
     },
     "Sqrt": {
-      "api": "jax.numpy.sqrt"
+      "api": "jnp.sqrt"
     },
     "Squeeze": {
-      "api": "jax.numpy.squeeze"
+      "api": "jnp.squeeze"
     },
     "Sum": {
-      "api": "jax.numpy.sum"
+      "api": "jnp.sum"
     },
     "Tan": {
-      "api": "jax.numpy.tan"
+      "api": "jnp.tan"
     },
     "Tanh": {
-      "api": "jax.numpy.tanh"
+      "api": "jnp.tanh"
     },
-    "TensorDataset": null,
     "Tile": {
-      "api": "jax.numpy.tile"
+      "api": "jnp.tile"
     },
     "Transpose": {
-      "api": "jax.numpy.transpose"
+      "api": "jnp.transpose"
     },
     "Unique": {
-      "api": "jax.numpy.unique"
+      "api": "jnp.unique"
     },
     "Where": {
-      "api": "jax.numpy.where"
+      "api": "jnp.where"
+    },
+    "__array_namespace_info__": {
+      "api": "jnp.__array_namespace_info__"
+    },
+    "__call__": {
+      "requires_plugin": "inject_training_flag"
     },
     "abs": {
-      "api": "jax.numpy.abs",
-      "args": {
-        "a": "a"
-      }
+      "api": "jnp.abs"
     },
     "acos": {
-      "api": "jax.numpy.acos"
+      "api": "jnp.acos"
     },
     "acosh": {
-      "api": "jax.numpy.acosh"
+      "api": "jnp.acosh"
     },
     "add": {
-      "api": "jax.numpy.add",
-      "requires_plugin": "decompose_alpha"
-    },
-    "add_": {
-      "api": "jax.numpy.add",
-      "requires_plugin": "unroll_inplace_ops"
+      "api": "jnp.add"
     },
     "all": {
-      "api": "jax.numpy.all"
+      "api": "jnp.all"
     },
     "any": {
-      "api": "jax.numpy.any"
+      "api": "jnp.any"
     },
     "argmax": {
-      "api": "jax.numpy.argmax"
+      "api": "jnp.argmax"
     },
     "argmin": {
-      "api": "jax.numpy.argmin"
+      "api": "jnp.argmin"
     },
     "asin": {
-      "api": "jax.numpy.asin"
+      "api": "jnp.asin"
     },
     "asinh": {
-      "api": "jax.numpy.asinh"
+      "api": "jnp.asinh"
     },
     "atan": {
-      "api": "jax.numpy.atan"
+      "api": "jnp.atan"
     },
     "atan2": {
-      "api": "jax.numpy.atan2"
+      "api": "jnp.atan2"
     },
     "atanh": {
-      "api": "jax.numpy.atanh"
+      "api": "jnp.atanh"
     },
     "bitwise_and": {
-      "api": "jax.numpy.bitwise_and"
+      "api": "jnp.bitwise_and"
     },
     "bitwise_invert": {
-      "api": "jax.numpy.bitwise_invert"
+      "api": "jnp.bitwise_invert"
     },
     "bitwise_left_shift": {
-      "api": "jax.numpy.bitwise_left_shift"
+      "api": "jnp.bitwise_left_shift"
     },
     "bitwise_or": {
-      "api": "jax.numpy.bitwise_or"
+      "api": "jnp.bitwise_or"
     },
     "bitwise_right_shift": {
-      "api": "jax.numpy.bitwise_right_shift"
+      "api": "jnp.bitwise_right_shift"
     },
     "bitwise_xor": {
-      "api": "jax.numpy.bitwise_xor"
+      "api": "jnp.bitwise_xor"
     },
     "broadcast_arrays": {
-      "api": "jax.numpy.broadcast_arrays"
+      "api": "jnp.broadcast_arrays"
     },
     "broadcast_to": {
-      "api": "jax.numpy.broadcast_to"
+      "api": "jnp.broadcast_to"
+    },
+    "call": {
+      "requires_plugin": "inject_training_flag"
     },
     "can_cast": {
-      "api": "jax.numpy.can_cast"
+      "api": "jnp.can_cast"
     },
     "ceil": {
-      "api": "jax.numpy.ceil"
+      "api": "jnp.ceil"
     },
     "clip": {
-      "api": "jax.numpy.clip"
+      "api": "jnp.clip"
     },
     "conj": {
-      "api": "jax.numpy.conj"
+      "api": "jnp.conj"
     },
     "copysign": {
-      "api": "jax.numpy.copysign"
+      "api": "jnp.copysign"
     },
     "cos": {
-      "api": "jax.numpy.cos"
+      "api": "jnp.cos"
     },
     "cosh": {
-      "api": "jax.numpy.cosh"
+      "api": "jnp.cosh"
     },
     "count_nonzero": {
-      "api": "jax.numpy.count_nonzero"
+      "api": "jnp.count_nonzero"
     },
     "cross": {
-      "api": "jax.numpy.cross"
-    },
-    "cuda_is_available": {
-      "api": "jax.devices",
-      "requires_plugin": "cuda_is_available"
+      "api": "jnp.cross"
     },
     "data_ptr": {
       "api": "data",
       "requires_plugin": "method_to_property"
     },
     "det": {
-      "api": "jax.numpy.linalg.det"
-    },
-    "device": {
-      "api": "jax.devices",
-      "requires_plugin": "device_allocator"
+      "api": "jnp.linalg.det"
     },
     "diagonal": {
-      "api": "jax.numpy.diagonal"
+      "api": "jnp.diagonal"
     },
     "diff": {
-      "api": "jax.numpy.diff"
+      "api": "jnp.diff"
     },
     "divide": {
-      "api": "jax.numpy.divide"
-    },
-    "dropout": {
-      "api": "jax.random.bernoulli",
-      "requires_plugin": "inject_prng"
+      "api": "jnp.divide"
     },
     "eigh": {
-      "api": "jax.numpy.linalg.eigh"
+      "api": "jnp.linalg.eigh"
     },
     "eigvalsh": {
-      "api": "jax.numpy.linalg.eigvalsh"
+      "api": "jnp.linalg.eigvalsh"
     },
     "empty_like": {
-      "api": "jax.numpy.empty_like"
+      "api": "jnp.empty_like"
     },
     "equal": {
-      "api": "jax.numpy.equal"
-    },
-    "eval": {
-      "api": "None",
-      "requires_plugin": "capture_eval_state"
+      "api": "jnp.equal"
     },
     "exp": {
-      "api": "jax.numpy.exp"
+      "api": "jnp.exp"
     },
     "expand_dims": {
-      "api": "jax.numpy.expand_dims"
+      "api": "jnp.expand_dims"
     },
     "expm1": {
-      "api": "jax.numpy.expm1"
+      "api": "jnp.expm1"
     },
     "fft": {
-      "api": "jax.numpy.fft.fft"
+      "api": "jnp.fft.fft"
     },
     "fftn": {
-      "api": "jax.numpy.fft.fftn"
+      "api": "jnp.fft.fftn"
     },
     "fftshift": {
-      "api": "jax.numpy.fft.fftshift"
+      "api": "jnp.fft.fftshift"
     },
     "finfo": {
-      "api": "jax.numpy.finfo"
+      "api": "jnp.finfo"
     },
     "flip": {
-      "api": "jax.numpy.flip"
-    },
-    "float32": {
-      "api": "jax.numpy.float32",
-      "args": {}
+      "api": "jnp.flip"
     },
     "floor": {
-      "api": "jax.numpy.floor"
+      "api": "jnp.floor"
     },
     "floor_divide": {
-      "api": "jax.numpy.floor_divide"
+      "api": "jnp.floor_divide"
+    },
+    "forward": {
+      "requires_plugin": "inject_training_flag"
     },
     "full_like": {
-      "api": "jax.numpy.full_like"
+      "api": "jnp.full_like"
     },
     "greater": {
-      "api": "jax.numpy.greater"
+      "api": "jnp.greater"
     },
     "greater_equal": {
-      "api": "jax.numpy.greater_equal"
+      "api": "jnp.greater_equal"
     },
     "hfft": {
-      "api": "jax.numpy.fft.hfft"
+      "api": "jnp.fft.hfft"
     },
     "hypot": {
-      "api": "jax.numpy.hypot"
+      "api": "jnp.hypot"
     },
     "ifft": {
-      "api": "jax.numpy.fft.ifft"
+      "api": "jnp.fft.ifft"
     },
     "ifftn": {
-      "api": "jax.numpy.fft.ifftn"
+      "api": "jnp.fft.ifftn"
     },
     "ifftshift": {
-      "api": "jax.numpy.fft.ifftshift"
+      "api": "jnp.fft.ifftshift"
     },
     "ihfft": {
-      "api": "jax.numpy.fft.ihfft"
+      "api": "jnp.fft.ihfft"
     },
     "iinfo": {
-      "api": "jax.numpy.iinfo"
+      "api": "jnp.iinfo"
     },
     "imag": {
-      "api": "jax.numpy.imag"
+      "api": "jnp.imag"
     },
-    "init_process_group": null,
     "inv": {
-      "api": "jax.numpy.linalg.inv"
+      "api": "jnp.linalg.inv"
     },
     "irfft": {
-      "api": "jax.numpy.fft.irfft"
+      "api": "jnp.fft.irfft"
     },
     "irfftn": {
-      "api": "jax.numpy.fft.irfftn"
-    },
-    "is_tensor": {
-      "api": "lambda x: hasattr(x, '__array__')",
-      "transformation_type": "inline_lambda"
+      "api": "jnp.fft.irfftn"
     },
     "isdtype": {
-      "api": "jax.numpy.isdtype"
+      "api": "jnp.isdtype"
     },
     "isfinite": {
-      "api": "jax.numpy.isfinite"
+      "api": "jnp.isfinite"
     },
     "isinf": {
-      "api": "jax.numpy.isinf"
+      "api": "jnp.isinf"
     },
     "isnan": {
-      "api": "jax.numpy.isnan"
+      "api": "jnp.isnan"
     },
     "less": {
-      "api": "jax.numpy.less"
+      "api": "jnp.less"
     },
     "less_equal": {
-      "api": "jax.numpy.less_equal"
+      "api": "jnp.less_equal"
     },
     "linspace": {
-      "api": "jax.numpy.linspace"
+      "api": "jnp.linspace"
     },
-    "load": {
-      "api": "orbax.checkpoint.restore",
-      "requires_plugin": "io_handler"
+    "load_state_dict": {
+      "requires_plugin": "torch_load_state_dict_to_nnx"
     },
     "log": {
-      "api": "jax.numpy.log"
+      "api": "jnp.log"
     },
     "log10": {
-      "api": "jax.numpy.log10"
+      "api": "jnp.log10"
     },
     "log1p": {
-      "api": "jax.numpy.log1p"
+      "api": "jnp.log1p"
     },
     "log2": {
-      "api": "jax.numpy.log2"
+      "api": "jnp.log2"
     },
     "logaddexp": {
-      "api": "jax.numpy.logaddexp"
+      "api": "jnp.logaddexp"
     },
     "logical_and": {
-      "api": "jax.numpy.logical_and"
+      "api": "jnp.logical_and"
     },
     "logical_not": {
-      "api": "jax.numpy.logical_not"
+      "api": "jnp.logical_not"
     },
     "logical_or": {
-      "api": "jax.numpy.logical_or"
+      "api": "jnp.logical_or"
     },
     "logical_xor": {
-      "api": "jax.numpy.logical_xor"
-    },
-    "manual_seed": {
-      "api": "numpy.random.seed",
-      "args": {
-        "seed": "seed"
-      }
+      "api": "jnp.logical_xor"
     },
     "matmul": {
-      "api": "jax.numpy.matmul"
+      "api": "jnp.matmul"
     },
     "matrix_power": {
-      "api": "jax.numpy.linalg.matrix_power"
+      "api": "jnp.linalg.matrix_power"
     },
     "matrix_rank": {
-      "api": "jax.numpy.linalg.matrix_rank"
+      "api": "jnp.linalg.matrix_rank"
     },
     "matrix_transpose": {
-      "api": "jax.numpy.matrix_transpose"
+      "api": "jnp.matrix_transpose"
     },
     "max": {
-      "api": "jax.numpy.max"
+      "api": "jnp.max"
     },
     "maximum": {
-      "api": "jax.numpy.maximum"
+      "api": "jnp.maximum"
     },
     "mean": {
-      "api": "jax.numpy.mean"
+      "api": "jnp.mean"
     },
     "meshgrid": {
-      "api": "jax.numpy.meshgrid"
+      "api": "jnp.meshgrid"
     },
     "min": {
-      "api": "jax.numpy.min"
+      "api": "jnp.min"
     },
     "minimum": {
-      "api": "jax.numpy.minimum"
+      "api": "jnp.minimum"
     },
     "moveaxis": {
-      "api": "jax.numpy.moveaxis"
+      "api": "jnp.moveaxis"
     },
     "multiply": {
-      "api": "jax.numpy.multiply"
+      "api": "jnp.multiply"
     },
     "negative": {
-      "api": "jax.numpy.negative"
+      "api": "jnp.negative"
     },
     "nextafter": {
-      "api": "jax.numpy.nextafter"
-    },
-    "nnx_Param": {
-      "api": "flax.nnx.Param"
-    },
-    "no_grad": {
-      "api": "jax.lax.stop_gradient",
-      "requires_plugin": "context_to_function_wrap"
+      "api": "jnp.nextafter"
     },
     "nonzero": {
-      "api": "jax.numpy.nonzero"
+      "api": "jnp.nonzero"
     },
     "not_equal": {
-      "api": "jax.numpy.not_equal"
+      "api": "jnp.not_equal"
     },
     "ones_like": {
-      "api": "jax.numpy.ones_like"
+      "api": "jnp.ones_like"
     },
     "outer": {
-      "api": "jax.numpy.outer"
+      "api": "jnp.outer"
+    },
+    "parameters": {
+      "requires_plugin": "torch_parameters_to_nnx"
     },
     "permute_dims": {
-      "api": "jax.numpy.permute_dims"
+      "api": "jnp.transpose",
+      "requires_plugin": "pack_varargs"
     },
     "pinv": {
-      "api": "jax.numpy.linalg.pinv"
+      "api": "jnp.linalg.pinv"
     },
     "positive": {
-      "api": "jax.numpy.positive"
+      "api": "jnp.positive"
     },
     "pow": {
-      "api": "jax.numpy.pow"
+      "api": "jnp.pow"
     },
     "prod": {
-      "api": "jax.numpy.prod"
+      "api": "jnp.prod"
     },
     "qr": {
-      "api": "jax.numpy.linalg.qr"
+      "api": "jnp.linalg.qr"
     },
     "real": {
-      "api": "jax.numpy.real"
+      "api": "jnp.real"
     },
     "reciprocal": {
-      "api": "jax.numpy.reciprocal"
+      "api": "jnp.reciprocal"
+    },
+    "register_buffer": {
+      "requires_plugin": "torch_register_buffer_to_nnx"
+    },
+    "register_parameter": {
+      "requires_plugin": "torch_register_parameter_to_nnx"
     },
     "remainder": {
-      "api": "jax.numpy.remainder"
+      "api": "jnp.remainder"
     },
     "repeat": {
-      "api": "jax.numpy.repeat"
+      "api": "jnp.repeat"
     },
     "reshape": {
-      "api": "jax.numpy.reshape"
+      "api": "jnp.reshape"
     },
     "result_type": {
-      "api": "jax.numpy.result_type"
+      "api": "jnp.result_type"
     },
     "rfft": {
-      "api": "jax.numpy.fft.rfft"
+      "api": "jnp.fft.rfft"
     },
     "rfftn": {
-      "api": "jax.numpy.fft.rfftn"
+      "api": "jnp.fft.rfftn"
     },
     "roll": {
-      "api": "jax.numpy.roll"
+      "api": "jnp.roll"
     },
     "round": {
-      "api": "jax.numpy.round"
-    },
-    "save": {
-      "api": "orbax.checkpoint.save",
-      "requires_plugin": "io_handler"
+      "api": "jnp.round"
     },
     "searchsorted": {
-      "api": "jax.numpy.searchsorted"
-    },
-    "set_printoptions": {
-      "api": "numpy.set_printoptions"
+      "api": "jnp.searchsorted"
     },
     "sign": {
-      "api": "jax.numpy.sign"
+      "api": "jnp.sign"
     },
     "signbit": {
-      "api": "jax.numpy.signbit"
+      "api": "jnp.signbit"
     },
     "sin": {
-      "api": "jax.numpy.sin"
+      "api": "jnp.sin"
     },
     "sinh": {
-      "api": "jax.numpy.sinh"
+      "api": "jnp.sinh"
     },
     "size": {
       "api": "shape",
       "requires_plugin": "method_to_property"
     },
     "slogdet": {
-      "api": "jax.numpy.linalg.slogdet"
+      "api": "jnp.linalg.slogdet"
     },
     "solve": {
-      "api": "jax.numpy.linalg.solve"
+      "api": "jnp.linalg.solve"
     },
     "sqrt": {
-      "api": "jax.numpy.sqrt"
+      "api": "jnp.sqrt"
     },
     "square": {
-      "api": "jax.numpy.square"
+      "api": "jnp.square"
     },
     "squeeze": {
-      "api": "jax.numpy.squeeze"
+      "api": "jnp.squeeze"
     },
     "stack": {
-      "api": "jax.numpy.stack"
+      "api": "jnp.stack"
+    },
+    "state_dict": {
+      "requires_plugin": "torch_state_dict_to_nnx"
     },
     "std": {
-      "api": "jax.numpy.std"
+      "api": "jnp.std"
+    },
+    "step": {
+      "requires_plugin": "optimizer_step"
     },
     "subtract": {
-      "api": "jax.numpy.subtract"
+      "api": "jnp.subtract"
     },
     "sum": {
-      "api": "jax.numpy.sum"
+      "api": "jnp.sum"
     },
     "svd": {
-      "api": "jax.numpy.linalg.svd"
+      "api": "jnp.linalg.svd"
     },
     "svdvals": {
-      "api": "jax.numpy.linalg.svdvals"
+      "api": "jnp.linalg.svdvals"
     },
     "take": {
-      "api": "jax.numpy.take"
+      "api": "jnp.take"
     },
     "take_along_axis": {
-      "api": "jax.numpy.take_along_axis"
+      "api": "jnp.take_along_axis"
     },
     "tan": {
-      "api": "jax.numpy.tan"
+      "api": "jnp.tan"
     },
     "tanh": {
-      "api": "jax.numpy.tanh"
+      "api": "jnp.tanh"
     },
     "tensordot": {
-      "api": "jax.numpy.tensordot"
+      "api": "jnp.tensordot"
     },
     "tile": {
-      "api": "jax.numpy.tile"
-    },
-    "torch.utils": {
-      "api": "torch.utils"
-    },
-    "torch.utils.data": {
-      "api": "torch.utils.data"
+      "api": "jnp.tile"
     },
     "trace": {
-      "api": "jax.numpy.trace"
-    },
-    "train": {
-      "api": "None",
-      "requires_plugin": "capture_eval_state"
+      "api": "jnp.trace"
     },
     "tril": {
-      "api": "jax.numpy.tril"
+      "api": "jnp.tril"
     },
     "triu": {
-      "api": "jax.numpy.triu"
+      "api": "jnp.triu"
     },
     "trunc": {
-      "api": "jax.numpy.trunc"
+      "api": "jnp.trunc"
     },
     "unique_all": {
-      "api": "jax.numpy.unique_all"
+      "api": "jnp.unique_all"
     },
     "unique_counts": {
-      "api": "jax.numpy.unique_counts"
+      "api": "jnp.unique_counts"
     },
     "unique_inverse": {
-      "api": "jax.numpy.unique_inverse"
+      "api": "jnp.unique_inverse"
     },
     "unique_values": {
-      "api": "jax.numpy.unique_values"
+      "api": "jnp.unique_values"
     },
     "var": {
-      "api": "jax.numpy.var"
+      "api": "jnp.var"
     },
     "where": {
-      "api": "jax.numpy.where"
+      "api": "jnp.where"
+    },
+    "zero_grad": {
+      "requires_plugin": "optimizer_zero_grad"
     },
     "zeros_like": {
-      "api": "jax.numpy.zeros_like"
+      "api": "jnp.zeros_like"
     }
   },
-  "metadata": {
-    "demo_example": "from flax import nnx\n\nclass Simple(nnx.Module):\n    def __init__(self, rngs: nnx.Rngs):\n        self.l = nnx.Linear(10, 10, rngs=rngs)\n\n    def __call__(self, x):\n        return self.l(x)"
-  },
   "templates": {
-    "convert_input": "jnp.array({np_var})",
-    "import": "import jax\nimport jax.numpy as jnp",
-    "jit_wrap": "True",
-    "to_numpy": "np.array({res_var})"
+    "fori_loop": "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})",
+    "scan": "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})"
   }
 }

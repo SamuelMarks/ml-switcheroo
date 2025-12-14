@@ -8,6 +8,7 @@ Verifies:
 4. Signatures (GhostRef) are correctly populated.
 5. Logic gracefully handles missing torch installation (simulated).
 6. Ghost Mode hydration works when snapshots are present.
+7. Wiring logic injects Vision Operations and Output Adapters correctly.
 """
 
 import sys
@@ -223,3 +224,42 @@ def test_ghost_mode_fallback():
       results = adapter.collect_api(StandardCategory.LOSS)
       assert len(results) == 1
       assert results[0].name == "GhostLoss"
+
+
+def test_wiring_injects_vision_ops(mock_torch_env):
+  """
+  Verify `apply_wiring` injects mappings for 'Resize', 'Normalize', etc.
+  even if discovery does not find them.
+  This fixes the 'Dormant Standards' issue.
+  """
+  adapter = mock_torch_env
+  snapshot = {"__framework__": "torch", "mappings": {}}
+
+  adapter.apply_wiring(snapshot)
+
+  mappings = snapshot["mappings"]
+  assert "Resize" in mappings
+  assert mappings["Resize"]["api"] == "torchvision.transforms.Resize"
+
+  assert "Normalize" in mappings
+  assert mappings["Normalize"]["api"] == "torchvision.transforms.Normalize"
+
+  assert "RandomCrop" in mappings
+  assert mappings["RandomCrop"]["api"] == "torchvision.transforms.RandomCrop"
+
+
+def test_wiring_injects_output_adapter_for_sort(mock_torch_env):
+  """
+  Verify `apply_wiring` injects an output adapter for 'sort' to handle
+  the tuple return type of `torch.sort`.
+  """
+  adapter = mock_torch_env
+  # Pre-seed 'sort' as if found by discovery
+  snapshot = {"__framework__": "torch", "mappings": {"sort": {"api": "torch.sort"}}}
+
+  adapter.apply_wiring(snapshot)
+
+  mappings = snapshot["mappings"]
+  assert "sort" in mappings
+  assert "output_adapter" in mappings["sort"]
+  assert mappings["sort"]["output_adapter"] == "lambda x: x.values"

@@ -23,6 +23,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 ROOT_DIR="$(dirname -- "$(dirname -- "$(realpath -- "$0")")")"
+VENV_DIR="${VENV_DIR:-$ROOT_DIR}"
 TEMP_DIR="_bootstrap_temp"
 SEMANTICS_DIR="$ROOT_DIR"'/src/ml_switcheroo/semantics'
 SNAPSHOTS_DIR="$ROOT_DIR"'/src/ml_switcheroo/snapshots'
@@ -87,14 +88,44 @@ echo "\n${BLUE}[4/4] Syncing Installed Frameworks...${NC}"
 
 # Iterate standard supported frameworks
 # We allow failure (|| true) so the script finishes even if a lib isn't installed.
-for fw in torch jax numpy tensorflow keras mlx paxml; do
-    echo -n "   👉 Syncing $fw... "
-    if ml_switcheroo sync "$fw" > /dev/null 2>&1; then
+if [ -d "$VENV_DIR"'/.venv-pyenv-3-12' ] || [ -d "$VENV_DIR"'/.venv-uv-3-12' ]; then
+  if [ -d "$VENV_DIR"'/.venv-pyenv-3-12' ]; then
+        . "$VENV_DIR"'/.venv-pyenv-3-12/bin/activate'
+        python3 -m pip install -e .  > /dev/null 2>&1
+        python3 -m pip install torch jax numpy tensorflow keras mlx > /dev/null 2>&1
+    else
+        . "$VENV_DIR"'/.venv-uv-3-12/bin/activate'
+        uv pip install -e . > /dev/null 2>&1
+        uv pip install torch jax numpy tensorflow keras mlx > /dev/null 2>&1
+    fi
+  for fw in torch jax numpy tensorflow keras mlx; do
+      echo -n "   👉 Syncing $fw... "
+      if ml_switcheroo sync "$fw" > /dev/null 2>&1; then
+          echo "${GREEN}✔ Done${NC}"
+      else
+          echo "${RED}Failed${NC}"
+      fi
+  done
+fi
+if [ -d "$VENV_DIR"'/.venv-pyenv-3-10' ] || [ -d "$VENV_DIR"'/.venv-uv-3-10' ]; then
+    echo -n "   👉 Syncing paxml... "
+    if [ -d "$VENV_DIR"'/.venv-pyenv-3-10' ]; then
+        . "$VENV_DIR"'/.venv-pyenv-3-10/bin/activate'
+        python3 -m pip install -e .  > /dev/null 2>&1
+        python3 -m pip install paxml jaxlib=='0.4.26' > /dev/null 2>&1
+    else
+        . "$VENV_DIR"'/.venv-uv-3-10/bin/activate'
+        uv pip install -e . > /dev/null 2>&1
+        uv pip install paxml jaxlib=='0.4.26' > /dev/null 2>&1
+    fi
+    if ml_switcheroo sync paxml > /dev/null 2>&1; then
         echo "${GREEN}✔ Done${NC}"
     else
-        echo "${YELLOW}Skipped (Not installed)${NC}"
+        echo "${RED}Failed${NC}"
     fi
-done
+else
+    echo "${YELLOW}Skipping paxml"
+fi
 
 # ------------------------------------------------------------------------------
 # CLEANUP & SUMMARY

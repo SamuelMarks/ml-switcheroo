@@ -219,8 +219,9 @@ def handle_sync(framework: str) -> int:
   specific framework. This process involves:
   1.  Reading the Specs from `semantics/`.
   2.  Introspecting the installed framework to find matching APIs.
-  3.  Applying Adapter-specific manual wiring (plugins, templates).
-  4.  Writing the results to the Snapshot Overlay (`snapshots/{fw}_mappings.json`).
+  3.  **Merging Static Definitions** from the Adapter (for Ghost support).
+  4.  Applying Adapter-specific manual wiring (plugins, templates).
+  5.  Writing the results to the Snapshot Overlay (`snapshots/{fw}_mappings.json`).
 
   Args:
       framework: The framework key to sync (e.g. 'torch', 'jax').
@@ -248,6 +249,7 @@ def handle_sync(framework: str) -> int:
 
   # Existing entries we want to preserve/respect
   existing_mappings = snapshot_data.get("mappings", {})
+  adapter = get_adapter(framework)
 
   # 2. Run Syncer on Spec data
   syncer = FrameworkSyncer()
@@ -290,13 +292,22 @@ def handle_sync(framework: str) -> int:
     except Exception as e:
       log_warning(f"Error processing {filename}: {e}")
 
-  # 3. Apply Manual Wiring (Plugins & Templates) from Adapter
-  # This replaces the standalone scripts/wire_*.py logic
-  adapter = get_adapter(framework)
+  # 3. Merge Static Definitions from Adapter (Ghost Resilience)
+  # This ensures fundamental ops are mapped even if the specific library isn't installed
+  if adapter and hasattr(adapter, "definitions"):
+    static_defs = adapter.definitions
+    if static_defs:
+      log_info(f"Merging {len(static_defs)} static definitions from Adapter.")
+      for op_name, map_model in static_defs.items():
+        # We fill gaps. If dynamic scan found a specific version, keep it.
+        # If nothing found (e.g. library missing or hard to scan), use static definition.
+        if op_name not in snapshot_data["mappings"]:
+          snapshot_data["mappings"][op_name] = map_model.model_dump(exclude_unset=True)
+          total_found += 1
+
+  # 4. Apply Manual Wiring (Plugins & Templates) from Adapter
   if adapter and hasattr(adapter, "apply_wiring"):
     try:
-      # We assume the adapter follows the protocol signature
-      # apply_wiring(snapshot: Dict) -> None
       adapter.apply_wiring(snapshot_data)
       log_info(f"Applied manual wiring rules for {framework}.")
       # Assume wiring modified the dict, treat as update found
@@ -304,7 +315,7 @@ def handle_sync(framework: str) -> int:
     except Exception as e:
       log_warning(f"Wiring failed for {framework}: {e}")
 
-  # 4. Write Snapshot
+  # 5. Write Snapshot
   if total_found > 0 or snap_path.exists():
     if not snap_dir.exists():
       snap_dir.mkdir(parents=True, exist_ok=True)

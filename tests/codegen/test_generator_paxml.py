@@ -10,6 +10,7 @@ are correctly applied to generate valid executable test code including:
 """
 
 import pytest
+from unittest.mock import MagicMock
 from ml_switcheroo.generated_tests.generator import TestGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -28,11 +29,19 @@ def test_paxml_code_generation(tmp_path):
   semantics = {"abs": {"std_args": ["x"], "variants": {"paxml": {"api": "jnp.abs"}, "numpy": {"api": "np.abs"}}}}
 
   # 2. Logic Setup
-  # We instantiate the real SemanticsManager.
-  # It should have loaded 'paxml' templates from k_test_templates.json
-  # or synchronized them from PaxmlAdapter in code.
-  mgr = SemanticsManager()
-  mgr._reverse_index = {}
+  # Mock the Manager to provide templates without relying on disk state/bootstrap
+  mgr = MagicMock(spec=SemanticsManager)
+
+  templates = {
+    "paxml": {
+      "import": "import praxis\nimport jax.numpy as jnp",
+      "convert_input": "jnp.array({np_var})",
+      "to_numpy": "np.array({res_var})",
+    },
+    "numpy": {"import": "import numpy as np", "convert_input": "{np_var}", "to_numpy": "{res_var}"},
+  }
+  mgr.get_test_template.side_effect = lambda fw: templates.get(fw)
+  mgr.get_framework_config.return_value = {}
 
   # Sanity check: Ensure template is actually loaded before generating
   # If this fails, the issue is in Manager loading, not Generator logic.

@@ -88,6 +88,9 @@
     "Mod": {
       "api": "tensorflow.math.mod"
     },
+    "Normalize": {
+      "api": "tensorflow.linalg.normalize"
+    },
     "Pad": {
       "api": "tensorflow.pad"
     },
@@ -232,10 +235,6 @@
     "det": {
       "api": "tensorflow.linalg.det"
     },
-    "device": {
-      "api": "tf.device",
-      "requires_plugin": "device_allocator"
-    },
     "divide": {
       "api": "tensorflow.divide"
     },
@@ -280,9 +279,6 @@
     },
     "inv": {
       "api": "tensorflow.linalg.inv"
-    },
-    "is_tensor": {
-      "api": "tensorflow.is_tensor"
     },
     "less": {
       "api": "tensorflow.less"
@@ -434,13 +430,5 @@
     "zeros_like": {
       "api": "tensorflow.zeros_like"
     }
-  },
-  "metadata": {
-    "demo_example": "import tensorflow as tf\n\nval = tf.abs(tf.constant([-1.0, 2.0]))"
-  },
-  "templates": {
-    "convert_input": "tf.convert_to_tensor({np_var})",
-    "import": "import tensorflow as tf",
-    "to_numpy": "{res_var}.numpy()"
   }
 }

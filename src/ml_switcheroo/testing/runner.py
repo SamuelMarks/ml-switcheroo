@@ -8,9 +8,9 @@ to ensure that standard inputs are passed to frameworks using their specific
 parameter names (e.g., mapping `axis` to `dim`).
 
 Refactor Note:
-    This module now utilizes the central `adapters.py` registry to handle output normalization
-    (Framework -> NumPy) by requesting a "numpy" adapter. This eliminates the redundant
-    `_to_numpy` logic that existed previously.
+    This module utilizes the central registry in `ml_switcheroo.frameworks` to handle
+    output normalization (Framework -> NumPy) by requesting a "numpy" adapter.
+    This provides a unified conversion interface and eliminates redundant normalization logic.
 """
 
 import importlib

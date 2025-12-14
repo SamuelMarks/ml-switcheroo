@@ -96,6 +96,18 @@ class TorchAdapter:
   def rng_seed_methods(self) -> List[str]:
     return ["manual_seed", "seed"]
 
+  # --- Documentation ---
+
+  @classmethod
+  def get_example_code(cls) -> str:
+    """Returns the standard demo example."""
+    return """import torch
+import torch.nn as nn
+
+class Model(nn.Module): 
+    def forward(self, x): 
+        return torch.abs(x)"""
+
   # --- Ghost Protocol Implementation ---
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
@@ -214,7 +226,7 @@ class TorchAdapter:
       return f"torch.load({file_arg})"
     return ""
 
-    # --- Verification ---
+  # --- Verification ---
 
   def convert(self, data):
     try:
@@ -240,3 +252,32 @@ class TorchAdapter:
     mappings["state_dict"] = {"api": "torch.nn.Module.state_dict"}
     mappings["load_state_dict"] = {"api": "torch.nn.Module.load_state_dict"}
     mappings["parameters"] = {"api": "torch.nn.Module.parameters"}
+
+    # Vision Ops (Tier C Extras) - Mapped to torchvision
+    # These are manually wired here because scanning torchvision requires it to be installed
+    # and it's not a hard dependency.
+    for vision_op in [
+      "Resize",
+      "Normalize",
+      "ToTensor",
+      "CenterCrop",
+      "RandomCrop",
+      "RandomHorizontalFlip",
+      "RandomVerticalFlip",
+      "Pad",
+      "Grayscale",
+    ]:
+      if vision_op not in mappings:
+        mappings[vision_op] = {"api": f"torchvision.transforms.{vision_op}"}
+
+    # Output Adapters for Ops returning NamedTuples (Feature Output Adapter Logic)
+    # torch.sort returns (values, indices). If target expects just values (like jax.numpy.sort),
+    # we must wrap the result.
+    # This applies when converting TO torch. If converting FROM torch, logic is inverted.
+    # This Adapter definition defines how 'torch' implements 'sort'.
+    # Since 'sort' abstract op implies just values in Array API (usually), or sorting logic,
+    # but torch implementation is rigid.
+    # Ideally, we define behavior for when we TARGET torch.
+    if "sort" in mappings:
+      # When generating Torch code: x = torch.sort(y).values
+      mappings["sort"]["output_adapter"] = "lambda x: x.values"

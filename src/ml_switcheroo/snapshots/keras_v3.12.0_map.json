@@ -4,57 +4,6 @@
     "Abs": {
       "api": "keras.ops.abs"
     },
-    "Adadelta": {
-      "api": "keras.optimizers.Adadelta",
-      "args": {
-        "eps": "epsilon",
-        "lr": "learning_rate",
-        "rho": "rho",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adafactor": {
-      "api": "keras.optimizers.Adafactor",
-      "args": {
-        "lr": "learning_rate",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adagrad": {
-      "api": "keras.optimizers.Adagrad",
-      "args": {
-        "eps": "epsilon",
-        "initial_accumulator_value": "initial_accumulator_value",
-        "lr": "learning_rate",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adam": {
-      "api": "keras.optimizers.Adam",
-      "args": {
-        "amsgrad": "amsgrad",
-        "eps": "epsilon",
-        "lr": "learning_rate",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adamax": {
-      "api": "keras.optimizers.Adamax",
-      "args": {
-        "eps": "epsilon",
-        "lr": "learning_rate",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adamw": {
-      "api": "keras.optimizers.AdamW",
-      "args": {
-        "amsgrad": "amsgrad",
-        "eps": "epsilon",
-        "lr": "learning_rate",
-        "weight_decay": "weight_decay"
-      }
-    },
     "Add": {
       "api": "keras.ops.add"
     },
@@ -68,9 +17,12 @@
       "api": "keras.ops.ceil"
     },
     "Celu": {
-      "api": "keras.activations.celu",
+      "api": "keras.ops.celu"
+    },
+    "CenterCrop": {
+      "api": "keras.layers.CenterCrop",
       "args": {
-        "alpha": "alpha"
+        "size": "height"
       }
     },
     "Clip": {
@@ -82,12 +34,6 @@
     "Cosh": {
       "api": "keras.ops.cosh"
     },
-    "Ctc": {
-      "api": "keras.losses.CTC",
-      "args": {
-        "reduction": "reduction"
-      }
-    },
     "Det": {
       "api": "keras.ops.det"
     },
@@ -98,10 +44,7 @@
       "api": "keras.ops.einsum"
     },
     "Elu": {
-      "api": "keras.activations.elu",
-      "args": {
-        "alpha": "alpha"
-      }
+      "api": "keras.ops.elu"
     },
     "Equal": {
       "api": "keras.ops.equal"
@@ -122,39 +65,17 @@
       "api": "keras.layers.GRU"
     },
     "Gelu": {
-      "api": "keras.activations.gelu",
-      "args": {
-        "approximate": "approximate",
-        "x": "x"
-      }
+      "api": "keras.ops.gelu"
     },
-    "Glu": {
-      "api": "keras.activations.glu",
-      "args": {
-        "dim": "axis"
-      }
+    "Grayscale": {
+      "api": "lambda x: x",
+      "transformation_type": "inline_lambda"
     },
     "Greater": {
       "api": "keras.ops.greater"
     },
     "GroupNormalization": {
       "api": "keras.layers.GroupNormalization"
-    },
-    "Hardshrink": {
-      "api": "keras.activations.hard_shrink"
-    },
-    "Hardsigmoid": {
-      "api": "keras.activations.hard_sigmoid"
-    },
-    "Hardtanh": {
-      "api": "keras.activations.hard_tanh"
-    },
-    "Huber": {
-      "api": "keras.losses.Huber",
-      "args": {
-        "delta": "delta",
-        "reduction": "reduction"
-      }
     },
     "Identity": {
       "api": "keras.ops.identity"
@@ -171,26 +92,11 @@
     "LeakyRelu": {
       "api": "keras.layers.LeakyReLU"
     },
-    "Leakyrelu": {
-      "api": "keras.activations.leaky_relu",
-      "args": {
-        "negative_slope": "negative_slope"
-      }
-    },
     "Less": {
       "api": "keras.ops.less"
     },
     "Log": {
       "api": "keras.ops.log"
-    },
-    "Logsigmoid": {
-      "api": "keras.activations.log_sigmoid"
-    },
-    "Logsoftmax": {
-      "api": "keras.activations.log_softmax",
-      "args": {
-        "dim": "axis"
-      }
     },
     "MatMul": {
       "api": "keras.ops.matmul"
@@ -207,30 +113,21 @@
     "Mish": {
       "api": "keras.activations.mish"
     },
-    "Muon": {
-      "api": "keras.optimizers.Muon",
-      "args": {
-        "eps": "epsilon",
-        "lr": "learning_rate",
-        "momentum": "momentum",
-        "nesterov": "nesterov",
-        "ns_steps": "ns_steps",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Nadam": {
-      "api": "keras.optimizers.Nadam",
-      "args": {
-        "eps": "epsilon",
-        "lr": "learning_rate",
-        "weight_decay": "weight_decay"
-      }
-    },
     "NonZero": {
       "api": "keras.ops.nonzero"
     },
+    "Normalize": {
+      "api": "keras.layers.Normalization",
+      "args": {
+        "mean": "mean",
+        "std": "variance"
+      }
+    },
     "PRelu": {
       "api": "keras.layers.PReLU"
+    },
+    "Pad": {
+      "api": "keras.layers.ZeroPadding2D"
     },
     "RMSNormalization": {
       "api": "keras.layers.RMSNormalization"
@@ -238,26 +135,31 @@
     "RNN": {
       "api": "keras.layers.RNN"
     },
+    "RandomCrop": {
+      "api": "keras.layers.RandomCrop"
+    },
+    "RandomHorizontalFlip": {
+      "api": "keras.layers.RandomFlip",
+      "args": {
+        "p": "mode"
+      }
+    },
+    "RandomVerticalFlip": {
+      "api": "keras.layers.RandomFlip"
+    },
     "Reciprocal": {
       "api": "keras.ops.reciprocal"
     },
     "Relu": {
-      "api": "keras.activations.relu"
-    },
-    "Relu6": {
-      "api": "keras.activations.relu6"
+      "api": "keras.ops.relu"
     },
     "Reshape": {
       "api": "keras.layers.Reshape"
     },
-    "Rmsprop": {
-      "api": "keras.optimizers.RMSprop",
+    "Resize": {
+      "api": "keras.layers.Resizing",
       "args": {
-        "centered": "centered",
-        "eps": "epsilon",
-        "lr": "learning_rate",
-        "momentum": "momentum",
-        "weight_decay": "weight_decay"
+        "size": "height"
       }
     },
     "Round": {
@@ -266,26 +168,11 @@
     "STFT": {
       "api": "keras.ops.stft"
     },
-    "Selu": {
-      "api": "keras.activations.selu"
-    },
-    "Sgd": {
-      "api": "keras.optimizers.SGD",
-      "args": {
-        "lr": "learning_rate",
-        "momentum": "momentum",
-        "nesterov": "nesterov",
-        "weight_decay": "weight_decay"
-      }
-    },
     "Sigmoid": {
-      "api": "keras.activations.sigmoid"
+      "api": "keras.ops.sigmoid"
     },
     "Sign": {
       "api": "keras.ops.sign"
-    },
-    "Silu": {
-      "api": "keras.activations.swish"
     },
     "Sin": {
       "api": "keras.ops.sin"
@@ -297,20 +184,13 @@
       "api": "keras.ops.size"
     },
     "Softmax": {
-      "api": "keras.activations.softmax",
-      "args": {
-        "dim": "axis",
-        "x": "x"
-      }
+      "api": "keras.ops.softmax"
     },
     "Softplus": {
-      "api": "keras.activations.softplus"
-    },
-    "Softshrink": {
-      "api": "keras.activations.soft_shrink"
+      "api": "keras.ops.softplus"
     },
     "Softsign": {
-      "api": "keras.activations.softsign"
+      "api": "keras.ops.softsign"
     },
     "Sqrt": {
       "api": "keras.ops.sqrt"
@@ -325,19 +205,13 @@
       "api": "keras.ops.tan"
     },
     "Tanh": {
-      "api": "keras.activations.tanh"
-    },
-    "Tanhshrink": {
-      "api": "keras.activations.tanh_shrink"
-    },
-    "Threshold": {
-      "api": "keras.activations.threshold",
-      "args": {
-        "threshold": "threshold"
-      }
+      "api": "keras.ops.tanh"
     },
     "Tile": {
       "api": "keras.ops.tile"
+    },
+    "ToTensor": {
+      "api": "keras.ops.convert_to_tensor"
     },
     "Transpose": {
       "api": "keras.ops.transpose"
@@ -349,7 +223,7 @@
       "api": "keras.ops.abs"
     },
     "add": {
-      "api": "keras.layers.Add"
+      "api": "keras.ops.add"
     },
     "all": {
       "api": "keras.ops.all"
@@ -414,9 +288,6 @@
     "divide": {
       "api": "keras.ops.divide"
     },
-    "dropout": {
-      "api": "keras.random.dropout"
-    },
     "eigh": {
       "api": "keras.ops.eigh"
     },
@@ -455,9 +326,6 @@
     },
     "inv": {
       "api": "keras.ops.inv"
-    },
-    "is_tensor": {
-      "api": "keras.ops.is_tensor"
     },
     "isfinite": {
       "api": "keras.ops.isfinite"
@@ -639,8 +507,5 @@
     "where": {
       "api": "keras.ops.where"
     }
-  },
-  "metadata": {
-    "demo_example": "import keras\nfrom keras import ops\n\nclass M(keras.Layer):\n    def __init__(self):\n        super().__init__()\n        self.d = keras.layers.Dense(10)\n\n    def call(self, x):\n        return self.d(x)"
   }
 }

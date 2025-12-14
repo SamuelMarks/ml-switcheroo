@@ -260,8 +260,6 @@ class SemanticsManager:
           priority = 10
         elif "neural" in fname:
           priority = 20
-        elif "templates" in fname:
-          priority = 99
         prioritized_files.append((priority, fpath))
 
       prioritized_files.sort(key=lambda x: (x[0], x[1].name))

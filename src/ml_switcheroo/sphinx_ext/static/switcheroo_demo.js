@@ -3,8 +3,30 @@ let srcEditor = null;
 let tgtEditor = null;
 
 // --- Feature 1 & 2: Examples Configuration ---
-// Default Hardcoded Fallbacks (for dev/test without build pipeline)
-let EXAMPLES = {};
+// Define robust defaults here so the dropdown never renders empty
+// even if the Python build pipeline fails to inject dynamic examples.
+let EXAMPLES = {
+    "torch": {
+        "label": "Standard PyTorch Example",
+        "srcFw": "torch",
+        "tgtFw": "jax",
+        "code": `import torch
+import torch.nn as nn
+
+class Model(nn.Module): 
+    def forward(self, x): 
+        return torch.abs(x)`
+    },
+    "jax": {
+        "label": "Standard JAX Example",
+        "srcFw": "jax",
+        "tgtFw": "torch",
+        "code": `import jax.numpy as jnp
+
+def compute(x):
+    return jnp.abs(x)`
+    }
+};
 
 const PYTHON_BRIDGE = `
 import json
@@ -118,8 +140,11 @@ importlib.util.find_spec("ml_switcheroo") is not None
         initEditors();
 
         // --- Merge Dynamic Examples ---
+        // If Python injected extra examples, merge them.
+        // If not, our hardcoded defaults in EXAMPLES ensure the UI isn't broken.
         if (window.SWITCHEROO_PRELOADED_EXAMPLES) {
             console.log("[WASM] Merging protocol-driven examples.");
+            // Merge logic: Dynamic overwrites default if keys collide, but we keep defaults
             EXAMPLES = { ...EXAMPLES, ...window.SWITCHEROO_PRELOADED_EXAMPLES };
         }
 
@@ -175,13 +200,21 @@ function initExampleSelector() {
     const sel = document.getElementById("select-example");
     if (!sel) return;
 
-    // Avoid double population
-    if (sel.options.length > 1) return;
-
-    // Clear default HTML placeholder (except title), remove selected attribute from it
+    // Reset Dropdown completely to prevent stale states
     sel.innerHTML = '<option value="" disabled>-- Select a Pattern --</option>';
 
-    const DEFAULT_KEY = "neural_net";
+    // Determine Logic for Default Selection
+    // Priority:
+    // 1. "torch" (Generic Python-injected matches key defined in TorchAdapter)
+    let targetKey = "torch";
+
+    // Fallback: If torch not found, pick first avaliable
+    if (!EXAMPLES[targetKey]) {
+        const keys = Object.keys(EXAMPLES);
+        if (keys.length > 0) targetKey = keys[0];
+        else targetKey = null;
+    }
+
     let defaultFound = false;
 
     // Populate
@@ -191,25 +224,28 @@ function initExampleSelector() {
         opt.innerText = details.label;
         sel.appendChild(opt);
 
-        if (key === DEFAULT_KEY) {
+        // Mark selected property
+        if (key === targetKey) {
             opt.selected = true;
             defaultFound = true;
         }
     }
 
-    // Force load default if present to ensure Editor matches Dropdown
-    if (defaultFound) {
-        // Fallback or ensure first item selected if no default logic
-        loadExample(DEFAULT_KEY);
+    // Trigger Load if we found a valid target
+    if (defaultFound && targetKey) {
+        // We load the example into the editor, ensuring editor state matches dropdown
+        loadExample(targetKey);
     } else {
-        // Fallback: select placeholder if default key is invalid
+        // Fallback selection of placeholder
         sel.querySelector('option[value=""]').selected = true;
     }
 
-    // Listener
-    sel.addEventListener("change", (e) => {
+    // Re-attach listener (clearing innerHTML removes old listeners on options)
+    // We attach onchange only if not already attached?
+    // Ideally we should just use onclick, but change is standard for Select.
+    sel.onchange = (e) => {
         loadExample(e.target.value);
-    });
+    };
 }
 
 function loadExample(key) {
@@ -219,10 +255,15 @@ function loadExample(key) {
     if (srcEditor) srcEditor.setValue(details.code);
     if (tgtEditor) tgtEditor.setValue(""); // clear old Output
 
-    document.getElementById("select-src").value = details.srcFw;
-    document.getElementById("select-tgt").value = details.tgtFw;
+    // Update Dropdowns if IDs exist
+    const srcEl = document.getElementById("select-src");
+    const tgtEl = document.getElementById("select-tgt");
 
-    document.getElementById("console-output").innerText = `Loaded example: ${details.label}`;
+    if (srcEl && details.srcFw) srcEl.value = details.srcFw;
+    if (tgtEl && details.tgtFw) tgtEl.value = details.tgtFw;
+
+    const cons = document.getElementById("console-output");
+    if(cons) cons.innerText = `Loaded example: ${details.label}`;
 }
 
 function swapContext() {
@@ -264,7 +305,6 @@ async function runTranspilation() {
     const tgtFw = document.getElementById("select-tgt").value;
 
     // Strict Mode: Check the toggle state
-    // Coerce to boolean just in case
     const strictMode = !!document.getElementById("chk-strict-mode").checked;
 
     btn.disabled = true;

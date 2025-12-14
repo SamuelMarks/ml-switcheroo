@@ -193,3 +193,23 @@ class KerasAdapter:
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     d_type = "gpu" if "cuda" in device_type.lower() else "cpu"
     return f"keras.name_scope('{d_type}')"
+
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """Injects Keras specific manual wiring hooks."""
+    mappings = snapshot.setdefault("mappings", {})
+
+    # Wiring for Tier C Vision Operations
+    # Maps abstract Vision Ops to Keras Preprocessing Layers
+    mappings["Resize"] = {"api": "keras.layers.Resizing", "args": {"size": "height"}}
+    mappings["CenterCrop"] = {"api": "keras.layers.CenterCrop", "args": {"size": "height"}}
+    mappings["Normalize"] = {"api": "keras.layers.Normalization", "args": {"std": "variance", "mean": "mean"}}
+    mappings["RandomCrop"] = {"api": "keras.layers.RandomCrop"}
+    mappings["RandomHorizontalFlip"] = {"api": "keras.layers.RandomFlip", "args": {"p": "mode"}}
+    mappings["RandomVerticalFlip"] = {"api": "keras.layers.RandomFlip"}
+    # Use ZeroPadding2D as nearest equivalent for general Pad
+    mappings["Pad"] = {"api": "keras.layers.ZeroPadding2D"}
+    # ToTensor logic is usually implicit in Keras or uses ops.convert_to_tensor
+    mappings["ToTensor"] = {"api": "keras.ops.convert_to_tensor"}
+    # Grayscale is often just a no-op identity in model definition or handled by preprocessing
+    # Mapping to a lambda pass-through for architectural compliance
+    mappings["Grayscale"] = {"api": "lambda x: x", "transformation_type": "inline_lambda"}

@@ -10,8 +10,8 @@
     "Elu": {
       "api": "praxis.layers.ELU"
     },
-    "Flatten": {
-      "api": "praxis.layers.Flatten"
+    "Exp": {
+      "api": "praxis.layers.activations.Exp"
     },
     "Gelu": {
       "api": "praxis.layers.GELU"
@@ -22,28 +22,17 @@
     "LeakyRelu": {
       "api": "praxis.layers.LeakyReLU"
     },
-    "Linear": {
-      "api": "praxis.layers.Linear",
-      "args": {
-        "bias": "use_bias",
-        "in_features": "input_dims",
-        "out_features": "output_dims"
-      }
-    },
     "Optional": {
       "api": "praxis.base_layer.Optional"
-    },
-    "ReLU": {
-      "api": "praxis.layers.ReLU"
     },
     "Relu": {
       "api": "praxis.layers.ReLU"
     },
-    "Sequential": {
-      "api": "praxis.layers.Sequential"
-    },
     "Sigmoid": {
       "api": "praxis.layers.Sigmoid"
+    },
+    "Softplus": {
+      "api": "praxis.layers.activations.Softplus"
     },
     "Swish": {
       "api": "praxis.layers.Swish"
@@ -54,8 +43,8 @@
     "any": {
       "api": "praxis.base_layer.Any"
     },
-    "dropout": {
-      "api": "praxis.layers.Dropout"
+    "exp": {
+      "api": "praxis.layers.activations.Exp"
     },
     "repeat": {
       "api": "praxis.layers.Repeat"
@@ -63,13 +52,5 @@
     "tanh": {
       "api": "praxis.layers.Tanh"
     }
-  },
-  "metadata": {
-    "demo_example": "import praxis.layers as pl\nfrom praxis import base_layer\n\nclass Simple(base_layer.BaseLayer):\n    def setup(self):\n        self.l = pl.Linear(10, 10)\n\n    def __call__(self, x):\n        return self.l(x)"
-  },
-  "templates": {
-    "convert_input": "jnp.array({np_var})",
-    "import": "import jax.numpy as jnp\nimport praxis",
-    "to_numpy": "np.array({res_var})"
   }
 }

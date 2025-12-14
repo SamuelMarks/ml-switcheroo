@@ -52,6 +52,9 @@ class TestSemantics(SemanticsManager):
     if name not in self.data:
       self.data[name] = {"std_args": std_args, "variants": {}}
 
+    if "variants" not in self.data[name]:
+      self.data[name]["variants"] = {}
+
     self.data[name]["variants"]["torch"] = {"api": s_api}
     self.data[name]["variants"]["jax"] = {"api": t_api}
 

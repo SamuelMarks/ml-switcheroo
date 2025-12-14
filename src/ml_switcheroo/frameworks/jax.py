@@ -132,9 +132,9 @@ class JaxAdapter:
   @property
   def structural_traits(self) -> StructuralTraits:
     return StructuralTraits(
-      module_base="flax.nnx.Module",
+      module_base="nnx.Module",  # UPDATED: Use alias nnx.Module
       forward_method="__call__",
-      inject_magic_args=[("rngs", "flax.nnx.Rngs")],
+      inject_magic_args=[("rngs", "nnx.Rngs")],  # UPDATED: Use alias nnx.Rngs
       requires_super_init=False,
       lifecycle_strip_methods=[],
       lifecycle_warn_methods=[],
@@ -184,49 +184,71 @@ class JaxAdapter:
     """Injects JAX/Flax specific plugin hooks and templates."""
     mappings = snapshot.setdefault("mappings", {})
     templates = snapshot.setdefault("templates", {})
+    # UPDATED: We use the imports config to drive aliases
+    imports = snapshot.setdefault("imports", {})
 
-    # 1. Argument Packing (permute_dims -> transpose with tuple)
-    mappings["permute_dims"] = {"api": "jax.numpy.transpose", "requires_plugin": "pack_varargs"}
+    # --- 1. Enforce Aliases (Paths found by Sync are rewritten here) ---
 
-    # 2. Einsum Normalization
+    # A. Rewrite Discovery Paths (jax.numpy -> jnp, flax.nnx -> nnx)
+    for key, variant in mappings.items():
+      if variant and "api" in variant:
+        api = variant["api"]
+        if api.startswith("jax.numpy."):
+          mappings[key]["api"] = api.replace("jax.numpy.", "jnp.")
+        elif api.startswith("flax.nnx."):
+          mappings[key]["api"] = api.replace("flax.nnx.", "nnx.")
+
+    # B. Configure Import Injection
+    # When code uses "nnx", ImportFixer will inject "from flax import nnx"
+    imports["flax.nnx"] = {"root": "flax", "sub": "nnx", "alias": "nnx"}
+
+    # Fix: Ensure logic maps to 'jnp.abs' regardless of casing in specs
+    # This prevents 'torch.abs' falling through if specs use 'abs' vs 'Abs'
+    mappings["Abs"] = {"api": "jnp.abs"}
+    mappings["abs"] = {"api": "jnp.abs"}
+
+    # Removal: Do NOT inject torch.nn -> flax.nnx.
+    # This allows ImportFixer to prune torch.nn when it is unused.
+
+    # --- 2. Plugin Configuration ---
+
+    # Argument Packing (permute_dims -> transpose with tuple)
+    mappings["permute_dims"] = {"api": "jnp.transpose", "requires_plugin": "pack_varargs"}
+
+    # Einsum Normalization
     if "Einsum" in mappings:
       mappings["Einsum"]["requires_plugin"] = "einsum_normalizer"
-      if "api" not in mappings["Einsum"]:
-        mappings["Einsum"]["api"] = "jax.numpy.einsum"
+      if "api" not in mappings["Einsum"] or mappings["Einsum"]["api"] == "jax.numpy.einsum":
+        mappings["Einsum"]["api"] = "jnp.einsum"
 
-    # 3. Method -> Property Swaps
+    # Method -> Property Swaps (e.g. .size() -> .shape)
     mappings["size"] = {"api": "shape", "requires_plugin": "method_to_property"}
     mappings["data_ptr"] = {"api": "data", "requires_plugin": "method_to_property"}
 
-    # 4. State Flag Injection (Training/Eval modes)
+    # State Flag Injection (Training/Eval modes)
     for op in ["forward", "__call__", "call"]:
-      # Only wire if not overridden by a specific discovery result
       if op not in mappings or "api" not in mappings[op]:
         mappings[op] = {"requires_plugin": "inject_training_flag"}
 
-    # 5. State Container Plugins (Torch -> Flax NNX mapping)
+    # State Container Plugins (Torch -> Flax NNX mapping)
     mappings["register_buffer"] = {"requires_plugin": "torch_register_buffer_to_nnx"}
     mappings["register_parameter"] = {"requires_plugin": "torch_register_parameter_to_nnx"}
     mappings["state_dict"] = {"requires_plugin": "torch_state_dict_to_nnx"}
     mappings["load_state_dict"] = {"requires_plugin": "torch_load_state_dict_to_nnx"}
     mappings["parameters"] = {"requires_plugin": "torch_parameters_to_nnx"}
 
-    # 6. Optimizer Wiring (Torch -> Optax Translation)
-    # Hooks defined in ml_switcheroo.plugins.optimizer_step
+    # Optimizer Wiring (Torch -> Optax Translation)
     mappings["step"] = {"requires_plugin": "optimizer_step"}
     mappings["zero_grad"] = {"requires_plugin": "optimizer_zero_grad"}
 
     # Wire common Optimizers to the constructor stripping hook
-    # Note: Target API usually 'optax.<name>' but JAX discovery handles the API string.
-    # Here we enforce the hook.
     for opt_name in ["Adam", "SGD", "RMSprop", "AdamW", "Adagrad", "LBFGS"]:
       if opt_name not in mappings:
         mappings[opt_name] = {}
       mappings[opt_name]["requires_plugin"] = "optimizer_constructor"
-      # Ensure basic mapping if discovery missed it (case insensitive optax fallback)
       if "api" not in mappings[opt_name]:
         mappings[opt_name]["api"] = f"optax.{opt_name.lower()}"
 
-    # 7. Loop Templates (Hints for Escape Hatches or Plugins)
+    # Loop Templates (Hints for Escape Hatches or Plugins)
     templates["fori_loop"] = "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})"
     templates["scan"] = "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})"

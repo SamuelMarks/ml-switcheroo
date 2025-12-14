@@ -8,24 +8,64 @@ Verifies:
 4.  Generator respects manually existing tests.
 """
 
+import pytest
+from unittest.mock import MagicMock
 from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_generation_safety(tmp_path):
+@pytest.fixture
+def mock_mgr():
+  """
+  Provides a SemanticsManager with pre-loaded templates for all frameworks
+  used in these tests. This ensures tests run independently of the filesystem/bootstrap state.
+  """
+  mgr = MagicMock(spec=SemanticsManager)
+
+  templates = {
+    "torch": {
+      "import": "import torch",
+      "convert_input": "torch.tensor({np_var})",
+      "to_numpy": "{res_var}.numpy()",
+    },
+    "jax": {
+      "import": "import jax\nimport jax.numpy as jnp",
+      "convert_input": "jnp.array({np_var})",
+      "to_numpy": "np.array({res_var})",
+    },
+    "tensorflow": {
+      "import": "import tensorflow as tf",
+      "convert_input": "tf.convert_to_tensor({np_var})",
+      "to_numpy": "{res_var}.numpy()",
+    },
+    "numpy": {
+      "import": "import numpy as np",
+      "convert_input": "{np_var}",
+      "to_numpy": "{res_var}",
+    },
+  }
+
+  mgr.get_test_template.side_effect = lambda fw: templates.get(fw)
+  # Safe fallback for other calls
+  mgr.get_framework_config.return_value = {}
+  return mgr
+
+
+def test_generation_safety(tmp_path, mock_mgr):
   """Verify manual overrides are respected."""
   # 1. Mock Semantics
   semantics = {"abs": {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}}}}
 
   # 2. Setup existing file with a manual test
   out_file = tmp_path / "test_generated.py"
-  out_file.write_text("""
-def test_gen_abs():
+  out_file.write_text(""" 
+def test_gen_abs(): 
     # Manual override
     assert True
 """)
 
   # 3. Run Generator
-  gen = TestGenerator()
+  gen = TestGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
   # 4. Verify Content
@@ -35,7 +75,7 @@ def test_gen_abs():
   assert "results = {}" not in content
 
 
-def test_generation_multi_backend(tmp_path):
+def test_generation_multi_backend(tmp_path, mock_mgr):
   """
   Scenario: Semantics includes Torch, JAX, and TensorFlow.
   Expect: Generated code contains try/except blocks for all three.
@@ -51,7 +91,7 @@ def test_generation_multi_backend(tmp_path):
   out_file = tmp_path / "test_multi.py"
 
   # 2. Run
-  gen = TestGenerator()
+  gen = TestGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
   # 3. Verify Imports
@@ -67,7 +107,7 @@ def test_generation_multi_backend(tmp_path):
   assert "res.numpy()" in content  # TF specific normalization
 
 
-def test_excludes_single_variant(tmp_path):
+def test_excludes_single_variant(tmp_path, mock_mgr):
   """
   Scenario: Operation only defined for Torch.
   Expect: No test generated (cannot compare).
@@ -76,7 +116,7 @@ def test_excludes_single_variant(tmp_path):
 
   out_file = tmp_path / "test_empty.py"
 
-  gen = TestGenerator()
+  gen = TestGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text() if out_file.exists() else ""
@@ -84,7 +124,7 @@ def test_excludes_single_variant(tmp_path):
   assert "def test_gen_unique_op" not in content
 
 
-def test_generation_unary_vs_binary(tmp_path):
+def test_generation_unary_vs_binary(tmp_path, mock_mgr):
   """
   Verify argument count logic.
   """
@@ -96,11 +136,11 @@ def test_generation_unary_vs_binary(tmp_path):
   }
 
   out_file = tmp_path / "test_unary.py"
-  gen = TestGenerator()
+  gen = TestGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
   # Should not generate np_y
   assert "np_y" not in content
   # Call should be unary
-  assert "torch.neg(torch.from_numpy(np_x))" in content
+  assert "torch.neg(torch.tensor(np_x))" in content

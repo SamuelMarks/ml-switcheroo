@@ -10,57 +10,6 @@
     "Acosh": {
       "api": "torch.acosh"
     },
-    "Adadelta": {
-      "api": "torch.optim.Adadelta",
-      "args": {
-        "eps": "eps",
-        "lr": "lr",
-        "rho": "rho",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adafactor": {
-      "api": "torch.optim.Adafactor",
-      "args": {
-        "lr": "lr",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adagrad": {
-      "api": "torch.optim.Adagrad",
-      "args": {
-        "eps": "eps",
-        "initial_accumulator_value": "initial_accumulator_value",
-        "lr": "lr",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adam": {
-      "api": "torch.optim.Adam",
-      "args": {
-        "amsgrad": "amsgrad",
-        "eps": "eps",
-        "lr": "lr",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adamax": {
-      "api": "torch.optim.Adamax",
-      "args": {
-        "eps": "eps",
-        "lr": "lr",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Adamw": {
-      "api": "torch.optim.AdamW",
-      "args": {
-        "amsgrad": "amsgrad",
-        "eps": "eps",
-        "lr": "lr",
-        "weight_decay": "weight_decay"
-      }
-    },
     "Add": {
       "api": "torch.add"
     },
@@ -89,10 +38,10 @@
       "api": "torch.ceil"
     },
     "Celu": {
-      "api": "torch.nn.CELU",
-      "args": {
-        "alpha": "alpha"
-      }
+      "api": "torch.celu"
+    },
+    "CenterCrop": {
+      "api": "torchvision.transforms.CenterCrop"
     },
     "Clip": {
       "api": "torch.clip"
@@ -100,29 +49,17 @@
     "Concat": {
       "api": "torch.concat"
     },
+    "Conv2d": {
+      "api": "torch.nn.Conv2d"
+    },
     "Cos": {
       "api": "torch.cos"
     },
     "Cosh": {
       "api": "torch.cosh"
     },
-    "Ctc": {
-      "api": "torch.nn.CTCLoss",
-      "args": {
-        "reduction": "reduction"
-      }
-    },
     "CumSum": {
       "api": "torch.cumsum"
-    },
-    "DataLoader": {
-      "api": "torch.utils.data.DataLoader",
-      "args": {
-        "batch_size": "batch_size",
-        "dataset": "dataset",
-        "drop_last": "drop_last",
-        "shuffle": "shuffle"
-      }
     },
     "Det": {
       "api": "torch.det"
@@ -137,10 +74,7 @@
       "api": "torch.einsum"
     },
     "Elu": {
-      "api": "torch.nn.ELU",
-      "args": {
-        "alpha": "alpha"
-      }
+      "api": "torch.nn.ELU"
     },
     "Equal": {
       "api": "torch.equal"
@@ -164,16 +98,10 @@
       "api": "torch.gather"
     },
     "Gelu": {
-      "api": "torch.nn.GELU",
-      "args": {
-        "approximate": "approximate"
-      }
+      "api": "torch.nn.GELU"
     },
-    "Glu": {
-      "api": "torch.nn.GLU",
-      "args": {
-        "dim": "dim"
-      }
+    "Grayscale": {
+      "api": "torchvision.transforms.Grayscale"
     },
     "Greater": {
       "api": "torch.greater"
@@ -183,22 +111,6 @@
     },
     "HardSwish": {
       "api": "torch.nn.Hardswish"
-    },
-    "Hardshrink": {
-      "api": "torch.nn.Hardshrink"
-    },
-    "Hardsigmoid": {
-      "api": "torch.nn.Hardsigmoid"
-    },
-    "Hardtanh": {
-      "api": "torch.nn.Hardtanh"
-    },
-    "Huber": {
-      "api": "torch.nn.HuberLoss",
-      "args": {
-        "delta": "delta",
-        "reduction": "reduction"
-      }
     },
     "Identity": {
       "api": "torch.nn.Identity"
@@ -215,33 +127,14 @@
     "LeakyRelu": {
       "api": "torch.nn.LeakyReLU"
     },
-    "Leakyrelu": {
-      "api": "torch.nn.LeakyReLU",
-      "args": {
-        "negative_slope": "negative_slope"
-      }
-    },
     "Less": {
       "api": "torch.less"
-    },
-    "Linear": {
-      "api": "torch.nn.Linear",
-      "args": {}
     },
     "Log": {
       "api": "torch.log"
     },
     "LogSoftmax": {
       "api": "torch.nn.LogSoftmax"
-    },
-    "Logsigmoid": {
-      "api": "torch.nn.LogSigmoid"
-    },
-    "Logsoftmax": {
-      "api": "torch.nn.LogSoftmax",
-      "args": {
-        "dim": "dim"
-      }
     },
     "MatMul": {
       "api": "torch.matmul"
@@ -264,39 +157,35 @@
     "Multinomial": {
       "api": "torch.multinomial"
     },
-    "Muon": {
-      "api": "torch.optim.Muon",
-      "args": {
-        "eps": "eps",
-        "lr": "lr",
-        "momentum": "momentum",
-        "nesterov": "nesterov",
-        "ns_steps": "ns_steps",
-        "weight_decay": "weight_decay"
-      }
-    },
-    "Nadam": {
-      "api": "torch.optim.NAdam",
-      "args": {
-        "eps": "eps",
-        "lr": "lr",
-        "weight_decay": "weight_decay"
-      }
-    },
     "Neg": {
       "api": "torch.neg"
     },
     "NonZero": {
       "api": "torch.nonzero"
     },
+    "Normalize": {
+      "api": "torchvision.transforms.Normalize"
+    },
     "PRelu": {
       "api": "torch.prelu"
+    },
+    "Pad": {
+      "api": "torchvision.transforms.Pad"
     },
     "Pow": {
       "api": "torch.pow"
     },
     "RNN": {
       "api": "torch.nn.RNN"
+    },
+    "RandomCrop": {
+      "api": "torchvision.transforms.RandomCrop"
+    },
+    "RandomHorizontalFlip": {
+      "api": "torchvision.transforms.RandomHorizontalFlip"
+    },
+    "RandomVerticalFlip": {
+      "api": "torchvision.transforms.RandomVerticalFlip"
     },
     "Range": {
       "api": "torch.range"
@@ -305,24 +194,13 @@
       "api": "torch.reciprocal"
     },
     "Relu": {
-      "api": "torch.nn.ReLU",
-      "args": {}
-    },
-    "Relu6": {
-      "api": "torch.nn.ReLU6"
+      "api": "torch.relu"
     },
     "Reshape": {
       "api": "torch.reshape"
     },
-    "Rmsprop": {
-      "api": "torch.optim.RMSprop",
-      "args": {
-        "centered": "centered",
-        "eps": "eps",
-        "lr": "lr",
-        "momentum": "momentum",
-        "weight_decay": "weight_decay"
-      }
+    "Resize": {
+      "api": "torchvision.transforms.Resize"
     },
     "Round": {
       "api": "torch.round"
@@ -334,25 +212,13 @@
       "api": "torch.scatter"
     },
     "Selu": {
-      "api": "torch.nn.SELU"
-    },
-    "Sgd": {
-      "api": "torch.optim.SGD",
-      "args": {
-        "lr": "lr",
-        "momentum": "momentum",
-        "nesterov": "nesterov",
-        "weight_decay": "weight_decay"
-      }
+      "api": "torch.selu"
     },
     "Sigmoid": {
-      "api": "torch.nn.Sigmoid"
+      "api": "torch.sigmoid"
     },
     "Sign": {
       "api": "torch.sign"
-    },
-    "Silu": {
-      "api": "torch.nn.SiLU"
     },
     "Sin": {
       "api": "torch.sin"
@@ -364,13 +230,10 @@
       "api": "torch.Size"
     },
     "Softmax": {
-      "api": "torch.nn.Softmax2d"
+      "api": "torch.softmax"
     },
     "Softplus": {
       "api": "torch.nn.Softplus"
-    },
-    "Softshrink": {
-      "api": "torch.nn.Softshrink"
     },
     "Softsign": {
       "api": "torch.nn.Softsign"
@@ -388,25 +251,13 @@
       "api": "torch.tan"
     },
     "Tanh": {
-      "api": "torch.nn.Tanh"
-    },
-    "Tanhshrink": {
-      "api": "torch.nn.Tanhshrink"
-    },
-    "TensorDataset": {
-      "api": "torch.utils.data.TensorDataset",
-      "args": {
-        "tensors": "tensors"
-      }
-    },
-    "Threshold": {
-      "api": "torch.nn.Threshold",
-      "args": {
-        "threshold": "threshold"
-      }
+      "api": "torch.tanh"
     },
     "Tile": {
       "api": "torch.tile"
+    },
+    "ToTensor": {
+      "api": "torchvision.transforms.ToTensor"
     },
     "TopK": {
       "api": "torch.topk"
@@ -427,10 +278,7 @@
       "api": "torch.where"
     },
     "abs": {
-      "api": "torch.abs",
-      "args": {
-        "x": "x"
-      }
+      "api": "torch.abs"
     },
     "acos": {
       "api": "torch.acos"
@@ -439,11 +287,7 @@
       "api": "torch.acosh"
     },
     "add": {
-      "api": "torch.add",
-      "requires_plugin": "recompose_alpha"
-    },
-    "add_": {
-      "api": "torch.Tensor.add_"
+      "api": "torch.add"
     },
     "all": {
       "api": "torch.all"
@@ -532,14 +376,8 @@
     "cross": {
       "api": "torch.cross"
     },
-    "cuda_is_available": {
-      "api": "torch.cuda.is_available"
-    },
     "det": {
       "api": "torch.det"
-    },
-    "device": {
-      "api": "torch.device"
     },
     "diagonal": {
       "api": "torch.diagonal"
@@ -549,9 +387,6 @@
     },
     "divide": {
       "api": "torch.divide"
-    },
-    "dropout": {
-      "api": "torch.nn.functional.dropout"
     },
     "eigh": {
       "api": "torch.linalg.eigh"
@@ -567,9 +402,6 @@
     },
     "equal": {
       "api": "torch.equal"
-    },
-    "eval": {
-      "api": "torch.nn.Module.eval"
     },
     "exp": {
       "api": "torch.exp"
@@ -598,10 +430,6 @@
     "flip": {
       "api": "torch.flip"
     },
-    "float32": {
-      "api": "torch.float32",
-      "args": {}
-    },
     "floor": {
       "api": "torch.floor"
     },
@@ -613,17 +441,6 @@
     },
     "full_like": {
       "api": "torch.full_like"
-    },
-    "full_op": {
-      "api": "torch.full_op",
-      "args": {
-        "axis": "dim",
-        "x": "input"
-      }
-    },
-    "func": {
-      "api": "torch.custom_util.func",
-      "args": {}
     },
     "greater": {
       "api": "torch.greater"
@@ -655,9 +472,6 @@
     "imag": {
       "api": "torch.imag"
     },
-    "init_process_group": {
-      "api": "torch.distributed.init_process_group"
-    },
     "inv": {
       "api": "torch.linalg.inv"
     },
@@ -666,9 +480,6 @@
     },
     "irfftn": {
       "api": "torch.fft.irfftn"
-    },
-    "is_tensor": {
-      "api": "torch.is_tensor"
     },
     "isfinite": {
       "api": "torch.isfinite"
@@ -688,8 +499,8 @@
     "linspace": {
       "api": "torch.linspace"
     },
-    "load": {
-      "api": "torch.load"
+    "load_state_dict": {
+      "api": "torch.nn.Module.load_state_dict"
     },
     "log": {
       "api": "torch.log"
@@ -717,9 +528,6 @@
     },
     "logical_xor": {
       "api": "torch.logical_xor"
-    },
-    "manual_seed": {
-      "api": "torch.manual_seed"
     },
     "matmul": {
       "api": "torch.matmul"
@@ -763,13 +571,6 @@
     "nextafter": {
       "api": "torch.nextafter"
     },
-    "nnx_Param": {
-      "api": "torch.nn.Parameter",
-      "requires_plugin": "nnx_param_to_torch"
-    },
-    "no_grad": {
-      "api": "torch.no_grad"
-    },
     "nonzero": {
       "api": "torch.nonzero"
     },
@@ -784,6 +585,9 @@
     },
     "outer": {
       "api": "torch.outer"
+    },
+    "parameters": {
+      "api": "torch.nn.Module.parameters"
     },
     "pinv": {
       "api": "torch.linalg.pinv"
@@ -805,6 +609,12 @@
     },
     "reciprocal": {
       "api": "torch.reciprocal"
+    },
+    "register_buffer": {
+      "api": "torch.nn.Module.register_buffer"
+    },
+    "register_parameter": {
+      "api": "torch.nn.Module.register_parameter"
     },
     "remainder": {
       "api": "torch.remainder"
@@ -830,17 +640,8 @@
     "round": {
       "api": "torch.round"
     },
-    "save": {
-      "api": "torch.my_hub.save",
-      "args": {
-        "obj": "obj"
-      }
-    },
     "searchsorted": {
       "api": "torch.searchsorted"
-    },
-    "set_printoptions": {
-      "api": "torch.set_printoptions"
     },
     "sign": {
       "api": "torch.sign"
@@ -861,7 +662,8 @@
       "api": "torch.solve"
     },
     "sort": {
-      "api": "torch.sort"
+      "api": "torch.sort",
+      "output_adapter": "lambda x: x.values"
     },
     "sqrt": {
       "api": "torch.sqrt"
@@ -874,6 +676,9 @@
     },
     "stack": {
       "api": "torch.stack"
+    },
+    "state_dict": {
+      "api": "torch.nn.Module.state_dict"
     },
     "std": {
       "api": "torch.std"
@@ -905,17 +710,8 @@
     "tile": {
       "api": "torch.tile"
     },
-    "torch.utils": {
-      "api": "torch.utils"
-    },
-    "torch.utils.data": {
-      "api": "torch.utils.data"
-    },
     "trace": {
       "api": "torch.trace"
-    },
-    "train": {
-      "api": "torch.nn.Module.train"
     },
     "tril": {
       "api": "torch.tril"
@@ -944,13 +740,5 @@
     "zeros_like": {
       "api": "torch.zeros_like"
     }
-  },
-  "metadata": {
-    "demo_example": "import torch.nn as nn\n\nclass Simple(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.l = nn.Linear(10, 10)\n\n    def forward(self, x):\n        return self.l(x)"
-  },
-  "templates": {
-    "convert_input": "torch.from_numpy({np_var})",
-    "import": "import torch",
-    "to_numpy": "{res_var}.detach().cpu().numpy() if hasattr({res_var}, 'detach') else {res_var}"
   }
 }

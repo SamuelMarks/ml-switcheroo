@@ -6,6 +6,11 @@ upstream bodies (ONNX/Array API).
 """
 
 INTERNAL_OPS = {
+  # --- Import Configurations (Feature 024) ---
+  "__imports__": {
+    "torchvision": {"variants": {"torch": {"root": "torchvision", "alias": None}}},
+    "torchvision.transforms": {"variants": {"torch": {"root": "torchvision", "sub": "transforms", "alias": "T"}}},
+  },
   # --- Optimizers (Migrated from Dead Code 'knowledge/' package) ---
   "Adam": {
     "description": "Adaptive Moment Estimation.",

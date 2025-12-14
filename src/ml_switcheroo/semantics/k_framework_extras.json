@@ -1,254 +1,142 @@
 {
-  "Adadelta": {
-    "std_args": [
-      "eps",
-      "lr",
-      "rho",
-      "weight_decay"
-    ]
-  },
-  "Adafactor": {
-    "std_args": [
-      "lr",
-      "weight_decay"
-    ]
-  },
   "Adagrad": {
+    "description": "Adaptive Gradient Algorithm.",
     "std_args": [
-      "eps",
-      "initial_accumulator_value",
+      "params",
       "lr",
-      "weight_decay"
+      "lr_decay",
+      "weight_decay",
+      "initial_accumulator_value",
+      "eps"
     ]
   },
   "Adam": {
+    "description": "Adaptive Moment Estimation.",
     "std_args": [
-      "amsgrad",
+      "params",
+      "lr",
+      "beta1",
+      "beta2",
       "eps",
-      "lr",
-      "weight_decay"
+      "weight_decay",
+      "amsgrad"
     ]
   },
-  "Adamax": {
+  "AdamW": {
+    "description": "Adam with decoupled weight decay.",
     "std_args": [
+      "params",
+      "lr",
+      "beta1",
+      "beta2",
       "eps",
-      "lr",
-      "weight_decay"
+      "weight_decay",
+      "amsgrad"
     ]
   },
-  "Adamw": {
+  "CenterCrop": {
+    "description": "Crops the given image at the center.",
     "std_args": [
-      "amsgrad",
-      "eps",
-      "lr",
-      "weight_decay"
+      "size"
     ]
   },
-  "Celu": {
+  "Grayscale": {
+    "description": "Convert image to grayscale.",
     "std_args": [
-      "alpha"
+      "num_output_channels"
     ]
   },
-  "Ctc": {
+  "Normalize": {
+    "description": "Normalize a tensor image with mean and standard deviation.",
     "std_args": [
-      "reduction"
-    ]
-  },
-  "DataLoader": {
-    "description": "Foundational PyTorch Data Loader. Explicitly unmapped to trigger Escape Hatch.",
-    "std_args": [
-      "dataset",
-      "batch_size",
-      "shuffle",
-      "sampler"
-    ]
-  },
-  "Elu": {
-    "std_args": [
-      "alpha"
-    ]
-  },
-  "Gelu": {
-    "std_args": [
-      "approximate",
-      "x"
-    ]
-  },
-  "Glu": {
-    "std_args": [
-      "dim"
-    ]
-  },
-  "Hardshrink": {
-    "std_args": []
-  },
-  "Hardsigmoid": {
-    "std_args": []
-  },
-  "Hardtanh": {
-    "std_args": []
-  },
-  "Huber": {
-    "std_args": [
-      "delta",
-      "reduction"
-    ]
-  },
-  "Leakyrelu": {
-    "std_args": [
-      "negative_slope"
-    ]
-  },
-  "Logsigmoid": {
-    "std_args": []
-  },
-  "Logsoftmax": {
-    "std_args": [
-      "dim"
-    ]
-  },
-  "Mish": {
-    "std_args": []
-  },
-  "Muon": {
-    "std_args": [
-      "eps",
-      "lr",
-      "momentum",
-      "nesterov",
-      "ns_steps",
-      "weight_decay"
-    ]
-  },
-  "Nadam": {
-    "std_args": [
-      "eps",
-      "lr",
-      "weight_decay"
-    ]
-  },
-  "Relu": {
-    "std_args": []
-  },
-  "Relu6": {
-    "std_args": []
-  },
-  "Rmsprop": {
-    "std_args": [
-      "centered",
-      "eps",
-      "lr",
-      "momentum",
-      "weight_decay"
-    ]
-  },
-  "Selu": {
-    "std_args": []
-  },
-  "Sgd": {
-    "std_args": [
-      "lr",
-      "momentum",
-      "nesterov",
-      "weight_decay"
-    ]
-  },
-  "Sigmoid": {
-    "std_args": []
-  },
-  "Silu": {
-    "std_args": []
-  },
-  "Softmax": {
-    "std_args": [
-      "dim",
-      "x"
-    ]
-  },
-  "Softplus": {
-    "std_args": []
-  },
-  "Softshrink": {
-    "std_args": []
-  },
-  "Softsign": {
-    "std_args": []
-  },
-  "Tanh": {
-    "std_args": []
-  },
-  "Tanhshrink": {
-    "std_args": []
-  },
-  "TensorDataset": {
-    "description": "Simple dataset wrapping tensors.",
-    "std_args": [
-      "tensors"
-    ]
-  },
-  "Threshold": {
-    "std_args": [
-      "threshold"
-    ]
-  },
-  "add": {
-    "description": "Add with Alpha scaling support.",
-    "std_args": [
-      "x",
-      "y",
-      "alpha"
-    ]
-  },
-  "add_": {
-    "description": "In-place addition.",
-    "std_args": [
-      "x",
-      "other",
-      "alpha"
-    ]
-  },
-  "cuda_is_available": {
-    "description": "Checks if a CUDA device is available.",
-    "std_args": []
-  },
-  "device": {
-    "description": "Device placement object.",
-    "std_args": [
-      "type"
-    ]
-  },
-  "dropout": {
-    "description": "Stochastic Dropout.",
-    "std_args": [
-      "input",
-      "p",
-      "training",
+      "mean",
+      "std",
       "inplace"
     ]
   },
-  "eval": {
-    "description": "Sets the module in evaluation mode.",
+  "Pad": {
+    "description": "Pad the given image on all sides.",
+    "std_args": [
+      "padding",
+      "fill",
+      "padding_mode"
+    ]
+  },
+  "RMSprop": {
+    "description": "Root Mean Square Propagation.",
+    "std_args": [
+      "params",
+      "lr",
+      "rho",
+      "eps",
+      "weight_decay",
+      "momentum",
+      "centered"
+    ]
+  },
+  "RandomCrop": {
+    "description": "Crop the given image at a random location.",
+    "std_args": [
+      "size",
+      "padding",
+      "pad_if_needed",
+      "fill",
+      "padding_mode"
+    ]
+  },
+  "RandomHorizontalFlip": {
+    "description": "Horizontally flip the image randomly with a given probability.",
+    "std_args": [
+      "p"
+    ]
+  },
+  "RandomVerticalFlip": {
+    "description": "Vertically flip the image randomly with a given probability.",
+    "std_args": [
+      "p"
+    ]
+  },
+  "Resize": {
+    "description": "Resize the input image to the given size.",
+    "std_args": [
+      "size",
+      "interpolation",
+      "antialias"
+    ]
+  },
+  "SGD": {
+    "description": "Stochastic Gradient Descent.",
+    "std_args": [
+      "params",
+      "lr",
+      "momentum",
+      "dampening",
+      "weight_decay",
+      "nesterov"
+    ]
+  },
+  "ToTensor": {
+    "description": "Convert a PIL Image or numpy.ndarray to tensor.",
     "std_args": []
   },
-  "init_process_group": {
-    "description": "Distributed Training initialization.",
-    "std_args": [
-      "backend",
-      "rank",
-      "world_size"
-    ]
-  },
-  "is_tensor": {
-    "description": "Type check helper.",
-    "std_args": [
-      "obj"
-    ]
-  },
-  "load": {
-    "description": "Deserialization utility.",
-    "std_args": [
-      "f"
-    ]
+  "__imports__": {
+    "torchvision": {
+      "variants": {
+        "torch": {
+          "alias": null,
+          "root": "torchvision"
+        }
+      }
+    },
+    "torchvision.transforms": {
+      "variants": {
+        "torch": {
+          "alias": "T",
+          "root": "torchvision",
+          "sub": "transforms"
+        }
+      }
+    }
   },
   "load_state_dict": {
     "description": "Copies parameters and buffers from state_dict into this module.",
@@ -256,22 +144,6 @@
       "state_dict",
       "strict"
     ]
-  },
-  "manual_seed": {
-    "description": "Seeding RNG. Maps to standard numpy seed often.",
-    "std_args": [
-      "seed"
-    ]
-  },
-  "nnx_Param": {
-    "description": "Flax NNX Parameter definition.",
-    "std_args": [
-      "value"
-    ]
-  },
-  "no_grad": {
-    "description": "Context manager to disable gradient calculation.",
-    "std_args": []
   },
   "parameters": {
     "description": "Returns an iterator over module parameters.",
@@ -294,31 +166,12 @@
       "param"
     ]
   },
-  "save": {
-    "description": "Serialization utility. IO is often framework specific.",
-    "std_args": [
-      "obj",
-      "f"
-    ]
-  },
-  "set_printoptions": {
-    "description": "Formatting utility for printing tensors.",
-    "std_args": [
-      "precision"
-    ]
-  },
   "state_dict": {
     "description": "Returns a dictionary containing a whole state of the module.",
     "std_args": [
       "destination",
       "prefix",
       "keep_vars"
-    ]
-  },
-  "train": {
-    "description": "Sets the module in training mode.",
-    "std_args": [
-      "mode"
     ]
   }
 }
