@@ -10,6 +10,7 @@ Features:
 - **Hierarchy Detection**: Checks `inherits_from` metadata on adapters.
 - **Dynamic HTML**: Generates nested `<select>` elements hidden/shown via JS.
 - **Flavour Routing**: Associates `flax_nnx` with the parent `jax` key.
+- **Example Injection**: Preloads tiered examples from all registered adapters.
 """
 
 import os
@@ -17,7 +18,7 @@ import shutil
 import json
 from pathlib import Path
 from collections import defaultdict
-from typing import Dict, List, Any
+from typing import Dict, List, Tuple, Any, Optional
 
 from docutils import nodes
 from docutils.parsers.rst import Directive
@@ -29,9 +30,26 @@ HierarchyMap = Dict[str, List[Dict[str, str]]]
 
 
 class SwitcherooDemo(Directive):
+  """
+  Sphinx Directive to embed the interactive WASM demo.
+
+  Usage:
+      .. switcheroo_demo::
+  """
+
   has_content = True
 
-  def run(self):
+  def run(self) -> List[nodes.raw]:
+    """
+    Main execution entry point for the directive.
+
+    1. Finds the latest .whl file in dist/.
+    2. Scans the registry for frameworks and examples.
+    3. Renders the HTML template with dynamic dropdowns.
+
+    Returns:
+        List[nodes.raw]: A list containing the raw HTML node.
+    """
     # 1. Locate Wheel
     root_dir = Path(__file__).parents[3]
     dist_dir = root_dir / "dist"
@@ -61,7 +79,7 @@ class SwitcherooDemo(Directive):
     html = f"""
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
             <script>
-                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json};
             </script>
 
             <div class="demo-header">
@@ -96,7 +114,7 @@ class SwitcherooDemo(Directive):
                     <!-- Target Column -->
                     <div class="select-wrapper">
                         <select id="select-tgt" class="material-select">
-                            {opts_tgt} 
+                            {opts_tgt}
                         </select>
                          <div id="tgt-flavour-region" style="display:none; margin-left:10px;">
                             {tgt_flavours_html}
@@ -116,8 +134,8 @@ class SwitcherooDemo(Directive):
                         <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Source code...">import torch
 import torch.nn as nn
 
-class Model(nn.Module): 
-    def forward(self, x): 
+class Model(nn.Module):
+    def forward(self, x):
         return torch.abs(x)</textarea>
                     </div>
                     <div class="editor-group target-group">
@@ -148,9 +166,12 @@ class Model(nn.Module):
 
   def _scan_registry(self) -> Tuple[HierarchyMap, str]:
     """
-    Scans registered adapters to build:
-    1. A hierarchy map (Parent -> [Children]).
-    2. Tiered Examples JSON.
+    Scans registered adapters to build hierarchy and examples.
+
+    Returns:
+        Tuple[HierarchyMap, str]: A tuple containing:
+            - The hierarchy dictionary (Parent -> [Children]).
+            - A JSON string of all discovered examples.
     """
     fws = available_frameworks()
 
@@ -186,21 +207,63 @@ class Model(nn.Module):
 
     final_hierarchy = {root: sorted(hierarchy.get(root, []), key=lambda x: x["label"]) for root in sorted_roots}
 
-    # Collect Examples
+    # Collect Examples from Adapters
     for key in fws:
       adapter = get_adapter(key)
       if hasattr(adapter, "get_tiered_examples"):
         tiers = adapter.get_tiered_examples()
-        # Add mapping if example provided.
-        # We construct example keys carefully to include source flavour info if needed.
-        # For simplicity in demo, we grab generic ones or map manually via JS EXAMPLES
-        # but here we can dump them if extended logic requires it.
-        pass
+        parent_key = getattr(adapter, "inherits_from", None)
+
+        for tier_name, code in tiers.items():
+          # Unique ID for the example entry
+          uid = f"{key}_{tier_name}"
+
+          # Determine Source configuration
+          # If this is a flavour (child), prompt user to select Parent as FW and Key as Flavour
+          if parent_key:
+            src_fw = parent_key
+            src_flavour = key
+          else:
+            src_fw = key
+            src_flavour = None
+
+          # Simple cleanup for label (e.g. "tier2_neural" -> "Neural")
+          # Split on underscores, take the last part and title case it.
+          clean_tier_name = tier_name.replace("tier", "")
+          clean_label = (
+            clean_tier_name.split("_")[-1].capitalize() if "_" in clean_tier_name else clean_tier_name.capitalize()
+          )
+
+          display_fw = getattr(adapter, "display_name", key.title())
+          label = f"{display_fw}: {clean_label}"
+
+          # Target Heuristic
+          # If source is JAX-based, target Torch. Otherwise target JAX.
+          tgt_fw = "jax"
+          if "jax" in src_fw:
+            tgt_fw = "torch"
+
+          examples[uid] = {
+            "label": label,
+            "srcFw": src_fw,
+            "srcFlavour": src_flavour,
+            "tgtFw": tgt_fw,
+            "tgtFlavour": None,  # Default
+            "code": code,
+          }
 
     return final_hierarchy, json.dumps(examples)
 
   def _render_primary_options(self, hierarchy: HierarchyMap) -> str:
-    """Renders the top-level <option> elements."""
+    """
+    Renders the top-level <option> elements for root frameworks.
+
+    Args:
+        hierarchy (HierarchyMap): The framework hierarchy.
+
+    Returns:
+        str: HTML string of option elements.
+    """
     html = []
     for root in hierarchy.keys():
       adapter = get_adapter(root)
@@ -210,11 +273,18 @@ class Model(nn.Module):
 
   def _render_flavour_dropdown(self, side: str, hierarchy: HierarchyMap) -> str:
     """
-    Renders the secondary dropdown.
-    Currently, only 'jax' has a hierarchy expected in the demo.
-    We hardcode the generation for JAX flavours based on the dynamic map.
-    In a more complex UI, this would be dynamically rebuilt by JS.
-    Here we pre-render the 'jax' flavours into the DOM element.
+    Renders the secondary dropdown for Framework Flavours.
+
+    Currently hardcodes generation for 'jax' based on hierarchy.
+    In a robust implementation, this would be generated dynamically by JS,
+    but pre-rendering works for the known JAX/Flax split.
+
+    Args:
+        side (str): 'src' or 'tgt', for ID generation.
+        hierarchy (HierarchyMap): The framework hierarchy.
+
+    Returns:
+        str: HTML string for the select element.
     """
     # We only support JAX hierarchy in UI for now
     children = hierarchy.get("jax", [])
@@ -237,7 +307,12 @@ class Model(nn.Module):
         """
 
 
-def setup(app):
+def setup(app: Any) -> Dict[str, Any]:
+  """
+  Sphinx Extension Setup Hook.
+
+  Registers directives and static assets.
+  """
   app.add_directive("switcheroo_demo", SwitcherooDemo)
   app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")
   app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")
@@ -250,16 +325,20 @@ def setup(app):
   app.connect("builder-inited", add_static_path)
   app.connect("build-finished", copy_wheel_and_reqs)
 
-  return {"version": "0.9.4", "parallel_read_safe": True, "parallel_write_safe": True}
+  return {"version": "0.9.5", "parallel_read_safe": True, "parallel_write_safe": True}
 
 
-def add_static_path(app):
+def add_static_path(app: Any) -> None:
+  """Adds the extension's static directory to HTML build configuration."""
   static_path = Path(__file__).parent / "static"
   if static_path.exists() and hasattr(app, "config"):
     app.config.html_static_path.append(str(static_path.resolve()))
 
 
-def copy_wheel_and_reqs(app, exception):
+def copy_wheel_and_reqs(app: Any, exception: Optional[Exception]) -> None:
+  """
+  Post-build hook to copy the latest .whl file into _static for WASM usage.
+  """
   if exception or not hasattr(app, "builder"):
     return
   here = Path(__file__).parent
