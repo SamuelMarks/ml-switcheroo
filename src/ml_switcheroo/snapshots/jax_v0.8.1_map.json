@@ -14,6 +14,12 @@
       "api": "optax.adabelief",
       "requires_plugin": "optimizer_constructor"
     },
+    "Adadelta": {
+      "api": "optax.adadelta"
+    },
+    "Adafactor": {
+      "api": "optax.adafactor"
+    },
     "Adagrad": {
       "api": "optax.adagrad",
       "requires_plugin": "optimizer_constructor"
@@ -25,6 +31,12 @@
     "AdamW": {
       "api": "optax.adamw",
       "requires_plugin": "optimizer_constructor"
+    },
+    "Adamax": {
+      "api": "optax.adamax"
+    },
+    "Adamw": {
+      "api": "optax.adamw"
     },
     "Add": {
       "api": "jax.numpy.add"
@@ -81,6 +93,9 @@
     "Floor": {
       "api": "jax.numpy.floor"
     },
+    "Fromage": {
+      "api": "optax.fromage"
+    },
     "Greater": {
       "api": "jax.numpy.greater"
     },
@@ -94,8 +109,14 @@
       "api": "optax.lbfgs",
       "requires_plugin": "optimizer_constructor"
     },
+    "Lamb": {
+      "api": "optax.lamb"
+    },
     "Less": {
       "api": "jax.numpy.less"
+    },
+    "Lion": {
+      "api": "optax.lion"
     },
     "Log": {
       "api": "jax.numpy.log"
@@ -112,8 +133,14 @@
     "Min": {
       "api": "jax.numpy.min"
     },
+    "Nadam": {
+      "api": "optax.nadam"
+    },
     "NonZero": {
       "api": "jax.numpy.nonzero"
+    },
+    "Novograd": {
+      "api": "optax.novograd"
     },
     "Pad": {
       "api": "jax.numpy.pad"
@@ -137,6 +164,9 @@
     "SGD": {
       "api": "optax.sgd",
       "requires_plugin": "optimizer_constructor"
+    },
+    "Sgd": {
+      "api": "optax.sgd"
     },
     "Sign": {
       "api": "jax.numpy.sign"

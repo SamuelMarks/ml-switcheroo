@@ -4,13 +4,14 @@ Discovery Tool for linking Framework implementations to Standards.
 This module scans installed libraries (e.g., Torch, JAX, TensorFlow, MLX) for
 functions that match the names defined in the Semantic Knowledge Base.
 
-It handles:
+Links:
+- Hub (Spec): "Abs(x)"
+- Spoke (Lib): "torch.abs"
+
+Logic:
 1. Module Discovery via FrameworkAdapters.
 2. Name Matching (`torch.abs` matches `Abs`).
-3. Signature Compatibility Verification.
-   - Supports Functions.
-   - **Fix**: Supports Classes (Layers) by checking `__call__`/`forward` signatures
-     and relaxing argument count requirements (assuming extras are in `__init__`/`setup`).
+3. Signature Compatibility Verification. (Robust against C-Exts).
 """
 
 import importlib
@@ -25,10 +26,6 @@ class FrameworkSyncer:
   """
   Links abstract operations to concrete framework implementations.
 
-  This class iterates through registered modules of a target framework, looking for
-  callables that match the operation names defined in the Semantic Knowledge Base.
-  It verifies that potential matches have compatible signatures before linking them.
-
   Attributes:
       console: A configured Rich console for logging output.
   """
@@ -40,17 +37,6 @@ class FrameworkSyncer:
   def sync(self, tier_data: Dict[str, Any], framework: str) -> None:
     """
     Updates the 'variants' dict in tier_data by hunting for ops in the target framework.
-
-    It resolves the `FrameworkAdapter` for the requested framework to determine
-    the list of python submodules to scan (e.g. `['jax.numpy', 'jax.numpy.fft']`).
-
-    If a function with a matching name and compatible signature is found, it is
-    recorded in the `tier_data` dictionary under the `variants` key.
-
-    Args:
-        tier_data: The Semantic Knowledge Base (dictionary of operations).
-            This dictionary is modified in-place.
-        framework: The target framework name (e.g., 'torch', 'tensorflow', 'mlx').
     """
     log_info(f"Syncing [code]{framework}[/code] against Standard...")
 
@@ -59,10 +45,8 @@ class FrameworkSyncer:
     paths_to_search = []
 
     if adapter and hasattr(adapter, "search_modules"):
-      # Use configuration from the adapter file
       paths_to_search = adapter.search_modules
     else:
-      # Fallback: Just try scanning the root package
       paths_to_search = [framework]
 
     # 2. Pre-load modules
@@ -91,14 +75,15 @@ class FrameworkSyncer:
 
       found_path = None
 
-      # Iterate modules
+      # Iterate modules looking for match
       for lib in libs:
         # Case-insensitive name match loop
         candidate_name = None
         if hasattr(lib, op_name):
           candidate_name = op_name
         else:
-          # Fallback: Scan dir() for case-insensitive match
+          # Fallback: Scan dir() for case-insensitive match (slower but thorough)
+          # We optimize by only doing this if direct access fails
           for member_name in dir(lib):
             if member_name.lower() == op_name.lower():
               candidate_name = member_name
@@ -126,9 +111,7 @@ class FrameworkSyncer:
     log_success(f"Linked {count} operations for {framework} (Skipped {skipped} mismatches).")
 
   def _extract_names(self, args: List[Union[str, Tuple[str, str]]]) -> List[str]:
-    """
-    Unpacks argument definitions into a flat list of names.
-    """
+    """Unpacks argument definitions into a flat list of names."""
     out = []
     for item in args:
       if isinstance(item, (list, tuple)):
@@ -140,6 +123,7 @@ class FrameworkSyncer:
   def _is_compatible(self, obj: Any, std_args: List[str]) -> bool:
     """
     Verifies if the candidate signature can accept the standard arguments.
+    Robustly handles C-Extensions by assuming compatibility if inspection fails.
     """
     target_func = obj
     is_class_obj = inspect.isclass(obj)
@@ -153,24 +137,25 @@ class FrameworkSyncer:
           target_func = getattr(obj, method_name)
           found_method = True
           break
-      # If no inference method found, fallback to constructor (function-like class)
 
     try:
       sig = inspect.signature(target_func)
     except (ValueError, TypeError):
       # Built-ins (C-extensions) or some ufuncs might not support signature inspection.
+      # FAIL OPEN: Assume compatibility rather than rejecting valid ops like torch.abs
       return True
 
     params = list(sig.parameters.values())
 
     # Aggressive self stripping: If we found a method on a class, assume arg 0 is self
-    # and strip it regardless of name (handles 'self', 'cls', 'this', implicit C++ bindings, etc)
     if is_class_obj and found_method and params:
-      # Check if the function is actually bound or unbound.
-      # getattr(Class, 'func') returns unbound in Py3, so signature includes self.
-      params = params[1:]
+      # Check if bound/unbound. getattr(Class, 'func') is unbound in Py3.
+      # usually first param is self.
+      if params[0].name in ["self", "cls"]:
+        params = params[1:]
 
     # 1. Check for var_positional (*args)
+    # If it accepts *args, it can accept anything. Compatible.
     has_var_args = any(p.kind == inspect.Parameter.VAR_POSITIONAL for p in params)
     if has_var_args:
       return True
@@ -183,12 +168,16 @@ class FrameworkSyncer:
     # 2. Check Mandatory count
     mandatory_params = [p for p in pos_params if p.default == inspect.Parameter.empty]
 
+    # If function requires MORE mandatory arguments than Spec provides, we can't call it.
+    # e.g. Spec: Abs(x) -> Func: Foo(a, b) [needs 2] -> Fail
     if len(mandatory_params) > len(std_args):
       return False
 
     # 3. Check Capacity
     # If class, we assume extras handled in init, so we skip exact capacity check
+    # If function, we check if it can accept the args.
     if not is_class_obj:
+      # e.g. Spec: Add(a, b) -> Func: Neg(x) [accepts 1] -> Fail
       if len(pos_params) < len(std_args):
         return False
 

@@ -1,29 +1,26 @@
 """
-Dynamic Test Code Generator.
+Dynamic Test Code Generator (Physical Synthesizer).
 
 This module is responsible for creating physical Python test files based on the
 Semantic Knowledge Base.
 
-It operates using a **Template-Driven** approach. For each framework (Torch, JAX, etc.),
-it looks up a configuration dictionary that defines how to:
-1.  Import the library.
-2.  Convert a NumPy array to the library's tensor format.
-3.  Convert the library's tensor format back to a NumPy array.
-4.  Optionally wrap execution in JIT compilation (for JAX correctness).
+It operations in two stages:
+1.  **Template Resolution**: It aggregates execution templates (`import`, `convert_input`, `to_numpy`)
+    from the SemanticsManager, prioritizing overlays (snapshots) over registry defaults.
+2.  **Code Emission**: It iterates over Operations in the Spec, generating `def test_gen_<opname>()`
+    functions that:
+    - Generate random inputs using type hints.
+    - Execute the operation across all available backends (Torch, JAX, etc.).
+    - Compare outputs using `np.allclose`.
 
-It emits:
-1.  **Imports**: Only for frameworks actually used in the generated batch.
-2.  **Input Generation**: NumPy seeded random data, using Type Hints from the Spec.
-3.  **Execution Blocks**: Try/Except blocks for each backend found.
-4.  **Comparison Logic**: A generic loop to compare all successful outputs.
-
-**Update for Distributed Semantics**:
-Templates are now retrieved from the unified SemanticsManager, which aggregates
-templates from Registry (Code) and Overlays (Snapshots).
+JIT Logic:
+    If a template specifies `jit_wrap: True` (e.g., JAX), the generator inspects the
+    framework traits to identify `static_argnums` (arguments like `axis` or `keepdims`)
+    and generates valid `jax.jit(fn, static_argnums=(...))` wrappers.
 """
 
 from pathlib import Path
-from typing import Dict, Any, List, Set, Tuple, Optional
+from typing import Dict, Any, List, Set, Tuple, Optional, Union
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import StructuralTraits
@@ -80,8 +77,13 @@ class TestGenerator:
     existing_tests = self._parse_existing_tests(output_path)
     new_test_funcs: List[str] = []
 
+    # Reset tracker for this generation run
+    self._processed_fws = set()
+
     # 1. Generate Test Functions
-    for op_name, details in semantics.items():
+    # Sort keys to ensure deterministic file generation
+    for op_name in sorted(semantics.keys()):
+      details = semantics[op_name]
       func_name = f"test_gen_{op_name}"
 
       # Skip if user manually defined this test (Human-in-the-Loop Override)
@@ -89,6 +91,7 @@ class TestGenerator:
         continue
 
       variants_map = details.get("variants", {})
+
       # Only generate blocks for frameworks we have templates for
       valid_variants = {}
       for fw, info in variants_map.items():
@@ -127,23 +130,25 @@ class TestGenerator:
     imports = ["import pytest", "import numpy as np", "import random"]
 
     # Add framework imports based on what we processed
-    for fw in sorted(self._processed_fws):
+    for fw in sorted(list(self._processed_fws)):
       template = self.semantics_mgr.get_test_template(fw)
       if template and "import" in template:
-        imports.append(template["import"])
+        # Split multiline imports
+        lines = template["import"].split("\n")
+        for line in lines:
+          if line.strip() and line not in imports:
+            imports.append(line.strip())
 
     header = "\n".join(imports)
-    body = "\n".join(new_test_funcs)
+    body = "\n\n".join(new_test_funcs)
 
     # 3. Write
-    mode = "a" if output_path.exists() else "w"
+    mode = "w"  # Always overwrite for reproducibility
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
     with open(output_path, mode, encoding="utf-8") as f:
-      if mode == "w":
-        f.write(header + "\n\n")
-      elif mode == "a":
-        # Ensure we have separation if appending
-        f.write("\n\n")
-      f.write(body)
+      f.write(header + "\n\n")
+      f.write(body + "\n")
 
     print(f"📝 Generated {len(new_test_funcs)} new tests in {output_path}")
 
@@ -184,8 +189,10 @@ class TestGenerator:
     lines.append("    results = {}")
 
     # 2. Execution Blocks
-    for fw, info in variants.items():
+    for fw in sorted(variants.keys()):
+      info = variants[fw]
       self._processed_fws.add(fw)
+
       api_call = info.get("api", f"plugin_required_{op_name}")
       template = self.semantics_mgr.get_test_template(fw)
       if not template:
@@ -259,20 +266,16 @@ class TestGenerator:
 
     # Use simple tolerance comparison.
     # Note: If output types are non-array (ints/bools), allclose handles it if coerced.
-    lines.append("        np.testing.assert_allclose(ref, val, rtol=1e-3, atol=1e-3)")
-    lines.append("")
+    lines.append("        if hasattr(ref, 'shape') and hasattr(val, 'shape'):")
+    lines.append("            np.testing.assert_allclose(ref, val, rtol=1e-3, atol=1e-3)")
+    lines.append("        else:")
+    lines.append("            assert ref == val")
 
     return "\n".join(lines)
 
   def _generate_value_code(self, name: str, type_hint: str) -> str:
     """
     Produces the Python code string to generate a value for the given argument.
-
-    Strategies:
-    1.  **Semantic Type Hint**: If `type_hint` is "int", "bool", "Array", etc.,
-        it maps directly to a random generator.
-    2.  **Name Heuristic**: If type is "Any", it guesses based on name e.g. "axis".
-    3.  **Fallback**: Defaults to `np.random.randn(...)` Float32 Array.
     """
     t = type_hint.lower()
 
@@ -295,11 +298,12 @@ class TestGenerator:
       return "'test_string'"
 
     # --- Strategy 2: Heuristics ---
-    if name in ["axis", "dim"]:
+    name_lower = name.lower()
+    if name_lower in ["axis", "dim"]:
       return "1"
-    if name in ["keepdims", "keepdim"]:
+    if name_lower in ["keepdims", "keepdim"]:
       return "True"
-    if "shape" in name or "size" in name:
+    if "shape" in name_lower or "size" in name_lower:
       return "(2, 2)"
 
     # --- Fallback ---

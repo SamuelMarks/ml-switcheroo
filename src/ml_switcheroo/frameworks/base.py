@@ -7,6 +7,7 @@ Key Updates (Hybrid Loading):
 - Adapters now possess an `init_mode` (LIVE or GHOST).
 - Added logic to finding and loading cached snapshots if live imports fail.
 - Expanded `collect_api` to branch between scanning live objects vs reading cached lists.
+- **New**: `supported_tiers` property to define capabilities (Math vs Neural).
 """
 
 import json
@@ -18,6 +19,7 @@ from pydantic import BaseModel, Field
 
 from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
+from ml_switcheroo.enums import SemanticTier
 
 # Define semantic storage for snapshots relative to this file
 # src/ml_switcheroo/frameworks/../snapshots
@@ -107,6 +109,15 @@ class FrameworkAdapter(Protocol):
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
     """Regex patterns used to categorize API surfaces."""
+    ...
+
+  @property
+  def supported_tiers(self) -> List[SemanticTier]:
+    """
+    Returns the semantic tiers supported by this framework.
+    e.g. [SemanticTier.ARRAY_API] for NumPy,
+         [SemanticTier.ARRAY_API, SemanticTier.NEURAL] for PyTorch.
+    """
     ...
 
   # --- 3. Import Management ---

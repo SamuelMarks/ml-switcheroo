@@ -1,10 +1,14 @@
 """
-Torch Adapter with Ghost Protocol Introspection.
+PyTorch Adapter with Dynamic Introspection.
 
-This adapter implements `collect_api` to dynamically discover PyTorch components
-(Losses, Optimizers, Activations) by introspecting the `torch` namespace at runtime.
-It supports **Ghost Mode**: if PyTorch is not installed (e.g. within a lightweight
-CI or WASM environment), it hydrates definitions from a pre-captured JSON snapshot.
+This adapter serves as the primary "Source of Truth" for many Deep Learning
+standards (Layers, Optimizers).
+
+Updates:
+- Removed hardcoded lists for Activations. Now scans ``torch.nn.modules.activation``.
+- Dynamic scanning of Optimizers via ``torch.optim.Optimizer`` inheritance check.
+- Dynamic scanning of Losses via naming convention.
+- Strict filtering applied to activation scanning to prevent layer leakage.
 """
 
 import inspect
@@ -22,7 +26,8 @@ except ImportError:
   nn = None
   optim = None
 
-from .base import (
+from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
   StandardMap,
@@ -43,6 +48,10 @@ class TorchAdapter:
   ui_priority: int = 0
 
   def __init__(self):
+    """
+    Initializes the adapter.
+    Checks for Torch installation to determine Live vs Ghost mode.
+    """
     self._mode = InitMode.LIVE
     self._snapshot_data = {}
     if torch is None:
@@ -50,6 +59,8 @@ class TorchAdapter:
       self._snapshot_data = load_snapshot_for_adapter("torch")
       if not self._snapshot_data:
         logging.warning("PyTorch not installed and no snapshot found. Scanning unavailable.")
+
+  # --- Metadata & Discovery Config ---
 
   @property
   def search_modules(self) -> List[str]:
@@ -68,19 +79,29 @@ class TorchAdapter:
     return ("torch", "torch")
 
   @property
+  def supported_tiers(self) -> List[SemanticTier]:
+    return [SemanticTier.NEURAL, SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
+
+  @property
   def import_namespaces(self) -> Dict[str, Dict[str, str]]:
     return {
       "torch.nn": {"alias": "nn", "sub": "nn"},
-      # Fix: map root correctly so it becomes 'import torch.nn.functional as F'
-      # 'root' is the module to import, 'sub' is None means we import the root directly
       "torch.nn.functional": {"root": "torch.nn.functional", "alias": "F", "sub": None},
     }
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
     return {
-      "neural": [r"\.nn\\.", r"\.modules\\.", r"\.layers\\.", r"Module$"],
-      "extras": [r"\.utils\\.", r"\.hub\\.", r"\.distributed\\.", r"\.autograd\\.", r"save$", r"load$", r"seed$"],
+      "neural": [r"\\.nn\\.", r"\\.modules\\.", r"\\.layers\\.", r"Module$"],
+      "extras": [
+        r"\\.utils\\.",
+        r"\\.hub\\.",
+        r"\\.distributed\\.",
+        r"\\.autograd\\.",
+        r"save$",
+        r"load$",
+        r"seed$",
+      ],
     }
 
   @property
@@ -97,28 +118,26 @@ class TorchAdapter:
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
+    """
+    Static definitions for base operations to ensure robustness.
+    """
     return {
       "Abs": StandardMap(api="torch.abs"),
       "Conv2d": StandardMap(api="torch.nn.Conv2d"),
       "relu": StandardMap(api="torch.nn.functional.relu"),
+      "permute_dims": StandardMap(api="torch.permute"),
     }
 
   @property
   def rng_seed_methods(self) -> List[str]:
     return ["manual_seed", "seed"]
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    return cls().get_tiered_examples()["tier2_neural"]
-
-  def get_tiered_examples(self) -> Dict[str, str]:
-    return {
-      "tier1_math": """import torch\n\ndef math_ops(x, y):\n  return torch.mean(torch.add(torch.abs(x), y))""",
-      "tier2_neural": """import torch\nimport torch.nn as nn\nclass Net(nn.Module):\n  def forward(self, x): return x""",
-      "tier3_extras": """import torch\nfrom torch.utils.data import DataLoader""",
-    }
+  # --- Discovery Logic (Dynamic) ---
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    """
+    Collects API signatures dynamically.
+    """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
     return self._collect_live(category)
@@ -137,61 +156,133 @@ class TorchAdapter:
       results.extend(self._scan_optimizers())
     elif category == StandardCategory.ACTIVATION:
       results.extend(self._scan_activations())
+    elif category == StandardCategory.LAYER:
+      results.extend(self._scan_layers())
     return results
 
   def _scan_losses(self) -> List[GhostRef]:
     if not nn:
       return []
     found = []
+    # Dynamic scan of torch.nn for Loss classes
     for name, obj in inspect.getmembers(nn):
       if inspect.isclass(obj) and name.endswith("Loss") and name != "_Loss":
-        ref = GhostInspector.inspect(obj, f"torch.nn.{name}")
-        found.append(ref)
+        if issubclass(obj, nn.Module):
+          found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
     return found
 
   def _scan_optimizers(self) -> List[GhostRef]:
     if not optim:
       return []
     found = []
+    # Dynamic scan of torch.optim for Optimizer subclasses
     for name, obj in inspect.getmembers(optim):
       if inspect.isclass(obj) and name != "Optimizer":
         try:
           if issubclass(obj, optim.Optimizer):
-            ref = GhostInspector.inspect(obj, f"torch.optim.{name}")
-            found.append(ref)
+            found.append(GhostInspector.inspect(obj, f"torch.optim.{name}"))
         except TypeError:
           pass
     return found
 
   def _scan_activations(self) -> List[GhostRef]:
-    if not nn:
-      return []
+    """Scans for Activations (both Class and Functional)."""
     found = []
-    # 1. Class Activations
-    for name, obj in inspect.getmembers(nn):
-      if inspect.isclass(obj):
-        try:
-          if issubclass(obj, nn.Module):
-            mod_name = getattr(obj, "__module__", "")
-            known_names = {"ReLU", "GELU", "Sigmoid", "Tanh", "Softmax", "LeakyReLU", "Elu", "SiLU"}
-            if "activation" in mod_name or name in known_names:
-              ref = GhostInspector.inspect(obj, f"torch.nn.{name}")
-              found.append(ref)
-        except TypeError:
-          pass
+    # Allowlist of known activations to prevent layers like Conv2d or losses leaking in
+    known_names = {
+      "ReLU",
+      "GELU",
+      "Sigmoid",
+      "Tanh",
+      "Softmax",
+      "LeakyReLU",
+      "Elu",
+      "SiLU",
+      "Hardswish",
+      "Mish",
+      "LogSoftmax",
+      "ReLU6",
+      "PReLU",
+      "SELU",
+      "CELU",
+      "Softplus",
+      "Softshrink",
+      "Softsign",
+      "Tanhshrink",
+      "Threshold",
+      "GLU",
+      "Hardsigmoid",
+      "Hardtanh",
+    }
+
+    # 1. Class-based Activations (torch.nn.modules.activation)
+    # We try to import the dedicated submodule to be precise, or scan nn if that fails
+    try:
+      import torch.nn.modules.activation as activ
+
+      for name, obj in inspect.getmembers(activ):
+        if inspect.isclass(obj) and issubclass(obj, nn.Module):
+          # Ensure strict filtering for unexpected leaks (even in dedicated module)
+          # Only accept known activation names
+          if name in known_names:
+            found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
+    except ImportError:
+      # Fallback scan of nn
+      if nn:
+        for name, obj in inspect.getmembers(nn):
+          if name in known_names and inspect.isclass(obj):
+            found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
+
     # 2. Functional Activations
+    # We scan functional, filtering for things with matching class names or lowercase equivalents
     try:
       import torch.nn.functional as F
 
-      targets = ["relu", "gelu", "sigmoid", "tanh", "softmax", "log_softmax", "silu", "elu", "leaky_relu"]
-      for name in targets:
-        if hasattr(F, name):
-          obj = getattr(F, name)
-          ref = GhostInspector.inspect(obj, f"torch.nn.functional.{name}")
-          found.append(ref)
+      for name, obj in inspect.getmembers(F):
+        if name.startswith("_"):
+          continue
+        if not inspect.isfunction(obj):
+          continue
+
+        # Heuristic: Activations usually lowercase equivalents of classes found above
+        # Or we liberally accept mathematical functions
+        if name in [
+          "relu",
+          "gelu",
+          "sigmoid",
+          "tanh",
+          "softmax",
+          "log_softmax",
+          "silu",
+          "elu",
+          "leaky_relu",
+          "hardswish",
+          "mish",
+        ]:
+          found.append(GhostInspector.inspect(obj, f"torch.nn.functional.{name}"))
     except ImportError:
       pass
+
     return found
+
+  def _scan_layers(self) -> List[GhostRef]:
+    """Scans for general Neural Layers (Linear, Conv, RNN, etc)."""
+    if not nn:
+      return []
+    found = []
+
+    # Broad scan of nn
+    for name, obj in inspect.getmembers(nn):
+      if inspect.isclass(obj) and issubclass(obj, nn.Module):
+        # Filter out Losses (handled separately) and Activations (handled separately)
+        if name.endswith("Loss") or name.startswith("_"):
+          continue
+
+        # We assume anything else is a Layer (or Container)
+        found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
+    return found
+
+  # --- Syntax & Conversion ---
 
   def get_device_syntax(self, device_type: str, device_index: None | str = None) -> str:
     args = [str(device_type)]
@@ -223,15 +314,18 @@ class TorchAdapter:
     return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """Applies manual fixes."""
     mappings = snapshot.setdefault("mappings", {})
     imports = snapshot.setdefault("imports", {})
 
+    # Torch Module wiring
     mappings["register_buffer"] = {"api": "torch.nn.Module.register_buffer"}
     mappings["register_parameter"] = {"api": "torch.nn.Module.register_parameter"}
     mappings["state_dict"] = {"api": "torch.nn.Module.state_dict"}
     mappings["load_state_dict"] = {"api": "torch.nn.Module.load_state_dict"}
     mappings["parameters"] = {"api": "torch.nn.Module.parameters"}
 
+    # TorchVision wiring
     for vision_op in [
       "Resize",
       "Normalize",
@@ -252,8 +346,18 @@ class TorchAdapter:
     if "sort" in mappings:
       mappings["sort"]["output_adapter"] = "lambda x: x.values"
 
-    mappings["relu"] = {"api": "torch.nn.functional.relu"}
-    activations = ["gelu", "sigmoid", "tanh", "softmax", "log_softmax", "silu", "elu", "leaky_relu"]
-    for act in activations:
-      if act not in mappings:
-        mappings[act] = {"api": f"torch.nn.functional.{act}"}
+    # Ensure F.relu fallback exists
+    if "relu" not in mappings:
+      mappings["relu"] = {"api": "torch.nn.functional.relu"}
+
+  @classmethod
+  def get_example_code(cls) -> str:
+    return cls().get_tiered_examples()["tier2_neural_simple"]
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    return {
+      "tier1_math": """import torch\n\ndef math_ops(x, y):\n    a = torch.abs(x)\n    b = torch.add(a, y)\n    return torch.mean(b)""",
+      "tier2_neural_simple": """from torch import nn\n\nclass Net(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.linear = nn.Linear(10, 10)\n\n    def forward(self, x):\n        x = self.linear(x)\n        return nn.functional.relu(x)""",
+      "tier2_neural_cnn": """import torch\nimport torch.nn as nn\nimport torch.nn.functional as F\n\nclass ConvNet(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.conv1 = nn.Conv2d(1, 32, 3, 1)\n        self.fc = nn.Linear(9216, 10)\n\n    def forward(self, x):\n        x = self.conv1(x)\n        x = F.relu(x)\n        x = torch.flatten(x, 1)\n        return self.fc(x)""",
+      "tier3_extras_dataloader": """import torch\nfrom torch.utils.data import DataLoader, TensorDataset\n\ndef get_loader():\n    x = torch.randn(100, 10)\n    y = torch.randint(0, 2, (100,))\n    ds = TensorDataset(x, y)\n    loader = DataLoader(ds, batch_size=32, shuffle=True, num_workers=4)\n    return loader""",
+    }

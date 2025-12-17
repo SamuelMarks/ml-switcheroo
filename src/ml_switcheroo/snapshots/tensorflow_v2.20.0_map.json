@@ -13,6 +13,9 @@
     "Add": {
       "api": "tensorflow.add"
     },
+    "Alphadropout": {
+      "api": "keras.layers.AlphaDropout"
+    },
     "ArgMax": {
       "api": "tensorflow.argmax"
     },
@@ -31,8 +34,26 @@
     "Atanh": {
       "api": "tensorflow.atanh"
     },
+    "Attention": {
+      "api": "keras.layers.Attention"
+    },
+    "BatchNormalization": {
+      "api": "keras.layers.BatchNormalization"
+    },
+    "Bidirectional": {
+      "api": "keras.layers.Bidirectional"
+    },
     "Ceil": {
       "api": "tensorflow.math.ceil"
+    },
+    "Celu": {
+      "api": "keras.ops.celu"
+    },
+    "CenterCrop": {
+      "api": "keras.layers.CenterCrop"
+    },
+    "Clip": {
+      "api": "keras.ops.clip"
     },
     "Concat": {
       "api": "tensorflow.concat"
@@ -52,8 +73,17 @@
     "Det": {
       "api": "tensorflow.linalg.det"
     },
+    "Dropout": {
+      "api": "keras.layers.Dropout"
+    },
     "Einsum": {
       "api": "tensorflow.einsum"
+    },
+    "Elu": {
+      "api": "keras.layers.ELU"
+    },
+    "Embedding": {
+      "api": "keras.layers.Embedding"
     },
     "Equal": {
       "api": "tensorflow.equal"
@@ -64,17 +94,56 @@
     "Exp": {
       "api": "tensorflow.exp"
     },
+    "Flatten": {
+      "api": "keras.layers.Flatten"
+    },
     "Floor": {
       "api": "tensorflow.floor"
+    },
+    "GRU": {
+      "api": "keras.layers.GRU"
     },
     "Gather": {
       "api": "tensorflow.gather"
     },
+    "Gelu": {
+      "api": "keras.ops.gelu"
+    },
+    "Glu": {
+      "api": "keras.ops.glu"
+    },
     "Greater": {
       "api": "tensorflow.greater"
     },
+    "GroupNormalization": {
+      "api": "keras.layers.GroupNormalization"
+    },
+    "Gru": {
+      "api": "keras.layers.GRU"
+    },
+    "Grucell": {
+      "api": "keras.layers.GRUCell"
+    },
     "Identity": {
       "api": "tensorflow.identity"
+    },
+    "IsNaN": {
+      "api": "keras.ops.isnan"
+    },
+    "LSTM": {
+      "api": "keras.layers.LSTM"
+    },
+    "LayerNormalization": {
+      "api": "keras.layers.LayerNormalization"
+    },
+    "Layernormalization": {
+      "api": "keras.layers.LayerNormalization"
+    },
+    "LeakyRelu": {
+      "api": "keras.layers.LeakyReLU"
+    },
+    "Leakyrelu": {
+      "api": "keras.layers.LeakyReLU"
     },
     "Less": {
       "api": "tensorflow.less"
@@ -82,14 +151,38 @@
     "Log": {
       "api": "tensorflow.math.log"
     },
+    "Lstm": {
+      "api": "keras.layers.LSTM"
+    },
+    "Lstmcell": {
+      "api": "keras.layers.LSTMCell"
+    },
     "MatMul": {
       "api": "tensorflow.matmul"
+    },
+    "Max": {
+      "api": "keras.ops.max"
+    },
+    "Mean": {
+      "api": "keras.ops.mean"
+    },
+    "Min": {
+      "api": "keras.ops.min"
     },
     "Mod": {
       "api": "tensorflow.math.mod"
     },
+    "Multiheadattention": {
+      "api": "keras.layers.MultiHeadAttention"
+    },
+    "NonZero": {
+      "api": "keras.ops.nonzero"
+    },
     "Normalize": {
       "api": "tensorflow.linalg.normalize"
+    },
+    "PRelu": {
+      "api": "keras.layers.PReLU"
     },
     "Pad": {
       "api": "tensorflow.pad"
@@ -97,14 +190,32 @@
     "Pow": {
       "api": "tensorflow.pow"
     },
+    "Prelu": {
+      "api": "keras.layers.PReLU"
+    },
+    "RMSNormalization": {
+      "api": "keras.layers.RMSNormalization"
+    },
+    "RNN": {
+      "api": "keras.layers.RNN"
+    },
+    "RandomCrop": {
+      "api": "keras.layers.RandomCrop"
+    },
     "Range": {
       "api": "tensorflow.range"
     },
     "Reciprocal": {
       "api": "tensorflow.math.reciprocal"
     },
+    "Relu": {
+      "api": "keras.layers.ReLU"
+    },
     "Reshape": {
       "api": "tensorflow.reshape"
+    },
+    "Rnn": {
+      "api": "keras.layers.RNN"
     },
     "Round": {
       "api": "tensorflow.round"
@@ -124,6 +235,9 @@
     "Sign": {
       "api": "tensorflow.sign"
     },
+    "Silu": {
+      "api": "keras.ops.silu"
+    },
     "Sin": {
       "api": "tensorflow.sin"
     },
@@ -142,6 +256,9 @@
     "Softsign": {
       "api": "tensorflow.math.softsign"
     },
+    "Sparsemax": {
+      "api": "keras.ops.sparsemax"
+    },
     "Split": {
       "api": "tensorflow.split"
     },
@@ -150,6 +267,9 @@
     },
     "Squeeze": {
       "api": "tensorflow.squeeze"
+    },
+    "Sum": {
+      "api": "keras.ops.sum"
     },
     "Tan": {
       "api": "tensorflow.tan"
@@ -181,6 +301,12 @@
     "add": {
       "api": "tensorflow.add"
     },
+    "all": {
+      "api": "keras.ops.all"
+    },
+    "any": {
+      "api": "keras.ops.any"
+    },
     "argmax": {
       "api": "tensorflow.argmax"
     },
@@ -205,6 +331,24 @@
     "atanh": {
       "api": "tensorflow.atanh"
     },
+    "bitwise_and": {
+      "api": "keras.ops.bitwise_and"
+    },
+    "bitwise_invert": {
+      "api": "keras.ops.bitwise_invert"
+    },
+    "bitwise_left_shift": {
+      "api": "keras.ops.bitwise_left_shift"
+    },
+    "bitwise_or": {
+      "api": "keras.ops.bitwise_or"
+    },
+    "bitwise_right_shift": {
+      "api": "keras.ops.bitwise_right_shift"
+    },
+    "bitwise_xor": {
+      "api": "keras.ops.bitwise_xor"
+    },
     "broadcast_to": {
       "api": "tensorflow.broadcast_to"
     },
@@ -213,6 +357,9 @@
     },
     "cholesky": {
       "api": "tensorflow.linalg.cholesky"
+    },
+    "clip": {
+      "api": "keras.ops.clip"
     },
     "concat": {
       "api": "tensorflow.concat"
@@ -234,6 +381,9 @@
     },
     "det": {
       "api": "tensorflow.linalg.det"
+    },
+    "diagonal": {
+      "api": "keras.ops.diagonal"
     },
     "divide": {
       "api": "tensorflow.divide"
@@ -262,14 +412,23 @@
     "fftshift": {
       "api": "tensorflow.signal.fftshift"
     },
+    "flip": {
+      "api": "keras.ops.flip"
+    },
     "floor": {
       "api": "tensorflow.floor"
+    },
+    "floor_divide": {
+      "api": "keras.ops.floor_divide"
     },
     "greater": {
       "api": "tensorflow.greater"
     },
     "greater_equal": {
       "api": "tensorflow.greater_equal"
+    },
+    "hypot": {
+      "api": "keras.ops.hypot"
     },
     "ifftshift": {
       "api": "tensorflow.signal.ifftshift"
@@ -280,17 +439,38 @@
     "inv": {
       "api": "tensorflow.linalg.inv"
     },
+    "isfinite": {
+      "api": "keras.ops.isfinite"
+    },
+    "isinf": {
+      "api": "keras.ops.isinf"
+    },
+    "isnan": {
+      "api": "keras.ops.isnan"
+    },
     "less": {
       "api": "tensorflow.less"
     },
     "less_equal": {
       "api": "tensorflow.less_equal"
     },
+    "linspace": {
+      "api": "keras.ops.linspace"
+    },
     "log": {
       "api": "tensorflow.math.log"
     },
+    "log10": {
+      "api": "keras.ops.log10"
+    },
     "log1p": {
       "api": "tensorflow.math.log1p"
+    },
+    "log2": {
+      "api": "keras.ops.log2"
+    },
+    "logaddexp": {
+      "api": "keras.ops.logaddexp"
     },
     "logical_and": {
       "api": "tensorflow.logical_and"
@@ -313,14 +493,26 @@
     "matrix_transpose": {
       "api": "tensorflow.linalg.matrix_transpose"
     },
+    "max": {
+      "api": "keras.ops.max"
+    },
     "maximum": {
       "api": "tensorflow.maximum"
+    },
+    "mean": {
+      "api": "keras.ops.mean"
     },
     "meshgrid": {
       "api": "tensorflow.meshgrid"
     },
+    "min": {
+      "api": "keras.ops.min"
+    },
     "minimum": {
       "api": "tensorflow.minimum"
+    },
+    "moveaxis": {
+      "api": "keras.ops.moveaxis"
     },
     "multiply": {
       "api": "tensorflow.multiply"
@@ -331,6 +523,9 @@
     "nextafter": {
       "api": "tensorflow.math.nextafter"
     },
+    "nonzero": {
+      "api": "keras.ops.nonzero"
+    },
     "not_equal": {
       "api": "tensorflow.not_equal"
     },
@@ -340,11 +535,21 @@
     "ones_like": {
       "api": "tensorflow.ones_like"
     },
+    "outer": {
+      "api": "keras.ops.outer"
+    },
+    "permute_dims": {
+      "api": "tf.transpose",
+      "requires_plugin": "pack_varargs"
+    },
     "pinv": {
       "api": "tensorflow.linalg.pinv"
     },
     "pow": {
       "api": "tensorflow.pow"
+    },
+    "prod": {
+      "api": "keras.ops.prod"
     },
     "qr": {
       "api": "tensorflow.linalg.qr"
@@ -372,6 +577,9 @@
     },
     "sign": {
       "api": "tensorflow.sign"
+    },
+    "signbit": {
+      "api": "keras.ops.signbit"
     },
     "sin": {
       "api": "tensorflow.sin"
@@ -406,6 +614,12 @@
     "svd": {
       "api": "tensorflow.linalg.svd"
     },
+    "take": {
+      "api": "keras.ops.take"
+    },
+    "take_along_axis": {
+      "api": "keras.ops.take_along_axis"
+    },
     "tan": {
       "api": "tensorflow.tan"
     },
@@ -417,6 +631,18 @@
     },
     "tile": {
       "api": "tensorflow.tile"
+    },
+    "trace": {
+      "api": "keras.ops.trace"
+    },
+    "tril": {
+      "api": "keras.ops.tril"
+    },
+    "triu": {
+      "api": "keras.ops.triu"
+    },
+    "trunc": {
+      "api": "keras.ops.trunc"
     },
     "unstack": {
       "api": "tensorflow.unstack"

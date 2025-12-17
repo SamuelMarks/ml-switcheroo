@@ -2,12 +2,11 @@
 JAX Core Framework Adapter (Level 0 & Level 1).
 
 This adapter provides support for the functional JAX ecosystem *without* binding
-to a high-level neural network library like Flax or Haiku. It is intended for:
-1.  **Pure Math/Array Conversions** (NumPy <-> JAX Array).
-2.  **Functional Optimization** (via Optax mapping).
-3.  **Low-Level Checkpointing** (via Orbax).
+to a high-level neural network library like Flax or Haiku.
 
-It implements the `JAXStackMixin` to standardized these common libraries.
+Updates:
+- Dynamic scanning of ``jax.nn`` for activations.
+- Dynamic scanning of ``optax`` for optimizers/losses via `OptaxScanner`.
 """
 
 import logging
@@ -20,7 +19,7 @@ except ImportError:
   jax = None
   jnp = None
 
-from .base import (
+from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
   InitMode,
@@ -38,7 +37,6 @@ from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 class JaxCoreAdapter(JAXStackMixin):
   """
   Adapter for Core JAX (jax + optax + orbax) without a Neural Framework.
-  Used for converting math libraries, or as a base for specific frameworks.
   """
 
   display_name: str = "JAX (Core)"
@@ -61,7 +59,6 @@ class JaxCoreAdapter(JAXStackMixin):
   def search_modules(self) -> List[str]:
     """
     Scans only core math and optimization libraries.
-    Does NOT scan flax/haiku modules.
     """
     return ["jax.numpy", "jax.numpy.linalg", "jax.numpy.fft", "optax"]
 
@@ -71,23 +68,17 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Core JAX API surface patterns."""
-    return {"array": [r"jax\.numpy\.", r"jnp\."], "extras": [r"jax\.random\.", r"jax\.lax\.", r"optax\."]}
+    return {"array": [r"jax\\.numpy\\.", r"jnp\\."], "extras": [r"jax\\.random\\.", r"jax\\.lax\\.", r"optax\\."]}
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """
-    Defines traits for pure JAX code.
-    Since pure JAX doesn't use classes for layers, module_base is None.
-    """
     return StructuralTraits(
       module_base=None,
-      forward_method="__call__",  # Default if user uses classes manually
+      forward_method="__call__",
       inject_magic_args=[],
       requires_super_init=False,
       lifecycle_strip_methods=[],
       lifecycle_warn_methods=[],
-      # JIT arguments that must be static
       jit_static_args=["axis", "axes", "dim", "dims", "keepdim", "keepdims", "ord", "mode", "dtype"],
     )
 
@@ -128,7 +119,9 @@ class JaxCoreAdapter(JAXStackMixin):
     return results
 
   def _scan_jax_activations(self) -> List[GhostRef]:
-    """Scans jax.nn for activation functions."""
+    """
+    Dynamically scans jax.nn for activation-like functions.
+    """
     if jax is None:
       return []
     found = []
@@ -136,13 +129,18 @@ class JaxCoreAdapter(JAXStackMixin):
       import jax.nn as jax_nn
       import inspect
 
+      # Iterate everything in jax.nn
       for name, obj in inspect.getmembers(jax_nn):
         if name.startswith("_"):
           continue
+
         if inspect.isfunction(obj):
-          if name in ["relu", "gelu", "silu", "elu", "sigmoid", "tanh", "softmax", "log_softmax"]:
-            ref = GhostInspector.inspect(obj, f"jax.nn.{name}")
-            found.append(ref)
+          # Heuristic: Does it look like an activation?
+          # Most JAX activations are in jax.nn and are lowercase.
+          # We filter out known utilities (like 'initializers') if they appear as functions
+          # but generally we accept most functions here for consensus voting.
+          found.append(GhostInspector.inspect(obj, f"jax.nn.{name}"))
+
     except ImportError:
       pass
     return found
@@ -154,8 +152,6 @@ class JaxCoreAdapter(JAXStackMixin):
       import jax.numpy as jnp
     except ImportError:
       return data
-    # Note: In test contexts 'np' usually refers to standard numpy, imported elsewhere if needed for isinstnace checks
-    # Assuming input is list/tuple or numpy array
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       return jnp.array(data)
     return data
@@ -170,18 +166,8 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @classmethod
   def get_example_code(cls) -> str:
-    return """import jax.numpy as jnp
-from jax import grad, jit
-
-def predict(params, x): 
-  # Pure JAX function
-  return jnp.dot(x, params['w']) + params['b'] 
-
-def loss_fn(params, x, y): 
-  preds = predict(params, x) 
-  return jnp.mean((preds - y) ** 2) 
-"""
+    return """import jax.numpy as jnp\nfrom jax import grad, jit\n\ndef predict(params, x):\n  return jnp.dot(x, params['w']) + params['b']"""
 
 
-# Backwards compatibility alias for tests importing directly from module
+# Backwards compatibility alias
 JaxAdapter = JaxCoreAdapter

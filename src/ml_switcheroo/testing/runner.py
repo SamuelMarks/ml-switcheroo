@@ -14,6 +14,7 @@ Refactor Note:
 """
 
 import importlib
+import traceback
 from typing import Dict, Any, Tuple, Optional, List
 
 import numpy as np
@@ -71,7 +72,8 @@ class EquivalenceRunner:
 
     # 2. Run for each framework
     for fw, details in variants.items():
-      # Skip if specific API undefined (e.g. complex plugin logic without API)
+      # Skip if specific API undefined (e.g. complex plugin logic without API string)
+      # or if details is None (explicit disable)
       if not isinstance(details, dict) or "api" not in details:
         continue
 
@@ -96,12 +98,14 @@ class EquivalenceRunner:
           # Fallback unlikely if adapters loaded, but safe
           results[fw] = res
 
-      except Exception as e:
+      except Exception:
+        # Capture traceback for detailed error reporting
+        err_msg = traceback.format_exc()
         # We return False immediately on crash to highlight the error
-        return False, f"Crash in {fw} ({api_path}): {e}"
+        return False, f"Crash in {fw} ({api_path}):\n{err_msg}"
 
     # 3. Compare Results
-    # We need at least 2 successful runs to compare logic
+    # We need at least 2 successful runs to perform a comparison
     if len(results) < 2:
       return True, "Skipped (Need 2+ frameworks to compare)"
 
@@ -113,7 +117,9 @@ class EquivalenceRunner:
       val = results[other_fw]
       # Use loose tolerance for float32 differences across backends
       if not self._deep_compare(ref_val, val):
-        return False, f"Mismatch between {ref_fw} and {other_fw}"
+        # Try to provide helpful debug info
+        msg = f"Mismatch between {ref_fw} and {other_fw}.\nRef ({ref_fw}): {ref_val}\nCand ({other_fw}): {val}"
+        return False, msg
 
     return True, "✅ Output Matched"
 
@@ -131,6 +137,7 @@ class EquivalenceRunner:
     new_inputs = {}
     for key, val in inputs.items():
       # Look up replacement name, default to original if not found
+      # mapping key is Standard Name, value is Framework Name
       new_key = mapping.get(key, key)
       new_inputs[new_key] = val
     return new_inputs
@@ -158,6 +165,9 @@ class EquivalenceRunner:
 
     # Import module dynamically (e.g. import torch.nn.functional)
     mod = importlib.import_module(module_name)
+
+    # Support nested attributes if needed (though usually flat)
+    # but standard split is robust for most cases.
     func = getattr(mod, func_name)
 
     return func(**kwargs)
@@ -166,6 +176,12 @@ class EquivalenceRunner:
     """
     Recursively compares two objects (Arrays, Lists, Scalars).
 
+    Handles:
+    - Nested Sequences (List/Tuple)
+    - Dictionaries
+    - NumPy Arrays (with tolerance)
+    - Scalars (int/float/bool)
+
     Args:
         a: Reference object.
         b: Candidate object.
@@ -173,28 +189,48 @@ class EquivalenceRunner:
     Returns:
         bool: True if they are effectively equal.
     """
-    # Check types match roughly first (sequences)
+    # 1. Type Mismatch Check (Loose)
+    # We allow list vs tuple comparison if contents match
     if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
       if len(a) != len(b):
         return False
       return all(self._deep_compare(x, y) for x, y in zip(a, b))
 
-    # Handle scalars and arrays uniformly via numpy
+    # 2. Dictionary Check
+    if isinstance(a, dict) and isinstance(b, dict):
+      if set(a.keys()) != set(b.keys()):
+        return False
+      return all(self._deep_compare(a[k], b[k]) for k in a)
+
+    # 3. Handle scalars and arrays uniformly via numpy
     # Using loose instance check to catch numpy scalars vs python scalars
     if isinstance(a, (float, int, np.ndarray, np.generic)) and isinstance(b, (float, int, np.ndarray, np.generic)):
       try:
-        # asanyarray handles python scalars by wrapping them
+        # asanyarray handles python scalars by wrapping them (0-rank array)
         arr_a = np.asanyarray(a)
         arr_b = np.asanyarray(b)
+
+        # Shape check
+        if arr_a.shape != arr_b.shape:
+          return False
 
         # Handle strings or object arrays which allclose doesn't like
         if arr_a.dtype.kind in ["U", "S", "O"]:
           return np.array_equal(arr_a, arr_b)
 
-        return np.allclose(arr_a, arr_b, rtol=1e-3, atol=1e-4)
+        # Check for NaNs - if locations match, we consider it equal
+        # (isnan throws error on strings/objects hence the check above)
+        nan_mask_a = np.isnan(arr_a)
+        nan_mask_b = np.isnan(arr_b)
+        if np.any(nan_mask_a != nan_mask_b):
+          return False
+
+        # Compare finite values
+        # rtol=1e-3, atol=1e-4 is standard for ML cross-framework testing (float32 precision)
+        return np.allclose(arr_a, arr_b, rtol=1e-3, atol=1e-4, equal_nan=True)
       except Exception:
-        # Fallback for shape mismatch or uncomparable types
+        # Fallback for shape mismatch or uncomparable types caught late
         return False
 
-    # Fallback for strings, booleans, or other objects
+    # 4. Fallback for strings, booleans, None, or other objects
     return a == b

@@ -470,7 +470,8 @@
       "api": "numpy.outer"
     },
     "permute_dims": {
-      "api": "numpy.permute_dims"
+      "api": "numpy.transpose",
+      "requires_plugin": "pack_varargs"
     },
     "pinv": {
       "api": "numpy.linalg.pinv"

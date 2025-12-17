@@ -7,11 +7,17 @@
     "Add": {
       "api": "keras.ops.add"
     },
+    "Alphadropout": {
+      "api": "keras.layers.AlphaDropout"
+    },
     "Attention": {
       "api": "keras.layers.Attention"
     },
     "BatchNormalization": {
       "api": "keras.layers.BatchNormalization"
+    },
+    "Bidirectional": {
+      "api": "keras.layers.Bidirectional"
     },
     "Ceil": {
       "api": "keras.ops.ceil"
@@ -46,6 +52,9 @@
     "Elu": {
       "api": "keras.ops.elu"
     },
+    "Embedding": {
+      "api": "keras.layers.Embedding"
+    },
     "Equal": {
       "api": "keras.ops.equal"
     },
@@ -67,6 +76,9 @@
     "Gelu": {
       "api": "keras.ops.gelu"
     },
+    "Glu": {
+      "api": "keras.ops.glu"
+    },
     "Grayscale": {
       "api": "lambda x: x",
       "transformation_type": "inline_lambda"
@@ -76,6 +88,12 @@
     },
     "GroupNormalization": {
       "api": "keras.layers.GroupNormalization"
+    },
+    "Gru": {
+      "api": "keras.layers.GRU"
+    },
+    "Grucell": {
+      "api": "keras.layers.GRUCell"
     },
     "Identity": {
       "api": "keras.ops.identity"
@@ -89,14 +107,32 @@
     "LayerNormalization": {
       "api": "keras.layers.LayerNormalization"
     },
+    "Layernormalization": {
+      "api": "keras.layers.LayerNormalization"
+    },
     "LeakyRelu": {
+      "api": "keras.layers.LeakyReLU"
+    },
+    "Leakyrelu": {
       "api": "keras.layers.LeakyReLU"
     },
     "Less": {
       "api": "keras.ops.less"
     },
+    "Linear": {
+      "api": "keras.layers.Dense",
+      "args": {
+        "out_features": "units"
+      }
+    },
     "Log": {
       "api": "keras.ops.log"
+    },
+    "Lstm": {
+      "api": "keras.layers.LSTM"
+    },
+    "Lstmcell": {
+      "api": "keras.layers.LSTMCell"
     },
     "MatMul": {
       "api": "keras.ops.matmul"
@@ -113,6 +149,9 @@
     "Mish": {
       "api": "keras.activations.mish"
     },
+    "Multiheadattention": {
+      "api": "keras.layers.MultiHeadAttention"
+    },
     "NonZero": {
       "api": "keras.ops.nonzero"
     },
@@ -128,6 +167,9 @@
     },
     "Pad": {
       "api": "keras.layers.ZeroPadding2D"
+    },
+    "Prelu": {
+      "api": "keras.layers.PReLU"
     },
     "RMSNormalization": {
       "api": "keras.layers.RMSNormalization"
@@ -162,6 +204,9 @@
         "size": "height"
       }
     },
+    "Rnn": {
+      "api": "keras.layers.RNN"
+    },
     "Round": {
       "api": "keras.ops.round"
     },
@@ -173,6 +218,9 @@
     },
     "Sign": {
       "api": "keras.ops.sign"
+    },
+    "Silu": {
+      "api": "keras.ops.silu"
     },
     "Sin": {
       "api": "keras.ops.sin"
@@ -191,6 +239,9 @@
     },
     "Softsign": {
       "api": "keras.ops.softsign"
+    },
+    "Sparsemax": {
+      "api": "keras.ops.sparsemax"
     },
     "Sqrt": {
       "api": "keras.ops.sqrt"

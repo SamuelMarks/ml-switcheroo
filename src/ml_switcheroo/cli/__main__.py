@@ -13,6 +13,7 @@ from typing import List, Optional
 from ml_switcheroo.config import parse_cli_key_values
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.cli import commands
+from ml_switcheroo.cli.handlers.discovery import handle_discover_layers
 from ml_switcheroo import __version__
 
 
@@ -129,7 +130,7 @@ def main(argv: Optional[List[str]] = None) -> int:
   cmd_sync = subparsers.add_parser("sync", help="Link a framework to the Spec")
   cmd_sync.add_argument("framework", help="Framework to sync (e.g. torch, jax, keras)")
 
-  # --- Command: SYNC-STANDARDS (Consensus Engine) ---
+  # --- Command: SYNC-STANDARDS (Generic Consensus) ---
   cmd_cons = subparsers.add_parser("sync-standards", help="Discovers and amends Abstract Standards via Consensus")
   cmd_cons.add_argument("--frameworks", nargs="+", help="Frameworks to scan (default: all installed)")
   cmd_cons.add_argument(
@@ -142,6 +143,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     "--dry-run",
     action="store_true",
     help="Print candidates without writing to disk",
+  )
+
+  # --- Command: DISCOVER LAYERS (Heuristic Polyfill) ---
+  cmd_layers = subparsers.add_parser(
+    "discover-layers", help="Heuristic discovery for common NN layers (Polyfill for Torch/Flax)"
+  )
+  cmd_layers.add_argument(
+    "--dry-run",
+    action="store_true",
+    help="Print found layers without saving",
   )
 
   # --- Command: GEN TESTS ---
@@ -185,6 +196,9 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   elif args.command == "sync-standards":
     return commands.handle_sync_standards(args.categories, args.frameworks, args.dry_run)
+
+  elif args.command == "discover-layers":
+    return handle_discover_layers(args.dry_run)
 
   elif args.command == "gen-tests":
     return commands.handle_gen_tests(args.out)

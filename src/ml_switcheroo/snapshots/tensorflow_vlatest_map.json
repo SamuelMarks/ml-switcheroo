@@ -1,0 +1,97 @@
+{
+  "__framework__": "tensorflow",
+  "mappings": {
+    "Elu": {
+      "api": "tf.nn.elu"
+    },
+    "Flax": {
+      "api": "tf.keras.layers.FlaxLayer",
+      "args": {
+        "kwargs": "kwargs",
+        "method": "method",
+        "module": "module",
+        "variables": "variables"
+      }
+    },
+    "Input": {
+      "api": "tf.keras.layers.InputLayer",
+      "args": {
+        "batch_shape": "batch_shape",
+        "batch_size": "batch_size",
+        "dtype": "dtype",
+        "kwargs": "kwargs",
+        "name": "name",
+        "optional": "optional",
+        "ragged": "ragged",
+        "shape": "shape",
+        "sparse": "sparse",
+        "x": "input_tensor"
+      }
+    },
+    "Jax": {
+      "api": "tf.keras.layers.JaxLayer",
+      "args": {
+        "call_fn": "call_fn",
+        "init_fn": "init_fn",
+        "kwargs": "kwargs",
+        "params": "params",
+        "seed": "seed",
+        "state": "state"
+      }
+    },
+    "Layernormalization": {
+      "api": "tf.keras.layers.LayerNormalization",
+      "args": {
+        "beta_constraint": "beta_constraint",
+        "beta_initializer": "beta_initializer",
+        "beta_regularizer": "beta_regularizer",
+        "center": "center",
+        "dim": "axis",
+        "eps": "epsilon",
+        "gamma_constraint": "gamma_constraint",
+        "gamma_initializer": "gamma_initializer",
+        "gamma_regularizer": "gamma_regularizer",
+        "kwargs": "kwargs",
+        "scale": "scale"
+      }
+    },
+    "Leakyrelu": {
+      "api": "tf.nn.leaky_relu"
+    },
+    "Relu": {
+      "api": "tf.nn.relu"
+    },
+    "Selu": {
+      "api": "tf.nn.selu"
+    },
+    "Sigmoid": {
+      "api": "tf.nn.sigmoid",
+      "args": {
+        "x": "x"
+      }
+    },
+    "Softmax": {
+      "api": "tf.nn.softmax",
+      "args": {
+        "dim": "axis"
+      }
+    },
+    "Tanh": {
+      "api": "tf.nn.tanh",
+      "args": {
+        "x": "x"
+      }
+    },
+    "Tfsm": {
+      "api": "tf.keras.layers.TFSMLayer",
+      "args": {
+        "call_endpoint": "call_endpoint",
+        "call_training_endpoint": "call_training_endpoint",
+        "dtype": "dtype",
+        "filepath": "filepath",
+        "name": "name",
+        "trainable": "trainable"
+      }
+    }
+  }
+}

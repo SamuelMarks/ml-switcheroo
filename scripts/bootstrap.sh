@@ -71,8 +71,8 @@ else
     fi
 fi
 
-# Run the python scraper to generate k_discovered.json
-python3 "$ROOT_DIR"/scripts/discover_missing_ops.py
+# Run Layer Discovery via integrated CLI (Previously discover_missing_ops.py)
+ml_switcheroo discover-layers
 
 # ------------------------------------------------------------------------------
 # 4. IMPORT TIER C: INTERNAL

@@ -21,6 +21,12 @@
       "api": "optax.adabelief",
       "requires_plugin": "optimizer_constructor"
     },
+    "Adadelta": {
+      "api": "optax.adadelta"
+    },
+    "Adafactor": {
+      "api": "optax.adafactor"
+    },
     "Adagrad": {
       "api": "optax.adagrad",
       "requires_plugin": "optimizer_constructor"
@@ -32,6 +38,12 @@
     "AdamW": {
       "api": "optax.adamw",
       "requires_plugin": "optimizer_constructor"
+    },
+    "Adamax": {
+      "api": "optax.adamax"
+    },
+    "Adamw": {
+      "api": "optax.adamw"
     },
     "Add": {
       "api": "jax.numpy.add"
@@ -54,6 +66,9 @@
     "Atanh": {
       "api": "jax.numpy.atanh"
     },
+    "Batchnorm": {
+      "api": "nnx.BatchNorm"
+    },
     "Ceil": {
       "api": "jax.numpy.ceil"
     },
@@ -70,6 +85,9 @@
       "api": "nnx.Conv"
     },
     "ConvTranspose": {
+      "api": "nnx.ConvTranspose"
+    },
+    "Convtranspose": {
       "api": "nnx.ConvTranspose"
     },
     "Cos": {
@@ -100,14 +118,26 @@
     "Floor": {
       "api": "jax.numpy.floor"
     },
+    "Fromage": {
+      "api": "optax.fromage"
+    },
     "Gelu": {
       "api": "nnx.gelu"
+    },
+    "Glu": {
+      "api": "nnx.glu"
     },
     "Greater": {
       "api": "jax.numpy.greater"
     },
+    "Groupnorm": {
+      "api": "nnx.GroupNorm"
+    },
     "Identity": {
       "api": "jax.numpy.identity"
+    },
+    "Instancenorm": {
+      "api": "nnx.InstanceNorm"
     },
     "IsNaN": {
       "api": "jax.numpy.isnan"
@@ -116,19 +146,26 @@
       "api": "optax.lbfgs",
       "requires_plugin": "optimizer_constructor"
     },
+    "Lamb": {
+      "api": "optax.lamb"
+    },
+    "Layernorm": {
+      "api": "nnx.LayerNorm"
+    },
     "Less": {
       "api": "jax.numpy.less"
     },
     "Linear": {
-      "api": "nnx.Linear",
-      "args": {
-        "bias": "use_bias",
-        "in_features": "in_features",
-        "out_features": "out_features"
-      }
+      "api": "nnx.Linear"
+    },
+    "Lion": {
+      "api": "optax.lion"
     },
     "Log": {
       "api": "jax.numpy.log"
+    },
+    "Logsumexp": {
+      "api": "nnx.logsumexp"
     },
     "MatMul": {
       "api": "jax.numpy.matmul"
@@ -142,8 +179,17 @@
     "Min": {
       "api": "jax.numpy.min"
     },
+    "Multiheadattention": {
+      "api": "nnx.MultiHeadAttention"
+    },
+    "Nadam": {
+      "api": "optax.nadam"
+    },
     "NonZero": {
       "api": "jax.numpy.nonzero"
+    },
+    "Novograd": {
+      "api": "optax.novograd"
     },
     "PRelu": {
       "api": "nnx.PReLU"
@@ -153,6 +199,9 @@
     },
     "Pow": {
       "api": "jax.numpy.pow"
+    },
+    "Prelu": {
+      "api": "nnx.PReLU"
     },
     "RMSprop": {
       "api": "optax.rmsprop",
@@ -170,6 +219,12 @@
     "Reshape": {
       "api": "jax.numpy.reshape"
     },
+    "Rmsnorm": {
+      "api": "nnx.RMSNorm"
+    },
+    "Rnn": {
+      "api": "nnx.RNN"
+    },
     "Round": {
       "api": "jax.numpy.round"
     },
@@ -177,11 +232,20 @@
       "api": "optax.sgd",
       "requires_plugin": "optimizer_constructor"
     },
+    "Sequential": {
+      "api": "nnx.Sequential"
+    },
+    "Sgd": {
+      "api": "optax.sgd"
+    },
     "Sigmoid": {
       "api": "nnx.sigmoid"
     },
     "Sign": {
       "api": "jax.numpy.sign"
+    },
+    "Silu": {
+      "api": "nnx.silu"
     },
     "Sin": {
       "api": "jax.numpy.sin"
@@ -430,6 +494,9 @@
     },
     "log2": {
       "api": "jax.numpy.log2"
+    },
+    "log_softmax": {
+      "api": "nnx.log_softmax"
     },
     "logaddexp": {
       "api": "jax.numpy.logaddexp"

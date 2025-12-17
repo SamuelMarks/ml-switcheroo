@@ -1,16 +1,13 @@
 """
 Consensus Engine: The Dynamic Standardization Brain.
 
-This module implements the logic to automatically discover Abstract Standards
-by analyzing API lists from multiple frameworks. It identifies common concepts
-(e.g., "HuberLoss" in Torch vs "huber" in JAX) via fuzzy clustering and naming
-normalization, proposing them as "Candidate Standards" for the Middle Layer.
-
-It also performs "Signature Alignment" to determine the standard arguments
-(e.g. deciding that 'lr' is the standard argument for learning rate across frameworks).
+This module provides the logic to identify common operations across disjoint frameworks.
+It aligns variable naming conventions (e.g., 'dim' vs 'axis') and clusters API endpoints
+(e.g., 'torch.sin' and 'jax.numpy.sin') into unified Abstract Standards suitable for
+the Semantic Knowledge Base.
 """
 
-from typing import Dict, List, Optional, Set, Counter
+from typing import Dict, List, Optional, Set, Counter, Any
 from pydantic import BaseModel, Field
 
 from ml_switcheroo.core.ghost import GhostRef
@@ -20,15 +17,12 @@ class CandidateStandard(BaseModel):
   """
   A proposed Abstract Standard discovered via consensus.
 
-  Represents a single concept (e.g., 'Huber') found in one or more frameworks.
-
   Attributes:
-      name: The proposed Abstract Name (e.g. 'Huber').
-      variants: Map of {framework_name: GhostRef} for the implementations found.
-      score: A confidence score (0.0-1.0) based on how many frameworks agree.
-      std_args: List of abstract argument names agreed upon by consensus.
-      arg_mappings: Nested dictionary {framework_name: {std_arg: fw_arg}}.
-                    Used to generate the keys in the final StandardMap.
+      name: The abstract name (e.g., 'Conv2d').
+      variants: A map of framework names to their specific implementations (GhostRefs).
+      score: A confidence score derived from the number of concurring frameworks.
+      std_args: The list of argument names deemed 'standard' via voting.
+      arg_mappings: Nested dictionary mapping {framework: {std_arg: fw_specific_arg}}.
   """
 
   name: str
@@ -38,9 +32,11 @@ class CandidateStandard(BaseModel):
   arg_mappings: Dict[str, Dict[str, str]] = Field(default_factory=dict)
 
   def add_variant(self, framework: str, ref: GhostRef):
-    """Registers a framework's implementation of this standard."""
+    """
+    Registers a framework's implementation of this concept.
+    Updates the consensus score.
+    """
     self.variants[framework] = ref
-    # Simple score based on number of votes
     self.score = float(len(self.variants))
 
 
@@ -48,13 +44,14 @@ class ConsensusEngine:
   """
   Algorithms for aligning divergent API naming conventions.
 
-  Responsibility:
-  1. Normalize API names (Clustering).
-  2. Normalize Argument names (Signature Alignment).
-  3. Compute intersection of arguments to define the Standard.
+  Capabilities:
+  1.  **Clustering**: Groups APIs like `HuberLoss`, `huber_loss`, and `Huber` together.
+  2.  **Normalization**: Strips common noise (prefixes/suffixes) to find the semantic root.
+  3.  **Signature Alignment**: Builds a translation map for arguments (e.g., `keepdims` <-> `keep_dims`).
   """
 
-  # Suffixes that carry framework implementation details rather than semantic meaning
+  # Suffixes that carry framework-specific implementation details rather than semantic meaning.
+  # We strip these during clustering to find the 'core' concept.
   IGNORED_SUFFIXES = [
     "loss",
     "error",
@@ -66,37 +63,62 @@ class ConsensusEngine:
     "v1",
     "v2",
     "object",
+    "op",
+    "func",
   ]
 
-  # Map of {SpecificVariant: CanonicalKey}
-  # Used to align 'learning_rate' (JAX) with 'lr' (Torch)
+  # Enhanced Aliases for robust consensus across frameworks.
+  # Maps variable names to a single canonical representation.
   ARG_ALIASES = {
+    # Optimization
     "learning_rate": "lr",
     "rate": "lr",
+    # Dimensions
     "axis": "dim",
     "dimension": "dim",
+    "axes": "dim",
+    "dim": "dim",
+    # Math / Logic
     "epsilon": "eps",
-    "keepdims": "keep_dim",
-    "weights": "weight",  # Torch often uses 'weight', others 'weights'
+    "keepdims": "keepdim",
+    "keep_dims": "keepdim",
     "prob": "p",
     "probability": "p",
+    "inverse": "inv",
+    # Neural
+    "weights": "weight",
     "kernel_shape": "kernel_size",
-    "filters": "out_channels",  # Keras vs Torch convention
-    "features": "out_features",  # Flax vs Torch
+    "filters": "out_channels",
+    "features": "out_features",
+    "input": "x",
+    "a": "x",
+    "input_tensor": "x",
+    "tensor": "x",
   }
 
   @classmethod
   def normalize_name(cls, name: str) -> str:
     """
     Reduces an API Name to its semantic core for comparison.
+
+    Examples:
+        - 'HuberLoss' -> 'huber'
+        - 'reduce_mean' -> 'mean'
+        - 'conv2d' -> 'conv'
+
+    Args:
+        name (str): The raw API name (e.g. 'CrossEntropyLoss').
+
+    Returns:
+        str: The normalized key (e.g. 'crossentropy').
     """
-    # 1. Lowercase
-    normalized = name.lower()
+    normalized = name.lower().replace("_", "")
 
-    # 2. Remove camelCase/Snake_case separators
-    normalized = normalized.replace("_", "")
+    # Common functional prefixes to strip
+    for prefix in ["reduce", "math", "ops", "nn", "special", "functional"]:
+      if normalized.startswith(prefix) and len(normalized) > len(prefix):
+        normalized = normalized[len(prefix) :]
 
-    # 3. Strip common noise suffixes
     clean = False
     while not clean:
       clean = True
@@ -110,7 +132,7 @@ class ConsensusEngine:
   @classmethod
   def normalize_arg(cls, arg_name: str) -> str:
     """
-    Canonicalizes an argument name.
+    Canonicalizes an argument name using the alias map.
     e.g., 'learning_rate' -> 'lr'.
     """
     lower = arg_name.lower()
@@ -118,77 +140,103 @@ class ConsensusEngine:
 
   def cluster(self, framework_inputs: Dict[str, List[GhostRef]]) -> List[CandidateStandard]:
     """
-    Groups API definitions from multiple frameworks into Candidates.
+    Groups API definitions from multiple frameworks into Candidates based on name similarity.
+
+    Args:
+        framework_inputs: Dictionary mapping 'framework_name' -> List of discovered GhostRefs.
+
+    Returns:
+        List[CandidateStandard]: A list of potential standards, sorted by score.
     """
     clusters: Dict[str, CandidateStandard] = {}
 
     for fw_name, distinct_refs in framework_inputs.items():
       for ref in distinct_refs:
+        # Normalized key for clustering (finding matches)
         key = self.normalize_name(ref.name)
 
         if not key:
           key = ref.name.lower()
 
         if key not in clusters:
+          # Use a capitalized version of the normalized key as the Abstract Name
           abstract_name = key.capitalize()
           clusters[key] = CandidateStandard(name=abstract_name)
 
         clusters[key].add_variant(fw_name, ref)
 
     results = list(clusters.values())
+    # Sort by score (number of frameworks implementing it) descending
     results.sort(key=lambda x: x.score, reverse=True)
     return results
 
   def filter_common(self, candidates: List[CandidateStandard], min_support: int = 2) -> List[CandidateStandard]:
     """
-    Returns only standards derived from agreement between multiple frameworks.
+    Filters candidates to keep only those present in a minimum number of frameworks.
+
+    Args:
+        candidates: List of candidates from clustering.
+        min_support: Minimum number of frameworks that must implement the op.
+
+    Returns:
+        Filtered list of CandidateStandard.
     """
     return [c for c in candidates if len(c.variants) >= min_support]
 
   def align_signatures(self, candidates: List[CandidateStandard], consensus_threshold: float = 0.5):
     """
-    Analyses the signatures of all variants in a candidate.
-    Populates 'std_args' and 'arg_mappings' based on consensus.
+    Analyses the arguments of all variants in a candidate to determine Standard Arguments.
+
+    It populates `std_args` on the candidate by voting: if an argument (normalized)
+    appears in >50% of the implementations, it becomes part of the standard signature.
+
+    It also populates `arg_mappings` to translate between the Standard name and
+    the specific framework name (e.g. Standard 'dim' -> Torch 'dim', Jax 'axis').
 
     Args:
         candidates: List of CandidateStandards to process (in-place modification).
-        consensus_threshold: Fraction of variants that must share an arg for it to be standard.
-                             (0.5 means > 50% must have it).
+        consensus_threshold: Fraction of variants that must share an arg (0.0 - 1.0).
     """
     for cand in candidates:
-      # 1. Harvest all args from all variants
       # Map: {canonical_arg: {fw_name: original_arg_name}}
       arg_matrix: Dict[str, Dict[str, str]] = {}
-
       total_variants = len(cand.variants)
+
       if total_variants == 0:
         continue
 
+      # 1. Harvest all args from all variants
       for fw_name, ref in cand.variants.items():
         for param in ref.params:
-          # Skip 'self' or varargs if ghost inspection didn't filter them (it usually does)
-          if param.name == "self":
+          # Access param.name safely depending on object structure
+          # GhostInspector usually returns objects with .name attribute
+          p_name = getattr(param, "name", param) if hasattr(param, "name") else param
+          p_str = str(p_name)
+
+          # Ignore common object-oriented instance arguments
+          if p_str in ["self", "cls"]:
             continue
 
-          canonical = self.normalize_arg(param.name)
+          canonical = self.normalize_arg(p_str)
 
           if canonical not in arg_matrix:
             arg_matrix[canonical] = {}
 
-          arg_matrix[canonical][fw_name] = param.name
+          arg_matrix[canonical][fw_name] = p_str
 
-      # 2. Determine Consensus
       std_args = []
       mappings = {fw: {} for fw in cand.variants}
 
+      # 2. Vote for consensus
       for canonical, occurrences in arg_matrix.items():
         support = len(occurrences) / total_variants
 
-        # If support strictly greater than threshold
+        # If support is sufficient, this arg becomes part of the standard
         if support > consensus_threshold:
           std_args.append(canonical)
 
-          # Populate mappings for frameworks that have this arg
+          # Create mappings for frameworks that possess this arg
+          # e.g., if canonical is 'dim', store mapping 'dim' -> 'axis' for JAX
           for fw, original_name in occurrences.items():
             mappings[fw][canonical] = original_name
 

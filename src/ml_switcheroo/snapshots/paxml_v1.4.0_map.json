@@ -15,6 +15,12 @@
       "api": "optax.adabelief",
       "requires_plugin": "optimizer_constructor"
     },
+    "Adadelta": {
+      "api": "optax.adadelta"
+    },
+    "Adafactor": {
+      "api": "optax.adafactor"
+    },
     "Adagrad": {
       "api": "optax.adagrad",
       "requires_plugin": "optimizer_constructor"
@@ -27,6 +33,18 @@
       "api": "optax.adamw",
       "requires_plugin": "optimizer_constructor"
     },
+    "Adamax": {
+      "api": "optax.adamax"
+    },
+    "Adamw": {
+      "api": "optax.adamw"
+    },
+    "Batchnorm": {
+      "api": "praxis.layers.BatchNorm"
+    },
+    "Dotproductattention": {
+      "api": "praxis.layers.DotProductAttention"
+    },
     "Dropout": {
       "api": "praxis.layers.Dropout"
     },
@@ -37,11 +55,20 @@
     "Elu": {
       "api": "praxis.layers.ELU"
     },
+    "Embedding": {
+      "api": "praxis.layers.Embedding"
+    },
     "Exp": {
       "api": "praxis.layers.activations.Exp"
     },
+    "Fromage": {
+      "api": "optax.fromage"
+    },
     "Gelu": {
       "api": "praxis.layers.GELU"
+    },
+    "Groupnorm": {
+      "api": "praxis.layers.GroupNorm"
     },
     "Identity": {
       "api": "praxis.layers.Identity"
@@ -50,16 +77,29 @@
       "api": "optax.lbfgs",
       "requires_plugin": "optimizer_constructor"
     },
+    "Lamb": {
+      "api": "optax.lamb"
+    },
+    "Layernorm": {
+      "api": "praxis.layers.LayerNorm"
+    },
     "LeakyRelu": {
       "api": "praxis.layers.LeakyReLU"
     },
+    "Leakyrelu": {
+      "api": "praxis.layers.LeakyReLU"
+    },
     "Linear": {
-      "api": "praxis.layers.Linear",
-      "args": {
-        "bias": "use_bias",
-        "in_features": "input_dims",
-        "out_features": "output_dims"
-      }
+      "api": "praxis.layers.Linear"
+    },
+    "Lion": {
+      "api": "optax.lion"
+    },
+    "Nadam": {
+      "api": "optax.nadam"
+    },
+    "Novograd": {
+      "api": "optax.novograd"
     },
     "Optional": {
       "api": "praxis.base_layer.Optional"
@@ -71,6 +111,9 @@
     "Relu": {
       "api": "praxis.layers.ReLU"
     },
+    "Rmsnorm": {
+      "api": "praxis.layers.RmsNorm"
+    },
     "SGD": {
       "api": "optax.sgd",
       "requires_plugin": "optimizer_constructor"
@@ -78,8 +121,14 @@
     "Sequential": {
       "api": "praxis.layers.Sequential"
     },
+    "Sgd": {
+      "api": "optax.sgd"
+    },
     "Sigmoid": {
       "api": "praxis.layers.Sigmoid"
+    },
+    "Silu": {
+      "api": "praxis.layers.SiLU"
     },
     "Softplus": {
       "api": "praxis.layers.activations.Softplus"

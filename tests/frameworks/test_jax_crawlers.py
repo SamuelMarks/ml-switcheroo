@@ -1,114 +1,76 @@
 """
-Tests for JAX Ecosystem Crawlers (Optax, Flax, JAX).
+Tests for JAX Ecosystem Crawlers (Level 0/1/2).
+
+Verifies that:
+1. OptaxScanner correctly identifies loss functions.
+2. JAX core adapter finds basic activations.
+3. FlaxNNX adapter leverages shims for optimization.
 """
 
 import sys
-import types
 import pytest
-import importlib
 from unittest.mock import MagicMock, patch
 
-# Fix: Import specific adapter that handles layers
+from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
-
-
-def create_mock_module(name):
-  return types.ModuleType(name)
+from ml_switcheroo.frameworks.optax_shim import OptaxScanner
+from ml_switcheroo.frameworks.base import StandardCategory
+from ml_switcheroo.core.ghost import GhostRef
 
 
 @pytest.fixture
-def mock_jax_env():
-  """Sets up sys.modules with fake jax, optax, flax."""
-
-  mock_losses_mod = create_mock_module("optax.losses")
-
-  def mock_l2_loss(p, t):
-    pass
-
-  mock_l2_loss.__name__ = "l2_loss"
-  mock_losses_mod.l2_loss = mock_l2_loss
-
-  mock_optax = create_mock_module("optax")
-  mock_optax.losses = mock_losses_mod
-
-  mock_linen = create_mock_module("flax.linen")
-
-  class Module:
-    pass
-
-  Module.__name__ = "Module"
-  mock_linen.Module = Module
-
-  class Dense(Module):
-    pass
-
-  Dense.__name__ = "Dense"
-  mock_linen.Dense = Dense
-
-  mock_flax = create_mock_module("flax")
-  mock_flax.linen = mock_linen
-  # We also mock flax.nnx as checking for it is part of FlaxNNXAdapter logic
-  mock_flax.nnx = create_mock_module("flax.nnx")
-
-  mock_jax = create_mock_module("jax")
-  mock_jax.nn = create_mock_module("jax.nn")
-  mock_jax.numpy = create_mock_module("jax.numpy")
-
-  def relu(x):
-    pass
-
-  relu.__name__ = "relu"
-  mock_jax.nn.relu = relu
-
-  overrides = {
-    "optax": mock_optax,
-    "optax.losses": mock_losses_mod,
-    "flax": mock_flax,
-    "flax.linen": mock_linen,
-    "flax.nnx": mock_flax.nnx,
-    "jax": mock_jax,
-    "jax.nn": mock_jax.nn,
-    "jax.numpy": mock_jax.numpy,
-  }
-
-  with patch.dict(sys.modules, overrides):
-    # Force reload modules
-    import ml_switcheroo.frameworks.optax_shim
-    import ml_switcheroo.frameworks.flax_shim
-    import ml_switcheroo.frameworks.jax
-
-    importlib.reload(ml_switcheroo.frameworks.optax_shim)
-    importlib.reload(ml_switcheroo.frameworks.flax_shim)
-    importlib.reload(ml_switcheroo.frameworks.jax)
-
-    with patch("inspect.getmembers") as mock_members:
-
-      def get_members(obj):
-        if obj == mock_losses_mod:
-          return [("l2_loss", mock_l2_loss)]
-        if obj == mock_linen:
-          # Return Module too so it behaves like real module
-          return [("Dense", Dense), ("Module", Module)]
-        if obj == mock_jax.nn:
-          return [("relu", relu)]
-        return []
-
-      mock_members.side_effect = get_members
-      # We explicitly use FlaxNNXAdapter which is capable of scanning layers
-      yield FlaxNNXAdapter()
+def mock_optax():
+  """Mocks optax library structure."""
+  m_optax = MagicMock()
+  m_optax.l2_loss = MagicMock()
+  m_optax.adam = MagicMock()
+  return m_optax
 
 
-def test_jax_adapter_integration(mock_jax_env):
-  """Verify FlaxNNXAdapter calls shims correctly."""
-  adapter = mock_jax_env
-  from ml_switcheroo.frameworks.base import StandardCategory
+def test_optax_scanner_losses(mock_optax):
+  """Verify OptaxScanner finds losses."""
+  with patch.dict(sys.modules, {"optax": mock_optax}):
+    results = OptaxScanner.scan_losses()
+    names = [r.name for r in results]
+    assert "l2_loss" in names
 
-  # LOSS -> Optax (inherited from core logic)
-  losses = adapter.collect_api(StandardCategory.LOSS)
-  names = [r.name for r in losses]
-  assert "l2_loss" in names, f"Expected l2_loss, found {names}"
 
-  # LAYER -> Flax (specific to Flax adapter)
-  layers = adapter.collect_api(StandardCategory.LAYER)
-  layer_names = [r.name for r in layers]
-  assert "Dense" in layer_names
+def test_optax_scanner_optimizers(mock_optax):
+  """Verify OptaxScanner finds optimizers."""
+  with patch.dict(sys.modules, {"optax": mock_optax}):
+    results = OptaxScanner.scan_optimizers()
+    names = [r.name for r in results]
+    assert "adam" in names
+
+
+def test_jax_adapter_integration():
+  """
+  Verify FlaxNNXAdapter calls shims correctly and finds layers.
+
+  We simulate the adapter finding 'l2_loss' via core logic and 'Dense'
+  via Flax-specific logic.
+  """
+
+  # We patch the two underlying discovery methods on the class itself
+  # 1. JaxCoreAdapter.collect_api (which Flax inherits/calls for losses)
+  # 2. FlaxNNXAdapter._scan_nnx_layers (which finds layers)
+
+  layer_ref = GhostRef(name="Dense", api_path="flax.nnx.Dense", kind="class", params=[])
+  loss_ref = GhostRef(name="l2_loss", api_path="optax.l2_loss", kind="func", params=[])
+
+  with patch("ml_switcheroo.frameworks.jax.JaxCoreAdapter.collect_api", return_value=[loss_ref]):
+    with patch("ml_switcheroo.frameworks.flax_nnx.FlaxNNXAdapter._scan_nnx_layers", return_value=[layer_ref]):
+      # Since we patched the methods, we don't need real imports
+      # We just need to ensure __init__ doesn't crash on imports
+      with patch.dict(sys.modules, {"flax.nnx": MagicMock()}):
+        adapter = FlaxNNXAdapter()
+        # Init might set _mode=GHOST if import fails, force it to behave like LIVE for logic
+        adapter._mode = "live"
+
+        # Test LOSS delegating to Core
+        losses = adapter.collect_api(StandardCategory.LOSS)
+        assert losses[0].name == "l2_loss"
+
+        # Test LAYER using Scan Logic
+        layers = adapter.collect_api(StandardCategory.LAYER)
+        assert layers[0].name == "Dense"

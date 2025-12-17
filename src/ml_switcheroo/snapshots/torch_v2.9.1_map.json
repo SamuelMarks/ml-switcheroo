@@ -25,6 +25,9 @@
     "Add": {
       "api": "torch.add"
     },
+    "Alphadropout": {
+      "api": "torch.nn.AlphaDropout"
+    },
     "ArgMax": {
       "api": "torch.argmax"
     },
@@ -70,6 +73,9 @@
     "Cosh": {
       "api": "torch.cosh"
     },
+    "Cosinesimilarity": {
+      "api": "torch.nn.CosineSimilarity"
+    },
     "CumSum": {
       "api": "torch.cumsum"
     },
@@ -87,6 +93,9 @@
     },
     "Elu": {
       "api": "torch.nn.ELU"
+    },
+    "Embedding": {
+      "api": "torch.embedding"
     },
     "Equal": {
       "api": "torch.equal"
@@ -112,17 +121,38 @@
     "Gelu": {
       "api": "torch.nn.GELU"
     },
+    "Glu": {
+      "api": "torch.nn.GLU"
+    },
     "Grayscale": {
       "api": "torchvision.transforms.Grayscale"
     },
     "Greater": {
       "api": "torch.greater"
     },
+    "Groupnorm": {
+      "api": "torch.nn.GroupNorm"
+    },
+    "Gru": {
+      "api": "torch.gru"
+    },
+    "Grucell": {
+      "api": "torch.nn.GRUCell"
+    },
     "HardSigmoid": {
       "api": "torch.nn.Hardsigmoid"
     },
     "HardSwish": {
       "api": "torch.nn.Hardswish"
+    },
+    "Hardshrink": {
+      "api": "torch.hardshrink"
+    },
+    "Hardsigmoid": {
+      "api": "torch.nn.Hardsigmoid"
+    },
+    "Hardtanh": {
+      "api": "torch.nn.Hardtanh"
     },
     "Identity": {
       "api": "torch.nn.Identity"
@@ -136,17 +166,41 @@
     "LSTM": {
       "api": "torch.lstm"
     },
+    "Layernorm": {
+      "api": "torch.nn.LayerNorm"
+    },
     "LeakyRelu": {
+      "api": "torch.nn.LeakyReLU"
+    },
+    "Leakyrelu": {
       "api": "torch.nn.LeakyReLU"
     },
     "Less": {
       "api": "torch.less"
+    },
+    "Linear": {
+      "api": "torch.nn.Linear"
     },
     "Log": {
       "api": "torch.log"
     },
     "LogSoftmax": {
       "api": "torch.nn.LogSoftmax"
+    },
+    "Logsigmoid": {
+      "api": "torch.nn.LogSigmoid"
+    },
+    "Logsoftmax": {
+      "api": "torch.nn.LogSoftmax"
+    },
+    "Logsumexp": {
+      "api": "torch.logsumexp"
+    },
+    "Lstm": {
+      "api": "torch.lstm"
+    },
+    "Lstmcell": {
+      "api": "torch.nn.LSTMCell"
     },
     "MatMul": {
       "api": "torch.matmul"
@@ -165,6 +219,9 @@
     },
     "Mul": {
       "api": "torch.mul"
+    },
+    "Multiheadattention": {
+      "api": "torch.nn.MultiheadAttention"
     },
     "Multinomial": {
       "api": "torch.multinomial"
@@ -190,6 +247,9 @@
     "Pow": {
       "api": "torch.pow"
     },
+    "Prelu": {
+      "api": "torch.prelu"
+    },
     "RNN": {
       "api": "torch.nn.RNN"
     },
@@ -211,11 +271,23 @@
     "Relu": {
       "api": "torch.relu"
     },
+    "Relu6": {
+      "api": "torch.nn.ReLU6"
+    },
     "Reshape": {
       "api": "torch.reshape"
     },
     "Resize": {
       "api": "torchvision.transforms.Resize"
+    },
+    "Rmsnorm": {
+      "api": "torch.nn.RMSNorm"
+    },
+    "Rnn": {
+      "api": "torch.nn.RNN"
+    },
+    "Rnncellbase": {
+      "api": "torch.nn.RNNCellBase"
     },
     "Round": {
       "api": "torch.round"
@@ -229,11 +301,17 @@
     "Selu": {
       "api": "torch.selu"
     },
+    "Sequential": {
+      "api": "torch.nn.Sequential"
+    },
     "Sigmoid": {
       "api": "torch.sigmoid"
     },
     "Sign": {
       "api": "torch.sign"
+    },
+    "Silu": {
+      "api": "torch.nn.SiLU"
     },
     "Sin": {
       "api": "torch.sin"
@@ -249,6 +327,9 @@
     },
     "Softplus": {
       "api": "torch.nn.Softplus"
+    },
+    "Softshrink": {
+      "api": "torch.nn.Softshrink"
     },
     "Softsign": {
       "api": "torch.nn.Softsign"
@@ -267,6 +348,12 @@
     },
     "Tanh": {
       "api": "torch.tanh"
+    },
+    "Tanhshrink": {
+      "api": "torch.nn.Tanhshrink"
+    },
+    "Threshold": {
+      "api": "torch.threshold"
     },
     "Tile": {
       "api": "torch.tile"
@@ -412,9 +499,6 @@
     "eigvalsh": {
       "api": "torch.linalg.eigvalsh"
     },
-    "elu": {
-      "api": "torch.nn.functional.elu"
-    },
     "empty": {
       "api": "torch.empty"
     },
@@ -462,9 +546,6 @@
     },
     "full_like": {
       "api": "torch.full_like"
-    },
-    "gelu": {
-      "api": "torch.nn.functional.gelu"
     },
     "greater": {
       "api": "torch.greater"
@@ -514,9 +595,6 @@
     "isnan": {
       "api": "torch.isnan"
     },
-    "leaky_relu": {
-      "api": "torch.nn.functional.leaky_relu"
-    },
     "less": {
       "api": "torch.less"
     },
@@ -540,9 +618,6 @@
     },
     "log2": {
       "api": "torch.log2"
-    },
-    "log_softmax": {
-      "api": "torch.nn.functional.log_softmax"
     },
     "logaddexp": {
       "api": "torch.logaddexp"
@@ -619,6 +694,9 @@
     "parameters": {
       "api": "torch.nn.Module.parameters"
     },
+    "permute_dims": {
+      "api": "torch.permute"
+    },
     "pinv": {
       "api": "torch.linalg.pinv"
     },
@@ -676,17 +754,11 @@
     "searchsorted": {
       "api": "torch.searchsorted"
     },
-    "sigmoid": {
-      "api": "torch.nn.functional.sigmoid"
-    },
     "sign": {
       "api": "torch.sign"
     },
     "signbit": {
       "api": "torch.signbit"
-    },
-    "silu": {
-      "api": "torch.nn.functional.silu"
     },
     "sin": {
       "api": "torch.sin"
@@ -696,9 +768,6 @@
     },
     "slogdet": {
       "api": "torch.slogdet"
-    },
-    "softmax": {
-      "api": "torch.nn.functional.softmax"
     },
     "solve": {
       "api": "torch.solve"

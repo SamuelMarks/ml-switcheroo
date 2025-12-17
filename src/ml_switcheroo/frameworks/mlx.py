@@ -1,12 +1,31 @@
-import numpy as np
-from typing import List, Tuple, Optional, Dict
-from ml_switcheroo.core.ghost import GhostRef
-from .base import register_framework, StructuralTraits, StandardCategory
+"""
+Apple MLX Framework Adapter.
+
+This module provides the adapter for Apple's MLX array framework.
+It supports:
+1.  **Unified Memory math**: Mapping `mlx.core` operations.
+2.  **Neural Networks**: Mapping `mlx.nn` layers and containers.
+3.  **Discovery**: Runtime introspection of the MLX API surface.
+"""
+
+from typing import List, Tuple, Optional, Dict, Any
+from ml_switcheroo.core.ghost import GhostRef, GhostInspector
+from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, StandardCategory, StandardMap
+
+# Conditional import to allow loading in environments without MLX
+try:
+  import mlx.core
+  import mlx.nn
+except ImportError:
+  pass
 
 
 @register_framework("mlx")
 class MLXAdapter:
-  """Adapter for Apple MLX."""
+  """
+  Adapter for Apple MLX (Silicon-optimized tensor framework).
+  """
 
   display_name: str = "Apple MLX"
   inherits_from: Optional[str] = None
@@ -14,37 +33,142 @@ class MLXAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    return ["mlx.core", "mlx.nn", "mlx.core.fft", "mlx.core.linalg"]
+    return ["mlx.core", "mlx.nn", "mlx.core.fft", "mlx.core.linalg", "mlx.core.random"]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
+    """Default alias for core array operations."""
     return ("mlx.core", "mx")
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    return {"neural": [r"\.nn\."], "extras": []}
+    return {"neural": [r"\\.nn\\."], "extras": [r"random\\."]}
+
+  @property
+  def supported_tiers(self) -> List[SemanticTier]:
+    return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
   def structural_traits(self) -> StructuralTraits:
     return StructuralTraits(module_base="mlx.nn.Module", forward_method="__call__", requires_super_init=True)
 
   @property
+  def definitions(self) -> Dict[str, StandardMap]:
+    return {
+      "Abs": StandardMap(api="mx.abs"),
+      "Mean": StandardMap(api="mx.mean"),
+      "Linear": StandardMap(api="mlx.nn.Linear", args={"in_features": "input_dims", "out_features": "output_dims"}),
+      "permute_dims": StandardMap(api="mx.transpose", requires_plugin="pack_varargs"),
+    }
+
+  @property
   def rng_seed_methods(self) -> List[str]:
-    return ["seed"]
+    return ["seed", "random.seed"]
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    return []
+    results = []
+    try:
+      import mlx.core
+      import mlx.nn
+      import inspect
+
+      if category == StandardCategory.LAYER:
+        for name, obj in inspect.getmembers(mlx.nn):
+          if not name.startswith("_") and inspect.isclass(obj) and name[0].isupper():
+            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))
+
+      if category == StandardCategory.ACTIVATION:
+        target_names = {"relu", "gelu", "silu", "sigmoid", "tanh", "softmax", "elu"}
+        for name, obj in inspect.getmembers(mlx.nn):
+          if name.lower() in target_names:
+            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))
+
+      if category == StandardCategory.LOSS:
+        if hasattr(mlx.nn, "losses"):
+          for name, obj in inspect.getmembers(mlx.nn.losses):
+            if inspect.isfunction(obj) or inspect.isclass(obj):
+              if "loss" in name.lower():
+                results.append(GhostInspector.inspect(obj, f"mlx.nn.losses.{name}"))
+
+    except ImportError:
+      pass
+
+    return results
+
+  def convert(self, data: Any) -> Any:
+    try:
+      import mlx.core as mx
+      import numpy as np
+
+      if isinstance(data, (np.ndarray, list, tuple, np.generic)):
+        return mx.array(data)
+    except ImportError:
+      pass
+    return data
+
+  @classmethod
+  def get_example_code(cls) -> str:
+    return cls().get_tiered_examples()["tier2_neural"]
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """
+    Returns MLX idiomatic examples used for validity testing.
+    """
+    return {
+      "tier1_math": """import mlx.core as mx
+
+def math_ops(x, y): 
+    # Tier 1: Unified Buffer Architecture Math
+    # MLX uses lazy evaluation by default
+    a = mx.abs(x) 
+    b = mx.add(a, y) 
+
+    # Reductions
+    return mx.mean(b, axis=0) 
+""",
+      "tier2_neural": """import mlx.core as mx
+import mlx.nn as nn
+
+class MLP(nn.Module): 
+    # Tier 2: Neural Modules
+    # Inherits from nn.Module, uses __call__ for inference
+    def __init__(self, in_dims: int, out_dims: int): 
+        super().__init__() 
+        self.layers = [ 
+            nn.Linear(in_dims, 64), 
+            nn.ReLU(), 
+            nn.Linear(64, out_dims) 
+        ] 
+
+    def __call__(self, x): 
+        for l in self.layers: 
+            x = l(x) 
+        return x
+""",
+      "tier3_extras": """import mlx.core as mx
+
+def compute_on_gpu(x): 
+    # Tier 3: Extras (Streams & Devices) 
+    # Explicitly schedule computation on the GPU stream
+    with mx.stream(mx.gpu): 
+        y = mx.array(x) * 2
+
+        # Trigger evaluation (sync) 
+        mx.eval(y) 
+        return y
+""",
+    }
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     clean_type = device_type.strip("'\"").lower()
-    backend_attr = "gpu" if clean_type in ("cuda", "gpu", "mps") else "cpu"
-
-    is_literal = device_type.startswith(("'", '"'))
-    type_code = f"mx.{backend_attr}" if is_literal else device_type
-
+    if clean_type in ("cuda", "gpu", "mps"):
+      backend = "mx.gpu"
+    else:
+      backend = "mx.cpu"
+    args = [backend]
     if device_index:
-      return f"mx.Device({type_code}, {device_index})"
-    return f"mx.Device({type_code})"
+      args.append(str(device_index))
+    return f"mx.Device({', '.join(args)})"
 
   def get_serialization_imports(self) -> List[str]:
     return ["import mlx.core as mx"]
@@ -56,13 +180,13 @@ class MLXAdapter:
       return f"mx.load({file_arg})"
     return ""
 
-    # --- Verification ---
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """
+    Applies manual wiring for MLX.
+    Ideally, we inject import mappings here.
+    """
+    imports = snapshot.setdefault("imports", {})
 
-  def convert(self, data):
-    try:
-      import mlx.core as mx
-    except ImportError:
-      return data
-    if isinstance(data, (np.ndarray, list, tuple, np.generic)):
-      return mx.array(data)
-    return data
+    # Map 'torch.nn' -> 'mlx.nn' aliased as 'nn'
+    # This ensures code like `import torch.nn as nn` is rewritten to `import mlx.nn as nn`
+    imports["torch.nn"] = {"root": "mlx", "sub": "nn", "alias": "nn"}

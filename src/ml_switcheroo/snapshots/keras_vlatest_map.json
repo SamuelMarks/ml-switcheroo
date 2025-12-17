@@ -1,0 +1,381 @@
+{
+  "__framework__": "keras",
+  "mappings": {
+    "Adadelta": {
+      "api": "keras.optimizers.Adadelta",
+      "args": {
+        "eps": "epsilon",
+        "lr": "learning_rate",
+        "rho": "rho",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Adafactor": {
+      "api": "keras.optimizers.Adafactor",
+      "args": {
+        "lr": "learning_rate",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Adagrad": {
+      "api": "keras.optimizers.Adagrad",
+      "args": {
+        "eps": "epsilon",
+        "initial_accumulator_value": "initial_accumulator_value",
+        "lr": "learning_rate"
+      }
+    },
+    "Adam": {
+      "api": "keras.optimizers.Adam",
+      "args": {
+        "eps": "epsilon",
+        "lr": "learning_rate"
+      }
+    },
+    "Adamax": {
+      "api": "keras.optimizers.Adamax",
+      "args": {
+        "eps": "epsilon",
+        "lr": "learning_rate",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Adamw": {
+      "api": "keras.optimizers.AdamW",
+      "args": {
+        "eps": "epsilon",
+        "lr": "learning_rate",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Alphadropout": {
+      "api": "keras.layers.AlphaDropout"
+    },
+    "Bidirectional": {
+      "api": "keras.layers.Bidirectional"
+    },
+    "Celu": {
+      "api": "keras.activations.celu",
+      "args": {
+        "alpha": "alpha"
+      }
+    },
+    "Conv": {
+      "api": "keras.layers.Convolution3D",
+      "args": {
+        "groups": "groups",
+        "kernel_size": "kernel_size",
+        "out_channels": "filters",
+        "padding": "padding",
+        "strides": "strides",
+        "use_bias": "use_bias"
+      }
+    },
+    "Cosinesimilarity": {
+      "api": "keras.losses.CosineSimilarity",
+      "args": {
+        "dim": "axis"
+      }
+    },
+    "Ctc": {
+      "api": "keras.losses.CTC"
+    },
+    "Dice": {
+      "api": "keras.losses.Dice",
+      "args": {
+        "dim": "axis",
+        "reduction": "reduction"
+      }
+    },
+    "Dropout": {
+      "api": "keras.layers.Dropout",
+      "args": {
+        "lr": "rate"
+      }
+    },
+    "Elu": {
+      "api": "keras.activations.elu",
+      "args": {
+        "alpha": "alpha",
+        "x": "x"
+      }
+    },
+    "Embedding": {
+      "api": "keras.layers.Embedding"
+    },
+    "Flatten": {
+      "api": "keras.layers.Flatten"
+    },
+    "Flax": {
+      "api": "keras.layers.FlaxLayer",
+      "args": {
+        "kwargs": "kwargs",
+        "method": "method",
+        "module": "module",
+        "variables": "variables"
+      }
+    },
+    "Gelu": {
+      "api": "keras.activations.gelu",
+      "args": {
+        "approximate": "approximate",
+        "x": "x"
+      }
+    },
+    "Glu": {
+      "api": "keras.activations.glu",
+      "args": {
+        "dim": "axis"
+      }
+    },
+    "Gru": {
+      "api": "keras.layers.GRU",
+      "args": {
+        "kwargs": "kwargs"
+      }
+    },
+    "Grucell": {
+      "api": "keras.layers.GRUCell"
+    },
+    "Hardshrink": {
+      "api": "keras.activations.hard_shrink"
+    },
+    "Hardsigmoid": {
+      "api": "keras.activations.hard_sigmoid"
+    },
+    "Hardtanh": {
+      "api": "keras.activations.hard_tanh"
+    },
+    "Hinge": {
+      "api": "keras.losses.Hinge"
+    },
+    "Huber": {
+      "api": "keras.losses.Huber",
+      "args": {
+        "delta": "delta"
+      }
+    },
+    "Identity": {
+      "api": "keras.layers.Identity",
+      "args": {
+        "kwargs": "kwargs"
+      }
+    },
+    "Input": {
+      "api": "keras.layers.InputLayer",
+      "args": {
+        "batch_shape": "batch_shape",
+        "batch_size": "batch_size",
+        "dtype": "dtype",
+        "kwargs": "kwargs",
+        "name": "name",
+        "optional": "optional",
+        "ragged": "ragged",
+        "shape": "shape",
+        "sparse": "sparse",
+        "x": "input_tensor"
+      }
+    },
+    "Jax": {
+      "api": "keras.layers.JaxLayer",
+      "args": {
+        "call_fn": "call_fn",
+        "init_fn": "init_fn",
+        "kwargs": "kwargs",
+        "params": "params",
+        "seed": "seed",
+        "state": "state"
+      }
+    },
+    "Lamb": {
+      "api": "keras.optimizers.Lamb",
+      "args": {
+        "eps": "epsilon",
+        "lr": "learning_rate",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Layernormalization": {
+      "api": "keras.layers.LayerNormalization",
+      "args": {
+        "beta_constraint": "beta_constraint",
+        "beta_initializer": "beta_initializer",
+        "beta_regularizer": "beta_regularizer",
+        "center": "center",
+        "dim": "axis",
+        "eps": "epsilon",
+        "gamma_constraint": "gamma_constraint",
+        "gamma_initializer": "gamma_initializer",
+        "gamma_regularizer": "gamma_regularizer",
+        "kwargs": "kwargs",
+        "scale": "scale"
+      }
+    },
+    "Leakyrelu": {
+      "api": "keras.activations.leaky_relu",
+      "args": {
+        "negative_slope": "negative_slope",
+        "x": "x"
+      }
+    },
+    "Linear": {
+      "api": "keras.activations.linear"
+    },
+    "Lion": {
+      "api": "keras.optimizers.Lion",
+      "args": {
+        "lr": "learning_rate",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Logsigmoid": {
+      "api": "keras.activations.log_sigmoid"
+    },
+    "Logsoftmax": {
+      "api": "keras.activations.log_softmax",
+      "args": {
+        "dim": "axis",
+        "x": "x"
+      }
+    },
+    "Lstm": {
+      "api": "keras.layers.LSTM",
+      "args": {
+        "kwargs": "kwargs"
+      }
+    },
+    "Lstmcell": {
+      "api": "keras.layers.LSTMCell"
+    },
+    "Mish": {
+      "api": "keras.activations.mish",
+      "args": {
+        "x": "x"
+      }
+    },
+    "Multiheadattention": {
+      "api": "keras.layers.MultiHeadAttention",
+      "args": {
+        "dropout": "dropout",
+        "num_heads": "num_heads",
+        "use_bias": "use_bias"
+      }
+    },
+    "Muon": {
+      "api": "keras.optimizers.Muon",
+      "args": {
+        "eps": "epsilon",
+        "lr": "learning_rate",
+        "momentum": "momentum",
+        "nesterov": "nesterov",
+        "ns_steps": "ns_steps",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Nadam": {
+      "api": "keras.optimizers.Nadam",
+      "args": {
+        "eps": "epsilon",
+        "lr": "learning_rate",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Prelu": {
+      "api": "keras.layers.PReLU"
+    },
+    "Relu": {
+      "api": "keras.activations.relu",
+      "args": {
+        "x": "x"
+      }
+    },
+    "Relu6": {
+      "api": "keras.activations.relu6"
+    },
+    "Rmspr": {
+      "api": "keras.optimizers.RMSprop",
+      "args": {
+        "centered": "centered",
+        "eps": "epsilon",
+        "lr": "learning_rate",
+        "momentum": "momentum"
+      }
+    },
+    "Rnn": {
+      "api": "keras.layers.RNN",
+      "args": {
+        "cell": "cell",
+        "kwargs": "kwargs",
+        "unroll": "unroll"
+      }
+    },
+    "Selu": {
+      "api": "keras.activations.selu"
+    },
+    "Sgd": {
+      "api": "keras.optimizers.SGD",
+      "args": {
+        "lr": "learning_rate",
+        "momentum": "momentum",
+        "nesterov": "nesterov"
+      }
+    },
+    "Sigmoid": {
+      "api": "keras.activations.sigmoid",
+      "args": {
+        "x": "x"
+      }
+    },
+    "Silu": {
+      "api": "keras.activations.swish",
+      "args": {
+        "x": "x"
+      }
+    },
+    "Softmax": {
+      "api": "keras.activations.softmax",
+      "args": {
+        "dim": "axis",
+        "x": "x"
+      }
+    },
+    "Softplus": {
+      "api": "keras.activations.softplus"
+    },
+    "Softshrink": {
+      "api": "keras.activations.soft_shrink"
+    },
+    "Softsign": {
+      "api": "keras.activations.softsign"
+    },
+    "Sparsemax": {
+      "api": "keras.activations.sparsemax"
+    },
+    "Tanh": {
+      "api": "keras.activations.tanh",
+      "args": {
+        "x": "x"
+      }
+    },
+    "Tanhshrink": {
+      "api": "keras.activations.tanh_shrink"
+    },
+    "Tfsm": {
+      "api": "keras.layers.TFSMLayer",
+      "args": {
+        "call_endpoint": "call_endpoint",
+        "call_training_endpoint": "call_training_endpoint",
+        "dtype": "dtype",
+        "filepath": "filepath",
+        "name": "name",
+        "trainable": "trainable"
+      }
+    },
+    "Threshold": {
+      "api": "keras.activations.threshold",
+      "args": {
+        "threshold": "threshold"
+      }
+    }
+  }
+}

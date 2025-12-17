@@ -3,13 +3,10 @@ PaxML (Praxis) Framework Adapter (Level 2).
 
 This adapter specializes the core JAX stack for Google's PaxML framework.
 It inherits Level 0 (Core JAX) and Level 1 (Optax/Orbax) capabilities from
-`JAXStackMixin` but implements the unique structural traits of the Praxis Layer library.
+``JAXStackMixin`` but implements the unique structural traits of the Praxis library.
 
-Key Features:
-- **Inheritance**: Uses `JAXStackMixin` for shared math/device/optimization logic.
-- **Structural Traits**: Defines `setup` instead of `__init__`, and `__call__` for inference.
-- **Layer API**: Maps `praxis.layers` to standard Neural Ops via manual wiring defaults
-  to ensure robust bootstrapping even if the environment lacks full Praxis installations.
+Updates:
+- Dynamic discovery of ``praxis.layers`` by scanning the module at runtime.
 """
 
 import logging
@@ -25,7 +22,7 @@ try:
 except ImportError:
   praxis = None
 
-from .base import (
+from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
   InitMode,
@@ -44,7 +41,7 @@ class PaxmlAdapter(JAXStackMixin):
   """
   Adapter for PaxML (Praxis Layers) running on JAX.
 
-  This Level 2 adapter leverages the Level 0/1 stack provided by `JAXStackMixin`
+  This Level 2 adapter leverages the Level 0/1 stack provided by ``JAXStackMixin``
   for array operations and optimization, while providing the specific layer
   definitions for the Praxis library.
   """
@@ -72,7 +69,7 @@ class PaxmlAdapter(JAXStackMixin):
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """
     Scans API surface.
-    Delegates Math/Opt to Jax Core, handles Layers specifically for Praxis.
+    Delegates Math/Opt to Jax Core, handles Layers (Praxis) dynamically.
     """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
@@ -83,7 +80,11 @@ class PaxmlAdapter(JAXStackMixin):
     # 1. Reuse Core JAX capabilities (Loss/Optimization/Activations)
     # Praxis often uses Optax or JAX NN directly.
     core = JaxCoreAdapter()
-    if category in [StandardCategory.LOSS, StandardCategory.OPTIMIZER, StandardCategory.ACTIVATION]:
+    if category in [
+      StandardCategory.LOSS,
+      StandardCategory.OPTIMIZER,
+      StandardCategory.ACTIVATION,
+    ]:
       results.extend(core.collect_api(category))
 
     # 2. Add Praxis Specifics (Layers)
@@ -97,10 +98,12 @@ class PaxmlAdapter(JAXStackMixin):
     if not self._snapshot_data:
       return []
     raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
-    return [GhostInspector.hydrate(item) for item in raw_list]
+    return list(map(GhostInspector.hydrate, raw_list))
 
   def _scan_praxis_layers(self) -> List[GhostRef]:
-    """Scans praxis.layers for BaseLayer subclasses."""
+    """
+    Dynamically scans ``praxis.layers`` for BaseLayer subclasses.
+    """
     if praxis is None:
       return []
 
@@ -110,6 +113,7 @@ class PaxmlAdapter(JAXStackMixin):
     # Scan common submodules
     # Praxis structure is vast, we focus on high-traffic areas
     targets = [praxis.layers]
+
     # Attempt to import specific submodules if they exist (depend on version)
     try:
       targets.extend([praxis.layers.activations, praxis.layers.normalizations])
@@ -118,13 +122,21 @@ class PaxmlAdapter(JAXStackMixin):
 
     for module in targets:
       for name, obj in inspect.getmembers(module):
+        # Skip private members
         if name.startswith("_"):
           continue
 
         if inspect.isclass(obj):
-          # Heuristic: Check for 'Layer' suffix or inheritance if BaseLayer is available
-          # We use name heuristic to avoid importing BaseLayer if not strictly needed
-          if "Layer" in name or "Norm" in name or name in ["Linear", "Bias", "StochasticDepth"]:
+          # Check inheritance from BaseLayer.
+          # If direct check fails (import issues), fallback to name heuristic
+          is_layer = False
+          if hasattr(praxis.base_layer, "BaseLayer") and issubclass(obj, praxis.base_layer.BaseLayer):
+            is_layer = True
+          # Heuristic fallback if direct inheritance check is tricky due to reloading
+          elif "Layer" in name or name in ["Linear", "Bias", "StochasticDepth", "Embedding"]:
+            is_layer = True
+
+          if is_layer:
             try:
               # Use fully qualified path
               api_path = f"{module.__name__}.{name}"
@@ -151,7 +163,13 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    return {"neural": [r"\.praxis\.", r"\.layers\."], "extras": []}
+    return {"neural": [r"\\.praxis\\.", r"\\.layers\\."], "extras": []}
+
+  @property
+  def supported_tiers(self) -> List[Any]:
+    from ml_switcheroo.enums import SemanticTier
+
+    return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
   def structural_traits(self) -> StructuralTraits:
@@ -164,8 +182,8 @@ class PaxmlAdapter(JAXStackMixin):
       forward_method="__call__",
       init_method_name="setup",
       requires_super_init=False,
-      # PaxML handles RNGs via context managers usually, explicit injection is less common
-      # in the layer signature itself compared to Flax NNX
+      # PaxML handles RNGs via context managers usually, explicit injection is
+      # less common in the layer signature itself compared to Flax NNX
       inject_magic_args=[],
       lifecycle_strip_methods=[],
     )
@@ -178,9 +196,15 @@ class PaxmlAdapter(JAXStackMixin):
     return {
       # Manually map common layers that might be tricky to discover dynamically
       "Linear": StandardMap(
-        api="praxis.layers.Linear", args={"in_features": "input_dims", "out_features": "output_dims"}
+        api="praxis.layers.Linear",
+        args={
+          "in_features": "input_dims",
+          "out_features": "output_dims",
+          "bias": "use_bias",  # Added Missing Mapping
+        },
       ),
       "Dropout": StandardMap(api="praxis.layers.Dropout", args={"p": "keep_prob"}),
+      "Embedding": StandardMap(api="praxis.layers.Embedding"),
     }
 
   @property
@@ -209,28 +233,10 @@ class PaxmlAdapter(JAXStackMixin):
     # Inject standard alias for generated code
     imports["praxis.layers"] = {"root": "praxis", "sub": "layers", "alias": "pl"}
 
-    # 3. Layer specific wiring
-
-    # Ensure Linear layer mapping handles argument discrepancy
-    # Standard: in_features, out_features
-    # Praxis: input_dims, output_dims
-    if "Linear" not in mappings:
-      mappings["Linear"] = {"api": "praxis.layers.Linear"}
-
-    if "args" not in mappings["Linear"]:
-      mappings["Linear"]["args"] = {}
-
-    mappings["Linear"]["args"]["in_features"] = "input_dims"
-    mappings["Linear"]["args"]["out_features"] = "output_dims"
-    mappings["Linear"]["args"]["bias"] = "use_bias"
-
-    # Ensure Sequential mapping
+    # 3. Layer specific wiring checks
+    # Ensure Sequential mapping exists
     if "Sequential" not in mappings:
       mappings["Sequential"] = {"api": "praxis.layers.Sequential"}
-
-    # Activations often sit in praxis.layers.activations but aliased in praxis.layers
-    # or just available via JAX stack (jnp).
-    # If discovery found them in praxis, we keep them. If not, stack provides jnp.relu.
 
   # --- Examples ---
 
@@ -239,20 +245,46 @@ class PaxmlAdapter(JAXStackMixin):
     return cls().get_tiered_examples()["tier2_neural"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
+    """
+    Returns PaxML (Praxis) idiomatic examples.
+
+    Tiers:
+    1. Math: Uses `jax.numpy` (JAX Core).
+    2. Neural: Uses `praxis.layers` and `setup()` method lifecycle.
+    3. Extras: Uses `HParams` configuration templates.
+    """
     return {
+      "tier1_math": JaxCoreAdapter.get_example_code(),
       "tier2_neural": """import praxis.layers as pl
 from praxis import base_layer
 
 class SimpleMLP(base_layer.BaseLayer):
-  def setup(self):
-    # PaxML uses setup() instead of __init__
-    self.fc1 = pl.Linear(output_dims=128)
-    self.fc2 = pl.Linear(output_dims=10)
+    # Tier 2: Praxis Layer Definition
+    # Note the use of 'setup()' instead of '__init__'
+    
+    def setup(self):
+        # Layers are instantiated in setup()
+        self.fc1 = pl.Linear(output_dims=128)
+        self.fc2 = pl.Linear(output_dims=10)
+        self.dropout = pl.Dropout(keep_prob=0.5)
 
-  def __call__(self, x):
-    x = self.fc1(x)
-    x = pl.relu(x)
-    return self.fc2(x)
+    def __call__(self, x):
+        x = self.fc1(x)
+        x = pl.relu(x)
+        x = self.dropout(x)
+        return self.fc2(x)
 """,
-      "tier1_math": JaxCoreAdapter.get_example_code(),
+      "tier3_extras": """import praxis.layers as pl
+from praxis import pax_fiddle
+
+def get_model_config():
+    # Tier 3: HParams Configuration
+    # Praxis often relies on fiddle/HParams for configuration
+    
+    p = pax_fiddle.Config(pl.Linear, name="my_linear")
+    p.input_dims = 64
+    p.output_dims = 10
+    
+    return p
+""",
     }

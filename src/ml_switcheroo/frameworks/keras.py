@@ -1,11 +1,14 @@
 """
 Keras (v3) Framework Adapter.
 
-Supports Keras 3.x which unifies JAX, TensorFlow, and PyTorch backends.
-It maps `keras.ops` to the Array API (Math) and `keras.layers` to Neural Ops.
+This module provides the adapter for Keras 3+, enabling translation between
+Keras and other frameworks (JAX, Torch, TensorFlow).
 
-Implements **Ghost Protocol** (collect_api) to support dynamic discovery
-in environments where the heavy Keras library might not be installed.
+Capabilities:
+1.  **Math Operations**: Maps `keras.ops` functions to Array API standards.
+2.  **Neural Layers**: Maps `keras.layers` to Neural Standards.
+3.  **Discovery**: Implements `collect_api` to dynamically find losses,
+    optimizers, and activations by inspecting the installed Keras package.
 """
 
 import inspect
@@ -17,6 +20,7 @@ from typing import List, Tuple, Dict, Optional, Any, Set
 try:
   import keras
   import keras.ops
+  import keras.layers
   import keras.losses
   import keras.optimizers
   import keras.activations
@@ -24,7 +28,7 @@ try:
 except ImportError:
   keras = None
 
-from .base import (
+from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
   StandardCategory,
@@ -34,11 +38,17 @@ from .base import (
   load_snapshot_for_adapter,
 )
 from ml_switcheroo.core.ghost import GhostInspector
+from ml_switcheroo.enums import SemanticTier
 
 
 @register_framework("keras")
 class KerasAdapter:
-  """Adapter for Keras 3+."""
+  """
+  Adapter for Keras 3+ (Multi-backend).
+
+  Supports translation of Functional API models, Layer subclasses, and
+  backend-agnostic math operations (`keras.ops`).
+  """
 
   display_name: str = "Keras"
   inherits_from: Optional[str] = None
@@ -58,60 +68,88 @@ class KerasAdapter:
       if not self._snapshot_data:
         logging.warning("Keras not installed and no snapshot found. Scanning unavailable.")
 
-    @classmethod
-    def get_example_code(cls) -> str:
-      return cls().get_tiered_examples()["tier2_neural"]
+  @classmethod
+  def get_example_code(cls) -> str:
+    """Returns the primary example code used for instant demos."""
+    return cls().get_tiered_examples()["tier2_neural"]
 
-    def get_tiered_examples(self) -> Dict[str, str]:
-      return {
-        "tier1_math": """import keras
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """
+    Returns Keras 3.0 idiomatic examples.
+
+    Tiers:
+    1. Math: Uses `keras.ops` for backend-agnostic tensor math.
+    2. Neural: Uses the Functional API (`Input` -> `Model`).
+    3. Extras: Uses `SeedGenerator` for controlled randomness.
+    """
+    return {
+      "tier1_math": """import keras
 from keras import ops
 
-def math_ops(x, y):
-  # Tier 1: Using keras.ops for backend-agnostic math
-  a = ops.abs(x)
-  b = ops.add(a, y)
-  return ops.mean(b)""",
-        "tier2_neural": """import keras
+def math_ops(x, y): 
+    # Tier 1: Using keras.ops for backend-agnostic math
+    # These map effectively to jax.numpy, torch, or tf via Keras 3 logic
+    a = ops.abs(x) 
+    b = ops.add(a, y) 
+    return ops.mean(b) 
+""",
+      "tier2_neural": """import keras
 from keras import layers
 
-def build_model(input_shape):
-  # Tier 2: Functional Model API
-  inputs = keras.Input(shape=input_shape)
-  x = layers.Conv2D(32, 3, activation="relu")(inputs)
-  x = layers.Flatten()(x)
-  outputs = layers.Dense(10)(x)
-  return keras.Model(inputs, outputs)""",
-        "tier3_extras": """import keras
-import keras.random
+def build_model(input_shape): 
+    # Tier 2: Functional Model API
+    # Maps input shape -> Conv -> Flatten -> Dense -> Model
+    inputs = keras.Input(shape=input_shape) 
+    x = layers.Conv2D(32, 3, activation="relu")(inputs) 
+    x = layers.Flatten()(x) 
+    outputs = layers.Dense(10)(x) 
+    
+    return keras.Model(inputs, outputs) 
+""",
+      "tier3_extras": """import keras
+from keras import random
 
-def logic(x):
-  # Tier 3: Framework Extras (Random)
-  seed = keras.random.SeedGenerator(42)
-  return keras.random.normal(x.shape, seed=seed)""",
-      }
+def generate_noise(shape): 
+    # Tier 3: Framework Extras (Random) 
+    # Keras 3 uses explicitly explicit SeedGenerators for stateful RNG behavior
+    # across stateless backends like JAX. 
+    seed_gen = random.SeedGenerator(42) 
+    return random.normal(shape, seed=seed_gen) 
+""",
+    }
 
   # --- Discovery Configuration ---
-  # Used by `ml_switcheroo sync keras` to find math/layer implementations
   @property
   def search_modules(self) -> List[str]:
+    """Modules to scan when running bulk scaffolding."""
     return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
+    """Returns default alias tuple: (module, alias)."""
     return ("keras", "keras")
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
+    """Regex patterns to categorize discovered APIs."""
     return {
       "neural": [r"\\.layers\\.", r"Layer$", r"Model$"],
       "array": [r"\\.ops\\.", r"\\.math\\."],
       "extras": [r"\\.callbacks\\.", r"\\.saving\\."],
     }
 
+  @property
+  def supported_tiers(self) -> List[SemanticTier]:
+    """Keras supports all major tiers including Neural Layers."""
+    return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
+
   # --- Structural Traits ---
   @property
   def structural_traits(self) -> StructuralTraits:
+    """
+    Defines behavior for class and function rewriting.
+    Keras uses `call` for forward pass and requires `super().__init__()`.
+    """
     return StructuralTraits(
       module_base="keras.Layer",
       forward_method="call",
@@ -124,16 +162,36 @@ def logic(x):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    return {}
+    """
+    Static definitions to ensure core ops work without discovery.
+    Includes argument name mapping for Dense layers (units vs out_features).
+    """
+    return {
+      "Abs": StandardMap(api="keras.ops.abs"),
+      "Mean": StandardMap(api="keras.ops.mean"),
+      "Linear": StandardMap(api="keras.layers.Dense", args={"out_features": "units"}),
+    }
 
   @property
   def rng_seed_methods(self) -> List[str]:
+    """Methods that set global random seed."""
     return ["utils.set_random_seed"]
 
   # --- Ghost Protocol Implementation ---
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Collects API signatures (Live or Ghost)."""
+    """
+    Collects API signatures (Live or Ghost).
+
+    If Keras is installed, it scans `keras.layers`, `keras.losses`, etc.
+    If not installed, it attempts to load from a cached snapshot.
+
+    Args:
+        category (StandardCategory): The API category to scan.
+
+    Returns:
+        List[GhostRef]: Found API signatures.
+    """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
     return self._collect_live(category)
@@ -146,29 +204,62 @@ def logic(x):
     return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
-    """Scans living Keras objects."""
+    """Scans living Keras objects using runtime introspection."""
     results = []
 
-    # Keras naming conventions (e.g. `MeanSquaredError`, `Adam`) do not strictly use suffixes.
-    # We rely on structural traits (get_config) and exclude base classes explicitly.
     if category == StandardCategory.LOSS:
-      results.extend(self._scan_module(keras.losses, "keras.losses", kind="class", block_list={"Loss", "Container"}))
-    elif category == StandardCategory.OPTIMIZER:
+      # Classes in keras.losses
       results.extend(
-        self._scan_module(keras.optimizers, "keras.optimizers", kind="class", block_list={"Optimizer", "TFOptimizer"})
+        self._scan_module(
+          keras.losses,
+          "keras.losses",
+          kind="class",
+          block_list={"Loss", "Container"},
+        )
       )
+
+    elif category == StandardCategory.OPTIMIZER:
+      # Classes in keras.optimizers
+      results.extend(
+        self._scan_module(
+          keras.optimizers,
+          "keras.optimizers",
+          kind="class",
+          block_list={"Optimizer", "TFOptimizer"},
+        )
+      )
+
     elif category == StandardCategory.ACTIVATION:
       # Activations in Keras are generally functions in keras.activations
       results.extend(self._scan_module(keras.activations, "keras.activations", kind="function"))
 
+    elif category == StandardCategory.LAYER:
+      # Layers in keras.layers
+      results.extend(self._scan_module(keras.layers, "keras.layers", kind="class", block_list={"Layer"}))
+
     return results
 
   def _scan_module(
-    self, module: Any, prefix: str, kind: str = "class", block_list: Optional[Set[str]] = None
+    self,
+    module: Any,
+    prefix: str,
+    kind: str = "class",
+    block_list: Optional[Set[str]] = None,
   ) -> List[GhostRef]:
     """
     Generic scanner for Keras modules.
-    Verifies that classes are likely serializable Keras objects (contain `get_config`).
+
+    Verifies that classes are valid serializable Keras objects by checking
+    for `get_config` or `from_config` methods.
+
+    Args:
+        module: The python module object.
+        prefix: The module path string (e.g. 'keras.layers').
+        kind: 'class' or 'function'.
+        block_list: Set of names to ignore.
+
+    Returns:
+        List[GhostRef]: Extracted API signatures.
     """
     if not module:
       return []
@@ -177,7 +268,7 @@ def logic(x):
     found = []
 
     for name, obj in inspect.getmembers(module):
-      # Skip private/internal
+      # Skip private/internal members
       if name.startswith("_"):
         continue
 
@@ -186,15 +277,15 @@ def logic(x):
 
       # Class Scanning Logic
       if kind == "class" and inspect.isclass(obj):
-        # Keras 3 check: All standard components have `get_config` or `from_config`
-        # This is the most robust signal that this is a valid serializable Keras Entity.
+        # Keras 3 check: All standard components have config methods.
+        # This explicitly filters out utility classes or mixins.
         is_keras_object = hasattr(obj, "get_config") or hasattr(obj, "from_config")
 
         if is_keras_object:
           ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
           found.append(ref)
 
-      # Function Scanning Logic (Activations)
+      # Function Scanning Logic (Activations/Ops)
       elif kind == "function" and inspect.isfunction(obj):
         ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
         found.append(ref)
@@ -204,6 +295,7 @@ def logic(x):
   # --- Test Harness Syntax ---
 
   def convert(self, data: Any) -> Any:
+    """Converts input data to Keras tensor."""
     try:
       import keras
 
@@ -224,6 +316,7 @@ def logic(x):
     return ""
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+    """Keras 3 device scopes."""
     d_type = "gpu" if "cuda" in device_type.lower() else "cpu"
     return f"keras.name_scope('{d_type}')"
 
@@ -233,16 +326,28 @@ def logic(x):
 
     # Wiring for Tier C Vision Operations
     # Maps abstract Vision Ops to Keras Preprocessing Layers
-    mappings["Resize"] = {"api": "keras.layers.Resizing", "args": {"size": "height"}}
-    mappings["CenterCrop"] = {"api": "keras.layers.CenterCrop", "args": {"size": "height"}}
-    mappings["Normalize"] = {"api": "keras.layers.Normalization", "args": {"std": "variance", "mean": "mean"}}
+    mappings["Resize"] = {
+      "api": "keras.layers.Resizing",
+      "args": {"size": "height"},
+    }
+    mappings["CenterCrop"] = {
+      "api": "keras.layers.CenterCrop",
+      "args": {"size": "height"},
+    }
+    mappings["Normalize"] = {
+      "api": "keras.layers.Normalization",
+      "args": {"std": "variance", "mean": "mean"},
+    }
     mappings["RandomCrop"] = {"api": "keras.layers.RandomCrop"}
-    mappings["RandomHorizontalFlip"] = {"api": "keras.layers.RandomFlip", "args": {"p": "mode"}}
+    mappings["RandomHorizontalFlip"] = {
+      "api": "keras.layers.RandomFlip",
+      "args": {"p": "mode"},
+    }
     mappings["RandomVerticalFlip"] = {"api": "keras.layers.RandomFlip"}
-    # Use ZeroPadding2D as nearest equivalent for general Pad
     mappings["Pad"] = {"api": "keras.layers.ZeroPadding2D"}
-    # ToTensor logic is usually implicit in Keras or uses ops.convert_to_tensor
     mappings["ToTensor"] = {"api": "keras.ops.convert_to_tensor"}
-    # Grayscale is often just a no-op identity in model definition or handled by preprocessing
-    # Mapping to a lambda pass-through for architectural compliance
-    mappings["Grayscale"] = {"api": "lambda x: x", "transformation_type": "inline_lambda"}
+    # Grayscale is often identity in model definition or handled by preprocessing pipeline
+    mappings["Grayscale"] = {
+      "api": "lambda x: x",
+      "transformation_type": "inline_lambda",
+    }

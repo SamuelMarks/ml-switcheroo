@@ -1,18 +1,30 @@
 """
 Inspection Engine for Python Packages.
 
-This module uses ``griffe`` to perform static analysis on installed packages,
-extracting function signatures, docstrings, and identifying attributes (constants/types).
-It provides robust detection of variable arguments (``*args``) to aid fuzzy matching.
+This module provides the :class:`ApiInspector`, a hybrid static-dynamic analysis tool
+designed to extract API signatures (functions, classes, and attributes) from Python packages.
+
+It employs a two-stage strategy:
+
+1.  **Static Analysis (Griffe)**: Attempts to parse the source code first. This is safer
+    and preserves comments/docstrings better, but fails on compiled modules (C-Extensions).
+2.  **Runtime Introspection (Inspect)**: Falls back to importing the module and inspecting
+    live objects. This is required for frameworks like PyTorch, TensorFlow, and MLX which
+    rely heavily on compiled bindings.
 """
 
-from typing import Dict, Any
+import inspect
+import importlib
+from typing import Dict, Any, List, Optional
 import griffe
 
 
 class ApiInspector:
   """
-  Static Analysis tool for Python packages.
+  A robust inspector for discovering API surfaces of installed libraries.
+
+  Attributes:
+      _package_cache (Dict[str, griffe.Object]): Cache of statically parsed Griffe trees.
   """
 
   def __init__(self):
@@ -22,109 +34,130 @@ class ApiInspector:
   def inspect(self, package_name: str) -> Dict[str, Any]:
     """
     Scans a package and returns a flat catalog of its public API.
-
-    Args:
-        package_name: The importable name of the package (e.g. 'torch', 'math').
-
-    Returns:
-        Dict[str, Any]: Catalog of API members.
-        Format: ``{ "pkg.sub.func": { "name": "func", "has_varargs": True, ... } }``
     """
+    catalog = {}
+
+    # Strategy 1: Static Analysis (Best for Source Code / Docstrings)
     try:
-      # Griffe loads the package tree
       if package_name in self._package_cache:
-        root_module = self._package_cache[package_name]
+        root = self._package_cache[package_name]
       else:
-        root_module = griffe.load(package_name)
-        self._package_cache[package_name] = root_module
+        root = griffe.load(package_name)
+        self._package_cache[package_name] = root
+
+      self._recurse_griffe(root, catalog)
+      if len(catalog) > 0:
+        return catalog
+    except Exception:
+      pass
+
+    # Strategy 2: Runtime Inspection (Fallback for C-Extensions)
+    try:
+      module = importlib.import_module(package_name)
+      self._recurse_runtime(module, package_name, catalog)
     except ImportError:
       print(f"⚠️  Could not load package '{package_name}'. Is it installed?")
-      return {}
     except Exception as e:
-      print(f"⚠️  Error analyzing package '{package_name}': {e}")
-      return {}
+      print(f"⚠️  Error analyzing '{package_name}': {e}")
 
-    catalog = {}
-    self._recurse(root_module, catalog)
     return catalog
 
-  def _recurse(self, obj: griffe.Object, catalog: Dict[str, Any]):
+  def _recurse_griffe(self, obj: griffe.Object, catalog: Dict[str, Any]):
     """
-    Recursively walks modules and classes.
-
-    Args:
-        obj: The current Griffe object being visited.
-        catalog: The accumulator dictionary for API definitions.
+    Recursively walks a Griffe object tree to build the catalog.
     """
     for member_name, member in obj.members.items():
-      # Skip private members (heuristic)
-      if member_name.startswith("_") and not member_name.startswith("__"):
+      if member_name.startswith("_"):
         continue
 
       try:
-        # 1. Alias Handling
         if member.is_alias:
-          # We typically skip aliases to avoid duplication,
-          # but if it's a re-export of a constant, it might be relevant.
-          # For stability, we skip unless we verify target is external.
           continue
 
-        # 2. Functions
         if member.is_function:
-          info = self._extract_signature(member, kind="function")
+          info = self._extract_griffe_sig(member, kind="function")
           catalog[member.path] = info
 
-        # 3. Attributes (Constants/Types) -> Feature 015
+        elif member.is_class:
+          info = self._extract_griffe_sig(member, kind="class")
+          catalog[member.path] = info
+          self._recurse_griffe(member, catalog)
+
+        # RESTORED: Attribute handling (Constants)
         elif member.is_attribute:
           info = self._extract_attribute_info(member)
           catalog[member.path] = info
 
-        # 4. Classes (Recurse + Catalog Class Itself)
-        elif member.is_class:
-          # Catalog the class itself (so we map 'Linear' not just 'Linear.forward')
-          info = self._extract_signature(member, kind="class")
-          catalog[member.path] = info
-
-          # Recurse into methods/nested classes
-          self._recurse(member, catalog)
-
-        # 5. Modules (Recurse only)
         elif member.is_module:
-          self._recurse(member, catalog)
+          self._recurse_griffe(member, catalog)
 
       except Exception:
-        # If inspection fails for a specific member, skip gracefully
         continue
 
-  def _extract_signature(self, func: griffe.Object, kind: str) -> Dict[str, Any]:
+  def _recurse_runtime(self, obj: Any, path: str, catalog: Dict[str, Any], depth: int = 0):
     """
-    Serializes a Function or Class signature.
-
-    Detects standard parameters and varargs (``*args``).
-
-    Args:
-        func: The Griffe function/class object.
-        kind: Label string ('function' or 'class').
-
-    Returns:
-        Dictionary containing metadata: name, type, params, has_varargs, docstring.
+    Recursively walks a live Python object to build the catalog.
     """
+    if depth > 5:
+      return
+
+    try:
+      members = inspect.getmembers(obj)
+    except Exception:
+      return
+
+    for name, member in members:
+      if name.startswith("_"):
+        continue
+
+      new_path = f"{path}.{name}"
+
+      if inspect.ismodule(member):
+        if hasattr(member, "__package__") and member.__package__ and path in member.__package__:
+          self._recurse_runtime(member, new_path, catalog, depth + 1)
+
+      elif inspect.isclass(member) or inspect.isfunction(member) or inspect.isbuiltin(member) or inspect.ismethod(member):
+        try:
+          if hasattr(member, "__module__") and member.__module__:
+            root_pkg = path.split(".")[0]
+            if not member.__module__.startswith(root_pkg):
+              continue
+
+          cat_type = "class" if inspect.isclass(member) else "function"
+          catalog[new_path] = self._extract_runtime_sig(member, name, cat_type)
+
+          if inspect.isclass(member):
+            self._recurse_runtime(member, new_path, catalog, depth + 1)
+        except Exception:
+          # C-ext fallback
+          catalog[new_path] = {
+            "name": name,
+            "type": "function" if not inspect.isclass(member) else "class",
+            "params": ["x"],
+            "has_varargs": False,
+            "docstring_summary": inspect.getdoc(member) or "",
+          }
+      # Runtime Attribute Handling (Basic check for simple types)
+      elif not inspect.ismodule(member) and not inspect.isroutine(member) and not inspect.isclass(member):
+        # Constants like math.pi
+        if isinstance(member, (int, float, str, bool)):
+          catalog[new_path] = {
+            "name": name,
+            "type": "attribute",
+            "params": [],
+            "has_varargs": False,
+            "docstring_summary": f"Constant: {member}",
+          }
+
+  def _extract_griffe_sig(self, func: griffe.Object, kind: str) -> Dict[str, Any]:
     params = []
     has_varargs = False
-
-    # Access parameters safely
     try:
       if hasattr(func, "parameters") and func.parameters:
         for param in func.parameters:
-          # Feature 07: Robust support for *args detection.
-          # Griffe 0.30+ uses .kind enum. We converting to string to be safe.
-          # "var_positional" corresponds to *args.
           p_kind = str(param.kind).lower() if param.kind else ""
-
-          if "var_positional" in p_kind or (param.name.startswith("*") and not param.name.startswith("**")):
+          if "var_positional" in p_kind or param.name.startswith("*"):
             has_varargs = True
-
-          # We store the cleaned name for the parameter list
           clean_name = param.name.lstrip("*")
           params.append(clean_name)
     except AttributeError:
@@ -132,7 +165,7 @@ class ApiInspector:
 
     return {
       "name": func.name,
-      "type": kind,  # 'function' or 'class'
+      "type": kind,
       "params": params,
       "has_varargs": has_varargs,
       "docstring_summary": self._get_doc_summary(func),
@@ -141,34 +174,40 @@ class ApiInspector:
   def _extract_attribute_info(self, attr: griffe.Attribute) -> Dict[str, Any]:
     """
     Serializes an Attribute (Constant/Type).
-
-    Args:
-        attr: Griffe Attribute object.
-
-    Returns:
-        Dictionary identifying the object as an attribute.
     """
     return {
       "name": attr.name,
       "type": "attribute",
-      "params": [],  # Attributes have no parameters
+      "params": [],
       "has_varargs": False,
       "docstring_summary": self._get_doc_summary(attr),
     }
 
-  def _get_doc_summary(self, obj: griffe.Object) -> str:
-    """
-    Helper to safely extract the first line of docstring.
+  def _extract_runtime_sig(self, obj: Any, name: str, kind: str) -> Dict[str, Any]:
+    params = []
+    has_varargs = False
+    try:
+      sig = inspect.signature(obj)
+      for p in sig.parameters.values():
+        if p.kind == inspect.Parameter.VAR_POSITIONAL:
+          has_varargs = True
+        params.append(p.name)
+    except (ValueError, TypeError):
+      pass
 
-    Args:
-        obj: The griffe object.
+    return {
+      "name": name,
+      "type": kind,
+      "params": params,
+      "has_varargs": has_varargs,
+      "docstring_summary": inspect.getdoc(obj) or "",
+    }
 
-    Returns:
-        The first non-empty line of the docstring or empty string.
-    """
+  def _get_doc_summary(self, obj: Any) -> str:
     doc = ""
-    if obj.docstring:
-      # Griffe docstrings are objects, .value gets the raw text
+    if hasattr(obj, "docstring") and obj.docstring:
       full_doc = obj.docstring.value or ""
       doc = full_doc.strip().split("\n")[0]
+    elif hasattr(obj, "__doc__") and obj.__doc__:
+      doc = str(obj.__doc__).strip().split("\n")[0]
     return doc

@@ -45,7 +45,7 @@ class SemanticsManager:
     self.data: Dict[str, Dict] = {}
     self.import_data: Dict[str, Dict] = {}
 
-    # Stores framework traits: { "jax": { "alias": {...}, "traits": {...} } }
+    # Stores framework traits: { "jax": { "alias": {...}, "traits": {...}, "tiers": [...] } }
     self.framework_configs: Dict[str, Dict] = {}
 
     self.test_templates: Dict[str, Dict] = {}
@@ -92,6 +92,10 @@ class SemanticsManager:
             self.framework_configs[fw_name]["traits"] = traits.model_dump(exclude_unset=True)
         except Exception as e:
           print(f"⚠️ Failed to load structural traits for {fw_name}: {e}")
+
+      # B2. Populate Semantic Tiers (New safety logic)
+      if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
+        self.framework_configs[fw_name]["tiers"] = [t.value for t in adapter.supported_tiers]
 
       # C. Populate RNG Methods
       if hasattr(adapter, "rng_seed_methods"):

@@ -1,8 +1,58 @@
 {
   "__framework__": "torch",
   "mappings": {
-    "BatchNorm1d": {
-      "api": "torch.nn.BatchNorm2d",
+    "Adadelta": {
+      "api": "torch.optim.Adadelta",
+      "args": {
+        "eps": "eps",
+        "lr": "lr",
+        "rho": "rho",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Adafactor": {
+      "api": "torch.optim.Adafactor",
+      "args": {
+        "lr": "lr",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Adagrad": {
+      "api": "torch.optim.Adagrad",
+      "args": {
+        "eps": "eps",
+        "initial_accumulator_value": "initial_accumulator_value",
+        "lr": "lr"
+      }
+    },
+    "Adam": {
+      "api": "torch.optim.Adam",
+      "args": {
+        "eps": "eps",
+        "lr": "lr"
+      }
+    },
+    "Adamax": {
+      "api": "torch.optim.Adamax",
+      "args": {
+        "eps": "eps",
+        "lr": "lr",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Adamw": {
+      "api": "torch.optim.AdamW",
+      "args": {
+        "eps": "eps",
+        "lr": "lr",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Alphadropout": {
+      "api": "torch.nn.AlphaDropout"
+    },
+    "Batchnorm": {
+      "api": "torch.nn.BatchNorm3d",
       "args": {
         "dtype": "dtype",
         "eps": "eps",
@@ -10,56 +60,128 @@
         "num_features": "num_features"
       }
     },
-    "Conv1d": {
+    "Celu": {
+      "api": "torch.nn.CELU",
+      "args": {
+        "alpha": "alpha"
+      }
+    },
+    "Conv": {
       "api": "torch.nn.Conv3d",
+      "args": {
+        "dtype": "dtype",
+        "groups": "groups",
+        "kernel_size": "kernel_size",
+        "out_channels": "out_channels",
+        "padding": "padding"
+      }
+    },
+    "Convtranspose": {
+      "api": "torch.nn.ConvTranspose3d",
       "args": {
         "dtype": "dtype",
         "kernel_size": "kernel_size",
         "padding": "padding"
       }
     },
-    "Embedding": {
-      "api": "torch.nn.Embedding",
+    "Cosinesimilarity": {
+      "api": "torch.nn.CosineSimilarity",
       "args": {
-        "_freeze": "_freeze",
-        "_weight": "_weight",
-        "device": "device",
-        "dtype": "dtype",
-        "embedding_dim": "embedding_dim",
-        "max_norm": "max_norm",
-        "norm_type": "norm_type",
-        "num_embeddings": "num_embeddings",
-        "padding_idx": "padding_idx",
-        "scale_grad_by_freq": "scale_grad_by_freq",
-        "sparse": "sparse"
+        "dim": "dim"
       }
+    },
+    "Ctc": {
+      "api": "torch.nn.CTCLoss"
+    },
+    "Dropout": {
+      "api": "torch.nn.Dropout3d"
+    },
+    "Elu": {
+      "api": "torch.nn.functional.elu",
+      "args": {
+        "alpha": "alpha",
+        "x": "input"
+      }
+    },
+    "Embedding": {
+      "api": "torch.nn.Embedding"
     },
     "Flatten": {
-      "api": "torch.nn.Flatten",
+      "api": "torch.nn.Flatten"
+    },
+    "Gelu": {
+      "api": "torch.nn.GELU",
       "args": {
-        "end_dim": "end_dim",
-        "start_dim": "start_dim"
+        "approximate": "approximate"
       }
     },
-    "GRU": {
+    "Glu": {
+      "api": "torch.nn.GLU",
+      "args": {
+        "dim": "dim"
+      }
+    },
+    "Groupnorm": {
+      "api": "torch.nn.GroupNorm",
+      "args": {
+        "dtype": "dtype",
+        "eps": "eps",
+        "num_groups": "num_groups"
+      }
+    },
+    "Gru": {
       "api": "torch.nn.GRU",
       "args": {
-        "args": "args",
         "kwargs": "kwargs"
       }
     },
-    "LSTM": {
-      "api": "torch.nn.LSTM",
+    "Grucell": {
+      "api": "torch.nn.GRUCell",
       "args": {
-        "args": "args",
+        "dtype": "dtype"
+      }
+    },
+    "Hardshrink": {
+      "api": "torch.nn.Hardshrink"
+    },
+    "Hardsigmoid": {
+      "api": "torch.nn.Hardsigmoid"
+    },
+    "Hardtanh": {
+      "api": "torch.nn.Hardtanh"
+    },
+    "Huber": {
+      "api": "torch.nn.HuberLoss",
+      "args": {
+        "delta": "delta"
+      }
+    },
+    "Identity": {
+      "api": "torch.nn.Identity",
+      "args": {
         "kwargs": "kwargs"
       }
     },
-    "LayerNorm": {
+    "Instancenorm": {
+      "api": "torch.nn.InstanceNorm3d",
+      "args": {
+        "dtype": "dtype",
+        "eps": "eps",
+        "num_features": "num_features"
+      }
+    },
+    "Layernorm": {
       "api": "torch.nn.LayerNorm",
       "args": {
         "dtype": "dtype",
         "eps": "eps"
+      }
+    },
+    "Leakyrelu": {
+      "api": "torch.nn.functional.leaky_relu",
+      "args": {
+        "negative_slope": "negative_slope",
+        "x": "input"
       }
     },
     "Linear": {
@@ -70,58 +192,163 @@
         "out_features": "out_features"
       }
     },
-    "RNN": {
-      "api": "torch.nn.RNN",
+    "Logsigmoid": {
+      "api": "torch.nn.LogSigmoid"
+    },
+    "Logsoftmax": {
+      "api": "torch.nn.functional.log_softmax",
       "args": {
-        "args": "args",
+        "dim": "dim",
+        "x": "input"
+      }
+    },
+    "Lstm": {
+      "api": "torch.nn.LSTM",
+      "args": {
         "kwargs": "kwargs"
       }
     },
-    "dropout": {
-      "api": "torch.nn.functional.dropout"
-    },
-    "gelu": {
-      "api": "torch.nn.functional.gelu"
-    },
-    "leaky_relu": {
-      "api": "torch.nn.functional.leaky_relu",
+    "Lstmcell": {
+      "api": "torch.nn.LSTMCell",
       "args": {
-        "inplace": "inplace",
-        "input": "input",
-        "negative_slope": "negative_slope"
+        "dtype": "dtype"
       }
     },
-    "log_softmax": {
-      "api": "torch.nn.functional.softmax",
+    "Mish": {
+      "api": "torch.nn.functional.mish",
       "args": {
-        "dim": "dim"
+        "x": "input"
       }
     },
-    "relu": {
-      "api": "torch.nn.functional.elu",
+    "Multiheadattention": {
+      "api": "torch.nn.MultiheadAttention",
       "args": {
-        "alpha": "alpha",
-        "inplace": "inplace",
-        "input": "input"
+        "dropout": "dropout",
+        "dtype": "dtype",
+        "num_heads": "num_heads"
       }
     },
-    "sigmoid": {
+    "Muon": {
+      "api": "torch.optim.Muon",
+      "args": {
+        "eps": "eps",
+        "lr": "lr",
+        "momentum": "momentum",
+        "nesterov": "nesterov",
+        "ns_steps": "ns_steps",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Nadam": {
+      "api": "torch.optim.NAdam",
+      "args": {
+        "eps": "eps",
+        "lr": "lr",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Prelu": {
+      "api": "torch.nn.PReLU",
+      "args": {
+        "dtype": "dtype"
+      }
+    },
+    "Relu": {
+      "api": "torch.nn.functional.relu",
+      "args": {
+        "x": "input"
+      }
+    },
+    "Relu6": {
+      "api": "torch.nn.ReLU6"
+    },
+    "Rmsnorm": {
+      "api": "torch.nn.RMSNorm",
+      "args": {
+        "dtype": "dtype",
+        "eps": "eps"
+      }
+    },
+    "Rmspr": {
+      "api": "torch.optim.RMSprop",
+      "args": {
+        "centered": "centered",
+        "eps": "eps",
+        "lr": "lr",
+        "momentum": "momentum"
+      }
+    },
+    "Rnn": {
+      "api": "torch.nn.RNN",
+      "args": {
+        "kwargs": "kwargs"
+      }
+    },
+    "Rnncellbase": {
+      "api": "torch.nn.RNNCellBase"
+    },
+    "Selu": {
+      "api": "torch.nn.SELU"
+    },
+    "Sequential": {
+      "api": "torch.nn.Sequential"
+    },
+    "Sgd": {
+      "api": "torch.optim.SGD",
+      "args": {
+        "lr": "lr",
+        "momentum": "momentum",
+        "nesterov": "nesterov"
+      }
+    },
+    "Sigmoid": {
       "api": "torch.nn.functional.sigmoid",
       "args": {
-        "input": "input"
+        "x": "input"
       }
     },
-    "silu": {
+    "Silu": {
       "api": "torch.nn.functional.silu",
       "args": {
-        "inplace": "inplace",
-        "input": "input"
+        "x": "input"
       }
     },
-    "tanh": {
+    "Softmax": {
+      "api": "torch.nn.functional.softmax",
+      "args": {
+        "dim": "dim",
+        "x": "input"
+      }
+    },
+    "Softplus": {
+      "api": "torch.nn.Softplus"
+    },
+    "Softshrink": {
+      "api": "torch.nn.Softshrink"
+    },
+    "Softsign": {
+      "api": "torch.nn.Softsign"
+    },
+    "Tanh": {
       "api": "torch.nn.functional.tanh",
       "args": {
-        "input": "input"
+        "x": "input"
+      }
+    },
+    "Tanhshrink": {
+      "api": "torch.nn.Tanhshrink"
+    },
+    "Threshold": {
+      "api": "torch.nn.Threshold",
+      "args": {
+        "threshold": "threshold"
+      }
+    },
+    "Tripletmargin": {
+      "api": "torch.nn.TripletMarginLoss",
+      "args": {
+        "eps": "eps",
+        "margin": "margin"
       }
     }
   }

@@ -1,0 +1,29 @@
+{
+  "__framework__": "mlx",
+  "imports": {
+    "torch.nn": {
+      "alias": "nn",
+      "root": "mlx",
+      "sub": "nn"
+    }
+  },
+  "mappings": {
+    "Abs": {
+      "api": "mx.abs"
+    },
+    "Linear": {
+      "api": "mlx.nn.Linear",
+      "args": {
+        "in_features": "input_dims",
+        "out_features": "output_dims"
+      }
+    },
+    "Mean": {
+      "api": "mx.mean"
+    },
+    "permute_dims": {
+      "api": "mx.transpose",
+      "requires_plugin": "pack_varargs"
+    }
+  }
+}

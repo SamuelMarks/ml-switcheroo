@@ -18,6 +18,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.semantics.standards_internal import INTERNAL_OPS
 from ml_switcheroo.discovery.scaffolder import Scaffolder
+from ml_switcheroo.discovery.layers import LayerDiscoveryBot
 from ml_switcheroo.cli.wizard import MappingWizard
 from ml_switcheroo.discovery.harvester import SemanticHarvester
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
@@ -40,6 +41,24 @@ from ml_switcheroo.utils.console import (
   log_error,
   log_warning,
 )
+
+
+def handle_discover_layers(dry_run: bool) -> int:
+  """
+  Handles 'discover-layers' command.
+
+  Runs the LayerDiscoveryBot to find missing Neural Network Layers (e.g. Linear, Conv)
+  in Torch and Flax environments and populates 'k_discovered.json'.
+
+  Args:
+      dry_run: If True, prints findings without writing to disk.
+
+  Returns:
+      int: Exit code.
+  """
+  bot = LayerDiscoveryBot()
+  count = bot.run(dry_run=dry_run)
+  return 0 if count >= 0 else 1
 
 
 def handle_wizard(package: str) -> int:
@@ -253,7 +272,9 @@ def handle_sync(framework: str) -> int:
 
   # 2. Run Syncer on Spec data
   syncer = FrameworkSyncer()
-  tiers = ["k_array_api.json", "k_neural_net.json", "k_framework_extras.json"]
+
+  # We include 'k_discovered.json' to ensure discovered layers are synced
+  tiers = ["k_array_api.json", "k_neural_net.json", "k_framework_extras.json", "k_discovered.json"]
 
   total_found = 0
 

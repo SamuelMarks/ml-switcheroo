@@ -8,6 +8,8 @@ and the Framework Configuration blocks.
 from typing import Dict, List, Optional, Union, Tuple, Any
 from pydantic import BaseModel, Field, ConfigDict
 
+from ml_switcheroo.enums import SemanticTier
+
 
 class StructuralTraits(BaseModel):
   """
@@ -77,6 +79,11 @@ class FrameworkTraits(BaseModel):
   extends: Optional[str] = Field(None, description="Base framework to inherit variants from (e.g. paxml extends jax).")
   alias: Optional[FrameworkAlias] = Field(None, description="Default import alias configuration.")
   stateful_call: Optional[Dict[str, str]] = Field(None, description="Configuration for stateful calling conventions.")
+
+  # Feature: Capability Tiers (Added to support safety checks)
+  tiers: Optional[List[SemanticTier]] = Field(
+    default=None, description="List of Semantic Tiers (array, neural, extras) this framework supports."
+  )
 
   # Feature: Structural Traits
   traits: Optional[StructuralTraits] = Field(

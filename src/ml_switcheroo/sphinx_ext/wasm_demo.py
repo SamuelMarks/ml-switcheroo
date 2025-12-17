@@ -1,13 +1,14 @@
 """
-Sphinx Extension for ML-Switcheroo WASM Demo (Level 2 Hierarchy Support).
+Sphinx Extension for ML-Switcheroo WASM Demo (Level 2 Hierarchy Support + Tier Filtering).
 
 This module renders the WASM interface HTML.
-It now introspects the Framework Registry to determine which frameworks
-support hierarchical "Flavours" (e.g. JAX -> Flax NNX, PaxML) and generates
-secondary dropdown menus for them.
+It introspects the Framework Registry to determine which frameworks
+support hierarchical "Flavours" and what Tiers they support, sending this
+metadata to the client-side JS for filtering invalid conversion pairs.
 
 Features:
 - **Hierarchy Detection**: Checks `inherits_from` metadata on adapters.
+- **Tier Detection**: Checks `supported_tiers` on adapters.
 - **Dynamic HTML**: Generates nested `<select>` elements hidden/shown via JS.
 - **Flavour Routing**: Associates `flax_nnx` with the parent `jax` key.
 - **Example Injection**: Preloads tiered examples from all registered adapters.
@@ -60,8 +61,8 @@ class SwitcherooDemo(Directive):
         latest = sorted(wheels, key=os.path.getmtime)[-1]
         wheel_name = latest.name
 
-    # 2. Build Hierarchy & Examples
-    hierarchy, examples_json = self._scan_registry()
+    # 2. Build Hierarchy & Examples & Tier Metadata
+    hierarchy, examples_json, tier_metadata_json = self._scan_registry()
 
     # 3. Generate HTML Blocks
     # Primary Options (Parents)
@@ -76,10 +77,11 @@ class SwitcherooDemo(Directive):
     # Default target to JAX to show off the hierarchy
     opts_tgt = primary_opts.replace('value="jax"', 'value="jax" selected')
 
-    html = f"""
+    html = f""" 
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
             <script>
-                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json};
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
+                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json}; 
             </script>
 
             <div class="demo-header">
@@ -102,10 +104,10 @@ class SwitcherooDemo(Directive):
                     <!-- Source Column -->
                     <div class="select-wrapper">
                         <select id="select-src" class="material-select">
-                            {opts_src}
+                            {opts_src} 
                         </select>
                         <div id="src-flavour-region" style="display:none; margin-left:10px;">
-                            {src_flavours_html}
+                            {src_flavours_html} 
                         </div>
                     </div>
 
@@ -114,10 +116,10 @@ class SwitcherooDemo(Directive):
                     <!-- Target Column -->
                     <div class="select-wrapper">
                         <select id="select-tgt" class="material-select">
-                            {opts_tgt}
+                            {opts_tgt} 
                         </select>
                          <div id="tgt-flavour-region" style="display:none; margin-left:10px;">
-                            {tgt_flavours_html}
+                            {tgt_flavours_html} 
                         </div>
                     </div>
                 </div>
@@ -134,8 +136,8 @@ class SwitcherooDemo(Directive):
                         <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Source code...">import torch
 import torch.nn as nn
 
-class Model(nn.Module):
-    def forward(self, x):
+class Model(nn.Module): 
+    def forward(self, x): 
         return torch.abs(x)</textarea>
                     </div>
                     <div class="editor-group target-group">
@@ -164,21 +166,21 @@ class Model(nn.Module):
         """
     return [nodes.raw("", html, format="html")]
 
-  def _scan_registry(self) -> Tuple[HierarchyMap, str]:
+  def _scan_registry(self) -> Tuple[HierarchyMap, str, str]:
     """
-    Scans registered adapters to build hierarchy and examples.
+    Scans registered adapters to build hierarchy, examples, and tier metadata.
 
     Returns:
-        Tuple[HierarchyMap, str]: A tuple containing:
-            - The hierarchy dictionary (Parent -> [Children]).
-            - A JSON string of all discovered examples.
+        Tuple[HierarchyMap, str, str]:
+            - The hierarchy dictionary.
+            - JSON string of examples.
+            - JSON string of framework tiers.
     """
     fws = available_frameworks()
 
     # 1. Build Node Map
-    # Nodes that are parents (inherits_from=None) or implicit parents.
-    # Structure: parent_key -> List of children definitions
     hierarchy: HierarchyMap = defaultdict(list)
+    tier_metadata: Dict[str, List[str]] = {}
 
     # Track roots explicitly
     roots = set()
@@ -190,6 +192,15 @@ class Model(nn.Module):
 
       label = getattr(adapter, "display_name", key.capitalize())
       parent = getattr(adapter, "inherits_from", None)
+
+      # Extract Tiers
+      tiers = []
+      if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
+        tiers = [t.value for t in adapter.supported_tiers]
+      else:
+        # Fallback if property missing to prevent breakage
+        tiers = ["array", "neural", "extras"]
+      tier_metadata[key] = tiers
 
       if parent:
         # This is a child node (e.g. flax_nnx -> jax)
@@ -219,7 +230,6 @@ class Model(nn.Module):
           uid = f"{key}_{tier_name}"
 
           # Determine Source configuration
-          # If this is a flavour (child), prompt user to select Parent as FW and Key as Flavour
           if parent_key:
             src_fw = parent_key
             src_flavour = key
@@ -227,8 +237,16 @@ class Model(nn.Module):
             src_fw = key
             src_flavour = None
 
-          # Simple cleanup for label (e.g. "tier2_neural" -> "Neural")
-          # Split on underscores, take the last part and title case it.
+          # Use tier_name to deduce required tier.
+          # "tier1_math" -> "array"
+          # "tier2_neural" -> "neural"
+          req_tier = "extras"
+          if "math" in tier_name:
+            req_tier = "array"
+          elif "neural" in tier_name:
+            req_tier = "neural"
+
+          # Simple cleanup for label
           clean_tier_name = tier_name.replace("tier", "")
           clean_label = (
             clean_tier_name.split("_")[-1].capitalize() if "_" in clean_tier_name else clean_tier_name.capitalize()
@@ -238,7 +256,6 @@ class Model(nn.Module):
           label = f"{display_fw}: {clean_label}"
 
           # Target Heuristic
-          # If source is JAX-based, target Torch. Otherwise target JAX.
           tgt_fw = "jax"
           if "jax" in src_fw:
             tgt_fw = "torch"
@@ -248,21 +265,16 @@ class Model(nn.Module):
             "srcFw": src_fw,
             "srcFlavour": src_flavour,
             "tgtFw": tgt_fw,
-            "tgtFlavour": None,  # Default
+            "tgtFlavour": None,
             "code": code,
+            "requiredTier": req_tier,
           }
 
-    return final_hierarchy, json.dumps(examples)
+    return final_hierarchy, json.dumps(examples), json.dumps(tier_metadata)
 
   def _render_primary_options(self, hierarchy: HierarchyMap) -> str:
     """
     Renders the top-level <option> elements for root frameworks.
-
-    Args:
-        hierarchy (HierarchyMap): The framework hierarchy.
-
-    Returns:
-        str: HTML string of option elements.
     """
     html = []
     for root in hierarchy.keys():
@@ -274,25 +286,11 @@ class Model(nn.Module):
   def _render_flavour_dropdown(self, side: str, hierarchy: HierarchyMap) -> str:
     """
     Renders the secondary dropdown for Framework Flavours.
-
-    Currently hardcodes generation for 'jax' based on hierarchy.
-    In a robust implementation, this would be generated dynamically by JS,
-    but pre-rendering works for the known JAX/Flax split.
-
-    Args:
-        side (str): 'src' or 'tgt', for ID generation.
-        hierarchy (HierarchyMap): The framework hierarchy.
-
-    Returns:
-        str: HTML string for the select element.
     """
-    # We only support JAX hierarchy in UI for now
     children = hierarchy.get("jax", [])
     if not children:
       return ""
 
-    # Default to Flax NNX if available, else first child
-    # Flax NNX key is 'flax_nnx' per phase 3
     default_child = "flax_nnx"
 
     opts = []
@@ -300,9 +298,9 @@ class Model(nn.Module):
       sel = "selected" if child["key"] == default_child else ""
       opts.append(f'<option value="{child["key"]}" {sel}>{child["label"]}</option>')
 
-    return f"""
+    return f""" 
         <select id="{side}-flavour" class="material-select-sm" style="background:#f0f4c3;">
-            {"".join(opts)}
+            {"".join(opts)} 
         </select>
         """
 
@@ -310,8 +308,6 @@ class Model(nn.Module):
 def setup(app: Any) -> Dict[str, Any]:
   """
   Sphinx Extension Setup Hook.
-
-  Registers directives and static assets.
   """
   app.add_directive("switcheroo_demo", SwitcherooDemo)
   app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")
@@ -325,7 +321,7 @@ def setup(app: Any) -> Dict[str, Any]:
   app.connect("builder-inited", add_static_path)
   app.connect("build-finished", copy_wheel_and_reqs)
 
-  return {"version": "0.9.5", "parallel_read_safe": True, "parallel_write_safe": True}
+  return {"version": "0.9.6", "parallel_read_safe": True, "parallel_write_safe": True}
 
 
 def add_static_path(app: Any) -> None:

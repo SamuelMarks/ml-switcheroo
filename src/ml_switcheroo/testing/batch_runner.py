@@ -1,7 +1,7 @@
 """
 Batch Validation Runner.
 
-Iterates over all defined semantic operations and verifies their correctness.
+Iterates over all defined semantic operations and verifys their correctness.
 Prioritizes "Manual/Human" tests found on disk over "Auto/Robotic" fuzzing.
 This closes the loop for Workflow B, allowing manual fixes to count as success.
 """
@@ -37,12 +37,12 @@ class BatchValidator:
 
     Validation Hierarchy:
 
-    1. **Manual Test Priority**: If a file contains ``def test_<op_name>():``,
+    1. **Manual Test Priority**: If a file contains `def test_<op_name>():`,
        we assume the developer has manually verified this operation. It is
        marked as Passing.
     2. **Automated Fuzzing**: If no manual test exists, we unpack the
        arguments and type hints from the spec, generate random inputs, and
-       check equivalence using ``EquivalenceRunner``.
+       check equivalence using `EquivalenceRunner`.
 
     Args:
         verbose: Show progress bar using Rich.
@@ -76,7 +76,7 @@ class BatchValidator:
       variants = details.get("variants", {})
       std_args_raw = details.get("std_args", ["x"])
 
-      # Feature Fix: Unpack typed arguments [(name, type)] into params & hints
+      # Unpack typed arguments [(name, type)] into params & hints
       params, hints = self._unpack_args(std_args_raw)
 
       passed, _ = self.runner.verify(variants, params, hints=hints)
@@ -91,7 +91,7 @@ class BatchValidator:
     Handles legacy list-of-strings AND new list-of-tuples formats.
 
     Args:
-        raw_args: List like ``["x", "axis"]`` or ``[("x", "Array"), ("axis", "int")]``.
+        raw_args: List like `["x", "axis"]` or `[("x", "Array"), ("axis", "int")]`.
 
     Returns:
         A tuple containing:
@@ -116,7 +116,7 @@ class BatchValidator:
     """
     Scans python files in root for test functions matching op names.
 
-    Looks for: ``def test_<op_name>():`` in non-generated files.
+    Looks for: `def test_<op_name>():` in non-generated files.
 
     Args:
         root: Directory to search recursively.
@@ -129,9 +129,7 @@ class BatchValidator:
       return found
 
     for py_file in root.rglob("*.py"):
-      # Skip generated files (robotic tests)
-      # We strictly check path parts (folders) to avoid matching
-      # substring collisions in temporary pytest paths.
+      # Skip generated files (robotic tests) to ensure we only count Human work
       if "generated" in py_file.parts:
         continue
 

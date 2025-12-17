@@ -14,6 +14,9 @@ from ml_switcheroo.core.tracer import reset_tracer, get_tracer
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.core.import_fixer import ImportFixer
+
+# Import Linter
+from ml_switcheroo.testing.linter import StructuralLinter
 from ml_switcheroo.core.scanners import UsageScanner
 from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.analysis.dependencies import DependencyScanner
@@ -76,7 +79,6 @@ class ASTEngine:
       self.semantics.load_validation_report(self.config.validation_report)
 
     # Flavour Support: Use 'flow-specific' keys
-    # If target_flavour is set (e.g. 'paxml'), we drive rewrites using that adapter.
     self.source = self.config.effective_source
     self.target = self.config.effective_target
     self.strict_mode = self.config.strict_mode
@@ -143,20 +145,18 @@ class ASTEngine:
 
     # Pass 1: Semantic Pivot (Rewriter)
     tracer.start_phase("Rewrite Engine", "Visitor Traversal")
-    # PivotRewriter receives the full config, so it can access effective_target
     rewriter = PivotRewriter(self.semantics, self.config)
     tree = tree.visit(rewriter)
     tracer.end_phase()
 
     # Pass 2: Import Scaffolding
     # If effective root differs, we run fixer.
-    # e.g., torch (src) != flax_nnx (tgt)
+    roots_to_prune = {self.source}
+
     if self.source != self.target:
       tracer.start_phase("Import Fixer", "Resolving Dependencies")
 
       # Resolve Effective Roots for Pruning (Inheritance Aware)
-      # e.g. if source is 'flax_nnx', we want to prune 'flax' AND 'jax' imports
-      roots_to_prune = {self.source}
       adapter = fw_registry.get_adapter(self.source)
 
       if adapter:
@@ -169,9 +169,9 @@ class ASTEngine:
           parent = adapter.inherits_from
           roots_to_prune.add(parent)
 
-          # Recurse one level up for parent alias (e.g. jax -> jax.numpy)
+          # Recurse one level up for parent alias
           parent_adp = fw_registry.get_adapter(parent)
-          if parent_adp and hasattr(parent_adp, "import_alias") and parent_adp.import_alias:
+          if parent_adp and hasattr(parent_adp, "import_alias"):
             roots_to_prune.add(parent_adp.import_alias[0].split(".")[0])
 
       # Convert set to sorted list for determinism
@@ -202,6 +202,21 @@ class ASTEngine:
       tracer.end_phase()
 
     final_code = self.to_source(tree)
+
+    # Pass 3: Structural Linter (Post-Conversion Validation)
+    # Ensure no forbidden roots remain in the output
+    if self.source != self.target:
+      tracer.start_phase("Structural Linter", "Verifying Cleanup")
+      linter = StructuralLinter(forbidden_roots=roots_to_prune)
+      lint_errors = linter.check(final_code)
+
+      if lint_errors:
+        for err in lint_errors:
+          full_err = f"Lint Violation: {err}"
+          errors_log.append(full_err)
+          tracer.log_warning(full_err)
+
+      tracer.end_phase()
 
     # Scan for failure markers to populate the error report
     if "# <SWITCHEROO_FAILED_TO_TRANS>" in final_code:

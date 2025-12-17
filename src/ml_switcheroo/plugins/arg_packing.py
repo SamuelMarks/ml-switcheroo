@@ -40,6 +40,11 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
       Input:  `torch.permute(x, 0, 2, 1)`
       Output: `jax.numpy.transpose(x, axes=(0, 2, 1))` (if mapped)
 
+  Config:
+      Adapts the keyword name based on the target framework.
+      - TensorFlow: uses 'perm'
+      - Default (JAX/NumPy/MLX): uses 'axes'
+
   Args:
       node: The original CST Call node.
       ctx: HookContext for API lookup directly from Semantics.
@@ -49,8 +54,6 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   # 1. Determine Target API via Abstract ID
   # We infer the abstract op is 'permute_dims' based on this plugin's explicit association.
-  # In a more generic version, we might inspect `node` to deduce the op, but for plugins
-  # wired via `requires_plugin`, the association is defined in the JSON.
   op_id = "permute_dims"
   target_api = ctx.lookup_api(op_id)
 
@@ -58,7 +61,13 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
   if not target_api:
     return node
 
-  # 2. Extract Arguments from Source Call
+  # 2. Determine Keyword Name based on Framework
+  # TensorFlow uses 'perm', others usually use 'axes'
+  keyword_name = "axes"
+  if ctx.target_fw.lower() == "tensorflow":
+    keyword_name = "perm"
+
+  # 3. Extract Arguments from Source Call
   # We assume signature `func(input, *dims)`.
   # Arg 0 is the Tensor/Array input.
   # Args 1..N are the dimensions to pack.
@@ -82,11 +91,11 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
     clean_val = arg.value
     packed_elements.append(cst.Element(value=clean_val))
 
-  # 3. Create Tuple Node for the packed sequence
+  # 4. Create Tuple Node for the packed sequence
   # (d0, d1, d2)
   tuple_node = cst.Tuple(elements=packed_elements)
 
-  # 4. Construct New Arguments List
+  # 5. Construct New Arguments List
   # Format: [input_arg, axes=tuple_node]
 
   # Ensure input_arg has a comma if it's followed by keyword args
@@ -96,13 +105,13 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   if packed_elements:
     axes_arg = cst.Arg(
-      keyword=cst.Name("axes"),
+      keyword=cst.Name(keyword_name),
       value=tuple_node,
       equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
     )
     new_args.append(axes_arg)
 
-  # 5. Construct New Function Name (e.g. jax.numpy.transpose)
+  # 6. Construct New Function Name (e.g. jax.numpy.transpose)
   new_func = _create_dotted_name(target_api)
 
   return node.with_changes(func=new_func, args=new_args)

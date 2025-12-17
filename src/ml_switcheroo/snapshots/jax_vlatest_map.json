@@ -1,0 +1,365 @@
+{
+  "__framework__": "jax",
+  "mappings": {
+    "Adabelief": {
+      "api": "optax.adabelief",
+      "args": {
+        "b1": "b1",
+        "b2": "b2",
+        "eps": "eps",
+        "eps_root": "eps_root",
+        "lr": "learning_rate",
+        "nesterov": "nesterov"
+      }
+    },
+    "Adagrad": {
+      "api": "optax.adagrad",
+      "args": {
+        "eps": "eps",
+        "initial_accumulator_value": "initial_accumulator_value",
+        "lr": "learning_rate"
+      }
+    },
+    "Adam": {
+      "api": "optax.adam",
+      "args": {
+        "eps": "eps",
+        "lr": "learning_rate"
+      }
+    },
+    "Adamw": {
+      "api": "optax.adamw",
+      "args": {
+        "eps": "eps",
+        "lr": "learning_rate",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Binarydice": {
+      "api": "optax.losses.binary_dice_loss",
+      "args": {
+        "apply_sigmoid": "apply_sigmoid",
+        "predictions": "predictions",
+        "smooth": "smooth",
+        "targets": "targets"
+      }
+    },
+    "Ctc": {
+      "api": "optax.losses.ctc_loss"
+    },
+    "Ctclosswithforwardprobs": {
+      "api": "optax.losses.ctc_loss_with_forward_probs",
+      "args": {
+        "blank_id": "blank_id",
+        "label_paddings": "label_paddings",
+        "labels": "labels",
+        "log_epsilon": "log_epsilon",
+        "logit_paddings": "logit_paddings",
+        "logits": "logits"
+      }
+    },
+    "Dice": {
+      "api": "optax.losses.dice_loss",
+      "args": {
+        "apply_softmax": "apply_softmax",
+        "class_weights": "class_weights",
+        "dim": "axis",
+        "ignore_background": "ignore_background",
+        "predictions": "predictions",
+        "reduction": "reduction",
+        "smooth": "smooth",
+        "targets": "targets"
+      }
+    },
+    "Dotproductattention": {
+      "api": "jax.nn.dot_product_attention",
+      "args": {
+        "bias": "bias",
+        "implementation": "implementation",
+        "is_causal": "is_causal",
+        "key": "key",
+        "key_value_seq_lengths": "key_value_seq_lengths",
+        "local_window_size": "local_window_size",
+        "mask": "mask",
+        "query": "query",
+        "query_seq_lengths": "query_seq_lengths",
+        "return_residual": "return_residual",
+        "scale": "scale",
+        "value": "value"
+      }
+    },
+    "Fromage": {
+      "api": "optax.fromage",
+      "args": {
+        "lr": "learning_rate",
+        "min_norm": "min_norm"
+      }
+    },
+    "Gelu": {
+      "api": "jax.nn.gelu",
+      "args": {
+        "approximate": "approximate",
+        "x": "x"
+      }
+    },
+    "Getscaleddotgeneralconfig": {
+      "api": "jax.nn.get_scaled_dot_general_config",
+      "args": {
+        "global_scale": "global_scale",
+        "mode": "mode"
+      }
+    },
+    "Hinge": {
+      "api": "optax.losses.hinge_loss",
+      "args": {
+        "predictor_outputs": "predictor_outputs",
+        "targets": "targets"
+      }
+    },
+    "Huber": {
+      "api": "optax.losses.huber_loss",
+      "args": {
+        "delta": "delta"
+      }
+    },
+    "Lamb": {
+      "api": "optax.lamb",
+      "args": {
+        "b1": "b1",
+        "b2": "b2",
+        "eps": "eps",
+        "eps_root": "eps_root",
+        "lr": "learning_rate",
+        "mask": "mask",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Lion": {
+      "api": "optax.lion",
+      "args": {
+        "b1": "b1",
+        "b2": "b2",
+        "lr": "learning_rate",
+        "mask": "mask",
+        "mu_dtype": "mu_dtype",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Logsumexp": {
+      "api": "jax.nn.logsumexp",
+      "args": {
+        "b": "b",
+        "dim": "axis",
+        "keepdim": "keepdims",
+        "return_sign": "return_sign",
+        "where": "where",
+        "x": "a"
+      }
+    },
+    "Makefenchelyoung": {
+      "api": "optax.losses.make_fenchel_young_loss",
+      "args": {
+        "max_fun": "max_fun"
+      }
+    },
+    "Multiclassgeneralizeddice": {
+      "api": "optax.losses.multiclass_generalized_dice_loss",
+      "args": {
+        "apply_softmax": "apply_softmax",
+        "ignore_background": "ignore_background",
+        "predictions": "predictions",
+        "smooth": "smooth",
+        "targets": "targets"
+      }
+    },
+    "Multiclasshinge": {
+      "api": "optax.losses.multiclass_hinge_loss",
+      "args": {
+        "labels": "labels",
+        "scores": "scores"
+      }
+    },
+    "Multiclassperceptron": {
+      "api": "optax.losses.multiclass_perceptron_loss",
+      "args": {
+        "labels": "labels",
+        "scores": "scores"
+      }
+    },
+    "Multiclasssparsemax": {
+      "api": "optax.losses.multiclass_sparsemax_loss",
+      "args": {
+        "labels": "labels",
+        "scores": "scores"
+      }
+    },
+    "Novograd": {
+      "api": "optax.novograd",
+      "args": {
+        "b1": "b1",
+        "b2": "b2",
+        "eps": "eps",
+        "eps_root": "eps_root",
+        "lr": "learning_rate",
+        "weight_decay": "weight_decay"
+      }
+    },
+    "Onehot": {
+      "api": "jax.nn.one_hot",
+      "args": {
+        "dim": "axis",
+        "dtype": "dtype",
+        "num_classes": "num_classes",
+        "x": "x"
+      }
+    },
+    "Perceptron": {
+      "api": "optax.losses.perceptron_loss",
+      "args": {
+        "predictor_outputs": "predictor_outputs",
+        "targets": "targets"
+      }
+    },
+    "Polylosscrossentropy": {
+      "api": "optax.losses.poly_loss_cross_entropy",
+      "args": {
+        "dim": "axis",
+        "eps": "epsilon",
+        "labels": "labels",
+        "logits": "logits",
+        "where": "where"
+      }
+    },
+    "Rankingsoftmax": {
+      "api": "optax.losses.ranking_softmax_loss",
+      "args": {
+        "labels": "labels",
+        "logits": "logits",
+        "reduce_fn": "reduce_fn",
+        "weight": "weights",
+        "where": "where"
+      }
+    },
+    "Rmspr": {
+      "api": "optax.rmsprop",
+      "args": {
+        "centered": "centered",
+        "eps": "eps",
+        "lr": "learning_rate",
+        "momentum": "momentum"
+      }
+    },
+    "Safesoftmaxcrossentropy": {
+      "api": "optax.losses.safe_softmax_cross_entropy",
+      "args": {
+        "labels": "labels",
+        "logits": "logits"
+      }
+    },
+    "Scaleddotgeneral": {
+      "api": "jax.nn.scaled_dot_general",
+      "args": {
+        "configs": "configs",
+        "dimension_numbers": "dimension_numbers",
+        "implementation": "implementation",
+        "lhs": "lhs",
+        "preferred_element_type": "preferred_element_type",
+        "rhs": "rhs"
+      }
+    },
+    "Scaledmatmul": {
+      "api": "jax.nn.scaled_matmul",
+      "args": {
+        "lhs": "lhs",
+        "lhs_scales": "lhs_scales",
+        "preferred_element_type": "preferred_element_type",
+        "rhs": "rhs",
+        "rhs_scales": "rhs_scales"
+      }
+    },
+    "Sgd": {
+      "api": "optax.sgd",
+      "args": {
+        "lr": "learning_rate",
+        "momentum": "momentum",
+        "nesterov": "nesterov"
+      }
+    },
+    "Sigmoidbinarycrossentropy": {
+      "api": "optax.losses.sigmoid_binary_cross_entropy",
+      "args": {
+        "labels": "labels",
+        "logits": "logits"
+      }
+    },
+    "Sigmoidfocal": {
+      "api": "optax.losses.sigmoid_focal_loss",
+      "args": {
+        "alpha": "alpha",
+        "gamma": "gamma",
+        "labels": "labels",
+        "logits": "logits"
+      }
+    },
+    "Softmax": {
+      "api": "jax.nn.softmax",
+      "args": {
+        "dim": "axis",
+        "x": "x"
+      }
+    },
+    "Softmaxcrossentropy": {
+      "api": "optax.losses.softmax_cross_entropy",
+      "args": {
+        "dim": "axis",
+        "labels": "labels",
+        "logits": "logits",
+        "where": "where"
+      }
+    },
+    "Softmaxcrossentropywithintegerlabels": {
+      "api": "optax.losses.softmax_cross_entropy_with_integer_labels",
+      "args": {
+        "dim": "axis",
+        "labels": "labels",
+        "logits": "logits",
+        "where": "where"
+      }
+    },
+    "Sparsemax": {
+      "api": "optax.losses.sparsemax_loss",
+      "args": {
+        "labels": "labels",
+        "logits": "logits"
+      }
+    },
+    "Squared": {
+      "api": "optax.losses.squared_error",
+      "args": {
+        "predictions": "predictions",
+        "targets": "targets"
+      }
+    },
+    "Tripletmargin": {
+      "api": "optax.losses.triplet_margin_loss",
+      "args": {
+        "anchors": "anchors",
+        "dim": "axis",
+        "eps": "eps",
+        "margin": "margin",
+        "negatives": "negatives",
+        "norm_degree": "norm_degree",
+        "positives": "positives"
+      }
+    },
+    "Yogi": {
+      "api": "optax.yogi",
+      "args": {
+        "b1": "b1",
+        "b2": "b2",
+        "eps": "eps",
+        "lr": "learning_rate"
+      }
+    }
+  }
+}

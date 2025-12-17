@@ -10,7 +10,7 @@ import pkgutil
 from pathlib import Path
 from typing import List
 
-from .base import FrameworkAdapter, _ADAPTER_REGISTRY, register_framework, get_adapter
+from ml_switcheroo.frameworks.base import FrameworkAdapter, _ADAPTER_REGISTRY, register_framework, get_adapter
 
 # --- Concrete Imports (Updated for JAX Hierarchy) ---
 

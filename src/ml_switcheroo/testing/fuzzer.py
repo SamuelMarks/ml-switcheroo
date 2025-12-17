@@ -5,36 +5,33 @@ This module provides the `InputFuzzer`, responsible for creating randomized
 NumPy arrays, scalars, and complex container structures to feed into Framework A
 and Framework B during behavioral verification tests.
 
-## Generation Strategies
-
 It uses a dual-strategy approach:
 
 1.  **Type Hints (Semantic Validated)**:
-    If `spec_reader` has extracted explicit type information from the spec files,
-    the fuzzer parses these strings using a mini-grammar to generate compliant data.
+    If explicit type information is available (e.g., from Spec files), the fuzzer
+    parses these strings using a mini-grammar to generate compliant data.
 
     **Supported Grammar:**
     - Primitives: `int`, `float`, `bool`, `str`
     - Structural: `List[T]`, `Tuple[T, ...]`, `Dict[K, V]`, `Optional[T]`
     - Unions: `int | float`
     - Domain: `Array`, `Tensor`, `dtype`
-    - **Symbolic Shapes (New)**: `Array['B', 'N']` (Constraint Solving)
+    - **Symbolic Shapes**: `Array['B', 'N']` (Constraint Solving for consistent dimensions)
 
 2.  **Heuristics (Fallback)**:
-    If no hints are available in the spec, it infers data types from argument names.
+    If no hints are available, it infers data types from argument names.
     - `mask`, `condition` -> `bool`
-    - `idx`, `axis`, `dim` -> `int`
+    - `idx`, `axis`, `dim` -> `int` within bounds
     - `x`, `y`, `input` -> `Array (float32)`
 
-## Safety
-
-The fuzzer implements `MAX_RECURSION_DEPTH` to prevent infinite loops when generating
-recursive or deeply nested types (e.g. `List[List[List[...]]]`).
+Safety:
+    Implements `MAX_RECURSION_DEPTH` to prevent infinite loops when generating
+    recursive or deeply nested types.
 """
 
 import random
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -45,12 +42,9 @@ class InputFuzzer:
   """
   Generates dummy inputs (Arrays, Scalars, Containers) for equivalence testing.
 
-  Prioritizes explicit Type Hints from the Knowledge Base. Falls back to
-  name-based heuristics if hints are missing or ambiguous (e.g., 'Any').
-
   Attributes:
       _seed_shape (Optional[Tuple[int, ...]]): If set, forces generation
-          of arrays with this specific shape.
+          of arrays with this specific shape in fallback mode.
       max_depth (int): Maximum recursion depth for nested container types.
   """
 
@@ -61,29 +55,31 @@ class InputFuzzer:
     Initializes the Fuzzer.
 
     Args:
-        seed_shape: If provided, all generated arrays will share this shape.
-                    If None, a random shape is chosen per `generate_inputs` call.
+        seed_shape: If provided, heuristic array generation defaults to this shape.
     """
     self._seed_shape = seed_shape
     self.max_depth = self.MAX_RECURSION_DEPTH
 
   def generate_inputs(self, params: List[str], hints: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     """
-    Creates a dictionary of {arg_name: value}.
+    Creates a dictionary of `{arg_name: value}`.
+
+    Resolves symbolic dimensions across the entire parameter set. For example,
+    if hints are `{'x': "Array['N']", 'y': "Array['N']"}`, both arrays will
+    have matching lengths.
 
     Args:
-        params: List of argument names [x, y, axis].
-        hints: Dictionary of {arg_name: type_string} derived from Spec.
-               Example: {"x": "Array['B', 'T']", "axis": "int"}.
+        params: List of argument names to generate (e.g. `['x', 'axis']`).
+        hints: Dictionary of `{arg_name: type_string}` derived from Spec.
 
     Returns:
         Dict[str, Any]: Randomized inputs ready for Framework adaptation.
     """
-    kwargs = {}
-    # Context for resolving symbolic dimensions across arguments in this call
+    kwargs: Dict[str, Any] = {}
+    # Context to resolve symbolic dimensions like 'B', 'N' across arguments
     symbol_map: Dict[str, int] = {}
 
-    # Decide on a consistent base shape for this batch of inputs fallback
+    # Decide on a consistent base shape for heuristics fallback
     base_shape = self._get_random_shape()
     hints = hints or {}
 
@@ -92,13 +88,12 @@ class InputFuzzer:
 
       # Strategy 1: Explicit Type Hint
       if hint and hint != "Any":
-        # Spec reader might return complex strings like "int | None"
         try:
           val = self._generate_from_hint(hint, base_shape, depth=0, symbol_map=symbol_map)
           kwargs[p] = val
           continue
         except Exception:
-          # If parsing fails, fall back silently to heuristics
+          # If parsing fails or hits recursion limit, fall back to heuristics
           pass
 
       # Strategy 2: Heuristic Matching based on Name
@@ -109,11 +104,12 @@ class InputFuzzer:
   def adapt_to_framework(self, kwargs: Dict[str, Any], framework: str) -> Dict[str, Any]:
     """
     Converts Numpy inputs to framework-specific tensor types.
-    Delegates to registered adapters in `ml_switcheroo.testing.adapters`.
+
+    Delegates to registered adapters (e.g., `TorchAdapter`, `JaxAdapter`).
 
     Args:
         kwargs: Input dictionary with Numpy values.
-        framework: "torch", "jax", "tensorflow", etc.
+        framework: Key of the framework (e.g., "torch", "jax").
 
     Returns:
         Dict with framework-specific tensors.
@@ -126,16 +122,17 @@ class InputFuzzer:
 
     converted = {}
     for k, v in kwargs.items():
-      converted[k] = adapter.convert(v)
+      try:
+        converted[k] = adapter.convert(v)
+      except Exception:
+        # If conversion logic fails, keep original
+        converted[k] = v
 
     return converted
 
   def _get_random_shape(self) -> Tuple[int, ...]:
     """
     Selects a random rank (1-4) and random dimensions (2-5).
-
-    Returns:
-        Tuple of integers representing shape.
     """
     if self._seed_shape:
       return self._seed_shape
@@ -148,64 +145,52 @@ class InputFuzzer:
     type_str: str,
     base_shape: Tuple[int, ...],
     depth: int,
-    symbol_map: Optional[Dict[str, int]] = None,
+    symbol_map: Dict[str, int],
   ) -> Any:
     """
-    Parses a type string and generates conforming data.
-
-    Args:
-        type_str: The type annotation string (e.g., "Optional[int]").
-        base_shape: The active array shape for context.
-        depth: Current recursion depth to prevent stack overflow.
-        symbol_map: Dictionary mapping symbolic dimension names to integers.
-
-    Returns:
-        Random data matching the type.
+    Parses a type string and generates conforming data via recursion.
     """
-    if symbol_map is None:
-      # Fallback if called directly without symbol context (rare)
-      symbol_map = {}
-
-    type_str = type_str.strip()
-
-    # Circuit breaker for recursion
     if depth > self.max_depth:
       return self._get_fallback_base_value(type_str, base_shape)
 
-    # 1. Unions (A | B)
+    type_str = type_str.strip()
+
+    # 1. Unions (A | B) from Python 3.10 syntax
     if "|" in type_str and self._is_pipe_top_level(type_str):
       options = [o.strip() for o in type_str.split("|")]
       chosen = random.choice(options)
       return self._generate_from_hint(chosen, base_shape, depth + 1, symbol_map)
 
     # 2. Optional (Optional[T])
-    match_opt = re.match(r"^Optional\[(.*)]$", type_str)
+    match_opt = re.match(r"^Optional\[(.*)\]$", type_str)
     if match_opt:
       if random.random() < 0.2:
         return None
       return self._generate_from_hint(match_opt.group(1), base_shape, depth + 1, symbol_map)
 
-    # 3. Tuple (Tuple[T, U] or Tuple[T, ...])
-    match_tup = re.match(r"^Tuple\[(.*)]$", type_str)
+    # 3. Tuple (Tuple[T, ...] or Tuple[T, U])
+    match_tup = re.match(r"^Tuple\[(.*)\]$", type_str)
     if match_tup:
       inner = match_tup.group(1)
       if "..." in inner:
+        # Variadic Tuple
         elem_type = inner.split(",")[0].strip()
         length = random.randint(1, 3)
         return tuple(self._generate_from_hint(elem_type, base_shape, depth + 1, symbol_map) for _ in range(length))
       else:
+        # Fixed Tuple
         sub_types = self._split_outside_brackets(inner)
         return tuple(self._generate_from_hint(t, base_shape, depth + 1, symbol_map) for t in sub_types)
 
     # 4. List/Sequence (List[T])
-    match_list = re.match(r"^(List|Sequence)\[(.*)]$", type_str)
+    match_list = re.match(r"^(List|Sequence)\[(.*)\]$", type_str)
     if match_list:
       inner = match_list.group(2)
       length = random.randint(1, 3)
       return [self._generate_from_hint(inner, base_shape, depth + 1, symbol_map) for _ in range(length)]
 
     # 5. Dict/Mapping (Dict[K, V])
-    match_dict = re.match(r"^(Dict|Mapping)\[(.*)]$", type_str)
+    match_dict = re.match(r"^(Dict|Mapping)\[(.*)\]$", type_str)
     if match_dict:
       inner = match_dict.group(2)
       parts = self._split_outside_brackets(inner)
@@ -216,25 +201,25 @@ class InputFuzzer:
         for _ in range(length):
           k = self._generate_from_hint(key_type, base_shape, depth + 1, symbol_map)
           v = self._generate_from_hint(val_type, base_shape, depth + 1, symbol_map)
-          try:
-            data[k] = v
-          except TypeError:
-            data[str(k)] = v
+          # Convert key to string if unhashable (e.g. array)
+          if isinstance(k, (list, dict, np.ndarray, np.generic)):
+            k = str(k)
+          data[k] = v
         return data
       return {}
 
-    # 6. None
+    # 6. Nulls
     if type_str in ["None", "NoneType"]:
       return None
 
     # 7. Symbolic Arrays / Tensors: Array['B', 'N']
-    match_sym = re.match(r"^(Array|Tensor|np\.ndarray)\[(.*)]$", type_str)
+    match_sym = re.match(r"^(Array|Tensor|np\.ndarray)\[(.*)\]$", type_str)
     if match_sym:
       dims_str = match_sym.group(2)
       shape = self._resolve_symbolic_shape(dims_str, symbol_map)
       return self._generate_array("float", shape)
 
-    # 8. Generic Arrays / Tensors
+    # 8. Generic Arrays
     if type_str in ["Array", "Tensor", "np.ndarray"]:
       return self._generate_array("float", base_shape)
 
@@ -245,37 +230,50 @@ class InputFuzzer:
       return self._generate_scalar_float()
     if type_str == "bool":
       return bool(random.getrandbits(1))
-    if type_str == "str":
-      return "test_val_" + str(random.randint(0, 100))
+    if type_str in ["str", "string"]:
+      return "val_" + str(random.randint(0, 100))
 
     # 10. Dtype objects
     if "dtype" in type_str.lower():
-      return random.choice([np.float32, np.int32, np.bool_])
+      return random.choice([np.float32, np.int32, np.float64, np.bool_])
 
+    # Fallback for unknown strings
     return self._generate_array("float", base_shape)
 
   def _resolve_symbolic_shape(self, dims_str: str, symbol_map: Dict[str, int]) -> Tuple[int, ...]:
     """
-    Parses dimensions string like "'B', 32" or "N, M".
-    Resolves symbols using the provided context map.
+    Parses dimension strings like "'B', 32" or "N, M".
+    Resolves symbols against the `symbol_map`.
+
+    Args:
+        dims_str: Comma-separated dimension tokens.
+        symbol_map: Mutable map of symbol->size.
+
+    Returns:
+        Tuple representing the concrete shape.
     """
     shape = []
-    # Naive split by comma is usually sufficient for dimensions
     raw_dims = [d.strip() for d in dims_str.split(",")]
 
     for dim in raw_dims:
-      # Clean quotes
+      # Clean possible quotes
       clean = dim.replace("'", "").replace('"', "")
       if not clean:
         continue
 
-      # Try explicit integer
+      # Check if it's a fixed integer literal (e.g., Array[3, 'C'])
       try:
         val = int(clean)
         shape.append(val)
         continue
       except ValueError:
         pass
+
+      # Validate symbol is a valid identifier or simple char
+      if not clean.isidentifier() and not clean.replace("_", "").isalnum():
+        # Fallback random for complex expressions we don't parse (e.g. N+1)
+        shape.append(random.randint(2, 6))
+        continue
 
       # It's a symbol
       if clean not in symbol_map:
@@ -284,8 +282,8 @@ class InputFuzzer:
 
     return tuple(shape)
 
-  def _get_fallback_base_value(self, type_str: str, base_shape: Tuple[int, ...]):
-    """Returns a minimal value for recursion termination."""
+  def _get_fallback_base_value(self, type_str: str, base_shape: Tuple[int, ...]) -> Any:
+    """Returns minimal valid value to terminate recursion."""
     if type_str == "bool":
       return False
     if type_str in ["int", "integer"]:
@@ -294,21 +292,22 @@ class InputFuzzer:
       return 0.0
     if type_str == "str":
       return ""
-    if type_str.startswith("Array") or type_str.startswith("Tensor"):
+    if type_str.startswith(("Array", "Tensor")):
       return np.zeros(base_shape, dtype=np.float32)
-    if type_str.startswith("List") or type_str.startswith("Sequence"):
+    if type_str.startswith(("List", "Sequence")):
       return []
     if type_str.startswith("Tuple"):
       return ()
-    if type_str.startswith("Dict") or type_str.startswith("Mapping"):
+    if type_str.startswith(("Dict", "Mapping")):
       return {}
     return None
 
   def _generate_by_heuristic(self, name: str, base_shape: Tuple[int, ...]) -> Any:
-    """Fallback generation based on argument name patterns."""
+    """Fallback generation when no type hint is provided."""
     name_lower = name.lower()
 
     if name_lower in ["axis", "dim"]:
+      # Ensure index is within rank of base_shape
       rank = len(base_shape)
       return random.randint(0, max(0, rank - 1))
 
@@ -319,22 +318,27 @@ class InputFuzzer:
       return base_shape
 
     heuristic_type = self._guess_dtype_by_name(name)
-    if heuristic_type in ["bool", "int", "float"]:
-      if any(prefix in name_lower for prefix in ["alpha", "beta", "scalar", "eps"]):
-        if heuristic_type == "int":
-          return self._generate_scalar_int()
-        return self._generate_scalar_float()
+    if heuristic_type == "bool":
+      return self._generate_array("bool", base_shape)
+    if heuristic_type == "int":
+      # Scalars check
+      if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):
+        return self._generate_scalar_int()
+      return self._generate_array("int", base_shape)
 
-      return self._generate_array(heuristic_type, base_shape)
+    # Floats
+    if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):
+      return self._generate_scalar_float()
 
     return self._generate_array("float", base_shape)
 
   def _generate_array(self, type_lbl: str, shape: Tuple[int, ...]) -> np.ndarray:
-    """Generates a random numpy array of specific type."""
+    """Generates random numpy array."""
     if type_lbl == "bool":
       return np.random.randint(0, 2, size=shape).astype(bool)
     if type_lbl == "int":
       return np.random.randint(-10, 10, size=shape).astype(np.int32)
+    # Float32 default
     return np.random.randn(*shape).astype(np.float32)
 
   def _generate_scalar_int(self) -> int:
@@ -344,16 +348,16 @@ class InputFuzzer:
     return random.random()
 
   def _guess_dtype_by_name(self, name: str) -> str:
-    """Determines probable dtype based on naming conventions."""
+    """Simple name matching heuristic."""
     name_lower = name.lower()
     if any(x in name_lower for x in ["mask", "condition", "is_", "p_val"]):
       return "bool"
-    if any(x in name_lower for x in ["idx", "index", "indices", "k", "n_"]):
+    if any(x in name_lower for x in ["idx", "index", "indices", "k", "n_", "count"]):
       return "int"
     return "float"
 
   def _is_pipe_top_level(self, text: str) -> bool:
-    """Checks if a pipe | exists outside of brackets []."""
+    """Checks if a pipe `|` exists outside of brackets `[]` for Union detection."""
     depth = 0
     for char in text:
       if char == "[":
@@ -365,7 +369,7 @@ class InputFuzzer:
     return False
 
   def _split_outside_brackets(self, text: str) -> List[str]:
-    """Splits string by comma, ignoring commas inside brackets."""
+    """Splits string by comma, ensuring correctness for nested generics."""
     parts = []
     current = []
     depth = 0
