@@ -41,14 +41,15 @@ def test_import_fixer_injects_pl_alias():
   submodule_map = {}
 
   # 2. Input Code (Simulating a conversion where 'pl.Linear' was generated)
-  source_code = """
-def setup(self):
-    self.layer = pl.Linear(10, 20)
+  source_code = """ 
+def setup(self): 
+    self.layer = pl.Linear(10, 20) 
 """
 
   # 3. Run Fixer targeting 'paxml'
   tree = cst.parse_module(source_code)
-  fixer = ImportFixer(source_fw="torch", target_fw="paxml", submodule_map=submodule_map, alias_map=alias_map)
+  # Updates: source_fws for constructor
+  fixer = ImportFixer(source_fws="torch", target_fw="paxml", submodule_map=submodule_map, alias_map=alias_map)
 
   new_tree = tree.visit(fixer)
   generated_code = new_tree.code

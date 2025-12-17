@@ -1,5 +1,17 @@
 {
   "__framework__": "torch",
+  "imports": {
+    "torch.nn": {
+      "alias": "nn",
+      "root": "torch",
+      "sub": "nn"
+    },
+    "torch.nn.functional": {
+      "alias": "F",
+      "root": "torch.nn.functional",
+      "sub": null
+    }
+  },
   "mappings": {
     "Abs": {
       "api": "torch.abs"
@@ -164,13 +176,16 @@
       "api": "torch.nonzero"
     },
     "Normalize": {
-      "api": "torchvision.transforms.Normalize"
+      "api": "torch.nn.functional.normalize"
+    },
+    "Optional": {
+      "api": "torch.nn.functional.Optional"
     },
     "PRelu": {
       "api": "torch.prelu"
     },
     "Pad": {
-      "api": "torchvision.transforms.Pad"
+      "api": "torch.nn.functional.pad"
     },
     "Pow": {
       "api": "torch.pow"
@@ -261,6 +276,9 @@
     },
     "TopK": {
       "api": "torch.topk"
+    },
+    "TorchFunctional": {
+      "api": "torch.nn.functional"
     },
     "Transpose": {
       "api": "torch.transpose"
@@ -394,6 +412,9 @@
     "eigvalsh": {
       "api": "torch.linalg.eigvalsh"
     },
+    "elu": {
+      "api": "torch.nn.functional.elu"
+    },
     "empty": {
       "api": "torch.empty"
     },
@@ -441,6 +462,9 @@
     },
     "full_like": {
       "api": "torch.full_like"
+    },
+    "gelu": {
+      "api": "torch.nn.functional.gelu"
     },
     "greater": {
       "api": "torch.greater"
@@ -490,6 +514,9 @@
     "isnan": {
       "api": "torch.isnan"
     },
+    "leaky_relu": {
+      "api": "torch.nn.functional.leaky_relu"
+    },
     "less": {
       "api": "torch.less"
     },
@@ -513,6 +540,9 @@
     },
     "log2": {
       "api": "torch.log2"
+    },
+    "log_softmax": {
+      "api": "torch.nn.functional.log_softmax"
     },
     "logaddexp": {
       "api": "torch.logaddexp"
@@ -616,6 +646,9 @@
     "register_parameter": {
       "api": "torch.nn.Module.register_parameter"
     },
+    "relu": {
+      "api": "torch.nn.functional.relu"
+    },
     "remainder": {
       "api": "torch.remainder"
     },
@@ -643,11 +676,17 @@
     "searchsorted": {
       "api": "torch.searchsorted"
     },
+    "sigmoid": {
+      "api": "torch.nn.functional.sigmoid"
+    },
     "sign": {
       "api": "torch.sign"
     },
     "signbit": {
       "api": "torch.signbit"
+    },
+    "silu": {
+      "api": "torch.nn.functional.silu"
     },
     "sin": {
       "api": "torch.sin"
@@ -657,6 +696,9 @@
     },
     "slogdet": {
       "api": "torch.slogdet"
+    },
+    "softmax": {
+      "api": "torch.nn.functional.softmax"
     },
     "solve": {
       "api": "torch.solve"

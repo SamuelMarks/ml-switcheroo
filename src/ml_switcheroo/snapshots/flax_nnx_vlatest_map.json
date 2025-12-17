@@ -1,0 +1,62 @@
+{
+  "__framework__": "flax_nnx",
+  "mappings": {
+    "BatchNorm1d": {
+      "api": "flax.nnx.BatchNorm",
+      "args": {
+        "dtype": "dtype",
+        "eps": "epsilon",
+        "momentum": "momentum",
+        "num_features": "num_features"
+      }
+    },
+    "Conv1d": {
+      "api": "flax.nnx.Conv",
+      "args": {
+        "dtype": "dtype",
+        "kernel_size": "kernel_size",
+        "padding": "padding"
+      }
+    },
+    "Embed": {
+      "api": "flax.nnx.Embed",
+      "args": {
+        "dtype": "dtype",
+        "embedding_init": "embedding_init",
+        "embedding_metadata": "embedding_metadata",
+        "num_embeddings": "num_embeddings",
+        "out_features": "features",
+        "param_dtype": "param_dtype",
+        "promote_dtype": "promote_dtype",
+        "rngs": "rngs"
+      }
+    },
+    "LayerNorm": {
+      "api": "flax.nnx.LayerNorm",
+      "args": {
+        "dtype": "dtype",
+        "eps": "epsilon"
+      }
+    },
+    "Linear": {
+      "api": "flax.nnx.Linear",
+      "args": {
+        "dtype": "dtype",
+        "in_features": "in_features",
+        "out_features": "out_features"
+      }
+    },
+    "dropout": {
+      "api": "flax.nnx.Dropout"
+    },
+    "gelu": {
+      "api": "flax.nnx.gelu"
+    },
+    "log_softmax": {
+      "api": "flax.nnx.softmax",
+      "args": {
+        "dim": "axis"
+      }
+    }
+  }
+}

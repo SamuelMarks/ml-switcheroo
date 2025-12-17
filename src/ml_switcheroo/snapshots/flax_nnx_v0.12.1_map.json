@@ -1,5 +1,12 @@
 {
-  "__framework__": "jax",
+  "__framework__": "flax_nnx",
+  "imports": {
+    "flax.nnx": {
+      "alias": "nnx",
+      "root": "flax",
+      "sub": "nnx"
+    }
+  },
   "mappings": {
     "Abs": {
       "api": "jnp.abs"
@@ -50,11 +57,20 @@
     "Ceil": {
       "api": "jax.numpy.ceil"
     },
+    "Celu": {
+      "api": "nnx.celu"
+    },
     "Clip": {
       "api": "jax.numpy.clip"
     },
     "Compress": {
       "api": "jax.numpy.compress"
+    },
+    "Conv": {
+      "api": "nnx.Conv"
+    },
+    "ConvTranspose": {
+      "api": "nnx.ConvTranspose"
     },
     "Cos": {
       "api": "jax.numpy.cos"
@@ -65,12 +81,15 @@
     "CumSum": {
       "api": "jax.numpy.cumsum"
     },
-    "Det": {
-      "api": "jax.numpy.linalg.det"
+    "Dropout": {
+      "api": "nnx.Dropout"
     },
     "Einsum": {
       "api": "jnp.einsum",
       "requires_plugin": "einsum_normalizer"
+    },
+    "Elu": {
+      "api": "nnx.elu"
     },
     "Equal": {
       "api": "jax.numpy.equal"
@@ -80,6 +99,9 @@
     },
     "Floor": {
       "api": "jax.numpy.floor"
+    },
+    "Gelu": {
+      "api": "nnx.gelu"
     },
     "Greater": {
       "api": "jax.numpy.greater"
@@ -96,6 +118,14 @@
     },
     "Less": {
       "api": "jax.numpy.less"
+    },
+    "Linear": {
+      "api": "nnx.Linear",
+      "args": {
+        "bias": "use_bias",
+        "in_features": "in_features",
+        "out_features": "out_features"
+      }
     },
     "Log": {
       "api": "jax.numpy.log"
@@ -115,6 +145,9 @@
     "NonZero": {
       "api": "jax.numpy.nonzero"
     },
+    "PRelu": {
+      "api": "nnx.PReLU"
+    },
     "Pad": {
       "api": "jax.numpy.pad"
     },
@@ -125,8 +158,14 @@
       "api": "optax.rmsprop",
       "requires_plugin": "optimizer_constructor"
     },
+    "RNN": {
+      "api": "nnx.RNN"
+    },
     "Reciprocal": {
       "api": "jax.numpy.reciprocal"
+    },
+    "Relu": {
+      "api": "nnx.relu"
     },
     "Reshape": {
       "api": "jax.numpy.reshape"
@@ -137,6 +176,9 @@
     "SGD": {
       "api": "optax.sgd",
       "requires_plugin": "optimizer_constructor"
+    },
+    "Sigmoid": {
+      "api": "nnx.sigmoid"
     },
     "Sign": {
       "api": "jax.numpy.sign"
@@ -149,6 +191,15 @@
     },
     "Size": {
       "api": "jax.numpy.size"
+    },
+    "Softmax": {
+      "api": "nnx.softmax"
+    },
+    "Softplus": {
+      "api": "nnx.softplus"
+    },
+    "Split": {
+      "api": "nnx.split"
     },
     "Sqrt": {
       "api": "jax.numpy.sqrt"
@@ -168,9 +219,6 @@
     "Tile": {
       "api": "jax.numpy.tile"
     },
-    "TorchFunctional": {
-      "api": "jax.nn"
-    },
     "Transpose": {
       "api": "jax.numpy.transpose"
     },
@@ -186,6 +234,9 @@
     },
     "__array_namespace_info__": {
       "api": "jax.numpy.__array_namespace_info__"
+    },
+    "__call__": {
+      "requires_plugin": "inject_training_flag"
     },
     "abs": {
       "api": "jnp.abs"
@@ -250,6 +301,9 @@
     "broadcast_to": {
       "api": "jax.numpy.broadcast_to"
     },
+    "call": {
+      "requires_plugin": "inject_training_flag"
+    },
     "can_cast": {
       "api": "jax.numpy.can_cast"
     },
@@ -281,9 +335,6 @@
       "api": "data",
       "requires_plugin": "method_to_property"
     },
-    "det": {
-      "api": "jax.numpy.linalg.det"
-    },
     "diagonal": {
       "api": "jax.numpy.diagonal"
     },
@@ -292,12 +343,6 @@
     },
     "divide": {
       "api": "jax.numpy.divide"
-    },
-    "eigh": {
-      "api": "jax.numpy.linalg.eigh"
-    },
-    "eigvalsh": {
-      "api": "jax.numpy.linalg.eigvalsh"
     },
     "empty_like": {
       "api": "jax.numpy.empty_like"
@@ -314,15 +359,6 @@
     "expm1": {
       "api": "jax.numpy.expm1"
     },
-    "fft": {
-      "api": "jax.numpy.fft.fft"
-    },
-    "fftn": {
-      "api": "jax.numpy.fft.fftn"
-    },
-    "fftshift": {
-      "api": "jax.numpy.fft.fftshift"
-    },
     "finfo": {
       "api": "jax.numpy.finfo"
     },
@@ -335,8 +371,14 @@
     "floor_divide": {
       "api": "jax.numpy.floor_divide"
     },
+    "forward": {
+      "requires_plugin": "inject_training_flag"
+    },
     "full_like": {
       "api": "jax.numpy.full_like"
+    },
+    "gelu": {
+      "api": "nnx.gelu"
     },
     "greater": {
       "api": "jax.numpy.greater"
@@ -344,38 +386,14 @@
     "greater_equal": {
       "api": "jax.numpy.greater_equal"
     },
-    "hfft": {
-      "api": "jax.numpy.fft.hfft"
-    },
     "hypot": {
       "api": "jax.numpy.hypot"
-    },
-    "ifft": {
-      "api": "jax.numpy.fft.ifft"
-    },
-    "ifftn": {
-      "api": "jax.numpy.fft.ifftn"
-    },
-    "ifftshift": {
-      "api": "jax.numpy.fft.ifftshift"
-    },
-    "ihfft": {
-      "api": "jax.numpy.fft.ihfft"
     },
     "iinfo": {
       "api": "jax.numpy.iinfo"
     },
     "imag": {
       "api": "jax.numpy.imag"
-    },
-    "inv": {
-      "api": "jax.numpy.linalg.inv"
-    },
-    "irfft": {
-      "api": "jax.numpy.fft.irfft"
-    },
-    "irfftn": {
-      "api": "jax.numpy.fft.irfftn"
     },
     "isdtype": {
       "api": "jax.numpy.isdtype"
@@ -397,6 +415,9 @@
     },
     "linspace": {
       "api": "jax.numpy.linspace"
+    },
+    "load_state_dict": {
+      "requires_plugin": "torch_load_state_dict_to_nnx"
     },
     "log": {
       "api": "jax.numpy.log"
@@ -427,12 +448,6 @@
     },
     "matmul": {
       "api": "jax.numpy.matmul"
-    },
-    "matrix_power": {
-      "api": "jax.numpy.linalg.matrix_power"
-    },
-    "matrix_rank": {
-      "api": "jax.numpy.linalg.matrix_rank"
     },
     "matrix_transpose": {
       "api": "jax.numpy.matrix_transpose"
@@ -479,12 +494,12 @@
     "outer": {
       "api": "jax.numpy.outer"
     },
+    "parameters": {
+      "requires_plugin": "torch_parameters_to_nnx"
+    },
     "permute_dims": {
       "api": "jnp.transpose",
       "requires_plugin": "pack_varargs"
-    },
-    "pinv": {
-      "api": "jax.numpy.linalg.pinv"
     },
     "positive": {
       "api": "jax.numpy.positive"
@@ -495,14 +510,20 @@
     "prod": {
       "api": "jax.numpy.prod"
     },
-    "qr": {
-      "api": "jax.numpy.linalg.qr"
-    },
     "real": {
       "api": "jax.numpy.real"
     },
     "reciprocal": {
       "api": "jax.numpy.reciprocal"
+    },
+    "register_buffer": {
+      "requires_plugin": "torch_register_buffer_to_nnx"
+    },
+    "register_parameter": {
+      "requires_plugin": "torch_register_parameter_to_nnx"
+    },
+    "relu": {
+      "api": "nnx.relu"
     },
     "remainder": {
       "api": "jax.numpy.remainder"
@@ -515,12 +536,6 @@
     },
     "result_type": {
       "api": "jax.numpy.result_type"
-    },
-    "rfft": {
-      "api": "jax.numpy.fft.rfft"
-    },
-    "rfftn": {
-      "api": "jax.numpy.fft.rfftn"
     },
     "roll": {
       "api": "jax.numpy.roll"
@@ -547,11 +562,8 @@
       "api": "shape",
       "requires_plugin": "method_to_property"
     },
-    "slogdet": {
-      "api": "jax.numpy.linalg.slogdet"
-    },
-    "solve": {
-      "api": "jax.numpy.linalg.solve"
+    "softmax": {
+      "api": "nnx.softmax"
     },
     "sqrt": {
       "api": "jax.numpy.sqrt"
@@ -565,6 +577,9 @@
     "stack": {
       "api": "jax.numpy.stack"
     },
+    "state_dict": {
+      "requires_plugin": "torch_state_dict_to_nnx"
+    },
     "std": {
       "api": "jax.numpy.std"
     },
@@ -576,12 +591,6 @@
     },
     "sum": {
       "api": "jax.numpy.sum"
-    },
-    "svd": {
-      "api": "jax.numpy.linalg.svd"
-    },
-    "svdvals": {
-      "api": "jax.numpy.linalg.svdvals"
     },
     "take": {
       "api": "jax.numpy.take"

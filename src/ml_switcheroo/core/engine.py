@@ -19,6 +19,7 @@ from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.analysis.dependencies import DependencyScanner
 from ml_switcheroo.analysis.lifecycle import InitializationTracker
 from ml_switcheroo.config import RuntimeConfig
+import ml_switcheroo.frameworks as fw_registry
 
 
 class ConversionResult(BaseModel):
@@ -153,10 +154,37 @@ class ASTEngine:
     if self.source != self.target:
       tracer.start_phase("Import Fixer", "Resolving Dependencies")
 
-      # Sub-step 2a: Check usage of effective source
-      scanner = UsageScanner(self.source)
-      tree.visit(scanner)
-      should_preserve = scanner.get_result()
+      # Resolve Effective Roots for Pruning (Inheritance Aware)
+      # e.g. if source is 'flax_nnx', we want to prune 'flax' AND 'jax' imports
+      roots_to_prune = {self.source}
+      adapter = fw_registry.get_adapter(self.source)
+
+      if adapter:
+        # Add alias root (e.g. flax.nnx -> flax)
+        if hasattr(adapter, "import_alias") and adapter.import_alias:
+          roots_to_prune.add(adapter.import_alias[0].split(".")[0])
+
+        # Add parent frameworks recursively (e.g. flax_nnx -> jax)
+        if hasattr(adapter, "inherits_from") and adapter.inherits_from:
+          parent = adapter.inherits_from
+          roots_to_prune.add(parent)
+
+          # Recurse one level up for parent alias (e.g. jax -> jax.numpy)
+          parent_adp = fw_registry.get_adapter(parent)
+          if parent_adp and hasattr(parent_adp, "import_alias") and parent_adp.import_alias:
+            roots_to_prune.add(parent_adp.import_alias[0].split(".")[0])
+
+      # Convert set to sorted list for determinism
+      source_roots = sorted(list(roots_to_prune))
+
+      # Sub-step 2a: Check usage of ANY source root aliases
+      should_preserve = False
+      for root in source_roots:
+        scanner = UsageScanner(root)
+        tree.visit(scanner)
+        if scanner.get_result():
+          should_preserve = True
+          break
 
       # Sub-step 2b: Retrieve import maps for effective target
       submodule_map = self.semantics.get_import_map(self.target)
@@ -164,8 +192,8 @@ class ASTEngine:
 
       # Sub-step 2c: Fix imports
       fixer = ImportFixer(
-        self.source,
-        self.target,
+        source_fws=source_roots,
+        target_fw=self.target,
         submodule_map=submodule_map,
         alias_map=alias_map,
         preserve_source=should_preserve,

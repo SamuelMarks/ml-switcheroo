@@ -168,6 +168,10 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         return result_node
 
     if not func_name:
+      # Fix: Prevent strict mode failure on super() calls
+      if self._is_super_call(original):
+        return updated
+
       if self.strict_mode:
         self._report_failure("Could not resolve function name")
       return updated
@@ -185,6 +189,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       return updated
 
     abstract_id, details = lookup
+
     # 2a. Infix / Prefix Transformation
     if mapping.get("transformation_type") == "infix":
       try:
@@ -240,11 +245,25 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     if self._signature_stack and self._signature_stack[-1].is_init and self._signature_stack[-1].is_module_method:
       origins = getattr(self.semantics, "_key_origins", {})
       tier = origins.get(abstract_id)
+      traits = self._get_target_traits()
 
-      # If this call is to a Neural Semantic Operation (e.g. Linear, Conv2d)
-      if tier == SemanticTier.NEURAL.value:
-        traits = self._get_target_traits()
+      # Determine if this operation is a Neural Candidate
+      # We check Semantic Tier (Preferred) OR explicit trait match (Fallback for Extras/Snapshots)
+      is_neural_candidate = tier == SemanticTier.NEURAL.value
 
+      # Fallback: If traits explicitly strip magic args (e.g. rngs),
+      # we should check if they exist here even if categorization failed (e.g. op loaded as Extra)
+      force_strip = False
+      for bad_arg in traits.strip_magic_args:
+        # Check if the generated call contains this arg as a keyword
+        if isinstance(result_node, cst.Call):
+          for arg in result_node.args:
+            if arg.keyword and arg.keyword.value == bad_arg:
+              force_strip = True
+              break
+
+      # Process Injection or Stripping
+      if is_neural_candidate or force_strip:
         # Injection: If target requires 'rngs' (like Flax NNX) and defines it in magic args
         if any(name == "rngs" for name, _ in traits.inject_magic_args):
           if isinstance(result_node, cst.Call):
@@ -372,3 +391,17 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       new_func = node.func
 
     return node.with_changes(func=new_func, args=new_args)
+
+  def _is_super_call(self, node: cst.Call) -> bool:
+    """Helper to identify direct super() usage or super().__init__()."""
+    if isinstance(node.func, cst.Attribute):
+      # Case: super().method()
+      receiver = node.func.value
+      if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
+        if receiver.func.value == "super":
+          return True
+    elif isinstance(node.func, cst.Name):
+      # Case: super()
+      if node.func.value == "super":
+        return True
+    return False

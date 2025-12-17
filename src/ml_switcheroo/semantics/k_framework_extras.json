@@ -119,6 +119,18 @@
     "description": "Convert a PIL Image or numpy.ndarray to tensor.",
     "std_args": []
   },
+  "TorchFunctional": {
+    "description": "Torch Functional Namespace",
+    "std_args": [],
+    "variants": {
+      "jax": {
+        "api": "jax.nn"
+      },
+      "torch": {
+        "api": "torch.nn.functional"
+      }
+    }
+  },
   "__imports__": {
     "torchvision": {
       "variants": {

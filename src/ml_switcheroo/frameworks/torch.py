@@ -13,7 +13,6 @@ import logging
 import numpy as np
 from typing import List, Tuple, Dict, Any, Optional
 
-# Conditional import to prevent hard crash if torch is missing
 try:
   import torch
   import torch.nn as nn
@@ -41,16 +40,11 @@ class TorchAdapter:
 
   display_name: str = "PyTorch"
   inherits_from: None = None
-  ui_priority: int = 0  # Highest Priority
+  ui_priority: int = 0
 
   def __init__(self):
-    """
-    Initializes the adapter.
-    Detects if 'torch' library is present. If not, enters Ghost Mode and loads snapshots.
-    """
     self._mode = InitMode.LIVE
     self._snapshot_data = {}
-
     if torch is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("torch")
@@ -59,17 +53,34 @@ class TorchAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    return ["torch", "torch.nn", "torch.linalg", "torch.special", "torch.fft"]
+    return [
+      "torch",
+      "torch.nn",
+      "torch.linalg",
+      "torch.special",
+      "torch.fft",
+      "torch.nn.functional",
+      "torchvision.transforms",
+    ]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
     return ("torch", "torch")
 
   @property
+  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+    return {
+      "torch.nn": {"alias": "nn", "sub": "nn"},
+      # Fix: map root correctly so it becomes 'import torch.nn.functional as F'
+      # 'root' is the module to import, 'sub' is None means we import the root directly
+      "torch.nn.functional": {"root": "torch.nn.functional", "alias": "F", "sub": None},
+    }
+
+  @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
     return {
-      "neural": [r"\\.nn\\.", r"\\.modules\\.", r"\\.layers\\.", r"Module$"],
-      "extras": [r"\\.utils\\.", r"\\.hub\\.", r"\\.distributed\\.", r"\\.autograd\\.", r"save$", r"load$", r"seed$"],
+      "neural": [r"\.nn\\.", r"\.modules\\.", r"\.layers\\.", r"Module$"],
+      "extras": [r"\.utils\\.", r"\.hub\\.", r"\.distributed\\.", r"\.autograd\\.", r"save$", r"load$", r"seed$"],
     }
 
   @property
@@ -86,122 +97,64 @@ class TorchAdapter:
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """Static definitions for core ops."""
     return {
       "Abs": StandardMap(api="torch.abs"),
       "Conv2d": StandardMap(api="torch.nn.Conv2d"),
+      "relu": StandardMap(api="torch.nn.functional.relu"),
     }
 
   @property
   def rng_seed_methods(self) -> List[str]:
     return ["manual_seed", "seed"]
 
-  # --- Documentation ---
-
   @classmethod
   def get_example_code(cls) -> str:
-    """Returns the standard demo example."""
     return cls().get_tiered_examples()["tier2_neural"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
     return {
-      "tier1_math": """import torch
-
-def math_ops(x, y):
-  # Tier 1: Array API Standard
-  # Examples: abs, add, mean
-  a = torch.abs(x)
-  b = torch.add(a, y)
-  return torch.mean(b)""",
-      "tier2_neural": """import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-class Net(nn.Module):
-  # Tier 2: Neural State & Layers
-  def __init__(self):
-    super().__init__()
-    self.conv1 = nn.Conv2d(1, 32, 3, 1)
-    self.fc1 = nn.Linear(5408, 10)
-
-  def forward(self, x):
-    x = self.conv1(x)
-    x = F.relu(x)
-    x = torch.flatten(x, 1)
-    return self.fc1(x)""",
-      "tier3_extras": """import torch
-from torch.utils.data import DataLoader
-
-def process_data(ds):
-  # Tier 3: Framework Extras
-  # DataLoaders and Device placement
-  dl = DataLoader(ds, batch_size=32, shuffle=True)
-  device = torch.device('cuda')
-  return dl""",
+      "tier1_math": """import torch\n\ndef math_ops(x, y):\n  return torch.mean(torch.add(torch.abs(x), y))""",
+      "tier2_neural": """import torch\nimport torch.nn as nn\nclass Net(nn.Module):\n  def forward(self, x): return x""",
+      "tier3_extras": """import torch\nfrom torch.utils.data import DataLoader""",
     }
 
-  # --- Ghost Protocol Implementation ---
-
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Collects API signatures for the requested category.
-
-    In LIVE mode: Introspects installed `torch` modules.
-    In GHOST mode: Hydrates from loaded JSON snapshot.
-    """
-    # 1. GHOST Mode Path
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
-
-    # 2. LIVE Mode Path
     return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
-    """Reads from snapshot dict."""
     if not self._snapshot_data:
       return []
-
     raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
     return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
-    """Scans living objects."""
     results = []
-
     if category == StandardCategory.LOSS:
       results.extend(self._scan_losses())
     elif category == StandardCategory.OPTIMIZER:
       results.extend(self._scan_optimizers())
     elif category == StandardCategory.ACTIVATION:
       results.extend(self._scan_activations())
-
     return results
 
   def _scan_losses(self) -> List[GhostRef]:
-    """Scans torch.nn for Loss functions."""
     if not nn:
       return []
-
     found = []
     for name, obj in inspect.getmembers(nn):
-      if inspect.isclass(obj):
-        # Heuristic: Ends with 'Loss' (covers MSELoss, CrossEntropyLoss, etc.)
-        # Also check inheritance from _Loss if possible, but naming is safer across versions
-        if name.endswith("Loss") and name != "_Loss":
-          ref = GhostInspector.inspect(obj, f"torch.nn.{name}")
-          found.append(ref)
+      if inspect.isclass(obj) and name.endswith("Loss") and name != "_Loss":
+        ref = GhostInspector.inspect(obj, f"torch.nn.{name}")
+        found.append(ref)
     return found
 
   def _scan_optimizers(self) -> List[GhostRef]:
-    """Scans torch.optim for Optimizers."""
     if not optim:
       return []
-
     found = []
     for name, obj in inspect.getmembers(optim):
       if inspect.isclass(obj) and name != "Optimizer":
-        # Check inheritance safety using getattr first (optimization)
-        # issubclass(obj, optim.Optimizer)
         try:
           if issubclass(obj, optim.Optimizer):
             ref = GhostInspector.inspect(obj, f"torch.optim.{name}")
@@ -211,35 +164,34 @@ def process_data(ds):
     return found
 
   def _scan_activations(self) -> List[GhostRef]:
-    """Scans torch.nn for Activations (Modules defined in torch.nn.modules.activation)."""
     if not nn:
       return []
-
     found = []
+    # 1. Class Activations
     for name, obj in inspect.getmembers(nn):
       if inspect.isclass(obj):
-        # Filter for nn.Module subclasses
         try:
           if issubclass(obj, nn.Module):
-            # Heuristic: Logic usually lives in 'activation' submodule in Source
-            # obj.__module__ is 'torch.nn.modules.activation'
             mod_name = getattr(obj, "__module__", "")
-
-            # Explicit check for known activation pattern or module path
-            # Also list specific common activations to be safe against varying struct
-            is_activation_mod = "activation" in mod_name
-
             known_names = {"ReLU", "GELU", "Sigmoid", "Tanh", "Softmax", "LeakyReLU", "Elu", "SiLU"}
-
-            if is_activation_mod or name in known_names:
+            if "activation" in mod_name or name in known_names:
               ref = GhostInspector.inspect(obj, f"torch.nn.{name}")
               found.append(ref)
         except TypeError:
           pass
+    # 2. Functional Activations
+    try:
+      import torch.nn.functional as F
 
+      targets = ["relu", "gelu", "sigmoid", "tanh", "softmax", "log_softmax", "silu", "elu", "leaky_relu"]
+      for name in targets:
+        if hasattr(F, name):
+          obj = getattr(F, name)
+          ref = GhostInspector.inspect(obj, f"torch.nn.functional.{name}")
+          found.append(ref)
+    except ImportError:
+      pass
     return found
-
-  # --- Interface Implementation ---
 
   def get_device_syntax(self, device_type: str, device_index: None | str = None) -> str:
     args = [str(device_type)]
@@ -258,14 +210,11 @@ def process_data(ds):
       return f"torch.load({file_arg})"
     return ""
 
-  # --- Verification ---
-
   def convert(self, data):
     try:
       import torch
     except ImportError:
       return data
-
     if isinstance(data, (np.ndarray, np.generic)):
       try:
         return torch.from_numpy(data)
@@ -274,20 +223,15 @@ def process_data(ds):
     return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Injects PyTorch specific manual mapping hooks."""
     mappings = snapshot.setdefault("mappings", {})
+    imports = snapshot.setdefault("imports", {})
 
-    # Map Abstract Ops to internal Torch API paths to ensure detection
-    # Logic from wire_state_container.py
     mappings["register_buffer"] = {"api": "torch.nn.Module.register_buffer"}
     mappings["register_parameter"] = {"api": "torch.nn.Module.register_parameter"}
     mappings["state_dict"] = {"api": "torch.nn.Module.state_dict"}
     mappings["load_state_dict"] = {"api": "torch.nn.Module.load_state_dict"}
     mappings["parameters"] = {"api": "torch.nn.Module.parameters"}
 
-    # Vision Ops (Tier C Extras) - Mapped to torchvision
-    # These are manually wired here because scanning torchvision requires it to be installed
-    # and it's not a hard dependency.
     for vision_op in [
       "Resize",
       "Normalize",
@@ -302,14 +246,14 @@ def process_data(ds):
       if vision_op not in mappings:
         mappings[vision_op] = {"api": f"torchvision.transforms.{vision_op}"}
 
-    # Output Adapters for Ops returning NamedTuples (Feature Output Adapter Logic)
-    # torch.sort returns (values, indices). If target expects just values (like jax.numpy.sort),
-    # we must wrap the result.
-    # This applies when converting TO torch. If converting FROM torch, logic is inverted.
-    # This Adapter definition defines how 'torch' implements 'sort'.
-    # Since 'sort' abstract op implies just values in Array API (usually), or sorting logic,
-    # but torch implementation is rigid.
-    # Ideally, we define behavior for when we TARGET torch.
+    imports["torch.nn"] = {"root": "torch", "sub": "nn", "alias": "nn"}
+    imports["torch.nn.functional"] = {"root": "torch.nn.functional", "alias": "F", "sub": None}
+
     if "sort" in mappings:
-      # When generating Torch code: x = torch.sort(y).values
       mappings["sort"]["output_adapter"] = "lambda x: x.values"
+
+    mappings["relu"] = {"api": "torch.nn.functional.relu"}
+    activations = ["gelu", "sigmoid", "tanh", "softmax", "log_softmax", "silu", "elu", "leaky_relu"]
+    for act in activations:
+      if act not in mappings:
+        mappings[act] = {"api": f"torch.nn.functional.{act}"}

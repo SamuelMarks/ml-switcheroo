@@ -11,11 +11,21 @@ INTERNAL_OPS = {
     "torchvision": {"variants": {"torch": {"root": "torchvision", "alias": None}}},
     "torchvision.transforms": {"variants": {"torch": {"root": "torchvision", "sub": "transforms", "alias": "T"}}},
   },
+  # --- Namespaces (Fix for Strict Mode) ---
+  "TorchFunctional": {
+    "description": "Torch Functional Namespace",
+    "std_args": [],
+    "variants": {
+      "torch": {"api": "torch.nn.functional"},
+      "jax": {"api": "jax.nn"},
+    },
+  },
   # --- Optimizers (Migrated from Dead Code 'knowledge/' package) ---
   "Adam": {
     "description": "Adaptive Moment Estimation.",
     "std_args": ["params", "lr", "beta1", "beta2", "eps", "weight_decay", "amsgrad"],
   },
+  # ... (rest of the file unchanged)
   "SGD": {
     "description": "Stochastic Gradient Descent.",
     "std_args": ["params", "lr", "momentum", "dampening", "weight_decay", "nesterov"],

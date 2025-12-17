@@ -3,13 +3,8 @@ Import Management Transformer for ml-switcheroo.
 
 This module is responsible for reading the AST's import references and remapping them
 based on the data provided by SemanticsManager (Feature 024).
-
-It performs:
-
-1.  **Pruning**: Removes source framework imports (e.g. ``import torch``) unless preserved.
-2.  **Remapping**: Maps submodules (e.g. ``from torch import nn`` -> ``from flax import linen as nn``).
-3.  **Smart Injection**: Dynamically injects target framework imports and standard aliases
-    (e.g., ``import tensorflow as tf``, ``import mlx.core as mx``) only when used in the code body.
+It also handles collapsing fully qualified paths (e.g. `torch.nn.Linear`) into
+aliases (e.g. `nn.Linear`) based on content injection logic.
 """
 
 from typing import Union, Optional, Tuple, Dict, Set, List
@@ -20,12 +15,12 @@ from ml_switcheroo.core.scanners import SimpleNameScanner, get_full_name
 
 class ImportFixer(cst.CSTTransformer):
   """
-  LibCST Transformer that manages top-level imports.
+  LibCST Transformer that manages top-level imports and path shortening.
   """
 
   def __init__(
     self,
-    source_fw: str,
+    source_fws: Union[str, List[str]],
     target_fw: str,
     submodule_map: Dict[str, Tuple[str, Optional[str], Optional[str]]],
     alias_map: Optional[Dict[str, Tuple[str, str]]] = None,
@@ -35,32 +30,70 @@ class ImportFixer(cst.CSTTransformer):
     Initializes the ImportFixer.
 
     Args:
-        source_fw: The framework string to strip.
+        source_fws: Single string or List of framework strings to strip (e.g. ['flax', 'jax']).
         target_fw: The framework string to inject.
         submodule_map: Data-driven remapping dictionary from SemanticsManager.
         alias_map: Configuration for standard framework aliases (e.g. jax->(jax.numpy, jnp)).
                    Added in Feature 07 to replace hardcoded map.
         preserve_source: Whether to keep source imports even if matched.
     """
-    self.source_fw = source_fw
+    if isinstance(source_fws, str):
+      self.source_fws = {source_fws}
+    else:
+      self.source_fws = set(source_fws)
+
     self.target_fw = target_fw
+    # Map of "fully.qualified.path" -> ("root", "sub", "alias")
     self.submodule_map = submodule_map
     self.alias_map = alias_map or {}
     self.preserve_source = preserve_source
     self._target_found = False
     self._defined_names: Set[str] = set()
 
+    # Build Collapsing Map: target_full_path -> alias
+    self._path_to_alias = {}
+
+    # 1. From Submodules Config
+    for _, (root, sub, alias) in self.submodule_map.items():
+      if alias:
+        full_path = f"{root}.{sub}" if sub else root
+        self._path_to_alias[full_path] = alias
+
+    # 2. From Framework Aliases Config
+    for _, (mod, alias) in self.alias_map.items():
+      if alias:
+        self._path_to_alias[mod] = alias
+
+  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
+    """
+    Collapses fully qualified paths to aliases if configured.
+    e.g. `torch.nn.Linear` -> `nn.Linear` if `torch.nn` -> `nn` alias exists for this target.
+    """
+    full_name = get_full_name(updated_node)
+    if not full_name:
+      return updated_node
+
+    parts = full_name.split(".")
+    # Try matching prefixes from longest to shortest
+    for i in range(len(parts) - 1, 0, -1):
+      prefix = ".".join(parts[:i])
+
+      if prefix in self._path_to_alias:
+        alias = self._path_to_alias[prefix]
+        suffix_parts = parts[i:]
+
+        # Construct collapsed node: alias.Remainder
+        new_node = cst.Name(alias)
+        for part in suffix_parts:
+          new_node = cst.Attribute(value=new_node, attr=cst.Name(part))
+        return new_node
+
+    return updated_node
+
   def leave_Import(self, original_node: cst.Import, updated_node: cst.Import) -> Union[cst.Import, cst.RemovalSentinel]:
     """
     Inspects ``import ...`` statements.
     Checks aliases against submodule_map or prunes matches to source_fw.
-
-    Args:
-        original_node: The original CST node.
-        updated_node: The CST node with transformed children.
-
-    Returns:
-        The modified node or RemovalSentinel if prune is required.
     """
     new_aliases = []
 
@@ -87,6 +120,7 @@ class ImportFixer(cst.CSTTransformer):
 
         # Determine alias
         new_asname = alias.asname
+        # Use default alias if present and no user alias
         if not new_asname and default_alias:
           new_asname = cst.AsName(name=cst.Name(default_alias))
 
@@ -95,8 +129,8 @@ class ImportFixer(cst.CSTTransformer):
         new_aliases.append(new_alias)
         continue
 
-      # 3. Prune Source Root (e.g. import torch)
-      if root_pkg == self.source_fw:
+      # 3. Prune Source Roots
+      if root_pkg in self.source_fws:
         if self.preserve_source:
           new_aliases.append(alias)
         continue
@@ -115,13 +149,6 @@ class ImportFixer(cst.CSTTransformer):
     """
     Inspects ``from ... import ...`` statements.
     Checks module+name against submodule_map.
-
-    Args:
-        original_node: The original CST node.
-        updated_node: The CST node with transformed children.
-
-    Returns:
-        The modified node or RemovalSentinel.
     """
     if not updated_node.module:
       return updated_node
@@ -164,7 +191,7 @@ class ImportFixer(cst.CSTTransformer):
         return new_node
 
     # Prune source framework imports
-    if root_pkg == self.source_fw:
+    if root_pkg in self.source_fws:
       if self.preserve_source:
         return updated_node
       return cst.RemoveFromParent()
@@ -177,19 +204,6 @@ class ImportFixer(cst.CSTTransformer):
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
     """
     Post-process module to inject imports intelligently.
-
-    Logic:
-    1. Identifies insertion point (after __future__ and docstrings).
-    2. Injects 'import target' only if needed (not found AND used).
-    3. Injects aliases (e.g. 'jnp', 'tf', 'mx') if detected in usage via ``alias_map``.
-    4. Injects submodule mappings (e.g., from flax import linen) if usage requires it.
-
-    Args:
-        original_node: The original CST module.
-        updated_node: The CST module after children transformations.
-
-    Returns:
-        The final CST module with injected imports.
     """
     injections: List[cst.CSTNode] = []
 
@@ -201,6 +215,8 @@ class ImportFixer(cst.CSTTransformer):
         injections.append(
           cst.SimpleStatementLine(body=[cst.Import(names=[cst.ImportAlias(name=cst.Name(self.target_fw))])])
         )
+        # Prevent re-injection by Step 2 if alias matches root
+        self._defined_names.add(self.target_fw)
 
     # -- Step 2: Check Usage of Framework Standard Aliases (e.g. 'jnp', 'tf', 'mx') --
     # Logic driven by self.alias_map loaded from SemanticsManager (default or custom)
@@ -211,6 +227,11 @@ class ImportFixer(cst.CSTTransformer):
       updated_node.visit(scanner)
 
       if scanner.found and alias_name not in self._defined_names:
+        # FIX: Avoid 'import torch as torch'.
+        asname_node = None
+        if alias_name != module_path:
+          asname_node = cst.AsName(name=cst.Name(alias_name))
+
         injections.append(
           cst.SimpleStatementLine(
             body=[
@@ -218,13 +239,14 @@ class ImportFixer(cst.CSTTransformer):
                 names=[
                   cst.ImportAlias(
                     name=self._create_dotted_name(module_path),
-                    asname=cst.AsName(name=cst.Name(alias_name)),
+                    asname=asname_node,
                   )
                 ]
               )
             ]
           )
         )
+        self._defined_names.add(alias_name)
 
     # -- Step 3: Data-Driven Submodule Injection (Smart 'From' Logic) --
     # Iterate over submodule_map to see if any mapped aliases are used but undefined
@@ -232,9 +254,9 @@ class ImportFixer(cst.CSTTransformer):
     for _, defn in self.submodule_map.items():
       tgt_root, tgt_sub, default_alias = defn
 
-      # We care about the name used in code. Usually 'default_alias'.
       if default_alias:
         desired_name = default_alias
+        # Check usage
         scanner = SimpleNameScanner(desired_name)
         updated_node.visit(scanner)
 
@@ -258,8 +280,6 @@ class ImportFixer(cst.CSTTransformer):
             )
           else:
             # Case B: Root Import
-            # import {tgt_root}
-            # import {tgt_root} as {alias}
             asname_node = None
             if default_alias != tgt_root:
               asname_node = cst.AsName(name=cst.Name(default_alias))

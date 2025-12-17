@@ -95,8 +95,9 @@ def test_import_fixer_uses_injected_aliases():
   # Custom map: jax -> import jaxoid as jXd
   alias_map = {"jax": ("jaxoid", "jXd")}
 
+  # Updated: use source_fws (plural) to match new signature
   fixer = ImportFixer(
-    source_fw="torch",
+    source_fws="torch",
     target_fw="jax",
     submodule_map={},
     alias_map=alias_map,

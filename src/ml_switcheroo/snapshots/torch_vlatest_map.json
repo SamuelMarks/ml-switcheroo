@@ -1,0 +1,128 @@
+{
+  "__framework__": "torch",
+  "mappings": {
+    "BatchNorm1d": {
+      "api": "torch.nn.BatchNorm2d",
+      "args": {
+        "dtype": "dtype",
+        "eps": "eps",
+        "momentum": "momentum",
+        "num_features": "num_features"
+      }
+    },
+    "Conv1d": {
+      "api": "torch.nn.Conv3d",
+      "args": {
+        "dtype": "dtype",
+        "kernel_size": "kernel_size",
+        "padding": "padding"
+      }
+    },
+    "Embedding": {
+      "api": "torch.nn.Embedding",
+      "args": {
+        "_freeze": "_freeze",
+        "_weight": "_weight",
+        "device": "device",
+        "dtype": "dtype",
+        "embedding_dim": "embedding_dim",
+        "max_norm": "max_norm",
+        "norm_type": "norm_type",
+        "num_embeddings": "num_embeddings",
+        "padding_idx": "padding_idx",
+        "scale_grad_by_freq": "scale_grad_by_freq",
+        "sparse": "sparse"
+      }
+    },
+    "Flatten": {
+      "api": "torch.nn.Flatten",
+      "args": {
+        "end_dim": "end_dim",
+        "start_dim": "start_dim"
+      }
+    },
+    "GRU": {
+      "api": "torch.nn.GRU",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "LSTM": {
+      "api": "torch.nn.LSTM",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "LayerNorm": {
+      "api": "torch.nn.LayerNorm",
+      "args": {
+        "dtype": "dtype",
+        "eps": "eps"
+      }
+    },
+    "Linear": {
+      "api": "torch.nn.Linear",
+      "args": {
+        "dtype": "dtype",
+        "in_features": "in_features",
+        "out_features": "out_features"
+      }
+    },
+    "RNN": {
+      "api": "torch.nn.RNN",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "dropout": {
+      "api": "torch.nn.functional.dropout"
+    },
+    "gelu": {
+      "api": "torch.nn.functional.gelu"
+    },
+    "leaky_relu": {
+      "api": "torch.nn.functional.leaky_relu",
+      "args": {
+        "inplace": "inplace",
+        "input": "input",
+        "negative_slope": "negative_slope"
+      }
+    },
+    "log_softmax": {
+      "api": "torch.nn.functional.softmax",
+      "args": {
+        "dim": "dim"
+      }
+    },
+    "relu": {
+      "api": "torch.nn.functional.elu",
+      "args": {
+        "alpha": "alpha",
+        "inplace": "inplace",
+        "input": "input"
+      }
+    },
+    "sigmoid": {
+      "api": "torch.nn.functional.sigmoid",
+      "args": {
+        "input": "input"
+      }
+    },
+    "silu": {
+      "api": "torch.nn.functional.silu",
+      "args": {
+        "inplace": "inplace",
+        "input": "input"
+      }
+    },
+    "tanh": {
+      "api": "torch.nn.functional.tanh",
+      "args": {
+        "input": "input"
+      }
+    }
+  }
+}

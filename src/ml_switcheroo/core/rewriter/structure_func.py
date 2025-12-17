@@ -16,6 +16,7 @@ from libcst import BaseSuite, SimpleStatementSuite, IndentedBlock, SimpleStateme
 from ml_switcheroo.core.rewriter.base import BaseRewriter
 from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.semantics.schema import StructuralTraits
+from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 class FuncStructureMixin(BaseRewriter):
@@ -24,7 +25,6 @@ class FuncStructureMixin(BaseRewriter):
   """
 
   def _get_traits(self) -> StructuralTraits:
-    """Retrieves structural traits for the current target framework."""
     try:
       if hasattr(self.semantics, "get_framework_config"):
         config_dict = self.semantics.get_framework_config(self.target_fw)
@@ -32,8 +32,6 @@ class FuncStructureMixin(BaseRewriter):
           return StructuralTraits.model_validate(config_dict["traits"])
     except Exception:
       pass
-
-    # No defaults. If no config found, assume identity behavior.
     return StructuralTraits()
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
@@ -64,23 +62,17 @@ class FuncStructureMixin(BaseRewriter):
     sig_ctx = self._signature_stack.pop()
     traits = self._get_traits()
 
-    # --- Logic 5: Method Renaming ---
     if sig_ctx.is_module_method:
       curr_name = updated_node.name.value
-      # Read the desired inference method name from target config (e.g. "__call__" or "call")
       target_name = traits.forward_method
-
-      # Set of standard inference method names to look for
       known_methods = {"forward", "__call__", "call"}
 
       if target_name and curr_name in known_methods and curr_name != target_name:
         updated_node = updated_node.with_changes(name=cst.Name(target_name))
 
-      # Init Renaming (e.g. __init__ -> setup for Pax)
       if sig_ctx.is_init and traits.init_method_name and traits.init_method_name != "__init__":
         updated_node = updated_node.with_changes(name=cst.Name(traits.init_method_name))
 
-    # --- Logic 2 & 3: Constructor Modification (Injection/Stripping) ---
     if sig_ctx.is_init and sig_ctx.is_module_method:
       for arg_name, arg_type in traits.inject_magic_args:
         if arg_name not in sig_ctx.existing_args:
@@ -91,18 +83,15 @@ class FuncStructureMixin(BaseRewriter):
       for arg_name in traits.strip_magic_args:
         updated_node = self._strip_argument_from_signature(updated_node, arg_name)
 
-      # Body Logic: Inject or Strip super().__init__()
       if traits.requires_super_init:
         updated_node = self._ensure_super_init(updated_node)
       else:
         # Logic 3: Strip super() if not required
         updated_node = self._strip_super_init(updated_node)
 
-    # --- Apply Pending Injections ---
     for name, annotation in sig_ctx.injected_args:
       updated_node = self._inject_argument_to_signature(updated_node, name, annotation)
 
-    # --- Preamble and Docstrings ---
     if sig_ctx.preamble_stmts:
       updated_node = self._apply_preamble(updated_node, sig_ctx.preamble_stmts)
 
@@ -137,9 +126,7 @@ class FuncStructureMixin(BaseRewriter):
     if annotation:
       anno_node = cst.Annotation(annotation=self._create_dotted_name(annotation))
 
-    # Start with default sentinel for comma
     new_param = cst.Param(name=cst.Name(arg_name), annotation=anno_node, comma=cst.MaybeSentinel.DEFAULT)
-
     params.insert(insert_idx, new_param)
 
     for i in range(len(params) - 1):
@@ -209,11 +196,36 @@ class FuncStructureMixin(BaseRewriter):
       return node
 
     new_body_stmts = []
-    for stmt in node.body.body:
-      if not self._is_super_init_stmt(stmt):
-        new_body_stmts.append(stmt)
+    skip_next = False
+
+    for i, stmt in enumerate(node.body.body):
+      if skip_next:
+        skip_next = False
+        continue
+
+      if self._is_super_init_stmt(stmt):
+        # Check if the NEXT statement is an Escape Hatch Footer that should also be removed
+        # (happens if the super call was wrapped due to warning/error)
+        if i + 1 < len(node.body.body):
+          next_stmt = node.body.body[i + 1]
+          if self._is_escape_footer(next_stmt):
+            skip_next = True
+        continue
+
+      new_body_stmts.append(stmt)
 
     return node.with_changes(body=node.body.with_changes(body=new_body_stmts))
+
+  def _is_escape_footer(self, stmt: cst.CSTNode) -> bool:
+    """Checks if a statement is the closure of an Escape Hatch."""
+    # Ends usually look like: ... (Ellipsis) with a comment leading lines
+    if isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) > 0:
+      if isinstance(stmt.body[0], cst.Expr) and isinstance(stmt.body[0].value, cst.Ellipsis):
+        # Check comments for END_MARKER
+        for line in stmt.leading_lines:
+          if EscapeHatch.END_MARKER in line.comment.value:
+            return True
+    return False
 
   def _has_super_init(self, node: cst.FunctionDef) -> bool:
     if hasattr(node.body, "body"):
@@ -223,12 +235,17 @@ class FuncStructureMixin(BaseRewriter):
     return False
 
   def _is_super_init_stmt(self, stmt: cst.CSTNode) -> bool:
+    """
+    Detects if statement is `super().__init__()` or `super(Type, self).__init__()`.
+    """
     if isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) == 1:
       small = stmt.body[0]
       if isinstance(small, cst.Expr) and isinstance(small.value, cst.Call):
         call = small.value
+        # Check for .__init__()
         if isinstance(call.func, cst.Attribute) and call.func.attr.value == "__init__":
           receiver = call.func.value
+          # Check for super(...)
           if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
             if receiver.func.value == "super":
               return True
@@ -244,7 +261,6 @@ class FuncStructureMixin(BaseRewriter):
         pass
 
     if isinstance(node.body, SimpleStatementSuite):
-      # Convert to indented block first
       node = self._convert_to_indented_block(node)
 
     existing = list(node.body.body)

@@ -1,0 +1,140 @@
+{
+  "BatchNorm1d": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "dtype",
+      "eps",
+      "momentum",
+      "num_features"
+    ]
+  },
+  "Conv1d": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "dtype",
+      "kernel_size",
+      "padding"
+    ]
+  },
+  "Embed": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "dtype",
+      "embedding_init",
+      "embedding_metadata",
+      "num_embeddings",
+      "out_features",
+      "param_dtype",
+      "promote_dtype",
+      "rngs"
+    ]
+  },
+  "Embedding": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "_freeze",
+      "_weight",
+      "device",
+      "dtype",
+      "embedding_dim",
+      "max_norm",
+      "norm_type",
+      "num_embeddings",
+      "padding_idx",
+      "scale_grad_by_freq",
+      "sparse"
+    ]
+  },
+  "Flatten": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "end_dim",
+      "start_dim"
+    ]
+  },
+  "GRU": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "args",
+      "kwargs"
+    ]
+  },
+  "LSTM": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "args",
+      "kwargs"
+    ]
+  },
+  "LayerNorm": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "dtype",
+      "eps"
+    ]
+  },
+  "Linear": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "dtype",
+      "in_features",
+      "out_features"
+    ]
+  },
+  "RNN": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "args",
+      "kwargs"
+    ]
+  },
+  "dropout": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": []
+  },
+  "gelu": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": []
+  },
+  "leaky_relu": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "inplace",
+      "input",
+      "negative_slope"
+    ]
+  },
+  "log_softmax": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "dim"
+    ]
+  },
+  "relu": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "alpha",
+      "inplace",
+      "input"
+    ]
+  },
+  "sigmoid": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "input"
+    ]
+  },
+  "silu": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "inplace",
+      "input"
+    ]
+  },
+  "tanh": {
+    "description": "Auto-discovered via Consensus (Score: 1.0)",
+    "std_args": [
+      "input"
+    ]
+  }
+}

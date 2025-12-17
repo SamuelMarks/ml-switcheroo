@@ -438,10 +438,8 @@ def _get_pkg_version(package_name: str) -> str:
       Version string or "unknown".
   """
   try:
-    if package_name == "torch":
-      import torch
-
-      return torch.__version__
+    if package_name == "flax_nnx":
+      package_name = "flax"
     return importlib.metadata.version(package_name)
   except Exception:
     return "unknown"

@@ -27,6 +27,9 @@ from ml_switcheroo.semantics.merging import (
   infer_tier_from_priority,
 )
 
+# Explicit constant for discovery filename to ensure correct tiering
+DISCOVERED_FILENAME = "k_discovered.json"
+
 
 class SemanticsManager:
   """
@@ -52,13 +55,18 @@ class SemanticsManager:
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
-    self._hydrate_defaults_from_registry()
+    # 1. Load Files (Specs & Overlays) first
     self._load_knowledge_graph()
+
+    # 2. Hydrate from Registry (Code Overrides)
+    # This allows Code definitions (e.g. static mappings in Adapter class) to fix/patch
+    # stale JSON data loaded from disk.
+    self._hydrate_defaults_from_registry()
 
   def _hydrate_defaults_from_registry(self) -> None:
     """
     Iterates over all registered frameworks and extracts configuration
-    defined in the Adapter code (Aliases, Traits, RNG Methods).
+    defined in the Adapter code.
     """
     for fw_name in available_frameworks():
       adapter = get_adapter(fw_name)
@@ -76,7 +84,7 @@ class SemanticsManager:
           "name": alias_name,
         }
 
-      # B. Populate Structural Traits (The Zero-Edit Addition)
+      # B. Populate Structural Traits
       if hasattr(adapter, "structural_traits"):
         try:
           traits = adapter.structural_traits
@@ -85,41 +93,87 @@ class SemanticsManager:
         except Exception as e:
           print(f"⚠️ Failed to load structural traits for {fw_name}: {e}")
 
-      # C. Populate RNG Methods (Purity Analysis)
+      # C. Populate RNG Methods
       if hasattr(adapter, "rng_seed_methods"):
         methods = adapter.rng_seed_methods
         if methods:
           self._known_rng_methods.update(methods)
 
+      # D. Populate Import Namespaces
+      if hasattr(adapter, "import_namespaces") and adapter.import_namespaces:
+        namespaces = adapter.import_namespaces
+        for src_mod, details in namespaces.items():
+          if src_mod not in self.import_data:
+            self.import_data[src_mod] = {"variants": {}}
+
+          root = details.get("root") if "root" in details else src_mod.split(".")[0]
+          self.import_data[src_mod]["variants"][fw_name] = {
+            "root": root,
+            "sub": details.get("sub"),
+            "alias": details.get("alias"),
+          }
+
+      # E. Populate Static Definitions
+      if hasattr(adapter, "definitions") and adapter.definitions:
+        for op_name, standard_map in adapter.definitions.items():
+          variant_data = standard_map.model_dump(exclude_unset=True)
+
+          if op_name not in self.data:
+            self.data[op_name] = {
+              "description": f"Static Definition from {fw_name} Adapter",
+              "std_args": [],
+              "variants": {},
+            }
+            self._key_origins[op_name] = SemanticTier.EXTRAS.value
+
+          if "variants" not in self.data[op_name]:
+            self.data[op_name]["variants"] = {}
+
+          if fw_name not in self.data[op_name]["variants"] or self.data[op_name]["variants"][fw_name] is None:
+            self.data[op_name]["variants"][fw_name] = {}
+
+          self.data[op_name]["variants"][fw_name].update(variant_data)
+          if "api" in variant_data:
+            self._reverse_index[variant_data["api"]] = (op_name, self.data[op_name])
+
+      # F. Apply Wiring (Manual Fixes)
+      # This ensures hardcoded wiring logic applies even if not running via CLI sync
+      if hasattr(adapter, "apply_wiring"):
+        dummy_snap = {"__framework__": fw_name}
+        try:
+          adapter.apply_wiring(dummy_snap)
+          # Merge results back into manager state using overlay logic
+          merge_overlay_data(
+            data=self.data,
+            key_origins=self._key_origins,
+            import_data=self.import_data,
+            framework_configs=self.framework_configs,
+            test_templates=self.test_templates,
+            content=dummy_snap,
+            filename=f"{fw_name}_dynamic_wiring",
+          )
+        except Exception as e:
+          print(f"⚠️ Failed to apply wiring for {fw_name}: {e}")
+
   def get_all_rng_methods(self) -> Set[str]:
-    """Returns the consolidated set of RNG methods from all frameworks."""
     return self._known_rng_methods
 
   def resolve_variant(self, abstract_id: str, target_fw: str) -> Optional[Dict[str, Any]]:
-    """
-    Resolves the variant definition for a given target framework, traversing inheritance.
-    """
     defn = self.data.get(abstract_id)
     if not defn:
       return None
 
     variants = defn.get("variants", {})
-
     if target_fw in variants:
       return variants[target_fw]
 
     curr = target_fw
     limit = 5
-
     while limit > 0:
       parent = None
-
-      # 1. JSON Configuration Precedence
       config = self.framework_configs.get(curr, {})
       if "extends" in config:
         parent = config["extends"]
-
-      # 2. Adapter Fallback
       if not parent:
         adapter = get_adapter(curr)
         if adapter and hasattr(adapter, "inherits_from") and adapter.inherits_from:
@@ -133,7 +187,6 @@ class SemanticsManager:
 
       curr = parent
       limit -= 1
-
     return None
 
   def load_validation_report(self, report_path: Path) -> None:
@@ -206,24 +259,19 @@ class SemanticsManager:
       return
 
     self.data[abstract_id] = final_data
-
     variants = final_data.get("variants", {})
     for _, impl in variants.items():
       if isinstance(impl, dict) and "api" in impl:
         self._reverse_index[impl["api"]] = (abstract_id, final_data)
 
-    # Infer destination file based on origin
     tier_str = self._key_origins.get(abstract_id, SemanticTier.ARRAY_API.value)
     filename = "k_array_api.json"
-
     if tier_str == SemanticTier.NEURAL.value:
       filename = "k_neural_net.json"
     elif tier_str == SemanticTier.EXTRAS.value:
       filename = "k_framework_extras.json"
 
     file_path = resolve_semantics_dir() / filename
-
-    # Load existing manually to preserve structure before overwriting
     if file_path.exists():
       try:
         with open(file_path, "r", encoding="utf-8") as f:
@@ -234,7 +282,6 @@ class SemanticsManager:
       file_content = {}
 
     file_content[abstract_id] = final_data
-
     try:
       with open(file_path, "w", encoding="utf-8") as f:
         json.dump(file_content, f, indent=2, sort_keys=True)
@@ -242,23 +289,21 @@ class SemanticsManager:
       print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")
 
   def _load_knowledge_graph(self) -> None:
-    """
-    Loads, sorts, and merges all semantic definition files.
-    """
     base_path = resolve_semantics_dir()
 
-    # --- Phase 1: Load Specs ---
     if base_path.exists():
       all_files = list(base_path.rglob("*.json"))
 
-      # Assign Priorities based on Tier Heuristics
       prioritized_files: List[Tuple[int, Path]] = []
       for fpath in all_files:
         fname = fpath.name
-        priority = 30  # Default (Extras / Extensions)
+        priority = 30
         if "array" in fname:
           priority = 10
         elif "neural" in fname:
+          priority = 20
+        # Fix: Ensure discovered ops are treated as Neural tier for state injection
+        elif DISCOVERED_FILENAME in fname:
           priority = 20
         prioritized_files.append((priority, fpath))
 
@@ -276,20 +321,14 @@ class SemanticsManager:
         except Exception as e:
           print(f"⚠️ Error loading {fpath.name}: {e}")
 
-    # --- Phase 2: Load Overlays ---
     self._load_overlays()
-
-    # --- Phase 3: Final Indexing ---
     self._build_index()
 
   def _load_overlays(self) -> None:
-    """Scans the snapshots directory for framework overlays."""
     snap_dir = resolve_snapshots_dir()
     if not snap_dir.exists():
       return
-
     mapping_files = list(snap_dir.glob("*_map.json"))
-
     for fpath in mapping_files:
       try:
         with open(fpath, "r", encoding="utf-8") as f:
@@ -299,7 +338,6 @@ class SemanticsManager:
         print(f"⚠️ Error loading overlay {fpath.name}: {e}")
 
   def _merge_overlay(self, content: Dict[str, Any], filename: str) -> None:
-    """Delegates to merging module."""
     merge_overlay_data(
       data=self.data,
       key_origins=self._key_origins,
@@ -311,7 +349,6 @@ class SemanticsManager:
     )
 
   def _merge_tier(self, new_data: Dict[str, Any], tier: SemanticTier) -> None:
-    """Delegates to merging module."""
     merge_tier_data(
       data=self.data,
       key_origins=self._key_origins,
@@ -322,7 +359,6 @@ class SemanticsManager:
     )
 
   def _build_index(self) -> None:
-    """Rebuilds the reverse index from loaded data."""
     self._reverse_index.clear()
     for abstract_id, details in self.data.items():
       variants = details.get("variants", {})

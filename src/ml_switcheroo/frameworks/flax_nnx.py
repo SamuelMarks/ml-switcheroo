@@ -9,6 +9,7 @@ Key Features:
 - Inheritance from `jax` core via Mixin reuse.
 - Rewriting `torch.nn.Module` -> `flax.nnx.Module`.
 - Handling `rngs` state threading for stochastic layers.
+- Maps core Neural Ops to ensure successful transpilation if not pre-seeded.
 """
 
 import logging
@@ -106,6 +107,7 @@ class FlaxNNXAdapter(JAXStackMixin):
   @property
   def import_alias(self) -> Tuple[str, str]:
     # Default alias for the *primary* interaction point of this framework (Neural)
+    # Tuple returned: (module_path, alias)
     return ("flax.nnx", "nnx")
 
   @property
@@ -128,7 +130,15 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    return {}
+    """Static definitions to ensure core ops work without discovery."""
+    return {
+      "Linear": StandardMap(
+        api="flax.nnx.Linear", args={"in_features": "in_features", "out_features": "out_features", "bias": "use_bias"}
+      ),
+      "relu": StandardMap(api="flax.nnx.relu"),
+      "gelu": StandardMap(api="flax.nnx.gelu"),
+      "softmax": StandardMap(api="flax.nnx.softmax"),
+    }
 
   @property
   def rng_seed_methods(self) -> List[str]:
@@ -177,6 +187,28 @@ class FlaxNNXAdapter(JAXStackMixin):
     mappings["load_state_dict"] = {"requires_plugin": "torch_load_state_dict_to_nnx"}
     mappings["parameters"] = {"requires_plugin": "torch_parameters_to_nnx"}
 
+    # 4. Neural Layer Mappings (Safety Injection)
+    # Ensures Rewriter can map 'Linear'/'relu' even if snapshot/discovery failed.
+    # Mappings are for when flax_nnx is the TARGET.
+    # NOTE: When flax_nnx is the SOURCE, these mappings are loaded into Reverse Index by Manager
+    # allowing detection of 'flax.nnx.Linear'.
+
+    # Linear: Use nnx.Linear alias
+    if "Linear" not in mappings:
+      mappings["Linear"] = {
+        "api": "flax.nnx.Linear",
+        "args": {"in_features": "in_features", "out_features": "out_features", "bias": "use_bias"},
+      }
+
+    # Activations
+    # flax.nnx often re-exports jax.nn or has its own wrappers.
+    if "relu" not in mappings:
+      mappings["relu"] = {"api": "flax.nnx.relu"}
+    if "gelu" not in mappings:
+      mappings["gelu"] = {"api": "flax.nnx.gelu"}
+    if "softmax" not in mappings:
+      mappings["softmax"] = {"api": "flax.nnx.softmax"}
+
   # --- Examples ---
 
   @classmethod
@@ -184,13 +216,13 @@ class FlaxNNXAdapter(JAXStackMixin):
     return """from flax import nnx
 import jax.numpy as jnp
 
-class Net(nnx.Module):
-    def __init__(self, rngs: nnx.Rngs):
-        self.linear = nnx.Linear(10, 10, rngs=rngs)
+class Net(nnx.Module): 
+    def __init__(self, rngs: nnx.Rngs): 
+        self.linear = nnx.Linear(10, 10, rngs=rngs) 
 
-    def __call__(self, x):
-        x = self.linear(x)
-        return nnx.relu(x)
+    def __call__(self, x): 
+        x = self.linear(x) 
+        return nnx.relu(x) 
 """
 
   def get_tiered_examples(self) -> Dict[str, str]:
