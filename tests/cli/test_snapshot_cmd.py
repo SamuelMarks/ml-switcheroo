@@ -7,11 +7,9 @@ calls collect_api, and writes the JSON output to the specified folder.
 
 import pytest
 import json
-import sys
-from pathlib import Path
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
-from ml_switcheroo.cli.commands import handle_snapshot
+from ml_switcheroo.cli.handlers.snapshots import handle_snapshot
 from ml_switcheroo.frameworks.base import GhostRef
 
 # --- Fixtures & Mocks ---
@@ -52,10 +50,10 @@ def mock_get_pkg_version(name):
 # --- Tests ---
 
 
-# FIX: Patch handlers.discovery where the code lives
-@patch("ml_switcheroo.cli.handlers.discovery.available_frameworks", return_value=["torch", "keras"])
-@patch("ml_switcheroo.cli.handlers.discovery.get_adapter", side_effect=mock_get_adapter)
-@patch("ml_switcheroo.cli.handlers.discovery._get_pkg_version", side_effect=mock_get_pkg_version)
+# FIX: Patch handlers.snapshots where the code lives
+@patch("ml_switcheroo.cli.handlers.snapshots.available_frameworks", return_value=["torch", "keras"])
+@patch("ml_switcheroo.cli.handlers.snapshots.get_adapter", side_effect=mock_get_adapter)
+@patch("ml_switcheroo.cli.handlers.snapshots._get_pkg_version", side_effect=mock_get_pkg_version)
 def test_snapshot_command_flow(mock_ver, mock_get_adp, mock_avail, mock_snapshot_dir):
   """
   Verify standard execution flow:
@@ -79,13 +77,13 @@ def test_snapshot_command_flow(mock_ver, mock_get_adp, mock_avail, mock_snapshot
     assert data["version"] == "1.0.0"
     assert len(data["categories"]) > 0
 
-    # 2. Keras should NOT exist (version unknown logic inside _capture_framework)
+  # 2. Keras should NOT exist (version unknown logic inside _capture_framework)
   keras_file = mock_snapshot_dir / "keras_vunknown.json"
   assert not keras_file.exists()
 
 
-@patch("ml_switcheroo.cli.handlers.discovery.available_frameworks", return_value=[])
+@patch("ml_switcheroo.cli.handlers.snapshots.available_frameworks", return_value=[])
 def test_snapshot_no_frameworks(mock_avail):
   """Verify error code when no frameworks registry found."""
-  ret = handle_snapshot(out_dir=Path("."))
+  ret = handle_snapshot(out_dir=None)
   assert ret == 1

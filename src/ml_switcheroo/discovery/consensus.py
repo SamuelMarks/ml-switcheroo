@@ -16,25 +16,28 @@ from ml_switcheroo.core.ghost import GhostRef
 class CandidateStandard(BaseModel):
   """
   A proposed Abstract Standard discovered via consensus.
-
-  Attributes:
-      name: The abstract name (e.g., 'Conv2d').
-      variants: A map of framework names to their specific implementations (GhostRefs).
-      score: A confidence score derived from the number of concurring frameworks.
-      std_args: The list of argument names deemed 'standard' via voting.
-      arg_mappings: Nested dictionary mapping {framework: {std_arg: fw_specific_arg}}.
   """
 
-  name: str
-  variants: Dict[str, GhostRef] = Field(default_factory=dict)
-  score: float = 0.0
-  std_args: List[str] = Field(default_factory=list)
-  arg_mappings: Dict[str, Dict[str, str]] = Field(default_factory=dict)
+  name: str = Field(description="The abstract name (e.g., 'Conv2d').")
+  variants: Dict[str, GhostRef] = Field(
+    default_factory=dict, description="A map of framework names to their specific implementations."
+  )
+  score: float = Field(0.0, description="A confidence score derived from the number of concurring frameworks.")
+  std_args: List[str] = Field(
+    default_factory=list, description="The list of argument names deemed 'standard' via voting."
+  )
+  arg_mappings: Dict[str, Dict[str, str]] = Field(
+    default_factory=dict, description="Nested dictionary mapping {framework: {std_arg: fw_specific_arg}}."
+  )
 
-  def add_variant(self, framework: str, ref: GhostRef):
+  def add_variant(self, framework: str, ref: GhostRef) -> None:
     """
     Registers a framework's implementation of this concept.
-    Updates the consensus score.
+    Updates the consensus score based on support count.
+
+    Args:
+        framework (str): The framework identifier (e.g. 'torch').
+        ref (GhostRef): The API reference object found in that framework.
     """
     self.variants[framework] = ref
     self.score = float(len(self.variants))
@@ -45,6 +48,7 @@ class ConsensusEngine:
   Algorithms for aligning divergent API naming conventions.
 
   Capabilities:
+
   1.  **Clustering**: Groups APIs like `HuberLoss`, `huber_loss`, and `Huber` together.
   2.  **Normalization**: Strips common noise (prefixes/suffixes) to find the semantic root.
   3.  **Signature Alignment**: Builds a translation map for arguments (e.g., `keepdims` <-> `keep_dims`).
@@ -101,10 +105,12 @@ class ConsensusEngine:
     """
     Reduces an API Name to its semantic core for comparison.
 
+    This removes casing, underscores, and common prefixes/suffixes.
+
     Examples:
-        - 'HuberLoss' -> 'huber'
-        - 'reduce_mean' -> 'mean'
-        - 'conv2d' -> 'conv'
+        * 'HuberLoss' -> 'huber'
+        * 'reduce_mean' -> 'mean'
+        * 'conv2d' -> 'conv'
 
     Args:
         name (str): The raw API name (e.g. 'CrossEntropyLoss').
@@ -133,7 +139,15 @@ class ConsensusEngine:
   def normalize_arg(cls, arg_name: str) -> str:
     """
     Canonicalizes an argument name using the alias map.
-    e.g., 'learning_rate' -> 'lr'.
+
+    Example:
+        'learning_rate' -> 'lr'
+
+    Args:
+        arg_name (str): The raw argument name.
+
+    Returns:
+        str: The canonical standard name.
     """
     lower = arg_name.lower()
     return cls.ARG_ALIASES.get(lower, lower)
@@ -146,7 +160,7 @@ class ConsensusEngine:
         framework_inputs: Dictionary mapping 'framework_name' -> List of discovered GhostRefs.
 
     Returns:
-        List[CandidateStandard]: A list of potential standards, sorted by score.
+        List[CandidateStandard]: A list of potential standards, sorted by descending score.
     """
     clusters: Dict[str, CandidateStandard] = {}
 
@@ -174,16 +188,19 @@ class ConsensusEngine:
     """
     Filters candidates to keep only those present in a minimum number of frameworks.
 
+    This ensures we only create standards for concepts that are truly shared across
+    ecosystems, avoiding framework-specific noise.
+
     Args:
-        candidates: List of candidates from clustering.
-        min_support: Minimum number of frameworks that must implement the op.
+        candidates (List[CandidateStandard]): List of candidates from clustering.
+        min_support (int): Minimum number of different frameworks that must implement the op.
 
     Returns:
-        Filtered list of CandidateStandard.
+        List[CandidateStandard]: Filtered list of robust candidates.
     """
     return [c for c in candidates if len(c.variants) >= min_support]
 
-  def align_signatures(self, candidates: List[CandidateStandard], consensus_threshold: float = 0.5):
+  def align_signatures(self, candidates: List[CandidateStandard], consensus_threshold: float = 0.5) -> None:
     """
     Analyses the arguments of all variants in a candidate to determine Standard Arguments.
 
@@ -194,8 +211,8 @@ class ConsensusEngine:
     the specific framework name (e.g. Standard 'dim' -> Torch 'dim', Jax 'axis').
 
     Args:
-        candidates: List of CandidateStandards to process (in-place modification).
-        consensus_threshold: Fraction of variants that must share an arg (0.0 - 1.0).
+        candidates (List[CandidateStandard]): List of CandidateStandards to process (in-place modification).
+        consensus_threshold (float): Fraction of variants that must share an arg (0.0 - 1.0).
     """
     for cand in candidates:
       # Map: {canonical_arg: {fw_name: original_arg_name}}

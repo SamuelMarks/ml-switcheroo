@@ -11,16 +11,21 @@ from ml_switcheroo.cli.handlers.convert import (
   _print_batch_summary,
 )
 from ml_switcheroo.cli.handlers.discovery import (
-  handle_snapshot,
+  handle_discover_layers,
   handle_scaffold,
   handle_import_spec,
-  handle_sync,
   handle_sync_standards,
-  handle_wizard,
-  handle_harvest,
+)
+from ml_switcheroo.cli.handlers.snapshots import (
+  handle_snapshot,
+  handle_sync,
   _get_pkg_version,
   _capture_framework,
   _save_snapshot,
+)
+from ml_switcheroo.cli.handlers.learning import (
+  handle_wizard,
+  handle_harvest,
 )
 from ml_switcheroo.cli.handlers.verify import handle_ci
 from ml_switcheroo.cli.handlers.dev import (
@@ -38,3 +43,34 @@ from ml_switcheroo.discovery.consensus import ConsensusEngine
 from ml_switcheroo.testing.batch_runner import BatchValidator
 from ml_switcheroo.utils.readme_editor import ReadmeEditor
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
+
+__all__ = [
+  "handle_convert",
+  "_convert_single_file",
+  "_print_batch_summary",
+  "handle_discover_layers",
+  "handle_scaffold",
+  "handle_import_spec",
+  "handle_sync_standards",
+  "handle_snapshot",
+  "handle_sync",
+  "_get_pkg_version",
+  "_capture_framework",
+  "_save_snapshot",
+  "handle_wizard",
+  "handle_harvest",
+  "handle_ci",
+  "handle_matrix",
+  "handle_docs",
+  "handle_gen_tests",
+  "SemanticsManager",
+  "FrameworkSyncer",
+  "available_frameworks",
+  "get_adapter",
+  "SemanticPersister",
+  "ConsensusEngine",
+  "BatchValidator",
+  "ReadmeEditor",
+  "resolve_semantics_dir",
+  "resolve_snapshots_dir",
+]

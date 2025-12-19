@@ -65,6 +65,7 @@ class HookContext:
     self.source_fw = config.source_framework
     self.target_fw = config.target_framework
     self.metadata: Dict[str, Any] = {}
+    self.current_op_id: Optional[str] = None
 
   def inject_signature_arg(self, name: str, annotation: Optional[str] = None) -> None:
     """Requests injection of an argument into the current function signature."""

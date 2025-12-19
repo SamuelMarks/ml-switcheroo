@@ -28,6 +28,9 @@ from ml_switcheroo.core.rewriter.types import SignatureContext
 class BaseRewriter(cst.CSTTransformer):
   """
   The base class for AST transformation traversal.
+
+  Provides common utilities for scope tracking, alias resolution, and error bubbling,
+  which are utilized by the specific Mixins (CallMixin, StructureMixin, etc.).
   """
 
   def __init__(self, semantics: SemanticsManager, config: RuntimeConfig):
@@ -116,8 +119,9 @@ class BaseRewriter(cst.CSTTransformer):
   def _mark_stateful(self, var_name: str) -> None:
     """
     Marks a variable name as stateful in the current scope.
+
     Used for tracking Neural Layers to determine if calls should be rewritten
-    as stateful invocations.
+    as stateful invocations (e.g. `layer.apply(...)` instead of `layer(...)`).
 
     Args:
         var_name: The variable identifier (e.g., 'self.conv1').
@@ -128,11 +132,13 @@ class BaseRewriter(cst.CSTTransformer):
     """
     Checks if a variable is marked as stateful in any active scope.
 
+    Traverses the scope stack from inner to outer.
+
     Args:
         var_name: The variable identifier.
 
     Returns:
-        True if the variable was previously marked as stateful.
+        bool: True if the variable was previously marked as stateful.
     """
     for scope in reversed(self._scope_stack):
       if var_name in scope:
@@ -142,7 +148,7 @@ class BaseRewriter(cst.CSTTransformer):
   def _report_failure(self, reason: str) -> None:
     """
     Records a fatal translation error for the current statement.
-    This will trigger the Escape Hatch wrapper.
+    This will trigger the Escape Hatch wrapper in `leave_SimpleStatementLine`.
 
     Args:
         reason: Human-readable error message.
@@ -170,7 +176,7 @@ class BaseRewriter(cst.CSTTransformer):
         node: The CST expression (Name or Attribute).
 
     Returns:
-        The resolved string (e.g. 'torch.abs') or None if unresolvable.
+        Optional[str]: The resolved string (e.g. 'torch.abs') or None if unresolvable.
     """
     full_str = self._cst_to_string(node)
     if not full_str:
@@ -189,7 +195,15 @@ class BaseRewriter(cst.CSTTransformer):
     return full_str
 
   def _cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
-    """Helper to flatten Attribute chains into strings."""
+    """
+    Helper to flatten Attribute chains into strings.
+
+    Args:
+        node: The CST node to stringify.
+
+    Returns:
+        Optional[str]: Dotted string path (e.g. "a.b.c") or None if complex.
+    """
     if isinstance(node, cst.Name):
       return node.value
     elif isinstance(node, cst.BinaryOperation):
@@ -201,7 +215,15 @@ class BaseRewriter(cst.CSTTransformer):
     return None
 
   def _create_name_node(self, api_path: str) -> cst.BaseExpression:
-    """Creates a LibCST node structure from a dotted string."""
+    """
+    Creates a LibCST node structure from a dotted string.
+
+    Args:
+        api_path: The fully qualified API name (e.g. 'jax.numpy.array').
+
+    Returns:
+        cst.BaseExpression: A nested Attribute (or Name) node used for AST replacement.
+    """
     parts = api_path.split(".")
     node = cst.Name(parts[0])
     for part in parts[1:]:
@@ -209,13 +231,28 @@ class BaseRewriter(cst.CSTTransformer):
     return node
 
   def _create_dotted_name(self, name_str: str) -> Union[cst.Name, cst.Attribute]:
-    """Alias for _create_name_node."""
+    """
+    Alias for _create_name_node used by plugins.
+
+    Args:
+        name_str: Dotted string path.
+
+    Returns:
+        Union[cst.Name, cst.Attribute]: The generated node.
+    """
     return self._create_name_node(name_str)
 
   def _get_mapping(self, name: str) -> Optional[Dict[str, Any]]:
     """
     Queries the SemanticsManager for the target framework's variant.
     Uses resolve_variant to handle framework inheritance (e.g. Pax -> JAX).
+
+    Args:
+        name: The fully qualified source name (e.g. 'torch.abs').
+
+    Returns:
+        Optional[Dict[str, Any]]: The dictionary describing the target implementation,
+                                  or None if not found/supported.
     """
     lookup = self.semantics.get_definition(name)
     if not lookup:
@@ -250,7 +287,16 @@ class BaseRewriter(cst.CSTTransformer):
     return target_impl
 
   def _is_docstring_node(self, node: cst.CSTNode, idx: int) -> bool:
-    """Helper to detect module docstrings to ensure injection happens after."""
+    """
+    Helper to detect module docstrings to ensure injection happens after them.
+
+    Args:
+        node: The statement node.
+        idx: The index of the statement in the module body.
+
+    Returns:
+        bool: True if it is a docstring.
+    """
     if idx != 0:
       return False
     if isinstance(node, cst.SimpleStatementLine) and len(node.body) == 1 and isinstance(node.body[0], cst.Expr):
@@ -262,6 +308,14 @@ class BaseRewriter(cst.CSTTransformer):
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
     """
     Injects module-level preambles (e.g. Shim classes) requested by plugins.
+    Ensures injection happens after docstrings to maintain valid Python help text.
+
+    Args:
+        original_node: Logic before transformation.
+        updated_node: Logic after transformation.
+
+    Returns:
+        cst.Module: The module with injected preambles.
     """
     if not self._module_preamble:
       return updated_node
@@ -297,6 +351,12 @@ class BaseRewriter(cst.CSTTransformer):
     """
     Scans ``import ...`` statements to populate the alias map.
     Example: ``import torch.nn as nn`` -> ``_alias_map['nn'] = 'torch.nn'``.
+
+    Args:
+        node: Import statement node.
+
+    Returns:
+        Optional[bool]: False to stop traversal of children.
     """
     for alias in node.names:
       full_name = self._cst_to_string(alias.name)
@@ -315,6 +375,12 @@ class BaseRewriter(cst.CSTTransformer):
     """
     Scans ``from ... import ...`` statements to populate the alias map.
     Example: ``from torch import nn`` -> ``_alias_map['nn'] = 'torch.nn'``.
+
+    Args:
+        node: ImportFrom statement node.
+
+    Returns:
+        Optional[bool]: False to stop traversal of children.
     """
     if node.relative:
       return False
@@ -346,6 +412,12 @@ class BaseRewriter(cst.CSTTransformer):
     """
     Resets error tracking at the start of each line.
     Errors bubble up from children (Expressions) to this Statement handler.
+
+    Args:
+        node: The statement line node.
+
+    Returns:
+        Optional[bool]: True to continue traversal.
     """
     self._current_stmt_errors = []
     self._current_stmt_warnings = []
@@ -357,10 +429,20 @@ class BaseRewriter(cst.CSTTransformer):
     updated_node: cst.SimpleStatementLine,
   ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel]:
     """
+    Handles error bubbling from expression rewrites.
+
     If errors occurred during processing of this line's children (e.g. failing
     to rewrite a function call), wrap the line in an ``EscapeHatch``.
 
     Prioritizes errors (reverting to original code) over warnings (using updated code).
+
+    Args:
+        original_node: The node before children were visited.
+        updated_node: The node after children transformation.
+
+    Returns:
+        Union[cst.SimpleStatementLine, cst.FlattenSentinel]: The resulted node
+        (possibly wrapped with comments).
     """
     if self._current_stmt_errors:
       unique_errors = list(dict.fromkeys(self._current_stmt_errors))

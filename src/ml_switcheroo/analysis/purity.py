@@ -96,6 +96,13 @@ class PurityScanner(cst.CSTTransformer):
     """
     Exits a statement line.
     If violations were found within this statement, wraps it in the EscapeHatch.
+
+    Args:
+        original_node: The original CST node structure.
+        updated_node: The potentially transformed inner node logic.
+
+    Returns:
+        The wrapped node if unsafe, otherwise the updated node.
     """
     if self._current_violations:
       # Deduplicate reasons
@@ -108,11 +115,17 @@ class PurityScanner(cst.CSTTransformer):
     return updated_node
 
   def visit_Global(self, node: cst.Global) -> Optional[bool]:
+    """
+    Detects usage of the 'global' keyword.
+    """
     names = [n.name.value for n in node.names]
     self._current_violations.append(f"Global mutation ({', '.join(names)})")
     return False
 
   def visit_Nonlocal(self, node: cst.Nonlocal) -> Optional[bool]:
+    """
+    Detects usage of the 'nonlocal' keyword.
+    """
     names = [n.name.value for n in node.names]
     self._current_violations.append(f"Nonlocal mutation ({', '.join(names)})")
     return False

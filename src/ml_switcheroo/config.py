@@ -5,7 +5,7 @@ Updated to support Framework Flavours (Hierarchical Selection).
 
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, TypeVar
+from typing import Any, Dict, List, Optional, Type, TypeVar, Tuple
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
@@ -25,16 +25,15 @@ def get_framework_priority_order() -> List[str]:
   """
   Returns a list of framework keys sorted by UI Priority.
 
-  Logic:
-  1. Retrieve registered frameworks.
-  2. Instantiate adapter to read 'ui_priority'.
-  3. Sort by priority (asc), then by name (asc) for stability.
-  4. Filter out 'Child' frameworks (flavours) if they declare inheritance,
-     keeping the UI list clean (root frameworks only).
+  The sort order is determined by the `ui_priority` attribute of the
+  registered FrameworkAdapter. Lower numbers appear first.
+
+  Returns:
+      List[str]: Sorted list of framework identifiers (e.g. ['torch', 'jax']).
   """
   frameworks = available_frameworks()
 
-  def sort_key(name: str):
+  def sort_key(name: str) -> Tuple[int, str]:
     adapter = get_adapter(name)
     priority = 999
     is_child = False
@@ -49,7 +48,7 @@ def get_framework_priority_order() -> List[str]:
         except (ValueError, TypeError):
           pass
 
-    # Move children to the very end (9999) or filter them out in UI logic
+    # Move children (flavours) to the very end or filter them out in UI logic
     if is_child:
       priority = 9999
 
@@ -63,23 +62,34 @@ class RuntimeConfig(BaseModel):
   Global configuration container for the translation engine.
   """
 
-  source_framework: str = "torch"
-  target_framework: str = "jax"
+  source_framework: str = Field("torch", description="The primary source framework key (e.g., 'torch').")
+  target_framework: str = Field("jax", description="The primary target framework key (e.g., 'jax').")
 
   # Feature 06: Framework Flavours
   # Used to specify sub-frameworks (e.g. 'flax_nnx') when the main selection is generic ('jax').
-  source_flavour: Optional[str] = None
-  target_flavour: Optional[str] = None
+  source_flavour: Optional[str] = Field(None, description="Detailed source sub-framework (e.g. 'flax_nnx').")
+  target_flavour: Optional[str] = Field(None, description="Detailed target sub-framework.")
 
-  strict_mode: bool = False
-  plugin_settings: Dict[str, Any] = Field(default_factory=dict)
-  plugin_paths: List[Path] = Field(default_factory=list)
-  validation_report: Optional[Path] = None
+  strict_mode: bool = Field(False, description="If True, fail on unknown APIs. If False, pass through.")
+  plugin_settings: Dict[str, Any] = Field(default_factory=dict, description="Configuration passed to plugins.")
+  plugin_paths: List[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
+  validation_report: Optional[Path] = Field(None, description="Path to a verification lockfile.")
 
   @field_validator("source_framework", "target_framework")
   @classmethod
   def validate_framework(cls, v: str) -> str:
-    """Ensures the framework is registered in the system."""
+    """
+    Ensures the framework is registered in the system.
+
+    Args:
+        v (str): The framework key to validate.
+
+    Returns:
+        str: The normalized (lowercase) framework key.
+
+    Raises:
+        ValueError: If the framework is not found in the registry.
+    """
     v_clean = v.lower().strip()
     known = available_frameworks()
     # We allow unregistered frameworks if the registry is empty (bootstrap/test mode)
@@ -91,7 +101,11 @@ class RuntimeConfig(BaseModel):
   def effective_source(self) -> str:
     """
     Resolves the specific framework key to use for source logic.
+
     If a flavour (e.g. 'flax_nnx') is provided, it overrides the general framework ('jax').
+
+    Returns:
+        str: The active source framework key.
     """
     return self.source_flavour if self.source_flavour else self.source_framework
 
@@ -99,10 +113,22 @@ class RuntimeConfig(BaseModel):
   def effective_target(self) -> str:
     """
     Resolves the specific framework key to use for target logic.
+
+    Returns:
+        str: The active target framework key.
     """
     return self.target_flavour if self.target_flavour else self.target_framework
 
   def parse_plugin_settings(self, schema: Type[T]) -> T:
+    """
+    Validates the raw plugin settings dictionary against a specific Pydantic model.
+
+    Args:
+        schema (Type[T]): The Pydantic model class defining expected settings.
+
+    Returns:
+        T: An instance of the schema model populated with runtime values.
+    """
     try:
       return schema.model_validate(self.plugin_settings)
     except ValidationError as e:
@@ -122,6 +148,19 @@ class RuntimeConfig(BaseModel):
   ) -> "RuntimeConfig":
     """
     Loads configuration from pyproject.toml and overrides with CLI arguments.
+
+    Args:
+        source (Optional[str]): Override for source framework.
+        target (Optional[str]): Override for target framework.
+        source_flavour (Optional[str]): Override for source flavour.
+        target_flavour (Optional[str]): Override for target flavour.
+        strict_mode (Optional[bool]): Override for strict mode setting.
+        plugin_settings (Optional[Dict]): Additional CLI plugin settings.
+        validation_report (Optional[Path]): Override for validation report path.
+        search_path (Optional[Path]): Directory to start searching for TOML config.
+
+    Returns:
+        RuntimeConfig: The fully resolved configuration object.
     """
     start_dir = search_path or Path.cwd()
     toml_config, toml_dir = _load_toml_settings(start_dir)
@@ -172,7 +211,16 @@ class RuntimeConfig(BaseModel):
     )
 
 
-def _load_toml_settings(start_path: Path) -> tuple[Dict[str, Any], Optional[Path]]:
+def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path]]:
+  """
+  Recursively searches parents for 'pyproject.toml' and extracts config.
+
+  Args:
+      start_path (Path): Directory to start search from.
+
+  Returns:
+      Tuple[Dict, Optional[Path]]: The config dict and the directory definition was found in.
+  """
   if not tomllib:
     return {}, None
 
@@ -194,6 +242,17 @@ def _load_toml_settings(start_path: Path) -> tuple[Dict[str, Any], Optional[Path
 
 
 def parse_cli_key_values(items: Optional[List[str]]) -> Dict[str, Any]:
+  """
+  Parses a list of 'key=value' strings into a dictionary.
+
+  Types are inferred (int, float, bool, or string).
+
+  Args:
+      items (Optional[List[str]]): List of raw CLI strings directly from argparse.
+
+  Returns:
+      Dict[str, Any]: Parsed dictionary.
+  """
   if not items:
     return {}
 

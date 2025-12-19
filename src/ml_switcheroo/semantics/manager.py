@@ -35,6 +35,9 @@ class SemanticsManager:
   """
   Central database for semantic mappings and configuration.
 
+  The Manager acts as the Single Source of Truth for the engine, aggregating
+  logic from JSON files on disk and Python code in the registry.
+
   Data Source Priority:
   1. Registry Defaults (Code-defined in FrameworkAdapters).
   2. Spec Files (`semantics/*.json`): Defines the Abstract Standards.
@@ -42,6 +45,9 @@ class SemanticsManager:
   """
 
   def __init__(self):
+    """
+    Initializes the Manager and loads the full Knowledge Graph.
+    """
     self.data: Dict[str, Dict] = {}
     self.import_data: Dict[str, Dict] = {}
 
@@ -66,7 +72,13 @@ class SemanticsManager:
   def _hydrate_defaults_from_registry(self) -> None:
     """
     Iterates over all registered frameworks and extracts configuration
-    defined in the Adapter code.
+    defined in the Adapter code properties.
+
+    This populates:
+    - Helper aliases (import_alias)
+    - structural_traits (used for rewrites)
+    - static definitions (fallback mappings)
+    - manual wiring logic (apply_wiring hooks)
     """
     for fw_name in available_frameworks():
       adapter = get_adapter(fw_name)
@@ -160,9 +172,26 @@ class SemanticsManager:
           print(f"⚠️ Failed to apply wiring for {fw_name}: {e}")
 
   def get_all_rng_methods(self) -> Set[str]:
+    """
+    Returns a collected set of all method names that affect global RNG state.
+    Used by the PurityScanner.
+    """
     return self._known_rng_methods
 
   def resolve_variant(self, abstract_id: str, target_fw: str) -> Optional[Dict[str, Any]]:
+    """
+    Resolves the implementation details for a specific operation and target framework.
+
+    Implements inheritance traversal: if the target_fw doesn't have a mapping,
+    checks its parent framework (e.g., paxml -> jax).
+
+    Args:
+        abstract_id (str): The abstract operation key (e.g. 'Abs').
+        target_fw (str): The target framework key (e.g. 'paxml').
+
+    Returns:
+        Optional[Dict]: The variant dictionary if found, else None.
+    """
     defn = self.data.get(abstract_id)
     if not defn:
       return None
@@ -194,6 +223,13 @@ class SemanticsManager:
     return None
 
   def load_validation_report(self, report_path: Path) -> None:
+    """
+    Loads a verification report (lockfile) to gate usage of APIs.
+    APIs marked as False in the report will be skipped during transpilation.
+
+    Args:
+        report_path (Path): Path to the JSON report file.
+    """
     if not report_path.exists():
       print(f"⚠️ Validation report not found at {report_path}. Skipping gating.")
       return
@@ -210,19 +246,54 @@ class SemanticsManager:
       print(f"❌ Error loading validation report: {e}")
 
   def is_verified(self, abstract_id: str) -> bool:
+    """
+    Checks if an operation is considered verified based on loaded reports.
+    Defaults to True if no report is loaded for the op to allow fail-open behavior.
+
+    Args:
+        abstract_id (str): The abstract operation name.
+
+    Returns:
+        bool: True if verified or unknown/untested. False if explicitly failed.
+    """
     status_map = getattr(self, "_validation_status", {})
     return status_map.get(abstract_id, True)
 
   def get_definition_by_id(self, abstract_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Result retrieval by Abstract Key.
+
+    Args:
+        abstract_id (str): The abstract key (e.g. 'Abs').
+    """
     return self.data.get(abstract_id)
 
   def get_definition(self, api_name: str) -> Optional[Tuple[str, Dict]]:
+    """
+    Reverse lookup from Source API path.
+
+    Args:
+        api_name (str): The source API string (e.g. 'torch.abs').
+
+    Returns:
+        tuple: (AbstractID, DefinitionDict) or None.
+    """
     return self._reverse_index.get(api_name)
 
   def get_known_apis(self) -> Dict[str, Dict]:
+    """Returns the full knowledge graph dictionary."""
     return self.data
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    """
+    Compiles the module import remapping table for the ImportFixer.
+
+    Args:
+        target_fw (str): The target framework key.
+
+    Returns:
+        Dict: Mapping of 'SourceModule' -> (TargetRoot, TargetSub, Alias).
+    """
     result = {}
     for src_mod, details in self.import_data.items():
       variants = details.get("variants", {})
@@ -238,12 +309,20 @@ class SemanticsManager:
     return result
 
   def get_framework_config(self, framework: str) -> Dict[str, Any]:
+    """Returns the configuration/traits dict for a specific framework."""
     return self.framework_configs.get(framework, {})
 
   def get_test_template(self, framework: str) -> Optional[Dict[str, str]]:
+    """Returns the testing templates (imports, conversions) for a framework."""
     return self.test_templates.get(framework)
 
   def get_framework_aliases(self) -> Dict[str, Tuple[str, str]]:
+    """
+    Returns the preferred import aliases for all loaded frameworks.
+
+    Returns:
+        Dict: {framework: (module_path, alias_name)}.
+    """
     result: Dict[str, Tuple[str, str]] = {}
     for fw, config in self.framework_configs.items():
       alias_conf = config.get("alias")
@@ -255,6 +334,14 @@ class SemanticsManager:
     return result
 
   def update_definition(self, abstract_id: str, new_data: Dict[str, Any]) -> None:
+    """
+    Updates an operation definition in memory AND writes it back to disk.
+    Used by the Harvester/Wizard.
+
+    Args:
+        abstract_id (str): The key to update.
+        new_data (Dict): The new content payload.
+    """
     try:
       validated = OpDefinition.model_validate(new_data)
       final_data = validated.model_dump(by_alias=True, exclude_unset=True)
@@ -293,11 +380,13 @@ class SemanticsManager:
       print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")
 
   def _load_knowledge_graph(self) -> None:
+    """Internal helper to load all Spec files from `semantics/` in priority order."""
     base_path = resolve_semantics_dir()
 
     if base_path.exists():
       all_files = list(base_path.rglob("*.json"))
 
+      # Sorting Priorities: Array (10), Neural (20), Extras/Discovered (30)
       prioritized_files: List[Tuple[int, Path]] = []
       for fpath in all_files:
         fname = fpath.name
@@ -329,6 +418,7 @@ class SemanticsManager:
     self._build_index()
 
   def _load_overlays(self) -> None:
+    """Internal helper to load all Snapshot files from `snapshots/`."""
     snap_dir = resolve_snapshots_dir()
     if not snap_dir.exists():
       return
@@ -342,6 +432,7 @@ class SemanticsManager:
         print(f"⚠️ Error loading overlay {fpath.name}: {e}")
 
   def _merge_overlay(self, content: Dict[str, Any], filename: str) -> None:
+    """Delegates merging of snapshot content to helper utility."""
     merge_overlay_data(
       data=self.data,
       key_origins=self._key_origins,
@@ -353,6 +444,7 @@ class SemanticsManager:
     )
 
   def _merge_tier(self, new_data: Dict[str, Any], tier: SemanticTier) -> None:
+    """Delegates merging of spec content to helper utility."""
     merge_tier_data(
       data=self.data,
       key_origins=self._key_origins,
@@ -363,6 +455,7 @@ class SemanticsManager:
     )
 
   def _build_index(self) -> None:
+    """Rebuilds the reverse API index mapping source strings to abstract IDs."""
     self._reverse_index.clear()
     for abstract_id, details in self.data.items():
       variants = details.get("variants", {})

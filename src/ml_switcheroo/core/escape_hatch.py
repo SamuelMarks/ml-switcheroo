@@ -6,6 +6,7 @@ that cannot be deterministically transpiled with specific marker comments.
 It ensures that broken or partial translations are not emitted silently.
 
 Reliability Logic:
+
 - START_MARKER: injected into the leading lines of the failed statement.
 - END_MARKER: injected via a sentinel statement (Ellipsis) following the failure.
 - Verbatim Preservation: The caller is responsible for passing the *original* node
@@ -32,6 +33,7 @@ class EscapeHatch:
 
     Transformation:
         original_stmt()
+
     Becomes:
         # <SWITCHEROO_FAILED_TO_TRANS>
         # Reason: ...

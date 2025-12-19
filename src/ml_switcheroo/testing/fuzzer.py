@@ -12,6 +12,7 @@ It uses a dual-strategy approach:
     parses these strings using a mini-grammar to generate compliant data.
 
     **Supported Grammar:**
+
     - Primitives: `int`, `float`, `bool`, `str`
     - Structural: `List[T]`, `Tuple[T, ...]`, `Dict[K, V]`, `Optional[T]`
     - Unions: `int | float`
@@ -20,6 +21,7 @@ It uses a dual-strategy approach:
 
 2.  **Heuristics (Fallback)**:
     If no hints are available, it infers data types from argument names.
+
     - `mask`, `condition` -> `bool`
     - `idx`, `axis`, `dim` -> `int` within bounds
     - `x`, `y`, `input` -> `Array (float32)`
@@ -41,11 +43,6 @@ from ml_switcheroo.frameworks import get_adapter
 class InputFuzzer:
   """
   Generates dummy inputs (Arrays, Scalars, Containers) for equivalence testing.
-
-  Attributes:
-      _seed_shape (Optional[Tuple[int, ...]]): If set, forces generation
-          of arrays with this specific shape in fallback mode.
-      max_depth (int): Maximum recursion depth for nested container types.
   """
 
   MAX_RECURSION_DEPTH = 3

@@ -1,6 +1,16 @@
 """
 Interactive Wizard for Semantic Mapping Discovery.
 Updated to support Distributed Semantics (Split Specs/Mappings).
+
+This module provides the `MappingWizard` class, an interactive CLI tool used
+by developers to categorize unmapped APIs found in a source framework.
+It guides the user through:
+
+1.  Identifying unknown APIs.
+2.  Assigning them to a Semantic Tier (Math, Neural, Extras).
+3.  Normalizing arguments (e.g. renaming `dim` to `axis`).
+4.  Defining the target mapping (Hub/Spoke split).
+5.  Persisting changes to the JSON knowledge base.
 """
 
 import json
@@ -22,10 +32,26 @@ class MappingWizard:
   """
 
   def __init__(self, semantics: SemanticsManager):
+    """
+    Initializes the Wizard.
+
+    Args:
+        semantics (SemanticsManager): The loaded semantics manager.
+    """
     self.semantics = semantics
     self.console = console
 
   def start(self, package_name: str) -> None:
+    """
+    Starts the interactive session.
+
+    Scans the target package for APIs not currently present in the
+    semantics manager, then iterates through them prompting the user
+    for categorization and mapping.
+
+    Args:
+        package_name (str): The python package to inspect (e.g., 'torch').
+    """
     log_info(f"Scanning [code]{package_name}[/code] for unmapped APIs...")
 
     inspector = ApiInspector()
@@ -85,7 +111,15 @@ class MappingWizard:
     log_success(f"Session Complete. Mapped {completed} APIs (Skipped {skipped}).")
 
   def _find_unmapped_apis(self, catalog: Dict[str, Any]) -> Dict[str, Any]:
-    """filters the catalog for items not present in the semantics."""
+    """
+    Filters the catalog for items not present in the semantics.
+
+    Args:
+        catalog (Dict): Results from ApiInspector.inspect().
+
+    Returns:
+        Dict: Subset of catalog containing only unmapped APIs.
+    """
     known_apis = set()
     # Reverse index maps API paths (src) to abstracts
     if hasattr(self.semantics, "_reverse_index"):
@@ -97,7 +131,16 @@ class MappingWizard:
         missing[api_path] = details
     return missing
 
-  def _render_card(self, api_path: str, details: Dict[str, Any], idx: int, total: int):
+  def _render_card(self, api_path: str, details: Dict[str, Any], idx: int, total: int) -> None:
+    """
+    Renders a UI card with API details.
+
+    Args:
+        api_path (str): The fully qualified name (e.g. 'torch.abs').
+        details (Dict): Metadata from inspector (signature, docstring).
+        idx (int): Current index.
+        total (int): Total items.
+    """
     sig = str(details.get("detected_sig", details.get("params", [])))
     doc = details.get("doc_summary", "No documentation available.")
     if not doc:
@@ -113,6 +156,12 @@ class MappingWizard:
     self.console.print(Panel(content, title=f"Item {idx + 1}/{total}", border_style="blue"))
 
   def _prompt_tier_decision(self) -> str:
+    """
+    Prompts the user to categorize the operation.
+
+    Returns:
+        str: One of 'math', 'neural', 'extras', or 'skip'.
+    """
     choices = ["[M]ath", "[N]eural", "[E]xtras", "[S]kip"]
     options_text = " / ".join(choices)
     while True:
@@ -125,6 +174,16 @@ class MappingWizard:
       return mapping[resp]
 
   def _prompt_arg_normalization(self, detected_args: List[str], ctx_label: str) -> tuple[List[str], Dict[str, str]]:
+    """
+    Prompts user to rename arguments to standard names.
+
+    Args:
+        detected_args (List[str]): List of argument names found in source.
+        ctx_label (str): Label for the UI context (e.g. "Source (torch)").
+
+    Returns:
+        tuple: (List of Standard Args, Map {standard_arg -> source_arg}).
+    """
     if not detected_args:
       return [], {}
     self.console.print(f"[dim]Normalizing arguments for {ctx_label}... (Press Enter to keep original)[/dim]")
@@ -140,6 +199,15 @@ class MappingWizard:
     return std_args, mapping
 
   def _prompt_target_mapping(self, std_args: List[str]) -> Optional[Dict[str, Any]]:
+    """
+    Prompts user to define the target framework implementation immediately.
+
+    Args:
+        std_args (List[str]): The standard argument names defined in the previous step.
+
+    Returns:
+        Optional[Dict]: Target mapping definition or None if skipped.
+    """
     if not Confirm.ask("Map to a Target Framework (e.g. JAX) now?", default=False):
       return None
     target_fw = Prompt.ask("Target Framework", default="jax")
@@ -164,6 +232,7 @@ class MappingWizard:
     }
 
   def _resolve_target_file(self, choice: str) -> str:
+    """Helper to map user choice to filename."""
     if choice == "math":
       return "k_array_api.json"
     if choice == "neural":
@@ -179,9 +248,19 @@ class MappingWizard:
     source_fw: str,
     source_arg_map: Dict[str, str],
     target_variant: Optional[Dict[str, Any]],
-  ):
+  ) -> None:
     """
+    Persists the wizard results to disk, splitting Spec and Mapping data.
     Writes to Spec file AND Snapshot files.
+
+    Args:
+        filename (str): Target semantics spec file (e.g. 'k_neural_net.json').
+        api_path (str): The source API path (e.g. 'torch.nn.Linear').
+        doc_summary (str): Documentation string.
+        std_args (List[str]): List of standardized argument names.
+        source_fw (str): Source framework key (e.g. 'torch').
+        source_arg_map (Dict): Mapping for source arguments.
+        target_variant (Optional[Dict]): Details for the optional target mapping.
     """
     sem_dir = resolve_semantics_dir()
     snap_dir = resolve_snapshots_dir()
@@ -217,7 +296,8 @@ class MappingWizard:
 
     self.console.print(f"[green]Saved {abstract_id} to distributed mappings[/green]")
 
-  def _write_to_file(self, path: Path, key: str, data: Dict):
+  def _write_to_file(self, path: Path, key: str, data: Dict) -> None:
+    """Helper to read-update-write a JSON file."""
     current = {}
     if path.exists():
       try:
@@ -234,7 +314,8 @@ class MappingWizard:
     with open(path, "w", encoding="utf-8") as f:
       json.dump(current, f, indent=2, sort_keys=True)
 
-  def _write_to_snapshot(self, snap_dir: Path, fw: str, key: str, data: Dict):
+  def _write_to_snapshot(self, snap_dir: Path, fw: str, key: str, data: Dict) -> None:
+    """Helper to write to framework-specific snapshot using 'latest' version."""
     path = snap_dir / f"{fw}_vlatest_map.json"
     current = {"__framework__": fw, "mappings": {}}
 
@@ -253,8 +334,15 @@ class MappingWizard:
     with open(path, "w", encoding="utf-8") as f:
       json.dump(current, f, indent=2, sort_keys=True)
 
-  def _save_entry(self, api_path: str, details: Dict[str, Any], filename: str):
-    """Legacy compatibility wrapper."""
+  def _save_entry(self, api_path: str, details: Dict[str, Any], filename: str) -> None:
+    """
+    Legacy compatibility wrapper for direct saving.
+
+    Args:
+        api_path: Source API string.
+        details: Metadata dict.
+        filename: Target spec file.
+    """
     summary = details.get("doc_summary", "")
     sig = details.get("detected_sig", details.get("params", []))
 

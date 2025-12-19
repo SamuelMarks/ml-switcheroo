@@ -46,6 +46,36 @@
       "num_output_channels"
     ]
   },
+  "MultiheadAttention": {
+    "description": "Multi-head attention mechanism. Supports repacking query/key/value via plugins.",
+    "std_args": [
+      "embed_dim",
+      "num_heads",
+      "dropout",
+      "bias",
+      "add_bias_kv",
+      "add_zero_attn",
+      "kdim",
+      "vdim",
+      "batch_first"
+    ],
+    "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.MultiHeadAttention",
+        "requires_plugin": "repack_attention_call"
+      },
+      "keras": {
+        "api": "keras.layers.MultiHeadAttention",
+        "args": {
+          "embed_dim": "key_dim"
+        },
+        "requires_plugin": "repack_attention_call"
+      },
+      "torch": {
+        "api": "torch.nn.MultiheadAttention"
+      }
+    }
+  },
   "Normalize": {
     "description": "Normalize a tensor image with mean and standard deviation.",
     "std_args": [

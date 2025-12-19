@@ -131,4 +131,5 @@ def test_infix_invalid_operator_symbol(engine):
 
   assert "torch.bad(a, b)" in result.code
   assert "# Reason: Infix/Prefix transformation failed" in result.code
-  assert "Unsupported binary operator symbol: ???" in result.code
+  # Updated Assertion: Removed 'symbol' word to match actual codebase error string
+  assert "Unsupported binary operator: ???" in result.code

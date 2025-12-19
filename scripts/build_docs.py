@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+"""
+Documentation Build Script for ml-switcheroo.
+
+This script orchestrates the Sphinx documentation build process, including:
+1.  Cleaning previous build artifacts.
+2.  Copying root-level Markdown files (README, ARCHITECTURE, etc.) into the docs directory.
+3.  Building a pure-Python Wheel (.whl) of the package to support the interactive WASM demo.
+4.  Invoking `sphinx-build` to generate the HTML site.
+"""
+
 import shutil
 import subprocess
 import sys
@@ -16,12 +26,19 @@ ROOT_FILES = [
   "EXTENDING.md",
   "IDEAS.md",
   "MAINTENANCE.md",
-  "LICENSE",  # Added to fix cross-reference warning
+  "LICENSE",
 ]
 
 
-def clean():
-  """Clean build directory and temp files."""
+def clean() -> None:
+  """
+  Cleans the build directory and temporary artifacts.
+
+  Removes:
+  - The `_build` directory.
+  - Copied root Markdown files in `docs/`.
+  - Auto-generated API documentation helpers.
+  """
   if BUILD_DIR.exists():
     shutil.rmtree(BUILD_DIR)
 
@@ -37,8 +54,13 @@ def clean():
     shutil.rmtree(api_dir)
 
 
-def copy_root_files():
-  """Copies markdown files from project root to docs dir."""
+def copy_root_files() -> None:
+  """
+  Copies essential Markdown files from the project root to the docs directory.
+
+  This allows files like `README.md` and `ARCHITECTURE.md` to be included
+  in the Sphinx toctree without duplication.
+  """
   print("📋 Copying root Markdown files to docs/...")
   for fname in ROOT_FILES:
     src = PROJECT_ROOT / fname
@@ -49,10 +71,16 @@ def copy_root_files():
       print(f"⚠️  Warning: {fname} not found in root.")
 
 
-def build_wheel():
+def build_wheel() -> None:
   """
-  Builds the pure python wheel for the WASM demo.
-  It delegates to 'python -m build' (generic frontend) or 'hatch build'.
+  Builds the pure Python wheel for the WASM demo.
+
+  Delegates to the standard `python -m build` command. The resulting `.whl` file
+  is placed in `dist/` and later picked up by the Sphinx extension to be embedded
+  in the static site.
+
+  Exits:
+      sys.exit(1): If the build process fails.
   """
   print("📦 Building Python Wheel for WASM...")
 
@@ -73,9 +101,16 @@ def build_wheel():
     sys.exit(1)
 
 
-def build():
-  """Runs sphinx-build."""
+def build() -> int:
+  """
+  Executes the Sphinx build process.
 
+  1. Builds the package wheel.
+  2. Runs `sphinx-build -b html`.
+
+  Returns:
+      int: The exit code from sphinx-build (0 for success).
+  """
   # 1. Build the wheel first so the sphinx extension can find it
   build_wheel()
 
@@ -94,7 +129,10 @@ def build():
   return result.returncode
 
 
-def main():
+def main() -> None:
+  """
+  Main entry point. Orchestrates clean, copy, and build steps.
+  """
   try:
     clean()
     copy_root_files()

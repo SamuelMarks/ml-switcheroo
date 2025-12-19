@@ -189,6 +189,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       return updated
 
     abstract_id, details = lookup
+    self.ctx.current_op_id = abstract_id  # Set context for plugins
 
     # 2a. Infix / Prefix Transformation
     if mapping.get("transformation_type") == "infix":

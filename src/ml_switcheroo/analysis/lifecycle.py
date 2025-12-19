@@ -18,7 +18,16 @@ import libcst as cst
 
 @dataclass
 class _ClassContext:
-  """Tracks state for the current class scope."""
+  """
+  Tracks state for the current class scope.
+
+  Attributes:
+      name (str): Name of the class.
+      initialized_members (Set[str]): Attributes assigned to `self` in `__init__`.
+      used_in_forward (Set[str]): Attributes accessed on `self` in `forward`/`call`.
+      in_init (bool): Flag indicating visitor is inside `__init__`.
+      in_forward (bool): Flag indicating visitor is inside inference method.
+  """
 
   name: str
   initialized_members: Set[str] = field(default_factory=set)
@@ -31,21 +40,30 @@ class InitializationTracker(cst.CSTVisitor):
   """
   Scans classes to ensure members used in forward are initialized in __init__.
 
+  It maintains a stack of Class Contexts to handle nested class definitions correctly.
+
   Attributes:
       warnings (List[str]): List of discovered issues (e.g. "Member 'conv1' used but not initialized").
       _scope_stack (List[_ClassContext]): Stack tracking nested class contexts.
   """
 
   def __init__(self):
+    """Initializes the tracker with empty state."""
     self.warnings: List[str] = []
     self._scope_stack: List[_ClassContext] = []
 
   def visit_ClassDef(self, node: cst.ClassDef) -> None:
-    """Enters a class definition."""
+    """
+    Enters a class definition.
+    Pushes a new Context onto the stack.
+    """
     self._scope_stack.append(_ClassContext(name=node.name.value))
 
   def leave_ClassDef(self, node: cst.ClassDef) -> None:
-    """Exits a class definition and computes diff."""
+    """
+    Exits a class definition and computes the difference between usages and inits.
+    If discrepancies are found, they are recorded in `self.warnings`.
+    """
     if not self._scope_stack:
       return
 
@@ -64,7 +82,10 @@ class InitializationTracker(cst.CSTVisitor):
       self.warnings.append(msg)
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Tracks entry into __init__ or forward/call methods."""
+    """
+    Tracks entry into __init__ or forward/call methods.
+    Sets context flags `in_init` or `in_forward`.
+    """
     if not self._scope_stack:
       return
 
@@ -77,7 +98,10 @@ class InitializationTracker(cst.CSTVisitor):
       ctx.in_forward = True
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Exits function scope."""
+    """
+    Exits function scope.
+    Resets context flags.
+    """
     if not self._scope_stack:
       return
 
@@ -90,7 +114,9 @@ class InitializationTracker(cst.CSTVisitor):
       ctx.in_forward = False
 
   def visit_Assign(self, node: cst.Assign) -> None:
-    """Tracks assignments to self.x in __init__."""
+    """
+    Tracks assignments to `self.x` inside `__init__`.
+    """
     if not self._scope_stack:
       return
 
@@ -101,7 +127,9 @@ class InitializationTracker(cst.CSTVisitor):
         self._check_assignment_target(target.target, ctx)
 
   def visit_AnnAssign(self, node: cst.AnnAssign) -> None:
-    """Tracks annotated assignments (self.x: int = ...) in __init__."""
+    """
+    Tracks annotated assignments (`self.x: int = ...`) inside `__init__`.
+    """
     if not self._scope_stack:
       return
 
@@ -110,7 +138,9 @@ class InitializationTracker(cst.CSTVisitor):
       self._check_assignment_target(node.target, ctx)
 
   def visit_Attribute(self, node: cst.Attribute) -> None:
-    """Tracks attribute access (self.x) in forward."""
+    """
+    Tracks attribute access (`self.x`) inside `forward`.
+    """
     if not self._scope_stack:
       return
 
@@ -130,7 +160,14 @@ class InitializationTracker(cst.CSTVisitor):
         ctx.used_in_forward.add(member_name)
 
   def _check_assignment_target(self, node: cst.BaseExpression, ctx: _ClassContext) -> None:
-    """Helper to extract attribute name from assignment target."""
+    """
+    Helper to extract attribute name from assignment target.
+    Recurses for tuple unpacking.
+
+    Args:
+        node: The target expression node.
+        ctx: Current class context.
+    """
     # We look for self.name
     if isinstance(node, cst.Attribute) and self._is_self(node.value):
       ctx.initialized_members.add(node.attr.value)
@@ -141,5 +178,7 @@ class InitializationTracker(cst.CSTVisitor):
         self._check_assignment_target(element.value, ctx)
 
   def _is_self(self, node: cst.BaseExpression) -> bool:
-    """Checks if a node is the Name 'self'."""
+    """
+    Checks if a node is the Name 'self'.
+    """
     return isinstance(node, cst.Name) and node.value == "self"

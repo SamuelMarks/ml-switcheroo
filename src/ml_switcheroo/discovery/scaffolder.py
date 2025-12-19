@@ -35,14 +35,6 @@ from ml_switcheroo.frameworks.common.data import get_dataloader_semantics
 class Scaffolder:
   """
   Automated discovery tool that aligns framework APIs.
-
-  Attributes:
-      inspector (ApiInspector): Tool to extract function signatures.
-      console (Console): Rich console for output.
-      semantics (SemanticsManager): The knowledge base manager.
-      similarity_threshold (float): Cutoff for fuzzy matching (0.0 - 1.0).
-      arity_penalty (float): Penalty subtracted from similarity score for mismatched arity.
-      _cached_heuristics (Dict[str, List[re.Pattern]]): Compiled regexes for categorization.
   """
 
   def __init__(

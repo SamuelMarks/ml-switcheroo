@@ -24,10 +24,6 @@ class CompatibilityMatrix:
 
   It queries the Knowledge Base to determine which operations have defined
   variants for specific backends.
-
-  Attributes:
-      semantics (SemanticsManager): The loaded knowledge base.
-      console (Console): Rich console for rendering outputs.
   """
 
   def __init__(self, semantics: SemanticsManager):

@@ -179,6 +179,10 @@
     "Min": {
       "api": "jax.numpy.min"
     },
+    "MultiheadAttention": {
+      "api": "nnx.MultiHeadAttention",
+      "requires_plugin": "repack_attention_call"
+    },
     "Multiheadattention": {
       "api": "nnx.MultiHeadAttention"
     },

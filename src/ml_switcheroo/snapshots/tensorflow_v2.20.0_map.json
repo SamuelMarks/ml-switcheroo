@@ -172,6 +172,9 @@
     "Mod": {
       "api": "tensorflow.math.mod"
     },
+    "MultiheadAttention": {
+      "api": "keras.layers.MultiHeadAttention"
+    },
     "Multiheadattention": {
       "api": "keras.layers.MultiHeadAttention"
     },

@@ -220,6 +220,9 @@
     "Mul": {
       "api": "torch.mul"
     },
+    "MultiheadAttention": {
+      "api": "torch.nn.MultiheadAttention"
+    },
     "Multiheadattention": {
       "api": "torch.nn.MultiheadAttention"
     },

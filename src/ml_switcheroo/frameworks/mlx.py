@@ -17,6 +17,7 @@ from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, 
 try:
   import mlx.core
   import mlx.nn
+  import mlx.optimizers
 except ImportError:
   pass
 
@@ -33,7 +34,7 @@ class MLXAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    return ["mlx.core", "mlx.nn", "mlx.core.fft", "mlx.core.linalg", "mlx.core.random"]
+    return ["mlx.core", "mlx.nn", "mlx.optimizers", "mlx.core.fft", "mlx.core.linalg", "mlx.core.random"]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -42,7 +43,7 @@ class MLXAdapter:
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    return {"neural": [r"\\.nn\\."], "extras": [r"random\\."]}
+    return {"neural": [r"\\.nn\\."], "extras": [r"random\\."], "optimizer": [r"\\.optimizers\\."]}
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
@@ -70,6 +71,7 @@ class MLXAdapter:
     try:
       import mlx.core
       import mlx.nn
+      import mlx.optimizers
       import inspect
 
       if category == StandardCategory.LAYER:
@@ -89,6 +91,11 @@ class MLXAdapter:
             if inspect.isfunction(obj) or inspect.isclass(obj):
               if "loss" in name.lower():
                 results.append(GhostInspector.inspect(obj, f"mlx.nn.losses.{name}"))
+
+      if category == StandardCategory.OPTIMIZER:
+        for name, obj in inspect.getmembers(mlx.optimizers):
+          if inspect.isclass(obj) and not name.startswith("_"):
+            results.append(GhostInspector.inspect(obj, f"mlx.optimizers.{name}"))
 
     except ImportError:
       pass
@@ -128,6 +135,7 @@ def math_ops(x, y):
 """,
       "tier2_neural": """import mlx.core as mx
 import mlx.nn as nn
+import mlx.optimizers as optim
 
 class MLP(nn.Module): 
     # Tier 2: Neural Modules
@@ -144,6 +152,10 @@ class MLP(nn.Module):
         for l in self.layers: 
             x = l(x) 
         return x
+        
+def train_step(model, optimizer, x, y):
+    # Backward pass handled by value_and_grad via mx.compile typically
+    pass
 """,
       "tier3_extras": """import mlx.core as mx
 
@@ -186,7 +198,22 @@ def compute_on_gpu(x):
     Ideally, we inject import mappings here.
     """
     imports = snapshot.setdefault("imports", {})
+    mappings = snapshot.setdefault("mappings", {})
 
     # Map 'torch.nn' -> 'mlx.nn' aliased as 'nn'
     # This ensures code like `import torch.nn as nn` is rewritten to `import mlx.nn as nn`
     imports["torch.nn"] = {"root": "mlx", "sub": "nn", "alias": "nn"}
+
+    # Map optimizers with plugin
+    # Standard: 'Adam' (from Specs)
+    optimizer_names = ["Adam", "SGD", "RMSprop", "AdamW", "Adagrad"]
+
+    for opt in optimizer_names:
+      mappings[opt] = {
+        "api": f"mlx.optimizers.{opt}",
+        "args": {"lr": "learning_rate"},
+        "requires_plugin": "mlx_optimizer_init",
+      }
+
+    mappings["step"] = {"requires_plugin": "mlx_optimizer_step"}
+    mappings["zero_grad"] = {"requires_plugin": "mlx_zero_grad"}

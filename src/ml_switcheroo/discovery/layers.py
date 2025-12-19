@@ -36,10 +36,6 @@ class LayerDiscoveryBot:
   This class orchestrates the "Consensus Discovery" workflow. It is completely
   agnostic to specific libraries; it relies exclusively on the
   :class:`FrameworkAdapter` protocol to abstract away framework introspection.
-
-  Attributes:
-      consensus (ConsensusEngine): The logic engine for clustering synonyms (e.g., 'dim' vs 'axis').
-      persister (SemanticPersister): The handler that serializes findings to JSON.
   """
 
   def __init__(self):
@@ -52,6 +48,7 @@ class LayerDiscoveryBot:
     Executes the full discovery process across ALL registered, active frameworks.
 
     Steps:
+
     1.  **Harvest**: Iterates specifically over installed frameworks and requests
         their API surfaces via :meth:`collect_api` (Layers, Activations, Losses).
     2.  **Cluster**: Uses the Consensus Engine to group similar concepts

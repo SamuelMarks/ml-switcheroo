@@ -1,15 +1,28 @@
-from enum import Enum
+"""
+Enumerations for ml-switcheroo.
 
-# NOTE: SupportedEngine Enum has been removed in favor of dynamic discovery.
-# Frameworks are now registered via src/ml_switcheroo/frameworks/*.py
-# and queried using `ml_switcheroo.frameworks.available_frameworks()`.
+This module defines standard enumerations used across the codebase for
+semantic categorization and framework identification.
+"""
+
+from enum import Enum
 
 
 class SemanticTier(str, Enum):
   """
-  Categorization of API operations to distinct JSON lookup files.
+  Categorization of API operations to distinct knowledge base tiers.
+
+  Used to route definitions to specific JSON files in `src/ml_switcheroo/semantics/`.
+
+  Attributes:
+      ARRAY_API: Basic math and array manipulation (e.g. `abs`, `sum`).
+                 Maps to `k_array_api.json`.
+      NEURAL: Nural network layers and stateful operations (e.g. `Conv2d`, `Linear`).
+              Maps to `k_neural_net.json`.
+      EXTRAS: Framework-specific utilities, IO, and device management.
+              Maps to `k_framework_extras.json`.
   """
 
-  ARRAY_API = "array"  # Pure Math (semantics/k_array_api.json)
-  NEURAL = "neural"  # Layers/Stateful (semantics/k_neural_net.json)
-  EXTRAS = "extras"  # Framework Utilities (semantics/k_framework_extras.json)
+  ARRAY_API = "array"
+  NEURAL = "neural"
+  EXTRAS = "extras"

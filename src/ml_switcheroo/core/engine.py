@@ -1,9 +1,27 @@
 """
 Orchestration Engine for AST Transformations.
 
-This module uses the configured `effective_target` to drive the compilation process.
-By resolving 'Flavours' (e.g. `flax_nnx`), it ensures specific structural traits
-are loaded by the `PivotRewriter` and `Analysis` passes.
+This module provides the `ASTEngine`, the primary driver for the transpilation process.
+It coordinates the various analysis and transformation passes required to convert code
+from a source framework to a target framework.
+
+The Engine pipeline consists of:
+
+1.  **Preprocessing**: Parsing source code into a LibCST tree.
+2.  **Safety Analysis**:
+
+    *   **Purity**: Checking for side effects if targeting functional frameworks (JAX).
+    *   **Lifecycle**: Verifying variable initialization.
+    *   **Dependencies**: Scanning for unmapped 3rd-party imports.
+
+3.  **Semantic Pivoting**: Executing the `PivotRewriter` to map API calls and structure.
+4.  **Post-processing**:
+
+    *   **Import Fixer**: Injecting necessary imports and removing unused source imports.
+    *   **Structural Linting**: Verifying no artifacts from the source framework remain.
+
+The engine relies on `RuntimeConfig` to resolve 'Flavours' (e.g., distinguishing
+`flax_nnx` from generic `jax`) to load the correct structural traits.
 """
 
 import libcst as cst
@@ -30,20 +48,28 @@ class ConversionResult(BaseModel):
   Structured result of a single file conversion.
   """
 
-  code: str = ""
-  errors: List[str] = Field(default_factory=list)
-  success: bool = True
-  trace_events: List[Dict[str, Any]] = Field(default_factory=list)
+  code: str = Field(default="", description="The transformed source code.")
+  errors: List[str] = Field(default_factory=list, description="A list of error messages or warnings.")
+  success: bool = Field(default=True, description="True if the pipeline completed without critical failures.")
+  trace_events: List[Dict[str, Any]] = Field(default_factory=list, description="A log of internal trace events.")
 
   @property
   def has_errors(self) -> bool:
-    """Returns True if any errors were recorded."""
+    """
+    Returns True if any errors or warnings were recorded during conversion.
+
+    Returns:
+        bool: True if errors list is non-empty.
+    """
     return len(self.errors) > 0
 
 
 class ASTEngine:
   """
   The main compilation unit.
+
+  This class encapsulates the state and logic required to transpile a single unit of code.
+  It manages the lifecycle of the LibCST tree and the invocation of visitor passes.
   """
 
   def __init__(
@@ -61,6 +87,14 @@ class ASTEngine:
 
     Populates `self.source` and `self.target` with the effective (flavour-resolved)
     framework keys to ensure specialized adapters are used.
+
+    Args:
+        semantics (SemanticsManager, optional): The knowledge base manager. Creates new if None.
+        config (RuntimeConfig, optional): The runtime configuration object.
+        source (str): Legacy override for source framework key (default: 'torch').
+        target (str): Legacy override for target framework key (default: 'jax').
+        strict_mode (bool): Legacy override for strict mode.
+        plugin_config (Dict, optional): Legacy override for plugin settings.
     """
     self.semantics = semantics or SemanticsManager()
 
@@ -84,19 +118,47 @@ class ASTEngine:
     self.strict_mode = self.config.strict_mode
 
   def parse(self, code: str) -> cst.Module:
-    """Parses source string into a LibCST Module."""
+    """
+    Parses source string into a LibCST Module.
+
+    Args:
+        code (str): Python source code.
+
+    Returns:
+        cst.Module: The parsed Abstract Syntax Tree.
+
+    Raises:
+        libcst.ParserSyntaxError: If the input code is invalid Python.
+    """
     return cst.parse_module(code)
 
   def to_source(self, tree: cst.Module) -> str:
-    """Converts CST back to source string."""
+    """
+    Converts CST back to source string.
+
+    Args:
+        tree (cst.Module): The modified syntax tree.
+
+    Returns:
+        str: Generated Python code.
+    """
     return tree.code
 
   def run(self, code: str) -> ConversionResult:
     """
     Executes the full transpilation pipeline.
 
+    Passes performed:
+    1.  Parse.
+    2.  Purity Scan (if targeting JAX-like frameworks).
+    3.  Lifecycle Analysis (Init/Forward mismatch).
+    4.  Dependency Scan (Checking 3rd party libs).
+    5.  Pivot Rewrite (The main transformation).
+    6.  Import Fixer (Injecting new imports, pruning old ones).
+    7.  Structural Linting (Verifying output cleanliness).
+
     Args:
-        code: The input source string.
+        code (str): The input source string.
 
     Returns:
         ConversionResult: Object containing transformed code and error logs.

@@ -149,6 +149,13 @@
     "Mish": {
       "api": "keras.activations.mish"
     },
+    "MultiheadAttention": {
+      "api": "keras.layers.MultiHeadAttention",
+      "args": {
+        "embed_dim": "key_dim"
+      },
+      "requires_plugin": "repack_attention_call"
+    },
     "Multiheadattention": {
       "api": "keras.layers.MultiHeadAttention"
     },
@@ -212,6 +219,10 @@
     },
     "STFT": {
       "api": "keras.ops.stft"
+    },
+    "Sequential": {
+      "api": "keras.Sequential",
+      "requires_plugin": "keras_sequential_pack"
     },
     "Sigmoid": {
       "api": "keras.ops.sigmoid"
