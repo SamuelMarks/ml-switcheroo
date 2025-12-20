@@ -28,11 +28,6 @@ class OptaxScanner:
   """
 
   @staticmethod
-  def is_available() -> bool:
-    """Checks if Optax is installed in the current environment."""
-    return optax is not None
-
-  @staticmethod
   def scan_optimizers() -> List[GhostRef]:
     """
     Scans the Optax public API for optimizer functions.

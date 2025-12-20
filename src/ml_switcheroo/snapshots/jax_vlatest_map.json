@@ -122,6 +122,13 @@
         "delta": "delta"
       }
     },
+    "L2": {
+      "api": "optax.losses.l2_loss",
+      "args": {
+        "predictions": "predictions",
+        "targets": "targets"
+      }
+    },
     "Lamb": {
       "api": "optax.lamb",
       "args": {

@@ -5,10 +5,7 @@ This adapter builds upon the core JAX stack to support the **Flax NNX**
 neural network library. It inherits math/optimizer logic from ``JAXStackMixin``
 but implements dynamic discovery for NNX Modules.
 
-Capabilities:
-1.  **Inheritance**: Extends ``jax`` core adapter.
-2.  **Structural Traits**: Handles ``rngs`` injection and ``__call__`` inference.
-3.  **Dynamic Discovery**: Scans ``flax.nnx`` to automatically find all available Layers.
+Refactor: Populates definitions for Neural Layers and Import Namespaces.
 """
 
 import logging
@@ -145,8 +142,24 @@ class FlaxNNXAdapter(JAXStackMixin):
     return ("flax.nnx", "nnx")
 
   @property
+  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+    return {
+      # Corrected alias to 'nnx' to prevent collision with 'nn' (Torch/JAX aliases)
+      "torch.nn": {"root": "flax", "sub": "nnx", "alias": "nnx"},
+      "flax.nnx": {"root": "flax", "sub": "nnx", "alias": "nnx"},
+    }
+
+  @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
     return {"neural": [r"\\.nnx\\.", r"\\.linen\\."], "extras": [r"random\\."]}
+
+  @property
+  def test_config(self) -> Dict[str, str]:
+    # Inherit and extend JAX core config
+    conf = self.jax_test_config.copy()
+    # Append flax specific import
+    conf["import"] = conf["import"] + "\nimport flax.nnx as nnx"
+    return conf
 
   @property
   def supported_tiers(self) -> List[Any]:
@@ -178,7 +191,7 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """Static definitions to ensure core ops work without discovery."""
+    """Static definitions for Flax NNX."""
     return {
       "Linear": StandardMap(
         api="flax.nnx.Linear",
@@ -188,11 +201,23 @@ class FlaxNNXAdapter(JAXStackMixin):
           "bias": "use_bias",
         },
       ),
-      # Flax often re-exports jax.nn activations or has specific wrappers.
+      "Flatten": StandardMap(api="flax.nnx.Flatten"),
+      "MultiheadAttention": StandardMap(api="flax.nnx.MultiHeadAttention", requires_plugin="repack_attention_call"),
+      "Embedding": StandardMap(api="flax.nnx.Embed", args={"embedding_dim": "features"}),
+      "Sequential": StandardMap(api="flax.nnx.Sequential"),
+      "BatchNorm": StandardMap(api="flax.nnx.BatchNorm", args={"eps": "epsilon"}, requires_plugin="batch_norm_unwrap"),
+      "LayerNorm": StandardMap(api="flax.nnx.LayerNorm", args={"normalized_shape": "num_features", "eps": "epsilon"}),
+      "GELU": StandardMap(api="flax.nnx.gelu"),
+      # Flax activations often re-export jax.nn or define usage
       "relu": StandardMap(api="flax.nnx.relu"),
-      "gelu": StandardMap(api="flax.nnx.gelu"),
       "softmax": StandardMap(api="flax.nnx.softmax"),
       "log_softmax": StandardMap(api="flax.nnx.log_softmax"),
+      "Conv2d": StandardMap(api="flax.nnx.Conv"),
+      "Dropout": StandardMap(api="flax.nnx.Dropout"),
+      "MaxPool2d": StandardMap(api="flax.nnx.max_pool"),
+      # Variable Containers
+      "Param": StandardMap(api="flax.nnx.Param"),
+      "Cache": StandardMap(api="flax.nnx.Cache"),
     }
 
   @property
@@ -226,9 +251,6 @@ class FlaxNNXAdapter(JAXStackMixin):
         if api.startswith("flax.nnx."):
           mappings[key]["api"] = api.replace("flax.nnx.", "nnx.")
 
-    # Ensure 'nnx' usage triggers 'from flax import nnx'
-    imports["flax.nnx"] = {"root": "flax", "sub": "nnx", "alias": "nnx"}
-
     # 3. Configure State Plugins
     # Wire standard neural methods to state injection hooks
     for op in ["forward", "__call__", "call"]:
@@ -249,13 +271,13 @@ class FlaxNNXAdapter(JAXStackMixin):
     return """from flax import nnx
 import jax.numpy as jnp
 
-class Net(nnx.Module):
-    def __init__(self, rngs: nnx.Rngs):
-        self.linear = nnx.Linear(10, 10, rngs=rngs)
+class Net(nnx.Module): 
+    def __init__(self, rngs: nnx.Rngs): 
+        self.linear = nnx.Linear(10, 10, rngs=rngs) 
 
-    def __call__(self, x):
-        x = self.linear(x)
-        return nnx.relu(x)
+    def __call__(self, x): 
+        x = self.linear(x) 
+        return nnx.relu(x) 
 """
 
   def get_tiered_examples(self) -> Dict[str, str]:

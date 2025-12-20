@@ -29,7 +29,22 @@ class JAXStackMixin:
   - Optimization (Torch Optimizers -> Optax Factory Functions).
   - Serialization (Torch Save/Load -> Orbax Checkpointing).
   - Device Management (Torch Device -> JAX Devices).
+  - **Test Configuration** (Gen-Tests templates).
   """
+
+  # --- Test Configuration (Shared) ---
+
+  @property
+  def jax_test_config(self) -> Dict[str, str]:
+    """
+    Returns standard JAX test generation templates using JIT wrapping.
+    """
+    return {
+      "import": "import jax\nimport jax.numpy as jnp",
+      "convert_input": "jnp.array({np_var})",
+      "to_numpy": "np.array({res_var})",
+      "jit_wrap": "True",  # Enable experimental JIT wrapper generation
+    }
 
   # --- Hardware Abstraction (Level 0) ---
 
@@ -97,6 +112,12 @@ class JAXStackMixin:
     """
     mappings = snapshot.setdefault("mappings", {})
     templates = snapshot.setdefault("templates", {})
+
+    # Inject test templates if not present
+    # Usually handled by handle_sync pulling from test_config,
+    # but populating here is a safe fallback for direct wiring calls.
+    if not templates:
+      templates.update(self.jax_test_config)
 
     # 1. Core JAX Operation rewrites (Level 0)
     # Ensure 'Abs' (Capitalized Abstract) maps to 'jnp.abs'

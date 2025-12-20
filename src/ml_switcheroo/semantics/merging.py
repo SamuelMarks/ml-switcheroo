@@ -101,6 +101,7 @@ def merge_tier_data(
     if op_name in data:
       if tier != SemanticTier.EXTRAS:
         prev_tier = key_origins.get(op_name, "unknown")
+        # Warn on collision even if tier matches, to flag duplicate definitions in specs.
         warnings.warn(
           f"Conflict detected for '{op_name}': Defined in '{prev_tier}' but overwritten by '{tier.value}' in load.",
           UserWarning,
@@ -173,13 +174,21 @@ def merge_overlay_data(
   for op_name, implementation in mappings.items():
     # A. Check if Op exists in Spec
     if op_name not in data:
-      # If not in spec, create a skeleton Extra.
+      # If not in spec, create a skeleton description.
       data[op_name] = {
         "description": f"Auto-generated from {filename}",
         "std_args": [],  # Unknown if not in Spec
         "variants": {},
       }
-      key_origins[op_name] = SemanticTier.EXTRAS.value
+      # FIX: Apply Heuristics for Tier Detection
+      # If an operation is found in an Overlay but NOT in a Spec, we must guess its Tier.
+      # 1. Uppercase usually implies Class-based Neural layers (Linear, Conv2d).
+      # 2. Lowercase usually implies Array/Math operations or Extras.
+      if op_name not in key_origins:
+        if op_name and op_name[0].isupper():
+          key_origins[op_name] = SemanticTier.NEURAL.value
+        else:
+          key_origins[op_name] = SemanticTier.EXTRAS.value
 
     # B. Ensure 'variants' dict exists
     if "variants" not in data[op_name]:

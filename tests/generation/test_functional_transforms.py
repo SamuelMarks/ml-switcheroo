@@ -10,13 +10,9 @@ Verifies:
 """
 
 import pytest
-import ast
-import json
-from unittest.mock import MagicMock
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.utils.ast_utils import cmp_ast
 
 
 # --- Mock Semantic Environment ---

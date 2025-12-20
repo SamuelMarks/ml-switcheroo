@@ -7,7 +7,7 @@ Automated Discovery and Specification Imports.
 It handles:
 1.  **Ingestion**: Importing external standards (ONNX, Array API) and Internal Golden Sets (Hub).
 2.  **Scaffolding**: Generating skeleton mappings.
-3.  **Discovery**: Identifying Neural Layers via Consensus.
+3.  **Discovery**: Identifying Neural Layers via Consensus and linking them to the Semantic Hub.
 """
 
 import json
@@ -18,7 +18,6 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.semantics.standards_internal import INTERNAL_OPS
 from ml_switcheroo.discovery.scaffolder import Scaffolder
-from ml_switcheroo.discovery.layers import LayerDiscoveryBot
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
 from ml_switcheroo.discovery.consensus import ConsensusEngine
@@ -38,34 +37,19 @@ from ml_switcheroo.utils.console import (
 )
 
 
-def handle_discover_layers(dry_run: bool) -> int:
-  """
-  Handles 'discover-layers' command.
-
-  Runs the LayerDiscoveryBot to find missing Neural Network Layers (e.g. Linear, Conv)
-  in Torch and Flax environments and populates 'k_discovered.json'.
-
-  Args:
-      dry_run: If True, prints findings without writing to disk.
-
-  Returns:
-      int: Exit code.
-  """
-  bot = LayerDiscoveryBot()
-  count = bot.run(dry_run=dry_run)
-  return 0 if count >= 0 else 1
-
-
 def handle_scaffold(frameworks: list[str], out_dir: Path) -> int:
   """
   Handles the 'scaffold' command.
 
-  Automatically generates mapping skeletons based on fuzzy matching between
-  framework APIs and the semantic spec rules.
+  -   Iterates through provided frameworks.
+  -   Uses `FrameworkAdapter.discovery_heuristics` regexes to fuzzy match framework
+      APIs against known specs or structural conventions.
+  -   Populates semantic specs (Hub) and framework mappings (Spokes/Snapshots).
 
   Args:
-      frameworks: List of framework names to scaffold.
-      out_dir: The root directory for generating the knowledge base.
+      frameworks (list[str]): List of framework package names to scaffold (e.g., ['torch', 'jax']).
+      out_dir (Path): The root directory for generating the knowledge base.
+                      Defaults to the package source if None.
 
   Returns:
       int: Exit code.
@@ -82,6 +66,12 @@ def handle_import_spec(target: Path) -> int:
 
   Parses upstream standards documentation or stubs and merges the definitions
   into the local semantics Hub.
+
+  Args:
+      target (Path): Code resource to import ('internal', .md file, or directory).
+
+  Returns:
+      int: Exit code.
   """
   # 1. Internal Standards (Tier C)
   if str(target) == "internal":
@@ -130,7 +120,17 @@ def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]]
   Handles 'sync-standards' command.
 
   Invokes the Consensus Engine to automatically discover new Abstract Operations
-  by finding commonalities across multiple framework API surfaces.
+  by finding commonalities across multiple framework API surfaces. Writes the
+  results to `k_discovered.json` (The Unofficial/Discovered Standard).
+
+  Args:
+      categories (List[str]): List of category strings (layer, loss, etc.) to scan.
+      frameworks (Optional[List[str]]): List of framework keys to scan.
+                                        Defaults to installed/registered frameworks.
+      dry_run (bool): If True, prints results without saving.
+
+  Returns:
+      int: Exit code.
   """
   console.print("[bold blue]Starting Consensus Engine...[/bold blue]")
 
@@ -154,8 +154,9 @@ def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]]
   persister = SemanticPersister()
   out_dir = resolve_semantics_dir()
 
-  # We use pending_standards.json as the persistent store for self-repaired standards.
-  target_file = out_dir / "pending_standards.json"
+  # MERGED LOGIC: Use 'k_discovered.json' as the persistent store for self-repaired standards.
+  # This aligns with the 'handle_sync' command which consumes this specific file.
+  target_file = out_dir / "k_discovered.json"
 
   total_persisted = 0
 

@@ -1,12 +1,5 @@
 {
   "__framework__": "paxml",
-  "imports": {
-    "praxis.layers": {
-      "alias": "pl",
-      "root": "praxis",
-      "sub": "layers"
-    }
-  },
   "mappings": {
     "Abs": {
       "api": "jnp.abs"
@@ -39,39 +32,21 @@
     "Adamw": {
       "api": "optax.adamw"
     },
-    "Batchnorm": {
-      "api": "praxis.layers.BatchNorm"
-    },
-    "Dotproductattention": {
-      "api": "praxis.layers.DotProductAttention"
-    },
     "Dropout": {
-      "api": "praxis.layers.Dropout"
+      "api": "praxis.layers.Dropout",
+      "args": {
+        "p": "keep_prob"
+      }
     },
     "Einsum": {
       "api": "jnp.einsum",
       "requires_plugin": "einsum_normalizer"
     },
-    "Elu": {
-      "api": "praxis.layers.ELU"
-    },
     "Embedding": {
       "api": "praxis.layers.Embedding"
     },
-    "Exp": {
-      "api": "praxis.layers.activations.Exp"
-    },
     "Fromage": {
       "api": "optax.fromage"
-    },
-    "Gelu": {
-      "api": "praxis.layers.GELU"
-    },
-    "Groupnorm": {
-      "api": "praxis.layers.GroupNorm"
-    },
-    "Identity": {
-      "api": "praxis.layers.Identity"
     },
     "LBFGS": {
       "api": "optax.lbfgs",
@@ -80,17 +55,13 @@
     "Lamb": {
       "api": "optax.lamb"
     },
-    "Layernorm": {
-      "api": "praxis.layers.LayerNorm"
-    },
-    "LeakyRelu": {
-      "api": "praxis.layers.LeakyReLU"
-    },
-    "Leakyrelu": {
-      "api": "praxis.layers.LeakyReLU"
-    },
     "Linear": {
-      "api": "praxis.layers.Linear"
+      "api": "praxis.layers.Linear",
+      "args": {
+        "bias": "use_bias",
+        "in_features": "input_dims",
+        "out_features": "output_dims"
+      }
     },
     "Lion": {
       "api": "optax.lion"
@@ -101,18 +72,12 @@
     "Novograd": {
       "api": "optax.novograd"
     },
-    "Optional": {
-      "api": "praxis.base_layer.Optional"
+    "OptState": {
+      "api": "optax.OptState"
     },
     "RMSprop": {
       "api": "optax.rmsprop",
       "requires_plugin": "optimizer_constructor"
-    },
-    "Relu": {
-      "api": "praxis.layers.ReLU"
-    },
-    "Rmsnorm": {
-      "api": "praxis.layers.RmsNorm"
     },
     "SGD": {
       "api": "optax.sgd",
@@ -124,21 +89,6 @@
     "Sgd": {
       "api": "optax.sgd"
     },
-    "Sigmoid": {
-      "api": "praxis.layers.Sigmoid"
-    },
-    "Silu": {
-      "api": "praxis.layers.SiLU"
-    },
-    "Softplus": {
-      "api": "praxis.layers.activations.Softplus"
-    },
-    "Swish": {
-      "api": "praxis.layers.Swish"
-    },
-    "Tanh": {
-      "api": "praxis.layers.Tanh"
-    },
     "Yogi": {
       "api": "optax.yogi",
       "requires_plugin": "optimizer_constructor"
@@ -146,22 +96,28 @@
     "abs": {
       "api": "jnp.abs"
     },
-    "any": {
-      "api": "praxis.base_layer.Any"
+    "chain": {
+      "api": "optax.chain"
     },
     "data_ptr": {
       "api": "data",
       "requires_plugin": "method_to_property"
     },
-    "exp": {
-      "api": "praxis.layers.activations.Exp"
+    "freeze": {
+      "api": "optax.freeze"
+    },
+    "kl_divergence": {
+      "api": "optax.kl_divergence"
+    },
+    "params": {
+      "api": "optax.Params"
     },
     "permute_dims": {
       "api": "jnp.transpose",
       "requires_plugin": "pack_varargs"
     },
-    "repeat": {
-      "api": "praxis.layers.Repeat"
+    "schedule": {
+      "api": "optax.Schedule"
     },
     "size": {
       "api": "shape",
@@ -169,9 +125,6 @@
     },
     "step": {
       "requires_plugin": "optimizer_step"
-    },
-    "tanh": {
-      "api": "praxis.layers.Tanh"
     },
     "trace": {
       "api": "optax.trace"
@@ -181,7 +134,11 @@
     }
   },
   "templates": {
+    "convert_input": "jnp.array({np_var})",
     "fori_loop": "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})",
-    "scan": "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})"
+    "import": "import jax\nimport jax.numpy as jnp\nimport praxis.layers as pl",
+    "jit_wrap": "True",
+    "scan": "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})",
+    "to_numpy": "np.array({res_var})"
   }
 }

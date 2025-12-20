@@ -51,7 +51,8 @@ def mock_root_tree(tmp_path):
       "Abs": {"api": "torch.abs"},
       "Add": {"api": "torch.add"},
       # Op not in Spec
-      "TorchOnlyOp": {"api": "torch.special"},
+      # Lowercase to ensure heuristic categorizes it as EXTRAS, not NEURAL
+      "custom_op": {"api": "torch.special"},
     },
   }
   (snapshots_dir / "torch_vlatest_map.json").write_text(json.dumps(torch_map))
@@ -98,14 +99,14 @@ def test_overlay_merging_logic(manager):
 
 def test_overlay_missing_op_handling(manager):
   """
-  Scenario: Overlay defines 'TorchOnlyOp' which is NOT in the Spec files.
+  Scenario: Overlay defines 'custom_op' which is NOT in the Spec files.
   Expectation: Manager creates a new entry (Tier: Extras).
   """
-  assert "TorchOnlyOp" in manager.data
-  entry = manager.data["TorchOnlyOp"]
+  assert "custom_op" in manager.data
+  entry = manager.data["custom_op"]
 
   # Check source tracking
-  assert manager._key_origins["TorchOnlyOp"] == SemanticTier.EXTRAS.value
+  assert manager._key_origins["custom_op"] == SemanticTier.EXTRAS.value
 
   # Check variant
   assert entry["variants"]["torch"]["api"] == "torch.special"

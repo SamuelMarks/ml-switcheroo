@@ -1,15 +1,19 @@
 Maintenance
 ===========
 
-ml-switcheroo is a data-driven system. Maintenance primarily involves keeping the **Semantic Knowledge Base** (`src/ml_switcheroo/semantics/*.json`) synchronized with upstream Standards (ONNX, Array API) and downstream Implementations (PyTorch, JAX, etc.).
+ml-switcheroo is a data-driven system. Maintenance primarily involves keeping the **Semantic Knowledge Base** (
+`src/ml_switcheroo/semantics/*.json`) synchronized with upstream Standards (ONNX, Array API) and downstream
+Implementations (PyTorch, JAX, etc.).
 
-This guide covers the 4 stages of the maintenance lifecycle: **Ingestion**, **Discovery**, **Verification**, and **Release**.
+This guide covers the 4 stages of the maintenance lifecycle: **Ingestion**, **Discovery**, **Verification**, and *
+*Release**.
 
----
+--- 
 
 ## 1. Ingestion (Upstream Standards)
 
-When Spec Bodies (maintained by the Python Consortium or Linux Foundation) update their definitions, we import them to establish the "Abstract Standard".
+When Spec Bodies (maintained by the Python Consortium or Linux Foundation) update their definitions, we import them to
+establish the "Abstract Standard".
 
 ### Updating the Math Standard (Array API)
 
@@ -20,10 +24,10 @@ When Spec Bodies (maintained by the Python Consortium or Linux Foundation) updat
 $ git clone -b 2024.12 --depth=1 https://github.com/data-apis/array-api
 $ ml_switcheroo import-spec ./array-api/src/array_api_stubs/_2024_12
 
-# Output:
+# Output: 
 # ℹ️  Detected Array API Stubs Directory
-# ℹ️  Parsing 19 stub files...
-# ℹ️  Merging with existing 182 entries...
+# ℹ️  Parsing 19 stub files... 
+# ℹ️  Merging with existing 182 entries... 
 # ✅ Saved 182 operations to src/ml_switcheroo/semantics/k_array_api.json
 ```
 
@@ -34,38 +38,37 @@ $ ml_switcheroo import-spec ./array-api/src/array_api_stubs/_2024_12
 
 ```bash
 $ git clone --depth=1 -b v1.20.0 https://github.com/onnx/onnx
-
 $ ml_switcheroo import-spec ./onnx/docs/Operators.md
 
-# Output:
+# Output: 
 # ℹ️  Detected ONNX Markdown Spec: Operators.md
-# ℹ️  Parsing ONNX Spec: Operators.md...
-# ℹ️  Merging with existing 5 entries...
+# ℹ️  Parsing ONNX Spec: Operators.md... 
+# ℹ️  Merging with existing 5 entries... 
 # ✅ Saved 202 operations to src/ml_switcheroo/semantics/k_neural_net.json
 ```
 
----
+--- 
 
 ## 2. Operation-connect (Mapping ML array & math APIs)
 
-This step links the Abstract Standards loaded in Step 1 to concrete implementations found in installed libraries. It writes to `src/ml_switcheroo/snapshots/{fw}_mappings.json`.
+This step links the Abstract Standards loaded in Step 1 to concrete implementations found in installed libraries. It
+writes to `src/ml_switcheroo/snapshots/{fw}_mappings.json`.
 
 ```bash
 $ uv pip install keras jax tensorflow torch
-
 $ for lib in keras jax tensorflow torch; do
-    ml_switcheroo sync "$lib"
+    ml_switcheroo sync "$lib" 
   done
 
-# Output:
-# ℹ️  Syncing keras against Array API Standard...
-# ✅ Linked 95 operations for keras (Skipped 26 mismatches).
-# ℹ️  Syncing jax against Array API Standard...
-# ✅ Linked 146 operations for jax (Skipped 26 mismatches).
-# ℹ️  Syncing tensorflow against Array API Standard...
-# ✅ Linked 89 operations for tensorflow (Skipped 10 mismatches).
-# ℹ️  Syncing torch against Array API Standard...
-# ✅ Linked 149 operations for torch (Skipped 5 mismatches).
+# Output: 
+# ℹ️  Syncing keras against Array API Standard... 
+# ✅ Linked 95 operations for keras (Skipped 26 mismatches). 
+# ℹ️  Syncing jax against Array API Standard... 
+# ✅ Linked 146 operations for jax (Skipped 26 mismatches). 
+# ℹ️  Syncing tensorflow against Array API Standard... 
+# ✅ Linked 89 operations for tensorflow (Skipped 10 mismatches). 
+# ℹ️  Syncing torch against Array API Standard... 
+# ✅ Linked 149 operations for torch (Skipped 5 mismatches). 
 ```
 
 ### Specialized Frameworks (e.g. PaxML)
@@ -76,14 +79,15 @@ Note: PaxML often requires specific environment constraints (e.g., Linux x86_64,
 $ uv pip install paxml jaxlib==0.4.26
 $ ml_switcheroo sync paxml
 
-# Output:
-# ℹ️  Syncing paxml against Standard...
-# ✅ Linked 0 operations for paxml (Skipped 3 mismatches)
+# Output: 
+# ℹ️  Syncing paxml against Standard... 
+# ✅ Linked 0 operations for paxml (Skipped 3 mismatches) 
 ```
 
-**Note:** The `sync` command combines findings from all Semantic Tiers (Math, Neural, Extras) into a single overlay file per framework.
+**Note:** The `sync` command combines findings from all Semantic Tiers (Math, Neural, Extras) into a single overlay file
+per framework.
 
----
+--- 
 
 ## 3. Discovery (Mapping Frameworks)
 
@@ -91,7 +95,8 @@ Once standards are defined, we check for APIs that exist in frameworks but *miss
 
 ### A. Batch Scaffolding (Automated)
 
-When adding a fresh framework or updating a major version (e.g., PyTorch 2.x -> 3.x), use the Scaffolder. It uses the `discovery_heuristics` defined in `FrameworkAdapter` classes to fuzzy-match APIs.
+When adding a fresh framework or updating a major version (e.g., PyTorch 2.x -> 3.x), use the Scaffolder. It uses the
+`discovery_heuristics` defined in `FrameworkAdapter` classes to fuzzy-match APIs.
 
 ```bash
 # Scan installed libraries and propose mappings
@@ -100,7 +105,8 @@ ml_switcheroo scaffold --frameworks torch jax
 
 ### B. Interactive Mapping (The Wizard)
 
-For APIs that don't match heuristics (e.g., `torch.rfft` vs `jax.numpy.fft.rfft`), use the interactive wizard. This handles argument renaming (`dim` -> `axis`) and plugin assignment.
+For APIs that don't match heuristics (e.g., `torch.rfft` vs `jax.numpy.fft.rfft`), use the interactive wizard. This
+handles argument renaming (`dim` -> `axis`) and plugin assignment.
 
 ```bash
 ml_switcheroo wizard torch
@@ -108,20 +114,34 @@ ml_switcheroo wizard torch
 
 ### C. Semantic Harvesting (Human-in-the-Loop)
 
-The most robust way to maintain mappings is to "Learn from Humans." If you write a manual test case fixing a translation error, the Harvester can extract the rule back into the JSONs.
+The most robust way to maintain mappings is to "Learn from Humans." If you write a manual test case fixing a translation
+error, the Harvester can extract the rule back into the JSONs.
 
 1. Write/Fix a test in `tests/examples/`:
    ```python
-   def test_custom_add():
+   def test_custom_add(): 
        # You manually fixed arguments: alpha -> scale
-       jax.numpy.add(x, y, scale=0.5)
+       jax.numpy.add(x, y, scale=0.5) 
    ```
 2. Run the extractor:
    ```bash
    ml_switcheroo harvest tests/examples/test_custom_add.py --target jax
    ```
 
----
+### D. Consensus Discovery (Multi-Framework Intersection)
+
+To discover high-confidence abstract standards that aren't in the official specs (Tier A/B), use the Consensus Engine.
+This scans installed frameworks for common API signatures (e.g. Layers, Optimizers) and promotes them if they exist in
+multiple libraries.
+
+```bash
+# Scan installed frameworks for common Layers/Losses
+ml_switcheroo sync-standards --categories layer activation loss optimizer
+```
+
+This generates JSON, effectively bridging gaps for common ML operators.
+
+--- 
 
 ## 4. Verification (CI Loop)
 
@@ -139,17 +159,19 @@ ml_switcheroo ci
 ml_switcheroo ci --json-report verified_ops.json
 ```
 
-*Note: The `verified_ops.json` can be referenced in `pyproject.toml` to prevent the engine from generating code for unverified operations.*
+*Note: The `verified_ops.json` can be referenced in `pyproject.toml` to prevent the engine from generating code for
+unverified operations.*
 
 ### Regenerating Physical Tests
 
-Ideally, we generate physical python test files (`tests/generated/`) to commit to the repo. This ensures regression testing even without running the full fuzzer.
+Ideally, we generate physical python test files (`tests/generated/`) to commit to the repo. This ensures regression
+testing even without running the full fuzzer.
 
 ```bash
 ml_switcheroo gen-tests --out tests/generated/test_tier_a_math.py
 ```
 
----
+--- 
 
 ## 5. Documentation & Web Demo
 
@@ -186,9 +208,10 @@ The documentation includes a client-side transpiler running via Pyodide. To upda
 
 ## Glossary of Artifacts
 
-| File | Purpose | Maintenance Strategy |
-| :--- | :--- | :--- |
-| `semantics/k_array_api.json` | Math Operations | **Import** via `import-spec` from Array API Stubs. |
-| `semantics/k_neural_net.json` | Layers & Stateful Ops | **Import** via `import-spec` from ONNX. |
-| `semantics/k_framework_extras.json` | IO, Devices, Utils | **Harvest** from manual code or **Wizard**. |
-| `snapshots/{fw}_mappings.json` | Framework Implementation Overlays | **Sync** command, **Scaffold**, or **Wizard**. |
+| File                                | Purpose                           | Maintenance Strategy                                  | 
+|:------------------------------------|:----------------------------------|:------------------------------------------------------| 
+| `semantics/k_array_api.json`        | Math Operations                   | **Import** via `import-spec` from Array API Stubs.    | 
+| `semantics/k_neural_net.json`       | Layers & Stateful Ops             | **Import** via `import-spec` from ONNX.               | 
+| `semantics/k_framework_extras.json` | IO, Devices, Utils                | **Harvest** from manual code or **Wizard**.           | 
+| `semantics/k_discovered.json`       | Discovered Consensus              | **Generate** via `sync-standards` (Consensus Engine). | 
+| `snapshots/{fw}_mappings.json`      | Framework Implementation Overlays | **Sync** command, **Scaffold**, or **Wizard**.        | 

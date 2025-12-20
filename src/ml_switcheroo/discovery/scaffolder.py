@@ -5,12 +5,10 @@ This module provides the `Scaffolder` class, which inspects installed
 libraries (Torch, JAX, etc.) and aligns them against the Specification-Guided
 Knowledge Base.
 
-It prioritizes matching discovered APIs against ingested Specs (ONNX, Array API)
-before falling back to structural heuristics provided by Framework Adapters.
-
-Updates for Distributed Semantics:
-- Writes Abstract Operation Definitions (Specs) to `semantics/*.json` (Hub).
-- Writes Implementation Details (Variants) to `snapshots/*.json` (Spokes).
+Optimization Update:
+- Implements Indexing for Catalog Lookups to prevent O(N^2) complexity
+  when aligning massive frameworks (Torch vs JAX).
+- Uses pre-computed indices keyed by lowercase API names for fast retrieval.
 """
 
 import json
@@ -35,6 +33,8 @@ from ml_switcheroo.frameworks.common.data import get_dataloader_semantics
 class Scaffolder:
   """
   Automated discovery tool that aligns framework APIs.
+
+  Optimized with catalog indexing to handle large-scale API surfaces efficiently.
   """
 
   def __init__(
@@ -58,13 +58,15 @@ class Scaffolder:
     self.staged_mappings: Dict[str, Dict[str, Any]] = defaultdict(dict)
     self._cached_heuristics: Optional[Dict[str, List[re.Pattern]]] = None
 
+    # Optimization: Lookup Indices for O(1) matching
+    # Map: Framework -> Name(Lower) -> List[(Path, Details)]
+    self._catalog_indices: Dict[str, Dict[str, List[Tuple[str, Dict]]]] = {}
+
   def _lazy_load_heuristics(self) -> Dict[str, List[re.Pattern]]:
     if self._cached_heuristics is not None:
       return self._cached_heuristics
 
     compiled: Dict[str, List[re.Pattern]] = {"neural": [], "extras": []}
-
-    # We need a way to iterate available frameworks, importing from manager or frameworks package
     from ml_switcheroo.frameworks import available_frameworks
 
     for fw_name in available_frameworks():
@@ -86,15 +88,17 @@ class Scaffolder:
     self._cached_heuristics = compiled
     return compiled
 
+  def _build_catalog_index(self, fw: str, catalog: Dict[str, Any]):
+    """Creates a fast lookup index for a framework catalog."""
+    index = defaultdict(list)
+    for path, details in catalog.items():
+      name = details["name"].lower()
+      index[name].append((path, details))
+    self._catalog_indices[fw] = index
+
   def scaffold(self, frameworks: List[str], root_dir: Optional[Path] = None):
     """
     Main entry point. Scans frameworks and builds/updates JSON mappings.
-
-    Args:
-        frameworks: List of package names (e.g. ['torch', 'jax']).
-        root_dir: Root directory of the Knowledge Base (Hub & Spokes).
-                  If provided, 'semantics/' and 'snapshots/' subdirs are used relative to this.
-                  If None, defaults to package location.
     """
     if root_dir:
       semantics_path = root_dir / "semantics"
@@ -103,7 +107,7 @@ class Scaffolder:
       semantics_path = resolve_semantics_dir()
       snapshots_path = resolve_snapshots_dir()
 
-    # Pre-load known specs to drive categorization
+    # Pre-load known specs
     known_neural_ops = self._get_ops_by_tier(SemanticTier.NEURAL)
     known_math_ops = self._get_ops_by_tier(SemanticTier.ARRAY_API)
     known_extras_ops = self._get_ops_by_tier(SemanticTier.EXTRAS)
@@ -112,14 +116,17 @@ class Scaffolder:
     for fw in frameworks:
       log_info(f"Scanning [code]{fw}[/code]...")
       catalogs[fw] = self.inspector.inspect(fw)
+      # Build optimize index immediately
+      self._build_catalog_index(fw, catalogs[fw])
 
     # Drive alignment by the first framework (Primary)
     primary_fw = "torch" if "torch" in frameworks else frameworks[0]
-    primary_catalog = catalogs[primary_fw]
+    # Use list to avoid modifying during iteration if logical changes happened (safe side)
+    primary_items = list(catalogs[primary_fw].items())
 
     log_info(f"Aligning APIs against [code]{primary_fw}[/code] and [code]Specs[/code]...")
 
-    for api_path, details in primary_catalog.items():
+    for api_path, details in primary_items:
       name = details["name"]
       kind = details.get("type", "function")
 
@@ -141,7 +148,6 @@ class Scaffolder:
 
       # Strategy 2: Heuristic Fallback (Dynamic)
       if self._is_structurally_neural(api_path, kind):
-        # FIX: Ensure neural heuristic routes to neural spec, not extras
         self._register_entry("k_neural_net.json", name, primary_fw, api_path, details, catalogs)
         continue
 
@@ -157,7 +163,8 @@ class Scaffolder:
     for op, defn in dataloader_defaults.items():
       self.staged_specs["k_framework_extras.json"][op] = {
         "description": defn.get("description"),
-        "std_args": defn.get("std_args"),
+        # Default to empty list if None, preventing Pydantic validation errors
+        "std_args": defn.get("std_args", []),
       }
       if "variants" in defn:
         for fw, variant in defn["variants"].items():
@@ -171,21 +178,17 @@ class Scaffolder:
     if not snapshots_path.exists():
       snapshots_path.mkdir(parents=True, exist_ok=True)
 
-    # Write Hub (Specs)
     for filename, content in self.staged_specs.items():
       if content:
         self._write_json(semantics_path / filename, content, merge=True)
 
-    # Write Spokes (Snapshots)
     for fw, mapping_data in self.staged_mappings.items():
       if mapping_data:
         try:
-          if fw == "torch":
-            import torch
-
-            ver = torch.__version__
-          else:
-            ver = importlib.metadata.version(fw)
+          ver_name = fw
+          if fw == "flax_nnx":
+            ver_name = "flax"
+          ver = importlib.metadata.version(ver_name)
         except Exception:
           ver = "latest"
 
@@ -203,6 +206,10 @@ class Scaffolder:
     lower_map = {k.lower(): k for k in spec_ops}
     if api_name.lower() in lower_map:
       return lower_map[api_name.lower()]
+
+    # Only perform close matches on smaller set, but exact match is preferred
+    # Removing fuzzy matching here for performance if set is huge,
+    # but spec_ops is usually small (~200). So this is safe.
     matches = difflib.get_close_matches(api_name, spec_ops, n=1, cutoff=0.95)
     if matches:
       return matches[0]
@@ -241,20 +248,22 @@ class Scaffolder:
     }
 
     self.staged_specs[target_filename][op_name] = spec_entry
-
     self.staged_mappings[primary_fw][op_name] = {"api": primary_path, "args": {p: p for p in details.get("params", [])}}
 
     primary_params = details.get("params", [])
 
+    # Find matches in OTHER frameworks
     for other_fw, other_cat in catalogs.items():
       if other_fw == primary_fw:
         continue
 
+      # Try fast path: same fully qualified path?
       if primary_path in other_cat:
         self._register_mapping(op_name, other_fw, primary_path, other_cat[primary_path])
         continue
 
-      fuzzy_match = self._find_fuzzy_match(other_cat, op_name, primary_params)
+      # Try fuzzy match (OPTIMIZED: uses index and fw_key)
+      fuzzy_match = self._find_fuzzy_match(other_cat, op_name, primary_params, fw_key=other_fw)
       if fuzzy_match:
         path, d = fuzzy_match
         self._register_mapping(op_name, other_fw, path, d)
@@ -262,25 +271,79 @@ class Scaffolder:
   def _register_mapping(self, op_name: str, fw: str, path: str, details: Dict):
     self.staged_mappings[fw][op_name] = {"api": path, "args": {p: p for p in details.get("params", [])}}
 
-  def _find_fuzzy_match(self, catalog: Dict, target_name: str, reference_params: List[str]) -> Optional[Tuple[str, Dict]]:
+  def _find_fuzzy_match(
+    self, catalog: Dict, target_name: str, reference_params: List[str], fw_key: str = None
+  ) -> Optional[Tuple[str, Dict]]:
+    """
+    Optimized fuzzy matching using indexing to avoid O(N) scan per item.
+    Includes fallback to fuzzy string matching if exact name match fails.
+    """
+    target_lower = target_name.lower()
+    candidates = []
+    using_fuzzy_score = False
+
+    # 1. Fast Lookup via Index (Exact Name Match)
+    if fw_key and fw_key in self._catalog_indices:
+      if target_lower in self._catalog_indices[fw_key]:
+        candidates.extend(self._catalog_indices[fw_key][target_lower])
+
+    # 2. Fallback: Fuzzy Name Match (Linear scan on Index Keys)
+    # Only if exact match found nothing AND catalog isn't massive (guard)
+    if not candidates and len(catalog) < 2000:
+      using_fuzzy_score = True
+
+      # Use index keys to avoid iterating full catalog items (N -> ~N/3)
+      # fw_key index is Dict[lower_name, List[items]]
+      source_names = []
+      if fw_key and fw_key in self._catalog_indices:
+        source_names = list(self._catalog_indices[fw_key].keys())
+      else:
+        # Manual extraction if fw_key logic failed
+        source_names = [d["name"].lower() for d in catalog.values()]
+
+      # Use a loose cutoff for candidate selection, exact threshold applied later in scoring
+      loose_cutoff = min(0.4, self.similarity_threshold)
+
+      # Find close names (e.g. 'absolute' vs 'abs')
+      matches = difflib.get_close_matches(target_lower, source_names, n=5, cutoff=loose_cutoff)
+
+      # Populate candidates from matches
+      if fw_key and fw_key in self._catalog_indices:
+        for m in matches:
+          candidates.extend(self._catalog_indices[fw_key][m])
+      else:
+        # Slow fallback without index
+        for path, details in catalog.items():
+          if details["name"].lower() in matches:
+            candidates.append((path, details))
+
+    if not candidates:
+      return None
+
+    # 3. Score Candidates (Name Similarity + Arity check)
     best_score = 0.0
     best_match = None
     ref_arity = len(reference_params)
 
-    for path, details in catalog.items():
-      leaf_name = path.split(".")[-1]
+    for path, details in candidates:
+      leaf_name = details["name"]
       candidate_params = details.get("params", [])
       cand_arity = len(candidate_params)
       has_varargs = details.get("has_varargs", False)
 
-      base_boost = 0.0
-      if target_name.lower() == leaf_name.lower():
-        base_boost = 0.3
-      elif target_name in leaf_name or leaf_name in target_name:
-        base_boost = 0.1
+      # Calculate name score
+      if using_fuzzy_score:
+        raw_score = difflib.SequenceMatcher(None, target_lower, leaf_name.lower()).ratio()
 
-      name_ratio = difflib.SequenceMatcher(None, target_name.lower(), leaf_name.lower()).ratio()
-      raw_score = name_ratio + base_boost
+        # Boost for containment/prefix to handle 'abs' vs 'absolute'
+        # Only if length is substantial enough to avoid noise (e.g., 'a' in 'add')
+        l_low = leaf_name.lower()
+        if len(target_lower) >= 3 and len(l_low) >= 3:
+          if target_lower.startswith(l_low) or l_low.startswith(target_lower):
+            raw_score = max(raw_score, 0.85)
+
+      else:
+        raw_score = 1.0
 
       arity_diff = abs(ref_arity - cand_arity)
       final_penalty = 0.0
@@ -294,7 +357,8 @@ class Scaffolder:
 
       final_score = raw_score - final_penalty
 
-      if final_score >= 1.25 and final_penalty == 0:
+      # Exact structural match shortcut
+      if final_score >= 1.0 and final_penalty == 0:
         return path, details
 
       if final_score > best_score:
@@ -325,4 +389,4 @@ class Scaffolder:
     with open(path, "wt", encoding="utf-8") as f:
       json.dump(final_data, f, indent=2, sort_keys=True)
 
-    log_success(f"Updated [path]{path.name}[/path] ({len(new_data.get('mappings', new_data))} entries generated)")
+    log_success(f"Updated [path]{path.name}[/path]")

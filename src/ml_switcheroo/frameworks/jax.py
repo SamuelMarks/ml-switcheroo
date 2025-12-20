@@ -4,9 +4,7 @@ JAX Core Framework Adapter (Level 0 & Level 1).
 This adapter provides support for the functional JAX ecosystem *without* binding
 to a high-level neural network library like Flax or Haiku.
 
-Updates:
-- Dynamic scanning of ``jax.nn`` for activations.
-- Dynamic scanning of ``optax`` for optimizers/losses via `OptaxScanner`.
+Refactor: Now includes comprehensive definitions for JAX ops and Optax/Orbax via `definitions`.
 """
 
 import logging
@@ -67,8 +65,19 @@ class JaxCoreAdapter(JAXStackMixin):
     return ("jax.numpy", "jnp")
 
   @property
+  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+    return {
+      "torch.nn.functional": {"root": "jax", "sub": "nn", "alias": None},
+    }
+
+  @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
     return {"array": [r"jax\\.numpy\\.", r"jnp\\."], "extras": [r"jax\\.random\\.", r"jax\\.lax\\.", r"optax\\."]}
+
+  @property
+  def test_config(self) -> Dict[str, str]:
+    # Use standard config from mixin
+    return self.jax_test_config
 
   @property
   def structural_traits(self) -> StructuralTraits:
@@ -84,7 +93,76 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    return {}
+    """
+    Static Definitions for JAX Core, Optax, Orbax.
+    """
+    return {
+      "TorchFunctional": StandardMap(api="jax.nn"),
+      # Optimization (Optax)
+      "Adam": StandardMap(api="optax.adam", requires_plugin="optimizer_constructor"),
+      "SGD": StandardMap(api="optax.sgd", requires_plugin="optimizer_constructor"),
+      "RMSprop": StandardMap(api="optax.rmsprop", requires_plugin="optimizer_constructor"),
+      "StepLR": StandardMap(api="optax.exponential_decay", requires_plugin="scheduler_rewire"),
+      "CosineAnnealingLR": StandardMap(api="optax.cosine_decay_schedule", requires_plugin="scheduler_rewire"),
+      "ClipGradNorm": StandardMap(api="optax.clip_by_global_norm", requires_plugin="grad_clipper"),
+      "step": StandardMap(api="optimizer_step", requires_plugin="optimizer_step"),
+      "zero_grad": StandardMap(api="optimizer_zero_grad", requires_plugin="optimizer_zero_grad"),
+      # Array / Math
+      "randn": StandardMap(api="jax.random.normal", requires_plugin="inject_prng"),
+      "Clamp": StandardMap(api="jax.numpy.clip", args={"min": "a_min", "max": "a_max", "input": "a"}),
+      "Gather": StandardMap(api="jax.numpy.take_along_axis", requires_plugin="gather_adapter"),
+      "Scatter": StandardMap(api="jax.ops.index_update", requires_plugin="scatter_indexer"),
+      "Flatten": StandardMap(api="jax.numpy.reshape", requires_plugin="flatten_range"),
+      "Reshape": StandardMap(api="jax.numpy.reshape", requires_plugin="pack_shape_args"),
+      "View": StandardMap(api="jax.numpy.reshape", requires_plugin="view_semantics"),
+      "Squeeze": StandardMap(api="jax.numpy.squeeze", args={"dim": "axis"}),
+      "Unsqueeze": StandardMap(api="jax.numpy.expand_dims", args={"dim": "axis"}),
+      "TopK": StandardMap(api="jax.lax.top_k", requires_plugin="topk_adapter"),
+      "ArgMax": StandardMap(api="jax.numpy.argmax", args={"dim": "axis"}),
+      "ArgMin": StandardMap(api="jax.numpy.argmin", args={"dim": "axis"}),
+      "Pad": StandardMap(api="jax.numpy.pad", requires_plugin="padding_converter"),
+      "Einsum": StandardMap(api="jnp.einsum", requires_plugin="einsum_normalizer"),
+      "permute_dims": StandardMap(api="jnp.transpose", requires_plugin="pack_varargs"),
+      "Abs": StandardMap(api="jnp.abs"),
+      "Mean": StandardMap(api="jnp.mean"),
+      "Sum": StandardMap(api="jnp.sum"),
+      # Casting
+      "CastFloat": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastDouble": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastHalf": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastLong": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastInt": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
+      "size": StandardMap(api="shape", requires_plugin="method_to_property"),
+      # Extras & State
+      "CrossEntropyLoss": StandardMap(
+        api="optax.softmax_cross_entropy_with_integer_labels",
+        args={"input": "logits", "target": "labels"},
+        requires_plugin="loss_reduction",
+      ),
+      "MSELoss": StandardMap(
+        api="optax.l2_loss", args={"input": "predictions", "target": "targets"}, requires_plugin="loss_reduction"
+      ),
+      "OneHot": StandardMap(api="jax.nn.one_hot", args={"tensor": "x", "input": "x"}),
+      "no_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
+      "enable_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
+      # Register Buffers mappings for JAX target usually handled by Plugins
+      # NOTE: JaxCore does not define neural containers (state_dict, modules), that's for FlaxNNX/Paxml.
+      # But basic hooks need to exist for pure-JAX conversions requiring valid fallbacks.
+      "register_buffer": StandardMap(api="torch_register_buffer_to_nnx", requires_plugin="torch_register_buffer_to_nnx"),
+      "register_parameter": StandardMap(
+        api="torch_register_parameter_to_nnx", requires_plugin="torch_register_parameter_to_nnx"
+      ),
+      "state_dict": StandardMap(api="torch_state_dict_to_nnx", requires_plugin="torch_state_dict_to_nnx"),
+      "load_state_dict": StandardMap(api="torch_load_state_dict_to_nnx", requires_plugin="torch_load_state_dict_to_nnx"),
+      "parameters": StandardMap(api="torch_parameters_to_nnx", requires_plugin="torch_parameters_to_nnx"),
+      "DataLoader": StandardMap(api="GenericDataLoader", requires_plugin="convert_dataloader"),
+      "LoadStateDict": StandardMap(api="KeyMapper.from_torch", requires_plugin="checkpoint_mapper"),
+      # Functional Transforms
+      "vmap": StandardMap(api="jax.vmap", args={"func": "fun"}),
+      "grad": StandardMap(api="jax.grad", args={"func": "fun"}),
+      "jit": StandardMap(api="jax.jit", args={"func": "fun"}),
+    }
 
   @property
   def rng_seed_methods(self) -> List[str]:

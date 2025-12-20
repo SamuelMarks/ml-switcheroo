@@ -10,7 +10,7 @@ import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.utils.ast_utils import cmp_ast
+from tests.utils.ast_utils import cmp_ast
 
 # --- Source Code ---
 # Derived from tests/examples/ex01_math_ops.torch.py

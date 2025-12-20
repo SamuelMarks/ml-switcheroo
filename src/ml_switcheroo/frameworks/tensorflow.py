@@ -4,14 +4,11 @@ TensorFlow Framework Adapter.
 This module provides the adapter for TensorFlow, supporting both core TF operations
 and legacy Keras integration if present within the TF namespace.
 
-Capabilities:
-1.  **Core Math**: Maps `Mean`, `Abs` to `tf.math`.
-2.  **Plugin Wiring**: Handles `transpose` (permute) via the `pack_varargs` plugin.
-3.  **Discovery**: Scans `tensorflow.nn` for activations and layers.
+Refactor: Distributed definitions populated.
 """
 
 import sys
-from typing import List, Tuple, Optional, Dict
+from typing import List, Tuple, Optional, Dict, Any
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, StandardCategory, StandardMap
@@ -26,8 +23,6 @@ except ImportError:
 class TensorFlowAdapter:
   """
   Adapter for TensorFlow (Core & Keras).
-
-  Supports translation of Low-level TF modules and math operations.
   """
 
   display_name: str = "TensorFlow"
@@ -39,10 +34,6 @@ class TensorFlowAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    """
-    Modules to scan during Scaffolding.
-    Broadens search to include signal, linalg, and embedded keras layers.
-    """
     return [
       "tensorflow",
       "tensorflow.math",
@@ -54,23 +45,29 @@ class TensorFlowAdapter:
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Default import alias: import tensorflow as tf."""
     return ("tensorflow", "tf")
 
   @property
+  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+    return {"tensorflow": {"root": "tensorflow", "sub": None, "alias": "tf"}}
+
+  @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Regex patterns for categorizing discovered APIs."""
     return {
       "neural": [r"\\.keras\\.", r"Layer$"],
       "extras": [r"\\.io\\.", r"\\.data\\."],
     }
 
   @property
+  def test_config(self) -> Dict[str, str]:
+    return {
+      "import": "import tensorflow as tf",
+      "convert_input": "tf.convert_to_tensor({np_var})",
+      "to_numpy": "{res_var}.numpy()",
+    }
+
+  @property
   def structural_traits(self) -> StructuralTraits:
-    """
-    Defines structural rewriting rules for TF Classes.
-    Often overlaps with Keras traits (call vs forward).
-    """
     return StructuralTraits(
       module_base="keras.Layer",
       forward_method="call",
@@ -86,12 +83,21 @@ class TensorFlowAdapter:
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Static definitions for core operations.
-
-    Ensures 'Mean' uses 'reduce_mean' and 'permute_dims' uses the plugin.
     """
     return {
+      # Math / Array
+      "Abs": StandardMap(api="tf.abs"),
       "Mean": StandardMap(api="tf.math.reduce_mean"),
+      "Sum": StandardMap(api="tf.math.reduce_sum"),
+      "exp": StandardMap(api="tf.math.exp"),
+      "log": StandardMap(api="tf.math.log"),
+      "square": StandardMap(api="tf.math.square"),
       "permute_dims": StandardMap(api="tf.transpose", requires_plugin="pack_varargs"),
+      # Extras & Utils
+      "randn": StandardMap(api="tf.random.normal"),
+      "ArgMax": StandardMap(api="tf.math.argmax"),
+      "ArgMin": StandardMap(api="tf.math.argmin"),
+      "DataLoader": StandardMap(api="tf.data.Dataset", requires_plugin="tf_data_loader"),
     }
 
   @property
@@ -99,18 +105,11 @@ class TensorFlowAdapter:
     return ["set_seed", "random.set_seed"]
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Implements runtime introspection for the Consensus Engine.
-    Scans `tf.nn` for activations/math and `tf.keras` for layers.
-    """
     results = []
     try:
       import tensorflow as tf
 
       if category == StandardCategory.ACTIVATION:
-        # Scan tf.nn for common activation functions
-        # Note: `tf.nn` includes many ops, we filter by known activation names
-        # to avoid pollution, or scan check signature.
         target_names = {
           "relu",
           "sigmoid",
@@ -125,8 +124,8 @@ class TensorFlowAdapter:
             results.append(GhostInspector.inspect(getattr(tf.nn, name), f"tf.nn.{name}"))
 
       elif category == StandardCategory.LAYER:
-        # Scan tf.keras.layers if available (TF < 2.16 might have embedded Keras)
-        if hasattr(tf, "keras") and hasattr(tf.keras, "layers"):
+        is_keras_available = hasattr(tf, "keras") and hasattr(tf.keras, "layers")
+        if is_keras_available:
           import inspect
 
           for name, obj in inspect.getmembers(tf.keras.layers):
@@ -137,22 +136,19 @@ class TensorFlowAdapter:
       pass
     return results
 
+  # --- Manual Wiring ---
+
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    pass
+    # definitions cover existing logic
+
   # --- Verification ---
 
   @classmethod
   def get_example_code(cls) -> str:
-    """Returns snippet for the web demo."""
     return cls().get_tiered_examples()["tier2_neural"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Returns TensorFlow Core idiomatic examples.
-
-    Tiers:
-    1. Math: Uses `tf.math` operations.
-    2. Neural: Uses `tf.Module` (distinct from Keras Layers) to show low-level state.
-    3. Extras: Uses `tf.data` pipelines.
-    """
     return {
       "tier1_math": """import tensorflow as tf
 
@@ -182,21 +178,14 @@ class Model(tf.Module):
 
 def data_pipeline(tensors, batch_size=32): 
     # Tier 3: tf.data Input Pipeline
-    # Efficient asynchronous data loading mechanism
+    # Valid TensorFlow dataset construction
     dataset = tf.data.Dataset.from_tensor_slices(tensors) 
-
-    # Shuffle and Batch
-    dataset = dataset.shuffle(buffer_size=1024).batch(batch_size) 
-
-    return dataset
+    loader = dataset.shuffle(1024).batch(batch_size) 
+    return loader
 """,
     }
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """
-    Generates `tf.device` string.
-    Resolves 'cuda'/'gpu' to 'GPU', 'cpu' to 'CPU'.
-    """
     clean_type = device_type.strip("'\"").lower()
     tf_type = "CPU"
     if clean_type in ("cuda", "gpu", "mps"):
@@ -207,7 +196,6 @@ def data_pipeline(tensors, batch_size=32):
       if device_index.isdigit():
         idx_str = device_index
       else:
-        # Dynamic index handling
         return f"tf.device(f'{tf_type}:{{str({device_index})}}')"
 
     return f"tf.device('{tf_type}:{idx_str}')"
@@ -223,7 +211,6 @@ def data_pipeline(tensors, batch_size=32):
     return ""
 
   def convert(self, data):
-    """Converts inputs to TF Tensors."""
     try:
       import tensorflow as tf
 

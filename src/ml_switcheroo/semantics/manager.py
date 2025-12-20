@@ -4,10 +4,10 @@ SemanticsManager for Knowledge Base Loading and Updating.
 This module is responsible for locating, loading, and merging semantic
 specification files (JSONs) into a unified Knowledge Graph.
 
-It implements a "Hub-and-Spoke" loading strategy:
-1.  **Hub (Specs)**: Loads Abstract Operation definitions from `semantics/*.json`.
-2.  **Spokes (Overlays)**: Scans `snapshots/*_mappings.json` to inject
-    framework-specific implementation details (variants).
+Updates:
+- Calls `_hydrate_defaults_from_registry` to merge code-defined variants.
+- Merges `adapter.definitions` as valid overlays.
+- Merges `adapter.import_namespaces` into import maps.
 """
 
 import json
@@ -19,7 +19,9 @@ from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.semantics.schema import OpDefinition
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
 
-# New Modules
+# Access Hook Registry to hydrate auto-wired plugins
+from ml_switcheroo.core import hooks
+
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.semantics.merging import (
   merge_tier_data,
@@ -27,33 +29,18 @@ from ml_switcheroo.semantics.merging import (
   infer_tier_from_priority,
 )
 
-# Explicit constant for discovery filename to ensure correct tiering
-DISCOVERED_FILENAME = "k_discovered.json"
+DISCOVERED_FILENAMES = {"k_discovered.json"}
 
 
 class SemanticsManager:
   """
   Central database for semantic mappings and configuration.
-
-  The Manager acts as the Single Source of Truth for the engine, aggregating
-  logic from JSON files on disk and Python code in the registry.
-
-  Data Source Priority:
-  1. Registry Defaults (Code-defined in FrameworkAdapters).
-  2. Spec Files (`semantics/*.json`): Defines the Abstract Standards.
-  3. Overlay Files (`snapshots/*_mappings.json`): Injects Framework Variants.
   """
 
   def __init__(self):
-    """
-    Initializes the Manager and loads the full Knowledge Graph.
-    """
     self.data: Dict[str, Dict] = {}
     self.import_data: Dict[str, Dict] = {}
-
-    # Stores framework traits: { "jax": { "alias": {...}, "traits": {...}, "tiers": [...] } }
     self.framework_configs: Dict[str, Dict] = {}
-
     self.test_templates: Dict[str, Dict] = {}
     self._known_rng_methods: Set[str] = set()
 
@@ -61,25 +48,17 @@ class SemanticsManager:
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
-    # 1. Load Files (Specs & Overlays) first
+    # 1. Load Files (Specs & Overlays)
     self._load_knowledge_graph()
 
     # 2. Hydrate from Registry (Code Overrides)
-    # This allows Code definitions (e.g. static mappings in Adapter class) to fix/patch
-    # stale JSON data loaded from disk.
     self._hydrate_defaults_from_registry()
 
   def _hydrate_defaults_from_registry(self) -> None:
     """
-    Iterates over all registered frameworks and extracts configuration
-    defined in the Adapter code properties.
-
-    This populates:
-    - Helper aliases (import_alias)
-    - structural_traits (used for rewrites)
-    - static definitions (fallback mappings)
-    - manual wiring logic (apply_wiring hooks)
+    Iterates over FrameWork Adapters and Plugin Hooks to extract configuration.
     """
+    # --- A. Framework Adapters ---
     for fw_name in available_frameworks():
       adapter = get_adapter(fw_name)
       if not adapter:
@@ -88,7 +67,7 @@ class SemanticsManager:
       if fw_name not in self.framework_configs:
         self.framework_configs[fw_name] = {}
 
-      # A. Populate Default Aliases
+      # Traits
       if hasattr(adapter, "import_alias") and adapter.import_alias:
         mod_path, alias_name = adapter.import_alias
         self.framework_configs[fw_name]["alias"] = {
@@ -96,7 +75,6 @@ class SemanticsManager:
           "name": alias_name,
         }
 
-      # B. Populate Structural Traits
       if hasattr(adapter, "structural_traits"):
         try:
           traits = adapter.structural_traits
@@ -105,60 +83,57 @@ class SemanticsManager:
         except Exception as e:
           print(f"⚠️ Failed to load structural traits for {fw_name}: {e}")
 
-      # B2. Populate Semantic Tiers (New safety logic)
       if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
         self.framework_configs[fw_name]["tiers"] = [t.value for t in adapter.supported_tiers]
 
-      # C. Populate RNG Methods
-      if hasattr(adapter, "rng_seed_methods"):
-        methods = adapter.rng_seed_methods
-        if methods:
-          self._known_rng_methods.update(methods)
+      if hasattr(adapter, "rng_seed_methods") and adapter.rng_seed_methods:
+        self._known_rng_methods.update(adapter.rng_seed_methods)
 
-      # D. Populate Import Namespaces
-      if hasattr(adapter, "import_namespaces") and adapter.import_namespaces:
-        namespaces = adapter.import_namespaces
-        for src_mod, details in namespaces.items():
-          if src_mod not in self.import_data:
-            self.import_data[src_mod] = {"variants": {}}
+      # **New: Merge Code-Defined Variants**
+      if hasattr(adapter, "definitions"):
+        defs = adapter.definitions
+        if defs:
+          mappings = {k: v.model_dump(exclude_unset=True) for k, v in defs.items()}
 
-          root = details.get("root") if "root" in details else src_mod.split(".")[0]
-          self.import_data[src_mod]["variants"][fw_name] = {
-            "root": root,
-            "sub": details.get("sub"),
-            "alias": details.get("alias"),
-          }
+          # Pre-label Tiers based on Naming Convention before merging
+          # Capitalized ops (Linear, Conv2d) -> Neural
+          # Lowercase ops (abs, sum) -> Array
+          for op_key in mappings.keys():
+            if op_key not in self._key_origins:
+              # Simple heuristic: Uppercase usually implies Class/Module (Neural)
+              # Lowercase implies Function (Array/Math)
+              if op_key[0].isupper():
+                self._key_origins[op_key] = SemanticTier.NEURAL.value
+              else:
+                self._key_origins[op_key] = SemanticTier.ARRAY_API.value
 
-      # E. Populate Static Definitions
-      if hasattr(adapter, "definitions") and adapter.definitions:
-        for op_name, standard_map in adapter.definitions.items():
-          variant_data = standard_map.model_dump(exclude_unset=True)
+          # Create a virtual snapshot structure
+          virtual_snap = {"__framework__": fw_name, "mappings": mappings}
+          merge_overlay_data(
+            data=self.data,
+            key_origins=self._key_origins,
+            import_data=self.import_data,
+            framework_configs=self.framework_configs,
+            test_templates=self.test_templates,
+            content=virtual_snap,
+            filename=f"{fw_name}_code_defs",
+          )
 
-          if op_name not in self.data:
-            self.data[op_name] = {
-              "description": f"Static Definition from {fw_name} Adapter",
-              "std_args": [],
-              "variants": {},
-            }
-            self._key_origins[op_name] = SemanticTier.EXTRAS.value
+      # **New: Merge Import Namespaces**
+      if hasattr(adapter, "import_namespaces"):
+        ns_map = adapter.import_namespaces
+        if ns_map:
+          # Structure imports appropriately: src -> variants -> target -> details
+          for src_pkg, details in ns_map.items():
+            if src_pkg not in self.import_data:
+              self.import_data[src_pkg] = {"variants": {}}
+            self.import_data[src_pkg]["variants"][fw_name] = details
 
-          if "variants" not in self.data[op_name]:
-            self.data[op_name]["variants"] = {}
-
-          if fw_name not in self.data[op_name]["variants"] or self.data[op_name]["variants"][fw_name] is None:
-            self.data[op_name]["variants"][fw_name] = {}
-
-          self.data[op_name]["variants"][fw_name].update(variant_data)
-          if "api" in variant_data:
-            self._reverse_index[variant_data["api"]] = (op_name, self.data[op_name])
-
-      # F. Apply Wiring (Manual Fixes)
-      # This ensures hardcoded wiring logic applies even if not running via CLI sync
+      # Wiring Logic (Dynamic/Legacy adjustments)
       if hasattr(adapter, "apply_wiring"):
         dummy_snap = {"__framework__": fw_name}
         try:
           adapter.apply_wiring(dummy_snap)
-          # Merge results back into manager state using overlay logic
           merge_overlay_data(
             data=self.data,
             key_origins=self._key_origins,
@@ -171,31 +146,29 @@ class SemanticsManager:
         except Exception as e:
           print(f"⚠️ Failed to apply wiring for {fw_name}: {e}")
 
+    # --- B. Auto-Wired Plugins ---
+    plugin_metadata = hooks.get_all_hook_metadata()
+    for trigger_name, spec in plugin_metadata.items():
+      for op_name, op_details in spec.ops.items():
+        merge_tier_data(
+          data=self.data,
+          key_origins=self._key_origins,
+          import_data=self.import_data,
+          framework_configs=self.framework_configs,
+          new_content={op_name: op_details},
+          tier=SemanticTier.EXTRAS,
+        )
+
+    # Rebuild index after all injections
+    self._build_index()
+
   def get_all_rng_methods(self) -> Set[str]:
-    """
-    Returns a collected set of all method names that affect global RNG state.
-    Used by the PurityScanner.
-    """
     return self._known_rng_methods
 
   def resolve_variant(self, abstract_id: str, target_fw: str) -> Optional[Dict[str, Any]]:
-    """
-    Resolves the implementation details for a specific operation and target framework.
-
-    Implements inheritance traversal: if the target_fw doesn't have a mapping,
-    checks its parent framework (e.g., paxml -> jax).
-
-    Args:
-        abstract_id (str): The abstract operation key (e.g. 'Abs').
-        target_fw (str): The target framework key (e.g. 'paxml').
-
-    Returns:
-        Optional[Dict]: The variant dictionary if found, else None.
-    """
     defn = self.data.get(abstract_id)
     if not defn:
       return None
-
     variants = defn.get("variants", {})
     if target_fw in variants:
       return variants[target_fw]
@@ -208,6 +181,11 @@ class SemanticsManager:
       if "extends" in config:
         parent = config["extends"]
       if not parent:
+        # Check loaded adapter class inheritance
+        # Note: We don't hold references to adapter instances directly map,
+        # so we instantiate temporarily or check known config?
+        # Since _hydrate_defaults_from_registry ran, it implies adapters exist.
+        # We can look up the adapter again here.
         adapter = get_adapter(curr)
         if adapter and hasattr(adapter, "inherits_from") and adapter.inherits_from:
           parent = adapter.inherits_from
@@ -223,77 +201,32 @@ class SemanticsManager:
     return None
 
   def load_validation_report(self, report_path: Path) -> None:
-    """
-    Loads a verification report (lockfile) to gate usage of APIs.
-    APIs marked as False in the report will be skipped during transpilation.
-
-    Args:
-        report_path (Path): Path to the JSON report file.
-    """
     if not report_path.exists():
       print(f"⚠️ Validation report not found at {report_path}. Skipping gating.")
       return
-
     try:
       with open(report_path, "r", encoding="utf-8") as f:
         report = json.load(f)
         if isinstance(report, dict):
           self._validation_status.update(report)
           print(f"🔒 Loaded {len(report)} verification statuses.")
-        else:
-          print(f"❌ Invalid report format in {report_path}. Expected JSON.")
     except Exception as e:
       print(f"❌ Error loading validation report: {e}")
 
   def is_verified(self, abstract_id: str) -> bool:
-    """
-    Checks if an operation is considered verified based on loaded reports.
-    Defaults to True if no report is loaded for the op to allow fail-open behavior.
-
-    Args:
-        abstract_id (str): The abstract operation name.
-
-    Returns:
-        bool: True if verified or unknown/untested. False if explicitly failed.
-    """
     status_map = getattr(self, "_validation_status", {})
     return status_map.get(abstract_id, True)
 
   def get_definition_by_id(self, abstract_id: str) -> Optional[Dict[str, Any]]:
-    """
-    Result retrieval by Abstract Key.
-
-    Args:
-        abstract_id (str): The abstract key (e.g. 'Abs').
-    """
     return self.data.get(abstract_id)
 
   def get_definition(self, api_name: str) -> Optional[Tuple[str, Dict]]:
-    """
-    Reverse lookup from Source API path.
-
-    Args:
-        api_name (str): The source API string (e.g. 'torch.abs').
-
-    Returns:
-        tuple: (AbstractID, DefinitionDict) or None.
-    """
     return self._reverse_index.get(api_name)
 
   def get_known_apis(self) -> Dict[str, Dict]:
-    """Returns the full knowledge graph dictionary."""
     return self.data
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
-    """
-    Compiles the module import remapping table for the ImportFixer.
-
-    Args:
-        target_fw (str): The target framework key.
-
-    Returns:
-        Dict: Mapping of 'SourceModule' -> (TargetRoot, TargetSub, Alias).
-    """
     result = {}
     for src_mod, details in self.import_data.items():
       variants = details.get("variants", {})
@@ -303,26 +236,17 @@ class SemanticsManager:
         target_root = tgt_impl.get("root")
         target_sub = tgt_impl.get("sub")
         alias = tgt_impl.get("alias")
-
         if target_root:
           result[src_mod] = (target_root, target_sub, alias)
     return result
 
   def get_framework_config(self, framework: str) -> Dict[str, Any]:
-    """Returns the configuration/traits dict for a specific framework."""
     return self.framework_configs.get(framework, {})
 
   def get_test_template(self, framework: str) -> Optional[Dict[str, str]]:
-    """Returns the testing templates (imports, conversions) for a framework."""
     return self.test_templates.get(framework)
 
   def get_framework_aliases(self) -> Dict[str, Tuple[str, str]]:
-    """
-    Returns the preferred import aliases for all loaded frameworks.
-
-    Returns:
-        Dict: {framework: (module_path, alias_name)}.
-    """
     result: Dict[str, Tuple[str, str]] = {}
     for fw, config in self.framework_configs.items():
       alias_conf = config.get("alias")
@@ -334,14 +258,6 @@ class SemanticsManager:
     return result
 
   def update_definition(self, abstract_id: str, new_data: Dict[str, Any]) -> None:
-    """
-    Updates an operation definition in memory AND writes it back to disk.
-    Used by the Harvester/Wizard.
-
-    Args:
-        abstract_id (str): The key to update.
-        new_data (Dict): The new content payload.
-    """
     try:
       validated = OpDefinition.model_validate(new_data)
       final_data = validated.model_dump(by_alias=True, exclude_unset=True)
@@ -380,13 +296,9 @@ class SemanticsManager:
       print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")
 
   def _load_knowledge_graph(self) -> None:
-    """Internal helper to load all Spec files from `semantics/` in priority order."""
     base_path = resolve_semantics_dir()
-
     if base_path.exists():
       all_files = list(base_path.rglob("*.json"))
-
-      # Sorting Priorities: Array (10), Neural (20), Extras/Discovered (30)
       prioritized_files: List[Tuple[int, Path]] = []
       for fpath in all_files:
         fname = fpath.name
@@ -395,8 +307,7 @@ class SemanticsManager:
           priority = 10
         elif "neural" in fname:
           priority = 20
-        # Fix: Ensure discovered ops are treated as Neural tier for state injection
-        elif DISCOVERED_FILENAME in fname:
+        elif fname in DISCOVERED_FILENAMES:
           priority = 20
         prioritized_files.append((priority, fpath))
 
@@ -406,11 +317,8 @@ class SemanticsManager:
         try:
           with open(fpath, "r", encoding="utf-8") as f:
             content = json.load(f)
-
           tier = infer_tier_from_priority(priority)
           self._merge_tier(content, tier)
-        except json.JSONDecodeError as e:
-          print(f"❌ Error decoding {fpath.name}: {e}")
         except Exception as e:
           print(f"⚠️ Error loading {fpath.name}: {e}")
 
@@ -418,7 +326,6 @@ class SemanticsManager:
     self._build_index()
 
   def _load_overlays(self) -> None:
-    """Internal helper to load all Snapshot files from `snapshots/`."""
     snap_dir = resolve_snapshots_dir()
     if not snap_dir.exists():
       return
@@ -432,7 +339,6 @@ class SemanticsManager:
         print(f"⚠️ Error loading overlay {fpath.name}: {e}")
 
   def _merge_overlay(self, content: Dict[str, Any], filename: str) -> None:
-    """Delegates merging of snapshot content to helper utility."""
     merge_overlay_data(
       data=self.data,
       key_origins=self._key_origins,
@@ -444,7 +350,6 @@ class SemanticsManager:
     )
 
   def _merge_tier(self, new_data: Dict[str, Any], tier: SemanticTier) -> None:
-    """Delegates merging of spec content to helper utility."""
     merge_tier_data(
       data=self.data,
       key_origins=self._key_origins,
@@ -455,7 +360,6 @@ class SemanticsManager:
     )
 
   def _build_index(self) -> None:
-    """Rebuilds the reverse API index mapping source strings to abstract IDs."""
     self._reverse_index.clear()
     for abstract_id, details in self.data.items():
       variants = details.get("variants", {})

@@ -5,6 +5,9 @@ This module manages the "Spoke" side of the Knowledge Base (Snapshots & Overlays
 It handles:
 1.  **Syncing**: Linking Abstract Standards (Hub) to installed framework implementations.
 2.  **Snapshotting**: Capturing API surfaces for Ghost Mode support.
+
+Update: Automatically extracts `test_config` from adapters and persists it into the snapshot
+templates. This ensures `gen-tests` has the necessary metadata.
 """
 
 import json
@@ -80,7 +83,8 @@ def handle_sync(framework: str) -> int:
   2.  Introspecting the installed framework to find matching APIs.
   3.  **Merging Static Definitions** from the Adapter (for Ghost support).
   4.  Applying Adapter-specific manual wiring (plugins, templates).
-  5.  Writing the results to the Snapshot Overlay (`snapshots/{fw}_mappings.json`).
+  5.  **Persisting Test Configuration templates**.
+  6.  Writing the results to the Snapshot Overlay (`snapshots/{fw}_mappings.json`).
 
   Args:
       framework: The framework key to sync (e.g. 'torch', 'jax').
@@ -171,7 +175,17 @@ def handle_sync(framework: str) -> int:
           snapshot_data["mappings"][op_name] = map_model.model_dump(exclude_unset=True)
           total_found += 1
 
-  # 4. Apply Manual Wiring (Plugins & Templates) from Adapter
+  # 4. Extract Test Generation Configuration
+  if adapter and hasattr(adapter, "test_config"):
+    tmpl = adapter.test_config
+    if tmpl:
+      if "templates" not in snapshot_data:
+        snapshot_data["templates"] = {}
+      snapshot_data["templates"].update(tmpl)
+      # Consider template updates as a successful sync action
+      total_found += 1
+
+  # 5. Apply Manual Wiring (Plugins & Templates) from Adapter
   if adapter and hasattr(adapter, "apply_wiring"):
     try:
       adapter.apply_wiring(snapshot_data)
@@ -181,7 +195,7 @@ def handle_sync(framework: str) -> int:
     except Exception as e:
       log_warning(f"Wiring failed for {framework}: {e}")
 
-  # 5. Write Snapshot
+  # 6. Write Snapshot
   if total_found > 0 or snap_path.exists():
     if not snap_dir.exists():
       snap_dir.mkdir(parents=True, exist_ok=True)

@@ -1,8 +1,14 @@
+"""
+Numpy Framework Adapter.
+
+Refactor: Definitions populated for NumPy specific Ops.
+"""
+
 import numpy as np
 from typing import List, Tuple, Optional, Dict, Any
 from ml_switcheroo.core.ghost import GhostRef
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, StandardCategory
+from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, StandardCategory, StandardMap
 
 
 @register_framework("numpy")
@@ -22,8 +28,21 @@ class NumpyAdapter:
     return ("numpy", "np")
 
   @property
+  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+    return {"numpy": {"root": "numpy", "sub": None, "alias": "np"}}
+
+  @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
     return {"extras": [r"\\.random\\\\.", r"save", r"load"]}
+
+  @property
+  def test_config(self) -> Dict[str, str]:
+    """Test templates for NumPy."""
+    return {
+      "import": "import numpy as np",
+      "convert_input": "{np_var}",  # Identity (NumPy is default)
+      "to_numpy": "{res_var}",  # Identity
+    }
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
@@ -36,8 +55,21 @@ class NumpyAdapter:
     return StructuralTraits()
 
   @property
-  def definitions(self) -> Dict[str, Any]:
-    return {}
+  def definitions(self) -> Dict[str, StandardMap]:
+    return {
+      # Math / Array
+      "Abs": StandardMap(api="np.abs"),
+      "Mean": StandardMap(api="np.mean"),
+      "Sum": StandardMap(api="np.sum"),
+      "max": StandardMap(api="np.max"),
+      "min": StandardMap(api="np.min"),
+      "exp": StandardMap(api="np.exp"),
+      "log": StandardMap(api="np.log"),
+      "square": StandardMap(api="np.square"),
+      # Extras
+      "randn": StandardMap(api="numpy.random.randn"),
+      "permute_dims": StandardMap(api="numpy.transpose", requires_plugin="pack_varargs"),
+    }
 
   @property
   def rng_seed_methods(self) -> List[str]:
@@ -105,15 +137,7 @@ def serialize_data(arr, filename):
     return ""
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """
-    Applies wiring fixes for NumPy.
-    Corrects auto-generated mappings that might incorrectly point to non-existent APIs.
-    """
-    mappings = snapshot.setdefault("mappings", {})
-
-    # Fix: `permute_dims` often fuzzy-matches to non-existent `numpy.permute_dims`
-    # Map it explicitly to `numpy.transpose` with the packing plugin.
-    mappings["permute_dims"] = {"api": "numpy.transpose", "requires_plugin": "pack_varargs"}
+    pass
 
   # --- Verification ---
 

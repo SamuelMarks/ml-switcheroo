@@ -11,12 +11,21 @@ It employs a two-stage strategy:
 2.  **Runtime Introspection (Inspect)**: Falls back to importing the module and inspecting
     live objects. This is required for frameworks like PyTorch, TensorFlow, and MLX which
     rely heavily on compiled bindings.
+
+**Memory Safety**:
+Includes recursion safeguards (visited set tracking) to prevent infinite loops
+or memory explosion when traversing circular references in large libraries like PyTorch.
 """
 
 import inspect
 import importlib
-from typing import Dict, Any, List, Optional
+import logging
+from typing import Dict, Any, Set
+
 import griffe
+
+# Suppress Griffe errors which are often noisy static analysis failures
+logging.getLogger("griffe").setLevel(logging.CRITICAL)
 
 
 class ApiInspector:
@@ -34,6 +43,12 @@ class ApiInspector:
   def inspect(self, package_name: str) -> Dict[str, Any]:
     """
     Scans a package and returns a flat catalog of its public API.
+
+    Args:
+        package_name: The importable name of the package.
+
+    Returns:
+        Dict mapping 'fully.qualified.name' -> {metadata_dict}.
     """
     catalog = {}
 
@@ -49,12 +64,16 @@ class ApiInspector:
       if len(catalog) > 0:
         return catalog
     except Exception:
+      # Griffe failed (common for C-ext or complex dynamic imports).
+      # We ignore it and proceed to runtime inspection.
       pass
 
     # Strategy 2: Runtime Inspection (Fallback for C-Extensions)
     try:
       module = importlib.import_module(package_name)
-      self._recurse_runtime(module, package_name, catalog)
+      # Track visited object IDs to prevent infinite recursion/memory explosion
+      visited_ids = set()
+      self._recurse_runtime(module, package_name, catalog, visited=visited_ids)
     except ImportError:
       print(f"⚠️  Could not load package '{package_name}'. Is it installed?")
     except Exception as e:
@@ -83,7 +102,6 @@ class ApiInspector:
           catalog[member.path] = info
           self._recurse_griffe(member, catalog)
 
-        # RESTORED: Attribute handling (Constants)
         elif member.is_attribute:
           info = self._extract_attribute_info(member)
           catalog[member.path] = info
@@ -94,32 +112,58 @@ class ApiInspector:
       except Exception:
         continue
 
-  def _recurse_runtime(self, obj: Any, path: str, catalog: Dict[str, Any], depth: int = 0):
+  def _recurse_runtime(self, obj: Any, path: str, catalog: Dict[str, Any], visited: Set[int], depth: int = 0):
     """
     Recursively walks a live Python object to build the catalog.
+
+    Args:
+        obj: The object to inspect.
+        path: The current dot-path (e.g. 'torch.nn').
+        catalog: The accumulator dict.
+        visited: Set of object IDs already processed.
+        depth: Recursion depth tracker.
     """
+    # Safety Checks
     if depth > 5:
       return
+
+    # Cycle detection
+    obj_id = id(obj)
+    if obj_id in visited:
+      return
+    visited.add(obj_id)
 
     try:
       members = inspect.getmembers(obj)
     except Exception:
       return
 
+    # Blacklist metadata for internal modules that cause crashes during inspection
+    unsafe_internals = {"core", "python", "compiler", "contrib", "examples", "tools", "pywrap_tensorflow", "_logging"}
+
     for name, member in members:
       if name.startswith("_"):
+        continue
+
+      if name in unsafe_internals:
         continue
 
       new_path = f"{path}.{name}"
 
       if inspect.ismodule(member):
-        if hasattr(member, "__package__") and member.__package__ and path in member.__package__:
-          self._recurse_runtime(member, new_path, catalog, depth + 1)
+        # Check integrity of package membership to avoid escaping to site-packages root
+        # Also ensure we don't re-scan the same module object if encountered via alias
+        if id(member) in visited:
+          continue
+
+        if hasattr(member, "__package__") and member.__package__ and path.split(".")[0] in member.__package__:
+          self._recurse_runtime(member, new_path, catalog, visited, depth + 1)
 
       elif inspect.isclass(member) or inspect.isfunction(member) or inspect.isbuiltin(member) or inspect.ismethod(member):
         try:
           if hasattr(member, "__module__") and member.__module__:
             root_pkg = path.split(".")[0]
+            # Ensure we only catalog objects belonging to this package family
             if not member.__module__.startswith(root_pkg):
               continue
 
@@ -127,7 +171,9 @@ class ApiInspector:
           catalog[new_path] = self._extract_runtime_sig(member, name, cat_type)
 
           if inspect.isclass(member):
-            self._recurse_runtime(member, new_path, catalog, depth + 1)
+            # Recurse into classes to find methods/nested classes
+            # but check visited to allow it if first time seeing this class
+            self._recurse_runtime(member, new_path, catalog, visited, depth + 1)
         except Exception:
           # C-ext fallback
           catalog[new_path] = {

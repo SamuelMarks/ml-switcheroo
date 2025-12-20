@@ -4,19 +4,13 @@ Keras (v3) Framework Adapter.
 This module provides the adapter for Keras 3+, enabling translation between
 Keras and other frameworks (JAX, Torch, TensorFlow).
 
-Capabilities:
-1.  **Math Operations**: Maps `keras.ops` functions to Array API standards.
-2.  **Neural Layers**: Maps `keras.layers` to Neural Standards.
-3.  **Discovery**: Implements `collect_api` to dynamically find losses,
-    optimizers, and activations by inspecting the installed Keras package.
-4.  **Plugins**: Wires `keras_sequential_pack` for Sequential container rewriting.
+Refactor: Definitions populated for Keras specific Layers, Ops, and Vision.
 """
 
 import inspect
 import logging
 from typing import List, Tuple, Dict, Optional, Any, Set
 
-# Conditional import for hybrid environment support
 try:
   import keras
   import keras.ops
@@ -45,9 +39,6 @@ from ml_switcheroo.enums import SemanticTier
 class KerasAdapter:
   """
   Adapter for Keras 3+ (Multi-backend).
-
-  Supports translation of Functional API models, Layer subclasses, and
-  backend-agnostic math operations (`keras.ops`).
   """
 
   display_name: str = "Keras"
@@ -55,13 +46,6 @@ class KerasAdapter:
   ui_priority: int = 25  # After JAX/Torch, before TF
 
   def __init__(self):
-    """
-    Initializes the adapter.
-
-    Detects if the 'keras' library is present in the environment.
-    If present, sets mode to `InitMode.LIVE` for runtime scanning.
-    If absent, sets mode to `InitMode.GHOST` and loads cached snapshots.
-    """
     self._mode = InitMode.LIVE
     self._snapshot_data = {}
 
@@ -73,18 +57,9 @@ class KerasAdapter:
 
   @classmethod
   def get_example_code(cls) -> str:
-    """
-    Returns the primary example code snippet used for instant demos.
-    """
     return cls().get_tiered_examples()["tier2_neural"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Returns a dictionary of Keras 3.0 idiomatic examples categorized by Tier.
-
-    Returns:
-        Dict[str, str]: Map of 'tierX_name' to Python source code strings.
-    """
     return {
       "tier1_math": """import keras
 from keras import ops
@@ -102,7 +77,7 @@ def build_model(input_shape):
   # Tier 2: Functional Model API
   inputs = keras.Input(shape=input_shape) 
   x = layers.Conv2D(32, 3, activation="relu")(inputs) 
-  x = layers.Flatten()(x)
+  x = layers.Flatten()(x) 
   outputs = layers.Dense(10)(x) 
   return keras.Model(inputs, outputs) 
 """,
@@ -115,28 +90,24 @@ def generate_noise(shape):
 """,
     }
 
-    # --- Discovery Configuration ---
+  # --- Discovery Configuration ---
 
   @property
   def search_modules(self) -> List[str]:
-    """
-    Returns the list of module paths to scan during bulk scaffolding.
-    """
     return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """
-    Returns the default import structure for generated code.
-    Format: (module_path, alias) -> `import keras as keras`.
-    """
     return ("keras", "keras")
 
   @property
+  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+    return {
+      "keras": {"root": "keras", "sub": None, "alias": "keras"},
+    }
+
+  @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """
-    Returns regex patterns used to categorize found APIs into Semantic Tiers.
-    """
     return {
       "neural": [r"\\.layers\\.", r"Layer$", r"Model$"],
       "array": [r"\\.ops\\.", r"\\.math\\."],
@@ -144,26 +115,21 @@ def generate_noise(shape):
     }
 
   @property
+  def test_config(self) -> Dict[str, str]:
+    return {
+      "import": "import keras\nfrom keras import ops",
+      "convert_input": "keras.ops.convert_to_tensor({np_var})",
+      "to_numpy": "keras.ops.convert_to_numpy({res_var})",
+    }
+
+  @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """
-    Returns list of Semantic Tiers supported by this framework.
-    Keras supports all major tiers including Neural Layers.
-    """
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   # --- Structural Traits ---
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """
-    Defines configuration for class and function rewriting logic.
-
-    Keras Traits:
-    - Base Class: `keras.Layer` (or Model)
-    - Forward Method: `call`
-    - Constructor: Requires `super().__init__()`
-    - Impurities: `fit`, `compile` (Stateful/Side-effect heavy methods)
-    """
     return StructuralTraits(
       module_base="keras.Layer",
       forward_method="call",
@@ -177,43 +143,56 @@ def generate_noise(shape):
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """
-    Returns static definitions to ensure core operations work without discovery.
-    Includes argument mappings for key layers (e.g. `Linear` -> `Dense`).
+    Static definitions for Keras mappings.
     """
     return {
       "Abs": StandardMap(api="keras.ops.abs"),
       "Mean": StandardMap(api="keras.ops.mean"),
+      # Layers
       "Linear": StandardMap(api="keras.layers.Dense", args={"out_features": "units"}),
+      "Flatten": StandardMap(api="keras.layers.Flatten"),
+      "Reshape": StandardMap(api="keras.ops.reshape", args={"shape": "newshape"}),
+      "ArgMax": StandardMap(api="keras.ops.argmax", args={"dim": "axis"}),
+      "ArgMin": StandardMap(api="keras.ops.argmin", args={"dim": "axis"}),
+      "MultiheadAttention": StandardMap(
+        api="keras.layers.MultiHeadAttention", args={"embed_dim": "key_dim"}, requires_plugin="repack_attention_call"
+      ),
+      "Embedding": StandardMap(
+        api="keras.layers.Embedding", args={"num_embeddings": "input_dim", "embedding_dim": "output_dim"}
+      ),
+      "Sequential": StandardMap(api="keras.Sequential", requires_plugin="keras_sequential_pack"),
+      "LayerNorm": StandardMap(
+        api="keras.layers.LayerNormalization", args={"eps": "epsilon", "normalized_shape": "axis"}
+      ),
+      "GELU": StandardMap(
+        api="keras.layers.Activation",
+        args={"input": "gelu"},
+        transformation_type="inline_lambda",
+        operator="keras.activations.gelu",
+      ),
+      # Vision
+      "Resize": StandardMap(api="keras.layers.Resizing", args={"size": "height"}),
+      "Normalize": StandardMap(api="keras.layers.Normalization", args={"std": "variance", "mean": "mean"}),
+      "ToTensor": StandardMap(api="keras.ops.convert_to_tensor"),
+      "CenterCrop": StandardMap(api="keras.layers.CenterCrop", args={"size": "height"}),
+      "RandomCrop": StandardMap(api="keras.layers.RandomCrop"),
+      "RandomHorizontalFlip": StandardMap(api="keras.layers.RandomFlip", args={"p": "mode"}),
+      "RandomVerticalFlip": StandardMap(api="keras.layers.RandomFlip"),
+      "Grayscale": StandardMap(api="lambda x: x", transformation_type="inline_lambda"),
     }
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """
-    Returns list of methods that set global random seeds.
-    """
     return ["utils.set_random_seed"]
 
   # --- Ghost Protocol Implementation ---
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Collects API signatures for the requested category.
-
-    If in GHOST mode, hydrates from cached snapshots.
-    If in LIVE mode, performs runtime introspection of the Keras package.
-
-    Args:
-        category (StandardCategory): The API category to scan (Loss, Layer, etc).
-
-    Returns:
-        List[GhostRef]: A list of discovered API references.
-    """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
     return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
-    """Hydrates GhostRefs from loaded snapshot JSON data."""
     if not self._snapshot_data:
       return []
 
@@ -221,7 +200,6 @@ def generate_noise(shape):
     return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
-    """Performs live introspection of Keras submodules."""
     results = []
 
     if category == StandardCategory.LOSS:
@@ -240,12 +218,6 @@ def generate_noise(shape):
   def _scan_module(
     self, module: Any, prefix: str, kind: str = "class", block_list: Optional[Set[str]] = None
   ) -> List[GhostRef]:
-    """
-    Generic helper to scan a Python module for Keras objects.
-
-    Filters based on `kind` (class vs function) and verifies Keras-specific traits
-    (serialization methods) to avoid collecting utility classes.
-    """
     if not module:
       return []
     block_list = block_list or set()
@@ -257,16 +229,12 @@ def generate_noise(shape):
       if name in block_list:
         continue
 
-      # Class Scanning Logic
       if kind == "class" and inspect.isclass(obj):
-        # Keras 3 check: All standard components have config methods.
-        # This explicitly filters out utility classes or mixins.
         is_keras_object = hasattr(obj, "get_config") or hasattr(obj, "from_config")
         if is_keras_object:
           ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
           found.append(ref)
 
-      # Function Scanning Logic
       elif kind == "function" and inspect.isfunction(obj):
         ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
         found.append(ref)
@@ -276,10 +244,6 @@ def generate_noise(shape):
   # --- Verification Support ---
 
   def convert(self, data: Any) -> Any:
-    """
-    Converts input data (NumPy/List) to a Keras tensor.
-    Used by the Fuzzer for equivalence testing.
-    """
     try:
       import keras
 
@@ -290,11 +254,9 @@ def generate_noise(shape):
   # --- IO Serialization ---
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns import statements required for serialization."""
     return ["import keras"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Returns Python code for saving/loading models."""
     if op == "save" and object_arg:
       return f"{object_arg}.save({file_arg})"
     elif op == "load":
@@ -304,42 +266,11 @@ def generate_noise(shape):
   # --- Device Management ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """
-    Returns Keras 3 device scope syntax (e.g. `keras.name_scope('gpu')`).
-    Note: Keras 3 handles devices via backend config largely, but scopes allow some control.
-    """
     d_type = "gpu" if "cuda" in device_type.lower() else "cpu"
     return f"keras.name_scope('{d_type}')"
 
   # --- Manual Wiring (The Last Mile) ---
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """
-    Injects manual wiring rules into the Snapshot.
-
-    This handles cases where automated discovery methods cannot fully capture
-    the necessary transformation logic (e.g., container packing, complex renames).
-
-    Updates:
-        - Wires `Sequential` to `keras_sequential_pack` plugin.
-        - Wires Vision ops (`Resize`, `Normalize`) to Keras Preprocessing Layers.
-        - Wires IO operations.
-
-    Args:
-        snapshot (Dict): The snapshot dictionary to mutate in-place.
-    """
-    mappings = snapshot.setdefault("mappings", {})
-
-    # Sequential: Requires packing args into list via plugin
-    mappings["Sequential"] = {"api": "keras.Sequential", "requires_plugin": "keras_sequential_pack"}
-
-    # Wiring for Tier C Vision Operations
-    mappings["Resize"] = {"api": "keras.layers.Resizing", "args": {"size": "height"}}
-    mappings["CenterCrop"] = {"api": "keras.layers.CenterCrop", "args": {"size": "height"}}
-    mappings["Normalize"] = {"api": "keras.layers.Normalization", "args": {"std": "variance", "mean": "mean"}}
-    mappings["RandomCrop"] = {"api": "keras.layers.RandomCrop"}
-    mappings["RandomHorizontalFlip"] = {"api": "keras.layers.RandomFlip", "args": {"p": "mode"}}
-    mappings["RandomVerticalFlip"] = {"api": "keras.layers.RandomFlip"}
-    mappings["Pad"] = {"api": "keras.layers.ZeroPadding2D"}
-    mappings["ToTensor"] = {"api": "keras.ops.convert_to_tensor"}
-    mappings["Grayscale"] = {"api": "lambda x: x", "transformation_type": "inline_lambda"}
+    pass
+    # definitions now handle wiring

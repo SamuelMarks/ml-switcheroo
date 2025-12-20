@@ -71,12 +71,6 @@
         "use_bias": "use_bias"
       }
     },
-    "Cosinesimilarity": {
-      "api": "keras.losses.CosineSimilarity",
-      "args": {
-        "dim": "axis"
-      }
-    },
     "Ctc": {
       "api": "keras.losses.CTC"
     },
@@ -94,10 +88,9 @@
       }
     },
     "Elu": {
-      "api": "keras.activations.elu",
+      "api": "keras.layers.ELU",
       "args": {
-        "alpha": "alpha",
-        "x": "x"
+        "alpha": "alpha"
       }
     },
     "Embedding": {
@@ -136,9 +129,6 @@
     },
     "Grucell": {
       "api": "keras.layers.GRUCell"
-    },
-    "Hardshrink": {
-      "api": "keras.activations.hard_shrink"
     },
     "Hardsigmoid": {
       "api": "keras.activations.hard_sigmoid"
@@ -212,14 +202,10 @@
       }
     },
     "Leakyrelu": {
-      "api": "keras.activations.leaky_relu",
+      "api": "keras.layers.LeakyReLU",
       "args": {
-        "negative_slope": "negative_slope",
-        "x": "x"
+        "negative_slope": "negative_slope"
       }
-    },
-    "Linear": {
-      "api": "keras.activations.linear"
     },
     "Lion": {
       "api": "keras.optimizers.Lion",
@@ -227,9 +213,6 @@
         "lr": "learning_rate",
         "weight_decay": "weight_decay"
       }
-    },
-    "Logsigmoid": {
-      "api": "keras.activations.log_sigmoid"
     },
     "Logsoftmax": {
       "api": "keras.activations.log_softmax",
@@ -284,10 +267,7 @@
       "api": "keras.layers.PReLU"
     },
     "Relu": {
-      "api": "keras.activations.relu",
-      "args": {
-        "x": "x"
-      }
+      "api": "keras.layers.ReLU"
     },
     "Relu6": {
       "api": "keras.activations.relu6"
@@ -333,10 +313,9 @@
       }
     },
     "Softmax": {
-      "api": "keras.activations.softmax",
+      "api": "keras.layers.Softmax",
       "args": {
-        "dim": "axis",
-        "x": "x"
+        "kwargs": "kwargs"
       }
     },
     "Softplus": {
@@ -347,9 +326,6 @@
     },
     "Softsign": {
       "api": "keras.activations.softsign"
-    },
-    "Sparsemax": {
-      "api": "keras.activations.sparsemax"
     },
     "Tanh": {
       "api": "keras.activations.tanh",

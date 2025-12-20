@@ -13,7 +13,6 @@ from typing import List, Optional
 from ml_switcheroo.config import parse_cli_key_values
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.cli import commands
-from ml_switcheroo.cli.handlers.discovery import handle_discover_layers
 from ml_switcheroo import __version__
 
 
@@ -33,6 +32,16 @@ def main(argv: Optional[List[str]] = None) -> int:
   parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
 
   subparsers = parser.add_subparsers(dest="command", required=True)
+
+  # --- Command: AUDIT ---
+  cmd_audit = subparsers.add_parser("audit", help="Check source code for unsupported operations")
+  cmd_audit.add_argument("path", type=Path, help="Input source file or directory")
+  cmd_audit.add_argument(
+    "--roots",
+    nargs="+",
+    default=["torch", "flax_nnx", "tensorflow", "mlx", "keras"],
+    help="Framework roots to scan for (default: torch flax_nnx tensorflow mlx keras)",
+  )
 
   # --- Command: CONVERT ---
   cmd_conv = subparsers.add_parser("convert", help="Transpile a Python file or directory")
@@ -145,23 +154,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     help="Print candidates without writing to disk",
   )
 
-  # --- Command: DISCOVER LAYERS (Heuristic Polyfill) ---
-  cmd_layers = subparsers.add_parser(
-    "discover-layers", help="Heuristic discovery for common NN layers (Polyfill for Torch/Flax)"
-  )
-  cmd_layers.add_argument(
-    "--dry-run",
-    action="store_true",
-    help="Print found layers without saving",
-  )
-
   # --- Command: GEN TESTS ---
   cmd_gen = subparsers.add_parser("gen-tests", help="Generate physical Python test files")
   cmd_gen.add_argument("--out", type=Path, default=Path("tests", "generated", "test_tier_a_math.py"))
 
   args = parser.parse_args(argv)
 
-  if args.command == "convert":
+  if args.command == "audit":
+    return commands.handle_audit(args.path, args.roots)
+
+  elif args.command == "convert":
     settings = parse_cli_key_values(args.config)
     return commands.handle_convert(
       args.path, args.out, args.source, args.target, args.verify, args.strict, settings, args.json_trace
@@ -196,9 +198,6 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   elif args.command == "sync-standards":
     return commands.handle_sync_standards(args.categories, args.frameworks, args.dry_run)
-
-  elif args.command == "discover-layers":
-    return handle_discover_layers(args.dry_run)
 
   elif args.command == "gen-tests":
     return commands.handle_gen_tests(args.out)

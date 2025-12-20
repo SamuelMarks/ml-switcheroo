@@ -143,6 +143,18 @@ class MockBidirectionalSemantics(SemanticsManager):
     self._alias("F.max_pool2d", "max_pool2d_func")
 
     # Keras aliases
+    # Add fully qualified paths because rewrites resolve 'from keras import layers' -> 'keras.layers.Dense'
+    self._alias("keras.layers.Conv2D", "Conv2d")
+    self._alias("keras.layers.MaxPooling2D", "MaxPool2d")
+    self._alias("keras.layers.Flatten", "Flatten")
+    self._alias("keras.layers.Dropout", "Dropout")
+    self._alias("keras.layers.Dense", "Linear")
+    self._alias("keras.ops.mean", "mean")
+    self._alias("keras.ops.square", "square")
+    self._alias("keras.Input", "Input")
+    self._alias("keras.Model", "Module")
+
+    # Keep short aliases too just in case
     self._alias("layers.Conv2D", "Conv2d")
     self._alias("layers.MaxPooling2D", "MaxPool2d")
     self._alias("layers.Flatten", "Flatten")

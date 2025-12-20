@@ -84,12 +84,6 @@
         "padding": "padding"
       }
     },
-    "Cosinesimilarity": {
-      "api": "torch.nn.CosineSimilarity",
-      "args": {
-        "dim": "dim"
-      }
-    },
     "Ctc": {
       "api": "torch.nn.CTCLoss"
     },
@@ -97,10 +91,9 @@
       "api": "torch.nn.Dropout3d"
     },
     "Elu": {
-      "api": "torch.nn.functional.elu",
+      "api": "torch.nn.ELU",
       "args": {
-        "alpha": "alpha",
-        "x": "input"
+        "alpha": "alpha"
       }
     },
     "Embedding": {
@@ -141,9 +134,6 @@
         "dtype": "dtype"
       }
     },
-    "Hardshrink": {
-      "api": "torch.nn.Hardshrink"
-    },
     "Hardsigmoid": {
       "api": "torch.nn.Hardsigmoid"
     },
@@ -178,10 +168,9 @@
       }
     },
     "Leakyrelu": {
-      "api": "torch.nn.functional.leaky_relu",
+      "api": "torch.nn.LeakyReLU",
       "args": {
-        "negative_slope": "negative_slope",
-        "x": "input"
+        "negative_slope": "negative_slope"
       }
     },
     "Linear": {
@@ -191,9 +180,6 @@
         "in_features": "in_features",
         "out_features": "out_features"
       }
-    },
-    "Logsigmoid": {
-      "api": "torch.nn.LogSigmoid"
     },
     "Logsoftmax": {
       "api": "torch.nn.functional.log_softmax",
@@ -254,10 +240,7 @@
       }
     },
     "Relu": {
-      "api": "torch.nn.functional.relu",
-      "args": {
-        "x": "input"
-      }
+      "api": "torch.nn.ReLU"
     },
     "Relu6": {
       "api": "torch.nn.ReLU6"
@@ -314,10 +297,9 @@
       }
     },
     "Softmax": {
-      "api": "torch.nn.functional.softmax",
+      "api": "torch.nn.Softmax2d",
       "args": {
-        "dim": "dim",
-        "x": "input"
+        "kwargs": "kwargs"
       }
     },
     "Softplus": {

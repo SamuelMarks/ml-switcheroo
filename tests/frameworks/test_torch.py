@@ -6,18 +6,7 @@ and the underlying PyTorch library (simulated via mocks). It ensures that
 the adapter can dynamically discover API surfaces when PyTorch is installed,
 and gracefully degrade to "Ghost Mode" using JSON snapshots when it is not.
 
-Test Coverage:
-1.  **Dynamic Discovery**:
-    - ``collect_api(LOSS)``: Finds standard Torch losses (by naming convention & inheritance).
-    - ``collect_api(OPTIMIZER)``: Finds standard Torch optimizers.
-    - ``collect_api(ACTIVATION)``: Finds standard activations (filtering out Layers).
-2.  **Signature Extraction**:
-    - Verifies that discovered items (GhostRefs) contain correct arguments (e.g., `reduction`, `lr`).
-3.  **Ghost Mode**:
-    - Verifies fallback to cached snapshots when `import torch` fails.
-4.  **Wiring & Polyfills**:
-    - Verifies `apply_wiring` injects manual overrides for TorchVision transforms.
-    - Verifies `output_adapters` are registered for complex return types (e.g., `torch.sort`).
+Refactor: Also verifies 'definitions' property contains expected keys.
 """
 
 import sys
@@ -260,55 +249,21 @@ def test_ghost_mode_fallback():
         assert results[0].name == "GhostLoss"
 
 
-def test_wiring_injects_vision_ops():
-  """
-  Verify `apply_wiring` injects mappings for 'Resize', 'Normalize', etc.
-
-  These operations are often in `torchvision` (separate lib) or specialized
-  submodules, so the Adapter injects them manually to ensure the 'Vision'
-  Standard Category works out-of-the-box.
-  """
-  # Create adapter without triggering live init
-  with patch.dict(sys.modules, {"torch": MagicMock()}):
-    adapter = TorchAdapter()
-
-  snapshot = {"__framework__": "torch", "mappings": {}}
-  adapter.apply_wiring(snapshot)
-
-  mappings = snapshot["mappings"]
-
-  # Assert Vision ops
-  assert "Resize" in mappings
-  assert mappings["Resize"]["api"] == "torchvision.transforms.Resize"
-
-  assert "Normalize" in mappings
-  assert mappings["Normalize"]["api"] == "torchvision.transforms.Normalize"
-
-  assert "RandomCrop" in mappings
-  assert mappings["RandomCrop"]["api"] == "torchvision.transforms.RandomCrop"
-
-  # Assert functional relu fallback (safety wiring)
-  assert "relu" in mappings
-  assert mappings["relu"]["api"] == "torch.nn.functional.relu"
+def test_definitions_exist():
+  """Verify static definitions include migrated keys."""
+  adapter = TorchAdapter()
+  defs = adapter.definitions
+  assert "Linear" in defs
+  assert "vmap" in defs
+  assert "Adam" in defs
+  # Verify content
+  assert defs["Linear"].api == "torch.nn.Linear"
+  assert defs["vmap"].args["in_axes"] == "in_dims"
 
 
-def test_wiring_injects_output_adapter_for_sort():
-  """
-  Verify `apply_wiring` injects output adapter for `torch.sort`.
-
-  Rationale: `torch.sort` returns `(values, indices)` named tuple.
-  Most other frameworks (JAX/Numpy) just return values.
-  The wiring ensures we extract `.values` to maintain compatibility.
-  """
-  with patch.dict(sys.modules, {"torch": MagicMock()}):
-    adapter = TorchAdapter()
-
-  # Pre-seed 'sort' as if found by discovery
-  snapshot = {"__framework__": "torch", "mappings": {"sort": {"api": "torch.sort"}}}
-
-  adapter.apply_wiring(snapshot)
-
-  mappings = snapshot["mappings"]
-  assert "sort" in mappings
-  assert "output_adapter" in mappings["sort"]
-  assert mappings["sort"]["output_adapter"] == "lambda x: x.values"
+def test_imports_exist():
+  """Verify import namespaces are defined."""
+  adapter = TorchAdapter()
+  ns = adapter.import_namespaces
+  assert "torch.nn" in ns
+  assert "torchvision" in ns
