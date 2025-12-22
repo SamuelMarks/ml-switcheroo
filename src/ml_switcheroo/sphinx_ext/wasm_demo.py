@@ -1,91 +1,87 @@
 """
-Sphinx Extension for ML-Switcheroo WASM Demo.
+Sphinx Extension for ML-Switcheroo WASM Demo (Level 2 Hierarchy Support + Tier Filtering).
 
-This module provides the ``switcheroo_demo`` directive, which embeds a client-side
-transpiler interface into the documentation. It configures the WebAssembly environment
-to load the package directly from the "latest" GitHub Release, ensuring the WASM
-demo always pulls the most recent build artifacts.
+This module renders the WASM interface HTML.
+It introspects the Framework Registry to determine which frameworks
+support hierarchical "Flavours" and what Tiers they support, sending this
+metadata to the client-side JS for filtering invalid conversion pairs.
 
 Features:
-- **Remote Loading**: Links to the ``latest`` .whl asset on GitHub Releases.
-- **Dynamic Registry**: Introspects installed adapters to populate UI dropdowns.
-- **Tier Filtering**: Injects metadata enabling the frontend to filter incompatible conversions.
+- **Hierarchy Detection**: Checks `inherits_from` metadata on adapters.
+- **Tier Detection**: Checks `supported_tiers` on adapters.
+- **Dynamic HTML**: Generates nested `<select>` elements hidden/shown via JS.
+- **Flavour Routing**: Associates `flax_nnx` with the parent `jax` key.
+- **Example Injection**: Preloads tiered examples from all registered adapters.
 """
 
-import json
+import os
 import shutil
-from collections import defaultdict
+import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from collections import defaultdict
+from typing import Dict, List, Tuple, Any, Optional
 
 from docutils import nodes
 from docutils.parsers.rst import Directive
 
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
-from ml_switcheroo import __version__  # Used to compute wheel filename
 
-# Type alias for structure: { "parent_fw": [{"key": "child_fw", "label": "Display Name"}] }
+# Map of Parent Key -> List of {key, label} for children
 HierarchyMap = Dict[str, List[Dict[str, str]]]
 
+
 class SwitcherooDemo(Directive):
+  """
+  Sphinx Directive to embed the interactive WASM demo.
+
+  Usage:
+      .. switcheroo_demo::
+  """
+
+  has_content = True
+
+  def run(self) -> List[nodes.raw]:
     """
-    Sphinx Directive to embed the interactive WASM demo.
+    Main execution entry point for the directive.
 
-    Generates the HTML shell required by ``switcheroo_demo.js``, including
-    data attributes for the remote wheel URL and injected JSON payloads
-    for examples and compatibility logic.
+    1. Finds the latest .whl file in dist/.
+    2. Scans the registry for frameworks and examples.
+    3. Renders the HTML template with dynamic dropdowns.
 
-    Usage:
-        .. switcheroo_demo::
+    Returns:
+        List[nodes.raw]: A list containing the raw HTML node.
     """
+    # 1. Locate Wheel
+    root_dir = Path(__file__).parents[3]
+    dist_dir = root_dir / "dist"
+    wheel_name = "ml_switcheroo-latest-py3-none-any.whl"
+    if dist_dir.exists():
+      wheels = list(dist_dir.glob("*.whl"))
+      if wheels:
+        latest = sorted(wheels, key=os.path.getmtime)[-1]
+        wheel_name = latest.name
 
-    has_content = True
+    # 2. Build Hierarchy & Examples & Tier Metadata
+    hierarchy, examples_json, tier_metadata_json = self._scan_registry()
 
-    def run(self) -> List[nodes.raw]:
-        """
-        Main execution entry point for the directive.
+    # 3. Generate HTML Blocks
+    # Primary Options (Parents)
+    primary_opts = self._render_primary_options(hierarchy)
 
-        It performs the following steps:
-        1. Constants definition (GitHub Repo/User).
-        2. Construction of the remote "latest" release URL using the current package version.
-        3. Introspection of the Python framework registry.
-        4. Generation of the HTML block with populated options.
+    # Flavour DOM (Children) - rendered but hidden by default CSS logic in JS
+    src_flavours_html = self._render_flavour_dropdown("src", hierarchy)
+    tgt_flavours_html = self._render_flavour_dropdown("tgt", hierarchy)
 
-        Returns:
-            List[nodes.raw]: A list containing the raw HTML node to be rendered.
-        """
-        # 1. Configuration
-        github_user = "SamuelMarks"
-        github_repo = "ml-switcheroo"
+    # Pre-select JAX/Torch for demo defaults
+    opts_src = primary_opts.replace('value="torch"', 'value="torch" selected')
+    # Default target to JAX to show off the hierarchy
+    opts_tgt = primary_opts.replace('value="jax"', 'value="jax" selected')
 
-        # 2. Construct wheel filename dynamically from package version
-        # e.g., ml_switcheroo-0.0.1-py3-none-any.whl
-        wheel_filename = f"ml_switcheroo-{__version__}-py3-none-any.whl"
-
-        # 3. Construct URL pointing to the 'latest' tag
-        remote_url = (
-            f"https://github.com/{github_user}/{github_repo}/releases/download/latest/{wheel_filename}"
-        )
-
-        # 4. Build Hierarchy & Examples & Tier Metadata
-        hierarchy, examples_json, tier_metadata_json = self._scan_registry()
-
-        # 5. Generate HTML Blocks
-        primary_opts = self._render_primary_options(hierarchy)
-        src_flavours_html = self._render_flavour_dropdown("src", hierarchy)
-        tgt_flavours_html = self._render_flavour_dropdown("tgt", hierarchy)
-
-        opts_src = primary_opts.replace('value="torch"', 'value="torch" selected')
-        opts_tgt = primary_opts.replace('value="jax"', 'value="jax" selected')
-
-        html = f"""
-        <div id="switcheroo-wasm-root" 
-             class="switcheroo-material-card" 
-             data-wheel-url="{remote_url}">
-             
+    html = f""" 
+        <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
             <script>
-                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json};
-                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json};
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
+                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json}; 
             </script>
 
             <div class="demo-header">
@@ -108,10 +104,10 @@ class SwitcherooDemo(Directive):
                     <!-- Source Column -->
                     <div class="select-wrapper">
                         <select id="select-src" class="material-select">
-                            {opts_src}
+                            {opts_src} 
                         </select>
                         <div id="src-flavour-region" style="display:none; margin-left:10px;">
-                            {src_flavours_html}
+                            {src_flavours_html} 
                         </div>
                     </div>
 
@@ -120,10 +116,10 @@ class SwitcherooDemo(Directive):
                     <!-- Target Column -->
                     <div class="select-wrapper">
                         <select id="select-tgt" class="material-select">
-                            {opts_tgt}
+                            {opts_tgt} 
                         </select>
                          <div id="tgt-flavour-region" style="display:none; margin-left:10px;">
-                            {tgt_flavours_html}
+                            {tgt_flavours_html} 
                         </div>
                     </div>
                 </div>
@@ -140,8 +136,8 @@ class SwitcherooDemo(Directive):
                         <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Source code...">import torch
 import torch.nn as nn
 
-class Model(nn.Module):
-    def forward(self, x):
+class Model(nn.Module): 
+    def forward(self, x): 
         return torch.abs(x)</textarea>
                     </div>
                     <div class="editor-group target-group">
@@ -168,151 +164,193 @@ class Model(nn.Module):
             </div>
         </div>
         """
-        return [nodes.raw("", html, format="html")]
+    return [nodes.raw("", html, format="html")]
 
-    def _scan_registry(self) -> Tuple[HierarchyMap, str, str]:
-        """
-        Scans registered adapters to build hierarchy, examples, and tier metadata.
-        Returns JSON strings for frontend injection.
-        """
-        fws = available_frameworks()
-        hierarchy: HierarchyMap = defaultdict(list)
-        tier_metadata: Dict[str, List[str]] = {}
-        roots = set()
+  def _scan_registry(self) -> Tuple[HierarchyMap, str, str]:
+    """
+    Scans registered adapters to build hierarchy, examples, and tier metadata.
 
-        for key in fws:
-            adapter = get_adapter(key)
-            if not adapter:
-                continue
+    Returns:
+        Tuple[HierarchyMap, str, str]:
+            - The hierarchy dictionary.
+            - JSON string of examples.
+            - JSON string of framework tiers.
+    """
+    fws = available_frameworks()
 
-            label = getattr(adapter, "display_name", key.capitalize())
-            parent = getattr(adapter, "inherits_from", None)
+    # 1. Build Node Map
+    hierarchy: HierarchyMap = defaultdict(list)
+    tier_metadata: Dict[str, List[str]] = {}
 
-            tiers = []
-            if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
-                tiers = [t.value for t in adapter.supported_tiers]
-            else:
-                tiers = ["array", "neural", "extras"]
-            tier_metadata[key] = tiers
+    # Track roots explicitly
+    roots = set()
 
-            if parent:
-                hierarchy[parent].append({"key": key, "label": label})
-            else:
-                roots.add(key)
+    for key in fws:
+      adapter = get_adapter(key)
+      if not adapter:
+        continue
 
-        examples = {}
-        main_priority = ["torch", "jax", "tensorflow", "numpy"]
-        sorted_roots = sorted(list(roots), key=lambda x: (main_priority.index(x) if x in main_priority else 99, x))
+      label = getattr(adapter, "display_name", key.capitalize())
+      parent = getattr(adapter, "inherits_from", None)
 
-        final_hierarchy = {
-            root: sorted(hierarchy.get(root, []), key=lambda x: x["label"])
-            for root in sorted_roots
-        }
+      # Extract Tiers
+      tiers = []
+      if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
+        tiers = [t.value for t in adapter.supported_tiers]
+      else:
+        # Fallback if property missing to prevent breakage
+        tiers = ["array", "neural", "extras"]
+      tier_metadata[key] = tiers
 
-        for key in fws:
-            adapter = get_adapter(key)
-            if hasattr(adapter, "get_tiered_examples"):
-                tiers_dict = adapter.get_tiered_examples()
-                parent_key = getattr(adapter, "inherits_from", None)
+      if parent:
+        # This is a child node (e.g. flax_nnx -> jax)
+        hierarchy[parent].append({"key": key, "label": label})
+      else:
+        # This is a root node (e.g. torch, jax)
+        roots.add(key)
 
-                for tier_name, code in tiers_dict.items():
-                    uid = f"{key}_{tier_name}"
+    # 2. Convert to Render-Ready structures & Gather Examples
+    examples = {}
 
-                    if parent_key:
-                        src_fw = parent_key
-                        src_flavour = key
-                    else:
-                        src_fw = key
-                        src_flavour = None
+    # Ensure we iterate roots sorted by priority
+    main_priority = ["torch", "jax", "tensorflow", "numpy"]
+    sorted_roots = sorted(list(roots), key=lambda x: (main_priority.index(x) if x in main_priority else 99, x))
 
-                    req_tier = "extras"
-                    if "math" in tier_name: req_tier = "array"
-                    elif "neural" in tier_name: req_tier = "neural"
+    final_hierarchy = {root: sorted(hierarchy.get(root, []), key=lambda x: x["label"]) for root in sorted_roots}
 
-                    clean_tier_name = tier_name.replace("tier", "")
-                    clean_label = (
-                        clean_tier_name.split("_")[-1].capitalize()
-                        if "_" in clean_tier_name
-                        else clean_tier_name.capitalize()
-                    )
+    # Collect Examples from Adapters
+    for key in fws:
+      adapter = get_adapter(key)
+      if hasattr(adapter, "get_tiered_examples"):
+        tiers = adapter.get_tiered_examples()
+        parent_key = getattr(adapter, "inherits_from", None)
 
-                    display_fw = getattr(adapter, "display_name", key.title())
-                    label = f"{display_fw}: {clean_label}"
+        for tier_name, code in tiers.items():
+          # Unique ID for the example entry
+          uid = f"{key}_{tier_name}"
 
-                    tgt_fw = "jax"
-                    if "jax" in src_fw:
-                        tgt_fw = "torch"
+          # Determine Source configuration
+          if parent_key:
+            src_fw = parent_key
+            src_flavour = key
+          else:
+            src_fw = key
+            src_flavour = None
 
-                    examples[uid] = {
-                        "label": label,
-                        "srcFw": src_fw,
-                        "srcFlavour": src_flavour,
-                        "tgtFw": tgt_fw,
-                        "tgtFlavour": None,
-                        "code": code,
-                        "requiredTier": req_tier,
-                    }
+          # Use tier_name to deduce required tier.
+          # "tier1_math" -> "array"
+          # "tier2_neural" -> "neural"
+          req_tier = "extras"
+          if "math" in tier_name:
+            req_tier = "array"
+          elif "neural" in tier_name:
+            req_tier = "neural"
 
-        return final_hierarchy, json.dumps(examples), json.dumps(tier_metadata)
+          # Simple cleanup for label
+          clean_tier_name = tier_name.replace("tier", "")
+          clean_label = (
+            clean_tier_name.split("_")[-1].capitalize() if "_" in clean_tier_name else clean_tier_name.capitalize()
+          )
 
-    def _render_primary_options(self, hierarchy: HierarchyMap) -> str:
-        html = []
-        for root in hierarchy.keys():
-            adapter = get_adapter(root)
-            label = getattr(adapter, "display_name", root.capitalize())
-            html.append(f'<option value="{root}">{label}</option>')
-        return "\n".join(html)
+          display_fw = getattr(adapter, "display_name", key.title())
+          label = f"{display_fw}: {clean_label}"
 
-    def _render_flavour_dropdown(self, side: str, hierarchy: HierarchyMap) -> str:
-        children = hierarchy.get("jax", [])
-        if not children:
-            return ""
+          # Target Heuristic
+          tgt_fw = "jax"
+          if "jax" in src_fw:
+            tgt_fw = "torch"
 
-        default_child = "flax_nnx"
-        opts = []
-        for child in children:
-            sel = "selected" if child["key"] == default_child else ""
-            opts.append(
-                f'<option value="{child["key"]}" {sel}>{child["label"]}</option>'
-            )
+          examples[uid] = {
+            "label": label,
+            "srcFw": src_fw,
+            "srcFlavour": src_flavour,
+            "tgtFw": tgt_fw,
+            "tgtFlavour": None,
+            "code": code,
+            "requiredTier": req_tier,
+          }
 
-        return f"""
+    return final_hierarchy, json.dumps(examples), json.dumps(tier_metadata)
+
+  def _render_primary_options(self, hierarchy: HierarchyMap) -> str:
+    """
+    Renders the top-level <option> elements for root frameworks.
+    """
+    html = []
+    for root in hierarchy.keys():
+      adapter = get_adapter(root)
+      label = getattr(adapter, "display_name", root.capitalize())
+      html.append(f'<option value="{root}">{label}</option>')
+    return "\n".join(html)
+
+  def _render_flavour_dropdown(self, side: str, hierarchy: HierarchyMap) -> str:
+    """
+    Renders the secondary dropdown for Framework Flavours.
+    """
+    children = hierarchy.get("jax", [])
+    if not children:
+      return ""
+
+    default_child = "flax_nnx"
+
+    opts = []
+    for child in children:
+      sel = "selected" if child["key"] == default_child else ""
+      opts.append(f'<option value="{child["key"]}" {sel}>{child["label"]}</option>')
+
+    return f""" 
         <select id="{side}-flavour" class="material-select-sm" style="background:#f0f4c3;">
-            {"".join(opts)}
+            {"".join(opts)} 
         </select>
         """
 
+
 def setup(app: Any) -> Dict[str, Any]:
-    """Sphinx Setup Hook."""
-    app.add_directive("switcheroo_demo", SwitcherooDemo)
-    app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")
-    app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")
-    app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js")
-    app.add_css_file("switcheroo_demo.css")
-    app.add_css_file("trace_graph.css")
-    app.add_js_file("trace_render.js")
-    app.add_js_file("switcheroo_demo.js")
+  """
+  Sphinx Extension Setup Hook.
+  """
+  app.add_directive("switcheroo_demo", SwitcherooDemo)
+  app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js")
+  app.add_css_file("switcheroo_demo.css")
+  app.add_css_file("trace_graph.css")
+  app.add_js_file("trace_render.js")
+  app.add_js_file("switcheroo_demo.js")
 
-    app.connect("builder-inited", add_static_path)
-    app.connect("build-finished", copy_deps_only)
+  app.connect("builder-inited", add_static_path)
+  app.connect("build-finished", copy_wheel_and_reqs)
 
-    return {"version": "0.9.8", "parallel_read_safe": True, "parallel_write_safe": True}
+  return {"version": "0.9.6", "parallel_read_safe": True, "parallel_write_safe": True}
+
 
 def add_static_path(app: Any) -> None:
-    static_path = Path(__file__).parent / "static"
-    if static_path.exists() and hasattr(app, "config"):
-        app.config.html_static_path.append(str(static_path.resolve()))
+  """Adds the extension's static directory to HTML build configuration."""
+  static_path = Path(__file__).parent / "static"
+  if static_path.exists() and hasattr(app, "config"):
+    app.config.html_static_path.append(str(static_path.resolve()))
 
-def copy_deps_only(app: Any, exception: Optional[Exception]) -> None:
-    """Copies requirements.txt to _static for Micropip."""
-    if exception or not hasattr(app, "builder") or app.builder.format != "html":
-        return
 
-    here = Path(__file__).parent
-    root_dir = here.parents[2]
-    static_dst = Path(app.builder.outdir) / "_static"
-    static_dst.mkdir(exist_ok=True, parents=True)
+def copy_wheel_and_reqs(app: Any, exception: Optional[Exception]) -> None:
+  """
+  Post-build hook to copy the latest .whl file into _static for WASM usage.
+  """
+  if exception or not hasattr(app, "builder"):
+    return
+  here = Path(__file__).parent
+  root_dir = here.parents[2]
+  dist_dir = root_dir / "dist"
+  static_dst = Path(app.builder.outdir) / "_static"
+  static_dst.mkdir(exist_ok=True, parents=True)
 
-    reqs_file = root_dir / "requirements.txt"
-    if reqs_file.exists():
-        shutil.copy2(reqs_file, static_dst / "requirements.txt")
+  reqs_file = root_dir / "requirements.txt"
+  if reqs_file.exists():
+    shutil.copy2(reqs_file, static_dst / "requirements.txt")
+
+  if dist_dir.exists():
+    wheels = list(dist_dir.glob("*.whl"))
+    if wheels:
+      latest = sorted(wheels, key=os.path.getmtime)[-1]
+      target_file = static_dst / latest.name
+      if not target_file.exists() or target_file.stat().st_mtime < latest.stat().st_mtime:
+        shutil.copy2(latest, target_file)
