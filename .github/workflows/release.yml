@@ -46,4 +46,5 @@ jobs:
           files: dist/*.whl
           generate_release_notes: false
           draft: true
-          prerelease: true
+          prerelease: false
+          make_latest: true
