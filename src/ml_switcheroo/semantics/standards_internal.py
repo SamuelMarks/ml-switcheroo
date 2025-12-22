@@ -350,6 +350,11 @@ INTERNAL_OPS = {
     "std_args": ["value"],
     "variants": {},
   },
+  "Variable": {
+    "description": "Generic state container (Trainable or Non-Trainable).",
+    "std_args": ["value"],
+    "variants": {},
+  },
   "Cache": {
     "description": "Container for mutable state (non-grad).",
     "std_args": ["value"],

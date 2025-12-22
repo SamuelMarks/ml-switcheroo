@@ -150,6 +150,12 @@ def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]]
     log_error("No valid categories to scan.")
     return 1
 
+  # 3. Load Existing Semantics for Deduplication
+  # We must not re-discover operations that are already defined in the Specs
+  # (e.g. from ONNX or Array API).
+  semantics_mgr = SemanticsManager()
+  known_ops = set(semantics_mgr.get_known_apis().keys())
+
   engine = ConsensusEngine()
   persister = SemanticPersister()
   out_dir = resolve_semantics_dir()
@@ -187,21 +193,35 @@ def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]]
     # Filter: Must be present in at least 2 frameworks to form a consensus standard
     common = engine.filter_common(candidates, min_support=2)
 
-    if not common:
+    # --- DEDUPLICATION ---
+    # Extract only candidates that are NOT currently known
+    new_candidates = []
+    skipped_count = 0
+    for cand in common:
+      if cand.name in known_ops:
+        skipped_count += 1
+      else:
+        new_candidates.append(cand)
+        known_ops.add(cand.name)  # Add to set so we don't duplicate within this run
+
+    if skipped_count > 0:
+      console.print(f"  [dim]Skipped {skipped_count} candidates already defined in Specs.[/dim]")
+
+    if not new_candidates:
       continue
 
-    # Augment signatures
-    engine.align_signatures(common)
+    # Augment signatures on surviving candidates
+    engine.align_signatures(new_candidates)
 
-    console.print(f"  => Discovered {len(common)} candidates (e.g. {common[0].name})")
+    console.print(f"  => Discovered {len(new_candidates)} new candidates (e.g. {new_candidates[0].name})")
 
     # C. Persist
     if dry_run:
-      for c in common:
+      for c in new_candidates:
         console.print(f"    [Dry] {c.name} (std_args={c.std_args})")
     else:
-      persister.persist(common, target_file)
-      total_persisted += len(common)
+      persister.persist(new_candidates, target_file)
+      total_persisted += len(new_candidates)
 
   if not dry_run:
     if total_persisted > 0:

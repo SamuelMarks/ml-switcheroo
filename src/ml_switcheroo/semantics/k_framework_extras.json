@@ -12374,15 +12374,11 @@
     "type": "class"
   },
   "Variable": {
-    "description": "The class representing a Python class.",
+    "description": "Generic state container (Trainable or Non-Trainable).",
     "std_args": [
-      "self",
-      "data",
-      "requires_grad",
-      "volatile",
-      "_grad_fn"
+      "value"
     ],
-    "type": "class"
+    "variants": {}
   },
   "VariableMeta": {
     "description": "The class representing a Python class.",

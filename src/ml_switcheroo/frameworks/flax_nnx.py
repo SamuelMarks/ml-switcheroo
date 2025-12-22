@@ -217,6 +217,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       "MaxPool2d": StandardMap(api="flax.nnx.max_pool"),
       # Variable Containers
       "Param": StandardMap(api="flax.nnx.Param"),
+      "Variable": StandardMap(api="flax.nnx.Variable"),
       "Cache": StandardMap(api="flax.nnx.Cache"),
     }
 

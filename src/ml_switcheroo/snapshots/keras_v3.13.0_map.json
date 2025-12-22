@@ -416,9 +416,6 @@
     "GroupNormalization": {
       "api": "keras.layers.GroupNormalization"
     },
-    "Gru": {
-      "api": "keras.layers.GRU"
-    },
     "Grucell": {
       "api": "keras.layers.GRUCell"
     },
@@ -490,9 +487,6 @@
     "LayerNormalization": {
       "api": "keras.layers.LayerNormalization"
     },
-    "Layernormalization": {
-      "api": "keras.layers.LayerNormalization"
-    },
     "LeakyRelu": {
       "api": "keras.src.ops.nn.LeakyRelu",
       "args": {
@@ -500,9 +494,6 @@
         "negative_slope": "negative_slope",
         "self": "self"
       }
-    },
-    "Leakyrelu": {
-      "api": "keras.layers.LeakyReLU"
     },
     "Less": {
       "api": "keras.ops.less"
@@ -533,9 +524,6 @@
         "name": "name",
         "self": "self"
       }
-    },
-    "Lstm": {
-      "api": "keras.layers.LSTM"
     },
     "Lstmcell": {
       "api": "keras.layers.LSTMCell"
@@ -581,9 +569,6 @@
       }
     },
     "MultiheadAttention": {
-      "api": "keras.layers.MultiHeadAttention"
-    },
-    "Multiheadattention": {
       "api": "keras.layers.MultiHeadAttention"
     },
     "NONE": {
@@ -647,9 +632,6 @@
         "a": "a",
         "x": "x"
       }
-    },
-    "Prelu": {
-      "api": "keras.layers.PReLU"
     },
     "Q": {
       "api": "keras.src.losses.losses.CategoricalGeneralizedCrossEntropy.q",
@@ -755,9 +737,6 @@
       "args": {
         "self": "self"
       }
-    },
-    "Rnn": {
-      "api": "keras.layers.RNN"
     },
     "Round": {
       "api": "keras.src.legacy.backend.round",
@@ -869,9 +848,6 @@
         "name": "name",
         "self": "self"
       }
-    },
-    "Sparsemax": {
-      "api": "keras.ops.sparsemax"
     },
     "Split": {
       "api": "keras.src.backend.torch.numpy.split",

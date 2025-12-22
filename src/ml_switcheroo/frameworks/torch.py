@@ -202,6 +202,7 @@ class TorchAdapter:
       "parameters": StandardMap(api="torch.nn.Module.parameters"),
       "DataLoader": StandardMap(api="torch.utils.data.DataLoader"),
       "Param": StandardMap(api="torch.nn.Parameter"),
+      "Variable": StandardMap(api="torch.nn.Parameter", requires_plugin="nnx_param_to_torch"),
       "Cache": StandardMap(api="torch.nn.Parameter", args={}, requires_plugin="nnx_param_to_torch"),
       # Functional Transforms
       "vmap": StandardMap(api="torch.vmap", args={"func": "func", "in_axes": "in_dims", "out_axes": "out_dims"}),

@@ -4921,9 +4921,6 @@
         "zero_point": "zero_point"
       }
     },
-    "Gru": {
-      "api": "torch.gru"
-    },
     "Grucell": {
       "api": "torch.ao.nn.quantized.reference.modules.rnn.GRUCell",
       "args": {
@@ -5059,9 +5056,6 @@
         "lambd": "lambd",
         "self": "self"
       }
-    },
-    "Hardsigmoid": {
-      "api": "torch.nn.Hardsigmoid"
     },
     "Hardtanh": {
       "api": "torch.ao.nn.quantized.functional.hardtanh",
@@ -5794,9 +5788,6 @@
         "zero_point": "zero_point"
       }
     },
-    "Layernorm": {
-      "api": "torch.nn.LayerNorm"
-    },
     "LazyBatchNorm1d": {
       "api": "torch.nn.modules.batchnorm.LazyBatchNorm1d",
       "args": {
@@ -5997,9 +5988,6 @@
         "self": "self",
         "zero_point": "zero_point"
       }
-    },
-    "Leakyrelu": {
-      "api": "torch.nn.LeakyReLU"
     },
     "Less": {
       "api": "torch.less"
@@ -6283,9 +6271,6 @@
         "tee": "tee"
       }
     },
-    "Logsoftmax": {
-      "api": "torch.nn.LogSoftmax"
-    },
     "Logsumexp": {
       "api": "torch.special.logsumexp",
       "args": {}
@@ -6317,9 +6302,6 @@
         "cache_size": "cache_size",
         "self": "self"
       }
-    },
-    "Lstm": {
-      "api": "torch.lstm"
     },
     "Lstmcell": {
       "api": "torch.ao.nn.quantizable.modules.rnn.LSTMCell",
@@ -6991,9 +6973,6 @@
         "self": "self",
         "vdim": "vdim"
       }
-    },
-    "Multiheadattention": {
-      "api": "torch.nn.MultiheadAttention"
     },
     "Multinomial": {
       "api": "torch.distributions.multinomial.Multinomial",
@@ -8339,9 +8318,6 @@
         "tracer": "tracer"
       }
     },
-    "Prelu": {
-      "api": "torch.prelu"
-    },
     "PrepareCustomConfig": {
       "api": "torch.ao.quantization.fx.custom_config.PrepareCustomConfig",
       "args": {
@@ -9441,9 +9417,6 @@
         "normalized_shape": "normalized_shape",
         "self": "self"
       }
-    },
-    "Rnn": {
-      "api": "torch.nn.RNN"
     },
     "Rnncellbase": {
       "api": "torch.ao.nn.quantized.reference.modules.rnn.RNNCellBase",

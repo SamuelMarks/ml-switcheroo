@@ -125,6 +125,7 @@ class MLXAdapter:
       "Synchronize": StandardMap(api="mx.eval", requires_plugin="mlx_synchronize"),
       "no_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
       "enable_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
+      "Variable": StandardMap(api="mlx.core.array"),
     }
 
   @property

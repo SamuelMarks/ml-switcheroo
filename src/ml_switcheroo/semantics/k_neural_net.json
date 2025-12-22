@@ -4403,6 +4403,11 @@
     "std_args": [],
     "type": "function"
   },
+  "Variable": {
+    "description": "Auto-generated from torch_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
   "WeightedQuantizedModule": {
     "description": "Wrapper for quantized modules than can be lowered from reference modules.",
     "std_args": [

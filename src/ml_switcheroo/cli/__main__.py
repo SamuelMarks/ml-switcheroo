@@ -2,7 +2,7 @@
 Main Entry Point for ml-switcheroo CLI.
 
 This module handles argument parsing and dispatches to specific command
-handlers defined in `ml_switcheroo.cli.commands`.
+handlers defined in `ml_switcheroo.cli.commands` and `ml_switcheroo.cli.handlers`.
 """
 
 import argparse
@@ -11,8 +11,10 @@ from pathlib import Path
 from typing import List, Optional
 
 from ml_switcheroo.config import parse_cli_key_values
-from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.cli import commands
+
+# Import direct handler for new 'define' command
+from ml_switcheroo.cli.handlers.define import handle_define
 from ml_switcheroo import __version__
 
 
@@ -68,6 +70,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     nargs="*",
     help="Plugin configuration flags in key=value format (e.g. epsilon=1e-5 use_custom=True)",
   )
+
+  # --- Command: DEFINE (New) ---
+  cmd_def = subparsers.add_parser("define", help="Inject new operation definitions from YAML.")
+  cmd_def.add_argument("yaml_file", type=Path, help="Path to the ODL definition YAML file.")
 
   # --- Command: MATRIX ---
   subparsers.add_parser("matrix", help="Show compatibility table")
@@ -166,8 +172,18 @@ def main(argv: Optional[List[str]] = None) -> int:
   elif args.command == "convert":
     settings = parse_cli_key_values(args.config)
     return commands.handle_convert(
-      args.path, args.out, args.source, args.target, args.verify, args.strict, settings, args.json_trace
+      args.path,
+      args.out,
+      args.source,
+      args.target,
+      args.verify,
+      args.strict,
+      settings,
+      args.json_trace,
     )
+
+  elif args.command == "define":
+    return handle_define(args.yaml_file)
 
   elif args.command == "matrix":
     return commands.handle_matrix()

@@ -17,9 +17,6 @@
     "Adadelta": {
       "api": "optax.adadelta"
     },
-    "Adafactor": {
-      "api": "optax.adafactor"
-    },
     "Adagrad": {
       "api": "optax.adagrad",
       "requires_plugin": "optimizer_constructor"
@@ -34,9 +31,6 @@
     },
     "Adamax": {
       "api": "optax.adamax"
-    },
-    "Adamw": {
-      "api": "optax.adamw"
     },
     "Add": {
       "api": "jax.numpy.add",
@@ -234,9 +228,6 @@
         "x": "x"
       }
     },
-    "Fromage": {
-      "api": "optax.fromage"
-    },
     "GELU": {
       "api": "jax.nn.gelu",
       "args": {
@@ -308,14 +299,8 @@
         "x": "x"
       }
     },
-    "Lamb": {
-      "api": "optax.lamb"
-    },
     "Less": {
       "api": "jax.numpy.less"
-    },
-    "Lion": {
-      "api": "optax.lion"
     },
     "LoadStateDict": {
       "api": "KeyMapper.from_torch",
@@ -370,9 +355,6 @@
     },
     "NonZero": {
       "api": "jax.numpy.nonzero"
-    },
-    "Novograd": {
-      "api": "optax.novograd"
     },
     "Number": {
       "api": "jax.numpy.number",
@@ -465,9 +447,6 @@
       "args": {
         "x": "x"
       }
-    },
-    "Sgd": {
-      "api": "optax.sgd"
     },
     "Shape": {
       "api": "jax.experimental.roofline.roofline.RooflineShape.shape",

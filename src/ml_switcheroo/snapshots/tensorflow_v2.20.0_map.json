@@ -149,9 +149,6 @@
     "GroupNormalization": {
       "api": "keras.layers.GroupNormalization"
     },
-    "Gru": {
-      "api": "keras.layers.GRU"
-    },
     "Grucell": {
       "api": "keras.layers.GRUCell"
     },
@@ -170,13 +167,7 @@
     "LayerNormalization": {
       "api": "keras.layers.LayerNormalization"
     },
-    "Layernormalization": {
-      "api": "keras.layers.LayerNormalization"
-    },
     "LeakyRelu": {
-      "api": "keras.layers.LeakyReLU"
-    },
-    "Leakyrelu": {
       "api": "keras.layers.LeakyReLU"
     },
     "Less": {
@@ -184,9 +175,6 @@
     },
     "Log": {
       "api": "tensorflow.math.log"
-    },
-    "Lstm": {
-      "api": "keras.layers.LSTM"
     },
     "Lstmcell": {
       "api": "keras.layers.LSTMCell"
@@ -221,9 +209,6 @@
     "MultiheadAttention": {
       "api": "keras.layers.MultiHeadAttention"
     },
-    "Multiheadattention": {
-      "api": "keras.layers.MultiHeadAttention"
-    },
     "NonZero": {
       "api": "keras.ops.nonzero"
     },
@@ -238,9 +223,6 @@
     },
     "Pow": {
       "api": "tensorflow.pow"
-    },
-    "Prelu": {
-      "api": "keras.layers.PReLU"
     },
     "RMSNormalization": {
       "api": "keras.layers.RMSNormalization"
@@ -262,9 +244,6 @@
     },
     "Reshape": {
       "api": "tensorflow.reshape"
-    },
-    "Rnn": {
-      "api": "keras.layers.RNN"
     },
     "Round": {
       "api": "tensorflow.round"
@@ -304,9 +283,6 @@
     },
     "Softsign": {
       "api": "tensorflow.math.softsign"
-    },
-    "Sparsemax": {
-      "api": "keras.ops.sparsemax"
     },
     "Split": {
       "api": "tensorflow.split"

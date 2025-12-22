@@ -72,9 +72,23 @@ def mock_consensus_engine():
     engine.cluster.side_effect = cluster_side_effect
 
     # Mock filter to pass through everything for simplicity in this test
+    # (Candidates, min_support)
     engine.filter_common.side_effect = lambda c, min_support: c
 
     yield engine
+
+
+@pytest.fixture
+def mock_semantics_cls():
+  """
+  Mocks SemanticsManager usage in discovery handler to ensure
+  the deduplication check (known_ops) returns empty, forcing the
+  'Huber' candidate to be treated as new.
+  """
+  with patch("ml_switcheroo.cli.handlers.discovery.SemanticsManager") as mock:
+    instance = mock.return_value
+    instance.get_known_apis.return_value = {}
+    yield mock
 
 
 # FIX: Patch paths/utils in discovery handler
@@ -82,7 +96,7 @@ def mock_consensus_engine():
 @patch("ml_switcheroo.cli.handlers.discovery.get_adapter")
 @patch("ml_switcheroo.cli.handlers.discovery.available_frameworks")
 def test_sync_standards_happy_path(
-  mock_avail, mock_get_adapter, mock_resolve, mock_adapters, mock_persister, mock_consensus_engine
+  mock_avail, mock_get_adapter, mock_resolve, mock_adapters, mock_persister, mock_consensus_engine, mock_semantics_cls
 ):
   """
   Scenario:
@@ -125,7 +139,7 @@ def test_sync_standards_happy_path(
 @patch("ml_switcheroo.cli.handlers.discovery.resolve_semantics_dir")
 @patch("ml_switcheroo.cli.handlers.discovery.get_adapter")
 @patch("ml_switcheroo.cli.handlers.discovery.available_frameworks")
-def test_sync_standards_not_enough_data(mock_avail, mock_get_adapter, mock_resolve, mock_persister):
+def test_sync_standards_not_enough_data(mock_avail, mock_get_adapter, mock_resolve, mock_persister, mock_semantics_cls):
   """
   Scenario: Only 1 framework returns data.
   Expectation: Consensus skipped for that category.

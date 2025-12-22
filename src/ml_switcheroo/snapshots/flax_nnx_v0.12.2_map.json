@@ -18,9 +18,6 @@
     "Adadelta": {
       "api": "optax.adadelta"
     },
-    "Adafactor": {
-      "api": "optax.adafactor"
-    },
     "Adagrad": {
       "api": "optax.adagrad",
       "requires_plugin": "optimizer_constructor"
@@ -35,9 +32,6 @@
     },
     "Adamax": {
       "api": "optax.adamax"
-    },
-    "Adamw": {
-      "api": "optax.adamw"
     },
     "Add": {
       "api": "jax.numpy.add"
@@ -63,9 +57,6 @@
     "BatchNorm": {
       "api": "nnx.BatchNorm"
     },
-    "Batchnorm": {
-      "api": "nnx.BatchNorm"
-    },
     "Cache": {
       "api": "nnx.Cache"
     },
@@ -88,9 +79,6 @@
       "api": "nnx.Conv"
     },
     "ConvTranspose": {
-      "api": "nnx.ConvTranspose"
-    },
-    "Convtranspose": {
       "api": "nnx.ConvTranspose"
     },
     "Cos": {
@@ -130,9 +118,6 @@
     "Floor": {
       "api": "jax.numpy.floor"
     },
-    "Fromage": {
-      "api": "optax.fromage"
-    },
     "GELU": {
       "api": "nnx.gelu"
     },
@@ -151,9 +136,6 @@
     "Identity": {
       "api": "jax.numpy.identity"
     },
-    "Instancenorm": {
-      "api": "nnx.InstanceNorm"
-    },
     "IsNaN": {
       "api": "jax.numpy.isnan"
     },
@@ -161,13 +143,7 @@
       "api": "optax.lbfgs",
       "requires_plugin": "optimizer_constructor"
     },
-    "Lamb": {
-      "api": "optax.lamb"
-    },
     "LayerNorm": {
-      "api": "nnx.LayerNorm"
-    },
-    "Layernorm": {
       "api": "nnx.LayerNorm"
     },
     "Less": {
@@ -175,9 +151,6 @@
     },
     "Linear": {
       "api": "nnx.Linear"
-    },
-    "Lion": {
-      "api": "optax.lion"
     },
     "Log": {
       "api": "jax.numpy.log"
@@ -206,17 +179,11 @@
     "MultiheadAttention": {
       "api": "nnx.MultiHeadAttention"
     },
-    "Multiheadattention": {
-      "api": "nnx.MultiHeadAttention"
-    },
     "Nadam": {
       "api": "optax.nadam"
     },
     "NonZero": {
       "api": "jax.numpy.nonzero"
-    },
-    "Novograd": {
-      "api": "optax.novograd"
     },
     "Number": {
       "api": "jax.numpy.number"
@@ -235,9 +202,6 @@
     },
     "Pow": {
       "api": "jax.numpy.pow"
-    },
-    "Prelu": {
-      "api": "nnx.PReLU"
     },
     "RMSprop": {
       "api": "optax.rmsprop",
@@ -258,9 +222,6 @@
     "Rmsnorm": {
       "api": "nnx.RMSNorm"
     },
-    "Rnn": {
-      "api": "nnx.RNN"
-    },
     "Round": {
       "api": "jax.numpy.round"
     },
@@ -273,9 +234,6 @@
     },
     "Sequential": {
       "api": "nnx.Sequential"
-    },
-    "Sgd": {
-      "api": "optax.sgd"
     },
     "Sigmoid": {
       "api": "nnx.sigmoid"

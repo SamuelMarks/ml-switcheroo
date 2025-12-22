@@ -11,9 +11,6 @@
     "Adadelta": {
       "api": "optax.adadelta"
     },
-    "Adafactor": {
-      "api": "optax.adafactor"
-    },
     "Adagrad": {
       "api": "optax.adagrad",
       "requires_plugin": "optimizer_constructor"
@@ -29,9 +26,6 @@
     "Adamax": {
       "api": "optax.adamax"
     },
-    "Adamw": {
-      "api": "optax.adamw"
-    },
     "Dropout": {
       "api": "praxis.layers.Dropout",
       "args": {
@@ -45,15 +39,9 @@
     "Embedding": {
       "api": "praxis.layers.Embedding"
     },
-    "Fromage": {
-      "api": "optax.fromage"
-    },
     "LBFGS": {
       "api": "optax.lbfgs",
       "requires_plugin": "optimizer_constructor"
-    },
-    "Lamb": {
-      "api": "optax.lamb"
     },
     "Linear": {
       "api": "praxis.layers.Linear",
@@ -63,14 +51,8 @@
         "out_features": "output_dims"
       }
     },
-    "Lion": {
-      "api": "optax.lion"
-    },
     "Nadam": {
       "api": "optax.nadam"
-    },
-    "Novograd": {
-      "api": "optax.novograd"
     },
     "OptState": {
       "api": "optax.OptState"
@@ -85,9 +67,6 @@
     },
     "Sequential": {
       "api": "praxis.layers.Sequential"
-    },
-    "Sgd": {
-      "api": "optax.sgd"
     },
     "Yogi": {
       "api": "optax.yogi",

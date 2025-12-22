@@ -179,6 +179,7 @@ def generate_noise(shape):
       "RandomHorizontalFlip": StandardMap(api="keras.layers.RandomFlip", args={"p": "mode"}),
       "RandomVerticalFlip": StandardMap(api="keras.layers.RandomFlip"),
       "Grayscale": StandardMap(api="lambda x: x", transformation_type="inline_lambda"),
+      "Variable": StandardMap(api="keras.Variable", args={"value": "initializer"}),
     }
 
   @property
