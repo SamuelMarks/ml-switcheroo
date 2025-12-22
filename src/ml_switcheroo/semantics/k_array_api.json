@@ -744,11 +744,6 @@
       ]
     ]
   },
-  "enable_grad": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
   "equal": {
     "description": "Computes the truth value of ``x1_i == x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
     "from": "_2024_12/elementwise_functions.py",
@@ -1012,11 +1007,6 @@
         "Optional[device]"
       ]
     ]
-  },
-  "grad": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "greater": {
     "description": "Computes the truth value of ``x1_i > x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -1343,11 +1333,6 @@
         "bool"
       ]
     ]
-  },
-  "load_state_dict": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "log": {
     "description": "Calculates an implementation-dependent approximation to the natural (base ``e``) logarithm for each element ``x_i`` of the input array ``x``.",
@@ -1689,11 +1674,6 @@
       ]
     ]
   },
-  "no_grad": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
   "nonzero": {
     "description": "Returns the indices of the array elements which are non-zero.",
     "from": "_2024_12/searching_functions.py",
@@ -1768,24 +1748,17 @@
       ]
     ]
   },
-  "parameters": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "permute_dims": {
-    "description": "Permutes the axes (dimensions) of an array ``x``.",
-    "from": "_2024_12/manipulation_functions.py",
+    "description": "Permutes tensor dimensions.",
     "std_args": [
-      [
-        "x",
-        "array"
-      ],
-      [
-        "axes",
-        "Tuple[int, Ellipsis]"
-      ]
-    ]
+      "input",
+      {
+        "is_variadic": true,
+        "name": "dims",
+        "type": "int"
+      }
+    ],
+    "variants": {}
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
@@ -1886,16 +1859,6 @@
         "array"
       ]
     ]
-  },
-  "register_buffer": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "register_parameter": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "relu": {
     "description": "Auto-generated from torch_code_defs",
@@ -2212,11 +2175,6 @@
     ],
     "type": "attribute"
   },
-  "state_dict": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "std": {
     "description": "Calculates the standard deviation of the input array ``x``.",
     "std_args": [
@@ -2238,11 +2196,6 @@
       ]
     ],
     "type": "class"
-  },
-  "step": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "subtract": {
     "description": "Calculates the difference for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2564,11 +2517,6 @@
     ],
     "type": "attribute"
   },
-  "vmap": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "where": {
     "description": "Returns elements chosen from ``x1`` or ``x2`` depending on ``condition``.",
     "from": "_2024_12/searching_functions.py",
@@ -2586,11 +2534,6 @@
         "Union[array, int, float, complex, bool]"
       ]
     ]
-  },
-  "zero_grad": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "zeros": {
     "description": "Returns a new array having a specified ``shape`` and filled with zeros.",

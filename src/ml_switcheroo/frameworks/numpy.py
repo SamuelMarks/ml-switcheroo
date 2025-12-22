@@ -68,7 +68,7 @@ class NumpyAdapter:
       "square": StandardMap(api="np.square"),
       # Extras
       "randn": StandardMap(api="numpy.random.randn"),
-      "permute_dims": StandardMap(api="numpy.transpose", requires_plugin="pack_varargs"),
+      "permute_dims": StandardMap(api="numpy.transpose", pack_to_tuple="axes"),
     }
 
   @property

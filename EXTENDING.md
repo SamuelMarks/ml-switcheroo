@@ -1,14 +1,19 @@
 Extending
 =========
 
-**ml-switcheroo** is built on a modular, data-driven architecture. Supporting new operations or entirely new frameworks
-involves populating the **Knowledge Base** rather than modifying the core engine logic.
+**ml-switcheroo** is built on a modular, data-driven architecture.
 
 There are three ways to extend the system, ordered by complexity:
 
-1. **ODL (YAML)**: Define operations declaratively using the Operation Definition Language. (Recommended)
-2. **Adapter API**: Write Python classes for full framework support.
+1.
+    - **ODL (YAML)**: Define operations declaratively. **[See: [EXTENDING_WITH_DSL](EXTENDING_WITH_DSL.md)]** 
+    - Or update these Python files (no YAML DSL required):
+      - `src/ml_switcheroo/semantics/standards_internal.py`
+      - `src/ml_switcheroo/frameworks/*.py` (for torch, mlx, tensorflow, jax, etc.)
+3. **Adapter API**: Write Python classes for full framework support (e.g. adding `TinyGrad`).
 3. **Plugin Hooks**: Write AST transformation logic for complex architectural mismatches.
+
+This document covers **2** and **3**. For adding mathematical operations, please refer to the DSL guide.
 
 ---
 
@@ -19,11 +24,12 @@ framework implementations (The Spokes).
 
 ```mermaid
 graph TD
-%% Styles
+%% Styles based on ARCHITECTURE.md theme
     classDef hub fill: #f9ab00, stroke: #20344b, stroke-width: 2px, color: #20344b, font-family: 'Google Sans', rx: 5px
-    classDef adapter fill: #4285f4, stroke: #20344b, stroke-width: 2px, stroke-dasharray: 0, color: #ffffff, font-family: 'Google Sans', rx: 5px
+    classDef adapter fill: #4285f4, stroke: #20344b, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans', rx: 5px
     classDef plugin fill: #34a853, stroke: #20344b, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans', rx: 5px
     classDef tool fill: #ea4335, stroke: #20344b, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans', rx: 5px
+    classDef input fill: #ffffff, stroke: #20344b, stroke-width: 1px, color: #20344b, font-family: 'Roboto Mono'
 
     subgraph EXT [Your Extension]
         direction TB
@@ -39,7 +45,7 @@ graph TD
     subgraph TOOLS [Automation Tools]
         direction TB
         DEFINE("<b>CLI Command</b><br/>ml_switcheroo define<br/><i>Code Injection</i>"):::tool
-        YAML("<b>ODL YAML</b><br/>Operation Definition<br/><i>Declarative Spec</i>"):::tool
+        YAML("<b>ODL YAML</b><br/>Operation Definition<br/><i>Declarative Spec</i>"):::input
     end
 
 %% Wiring
@@ -48,138 +54,30 @@ graph TD
     DEFINE -->|" 2. Inject Mapping "| ADAPTER
     DEFINE -->|" 3. Scaffold File "| PLUGIN
     ADAPTER -->|" Registration "| HUB
-    PLUGIN -->|" Transformation "| HUB
-```
-
----
-
-## 🚀 1. The Operation Definition Language (ODL)
-
-The quickest way to add support for missing operations is via the `define` command. You write a YAML file describing the
-operation, and the tool injects the necessary Python code into the system.
-
-### Workflow
-
-1. Create a file `my_op.yaml`.
-2. Run `ml_switcheroo define my_op.yaml`.
-
-This command automatically:
-
-1. Updates the Abstract Standard (Hub) in `standards_internal.py`.
-2. Updates Framework Mappings (Spokes) in `frameworks/*.py`.
-3. Scaffolds Plugin files (if complex logic is requested).
-
-### ODL Schema Reference (Advanced)
-
-The ODL has been expanded to support **Semantic Constraints**, **Output Adaptation**, and **Declarative Logic Rules**.
-
-```yaml
-# 1. Abstract Definition (The Hub)
-operation: "LogSoftmax"
-description: "Applies the LogSoftmax function to an n-dimensional input Tensor."
-std_args:
-  - name: "input"
-    type: "Tensor"
-  - name: "dim"
-    type: "int"
-    default: "-1"
-    # Semantics Constraints (Used by the Fuzzer)
-    min: -3
-    max: 3
-  - name: "reduction"
-    type: "str"
-    options: [ "mean", "sum", "none" ]
-
-# 2. Variants (The Spokes)
-variants:
-  # Torch: Direct mapping
-  torch:
-    api: "torch.nn.functional.log_softmax"
-
-  # JAX: Argument Renaming
-  jax:
-    api: "jax.nn.log_softmax"
-    args:
-      dim: "axis"
-
-  # Mixed: Argument Injection + Casting
-  # Useful when target requires fixed parameters not present in source.
-  tensorflow:
-    api: "tf.nn.log_softmax"
-    inject_args:
-      full_precision: true  # Inject 'full_precision=True'
-    casts:
-      input: "float32"      # Cast input argument to float32
-
-  # Output Adaptation (Lambda Wrapper)
-  # Useful for APIs that return (val, indices) when you only need val.
-  numpy:
-    api: "np.some_func"
-    # Wraps call result: (lambda x: x[0])(np.some_func(...))
-    output_adapter: "lambda x: x[0]"
-
-  # Infix Transformation
-  # Maps function call to math operator: add(a, b) -> a + b
-  mlx:
-    api: "mx.add"
-    transformation_type: "infix"
-    operator: "+"
-```
-
-### Declarative Plugin Scaffolding
-
-If an operation requires conditional logic (e.g., dispatching to different APIs based on an argument value), you can
-define **Rules** in the YAML. The CLI will generate a Python plugin with `if/else` logic pre-written, handling all
-necessary boilerplate.
-
-Supported Operators: `eq`, `neq`, `gt`, `lt`, `gte`, `lte`, `in`, `not_in`.
-
-```yaml
-# Inside your YAML file:
-scaffold_plugins:
-  - name: "resize_dispatcher"
-    type: "call_transform"
-    doc: "Dispatches to different resize APIs based on interpolation mode."
-    rules:
-      # Rule 1: Exact Match
-      - if_arg: "mode"
-        op: "eq"
-        val: "nearest"
-        use_api: "jax.image.resize_nearest"
-
-      # Rule 2: List Membership (IN)
-      - if_arg: "mode"
-        op: "in"
-        val: [ "bilinear", "bicubic" ]
-        use_api: "jax.image.resize_bilinear"
-
-      # Rule 3: Numeric Comparison
-      - if_arg: "size"
-        op: "gt"
-        val: 512
-        use_api: "jax.image.resize_large"
+    PLUGIN -.->|" AST Transformation "| HUB
 ```
 
 ---
 
 ## 🔌 2. Adding a Framework Adapter
 
-To support a new library (e.g., `tinygrad` or `my_lib`), you create a Python class that acts as the translation
-interface.
+To support a new library (e.g., `tinygrad`, `custom_engine`), you create a Python class that acts as the translation
+interface. It converts the library's specific idioms into traits understood by the core engine.
 
 **Location:** `src/ml_switcheroo/frameworks/my_lib.py`
 
 ```python
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 from ml_switcheroo.frameworks.base import register_framework, FrameworkAdapter, StandardMap
 from ml_switcheroo.semantics.schema import StructuralTraits
+from ml_switcheroo.enums import SemanticTier
 
 
 @register_framework("my_lib")
 class MyLibAdapter:
     display_name = "My Library"
 
-    # Optional: Inherit implementation behavior (e.g. 'flax_nnx' inherits 'jax' math capabilities)
+    # Optional: Inherit implementation behavior (e.g., 'flax_nnx' inherits 'jax' math)
     inherits_from = None
 
     # Discovery configuration
@@ -188,7 +86,7 @@ class MyLibAdapter:
     # --- 1. Import Logic ---
     @property
     def import_alias(self) -> Tuple[str, str]:
-        # How is the library imported? alias is usually what users type (e.g. 'np', 'tf')
+        # How is the library imported? (Package Name, Common Alias)
         return ("my_lib", "ml")
 
     @property
@@ -240,6 +138,11 @@ class MyLibAdapter:
             lifecycle_strip_methods=["to", "cpu"],  # Methods to silently remove
             impurity_methods=["add_"]  # Methods flagged as side-effects
         )
+
+    # --- 4. Tiers ---
+    @property
+    def supported_tiers(self) -> List[SemanticTier]:
+        return [SemanticTier.ARRAY_API, SemanticTier.NEURAL]
 ```
 
 ---
@@ -254,7 +157,7 @@ Create a python file in `src/ml_switcheroo/plugins/`. It will be automatically d
 ### Auto-Wired Plugins
 
 You can register a hook and define its semantic mapping ("Hub entry") in one place using the `auto_wire` parameter. This
-architecture maintains locality of behavior and avoids editing large JSON files manually.
+architecture maintains locality of behavior and avoids editing multiple JSON files manually.
 
 ```python
 import libcst as cst
@@ -281,7 +184,7 @@ def transform_reshape(node: cst.Call, ctx: HookContext) -> cst.Call:
     # 2. Use 'ctx' to look up config or API mappings
     target_api = ctx.lookup_api("Reshape")  # returns "jnp.reshape"
 
-    # 3. Perform transformation logic (e.g. check args and modify them)
+    # 3. Perform transformation logic (e.g., check args and modify them)
     # This example grabs the function name, ignores args logic for brevity
     new_func = cst.Name("reshaped_manually")
 

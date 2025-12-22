@@ -21,6 +21,7 @@ from ml_switcheroo.frameworks import available_frameworks, get_adapter
 
 # Access Hook Registry to hydrate auto-wired plugins
 from ml_switcheroo.core import hooks
+from ml_switcheroo.semantics.standards_internal import INTERNAL_OPS
 
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.semantics.merging import (
@@ -48,10 +49,24 @@ class SemanticsManager:
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
-    # 1. Load Files (Specs & Overlays)
+    # 1. Load Internal Defaults (Golden Set)
+    # Must happen FIRST to act as a baseline that Files and Adapters can augment/override.
+    # Merged as EXTRAS tier but serves as foundational specs.
+    merge_tier_data(
+      data=self.data,
+      key_origins=self._key_origins,
+      import_data=self.import_data,
+      framework_configs=self.framework_configs,
+      new_content=INTERNAL_OPS,
+      tier=SemanticTier.EXTRAS,
+    )
+
+    # 2. Load Files (Specs & Overlays)
+    # Overwrites Internal defaults if user has custom JSONs (File > Internal)
     self._load_knowledge_graph()
 
-    # 2. Hydrate from Registry (Code Overrides)
+    # 3. Hydrate from Registry (Code Overrides)
+    # Overwrites Files (Code > File > Internal)
     self._hydrate_defaults_from_registry()
 
   def _hydrate_defaults_from_registry(self) -> None:

@@ -5,13 +5,17 @@ This module defines the data structure of the JSON mapping files (`k_array_api.j
 and the Framework Configuration blocks.
 
 Updated to support richer Argument Definitions (Dictionaries with constraints)
-in `std_args`.
+in `std_args` and Conditional Dispatch Rules.
 """
 
 from typing import Dict, List, Optional, Union, Tuple, Any
 from pydantic import BaseModel, Field, ConfigDict
 
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.enums import SemanticTier, LogicOp
+
+# Re-exporting LogicOp just in case it's used directly,
+# although import from enums is preferred.
+# LogicOp = LogicOp
 
 
 class StructuralTraits(BaseModel):
@@ -94,6 +98,22 @@ class FrameworkTraits(BaseModel):
   )
 
 
+class Rule(BaseModel):
+  """
+  Declarative rule for conditional logic within a variant.
+  Evaluated at runtime to dynamically switch APIs.
+  """
+
+  model_config = ConfigDict(populate_by_name=True)
+
+  if_arg: str = Field(..., description="Name of the standard argument to check.")
+  op: LogicOp = Field(LogicOp.EQ, description="Logical operator for comparison.")
+  is_val: Union[str, int, float, bool, List[Union[str, int, float]]] = Field(
+    ..., alias="val", description="Value or list of values to compare against."
+  )
+  use_api: str = Field(..., description="The target API path to use if the condition matches.")
+
+
 class Variant(BaseModel):
   """
   Defines how a specific framework implements an abstract operation.
@@ -104,6 +124,13 @@ class Variant(BaseModel):
   api: Optional[str] = Field(None, description="Fully qualified API path (e.g. 'jax.numpy.sum').")
   args: Optional[Dict[str, str]] = Field(None, description="Map of 'Standard Name' -> 'Framework Name' for arguments.")
   requires_plugin: Optional[str] = Field(None, description="Name of a registered plugin hook to handle translation.")
+
+  # --- Feature: Conditional Dispatch ---
+  dispatch_rules: List[Rule] = Field(
+    default_factory=list,
+    description="List of conditional rules to switch APIs based on argument values at runtime.",
+  )
+
   transformation_type: Optional[str] = Field(None, description="Special rewrite mode (e.g. 'infix', 'inline_lambda').")
   operator: Optional[str] = Field(None, description="If transformation_type='infix', the symbol to use (e.g. '+').")
 

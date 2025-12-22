@@ -104,7 +104,7 @@ class MLXAdapter:
       "Abs": StandardMap(api="mx.abs"),
       "Mean": StandardMap(api="mx.mean"),
       "Linear": StandardMap(api="mlx.nn.Linear", args={"in_features": "input_dims", "out_features": "output_dims"}),
-      "permute_dims": StandardMap(api="mx.transpose", requires_plugin="pack_varargs"),
+      "permute_dims": StandardMap(api="mx.transpose", pack_to_tuple="axes"),
       # Optimization
       "Adam": StandardMap(api="mlx.optimizers.Adam", args={"lr": "learning_rate"}, requires_plugin="mlx_optimizer_init"),
       "SGD": StandardMap(api="mlx.optimizers.SGD", args={"lr": "learning_rate"}, requires_plugin="mlx_optimizer_init"),

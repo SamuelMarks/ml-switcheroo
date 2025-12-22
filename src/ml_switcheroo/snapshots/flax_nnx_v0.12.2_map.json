@@ -57,6 +57,9 @@
     "BatchNorm": {
       "api": "nnx.BatchNorm"
     },
+    "Batchnorm": {
+      "api": "nnx.BatchNorm"
+    },
     "Cache": {
       "api": "nnx.Cache"
     },
@@ -513,9 +516,6 @@
     "full_like": {
       "api": "jax.numpy.full_like"
     },
-    "grad": {
-      "api": "nnx.grad"
-    },
     "greater": {
       "api": "jax.numpy.greater"
     },
@@ -656,7 +656,7 @@
     },
     "permute_dims": {
       "api": "jnp.transpose",
-      "requires_plugin": "pack_varargs"
+      "pack_to_tuple": "axes"
     },
     "pop": {
       "api": "nnx.pop"
@@ -814,9 +814,6 @@
     },
     "variables": {
       "api": "nnx.variables"
-    },
-    "vmap": {
-      "api": "nnx.vmap"
     },
     "where": {
       "api": "jax.numpy.where"

@@ -375,24 +375,6 @@
     ],
     "type": "class"
   },
-  "ArgMax": {
-    "description": "Returns the indices of the maximum value of all elements in the input tensor.",
-    "std_args": [
-      "input",
-      "dim",
-      "keepdim"
-    ],
-    "variants": {}
-  },
-  "ArgMin": {
-    "description": "Returns the indices of the minimum value of all elements in the input tensor.",
-    "std_args": [
-      "input",
-      "dim",
-      "keepdim"
-    ],
-    "variants": {}
-  },
   "Args": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -896,6 +878,16 @@
       "wrapper_class"
     ],
     "type": "class"
+  },
+  "Batchnorm": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "dtype",
+      "eps",
+      "momentum",
+      "num_features"
+    ],
+    "type": "attribute"
   },
   "Benchmark": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -3834,14 +3826,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "Einsum": {
-    "description": "Sums the product of the elements of the input operands along dimensions specified using a notation based on the Einstein summation convention.",
-    "std_args": [
-      "equation",
-      "operands"
-    ],
-    "variants": {}
-  },
   "ElasticAgent": {
     "description": "An agent process responsible for managing one or more worker processes.",
     "std_args": [],
@@ -4587,13 +4571,9 @@
     "type": "class"
   },
   "Flatten": {
-    "description": "Flattens input by reshaping it into a one-dimensional tensor.",
-    "std_args": [
-      "input",
-      "start_dim",
-      "end_dim"
-    ],
-    "variants": {}
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [],
+    "type": "class"
   },
   "FlexKernelOptions": {
     "description": "Options for controlling the behavior of FlexAttention kernels.",
@@ -5030,15 +5010,6 @@
       "validate_args"
     ],
     "type": "class"
-  },
-  "Gather": {
-    "description": "Gathers values along an axis specified by dim.",
-    "std_args": [
-      "input",
-      "dim",
-      "index"
-    ],
-    "variants": {}
   },
   "GaussianNLLLoss": {
     "description": "Gaussian negative log likelihood loss.",
@@ -7941,14 +7912,6 @@
     ],
     "type": "class"
   },
-  "OneHot": {
-    "description": "One-hot encoding.",
-    "std_args": [
-      "input",
-      "num_classes"
-    ],
-    "variants": {}
-  },
   "OneHotCategorical": {
     "description": "Creates a one-hot categorical distribution parameterized by :attr:`probs` or",
     "std_args": [
@@ -8325,16 +8288,6 @@
     "description": "The class representing a Python class.",
     "std_args": [],
     "type": "class"
-  },
-  "Pad": {
-    "description": "Pads tensor.",
-    "std_args": [
-      "input",
-      "pad",
-      "mode",
-      "value"
-    ],
-    "variants": {}
   },
   "PairwiseDistance": {
     "description": "Computes the pairwise distance between input vectors, or between columns of input matrices.",
@@ -9893,14 +9846,6 @@
     "std_args": [],
     "type": "class"
   },
-  "Reshape": {
-    "description": "Returns a tensor with the same data and number of elements as input, but with the specified shape.",
-    "std_args": [
-      "x",
-      "shape"
-    ],
-    "variants": {}
-  },
   "ReshapeTransform": {
     "description": "Unit Jacobian transform to reshape the rightmost part of a tensor.",
     "std_args": [
@@ -9910,15 +9855,6 @@
       "cache_size"
     ],
     "type": "class"
-  },
-  "Resize": {
-    "description": "Resize the input image to the given size.",
-    "std_args": [
-      "size",
-      "interpolation",
-      "antialias"
-    ],
-    "variants": {}
   },
   "Result": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -10314,16 +10250,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "Scatter": {
-    "description": "Writes all values from the tensor src into self at the indices specified in index.",
-    "std_args": [
-      "input",
-      "dim",
-      "index",
-      "src"
-    ],
-    "variants": {}
   },
   "Schedule1F1B": {
     "description": "The 1F1B schedule.",
@@ -10910,14 +10836,6 @@
     "description": "Stores the results of the splitter.",
     "std_args": [],
     "type": "class"
-  },
-  "Squeeze": {
-    "description": "Returns a tensor with all the dimensions of input of size 1 removed.",
-    "std_args": [
-      "input",
-      "dim"
-    ],
-    "variants": {}
   },
   "StackDataset": {
     "description": "Dataset as a stacking of multiple datasets.",
@@ -11865,15 +11783,6 @@
     ],
     "type": "class"
   },
-  "TopK": {
-    "description": "Returns the k largest elements of the given input tensor along a given dimension.",
-    "std_args": [
-      "input",
-      "k",
-      "dim"
-    ],
-    "variants": {}
-  },
   "TorchAODType": {
     "description": "Placeholder for dtypes that do not exist in PyTorch core yet.",
     "std_args": [],
@@ -12254,14 +12163,6 @@
       "inner"
     ],
     "type": "class"
-  },
-  "Unsqueeze": {
-    "description": "Returns a new tensor with a dimension of size one inserted at the specified position.",
-    "std_args": [
-      "input",
-      "dim"
-    ],
-    "variants": {}
   },
   "UnsupportedNodeError": {
     "description": "The class representing a Python class.",
@@ -19952,6 +19853,7 @@
   },
   "enable_grad": {
     "description": "Context-manager that enables gradient calculation.",
+    "op_type": "context",
     "std_args": [],
     "variants": {}
   },
@@ -31173,6 +31075,7 @@
   },
   "no_grad": {
     "description": "Context-manager that disabled gradient calculation.",
+    "op_type": "context",
     "std_args": [],
     "variants": {}
   },
@@ -32620,14 +32523,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "permute_dims": {
-    "description": "Permutes the dimensions of the input.",
-    "std_args": [
-      "x",
-      "axes"
-    ],
-    "variants": {}
   },
   "permute_hidden": {
     "description": "The class representing a Python function.",

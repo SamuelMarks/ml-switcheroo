@@ -15,12 +15,6 @@
       "api": "numpy.add",
       "args": {}
     },
-    "ArgMax": {
-      "api": "numpy.argmax"
-    },
-    "ArgMin": {
-      "api": "numpy.argmin"
-    },
     "Args": {
       "api": "numpy.typing.tests.test_runtime.TypeTup.args",
       "args": {}

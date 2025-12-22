@@ -71,6 +71,21 @@ class StandardMap(BaseModel):
     default=None,
     description="Infix operator symbol if transformation_type='infix'.",
   )
+  # --- Feature 09: Argument Packing ---
+  pack_to_tuple: Optional[str] = Field(
+    default=None,
+    description="If set (e.g. 'axes'), collects variadic positional args into a tuple kwargs.",
+  )
+  # --- Feature: Macros ---
+  macro_template: Optional[str] = Field(
+    default=None,
+    description="Expression template for composite ops (e.g. '{x} * functional.sigmoid({x})').",
+  )
+  # --- Feature: Output Dtype Casting (Limitation 12) ---
+  output_cast: Optional[str] = Field(
+    default=None,
+    description="Target Dtype string (e.g. 'jnp.int64') to cast the output to via .astype().",
+  )
 
 
 class FrameworkAdapter(Protocol):

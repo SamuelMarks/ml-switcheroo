@@ -92,7 +92,8 @@ class TensorFlowAdapter:
       "exp": StandardMap(api="tf.math.exp"),
       "log": StandardMap(api="tf.math.log"),
       "square": StandardMap(api="tf.math.square"),
-      "permute_dims": StandardMap(api="tf.transpose", requires_plugin="pack_varargs"),
+      # TF transpose uses 'perm' keyword for axes
+      "permute_dims": StandardMap(api="tf.transpose", pack_to_tuple="perm"),
       # Extras & Utils
       "randn": StandardMap(api="tf.random.normal"),
       "ArgMax": StandardMap(api="tf.math.argmax"),

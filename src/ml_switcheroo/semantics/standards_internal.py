@@ -9,10 +9,9 @@ It defines:
 1.  **Abstract Schema**: The standard argument names (`std_args`) and docstrings.
 2.  **Implementation Variants**: Currently empty, as all implementations have been
     distributed to their respective Framework Adapters in `src/ml_switcheroo/frameworks/`.
-
-Refactor Status:
-- All Frameworks: Mappings moved to `definitions` property in Adapter classes.
 """
+
+from ml_switcheroo.core.dsl import OpType
 
 INTERNAL_OPS = {
   # ============================================================================
@@ -82,69 +81,19 @@ INTERNAL_OPS = {
     "std_args": ["input", "min", "max"],
     "variants": {},
   },
-  "Gather": {
-    "description": "Gathers values along an axis specified by dim.",
-    "std_args": ["input", "dim", "index"],
-    "variants": {},
-  },
-  "Scatter": {
-    "description": "Writes all values from the tensor src into self at the indices specified in index.",
-    "std_args": ["input", "dim", "index", "src"],
-    "variants": {},
-  },
-  "Flatten": {
-    "description": "Flattens input by reshaping it into a one-dimensional tensor.",
-    "std_args": ["input", "start_dim", "end_dim"],
-    "variants": {},
-  },
-  "Reshape": {
-    "description": "Returns a tensor with the same data and number of elements as input, but with the specified shape.",
-    "std_args": ["x", "shape"],
-    "variants": {},
-  },
   "View": {
     "description": "Returns a new tensor with the same data as the self tensor but of a different shape.",
     "std_args": ["input", "shape"],
     "variants": {},
   },
-  "Squeeze": {
-    "description": "Returns a tensor with all the dimensions of input of size 1 removed.",
-    "std_args": ["input", "dim"],
-    "variants": {},
-  },
-  "Unsqueeze": {
-    "description": "Returns a new tensor with a dimension of size one inserted at the specified position.",
-    "std_args": ["input", "dim"],
-    "variants": {},
-  },
-  "TopK": {
-    "description": "Returns the k largest elements of the given input tensor along a given dimension.",
-    "std_args": ["input", "k", "dim"],
-    "variants": {},
-  },
-  "ArgMax": {
-    "description": "Returns the indices of the maximum value of all elements in the input tensor.",
-    "std_args": ["input", "dim", "keepdim"],
-    "variants": {},
-  },
-  "ArgMin": {
-    "description": "Returns the indices of the minimum value of all elements in the input tensor.",
-    "std_args": ["input", "dim", "keepdim"],
-    "variants": {},
-  },
-  "Pad": {
-    "description": "Pads tensor.",
-    "std_args": ["input", "pad", "mode", "value"],
-    "variants": {},
-  },
-  "Einsum": {
-    "description": "Sums the product of the elements of the input operands along dimensions specified using a notation based on the Einstein summation convention.",
-    "std_args": ["equation", "operands"],
+  "perumte_dims": {
+    "description": "Permutes tensor dimensions.",
+    "std_args": ["input", {"name": "dims", "type": "int", "is_variadic": True}],
     "variants": {},
   },
   "permute_dims": {
-    "description": "Permutes the dimensions of the input.",
-    "std_args": ["x", "axes"],
+    "description": "Permutes tensor dimensions.",
+    "std_args": ["input", {"name": "dims", "type": "int", "is_variadic": True}],
     "variants": {},
   },
   # Casting (Type Mapping)
@@ -239,11 +188,6 @@ INTERNAL_OPS = {
     "std_args": ["input"],
     "variants": {},
   },
-  "OneHot": {
-    "description": "One-hot encoding.",
-    "std_args": ["input", "num_classes"],
-    "variants": {},
-  },
   "CrossEntropyLoss": {
     "description": "Cross Entropy Loss.",
     "std_args": ["input", "target", "weight"],
@@ -257,11 +201,6 @@ INTERNAL_OPS = {
   # ============================================================================
   # 5. Vision Transforms
   # ============================================================================
-  "Resize": {
-    "description": "Resize the input image to the given size.",
-    "std_args": ["size", "interpolation", "antialias"],
-    "variants": {},
-  },
   "Normalize": {
     "description": "Normalize a tensor image with mean and standard deviation.",
     "std_args": ["mean", "std", "inplace"],
@@ -302,11 +241,13 @@ INTERNAL_OPS = {
   # ============================================================================
   "no_grad": {
     "description": "Context-manager that disabled gradient calculation.",
+    "op_type": OpType.CONTEXT,
     "std_args": [],
     "variants": {},
   },
   "enable_grad": {
     "description": "Context-manager that enables gradient calculation.",
+    "op_type": OpType.CONTEXT,
     "std_args": [],
     "variants": {},
   },

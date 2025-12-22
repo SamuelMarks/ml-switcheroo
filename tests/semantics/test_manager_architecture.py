@@ -5,7 +5,7 @@ Updated to verify extraction of definitions and imports from Adapters.
 
 import pytest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from ml_switcheroo.semantics.manager import SemanticsManager, resolve_snapshots_dir
 from ml_switcheroo.frameworks import register_framework
@@ -86,7 +86,7 @@ def test_import_namespace_hydration(empty_directories):
 def test_clean_slate_if_registry_empty(empty_directories):
   """
   Scenario: No JSONs and No Adapters.
-  Expectation: Manager is truly empty.
+  Expectation: Manager is populated ONLY with INTERNAL_OPS defaults.
   """
   sem = empty_directories / "semantics"
   snap = empty_directories / "snapshots"
@@ -95,6 +95,10 @@ def test_clean_slate_if_registry_empty(empty_directories):
     with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=snap):
       # Mock available_frameworks to return nothing
       with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
-        mgr = SemanticsManager()
-        mgr._reverse_index = {}
-        assert len(mgr.data) == 0
+        # Patch INTERNAL_OPS to verify it gets loaded correctly
+        with patch("ml_switcheroo.semantics.manager.INTERNAL_OPS", {"BuiltinOp": {}}):
+          mgr = SemanticsManager()
+          mgr._reverse_index = {}
+          # Should contain exactly the mocked internal ops
+          assert len(mgr.data) == 1
+          assert "BuiltinOp" in mgr.data

@@ -5,33 +5,8 @@ This module provides the `InputFuzzer`, responsible for creating randomized
 NumPy arrays, scalars, and complex container structures to feed into Framework A
 and Framework B during behavioral verification tests.
 
-It uses a dual-strategy approach:
-
-1.  **Type Hints (Semantic Validated)**:
-    If explicit type information is available (e.g., from Spec files), the fuzzer
-    parses these strings using a mini-grammar to generate compliant data.
-
-    **Supported Grammar:**
-
-    - Primitives: `int`, `float`, `bool`, `str`
-    - Structural: `List[T]`, `Tuple[T, ...]`, `Dict[K, V]`, `Optional[T]`
-    - Unions: `int | float`
-    - Domain: `Array`, `Tensor`, `dtype`
-    - **Symbolic Shapes**: `Array['B', 'N']` (Constraint Solving for consistent dimensions)
-
-2.  **Heuristics (Fallback)**:
-    If no hints are available, it infers data types from argument names.
-    - `mask`, `condition` -> `bool`
-    - `idx`, `axis`, `dim` -> `int` within bounds
-    - `x`, `y`, `input` -> `Array (float32)`
-
-3.  **Semantic Constraints**:
-    Respects `min`, `max`, and `options` constraints applied to parameters,
-    preventing invalid inputs (e.g., negative args for log).
-
-Safety:
-    Implements `MAX_RECURSION_DEPTH` to prevent infinite loops when generating
-    recursive or deeply nested types.
+Updates:
+    - Support for `dtype` constraints in array generation (Limitation #2 Fix).
 """
 
 import random
@@ -76,7 +51,7 @@ class InputFuzzer:
     Args:
         params: List of argument names to generate (e.g. `['x', 'axis']`).
         hints: Dictionary of `{arg_name: type_string}` derived from Spec.
-        constraints: Dictionary of `{arg_name: {min, max, options}}`.
+        constraints: Dictionary of `{arg_name: {min, max, options, dtype}}`.
 
     Returns:
         Dict[str, Any]: Randomized inputs ready for Framework adaptation.
@@ -159,7 +134,7 @@ class InputFuzzer:
   ) -> Any:
     """
     Parses a type string and generates conforming data via recursion.
-    Applies Semantic Constraints (min, max, options) to leaf values.
+    Applies Semantic Constraints (min, max, options, dtype) to leaf values.
     """
     if depth > self.max_depth:
       return self._get_fallback_base_value(type_str, base_shape)
@@ -239,11 +214,17 @@ class InputFuzzer:
     if match_sym:
       dims_str = match_sym.group(2)
       shape = self._resolve_symbolic_shape(dims_str, symbol_map)
+      # Resolve rank override if present
+      if constrs.get("rank"):
+        shape = self._adjust_shape_rank(shape, constrs["rank"])
       return self._generate_array("float", shape, constrs)
 
     # 8. Generic Arrays
     if type_str in ["Array", "Tensor", "np.ndarray"]:
-      return self._generate_array("float", base_shape, constrs)
+      shape = base_shape
+      if constrs.get("rank"):
+        shape = self._adjust_shape_rank(shape, constrs["rank"])
+      return self._generate_array("float", shape, constrs)
 
     # 9. Primitives
     if type_str in ["int", "integer"]:
@@ -257,6 +238,7 @@ class InputFuzzer:
 
     # 10. Dtype objects
     if "dtype" in type_str.lower():
+      # Dtype constraints on a dtype object is meta (e.g. valid types), but implementation is simpler
       return random.choice([np.float32, np.int32, np.float64, np.bool_])
 
     # Fallback for unknown strings
@@ -296,6 +278,19 @@ class InputFuzzer:
       shape.append(symbol_map[clean])
 
     return tuple(shape)
+
+  def _adjust_shape_rank(self, shape: Tuple[int, ...], required_rank: int) -> Tuple[int, ...]:
+    """Adjusts shape to match required rank."""
+    current_rank = len(shape)
+    if current_rank == required_rank:
+      return shape
+    elif current_rank < required_rank:
+      # Pad
+      extra = tuple(random.randint(2, 5) for _ in range(required_rank - current_rank))
+      return shape + extra
+    else:
+      # Truncate
+      return shape[:required_rank]
 
   def _get_fallback_base_value(self, type_str: str, base_shape: Tuple[int, ...]) -> Any:
     """Returns minimal valid value to terminate recursion."""
@@ -337,11 +332,18 @@ class InputFuzzer:
     if name_lower in ["shape", "size"]:
       return base_shape
 
+    # Apply Explicit Dtype Requests if present in constraint without type hint
+    if constrs.get("dtype"):
+      if "int" in constrs["dtype"]:
+        return self._generate_array("int", base_shape, constrs)
+      if "bool" in constrs["dtype"]:
+        return self._generate_array("bool", base_shape, constrs)
+
     heuristic_type = self._guess_dtype_by_name(name)
     if heuristic_type == "bool":
       return self._generate_array("bool", base_shape, constrs)
     if heuristic_type == "int":
-      # Scalars check
+      # Scalars check e.g. alpha
       if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):
         return self._generate_scalar_int(constrs)
       return self._generate_array("int", base_shape, constrs)
@@ -360,26 +362,49 @@ class InputFuzzer:
     min_val = constraints.get("min")
     max_val = constraints.get("max")
 
+    # Limitation #2 Fix: Dtype Support
+    dtype_req = constraints.get("dtype")
+    explicit_dtype = None
+    if dtype_req:
+      try:
+        explicit_dtype = np.dtype(dtype_req)
+      except TypeError:
+        pass
+
+    # Use explicit dtype if available to override heuristic label
+    # E.g. type_lbl='float' but constraint='int64' -> force int64
+    if explicit_dtype:
+      if np.issubdtype(explicit_dtype, np.integer):
+        type_lbl = "int"
+      elif explicit_dtype.kind == "b":
+        type_lbl = "bool"
+      else:
+        type_lbl = "float"
+
     if type_lbl == "bool":
       return np.random.randint(0, 2, size=shape).astype(bool)
 
     if type_lbl == "int":
       # Default range [-10, 10]
       low = int(min_val) if min_val is not None else -10
-      high = int(max_val) if max_val is not None else 10
       # High in randint is exclusive, update for inclusivity match
-      return np.random.randint(low, high + 1, size=shape).astype(np.int32)
+      # If max is None default to 10, else use max+1
+      high_bound = int(max_val) if max_val is not None else 10
+      high = high_bound + 1
 
-    # Float32 default
-    arr = np.random.randn(*shape).astype(np.float32)
+      arr = np.random.randint(low, high, size=shape)
+      if explicit_dtype:
+        return arr.astype(explicit_dtype)
+      return arr.astype(np.int32)
+
+    # Float default
+    arr = np.random.randn(*shape)
 
     # Constraint Clipping logic
-    # If explicit bounds provided, we use uniform generation instead of normal
-    # to better span the range, or we clip the normal distribution.
     if min_val is not None or max_val is not None:
       if min_val is not None and max_val is not None:
         # Uniform within bounds
-        arr = np.random.uniform(min_val, max_val, size=shape).astype(np.float32)
+        arr = np.random.uniform(min_val, max_val, size=shape)
       else:
         # Clip standard normal
         safe_min = float(min_val) if min_val is not None else -np.inf
@@ -391,7 +416,10 @@ class InputFuzzer:
 
         arr = np.clip(arr, safe_min, safe_max)
 
-    return arr
+    if explicit_dtype:
+      return arr.astype(explicit_dtype)
+
+    return arr.astype(np.float32)
 
   def _generate_scalar_int(self, constraints: Dict[str, Any]) -> int:
     min_v = int(constraints.get("min", -5))

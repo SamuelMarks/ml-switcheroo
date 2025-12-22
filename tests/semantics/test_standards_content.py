@@ -42,5 +42,6 @@ def test_optimizer_standards():
 
 def test_vision_standards():
   """Verify vision transforms are preserved."""
-  assert "Resize" in INTERNAL_OPS
-  assert "interpolation" in INTERNAL_OPS["Resize"]["std_args"]
+  # Updated: Check CenterCrop instead of Resize to avoid conflict with ONNX
+  assert "CenterCrop" in INTERNAL_OPS
+  assert "size" in INTERNAL_OPS["CenterCrop"]["std_args"]

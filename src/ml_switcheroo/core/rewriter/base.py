@@ -12,6 +12,7 @@ the ``PivotRewriter``. It handles:
     up to the ``ASTEngine``.
 4.  **Hook Infrastructure**: initializing the ``HookContext`` used by plugins.
 5.  **Global Injection**: Handling file-level preamble injection (``leave_Module``).
+6.  **Import Injection**: Processing dynamic import requirements from variants.
 """
 
 from typing import Optional, List, Dict, Any, Union, Set
@@ -106,6 +107,42 @@ class BaseRewriter(cst.CSTTransformer):
     ctx = self._signature_stack[-1]
     if code_str not in ctx.preamble_stmts:
       ctx.preamble_stmts.append(code_str)
+
+  def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
+    """
+    Processes `required_imports` from a variant specification.
+    Injects valid import statements into the module preamble via the Context.
+
+    Supports:
+    - List of strings: `["import numpy"]`
+    - List of structured specifications: `[{"module": "numpy", "alias": "np"}]`
+
+    Args:
+        variant: The framework variant dictionary from Semantics.
+    """
+    reqs = variant.get("required_imports", [])
+    for r in reqs:
+      stmt = ""
+      if isinstance(r, str):
+        # Heuristic: if it doesn't look like a statement, treat as module name
+        clean = r.strip()
+        if clean.startswith("import") or clean.startswith("from"):
+          stmt = clean
+        else:
+          stmt = f"import {clean}"
+      elif isinstance(r, dict):
+        mod = r.get("module")
+        alias = r.get("alias")
+        if mod:
+          if alias:
+            stmt = f"import {mod} as {alias}"
+          else:
+            stmt = f"import {mod}"
+
+      # Use injection logic via context callback logic
+      # (Accessing _callback_inject_preamble directly or via ctx)
+      if stmt:
+        self.ctx.inject_preamble(stmt)
 
   def _enter_scope(self) -> None:
     """Push a new scope onto the stack (e.g. entering a class or function)."""

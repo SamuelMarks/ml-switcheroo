@@ -214,14 +214,15 @@ class FrameworkInjector(cst.CSTTransformer):
     args_list: List[cst.Arg] = []
 
     # 1. api="string"
-    args_list.append(
-      cst.Arg(
-        keyword=cst.Name("api"),
-        value=cst.SimpleString(f'"{self.variant.api}"'),
-        equal=tight_eq,
-        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+    if self.variant.api:
+      args_list.append(
+        cst.Arg(
+          keyword=cst.Name("api"),
+          value=cst.SimpleString(f'"{self.variant.api}"'),
+          equal=tight_eq,
+          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+        )
       )
-    )
 
     # 2. args={"std": "fw"}
     if self.variant.args:
@@ -303,7 +304,14 @@ class FrameworkInjector(cst.CSTTransformer):
       )
 
     # 5. optional fields
-    for field in ["requires_plugin", "transformation_type", "output_adapter", "operator"]:
+    for field in [
+      "requires_plugin",
+      "transformation_type",
+      "output_adapter",
+      "operator",
+      "macro_template",
+      "output_cast",
+    ]:
       val = getattr(self.variant, field, None)
       if val:
         args_list.append(
@@ -314,6 +322,34 @@ class FrameworkInjector(cst.CSTTransformer):
             comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
           )
         )
+
+    # 6. required_imports support
+    if self.variant.required_imports:
+      req_elements = []
+      for item in self.variant.required_imports:
+        # item can be str or ImportReq object
+        # Convert to CST using our generic literal converter
+        # If it's an object use model_dump
+        if hasattr(item, "model_dump"):
+          val_node = _convert_to_cst_literal(item.model_dump())
+        else:
+          val_node = _convert_to_cst_literal(item)
+
+        req_elements.append(cst.Element(value=val_node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
+
+      # Clean trailing comma
+      if req_elements:
+        last = req_elements[-1]
+        req_elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+
+      args_list.append(
+        cst.Arg(
+          keyword=cst.Name("required_imports"),
+          value=cst.List(elements=req_elements),
+          equal=tight_eq,
+          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+        )
+      )
 
     # Remove comma from the last argument to ensure clean syntax: StandardMap(api="...")
     if args_list:

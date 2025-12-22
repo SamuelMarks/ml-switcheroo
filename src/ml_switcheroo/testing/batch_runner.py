@@ -5,7 +5,8 @@ Iterates over all defined semantic operations and verifys their correctness.
 Prioritizes "Manual/Human" tests found on disk over "Auto/Robotic" fuzzing.
 This closes the loop for Workflow B, allowing manual fixes to count as success.
 
-Updated to handle Rich Parameter Constraints (dict items in std_args).
+Updated to handle Rich Parameter Constraints (dict items in std_args),
+including Dtype and Rank constraints, and **Input-Dependent Output Shape** verification.
 """
 
 import ast
@@ -77,11 +78,12 @@ class BatchValidator:
       details = known_apis[op_name]
       variants = details.get("variants", {})
       std_args_raw = details.get("std_args", ["x"])
+      output_shape_calc = details.get("output_shape_calc")
 
       # Unpack typed arguments and constraints
       params, hints, constraints = self._unpack_args(std_args_raw)
 
-      passed, _ = self.runner.verify(variants, params, hints=hints, constraints=constraints)
+      passed, _ = self.runner.verify(variants, params, hints=hints, constraints=constraints, shape_calc=output_shape_calc)
       results[op_name] = passed
 
     return results
@@ -99,7 +101,7 @@ class BatchValidator:
         A tuple containing:
             - List of argument names [str].
             - Dictionary of type hints {name: type_str}.
-            - Dictionary of constraints {name: {min: val, ...}}.
+            - Dictionary of constraints {name: {min: val, dtype: 'int64', ...}}.
     """
     params = []
     hints = {}
@@ -116,10 +118,10 @@ class BatchValidator:
         if "type" in item:
           hints[name] = item["type"]
 
-        # Extract constraints if present
+        # Extract constraints if present (Updated for dtype/rank)
         constrs = {}
-        for k in ["min", "max", "options"]:
-          if k in item:
+        for k in ["min", "max", "options", "rank", "dtype"]:
+          if k in item and item[k] is not None:
             constrs[k] = item[k]
 
         if constrs:

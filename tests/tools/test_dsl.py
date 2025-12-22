@@ -1,10 +1,20 @@
 """
 Tests for ODL DSL Schema.
+
+Updated to align with Schema Version 2, where `FrameworkVariant.api` is optional
+to allow defining explicit failure variants with custom error messages.
 """
 
 import pytest
 from pydantic import ValidationError
-from ml_switcheroo.core.dsl import OperationDef, ParameterDef, FrameworkVariant, Rule, PluginScaffoldDef, PluginType
+from ml_switcheroo.core.dsl import (
+  OperationDef,
+  ParameterDef,
+  FrameworkVariant,
+  Rule,
+  PluginScaffoldDef,
+  PluginType,
+)
 
 
 def test_parameter_def_defaults():
@@ -16,10 +26,18 @@ def test_parameter_def_defaults():
   assert p.default is None
 
 
-def test_framework_variant_required_api():
-  """Verify API string is mandatory."""
-  with pytest.raises(ValidationError):
-    FrameworkVariant(requires_plugin="foo")  # Missing api field
+def test_framework_variant_optional_api():
+  """
+  Verify API string is OPTIONAL.
+
+  Previously this field was mandatory. It is now optional to allow
+  explicitly blocking a framework variant (e.g. for operations that
+  cannot be supported) by providing a `missing_message` instead.
+  """
+  # Should NOT raise ValidationError
+  v = FrameworkVariant(missing_message="Not supported on this backend")
+  assert v.api is None
+  assert v.missing_message == "Not supported on this backend"
 
 
 def test_framework_variant_casts():
@@ -33,6 +51,34 @@ def test_framework_variant_inject_args():
   v = FrameworkVariant(api="foo", inject_args={"eps": 1e-5, "flag": True})
   assert v.inject_args["eps"] == 1e-5
   assert v.inject_args["flag"] is True
+
+
+def test_framework_variant_arg_values():
+  """Verify 'arg_values' dictionary support."""
+  v = FrameworkVariant(api="foo", arg_values={"reduction": {"mean": "'avg'", "sum": "'add'"}})
+  assert v.arg_values["reduction"]["mean"] == "'avg'"
+  assert v.arg_values["reduction"]["sum"] == "'add'"
+
+
+def test_framework_variant_pack_to_tuple():
+  """Verify 'pack_to_tuple' field support."""
+  v = FrameworkVariant(api="foo", pack_to_tuple="axes")
+  assert v.pack_to_tuple == "axes"
+
+
+def test_framework_variant_select_index():
+  """
+  Verify 'output_select_index' validation.
+  """
+  v = FrameworkVariant(api="foo", output_select_index=0)
+  assert v.output_select_index == 0
+
+  v2 = FrameworkVariant(api="foo", output_select_index=1)
+  assert v2.output_select_index == 1
+
+  # Ensure type safety (should raise error if string provided for int field)
+  with pytest.raises(ValidationError):
+    FrameworkVariant(api="foo", output_select_index="zero")
 
 
 def test_operation_def_structure():
@@ -60,7 +106,7 @@ def test_rule_instantiation_by_name():
 
 def test_rule_instantiation_by_alias():
   """Verify Rule can be instantiated via dictionary validation using 'val' alias."""
-  # Fixed: Schema defines alias="val", not "is"
+  # Schema defines alias="val", not "is"
   data = {"if_arg": "flag", "val": True, "use_api": "target"}
   r = Rule.model_validate(data)
   assert r.is_val is True

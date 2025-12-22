@@ -94,10 +94,16 @@
       "api": "keras.layers.AlphaDropout"
     },
     "ArgMax": {
-      "api": "keras.ops.argmax"
+      "api": "keras.ops.argmax",
+      "args": {
+        "dim": "axis"
+      }
     },
     "ArgMin": {
-      "api": "keras.ops.argmin"
+      "api": "keras.ops.argmin",
+      "args": {
+        "dim": "axis"
+      }
     },
     "Args": {
       "api": "keras.src.ops.symbolic_arguments.SymbolicArguments.args",

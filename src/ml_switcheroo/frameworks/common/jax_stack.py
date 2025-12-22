@@ -125,7 +125,8 @@ class JAXStackMixin:
     mappings["abs"] = {"api": "jnp.abs"}
 
     # Handle varargs packing for Permute/Transpose
-    mappings["permute_dims"] = {"api": "jnp.transpose", "requires_plugin": "pack_varargs"}
+    # Now handled via DSL mapping
+    mappings["permute_dims"] = {"api": "jnp.transpose", "pack_to_tuple": "axes"}
 
     # Method -> Property swaps common in JAX arrays (e.g. .size() -> .shape)
     mappings["size"] = {"api": "shape", "requires_plugin": "method_to_property"}

@@ -122,7 +122,7 @@ class JaxCoreAdapter(JAXStackMixin):
       "ArgMin": StandardMap(api="jax.numpy.argmin", args={"dim": "axis"}),
       "Pad": StandardMap(api="jax.numpy.pad", requires_plugin="padding_converter"),
       "Einsum": StandardMap(api="jnp.einsum", requires_plugin="einsum_normalizer"),
-      "permute_dims": StandardMap(api="jnp.transpose", requires_plugin="pack_varargs"),
+      "permute_dims": StandardMap(api="jnp.transpose", pack_to_tuple="axes"),
       "Abs": StandardMap(api="jnp.abs"),
       "Mean": StandardMap(api="jnp.mean"),
       "Sum": StandardMap(api="jnp.sum"),

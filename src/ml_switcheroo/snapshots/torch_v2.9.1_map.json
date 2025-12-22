@@ -816,8 +816,7 @@
       }
     },
     "BatchNorm": {
-      "api": "torch.utils.mobile_optimizer.LintCode.BATCHNORM",
-      "args": {}
+      "api": "torch.nn.BatchNorm2d"
     },
     "BatchNorm1d": {
       "api": "torch.nn.modules.batchnorm.BatchNorm1d",
@@ -893,6 +892,10 @@
         "self": "self",
         "wrapper_class": "wrapper_class"
       }
+    },
+    "Batchnorm": {
+      "api": "torch.utils.mobile_optimizer.LintCode.BATCHNORM",
+      "args": {}
     },
     "Benchmark": {
       "api": "torch.utils.benchmark.examples.spectral_ops_fuzz_test.Benchmark",

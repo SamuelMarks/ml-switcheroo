@@ -3,9 +3,13 @@ Normalization Helpers for AST Rewriting (The Argument Pivot).
 
 This module provides the `NormalizationMixin`, a component of the `PivotRewriter`
 responsible for reshaping function arguments and call structures during translation.
+
+Updates:
+- Supports argument value mapping (Enums) via `arg_values`.
+- Supports variadic argument packing via `pack_to_tuple`.
 """
 
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Optional
 import libcst as cst
 from ml_switcheroo.core.rewriter.base import BaseRewriter
 
@@ -56,6 +60,27 @@ class NormalizationMixin(BaseRewriter):
 
     return root in common_roots
 
+  def _extract_primitive_key(self, node: cst.BaseExpression) -> Optional[str]:
+    """
+    Extracts a string representation of a primitive AST node for key lookup.
+
+    Args:
+        node: The CST node to extract value from.
+
+    Returns:
+        String representation (e.g., "0", "mean", "True") or None if complex.
+        Strings are returned without quotes.
+    """
+    if isinstance(node, cst.SimpleString):
+      # "mean" -> mean
+      return node.value.strip("'").strip('"')
+    elif isinstance(node, cst.Integer):
+      return node.value
+    elif isinstance(node, cst.Name):
+      # True, False, None
+      return node.value
+    return None
+
   def _normalize_arguments(
     self,
     original_node: cst.Call,
@@ -65,13 +90,21 @@ class NormalizationMixin(BaseRewriter):
   ) -> List[cst.Arg]:
     """
     Normalizes arguments from the source call to the target signature via the Pivot.
-    Supports renaming, reordering, and injection of new arguments via 'inject_args'.
+    Supports renaming, reordering, value mapping, packing, and injection of new arguments.
     """
-    # 1. Extract Standard Argument Order
+    # 1. Extract Standard Argument Order with metadata
     std_args_raw = op_details.get("std_args", [])
     std_args_order = []
+    variadic_arg_name = None
+
     for item in std_args_raw:
-      if isinstance(item, (list, tuple)):
+      if isinstance(item, dict):
+        name = item.get("name")
+        if name:
+          std_args_order.append(name)
+          if item.get("is_variadic"):
+            variadic_arg_name = name
+      elif isinstance(item, (list, tuple)):
         std_args_order.append(item[0])
       else:
         std_args_order.append(item)
@@ -81,6 +114,12 @@ class NormalizationMixin(BaseRewriter):
     source_arg_map = source_variant.get("args", {})
     target_arg_map = target_impl.get("args", {})
 
+    # Feature: Argument Value Mapping
+    target_val_map = target_impl.get("arg_values", {})
+
+    # Feature: Argument Packing (Tuple)
+    pack_target_kw = target_impl.get("pack_to_tuple")
+
     # New: retrieve injected args for target
     target_inject_map = target_impl.get("inject_args", {})
 
@@ -89,6 +128,7 @@ class NormalizationMixin(BaseRewriter):
 
     found_args: Dict[str, cst.Arg] = {}
     extra_args: List[cst.Arg] = []
+    variadic_buffer: List[cst.Arg] = []
 
     # 3. Method-to-Function Receiver Injection
     is_method_call = isinstance(original_node.func, cst.Attribute)
@@ -129,15 +169,29 @@ class NormalizationMixin(BaseRewriter):
     # Shift positional index if we injected arg 0
     pos_idx = 1 if receiver_injected else 0
 
+    # Determine if packing should occur
+    packing_mode = False
+
     for orig_arg, upd_arg in zip(original_node.args, updated_node.args):
       if not orig_arg.keyword:
-        if pos_idx < len(std_args_order):
+        if packing_mode:
+          # Continue collecting variadics
+          variadic_buffer.append(upd_arg)
+        elif pos_idx < len(std_args_order):
           std_name = std_args_order[pos_idx]
-          if std_name not in found_args:
-            found_args[std_name] = upd_arg
+
+          # Check if this standard arg triggers packing
+          if pack_target_kw and std_name == variadic_arg_name:
+            packing_mode = True
+            variadic_buffer.append(upd_arg)
+            # std_name remains current for this buffer (we map it after loop)
+          else:
+            if std_name not in found_args:
+              found_args[std_name] = upd_arg
+            pos_idx += 1
         else:
+          # Truly extra positional not accounted for by spec
           extra_args.append(upd_arg)
-        pos_idx += 1
       else:
         k_name = orig_arg.keyword.value
         std_name = lib_to_std.get(k_name, k_name)
@@ -147,25 +201,74 @@ class NormalizationMixin(BaseRewriter):
         else:
           extra_args.append(upd_arg)
 
-    # 5. Construct New List
+    # 5. Handle Packing Buffer
+    if packing_mode and variadic_arg_name and pack_target_kw:
+      # Create Tuple
+      elements = []
+      for arg in variadic_buffer:
+        elements.append(cst.Element(value=arg.value, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
+
+      # Clean trailing comma for tuples if desired, though valid in Python
+      if elements:
+        elements[-1] = elements[-1].with_changes(
+          comma=cst.MaybeSentinel.DEFAULT if len(elements) > 1 else cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
+        )
+
+      packed_tuple = cst.Tuple(elements=elements)
+
+      # Create keyword argument for target
+      packed_arg = cst.Arg(
+        keyword=cst.Name(pack_target_kw),
+        value=packed_tuple,
+        equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
+      )
+      found_args[variadic_arg_name] = packed_arg
+
+    # 6. Construct New List
     new_args_list: List[cst.Arg] = []
     for std_name in std_args_order:
       if std_name in found_args:
         current_arg = found_args[std_name]
+
+        # If this was the packed argument, it already has the correct target keyword.
+        if std_name == variadic_arg_name and pack_target_kw:
+          new_args_list.append(current_arg)
+          continue
+
         tg_alias = target_arg_map.get(std_name, std_name)
+
+        # Apply Value Mapping
+        final_val_node = current_arg.value
+        if target_val_map and std_name in target_val_map:
+          val_options = target_val_map[std_name]
+          raw_key = self._extract_primitive_key(current_arg.value)
+          # Check if key matches config
+          if raw_key is not None and str(raw_key) in val_options:
+            target_code = val_options[str(raw_key)]
+            try:
+              final_val_node = cst.parse_expression(target_code)
+            except cst.ParserSyntaxError:
+              # Fallback to original if code string is invalid
+              pass
 
         if current_arg.keyword:
           new_arg = current_arg.with_changes(
             keyword=cst.Name(tg_alias),
+            value=final_val_node,
             equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
           )
           new_args_list.append(new_arg)
         else:
-          new_args_list.append(current_arg)
+          # Positional arg, update value if changed
+          if final_val_node is not current_arg.value:
+            new_arg = current_arg.with_changes(value=final_val_node)
+            new_args_list.append(new_arg)
+          else:
+            new_args_list.append(current_arg)
 
     new_args_list.extend(extra_args)
 
-    # 6. Inject Additional Arguments
+    # 7. Inject Additional Arguments
     if target_inject_map:
       for arg_name, arg_val in target_inject_map.items():
         # Convert literal to CST node
@@ -213,56 +316,3 @@ class NormalizationMixin(BaseRewriter):
     else:
       # Fallback for unexpected types
       return cst.SimpleString(f"'{str(val)}'")
-
-  def _rewrite_as_infix(
-    self,
-    _original_node: cst.Call,
-    args: List[cst.Arg],
-    op_symbol: str,
-    std_args: List[str],
-  ) -> Union[cst.BinaryOperation, cst.UnaryOperation]:
-    arity = len(std_args) if std_args else len(args)
-
-    if arity == 1:
-      if len(args) < 1:
-        raise ValueError(f"Unary operator '{op_symbol}' expects 1 argument, got {len(args)}")
-
-      unary_map = {"+": cst.Plus(), "-": cst.Minus(), "~": cst.BitInvert(), "not": cst.Not()}
-      cst_op = unary_map.get(op_symbol)
-      if not cst_op:
-        # FIXED: Updated error message to remove 'symbol' word to match test expectations if strict,
-        # or maintain code correctness. Based on log, code emits 'Unsupported binary operator: ???'.
-        raise ValueError(f"Unsupported unary operator: {op_symbol}")
-
-      expr = args[0].value
-      if isinstance(expr, cst.BinaryOperation):
-        expr = expr.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
-      return cst.UnaryOperation(operator=cst_op, expression=expr)
-
-    elif arity == 2:
-      if len(args) < 2:
-        raise ValueError(f"Binary operator '{op_symbol}' requires 2 arguments, got {len(args)}")
-
-      op_map = {
-        "+": cst.Add(),
-        "-": cst.Subtract(),
-        "*": cst.Multiply(),
-        "/": cst.Divide(),
-        "//": cst.FloorDivide(),
-        "%": cst.Modulo(),
-        "**": cst.Power(),
-        "@": cst.MatrixMultiply(),
-        "&": cst.BitAnd(),
-        "|": cst.BitOr(),
-        "^": cst.BitXor(),
-        "<<": cst.LeftShift(),
-        ">>": cst.RightShift(),
-      }
-      cst_op = op_map.get(op_symbol)
-      if not cst_op:
-        raise ValueError(f"Unsupported binary operator: {op_symbol}")
-
-      return cst.BinaryOperation(left=args[0].value, operator=cst_op, right=args[1].value)
-
-    else:
-      raise ValueError(f"Infix operator requires 1 or 2 args, got {len(args)}")

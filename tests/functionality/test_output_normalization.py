@@ -73,10 +73,20 @@ class MockOutputSemantics(SemanticsManager):
       operator="@",
     )
 
+    # Scenario 6: Structured Field (output_select_index)
+    # Using the new safe DSL field for tuple destructuring
+    self._inject(
+      "split_vals",
+      "torch.split",
+      "jax.numpy.split",
+      adapter=None,  # no string adapter
+      select_index=0,
+    )
+
   def get_framework_config(self, framework: str):
     return self.framework_configs.get(framework, {})
 
-  def _inject(self, name, s_api, t_api, adapter=None, transform_type=None, operator=None):
+  def _inject(self, name, s_api, t_api, adapter=None, transform_type=None, operator=None, select_index=None):
     variants = {"torch": {"api": s_api}, "jax": {"api": t_api}}
 
     target_var = variants["jax"]
@@ -86,6 +96,8 @@ class MockOutputSemantics(SemanticsManager):
       target_var["transformation_type"] = transform_type
     if operator:
       target_var["operator"] = operator
+    if select_index is not None:
+      target_var["output_select_index"] = select_index
 
     self.data[name] = {"variants": variants, "std_args": ["x", "y"]}
     self._reverse_index[s_api] = (name, self.data[name])
@@ -125,6 +137,20 @@ def test_simple_index_wrapping(rewriter):
   # Logic: (lambda ...)(call(...))
   clean_res = result.replace(" ", "")
   assert "(lambdax:x[0])(jax.numpy.max(input_tensor))" in clean_res
+
+
+def test_structured_index_wrapping(rewriter):
+  """
+  Scenario: `res = torch.split(x)`
+  Semantics: `jax.numpy.split` accessed via `output_select_index=0`.
+  Expectation: `res = jax.numpy.split(x)[0]` (Clean Subscript Syntax)
+  """
+  code = "res = torch.split(x)"
+  result = rewrite(rewriter, code)
+
+  # Should use subscription, not lambda
+  assert "jax.numpy.split(x)[0]" in result
+  assert "lambda" not in result
 
 
 def test_tuple_reordering_adapter(rewriter):

@@ -7,10 +7,9 @@ It handles input generation, type adaptation, and crucially, **argument mapping*
 to ensure that standard inputs are passed to frameworks using their specific
 parameter names (e.g., mapping `axis` to `dim`).
 
-Refactor Note:
-    This module utilizes the central registry in `ml_switcheroo.frameworks` to handle
-    output normalization (Framework -> NumPy) by requesting a "numpy" adapter.
-    This provides a unified conversion interface and eliminates redundant normalization logic.
+Updates:
+    - Added support for `shape_calc` lambda verification (Feature 20).
+    - Uses central registry for output normalization.
 """
 
 import importlib
@@ -41,6 +40,7 @@ class EquivalenceRunner:
     params: List[str],
     hints: Optional[Dict[str, str]] = None,
     constraints: Optional[Dict[str, Dict]] = None,
+    shape_calc: Optional[str] = None,
   ) -> Tuple[bool, str]:
     """
     Runs the operation across all defined variants and compares results.
@@ -51,16 +51,18 @@ class EquivalenceRunner:
        defined in the Semantics (e.g., `axis` -> `dim`).
     3. Adaptation: Converts NumPy arrays to framework Tensors.
     4. Execution: Runs the functions via dynamic import.
-    5. Comparison: Converts results back to NumPy and asserts closeness.
+    5. Normalization: Converts results back to NumPy.
+    6. **Shape Check**: Verifies result shape using `shape_calc` lambda if provided.
+    7. Comparison: Asserts numeric closeness between frameworks.
 
     Args:
         variants: Dictionary of framework implementations from the Semantic
                   Knowledge Base.
-                  Structure: `{"torch": {"api": "...", "args": {...}}, ...}`
         params: List of standard argument names (e.g. `['x', 'axis']`).
         hints: Dictionary of type hints (e.g. `{'axis': 'int'}`) to guide
                the fuzzer. Uses explicit types over heuristics.
         constraints: Dictionary of constraint maps (min, max, options) to bound fuzzer.
+        shape_calc: Optional python lambda string (e.g. `lambda x: x.shape`) to verify output shape.
 
     Returns:
         Tuple[bool, str]: A pair containing:
@@ -106,7 +108,28 @@ class EquivalenceRunner:
         # We return False immediately on crash to highlight the error
         return False, f"Crash in {fw} ({api_path}):\n{err_msg}"
 
-    # 3. Compare Results
+    if not results:
+      return True, "Skipped (No executable variants found)"
+
+    # 3. Shape Verification (Feature 20)
+    if shape_calc:
+      try:
+        # order args for positional lambda arguments if names match input list ordering
+        # Assuming lambda signature accepts args in same order as 'params' keys
+        # We pass arguments as *args to the lambda
+        input_args_ordered = [base_inputs[p] for p in params]
+
+        calc_fn = eval(shape_calc)
+        expected_shape = calc_fn(*input_args_ordered)
+
+        for fw, val in results.items():
+          if hasattr(val, "shape"):
+            if val.shape != expected_shape:
+              return False, f"Shape Mismatch in {fw}: {val.shape} != {expected_shape}"
+      except Exception as e:
+        return False, f"Shape Calculation Error: {e}"
+
+    # 4. Compare Results
     # We need at least 2 successful runs to perform a comparison
     if len(results) < 2:
       return True, "Skipped (Need 2+ frameworks to compare)"

@@ -276,11 +276,6 @@
     ],
     "type": "class"
   },
-  "BatchNorm": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "BatchNormalization": {
     "description": "Carries out batch normalization as described in the paper https://arxiv.org/abs/1502.03167. Depending on the mode it is being run, There are five required inputs 'X', 'scale', 'B', 'input_mean' and 'input_var'. Note that 'input_mean' and 'input_var' are expected to be the estimated statistics in inf...",
     "from": "Operators.md",
@@ -516,11 +511,6 @@
       ]
     ]
   },
-  "Clamp": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "Clip": {
     "description": "Clip operator limits the given input within an interval. The interval is specified by the inputs 'min' and 'max'. They default to numeric_limits::lowest() and numeric_limits::max(), respectively. When 'min' is greater than 'max', the clip operator sets all the 'input' values to the value of 'max'. T...",
     "from": "Operators.md",
@@ -568,11 +558,6 @@
         "List[int]"
       ]
     ]
-  },
-  "Compile": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "Compress": {
     "description": "Selects slices from an input tensor along a given axis where condition evaluates to True for each axis index. In case axis is not provided, input is flattened before elements are selected. Compress behaves like numpy.compress: https://docs.scipy.org/doc/numpy/reference/generated/numpy.compress.html",
@@ -839,16 +824,6 @@
       ]
     ]
   },
-  "CosineAnnealingLR": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
-  "CrossEntropyLoss": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
   "CudnnModule": {
     "description": "The class representing a Python class.",
     "std_args": [
@@ -917,11 +892,6 @@
         "int"
       ]
     ]
-  },
-  "DataLoader": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
   },
   "DeformConv": {
     "description": "Performs deformable convolution as described in https://arxiv.org/abs/1703.06211 and https://arxiv.org/abs/1811.11168. This operator specification supports the general N-D case. Note that most common use cases have 2D or 3D data.",
@@ -1219,11 +1189,6 @@
   },
   "FxNetMinimizerBadModuleError": {
     "description": "Raised if failed to split out a minimize module",
-    "std_args": [],
-    "type": "class"
-  },
-  "GELU": {
-    "description": "Auto-generated from torch_code_defs",
     "std_args": [],
     "type": "class"
   },
@@ -1830,11 +1795,6 @@
     ],
     "type": "class"
   },
-  "LayerNorm": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
   "LayerNormalization": {
     "description": "This is layer normalization defined in ONNX as function. The overall computation can be split into two stages. The first stage is standardization, which makes the normalized elements have zero mean and unit variances. The computation required by standardization can be described by the following equa...",
     "from": "Operators.md",
@@ -2025,11 +1985,6 @@
         "List[int]"
       ]
     ]
-  },
-  "MSELoss": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
   },
   "MatMul": {
     "description": "Matrix product that behaves like [numpy.matmul](https://numpy.org/doc/stable/reference/generated/numpy.matmul.html).",
@@ -2365,11 +2320,6 @@
     ],
     "type": "function"
   },
-  "MultiheadAttention": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
   "Multinomial": {
     "description": "Generate a tensor of samples from a multinomial distribution according to the probabilities of each of the possible outcomes.",
     "std_args": [
@@ -2467,11 +2417,6 @@
         "Tensor"
       ]
     ]
-  },
-  "Normalize": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "Not": {
     "description": "Returns the negation of the input tensor element-wise.",
@@ -2638,11 +2583,6 @@
       ]
     ],
     "type": "function"
-  },
-  "Param": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "attribute"
   },
   "Pow": {
     "description": "Pow takes input data (Tensor<T>) and exponent Tensor, and produces one output data (Tensor<T>) where the function `f(x) = x^exponent`, is applied to the data tensor elementwise. This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broa...",
@@ -2881,11 +2821,6 @@
         "int"
       ]
     ]
-  },
-  "RMSprop": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "RNN": {
     "description": "Computes an one-layer simple RNN. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `i` - input gate * `t` - time step (t-1 means previous time step) * `Wi` - W parameter weight matrix for input gate * `Ri` - R recurrence weight matrix...",
@@ -3525,11 +3460,6 @@
     ],
     "type": "attribute"
   },
-  "SGD": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "STFT": {
     "description": "Computes the Short-time Fourier Transform of the signal.",
     "std_args": [
@@ -4032,11 +3962,6 @@
     ],
     "type": "class"
   },
-  "StepLR": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
   "StringConcat": {
     "description": "StringConcat concatenates string tensors elementwise (with NumPy-style broadcasting support)",
     "from": "Operators.md",
@@ -4132,11 +4057,6 @@
         "float"
       ]
     ]
-  },
-  "Synchronize": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "T_module": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -4402,11 +4322,6 @@
     "description": "Upsample the input tensor. Each dimension value of the output tensor is: output_dimension = floor(input_dimension * scale).",
     "std_args": [],
     "type": "function"
-  },
-  "Variable": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
   },
   "WeightedQuantizedModule": {
     "description": "Wrapper for quantized modules than can be lowered from reference modules.",

@@ -5,6 +5,7 @@ This package provides the `PivotRewriter` class, composed of several mixins
 to handle specific aspects of the AST transformation:
 - Structure: Class and Function definitions.
 - Calls: Function invocations.
+- Contexts: With blocks.
 - Attributes: Attribute access.
 - Normalization: Argument mapping.
 - ControlFlow: Loop and branching logic.
@@ -17,10 +18,12 @@ from ml_switcheroo.core.rewriter.attributes import AttributeMixin
 from ml_switcheroo.core.rewriter.structure import StructureMixin
 from ml_switcheroo.core.rewriter.decorators import DecoratorMixin
 from ml_switcheroo.core.rewriter.control_flow import ControlFlowMixin
+from ml_switcheroo.core.rewriter.contexts import ContextMixin
 from ml_switcheroo.core.rewriter.base import BaseRewriter
 
 
 class PivotRewriter(
+  ContextMixin,
   ControlFlowMixin,
   DecoratorMixin,
   CallMixin,

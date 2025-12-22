@@ -12,6 +12,7 @@ It operations in two stages:
     - Generate random inputs using type hints.
     - Execute the operation across all available backends (Torch, JAX, etc.).
     - Compare outputs using `np.allclose`.
+    - **Verify Output Shape** if `output_shape_calc` is defined in the ODL.
 
 JIT Logic:
     If a template specifies `jit_wrap: True` (e.g., JAX), the generator inspects the
@@ -114,11 +115,16 @@ class TestGenerator:
           args_info.append((item[0], item[1]))
         elif isinstance(item, str):
           args_info.append((item, "Any"))
+        elif isinstance(item, dict):
+          # ODL Dictionary format
+          n = item.get("name", f"arg_{len(args_info)}")
+          t = item.get("type", "Any")
+          args_info.append((n, t))
         else:
           # Fallback for weird structures
           args_info.append((f"arg_{len(args_info)}", "Any"))
 
-      test_code = self._build_function(op_name, valid_variants, args_info)
+      test_code = self._build_function(op_name, valid_variants, args_info, details)
       new_test_funcs.append(test_code)
 
     if not new_test_funcs:
@@ -157,15 +163,17 @@ class TestGenerator:
     op_name: str,
     variants: Dict[str, Any],
     args_info: List[Tuple[str, str]],
+    details: Dict[str, Any],
   ) -> str:
     """
     Constructs a single test function string.
-    Includes logic for JIT wrapping if configured in template.
+    Includes logic for JIT wrapping and Output Shape Verification.
 
     Args:
         op_name: Name of the operation (e.g. 'sum').
         variants: Dict of implementations.
         args_info: List of (name, type) tuples used for input generation strategies.
+        details: Full operation definition dictionary (for shape calc).
 
     Returns:
         String containing the python code for the test function.
@@ -255,8 +263,23 @@ class TestGenerator:
       # Use 'print' to debug in pytest -s, but otherwise just skip recording result
       lines.append(f"        print(f'Skipping {fw} due to error: {{e}}')")
 
-    # 3. Comparison Logic
-    lines.append("\n    # 3. Comparison")
+    # 3. Shape Verification (Feature 20)
+    # If the semantic definition provides a calculation lambda string, we insert checks.
+    shape_calc = details.get("output_shape_calc")
+    if shape_calc:
+      lines.append("\n    # 3. Shape Verification")
+      lines.append(f"    shape_fn = {shape_calc}")
+      # Pass the numpy input variables to the shape function
+      args_str = ", ".join(input_vars)
+      lines.append(f"    expected_shape = shape_fn({args_str})")
+      lines.append("    for fw, val in results.items():")
+      lines.append("        if hasattr(val, 'shape'):")
+      lines.append(
+        "            assert val.shape == expected_shape, f'{fw} shape mismatch: {val.shape} != {expected_shape}'"
+      )
+
+    # 4. Comparison Logic
+    lines.append("\n    # 4. Comparison")
     lines.append("    if len(results) < 2:")
     lines.append("        pytest.skip('Not enough successful backends to compare')")
     lines.append("")

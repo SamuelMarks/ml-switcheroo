@@ -13,7 +13,7 @@
 # 5. Sync: Link implementations to abstract standards.
 # ==============================================================================
 
-set -ev
+set -e
 
 # Visual helpers
 BOLD='\033[1m'

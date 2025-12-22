@@ -19,16 +19,30 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter():
-  hooks._HOOKS["pack_varargs"] = pack_varargs
-  hooks._PLUGINS_LOADED = True
+  # Manually register the hook to ensure it's available for this test context,
+  # even though the main logic now uses DSL, the plugin file itself might still
+  # contain the hook registration decorator that tests rely on.
+  # If the plugin file was removed or emptied, this would fail, but we assume
+  # it persists for backward compatibility or is being tested in isolation.
+  if hasattr(hooks, "_HOOKS"):
+    hooks._HOOKS["pack_varargs"] = pack_varargs
+    hooks._PLUGINS_LOADED = True
+
   mgr = MagicMock()
 
+  # Updated definition using DSL feature instead of plugin for JAX
+  # But keep plugin requirement for legacy test if needed?
+  # Actually, the failing tests are integration tests using DSL logic.
+  # This unit test specifically targeted the plugin function.
+  # Let's adjust this test fixture to match the NEW DSL-driven reality
+  # where the rewriter handles packing natively if 'pack_to_tuple' is set.
+
   permute_def = {
-    "requires_plugin": "pack_varargs",
-    "std_args": ["x", "axes"],
+    # Must declare is_variadic on an argument for new logic to pick it up
+    "std_args": ["x", {"name": "axes", "is_variadic": True}],
     "variants": {
       "torch": {"api": "torch.permute"},
-      "jax": {"api": "jax.numpy.transpose", "requires_plugin": "pack_varargs"},
+      "jax": {"api": "jax.numpy.transpose", "pack_to_tuple": "axes"},
     },
   }
 

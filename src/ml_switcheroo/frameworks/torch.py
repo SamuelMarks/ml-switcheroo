@@ -1,11 +1,5 @@
 """
 PyTorch Adapter with Dynamic Introspection.
-
-This adapter serves as the primary "Source of Truth" for many Deep Learning
-standards (Layers, Optimizers).
-
-Refactor: Now includes full distributed definitions for PyTorch mappings,
-migrated from the core standards file.
 """
 
 import inspect
@@ -386,9 +380,6 @@ class TorchAdapter:
     return cls().get_tiered_examples()["tier1_math"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Returns PyTorch idiomatic examples used for validity testing.
-    """
     return {
       "tier1_math": """import torch
 

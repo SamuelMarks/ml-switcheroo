@@ -61,6 +61,8 @@ class AttributeMixin(BaseRewriter):
 
     target_impl = self._get_mapping(name)
     if target_impl and "api" in target_impl:
+      # --- Feature 13: Dynamic Import Injection ---
+      self._handle_variant_imports(target_impl)
       return self._create_name_node(target_impl["api"])
 
     return updated

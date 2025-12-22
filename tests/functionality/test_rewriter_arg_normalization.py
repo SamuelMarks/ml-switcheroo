@@ -11,6 +11,7 @@ Coverage:
     4. Passthrough of unknown/extra arguments (kwargs).
     5. Handling of Typed specifications (`("x", "int")`).
     6. Argument Injection (Feature: inject_args).
+    7. Argument Value Mapping (Feature: arg_values).
 """
 
 import pytest
@@ -82,6 +83,18 @@ class MockArgSemantics(SemanticsManager):
       variants={
         "torch": {"api": "torch.normalize"},
         "jax": {"api": "jax.nn.normalize", "inject_args": {"epsilon": 1e-5, "flag": True}},
+      },
+    )
+
+    # 5. Value Mapping Scenario ('reduce')
+    # torch.reduce(..., val='mean') -> jax.reduce(..., mode='avg')
+    # torch.reduce(..., val=0)      -> jax.reduce(..., mode='none')
+    self._inject_op(
+      op_name="reduce",
+      std_args=["x", "val"],
+      variants={
+        "torch": {"api": "torch.reduce", "args": {"val": "reduction"}},
+        "jax": {"api": "jax.reduce", "args": {"val": "mode"}, "arg_values": {"val": {"mean": "'avg'", "0": "'none'"}}},
       },
     )
 
@@ -205,3 +218,45 @@ def test_argument_injection(engine: PivotRewriter) -> None:
   clean = result.replace(" ", "")
   assert ",epsilon=1e-05" in clean
   assert ",flag=True" in clean
+
+
+def test_argument_value_mapping_strings(engine: PivotRewriter) -> None:
+  """
+  Test argument value mapping for strings.
+  Input: `torch.reduce(x, reduction='mean')`
+  Logic: 'reduction' maps to std 'val'. Map for 'val': 'mean' -> 'avg'.
+  Target Arg Name: 'mode'.
+  Output: `jax.reduce(x, mode='avg')`
+  """
+  code = "y = torch.reduce(x, reduction='mean')"
+  result = rewrite_code(engine, code)
+
+  assert "jax.reduce" in result
+  assert "mode='avg'" in result
+
+
+def test_argument_value_mapping_ints(engine: PivotRewriter) -> None:
+  """
+  Test argument value mapping for integers.
+  Input: `torch.reduce(x, reduction=0)`
+  Logic: 0 -> 'none'.
+  Output: `jax.reduce(x, mode='none')`
+  """
+  code = "y = torch.reduce(x, reduction=0)"
+  result = rewrite_code(engine, code)
+
+  assert "mode='none'" in result
+
+
+def test_argument_value_mapping_positional(engine: PivotRewriter) -> None:
+  """
+  Test argument value mapping for positional args.
+  Input: `torch.reduce(x, 'mean')`
+  Output: `jax.reduce(x, 'avg')`
+  """
+  code = "y = torch.reduce(x, 'mean')"
+  result = rewrite_code(rewriter=engine, code=code)
+
+  # For positional args, we update the value but don't add keywords unless logic forces it
+  # Current NormalizationMixin keeps positional if source was positional
+  assert "jax.reduce(x, 'avg')" in result

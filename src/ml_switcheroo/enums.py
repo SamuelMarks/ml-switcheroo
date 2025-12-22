@@ -26,3 +26,19 @@ class SemanticTier(str, Enum):
   ARRAY_API = "array"
   NEURAL = "neural"
   EXTRAS = "extras"
+
+
+class LogicOp(str, Enum):
+  """
+  Supported operators for conditional logic rules in operations.
+  Used for Conditional API Dispatch.
+  """
+
+  EQ = "eq"  # ==
+  NEQ = "neq"  # !=
+  GT = "gt"  # >
+  LT = "lt"  # <
+  GTE = "gte"  # >=
+  LTE = "lte"  # <=
+  IN = "in"  # value in [list]
+  NOT_IN = "not_in"  # value not in [list]

@@ -1330,7 +1330,7 @@
     },
     "permute_dims": {
       "api": "jnp.transpose",
-      "requires_plugin": "pack_varargs"
+      "pack_to_tuple": "axes"
     },
     "pinv": {
       "api": "jax.numpy.linalg.pinv"

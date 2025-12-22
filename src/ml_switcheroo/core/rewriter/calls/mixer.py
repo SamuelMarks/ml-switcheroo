@@ -1,19 +1,12 @@
 """
-Call Rewriting Logic.
+CallMixin Definition.
 
-Handles function invocation usage (`leave_Call`) and Assignment Unwrapping.
-Includes functionality for:
-- Lifecycle method stripping (Data-Driven via Source Framework Traits).
-- Functional -> OOP Unwrapping.
-- Stateful object management.
-- Standard API pivots.
-- Plugin dispatch.
-- Output Normalization.
-- **Logc 4: Layer Init State Threading** (Neural Tier detection & rngs injection).
-- **Trace Instrumention** for visibility.
+The primary visitor logic for handling `Call` and `Assign` nodes in the AST.
+This module orchestrates the transformation pipeline by delegating specific tasks
+(dispatch, reshaping, lifecycle management) to helper modules.
 """
 
-from typing import Union, Set, Dict, Tuple
+from typing import Union, Set, Tuple, List, Dict, Any
 import libcst as cst
 
 from ml_switcheroo.core.hooks import get_hook
@@ -22,12 +15,40 @@ from ml_switcheroo.core.rewriter.base import BaseRewriter
 from ml_switcheroo.core.rewriter.normalization import NormalizationMixin
 from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.semantics.schema import StructuralTraits
-from ml_switcheroo.utils.node_diff import capture_node_source, diff_nodes
+from ml_switcheroo.utils.node_diff import capture_node_source
+
+# Import split logic
+from ml_switcheroo.core.rewriter.calls.dispatch import evaluate_dispatch_rules
+from ml_switcheroo.core.rewriter.calls.transformers import (
+  rewrite_as_infix,
+  rewrite_as_inline_lambda,
+  rewrite_as_macro,
+  apply_output_adapter,
+  apply_index_select,
+)
+from ml_switcheroo.core.rewriter.calls.utils import (
+  is_functional_apply,
+  rewrite_stateful_call,
+  inject_rngs_kwarg,
+  strip_kwarg,
+  is_super_call,
+  is_builtin,
+  log_diff,
+  compute_permutation,
+  inject_permute_call,
+)
 
 
 class CallMixin(NormalizationMixin, BaseRewriter):
   """
   Mixin for transforming Call nodes and unpacking Assignments.
+
+  Responsible for:
+  1.  Handling functional `apply` patterns (Flax).
+  2.  Lifecycle method stripping (`.to()`, `.cuda()`).
+  3.  Plugin dispatch.
+  4.  Standard API pivoting (Lookup -> Normalize -> Rewrite).
+  5.  Output Transformation (Indexing, Casting).
   """
 
   # Internal cache for traits to avoid lookup overhead per call
@@ -80,7 +101,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     if not isinstance(original_node.value, cst.Call):
       return super().leave_Assign(original_node, updated_node)
 
-    if self._is_functional_apply(original_node.value):
+    if is_functional_apply(original_node.value):
       if len(updated_node.targets) == 1:
         target = updated_node.targets[0].target
         if isinstance(target, (cst.Tuple, cst.List)):
@@ -91,7 +112,9 @@ class CallMixin(NormalizationMixin, BaseRewriter):
 
             new_node = updated_node.with_changes(targets=[new_target])
             get_tracer().log_mutation(
-              "Assignment Unwrapping", capture_node_source(original_node), capture_node_source(new_node)
+              "Assignment Unwrapping",
+              capture_node_source(original_node),
+              capture_node_source(new_node),
             )
             return new_node
 
@@ -109,12 +132,12 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     func_name = self._get_qualified_name(original.func)
 
     # 0a. Functional 'apply' unwrapping
-    if self._is_functional_apply(original):
+    if is_functional_apply(original):
       if isinstance(updated.func, cst.Attribute):
         receiver = updated.func.value
         new_args = updated.args[1:] if len(updated.args) > 0 else []
         result_node = updated.with_changes(func=receiver, args=new_args)
-        self._log_diff("Functional Unwrap", original, result_node)
+        log_diff("Functional Unwrap", original, result_node)
         return result_node
 
     # 0b. Plugin Check
@@ -125,14 +148,12 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         plugin_claim = True
 
     # 0b.2 Heuristic: In-Place Unrolling
-    # If no mapping was found but method ends in '_' (e.g. x.add_), try to unroll it.
     if not plugin_claim and func_name and func_name.endswith("_") and not func_name.startswith("__"):
       hook = get_hook("unroll_inplace_ops")
       if hook:
         new_node = hook(updated, self.ctx)
         if new_node != updated:
-          self._log_diff("In-place Unroll (Heuristic)", updated, new_node)
-          # Adopt changes and update name resolution for subsequent passes
+          log_diff("In-place Unroll (Heuristic)", updated, new_node)
           updated = new_node
           func_name = self._get_qualified_name(
             updated.operator if isinstance(updated, cst.BinaryOperation) else updated.func
@@ -148,14 +169,14 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         if isinstance(updated.func, cst.Attribute):
           self._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
           result_node = updated.func.value
-          self._log_diff("Lifecycle Strip", original, result_node)
+          log_diff("Lifecycle Strip", original, result_node)
           return result_node
 
       if method_name in warn_set:
         if isinstance(updated.func, cst.Attribute):
           self._report_warning(f"Ignored model state method '.{method_name}()'.")
           result_node = updated.func.value
-          self._log_diff("Lifecycle Warn", original, result_node)
+          log_diff("Lifecycle Warn", original, result_node)
           return result_node
 
     # 1. Stateful Object Usage
@@ -163,13 +184,13 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       fw_config = self.semantics.get_framework_config(self.target_fw)
       stateful_spec = fw_config.get("stateful_call")
       if stateful_spec:
-        result_node = self._rewrite_stateful_call(updated, func_name, stateful_spec)
-        self._log_diff("State Mechanism", original, result_node)
+        result_node = rewrite_stateful_call(self, updated, func_name, stateful_spec)
+        log_diff("State Mechanism", original, result_node)
         return result_node
 
     if not func_name:
       # Fix: Prevent strict mode failure on super() calls
-      if self._is_super_call(original):
+      if is_super_call(original):
         return updated
 
       if self.strict_mode:
@@ -180,8 +201,12 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     mapping = self._get_mapping(func_name)
     if not mapping:
       # --- TRACE: Detailed Decision Log ---
-      if not self._is_builtin(func_name):
-        get_tracer().log_inspection(node_str=func_name, outcome="Skipped", detail="No Entry in Semantics Knowledge Base")
+      if not is_builtin(func_name):
+        get_tracer().log_inspection(
+          node_str=func_name,
+          outcome="Skipped",
+          detail="No Entry in Semantics Knowledge Base",
+        )
       return updated
 
     lookup = self.semantics.get_definition(func_name)
@@ -191,11 +216,21 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     abstract_id, details = lookup
     self.ctx.current_op_id = abstract_id  # Set context for plugins
 
+    # --- Feature 13: Dynamic Import Injection ---
+    self._handle_variant_imports(mapping)
+
+    # --- FEATURE: Conditional API Dispatch ---
+    if "dispatch_rules" in mapping and mapping["dispatch_rules"]:
+      dispatched_api = evaluate_dispatch_rules(self, original, mapping["dispatch_rules"], details)
+      if dispatched_api:
+        mapping = mapping.copy()
+        mapping["api"] = dispatched_api
+
     # 2a. Infix / Prefix Transformation
     if mapping.get("transformation_type") == "infix":
       try:
         norm_args = self._normalize_arguments(original, updated, details, mapping)
-        result_node = self._rewrite_as_infix(
+        result_node = rewrite_as_infix(
           original,
           norm_args,
           mapping.get("operator"),
@@ -209,7 +244,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     elif mapping.get("transformation_type") == "inline_lambda":
       try:
         norm_args = self._normalize_arguments(original, updated, details, mapping)
-        result_node = self._rewrite_as_inline_lambda(mapping["api"], norm_args)
+        result_node = rewrite_as_inline_lambda(mapping["api"], norm_args)
       except Exception as e:
         self._report_failure(f"Inline lambda transformation failed: {e}")
         return updated
@@ -224,22 +259,103 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         self._report_failure(f"Missing required plugin: '{plugin_name}'")
         return updated
 
-    # 2d. Standard Function Rewrite
+    # 2d. Macro Template Expansion
+    elif mapping.get("macro_template"):
+      try:
+        norm_args = self._normalize_arguments(original, updated, details, mapping)
+        std_arg_names = []
+        for item in details.get("std_args", []):
+          if isinstance(item, (list, tuple)):
+            std_arg_names.append(item[0])
+          elif isinstance(item, dict):
+            std_arg_names.append(item["name"])
+          else:
+            std_arg_names.append(item)
+
+        result_node = rewrite_as_macro(mapping["macro_template"], norm_args, std_arg_names)
+      except Exception as e:
+        self._report_failure(f"Macro expansion failed: {e}")
+        return updated
+
+    # 2e. Standard Function Rewrite
     else:
       try:
         norm_args = self._normalize_arguments(original, updated, details, mapping)
         new_func = self._create_name_node(mapping["api"])
         result_node = updated.with_changes(func=new_func, args=norm_args)
+
+        # --- Feature: Tensor Layout Permutation Input Injection ---
+        # Check if the variant defines a layout map
+        if "layout_map" in mapping and mapping["layout_map"]:
+          layout_map = mapping["layout_map"]
+          std_args_raw = details.get("std_args", [])
+
+          idx = 0
+          modified_args = list(result_node.args)
+
+          for item in std_args_raw:
+            arg_name = None
+            if isinstance(item, (list, tuple)):
+              arg_name = item[0]
+            elif isinstance(item, dict):
+              arg_name = item.get("name")
+            elif isinstance(item, str):
+              arg_name = item
+
+            if arg_name and arg_name in layout_map:
+              rule = layout_map[arg_name]
+              if "->" in rule:
+                src_l, tgt_l = rule.split("->")
+                perm_indices = compute_permutation(src_l.strip(), tgt_l.strip())
+
+                if perm_indices and idx < len(modified_args):
+                  # Wrap input
+                  original_arg = modified_args[idx]
+                  wrapped_val = inject_permute_call(original_arg.value, perm_indices, self.semantics, self.target_fw)
+                  modified_args[idx] = original_arg.with_changes(value=wrapped_val)
+
+            idx += 1
+
+          result_node = result_node.with_changes(args=modified_args)
+
+          # --- Handle Return Permutation ---
+          if "return" in layout_map:
+            rule = layout_map["return"]
+            if "->" in rule:
+              src_l, tgt_l = rule.split("->")
+              perm_indices = compute_permutation(src_l.strip(), tgt_l.strip())
+              if perm_indices:
+                result_node = inject_permute_call(result_node, perm_indices, self.semantics, self.target_fw)
+
       except ValueError:
         self._report_failure("Argument normalization failed")
         return updated
 
     # 3. Output Normalization (Post-Processing)
-    if "output_adapter" in mapping and mapping["output_adapter"]:
+    if "output_select_index" in mapping and mapping["output_select_index"] is not None:
       try:
-        result_node = self._apply_output_adapter(result_node, mapping["output_adapter"])
+        result_node = apply_index_select(result_node, mapping["output_select_index"])
+      except Exception as e:
+        self._report_failure(f"Output indexing failed: {e}")
+        return updated
+
+    elif "output_adapter" in mapping and mapping["output_adapter"]:
+      try:
+        result_node = apply_output_adapter(result_node, mapping["output_adapter"])
       except Exception as e:
         self._report_failure(f"Output adapter failed: {e}")
+        return updated
+
+    # 3b. Output Casting logic (Feature 12)
+    if "output_cast" in mapping and mapping["output_cast"]:
+      try:
+        type_node = self._create_dotted_name(mapping["output_cast"])
+        # Wrap result_node.astype(type_node)
+        result_node = cst.Call(
+          func=cst.Attribute(value=result_node, attr=cst.Name("astype")), args=[cst.Arg(value=type_node)]
+        )
+      except Exception as e:
+        self._report_failure(f"Output casting failed: {e}")
         return updated
 
     # 4. Class Construction Logic (Logic 4 implementation)
@@ -248,161 +364,25 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       tier = origins.get(abstract_id)
       traits = self._get_target_traits()
 
-      # Determine if this operation is a Neural Candidate
-      # We check Semantic Tier (Preferred) OR explicit trait match (Fallback for Extras/Snapshots)
       is_neural_candidate = tier == SemanticTier.NEURAL.value
-
-      # Fallback: If traits explicitly strip magic args (e.g. rngs),
-      # we should check if they exist here even if categorization failed (e.g. op loaded as Extra)
       force_strip = False
+
       for bad_arg in traits.strip_magic_args:
-        # Check if the generated call contains this arg as a keyword
         if isinstance(result_node, cst.Call):
           for arg in result_node.args:
             if arg.keyword and arg.keyword.value == bad_arg:
               force_strip = True
               break
 
-      # Process Injection or Stripping
       if is_neural_candidate or force_strip:
-        # Injection: If target requires 'rngs' (like Flax NNX) and defines it in magic args
         if any(name == "rngs" for name, _ in traits.inject_magic_args):
           if isinstance(result_node, cst.Call):
-            result_node = self._inject_rngs_kwarg(result_node)
+            result_node = inject_rngs_kwarg(result_node)
 
-        # Stripping: If target explicitly strips 'rngs' (like Torch)
         elif "rngs" in traits.strip_magic_args:
           if isinstance(result_node, cst.Call):
-            result_node = self._strip_kwarg(result_node, "rngs")
+            result_node = strip_kwarg(result_node, "rngs")
 
-    self._log_diff(f"Operation ({abstract_id})", original, result_node)
+    log_diff(f"Operation ({abstract_id})", original, result_node)
 
     return result_node
-
-  def _is_builtin(self, name: str) -> bool:
-    """Avoid spamming logs for standard python builtins unless mapped."""
-    return name in {"print", "len", "range", "super", "enumerate", "zip", "int", "float", "str"}
-
-  def _log_diff(self, label: str, original: cst.CSTNode, modified: cst.CSTNode) -> None:
-    """Helper to compute diff and log if changed."""
-    src_before, src_after, is_changed = diff_nodes(original, modified)
-    if is_changed:
-      get_tracer().log_mutation(label, src_before, src_after)
-
-  def _apply_output_adapter(self, inner_node: cst.CSTNode, adapter_str: str) -> cst.Call:
-    """
-    Wraps a node with a lambda adapter to normalize output.
-    Transform: `node` -> `(adapter_str)(node)`
-    """
-    try:
-      lambda_node = cst.parse_expression(adapter_str)
-      parenthesized = lambda_node.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
-      return cst.Call(func=parenthesized, args=[cst.Arg(value=inner_node)])
-    except cst.ParserSyntaxError:
-      raise ValueError(f"Invalid syntax in output_adapter: {adapter_str}")
-
-  def _rewrite_as_inline_lambda(self, lambda_str: str, args: list[cst.Arg]) -> cst.Call:
-    """
-    Wraps arguments in an Immediately Invoked Lambda Expression (IIFE).
-    """
-    try:
-      parsed_expr = cst.parse_expression(lambda_str)
-      parenthesized_lambda = parsed_expr.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
-      return cst.Call(func=parenthesized_lambda, args=args)
-    except cst.ParserSyntaxError:
-      raise ValueError(f"Invalid lambda syntax in semantics: {lambda_str}")
-
-  def _is_functional_apply(self, node: cst.Call) -> bool:
-    """
-    Detects if a call node matches the `obj.apply` pattern used in Flax Linen.
-    """
-    if isinstance(node.func, cst.Attribute):
-      if node.func.attr.value == "apply":
-        return True
-    return False
-
-  def _inject_rngs_kwarg(self, node: cst.Call) -> cst.Call:
-    """Injects `rngs=rngs` into a constructor call."""
-    # Duplicate check
-    for arg in node.args:
-      if arg.keyword and arg.keyword.value == "rngs":
-        return node
-
-    new_args = list(node.args)
-
-    # Ensure comma on previous arg
-    if len(new_args) > 0:
-      last = new_args[-1]
-      # Always force whitespace after the comma, replacing potentially dense trailing commas
-      new_args[-1] = last.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-
-    new_args.append(
-      cst.Arg(
-        keyword=cst.Name("rngs"),
-        value=cst.Name("rngs"),
-        equal=cst.AssignEqual(
-          whitespace_before=cst.SimpleWhitespace(""),
-          whitespace_after=cst.SimpleWhitespace(""),
-        ),
-      )
-    )
-    return node.with_changes(args=new_args)
-
-  def _strip_kwarg(self, node: cst.Call, kw_name: str) -> cst.Call:
-    """Removes a keyword argument from a call node."""
-    filtered = []
-    for arg in node.args:
-      if arg.keyword and arg.keyword.value == kw_name:
-        continue
-      filtered.append(arg)
-
-    # Clean trailing comma on new last arg
-    if filtered and filtered[-1].comma != cst.MaybeSentinel.DEFAULT:
-      last = filtered[-1]
-      filtered[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
-
-    return node.with_changes(args=filtered)
-
-  def _rewrite_stateful_call(self, node: cst.Call, instance_name: str, config: Dict[str, str]) -> cst.Call:
-    """Rewrites a call to a stateful object (Functional patterns only)."""
-    new_args = list(node.args)
-    target_arg_name = config.get("prepend_arg", "variables")
-
-    if self._signature_stack:
-      sig_ctx = self._signature_stack[-1]
-      if target_arg_name not in sig_ctx.existing_args:
-        found = any(n == target_arg_name for n, _ in sig_ctx.injected_args)
-        if not found:
-          sig_ctx.injected_args.append((target_arg_name, None))
-          self._report_warning(f"Injected missing state argument '{target_arg_name}' into signature.")
-
-    injected_arg = cst.Arg(
-      value=cst.Name(target_arg_name),
-      comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-    )
-    new_args.insert(0, injected_arg)
-
-    method_name = config.get("method")
-    if method_name:
-      new_func = cst.Attribute(
-        value=self._create_dotted_name(instance_name),
-        attr=cst.Name(method_name),
-      )
-    else:
-      new_func = node.func
-
-    return node.with_changes(func=new_func, args=new_args)
-
-  def _is_super_call(self, node: cst.Call) -> bool:
-    """Helper to identify direct super() usage or super().__init__()."""
-    if isinstance(node.func, cst.Attribute):
-      # Case: super().method()
-      receiver = node.func.value
-      if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
-        if receiver.func.value == "super":
-          return True
-    elif isinstance(node.func, cst.Name):
-      # Case: super()
-      if node.func.value == "super":
-        return True
-    return False
