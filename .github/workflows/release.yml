@@ -45,7 +45,7 @@ jobs:
           # This grabs the .whl file generated in the previous step
           files: dist/*.whl
           generate_release_notes: false
-          draft: true
+          draft: false
           prerelease: false
           make_latest: true
           tag_name: "latest"
