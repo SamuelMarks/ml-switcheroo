@@ -3,7 +3,7 @@ Plugin Scaffolder.
 
 Generates valid Python source files for new hooks in the plugins directory.
 Used by the CLI to provide a starting point for complex logic implementations.
-Feature 083: Supports compiling declarative rules into switch statements.
+Feature 083: Supports compiling declarative rules including complex operators into switch statements.
 Feature 084: Supports Preservative Updates (Body Extraction).
 """
 
@@ -12,34 +12,35 @@ from pathlib import Path
 from typing import List, Optional
 import libcst as cst
 
-from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule
+from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule, LogicOp
 
 # Helper logic injected into plugins generated with rules
-HELPER_LOGIC = """
-def _get_kwarg_value(node: cst.Call, arg_name: str):
-    for arg in node.args:
-        if arg.keyword and arg.keyword.value == arg_name:
-             return _node_to_literal(arg.value)
+HELPER_LOGIC = """ 
+def _get_kwarg_value(node: cst.Call, arg_name: str): 
+    for arg in node.args: 
+        if arg.keyword and arg.keyword.value == arg_name: 
+             return _node_to_literal(arg.value) 
     return None
 
-def _node_to_literal(node):
-    if isinstance(node, cst.Integer): return int(node.value)
-    if isinstance(node, cst.Float): return float(node.value)
-    if isinstance(node, cst.SimpleString): return node.value.strip("'").strip('"')
-    if isinstance(node, cst.Name):
+def _node_to_literal(node): 
+    if isinstance(node, cst.Integer): return int(node.value) 
+    if isinstance(node, cst.Float): return float(node.value) 
+    if isinstance(node, cst.SimpleString): return node.value.strip("'").strip('"') 
+    if isinstance(node, cst.Name): 
          if node.value == "True": return True
          if node.value == "False": return False
          if node.value == "None": return None
     return None
 
-def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-    parts = name_str.split(".")
-    node = cst.Name(parts[0])
-    for part in parts[1:]:
-        node = cst.Attribute(value=node, attr=cst.Name(part))
+def _create_dotted_name(name_str: str) -> cst.BaseExpression: 
+    parts = name_str.split(".") 
+    node = cst.Name(parts[0]) 
+    for part in parts[1:]: 
+        node = cst.Attribute(value=node, attr=cst.Name(part)) 
     return node
 """
 
+# Adjusted template to remove trailing spaces after quotes
 TEMPLATE_HEADER = '''"""
 {doc}
 """
@@ -47,6 +48,7 @@ import libcst as cst
 from ml_switcheroo.core.hooks import register_hook, HookContext
 '''
 
+# Adjusted template
 TEMPLATE_FUNC_DEF = '''
 @register_hook("{name}")
 def {name}(node: {node_type}, ctx: HookContext) -> cst.CSTNode:
@@ -219,12 +221,30 @@ class PluginGenerator:
     lines = []
     lines.append("    # Auto-Generated Conditional Logic")
 
+    op_map = {
+      LogicOp.EQ: "==",
+      LogicOp.NEQ: "!=",
+      LogicOp.GT: ">",
+      LogicOp.LT: "<",
+      LogicOp.GTE: ">=",
+      LogicOp.LTE: "<=",
+      LogicOp.IN: "in",
+      LogicOp.NOT_IN: "not in",
+    }
+
     for i, rule in enumerate(rules):
       keyword = "if" if i == 0 else "elif"
       val_repr = repr(rule.is_val)
+      py_op = op_map.get(rule.op, "==")
 
       lines.append(f'    val_{i} = _get_kwarg_value(node, "{rule.if_arg}")')
-      lines.append(f"    {keyword} val_{i} == {val_repr}:")
+
+      # Safety Wrapper for None comparisons
+      if rule.op in [LogicOp.GT, LogicOp.LT, LogicOp.GTE, LogicOp.LTE]:
+        lines.append(f"    {keyword} val_{i} is not None and val_{i} {py_op} {val_repr}:")
+      else:
+        lines.append(f"    {keyword} val_{i} {py_op} {val_repr}:")
+
       lines.append(f'        new_func = _create_dotted_name("{rule.use_api}")')
       lines.append(f"        return node.with_changes(func=new_func)")
 

@@ -41,6 +41,24 @@ def validator(mock_semantics):
   return BatchValidator(mock_semantics)
 
 
+def test_unpack_args_mixed_support():
+  """
+  Verify parsing of mixed arg formats (tuple vs string).
+  """
+  mgr = MagicMock(spec=SemanticsManager)
+  validator = BatchValidator(mgr)
+
+  # Input: Mix of legacy string and new typed tuple
+  raw_args = ["x", ("axis", "int")]
+
+  params, hints, constraints = validator._unpack_args(raw_args)
+
+  assert params == ["x", "axis"]
+  assert hints == {"axis": "int"}
+  assert "x" not in hints
+  assert constraints == {}
+
+
 def test_batch_execution_flow(validator):
   """
   Verify that runner.verify is called for operations without manual tests.
@@ -48,7 +66,7 @@ def test_batch_execution_flow(validator):
 
   # Mock Runner behavior
   # auto_op -> True, broken_op -> False
-  def mock_verify(variants, params, hints=None):
+  def mock_verify(variants, params, hints=None, constraints=None):
     # Handle case where variants is empty (manual_op in this fixture)
     if not variants:
       return True, "Skipped"
@@ -85,7 +103,7 @@ def test_manual_override_priority(validator, tmp_path):
   (test_dir / "test_manual.py").write_text("def test_manual_op(): pass")
 
   # Mock Runner to crash if called for manual_op
-  def mock_verify(variants, params, hints=None):
+  def mock_verify(variants, params, hints=None, constraints=None):
     return True, "OK"
 
   with patch.object(validator.runner, "verify", side_effect=mock_verify) as mock_run:
@@ -121,9 +139,10 @@ def test_unpack_args_logic(validator):
   """
   raw = [("x", "Array"), "axis", ("dims", "Tuple[int]")]
 
-  params, hints = validator._unpack_args(raw)
+  params, hints, constraints = validator._unpack_args(raw)
 
   assert params == ["x", "axis", "dims"]
   assert hints["x"] == "Array"
   assert "axis" not in hints
   assert hints["dims"] == "Tuple[int]"
+  assert constraints == {}

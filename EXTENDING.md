@@ -67,9 +67,11 @@ This command automatically:
 
 1. Updates the Abstract Standard (Hub) in `standards_internal.py`.
 2. Updates Framework Mappings (Spokes) in `frameworks/*.py`.
-3. Scaffolds Plugin files if complex logic is requested.
+3. Scaffolds Plugin files (if complex logic is requested).
 
-### ODL Schema Reference
+### ODL Schema Reference (Advanced)
+
+The ODL has been expanded to support **Semantic Constraints**, **Output Adaptation**, and **Declarative Logic Rules**.
 
 ```yaml
 # 1. Abstract Definition (The Hub)
@@ -81,44 +83,56 @@ std_args:
   - name: "dim"
     type: "int"
     default: "-1"
+    # Semantics Constraints (Used by the Fuzzer)
+    min: -3
+    max: 3
+  - name: "reduction"
+    type: "str"
+    options: [ "mean", "sum", "none" ]
 
 # 2. Variants (The Spokes)
 variants:
-  # Framework keys must match registered adapters (torch, jax, tensorflow, etc.)
+  # Torch: Direct mapping
   torch:
-    api: "torch.nn.functional.log_softmax" # Direct mapping
+    api: "torch.nn.functional.log_softmax"
 
+  # JAX: Argument Renaming
   jax:
     api: "jax.nn.log_softmax"
-    # Argument renaming: Standard 'dim' -> Framework 'axis'
     args:
       dim: "axis"
 
-  # Advanced Feature: Auto-Inference
-  # If you don't know the exact API path, use "infer" to let the engine search existing libraries.
-  numpy:
-    api: "infer"
-
-  # Advanced Feature: Output Adaptation
-  # Use Python lambdas to reshape return values (e.g., taking the first element of a tuple)
-  # Useful for APIs that return (val, indices) when you only need val.
+  # Mixed: Argument Injection + Casting
+  # Useful when target requires fixed parameters not present in source.
   tensorflow:
     api: "tf.nn.log_softmax"
+    inject_args:
+      full_precision: true  # Inject 'full_precision=True'
+    casts:
+      input: "float32"      # Cast input argument to float32
+
+  # Output Adaptation (Lambda Wrapper)
+  # Useful for APIs that return (val, indices) when you only need val.
+  numpy:
+    api: "np.some_func"
+    # Wraps call result: (lambda x: x[0])(np.some_func(...))
     output_adapter: "lambda x: x[0]"
 
-  # Advanced Feature: Infix Operators
-  # Map a function call to a math operator 
-  # Example: add(a, b) -> a + b
+  # Infix Transformation
+  # Maps function call to math operator: add(a, b) -> a + b
   mlx:
     api: "mx.add"
-    transformation_type: "infix" # or "inline_lambda"
+    transformation_type: "infix"
     operator: "+"
 ```
 
-### Plugin Scaffolding via ODL
+### Declarative Plugin Scaffolding
 
-If an operation requires logic too complex for simple mapping (e.g., conditional dispatch based on argument values), you
-can define **Rules** in the YAML. The CLI will generate a Python plugin with `if/else` logic pre-written.
+If an operation requires conditional logic (e.g., dispatching to different APIs based on an argument value), you can
+define **Rules** in the YAML. The CLI will generate a Python plugin with `if/else` logic pre-written, handling all
+necessary boilerplate.
+
+Supported Operators: `eq`, `neq`, `gt`, `lt`, `gte`, `lte`, `in`, `not_in`.
 
 ```yaml
 # Inside your YAML file:
@@ -127,12 +141,23 @@ scaffold_plugins:
     type: "call_transform"
     doc: "Dispatches to different resize APIs based on interpolation mode."
     rules:
+      # Rule 1: Exact Match
       - if_arg: "mode"
-        is: "nearest"
+        op: "eq"
+        val: "nearest"
         use_api: "jax.image.resize_nearest"
+
+      # Rule 2: List Membership (IN)
       - if_arg: "mode"
-        is: "bilinear"
+        op: "in"
+        val: [ "bilinear", "bicubic" ]
         use_api: "jax.image.resize_bilinear"
+
+      # Rule 3: Numeric Comparison
+      - if_arg: "size"
+        op: "gt"
+        val: 512
+        use_api: "jax.image.resize_large"
 ```
 
 ---
@@ -154,7 +179,7 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 class MyLibAdapter:
     display_name = "My Library"
 
-    # Optional: Inherit behavior (e.g. 'flax_nnx' inherits 'jax' math capabilities)
+    # Optional: Inherit implementation behavior (e.g. 'flax_nnx' inherits 'jax' math capabilities)
     inherits_from = None
 
     # Discovery configuration
@@ -168,7 +193,7 @@ class MyLibAdapter:
 
     @property
     def import_namespaces(self) -> Dict[str, Dict[str, str]]:
-        # Remap source namespaces. 
+        # Remap source namespaces.
         # Rules: If input uses 'torch.nn', we inject 'import my_lib.layers as nn'
         return {
             "torch.nn": {"root": "my_lib", "sub": "layers", "alias": "nn"},
@@ -176,6 +201,7 @@ class MyLibAdapter:
 
     # --- 2. Static Mappings (The "Definitions") ---
     # This property allows Ghost Mode to work without the library installed.
+    # It populates the Spokes.
     @property
     def definitions(self) -> Dict[str, StandardMap]:
         return {
@@ -192,6 +218,13 @@ class MyLibAdapter:
             "permute_dims": StandardMap(
                 api="ml.transpose",
                 requires_plugin="pack_varargs"
+            ),
+
+            # Inline Transformation
+            "Add": StandardMap(
+                api="ml.add",
+                transformation_type="infix",
+                operator="+"
             )
         }
 
@@ -220,8 +253,8 @@ Create a python file in `src/ml_switcheroo/plugins/`. It will be automatically d
 
 ### Auto-Wired Plugins
 
-You can register a hook and definition its semantic mapping in one place using the `auto_wire` parameter. This
-architecture maintains locality of behavior and avoids editing huge JSON files manually.
+You can register a hook and define its semantic mapping ("Hub entry") in one place using the `auto_wire` parameter. This
+architecture maintains locality of behavior and avoids editing large JSON files manually.
 
 ```python
 import libcst as cst

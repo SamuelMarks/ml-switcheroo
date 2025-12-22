@@ -4,7 +4,7 @@ from datetime import datetime
 
 # -- Project information -----------------------------------------------------
 project = "ml-switcheroo"
-author = "ml-switcheroo Developers"
+author = "Samuel Marks"
 copyright = f"{datetime.now().year}, {author}"
 version = "0.0.1"
 release = version

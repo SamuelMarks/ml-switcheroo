@@ -3,6 +3,9 @@ Pydantic Schemas for Semantic Knowledge Base.
 
 This module defines the data structure of the JSON mapping files (`k_array_api.json`, etc.)
 and the Framework Configuration blocks.
+
+Updated to support richer Argument Definitions (Dictionaries with constraints)
+in `std_args`.
 """
 
 from typing import Dict, List, Optional, Union, Tuple, Any
@@ -124,9 +127,9 @@ class OpDefinition(BaseModel):
   description: Optional[str] = None
   from_file: Optional[str] = Field(None, alias="from")
 
-  # std_args can be simple ["x"] or typed [("x", "int")].
-  std_args: List[Union[str, Tuple[str, str]]] = Field(
-    default_factory=list, description="List of standard argument names/types defined by the spec."
+  # std_args can be simple ["x"], typed [("x", "int")], or rich Dicts [{"name": "x", "min": 0}]
+  std_args: List[Union[str, Tuple[str, str], Dict[str, Any]]] = Field(
+    default_factory=list, description="List of standard argument names, types, or rich definitions."
   )
 
   variants: Dict[str, Optional[Variant]] = Field(

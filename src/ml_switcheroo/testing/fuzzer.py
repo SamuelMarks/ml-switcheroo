@@ -21,10 +21,13 @@ It uses a dual-strategy approach:
 
 2.  **Heuristics (Fallback)**:
     If no hints are available, it infers data types from argument names.
-
     - `mask`, `condition` -> `bool`
     - `idx`, `axis`, `dim` -> `int` within bounds
     - `x`, `y`, `input` -> `Array (float32)`
+
+3.  **Semantic Constraints**:
+    Respects `min`, `max`, and `options` constraints applied to parameters,
+    preventing invalid inputs (e.g., negative args for log).
 
 Safety:
     Implements `MAX_RECURSION_DEPTH` to prevent infinite loops when generating
@@ -57,7 +60,12 @@ class InputFuzzer:
     self._seed_shape = seed_shape
     self.max_depth = self.MAX_RECURSION_DEPTH
 
-  def generate_inputs(self, params: List[str], hints: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+  def generate_inputs(
+    self,
+    params: List[str],
+    hints: Optional[Dict[str, str]] = None,
+    constraints: Optional[Dict[str, Dict]] = None,
+  ) -> Dict[str, Any]:
     """
     Creates a dictionary of `{arg_name: value}`.
 
@@ -68,6 +76,7 @@ class InputFuzzer:
     Args:
         params: List of argument names to generate (e.g. `['x', 'axis']`).
         hints: Dictionary of `{arg_name: type_string}` derived from Spec.
+        constraints: Dictionary of `{arg_name: {min, max, options}}`.
 
     Returns:
         Dict[str, Any]: Randomized inputs ready for Framework adaptation.
@@ -79,22 +88,25 @@ class InputFuzzer:
     # Decide on a consistent base shape for heuristics fallback
     base_shape = self._get_random_shape()
     hints = hints or {}
+    constraints_map = constraints or {}
 
     for p in params:
       hint = hints.get(p)
+      cons = constraints_map.get(p, {})
 
       # Strategy 1: Explicit Type Hint
       if hint and hint != "Any":
         try:
-          val = self._generate_from_hint(hint, base_shape, depth=0, symbol_map=symbol_map)
+          val = self._generate_from_hint(hint, base_shape, depth=0, symbol_map=symbol_map, constraints=cons)
           kwargs[p] = val
           continue
         except Exception:
-          # If parsing fails or hits recursion limit, fall back to heuristics
+          # If parsing fails, fall back to heuristics... BUT apply constraints if possible?
+          # Or better, let recursion handle logic. Exception implies structural failure.
           pass
 
       # Strategy 2: Heuristic Matching based on Name
-      kwargs[p] = self._generate_by_heuristic(p, base_shape)
+      kwargs[p] = self._generate_by_heuristic(p, base_shape, constraints=cons)
 
     return kwargs
 
@@ -143,12 +155,20 @@ class InputFuzzer:
     base_shape: Tuple[int, ...],
     depth: int,
     symbol_map: Dict[str, int],
+    constraints: Dict[str, Any] = None,
   ) -> Any:
     """
     Parses a type string and generates conforming data via recursion.
+    Applies Semantic Constraints (min, max, options) to leaf values.
     """
     if depth > self.max_depth:
       return self._get_fallback_base_value(type_str, base_shape)
+
+    constrs = constraints or {}
+
+    # Options Override: if explicit options provided, pick one
+    if "options" in constrs:
+      return random.choice(constrs["options"])
 
     type_str = type_str.strip()
 
@@ -156,35 +176,39 @@ class InputFuzzer:
     if "|" in type_str and self._is_pipe_top_level(type_str):
       options = [o.strip() for o in type_str.split("|")]
       chosen = random.choice(options)
-      return self._generate_from_hint(chosen, base_shape, depth + 1, symbol_map)
+      return self._generate_from_hint(chosen, base_shape, depth + 1, symbol_map, constraints)
 
     # 2. Optional (Optional[T])
     match_opt = re.match(r"^Optional\[(.*)\]$", type_str)
     if match_opt:
       if random.random() < 0.2:
         return None
-      return self._generate_from_hint(match_opt.group(1), base_shape, depth + 1, symbol_map)
+      return self._generate_from_hint(match_opt.group(1), base_shape, depth + 1, symbol_map, constraints)
 
     # 3. Tuple (Tuple[T, ...] or Tuple[T, U])
     match_tup = re.match(r"^Tuple\[(.*)\]$", type_str)
     if match_tup:
+      # Constraints generally apply to the tuple contents if uniform, or ignored.
+      # Passing constraints recursively is naive but safe.
       inner = match_tup.group(1)
       if "..." in inner:
         # Variadic Tuple
         elem_type = inner.split(",")[0].strip()
         length = random.randint(1, 3)
-        return tuple(self._generate_from_hint(elem_type, base_shape, depth + 1, symbol_map) for _ in range(length))
+        return tuple(
+          self._generate_from_hint(elem_type, base_shape, depth + 1, symbol_map, constraints) for _ in range(length)
+        )
       else:
         # Fixed Tuple
         sub_types = self._split_outside_brackets(inner)
-        return tuple(self._generate_from_hint(t, base_shape, depth + 1, symbol_map) for t in sub_types)
+        return tuple(self._generate_from_hint(t, base_shape, depth + 1, symbol_map, constraints) for t in sub_types)
 
     # 4. List/Sequence (List[T])
     match_list = re.match(r"^(List|Sequence)\[(.*)\]$", type_str)
     if match_list:
       inner = match_list.group(2)
       length = random.randint(1, 3)
-      return [self._generate_from_hint(inner, base_shape, depth + 1, symbol_map) for _ in range(length)]
+      return [self._generate_from_hint(inner, base_shape, depth + 1, symbol_map, constraints) for _ in range(length)]
 
     # 5. Dict/Mapping (Dict[K, V])
     match_dict = re.match(r"^(Dict|Mapping)\[(.*)\]$", type_str)
@@ -197,7 +221,8 @@ class InputFuzzer:
         data = {}
         for _ in range(length):
           k = self._generate_from_hint(key_type, base_shape, depth + 1, symbol_map)
-          v = self._generate_from_hint(val_type, base_shape, depth + 1, symbol_map)
+          # Apply value constraints to the Value
+          v = self._generate_from_hint(val_type, base_shape, depth + 1, symbol_map, constraints)
           # Convert key to string if unhashable (e.g. array)
           if isinstance(k, (list, dict, np.ndarray, np.generic)):
             k = str(k)
@@ -214,17 +239,17 @@ class InputFuzzer:
     if match_sym:
       dims_str = match_sym.group(2)
       shape = self._resolve_symbolic_shape(dims_str, symbol_map)
-      return self._generate_array("float", shape)
+      return self._generate_array("float", shape, constrs)
 
     # 8. Generic Arrays
     if type_str in ["Array", "Tensor", "np.ndarray"]:
-      return self._generate_array("float", base_shape)
+      return self._generate_array("float", base_shape, constrs)
 
     # 9. Primitives
     if type_str in ["int", "integer"]:
-      return self._generate_scalar_int()
+      return self._generate_scalar_int(constrs)
     if type_str in ["float", "number"]:
-      return self._generate_scalar_float()
+      return self._generate_scalar_float(constrs)
     if type_str == "bool":
       return bool(random.getrandbits(1))
     if type_str in ["str", "string"]:
@@ -235,19 +260,12 @@ class InputFuzzer:
       return random.choice([np.float32, np.int32, np.float64, np.bool_])
 
     # Fallback for unknown strings
-    return self._generate_array("float", base_shape)
+    return self._generate_array("float", base_shape, constrs)
 
   def _resolve_symbolic_shape(self, dims_str: str, symbol_map: Dict[str, int]) -> Tuple[int, ...]:
     """
     Parses dimension strings like "'B', 32" or "N, M".
     Resolves symbols against the `symbol_map`.
-
-    Args:
-        dims_str: Comma-separated dimension tokens.
-        symbol_map: Mutable map of symbol->size.
-
-    Returns:
-        Tuple representing the concrete shape.
     """
     shape = []
     raw_dims = [d.strip() for d in dims_str.split(",")]
@@ -299,8 +317,13 @@ class InputFuzzer:
       return {}
     return None
 
-  def _generate_by_heuristic(self, name: str, base_shape: Tuple[int, ...]) -> Any:
-    """Fallback generation when no type hint is provided."""
+  def _generate_by_heuristic(self, name: str, base_shape: Tuple[int, ...], constraints: Dict[str, Any] = None) -> Any:
+    """Fallback generation when no type hint is provided. Respects constraints."""
+    constrs = constraints or {}
+
+    if "options" in constrs:
+      return random.choice(constrs["options"])
+
     name_lower = name.lower()
 
     if name_lower in ["axis", "dim"]:
@@ -316,33 +339,76 @@ class InputFuzzer:
 
     heuristic_type = self._guess_dtype_by_name(name)
     if heuristic_type == "bool":
-      return self._generate_array("bool", base_shape)
+      return self._generate_array("bool", base_shape, constrs)
     if heuristic_type == "int":
       # Scalars check
       if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):
-        return self._generate_scalar_int()
-      return self._generate_array("int", base_shape)
+        return self._generate_scalar_int(constrs)
+      return self._generate_array("int", base_shape, constrs)
 
     # Floats
     if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):
-      return self._generate_scalar_float()
+      return self._generate_scalar_float(constrs)
 
-    return self._generate_array("float", base_shape)
+    return self._generate_array("float", base_shape, constrs)
 
-  def _generate_array(self, type_lbl: str, shape: Tuple[int, ...]) -> np.ndarray:
-    """Generates random numpy array."""
+  def _generate_array(self, type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str, Any]) -> np.ndarray:
+    """Generates random numpy array bounded by constraints."""
+
+    # Resolve bounds
+    # Note: numpy works better with standard types (not None)
+    min_val = constraints.get("min")
+    max_val = constraints.get("max")
+
     if type_lbl == "bool":
       return np.random.randint(0, 2, size=shape).astype(bool)
+
     if type_lbl == "int":
-      return np.random.randint(-10, 10, size=shape).astype(np.int32)
+      # Default range [-10, 10]
+      low = int(min_val) if min_val is not None else -10
+      high = int(max_val) if max_val is not None else 10
+      # High in randint is exclusive, update for inclusivity match
+      return np.random.randint(low, high + 1, size=shape).astype(np.int32)
+
     # Float32 default
-    return np.random.randn(*shape).astype(np.float32)
+    arr = np.random.randn(*shape).astype(np.float32)
 
-  def _generate_scalar_int(self) -> int:
-    return random.randint(-5, 5)
+    # Constraint Clipping logic
+    # If explicit bounds provided, we use uniform generation instead of normal
+    # to better span the range, or we clip the normal distribution.
+    if min_val is not None or max_val is not None:
+      if min_val is not None and max_val is not None:
+        # Uniform within bounds
+        arr = np.random.uniform(min_val, max_val, size=shape).astype(np.float32)
+      else:
+        # Clip standard normal
+        safe_min = float(min_val) if min_val is not None else -np.inf
+        safe_max = float(max_val) if max_val is not None else np.inf
 
-  def _generate_scalar_float(self) -> float:
-    return random.random()
+        # If just Min is 0 (Log), use absolute or exp
+        if min_val is not None and min_val >= 0:
+          arr = np.abs(arr) + min_val
+
+        arr = np.clip(arr, safe_min, safe_max)
+
+    return arr
+
+  def _generate_scalar_int(self, constraints: Dict[str, Any]) -> int:
+    min_v = int(constraints.get("min", -5))
+    max_v = int(constraints.get("max", 5))
+    return random.randint(min_v, max_v)
+
+  def _generate_scalar_float(self, constraints: Dict[str, Any]) -> float:
+    if constraints.get("min") is not None and constraints.get("max") is not None:
+      return random.uniform(constraints["min"], constraints["max"])
+
+    val = random.random()
+    # Adjust
+    if constraints.get("min") is not None:
+      val = max(val, constraints["min"])
+    if constraints.get("max") is not None:
+      val = min(val, constraints["max"])
+    return val
 
   def _guess_dtype_by_name(self, name: str) -> str:
     """Simple name matching heuristic."""

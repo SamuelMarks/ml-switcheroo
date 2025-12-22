@@ -9,10 +9,12 @@ It handles:
 1.  **Definitions Injection**: Appending the mapping to the definitions dictionary.
 2.  **Smart Import Injection**: Analyzing the target API path (e.g. `scipy.special.erf`)
     and injecting necessary top-level imports (`import scipy`) if missing.
+3.  **Variant Parameter Injection**: Supporting `inject_args` for adding fixed arguments.
+4.  **Complex Literal Support**: Recursively converting Lists, Tuples, and Dicts to CST nodes.
 """
 
 import libcst as cst
-from typing import Optional, Union, List, Set, Sequence
+from typing import Optional, Union, List, Set, Sequence, Any, Dict
 from ml_switcheroo.core.dsl import FrameworkVariant
 
 
@@ -74,10 +76,6 @@ class FrameworkInjector(cst.CSTTransformer):
       # "import scipy.special" -> tracks "scipy"
       root = _get_import_root(alias.name)
       self._existing_roots.add(root)
-      # Also track alias if present? "import numpy as np" -> tracks "np"???
-      # Currently we care about ensuring the module is available.
-      # Ideally we check if `root` is available or aliased.
-      # For simplicity in this tool, checking if root is imported covers 99% of generated specs.
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
     """Tracks existing from-imports."""
@@ -204,7 +202,7 @@ class FrameworkInjector(cst.CSTTransformer):
 
   def _build_standard_map_call(self) -> cst.Call:
     """
-    Constructs `StandardMap(api='...', args={...}, casts={...}, ...)` CST node.
+    Constructs `StandardMap(api='...', args={...}, inject_args={...}, ...)` CST node.
     Ensures strict formatting (no spaces around '=') to match test expectations.
     """
     # Tight assignment (keyword=value) without spaces
@@ -251,7 +249,35 @@ class FrameworkInjector(cst.CSTTransformer):
         )
       )
 
-    # 3. casts={"arg": "type"}
+    # 3. inject_args={"arg": val} -> Handles recursion now
+    if self.variant.inject_args:
+      dict_elements = []
+      for k, v in self.variant.inject_args.items():
+        # Handle types for the value (Recursive)
+        val_node = _convert_to_cst_literal(v)
+
+        dict_elements.append(
+          cst.DictElement(
+            key=cst.SimpleString(f'"{k}"'),
+            value=val_node,
+            comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+          )
+        )
+
+      if dict_elements:
+        last_d = dict_elements[-1]
+        dict_elements[-1] = last_d.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+
+      args_list.append(
+        cst.Arg(
+          keyword=cst.Name("inject_args"),
+          value=cst.Dict(elements=dict_elements),
+          equal=tight_eq,
+          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+        )
+      )
+
+    # 4. casts={"arg": "type"}
     if self.variant.casts:
       dict_elements = []
       for k, v in self.variant.casts.items():
@@ -276,7 +302,7 @@ class FrameworkInjector(cst.CSTTransformer):
         )
       )
 
-    # 4. optional fields
+    # 5. optional fields
     for field in ["requires_plugin", "transformation_type", "output_adapter", "operator"]:
       val = getattr(self.variant, field, None)
       if val:
@@ -328,3 +354,65 @@ def _is_future_import(node: cst.CSTNode) -> bool:
         if stmt.module and isinstance(stmt.module, cst.Name) and stmt.module.value == "__future__":
           return True
   return False
+
+
+def _convert_to_cst_literal(val: Any) -> cst.BaseExpression:
+  """
+  Recursively converts a python primitive or container to a CST node.
+  Supports: int, float, bool, str, list, tuple, dict.
+  """
+  # 1. Container Recursion (List/Tuple)
+  if isinstance(val, (list, tuple)):
+    elements = []
+    for item in val:
+      node = _convert_to_cst_literal(item)
+      elements.append(cst.Element(value=node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
+
+    # Strip trailing comma from last element for cleanliness
+    if elements:
+      last = elements[-1]
+      elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+
+    if isinstance(val, list):
+      return cst.List(elements=elements)
+    else:
+      return cst.Tuple(elements=elements)
+
+  # 2. Key-Value Recursion (Dict)
+  if isinstance(val, dict):
+    elements = []
+    for k, v in val.items():
+      k_node = _convert_to_cst_literal(k)
+      v_node = _convert_to_cst_literal(v)
+
+      elements.append(
+        cst.DictElement(
+          key=k_node,
+          value=v_node,
+          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+        )
+      )
+
+    if elements:
+      last = elements[-1]
+      elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+
+    return cst.Dict(elements=elements)
+
+  # 3. Primitives
+  if isinstance(val, bool):
+    return cst.Name("True") if val else cst.Name("False")
+  elif isinstance(val, int):
+    return cst.Integer(str(val))
+  elif isinstance(val, float):
+    return cst.Float(str(val))
+  elif isinstance(val, str):
+    # Basic quote escaping
+    s = val.replace('"', '\\"')
+    return cst.SimpleString(f'"{s}"')
+  elif val is None:
+    return cst.Name("None")
+  else:
+    # Fallback
+    s = str(val).replace('"', '\\"')
+    return cst.SimpleString(f'"{s}"')

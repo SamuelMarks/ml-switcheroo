@@ -10,6 +10,7 @@ Coverage:
     3. Mixed usage (positional + keyword).
     4. Passthrough of unknown/extra arguments (kwargs).
     5. Handling of Typed specifications (`("x", "int")`).
+    6. Argument Injection (Feature: inject_args).
 """
 
 import pytest
@@ -70,6 +71,17 @@ class MockArgSemantics(SemanticsManager):
       variants={
         "torch": {"api": "torch.randint"},
         "jax": {"api": "jax.random.randint"},
+      },
+    )
+
+    # 4. Injection Scenario ('normalize')
+    # Target needs epsilon injected
+    self._inject_op(
+      op_name="normalize",
+      std_args=["x"],
+      variants={
+        "torch": {"api": "torch.normalize"},
+        "jax": {"api": "jax.nn.normalize", "inject_args": {"epsilon": 1e-5, "flag": True}},
       },
     )
 
@@ -173,3 +185,23 @@ def test_source_arg_name_precedence(engine: PivotRewriter) -> None:
   code = "res = torch.sum(x=tensor)"
   result = rewrite_code(engine, code)
   assert "a=tensor" in result
+
+
+def test_argument_injection(engine: PivotRewriter) -> None:
+  """
+  Test that arguments defined in `inject_args` are added to the call.
+
+  Input: `torch.normalize(data)`
+  Output: `jax.nn.normalize(data, epsilon=1e-05, flag=True)` (Values from mock)
+  """
+  code = "y = torch.normalize(data)"
+  result = rewrite_code(engine, code)
+
+  assert "jax.nn.normalize(data" in result
+  assert "epsilon=1e-05" in result
+  assert "flag=True" in result
+
+  # Ensure commas handled
+  clean = result.replace(" ", "")
+  assert ",epsilon=1e-05" in clean
+  assert ",flag=True" in clean

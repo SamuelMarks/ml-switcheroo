@@ -24,11 +24,12 @@ def test_unpack_args_mixed_support():
   # Input: Mix of legacy string and new typed tuple
   raw_args = ["x", ("axis", "int")]
 
-  params, hints = validator._unpack_args(raw_args)
+  params, hints, constraints = validator._unpack_args(raw_args)
 
   assert params == ["x", "axis"]
   assert hints == {"axis": "int"}
   assert "x" not in hints
+  assert constraints == {}
 
 
 def test_batch_runner_execution_flow():
@@ -59,9 +60,11 @@ def test_batch_runner_execution_flow():
   # Inspect arguments passed to runner.verify(variants, params, hints=...)
   params_arg = call_args[0][1] if len(call_args[0]) > 1 else call_args[1]["params"]
   hints_arg = call_args[1].get("hints")
+  constraints_arg = call_args[1].get("constraints")
 
   assert params_arg == ["input", "dims"]
   assert hints_arg == {"input": "Array", "dims": "Tuple[int]"}
+  assert constraints_arg == {}
 
 
 def test_skip_generated_tests(tmp_path):

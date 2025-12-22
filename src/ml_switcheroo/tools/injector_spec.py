@@ -4,9 +4,13 @@ LibCST Transformer for Injecting Specifications.
 This tool modifies Python source files (specifically `standards_internal.py`)
 by locating the `INTERNAL_OPS` dictionary and appending a new operation definition
 derived from an ODL (Operation Definition Language) model.
+
+Update: Now supports persisting semantic constraints (min, max, options) into
+the dictionary structure.
 """
 
 import libcst as cst
+from typing import Any
 from ml_switcheroo.core.dsl import OperationDef, ParameterDef
 
 
@@ -15,8 +19,8 @@ class StandardsInjector(cst.CSTTransformer):
   Injects a new operation definition into the INTERNAL_OPS dict.
 
   It transforms the abstract `OperationDef` into a concrete LibCST Dictionary
-  node structure, including rich parameter metadata, and appends it to the
-  existing dictionary in the source.
+  node structure, including rich parameter metadata (min, max, options) and appends
+  it to the existing dictionary in the source.
 
   Attributes:
       op_def (OperationDef): The operation model to inject.
@@ -37,7 +41,7 @@ class StandardsInjector(cst.CSTTransformer):
     """
     Constructs a CST Dictionary node representing a parameter definition.
 
-    Result format: `{'name': 'x', 'type': 'int', 'default': '0'}`
+    Result format: `{'name': 'x', 'type': 'int', 'min': 0, 'options': [1, 2]}`
 
     Args:
         param: Validated parameter data.
@@ -73,7 +77,57 @@ class StandardsInjector(cst.CSTTransformer):
         )
       )
 
+    # --- Constraints Injection ---
+
+    if param.min is not None:
+      elements.append(
+        cst.DictElement(
+          cst.SimpleString("'min'"),
+          cst.Float(str(param.min)),
+          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+        )
+      )
+
+    if param.max is not None:
+      elements.append(
+        cst.DictElement(
+          cst.SimpleString("'max'"),
+          cst.Float(str(param.max)),
+          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+        )
+      )
+
+    if param.options is not None:
+      # Convert list of options to CST list node
+      list_elements = []
+      for opt in param.options:
+        val_node = self._convert_literal(opt)
+        list_elements.append(cst.Element(value=val_node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
+
+      # Clean last comma is optional in lists but clean style
+      if list_elements:
+        list_elements[-1] = list_elements[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
+
+      elements.append(
+        cst.DictElement(
+          cst.SimpleString("'options'"),
+          cst.List(list_elements),
+          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+        )
+      )
+
     return cst.Dict(elements)
+
+  def _convert_literal(self, val: Any) -> cst.BaseExpression:
+    if isinstance(val, bool):
+      return cst.Name("True") if val else cst.Name("False")
+    if isinstance(val, int):
+      return cst.Integer(str(val))
+    if isinstance(val, float):
+      return cst.Float(str(val))
+    if isinstance(val, str):
+      return cst.SimpleString(f"'{val}'")
+    return cst.SimpleString(f"'{str(val)}'")
 
   def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
     """

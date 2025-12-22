@@ -28,6 +28,13 @@ def test_framework_variant_casts():
   assert v.casts["x"] == "int32"
 
 
+def test_framework_variant_inject_args():
+  """Verify 'inject_args' dictionary support."""
+  v = FrameworkVariant(api="foo", inject_args={"eps": 1e-5, "flag": True})
+  assert v.inject_args["eps"] == 1e-5
+  assert v.inject_args["flag"] is True
+
+
 def test_operation_def_structure():
   """Verify full hierarchical structure validation."""
   data = {
@@ -52,8 +59,9 @@ def test_rule_instantiation_by_name():
 
 
 def test_rule_instantiation_by_alias():
-  """Verify Rule can be instantiated via dictionary validation using 'is' alias."""
-  data = {"if_arg": "flag", "is": True, "use_api": "target"}
+  """Verify Rule can be instantiated via dictionary validation using 'val' alias."""
+  # Fixed: Schema defines alias="val", not "is"
+  data = {"if_arg": "flag", "val": True, "use_api": "target"}
   r = Rule.model_validate(data)
   assert r.is_val is True
 

@@ -40,12 +40,13 @@ class EquivalenceRunner:
     variants: Dict[str, Any],
     params: List[str],
     hints: Optional[Dict[str, str]] = None,
+    constraints: Optional[Dict[str, Dict]] = None,
   ) -> Tuple[bool, str]:
     """
     Runs the operation across all defined variants and compares results.
 
     This process includes:
-    1. Fuzzing: Generates standard NumPy inputs based on `params` and `hints`.
+    1. Fuzzing: Generates standard NumPy inputs based on `params`, `hints` and `constraints`.
     2. Renaming: Maps standard argument names to framework-specific names
        defined in the Semantics (e.g., `axis` -> `dim`).
     3. Adaptation: Converts NumPy arrays to framework Tensors.
@@ -59,6 +60,7 @@ class EquivalenceRunner:
         params: List of standard argument names (e.g. `['x', 'axis']`).
         hints: Dictionary of type hints (e.g. `{'axis': 'int'}`) to guide
                the fuzzer. Uses explicit types over heuristics.
+        constraints: Dictionary of constraint maps (min, max, options) to bound fuzzer.
 
     Returns:
         Tuple[bool, str]: A pair containing:
@@ -66,7 +68,7 @@ class EquivalenceRunner:
             - str: A human-readable status message or error log.
     """
     # 1. Generate Base Inputs (Standard Names, Typed via Hints)
-    base_inputs = self.fuzzer.generate_inputs(params, hints=hints)
+    base_inputs = self.fuzzer.generate_inputs(params, hints=hints, constraints=constraints)
 
     results = {}
 

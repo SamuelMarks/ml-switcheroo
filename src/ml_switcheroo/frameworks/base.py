@@ -17,7 +17,7 @@ import json
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Any, Protocol, Type, Dict, List, Tuple, Optional
+from typing import Any, Protocol, Type, Dict, List, Tuple, Optional, Union
 from pydantic import BaseModel, Field
 
 from ml_switcheroo.semantics.schema import StructuralTraits
@@ -49,6 +49,10 @@ class StandardMap(BaseModel):
   args: Optional[Dict[str, str]] = Field(
     default=None,
     description="Map of {StandardArg: FrameworkArg}. Keys must match the Abstract Standard.",
+  )
+  inject_args: Optional[Dict[str, Union[str, int, float, bool]]] = Field(
+    default=None,
+    description="Dictionary of new arguments to inject with fixed literal values.",
   )
   requires_plugin: Optional[str] = Field(
     default=None,

@@ -15,12 +15,22 @@ from pydantic import BaseModel, Field, ConfigDict
 class ParameterDef(BaseModel):
   """
   Definition of a single argument in an abstract operation signature.
+
+  Updated to support semantic constraints (min, max, options) to guide
+  fuzzing and validation logic (Bounds Checking).
   """
 
   name: str = Field(..., description="Argument name (e.g. 'dim').")
   type: Optional[str] = Field("Any", description="Type hint string (e.g. 'int', 'Tensor').")
   doc: Optional[str] = Field(None, description="Argument docstring explanation.")
   default: Optional[str] = Field(None, description="Default value as a string code representation.")
+
+  # Semantic Constraints
+  min: Optional[float] = Field(None, description="Minimum numeric value (inclusive).")
+  max: Optional[float] = Field(None, description="Maximum numeric value (inclusive).")
+  options: Optional[List[Union[str, int, float, bool]]] = Field(
+    None, description="List of allowed discrete values (Enumeration)."
+  )
 
 
 class FrameworkVariant(BaseModel):
@@ -31,6 +41,10 @@ class FrameworkVariant(BaseModel):
   api: str = Field(..., description="The fully qualified API path (e.g. 'torch.nn.functional.relu').")
   args: Optional[Dict[str, str]] = Field(
     None, description="Mapping from Standard Argument Name to Framework Argument Name."
+  )
+  inject_args: Optional[Dict[str, Union[str, int, float, bool]]] = Field(
+    None,
+    description="Dictionary of new arguments to inject with fixed default values (e.g. {'epsilon': 1e-5}).",
   )
   casts: Optional[Dict[str, str]] = Field(
     None, description="Mapping of argument names to target types (e.g. {'x': 'int32'})."
@@ -49,6 +63,21 @@ class PluginType(str, Enum):
   BLOCK = "block_transform"
 
 
+class LogicOp(str, Enum):
+  """
+  Supported boolean operators for conditional rules.
+  """
+
+  EQ = "eq"  # ==
+  NEQ = "neq"  # !=
+  GT = "gt"  # >
+  LT = "lt"  # <
+  GTE = "gte"  # >=
+  LTE = "lte"  # <=
+  IN = "in"  # value in [list]
+  NOT_IN = "not_in"  # value not in [list]
+
+
 class Rule(BaseModel):
   """
   Declarative rule for conditional logic within a plugin.
@@ -58,8 +87,9 @@ class Rule(BaseModel):
   model_config = ConfigDict(populate_by_name=True)
 
   if_arg: str = Field(..., description="Name of the keyword argument to check in the source call.")
-  is_val: Union[str, int, float, bool] = Field(
-    ..., alias="is", description="Literal value to match (eq check). Matches Python types."
+  op: LogicOp = Field(LogicOp.EQ, description="Logical operator for comparison.")
+  is_val: Union[str, int, float, bool, List[Union[str, int, float]]] = Field(
+    ..., alias="val", description="Value or list of values to compare against."
   )
   use_api: str = Field(..., description="The target API path to use if the condition matches.")
 

@@ -4,6 +4,8 @@ Batch Validation Runner.
 Iterates over all defined semantic operations and verifys their correctness.
 Prioritizes "Manual/Human" tests found on disk over "Auto/Robotic" fuzzing.
 This closes the loop for Workflow B, allowing manual fixes to count as success.
+
+Updated to handle Rich Parameter Constraints (dict items in std_args).
 """
 
 import ast
@@ -41,8 +43,8 @@ class BatchValidator:
        we assume the developer has manually verified this operation. It is
        marked as Passing.
     2. **Automated Fuzzing**: If no manual test exists, we unpack the
-       arguments and type hints from the spec, generate random inputs, and
-       check equivalence using `EquivalenceRunner`.
+       arguments, type hints, and constraints from the spec, generate random inputs,
+       and check equivalence using `EquivalenceRunner`.
 
     Args:
         verbose: Show progress bar using Rich.
@@ -76,41 +78,65 @@ class BatchValidator:
       variants = details.get("variants", {})
       std_args_raw = details.get("std_args", ["x"])
 
-      # Unpack typed arguments [(name, type)] into params & hints
-      params, hints = self._unpack_args(std_args_raw)
+      # Unpack typed arguments and constraints
+      params, hints, constraints = self._unpack_args(std_args_raw)
 
-      passed, _ = self.runner.verify(variants, params, hints=hints)
+      passed, _ = self.runner.verify(variants, params, hints=hints, constraints=constraints)
       results[op_name] = passed
 
     return results
 
-  def _unpack_args(self, raw_args: List[Any]) -> Tuple[List[str], Dict[str, str]]:
+  def _unpack_args(self, raw_args: List[Any]) -> Tuple[List[str], Dict[str, str], Dict[str, Dict]]:
     """
-    Separates argument names from type hints.
+    Separates argument names from type hints and extracts semantic constraints.
 
-    Handles legacy list-of-strings AND new list-of-tuples formats.
-
-    Args:
-        raw_args: List like `["x", "axis"]` or `[("x", "Array"), ("axis", "int")]`.
+    Handles formats:
+    1. Legacy strings: `["x", "axis"]`
+    2. Tuple types: `[("x", "Array"), ("axis", "int")]`
+    3. Rich Dictionaries: `[{"name": "x", "min": 0}, {"name": "axis", "type": "int"}]`
 
     Returns:
         A tuple containing:
-            - List of argument names.
-            - Dictionary of type hints.
+            - List of argument names [str].
+            - Dictionary of type hints {name: type_str}.
+            - Dictionary of constraints {name: {min: val, ...}}.
     """
     params = []
     hints = {}
+    constraints = {}
 
     for item in raw_args:
-      if isinstance(item, (list, tuple)) and len(item) == 2:
+      # Case 3: Rich Dict (ODL)
+      if isinstance(item, dict):
+        name = item.get("name")
+        if not name:
+          continue  # Malformed
+        params.append(name)
+
+        if "type" in item:
+          hints[name] = item["type"]
+
+        # Extract constraints if present
+        constrs = {}
+        for k in ["min", "max", "options"]:
+          if k in item:
+            constrs[k] = item[k]
+
+        if constrs:
+          constraints[name] = constrs
+
+      # Case 2: Typed Tuple
+      elif isinstance(item, (list, tuple)) and len(item) == 2:
         name, annotation = item
         params.append(name)
         hints[name] = annotation
+
+      # Case 1: Simple String
       elif isinstance(item, str):
         params.append(item)
         # No hint available
 
-    return params, hints
+    return params, hints, constraints
 
   def _scan_manual_tests(self, root: Path) -> Set[str]:
     """

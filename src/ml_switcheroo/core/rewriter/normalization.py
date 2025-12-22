@@ -65,6 +65,7 @@ class NormalizationMixin(BaseRewriter):
   ) -> List[cst.Arg]:
     """
     Normalizes arguments from the source call to the target signature via the Pivot.
+    Supports renaming, reordering, and injection of new arguments via 'inject_args'.
     """
     # 1. Extract Standard Argument Order
     std_args_raw = op_details.get("std_args", [])
@@ -79,6 +80,9 @@ class NormalizationMixin(BaseRewriter):
     source_variant = op_details["variants"].get(self.source_fw, {})
     source_arg_map = source_variant.get("args", {})
     target_arg_map = target_impl.get("args", {})
+
+    # New: retrieve injected args for target
+    target_inject_map = target_impl.get("inject_args", {})
 
     # Invert source map: {fw_name: std_name}
     lib_to_std = {v: k for k, v in source_arg_map.items()}
@@ -161,6 +165,30 @@ class NormalizationMixin(BaseRewriter):
 
     new_args_list.extend(extra_args)
 
+    # 6. Inject Additional Arguments
+    if target_inject_map:
+      for arg_name, arg_val in target_inject_map.items():
+        # Convert literal to CST node
+        val_node = self._convert_value_to_cst(arg_val)
+
+        # Don't inject if argument is already present (e.g. user provided it)
+        # Check against existing keywords in new_args_list
+        if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):
+          continue
+
+        # Ensure previous arg has comma
+        if len(new_args_list) > 0:
+          last = new_args_list[-1]
+          if last.comma == cst.MaybeSentinel.DEFAULT:
+            new_args_list[-1] = last.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+
+        injected_arg = cst.Arg(
+          keyword=cst.Name(arg_name),
+          value=val_node,
+          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
+        )
+        new_args_list.append(injected_arg)
+
     # Ensure commas
     for i in range(len(new_args_list) - 1):
       if new_args_list[i].comma == cst.MaybeSentinel.DEFAULT:
@@ -171,6 +199,20 @@ class NormalizationMixin(BaseRewriter):
       new_args_list[-1] = new_args_list[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
     return new_args_list
+
+  def _convert_value_to_cst(self, val: Any) -> cst.BaseExpression:
+    """Converts a python primitive to a CST node."""
+    if isinstance(val, bool):
+      return cst.Name("True") if val else cst.Name("False")
+    elif isinstance(val, int):
+      return cst.Integer(str(val))
+    elif isinstance(val, float):
+      return cst.Float(str(val))
+    elif isinstance(val, str):
+      return cst.SimpleString(f"'{val}'")
+    else:
+      # Fallback for unexpected types
+      return cst.SimpleString(f"'{str(val)}'")
 
   def _rewrite_as_infix(
     self,

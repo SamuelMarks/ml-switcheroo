@@ -96,6 +96,24 @@ def test_injector_with_casts(target_source):
   assert 'casts={"arg1": "int32", "arg2": "float32"}' in code or 'casts={"arg2": "float32", "arg1": "int32"}' in code
 
 
+def test_injector_with_inject_args(target_source):
+  """
+  Verify that inject_args configuration is injected into StandardMap arguments.
+  """
+  # Variant with injected arguments
+  inject_variant = FrameworkVariant(api="target.op", inject_args={"epsilon": 1e-5, "flag": True})
+
+  wrapper = cst.parse_module(target_source)
+  transformer = FrameworkInjector("torch", "InjectedOp", inject_variant)
+  new_module = wrapper.visit(transformer)
+
+  code = new_module.code
+  assert '"InjectedOp": StandardMap(api="target.op"' in code
+
+  # Check for dictionary presence
+  assert 'inject_args={"epsilon": 1e-05, "flag": True}' in code or 'inject_args={"flag": True, "epsilon": 1e-05}' in code
+
+
 def test_injector_missed_target():
   """
   Verify behavior when the target framework class is not found.
