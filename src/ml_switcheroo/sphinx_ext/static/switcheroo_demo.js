@@ -2,14 +2,14 @@
  * @file switcheroo_demo.js
  * @description Client-side logic for the ML-Switcheroo WebAssembly Demo in Sphinx documentation.
  * Handles Pyodide initialization, CodeMirror editor state, and the UI interaction for running
- * transpilation purely in the browser.
+ * transpilation purely in the browser via a Python Wheel loaded from GitHub Releases.
  *
  * Capabilities:
- * - Loads Pyodide and installs wheels dynamically.
+ * - Loads Pyodide and installs wheels dynamically from a remote URL ("latest").
  * - Manages Hierarchical Framework Selection (Flavour Dropdowns).
  * - Executes the AST Engine via a Python Bridge.
  * - Renders Trace Graphs for debugging.
- * - **NEW**: Filters target options based on Source Tier compatibility.
+ * - Filters target options based on Source Tier compatibility.
  */
 
 /**
@@ -62,7 +62,7 @@ class Model(nn.Module):
  */
 let FW_TIERS = {};
 
-// Python Bridge Script (unchanged logic)
+// Python Bridge Script (executes inside WASM)
 const PYTHON_BRIDGE = `
 import json
 import traceback
@@ -112,6 +112,10 @@ except Exception as e:
 json_output = json.dumps(response) 
 `;
 
+/**
+ * Initializes the Pyodide runtime and installs logic.
+ * Called when the "Initialize Engine" button is clicked.
+ */
 async function initEngine() {
     const rootEl = document.getElementById("switcheroo-wasm-root");
     const statusEl = document.getElementById("engine-status");
@@ -119,14 +123,18 @@ async function initEngine() {
     const splashEl = document.getElementById("demo-splash");
     const interfaceEl = document.getElementById("demo-interface");
     const logBox = document.getElementById("console-output");
-    const wheelName = rootEl.dataset.wheel;
 
+    // Remote URL retrieved from Python injection
+    const wheelUrl = rootEl.dataset.wheelUrl;
+
+    // UI Updates
     statusEl.innerText = "Downloading...";
     statusEl.className = "status-badge status-loading";
     btnLoad.disabled = true;
     btnLoad.innerText = "Loading Pyodide...";
 
     try {
+        // 1. Load Pyodide Core
         if (!window.loadPyodide) {
             await loadScript("https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js");
         }
@@ -134,31 +142,43 @@ async function initEngine() {
             pyodide = await loadPyodide();
         }
 
+        // 2. Check if already installed
         const isInstalled = pyodide.runPython(`
 import importlib.util
 importlib.util.find_spec("ml_switcheroo") is not None
         `);
 
+        // 3. Install Package
         if (!isInstalled) {
             statusEl.innerText = "Fetching Requirements...";
             await pyodide.loadPackage("micropip");
             const micropip = pyodide.pyimport("micropip");
+
+            // Requirements (copied locally to _static during doc build)
             const reqRes = await fetch("_static/requirements.txt");
-            const reqText = await reqRes.text();
-            const reqs = reqText.split('\n')
-                .map(line => line.trim())
-                .filter(line => line && !line.startsWith('#'));
+            if (reqRes.ok) {
+                const reqText = await reqRes.text();
+                const reqs = reqText.split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line && !line.startsWith('#'));
 
-            statusEl.innerText = `Installing Dependencies...`;
-            await micropip.install("numpy");
-            await micropip.install(reqs);
+                statusEl.innerText = `Installing Dependencies...`;
+                await micropip.install("numpy");
+                // Allow error tolerance for complex deps not in Pyodide
+                try {
+                    await micropip.install(reqs);
+                } catch(e) {
+                    console.warn("Some requirements failed to install, proceeding:", e);
+                }
+            }
 
-            statusEl.innerText = "Installing Engine...";
-            const wheelUrl = `_static/${wheelName}`;
+            statusEl.innerText = "Installing Engine (Remote)...";
+
+            console.log(`[WASM] Downloading wheel from: ${wheelUrl}`);
             await micropip.install(wheelUrl);
         }
 
-        // Reveal Interface
+        // 4. Reveal Interface
         splashEl.style.display = "none";
         interfaceEl.style.display = "block";
 
@@ -189,10 +209,13 @@ importlib.util.find_spec("ml_switcheroo") is not None
         interfaceEl.style.display = "none";
         statusEl.innerText = "Load Failed";
         statusEl.className = "status-badge status-error";
-        logBox.innerText = `❌ WASM Initialization Error:\n\n${err}\n`;
+        logBox.innerText = `❌ WASM Initialization Error:\n\n${err}\n\nCheck console for details.`;
     }
 }
 
+/**
+ * Initializes CodeMirror editors for source and target.
+ */
 function initEditors() {
     if (srcEditor) {
         srcEditor.refresh();
@@ -204,6 +227,9 @@ function initEditors() {
     tgtEditor = CodeMirror.fromTextArea(document.getElementById("code-target"), { ...commonOpts, readOnly: true });
 }
 
+/**
+ * Populates the example dropdown based on EXAMPLES object.
+ */
 function initExampleSelector() {
     const sel = document.getElementById("select-example");
     if (!sel) return;
@@ -228,6 +254,9 @@ function initExampleSelector() {
     sel.onchange = (e) => loadExample(e.target.value);
 }
 
+/**
+ * Sets up listeners to show/hide flavour dropdowns (e.g. JAX -> Flax NNX).
+ */
 function initFlavourListeners() {
     const srcSel = document.getElementById("select-src");
     const tgtSel = document.getElementById("select-tgt");
@@ -247,6 +276,10 @@ function initFlavourListeners() {
     handler('tgt');
 }
 
+/**
+ * Loads a specific example into the editor and sets dropdown states.
+ * @param {string} key - The example ID key.
+ */
 function loadExample(key) {
     const details = EXAMPLES[key];
     if (!details) return;
@@ -319,6 +352,11 @@ function filterTargetOptions(reqTier) {
     }
 }
 
+/**
+ * Helper to select an option by value.
+ * @param {HTMLSelectElement} selectEl
+ * @param {string} value
+ */
 function setSelectValue(selectEl, value) {
     let found = false;
     for (let i = 0; i < selectEl.options.length; i++) {
@@ -330,13 +368,12 @@ function setSelectValue(selectEl, value) {
     }
 }
 
+/**
+ * Swaps Source and Target frameworks (and code content).
+ */
 function swapContext() {
     const srcSel = document.getElementById("select-src");
     const tgtSel = document.getElementById("select-tgt");
-
-    // Check if swap is valid logic?
-    // If we swap, we might be moving code that requires 'Neural' into a 'NumPy' target.
-    // Generally allowed unless we re-validate content.
 
     const tmpFw = srcSel.value;
     srcSel.value = tgtSel.value;
@@ -353,6 +390,9 @@ function swapContext() {
     }
 }
 
+/**
+ * Triggers the Python Transpilation Engine via Pyodide.
+ */
 async function runTranspilation() {
     if (!pyodide || !srcEditor) return;
     const consoleEl = document.getElementById("console-output");
@@ -377,14 +417,7 @@ async function runTranspilation() {
     if (tgtRegion && tgtRegion.style.display !== "none") tgtFlavour = document.getElementById("tgt-flavour").value;
 
     // Final Compatibility Check
-    // If user somehow bypassed UI or swapped contexts invalidly
-    // We check: does configured Tgt Flavour (or Tgt FW) support the code's tier?
-    // We define this loosely based on 'reqTier' from last loaded example, or default to array.
-
     const reqTier = document.getElementById("select-src").dataset.requiredTier || "array";
-
-    // Need to resolve effective target tier support.
-    // If flavour is used (e.g. flax_nnx), check its tiers. If generic 'jax', check its tiers.
     const effectiveTgt = tgtFlavour || tgtFw;
     const supported = FW_TIERS[effectiveTgt] || ["array", "neural", "extras"]; // Default permissive if missing logic
 
@@ -426,6 +459,10 @@ async function runTranspilation() {
     }
 }
 
+/**
+ * Helper to load external JS scripts relative to the page.
+ * @param {string} src - The script URL.
+ */
 function loadScript(src) {
     return new Promise((resolve, reject) => {
         const script = document.createElement('script');

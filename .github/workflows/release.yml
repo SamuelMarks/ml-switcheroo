@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  # Trigger the workflow when you push "latest" tag or a tag like v0.0.1, v1.0.0, etc.
+  push:
+    tags:
+      - "v*.*.*"
+      - "latest"
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    name: Build Wheel and Release
+    runs-on: ubuntu-latest
+
+    # Permissions required to upload files to GitHub Releases
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+
+      # other workflow uses uv, by using non-uv this is another test so let's keep heterogeneity
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools and deps
+        run: |
+          python3 -m pip install build
+          python3 -m pip install -r requirements.txt -r docs/requirements.txt
+
+      - name: Build Wheel
+        # This matches the logic inside your scripts/build_docs.py
+        # It will output the .whl file to the dist/ directory
+        run: python3 -m build . --wheel
+
+      - name: Upload to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          # This grabs the .whl file generated in the previous step
+          files: dist/*.whl
+          generate_release_notes: false
+          draft: true
+          prerelease: true
