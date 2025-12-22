@@ -33,7 +33,7 @@ let tgtEditor = null;
 /**
  * Dictionary of pre-loaded examples.
  * This is populated/merged by 'window.SWITCHEROO_PRELOADED_EXAMPLES' injected by the Sphinx extension.
- * @type {Object.<string, {label: string, srcFw: string, tgtFw: string, code: string, requiredTier?: string}>}
+ * @type {Object.<string, {label: string, srcFw: string, tgtFw: string, srcFlavour?: string, tgtFlavour?: string, code: string, requiredTier?: string}>}
  */
 let EXAMPLES = {
     "torch_nn": {
@@ -42,27 +42,22 @@ let EXAMPLES = {
         "tgtFw": "jax",
         "tgtFlavour": "flax_nnx",
         "requiredTier": "neural",
-        "code": `import torch
-import torch.nn as nn
-
-class Model(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
-        self.linear = nn.Linear(10, 10) 
-
-    def forward(self, x): 
-        return self.linear(x)`
+        "code": `import torch\nimport torch.nn as nn\n\nclass Model(nn.Module):\n    def forward(self, x):\n        return torch.abs(x)`
     }
 };
 
 /**
  * Tier Capability Map injected by Python.
- * Example: { "torch": ["neural", "array"], "numpy": ["array"] }
+ * Keys are framework strings (e.g. 'torch'), values are arrays of supported tiers (['neural', 'array']).
  * @type {Object.<string, Array<string>>}
  */
 let FW_TIERS = {};
 
-// Python Bridge Script (executes inside WASM)
+/**
+ * Python script string executed inside Pyodide to invoke the transpiler.
+ * Handles stdout capturing, exception formatting, and JSON response creation.
+ * @const {string}
+ */
 const PYTHON_BRIDGE = `
 import json
 import traceback
@@ -113,8 +108,14 @@ json_output = json.dumps(response)
 `;
 
 /**
- * Initializes the Pyodide runtime and installs logic.
+ * Initializes the Pyodide runtime and installs core logic.
  * Called when the "Initialize Engine" button is clicked.
+ *
+ * 1. Loads pyodide.js from CDN.
+ * 2. Initializes the WASM runtime.
+ * 3. Installs `micropip` and fetches `requirements.txt`.
+ * 4. Installs the project wheel from the remote URL defined in data attributes.
+ * 5. Visualizes the main interface upon success.
  */
 async function initEngine() {
     const rootEl = document.getElementById("switcheroo-wasm-root");
@@ -124,7 +125,7 @@ async function initEngine() {
     const interfaceEl = document.getElementById("demo-interface");
     const logBox = document.getElementById("console-output");
 
-    // Remote URL retrieved from Python injection
+    // Remote URL retrieved from Python injection via Jinja template logic in Sphinx extension
     const wheelUrl = rootEl.dataset.wheelUrl;
 
     // UI Updates
@@ -184,6 +185,7 @@ importlib.util.find_spec("ml_switcheroo") is not None
 
         initEditors();
 
+        // Load injected globals from Python
         if (window.SWITCHEROO_PRELOADED_EXAMPLES) {
             EXAMPLES = window.SWITCHEROO_PRELOADED_EXAMPLES;
         }
@@ -214,7 +216,8 @@ importlib.util.find_spec("ml_switcheroo") is not None
 }
 
 /**
- * Initializes CodeMirror editors for source and target.
+ * Initializes CodeMirror editors for source and target areas.
+ * Checks for existing instances to avoid double initialization.
  */
 function initEditors() {
     if (srcEditor) {
@@ -228,7 +231,8 @@ function initEditors() {
 }
 
 /**
- * Populates the example dropdown based on EXAMPLES object.
+ * Populates the example selector dropdown based on the global EXAMPLES object.
+ * Triggers the load of the first available example if possible.
  */
 function initExampleSelector() {
     const sel = document.getElementById("select-example");
@@ -255,7 +259,8 @@ function initExampleSelector() {
 }
 
 /**
- * Sets up listeners to show/hide flavour dropdowns (e.g. JAX -> Flax NNX).
+ * Sets up event listeners to show/hide flavour dropdowns.
+ * For example, if JAX is selected, shows the Flax NNX sub-option.
  */
 function initFlavourListeners() {
     const srcSel = document.getElementById("select-src");
@@ -264,6 +269,7 @@ function initFlavourListeners() {
     const handler = (type) => {
         const sel = type === 'src' ? srcSel : tgtSel;
         const region = document.getElementById(`${type}-flavour-region`);
+        // Logic currently only shows flavours for JAX (hardcoded for demo simplicity)
         if (sel.value === 'jax') {
             region.style.display = 'inline-block';
         } else {
@@ -272,13 +278,17 @@ function initFlavourListeners() {
     };
     srcSel.addEventListener("change", () => handler('src'));
     tgtSel.addEventListener("change", () => handler('tgt'));
+
+    // Initial trigger
     handler('src');
     handler('tgt');
 }
 
 /**
- * Loads a specific example into the editor and sets dropdown states.
- * @param {string} key - The example ID key.
+ * Loads a specific example logic into the editor and updates dropdown states.
+ * Also triggers logic to filter valid targets based on source tier.
+ *
+ * @param {string} key - The example ID key (e.g. 'torch_nn').
  */
 function loadExample(key) {
     const details = EXAMPLES[key];
@@ -292,10 +302,11 @@ function loadExample(key) {
 
     if (srcEl && details.srcFw) {
         setSelectValue(srcEl, details.srcFw);
+        // Dispatch change to trigger flavour visibility logic
         srcEl.dispatchEvent(new Event('change'));
     }
 
-    // Store the required tier on the DOM for validation
+    // Store the required tier on the DOM for validation during execution/selection
     srcEl.dataset.requiredTier = details.requiredTier || "array";
 
     // Filter targets based on this new requirement BEFORE setting target
@@ -306,7 +317,7 @@ function loadExample(key) {
         tgtEl.dispatchEvent(new Event('change'));
     }
 
-    // Handle Flavour updates...
+    // Handle Flavour updates if defined in the example
     const srcFlavourEl = document.getElementById("src-flavour");
     const tgtFlavourEl = document.getElementById("tgt-flavour");
     if (srcFlavourEl && details.srcFlavour) setSelectValue(srcFlavourEl, details.srcFlavour);
@@ -317,8 +328,9 @@ function loadExample(key) {
 }
 
 /**
- * Disables target frameworks that do not support the required tier.
- * Used to preventing mapping High Level (Neural) -> Low Level (NumPy).
+ * Disables target framework options that do not support the required tier.
+ * Used to preventing mapping High Level (Neural) code to Low Level (NumPy) targets.
+ *
  * @param {string} reqTier - The required tier ('neural', 'array', 'extras').
  */
 function filterTargetOptions(reqTier) {
@@ -333,7 +345,7 @@ function filterTargetOptions(reqTier) {
     for (let i = 0; i < tgtSel.options.length; i++) {
         const opt = tgtSel.options[i];
         const fwKey = opt.value;
-        const supports = FW_TIERS[fwKey] || ["array"]; // Default conservative
+        const supports = FW_TIERS[fwKey] || ["array"]; // Default to conservative if unknown
 
         if (supports.includes(reqTier)) {
             opt.disabled = false;
@@ -343,7 +355,7 @@ function filterTargetOptions(reqTier) {
         }
     }
 
-    // If current selection is invalid, switch to first valid
+    // If current selection became invalid, switch to first valid option
     const current = tgtSel.value;
     const currentSupports = FW_TIERS[current] || ["array"];
     if (!currentSupports.includes(reqTier) && firstValid) {
@@ -353,9 +365,9 @@ function filterTargetOptions(reqTier) {
 }
 
 /**
- * Helper to select an option by value.
- * @param {HTMLSelectElement} selectEl
- * @param {string} value
+ * Helper to select an option in a dropdown by value.
+ * @param {HTMLSelectElement} selectEl - The select element.
+ * @param {string} value - The value string to select.
  */
 function setSelectValue(selectEl, value) {
     let found = false;
@@ -369,7 +381,8 @@ function setSelectValue(selectEl, value) {
 }
 
 /**
- * Swaps Source and Target frameworks (and code content).
+ * Swaps Source and Target frameworks (and code content via temp variable).
+ * Triggered by the swap button.
  */
 function swapContext() {
     const srcSel = document.getElementById("select-src");
@@ -392,6 +405,7 @@ function swapContext() {
 
 /**
  * Triggers the Python Transpilation Engine via Pyodide.
+ * Gathers inputs, sets globals, runs the bridge script, and processes output.
  */
 async function runTranspilation() {
     if (!pyodide || !srcEditor) return;
@@ -419,7 +433,7 @@ async function runTranspilation() {
     // Final Compatibility Check
     const reqTier = document.getElementById("select-src").dataset.requiredTier || "array";
     const effectiveTgt = tgtFlavour || tgtFw;
-    const supported = FW_TIERS[effectiveTgt] || ["array", "neural", "extras"]; // Default permissive if missing logic
+    const supported = FW_TIERS[effectiveTgt] || ["array", "neural", "extras"];
 
     if (!supported.includes(reqTier)) {
         consoleEl.innerText = `⚠️  Warning: Converting ${reqTier.toUpperCase()} code to ${effectiveTgt} which only supports [${supported.join(", ")}].\nResult may contain escape hatches.`;
@@ -431,6 +445,7 @@ async function runTranspilation() {
     btn.innerText = "Running...";
 
     try {
+        // Pass variables to Python scope
         pyodide.globals.set("js_source_code", srcCode);
         pyodide.globals.set("js_src_fw", srcFw);
         pyodide.globals.set("js_tgt_fw", tgtFw);
@@ -438,7 +453,10 @@ async function runTranspilation() {
         pyodide.globals.set("js_tgt_flavour", tgtFlavour);
         pyodide.globals.set("js_strict_mode", !!document.getElementById("chk-strict-mode").checked);
 
+        // Execute Bridge
         await pyodide.runPythonAsync(PYTHON_BRIDGE);
+
+        // Retrieve JSON response
         const result = JSON.parse(pyodide.globals.get("json_output"));
         tgtEditor.setValue(result.code);
 
@@ -448,6 +466,7 @@ async function runTranspilation() {
              consoleEl.innerText = result.logs;
         }
 
+        // Render Traces if visualiser class is available
         if (result.trace_events && window.TraceGraph) {
              new TraceGraph('trace-visualizer').render(result.trace_events);
         }
@@ -460,8 +479,9 @@ async function runTranspilation() {
 }
 
 /**
- * Helper to load external JS scripts relative to the page.
+ * Helper to dynamically load external JS scripts relative to the page.
  * @param {string} src - The script URL.
+ * @returns {Promise<void>}
  */
 function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -473,6 +493,7 @@ function loadScript(src) {
     });
 }
 
+// Initialization Hook
 document.addEventListener("DOMContentLoaded", () => {
     const btnLoad = document.getElementById("btn-load-engine");
     if (btnLoad) btnLoad.addEventListener("click", initEngine);
