@@ -147,6 +147,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       # Corrected alias to 'nnx' to prevent collision with 'nn' (Torch/JAX aliases)
       "torch.nn": {"root": "flax", "sub": "nnx", "alias": "nnx"},
       "flax.nnx": {"root": "flax", "sub": "nnx", "alias": "nnx"},
+      "keras.ops": {"root": "jax.numpy", "sub": None, "alias": "jnp"},
     }
 
   @property

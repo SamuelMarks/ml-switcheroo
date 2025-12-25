@@ -5,6 +5,12 @@ This module is responsible for reading the AST's import references and remapping
 based on the data provided by SemanticsManager (Feature 024).
 It also handles collapsing fully qualified paths (e.g. `torch.nn.Linear`) into
 aliases (e.g. `nn.Linear`) based on content injection logic.
+
+Updates:
+- Fixed: Correctly transforms `from source import sub` into `import target` calls
+         when the target mapping specifies a root import (sub=None).
+- Improved: Smart injection now prefers `from root import sub` syntax for aliases
+            where the alias name matches the submodule (e.g. `from flax import nnx`).
 """
 
 from typing import Union, Optional, Tuple, Dict, Set, List
@@ -68,8 +74,13 @@ class ImportFixer(cst.CSTTransformer):
     """
     Collapses fully qualified paths to aliases if configured.
     e.g. `torch.nn.Linear` -> `nn.Linear` if `torch.nn` -> `nn` alias exists for this target.
+
+    FIX: Uses `original_node` to determine the full path. This prevents greedy collapsing
+    of shorter prefixes (e.g. 'torch.nn' -> 'nn') from breaking matching of longer prefixes
+    (e.g. 'torch.nn.functional' -> 'F') when traversal bubbles up.
     """
-    full_name = get_full_name(updated_node)
+    # Use original_node to get the full untransformed path (e.g. 'torch.nn.functional.relu')
+    full_name = get_full_name(original_node)
     if not full_name:
       return updated_node
 
@@ -145,7 +156,7 @@ class ImportFixer(cst.CSTTransformer):
 
   def leave_ImportFrom(
     self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
-  ) -> Union[cst.ImportFrom, cst.RemovalSentinel]:
+  ) -> Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel]:
     """
     Inspects ``from ... import ...`` statements.
     Checks module+name against submodule_map.
@@ -177,18 +188,32 @@ class ImportFixer(cst.CSTTransformer):
         if not final_alias and default_alias:
           final_alias = cst.AsName(name=cst.Name(default_alias))
 
-        new_node = cst.ImportFrom(
-          module=cst.Name(tgt_root),
-          names=[
-            cst.ImportAlias(
-              name=cst.Name(tgt_sub) if tgt_sub else cst.Name(tgt_root),
-              asname=final_alias,
-            )
-          ],
-        )
-        # Track the NEW definition so we don't duplicate inject it later
-        self._track_definition(new_node.names[0])
-        return new_node
+        # FIX: Handle case where target is a direct import (tgt_sub is None)
+        # Example: Mapped 'flax.nnx' -> 'torch.nn' (root='torch.nn', sub=None)
+        # Source: 'from flax import nnx' -> Target: 'import torch.nn as nn'
+        if tgt_sub is None:
+          # We must return an 'Import' node, not 'ImportFrom'
+          # Note: We rely on LibCST transformers allowing replacement of one Stmt with another Stmt
+          new_node = cst.Import(names=[cst.ImportAlias(name=self._create_dotted_name(tgt_root), asname=final_alias)])
+          # Track definition
+          self._track_definition(new_node.names[0])
+          return new_node
+
+        else:
+          # Standard 'from ... import ...' replacement
+          new_node = cst.ImportFrom(
+            module=self._create_dotted_name(tgt_root),
+            names=[
+              cst.ImportAlias(
+                name=cst.Name(tgt_sub),
+                asname=final_alias,
+              )
+            ],
+          )
+          # Track the NEW definition
+          if isinstance(new_node.names[0], cst.ImportAlias):
+            self._track_definition(new_node.names[0])
+          return new_node
 
     # Prune source framework imports
     if root_pkg in self.source_fws:
@@ -227,13 +252,30 @@ class ImportFixer(cst.CSTTransformer):
       updated_node.visit(scanner)
 
       if scanner.found and alias_name not in self._defined_names:
-        # FIX: Avoid 'import torch as torch'.
-        asname_node = None
-        if alias_name != module_path:
-          asname_node = cst.AsName(name=cst.Name(alias_name))
+        # Enhancement: If alias matches submodule structure, prefer 'from X import Y'
+        # Example: module_path="flax.nnx", alias="nnx" -> "from flax import nnx"
 
-        injections.append(
-          cst.SimpleStatementLine(
+        is_sub_match = False
+        if "." in module_path:
+          parts = module_path.rsplit(".", 1)
+          if len(parts) == 2 and parts[1] == alias_name:
+            # Match found: root=parts[0], sub=parts[1] (alias)
+            injection_node = cst.SimpleStatementLine(
+              body=[
+                cst.ImportFrom(
+                  module=self._create_dotted_name(parts[0]), names=[cst.ImportAlias(name=cst.Name(alias_name))]
+                )
+              ]
+            )
+            is_sub_match = True
+
+        if not is_sub_match:
+          # Fallback to standard 'import X as Y'
+          asname_node = None
+          if alias_name != module_path:
+            asname_node = cst.AsName(name=cst.Name(alias_name))
+
+          injection_node = cst.SimpleStatementLine(
             body=[
               cst.Import(
                 names=[
@@ -245,7 +287,8 @@ class ImportFixer(cst.CSTTransformer):
               )
             ]
           )
-        )
+
+        injections.append(injection_node)
         self._defined_names.add(alias_name)
 
     # -- Step 3: Data-Driven Submodule Injection (Smart 'From' Logic) --
@@ -273,19 +316,21 @@ class ImportFixer(cst.CSTTransformer):
             injection_node = cst.SimpleStatementLine(
               body=[
                 cst.ImportFrom(
-                  module=cst.Name(tgt_root),
+                  module=self._create_dotted_name(tgt_root),
                   names=[cst.ImportAlias(name=cst.Name(tgt_sub), asname=asname_node)],
                 )
               ]
             )
           else:
             # Case B: Root Import
+            # import {tgt_root} as {alias}
             asname_node = None
             if default_alias != tgt_root:
               asname_node = cst.AsName(name=cst.Name(default_alias))
 
+            # FIX: Use _create_dotted_name to handle e.g. import torch.nn.functional
             injection_node = cst.SimpleStatementLine(
-              body=[cst.Import(names=[cst.ImportAlias(name=cst.Name(tgt_root), asname=asname_node)])]
+              body=[cst.Import(names=[cst.ImportAlias(name=self._create_dotted_name(tgt_root), asname=asname_node)])]
             )
 
           injections.append(injection_node)

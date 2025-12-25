@@ -9,6 +9,8 @@ Optimization Update:
 - Implements Indexing for Catalog Lookups to prevent O(N^2) complexity
   when aligning massive frameworks (Torch vs JAX).
 - Uses pre-computed indices keyed by lowercase API names for fast retrieval.
+- **Refactor**: Uses `adapter.search_modules` to scan specific submodules instead of
+  blindly recursing the root package, ensuring internal paths (like `keras.src`) are avoided.
 """
 
 import json
@@ -113,18 +115,52 @@ class Scaffolder:
     known_extras_ops = self._get_ops_by_tier(SemanticTier.EXTRAS)
 
     catalogs = {}
+
+    # --- PHASE 1: SCANNING ---
     for fw in frameworks:
       log_info(f"Scanning [code]{fw}[/code]...")
-      catalogs[fw] = self.inspector.inspect(fw)
+
+      # Use Adapter search modules to ensure clean paths priority (Fix for Keras.src)
+      adapter = get_adapter(fw)
+      scan_targets = [fw]
+      if adapter and hasattr(adapter, "search_modules") and adapter.search_modules:
+        scan_targets = adapter.search_modules
+
+      fw_catalog = {}
+      for module_name in scan_targets:
+        try:
+          module_catalog = self.inspector.inspect(module_name)
+          fw_catalog.update(module_catalog)
+        except Exception as e:
+          log_info(f"Skipping module {module_name}: {e}")
+
+      catalogs[fw] = fw_catalog
       # Build optimize index immediately
       self._build_catalog_index(fw, catalogs[fw])
 
+    # Strategy 3: Static Injection (Execute before alignment to ensure base files exist)
+    # This ensures files are created even if scanning fails (e.g. CI environments with partial deps)
+    dataloader_defaults = get_dataloader_semantics()
+    for op, defn in dataloader_defaults.items():
+      self.staged_specs["k_framework_extras.json"][op] = {
+        "description": defn.get("description"),
+        # Default to empty list if None, preventing Pydantic validation errors
+        "std_args": defn.get("std_args", []),
+      }
+      if "variants" in defn:
+        for fw, variant in defn["variants"].items():
+          if variant is not None:
+            self.staged_mappings[fw][op] = variant
+
     # Drive alignment by the first framework (Primary)
     primary_fw = "torch" if "torch" in frameworks else frameworks[0]
-    # Use list to avoid modifying during iteration if logical changes happened (safe side)
-    primary_items = list(catalogs[primary_fw].items())
 
-    log_info(f"Aligning APIs against [code]{primary_fw}[/code] and [code]Specs[/code]...")
+    primary_items = []
+    if primary_fw in catalogs and catalogs[primary_fw]:
+      primary_items = list(catalogs[primary_fw].items())
+      log_info(f"Aligning APIs against [code]{primary_fw}[/code] and [code]Specs[/code]...")
+    else:
+      log_info(f"Primary framework {primary_fw} scan empty or failed. Skipping heuristic alignment.")
 
     for api_path, details in primary_items:
       name = details["name"]
@@ -157,19 +193,6 @@ class Scaffolder:
 
       # Heuristic: Math Tier (Default)
       self._register_entry("k_framework_extras.json", name, primary_fw, api_path, details, catalogs)
-
-    # Strategy 3: Static Injection
-    dataloader_defaults = get_dataloader_semantics()
-    for op, defn in dataloader_defaults.items():
-      self.staged_specs["k_framework_extras.json"][op] = {
-        "description": defn.get("description"),
-        # Default to empty list if None, preventing Pydantic validation errors
-        "std_args": defn.get("std_args", []),
-      }
-      if "variants" in defn:
-        for fw, variant in defn["variants"].items():
-          if variant is not None:
-            self.staged_mappings[fw][op] = variant
 
     # 4. Write to Disk
     if not semantics_path.exists():

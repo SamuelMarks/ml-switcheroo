@@ -8,9 +8,6 @@
       "api": "optax.adabelief",
       "requires_plugin": "optimizer_constructor"
     },
-    "Adadelta": {
-      "api": "optax.adadelta"
-    },
     "Adagrad": {
       "api": "optax.adagrad",
       "requires_plugin": "optimizer_constructor"
@@ -22,9 +19,6 @@
     "AdamW": {
       "api": "optax.adamw",
       "requires_plugin": "optimizer_constructor"
-    },
-    "Adamax": {
-      "api": "optax.adamax"
     },
     "Dropout": {
       "api": "praxis.layers.Dropout",
@@ -51,12 +45,6 @@
         "out_features": "output_dims"
       }
     },
-    "Nadam": {
-      "api": "optax.nadam"
-    },
-    "OptState": {
-      "api": "optax.OptState"
-    },
     "RMSprop": {
       "api": "optax.rmsprop",
       "requires_plugin": "optimizer_constructor"
@@ -75,28 +63,13 @@
     "abs": {
       "api": "jnp.abs"
     },
-    "chain": {
-      "api": "optax.chain"
-    },
     "data_ptr": {
       "api": "data",
       "requires_plugin": "method_to_property"
     },
-    "freeze": {
-      "api": "optax.freeze"
-    },
-    "kl_divergence": {
-      "api": "optax.kl_divergence"
-    },
-    "params": {
-      "api": "optax.Params"
-    },
     "permute_dims": {
       "api": "jnp.transpose",
       "pack_to_tuple": "axes"
-    },
-    "schedule": {
-      "api": "optax.Schedule"
     },
     "size": {
       "api": "shape",

@@ -39,7 +39,13 @@ def test_generation_and_execution_flow(tmp_path):
 
   # 3. Execution
   # Pass tmp_path as root
-  scaffolder.scaffold(["torch"], root_dir=tmp_path)
+  # Mock adapter for 'torch' to prevent scan fail return
+  mock_adapter = MagicMock()
+  mock_adapter.search_modules = None  # Scan root only
+
+  with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
+    with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
+      scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
   # 4. Verify Abstract Spec Creation (semantics/k_framework_extras.json)
   # This comes from the python file (common/data.py)

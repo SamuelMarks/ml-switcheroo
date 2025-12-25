@@ -6,6 +6,7 @@ Verifies that:
 1. Source imports are PRESERVED if aliased usages are found (robust logic).
 2. 'from X import Y' bindings are tracked.
 3. Plain usage tracking still works.
+4. Root import switching (Case B from FromImport) works.
 """
 
 from ml_switcheroo.core.import_fixer import ImportFixer
@@ -17,6 +18,8 @@ TEST_MAP = {
   "torch.nn": ("flax", "linen", "nn"),
   "torch.nn.functional": ("jax", "nn", "F"),
   "torch.optim": ("optax", None, None),
+  # Test Case: from Source import Sub -> import Root as Alias (sub=None)
+  "flax.nnx": ("torch.nn", None, "nn"),
 }
 
 
@@ -97,11 +100,11 @@ def test_remap_and_preserve_mixed():
   'torch' is used elsewhere (lingering).
   Expect: 'import torch' preserved, 'from torch import nn' replaced.
   """
-  code = """
+  code = """ 
 import torch
 from torch import nn
-x = torch.bad()
-y = nn.Linear()
+x = torch.bad() 
+y = nn.Linear() 
 """
   # Simulate scanner finding 'torch' usage
   result = apply_fixer(code, preserve=True)
@@ -131,3 +134,22 @@ def test_preserve_submodule_if_used_unmapped():
   result = apply_fixer(code, preserve=True)
 
   assert "from torch import unknown" in result
+
+
+def test_transform_from_import_to_root_import():
+  """
+  Scenario: 'from flax import nnx' -> Mapped to 'torch.nn' (root='torch.nn', sub=None).
+  Expect: 'import torch.nn as nnx' (or alias if specified).
+  """
+  code = "from flax import nnx"
+  # Using the 'flax.nnx' mapping defined in TEST_MAP above which maps to (torch.nn, None, nn)
+
+  # Run fixer with source=flax, target=torch
+  tree = cst.parse_module(code)
+  fixer = ImportFixer("flax", "torch", submodule_map=TEST_MAP)
+  new_tree = tree.visit(fixer)
+  result = new_tree.code
+
+  # Should become 'import torch.nn as nn'
+  assert "import torch.nn as nn" in result
+  assert "from" not in result

@@ -32,7 +32,16 @@ from ml_switcheroo.core.ghost import GhostInspector
 
 @register_framework("torch")
 class TorchAdapter:
-  """Adapter for PyTorch."""
+  """
+  Adapter for PyTorch.
+
+  Handles mapping of:
+  1.  **Neural Networks**: `torch.nn.*` layers and containers.
+  2.  **Math**: `torch.*` tensor operations.
+  3.  **Types**: `torch.float32`, etc.
+  4.  **Casting**: `.float()`, `.long()`, etc. mapped to Abstract Casts.
+  5.  **Optimization**: `torch.optim.*`.
+  """
 
   display_name: str = "PyTorch"
   inherits_from: None = None
@@ -55,8 +64,10 @@ class TorchAdapter:
 
   @property
   def search_modules(self) -> List[str]:
+    """
+    Search targets for discovery.
+    """
     return [
-      "torch",
       "torch.nn",
       "torch.linalg",
       "torch.special",
@@ -67,24 +78,34 @@ class TorchAdapter:
 
   @property
   def import_alias(self) -> Tuple[str, str]:
+    """Returns standard alias ('torch', 'torch')."""
     return ("torch", "torch")
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
+    """Returns supported semantic tiers."""
     return [SemanticTier.NEURAL, SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
 
   @property
   def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+    """
+    Defines how to import specific submodules.
+
+    Examples:
+        "torch.nn" -> `import torch.nn as nn`
+        "torch.nn.functional" -> `import torch.nn.functional as F`
+    """
     return {
-      "torch.nn": {"alias": "nn", "sub": "nn"},
+      "torch.nn": {"root": "torch.nn", "alias": "nn", "sub": None},
       "torch.nn.functional": {"root": "torch.nn.functional", "alias": "F", "sub": None},
       "torchvision": {"root": "torchvision", "alias": None},
       "torchvision.transforms": {"root": "torchvision", "sub": "transforms", "alias": "T"},
-      "flax.nnx": {"root": "torch", "sub": "nn", "alias": "nn"},
+      "flax.nnx": {"root": "torch.nn", "sub": None, "alias": "nn"},
     }
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
+    """Regex patterns for categorizing APIs."""
     return {
       "neural": [r"\\.nn\\.", r"\\.modules\\.", r"\\.layers\\.", r"Module$"],
       "extras": [
@@ -100,7 +121,7 @@ class TorchAdapter:
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Test templates for Torch."""
+    """Templates for generating physical verification tests."""
     return {
       "import": "import torch",
       "convert_input": "torch.tensor({np_var})",
@@ -109,13 +130,18 @@ class TorchAdapter:
 
   @property
   def structural_traits(self) -> StructuralTraits:
+    """
+    Defines PyTorch structural patterns.
+    Includes lifecycle method stripping (e.g. .cuda(), .detach()).
+    """
     return StructuralTraits(
       module_base="torch.nn.Module",
       forward_method="forward",
       requires_super_init=True,
       strip_magic_args=["rngs"],
       lifecycle_strip_methods=["to", "cpu", "cuda", "detach", "clone", "requires_grad_", "share_memory_"],
-      lifecycle_warn_methods=["eval", "train", "half", "float", "double", "type"],
+      lifecycle_warn_methods=["eval", "train"],
+      # .half, .float, .double, .type removed from warn list as they are handled via Casting Plugin now
       impurity_methods=["add_", "sub_", "mul_", "div_", "pow_", "zero_", "copy_", "fill_"],
     )
 
@@ -123,11 +149,11 @@ class TorchAdapter:
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Comprehensive distributed definitions for PyTorch mappings.
-    Moved from standards_internal.py.
+    Maps source API calls to Abstract Operations defined in the Hub.
     """
     return {
       "TorchFunctional": StandardMap(api="torch.nn.functional"),
-      # Optimization
+      # --- Optimization ---
       "Adam": StandardMap(api="torch.optim.Adam"),
       "SGD": StandardMap(api="torch.optim.SGD"),
       "RMSprop": StandardMap(api="torch.optim.RMSprop"),
@@ -136,7 +162,7 @@ class TorchAdapter:
       "ClipGradNorm": StandardMap(api="torch.nn.utils.clip_grad_norm_"),
       "step": StandardMap(api="optimizer.step"),
       "zero_grad": StandardMap(api="optimizer.zero_grad"),
-      # Array / Math
+      # --- Array / Math ---
       "randn": StandardMap(api="torch.randn"),
       "Clamp": StandardMap(api="torch.clamp"),
       "Gather": StandardMap(api="torch.gather"),
@@ -155,15 +181,29 @@ class TorchAdapter:
       "Abs": StandardMap(api="torch.abs"),
       "Mean": StandardMap(api="torch.mean"),
       "Sum": StandardMap(api="torch.sum"),
-      # Casting
+      "size": StandardMap(api="torch.Tensor.size"),
+      # --- Types ---
+      "Float32": StandardMap(api="torch.float32"),
+      "Float64": StandardMap(api="torch.float64"),
+      "Float16": StandardMap(api="torch.float16"),
+      "Int64": StandardMap(api="torch.int64"),
+      "Int32": StandardMap(api="torch.int32"),
+      "Int16": StandardMap(api="torch.int16"),
+      "UInt8": StandardMap(api="torch.uint8"),
+      "Bool": StandardMap(api="torch.bool"),
+      # --- Casting (Shorthands) ---
+      # These map the source method (e.g. .float()) to the Abstract Cast Operation (e.g. CastFloat).
+      # The Casting Plugin uses the 'target_type' metadata on CastFloat to determine the target API.
       "CastFloat": StandardMap(api="torch.Tensor.float"),
       "CastDouble": StandardMap(api="torch.Tensor.double"),
       "CastHalf": StandardMap(api="torch.Tensor.half"),
       "CastLong": StandardMap(api="torch.Tensor.long"),
       "CastInt": StandardMap(api="torch.Tensor.int"),
+      "CastShort": StandardMap(api="torch.Tensor.short"),
+      "CastByte": StandardMap(api="torch.Tensor.byte"),
       "CastBool": StandardMap(api="torch.Tensor.bool"),
-      "size": StandardMap(api="torch.Tensor.size"),
-      # Neural Layers
+      "CastChar": StandardMap(api="torch.Tensor.char"),
+      # --- Neural Layers ---
       "MultiheadAttention": StandardMap(api="torch.nn.MultiheadAttention"),
       "Embedding": StandardMap(api="torch.nn.Embedding"),
       "Linear": StandardMap(api="torch.nn.Linear"),
@@ -177,7 +217,7 @@ class TorchAdapter:
       "Conv2d": StandardMap(api="torch.nn.Conv2d"),
       "relu": StandardMap(api="torch.nn.functional.relu"),
       "MaxPool2d": StandardMap(api="torch.nn.MaxPool2d"),
-      # Vision
+      # --- Vision ---
       "Resize": StandardMap(api="torchvision.transforms.Resize"),
       "Normalize": StandardMap(api="torchvision.transforms.Normalize"),
       "ToTensor": StandardMap(api="torchvision.transforms.ToTensor"),
@@ -186,7 +226,7 @@ class TorchAdapter:
       "RandomHorizontalFlip": StandardMap(api="torchvision.transforms.RandomHorizontalFlip"),
       "RandomVerticalFlip": StandardMap(api="torchvision.transforms.RandomVerticalFlip"),
       "Grayscale": StandardMap(api="torchvision.transforms.Grayscale"),
-      # State & Extras
+      # --- State & Extras ---
       "no_grad": StandardMap(api="torch.no_grad"),
       "enable_grad": StandardMap(api="torch.enable_grad"),
       "register_buffer": StandardMap(api="torch.nn.Module.register_buffer"),
@@ -198,7 +238,7 @@ class TorchAdapter:
       "Param": StandardMap(api="torch.nn.Parameter"),
       "Variable": StandardMap(api="torch.nn.Parameter", requires_plugin="nnx_param_to_torch"),
       "Cache": StandardMap(api="torch.nn.Parameter", args={}, requires_plugin="nnx_param_to_torch"),
-      # Functional Transforms
+      # --- Functional Transforms ---
       "vmap": StandardMap(api="torch.vmap", args={"func": "func", "in_axes": "in_dims", "out_axes": "out_dims"}),
       "grad": StandardMap(api="torch.func.grad"),
       "jit": StandardMap(api="torch.compile"),
@@ -208,6 +248,7 @@ class TorchAdapter:
 
   @property
   def rng_seed_methods(self) -> List[str]:
+    """Returns list of RNG seeding methods."""
     return ["manual_seed", "seed"]
 
   # --- Discovery Logic (Dynamic) ---
@@ -383,47 +424,47 @@ class TorchAdapter:
     return {
       "tier1_math": """import torch
 
-def math_ops(x, y): 
+def math_ops(x, y):
     # Tier 1: Core Tensor Operations
-    a = torch.abs(x) 
-    b = torch.add(a, y) 
+    a = torch.abs(x)
+    b = torch.add(a, y)
     
     # Reduction
-    return torch.mean(b) 
+    return torch.mean(b)
 """,
       "tier2_neural_simple": """import torch
 import torch.nn as nn
 
-class Net(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
-        self.fc = nn.Linear(10, 10) 
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc = nn.Linear(10, 10)
         
-    def forward(self, x): 
-        x = self.fc(x) 
-        return nn.functional.relu(x) 
+    def forward(self, x):
+        x = self.fc(x)
+        return nn.functional.relu(x)
 """,
       "tier2_neural_cnn": """import torch
 import torch.nn as nn
 
-class ConvNet(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
-        self.conv = nn.Conv2d(1, 32, 3) 
-        self.fc = nn.Linear(32 * 26 * 26, 10) 
+class ConvNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv = nn.Conv2d(1, 32, 3)
+        self.fc = nn.Linear(32 * 26 * 26, 10)
 
-    def forward(self, x): 
-        x = self.conv(x) 
-        x = torch.flatten(x, 1) 
-        return self.fc(x) 
+    def forward(self, x):
+        x = self.conv(x)
+        x = torch.flatten(x, 1)
+        return self.fc(x)
 """,
       "tier3_extras_dataloader": """import torch
 from torch.utils.data import DataLoader, TensorDataset
 
-def create_loader(data, targets): 
+def create_loader(data, targets):
     # Tier 3: Data Loader
-    ds = TensorDataset(data, targets) 
-    return DataLoader(ds, batch_size=32, num_workers=4) 
+    ds = TensorDataset(data, targets)
+    return DataLoader(ds, batch_size=32, num_workers=4)
 """,
     }
 
@@ -437,6 +478,11 @@ def create_loader(data, targets):
         return torch.from_numpy(data)
       except Exception:
         return torch.tensor(data)
+    if isinstance(data, (list, tuple)):
+      try:
+        return torch.tensor(data)
+      except Exception:
+        pass
     return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:

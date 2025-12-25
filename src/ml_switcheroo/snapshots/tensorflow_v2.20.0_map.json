@@ -52,6 +52,57 @@
     "Bidirectional": {
       "api": "keras.layers.Bidirectional"
     },
+    "Bool": {
+      "api": "tf.bool"
+    },
+    "CastBool": {
+      "api": "tf.cast",
+      "inject_args": {
+        "dtype": "tf.bool"
+      }
+    },
+    "CastByte": {
+      "api": "tf.cast",
+      "inject_args": {
+        "dtype": "tf.uint8"
+      }
+    },
+    "CastDouble": {
+      "api": "tf.cast",
+      "inject_args": {
+        "dtype": "tf.float64"
+      }
+    },
+    "CastFloat": {
+      "api": "tf.cast",
+      "inject_args": {
+        "dtype": "tf.float32"
+      }
+    },
+    "CastHalf": {
+      "api": "tf.cast",
+      "inject_args": {
+        "dtype": "tf.float16"
+      }
+    },
+    "CastInt": {
+      "api": "tf.cast",
+      "inject_args": {
+        "dtype": "tf.int32"
+      }
+    },
+    "CastLong": {
+      "api": "tf.cast",
+      "inject_args": {
+        "dtype": "tf.int64"
+      }
+    },
+    "CastShort": {
+      "api": "tf.cast",
+      "inject_args": {
+        "dtype": "tf.int16"
+      }
+    },
     "Ceil": {
       "api": "tensorflow.math.ceil"
     },
@@ -119,11 +170,17 @@
     "Flatten": {
       "api": "keras.layers.Flatten"
     },
+    "Float16": {
+      "api": "tf.float16"
+    },
+    "Float32": {
+      "api": "tf.float32"
+    },
+    "Float64": {
+      "api": "tf.float64"
+    },
     "Floor": {
       "api": "tensorflow.floor"
-    },
-    "Function": {
-      "api": "tensorflow.function"
     },
     "GELU": {
       "api": "keras.ops.gelu"
@@ -140,9 +197,6 @@
     "Glu": {
       "api": "keras.ops.glu"
     },
-    "Graph": {
-      "api": "tensorflow.Graph"
-    },
     "Greater": {
       "api": "tensorflow.greater"
     },
@@ -155,8 +209,14 @@
     "Identity": {
       "api": "tensorflow.identity"
     },
-    "InputSpec": {
-      "api": "keras.layers.InputSpec"
+    "Int16": {
+      "api": "tf.int16"
+    },
+    "Int32": {
+      "api": "tf.int32"
+    },
+    "Int64": {
+      "api": "tf.int64"
     },
     "IsNaN": {
       "api": "keras.ops.isnan"
@@ -296,9 +356,6 @@
     "Sum": {
       "api": "keras.ops.sum"
     },
-    "TENSOR": {
-      "api": "tensorflow.Tensor"
-    },
     "Tan": {
       "api": "tensorflow.tan"
     },
@@ -313,6 +370,9 @@
     },
     "Transpose": {
       "api": "tensorflow.transpose"
+    },
+    "UInt8": {
+      "api": "tf.uint8"
     },
     "Unfold": {
       "api": "keras.ops.unfold"
@@ -413,9 +473,6 @@
     "conj": {
       "api": "tensorflow.math.conj"
     },
-    "conjugate": {
-      "api": "keras.ops.conjugate"
-    },
     "conv1d": {
       "api": "keras.layers.Conv1D"
     },
@@ -437,9 +494,6 @@
     "cross": {
       "api": "tensorflow.linalg.cross"
     },
-    "deserialize": {
-      "api": "keras.layers.deserialize"
-    },
     "det": {
       "api": "tensorflow.linalg.det"
     },
@@ -448,9 +502,6 @@
     },
     "divide": {
       "api": "tensorflow.divide"
-    },
-    "dtype": {
-      "api": "tensorflow.DType"
     },
     "eigh": {
       "api": "tensorflow.linalg.eigh"
@@ -485,26 +536,11 @@
     "floor_divide": {
       "api": "keras.ops.floor_divide"
     },
-    "floordiv": {
-      "api": "tensorflow.math.floordiv"
-    },
-    "function": {
-      "api": "tensorflow.function"
-    },
-    "get_item": {
-      "api": "keras.ops.get_item"
-    },
-    "graph": {
-      "api": "tensorflow.Graph"
-    },
     "greater": {
       "api": "tensorflow.greater"
     },
     "greater_equal": {
       "api": "tensorflow.greater_equal"
-    },
-    "group": {
-      "api": "tensorflow.group"
     },
     "hypot": {
       "api": "keras.ops.hypot"
@@ -520,9 +556,6 @@
     },
     "invert_permutation": {
       "api": "tensorflow.math.invert_permutation"
-    },
-    "is_tensor": {
-      "api": "tensorflow.is_tensor"
     },
     "isfinite": {
       "api": "keras.ops.isfinite"
@@ -568,9 +601,6 @@
     },
     "logical_xor": {
       "api": "tensorflow.math.logical_xor"
-    },
-    "map": {
-      "api": "keras.ops.map"
     },
     "matmul": {
       "api": "tensorflow.matmul"
@@ -639,9 +669,6 @@
     "pow": {
       "api": "tensorflow.pow"
     },
-    "print": {
-      "api": "tensorflow.print"
-    },
     "prod": {
       "api": "keras.ops.prod"
     },
@@ -674,9 +701,6 @@
     },
     "searchsorted": {
       "api": "tensorflow.searchsorted"
-    },
-    "serialize": {
-      "api": "keras.layers.serialize"
     },
     "sign": {
       "api": "tensorflow.sign"
@@ -732,17 +756,11 @@
     "tanh": {
       "api": "tensorflow.tanh"
     },
-    "tensor": {
-      "api": "tensorflow.Tensor"
-    },
     "tensordot": {
       "api": "tensorflow.tensordot"
     },
     "tile": {
       "api": "tensorflow.tile"
-    },
-    "timestamp": {
-      "api": "tensorflow.timestamp"
     },
     "trace": {
       "api": "keras.ops.trace"
@@ -753,17 +771,11 @@
     "triu": {
       "api": "keras.ops.triu"
     },
-    "truediv": {
-      "api": "tensorflow.truediv"
-    },
     "trunc": {
       "api": "keras.ops.trunc"
     },
     "unfold": {
       "api": "keras.ops.unfold"
-    },
-    "unravel_index": {
-      "api": "tensorflow.unravel_index"
     },
     "unstack": {
       "api": "tensorflow.unstack"

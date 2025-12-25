@@ -15,6 +15,7 @@ It employs a two-stage strategy:
 **Memory Safety**:
 Includes recursion safeguards (visited set tracking) to prevent infinite loops
 or memory explosion when traversing circular references in large libraries like PyTorch.
+It also blacklists known heavy internals (`_C`, `distributed`, `cuda`) to prevent hangs during scanning.
 """
 
 import inspect
@@ -139,7 +140,26 @@ class ApiInspector:
       return
 
     # Blacklist metadata for internal modules that cause crashes during inspection
-    unsafe_internals = {"core", "python", "compiler", "contrib", "examples", "tools", "pywrap_tensorflow", "_logging"}
+    # Updates: added '_C' (Torch binaries), 'distributed', 'cuda' (Prevent Hardware Init hangs)
+    unsafe_internals = {
+      "core",
+      "python",
+      "compiler",
+      "contrib",
+      "examples",
+      "tools",
+      "pywrap_tensorflow",
+      "_logging",
+      "_C",
+      "distributed",
+      "cuda",
+      "backends",
+      "fx",
+      "masked",
+      "ao",
+      "quantization",
+      "testing",
+    }
 
     for name, member in members:
       if name.startswith("_"):

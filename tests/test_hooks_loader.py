@@ -19,11 +19,11 @@ def mock_plugin_dir(tmp_path):
 
   # Create valid plugin
   plugin_file = plugin_dir / "my_plugin.py"
-  plugin_file.write_text("""
+  plugin_file.write_text(""" 
 from ml_switcheroo.core.hooks import register_hook
 
-@register_hook("dynamic_test_trigger")
-def my_hook(node, ctx):
+@register_hook("dynamic_test_trigger") 
+def my_hook(node, ctx): 
     return node
 """)
 

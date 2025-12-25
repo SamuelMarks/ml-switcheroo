@@ -154,6 +154,9 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         new_node = hook(updated, self.ctx)
         if new_node != updated:
           log_diff("In-place Unroll (Heuristic)", updated, new_node)
+          # If helper returned a BinaryOperation (e.g. x + y), we cannot process it as Call further
+          if not isinstance(new_node, cst.Call):
+            return new_node
           updated = new_node
           func_name = self._get_qualified_name(
             updated.operator if isinstance(updated, cst.BinaryOperation) else updated.func
@@ -193,24 +196,55 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       if is_super_call(original):
         return updated
 
-      if self.strict_mode:
-        self._report_failure("Could not resolve function name")
-      return updated
+      # Try to recover: if this is a method call on an unknown object, try resolving just the method name
+      # This enables x.float() -> CastFloat without knowing x is a Tensor
+      if isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
+        func_name = f"__method_fallback__.{original.func.attr.value}"  # Placeholder to skip next check logic
+      else:
+        if self.strict_mode:
+          self._report_failure("Could not resolve function name")
+        return updated
 
     # 2. Standard API Rewrite Setup
     mapping = self._get_mapping(func_name)
+
+    # FIX: Fallback lookup for methods on unknown objects (e.g. x.float() where x is unknown type)
+    # We check if the leaf name (float, long) is mapped in the semantics specifically for casting/util behavior.
+    # Guard: Do NOT apply if receiver is 'self' (likely a module call, not tensor operation like .float())
+    # Also prevent trying to look up module aliases as method calls (e.g. torch.bad(1))
+    if not mapping and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
+      receiver = original.func.value
+      is_self = isinstance(receiver, cst.Name) and receiver.value == "self"
+
+      if not is_self and not self._is_module_alias(receiver):
+        leaf_method = original.func.attr.value
+        # Try fallback lookup using the guessed API. Use silent=True to avoid reporting failure logic twice.
+        full_api_guess = f"torch.Tensor.{leaf_method}"
+        mapping = self._get_mapping(full_api_guess, silent=True)
+        if mapping:
+          # If we found a mapping logic via assumption, we use the guessed name for definition lookup too
+          # This ensures plugins like 'type_methods' find the metadata they need
+          func_name = full_api_guess
+
     if not mapping:
       # --- TRACE: Detailed Decision Log ---
-      if not is_builtin(func_name):
+      if not is_builtin(func_name) and not func_name.startswith("__method_fallback__"):
         get_tracer().log_inspection(
           node_str=func_name,
           outcome="Skipped",
           detail="No Entry in Semantics Knowledge Base",
         )
+      # Re-check strict failure reporting for the ORIGINAL name if we skipped fallback reporting
+      # This covers the case where func_name exists but has no mapping
+      if self.strict_mode and func_name and func_name.startswith(f"{self.source_fw}."):
+        self._report_failure(f"API '{func_name}' not found in semantics.")
+
       return updated
 
     lookup = self.semantics.get_definition(func_name)
+
     if not lookup:
+      # Should not happen if mapping is present, unless broken state
       return updated
 
     abstract_id, details = lookup

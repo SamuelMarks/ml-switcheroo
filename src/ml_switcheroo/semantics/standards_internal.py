@@ -9,6 +9,7 @@ It defines:
 1.  **Abstract Schema**: The standard argument names (`std_args`) and docstrings.
 2.  **Implementation Variants**: Currently empty, as all implementations have been
     distributed to their respective Framework Adapters in `src/ml_switcheroo/frameworks/`.
+3.  **Abstract Types**: Standardizes Dtype identifiers.
 """
 
 from ml_switcheroo.core.dsl import OpType
@@ -86,46 +87,111 @@ INTERNAL_OPS = {
     "std_args": ["input", "shape"],
     "variants": {},
   },
-  "perumte_dims": {
-    "description": "Permutes tensor dimensions.",
-    "std_args": ["input", {"name": "dims", "type": "int", "is_variadic": True}],
-    "variants": {},
-  },
   "permute_dims": {
     "description": "Permutes tensor dimensions.",
     "std_args": ["input", {"name": "dims", "type": "int", "is_variadic": True}],
     "variants": {},
   },
-  # Casting (Type Mapping)
-  "CastFloat": {
-    "description": "Cast tensor to float32",
+  # ============================================================================
+  # 4. Standard Types (Abstract Dtypes)
+  # ============================================================================
+  "Float32": {
+    "description": "32-bit floating point type.",
     "std_args": [],
     "variants": {},
+  },
+  "Float64": {
+    "description": "64-bit floating point type (Double).",
+    "std_args": [],
+    "variants": {},
+  },
+  "Float16": {
+    "description": "16-bit floating point type (Half).",
+    "std_args": [],
+    "variants": {},
+  },
+  "Int64": {
+    "description": "64-bit signed integer type (Long).",
+    "std_args": [],
+    "variants": {},
+  },
+  "Int32": {
+    "description": "32-bit signed integer type (Int).",
+    "std_args": [],
+    "variants": {},
+  },
+  "Int16": {
+    "description": "16-bit signed integer type (Short).",
+    "std_args": [],
+    "variants": {},
+  },
+  "UInt8": {
+    "description": "8-bit unsigned integer type (Byte).",
+    "std_args": [],
+    "variants": {},
+  },
+  "Bool": {
+    "description": "Boolean type.",
+    "std_args": [],
+    "variants": {},
+  },
+  # ============================================================================
+  # 5. Casting (Type Mapping)
+  #    Metadata links generic operations to specific Abstract Types.
+  # ============================================================================
+  "CastFloat": {
+    "description": "Cast tensor to float32",
+    "std_args": ["x"],
+    "variants": {},
+    "metadata": {"target_type": "Float32"},
   },
   "CastDouble": {
     "description": "Cast tensor to float64",
-    "std_args": [],
+    "std_args": ["x"],
     "variants": {},
+    "metadata": {"target_type": "Float64"},
   },
   "CastHalf": {
     "description": "Cast tensor to float16",
-    "std_args": [],
+    "std_args": ["x"],
     "variants": {},
+    "metadata": {"target_type": "Float16"},
   },
   "CastLong": {
     "description": "Cast tensor to int64",
-    "std_args": [],
+    "std_args": ["x"],
     "variants": {},
+    "metadata": {"target_type": "Int64"},
   },
   "CastInt": {
     "description": "Cast tensor to int32",
-    "std_args": [],
+    "std_args": ["x"],
     "variants": {},
+    "metadata": {"target_type": "Int32"},
+  },
+  "CastShort": {
+    "description": "Cast tensor to int16",
+    "std_args": ["x"],
+    "variants": {},
+    "metadata": {"target_type": "Int16"},
+  },
+  "CastByte": {
+    "description": "Cast tensor to uint8",
+    "std_args": ["x"],
+    "variants": {},
+    "metadata": {"target_type": "UInt8"},
   },
   "CastBool": {
     "description": "Cast tensor to bool",
-    "std_args": [],
+    "std_args": ["x"],
     "variants": {},
+    "metadata": {"target_type": "Bool"},
+  },
+  "CastChar": {
+    "description": "Cast tensor to int8/char (Keras context)",
+    "std_args": ["x"],
+    "variants": {},
+    "metadata": {"target_type": "Int8"},
   },
   "size": {
     "description": "Get tensor shape",
@@ -133,7 +199,7 @@ INTERNAL_OPS = {
     "variants": {},
   },
   # ============================================================================
-  # 4. Neural Layers (Specific Mappings and Overrides)
+  # 6. Neural Layers (Specific Mappings and Overrides)
   # ============================================================================
   "MultiheadAttention": {
     "description": "Multi-head attention mechanism. Supports repacking query/key/value via plugins.",
@@ -199,7 +265,7 @@ INTERNAL_OPS = {
     "variants": {},
   },
   # ============================================================================
-  # 5. Vision Transforms
+  # 7. Vision Transforms
   # ============================================================================
   "Normalize": {
     "description": "Normalize a tensor image with mean and standard deviation.",
@@ -237,7 +303,7 @@ INTERNAL_OPS = {
     "variants": {},
   },
   # ============================================================================
-  # 6. State Containers & Extras
+  # 8. State Containers & Extras
   # ============================================================================
   "no_grad": {
     "description": "Context-manager that disabled gradient calculation.",
@@ -302,7 +368,7 @@ INTERNAL_OPS = {
     "variants": {},
   },
   # ============================================================================
-  # 7. Functional Transforms
+  # 9. Functional Transforms
   # ============================================================================
   "vmap": {
     "description": "Vectorizing map. Creates a function which maps 'func' over argument axes.",

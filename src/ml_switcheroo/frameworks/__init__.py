@@ -69,15 +69,15 @@ def available_frameworks() -> List[str]:
 
 
 __all__ = [
+  "FlaxNNXAdapter",
+  "FrameworkAdapter",
+  "JaxAdapter",
+  "MLXAdapter",
+  "NumpyAdapter",
+  "PaxmlAdapter",
+  "TensorFlowAdapter",
+  "TorchAdapter",
+  "available_frameworks",
   "get_adapter",
   "register_framework",
-  "FrameworkAdapter",
-  "available_frameworks",
-  "TorchAdapter",
-  "JaxAdapter",
-  "FlaxNNXAdapter",
-  "NumpyAdapter",
-  "TensorFlowAdapter",
-  "MLXAdapter",
-  "PaxmlAdapter",
 ]

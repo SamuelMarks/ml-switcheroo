@@ -38,5 +38,3 @@ class PivotRewriter(
   Inherits functionality from component identifiers (Mixins) and the base
   transformer logic. This class is the entry point for the ASTEngine.
   """
-
-  pass

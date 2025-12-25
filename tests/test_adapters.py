@@ -31,7 +31,8 @@ def test_torch_metadata():
   adapter = get_adapter("torch")
   assert adapter.display_name == "PyTorch"
   assert adapter.inherits_from is None
-  assert "torch" in adapter.search_modules
+  # Updated: 'torch' root removed from search_modules to prevent recursion issues
+  assert "torch.nn" in adapter.search_modules
   assert "torch.linalg" in adapter.search_modules
   assert adapter.import_alias == ("torch", "torch")
 

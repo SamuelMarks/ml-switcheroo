@@ -48,9 +48,9 @@ SOURCE_TORCH = textwrap.dedent("""
 # - Init: Injects 'rngs' because Linear is a stochastic layer (initialization needs RNG).
 # - Linear: Requires 'rngs=rngs' pass-through.
 # - Inference: '__call__' instead of forward.
-# - UPDATED: Reflects actual import fixer output (includes alias shim)
+# - UPDATED: Reflects actual import fixer output (from flax import nnx)
 EXPECTED_FLAX_NNX = textwrap.dedent(""" 
-  import flax.nnx as nnx
+  from flax import nnx
   import flax.nnx as nn
 
   class SimplePerceptron(nnx.Module): 

@@ -16,16 +16,16 @@ from ml_switcheroo.config import RuntimeConfig
 def toml_file(tmp_path):
   """Creates a dummy pyproject.toml in the temp dir."""
   fpath = tmp_path / "pyproject.toml"
-  content = """
-[tool.ml_switcheroo]
-source_framework = "tensorflow"
-target_framework = "mlx"
+  content = """ 
+[tool.ml_switcheroo] 
+source_framework = "tensorflow" 
+target_framework = "mlx" 
 strict_mode = true
 
-[tool.ml_switcheroo.plugin_settings]
+[tool.ml_switcheroo.plugin_settings] 
 epsilon = 0.005
 use_gpu = false
-debug_level = "info"
+debug_level = "info" 
 """
   fpath.write_text(content, encoding="utf-8")
   return fpath

@@ -6,9 +6,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 class MockInspector:
   def inspect(self, fw):
-    if fw == "torch":
+    # Updated to handle search_modules iteration (e.g. 'jax.numpy')
+    if "torch" in fw:
       return {"torch.abs": {"name": "abs", "type": "function", "params": ["x"]}}
-    if fw == "jax":
+    if "jax" in fw:
       return {"jax.numpy.abs": {"name": "abs", "type": "function", "params": ["a"]}}
     return {}
 
@@ -21,7 +22,10 @@ def test_scaffolder_logic(tmp_path):
   scaffolder = Scaffolder(semantics=clean_semantics)
   scaffolder.inspector = MockInspector()
 
-  scaffolder.scaffold(["torch", "jax"], root_dir=tmp_path)
+  # Ensure get_adapter returns None so Scaffolder iterates ['torch'] directly
+  # rather than attempting to resolve complex submodules against our simple MockInspector
+  with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=None):
+    scaffolder.scaffold(["torch", "jax"], root_dir=tmp_path)
 
   # Verify Spec (Semantics Directory created inside root)
   # Without pre-seeded knowledge, Scaffolder might route to extras.

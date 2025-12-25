@@ -460,7 +460,7 @@
           {
             "name": "reduce_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<function mean at 0x7ab3720e3f60>",
+            "default": "<function mean at 0x76c147904040>",
             "annotation": "Optional"
           }
         ],
@@ -1244,13 +1244,13 @@
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Union"
           },
           {
             "name": "scale_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function ones at 0x7ab371e491c0>",
+            "default": "<function ones at 0x76c14764d260>",
             "annotation": "Union"
           },
           {
@@ -1274,7 +1274,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -1319,7 +1319,7 @@
           {
             "name": "merge_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<function _concatenate at 0x7ab371095ee0>",
+            "default": "<function _concatenate at 0x76c146899f80>",
             "annotation": "Callable"
           },
           {
@@ -1430,25 +1430,25 @@
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123eb60>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a46c00>",
             "annotation": "Initializer"
           },
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Initializer"
           },
           {
             "name": "conv_general_dilated",
             "kind": "KEYWORD_ONLY",
-            "default": "<function conv_general_dilated at 0x7ab3722d1440>",
+            "default": "<function conv_general_dilated at 0x76c147ad54e0>",
             "annotation": "ConvGeneralDilatedT"
           },
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -1553,13 +1553,13 @@
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123eb60>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a46c00>",
             "annotation": "Initializer"
           },
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Initializer"
           },
           {
@@ -1571,7 +1571,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -1706,25 +1706,25 @@
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123eb60>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a46c00>",
             "annotation": "Initializer"
           },
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Initializer"
           },
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
             "name": "einsum_op",
             "kind": "KEYWORD_ONLY",
-            "default": "<function einsum at 0x7ab3720a9ee0>",
+            "default": "<function einsum at 0x76c1478a9f80>",
             "annotation": "EinsumT"
           },
           {
@@ -1787,13 +1787,13 @@
           {
             "name": "embedding_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123ee80>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a46f20>",
             "annotation": "Initializer"
           },
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -1832,31 +1832,31 @@
           {
             "name": "gate_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<PjitFunction of <function sigmoid at 0x7ab371c92200>>",
+            "default": "<PjitFunction of <function sigmoid at 0x76c1474922a0>>",
             "annotation": "Callable"
           },
           {
             "name": "activation_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<PjitFunction of <function tanh at 0x7ab371fa1120>>",
+            "default": "<PjitFunction of <function tanh at 0x76c1477a91c0>>",
             "annotation": "Callable"
           },
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123fce0>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a47d80>",
             "annotation": "Union"
           },
           {
             "name": "recurrent_kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function orthogonal.<locals>.init at 0x7ab371095940>",
+            "default": "<function orthogonal.<locals>.init at 0x76c1468999e0>",
             "annotation": "Union"
           },
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Union"
           },
           {
@@ -1880,7 +1880,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -1973,13 +1973,13 @@
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Union"
           },
           {
             "name": "scale_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function ones at 0x7ab371e491c0>",
+            "default": "<function ones at 0x76c14764d260>",
             "annotation": "Union"
           },
           {
@@ -2009,7 +2009,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -2078,13 +2078,13 @@
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Union"
           },
           {
             "name": "scale_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function ones at 0x7ab371e491c0>",
+            "default": "<function ones at 0x76c14764d260>",
             "annotation": "Union"
           },
           {
@@ -2114,7 +2114,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -2159,31 +2159,31 @@
           {
             "name": "gate_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<PjitFunction of <function sigmoid at 0x7ab371c92200>>",
+            "default": "<PjitFunction of <function sigmoid at 0x76c1474922a0>>",
             "annotation": "Callable"
           },
           {
             "name": "activation_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<PjitFunction of <function tanh at 0x7ab371fa1120>>",
+            "default": "<PjitFunction of <function tanh at 0x76c1477a91c0>>",
             "annotation": "Callable"
           },
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123fce0>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a47d80>",
             "annotation": "Union"
           },
           {
             "name": "recurrent_kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function modified_orthogonal at 0x7ab37125d260>",
+            "default": "<function modified_orthogonal at 0x76c146a61300>",
             "annotation": "Union"
           },
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Union"
           },
           {
@@ -2207,7 +2207,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -2288,13 +2288,13 @@
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Union"
           },
           {
             "name": "scale_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function ones at 0x7ab371e491c0>",
+            "default": "<function ones at 0x76c14764d260>",
             "annotation": "Union"
           },
           {
@@ -2330,7 +2330,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -2399,25 +2399,25 @@
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123eb60>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a46c00>",
             "annotation": "Initializer"
           },
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Initializer"
           },
           {
             "name": "dot_general",
             "kind": "KEYWORD_ONLY",
-            "default": "<function dot_general at 0x7ab372454540>",
+            "default": "<function dot_general at 0x76c147c585e0>",
             "annotation": "DotGeneralT"
           },
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -2498,13 +2498,13 @@
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123eb60>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a46c00>",
             "annotation": "Initializer"
           },
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Initializer"
           },
           {
@@ -2516,7 +2516,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -2618,13 +2618,13 @@
           {
             "name": "a_initializer",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab3710962a0>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c14689a340>",
             "annotation": "Initializer"
           },
           {
             "name": "b_initializer",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Initializer"
           },
           {
@@ -2636,7 +2636,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -2699,13 +2699,13 @@
           {
             "name": "a_initializer",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab3710962a0>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c14689a340>",
             "annotation": "Initializer"
           },
           {
             "name": "b_initializer",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Initializer"
           },
           {
@@ -2717,7 +2717,7 @@
           {
             "name": "lora_promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -2822,7 +2822,7 @@
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123eb60>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a46c00>",
             "annotation": "Initializer"
           },
           {
@@ -2834,7 +2834,7 @@
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Initializer"
           },
           {
@@ -2852,7 +2852,7 @@
           {
             "name": "attention_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<function dot_product_attention at 0x7ab37123fa60>",
+            "default": "<function dot_product_attention at 0x76c146a47b00>",
             "annotation": "Callable[..., Array]"
           },
           {
@@ -2870,19 +2870,19 @@
           {
             "name": "qkv_promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
             "name": "out_promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
             "name": "ln_promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -2981,31 +2981,31 @@
           {
             "name": "gate_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<PjitFunction of <function sigmoid at 0x7ab371c92200>>",
+            "default": "<PjitFunction of <function sigmoid at 0x76c1474922a0>>",
             "annotation": "Callable"
           },
           {
             "name": "activation_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<PjitFunction of <function tanh at 0x7ab371fa1120>>",
+            "default": "<PjitFunction of <function tanh at 0x76c1477a91c0>>",
             "annotation": "Callable"
           },
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab37123fce0>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146a47d80>",
             "annotation": "Union"
           },
           {
             "name": "recurrent_kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function orthogonal.<locals>.init at 0x7ab371095260>",
+            "default": "<function orthogonal.<locals>.init at 0x76c146899300>",
             "annotation": "Union"
           },
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Union"
           },
           {
@@ -3029,7 +3029,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -3092,7 +3092,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -3143,7 +3143,7 @@
           {
             "name": "scale_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function ones at 0x7ab371e491c0>",
+            "default": "<function ones at 0x76c14764d260>",
             "annotation": "Union"
           },
           {
@@ -3179,7 +3179,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -3341,31 +3341,31 @@
           {
             "name": "activation_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<PjitFunction of <function tanh at 0x7ab371fa1120>>",
+            "default": "<PjitFunction of <function tanh at 0x76c1477a91c0>>",
             "annotation": "Callable"
           },
           {
             "name": "kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function variance_scaling.<locals>.init at 0x7ab371095580>",
+            "default": "<function variance_scaling.<locals>.init at 0x76c146899620>",
             "annotation": "Union"
           },
           {
             "name": "recurrent_kernel_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function orthogonal.<locals>.init at 0x7ab371095620>",
+            "default": "<function orthogonal.<locals>.init at 0x76c1468996c0>",
             "annotation": "Union"
           },
           {
             "name": "bias_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function zeros at 0x7ab371f86e80>",
+            "default": "<function zeros at 0x76c14778af20>",
             "annotation": "Union"
           },
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {
@@ -3485,7 +3485,7 @@
           {
             "name": "scale_init",
             "kind": "KEYWORD_ONLY",
-            "default": "<function ones at 0x7ab371e491c0>",
+            "default": "<function ones at 0x76c14764d260>",
             "annotation": "Union"
           },
           {
@@ -3515,7 +3515,7 @@
           {
             "name": "promote_dtype",
             "kind": "KEYWORD_ONLY",
-            "default": "<function promote_dtype at 0x7ab37123e2a0>",
+            "default": "<function promote_dtype at 0x76c146a46340>",
             "annotation": "PromoteDtypeFn"
           },
           {

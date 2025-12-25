@@ -1,7 +1,9 @@
 """
 Numpy Framework Adapter.
 
-Refactor: Definitions populated for NumPy specific Ops.
+This module provides the implementation definitions for the NumPy API.
+It maps abstract operations for Math and Extras to `numpy.*` functions
+and defines type mappings for data-driven casting logic.
 """
 
 import numpy as np
@@ -13,7 +15,14 @@ from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, 
 
 @register_framework("numpy")
 class NumpyAdapter:
-  """Adapter for generic NumPy."""
+  """
+  Adapter for generic NumPy.
+
+  Provides support for:
+  1.  **Math Tiers**: Basic array operations (abs, mean, sum).
+  2.  **Type Mapping**: Abstract Dtypes to `numpy.float32`, etc.
+  3.  **IO**: Save/Load operations.
+  """
 
   display_name: str = "NumPy"
   inherits_from: Optional[str] = None
@@ -21,18 +30,22 @@ class NumpyAdapter:
 
   @property
   def search_modules(self) -> List[str]:
+    """Returns list of numpy submodules to scan."""
     return ["numpy", "numpy.linalg", "numpy.fft"]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
+    """Returns ('numpy', 'np')."""
     return ("numpy", "np")
 
   @property
   def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+    """Remaps imports to 'np' alias."""
     return {"numpy": {"root": "numpy", "sub": None, "alias": "np"}}
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
+    """Regex patterns for IO and Randomness."""
     return {"extras": [r"\\.random\\\\.", r"save", r"load"]}
 
   @property
@@ -46,18 +59,25 @@ class NumpyAdapter:
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    # NumPy supports Arrays (Math) and Extras (IO).
-    # It does NOT support Neural layers structurally.
+    """
+    NumPy supports Arrays (Math) and Extras (IO).
+    It does NOT support Neural layers structurally.
+    """
     return [SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
 
   @property
   def structural_traits(self) -> StructuralTraits:
+    """Returns default structural traits (no class rewriting)."""
     return StructuralTraits()
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
+    """
+    Static definitions for NumPy mappings.
+    Includes Math, Extras, Types, and Casting logic.
+    """
     return {
-      # Math / Array
+      # --- Math / Array ---
       "Abs": StandardMap(api="np.abs"),
       "Mean": StandardMap(api="np.mean"),
       "Sum": StandardMap(api="np.sum"),
@@ -66,17 +86,38 @@ class NumpyAdapter:
       "exp": StandardMap(api="np.exp"),
       "log": StandardMap(api="np.log"),
       "square": StandardMap(api="np.square"),
-      # Extras
+      # --- Extras ---
       "randn": StandardMap(api="numpy.random.randn"),
       "permute_dims": StandardMap(api="numpy.transpose", pack_to_tuple="axes"),
+      # --- Types ---
+      "Float32": StandardMap(api="numpy.float32"),
+      "Float64": StandardMap(api="numpy.float64"),
+      "Float16": StandardMap(api="numpy.float16"),
+      "Int64": StandardMap(api="numpy.int64"),
+      "Int32": StandardMap(api="numpy.int32"),
+      "Int16": StandardMap(api="numpy.int16"),
+      "UInt8": StandardMap(api="numpy.uint8"),
+      "Bool": StandardMap(api="numpy.bool_"),
+      # --- Casting ---
+      # Maps generic casting hooks to .astype(), relying on the plugin to
+      # inject the correct type object looked up from the types above.
+      "CastFloat": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastDouble": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastHalf": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastLong": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastInt": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastShort": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastByte": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
     }
 
   @property
   def rng_seed_methods(self) -> List[str]:
+    """Returns seed methods."""
     return ["seed"]
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    # NumPy doesn't implement Layers/Losses structurally
+    """NumPy doesn't implement Layers/Losses structurally."""
     return []
 
   @classmethod
@@ -91,45 +132,48 @@ class NumpyAdapter:
     return {
       "tier1_math": """import numpy as np
 
-def linear_algebra_ops(a, b): 
+def linear_algebra_ops(a, b):
     # Tier 1: Standard Numeric Computing
     # Matrix Multiplication
-    dot = np.matmul(a, b) 
+    dot = np.matmul(a, b)
 
     # Element-wise operations
-    diff = np.abs(a - b) 
+    diff = np.abs(a - b)
 
     # Aggregation
-    norm = np.linalg.norm(diff) 
+    norm = np.linalg.norm(diff)
     return dot, norm
 """,
       "tier2_neural": """import numpy as np
 
-# Tier 2: Neural Networks (Out of Scope for NumPy) 
-# NumPy does not offer a built-in neural layer API. 
-# While possible to write one from scratch, it is not 
-# supported by the ml-switcheroo transpiler out-of-the-box. 
+# Tier 2: Neural Networks (Out of Scope for NumPy)
+# NumPy does not offer a built-in neural layer API.
+# While possible to write one from scratch, it is not
+# supported by the ml-switcheroo transpiler out-of-the-box.
 """,
       "tier3_extras": """import numpy as np
 
-def serialize_data(arr, filename): 
+def serialize_data(arr, filename):
     # Tier 3: IO Persistence
-    # Use standard binary format (.npy) 
-    np.save(file=filename, arr=arr) 
+    # Use standard binary format (.npy)
+    np.save(file=filename, arr=arr)
 
     # Reload
-    loaded = np.load(file=filename) 
+    loaded = np.load(file=filename)
     return loaded
 """,
     }
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+    """Returns CPU syntax ignoring device requests (NumPy is CPU-only)."""
     return "'cpu'"
 
   def get_serialization_imports(self) -> List[str]:
+    """Returns imports for IO."""
     return ["import numpy as np"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+    """Returns np.save/load syntax."""
     if op == "save" and object_arg:
       return f"np.save(file={file_arg}, arr={object_arg})"
     elif op == "load":
@@ -137,11 +181,13 @@ def serialize_data(arr, filename):
     return ""
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """No dynamic wiring needed for NumPy."""
     pass
 
   # --- Verification ---
 
-  def convert(self, data):
+  def convert(self, data: Any) -> Any:
+    """Attempts to convert input data to a NumPy array."""
     if isinstance(data, (list, tuple)):
       return type(data)(self.convert(x) for x in data)
     if isinstance(data, dict):
@@ -150,16 +196,16 @@ def serialize_data(arr, filename):
     if hasattr(data, "detach"):
       try:
         return data.detach().cpu().numpy()
-      except:
+      except Exception:
         pass
     if hasattr(data, "numpy"):
       try:
         return data.numpy()
-      except:
+      except Exception:
         pass
     if hasattr(data, "__array__"):
       try:
         return np.array(data)
-      except:
+      except Exception:
         pass
     return data

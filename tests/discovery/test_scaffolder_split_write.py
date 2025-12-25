@@ -12,12 +12,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 class MockInspector:
   def inspect(self, fw):
-    if fw == "torch":
-      return {
-        "torch.abs": {"name": "abs", "params": ["x"], "docstring_summary": "Abs"},
-        "torch.nn.Linear": {"name": "Linear", "type": "class", "params": ["in", "out"]},
-      }
-    return {}
+    # Robust return for any submodule calls
+    return {
+      "torch.abs": {"name": "abs", "params": ["x"], "docstring_summary": "Abs"},
+      "torch.nn.Linear": {"name": "Linear", "type": "class", "params": ["in", "out"]},
+    }
 
 
 @pytest.fixture
@@ -50,9 +49,11 @@ def test_scaffold_splits_data(env_paths, tmp_path):
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     # Fix: Patch version detection to ensure deterministic filename
     with patch("ml_switcheroo.discovery.scaffolder.importlib.metadata.version", return_value="latest"):
-      # Fix: Configure heuristics so Linear is routed to Neural Tier
+      # Fix: Configure heuristics
       mock_adapter = MagicMock()
       mock_adapter.discovery_heuristics = {"neural": [r"\\.nn\\."]}
+      # Explicitly disable search modules traversal
+      mock_adapter.search_modules = None
 
       with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
         with patch.dict("sys.modules", {"torch": MagicMock(__version__="latest")}):
@@ -60,8 +61,7 @@ def test_scaffold_splits_data(env_paths, tmp_path):
 
   array_spec = sem_dir / "k_array_api.json"
   if not array_spec.exists():
-    # Fallback check - if it went to extras, that's fine for this test structure
-    # but we expect it in extras if not mathed as neural.
+    # Fallback check
     array_spec = sem_dir / "k_framework_extras.json"
 
   assert array_spec.exists()
@@ -100,9 +100,12 @@ def test_scaffolder_caches_existing_specs(env_paths, tmp_path):
   scaffolder = Scaffolder(semantics=mgr)
   scaffolder.inspector = MockInspector()
 
+  mock_adapter = MagicMock()
+  mock_adapter.search_modules = None
+
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     with patch("ml_switcheroo.discovery.scaffolder.importlib.metadata.version", return_value="latest"):
-      with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=MagicMock()):
+      with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
         with patch.dict("sys.modules", {"torch": MagicMock(__version__="latest")}):
           scaffolder.scaffold(["torch"], root_dir=tmp_path)
 

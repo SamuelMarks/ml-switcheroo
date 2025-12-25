@@ -10,7 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 class MockAttributeInspector:
   def inspect(self, fw):
-    if fw == "torch":
+    if "torch" in fw:
       return {"torch.float32": {"name": "float32", "type": "attribute", "params": []}}
     return {}
 
@@ -30,10 +30,14 @@ def test_scaffolder_propagates_type_field(tmp_path):
   sem_dir.mkdir()
   snap_dir.mkdir()
 
+  # Configure mock adapter safely
+  mock_adapter = MagicMock()
+  mock_adapter.search_modules = None  # Force simple scan
+
   # Patch where it is DEFINED to affect all imports, since Scaffolder uses it internally
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     # Patch adapter to avoid real torch lookup
-    with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=MagicMock()):
+    with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
       # Patch importlib.metadata.version to return 'latest' directly for deterministic filenames
       with patch("importlib.metadata.version", return_value="latest"):
         # Also need to patch torch.__version__ if torch is importable

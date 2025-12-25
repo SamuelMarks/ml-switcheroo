@@ -14,7 +14,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 class MockInspectorExtras:
   def inspect(self, fw):
-    if fw == "torch":
+    if "torch" in fw:
       return {
         # Should go to Extras (via dynamic regex)
         "torch.custom_util.func": {"name": "func", "params": [], "type": "function"},
@@ -41,15 +41,15 @@ def test_extras_scaffolding_dynamic(tmp_path):
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     mock_adapter = MagicMock()
     mock_adapter.discovery_heuristics = {"extras": [r"\.custom_util\.", r"\.my_hub\."]}
+    # Force single Scan
+    mock_adapter.search_modules = None
+
     with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
       scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
   extras_file = tmp_path / "semantics" / "k_framework_extras.json"
   math_file = tmp_path / "semantics" / "k_array_api.json"
 
-  # Scaffolder defaults everything else to extras if not explicitly math,
-  # so without pre-seeded math knowledge, abs might end up in extras too in this mock.
-  # But we check for existence of the specific extras target.
   assert extras_file.exists()
 
   extras_data = json.loads(extras_file.read_text())

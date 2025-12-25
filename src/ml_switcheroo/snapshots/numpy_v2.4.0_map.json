@@ -2,8 +2,7 @@
   "__framework__": "numpy",
   "mappings": {
     "Abs": {
-      "api": "numpy.abs",
-      "args": {}
+      "api": "numpy.abs"
     },
     "Acos": {
       "api": "numpy.acos"
@@ -12,12 +11,7 @@
       "api": "numpy.acosh"
     },
     "Add": {
-      "api": "numpy.add",
-      "args": {}
-    },
-    "Args": {
-      "api": "numpy.typing.tests.test_runtime.TypeTup.args",
-      "args": {}
+      "api": "numpy.add"
     },
     "Asin": {
       "api": "numpy.asin"
@@ -31,29 +25,52 @@
     "Atanh": {
       "api": "numpy.atanh"
     },
-    "B": {
-      "api": "numpy.linalg.tests.test_linalg.LinalgCase.b",
-      "args": {}
+    "Bool": {
+      "api": "numpy.bool"
+    },
+    "CastBool": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
+    "CastByte": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
+    "CastDouble": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
+    "CastFloat": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
+    "CastHalf": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
+    "CastInt": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
+    "CastLong": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
+    "CastShort": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
     },
     "Ceil": {
-      "api": "numpy.ceil",
-      "args": {}
+      "api": "numpy.ceil"
     },
     "Clip": {
       "api": "numpy.clip"
-    },
-    "Compile": {
-      "api": "numpy.f2py.tests.util.SimplifiedMesonBackend.compile",
-      "args": {
-        "self": "self"
-      }
     },
     "Compress": {
       "api": "numpy.compress"
     },
     "Concat": {
-      "api": "numpy.f2py.symbolic.Op.CONCAT",
-      "args": {}
+      "api": "numpy.concat"
     },
     "Cos": {
       "api": "numpy.cos"
@@ -62,12 +79,7 @@
       "api": "numpy.cosh"
     },
     "CumSum": {
-      "api": "numpy.ma.core.cumsum",
-      "args": {}
-    },
-    "D": {
-      "api": "numpy.lib.tests.test_function_base.TestTrimZeros.d",
-      "args": {}
+      "api": "numpy.cumsum"
     },
     "Det": {
       "api": "numpy.linalg.det"
@@ -76,15 +88,10 @@
       "api": "numpy.einsum"
     },
     "Equal": {
-      "api": "numpy.equal",
-      "args": {}
+      "api": "numpy.equal"
     },
     "Exp": {
       "api": "numpy.exp"
-    },
-    "F": {
-      "api": "numpy.f2py.crackfortran.f",
-      "args": {}
     },
     "Flatten": {
       "api": "numpy.generic.flatten",
@@ -93,20 +100,20 @@
         "self": "self"
       }
     },
+    "Float16": {
+      "api": "numpy.float16"
+    },
+    "Float32": {
+      "api": "numpy.float32"
+    },
+    "Float64": {
+      "api": "numpy.float64"
+    },
     "Floor": {
-      "api": "numpy.floor",
-      "args": {}
+      "api": "numpy.floor"
     },
     "Greater": {
       "api": "numpy.greater"
-    },
-    "I": {
-      "api": "numpy.matrixlib.defmatrix.matrix.I",
-      "args": {}
-    },
-    "INT8": {
-      "api": "numpy.int8",
-      "args": {}
     },
     "Identity": {
       "api": "numpy.matlib.identity",
@@ -115,27 +122,23 @@
         "n": "n"
       }
     },
+    "Int16": {
+      "api": "numpy.int16"
+    },
+    "Int32": {
+      "api": "numpy.int32"
+    },
+    "Int64": {
+      "api": "numpy.int64"
+    },
     "IsNaN": {
       "api": "numpy.isnan"
-    },
-    "K": {
-      "api": "numpy.f2py.rules.k",
-      "args": {}
-    },
-    "LOCK": {
-      "api": "numpy.random.bit_generator.BitGenerator.lock",
-      "args": {}
-    },
-    "Language": {
-      "api": "numpy.f2py.symbolic.Language",
-      "args": {}
     },
     "Less": {
       "api": "numpy.less"
     },
     "Log": {
-      "api": "numpy.log",
-      "args": {}
+      "api": "numpy.log"
     },
     "MatMul": {
       "api": "numpy.matmul",
@@ -145,64 +148,19 @@
       "api": "numpy.max"
     },
     "Mean": {
-      "api": "numpy.ma.core.mean",
-      "args": {}
+      "api": "numpy.mean"
     },
     "Min": {
       "api": "numpy.min"
     },
     "Mod": {
-      "api": "numpy.mod",
-      "args": {}
-    },
-    "Multinomial": {
-      "api": "numpy.random.mtrand.multinomial",
-      "args": {}
-    },
-    "NONE": {
-      "api": "numpy.f2py.symbolic.Precedence.NONE",
-      "args": {}
-    },
-    "Names": {
-      "api": "numpy.dtype.names",
-      "args": {}
-    },
-    "Neg": {
-      "api": "numpy.f2py.symbolic.ArithOp.NEG",
-      "args": {}
+      "api": "numpy.mod"
     },
     "NonZero": {
       "api": "numpy.nonzero"
     },
-    "Number": {
-      "api": "numpy.number",
-      "args": {}
-    },
-    "P": {
-      "api": "numpy.polynomial.tests.test_symbol.TestUnaryOperators.p",
-      "args": {}
-    },
-    "PYTHON": {
-      "api": "numpy.f2py.symbolic.Language.Python",
-      "args": {}
-    },
-    "Partition": {
-      "api": "numpy.ma.core.MaskedArray.partition",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs",
-        "self": "self"
-      }
-    },
-    "Pool": {
-      "api": "numpy.random.bit_generator.SeedSequence.pool",
-      "args": {}
-    },
     "Pow": {
       "api": "numpy.pow"
-    },
-    "RECORD": {
-      "api": "numpy.record"
     },
     "Reciprocal": {
       "api": "numpy.reciprocal"
@@ -219,8 +177,7 @@
       "args": {}
     },
     "Sign": {
-      "api": "numpy.sign",
-      "args": {}
+      "api": "numpy.sign"
     },
     "Sin": {
       "api": "numpy.sin"
@@ -239,13 +196,7 @@
       "api": "numpy.squeeze"
     },
     "Sum": {
-      "api": "numpy.matrixlib.defmatrix.matrix.sum",
-      "args": {
-        "axis": "axis",
-        "dtype": "dtype",
-        "out": "out",
-        "self": "self"
-      }
+      "api": "numpy.sum"
     },
     "T": {
       "api": "numpy.ma.core.MaskedArray.T",
@@ -263,22 +214,17 @@
     "Transpose": {
       "api": "numpy.transpose"
     },
+    "UInt8": {
+      "api": "numpy.uint8"
+    },
     "Unique": {
       "api": "numpy.unique"
-    },
-    "V": {
-      "api": "numpy.testing.print_coercion_tables.GenericObject.v",
-      "args": {}
     },
     "Where": {
       "api": "numpy.where"
     },
     "__array_namespace_info__": {
       "api": "numpy.__array_namespace_info__"
-    },
-    "a": {
-      "api": "numpy.linalg.tests.test_linalg.LinalgCase.a",
-      "args": {}
     },
     "abs": {
       "api": "numpy.abs"
@@ -293,8 +239,7 @@
       "api": "numpy.add"
     },
     "all": {
-      "api": "numpy.ma.core.all",
-      "args": {}
+      "api": "numpy.all"
     },
     "any": {
       "api": "numpy.any"
@@ -313,18 +258,8 @@
     "argmin": {
       "api": "numpy.argmin"
     },
-    "args": {
-      "api": "numpy.typing.tests.test_runtime.TypeTup.args",
-      "args": {}
-    },
     "argsort": {
       "api": "numpy.argsort"
-    },
-    "as_integer_ratio": {
-      "api": "numpy.floating.as_integer_ratio",
-      "args": {
-        "self": "self"
-      }
     },
     "asin": {
       "api": "numpy.asin"
@@ -340,22 +275,6 @@
     },
     "atanh": {
       "api": "numpy.atanh"
-    },
-    "atleast_1d": {
-      "api": "numpy.ma.extras.atleast_1d",
-      "args": {}
-    },
-    "atleast_2d": {
-      "api": "numpy.ma.extras.atleast_2d",
-      "args": {}
-    },
-    "atleast_3d": {
-      "api": "numpy.ma.extras.atleast_3d",
-      "args": {}
-    },
-    "axis": {
-      "api": "numpy.exceptions.AxisError.axis",
-      "args": {}
     },
     "beta": {
       "api": "numpy.random.mtrand.beta",
@@ -379,32 +298,17 @@
     "bitwise_xor": {
       "api": "numpy.bitwise_xor"
     },
-    "bool": {
-      "api": "numpy.bool",
-      "args": {}
-    },
-    "bool_": {
-      "api": "numpy.bool_",
-      "args": {}
-    },
     "broadcast": {
       "api": "numpy.broadcast"
     },
     "broadcast_arrays": {
       "api": "numpy.broadcast_arrays"
     },
-    "broadcast_shapes": {
-      "api": "numpy.broadcast_shapes"
-    },
     "broadcast_to": {
       "api": "numpy.broadcast_to"
     },
     "byte": {
       "api": "numpy.byte",
-      "args": {}
-    },
-    "c": {
-      "api": "numpy.lib.tests.test_function_base.TestTrimZeros.c",
       "args": {}
     },
     "can_cast": {
@@ -417,37 +321,14 @@
       "api": "numpy.dtype.char",
       "args": {}
     },
-    "check": {
-      "api": "numpy.linalg.tests.test_linalg.LinalgCase.check",
-      "args": {
-        "do": "do",
-        "self": "self"
-      }
-    },
     "clip": {
       "api": "numpy.clip"
-    },
-    "close": {
-      "api": "numpy.nditer.close",
-      "args": {
-        "self": "self"
-      }
-    },
-    "code": {
-      "api": "numpy.f2py.tests.test_character.TestCharacterString.code",
-      "args": {}
     },
     "concat": {
       "api": "numpy.concat"
     },
     "conj": {
       "api": "numpy.conj"
-    },
-    "conjugate": {
-      "api": "numpy.complex128.conjugate",
-      "args": {
-        "self": "self"
-      }
     },
     "copy": {
       "api": "numpy.flatiter.copy",
@@ -464,19 +345,11 @@
     "cosh": {
       "api": "numpy.cosh"
     },
-    "count": {
-      "api": "numpy.ma.core.count",
-      "args": {}
-    },
     "cross": {
       "api": "numpy.cross"
     },
     "data": {
       "api": "numpy.f2py.symbolic.Expr.data",
-      "args": {}
-    },
-    "debug": {
-      "api": "numpy.f2py.crackfortran.debug",
       "args": {}
     },
     "det": {
@@ -492,16 +365,8 @@
     "divide": {
       "api": "numpy.divide"
     },
-    "domain": {
-      "api": "numpy.polynomial.laguerre.Laguerre.domain",
-      "args": {}
-    },
     "double": {
       "api": "numpy.double",
-      "args": {}
-    },
-    "dtype": {
-      "api": "numpy.dtype",
       "args": {}
     },
     "eigh": {
@@ -515,24 +380,6 @@
     },
     "empty_like": {
       "api": "numpy.empty_like"
-    },
-    "endpoint": {
-      "api": "numpy.random.tests.test_generator_mt19937.endpoint",
-      "args": {
-        "request": "request"
-      }
-    },
-    "entropy": {
-      "api": "numpy.random.bit_generator.SeedSequence.entropy",
-      "args": {}
-    },
-    "eq": {
-      "api": "numpy.ma.tests.test_old_ma.eq",
-      "args": {
-        "msg": "msg",
-        "v": "v",
-        "w": "w"
-      }
     },
     "equal": {
       "api": "numpy.equal"
@@ -554,10 +401,6 @@
     "eye": {
       "api": "numpy.eye"
     },
-    "f": {
-      "api": "numpy.f2py.crackfortran.f",
-      "args": {}
-    },
     "fft": {
       "api": "numpy.fft.fft"
     },
@@ -567,16 +410,8 @@
     "fftshift": {
       "api": "numpy.fft.fftshift"
     },
-    "filename": {
-      "api": "numpy.memmap.filename",
-      "args": {}
-    },
     "finfo": {
       "api": "numpy.finfo"
-    },
-    "flags": {
-      "api": "numpy.dtype.flags",
-      "args": {}
     },
     "flip": {
       "api": "numpy.flip"
@@ -587,49 +422,11 @@
     "floor_divide": {
       "api": "numpy.floor_divide"
     },
-    "flush": {
-      "api": "numpy.memmap.flush",
-      "args": {
-        "self": "self"
-      }
-    },
-    "frexp": {
-      "api": "numpy.frexp",
-      "args": {}
-    },
-    "from_dlpack": {
-      "api": "numpy.from_dlpack",
-      "args": {
-        "copy": "copy",
-        "device": "device",
-        "x": "x"
-      }
-    },
     "full": {
       "api": "numpy.full"
     },
     "full_like": {
       "api": "numpy.full_like"
-    },
-    "funcs": {
-      "api": "numpy.f2py.crackfortran.funcs",
-      "args": {}
-    },
-    "gamma": {
-      "api": "numpy.random.mtrand.gamma",
-      "args": {}
-    },
-    "get_data": {
-      "api": "numpy.ma.core.get_data",
-      "args": {}
-    },
-    "get_mask": {
-      "api": "numpy.ma.core.get_mask",
-      "args": {}
-    },
-    "get_state": {
-      "api": "numpy.random.mtrand.get_state",
-      "args": {}
     },
     "greater": {
       "api": "numpy.greater"
@@ -646,10 +443,6 @@
     },
     "hypot": {
       "api": "numpy.hypot"
-    },
-    "i": {
-      "api": "numpy.matrixlib.defmatrix.matrix.I",
-      "args": {}
     },
     "ifft": {
       "api": "numpy.fft.ifft"
@@ -669,31 +462,8 @@
     "imag": {
       "api": "numpy.imag"
     },
-    "include_paths": {
-      "api": "numpy.f2py.crackfortran.include_paths",
-      "args": {}
-    },
-    "index": {
-      "api": "numpy.broadcast.index",
-      "args": {}
-    },
-    "indices": {
-      "api": "numpy.ma.core.indices",
-      "args": {}
-    },
-    "int_": {
-      "api": "numpy.int_",
-      "args": {}
-    },
-    "interpolate": {
-      "api": "numpy.polynomial.chebyshev.Chebyshev.interpolate",
-      "args": {
-        "args": "args",
-        "cls": "cls",
-        "deg": "deg",
-        "domain": "domain",
-        "func": "func"
-      }
+    "insert": {
+      "api": "numpy.insert"
     },
     "inv": {
       "api": "numpy.linalg.inv"
@@ -703,12 +473,6 @@
     },
     "irfftn": {
       "api": "numpy.fft.irfftn"
-    },
-    "is_integer": {
-      "api": "numpy.floating.is_integer",
-      "args": {
-        "self": "self"
-      }
     },
     "isdtype": {
       "api": "numpy.isdtype"
@@ -726,10 +490,6 @@
       "api": "numpy.f2py.rules.k",
       "args": {}
     },
-    "kind": {
-      "api": "numpy.dtype.kind",
-      "args": {}
-    },
     "less": {
       "api": "numpy.less"
     },
@@ -738,9 +498,6 @@
     },
     "linspace": {
       "api": "numpy.linspace"
-    },
-    "load": {
-      "api": "numpy.load"
     },
     "log": {
       "api": "numpy.log"
@@ -774,14 +531,6 @@
       "api": "numpy.long",
       "args": {}
     },
-    "m": {
-      "api": "numpy.matrixlib.tests.test_defmatrix.TestShape.m",
-      "args": {}
-    },
-    "main": {
-      "api": "numpy.f2py.main",
-      "args": {}
-    },
     "mask": {
       "api": "numpy.ma.core.MaskedArray.mask",
       "args": {}
@@ -810,10 +559,6 @@
     "meshgrid": {
       "api": "numpy.meshgrid"
     },
-    "metadata": {
-      "api": "numpy.dtype.metadata",
-      "args": {}
-    },
     "min": {
       "api": "numpy.min"
     },
@@ -831,10 +576,6 @@
     "moveaxis": {
       "api": "numpy.moveaxis"
     },
-    "msg": {
-      "api": "numpy.msg",
-      "args": {}
-    },
     "multiply": {
       "api": "numpy.multiply"
     },
@@ -844,14 +585,6 @@
     },
     "name": {
       "api": "numpy.dtype.name",
-      "args": {}
-    },
-    "nbytes": {
-      "api": "numpy.bool.nbytes",
-      "args": {}
-    },
-    "ndim": {
-      "api": "numpy.broadcast.ndim",
       "args": {}
     },
     "negative": {
@@ -870,19 +603,11 @@
     "not_equal": {
       "api": "numpy.not_equal"
     },
-    "offset": {
-      "api": "numpy.memmap.offset",
-      "args": {}
-    },
     "ones": {
       "api": "numpy.ones"
     },
     "ones_like": {
       "api": "numpy.ones_like"
-    },
-    "op": {
-      "api": "numpy.f2py.symbolic.Op",
-      "args": {}
     },
     "outer": {
       "api": "numpy.outer"
@@ -897,24 +622,11 @@
     "pinv": {
       "api": "numpy.linalg.pinv"
     },
-    "pool": {
-      "api": "numpy.random.bit_generator.SeedSequence.pool",
-      "args": {}
-    },
-    "pos": {
-      "api": "numpy.f2py.symbolic.ArithOp.POS",
-      "args": {}
-    },
     "positive": {
-      "api": "numpy.positive",
-      "args": {}
+      "api": "numpy.positive"
     },
     "pow": {
       "api": "numpy.pow"
-    },
-    "power": {
-      "api": "numpy.power",
-      "args": {}
     },
     "prod": {
       "api": "numpy.prod"
@@ -926,66 +638,16 @@
       "api": "numpy.random.randn"
     },
     "real": {
-      "api": "numpy.bool.real",
-      "args": {}
+      "api": "numpy.real"
     },
     "reciprocal": {
       "api": "numpy.reciprocal"
-    },
-    "record": {
-      "api": "numpy.record"
-    },
-    "reduce": {
-      "api": "numpy.ufunc.reduce",
-      "args": {
-        "array": "array",
-        "axis": "axis",
-        "dtype": "dtype",
-        "kwargs": "kwargs",
-        "out": "out",
-        "self": "self"
-      }
-    },
-    "ref": {
-      "api": "numpy.f2py.symbolic.Op.REF",
-      "args": {}
-    },
-    "release": {
-      "api": "numpy.version.release",
-      "args": {}
     },
     "remainder": {
       "api": "numpy.remainder"
     },
     "repeat": {
-      "api": "numpy.generic.repeat",
-      "args": {
-        "axis": "axis",
-        "repeats": "repeats",
-        "self": "self"
-      }
-    },
-    "replace": {
-      "api": "numpy.f2py.auxfuncs.replace",
-      "args": {
-        "d": "d",
-        "defaultsep": "defaultsep",
-        "str": "str"
-      }
-    },
-    "res1": {
-      "api": "numpy.lib.tests.test_function_base.TestCorrCoef.res1",
-      "args": {}
-    },
-    "res2": {
-      "api": "numpy.lib.tests.test_function_base.TestCorrCoef.res2",
-      "args": {}
-    },
-    "reset": {
-      "api": "numpy.broadcast.reset",
-      "args": {
-        "self": "self"
-      }
+      "api": "numpy.repeat"
     },
     "reshape": {
       "api": "numpy.reshape"
@@ -999,45 +661,21 @@
     "rfftn": {
       "api": "numpy.fft.rfftn"
     },
-    "rng": {
-      "api": "numpy.random.tests.test_smoke.RNG",
-      "args": {}
-    },
     "roll": {
       "api": "numpy.roll"
-    },
-    "root": {
-      "api": "numpy.typing.tests.test_isfile.ROOT",
-      "args": {}
     },
     "round": {
       "api": "numpy.round"
     },
-    "run": {
-      "api": "numpy.f2py.diagnose.run",
-      "args": {}
-    },
     "searchsorted": {
       "api": "numpy.searchsorted"
-    },
-    "seed": {
-      "api": "numpy.random.tests.test_randomstate.TestRandomDist.seed",
-      "args": {}
     },
     "short": {
       "api": "numpy.short",
       "args": {}
     },
-    "shuffle": {
-      "api": "numpy.random.mtrand.shuffle",
-      "args": {}
-    },
     "sign": {
       "api": "numpy.sign"
-    },
-    "signature": {
-      "api": "numpy.ufunc.signature",
-      "args": {}
     },
     "signbit": {
       "api": "numpy.signbit"
@@ -1061,34 +699,16 @@
       "api": "numpy.sqrt"
     },
     "square": {
-      "api": "numpy.square",
-      "args": {}
+      "api": "numpy.square"
     },
     "squeeze": {
       "api": "numpy.squeeze"
     },
     "stack": {
-      "api": "numpy.ma.extras.stack",
-      "args": {}
-    },
-    "state": {
-      "api": "numpy.random.bit_generator.BitGenerator.state",
-      "args": {}
+      "api": "numpy.stack"
     },
     "std": {
-      "api": "numpy.ma.core.std",
-      "args": {}
-    },
-    "str": {
-      "api": "numpy.dtype.str",
-      "args": {}
-    },
-    "substitute": {
-      "api": "numpy.f2py.symbolic.Expr.substitute",
-      "args": {
-        "self": "self",
-        "symbols_map": "symbols_map"
-      }
+      "api": "numpy.std"
     },
     "subtract": {
       "api": "numpy.subtract"
@@ -1101,12 +721,6 @@
     },
     "svdvals": {
       "api": "numpy.linalg.svdvals"
-    },
-    "symbols": {
-      "api": "numpy.f2py.symbolic.Expr.symbols",
-      "args": {
-        "self": "self"
-      }
     },
     "take": {
       "api": "numpy.take"
@@ -1127,25 +741,8 @@
     "tile": {
       "api": "numpy.tile"
     },
-    "tolist": {
-      "api": "numpy.generic.tolist",
-      "args": {
-        "self": "self"
-      }
-    },
     "trace": {
       "api": "numpy.trace"
-    },
-    "traverse": {
-      "api": "numpy.f2py.crackfortran.traverse",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs",
-        "obj": "obj",
-        "parents": "parents",
-        "result": "result",
-        "visit": "visit"
-      }
     },
     "tril": {
       "api": "numpy.tril"
@@ -1154,15 +751,7 @@
       "api": "numpy.triu"
     },
     "trunc": {
-      "api": "numpy.trunc",
-      "args": {}
-    },
-    "type": {
-      "api": "numpy.dtype.type",
-      "args": {}
-    },
-    "typename": {
-      "api": "numpy.typename"
+      "api": "numpy.trunc"
     },
     "uniform": {
       "api": "numpy.random.mtrand.uniform",
@@ -1180,9 +769,6 @@
     "unique_values": {
       "api": "numpy.unique_values"
     },
-    "unravel_index": {
-      "api": "numpy.unravel_index"
-    },
     "value": {
       "api": "numpy.nditer.value",
       "args": {}
@@ -1194,23 +780,10 @@
       }
     },
     "var": {
-      "api": "numpy.ma.core.var",
-      "args": {}
+      "api": "numpy.var"
     },
     "vecdot": {
       "api": "numpy.vecdot",
-      "args": {}
-    },
-    "verbose": {
-      "api": "numpy.f2py.crackfortran.verbose",
-      "args": {}
-    },
-    "version": {
-      "api": "numpy.version.version",
-      "args": {}
-    },
-    "weights": {
-      "api": "numpy.lib.tests.test_function_base.TestCov.weights",
       "args": {}
     },
     "where": {

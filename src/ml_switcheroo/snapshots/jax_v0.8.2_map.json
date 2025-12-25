@@ -14,9 +14,6 @@
       "api": "optax.adabelief",
       "requires_plugin": "optimizer_constructor"
     },
-    "Adadelta": {
-      "api": "optax.adadelta"
-    },
     "Adagrad": {
       "api": "optax.adagrad",
       "requires_plugin": "optimizer_constructor"
@@ -29,26 +26,14 @@
       "api": "optax.adamw",
       "requires_plugin": "optimizer_constructor"
     },
-    "Adamax": {
-      "api": "optax.adamax"
-    },
     "Add": {
-      "api": "jax.numpy.add",
-      "args": {}
+      "api": "jax.numpy.add"
     },
     "ArgMax": {
       "api": "jax.numpy.argmax"
     },
     "ArgMin": {
       "api": "jax.numpy.argmin"
-    },
-    "Args": {
-      "api": "jax.tools.pgo_nsys_converter.args",
-      "args": {}
-    },
-    "Argument": {
-      "api": "jax.experimental.mosaic.gpu.layout_inference.VariableType.ARGUMENT",
-      "args": {}
     },
     "Asin": {
       "api": "jax.numpy.asin"
@@ -62,23 +47,14 @@
     "Atanh": {
       "api": "jax.numpy.atanh"
     },
-    "BACKEND": {
-      "api": "jax.interpreters.xla.Backend",
-      "args": {}
-    },
-    "BLOCK_SIZE": {
-      "api": "jax.experimental.pallas.ops.tpu.random.threefry.BLOCK_SIZE",
-      "args": {}
-    },
-    "BUFFER": {
-      "api": "jax.experimental.sparse.bcoo.Buffer",
-      "args": {}
-    },
-    "Backend": {
-      "api": "jax.interpreters.xla.Backend",
-      "args": {}
+    "Bool": {
+      "api": "jnp.bool_"
     },
     "CastBool": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
+    "CastByte": {
       "api": "astype",
       "requires_plugin": "type_methods"
     },
@@ -87,6 +63,10 @@
       "requires_plugin": "type_methods"
     },
     "CastFloat": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
+    "CastFloat32": {
       "api": "astype",
       "requires_plugin": "type_methods"
     },
@@ -102,18 +82,12 @@
       "api": "astype",
       "requires_plugin": "type_methods"
     },
-    "Ceil": {
-      "api": "jax.numpy.ceil",
-      "args": {
-        "x": "x"
-      }
+    "CastShort": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
     },
-    "Celu": {
-      "api": "jax.nn.celu",
-      "args": {
-        "alpha": "alpha",
-        "x": "x"
-      }
+    "Ceil": {
+      "api": "jax.numpy.ceil"
     },
     "Clamp": {
       "api": "jax.numpy.clip",
@@ -133,23 +107,8 @@
     "Compress": {
       "api": "jax.numpy.compress"
     },
-    "Concat": {
-      "api": "jax.numpy.concat",
-      "args": {
-        "arrays": "arrays",
-        "axis": "axis"
-      }
-    },
     "Constant": {
-      "api": "jax.experimental.mosaic.gpu.constraints.Constant",
-      "args": {}
-    },
-    "Constraint": {
-      "api": "jax.experimental.mosaic.gpu.constraints.Constraint",
-      "args": {}
-    },
-    "Conv": {
-      "api": "jax.example_libraries.stax.Conv",
+      "api": "optax.constant_schedule",
       "args": {}
     },
     "Cos": {
@@ -173,16 +132,6 @@
     "CumSum": {
       "api": "jax.numpy.cumsum"
     },
-    "DONE": {
-      "api": "jax.experimental.array_serialization.pytree_serialization_utils.PyTreeFuture.done",
-      "args": {
-        "self": "self"
-      }
-    },
-    "DYNAMIC": {
-      "api": "jax.experimental.mosaic.gpu.utils.DYNAMIC",
-      "args": {}
-    },
     "DataLoader": {
       "api": "GenericDataLoader",
       "requires_plugin": "convert_dataloader"
@@ -190,27 +139,12 @@
     "Det": {
       "api": "jax.numpy.linalg.det"
     },
-    "Device": {
-      "api": "jax.Device",
-      "args": {}
-    },
-    "Dropout": {
-      "api": "jax.example_libraries.stax.Dropout",
-      "args": {
-        "mode": "mode",
-        "rate": "rate"
-      }
+    "Div": {
+      "api": "jnp.divide"
     },
     "Einsum": {
       "api": "jnp.einsum",
       "requires_plugin": "einsum_normalizer"
-    },
-    "Elu": {
-      "api": "jax.nn.elu",
-      "args": {
-        "alpha": "alpha",
-        "x": "x"
-      }
     },
     "Equal": {
       "api": "jax.numpy.equal"
@@ -222,44 +156,24 @@
       "api": "jax.numpy.reshape",
       "requires_plugin": "flatten_range"
     },
-    "Floor": {
-      "api": "jax.numpy.floor",
-      "args": {
-        "x": "x"
-      }
+    "Float16": {
+      "api": "jnp.float16"
     },
-    "GELU": {
-      "api": "jax.nn.gelu",
-      "args": {
-        "approximate": "approximate",
-        "x": "x"
-      }
+    "Float32": {
+      "api": "jnp.float32"
+    },
+    "Float64": {
+      "api": "jnp.float64"
+    },
+    "Floor": {
+      "api": "jax.numpy.floor"
     },
     "Gather": {
       "api": "jax.numpy.take_along_axis",
       "requires_plugin": "gather_adapter"
     },
-    "Glu": {
-      "api": "jax.nn.glu",
-      "args": {
-        "axis": "axis",
-        "x": "x"
-      }
-    },
     "Greater": {
       "api": "jax.numpy.greater"
-    },
-    "INT2": {
-      "api": "jax.numpy.int2",
-      "args": {}
-    },
-    "INT4": {
-      "api": "jax.numpy.int4",
-      "args": {}
-    },
-    "INT8": {
-      "api": "jax.numpy.int8",
-      "args": {}
     },
     "Identity": {
       "api": "jax.numpy.identity",
@@ -268,36 +182,21 @@
         "n": "n"
       }
     },
+    "Int16": {
+      "api": "jnp.int16"
+    },
+    "Int32": {
+      "api": "jnp.int32"
+    },
+    "Int64": {
+      "api": "jnp.int64"
+    },
     "IsNaN": {
       "api": "jax.numpy.isnan"
-    },
-    "K": {
-      "api": "jax.experimental.mosaic.gpu.mma_utils.Dim.K",
-      "args": {}
-    },
-    "Kwargs": {
-      "api": "jax.experimental.pallas.ops.tpu.splash_attention.splash_attention_kernel.SplashAttentionKernel.kwargs",
-      "args": {}
     },
     "LBFGS": {
       "api": "optax.lbfgs",
       "requires_plugin": "optimizer_constructor"
-    },
-    "LSTM": {
-      "api": "jax.experimental.rnn.lstm",
-      "args": {
-        "bidirectional": "bidirectional",
-        "c_0": "c_0",
-        "dropout": "dropout",
-        "h_0": "h_0",
-        "hidden_size": "hidden_size",
-        "input_size": "input_size",
-        "num_layers": "num_layers",
-        "precision": "precision",
-        "seq_lengths": "seq_lengths",
-        "weights": "weights",
-        "x": "x"
-      }
     },
     "Less": {
       "api": "jax.numpy.less"
@@ -307,10 +206,7 @@
       "requires_plugin": "checkpoint_mapper"
     },
     "Log": {
-      "api": "jax.numpy.log",
-      "args": {
-        "x": "x"
-      }
+      "api": "jax.numpy.log"
     },
     "MSELoss": {
       "api": "optax.l2_loss",
@@ -321,12 +217,7 @@
       "requires_plugin": "loss_reduction"
     },
     "MatMul": {
-      "api": "jax.experimental.pallas.ops.gpu.hopper_matmul_mgpu.matmul",
-      "args": {
-        "a": "a",
-        "b": "b",
-        "config": "config"
-      }
+      "api": "jax.numpy.matmul"
     },
     "Max": {
       "api": "jax.numpy.max"
@@ -337,28 +228,11 @@
     "Min": {
       "api": "jax.numpy.min"
     },
-    "Mish": {
-      "api": "jax.nn.mish",
-      "args": {
-        "x": "x"
-      }
-    },
-    "Mod": {
-      "api": "jax.numpy.mod",
-      "args": {
-        "x": "x",
-        "y": "y"
-      }
-    },
-    "Nadam": {
-      "api": "optax.nadam"
+    "Mul": {
+      "api": "jnp.multiply"
     },
     "NonZero": {
       "api": "jax.numpy.nonzero"
-    },
-    "Number": {
-      "api": "jax.numpy.number",
-      "args": {}
     },
     "OneHot": {
       "api": "jax.nn.one_hot",
@@ -366,13 +240,6 @@
         "input": "x",
         "tensor": "x"
       }
-    },
-    "OptState": {
-      "api": "optax.OptState"
-    },
-    "P": {
-      "api": "jax.experimental.pallas.ops.tpu.all_gather.P",
-      "args": {}
     },
     "Pad": {
       "api": "jax.numpy.pad",
@@ -383,24 +250,8 @@
         "pad_width": "pad_width"
       }
     },
-    "Partition": {
-      "api": "jax.numpy.partition",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "kth": "kth"
-      }
-    },
     "Pow": {
-      "api": "jax.numpy.pow",
-      "args": {
-        "x": "x",
-        "y": "y"
-      }
-    },
-    "Q": {
-      "api": "jax.experimental.pallas.ops.tpu.flash_attention.SegmentIds.q",
-      "args": {}
+      "api": "jax.numpy.pow"
     },
     "RMSprop": {
       "api": "optax.rmsprop",
@@ -409,30 +260,11 @@
     "Reciprocal": {
       "api": "jax.numpy.reciprocal"
     },
-    "Relu6": {
-      "api": "jax.nn.relu6",
-      "args": {
-        "x": "x"
-      }
-    },
     "Reshape": {
       "api": "jax.numpy.reshape"
     },
-    "Result": {
-      "api": "jax.experimental.array_serialization.pytree_serialization_utils.PyTreeFuture.result",
-      "args": {
-        "args": "args",
-        "kw": "kw",
-        "self": "self"
-      }
-    },
     "Round": {
-      "api": "jax.numpy.round",
-      "args": {
-        "a": "a",
-        "decimals": "decimals",
-        "out": "out"
-      }
+      "api": "jax.numpy.round"
     },
     "SGD": {
       "api": "optax.sgd",
@@ -442,33 +274,14 @@
       "api": "jax.ops.index_update",
       "requires_plugin": "scatter_indexer"
     },
-    "Selu": {
-      "api": "jax.nn.selu",
-      "args": {
-        "x": "x"
-      }
-    },
     "Shape": {
-      "api": "jax.experimental.roofline.roofline.RooflineShape.shape",
-      "args": {}
-    },
-    "Sigmoid": {
-      "api": "jax.nn.sigmoid",
+      "api": "jax.numpy.shape",
       "args": {
-        "x": "x"
+        "a": "a"
       }
     },
     "Sign": {
-      "api": "jax.numpy.sign",
-      "args": {
-        "x": "x"
-      }
-    },
-    "Silu": {
-      "api": "jax.nn.silu",
-      "args": {
-        "x": "x"
-      }
+      "api": "jax.numpy.sign"
     },
     "Sin": {
       "api": "jax.numpy.sin"
@@ -477,20 +290,8 @@
       "api": "jax.numpy.sinh"
     },
     "Size": {
-      "api": "jax.experimental.roofline.roofline.RooflineShape.size",
+      "api": "optax.tree.size",
       "args": {}
-    },
-    "Softplus": {
-      "api": "jax.example_libraries.stax.Softplus",
-      "args": {}
-    },
-    "Split": {
-      "api": "jax.numpy.split",
-      "args": {
-        "ary": "ary",
-        "axis": "axis",
-        "indices_or_sections": "indices_or_sections"
-      }
     },
     "Sqrt": {
       "api": "jax.numpy.sqrt"
@@ -502,15 +303,11 @@
       "api": "optax.exponential_decay",
       "requires_plugin": "scheduler_rewire"
     },
-    "Sum": {
-      "api": "jax.experimental.sparse.bcoo.BCOO.sum",
-      "args": {
-        "self": "self"
-      }
+    "Sub": {
+      "api": "jnp.subtract"
     },
-    "T": {
-      "api": "jax.experimental.array_serialization.pytree_serialization_utils.T",
-      "args": {}
+    "Sum": {
+      "api": "jax.numpy.sum"
     },
     "Tan": {
       "api": "jax.numpy.tan"
@@ -518,9 +315,11 @@
     "Tanh": {
       "api": "jax.numpy.tanh"
     },
-    "Target": {
-      "api": "jax.experimental.mosaic.gpu.constraints.Relayout.target",
-      "args": {}
+    "Tanhshrink": {
+      "api": "jax.numpy.tanh",
+      "args": {
+        "x": "x"
+      }
     },
     "Tile": {
       "api": "jax.numpy.tile"
@@ -533,12 +332,10 @@
       "api": "jax.nn"
     },
     "Transpose": {
-      "api": "jax.experimental.sparse.bcsr.BCSR.transpose",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs",
-        "self": "self"
-      }
+      "api": "jax.numpy.transpose"
+    },
+    "UInt8": {
+      "api": "jnp.uint8"
     },
     "Unique": {
       "api": "jax.numpy.unique"
@@ -552,10 +349,6 @@
     "View": {
       "api": "jax.numpy.reshape",
       "requires_plugin": "view_semantics"
-    },
-    "WEIGHT": {
-      "api": "jax.experimental.pallas.ops.tpu.paged_attention.quantization_utils.QuantizedTensor.weight",
-      "args": {}
     },
     "Where": {
       "api": "jax.numpy.where"
@@ -582,15 +375,6 @@
     "all": {
       "api": "jax.numpy.all"
     },
-    "all_gather": {
-      "api": "jax.experimental.pallas.ops.tpu.all_gather.all_gather",
-      "args": {
-        "axis_name": "axis_name",
-        "memory_space": "memory_space",
-        "mesh": "mesh",
-        "x": "x"
-      }
-    },
     "any": {
       "api": "jax.numpy.any"
     },
@@ -602,22 +386,11 @@
         "values": "values"
       }
     },
-    "apply": {
-      "api": "jax.experimental.mosaic.gpu.launch_context.MemRefTransform.apply",
-      "args": {
-        "ref": "ref",
-        "self": "self"
-      }
-    },
     "argmax": {
       "api": "jax.numpy.argmax"
     },
     "argmin": {
       "api": "jax.numpy.argmin"
-    },
-    "args": {
-      "api": "jax.tools.pgo_nsys_converter.args",
-      "args": {}
     },
     "asin": {
       "api": "jax.numpy.asin"
@@ -633,31 +406,6 @@
     },
     "atanh": {
       "api": "jax.numpy.atanh"
-    },
-    "atleast_1d": {
-      "api": "jax.numpy.atleast_1d"
-    },
-    "atleast_2d": {
-      "api": "jax.numpy.atleast_2d"
-    },
-    "atleast_3d": {
-      "api": "jax.numpy.atleast_3d"
-    },
-    "axis": {
-      "api": "jax.nn.Axis",
-      "args": {}
-    },
-    "backend": {
-      "api": "jax.interpreters.xla.Backend",
-      "args": {}
-    },
-    "barrier": {
-      "api": "jax.experimental.mosaic.gpu.core.Barrier",
-      "args": {
-        "arrival_count": "arrival_count",
-        "num_barriers": "num_barriers",
-        "self": "self"
-      }
     },
     "bfloat16": {
       "api": "jax.numpy.bfloat16",
@@ -681,51 +429,19 @@
     "bitwise_xor": {
       "api": "jax.numpy.bitwise_xor"
     },
-    "block_size": {
-      "api": "jax.experimental.pallas.ops.tpu.random.threefry.BLOCK_SIZE",
-      "args": {}
-    },
-    "bool": {
-      "api": "jax.numpy.bool",
-      "args": {}
-    },
-    "bool_": {
-      "api": "jax.numpy.bool_",
-      "args": {}
-    },
     "broadcast": {
-      "api": "jax.experimental.mosaic.gpu.fragmented_array.FragmentedArray.broadcast",
+      "api": "jax.numpy.broadcast_to",
       "args": {
-        "self": "self",
+        "array": "array",
+        "out_sharding": "out_sharding",
         "shape": "shape"
       }
     },
     "broadcast_arrays": {
       "api": "jax.numpy.broadcast_arrays"
     },
-    "broadcast_shapes": {
-      "api": "jax.numpy.broadcast_shapes"
-    },
     "broadcast_to": {
       "api": "jax.numpy.broadcast_to"
-    },
-    "buffer": {
-      "api": "jax.experimental.sparse.bcoo.Buffer",
-      "args": {}
-    },
-    "build": {
-      "api": "jax.experimental.mosaic.gpu.fragmented_array.FragmentedArray.build",
-      "args": {
-        "cls": "cls",
-        "fn": "fn",
-        "is_signed": "is_signed",
-        "layout": "layout",
-        "shape": "shape"
-      }
-    },
-    "c": {
-      "api": "jax.experimental.mosaic.gpu.wgmma.c",
-      "args": {}
     },
     "can_cast": {
       "api": "jax.numpy.can_cast"
@@ -733,53 +449,17 @@
     "ceil": {
       "api": "jax.numpy.ceil"
     },
-    "chain": {
-      "api": "optax.chain"
-    },
     "clip": {
       "api": "jax.numpy.clip"
     },
-    "config": {
-      "api": "jax.interpreters.partial_eval.config",
-      "args": {}
-    },
     "conj": {
-      "api": "jax.numpy.conj",
-      "args": {
-        "x": "x"
-      }
-    },
-    "conjugate": {
-      "api": "jax.numpy.conjugate",
-      "args": {
-        "x": "x"
-      }
-    },
-    "constraint": {
-      "api": "jax.experimental.mosaic.gpu.constraints.Constraint",
-      "args": {}
-    },
-    "constraints": {
-      "api": "jax.experimental.mosaic.gpu.constraints.ConstraintSystem.constraints",
-      "args": {}
-    },
-    "convert": {
-      "api": "jax.experimental.jax2tf.jax2tf.convert",
-      "args": {
-        "enable_xla": "enable_xla",
-        "fun_jax": "fun_jax",
-        "native_serialization": "native_serialization",
-        "native_serialization_disabled_checks": "native_serialization_disabled_checks",
-        "native_serialization_platforms": "native_serialization_platforms",
-        "polymorphic_constraints": "polymorphic_constraints",
-        "polymorphic_shapes": "polymorphic_shapes",
-        "with_gradient": "with_gradient"
-      }
+      "api": "jax.numpy.conj"
     },
     "copy": {
-      "api": "jax.experimental.mosaic.gpu.fragmented_array.FragmentedArray.copy",
+      "api": "jax.numpy.copy",
       "args": {
-        "self": "self"
+        "a": "a",
+        "order": "order"
       }
     },
     "copysign": {
@@ -791,19 +471,15 @@
     "cosh": {
       "api": "jax.numpy.cosh"
     },
+    "cosine_similarity": {
+      "api": "optax.cosine_similarity",
+      "args": {}
+    },
     "count_nonzero": {
       "api": "jax.numpy.count_nonzero"
     },
     "cross": {
       "api": "jax.numpy.cross"
-    },
-    "ctx": {
-      "api": "jax.experimental.mosaic.gpu.profiler.OnDeviceProfiler.ctx",
-      "args": {}
-    },
-    "data": {
-      "api": "jax.experimental.sparse.bcsr.BCSR.data",
-      "args": {}
     },
     "data_ptr": {
       "api": "data",
@@ -812,42 +488,24 @@
     "det": {
       "api": "jax.numpy.linalg.det"
     },
-    "device": {
-      "api": "jax.Device",
-      "args": {}
-    },
-    "devices": {
-      "api": "jax.experimental.topologies.TopologyDescription.devices",
-      "args": {}
-    },
     "diagonal": {
       "api": "jax.numpy.diagonal"
     },
     "diff": {
       "api": "jax.numpy.diff"
     },
-    "dim": {
-      "api": "jax.experimental.mosaic.gpu.mma_utils.Dim",
-      "args": {}
-    },
     "divide": {
       "api": "jax.numpy.divide"
     },
-    "done": {
-      "api": "jax.experimental.array_serialization.pytree_serialization_utils.PyTreeFuture.done",
-      "args": {
-        "self": "self"
-      }
-    },
     "double": {
-      "api": "jax.experimental.pallas.ops.tpu.example_kernel.double",
-      "args": {
-        "x": "x"
-      }
-    },
-    "dtype": {
-      "api": "jax.experimental.roofline.roofline.RooflineShape.dtype",
+      "api": "jax.numpy.double",
       "args": {}
+    },
+    "eig": {
+      "api": "jax.numpy.linalg.eig",
+      "args": {
+        "a": "a"
+      }
     },
     "eigh": {
       "api": "jax.numpy.linalg.eigh"
@@ -883,10 +541,6 @@
         "x": "x"
       }
     },
-    "expr": {
-      "api": "jax.experimental.mosaic.gpu.constraints.NotOfType.expr",
-      "args": {}
-    },
     "fft": {
       "api": "jax.numpy.fft.fft"
     },
@@ -896,31 +550,11 @@
     "fftshift": {
       "api": "jax.numpy.fft.fftshift"
     },
-    "finalize": {
-      "api": "jax.experimental.mosaic.gpu.profiler.Cupti.finalize",
-      "args": {}
-    },
     "finfo": {
       "api": "jax.numpy.finfo"
     },
     "flip": {
       "api": "jax.numpy.flip"
-    },
-    "float8_e4m3fn": {
-      "api": "jax.numpy.float8_e4m3fn",
-      "args": {}
-    },
-    "float8_e4m3fnuz": {
-      "api": "jax.numpy.float8_e4m3fnuz",
-      "args": {}
-    },
-    "float8_e5m2": {
-      "api": "jax.numpy.float8_e5m2",
-      "args": {}
-    },
-    "float8_e5m2fnuz": {
-      "api": "jax.numpy.float8_e5m2fnuz",
-      "args": {}
     },
     "floor": {
       "api": "jax.numpy.floor"
@@ -928,40 +562,26 @@
     "floor_divide": {
       "api": "jax.numpy.floor_divide"
     },
-    "flops": {
-      "api": "jax.experimental.roofline.roofline.RooflineResult.flops",
-      "args": {}
-    },
     "freeze": {
-      "api": "optax.freeze"
-    },
-    "frexp": {
-      "api": "jax.numpy.frexp",
-      "args": {
-        "x": "x"
-      }
-    },
-    "from_dlpack": {
-      "api": "jax.numpy.from_dlpack",
-      "args": {
-        "copy": "copy",
-        "device": "device",
-        "x": "x"
-      }
+      "api": "optax.freeze",
+      "args": {}
     },
     "full_like": {
       "api": "jax.numpy.full_like"
-    },
-    "get_device_name": {
-      "api": "jax.experimental.pallas.ops.tpu.ragged_paged_attention.tuned_block_sizes.get_device_name",
-      "args": {
-        "num_devices": "num_devices"
-      }
     },
     "grad": {
       "api": "jax.grad",
       "args": {
         "func": "fun"
+      }
+    },
+    "gradient_as_bucket_view": {
+      "api": "jax.numpy.gradient",
+      "args": {
+        "axis": "axis",
+        "edge_order": "edge_order",
+        "f": "f",
+        "varargs": "varargs"
       }
     },
     "greater": {
@@ -972,16 +592,6 @@
     },
     "hfft": {
       "api": "jax.numpy.fft.hfft"
-    },
-    "histogram": {
-      "api": "jax.numpy.histogram",
-      "args": {
-        "a": "a",
-        "bins": "bins",
-        "density": "density",
-        "range": "range",
-        "weights": "weights"
-      }
     },
     "hypot": {
       "api": "jax.numpy.hypot"
@@ -1010,21 +620,6 @@
     "imag": {
       "api": "jax.numpy.imag"
     },
-    "index": {
-      "api": "jax.interpreters.pxla.Index",
-      "args": {}
-    },
-    "indices": {
-      "api": "jax.experimental.sparse.bcsr.BCSR.indices",
-      "args": {}
-    },
-    "initialize": {
-      "api": "jax.experimental.mosaic.gpu.utils.BarrierRef.initialize",
-      "args": {
-        "arrival_count": "arrival_count",
-        "barrier_memref": "barrier_memref"
-      }
-    },
     "insert": {
       "api": "jax.numpy.insert",
       "args": {
@@ -1034,22 +629,26 @@
         "values": "values"
       }
     },
-    "int_": {
-      "api": "jax.numpy.int_",
-      "args": {}
+    "int": {
+      "api": "jax.numpy.rint",
+      "args": {
+        "x": "x"
+      }
     },
     "inv": {
       "api": "jax.numpy.linalg.inv"
+    },
+    "invert_permutation": {
+      "api": "jax.numpy.invert",
+      "args": {
+        "x": "x"
+      }
     },
     "irfft": {
       "api": "jax.numpy.fft.irfft"
     },
     "irfftn": {
       "api": "jax.numpy.fft.irfftn"
-    },
-    "is_sparse": {
-      "api": "jax.experimental.sparse.ad.is_sparse",
-      "args": {}
     },
     "isdtype": {
       "api": "jax.numpy.isdtype"
@@ -1063,49 +662,11 @@
     "isnan": {
       "api": "jax.numpy.isnan"
     },
-    "iterable": {
-      "api": "jax.numpy.iterable",
-      "args": {}
-    },
     "jit": {
       "api": "jax.jit",
       "args": {
         "func": "fun"
       }
-    },
-    "k": {
-      "api": "jax.experimental.mosaic.gpu.mma_utils.Dim.K",
-      "args": {}
-    },
-    "key": {
-      "api": "jax.experimental.mosaic.gpu.constraints.Variable.key",
-      "args": {}
-    },
-    "kl_divergence": {
-      "api": "optax.kl_divergence"
-    },
-    "kwargs": {
-      "api": "jax.experimental.pallas.ops.tpu.splash_attention.splash_attention_kernel.SplashAttentionKernel.kwargs",
-      "args": {}
-    },
-    "layout": {
-      "api": "jax.experimental.mosaic.gpu.core.TMEM.layout",
-      "args": {}
-    },
-    "leaky_relu": {
-      "api": "jax.nn.leaky_relu",
-      "args": {
-        "negative_slope": "negative_slope",
-        "x": "x"
-      }
-    },
-    "left": {
-      "api": "jax.experimental.pallas.ops.tpu.splash_attention.splash_attention_mask.LogicalOr.left",
-      "args": {}
-    },
-    "length": {
-      "api": "jax.experimental.mosaic.gpu.utils.DynamicSlice.length",
-      "args": {}
     },
     "less": {
       "api": "jax.numpy.less"
@@ -1113,20 +674,8 @@
     "less_equal": {
       "api": "jax.numpy.less_equal"
     },
-    "lhs": {
-      "api": "jax.experimental.mosaic.gpu.mma.MMALayouts.lhs",
-      "args": {}
-    },
     "linspace": {
       "api": "jax.numpy.linspace"
-    },
-    "load": {
-      "api": "jax.experimental.mosaic.gpu.tcgen05.TMEMRef.load",
-      "args": {
-        "is_signed": "is_signed",
-        "layout": "layout",
-        "self": "self"
-      }
     },
     "load_state_dict": {
       "api": "torch_load_state_dict_to_nnx",
@@ -1147,20 +696,8 @@
     "log2": {
       "api": "jax.numpy.log2"
     },
-    "log_softmax": {
-      "api": "jax.nn.log_softmax",
-      "args": {
-        "axis": "axis",
-        "where": "where",
-        "x": "x"
-      }
-    },
     "logaddexp": {
       "api": "jax.numpy.logaddexp"
-    },
-    "logger": {
-      "api": "jax.experimental.array_serialization.pytree_serialization_utils.logger",
-      "args": {}
     },
     "logical_and": {
       "api": "jax.numpy.logical_and"
@@ -1174,22 +711,14 @@
     "logical_xor": {
       "api": "jax.numpy.logical_xor"
     },
-    "m": {
-      "api": "jax.tools.pgo_nsys_converter.m",
-      "args": {}
-    },
-    "main": {
-      "api": "jax.collect_profile.main",
+    "long": {
+      "api": "jax.numpy.log",
       "args": {
-        "args": "args"
+        "x": "x"
       }
     },
     "mask": {
-      "api": "jax.experimental.pallas.ops.tpu.splash_attention.splash_attention_mask.Mask",
-      "args": {}
-    },
-    "masks": {
-      "api": "jax.experimental.pallas.ops.tpu.splash_attention.splash_attention_mask.MultiHeadMask.masks",
+      "api": "optax.masked",
       "args": {}
     },
     "matmul": {
@@ -1207,38 +736,32 @@
     "max": {
       "api": "jax.numpy.max"
     },
+    "max_norm": {
+      "api": "optax.tree.max",
+      "args": {}
+    },
+    "max_val": {
+      "api": "optax.tree.max",
+      "args": {}
+    },
     "maximum": {
       "api": "jax.numpy.maximum"
     },
     "mean": {
       "api": "jax.numpy.mean"
     },
-    "members": {
-      "api": "jax.experimental.mosaic.gpu.core.Union.members",
-      "args": {}
-    },
-    "mesh": {
-      "api": "jax.experimental.roofline.roofline.RooflineRuleContext.mesh",
-      "args": {}
-    },
     "meshgrid": {
-      "api": "jax.numpy.meshgrid",
-      "args": {
-        "copy": "copy",
-        "indexing": "indexing",
-        "sparse": "sparse",
-        "xi": "xi"
-      }
+      "api": "jax.numpy.meshgrid"
     },
     "min": {
       "api": "jax.numpy.min"
     },
+    "min_val": {
+      "api": "optax.tree.min",
+      "args": {}
+    },
     "minimum": {
       "api": "jax.numpy.minimum"
-    },
-    "module": {
-      "api": "jax.experimental.mosaic.gpu.launch_context.LaunchContext.module",
-      "args": {}
     },
     "moveaxis": {
       "api": "jax.numpy.moveaxis"
@@ -1246,28 +769,8 @@
     "multiply": {
       "api": "jax.numpy.multiply"
     },
-    "n": {
-      "api": "jax.experimental.pallas.ops.gpu.blackwell_matmul_mgpu.MatmulDimension.N",
-      "args": {}
-    },
-    "n_batch": {
-      "api": "jax.experimental.sparse.bcsr.BCSRProperties.n_batch",
-      "args": {}
-    },
-    "name": {
-      "api": "jax.tools.pgo_nsys_converter.name",
-      "args": {}
-    },
-    "ndim": {
-      "api": "jax.experimental.sparse.transform.SparsifyValue.ndim",
-      "args": {}
-    },
     "negative": {
       "api": "jax.numpy.negative"
-    },
-    "newaxis": {
-      "api": "jax.numpy.newaxis",
-      "args": {}
     },
     "nextafter": {
       "api": "jax.numpy.nextafter"
@@ -1279,54 +782,46 @@
     "nonzero": {
       "api": "jax.numpy.nonzero"
     },
+    "norm": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm1": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm2": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm3": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm_first": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm_type": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "normal": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
     "not_equal": {
       "api": "jax.numpy.not_equal"
-    },
-    "offset": {
-      "api": "jax.experimental.pallas.ops.tpu.splash_attention.splash_attention_mask.CausalMask.offset",
-      "args": {}
     },
     "ones_like": {
       "api": "jax.numpy.ones_like"
     },
-    "op": {
-      "api": "jax.experimental.mosaic.gpu.utils.ForResult.op",
-      "args": {}
-    },
-    "optimizer": {
-      "api": "jax.example_libraries.optimizers.Optimizer",
-      "args": {}
-    },
-    "order": {
-      "api": "jax.experimental.jet.JetTrace.order",
-      "args": {}
-    },
-    "original": {
-      "api": "jax.experimental.source_mapper.hlo.HloPass.ORIGINAL",
-      "args": {}
-    },
     "outer": {
       "api": "jax.numpy.outer"
-    },
-    "p": {
-      "api": "jax.experimental.pallas.ops.tpu.all_gather.P",
-      "args": {}
     },
     "parameters": {
       "api": "torch_parameters_to_nnx",
       "requires_plugin": "torch_parameters_to_nnx"
-    },
-    "params": {
-      "api": "jax.example_libraries.optimizers.Params",
-      "args": {}
-    },
-    "parser": {
-      "api": "jax.collect_profile.parser",
-      "args": {}
-    },
-    "pass_name": {
-      "api": "jax.experimental.source_mapper.common.SourceMapDump.pass_name",
-      "args": {}
     },
     "permute_dims": {
       "api": "jnp.transpose",
@@ -1336,24 +831,17 @@
       "api": "jax.numpy.linalg.pinv"
     },
     "positive": {
-      "api": "jax.numpy.positive",
-      "args": {
-        "x": "x"
-      }
+      "api": "jax.numpy.positive"
     },
     "pow": {
       "api": "jax.numpy.pow"
     },
-    "primal": {
-      "api": "jax.experimental.jet.JetTracer.primal",
-      "args": {}
-    },
-    "proc": {
-      "api": "jax.tools.pgo_nsys_converter.proc",
-      "args": {}
-    },
     "prod": {
       "api": "jax.numpy.prod"
+    },
+    "psi": {
+      "api": "jax.numpy.pi",
+      "args": {}
     },
     "qr": {
       "api": "jax.numpy.linalg.qr"
@@ -1363,37 +851,10 @@
       "requires_plugin": "inject_prng"
     },
     "real": {
-      "api": "jax.numpy.real",
-      "args": {
-        "x": "x"
-      }
+      "api": "jax.numpy.real"
     },
     "reciprocal": {
       "api": "jax.numpy.reciprocal"
-    },
-    "record": {
-      "api": "jax.experimental.mosaic.gpu.profiler.OnDeviceProfiler.record",
-      "args": {
-        "name": "name",
-        "self": "self"
-      }
-    },
-    "reduce": {
-      "api": "jax.numpy.ufunc.reduce",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "dtype": "dtype",
-        "initial": "initial",
-        "keepdims": "keepdims",
-        "out": "out",
-        "self": "self",
-        "where": "where"
-      }
-    },
-    "ref": {
-      "api": "jax.experimental.mosaic.gpu.utils.MultimemRef.ref",
-      "args": {}
     },
     "register_buffer": {
       "api": "torch_register_buffer_to_nnx",
@@ -1402,10 +863,6 @@
     "register_parameter": {
       "api": "torch_register_parameter_to_nnx",
       "requires_plugin": "torch_register_parameter_to_nnx"
-    },
-    "relu": {
-      "api": "jax.example_libraries.stax.Relu",
-      "args": {}
     },
     "remainder": {
       "api": "jax.numpy.remainder"
@@ -1419,23 +876,11 @@
     "result_type": {
       "api": "jax.numpy.result_type"
     },
-    "results": {
-      "api": "jax.experimental.mosaic.gpu.utils.ForResult.results",
-      "args": {}
-    },
     "rfft": {
       "api": "jax.numpy.fft.rfft"
     },
     "rfftn": {
       "api": "jax.numpy.fft.rfftn"
-    },
-    "rhs": {
-      "api": "jax.experimental.mosaic.gpu.mma.MMALayouts.rhs",
-      "args": {}
-    },
-    "right": {
-      "api": "jax.experimental.pallas.ops.tpu.splash_attention.splash_attention_mask.LogicalOr.right",
-      "args": {}
     },
     "roll": {
       "api": "jax.numpy.roll"
@@ -1443,27 +888,12 @@
     "round": {
       "api": "jax.numpy.round"
     },
-    "save": {
-      "api": "jax.experimental.array_serialization.pytree_serialization.save",
-      "args": {
-        "data": "data",
-        "directory": "directory",
-        "overwrite": "overwrite",
-        "ts_specs": "ts_specs"
-      }
-    },
-    "schedule": {
-      "api": "jax.example_libraries.optimizers.Schedule",
+    "scale_factor": {
+      "api": "optax.tree.scale",
       "args": {}
     },
     "searchsorted": {
       "api": "jax.numpy.searchsorted"
-    },
-    "serialize": {
-      "api": "jax.experimental.serialize_executable.serialize",
-      "args": {
-        "compiled": "compiled"
-      }
     },
     "sign": {
       "api": "jax.numpy.sign"
@@ -1490,45 +920,20 @@
     "slogdet": {
       "api": "jax.numpy.linalg.slogdet"
     },
-    "softmax": {
-      "api": "jax.example_libraries.stax.Softmax",
-      "args": {}
-    },
     "solve": {
       "api": "jax.numpy.linalg.solve"
-    },
-    "source": {
-      "api": "jax.experimental.mosaic.gpu.constraints.Relayout.source",
-      "args": {}
-    },
-    "spec": {
-      "api": "jax.experimental.mosaic.gpu.profiler.OnDeviceProfiler.spec",
-      "args": {}
     },
     "sqrt": {
       "api": "jax.numpy.sqrt"
     },
     "square": {
-      "api": "jax.numpy.square",
-      "args": {
-        "x": "x"
-      }
+      "api": "jax.numpy.square"
     },
     "squeeze": {
       "api": "jax.numpy.squeeze"
     },
     "stack": {
       "api": "jax.numpy.stack"
-    },
-    "start": {
-      "api": "jax.experimental.pallas.ops.tpu.paged_attention.paged_attention_kernel.MultiPageAsyncCopyDescriptor.start",
-      "args": {
-        "self": "self"
-      }
-    },
-    "state": {
-      "api": "jax.example_libraries.optimizers.State",
-      "args": {}
     },
     "state_dict": {
       "api": "torch_state_dict_to_nnx",
@@ -1540,10 +945,6 @@
     "step": {
       "requires_plugin": "optimizer_step"
     },
-    "store": {
-      "api": "jax.experimental.pallas.store",
-      "args": {}
-    },
     "subtract": {
       "api": "jax.numpy.subtract"
     },
@@ -1554,15 +955,10 @@
       "api": "jax.numpy.linalg.svd"
     },
     "svdvals": {
-      "api": "jax.numpy.linalg.svdvals"
-    },
-    "swap": {
-      "api": "jax.experimental.pallas.swap",
-      "args": {}
-    },
-    "tag": {
-      "api": "jax.experimental.jet.JetTrace.tag",
-      "args": {}
+      "api": "jax.numpy.linalg.svdvals",
+      "args": {
+        "x": "x"
+      }
     },
     "take": {
       "api": "jax.numpy.take"
@@ -1574,25 +970,16 @@
       "api": "jax.numpy.tan"
     },
     "tanh": {
-      "api": "jax.experimental.mosaic.gpu.fragmented_array.FragmentedArray.tanh",
+      "api": "jax.numpy.tanh",
       "args": {
-        "approx": "approx",
-        "self": "self"
+        "x": "x"
       }
-    },
-    "target": {
-      "api": "jax.experimental.mosaic.gpu.constraints.Relayout.target",
-      "args": {}
     },
     "tensordot": {
       "api": "jax.numpy.tensordot"
     },
     "tile": {
       "api": "jax.numpy.tile"
-    },
-    "times": {
-      "api": "jax.experimental.mosaic.gpu.fragmented_array.Replicated.times",
-      "args": {}
     },
     "trace": {
       "api": "jax.numpy.trace"
@@ -1604,14 +991,7 @@
       "api": "jax.numpy.triu"
     },
     "trunc": {
-      "api": "jax.numpy.trunc",
-      "args": {
-        "x": "x"
-      }
-    },
-    "type": {
-      "api": "jax.experimental.mosaic.gpu.constraints.NotOfType.type",
-      "args": {}
+      "api": "jax.numpy.trunc"
     },
     "unique_all": {
       "api": "jax.numpy.unique_all"
@@ -1625,24 +1005,6 @@
     "unique_values": {
       "api": "jax.numpy.unique_values"
     },
-    "unravel_index": {
-      "api": "jax.numpy.unravel_index",
-      "args": {
-        "indices": "indices",
-        "shape": "shape"
-      }
-    },
-    "update": {
-      "api": "jax.experimental.mosaic.gpu.layout_inference.DerivationContext.update",
-      "args": {
-        "mapping": "mapping",
-        "self": "self"
-      }
-    },
-    "value": {
-      "api": "jax.experimental.mosaic.gpu.wgmma.WGMMAAccumulator.value",
-      "args": {}
-    },
     "var": {
       "api": "jax.numpy.var"
     },
@@ -1651,17 +1013,6 @@
       "args": {
         "func": "fun"
       }
-    },
-    "wait": {
-      "api": "jax.experimental.mosaic.gpu.utils.BarrierRef.wait",
-      "args": {
-        "orders_tensor_core": "orders_tensor_core",
-        "self": "self"
-      }
-    },
-    "weight": {
-      "api": "jax.experimental.pallas.ops.tpu.paged_attention.quantization_utils.QuantizedTensor.weight",
-      "args": {}
     },
     "where": {
       "api": "jax.numpy.where"

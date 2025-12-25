@@ -15,9 +15,6 @@
       "api": "optax.adabelief",
       "requires_plugin": "optimizer_constructor"
     },
-    "Adadelta": {
-      "api": "optax.adadelta"
-    },
     "Adagrad": {
       "api": "optax.adagrad",
       "requires_plugin": "optimizer_constructor"
@@ -29,9 +26,6 @@
     "AdamW": {
       "api": "optax.adamw",
       "requires_plugin": "optimizer_constructor"
-    },
-    "Adamax": {
-      "api": "optax.adamax"
     },
     "Add": {
       "api": "jax.numpy.add"
@@ -55,9 +49,6 @@
       "api": "jax.numpy.atanh"
     },
     "BatchNorm": {
-      "api": "nnx.BatchNorm"
-    },
-    "Batchnorm": {
       "api": "nnx.BatchNorm"
     },
     "Cache": {
@@ -182,20 +173,8 @@
     "MultiheadAttention": {
       "api": "nnx.MultiHeadAttention"
     },
-    "Nadam": {
-      "api": "optax.nadam"
-    },
     "NonZero": {
       "api": "jax.numpy.nonzero"
-    },
-    "Number": {
-      "api": "jax.numpy.number"
-    },
-    "OptState": {
-      "api": "nnx.OptState"
-    },
-    "Optimizer": {
-      "api": "nnx.Optimizer"
     },
     "PRelu": {
       "api": "nnx.PReLU"
@@ -231,9 +210,6 @@
     "SGD": {
       "api": "optax.sgd",
       "requires_plugin": "optimizer_constructor"
-    },
-    "STATIC": {
-      "api": "nnx.Static"
     },
     "Sequential": {
       "api": "nnx.Sequential"
@@ -353,15 +329,6 @@
     "atanh": {
       "api": "jax.numpy.atanh"
     },
-    "atleast_1d": {
-      "api": "jax.numpy.atleast_1d"
-    },
-    "atleast_2d": {
-      "api": "jax.numpy.atleast_2d"
-    },
-    "atleast_3d": {
-      "api": "jax.numpy.atleast_3d"
-    },
     "bfloat16": {
       "api": "jax.numpy.bfloat16"
     },
@@ -383,17 +350,8 @@
     "bitwise_xor": {
       "api": "jax.numpy.bitwise_xor"
     },
-    "bool": {
-      "api": "jax.numpy.bool"
-    },
-    "bool_": {
-      "api": "jax.numpy.bool_"
-    },
     "broadcast_arrays": {
       "api": "jax.numpy.broadcast_arrays"
-    },
-    "broadcast_shapes": {
-      "api": "jax.numpy.broadcast_shapes"
     },
     "broadcast_to": {
       "api": "jax.numpy.broadcast_to"
@@ -407,23 +365,14 @@
     "ceil": {
       "api": "jax.numpy.ceil"
     },
-    "chain": {
-      "api": "optax.chain"
-    },
     "clip": {
       "api": "jax.numpy.clip"
-    },
-    "clone": {
-      "api": "nnx.clone"
     },
     "cond": {
       "api": "nnx.cond"
     },
     "conj": {
       "api": "jax.numpy.conj"
-    },
-    "conjugate": {
-      "api": "jax.numpy.conjugate"
     },
     "copy": {
       "api": "jax.numpy.copy"
@@ -456,17 +405,11 @@
     "diff": {
       "api": "jax.numpy.diff"
     },
-    "display": {
-      "api": "nnx.display"
-    },
     "divide": {
       "api": "jax.numpy.divide"
     },
     "double": {
       "api": "jax.numpy.double"
-    },
-    "dtype": {
-      "api": "jax.numpy.dtype"
     },
     "empty_like": {
       "api": "jax.numpy.empty_like"
@@ -489,18 +432,6 @@
     "flip": {
       "api": "jax.numpy.flip"
     },
-    "float8_e4m3fn": {
-      "api": "jax.numpy.float8_e4m3fn"
-    },
-    "float8_e4m3fnuz": {
-      "api": "jax.numpy.float8_e4m3fnuz"
-    },
-    "float8_e5m2": {
-      "api": "jax.numpy.float8_e5m2"
-    },
-    "float8_e5m2fnuz": {
-      "api": "jax.numpy.float8_e5m2fnuz"
-    },
     "floor": {
       "api": "jax.numpy.floor"
     },
@@ -509,9 +440,6 @@
     },
     "forward": {
       "requires_plugin": "inject_training_flag"
-    },
-    "freeze": {
-      "api": "optax.freeze"
     },
     "full_like": {
       "api": "jax.numpy.full_like"
@@ -531,8 +459,8 @@
     "imag": {
       "api": "jax.numpy.imag"
     },
-    "int_": {
-      "api": "jax.numpy.int_"
+    "insert": {
+      "api": "jax.numpy.insert"
     },
     "isdtype": {
       "api": "jax.numpy.isdtype"
@@ -546,9 +474,6 @@
     "isnan": {
       "api": "jax.numpy.isnan"
     },
-    "kl_divergence": {
-      "api": "optax.kl_divergence"
-    },
     "less": {
       "api": "jax.numpy.less"
     },
@@ -557,12 +482,6 @@
     },
     "linspace": {
       "api": "jax.numpy.linspace"
-    },
-    "list": {
-      "api": "nnx.List"
-    },
-    "load": {
-      "api": "jax.numpy.load"
     },
     "load_state_dict": {
       "requires_plugin": "torch_load_state_dict_to_nnx"
@@ -612,9 +531,6 @@
     "mean": {
       "api": "jax.numpy.mean"
     },
-    "merge": {
-      "api": "nnx.merge"
-    },
     "meshgrid": {
       "api": "jax.numpy.meshgrid"
     },
@@ -650,9 +566,6 @@
     },
     "parameters": {
       "requires_plugin": "torch_parameters_to_nnx"
-    },
-    "params": {
-      "api": "optax.Params"
     },
     "permute_dims": {
       "api": "jnp.transpose",
@@ -703,9 +616,6 @@
     "round": {
       "api": "jax.numpy.round"
     },
-    "schedule": {
-      "api": "optax.Schedule"
-    },
     "searchsorted": {
       "api": "jax.numpy.searchsorted"
     },
@@ -739,9 +649,6 @@
     },
     "stack": {
       "api": "jax.numpy.stack"
-    },
-    "state": {
-      "api": "nnx.state"
     },
     "state_dict": {
       "requires_plugin": "torch_state_dict_to_nnx"
@@ -788,9 +695,6 @@
     "trunc": {
       "api": "jax.numpy.trunc"
     },
-    "unflatten": {
-      "api": "nnx.unflatten"
-    },
     "unique_all": {
       "api": "jax.numpy.unique_all"
     },
@@ -803,17 +707,11 @@
     "unique_values": {
       "api": "jax.numpy.unique_values"
     },
-    "unravel_index": {
-      "api": "jax.numpy.unravel_index"
-    },
     "update": {
       "api": "nnx.update"
     },
     "var": {
       "api": "jax.numpy.var"
-    },
-    "variables": {
-      "api": "nnx.variables"
     },
     "where": {
       "api": "jax.numpy.where"

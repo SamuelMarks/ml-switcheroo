@@ -279,13 +279,14 @@ class BaseRewriter(cst.CSTTransformer):
     """
     return self._create_name_node(name_str)
 
-  def _get_mapping(self, name: str) -> Optional[Dict[str, Any]]:
+  def _get_mapping(self, name: str, silent: bool = False) -> Optional[Dict[str, Any]]:
     """
     Queries the SemanticsManager for the target framework's variant.
     Uses resolve_variant to handle framework inheritance (e.g. Pax -> JAX).
 
     Args:
         name: The fully qualified source name (e.g. 'torch.abs').
+        silent: If True, suppresses failure reporting in strict mode.
 
     Returns:
         Optional[Dict[str, Any]]: The dictionary describing the target implementation,
@@ -293,7 +294,7 @@ class BaseRewriter(cst.CSTTransformer):
     """
     lookup = self.semantics.get_definition(name)
     if not lookup:
-      if self.strict_mode and name.startswith(f"{self.source_fw}."):
+      if self.strict_mode and name.startswith(f"{self.source_fw}.") and not silent:
         self._report_failure(f"API '{name}' not found in semantics.")
       return None
 
@@ -301,7 +302,8 @@ class BaseRewriter(cst.CSTTransformer):
 
     # Check Verification Gating
     if not self.semantics.is_verified(abstract_id):
-      self._report_failure(f"Skipped '{name}': Marked unsafe by verification report.")
+      if not silent:
+        self._report_failure(f"Skipped '{name}': Marked unsafe by verification report.")
       return None
 
     # Retrieve Target Implementation via Inheritance aware resolver
@@ -310,14 +312,8 @@ class BaseRewriter(cst.CSTTransformer):
     if target_impl:
       get_tracer().log_match(source_api=name, target_api=target_impl.get("api", "Plugin Logic"), abstract_op=abstract_id)
     else:
-      # If the key exists but is None (explicit block) or just missing
-      # Note: direct variants check is still useful for explicit blocking?
-      # variants = details.get("variants", {})
-      # if self.target_fw in variants and variants[self.target_fw] is None:
-      #    ... (Already handled by resolve_variant returning None/Explicit rules?)
-
       # Simple missing logic
-      if self.strict_mode:
+      if self.strict_mode and not silent:
         self._report_failure(f"No mapping available for '{name}' -> '{self.target_fw}'")
       return None
 
@@ -375,11 +371,6 @@ class BaseRewriter(cst.CSTTransformer):
 
     if body and self._is_docstring_node(body[0], 0):
       insert_idx = 1
-
-    # We insert shim classes before other code but often after imports.
-    # Since ImportFixer runs AFTER this, standard imports aren't here yet?
-    # No, standard imports are in `body` if they were in source.
-    # It is safer to insert after docstring. ImportFixer will handle import sorting/deduping later.
 
     updated_body = body[:insert_idx] + new_stmts + body[insert_idx:]
     return updated_node.with_changes(body=updated_body)

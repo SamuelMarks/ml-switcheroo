@@ -64,6 +64,7 @@
   },
   "all": {
     "description": "Tests whether all input array elements evaluate to ``True`` along a specified axis.",
+    "from": "_2024_12/utility_functions.py",
     "std_args": [
       [
         "x",
@@ -77,8 +78,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "any": {
     "description": "Tests whether any input array element evaluates to ``True`` along a specified axis.",
@@ -288,6 +288,7 @@
   },
   "bitwise_and": {
     "description": "Computes the bitwise AND of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x1",
@@ -297,8 +298,7 @@
         "x2",
         "Union[array, int, bool]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "bitwise_invert": {
     "description": "Inverts (flips) each bit for each element ``x_i`` of the input array ``x``.",
@@ -326,6 +326,7 @@
   },
   "bitwise_or": {
     "description": "Computes the bitwise OR of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x1",
@@ -335,8 +336,7 @@
         "x2",
         "Union[array, int, bool]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "bitwise_right_shift": {
     "description": "Shifts the bits of each element ``x1_i`` of the input array ``x1`` to the right according to the respective element ``x2_i`` of the input array ``x2``.",
@@ -462,13 +462,13 @@
   },
   "conj": {
     "description": "Returns the complex conjugate for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "copysign": {
     "description": "Composes a floating-point value with the magnitude of ``x1_i`` and the sign of ``x2_i`` for each element of the input array ``x1``.",
@@ -611,8 +611,8 @@
   },
   "devices": {
     "description": "Returns a list of supported devices which are available at runtime.",
-    "std_args": [],
-    "type": "attribute"
+    "from": "_2024_12/info.py",
+    "std_args": []
   },
   "diagonal": {
     "description": "Returns the specified diagonals of a matrix (or a stack of matrices) ``x``.",
@@ -948,6 +948,7 @@
   },
   "from_dlpack": {
     "description": "Returns a new array containing the data from another (array) object with a ``__dlpack__`` method.",
+    "from": "_2024_12/creation_functions.py",
     "std_args": [
       [
         "x",
@@ -961,8 +962,7 @@
         "copy",
         "Optional[bool]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "full": {
     "description": "Returns a new array having a specified ``shape`` and filled with ``fill_value``.",
@@ -1567,13 +1567,13 @@
   },
   "meshgrid": {
     "description": "Returns coordinate matrices from coordinate vectors.",
+    "from": "_2024_12/creation_functions.py",
     "std_args": [
       [
         "indexing",
         "str"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "min": {
     "description": "Calculates the minimum value of the input array ``x``.",
@@ -1657,8 +1657,9 @@
   },
   "newaxis": {
     "description": "An alias for ``None`` which is useful for indexing arrays.",
+    "from": "_2024_12/constants.py",
     "std_args": [],
-    "type": "attribute"
+    "variants": {}
   },
   "nextafter": {
     "description": "Returns the next representable floating-point value for each element ``x1_i`` of the input array ``x1`` in the direction of the respective element ``x2_i`` of the input array ``x2``.",
@@ -1749,16 +1750,18 @@
     ]
   },
   "permute_dims": {
-    "description": "Permutes tensor dimensions.",
+    "description": "Permutes the axes (dimensions) of an array ``x``.",
+    "from": "_2024_12/manipulation_functions.py",
     "std_args": [
-      "input",
-      {
-        "is_variadic": true,
-        "name": "dims",
-        "type": "int"
-      }
-    ],
-    "variants": {}
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axes",
+        "Tuple[int, Ellipsis]"
+      ]
+    ]
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
@@ -1782,13 +1785,13 @@
   },
   "positive": {
     "description": "Computes the numerical positive of each element ``x_i`` (i.e., ``y_i = +x_i``) of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "pow": {
     "description": "Calculates an implementation-dependent approximation of exponentiation by raising each element ``x1_i`` (the base) of the input array ``x1`` to the power of ``x2_i`` (the exponent), where ``x2_i`` is the corresponding element of the input array ``x2``.",
@@ -1806,6 +1809,7 @@
   },
   "prod": {
     "description": "Calculates the product of input array ``x`` elements.",
+    "from": "_2024_12/statistical_functions.py",
     "std_args": [
       [
         "x",
@@ -1823,8 +1827,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "qr": {
     "description": "Returns the QR decomposition of a full column rank matrix (or a stack of matrices).",
@@ -1842,13 +1845,13 @@
   },
   "real": {
     "description": "Returns the real component of a complex number for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "reciprocal": {
     "description": "Returns the reciprocal for each element ``x_i`` of the input array ``x``.",
@@ -1863,7 +1866,7 @@
   "relu": {
     "description": "Auto-generated from torch_code_defs",
     "std_args": [],
-    "type": "attribute"
+    "type": "class"
   },
   "remainder": {
     "description": "Returns the remainder of division for each element ``x1_i`` of the input array ``x1`` and the respective element ``x2_i`` of the input array ``x2``.",
@@ -1881,6 +1884,7 @@
   },
   "repeat": {
     "description": "Repeats each element of an array a specified number of times on a per-element basis.",
+    "from": "_2024_12/manipulation_functions.py",
     "std_args": [
       [
         "x",
@@ -1894,8 +1898,7 @@
         "axis",
         "Optional[int]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "reshape": {
     "description": "Reshapes an array without changing its data.",
@@ -2103,10 +2106,11 @@
         "array"
       ]
     ],
-    "type": "function"
+    "type": "attribute"
   },
   "sort": {
     "description": "Returns a sorted copy of an input array ``x``.",
+    "from": "_2024_12/sorting_functions.py",
     "std_args": [
       [
         "x",
@@ -2124,8 +2128,7 @@
         "stable",
         "bool"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "sqrt": {
     "description": "Calculates the principal square root for each element ``x_i`` of the input array ``x``.",
@@ -2139,13 +2142,13 @@
   },
   "square": {
     "description": "Squares each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "squeeze": {
     "description": "Removes singleton dimensions (axes) from ``x``.",
@@ -2163,6 +2166,7 @@
   },
   "stack": {
     "description": "Joins a sequence of arrays along a new axis.",
+    "from": "_2024_12/manipulation_functions.py",
     "std_args": [
       [
         "arrays",
@@ -2172,11 +2176,11 @@
         "axis",
         "int"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "std": {
     "description": "Calculates the standard deviation of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
     "std_args": [
       [
         "x",
@@ -2194,8 +2198,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "subtract": {
     "description": "Calculates the difference for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -2259,6 +2262,7 @@
   },
   "take": {
     "description": "Returns elements of an array along an axis.",
+    "from": "_2024_12/indexing_functions.py",
     "std_args": [
       [
         "x",
@@ -2272,8 +2276,7 @@
         "axis",
         "Optional[int]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "take_along_axis": {
     "description": "Returns elements from an array at the one-dimensional indices specified by ``indices`` along a provided ``axis``.",
@@ -2315,6 +2318,7 @@
   },
   "tensordot": {
     "description": "Alias for :func:`~array_api.tensordot`.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x1",
@@ -2328,8 +2332,7 @@
         "axes",
         "Union[int, Tuple[Sequence[int], Sequence[int]]]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "tile": {
     "description": "Constructs an array by tiling an input array.",
@@ -2347,6 +2350,7 @@
   },
   "trace": {
     "description": "Returns the sum along the specified diagonals of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -2360,8 +2364,7 @@
         "dtype",
         "Optional[dtype]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "tril": {
     "description": "Returns the lower triangular part of a matrix (or a stack of matrices) ``x``.",
@@ -2393,13 +2396,13 @@
   },
   "trunc": {
     "description": "Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number that is closer to zero than ``x_i``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "unique_all": {
     "description": "Returns the unique elements of an input array ``x``, the first occurring indices for each unique element in ``x``, the indices from the set of unique elements that reconstruct ``x``, and the corresponding counts for each unique element in ``x``.",
@@ -2457,6 +2460,7 @@
   },
   "var": {
     "description": "Calculates the variance of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
     "std_args": [
       [
         "x",
@@ -2474,8 +2478,7 @@
         "keepdims",
         "bool"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "vecdot": {
     "description": "Alias for :func:`~array_api.vecdot`.",

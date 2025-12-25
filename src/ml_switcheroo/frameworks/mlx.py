@@ -6,13 +6,16 @@ It supports:
 1.  **Unified Memory math**: Mapping `mlx.core` operations.
 2.  **Neural Networks**: Mapping `mlx.nn` layers and containers.
 3.  **Discovery**: Runtime introspection of the MLX API surface.
-4.  **Test Config**: Provides generation templates for `gen-tests`.
+4.  **Types**: Mapping Abstract Types to `mlx.core` dtypes (e.g. `mx.float32`).
+5.  **Casting**: Generic casting plugin integration via `.astype()`.
 
-Refactor: Distributed definitions populated for MLX specific Layers, Ops, and Optimizers.
+Refactor: Distributed definitions populated for MLX specific Layers, Ops, Optimizers, and Types.
 """
 
 from typing import List, Tuple, Optional, Dict, Any
 import logging
+
+import numpy as np
 
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
 from ml_switcheroo.enums import SemanticTier
@@ -59,6 +62,7 @@ class MLXAdapter:
     """
     return {
       "torch.nn": {"root": "mlx", "sub": "nn", "alias": "nn"},
+      "flax.nnx": {"root": "mlx", "sub": "nn", "alias": "nn"},
       "mlx.core": {"root": "mlx", "sub": "core", "alias": "mx"},
     }
 
@@ -91,41 +95,69 @@ class MLXAdapter:
   def structural_traits(self) -> StructuralTraits:
     """
     Defines structural rewriting rules (Classes, Methods, Init).
+
+    Updated to strip 'rngs' argument coming from Flax NNX, as MLX
+    handles initialization statefully/eagerly.
     """
-    return StructuralTraits(module_base="mlx.nn.Module", forward_method="__call__", requires_super_init=True)
+    return StructuralTraits(
+      module_base="mlx.nn.Module", forward_method="__call__", requires_super_init=True, strip_magic_args=["rngs"]
+    )
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Static definitions for MLX mappings.
-    Covers Optimization, Math, Layers, and Compilation.
+    Covers Optimization, Math, Layers, Compilation, Types, and Casting.
     """
     return {
       "Abs": StandardMap(api="mx.abs"),
       "Mean": StandardMap(api="mx.mean"),
       "Linear": StandardMap(api="mlx.nn.Linear", args={"in_features": "input_dims", "out_features": "output_dims"}),
       "permute_dims": StandardMap(api="mx.transpose", pack_to_tuple="axes"),
-      # Optimization
+      # --- Optimization ---
       "Adam": StandardMap(api="mlx.optimizers.Adam", args={"lr": "learning_rate"}, requires_plugin="mlx_optimizer_init"),
       "SGD": StandardMap(api="mlx.optimizers.SGD", args={"lr": "learning_rate"}, requires_plugin="mlx_optimizer_init"),
       "step": StandardMap(api="optimizer_step", requires_plugin="mlx_optimizer_step"),
       "zero_grad": StandardMap(api="optimizer_zero_grad", requires_plugin="mlx_zero_grad"),
-      # Arrays
+      # --- Arrays ---
       "randn": StandardMap(api="mlx.random.normal"),
       "ArgMax": StandardMap(api="mlx.core.argmax", args={"dim": "axis", "keepdim": "keepdims"}),
       "ArgMin": StandardMap(api="mlx.core.argmin", args={"dim": "axis", "keepdim": "keepdims"}),
-      # Layers
+      # --- Layers ---
       "Embedding": StandardMap(api="mlx.nn.Embedding", args={"embedding_dim": "dims"}),
       "BatchNorm": StandardMap(api="mlx.nn.BatchNorm"),
       "LayerNorm": StandardMap(api="mlx.nn.LayerNorm", args={"normalized_shape": "dims"}),
       "GELU": StandardMap(api="mlx.nn.GELU"),
       "OneHot": StandardMap(api="mlx.nn.OneHot"),
-      # Extras including compilation and sync
+      "relu": StandardMap(api="mlx.nn.relu"),
+      "softmax": StandardMap(api="mlx.core.softmax"),
+      "log_softmax": StandardMap(api="mlx.nn.log_softmax"),
+      # --- Extras including compilation and sync ---
       "Compile": StandardMap(api="mlx.core.compile", requires_plugin="mlx_compiler"),
       "Synchronize": StandardMap(api="mx.eval", requires_plugin="mlx_synchronize"),
       "no_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
       "enable_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
       "Variable": StandardMap(api="mlx.core.array"),
+      # --- Types ---
+      "Float32": StandardMap(api="mx.float32"),
+      "Float16": StandardMap(api="mx.float16"),
+      # Mapping Float64 to Float32 as Metal/MLX generally optimizes for lower precision,
+      # and missing explicit Double support in some contexts triggers fallback.
+      "Float64": StandardMap(api="mx.float32"),
+      "Int64": StandardMap(api="mx.int64"),
+      "Int32": StandardMap(api="mx.int32"),
+      "Int16": StandardMap(api="mx.int16"),
+      "UInt8": StandardMap(api="mx.uint8"),
+      "Bool": StandardMap(api="mx.bool_"),
+      # --- Casting (via Plugin) ---
+      "CastFloat": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastDouble": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastHalf": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastLong": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastInt": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastShort": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastByte": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
     }
 
   @property
@@ -179,7 +211,7 @@ class MLXAdapter:
     """
     try:
       import mlx.core as mx
-      import numpy as np
+      # import numpy as np # already imported globally
 
       if isinstance(data, (np.ndarray, list, tuple, np.generic)):
         return mx.array(data)

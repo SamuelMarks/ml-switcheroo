@@ -11,6 +11,7 @@ from ml_switcheroo.enums import SemanticTier
 
 class MockInspector:
   def inspect(self, fw):
+    # Handle modules
     return {
       "torch.nn.ReLU": {"name": "ReLU", "type": "class", "params": []},
       "torch.custom.Unknown": {"name": "UnknownLayer", "type": "class", "params": []},
@@ -32,11 +33,15 @@ def test_spec_driven_categorization(tmp_path):
   sem_dir.mkdir()
   snap_dir.mkdir()
 
+  mock_adapter = MagicMock()
+  mock_adapter.search_modules = None
+
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     # Fix: Patch version detection to ensure deterministic filename
     with patch("ml_switcheroo.discovery.scaffolder.importlib.metadata.version", return_value="latest"):
-      with patch.dict("sys.modules", {"torch": MagicMock(__version__="latest")}):
-        scaffolder.scaffold(["torch"], root_dir=tmp_path)
+      with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
+        with patch.dict("sys.modules", {"torch": MagicMock(__version__="latest")}):
+          scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
   neural_spec = json.loads((sem_dir / "k_neural_net.json").read_text())
   assert "Relu" in neural_spec
@@ -58,6 +63,7 @@ def test_heuristic_fallback_dynamic(tmp_path):
 
   mock_adapter = MagicMock()
   mock_adapter.discovery_heuristics = {"neural": [r"\\.custom\\."]}
+  mock_adapter.search_modules = None
 
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     with patch("ml_switcheroo.discovery.scaffolder.importlib.metadata.version", return_value="latest"):

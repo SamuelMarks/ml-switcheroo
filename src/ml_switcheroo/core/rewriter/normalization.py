@@ -7,6 +7,9 @@ responsible for reshaping function arguments and call structures during translat
 Updates:
 - Supports argument value mapping (Enums) via `arg_values`.
 - Supports variadic argument packing via `pack_to_tuple`.
+- Fix: Robustly injects method receiver as first argument when rewriting
+  methods to functions (e.g. `x.float()` -> `tf.cast(x, ...)`), even if
+  argument maps are empty or implicit.
 """
 
 from typing import List, Dict, Any, Union, Optional
@@ -140,33 +143,41 @@ class NormalizationMixin(BaseRewriter):
       if self._is_module_alias(original_node.func.value):
         is_method_call = False
 
-    if is_method_call and std_args_order:
-      # Check if first arg is missing from call args
-      first_std_arg = std_args_order[0]
+    if is_method_call:
+      # Case A: We have a standard mapping (e.g. method X corresponds to arg 'x')
+      if std_args_order:
+        first_std_arg = std_args_order[0]
 
-      # Check if explicitly provided via kwarg
-      arg_provided = False
-      for arg in original_node.args:
-        if arg.keyword:
-          k_name = arg.keyword.value
-          mapped = lib_to_std.get(k_name) or (k_name if k_name == first_std_arg else None)
-          if mapped == first_std_arg:
-            arg_provided = True
-            break
+        # Check if explicitly provided via kwarg (edge case for some libraries)
+        arg_provided = False
+        for arg in original_node.args:
+          if arg.keyword:
+            k_name = arg.keyword.value
+            mapped = lib_to_std.get(k_name) or (k_name if k_name == first_std_arg else None)
+            if mapped == first_std_arg:
+              arg_provided = True
+              break
 
-      if not arg_provided:
-        # Inject Receiver
-        if isinstance(updated_node.func, cst.Attribute):
-          rec = updated_node.func.value
-        else:
+        if not arg_provided:
+          # Inject Receiver using the ORIGINAL node to preserve full semantics
+          # even if updated_node children were transformed.
+          if isinstance(original_node.func, cst.Attribute):
+            rec = original_node.func.value
+            # Create arg without comma initially
+            found_args[first_std_arg] = cst.Arg(value=rec)
+            receiver_injected = True
+
+      # Case B: Safety Fallback for Methods with missing/empty spec
+      # If we convert a Method to a Function, we MUST preserve the receiver.
+      # If std_args didn't catch it, we treat it as the first EXTRA arg.
+      else:
+        if isinstance(original_node.func, cst.Attribute):
           rec = original_node.func.value
-
-        # Create arg without comma initially
-        found_args[first_std_arg] = cst.Arg(value=rec)
-        receiver_injected = True
+          # Prepend to extra args
+          extra_args.append(cst.Arg(value=rec))
 
     # 4. Process Arguments
-    # Shift positional index if we injected arg 0
+    # Shift positional index if we injected arg 0 via standard slot
     pos_idx = 1 if receiver_injected else 0
 
     # Determine if packing should occur
@@ -226,6 +237,7 @@ class NormalizationMixin(BaseRewriter):
 
     # 6. Construct New List
     new_args_list: List[cst.Arg] = []
+
     for std_name in std_args_order:
       if std_name in found_args:
         current_arg = found_args[std_name]
@@ -251,7 +263,12 @@ class NormalizationMixin(BaseRewriter):
               # Fallback to original if code string is invalid
               pass
 
-        if current_arg.keyword:
+        # Use keyword if it was present originally (explicit) OR if user mapped it (aliased)
+        # But if it's an injected receiver, keyword is None.
+        # By default we keep positional if keyword is None.
+        should_use_keyword = current_arg.keyword is not None
+
+        if should_use_keyword:
           new_arg = current_arg.with_changes(
             keyword=cst.Name(tg_alias),
             value=final_val_node,
@@ -274,8 +291,7 @@ class NormalizationMixin(BaseRewriter):
         # Convert literal to CST node
         val_node = self._convert_value_to_cst(arg_val)
 
-        # Don't inject if argument is already present (e.g. user provided it)
-        # Check against existing keywords in new_args_list
+        # Don't inject if argument is already present
         if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):
           continue
 
@@ -292,10 +308,10 @@ class NormalizationMixin(BaseRewriter):
         )
         new_args_list.append(injected_arg)
 
-    # Ensure commas
+    # Ensure commas for internal items
     for i in range(len(new_args_list) - 1):
-      if new_args_list[i].comma == cst.MaybeSentinel.DEFAULT:
-        new_args_list[i] = new_args_list[i].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+      # Always enforce comma separator for previous items
+      new_args_list[i] = new_args_list[i].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
     # Clean last comma
     if new_args_list:
