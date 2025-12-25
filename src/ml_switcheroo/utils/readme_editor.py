@@ -13,10 +13,6 @@ class ReadmeEditor:
   It regenerates the "Compatibility Matrix" table based on the current state of
   the Knowledge Base and the results of the latest CI run, then splices it
   into the README content using regex markers.
-
-  Attributes:
-    semantics (SemanticsManager): Source of Truth for API definitions.
-    readme_path (Path): Path to the README file.
   """
 
   def __init__(self, semantics: SemanticsManager, readme_path: Path) -> None:
@@ -24,8 +20,8 @@ class ReadmeEditor:
     Initializes the editor.
 
     Args:
-      semantics: The loaded semantics manager.
-      readme_path: File system path to the target markdown file.
+        semantics: The loaded semantics manager.
+        readme_path: File system path to the target markdown file.
     """
     self.semantics = semantics
     self.readme_path = readme_path
@@ -38,10 +34,10 @@ class ReadmeEditor:
     replaces the content up to the next `## Header` or End of File.
 
     Args:
-      validation_results: Dictionary mapping op_name -> boolean pass status.
+        validation_results: Dictionary mapping op_name -> boolean pass status.
 
     Returns:
-      bool: True if the update was successful, False otherwise.
+        bool: True if the update was successful, False otherwise.
     """
     if not self.readme_path.exists():
       log_error(f"README not found at {self.readme_path}")
@@ -99,16 +95,16 @@ class ReadmeEditor:
     Constructs the ASCII Markdown table from semantics data.
 
     Columns:
-      - Category: Derived from Semantic Tier heuristics.
-      - PyTorch: Source API path.
-      - JAX: Target API path.
-      - Verification: Status icon based on results dict.
+        - Category: Derived from Semantic Tier heuristics.
+        - PyTorch: Source API path.
+        - JAX: Target API path.
+        - Verification: Status icon based on results dict.
 
     Args:
-      results: Validation outcomes.
+        results: Validation outcomes.
 
     Returns:
-      str: The formatted markdown table.
+        str: The formatted markdown table.
     """
     known_apis = self.semantics.get_known_apis()
     # Sort for deterministic output

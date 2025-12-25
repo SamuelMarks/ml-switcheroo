@@ -7,6 +7,7 @@ harnesses support ALL registered frameworks (Torch, JAX, Keras, etc.) without
 hardcoding switch statements.
 
 Capabilities:
+
 1. **Dynamic Shim Generation**: Reads `convert()` methods from all registered
    Framework Adapters and synthesizes a standalone `get_adapter` function.
 2. **Fuzzer Inlining**: Extracts the `InputFuzzer` class source code.
@@ -28,9 +29,6 @@ from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, FrameworkAdapter
 class HarnessGenerator:
   """
   Generates standalone verification scripts.
-
-  Attributes:
-      extractor (CodeExtractor): Tool to read source from live objects.
   """
 
   def __init__(self) -> None:

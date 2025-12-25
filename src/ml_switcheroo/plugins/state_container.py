@@ -6,6 +6,7 @@ impedance mismatches between PyTorch's imperative `register_buffer`/`parameters`
 and Flax NNX's explicit state management.
 
 Mappings (Torch -> JAX/NNX):
+
 1. `self.register_buffer("name", t)` -> `setattr(self, "name", flax.nnx.BatchStat(t))`
 2. `self.register_parameter("name", p)` -> `setattr(self, "name", flax.nnx.Param(p))`
 3. `model.state_dict()` -> `flax.nnx.state(model).to_pure_dict()`

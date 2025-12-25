@@ -9,19 +9,17 @@ However, many neural network definitions use loops over **fixed constants**
 (e.g., ``for i in range(3): layer(x)``). Unrolling these provides a valid,
 optimizable graph structure without requiring complex functional rewrite logic.
 
-Usage
------
-This plugin registers the hook ``transform_for_loop_static``. It is invoked
-by the ``ControlFlowMixin`` prior to general loop safety scanners.
+Usage:
+    This plugin registers the hook ``transform_for_loop_static``. It is invoked
+    by the ``ControlFlowMixin`` prior to general loop safety scanners.
 
-Process
--------
-1.  **Analysis**: Detects ``for i in range(N)`` where N is a static integer literal.
-2.  **Safety**: Checks if N is within a reasonable limit to prevent code explosion.
-3.  **Expansion**: Duplicates the loop body N times.
-4.  **Substitution**: Replaces usages of the loop variable (``i``) with the
-    literal integer for that iteration (``0``, ``1``, etc.).
-5.  **Output**: Returns a ``cst.FlattenSentinel`` containing the list of statements.
+Process:
+    1.  **Analysis**: Detects ``for i in range(N)`` where N is a static integer literal.
+    2.  **Safety**: Checks if N is within a reasonable limit to prevent code explosion.
+    3.  **Expansion**: Duplicates the loop body N times.
+    4.  **Substitution**: Replaces usages of the loop variable (``i``) with the
+        literal integer for that iteration (``0``, ``1``, etc.).
+    5.  **Output**: Returns a ``cst.FlattenSentinel`` containing the list of statements.
 """
 
 import libcst as cst
@@ -33,10 +31,6 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 class LoopVarReplacer(cst.CSTTransformer):
   """
   Helper visitor to replace loop variable instances with a constant integer.
-
-  Attributes:
-      var_name (str): The name of the loop variable to target (e.g., 'i').
-      value (int): The integer constant to substitute (e.g., 0).
   """
 
   def __init__(self, var_name: str, value: int):

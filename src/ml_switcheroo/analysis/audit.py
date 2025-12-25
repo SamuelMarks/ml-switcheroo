@@ -12,12 +12,16 @@ from ml_switcheroo.core.scanners import get_full_name
 class CoverageScanner(cst.CSTVisitor):
   """
   Scans a file to identify API calls and checks if they exist in the Semantics Manager.
-
-  Attributes:
-      results (Dict): FQN -> (IsSupported: bool, FrameworkKey: str)
   """
 
   def __init__(self, semantics: SemanticsManager, allowed_roots: Set[str]):
+    """
+    Initializes the scanner.
+
+    Args:
+        semantics: The knowledge base manager.
+        allowed_roots: A set of framework roots to consider (e.g. {'torch'}).
+    """
     self.semantics = semantics
     self.allowed_roots = allowed_roots
 

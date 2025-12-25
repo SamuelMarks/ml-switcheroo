@@ -6,6 +6,7 @@ extracting operator names, summaries, inputs, and attributes. It converts
 these definitions into the Semantic Knowledge Base format.
 
 Key Features:
+
 - **Markdown Splitting**: Identifies operators via specific HTML anchors.
 - **Input & Attribute Parsing**: Extracts definitions lists (``<dl>``).
 - **Type Extraction**: Parses HTML type signatures (e.g., ``<dt>x : T</dt>``)

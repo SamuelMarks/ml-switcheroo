@@ -7,7 +7,7 @@ defined in the initialization phase (`__init__`).
 
 This check helps detect:
 1.  Dynamic attribute definition (valid in Python, often invalid in static graph compilation like JAX/XLA).
-2.  Typoes in member names between init and forward.
+2.  Typos in member names between init and forward.
 3.  Implicit state that might be lost during transpilation if not explicitly declared.
 """
 
@@ -20,13 +20,6 @@ import libcst as cst
 class _ClassContext:
   """
   Tracks state for the current class scope.
-
-  Attributes:
-      name (str): Name of the class.
-      initialized_members (Set[str]): Attributes assigned to `self` in `__init__`.
-      used_in_forward (Set[str]): Attributes accessed on `self` in `forward`/`call`.
-      in_init (bool): Flag indicating visitor is inside `__init__`.
-      in_forward (bool): Flag indicating visitor is inside inference method.
   """
 
   name: str
@@ -41,10 +34,6 @@ class InitializationTracker(cst.CSTVisitor):
   Scans classes to ensure members used in forward are initialized in __init__.
 
   It maintains a stack of Class Contexts to handle nested class definitions correctly.
-
-  Attributes:
-      warnings (List[str]): List of discovered issues (e.g. "Member 'conv1' used but not initialized").
-      _scope_stack (List[_ClassContext]): Stack tracking nested class contexts.
   """
 
   def __init__(self):

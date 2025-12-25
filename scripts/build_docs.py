@@ -24,6 +24,7 @@ ROOT_FILES = [
   "README.md",
   "ARCHITECTURE.md",
   "EXTENDING.md",
+  "EXTENDING_WITH_DSL.md",  # Added to fix cross-reference warning
   "IDEAS.md",
   "MAINTENANCE.md",
   "LICENSE",

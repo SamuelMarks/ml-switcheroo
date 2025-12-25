@@ -45,19 +45,11 @@ from ml_switcheroo.utils.readme_editor import ReadmeEditor
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 
 __all__ = [
-  "BatchValidator",
-  "ConsensusEngine",
-  "FrameworkSyncer",
-  "ReadmeEditor",
-  "SemanticPersister",
-  "SemanticsManager",
   "_capture_framework",
   "_convert_single_file",
   "_get_pkg_version",
   "_print_batch_summary",
   "_save_snapshot",
-  "available_frameworks",
-  "get_adapter",
   "handle_audit",
   "handle_ci",
   "handle_convert",

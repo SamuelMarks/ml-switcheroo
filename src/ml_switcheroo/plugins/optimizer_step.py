@@ -58,32 +58,23 @@ def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
   for i in range(start_index, len(node.args)):
     new_args.append(node.args[i])
 
-  # Resolves target API (e.g. torch.optim.Adam -> optax.adam) via Semantics
-  # The Rewrite Engine handles name swap before or after hook?
-  # Usually Hooks run inside 'leave_Call', replacing the node.
-  # We rely on the caller to handle the name if we don't change it here,
-  # but we can resolve it via context if we want to be precise.
-
-  # Note: PivotRewriter handles the API name swap based on JSON mapping.
-  # We only need to manipulate arguments here.
-
   return node.with_changes(args=new_args)
 
 
 @register_hook("optimizer_step")
 def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel]:
-  """
-  Hook to rewrite `optimizer.step()`.
+  """Hook to rewrite ``optimizer.step()``.
 
-  JAX Target:
-  Emits the functional update pattern.
-  Assumes existence of `grads`, `opt_state`, `params` variables in the local scope.
-  Use EscapeHatch to warn user if variables can't be inferred.
+  **JAX Target**
+
+  - Emits the functional update pattern.
+  - Assumes existence of ``grads``, ``opt_state``, ``params`` variables in the local scope.
+  - Use EscapeHatch to warn user if variables can't be inferred.
   """
   if ctx.target_fw != "jax":
     return node
 
-  # Heuristic check for receiver name
+  # Heuristic check for the receiver name
   optimizer_name = "optimizer"
   if isinstance(node.func, cst.Attribute) and isinstance(node.func.value, cst.Name):
     optimizer_name = node.func.value.value
@@ -96,10 +87,6 @@ def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call
   # updates, opt_state = optimizer.update(grads, opt_state, params)
   # params = optax.apply_updates(params, updates)
 
-  # Since CST replacement must return a node that fits the spot (Expr),
-  # we return a FlattenSentinel containing the logic if possible,
-  # OR we wrap in EscapeHatch if we are deep in an expression tree.
-
   reason = (
     "Imperative optimizer.step() cannot be automatically converted to JAX functional update. "
     "Manual intervention required: `updates, opt_state = optimizer.update(grads, opt_state, params)`"
@@ -109,10 +96,10 @@ def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call
 
 @register_hook("optimizer_zero_grad")
 def strip_zero_grad(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook for `optimizer.zero_grad()`.
+  """Hook for ``optimizer.zero_grad()``.
 
-  JAX Target:
+  **JAX Target**
+
   Removes the call (No-op), as JAX gradients are not accumulated by default.
   """
   if ctx.target_fw != "jax":

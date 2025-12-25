@@ -53,9 +53,10 @@ class CompatibilityMatrix:
     Returns:
         List[Dict[str, str]]: A list of row objects.
         Each dictionary contains:
-            - 'operation': The abstract operation name.
-            - 'tier': The semantic category.
-            - '{engine}': The status icon for that engine (e.g. 'torch': '✅').
+
+        - 'operation': The abstract operation name.
+        - 'tier': The semantic category.
+        - '{engine}': The status icon for that engine (e.g. 'torch': '✅').
     """
     rows = []
     engines = self._get_sorted_engines()

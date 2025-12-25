@@ -21,10 +21,6 @@ class StandardsInjector(cst.CSTTransformer):
   It transforms the abstract `OperationDef` into a concrete LibCST Dictionary
   node structure, including rich parameter metadata (min, max, options) and appends
   it to the existing dictionary in the source.
-
-  Attributes:
-      op_def (OperationDef): The operation model to inject.
-      found (bool): Flag indicating if the injection target (INTERNAL_OPS) was found.
   """
 
   def __init__(self, op_def: OperationDef):

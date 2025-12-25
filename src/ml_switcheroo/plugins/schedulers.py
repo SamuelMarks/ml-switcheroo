@@ -2,23 +2,29 @@
 Plugin for Learning Rate Scheduler Rewiring.
 
 Addresses the architectural difference between:
+
 1. PyTorch: `scheduler = StepLR(optimizer, step_size=30)` (Stateful object wrapping optimizer).
 2. JAX/Optax: `schedule_fn = optax.piecewise_constant(...)` (Pure function passed to optimizer).
 
-Transformation:
+**Transformation**
+
 1.  **Instantiation**:
+
     -   Detects specific Scheduler constructors.
     -   Removes the `optimizer` argument (Arg 0).
     -   Maps hyperparameters to Optax equivalents.
     -   Changes the API call to an Optax schedule factory.
     -   Injects `init_value=1.0` (as partial schedule) or tries to preserve semantics.
+
 2.  **Stepping**:
+
     -   Detects `scheduler.step()`.
     -   Since JAX schedulers are integrated into the gradient transform chain and stepped automatically via state,
         manual stepping is redundant.
     -   Replaces `scheduler.step()` with a no-op placeholder `None`.
 
 Supported Mappings:
+
 -   `StepLR` -> `optax.exponential_decay(staircase=True)`
 -   `CosineAnnealingLR` -> `optax.cosine_decay_schedule`
 """
@@ -27,7 +33,6 @@ import libcst as cst
 from typing import Union
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
-from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -54,7 +59,6 @@ def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   elif "CosineAnnealingLR" in op_id:
     return _transform_cosine_lr(node)
 
-  # Fallback or other schedulers
   return node
 
 
@@ -68,10 +72,6 @@ def _transform_step_lr(node: cst.Call) -> cst.Call:
   if args:
     args.pop(0)
 
-  # Mappings
-  # Torch: step_size (arg 0 now), gamma (arg 1 now)
-  # Optax: init_value, transition_steps, decay_rate, transition_begin, staircase
-
   new_args = []
 
   # 1. init_value (Inject 1.0 placeholder, user must adjust)
@@ -79,7 +79,6 @@ def _transform_step_lr(node: cst.Call) -> cst.Call:
     cst.Arg(
       value=cst.Float("1.0"),
       keyword=cst.Name("init_value"),
-      # Fix: Ensure tight spacing "init_value=1.0"
       equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
       comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
     )
@@ -181,8 +180,6 @@ def _transform_cosine_lr(node: cst.Call) -> cst.Call:
       )
     )
 
-  # 3. Alpha (eta_min). Optax alpha is fraction of init_value.
-  # If init_value=1.0, alpha == eta_min.
   if eta_min_arg:
     new_args.append(
       eta_min_arg.with_changes(
@@ -198,7 +195,7 @@ def _transform_cosine_lr(node: cst.Call) -> cst.Call:
 @register_hook("scheduler_step_noop")
 def transform_scheduler_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
-  Hook: Replaces `scheduler.step()` with a no-op value (None).
+  Hook: Replaces ``scheduler.step()`` with a no-op value (None).
   """
   if ctx.target_fw.lower() not in ["jax", "flax", "flax_nnx"]:
     return node

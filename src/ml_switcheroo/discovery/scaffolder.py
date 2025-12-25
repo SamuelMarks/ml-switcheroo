@@ -6,6 +6,7 @@ libraries (Torch, JAX, etc.) and aligns them against the Specification-Guided
 Knowledge Base.
 
 Optimization Update:
+
 - Implements Indexing for Catalog Lookups to prevent O(N^2) complexity
   when aligning massive frameworks (Torch vs JAX).
 - Uses pre-computed indices keyed by lowercase API names for fast retrieval.

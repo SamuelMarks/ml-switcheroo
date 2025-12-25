@@ -5,6 +5,7 @@ This module provides the `NormalizationMixin`, a component of the `PivotRewriter
 responsible for reshaping function arguments and call structures during translation.
 
 Updates:
+
 - Supports argument value mapping (Enums) via `arg_values`.
 - Supports variadic argument packing via `pack_to_tuple`.
 - Fix: Robustly injects method receiver as first argument when rewriting

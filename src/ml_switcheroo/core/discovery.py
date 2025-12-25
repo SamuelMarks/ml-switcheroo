@@ -48,6 +48,7 @@ class SimulatedReflection:
     Attempts to locate the fully qualified API path for an operation.
 
     Strategy:
+
     1.  **Normalization**: Converts input and candidates to lowercase, stripping underscores.
     2.  **Exact Match**: Iterates through search modules. If a normalized match is found, returns immediately.
     3.  **Fuzzy Match**: If no exact match is found, collects all candidates and uses `difflib`

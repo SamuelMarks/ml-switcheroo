@@ -6,6 +6,7 @@ Flax NNX's explicit variable declarations (`nnx.Param`, `nnx.BatchStat`) and
 PyTorch's `nn.Parameter` pattern.
 
 It handles:
+
 1.  **Trainable Parameters**: `nnx.Param(val)` -> `torch.nn.Parameter(val)`.
 2.  **Non-Trainable State**: `nnx.BatchStat(val)` -> `torch.nn.Parameter(val, requires_grad=False)`.
     *Note: While PyTorch typically uses `register_buffer` for this, converting an Assignment

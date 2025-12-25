@@ -7,6 +7,7 @@ JAX requires loops to be expressed as functional operators (`jax.lax.scan` or `j
 to enable XLA compilation (JIT).
 
 Logic:
+
 1.  **Analysis**: Inspects `for` loops to determine if they iterate over a `range` (candidates for `fori_loop`)
     or an iterable (candidates for `scan`).
 2.  **Safety Check**: Because automated loop conversion requires solving the "Carry State" problem

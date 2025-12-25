@@ -23,3 +23,9 @@ without relying strictly on API naming conventions.
 Compare same architecture, precision, hyperparameters across different datasets and accelerators. Show performance from
 each ML framework, in order to confidently—and with evidence—make haughty claims like:
 > "ml-switcheroo speeds up ML by up to XXX%"
+
+## Novel source/target frameworks
+
+### Math for theorem provers
+
+To/fro Lean or Coq. Maybe u

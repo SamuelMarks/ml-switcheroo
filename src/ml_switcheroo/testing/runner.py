@@ -8,8 +8,9 @@ to ensure that standard inputs are passed to frameworks using their specific
 parameter names (e.g., mapping `axis` to `dim`).
 
 Updates:
-    - Added support for `shape_calc` lambda verification (Feature 20).
-    - Uses central registry for output normalization.
+
+- Added support for `shape_calc` lambda verification (Feature 20).
+- Uses central registry for output normalization.
 """
 
 import importlib
@@ -25,9 +26,6 @@ from ml_switcheroo.frameworks import get_adapter
 class EquivalenceRunner:
   """
   Executes and compares operations across different Deep Learning frameworks.
-
-  Attributes:
-      fuzzer (InputFuzzer): The engine used to generate randomized inputs.
   """
 
   def __init__(self) -> None:
@@ -46,6 +44,7 @@ class EquivalenceRunner:
     Runs the operation across all defined variants and compares results.
 
     This process includes:
+
     1. Fuzzing: Generates standard NumPy inputs based on `params`, `hints` and `constraints`.
     2. Renaming: Maps standard argument names to framework-specific names
        defined in the Semantics (e.g., `axis` -> `dim`).

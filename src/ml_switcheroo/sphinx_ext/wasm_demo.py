@@ -12,6 +12,8 @@ Features:
 - **Dynamic HTML**: Generates nested `<select>` elements hidden/shown via JS.
 - **Flavour Routing**: Associates `flax_nnx` with the parent `jax` key.
 - **Example Injection**: Preloads tiered examples from all registered adapters.
+- **Retro Mode**: Adds UI toggle for CRT/Matrix visualization style.
+- **AST Visualizer**: Creates DOM container for interactive Tree diagrams.
 """
 
 import os
@@ -92,6 +94,7 @@ class SwitcherooDemo(Directive):
                 <span id="engine-status" class="status-badge">Offline</span>
             </div>
 
+            <!-- Splash Screen -->
             <div id="demo-splash" class="splash-screen">
                 <p>Initialize the engine to translate code between frameworks locally.</p>
                 <button id="btn-load-engine" class="md-btn md-btn-primary">
@@ -100,30 +103,24 @@ class SwitcherooDemo(Directive):
             </div>
 
             <div id="demo-interface" style="display:none;">
+                <!-- Toolbar -->
                 <div class="translate-toolbar">
-                    <!-- Source Column -->
                     <div class="select-wrapper">
-                        <select id="select-src" class="material-select">
-                            {opts_src} 
-                        </select>
+                        <select id="select-src" class="material-select">{opts_src}</select>
                         <div id="src-flavour-region" style="display:none; margin-left:10px;">
                             {src_flavours_html} 
                         </div>
                     </div>
-
                     <button id="btn-swap" class="swap-icon-btn" title="Swap Languages">⇄</button>
-
-                    <!-- Target Column -->
                     <div class="select-wrapper">
-                        <select id="select-tgt" class="material-select">
-                            {opts_tgt} 
-                        </select>
+                        <select id="select-tgt" class="material-select">{opts_tgt}</select>
                          <div id="tgt-flavour-region" style="display:none; margin-left:10px;">
                             {tgt_flavours_html} 
                         </div>
                     </div>
                 </div>
 
+                <!-- Examples -->
                 <div class="example-toolbar">
                     <span class="label">Load Example:</span>
                     <select id="select-example" class="material-select-sm">
@@ -131,6 +128,7 @@ class SwitcherooDemo(Directive):
                     </select>
                 </div>
 
+                <!-- Editors -->
                 <div class="editor-grid">
                     <div class="editor-group source-group">
                         <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Source code...">import torch
@@ -145,7 +143,10 @@ class Model(nn.Module):
                     </div>
                 </div>
 
+                <!-- Controls -->
                 <div class="controls-bar">
+                    <button type="button" id="btn-retro" class="icon-btn" title="Matrix Mode">🕶️</button>
+                    
                     <label class="md-switch" title="Strict Mode: Fail on unknown APIs.">
                         <input type="checkbox" id="chk-strict-mode">
                         <span class="md-switch-track"><span class="md-switch-thumb"></span></span>
@@ -155,12 +156,36 @@ class Model(nn.Module):
                     <button id="btn-convert" class="md-btn md-btn-accent" disabled>Run Translation</button>
                 </div>
 
-                <div id="trace-visualizer" class="trace-container" style="display:none;"></div>
-            </div>
+                <!-- Three Tabs: Console, Mermaid, Timeline -->
+                <div class="output-tabs">
+                    <input type="radio" name="wm-tabs" id="tab-console">
+                    <label for="tab-console" class="tab-label"><span class="tab-icon">💻</span> Console</label>
 
-            <div class="console-group">
-                <div class="editor-label">Engine Logs</div>
-                <pre id="console-output">Waiting for engine...</pre>
+                    <input type="radio" name="wm-tabs" id="tab-mermaid">
+                    <label for="tab-mermaid" class="tab-label"><span class="tab-icon">🌳</span> AST visualisation</label>
+
+                    <input type="radio" name="wm-tabs" id="tab-trace" checked>
+                    <label for="tab-trace" class="tab-label"><span class="tab-icon">⏱️</span> Timeline</label>
+
+                    <div class="tab-panel" id="panel-console">
+                        <pre id="console-output">Waiting for engine...</pre>
+                    </div>
+
+                    <div class="tab-panel" id="panel-mermaid">
+                        <div class="ast-toolbar">
+                            <button id="btn-ast-prev" class="md-btn md-btn-primary" style="padding:4px 10px; font-size:12px;">Before Pivot</button>
+                            <button id="btn-ast-next" class="md-btn md-btn-primary" style="padding:4px 10px; font-size:12px; opacity:0.6;">After Pivot</button>
+                        </div>
+                        <div id="ast-mermaid-target" class="mermaid" style="text-align:center; overflow-x:auto;">
+                            <em style="color:#999">Run a translation to generate the AST graph.</em>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel" id="panel-trace">
+                        <div id="trace-visualizer" class="trace-container"></div>
+                    </div>
+                </div>
+
             </div>
         </div>
         """
@@ -214,7 +239,10 @@ class Model(nn.Module):
 
     # Ensure we iterate roots sorted by priority
     main_priority = ["torch", "jax", "tensorflow", "numpy"]
-    sorted_roots = sorted(list(roots), key=lambda x: (main_priority.index(x) if x in main_priority else 99, x))
+    sorted_roots = sorted(
+      list(roots),
+      key=lambda x: (main_priority.index(x) if x in main_priority else 99, x),
+    )
 
     final_hierarchy = {root: sorted(hierarchy.get(root, []), key=lambda x: x["label"]) for root in sorted_roots}
 
@@ -288,15 +316,19 @@ class Model(nn.Module):
     Renders the secondary dropdown for Framework Flavours.
     """
     children = hierarchy.get("jax", [])
-    if not children:
-      return ""
-
-    default_child = "flax_nnx"
+    # Always render the select element even if empty, to ensure JS logic for ID lookup doesn't fail
+    # or populate it with a default dummy if hierarchy is not yet loaded.
 
     opts = []
-    for child in children:
-      sel = "selected" if child["key"] == default_child else ""
-      opts.append(f'<option value="{child["key"]}" {sel}>{child["label"]}</option>')
+    if children:
+      # Standard logic
+      default_child = "flax_nnx"
+      for child in children:
+        sel = "selected" if child["key"] == default_child else ""
+        opts.append(f'<option value="{child["key"]}" {sel}>{child["label"]}</option>')
+    else:
+      # Fallback for empty state or tests
+      opts.append('<option value="" disabled selected>No Flavours</option>')
 
     return f""" 
         <select id="{side}-flavour" class="material-select-sm" style="background:#f0f4c3;">
@@ -310,9 +342,16 @@ def setup(app: Any) -> Dict[str, Any]:
   Sphinx Extension Setup Hook.
   """
   app.add_directive("switcheroo_demo", SwitcherooDemo)
+
+  # CodeMirror
   app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")
   app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")
   app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js")
+
+  # Mermaid JS (Critical for AST Visualizer)
+  app.add_js_file("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js")
+
+  # Local Assets
   app.add_css_file("switcheroo_demo.css")
   app.add_css_file("trace_graph.css")
   app.add_js_file("trace_render.js")
@@ -321,7 +360,7 @@ def setup(app: Any) -> Dict[str, Any]:
   app.connect("builder-inited", add_static_path)
   app.connect("build-finished", copy_wheel_and_reqs)
 
-  return {"version": "0.9.6", "parallel_read_safe": True, "parallel_write_safe": True}
+  return {"version": "0.9.8", "parallel_read_safe": True, "parallel_write_safe": True}
 
 
 def add_static_path(app: Any) -> None:

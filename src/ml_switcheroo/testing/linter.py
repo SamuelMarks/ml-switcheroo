@@ -20,13 +20,6 @@ from ml_switcheroo.frameworks import get_adapter
 class StructuralLinter(cst.CSTVisitor):
   """
   Scans CST for forbidden framework usage.
-
-  Attributes:
-      forbidden_roots (Set[str]): The set of root package names (e.g., {'torch', 'flax'})
-                                  that should NOT appear in the generated code.
-      violations (List[str]): usage violations found during the scan.
-      _local_aliases (Dict[str, str]): Maps local variable names to forbidden roots.
-                                       e.g., {'t': 'torch', 'nn': 'torch.nn'}.
   """
 
   def __init__(self, forbidden_roots: Set[str]):
@@ -195,4 +188,4 @@ def validate_transpilation(code: str, source_fw: str) -> Tuple[bool, List[str]]:
   linter = StructuralLinter(forbidden)
   errors = linter.check(code)
 
-  return (len(errors) == 0), errors
+  return len(errors) == 0, errors

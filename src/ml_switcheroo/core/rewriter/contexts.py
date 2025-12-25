@@ -5,6 +5,7 @@ This module provides the `ContextMixin` for the `PivotRewriter`,
 handling transformations of `With` blocks (Context Managers).
 
 Capabilities:
+
 1.  **API Mapping**: Maps context managers (e.g., `torch.no_grad() -> contextlib.nullcontext()`).
 2.  **Structural Stripping**: Supports completely removing the `with` block while preserving the
     body indentation (Lifting), if the semantic mapping dictates `transformation_type="strip_context"`.
@@ -26,9 +27,11 @@ class ContextMixin(BaseRewriter):
     Processes 'with' statements.
 
     Logic:
+
     1. Iterate over `with` items (expressions).
     2. Identify if the expression corresponds to a `CONTEXT` OpType in semantics.
     3. Check transformation logic:
+
        - If `strip_context`, identifying marker is found, lift the body.
        - Otherwise, allow `CallMixin` (which runs on children) to have already renamed the API.
     """

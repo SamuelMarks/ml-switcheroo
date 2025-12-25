@@ -6,6 +6,7 @@ covered by (or require overrides on top of) upstream standards like ONNX
 or the Python Array API.
 
 It defines:
+
 1.  **Abstract Schema**: The standard argument names (`std_args`) and docstrings.
 2.  **Implementation Variants**: Currently empty, as all implementations have been
     distributed to their respective Framework Adapters in `src/ml_switcheroo/frameworks/`.

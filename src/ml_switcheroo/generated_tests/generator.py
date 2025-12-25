@@ -5,10 +5,12 @@ This module is responsible for creating physical Python test files based on the
 Semantic Knowledge Base.
 
 It operations in two stages:
+
 1.  **Template Resolution**: It aggregates execution templates (`import`, `convert_input`, `to_numpy`)
     from the SemanticsManager, prioritizing overlays (snapshots) over registry defaults.
 2.  **Code Emission**: It iterates over Operations in the Spec, generating `def test_gen_<opname>()`
     functions that:
+
     - Generate random inputs using type hints.
     - Execute the operation across all available backends (Torch, JAX, etc.).
     - Compare outputs using `np.allclose`.
@@ -30,10 +32,6 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 class TestGenerator:
   """
   Generates Pytest-compatible test files from Semantic Operations.
-
-  Attributes:
-      semantics_mgr (SemanticsManager): Source for op definitions and backend templates.
-      _processed_fws (Set[str]): Tracks which frameworks were seen to optimize imports.
   """
 
   def __init__(self, semantics_mgr: Optional[SemanticsManager] = None):

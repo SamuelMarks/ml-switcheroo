@@ -15,28 +15,28 @@ import libcst as cst
 from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule, LogicOp
 
 # Helper logic injected into plugins generated with rules
-HELPER_LOGIC = """ 
-def _get_kwarg_value(node: cst.Call, arg_name: str): 
-    for arg in node.args: 
-        if arg.keyword and arg.keyword.value == arg_name: 
-             return _node_to_literal(arg.value) 
+HELPER_LOGIC = """
+def _get_kwarg_value(node: cst.Call, arg_name: str):
+    for arg in node.args:
+        if arg.keyword and arg.keyword.value == arg_name:
+             return _node_to_literal(arg.value)
     return None
 
-def _node_to_literal(node): 
-    if isinstance(node, cst.Integer): return int(node.value) 
-    if isinstance(node, cst.Float): return float(node.value) 
-    if isinstance(node, cst.SimpleString): return node.value.strip("'").strip('"') 
-    if isinstance(node, cst.Name): 
+def _node_to_literal(node):
+    if isinstance(node, cst.Integer): return int(node.value)
+    if isinstance(node, cst.Float): return float(node.value)
+    if isinstance(node, cst.SimpleString): return node.value.strip("'").strip('"')
+    if isinstance(node, cst.Name):
          if node.value == "True": return True
          if node.value == "False": return False
          if node.value == "None": return None
     return None
 
-def _create_dotted_name(name_str: str) -> cst.BaseExpression: 
-    parts = name_str.split(".") 
-    node = cst.Name(parts[0]) 
-    for part in parts[1:]: 
-        node = cst.Attribute(value=node, attr=cst.Name(part)) 
+def _create_dotted_name(name_str: str) -> cst.BaseExpression:
+    parts = name_str.split(".")
+    node = cst.Name(parts[0])
+    for part in parts[1:]:
+        node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
 """
 
@@ -84,9 +84,6 @@ class BodyExtractor(cst.CSTVisitor):
 class PluginGenerator:
   """
   Writes Python plugin files to disk based on scaffold definitions.
-
-  Attributes:
-      plugins_dir (Path): The directory where new files will be written.
   """
 
   def __init__(self, plugins_dir: Path):

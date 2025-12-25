@@ -6,15 +6,17 @@ of the transpiler. It captures:
 1. Lifecycle Phases (Parsing, Analysis, Rewriting).
 2. Semantics Matches (Found `torch.abs` -> Map to `Abs` op).
 3. AST Mutations (Node A transformed to Node B).
+4. **Source Line Mapping** for interactive visualization.
+5. **AST Snapshots** for visual graph debugging.
 
 The output is a structured list of Event Log dictionaries suitable for JSON serialization.
 """
 
 import time
 import uuid
+from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional
-from dataclasses import dataclass, field, asdict
 
 
 class TraceEventType(str, Enum):
@@ -28,8 +30,8 @@ class TraceEventType(str, Enum):
   AST_MUTATION = "ast_mutation"
   ANALYSIS_WARNING = "analysis_warning"
   IMPORT_ACTION = "import_action"
-  # New event for debugging decisions
   INSPECTION = "inspection"
+  AST_SNAPSHOT = "ast_snapshot"
 
 
 @dataclass
@@ -44,6 +46,7 @@ class TraceEvent:
   description: str
   parent_id: Optional[str] = None
   metadata: Dict[str, Any] = field(default_factory=dict)
+  lineno: Optional[int] = None
 
 
 class TraceLogger:
@@ -106,7 +109,13 @@ class TraceLogger:
     )
     self._events.append(event)
 
-  def log_match(self, source_api: str, target_api: str, abstract_op: str) -> None:
+  def log_match(
+    self,
+    source_api: str,
+    target_api: str,
+    abstract_op: str,
+    lineno: Optional[int] = None,
+  ) -> None:
     """
     Logs a Semantic Match event.
 
@@ -114,14 +123,16 @@ class TraceLogger:
         source_api: The source function name (e.g. `torch.abs`).
         target_api: The target implementation (e.g. `jax.numpy.abs`).
         abstract_op: The abstract standard key (e.g. `Abs`).
+        lineno: Optional 1-based source line number.
     """
     self._log_simple(
       TraceEventType.MATCH_SEMANTICS,
       f"Mapped {source_api} -> {target_api}",
       {"source": source_api, "target": target_api, "abstract": abstract_op},
+      lineno=lineno,
     )
 
-  def log_mutation(self, node_type: str, before: str, after: str) -> None:
+  def log_mutation(self, node_type: str, before: str, after: str, lineno: Optional[int] = None) -> None:
     """
     Logs an AST transformation with code diffs.
 
@@ -129,21 +140,29 @@ class TraceLogger:
         node_type: Description of node being changed (e.g. "Call").
         before: Source code snapshot before mutation.
         after: Source code snapshot after mutation.
+        lineno: Optional 1-based source line number.
     """
     self._log_simple(
       TraceEventType.AST_MUTATION,
       f"Transformed {node_type}",
       {"before": before, "after": after},
+      lineno=lineno,
     )
 
-  def log_warning(self, message: str) -> None:
+  def log_warning(self, message: str, lineno: Optional[int] = None) -> None:
     """
     Logs an analysis warning.
 
     Args:
         message: The warning text.
+        lineno: Optional 1-based source line number.
     """
-    self._log_simple(TraceEventType.ANALYSIS_WARNING, message, {"level": "warning"})
+    self._log_simple(
+      TraceEventType.ANALYSIS_WARNING,
+      message,
+      {"level": "warning"},
+      lineno=lineno,
+    )
 
   def log_inspection(self, node_str: str, outcome: str, detail: str = "") -> None:
     """
@@ -160,7 +179,27 @@ class TraceLogger:
       {"outcome": outcome, "detail": detail},
     )
 
-  def _log_simple(self, evt_type: TraceEventType, desc: str, meta: Dict[str, Any]) -> None:
+  def log_snapshot(self, description: str, mermaid_graph: str) -> None:
+    """
+    Logs a full AST snapshot for visualization.
+
+    Args:
+        description: Label for the snapshot (e.g. "Before Pivot").
+        mermaid_graph: string containing Mermaid diagram definition.
+    """
+    self._log_simple(
+      TraceEventType.AST_SNAPSHOT,
+      description,
+      {"mermaid": mermaid_graph},
+    )
+
+  def _log_simple(
+    self,
+    evt_type: TraceEventType,
+    desc: str,
+    meta: Dict[str, Any],
+    lineno: Optional[int] = None,
+  ) -> None:
     """Helper to create and append events."""
     parent = self._active_phases[-1] if self._active_phases else None
     self._events.append(
@@ -171,6 +210,7 @@ class TraceLogger:
         description=desc,
         parent_id=parent,
         metadata=meta,
+        lineno=lineno,
       )
     )
 
@@ -185,7 +225,6 @@ class TraceLogger:
 
 
 # Global/Contextual instance for ease of access in deep mixins
-# In a rigorous implementation, pass this via Engine Config.
 _GLOBAL_TRACER = TraceLogger()
 
 

@@ -10,26 +10,32 @@ for programmatic usage.
 Usage
 -----
 
-### Simple String Conversion
+Simple String Conversion
+^^^^^^^^^^^^^^^^^^^^^^^^
 
->>> import ml_switcheroo as mls
->>> code = "y = torch.abs(x)"
->>> result = mls.convert(code, source="torch", target="jax")
->>> print(result)
-y = jax.numpy.abs(x)
+.. code-block:: python
 
-### Advanced Usage (AST Engine)
+    import ml_switcheroo as mls
+    code = "y = torch.abs(x)"
+    result = mls.convert(code, source="torch", target="jax")
+    print(result)
+    # y = jax.numpy.abs(x)
 
->>> from ml_switcheroo import ASTEngine, RuntimeConfig
->>>
->>> config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
->>> engine = ASTEngine(config=config)
->>> res = engine.run("y = torch.abs(x)")
->>>
->>> if res.success:
-...     print(res.code)
-... else:
-...     print(f"Errors: {res.errors}")
+Advanced Usage (AST Engine)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: python
+
+    from ml_switcheroo import ASTEngine, RuntimeConfig
+
+    config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
+    engine = ASTEngine(config=config)
+    res = engine.run("y = torch.abs(x)")
+
+    if res.success:
+        print(res.code)
+    else:
+        print(f"Errors: {res.errors}")
 """
 
 from typing import Any, Dict, Optional
@@ -100,10 +106,6 @@ def convert(
 
 
 __all__ = [
-  "ASTEngine",
-  "ConversionResult",
-  "RuntimeConfig",
-  "SemanticsManager",
   "convert",
   "__version__",
 ]

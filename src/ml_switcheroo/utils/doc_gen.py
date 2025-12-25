@@ -16,10 +16,6 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class MigrationGuideGenerator:
   """
   Generates a Markdown Migration Guide by diffing semantic specifications.
-
-  Attributes:
-      semantics (SemanticsManager): The loaded knowledge base containing
-          operations, variants, and argument maps.
   """
 
   def __init__(self, semantics: SemanticsManager):

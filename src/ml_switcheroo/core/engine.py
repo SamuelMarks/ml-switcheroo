@@ -15,6 +15,8 @@ The Engine pipeline consists of:
     *   **Dependencies**: Scanning for unmapped 3rd-party imports.
 
 3.  **Semantic Pivoting**: Executing the `PivotRewriter` to map API calls and structure.
+    *Creates AST Snapshots for visualization before and after this phase using Mermaid.*
+
 4.  **Post-processing**:
 
     *   **Import Fixer**: Injecting necessary imports and removing unused source imports.
@@ -24,6 +26,7 @@ The engine relies on `RuntimeConfig` to resolve 'Flavours' (e.g., distinguishing
 `flax_nnx` from generic `jax`) to load the correct structural traits.
 """
 
+import traceback
 import libcst as cst
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
@@ -32,8 +35,6 @@ from ml_switcheroo.core.tracer import reset_tracer, get_tracer
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.core.import_fixer import ImportFixer
-
-# Import Linter
 from ml_switcheroo.testing.linter import StructuralLinter
 from ml_switcheroo.core.scanners import UsageScanner
 from ml_switcheroo.analysis.purity import PurityScanner
@@ -41,6 +42,9 @@ from ml_switcheroo.analysis.dependencies import DependencyScanner
 from ml_switcheroo.analysis.lifecycle import InitializationTracker
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.frameworks as fw_registry
+
+# Import Visualizer for snapshots
+from ml_switcheroo.utils.visualizer import MermaidGenerator
 
 
 class ConversionResult(BaseModel):
@@ -50,7 +54,10 @@ class ConversionResult(BaseModel):
 
   code: str = Field(default="", description="The transformed source code.")
   errors: List[str] = Field(default_factory=list, description="A list of error messages or warnings.")
-  success: bool = Field(default=True, description="True if the pipeline completed without critical failures.")
+  success: bool = Field(
+    default=True,
+    description="True if the pipeline completed without critical failures.",
+  )
   trace_events: List[Dict[str, Any]] = Field(default_factory=list, description="A log of internal trace events.")
 
   @property
@@ -144,17 +151,49 @@ class ASTEngine:
     """
     return tree.code
 
+  def _generate_snapshot(self, tree: cst.CSTNode, phase_label: str) -> None:
+    """
+    Helper to generate and log an AST visualization snapshot.
+    Includes verbose print logging visible in the UI console.
+    """
+    print(f"[Visualizer] Generating snapshot: {phase_label}...")
+    tracer = get_tracer()
+    try:
+      viz = MermaidGenerator()
+      graph = viz.generate(tree)
+
+      # Sanity check graph size
+      graph_lines = len(graph.splitlines())
+      print(f"[Visualizer] Success. Graph size: {len(graph)} chars, {graph_lines} lines.")
+
+      tracer.log_snapshot(phase_label, graph)
+    except Exception as e:
+      # Capture full traceback
+      tb = traceback.format_exc()
+      clean_tb = tb.replace("\n", "<br/>").replace('"', "'")
+
+      print(f"[Visualizer] FAILED: {str(e)}")
+      tracer.log_warning(f"Visualizer Error {phase_label}: {str(e)}")
+
+      error_graph = (
+        f'graph TD\nclassDef err fill:#ea4335,color:white,font-weight:bold;\nE["Visualizer Crash:<br/>{str(e)}"]:::err\n'
+      )
+      tracer.log_snapshot(f"{phase_label} (FAILED)", error_graph)
+
   def run(self, code: str) -> ConversionResult:
     """
     Executes the full transpilation pipeline.
 
     Passes performed:
+
     1.  Parse.
     2.  Purity Scan (if targeting JAX-like frameworks).
     3.  Lifecycle Analysis (Init/Forward mismatch).
     4.  Dependency Scan (Checking 3rd party libs).
     5.  Pivot Rewrite (The main transformation).
+        *Includes visual snapshots before and after.*
     6.  Import Fixer (Injecting new imports, pruning old ones).
+        *Checks for lingering usage before pruning.*
     7.  Structural Linting (Verifying output cleanliness).
 
     Args:
@@ -166,15 +205,21 @@ class ASTEngine:
     reset_tracer()
     tracer = get_tracer()
 
-    # Log the effective translation path (e.g. torch -> flax_nnx)
-    root_phase = tracer.start_phase("Transpilation Pipeline", f"{self.source} -> {self.target}")
+    print(f"[Engine] Starting run: {self.source} -> {self.target}")
+
+    _root_phase = tracer.start_phase("Transpilation Pipeline", f"{self.source} -> {self.target}")
 
     try:
       tracer.start_phase("Preprocessing", "Parsing & Analysis")
       tree = self.parse(code)
       tracer.log_mutation("Module", "(Raw Source)", "(AST Parsed)")
     except Exception as e:
-      return ConversionResult(code=code, errors=[f"Parse Error: {e}"], success=False, trace_events=tracer.export())
+      return ConversionResult(
+        code=code,
+        errors=[f"Parse Error: {e}"],
+        success=False,
+        trace_events=tracer.export(),
+      )
 
     errors_log = []
 
@@ -189,21 +234,19 @@ class ASTEngine:
     # Pass 0b: Lifecycle Analysis
     lifecycle_tracker = InitializationTracker()
     tree.visit(lifecycle_tracker)
-
     if lifecycle_tracker.warnings:
-      for warning in lifecycle_tracker.warnings:
-        errors_log.append(f"Lifecycle Warning: {warning}")
+      errors_log.extend([f"Lifecycle: {w}" for w in lifecycle_tracker.warnings])
 
     # Pass 0c: Dependency Analysis
-    # Use effective source to ignore framework imports correctly
     dep_scanner = DependencyScanner(self.semantics, self.source)
     tree.visit(dep_scanner)
     if dep_scanner.unknown_imports:
-      sorted_deps = sorted(list(dep_scanner.unknown_imports))
-      msg = f"Warning: Unmapped 3rd-party dependencies detected: {', '.join(sorted_deps)}"
-      errors_log.append(msg)
+      errors_log.append(f"Deps: {dep_scanner.unknown_imports}")
 
     tracer.end_phase()
+
+    # --- VISUALIZER HOOK 1 ---
+    self._generate_snapshot(tree, "AST Before Pivot")
 
     # Pass 1: Semantic Pivot (Rewriter)
     tracer.start_phase("Rewrite Engine", "Visitor Traversal")
@@ -211,79 +254,45 @@ class ASTEngine:
     tree = tree.visit(rewriter)
     tracer.end_phase()
 
-    # Pass 2: Import Scaffolding
-    # If effective root differs, we run fixer.
-    roots_to_prune = {self.source}
+    # --- VISUALIZER HOOK 2 ---
+    self._generate_snapshot(tree, "AST After Pivot")
 
+    # Pass 2: Import Scaffolding
+    roots_to_prune = {self.source}
     if self.source != self.target:
       tracer.start_phase("Import Fixer", "Resolving Dependencies")
-
-      # Resolve Effective Roots for Pruning (Inheritance Aware)
       adapter = fw_registry.get_adapter(self.source)
-
       if adapter:
-        # Add alias root (e.g. flax.nnx -> flax)
         if hasattr(adapter, "import_alias") and adapter.import_alias:
           roots_to_prune.add(adapter.import_alias[0].split(".")[0])
-
-        # Add parent frameworks recursively (e.g. flax_nnx -> jax)
         if hasattr(adapter, "inherits_from") and adapter.inherits_from:
-          parent = adapter.inherits_from
-          roots_to_prune.add(parent)
+          roots_to_prune.add(adapter.inherits_from)
 
-          # Recurse one level up for parent alias
-          parent_adp = fw_registry.get_adapter(parent)
-          if parent_adp and hasattr(parent_adp, "import_alias"):
-            roots_to_prune.add(parent_adp.import_alias[0].split(".")[0])
-
-      # Convert set to sorted list for determinism
-      source_roots = sorted(list(roots_to_prune))
-
-      # Sub-step 2a: Check usage of ANY source root aliases
-      should_preserve = False
-      for root in source_roots:
-        scanner = UsageScanner(root)
-        tree.visit(scanner)
-        if scanner.get_result():
-          should_preserve = True
-          break
-
-      # Sub-step 2b: Retrieve import maps for effective target
       submodule_map = self.semantics.get_import_map(self.target)
       alias_map = self.semantics.get_framework_aliases()
 
-      # Sub-step 2c: Fix imports
-      fixer = ImportFixer(
-        source_fws=source_roots,
-        target_fw=self.target,
-        submodule_map=submodule_map,
-        alias_map=alias_map,
-        preserve_source=should_preserve,
-      )
+      # Check for lingering usage of source framework logic before instructing fixer to prune
+      usage_scanner = UsageScanner(self.source)
+      tree.visit(usage_scanner)
+      should_preserve = usage_scanner.get_result()
+
+      fixer = ImportFixer(sorted(list(roots_to_prune)), self.target, submodule_map, alias_map, should_preserve)
       tree = tree.visit(fixer)
       tracer.end_phase()
 
     final_code = self.to_source(tree)
 
-    # Pass 3: Structural Linter (Post-Conversion Validation)
-    # Ensure no forbidden roots remain in the output
+    # Pass 3: Linter
     if self.source != self.target:
       tracer.start_phase("Structural Linter", "Verifying Cleanup")
       linter = StructuralLinter(forbidden_roots=roots_to_prune)
       lint_errors = linter.check(final_code)
-
       if lint_errors:
-        for err in lint_errors:
-          full_err = f"Lint Violation: {err}"
-          errors_log.append(full_err)
-          tracer.log_warning(full_err)
-
+        errors_log.extend(lint_errors)
       tracer.end_phase()
 
-    # Scan for failure markers to populate the error report
     if "# <SWITCHEROO_FAILED_TO_TRANS>" in final_code:
-      count = final_code.count("# <SWITCHEROO_FAILED_TO_TRANS>")
-      errors_log.append(f"{count} block(s) marked for manual review (Escape Hatch).")
+      errors_log.append("Escape Hatches Detected")
 
     tracer.end_phase()
     return ConversionResult(code=final_code, errors=errors_log, success=True, trace_events=tracer.export())

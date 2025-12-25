@@ -3,6 +3,7 @@ Decorator Rewriting Mixin.
 
 This module provides logic to handle Python decorators (e.g., `@torch.jit.script`).
 It enables:
+
 1.  **Renaming**: Mapping decorators between frameworks (e.g., `@torch.jit.script` -> `@jax.jit`).
 2.  **Removal**: stripping decorators that have no equivalent in the target framework (if mapped to null).
 
@@ -31,6 +32,7 @@ class DecoratorMixin(BaseRewriter):
     Processes decorators attached to functions or classes.
 
     Logic:
+
     1. Identifies the decorator name from `original_node` to ensure we key off the
        Source Framework API, even if `CallMixin` modified the children in `updated_node`.
     2. Looks up the semantic definition.

@@ -31,6 +31,7 @@ class ControlFlowMixin(BaseRewriter):
     Invokes loop transformation logic.
 
     Implements a priority chain:
+
     1.  **Static Unroll**: Checks ``transform_for_loop_static``. If the loop index
         is constant, unrolls it (Optimization).
     2.  **General Transform**: Checks ``transform_for_loop``. Handles general

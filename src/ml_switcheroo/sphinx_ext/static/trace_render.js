@@ -3,15 +3,19 @@
  *
  * Logic for rendering the "Git Graph" visualization of the transpilation process.
  * Consumes the JSON event stream from the ASTEngine.
+ *
+ * Update: Supports 'hover' callback for editor line correlation.
  */
 
 class TraceGraph {
     /**
      * @param {string} containerId - The ID of the HTML element to render into.
+     * @param {function} onHover - Callback (eventData, isHovering) => void
      */
-    constructor(containerId) {
+    constructor(containerId, onHover = null) {
         this.container = document.getElementById(containerId);
         this.eventsMap = new Map();
+        this.onHover = onHover;
     }
 
     /**
@@ -72,6 +76,22 @@ class TraceGraph {
     _createRow(event, isLastEvent) {
         const row = document.createElement('div');
         row.className = `trace-row trace-depth-${event.uiDepth} type-${event.type}`;
+
+        // --- Interaction Logic (Line Hover) ---
+        if (this.onHover && event.lineno) {
+            row.style.cursor = "crosshair";
+            row.title = `Source Line: ${event.lineno}`; // Tooltip
+
+            row.addEventListener('mouseenter', () => {
+                this.onHover(event, true);
+                row.style.backgroundColor = 'rgba(255, 249, 196, 0.3)'; // Subtle hover visual in list
+            });
+
+            row.addEventListener('mouseleave', () => {
+                this.onHover(event, false);
+                row.style.backgroundColor = 'transparent';
+            });
+        }
 
         // --- 1. Timestamp Column ---
         const meta = document.createElement('div');

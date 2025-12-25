@@ -7,10 +7,11 @@ It also handles collapsing fully qualified paths (e.g. `torch.nn.Linear`) into
 aliases (e.g. `nn.Linear`) based on content injection logic.
 
 Updates:
+
 - Fixed: Correctly transforms `from source import sub` into `import target` calls
-         when the target mapping specifies a root import (sub=None).
+  when the target mapping specifies a root import (sub=None).
 - Improved: Smart injection now prefers `from root import sub` syntax for aliases
-            where the alias name matches the submodule (e.g. `from flax import nnx`).
+  where the alias name matches the submodule (e.g. `from flax import nnx`).
 """
 
 from typing import Union, Optional, Tuple, Dict, Set, List

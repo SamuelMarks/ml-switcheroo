@@ -1,4 +1,10 @@
-/* Container */
+/*
+    switcheroo_demo.css
+    Main styling for the ml-switcheroo interactive demo wrapper in Sphinx.
+    Includes Material Design components and the "CRT" Retro mode overrides.
+*/
+
+/* --- Container & Layout --- */
 .switcheroo-material-card {
     background: #ffffff;
     border-radius: 8px;
@@ -7,6 +13,7 @@
     margin: 30px 0;
     font-family: 'Roboto', sans-serif;
     border: 1px solid #eee;
+    transition: background 0.3s, border-color 0.3s;
 }
 
 .demo-header {
@@ -18,12 +25,11 @@
     margin-bottom: 20px;
 }
 
-/* --- TOOLBAR LAYOUT --- */
 .translate-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    text-align: center; /* helps swap button alignment */
+    text-align: center;
     background: #f8f9fa;
     border-bottom: 1px solid #ddd;
     border-radius: 4px 4px 0 0;
@@ -54,14 +60,7 @@
     align-items: center;
 }
 
-.toolbar-label {
-    margin-right: 8px;
-    font-size: 13px;
-    color: #555;
-    font-weight: 500;
-}
-
-/* Material Drops */
+/* --- Controls: Inputs & Buttons --- */
 .material-select {
     width: 100%;
     padding: 10px;
@@ -74,7 +73,8 @@
     cursor: pointer;
     border-bottom: 2px solid transparent;
     transition: border-color 0.2s;
-    appearance: none; /* Hide default arrow */
+    appearance: none;
+    /* Blue Arrow */
     background-image: url('data:image/svg+xml;utf8,<svg fill="%231976d2" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
     background-repeat: no-repeat;
     background-position: right 10px top 50%;
@@ -96,7 +96,6 @@
     border-bottom-color: #1976d2;
 }
 
-/* Swap Button (Circular) */
 .swap-icon-btn {
     background: #fff;
     border: 1px solid #ddd;
@@ -117,65 +116,10 @@
 
 .swap-icon-btn:hover {
     background: #f1f3f4;
-    transform: rotate(180deg); /* Nice spin effect */
+    transform: rotate(180deg);
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
-.swap-icon-btn:active {
-    background: #e8eaed;
-}
-
-/* --- CodeMirror Integration (Feature 0) --- */
-.editor-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1px;
-    background-color: #ddd; /* Acts as border between */
-    border: 1px solid #ddd;
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    height: 400px; /* Increased height for better view */
-    margin-bottom: 20px;
-}
-
-.editor-group {
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* Contain CodeMirror */
-}
-
-/* CodeMirror Overrides */
-.CodeMirror {
-    height: 100% !important;
-    font-family: 'Roboto Mono', 'Consolas', monospace;
-    font-size: 13px;
-    line-height: 1.5;
-    background-color: #fff;
-}
-
-/* Different BG for Target Editor */
-.target-group .CodeMirror {
-    background-color: #f7f9fb;
-}
-.target-group .CodeMirror-cursor {
-    display: none; /* mimic readonly visually */
-}
-
-/* Hide fallback textareas */
-.material-input {
-    display: none;
-}
-
-/* --- Controls & Logs --- */
-.controls-bar {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 20px;
-}
-
-/* Standard Material Button */
 .md-btn {
     text-transform: uppercase;
     font-weight: 500;
@@ -201,18 +145,62 @@
     cursor: default;
 }
 
-.status-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
-    background: #eee;
+.icon-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    outline: none;
 }
-.status-ready { background: #e8f5e9; color: #2e7d32; }
-.status-loading { background: #fff3e0; color: #ef6c00; }
-.status-error { background: #ffebee; color: #c62828; }
+.icon-btn:hover {
+    transform: scale(1.1);
+}
 
+/* --- Code Editor Layout --- */
+.editor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background-color: #ddd;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    height: 400px;
+    margin-bottom: 20px;
+}
+
+.editor-group {
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.material-input {
+    display: none;
+}
+
+.CodeMirror {
+    height: 100% !important;
+    font-family: 'Roboto Mono', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    background-color: #fff;
+}
+
+.target-group .CodeMirror {
+    background-color: #f7f9fb;
+}
+
+/* Trace Highlighting */
+.cm-trace-highlight {
+    background-color: #fff9c4 !important;
+    font-weight: bold;
+    border-left: 3px solid #fbc02d;
+}
+
+/* --- Log Console --- */
 #console-output {
     background: #263238;
     color: #eceff1;
@@ -220,7 +208,7 @@
     padding: 12px;
     font-family: 'Roboto Mono', monospace;
     font-size: 11px;
-    height: 150px;
+    height: 350px;
     overflow-y: auto;
     white-space: pre-wrap;
     margin-top: 10px;
@@ -235,7 +223,26 @@
     text-transform: uppercase;
 }
 
-/* --- Material Switch --- */
+/* --- Misc UI Components --- */
+.controls-bar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: #eee;
+}
+.status-ready { background: #e8f5e9; color: #2e7d32; }
+.status-loading { background: #fff3e0; color: #ef6c00; }
+.status-error { background: #ffebee; color: #c62828; }
+
 .md-switch {
     display: inline-flex;
     align-items: center;
@@ -280,17 +287,340 @@
     transition: transform 0.2s, background-color 0.2s;
 }
 
-/* Checked State */
 .md-switch input:checked + .md-switch-track {
-    background-color: #90caf9; /* Light Blue */
+    background-color: #90caf9;
 }
 
 .md-switch input:checked + .md-switch-track .md-switch-thumb {
-    background-color: #2196f3; /* Blue Primary */
+    background-color: #2196f3;
     transform: translateX(20px);
 }
 
-/* Hover/Focus States */
-.md-switch:hover .md-switch-thumb {
-    box-shadow: 0 0 0 8px rgba(0,0,0,0.05); /* Halo effect */
+/* --- AST Visualizer Container --- */
+/* Now handled via generic Tab Panels */
+.ast-toolbar {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* Ensure Mermaid diagram is scrollable if wide */
+#ast-mermaid-target {
+    width: 100%;
+    overflow-x: auto;
+    padding: 10px;
+    background: #fff;
+    border-radius: 4px;
+    min-height: 200px;
+}
+
+/* --- Pure CSS Tabs --- */
+.output-tabs {
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.output-tabs input[type="radio"] {
+    display: none;
+}
+
+.output-tabs .tab-label {
+    display: inline-block;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-bottom 0.2s;
+    text-transform: uppercase;
+    margin-right: 5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.output-tabs .tab-label:hover {
+    color: #4285f4;
+    background: #f5f5f5;
+    border-radius: 4px 4px 0 0;
+}
+
+.output-tabs input[type="radio"]:checked + .tab-label {
+    color: #4285f4;
+    border-bottom: 2px solid #4285f4;
+}
+
+.output-tabs .tab-panel {
+    display: none;
+    padding-top: 15px;
+    min-height: 200px;
+}
+
+.tab-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* Tab Switching Logic */
+#tab-console:checked ~ #panel-console { display: block; }
+#tab-trace:checked ~ #panel-trace { display: block; }
+#tab-mermaid:checked ~ #panel-mermaid { display: block; }
+
+/* =========================================================================
+   RETRO CRT / MATRIX MODE
+   - Activates when .crt-mode is present on <body>
+   ========================================================================= */
+
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+}
+
+@keyframes flicker {
+    0% { opacity: 0.95; }
+    5% { opacity: 0.85; }
+    10% { opacity: 0.9; }
+    15% { opacity: 0.95; }
+    20% { opacity: 0.8; }
+    25% { opacity: 0.95; }
+    30% { opacity: 0.9; }
+    100% { opacity: 0.95; }
+}
+
+body.crt-mode {
+    /* Base variables */
+    --crt-bg: #0d0208;
+    --crt-green: #00ff41;
+    --crt-border: #003b00;
+    --crt-glow: 0 0 5px #00ff41, 0 0 10px #003b00;
+
+    background-color: #000;
+    color: var(--crt-green);
+
+    /* Force native form controls to use dark theme (makes arrows white) */
+    color-scheme: dark;
+}
+
+body.crt-mode::-webkit-scrollbar {
+    background: #000;
+}
+body.crt-mode::-webkit-scrollbar-thumb {
+    background: #003b00;
+    border: 1px solid #00ff41;
+}
+
+/* Scanlines Overlay */
+.crt-mode::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 9999;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    animation: flicker 0.15s infinite;
+}
+
+/* Moving Scanline */
+.crt-mode::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background-color: rgba(0, 255, 65, 0.2);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.4);
+    z-index: 9999;
+    pointer-events: none;
+    animation: scanline 8s linear infinite;
+    opacity: 0.3;
+}
+
+/* Reskin Elements */
+.crt-mode .switcheroo-material-card {
+    background: #001100;
+    border: 1px solid var(--crt-border);
+    box-shadow: 0 0 15px var(--crt-border);
+}
+
+.crt-mode h1, .crt-mode h2, .crt-mode h3,
+.crt-mode p, .crt-mode span, .crt-mode div,
+.crt-mode button {
+    font-family: 'Courier New', Courier, monospace !important;
+    text-shadow: 0 0 2px var(--crt-green);
+}
+
+.crt-mode .editor-grid {
+    background-color: var(--crt-border);
+    border-color: var(--crt-border);
+}
+
+/* --- FIX: CodeMirror Syntax Highlighting for CRT --- */
+
+/* Base overrides */
+.crt-mode .editor-group,
+.crt-mode .target-group .CodeMirror,
+.crt-mode .CodeMirror {
+    background: #0d0208 !important;
+    color: var(--crt-green) !important;
+}
+
+/* Line Number Gutter */
+.crt-mode .CodeMirror-gutters {
+    background: #050102 !important;
+    border-right: 1px solid var(--crt-border);
+}
+.crt-mode .CodeMirror-linenumber {
+    color: #004400 !important;
+}
+
+/* Cursor */
+.crt-mode .CodeMirror-cursor {
+    border-left: 5px solid var(--crt-green) !important;
+}
+
+/* Selection */
+.crt-mode .CodeMirror-selected {
+    background: #003b00 !important;
+}
+.crt-mode .CodeMirror-focused .CodeMirror-selected {
+    background: #004400 !important;
+}
+
+/* Syntax Tokens: Force everything to Neon Green Palette */
+.crt-mode .cm-keyword,
+.crt-mode .cm-def,
+.crt-mode .cm-variable,
+.crt-mode .cm-variable-2,
+.crt-mode .cm-variable-3,
+.crt-mode .cm-operator,
+.crt-mode .cm-property,
+.crt-mode .cm-builtin,
+.crt-mode .cm-number,
+.crt-mode .cm-meta,
+.crt-mode .cm-attribute,
+.crt-mode .cm-type {
+    color: #33ff66 !important;
+    text-shadow: 0 0 2px #33ff66;
+}
+
+.crt-mode .cm-string, .crt-mode .cm-string-2 {
+    color: #66ff99 !important;
+}
+
+.crt-mode .cm-comment {
+    color: #008f11 !important;
+    font-style: italic;
+    text-shadow: none;
+}
+
+/* Button Reskins */
+.crt-mode .md-btn {
+    background: #000;
+    color: var(--crt-green);
+    border: 1px solid var(--crt-green);
+    box-shadow: none;
+}
+.crt-mode .md-btn:hover {
+    background: var(--crt-green);
+    color: #000;
+}
+.crt-mode .md-btn:disabled {
+    border-color: #004400;
+    color: #004400;
+}
+
+.crt-mode .translate-toolbar,
+.crt-mode .example-toolbar {
+    background-color: #001100;
+    border-color: var(--crt-border);
+}
+
+.crt-mode .material-select {
+    background-color: #000 !important;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%2300ff41" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') !important;
+    color: var(--crt-green) !important;
+    border: 1px solid var(--crt-border);
+}
+.crt-mode .material-select:focus {
+    border-bottom-color: var(--crt-green);
+}
+
+.crt-mode .material-select-sm,
+.crt-mode .md-switch-text {
+    background-color: #000 !important;
+    color: var(--crt-green) !important;
+    border: 1px solid var(--crt-border);
+}
+
+.crt-mode .swap-icon-btn {
+    background: #000;
+    border: 1px solid var(--crt-green);
+    color: var(--crt-green);
+}
+
+/* Console Reskin */
+.crt-mode #console-output {
+    background: #000;
+    border: 1px solid var(--crt-green);
+    color: var(--crt-green);
+}
+
+/* Trace Graph */
+.crt-mode .trace-container {
+    background: #000;
+    border-color: var(--crt-border);
+}
+.crt-mode .trace-row {
+    border-left: 1px solid #004400;
+}
+.crt-mode .trace-node {
+    background: #000;
+    border-color: var(--crt-green);
+    box-shadow: 0 0 5px var(--crt-green);
+}
+.crt-mode .trace-rail {
+    background: #004400;
+}
+.crt-mode .trace-title-text {
+    color: var(--crt-green);
+}
+.crt-mode .trace-meta {
+    color: #008f11;
+}
+
+/* Tab Reskin for CRT */
+.crt-mode .output-tabs {
+    border-top: 1px solid var(--crt-border);
+}
+.crt-mode .output-tabs .tab-label {
+    color: #006600;
+}
+.crt-mode .output-tabs .tab-label:hover {
+    color: var(--crt-green);
+    background: #002200;
+}
+.crt-mode .output-tabs input[type="radio"]:checked + .tab-label {
+    color: var(--crt-green);
+    border-bottom: 2px solid var(--crt-green);
+}
+
+/* AST Container Reskin */
+.crt-mode #panel-mermaid {
+    border-top: none;
+    background: #000;
+}
+.crt-mode #ast-mermaid-target {
+    background: #000;
+    color: var(--crt-green);
+    border: 1px solid var(--crt-border);
 }

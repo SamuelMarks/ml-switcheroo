@@ -5,9 +5,11 @@ This module provides the `JAXStackMixin`, a reusable base for any Framework Adap
 built on top of the JAX ecosystem (e.g., Flax, PaxML, Haiku).
 
 It standardizes:
+
 1.  **Level 0 (Core)**: JIT compilation templates, Device syntax (`jax.devices`),
     and Array API mappings (`jax.numpy`).
 2.  **Level 1 (Common Libs)**:
+
     - **Optax**: Optimization primitives and loss functions.
     - **Orbax**: Checkpointing and Serialization.
 
@@ -26,6 +28,7 @@ class JAXStackMixin:
   Mixin providing shared implementations for JAX ecosystem adapters.
 
   This ensures consistent translation for:
+
   - Optimization (Torch Optimizers -> Optax Factory Functions).
   - Serialization (Torch Save/Load -> Orbax Checkpointing).
   - Device Management (Torch Device -> JAX Devices).

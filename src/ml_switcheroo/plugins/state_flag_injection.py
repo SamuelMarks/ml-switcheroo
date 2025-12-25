@@ -5,6 +5,7 @@ This module handles the impedance mismatch between Object-Oriented state managem
 (PyTorch's `model.eval()`, `model.train()`) and Functional statelessness (JAX, Keras functional).
 
 The plugin consists of two cooperating hooks:
+
 1.  `capture_eval_state`: Intercepts `model.eval()`/`train()` calls, records the state
     change in the `HookContext`, and removes the imperative call from the AST.
 2.  `inject_training_flag`: Intercepts calls to the model (e.g. `model(x)`), checks if
@@ -51,6 +52,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
   they map to an abstract operation configured with `requires_plugin="inject_training_flag"`.
 
   Logic:
+
   1. Resolve the name of the object being called (the Receiver).
      It robustly checks both the full callable name (e.g. `self.layer` in `self.layer(x)`)
      and the parent object (e.g. `model` in `model.forward(x)`).
@@ -122,6 +124,7 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   Hook: Intercepts `eval()`/`train()` calls to track state removal.
 
   Action:
+
   1. Identifies the receiver object (`model`).
   2. Determines mode (`training=True` for .train(), `False` for .eval()).
   3. Updates `ctx.metadata` with this knowledge.

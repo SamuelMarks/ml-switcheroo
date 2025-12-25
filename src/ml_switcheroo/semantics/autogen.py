@@ -5,12 +5,14 @@ This module is responsible for finalizing "Candidate Standards" proposed by the
 Consensus Engine into the Distributed Knowledge Base.
 
 It implements the **Hub-and-Spoke** write strategy:
+
 1.  **Hub (Specs)**: Writes Abstract Definitions (`std_args`, `description`)
     to the target spec file in `semantics/`.
 2.  **Spokes (Snapshots)**: Writes Implementation Details (`api`, `args`)
     to `snapshots/{framework}_vlatest_map.json`.
 
 Policy:
+
 - **Do Not Harm**: Existing keys in Specs or Snapshots (implying manual curation)
   are skipped to prevent overwriting high-quality manual edits.
 - **Additive**: New discoveries are added.

@@ -25,9 +25,6 @@ from ml_switcheroo.frameworks import get_adapter
 class FrameworkSyncer:
   """
   Links abstract operations to concrete framework implementations.
-
-  Attributes:
-      console: A configured Rich console for logging output.
   """
 
   def __init__(self):

@@ -6,16 +6,18 @@ written by developers (Human Override Workflow). It analyzes successful test
 calls to reverse-engineer valid argument mappings for the Knowledge Base.
 
 Logic:
-    1. Parse a test file's AST.
-    2. Scan for imports to resolve aliases (e.g. ``import jax.numpy as jnp``).
-    3. Identify test functions (e.g., ``test_matmul``).
-    4. Find calls to the target framework (e.g., ``jax.numpy.matmul``).
-    5. Correlate input arguments to target parameters using:
-       - **Naming Convention**: `np_x` matches standard arg `x`.
-       - **Explicit Keywords**: `kwargs` match standard arg names directly.
-       - **Value-Based Inference**: Matches literals (e.g. `1`, `True`) to
-         type hints defined in the Semantics (e.g., `axis: int`).
-    6. Construct and return valid mapping dictionaries.
+
+1.  Parse a test file's AST.
+2.  Scan for imports to resolve aliases (e.g. ``import jax.numpy as jnp``).
+3.  Identify test functions (e.g., ``test_matmul``).
+4.  Find calls to the target framework (e.g., ``jax.numpy.matmul``).
+5.  Correlate input arguments to target parameters using:
+
+    - **Naming Convention**: `np_x` matches standard arg `x`.
+    - **Explicit Keywords**: `kwargs` match standard arg names directly.
+    - **Value-Based Inference**: Matches literals (e.g. `1`, `True`) to
+      type hints defined in the Semantics (e.g., `axis: int`).
+6.  Construct and return valid mapping dictionaries.
 """
 
 import ast
@@ -217,6 +219,7 @@ class TargetCallVisitor(ast.NodeVisitor):
   Helper AST walker to find specific API calls and extract arguments.
 
   Implements **Value-Based Inference**:
+
   - Matches naming conventions (``np_x``).
   - Matches literal types (e.g. ``1`` is ``int``) to Semantic Types (``axis: int``).
   """

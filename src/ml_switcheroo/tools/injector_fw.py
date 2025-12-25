@@ -6,6 +6,7 @@ by locating the specific class registered for a framework and injecting a new
 `StandardMap` definition into its `definitions` property.
 
 It handles:
+
 1.  **Definitions Injection**: Appending the mapping to the definitions dictionary.
 2.  **Smart Import Injection**: Analyzing the target API path (e.g. `scipy.special.erf`)
     and injecting necessary top-level imports (`import scipy`) if missing.
@@ -14,7 +15,7 @@ It handles:
 """
 
 import libcst as cst
-from typing import Optional, Union, List, Set, Sequence, Any, Dict
+from typing import Optional, Union, List, Set, Any
 from ml_switcheroo.core.dsl import FrameworkVariant
 
 
@@ -23,6 +24,7 @@ class FrameworkInjector(cst.CSTTransformer):
   Injects a `StandardMap` entry into a Framework Adapter's definitions.
 
   It performs a targeted search for:
+
   1. A class decorated with `@register_framework("target_fw")`.
   2. A method named `definitions` decorated with `@property`.
   3. A `return` statement returning a `Dict`.
@@ -30,12 +32,6 @@ class FrameworkInjector(cst.CSTTransformer):
   Additionally, it scans the module for existing imports and injects missing
   dependencies required by the new mapping (e.g. injecting `import scipy` if
   the API is `scipy.special.erf`).
-
-  Attributes:
-      target_fw (str): The framework key to look for (e.g. 'torch').
-      op_name (str): The abstract operation name (e.g. 'LogSoftmax').
-      variant (FrameworkVariant): The configuration to inject.
-      found (bool): True if intrusion was successful.
   """
 
   def __init__(self, target_fw: str, op_name: str, variant: FrameworkVariant):
