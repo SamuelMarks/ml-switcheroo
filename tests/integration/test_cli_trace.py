@@ -20,7 +20,10 @@ class MockTraceSemantics(SemanticsManager):
   def __init__(self):
     # Skip file loading
     self.data = {}
-    self.import_data = {}
+    # New attributes
+    self._providers = {}
+    self._source_registry = {}
+
     self.framework_configs = {}
     self._reverse_index = {}
     self._key_origins = {}
@@ -28,7 +31,10 @@ class MockTraceSemantics(SemanticsManager):
     self._known_rng_methods = set()
 
     # Inject torch.abs definition
-    self.data["abs"] = {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}, "std_args": ["x"]}
+    self.data["abs"] = {
+      "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}},
+      "std_args": ["x"],
+    }
     self._reverse_index["torch.abs"] = ("abs", self.data["abs"])
 
   def get_all_rng_methods(self) -> Set[str]:

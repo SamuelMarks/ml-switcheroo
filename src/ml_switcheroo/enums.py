@@ -17,6 +17,7 @@ class SemanticTier(str, Enum):
 
   ARRAY_API = "array"
   NEURAL = "neural"
+  NEURAL_OPS = "neural_ops"  # Functional neural ops (activations, functional layers)
   EXTRAS = "extras"
 
 

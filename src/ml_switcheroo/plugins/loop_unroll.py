@@ -1,25 +1,20 @@
 """
-Plugin for Unrolling Loops (JAX Scan/Fori_loop).
+Plugin for Unrolling Loops (Functional Control Flow Enforcement).
 
 This module handles the structural transformation of Python control flow into
-JAX-compatible primitives. Unlike PyTorch, which supports imperative Python loops,
-JAX requires loops to be expressed as functional operators (`jax.lax.scan` or `jax.lax.fori_loop`)
-to enable XLA compilation (JIT).
+functional primitives required by XLA-based frameworks. Unlike PyTorch/TensorFlow Eager,
+which support imperative Python loops, frameworks targeting XLA (like JAX) require
+loops to be expressed as functional operators (`scan` or `fori_loop`) to be compiled.
 
-Logic:
-
-1.  **Analysis**: Inspects `for` loops to determine if they iterate over a `range` (candidates for `fori_loop`)
-    or an iterable (candidates for `scan`).
-2.  **Safety Check**: Because automated loop conversion requires solving the "Carry State" problem
-    (identifying which variables are mutated across iterations), this plugin currently defaults to a
-    **Safety-First** strategy.
-3.  **Transformation**: Instead of hallucinating broken JAX code, it wraps the loop in an `EscapeHatch`.
-    This preserves the original logic while explicitly flagging it as a blocker for JIT compliance,
-    guiding the user to manually refactor it into a functional pattern.
+The strategy is **Safety-First**:
+1.  **Analysis**: Inspects `for` loops.
+2.  **Trait Check**: Determines if the target framework requires functional control flow.
+3.  **Handling**: Wraps imperative loops in an `EscapeHatch` warning rather than
+    attempting unsafe auto-conversion (solving the "carry state" problem is often undecidable).
 """
 
 import libcst as cst
-from typing import Optional, Tuple, List, Union
+from typing import Tuple, List, Union
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -44,36 +39,39 @@ def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Ar
 @register_hook("transform_for_loop")
 def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.FlattenSentinel]:
   """
-  Plugin Hook: Transforms `for` loops for JAX compliance.
+  Plugin Hook: Transforms or Flags `for` loops for functional compliance.
 
   Triggered by the `ControlFlowMixin` when visiting `For` nodes.
 
   Strategy:
-      - If Target != JAX: Pass through (Python loops are valid in Torch/TF Eager).
-      - If Target == JAX:
+      - Check `ctx.plugin_traits.requires_functional_control_flow`.
+      - If False: Pass through (Imperative loops are valid).
+      - If True:
           - Analyze the iterator.
-          - If `range()`: Flag as candidates for `jax.lax.fori_loop`.
-          - Else: Flag as candidates for `jax.lax.scan`.
-          - Wrap in `EscapeHatch` to prevent compilation errors in JAX/XLA.
+          - If `range()`: Warn that `jax.lax.fori_loop` (or equivalent) is required.
+          - Else: Warn that `scan` is required.
+          - Wrap in `EscapeHatch` to prevent compilation errors in the target.
 
   Args:
       node: The original CST For loop node.
-      ctx: Hook context containing framework targets.
+      ctx: Hook context containing framework configuration traits.
 
   Returns:
       The transformed node or an EscapeHatch sentinel.
   """
-  # 1. Check Target Constraints
-  # Transformation is only required for JAX; other frameworks support imperative loops.
-  if ctx.target_fw != "jax":
+  # 1. Check Target Constraints (Decoupled check)
+  # We rely on the Adapter's declared capabilities rather than the framework name.
+  if not ctx.plugin_traits.requires_functional_control_flow:
     return node
 
   # 2. Analyze Iterator Pattern
   # Python: `for i in range(start, stop)`
   is_range, _range_args = _analyze_range_iterator(node.iter)
 
+  target_fw_label = ctx.target_fw.upper()
+
   if is_range:
-    # Candidate for jax.lax.fori_loop
+    # Candidate for fori_loop
     # To auto-convert, we would need to:
     # 1. Identify 'carry' variables (variables mutated in the body).
     # 2. Define a body_fun(i, carry).
@@ -81,15 +79,15 @@ def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.Flatt
     # Without full dataflow analysis, this is unsafe.
 
     warn_msg = (
-      "JAX requires `jax.lax.fori_loop` or `scan` for stateful loops. "
+      f"{target_fw_label} requires explicit functional loops (e.g. `fori_loop`) for stateful logic. "
       "Auto-conversion prevented due to missing dataflow analysis of 'carry' state."
     )
     return EscapeHatch.mark_failure(node, warn_msg)
 
   # 3. Fallback for Generic Iterators (Lists, Tensors, Zips)
-  # Candidate for jax.lax.scan
+  # Candidate for scan
   warn_msg = (
-    "Python 'for' loop in JAX requires `scan`. Check JIT compatibility. "
+    f"Python 'for' loop in {target_fw_label} requires structural rewrite (e.g. `scan`). "
     "Unrolling this loop may break if it depends on external state."
   )
   return EscapeHatch.mark_failure(node, warn_msg)

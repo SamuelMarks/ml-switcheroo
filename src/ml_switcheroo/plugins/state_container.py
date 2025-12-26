@@ -28,9 +28,6 @@ def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Transforms `self.register_buffer('name', tensor)` -> `setattr(self, 'name', nnx.BatchStat(tensor))`.
   """
-  if ctx.target_fw != "jax":
-    return node
-
   # Check args: expected (name, tensor)
   if len(node.args) < 2:
     return node
@@ -70,9 +67,6 @@ def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Transforms `self.register_parameter('name', param)` -> `setattr(self, 'name', nnx.Param(param))`.
   """
-  if ctx.target_fw != "jax":
-    return node
-
   if len(node.args) < 2:
     return node
 
@@ -102,10 +96,6 @@ def convert_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Transforms `model.state_dict()` -> `flax.nnx.state(model).to_pure_dict()`.
   """
-  # Only if targeting JAX/NNX
-  if ctx.target_fw != "jax":
-    return node
-
   receiver = node.func.value if isinstance(node.func, cst.Attribute) else None
   if not receiver:
     return node
@@ -124,9 +114,6 @@ def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Transforms `model.load_state_dict(state)` -> `flax.nnx.update(model, state)`.
   """
-  if ctx.target_fw != "jax":
-    return node
-
   receiver = node.func.value if isinstance(node.func, cst.Attribute) else None
   if not receiver:
     return node
@@ -151,9 +138,6 @@ def convert_parameters(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Transforms `model.parameters()` -> `flax.nnx.state(model, flax.nnx.Param).values()`.
   """
-  if ctx.target_fw != "jax":
-    return node
-
   receiver = node.func.value if isinstance(node.func, cst.Attribute) else None
   if not receiver:
     return node

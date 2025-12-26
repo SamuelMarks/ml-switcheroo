@@ -4,20 +4,8 @@
     "Abs": {
       "api": "jnp.abs"
     },
-    "AdaBelief": {
-      "api": "optax.adabelief",
-      "requires_plugin": "optimizer_constructor"
-    },
-    "Adagrad": {
-      "api": "optax.adagrad",
-      "requires_plugin": "optimizer_constructor"
-    },
     "Adam": {
       "api": "optax.adam",
-      "requires_plugin": "optimizer_constructor"
-    },
-    "AdamW": {
-      "api": "optax.adamw",
       "requires_plugin": "optimizer_constructor"
     },
     "Dropout": {
@@ -33,10 +21,6 @@
     "Embedding": {
       "api": "praxis.layers.Embedding"
     },
-    "LBFGS": {
-      "api": "optax.lbfgs",
-      "requires_plugin": "optimizer_constructor"
-    },
     "Linear": {
       "api": "praxis.layers.Linear",
       "args": {
@@ -46,19 +30,10 @@
       }
     },
     "RMSprop": {
-      "api": "optax.rmsprop",
-      "requires_plugin": "optimizer_constructor"
-    },
-    "SGD": {
-      "api": "optax.sgd",
-      "requires_plugin": "optimizer_constructor"
+      "api": "optax.rmsprop"
     },
     "Sequential": {
       "api": "praxis.layers.Sequential"
-    },
-    "Yogi": {
-      "api": "optax.yogi",
-      "requires_plugin": "optimizer_constructor"
     },
     "abs": {
       "api": "jnp.abs"

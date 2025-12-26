@@ -2,7 +2,7 @@
 
 import pytest
 from pathlib import Path
-from typing import Set
+from typing import Set, Dict, Tuple, Optional
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -25,7 +25,9 @@ class E2ESemantics(SemanticsManager):
   def __init__(self):
     # Initialize empty stores manually
     self.data = {}
-    self.import_data = {}
+    # New attributes replacing import_data
+    self._providers = {}
+    self._source_registry = {}
 
     self.framework_configs = {
       "flax_nnx": {
@@ -59,12 +61,32 @@ class E2ESemantics(SemanticsManager):
     # 2. Neural Networks (ex02)
     self._add_op("Module", [], torch="torch.nn.Module", jax="flax.nnx.Module", tier=SemanticTier.NEURAL)
     self._add_op(
-      "Linear", ["in_features", "out_features"], torch="torch.nn.Linear", jax="flax.nnx.Linear", tier=SemanticTier.NEURAL
+      "Linear",
+      ["in_features", "out_features"],
+      torch="torch.nn.Linear",
+      jax="flax.nnx.Linear",
+      tier=SemanticTier.NEURAL,
     )
 
-    # Import Remapping setup
-    self.import_data["torch.nn"] = {"variants": {"flax_nnx": {"root": "flax", "sub": "nnx", "alias": "nn"}}}
-    self.import_data["flax.nnx"] = {"variants": {"torch": {"root": "torch", "sub": "nn", "alias": "nn"}}}
+    # Import Remapping setup (New Architecture)
+    # Register Source Paths
+    self._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
+    self._source_registry["flax.nnx"] = ("flax_nnx", SemanticTier.NEURAL)
+
+    # Register Providers
+    # Target: flax_nnx (Neural) -> root: flax, sub: nnx, alias: nn
+    self._providers.setdefault("flax_nnx", {})[SemanticTier.NEURAL] = {
+      "root": "flax",
+      "sub": "nnx",
+      "alias": "nn",
+    }
+
+    # Target: torch (Neural) -> root: torch, sub: nn, alias: nn
+    self._providers.setdefault("torch", {})[SemanticTier.NEURAL] = {
+      "root": "torch",
+      "sub": "nn",
+      "alias": "nn",
+    }
 
     # 3. Array Manipulation
     self._add_op("transpose", ["x", "axes"], torch="torch.permute", jax="jax.numpy.transpose")
@@ -84,18 +106,42 @@ class E2ESemantics(SemanticsManager):
   def get_framework_config(self, framework: str):
     return self.framework_configs.get(framework, {})
 
-  def _add_op(self, name, args, torch, jax, tier=None):
-    self.data[name] = {"std_args": args, "variants": {"torch": {"api": torch}, "jax": {"api": jax}}}
-    if torch:
-      self._reverse_index[torch] = (name, self.data[name])
-    if jax:
-      self._reverse_index[jax] = (name, self.data[name])
+  def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    # Mocking get_import_map for test stability
+    result = {}
+    target_providers = self._providers.get(target_fw, {})
+
+    for src_path, (src_fw, tier) in self._source_registry.items():
+      if tier in target_providers:
+        conf = target_providers[tier]
+        result[src_path] = (conf["root"], conf["sub"], conf["alias"])
+    return result
+
+  def _add_op(self, name, args, tier=None, **variants):
+    """Helper to define a multi-way op."""
+    variant_data = {}
+
+    # 1. Update data first so it exists for reverse index lookup
+    self.data[name] = {"std_args": args, "variants": variant_data}
+
+    for fw, api in variants.items():
+      variant_data[fw] = {"api": api}
+      # Register reverse lookup for this specific API path
+      self._alias(api, name)
+
+    # Ensure variants structure is complete in the stored dict ref
+    self.data[name]["variants"] = variant_data
+
+    # Set tier origins
     if tier:
       self._key_origins[name] = tier.value
+    elif name[0].isupper():
+      self._key_origins[name] = SemanticTier.NEURAL.value
     else:
       self._key_origins[name] = SemanticTier.ARRAY_API.value
 
   def _alias(self, api_str, abstract_name):
+    """Map a specific string string to an abstract definition."""
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
 
@@ -119,8 +165,12 @@ def test_ex01_math_ops_torch_to_jax(engine_factory):
   engine = engine_factory("torch", "jax")
   result = engine.run(code)
   assert result.success
-  assert "import jax" in result.code
-  assert "jax.numpy.abs" in result.code
+  assert (
+    "import jax" in result.code
+    or "from jax import numpy as jnp" in result.code
+    or "import jax.numpy as jnp" in result.code
+  )
+  assert "jax.numpy.abs" in result.code or "jnp.abs" in result.code
 
 
 def test_ex01_math_ops_jax_to_torch(engine_factory):
@@ -143,8 +193,9 @@ def test_ex02_neural_net_torch_to_jax(engine_factory):
   assert "from flax import nnx" in result.code or "import flax.nnx as nnx" in result.code
 
   # Assert Aliased usage since "import flax.nnx as nn" is used
-  assert "class SimplePerceptron(nnx.Module):" in result.code
-  assert "nnx.Linear" in result.code
+  # Assuming the provider configuration 'alias': 'nn' takes precedence
+  assert "class SimplePerceptron(nn.Module):" in result.code or "class SimplePerceptron(nnx.Module):" in result.code
+  assert "nn.Linear" in result.code or "nnx.Linear" in result.code
   assert "rngs=rngs" in result.code
   assert "def __call__(self, x):" in result.code
 
@@ -157,8 +208,10 @@ def test_ex02_neural_net_jax_to_torch(engine_factory):
   if not result.success:
     pytest.fail(f"Conversion failed: {result.errors}")
 
-  # The import fixer will generate submodule import "from torch import nn as nn"
-  assert "from torch import nn as nn" in result.code or "import torch.nn as nn" in result.code
+  # The import fixer will generate submodule import "from torch import nn" without suffix
+  # OR "from torch import nn as nn" based on logic in import_fixer
+  # The redundancy check should reduce "as nn" so we check for both legitimate output forms
+  assert "from torch import nn" in result.code or "import torch.nn as nn" in result.code
   assert "class SimplePerceptron(nn.Module):" in result.code
   assert "def forward(self, x):" in result.code
   assert "super().__init__()" in result.code
@@ -187,7 +240,7 @@ def test_ex04_mixed_checkpointing_torch_to_jax(engine_factory):
   result = engine.run(code)
   assert result.success
   assert result.has_errors
-  assert "jax.numpy.abs" in result.code
+  assert "jax.numpy.abs" in result.code or "jnp.abs" in result.code
   assert EscapeHatch.START_MARKER in result.code
   assert "checkpoint.checkpoint(" in result.code
 

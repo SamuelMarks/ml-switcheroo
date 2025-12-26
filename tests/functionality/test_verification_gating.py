@@ -10,7 +10,7 @@ Verifies that:
 
 import json
 import pytest
-from typing import Set
+from typing import Set, Dict, Tuple, Optional, Any
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -26,10 +26,13 @@ class MockSemantics(SemanticsManager):
   def __init__(self):
     self.data = {}
     self._validation_status = {}
-    self.import_data = {}
     self.framework_configs = {}
     self._reverse_index = {}
     self._known_rng_methods = set()
+
+    # New attributes
+    self._providers = {}
+    self._source_registry = {}
 
     # 1. 'good_op': Valid mapping, will pass verification
     self._inject("good_op", "torch.good", "jax.good")
@@ -43,6 +46,12 @@ class MockSemantics(SemanticsManager):
   def _inject(self, name, s_api, t_api):
     self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
+
+  def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    return {}
+
+  def get_framework_config(self, framework: str) -> Dict[str, Any]:
+    return {}
 
 
 @pytest.fixture
@@ -76,9 +85,9 @@ def test_validation_gating_logic(mock_report):
   assert semantics.is_verified("bad_op") is False
 
   # 4. Run Transformation
-  code = """ 
-y1 = torch.good(x) 
-y2 = torch.bad(x) 
+  code = """
+y1 = torch.good(x)
+y2 = torch.bad(x)
 """
   result = engine.run(code)
 

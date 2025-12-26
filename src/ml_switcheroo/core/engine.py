@@ -41,6 +41,7 @@ from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.analysis.dependencies import DependencyScanner
 from ml_switcheroo.analysis.lifecycle import InitializationTracker
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.schema import PluginTraits
 import ml_switcheroo.frameworks as fw_registry
 
 # Import Visualizer for snapshots
@@ -156,29 +157,51 @@ class ASTEngine:
     Helper to generate and log an AST visualization snapshot.
     Includes verbose print logging visible in the UI console.
     """
-    print(f"[Visualizer] Generating snapshot: {phase_label}...")
     tracer = get_tracer()
     try:
       viz = MermaidGenerator()
       graph = viz.generate(tree)
 
       # Sanity check graph size
-      graph_lines = len(graph.splitlines())
-      print(f"[Visualizer] Success. Graph size: {len(graph)} chars, {graph_lines} lines.")
+      # graph_lines = len(graph.splitlines())
 
       tracer.log_snapshot(phase_label, graph)
     except Exception as e:
-      # Capture full traceback
-      tb = traceback.format_exc()
-      clean_tb = tb.replace("\n", "<br/>").replace('"', "'")
-
-      print(f"[Visualizer] FAILED: {str(e)}")
       tracer.log_warning(f"Visualizer Error {phase_label}: {str(e)}")
 
       error_graph = (
         f'graph TD\nclassDef err fill:#ea4335,color:white,font-weight:bold;\nE["Visualizer Crash:<br/>{str(e)}"]:::err\n'
       )
       tracer.log_snapshot(f"{phase_label} (FAILED)", error_graph)
+
+  def _should_enforce_purity(self) -> bool:
+    """
+    Determines if the target framework requires purity checks based on PluginTraits.
+    Checks the SemanticsManager configuration first, and falls back to inspecting
+    the live Adapter directly if configuration hasn't been hydrated.
+
+    Returns:
+        bool: True if the target framework requires functional purity checks.
+    """
+    # 1. Check Semantics Config (Hydrated from JSON)
+    conf = self.semantics.get_framework_config(self.target)
+    if conf:
+      traits_data = conf.get("plugin_traits")
+      if traits_data:
+        if isinstance(traits_data, dict):
+          return traits_data.get("enforce_purity_analysis", False)
+        if isinstance(traits_data, PluginTraits):
+          return traits_data.enforce_purity_analysis
+        # Fallback for generic object access
+        return getattr(traits_data, "enforce_purity_analysis", False)
+
+    # 2. Fallback: Check Adapter Logic directly (Source of Truth)
+    # This covers cases where manager loading might lag behind code changes or in pure unit tests
+    adapter = fw_registry.get_adapter(self.target)
+    if adapter and hasattr(adapter, "plugin_traits"):
+      return adapter.plugin_traits.enforce_purity_analysis
+
+    return False
 
   def run(self, code: str) -> ConversionResult:
     """
@@ -187,7 +210,7 @@ class ASTEngine:
     Passes performed:
 
     1.  Parse.
-    2.  Purity Scan (if targeting JAX-like frameworks).
+    2.  Purity Scan (if targeting traits.enforce_purity_analysis).
     3.  Lifecycle Analysis (Init/Forward mismatch).
     4.  Dependency Scan (Checking 3rd party libs).
     5.  Pivot Rewrite (The main transformation).
@@ -224,8 +247,8 @@ class ASTEngine:
     errors_log = []
 
     # Pass 0a: Purity Analysis
-    # Check against JAX-like targets (jax, flax_nnx, paxml)
-    if "jax" in self.target or "flax" in self.target or "pax" in self.target:
+    # Controlled dynamically by Framework Traits (e.g. JAX/Flax opt-in)
+    if self._should_enforce_purity():
       tracer.start_phase("Purity Check", "Scanning for side-effects")
       purity_scanner = PurityScanner(semantics=self.semantics, source_fw=self.source)
       tree = tree.visit(purity_scanner)

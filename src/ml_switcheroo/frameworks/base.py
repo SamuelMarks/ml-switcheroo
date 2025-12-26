@@ -2,25 +2,26 @@
 Base Protocol and Registry for Framework Adapters.
 
 This module defines the interface that all Framework Adapters must implement.
-It acts as the primary contact point between the `ASTEngine` and the specific
+It acts as the primary contact point between the ``ASTEngine`` and the specific
 ML library implementations (plugins).
 
 Key Capabilities (Hybrid Loading):
-- Adapters possess an `init_mode` (LIVE or GHOST).
-- In LIVE mode, they introspect installed packages.
-- In GHOST mode, they load cached JSON snapshots.
+- Adapters possess an ``init_mode`` (LIVE or GHOST).
+- In **LIVE** mode, they introspect installed packages module-by-module.
+- In **GHOST** mode, they load cached JSON snapshots.
 
-Update: Enhanced StandardMap schema and import definitions.
+The ``definitions`` and ``import_namespaces`` properties allow adapters to
+self-declare their capabilities and import requirements to the SemanticsManager.
 """
 
 import json
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Any, Protocol, Type, Dict, List, Tuple, Optional, Union
+from typing import Any, Protocol, Type, Dict, List, Tuple, Optional, Union, Set
 from pydantic import BaseModel, Field
 
-from ml_switcheroo.semantics.schema import StructuralTraits
+from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
 from ml_switcheroo.enums import SemanticTier
 
@@ -28,6 +29,8 @@ SNAPSHOT_DIR = Path(__file__).resolve().parent.parent / "snapshots"
 
 
 class StandardCategory(str, Enum):
+  """Enumeration of API categories for discovery."""
+
   LOSS = "loss"
   OPTIMIZER = "optimizer"
   LAYER = "layer"
@@ -35,8 +38,22 @@ class StandardCategory(str, Enum):
 
 
 class InitMode(str, Enum):
+  """Initialization mode for adapters."""
+
   LIVE = "live"
   GHOST = "ghost"
+
+
+class ImportConfig(BaseModel):
+  """
+  Configuration for an exposed namespace.
+
+  Used by adapters to self-declare the semantic role of their modules.
+  Example: ``torch.nn`` declares itself as ``tier=NEURAL``.
+  """
+
+  tier: SemanticTier = Field(description="The semantic category of this namespace.")
+  recommended_alias: Optional[str] = Field(default=None, description="Preferred alias (e.g., 'nn').")
 
 
 class StandardMap(BaseModel):
@@ -91,52 +108,128 @@ class StandardMap(BaseModel):
 class FrameworkAdapter(Protocol):
   """
   Protocol definition for a Framework Adapter.
+
+  Adapters provide translation traits, discovery logic, and syntax generation
+  for specific machine learning frameworks.
   """
 
   _mode: InitMode = InitMode.LIVE
   _snapshot_data: Dict[str, Any] = {}
 
-  def __init__(self): ...
-  def convert(self, data: Any) -> Any: ...
+  def __init__(self) -> None:
+    """Initialize the adapter."""
+    ...
+
+  def convert(self, data: Any) -> Any:
+    """
+    Converts input data (List, NumPy) to the framework's Tensor format.
+    Used by the Fuzzer for validation.
+    """
+    ...
 
   @property
-  def test_config(self) -> Dict[str, str]: ...
+  def test_config(self) -> Dict[str, str]:
+    """Templates for generating physical test files (imports, conversions)."""
+    ...
 
   @property
-  def search_modules(self) -> List[str]: ...
+  def search_modules(self) -> List[str]:
+    """List of module names to scan during discovery."""
+    ...
 
   @property
-  def display_name(self) -> str: ...
+  def display_name(self) -> str:
+    """Human-readable name of the framework."""
+    ...
 
   @property
-  def ui_priority(self) -> int: ...
+  def ui_priority(self) -> int:
+    """Sort priority for UI display (lower is earlier)."""
+    ...
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]: ...
+  def discovery_heuristics(self) -> Dict[str, List[str]]:
+    """Dictionary of Regex patterns for categorizing APIs."""
+    ...
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]: ...
+  def supported_tiers(self) -> List[SemanticTier]:
+    """List of semantic tiers supported by this framework."""
+    ...
 
   @property
-  def import_alias(self) -> Tuple[str, str]: ...
+  def import_alias(self) -> Tuple[str, str]:
+    """The primary import tuple (e.g. ('torch', 'torch'))."""
+    ...
 
   @property
-  def inherits_from(self) -> Optional[str]: ...
+  def inherits_from(self) -> Optional[str]:
+    """Optional parent framework key to inherit behavior from."""
+    ...
 
   @property
-  def structural_traits(self) -> StructuralTraits: ...
+  def structural_traits(self) -> StructuralTraits:
+    """Configuration for class/function rewriting."""
+    ...
 
   @property
-  def rng_seed_methods(self) -> List[str]: ...
+  def plugin_traits(self) -> PluginTraits:
+    """
+    Returns flags controlling plugin behavior (e.g. supported casting syntax).
+    Default should be PluginTraits().
+    """
+    ...
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str: ...
+  @property
+  def rng_seed_methods(self) -> List[str]:
+    """List of global RNG seeding method names."""
+    ...
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str: ...
-  def get_serialization_imports(self) -> List[str]: ...
+  # --- Safety ---
+  @property
+  def unsafe_submodules(self) -> Set[str]:
+    """
+    Returns a set of submodule names to exclude from recursive introspection.
+    Prevents crashes on C-extensions or internals (e.g., '_C', 'distributed').
+    """
+    ...
+
+  # --- Syntax Generators ---
+
+  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+    """Generates code for device object creation."""
+    ...
+
+  def get_device_check_syntax(self) -> str:
+    """
+    Returns syntax for checking GPU/Accelerator availability.
+    Example: ``torch.cuda.is_available()`` or ``len(jax.devices('gpu')) > 0``.
+    """
+    ...
+
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """
+    Returns syntax for splitting an RNG state (Preamble Injection).
+    Example: ``rng, key = jax.random.split(rng)``.
+    """
+    ...
+
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+    """Generates code for save/load operations."""
+    ...
+
+  def get_serialization_imports(self) -> List[str]:
+    """Returns list of imports required for serialization."""
+    ...
 
   @classmethod
-  def get_example_code(cls) -> str: ...
-  def get_tiered_examples(self) -> Dict[str, str]: ...
+  def get_example_code(cls) -> str:
+    """Returns the primary code example for documentation."""
+    ...
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """Returns examples for each supported tier."""
+    ...
 
   # --- Distributed Semantics ---
   @property
@@ -145,15 +238,25 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
     """
-    Returns import path remapping rules.
-    Format: {"source.mod": {"root": "target", "sub": "mod", "alias": "alias"}}
+    Exposes namespaces provided by this framework with Tier metadata.
+
+    New Self-Declaration Format:
+        { "torch.nn": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="nn") }
+
+    Legacy Format (Deprecated):
+        { "source.mod": {"root": "target", "sub": "mod", "alias": "alias"} }
     """
     ...
 
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]: ...
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None: ...
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    """Collects APIs for consensus discovery."""
+    ...
+
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """Applies manual patches to the snapshot dictionary."""
+    ...
 
 
 def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
@@ -176,6 +279,8 @@ _ADAPTER_REGISTRY: Dict[str, Type[FrameworkAdapter]] = {}
 
 
 def register_framework(name: str):
+  """Decorator to register a framework adapter class."""
+
   def wrapper(cls):
     _ADAPTER_REGISTRY[name] = cls
     return cls
@@ -184,6 +289,7 @@ def register_framework(name: str):
 
 
 def get_adapter(name: str) -> Optional[FrameworkAdapter]:
+  """Factory to retrieve an instantiated adapter."""
   cls = _ADAPTER_REGISTRY.get(name)
   if cls:
     return cls()

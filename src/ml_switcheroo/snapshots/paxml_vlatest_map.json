@@ -1,0 +1,117 @@
+{
+  "__framework__": "paxml",
+  "mappings": {
+    "Constant": {
+      "api": "optax.constant_schedule",
+      "args": {}
+    },
+    "Linear": {
+      "api": "optax.linear_schedule",
+      "args": {}
+    },
+    "Size": {
+      "api": "optax.tree.size",
+      "args": {}
+    },
+    "bias": {
+      "api": "optax.bias_correction",
+      "args": {}
+    },
+    "cosine_similarity": {
+      "api": "optax.cosine_similarity",
+      "args": {}
+    },
+    "div_value": {
+      "api": "optax.tree.div",
+      "args": {}
+    },
+    "freeze": {
+      "api": "optax.freeze",
+      "args": {}
+    },
+    "full": {
+      "api": "optax.tree.full_like",
+      "args": {}
+    },
+    "mask": {
+      "api": "optax.masked",
+      "args": {}
+    },
+    "max_norm": {
+      "api": "optax.tree.max",
+      "args": {}
+    },
+    "max_pool1d": {
+      "api": "optax.tree.max",
+      "args": {}
+    },
+    "max_pool2d": {
+      "api": "optax.tree.max",
+      "args": {}
+    },
+    "max_pool3d": {
+      "api": "optax.tree.max",
+      "args": {}
+    },
+    "max_val": {
+      "api": "optax.tree.max",
+      "args": {}
+    },
+    "min_val": {
+      "api": "optax.tree.min",
+      "args": {}
+    },
+    "multi_dot": {
+      "api": "optax.tree.mul",
+      "args": {}
+    },
+    "name": {
+      "api": "optax.named_chain",
+      "args": {}
+    },
+    "norm": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm1": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm2": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm3": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm_first": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "norm_type": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "normal": {
+      "api": "optax.tree.norm",
+      "args": {}
+    },
+    "scale_factor": {
+      "api": "optax.tree.scale",
+      "args": {}
+    },
+    "scale_grad_by_freq": {
+      "api": "optax.tree.scale",
+      "args": {}
+    },
+    "softmax": {
+      "api": "optax.softmax_cross_entropy",
+      "args": {}
+    },
+    "vecdot": {
+      "api": "optax.tree.vdot",
+      "args": {}
+    }
+  }
+}

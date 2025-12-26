@@ -2,15 +2,21 @@
 Numpy Framework Adapter.
 
 This module provides the implementation definitions for the NumPy API.
-It maps abstract operations for Math and Extras to `numpy.*` functions
+It maps abstract operations for Math and Extras to ``numpy.*`` functions
 and defines type mappings for data-driven casting logic.
 """
 
 import numpy as np
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Tuple, Optional, Dict, Any, Set
 from ml_switcheroo.core.ghost import GhostRef
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, StandardCategory, StandardMap
+from ml_switcheroo.frameworks.base import (
+  register_framework,
+  StructuralTraits,
+  StandardCategory,
+  StandardMap,
+  ImportConfig,
+)
 
 
 @register_framework("numpy")
@@ -20,7 +26,7 @@ class NumpyAdapter:
 
   Provides support for:
   1.  **Math Tiers**: Basic array operations (abs, mean, sum).
-  2.  **Type Mapping**: Abstract Dtypes to `numpy.float32`, etc.
+  2.  **Type Mapping**: Abstract Dtypes to ``numpy.float32``, etc.
   3.  **IO**: Save/Load operations.
   """
 
@@ -34,14 +40,18 @@ class NumpyAdapter:
     return ["numpy", "numpy.linalg", "numpy.fft"]
 
   @property
+  def unsafe_submodules(self) -> Set[str]:
+    return set()
+
+  @property
   def import_alias(self) -> Tuple[str, str]:
     """Returns ('numpy', 'np')."""
     return ("numpy", "np")
 
   @property
-  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+  def import_namespaces(self) -> Dict[str, ImportConfig]:
     """Remaps imports to 'np' alias."""
-    return {"numpy": {"root": "numpy", "sub": None, "alias": "np"}}
+    return {"numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="np")}
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
@@ -71,6 +81,17 @@ class NumpyAdapter:
     return StructuralTraits()
 
   @property
+  def plugin_traits(self) -> Any:
+    from ml_switcheroo.semantics.schema import PluginTraits
+
+    return PluginTraits(
+      has_numpy_compatible_arrays=True,
+      requires_explicit_rng=False,
+      requires_functional_state=False,
+      requires_functional_control_flow=False,
+    )
+
+  @property
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Static definitions for NumPy mappings.
@@ -81,11 +102,16 @@ class NumpyAdapter:
       "Abs": StandardMap(api="np.abs"),
       "Mean": StandardMap(api="np.mean"),
       "Sum": StandardMap(api="np.sum"),
+      "Add": StandardMap(api="np.add", transformation_type="infix", operator="+"),
+      "Sub": StandardMap(api="np.subtract", transformation_type="infix", operator="-"),
+      "Mul": StandardMap(api="np.multiply", transformation_type="infix", operator="*"),
+      "Div": StandardMap(api="np.divide", transformation_type="infix", operator="/"),
       "max": StandardMap(api="np.max"),
       "min": StandardMap(api="np.min"),
       "exp": StandardMap(api="np.exp"),
       "log": StandardMap(api="np.log"),
       "square": StandardMap(api="np.square"),
+      "sqrt": StandardMap(api="np.sqrt"),
       # --- Extras ---
       "randn": StandardMap(api="numpy.random.randn"),
       "permute_dims": StandardMap(api="numpy.transpose", pack_to_tuple="axes"),
@@ -120,53 +146,21 @@ class NumpyAdapter:
     """NumPy doesn't implement Layers/Losses structurally."""
     return []
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    """Returns the primary example code used for instant demos."""
-    return cls().get_tiered_examples()["tier1_math"]
-
-  def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Returns NumPy idiomatic examples.
-    """
-    return {
-      "tier1_math": """import numpy as np
-
-def linear_algebra_ops(a, b):
-    # Tier 1: Standard Numeric Computing
-    # Matrix Multiplication
-    dot = np.matmul(a, b)
-
-    # Element-wise operations
-    diff = np.abs(a - b)
-
-    # Aggregation
-    norm = np.linalg.norm(diff)
-    return dot, norm
-""",
-      "tier2_neural": """import numpy as np
-
-# Tier 2: Neural Networks (Out of Scope for NumPy)
-# NumPy does not offer a built-in neural layer API.
-# While possible to write one from scratch, it is not
-# supported by the ml-switcheroo transpiler out-of-the-box.
-""",
-      "tier3_extras": """import numpy as np
-
-def serialize_data(arr, filename):
-    # Tier 3: IO Persistence
-    # Use standard binary format (.npy)
-    np.save(file=filename, arr=arr)
-
-    # Reload
-    loaded = np.load(file=filename)
-    return loaded
-""",
-    }
+  # --- Syntax Generation ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Returns CPU syntax ignoring device requests (NumPy is CPU-only)."""
     return "'cpu'"
+
+  def get_device_check_syntax(self) -> str:
+    """
+    NumPy does not support GPUs.
+    """
+    return "False"
+
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """No-op for NumPy."""
+    return "pass"
 
   def get_serialization_imports(self) -> List[str]:
     """Returns imports for IO."""
@@ -209,3 +203,47 @@ def serialize_data(arr, filename):
       except Exception:
         pass
     return data
+
+  @classmethod
+  def get_example_code(cls) -> str:
+    """Returns the primary example code used for instant demos."""
+    return cls().get_tiered_examples()["tier1_math"]
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """
+    Returns NumPy idiomatic examples.
+    """
+    return {
+      "tier1_math": """import numpy as np
+
+def linear_algebra_ops(a, b): 
+    # Tier 1: Standard Numeric Computing
+    # Matrix Multiplication
+    dot = np.matmul(a, b) 
+
+    # Element-wise operations
+    diff = np.abs(a - b) 
+
+    # Aggregation
+    norm = np.linalg.norm(diff) 
+    return dot, norm
+""",
+      "tier2_neural": """import numpy as np
+
+# Tier 2: Neural Networks (Out of Scope for NumPy) 
+# NumPy does not offer a built-in neural layer API. 
+# While possible to write one from scratch, it is not
+# supported by the ml-switcheroo transpiler out-of-the-box. 
+""",
+      "tier3_extras": """import numpy as np
+
+def serialize_data(arr, filename): 
+    # Tier 3: IO Persistence
+    # Use standard binary format (.npy) 
+    np.save(file=filename, arr=arr) 
+
+    # Reload
+    loaded = np.load(file=filename) 
+    return loaded
+""",
+    }

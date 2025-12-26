@@ -4,10 +4,7 @@ Integration Tests for Type Mapping and Casting Logic.
 This suite verifies that:
 1.  **Attribute Types**: `torch.float32` maps correctly to `jnp.float32`, `tf.float32`, `np.float32` (Keras).
 2.  **Method Casting**: Method shorthands (`.float()`, `.long()`) are transformed into the
-    target framework's specific idiom:
-    -   **JAX/NumPy/MLX**: `.astype(...)` via the `casting` plugin.
-    -   **TensorFlow**: `tf.cast(...)` via functional rewriting.
-    -   **Keras**: `keras.ops.cast(..., dtype='...')` via string injection.
+    target framework's specific idiom using `PluginTraits` logic.
 """
 
 import pytest
@@ -15,10 +12,10 @@ import importlib
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.schema import PluginTraits
 
 
 # Ensure plugins are loaded for this test session by forcing reload
-# This fixes issues where previous tests cleared the hook registry
 @pytest.fixture(autouse=True)
 def reload_plugins():
   from ml_switcheroo.core import hooks
@@ -34,13 +31,23 @@ def reload_plugins():
 def run_transpile(code: str, target: str) -> str:
   """
   Helper to run the engine end-to-end for a specific target.
+  Injects required traits into the manager for the test target.
   """
-  # Initialize fresh manager to ensure all adapter definitions are hydrated
+  # Initialize fresh manager
   mgr = SemanticsManager()
 
   # Ensure CastFloat/CastInt definitions exist in manager
   if "CastFloat" not in mgr.get_known_apis():
     pytest.fail("SemanticsManager did not load CastFloat standards. Check standards_internal.py.")
+
+  # INJECT PLUGIN TRAITS for the target framework
+  # This is required because the Casting plugin now checks 'has_numpy_compatible_arrays'
+  if target in ["jax", "numpy", "tensorflow", "mlx", "flax", "flax_nnx"]:
+    if target not in mgr.framework_configs:
+      mgr.framework_configs[target] = {}
+
+    # Enable numpy compat
+    mgr.framework_configs[target]["plugin_traits"] = PluginTraits(has_numpy_compatible_arrays=True)
 
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   engine = ASTEngine(semantics=mgr, config=cfg)
@@ -107,14 +114,11 @@ def test_cast_float_jax_plugin():
   res = run_transpile(code, "jax")
   assert ".astype" in res
   assert "jnp.float32" in res
-  # Ensure method name replaced; the ".float" substring check must avoid false positives on "float32"
   assert ".float(" not in res
 
 
 def test_cast_long_numpy_plugin():
-  """
-  Scenario: .long() -> .astype(np.int64).
-  """
+  """Scenario: .long() -> .astype(np.int64)."""
   code = "y = x.long()"
   res = run_transpile(code, "numpy")
   assert ".astype" in res
@@ -122,9 +126,7 @@ def test_cast_long_numpy_plugin():
 
 
 def test_cast_half_mlx_plugin():
-  """
-  Scenario: .half() -> .astype(mx.float16).
-  """
+  """Scenario: .half() -> .astype(mx.float16)."""
   code = "y = x.half()"
   res = run_transpile(code, "mlx")
   assert ".astype" in res
@@ -134,15 +136,12 @@ def test_cast_half_mlx_plugin():
 def test_cast_int_tensorflow_functional():
   """
   Scenario: .int() -> tf.cast(x, dtype=tf.int32).
-  Logic: Uses standard functional rewriting (TensorFlowAdapter definition),
-          bypassing the 'type_methods' plugin for Functional rewrites.
+  Logic: Uses standard functional rewriting (TensorFlowAdapter definition).
   """
   code = "y = x.int()"
   res = run_transpile(code, "tensorflow")
   assert "tf.cast" in res
-  # TF definition injects dtype as literal string "tf.int32", resulting in quoted arg
   assert "dtype='tf.int32'" in res or 'dtype="tf.int32"' in res
-  # Verify 'x' is passed as argument
   assert "tf.cast(x" in res
 
 
@@ -154,7 +153,6 @@ def test_cast_bool_keras_string():
   code = "mask = x.bool()"
   res = run_transpile(code, "keras")
   assert "keras.ops.cast" in res
-  # Check for string literal dtype injection
   assert 'dtype="bool"' in res or "dtype='bool'" in res
 
 
@@ -166,16 +164,13 @@ def test_nested_casting_expression():
   """
   code = "y = torch.abs(x.float())"
   res = run_transpile(code, "jax")
-
   assert "jnp.abs" in res
   assert "x.astype(" in res
   assert "jnp.float32" in res
 
 
 def test_cast_byte_uint8():
-  """
-  Scenario: .byte() -> uint8.
-  """
+  """Scenario: .byte() -> uint8."""
   code = "img = x.byte()"
   res = run_transpile(code, "jax")
   # JAX maps uint8 types correctly

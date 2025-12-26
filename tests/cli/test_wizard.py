@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector:
-  def inspect(self, _pkg):
+  def inspect(self, _pkg, **kwargs):
     return {
       "pkg.new_math_op": {"params": ["x"]},
       "pkg.nn.Layer": {"params": ["x"]},

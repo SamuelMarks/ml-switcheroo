@@ -9,24 +9,15 @@ Addresses the architectural difference between:
 **Transformation**
 
 1.  **Instantiation**:
-
-    -   Detects specific Scheduler constructors.
+    -   Detects specific Scheduler constructors via `scheduler_rewire`.
     -   Removes the `optimizer` argument (Arg 0).
     -   Maps hyperparameters to Optax equivalents.
     -   Changes the API call to an Optax schedule factory.
     -   Injects `init_value=1.0` (as partial schedule) or tries to preserve semantics.
 
 2.  **Stepping**:
-
-    -   Detects `scheduler.step()`.
-    -   Since JAX schedulers are integrated into the gradient transform chain and stepped automatically via state,
-        manual stepping is redundant.
+    -   Detects `scheduler.step()` via `scheduler_step_noop`.
     -   Replaces `scheduler.step()` with a no-op placeholder `None`.
-
-Supported Mappings:
-
--   `StepLR` -> `optax.exponential_decay(staircase=True)`
--   `CosineAnnealingLR` -> `optax.cosine_decay_schedule`
 """
 
 import libcst as cst
@@ -47,10 +38,10 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
   Hook: Transforms Scheduler instantiation.
-  """
-  if ctx.target_fw.lower() not in ["jax", "flax", "flax_nnx"]:
-    return node
+  Logic routes based on detected Operation ID in context (StepLR vs Cosine).
 
+  Decoupling: Executes blindly if wired. Relies on `ctx.current_op_id` to determine flavor.
+  """
   # We rely on the operation ID to know which scheduler specific logic to apply
   op_id = ctx.current_op_id or ""
 
@@ -196,9 +187,7 @@ def _transform_cosine_lr(node: cst.Call) -> cst.Call:
 def transform_scheduler_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
   Hook: Replaces ``scheduler.step()`` with a no-op value (None).
+  Triggered if the scheduler step operation is wired to `scheduler_step_noop`.
   """
-  if ctx.target_fw.lower() not in ["jax", "flax", "flax_nnx"]:
-    return node
-
   # Return explicit None. In an expression statement, `None` does nothing.
   return cst.Name("None")

@@ -11,61 +11,47 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.enums import SemanticTier
 
 
+class MockSemantics(SemanticsManager):
+  def __init__(self):
+    self._providers = {}
+    self._source_registry = {}
+    self.data = {}
+    self.import_data = {}  # Keep for backward compatibility check if needed or remove
+    self.framework_configs = {}
+    self._reverse_index = {}
+
+
 def test_no_hardcoded_defaults():
   """
   Ensure the manager honors the strict architecture rule:
   No hardcoded mappings in Python. Initialization should yield
-  an empty state if no JSON files are found (or in a test env without them).
-
-  Note: If this test runs in an environment where real JSONs exist,
-  we patch `resolve_semantics_dir` to point to an empty dir to verify
-  the code itself carries no data.
+  an empty state if no JSON files are found.
   """
-  # Create the manager without loading properties
-  mgr = SemanticsManager()
-  mgr._reverse_index = {}
+  mgr = MockSemantics()
 
-  # We manually clear data that might have been loaded from real files
-  # during __init__ to verify the *code* doesn't verify defaults.
-  # Alternatively, we can check that a made-up key like 'torch.magic' is missing.
-  # But strictly, checking 'torch.nn' might fail if the user has JSONs.
-
-  # A cleaner test uses a temporary empty directory and patches resolution.
-  pass  # Logic moved to test_manager_architecture.py for isolation.
-
-  # Here we test mechanism. If we assume a blank slate:
-  mgr.import_data = {}
-
-  # Assert 'torch.nn' is NOT present by magic code
-  assert "torch.nn" not in mgr.import_data
+  # Assert 'torch.nn' is NOT present in providers/registry
+  assert "torch.nn" not in mgr._source_registry
 
 
 def test_merged_json_data():
   """
-  Simulate loading a JSON file containing an `__imports__` section.
-  This proves we can re-create the 'defaults' purely via data injection.
+  Simulate loading usage of providers from adapter/json.
+  Since 'import_data' attribute is removed, we check _providers structure.
   """
   mgr = SemanticsManager()
-  mgr._reverse_index = {}
-  # Ensure clean state for test
-  mgr.import_data = {}
 
-  # Mock data structure representing k_framework_extras.json
-  mock_json = {
-    "__imports__": {"torch.custom_sub": {"variants": {"jax": {"root": "my_lib", "sub": "mod", "alias": "cust"}}}},
-    "some_op": {"variants": {}},  # Standard op
-  }
+  # Manually inject data as if loaded from an Adapter
+  mgr._source_registry["torch.custom_sub"] = ("torch", SemanticTier.EXTRAS)
+  mgr._providers["jax"] = {SemanticTier.EXTRAS: {"root": "my_lib", "sub": "mod", "alias": "cust"}}
 
-  # Merge into manager
-  mgr._merge_tier(mock_json, SemanticTier.EXTRAS)
+  # Verify lookups
+  mapping = mgr.get_import_map(target_fw="jax")
 
-  # Verify op loading
-  assert "some_op" in mgr.data
-
-  # Verify import loading
-  assert "torch.custom_sub" in mgr.import_data
-  details = mgr.import_data["torch.custom_sub"]
-  assert details["variants"]["jax"]["alias"] == "cust"
+  # Should find mapping for torch.custom_sub
+  assert "torch.custom_sub" in mapping
+  root, sub, alias = mapping["torch.custom_sub"]
+  assert root == "my_lib"
+  assert alias == "cust"
 
 
 def test_get_import_map_structure():
@@ -74,19 +60,17 @@ def test_get_import_map_structure():
   expected by ImportFixer.
   Format: Dict[str, Tuple[root, sub, alias]]
   """
-  mgr = SemanticsManager()
-  mgr._reverse_index = {}
-  mgr.import_data = {}
+  mgr = MockSemantics()
 
-  # Inject data that matches the old hardcoded defaults
-  # to correct tests that relied on specific torch.nn behavior
-  injected_spec = {
-    "__imports__": {
-      "torch.nn": {"variants": {"jax": {"root": "flax", "sub": "linen", "alias": "nn"}}},
-      "torch.optim": {"variants": {"jax": {"root": "optax", "sub": None, "alias": None}}},
-    }
+  # Setup Provider for JAX Extras
+  mgr._providers["jax"] = {
+    SemanticTier.NEURAL: {"root": "flax", "sub": "linen", "alias": "nn"},
+    SemanticTier.EXTRAS: {"root": "optax", "sub": None, "alias": None},
   }
-  mgr._merge_tier(injected_spec, SemanticTier.EXTRAS)
+
+  # Setup Source Registry
+  mgr._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
+  mgr._source_registry["torch.optim"] = ("torch", SemanticTier.EXTRAS)
 
   # Use the injected data
   mapping = mgr.get_import_map(target_fw="jax")
@@ -106,12 +90,13 @@ def test_get_import_map_structure():
 
 def test_get_import_map_ignoring_irrelevant_targets():
   """Verify we filter out imports not matching the target framework."""
-  mgr = SemanticsManager()
-  mgr._reverse_index = {}
-  mgr.import_data = {}
+  mgr = MockSemantics()
 
-  # Inject a TensorFlow mapping
-  mgr.import_data["torch.stuff"] = {"variants": {"tensorflow": {"root": "tf", "sub": "stuff", "alias": None}}}
+  # Register source
+  mgr._source_registry["torch.stuff"] = ("torch", SemanticTier.EXTRAS)
+
+  # Provider is tensorflow
+  mgr._providers["tensorflow"] = {SemanticTier.EXTRAS: {"root": "tf", "sub": "stuff", "alias": None}}
 
   # Request JAX map
   mapping = mgr.get_import_map(target_fw="jax")

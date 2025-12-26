@@ -5,15 +5,10 @@
       "api": "keras.ops.abs"
     },
     "Add": {
-      "api": "keras.ops.add"
-    },
-    "Alphadropout": {
-      "api": "keras.layers.AlphaDropout",
+      "api": "keras.ops.add",
       "args": {
-        "kwargs": "kwargs",
-        "noise_shape": "noise_shape",
-        "rate": "rate",
-        "seed": "seed"
+        "x": "x1",
+        "y": "x2"
       }
     },
     "ArgMax": {
@@ -27,48 +22,6 @@
       "args": {
         "dim": "axis"
       }
-    },
-    "Attention": {
-      "api": "keras.layers.Attention"
-    },
-    "AvgPool1d": {
-      "api": "keras.layers.AvgPool1D",
-      "args": {
-        "data_format": "data_format",
-        "kwargs": "kwargs",
-        "name": "name",
-        "padding": "padding",
-        "pool_size": "pool_size",
-        "strides": "strides"
-      }
-    },
-    "AvgPool2d": {
-      "api": "keras.layers.AvgPool2D",
-      "args": {
-        "data_format": "data_format",
-        "kwargs": "kwargs",
-        "name": "name",
-        "padding": "padding",
-        "pool_size": "pool_size",
-        "strides": "strides"
-      }
-    },
-    "AvgPool3d": {
-      "api": "keras.layers.AvgPool3D",
-      "args": {
-        "data_format": "data_format",
-        "kwargs": "kwargs",
-        "name": "name",
-        "padding": "padding",
-        "pool_size": "pool_size",
-        "strides": "strides"
-      }
-    },
-    "BatchNormalization": {
-      "api": "keras.layers.BatchNormalization"
-    },
-    "Bidirectional": {
-      "api": "keras.layers.Bidirectional"
     },
     "Bool": {
       "api": "bool"
@@ -127,41 +80,10 @@
         "dtype": "int16"
       }
     },
-    "Ceil": {
-      "api": "keras.ops.ceil"
-    },
-    "Celu": {
-      "api": "keras.ops.celu",
-      "args": {
-        "alpha": "alpha",
-        "x": "x"
-      }
-    },
     "CenterCrop": {
-      "api": "keras.layers.CenterCrop"
-    },
-    "Clip": {
-      "api": "keras.ops.clip"
-    },
-    "Conv1d": {
-      "api": "keras.layers.Conv1D"
-    },
-    "Conv2d": {
-      "api": "keras.layers.Conv2D"
-    },
-    "Conv3d": {
-      "api": "keras.layers.Conv3D"
-    },
-    "Cos": {
-      "api": "keras.ops.cos"
-    },
-    "Cosh": {
-      "api": "keras.ops.cosh"
-    },
-    "Det": {
-      "api": "keras.ops.det",
+      "api": "keras.layers.CenterCrop",
       "args": {
-        "x": "x"
+        "size": "height"
       }
     },
     "Div": {
@@ -171,59 +93,15 @@
         "y": "x2"
       }
     },
-    "Dropout": {
-      "api": "keras.layers.Dropout",
-      "args": {
-        "kwargs": "kwargs",
-        "noise_shape": "noise_shape",
-        "rate": "rate",
-        "seed": "seed"
-      }
-    },
-    "Einsum": {
-      "api": "keras.ops.einsum"
-    },
-    "Elu": {
-      "api": "keras.ops.elu",
-      "args": {
-        "alpha": "alpha",
-        "x": "x"
-      }
-    },
     "Embedding": {
       "api": "keras.layers.Embedding",
       "args": {
-        "embeddings_constraint": "embeddings_constraint",
-        "embeddings_initializer": "embeddings_initializer",
-        "embeddings_regularizer": "embeddings_regularizer",
-        "input_dim": "input_dim",
-        "kwargs": "kwargs",
-        "lora_alpha": "lora_alpha",
-        "lora_rank": "lora_rank",
-        "mask_zero": "mask_zero",
-        "output_dim": "output_dim",
-        "quantization_config": "quantization_config",
-        "weights": "weights"
+        "embedding_dim": "output_dim",
+        "num_embeddings": "input_dim"
       }
-    },
-    "Equal": {
-      "api": "keras.ops.equal"
-    },
-    "Erf": {
-      "api": "keras.ops.erf",
-      "args": {
-        "x": "x"
-      }
-    },
-    "Exp": {
-      "api": "keras.ops.exp"
     },
     "Flatten": {
-      "api": "keras.layers.Flatten",
-      "args": {
-        "data_format": "data_format",
-        "kwargs": "kwargs"
-      }
+      "api": "keras.layers.Flatten"
     },
     "Float16": {
       "api": "numpy.float16"
@@ -234,48 +112,17 @@
     "Float64": {
       "api": "numpy.float64"
     },
-    "Floor": {
-      "api": "keras.ops.floor"
-    },
     "GELU": {
-      "api": "keras.ops.gelu",
+      "api": "keras.layers.Activation",
       "args": {
-        "approximate": "approximate",
-        "x": "x"
-      }
-    },
-    "GRU": {
-      "api": "keras.layers.GRU"
-    },
-    "Gelu": {
-      "api": "keras.ops.gelu"
-    },
-    "Glu": {
-      "api": "keras.ops.glu",
-      "args": {
-        "axis": "axis",
-        "x": "x"
-      }
+        "input": "gelu"
+      },
+      "operator": "keras.activations.gelu",
+      "transformation_type": "inline_lambda"
     },
     "Grayscale": {
       "api": "lambda x: x",
       "transformation_type": "inline_lambda"
-    },
-    "Greater": {
-      "api": "keras.ops.greater"
-    },
-    "GroupNormalization": {
-      "api": "keras.layers.GroupNormalization"
-    },
-    "Grucell": {
-      "api": "keras.layers.GRUCell"
-    },
-    "Identity": {
-      "api": "keras.ops.identity",
-      "args": {
-        "dtype": "dtype",
-        "n": "n"
-      }
     },
     "Int16": {
       "api": "numpy.int16"
@@ -286,12 +133,6 @@
     "Int64": {
       "api": "numpy.int64"
     },
-    "IsNaN": {
-      "api": "keras.ops.isnan"
-    },
-    "LSTM": {
-      "api": "keras.layers.LSTM"
-    },
     "LayerNorm": {
       "api": "keras.layers.LayerNormalization",
       "args": {
@@ -299,81 +140,14 @@
         "normalized_shape": "axis"
       }
     },
-    "LayerNormalization": {
-      "api": "keras.layers.LayerNormalization"
-    },
-    "LeakyRelu": {
-      "api": "keras.layers.LeakyReLU",
-      "args": {
-        "kwargs": "kwargs",
-        "negative_slope": "negative_slope"
-      }
-    },
-    "Less": {
-      "api": "keras.ops.less"
-    },
     "Linear": {
-      "api": "keras.activations.linear",
+      "api": "keras.layers.Dense",
       "args": {
-        "x": "x"
-      }
-    },
-    "Log": {
-      "api": "keras.ops.log"
-    },
-    "Lstmcell": {
-      "api": "keras.layers.LSTMCell"
-    },
-    "MatMul": {
-      "api": "keras.ops.matmul"
-    },
-    "Max": {
-      "api": "keras.ops.max"
-    },
-    "MaxPool1d": {
-      "api": "keras.layers.MaxPool1D",
-      "args": {
-        "data_format": "data_format",
-        "kwargs": "kwargs",
-        "name": "name",
-        "padding": "padding",
-        "pool_size": "pool_size",
-        "strides": "strides"
-      }
-    },
-    "MaxPool2d": {
-      "api": "keras.layers.MaxPool2D",
-      "args": {
-        "data_format": "data_format",
-        "kwargs": "kwargs",
-        "name": "name",
-        "padding": "padding",
-        "pool_size": "pool_size",
-        "strides": "strides"
-      }
-    },
-    "MaxPool3d": {
-      "api": "keras.layers.MaxPool3D",
-      "args": {
-        "data_format": "data_format",
-        "kwargs": "kwargs",
-        "name": "name",
-        "padding": "padding",
-        "pool_size": "pool_size",
-        "strides": "strides"
+        "out_features": "units"
       }
     },
     "Mean": {
       "api": "keras.ops.mean"
-    },
-    "Min": {
-      "api": "keras.ops.min"
-    },
-    "Mish": {
-      "api": "keras.activations.mish",
-      "args": {
-        "x": "x"
-      }
     },
     "Mul": {
       "api": "keras.ops.multiply",
@@ -383,44 +157,18 @@
       }
     },
     "MultiheadAttention": {
-      "api": "keras.layers.MultiHeadAttention"
-    },
-    "NonZero": {
-      "api": "keras.ops.nonzero"
+      "api": "keras.layers.MultiHeadAttention",
+      "args": {
+        "embed_dim": "key_dim"
+      },
+      "requires_plugin": "repack_attn_keras"
     },
     "Normalize": {
-      "api": "keras.ops.nn.normalize",
+      "api": "keras.layers.Normalization",
       "args": {
-        "axis": "axis",
-        "epsilon": "epsilon",
-        "order": "order",
-        "x": "x"
+        "mean": "mean",
+        "std": "variance"
       }
-    },
-    "PRelu": {
-      "api": "keras.layers.PReLU",
-      "args": {
-        "alpha_constraint": "alpha_constraint",
-        "alpha_initializer": "alpha_initializer",
-        "alpha_regularizer": "alpha_regularizer",
-        "kwargs": "kwargs",
-        "shared_axes": "shared_axes"
-      }
-    },
-    "Pad": {
-      "api": "keras.ops.numpy.pad",
-      "args": {
-        "constant_values": "constant_values",
-        "mode": "mode",
-        "pad_width": "pad_width",
-        "x": "x"
-      }
-    },
-    "RMSNormalization": {
-      "api": "keras.layers.RMSNormalization"
-    },
-    "RNN": {
-      "api": "keras.layers.RNN"
     },
     "RandomCrop": {
       "api": "keras.layers.RandomCrop"
@@ -434,20 +182,11 @@
     "RandomVerticalFlip": {
       "api": "keras.layers.RandomFlip"
     },
-    "Reciprocal": {
-      "api": "keras.ops.reciprocal"
-    },
-    "Relu": {
-      "api": "keras.ops.relu"
-    },
-    "Relu6": {
-      "api": "keras.ops.nn.relu6",
-      "args": {
-        "x": "x"
-      }
-    },
     "Reshape": {
-      "api": "keras.layers.Reshape"
+      "api": "keras.ops.reshape",
+      "args": {
+        "shape": "newshape"
+      }
     },
     "Resize": {
       "api": "keras.layers.Resizing",
@@ -455,83 +194,9 @@
         "size": "height"
       }
     },
-    "Round": {
-      "api": "keras.ops.round"
-    },
-    "STFT": {
-      "api": "keras.ops.stft"
-    },
-    "Scatter": {
-      "api": "keras.ops.scatter",
-      "args": {
-        "indices": "indices",
-        "shape": "shape",
-        "values": "values"
-      }
-    },
-    "Selu": {
-      "api": "keras.ops.nn.selu",
-      "args": {
-        "x": "x"
-      }
-    },
     "Sequential": {
       "api": "keras.Sequential",
       "requires_plugin": "keras_sequential_pack"
-    },
-    "Shape": {
-      "api": "keras.ops.shape",
-      "args": {
-        "x": "x"
-      }
-    },
-    "Sigmoid": {
-      "api": "keras.ops.nn.sigmoid",
-      "args": {
-        "x": "x"
-      }
-    },
-    "Sign": {
-      "api": "keras.ops.sign"
-    },
-    "Silu": {
-      "api": "keras.ops.nn.silu",
-      "args": {
-        "x": "x"
-      }
-    },
-    "Sin": {
-      "api": "keras.ops.sin"
-    },
-    "Sinh": {
-      "api": "keras.ops.sinh"
-    },
-    "Size": {
-      "api": "keras.ops.numpy.size",
-      "args": {
-        "x": "x"
-      }
-    },
-    "Softmax": {
-      "api": "keras.ops.softmax"
-    },
-    "Softplus": {
-      "api": "keras.ops.nn.softplus",
-      "args": {
-        "x": "x"
-      }
-    },
-    "Softsign": {
-      "api": "keras.ops.nn.softsign",
-      "args": {
-        "x": "x"
-      }
-    },
-    "Sqrt": {
-      "api": "keras.ops.sqrt"
-    },
-    "Squeeze": {
-      "api": "keras.ops.squeeze"
     },
     "Sub": {
       "api": "keras.ops.subtract",
@@ -540,44 +205,11 @@
         "y": "x2"
       }
     },
-    "Sum": {
-      "api": "keras.ops.sum"
-    },
-    "Tan": {
-      "api": "keras.ops.tan"
-    },
-    "Tanh": {
-      "api": "keras.ops.tanh"
-    },
-    "Threshold": {
-      "api": "keras.ops.nn.threshold",
-      "args": {
-        "default_value": "default_value",
-        "threshold": "threshold",
-        "x": "x"
-      }
-    },
-    "Tile": {
-      "api": "keras.ops.tile"
-    },
     "ToTensor": {
       "api": "keras.ops.convert_to_tensor"
     },
-    "Transpose": {
-      "api": "keras.ops.transpose"
-    },
     "UInt8": {
       "api": "numpy.uint8"
-    },
-    "Unfold": {
-      "api": "keras.ops.nn.unfold",
-      "args": {
-        "dilation": "dilation",
-        "kernel_size": "kernel_size",
-        "padding": "padding",
-        "stride": "stride",
-        "x": "x"
-      }
     },
     "Variable": {
       "api": "keras.Variable",
@@ -585,436 +217,20 @@
         "value": "initializer"
       }
     },
-    "View": {
-      "api": "keras.ops.view"
-    },
-    "Where": {
-      "api": "keras.ops.where"
-    },
-    "abs": {
-      "api": "keras.ops.abs"
-    },
-    "activation": {
-      "api": "keras.layers.Activation"
-    },
-    "add": {
-      "api": "keras.ops.add"
-    },
-    "all": {
-      "api": "keras.ops.all"
-    },
-    "any": {
-      "api": "keras.ops.any"
-    },
-    "append": {
-      "api": "keras.ops.append",
-      "args": {
-        "axis": "axis",
-        "x1": "x1",
-        "x2": "x2"
-      }
-    },
-    "argmax": {
-      "api": "keras.ops.argmax"
-    },
-    "argmin": {
-      "api": "keras.ops.argmin"
-    },
-    "bitwise_and": {
-      "api": "keras.ops.bitwise_and"
-    },
-    "bitwise_invert": {
-      "api": "keras.ops.bitwise_invert"
-    },
-    "bitwise_left_shift": {
-      "api": "keras.ops.bitwise_left_shift"
-    },
-    "bitwise_or": {
-      "api": "keras.ops.bitwise_or"
-    },
-    "bitwise_right_shift": {
-      "api": "keras.ops.bitwise_right_shift"
-    },
-    "bitwise_xor": {
-      "api": "keras.ops.bitwise_xor"
-    },
-    "broadcast_to": {
-      "api": "keras.ops.broadcast_to"
-    },
-    "ceil": {
-      "api": "keras.ops.ceil"
-    },
-    "cholesky": {
-      "api": "keras.ops.cholesky"
-    },
-    "clip": {
-      "api": "keras.ops.clip"
-    },
-    "compute_mask": {
-      "api": "keras.layers.Activation.compute_mask",
-      "args": {
-        "inputs": "inputs",
-        "previous_mask": "previous_mask",
-        "self": "self"
-      }
-    },
-    "conj": {
-      "api": "keras.ops.conj"
-    },
-    "conv1d": {
-      "api": "keras.layers.Conv1D"
-    },
-    "conv3d": {
-      "api": "keras.layers.Conv3D"
-    },
-    "copy": {
-      "api": "keras.ops.copy",
-      "args": {
-        "x": "x"
-      }
-    },
-    "cos": {
-      "api": "keras.ops.cos"
-    },
-    "cosh": {
-      "api": "keras.ops.cosh"
-    },
-    "cross": {
-      "api": "keras.ops.cross"
-    },
-    "det": {
-      "api": "keras.ops.det"
-    },
-    "diagonal": {
-      "api": "keras.ops.diagonal"
-    },
-    "divide": {
-      "api": "keras.ops.divide"
-    },
-    "eig": {
-      "api": "keras.ops.eig",
-      "args": {
-        "x": "x"
-      }
-    },
-    "eigh": {
-      "api": "keras.ops.eigh",
-      "args": {
-        "x": "x"
-      }
-    },
-    "equal": {
-      "api": "keras.ops.equal"
-    },
-    "erfinv": {
-      "api": "keras.ops.erfinv",
-      "args": {
-        "x": "x"
-      }
-    },
     "exp": {
       "api": "keras.ops.exp"
-    },
-    "exp2": {
-      "api": "keras.ops.exp2",
-      "args": {
-        "x": "x"
-      }
-    },
-    "expand_dims": {
-      "api": "keras.ops.expand_dims"
-    },
-    "expm1": {
-      "api": "keras.ops.expm1",
-      "args": {
-        "x": "x"
-      }
-    },
-    "fft": {
-      "api": "keras.ops.fft",
-      "args": {
-        "x": "x"
-      }
-    },
-    "fft2": {
-      "api": "keras.ops.fft2",
-      "args": {
-        "x": "x"
-      }
-    },
-    "flip": {
-      "api": "keras.ops.flip"
-    },
-    "floor": {
-      "api": "keras.ops.floor"
-    },
-    "floor_divide": {
-      "api": "keras.ops.floor_divide"
-    },
-    "greater": {
-      "api": "keras.ops.greater"
-    },
-    "greater_equal": {
-      "api": "keras.ops.greater_equal"
-    },
-    "hypot": {
-      "api": "keras.ops.hypot"
-    },
-    "ifft2": {
-      "api": "keras.ops.ifft2",
-      "args": {
-        "x": "x"
-      }
-    },
-    "imag": {
-      "api": "keras.ops.imag"
-    },
-    "inv": {
-      "api": "keras.ops.inv",
-      "args": {
-        "x": "x"
-      }
-    },
-    "is_tensor": {
-      "api": "keras.ops.is_tensor",
-      "args": {
-        "x": "x"
-      }
-    },
-    "isfinite": {
-      "api": "keras.ops.isfinite"
-    },
-    "isinf": {
-      "api": "keras.ops.isinf"
-    },
-    "isnan": {
-      "api": "keras.ops.isnan"
-    },
-    "leaky_relu": {
-      "api": "keras.ops.leaky_relu",
-      "args": {
-        "negative_slope": "negative_slope",
-        "x": "x"
-      }
-    },
-    "less": {
-      "api": "keras.ops.less"
-    },
-    "less_equal": {
-      "api": "keras.ops.less_equal"
-    },
-    "linspace": {
-      "api": "keras.ops.linspace"
     },
     "log": {
       "api": "keras.ops.log"
     },
-    "log10": {
-      "api": "keras.ops.log10"
-    },
-    "log1p": {
-      "api": "keras.ops.log1p",
-      "args": {
-        "x": "x"
-      }
-    },
-    "log2": {
-      "api": "keras.ops.log2"
-    },
     "log_softmax": {
       "api": "keras.activations.log_softmax"
-    },
-    "logaddexp": {
-      "api": "keras.ops.logaddexp"
-    },
-    "logical_and": {
-      "api": "keras.ops.logical_and"
-    },
-    "logical_not": {
-      "api": "keras.ops.logical_not"
-    },
-    "logical_or": {
-      "api": "keras.ops.logical_or"
-    },
-    "logical_xor": {
-      "api": "keras.ops.logical_xor"
-    },
-    "lu_factor": {
-      "api": "keras.ops.linalg.lu_factor",
-      "args": {
-        "x": "x"
-      }
-    },
-    "matmul": {
-      "api": "keras.ops.matmul"
-    },
-    "max": {
-      "api": "keras.ops.max"
-    },
-    "maximum": {
-      "api": "keras.ops.maximum"
-    },
-    "mean": {
-      "api": "keras.ops.mean"
-    },
-    "meshgrid": {
-      "api": "keras.ops.meshgrid"
-    },
-    "min": {
-      "api": "keras.ops.min"
-    },
-    "minimum": {
-      "api": "keras.ops.minimum"
-    },
-    "moveaxis": {
-      "api": "keras.ops.moveaxis"
-    },
-    "multiply": {
-      "api": "keras.ops.multiply"
-    },
-    "negative": {
-      "api": "keras.ops.negative"
-    },
-    "nonzero": {
-      "api": "keras.ops.nonzero"
-    },
-    "not_equal": {
-      "api": "keras.ops.not_equal"
-    },
-    "outer": {
-      "api": "keras.ops.outer"
-    },
-    "parameters": {
-      "api": "keras.layers.TorchModuleWrapper.parameters",
-      "args": {
-        "recurse": "recurse",
-        "self": "self"
-      }
-    },
-    "prod": {
-      "api": "keras.ops.prod"
-    },
-    "qr": {
-      "api": "keras.ops.qr"
-    },
-    "real": {
-      "api": "keras.ops.real"
-    },
-    "reciprocal": {
-      "api": "keras.ops.reciprocal"
-    },
-    "relu": {
-      "api": "keras.ops.nn.relu",
-      "args": {
-        "x": "x"
-      }
-    },
-    "repeat": {
-      "api": "keras.ops.repeat"
-    },
-    "reshape": {
-      "api": "keras.layers.Reshape"
-    },
-    "roll": {
-      "api": "keras.ops.roll"
-    },
-    "round": {
-      "api": "keras.ops.round"
-    },
-    "sign": {
-      "api": "keras.ops.sign"
-    },
-    "signbit": {
-      "api": "keras.ops.signbit"
-    },
-    "sin": {
-      "api": "keras.ops.sin"
-    },
-    "sinh": {
-      "api": "keras.ops.sinh"
-    },
-    "slogdet": {
-      "api": "keras.ops.numpy.slogdet",
-      "args": {
-        "x": "x"
-      }
-    },
-    "softmax": {
-      "api": "keras.ops.nn.softmax",
-      "args": {
-        "axis": "axis",
-        "x": "x"
-      }
-    },
-    "solve": {
-      "api": "keras.ops.solve"
     },
     "sqrt": {
       "api": "keras.ops.sqrt"
     },
     "square": {
       "api": "keras.ops.square"
-    },
-    "squeeze": {
-      "api": "keras.ops.squeeze"
-    },
-    "stack": {
-      "api": "keras.ops.stack"
-    },
-    "subtract": {
-      "api": "keras.ops.subtract"
-    },
-    "svd": {
-      "api": "keras.ops.svd"
-    },
-    "take": {
-      "api": "keras.ops.take"
-    },
-    "take_along_axis": {
-      "api": "keras.ops.take_along_axis"
-    },
-    "tan": {
-      "api": "keras.ops.tan"
-    },
-    "tanh": {
-      "api": "keras.ops.numpy.tanh",
-      "args": {
-        "x": "x"
-      }
-    },
-    "tensordot": {
-      "api": "keras.ops.tensordot"
-    },
-    "tile": {
-      "api": "keras.ops.tile"
-    },
-    "trace": {
-      "api": "keras.ops.trace"
-    },
-    "tril": {
-      "api": "keras.ops.tril"
-    },
-    "triu": {
-      "api": "keras.ops.triu"
-    },
-    "trunc": {
-      "api": "keras.ops.trunc"
-    },
-    "unfold": {
-      "api": "keras.ops.nn.unfold",
-      "args": {
-        "dilation": "dilation",
-        "kernel_size": "kernel_size",
-        "padding": "padding",
-        "stride": "stride",
-        "x": "x"
-      }
-    },
-    "unstack": {
-      "api": "keras.ops.unstack"
-    },
-    "where": {
-      "api": "keras.ops.where"
     }
   },
   "templates": {

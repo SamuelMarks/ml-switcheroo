@@ -4,16 +4,13 @@ Plugin for packing variable positional arguments into a sequence (tuple/list).
 Essential for mapping vararg APIs (like `torch.permute(x, 0, 2, 1)`) to sequence-based
 APIs (like `jax.numpy.transpose(x, axes=(0, 2, 1))`).
 
-Strategy:
-1.  Identify the operation (e.g. `permute_dims`).
-2.  Lookup the target API (e.g. `jax.numpy.transpose`).
-3.  Separate the primary input argument (first positional) from the varargs.
-4.  Pack the trailing varargs into a `Tuple` node.
-5.  Construct the new call with the sequence passed as a keyword argument (e.g. `axes=...`).
+Decoupling Update:
+This plugin no longer checks framework names directly. It reads the `pack_to_tuple`
+keyword field from the `Variant` metadata exposed via `HookContext`.
 """
 
 import libcst as cst
-from typing import List
+from typing import List, Optional
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -33,39 +30,40 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
   Plugin Hook: Packs trailing positional arguments into a keyword tuple.
 
   Triggers:
-      Operations marked with `requires_plugin: "pack_varargs"`.
-      Designed for abstract operations like `permute_dims`.
+      Operations marked with `requires_plugin: "pack_varargs"` or manual hook usage.
 
-  Transformation:
-      Input:  `torch.permute(x, 0, 2, 1)`
-      Output: `jax.numpy.transpose(x, axes=(0, 2, 1))` (if mapped)
-
-  Config:
-      Adapts the keyword name based on the target framework.
-      - TensorFlow: uses 'perm'
-      - Default (JAX/NumPy/MLX): uses 'axes'
+  Configuration:
+      The keyword name (e.g. 'axes' vs 'perm') is derived from the Semantic Variant definition:
+      `{"pack_to_tuple": "perm"}` (TensorFlow) vs `{"pack_to_tuple": "axes"}` (JAX).
+      Defaults to "axes" if not specified.
 
   Args:
       node: The original CST Call node.
-      ctx: HookContext for API lookup directly from Semantics.
+      ctx: HookContext giving access to Semantic definitions.
 
   Returns:
-      The transformed CST Call node, or original if target mapping is missing.
+      The transformed CST Call node using keyword tuple arguments.
   """
-  # 1. Determine Target API via Abstract ID
-  # We infer the abstract op is 'permute_dims' based on this plugin's explicit association.
-  op_id = "permute_dims"
-  target_api = ctx.lookup_api(op_id)
+  # 1. Access Variant Metadata via Context
+  # This replaces hardcoded checks like 'if target_fw == tensorflow'
+  variant = ctx.current_variant
 
-  # If we don't know the target logic via JSON (Semantics), return unmodified.
+  # Resolve API name
+  target_api = variant.api if variant else None
+
+  # Use context lookup fallback if variant isn't populated (e.g. partial manual hook invocation)
+  if not target_api:
+    # Identify abstract op associated with this hook mechanism?
+    # usually permute_dims.
+    target_api = ctx.lookup_api("permute_dims")
+
   if not target_api:
     return node
 
-  # 2. Determine Keyword Name based on Framework
-  # TensorFlow uses 'perm', others usually use 'axes'
-  keyword_name = "axes"
-  if ctx.target_fw.lower() == "tensorflow":
-    keyword_name = "perm"
+  # 2. Determine Keyword Name Data-Driven
+  keyword_name = "axes"  # Default standard (JAX/NumPy)
+  if variant and variant.pack_to_tuple:
+    keyword_name = variant.pack_to_tuple
 
   # 3. Extract Arguments from Source Call
   # We assume signature `func(input, *dims)`.
@@ -78,9 +76,6 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
   input_arg = all_args[0]
   dims_args = all_args[1:]
 
-  # If no dims provided, or if existing dims are keyword args, the logic might differ.
-  # We filter out any keyword matches just in case user did something explicitly named,
-  # though varargs are usually positional.
   packed_elements: List[cst.BaseElement] = []
   for arg in dims_args:
     # If we hit a keyword arg, we assume packing should stop or ignore it
@@ -96,7 +91,7 @@ def pack_varargs(node: cst.Call, ctx: HookContext) -> cst.Call:
   tuple_node = cst.Tuple(elements=packed_elements)
 
   # 5. Construct New Arguments List
-  # Format: [input_arg, axes=tuple_node]
+  # Format: [input_arg, {keyword_name}=tuple_node]
 
   # Ensure input_arg has a comma if it's followed by keyword args
   input_arg_clean = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))

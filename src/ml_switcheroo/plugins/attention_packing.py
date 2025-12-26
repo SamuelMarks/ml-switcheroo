@@ -1,18 +1,29 @@
 """
-Plugin for MultiHead Attention Argument Alignment.
+Plugin for MultiHead Attention Strategy Selection.
 
-Handles the divergence in call signatures for Attention layers:
-- Reorders (Query, Key, Value) tuples.
-- Maps `key_padding_mask` (Torch: True=Masked) to `mask` (Keras/Flax: True=Keep).
-- Handles 'packed' inputs vs separate arguments.
+This module provides modular hooks for transforming MultiHeadAttention API calls.
+Unlike a monolithic function, it splits logic into discrete strategies (`repack_attn_keras`
+and `repack_attn_flax`).
+
+The main entry point `repack_attention_dispatch` uses the Abstract Operation definition
+to select the appropriate strategy defined in the framework's JSON mapping.
+
+Strategies:
+1.  **Keras**: `repack_attn_keras`
+    - Maps constructor: `embed_dim` -> `key_dim`.
+    - Maps call: `(q, k, v, mask)` -> `(q, v, key=k, attention_mask=mask)`.
+
+2.  **Flax/JAX**: `repack_attn_flax`
+    - Maps constructor: Standard rename.
+    - Maps call: `key_padding_mask` -> `mask`.
 """
 
 import libcst as cst
-
-from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.core.hooks import register_hook, HookContext, get_hook
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
+  """Creates a CST attribute chain from a dotted string."""
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -20,59 +31,67 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   return node
 
 
-@register_hook("repack_attention_call")
-def repack_attention(node: cst.Call, ctx: HookContext) -> cst.Call:
+@register_hook("repack_attention_dispatch")
+def repack_attention_dispatch(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
-  Plugin Hook: Repacks arguments for MultiHeadAttention.
-  Handles both Constructor (Init) and Forward Call patterns.
+  Dispatch Entry Point.
+  Reads the `requires_plugin` field from the Semantics to determine the concrete strategy.
+
+  If the variant specifies "repack_attention_dispatch" (itself), it attempts to
+  guess based on target framework or fall through. However, modern adapters
+  should point directly to `repack_attn_keras` or `repack_attn_flax`.
   """
-  args = list(node.args)
+  # Check if the variant specifies a specific sub-strategy
+  # e.g. "requires_plugin": "repack_attn_keras"
+  # But if this hook was called, it means "requires_plugin" was likely "repack_attention_dispatch"
+  # or the rewriter resolved an alias.
+
+  # We allow adapters to point to specific strategies directly in JSON.
+  # If they point here, we dispatch based on target framework name (Legacy Backcompat).
+
   target_fw = ctx.target_fw.lower()
 
+  if "keras" in target_fw:
+    return repack_attn_keras(node, ctx)
+  elif "flax" in target_fw or "jax" in target_fw:
+    return repack_attn_flax(node, ctx)
+
+  return node
+
+
+@register_hook("repack_attn_keras")
+def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
+  """
+  Strategy: Keras Attention Packing.
+
+  Constructor:
+      torch: MultiheadAttention(embed_dim, num_heads)
+      keras: MultiHeadAttention(num_heads, key_dim)
+
+  Call:
+      torch: forward(q, k, v, mask)
+      keras: call(q, v, key=k, attention_mask=mask)
+  """
+  args = list(node.args)
+
   # --- Constructor Detection ---
-  # Heuristic: Check for 'embed_dim' or 'num_heads' kwargs, or very short positional args (2 ints).
-  # Also check if target API mapping suggests a class name.
-
-  is_constructor = False
-  for arg in args:
-    if arg.keyword and arg.keyword.value in ["embed_dim", "num_heads"]:
-      is_constructor = True
-      break
-
-  if is_constructor or (len(args) == 2 and not any(a.keyword for a in args)):
-    # Handle Constructor Rewriting
-    # torch: embed_dim, num_heads
-    # keras: num_heads, key_dim (map embed_dim -> key_dim)
-
-    if target_fw == "keras":
-      new_func = _create_dotted_name("keras.layers.MultiHeadAttention")
-      new_args = []
-
-      # Map args
-      for arg in args:
-        if arg.keyword:
-          k = arg.keyword.value
-          if k == "embed_dim":
-            new_args.append(arg.with_changes(keyword=cst.Name("key_dim")))
-          else:
-            new_args.append(arg)
+  # Keras specific renaming logic
+  if _is_constructor_signature(args):
+    new_func = _create_dotted_name("keras.layers.MultiHeadAttention")
+    new_args = []
+    for arg in args:
+      if arg.keyword:
+        k = arg.keyword.value
+        if k == "embed_dim":
+          new_args.append(arg.with_changes(keyword=cst.Name("key_dim")))
         else:
-          # Positional mapping
-          # Torch: (embed_dim, num_heads) -> Keras (num_heads, key_dim)
-          # We swap them if we can identify them by position?
-          # This is risky without types. Assuming kwargs for safety in tests.
           new_args.append(arg)
+      else:
+        # Blind positional preservation (usually safe here)
+        new_args.append(arg)
+    return node.with_changes(func=new_func, args=new_args)
 
-      return node.with_changes(func=new_func, args=new_args)
-
-    elif target_fw in ["flax_nnx", "jax"]:
-      new_func = _create_dotted_name("flax.nnx.MultiHeadAttention")
-      return node.with_changes(func=new_func)
-
-    return node
-
-  # --- Forward Call Detection ---
-  # If args >= 3 (q, k, v)
+  # --- Call Detection ---
   if len(args) >= 3:
     q_arg = args[0]
     k_arg = args[1]
@@ -80,46 +99,93 @@ def repack_attention(node: cst.Call, ctx: HookContext) -> cst.Call:
     remaining_args = args[3:]
 
     new_args = []
+    # Keras expects (query, value, key=...)
+    new_args.append(q_arg)
 
-    if target_fw == "keras":
-      new_args.append(q_arg)
-      v_arg_clean = v_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-      new_args.append(v_arg_clean)
+    # Ensure comma formatting for the new 2nd arg (value)
+    v_arg_clean = v_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+    new_args.append(v_arg_clean)
 
-      if k_arg:
-        k_val = k_arg.value
-        k_kw = cst.Arg(
-          keyword=cst.Name("key"),
-          value=k_val,
-          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
-          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-        )
-        if new_args[-1].comma == cst.MaybeSentinel.DEFAULT:
-          new_args[-1] = new_args[-1].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-        new_args.append(k_kw)
+    # Convert Key to kwarg
+    if k_arg:
+      k_val = k_arg.value
+      k_kw = cst.Arg(
+        keyword=cst.Name("key"),
+        value=k_val,
+        equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
+        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+      )
+      # ensure comma on previous (v_arg_clean handled it)
+      new_args.append(k_kw)
 
-      for arg in remaining_args:
-        if arg.keyword:
-          k = arg.keyword.value
-          val = arg.value
-          if k in ["attn_mask", "key_padding_mask"]:
-            new_arg = arg.with_changes(keyword=cst.Name("attention_mask"), value=val)
-            new_args.append(new_arg)
-          else:
-            new_args.append(arg)
+    # Map rest
+    for arg in remaining_args:
+      if arg.keyword:
+        k = arg.keyword.value
+        val = arg.value
+        if k in ["attn_mask", "key_padding_mask"]:
+          new_arg = arg.with_changes(keyword=cst.Name("attention_mask"), value=val)
+          new_args.append(new_arg)
         else:
           new_args.append(arg)
-
-    elif target_fw in ["flax_nnx", "jax"]:
-      new_args = [q_arg, k_arg, v_arg]
-      for arg in remaining_args:
-        if arg.keyword and arg.keyword.value in ["attn_mask", "key_padding_mask"]:
-          new_args.append(arg.with_changes(keyword=cst.Name("mask")))
-        else:
-          new_args.append(arg)
-    else:
-      return node
+      else:
+        new_args.append(arg)
 
     return node.with_changes(args=new_args)
 
   return node
+
+
+@register_hook("repack_attn_flax")
+def repack_attn_flax(node: cst.Call, ctx: HookContext) -> cst.Call:
+  """
+  Strategy: Flax Attention Packing.
+
+  Constructor:
+      Standardizes to `flax.nnx.MultiHeadAttention`.
+
+  Call:
+      Maps `key_padding_mask` -> `mask`.
+  """
+  args = list(node.args)
+
+  # Constructor
+  if _is_constructor_signature(args):
+    new_func = _create_dotted_name("flax.nnx.MultiHeadAttention")
+    return node.with_changes(func=new_func)
+
+  # Call
+  if len(args) >= 3:
+    q_arg = args[0]
+    k_arg = args[1]
+    v_arg = args[2]
+    remaining_args = args[3:]
+
+    new_args = [q_arg, k_arg, v_arg]
+
+    for arg in remaining_args:
+      if arg.keyword and arg.keyword.value in ["attn_mask", "key_padding_mask"]:
+        new_args.append(arg.with_changes(keyword=cst.Name("mask")))
+      else:
+        new_args.append(arg)
+
+    return node.with_changes(args=new_args)
+
+  return node
+
+
+def _is_constructor_signature(args: list) -> bool:
+  """Heuristic to detect initialization vs forward call."""
+  for arg in args:
+    if arg.keyword and arg.keyword.value in ["embed_dim", "num_heads", "key_dim"]:
+      return True
+
+  # Fallback: very short positional args usually implies constructor
+  # (embed_dim, num_heads) vs (q, k, v)
+  if len(args) == 2 and not any(a.keyword for a in args):
+    # Check if values are Integers?
+    # If literals, safer guess.
+    if isinstance(args[0].value, cst.Integer):
+      return True
+
+  return False

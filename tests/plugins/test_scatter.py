@@ -38,7 +38,10 @@ def rewriter():
     return None
 
   mgr.get_definition.side_effect = get_def
+
+  # Wiring Logic: Only JAX requests the plugin
   mgr.resolve_variant.side_effect = lambda aid, fw: scatter_def["variants"]["jax"] if fw == "jax" else None
+
   mgr.is_verified.return_value = True
   mgr.get_known_apis.return_value = {"Scatter": scatter_def}
 
@@ -86,11 +89,21 @@ def test_scatter_keywords(rewriter):
 
 
 def test_ignore_tf_target(rewriter):
+  """
+  Verify that if the target framework is NOT JAX (and thus not wired to the plugin),
+  the conversion is skipped.
+  Implementation relies on the SemanticsManager returning None for 'tensorflow'.
+  """
+  # Update Context Config
   rewriter.ctx._runtime_config.target_framework = "tensorflow"
   rewriter.ctx.target_fw = "tensorflow"
+
+  # CRITICAL FIX: Update the Rewriter's target_fw string so the wiring lookup logic
+  # passes 'tensorflow' to resolve_variant instead of the initialized 'jax'.
+  rewriter.target_fw = "tensorflow"
 
   code = "x.scatter_(1, i, v)"
   res = rewrite_code(rewriter, code)
 
-  # Should not produce .at[] syntax
+  # Should not produce .at[] syntax because resolves to None
   assert ".at[" not in res

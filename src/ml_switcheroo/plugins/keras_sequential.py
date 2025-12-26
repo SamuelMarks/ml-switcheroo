@@ -23,10 +23,9 @@ def transform_keras_sequential(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Plugin Hook: Packs positional layer arguments into a list for Keras Sequential.
   Also renames the function to `keras.Sequential`.
-  """
-  if ctx.target_fw != "keras":
-    return node
 
+  Decoupling: Executes blindly if wired. Target API renaming relies on context value or defaults.
+  """
   # 1. Rename Function (API Swap)
   # We resolve the name "Sequential" to the target API using the context if possible.
   op_api = ctx.lookup_api("Sequential")

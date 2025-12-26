@@ -11,6 +11,7 @@ Verifies:
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.enums import SemanticTier
 
 # Fix: Import specific adapter for Neural traits
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
@@ -55,11 +56,17 @@ class FixedSemantics(SemanticsManager):
     # NOTE: We do NOT add torch.nn -> flax.nnx here, confirming the fix
     # The default behavior logic comes from adapter.import_namespaces being loaded by manager
     # but here we are mocking, so we manually inject the fixed alias
-    self.import_data["torch.nn"] = {"variants": {"jax": {"root": "flax", "sub": "nnx", "alias": "nnx"}}}
+
+    self._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
+
+    if "jax" not in self._providers:
+      self._providers["jax"] = {}
+
+    self._providers["jax"][SemanticTier.NEURAL] = {"root": "flax", "sub": "nnx", "alias": "nnx"}
 
 
 def test_specific_abs_conversion():
-  input_torch = """ 
+  input_torch = """
 import torch
 import torch.nn as nn
 
@@ -67,7 +74,7 @@ class Model(nn.Module):
     def forward(self, x): 
         return torch.abs(x) 
 """
-  output_jax_flax = """ 
+  output_jax_flax = """
 import jax.numpy as jnp
 import flax.nnx as nnx
 

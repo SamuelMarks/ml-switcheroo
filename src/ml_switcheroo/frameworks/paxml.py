@@ -24,15 +24,18 @@ except ImportError:
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
+  PluginTraits,
   InitMode,
   StandardCategory,
   StandardMap,
+  ImportConfig,
   GhostRef,
   load_snapshot_for_adapter,
 )
 from ml_switcheroo.core.ghost import GhostInspector
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
+from ml_switcheroo.enums import SemanticTier
 
 
 @register_framework("paxml")
@@ -45,12 +48,12 @@ class PaxmlAdapter(JAXStackMixin):
   inherits_from: str = "jax"
   ui_priority: int = 60
 
-  def __init__(self):
+  def __init__(self) -> None:
     """
     Initialize PaxML Adapter.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data = {}
+    self._snapshot_data: Dict[str, Any] = {}
 
     if praxis is None:
       self._mode = InitMode.GHOST
@@ -127,7 +130,7 @@ class PaxmlAdapter(JAXStackMixin):
           is_layer = False
           if hasattr(praxis.base_layer, "BaseLayer") and issubclass(obj, praxis.base_layer.BaseLayer):
             is_layer = True
-          # Heuristic fallback if direct inheritance check is tricky due to reloading
+          # Heuristic fallback ifdirect inheritance check is tricky due to reloading
           elif "Layer" in name or name in ["Linear", "Bias", "StochasticDepth", "Embedding"]:
             is_layer = True
 
@@ -157,10 +160,10 @@ class PaxmlAdapter(JAXStackMixin):
     return ("praxis.layers", "pl")
 
   @property
-  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+  def import_namespaces(self) -> Dict[str, ImportConfig]:
     return {
-      "torch.nn": {"root": "praxis", "sub": "layers", "alias": "pl"},
-      "praxis.layers": {"root": "praxis", "sub": "layers", "alias": "pl"},
+      "praxis.layers": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="pl"),
+      "praxis.base_layer": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="base_layer"),
     }
 
   @property
@@ -198,6 +201,19 @@ class PaxmlAdapter(JAXStackMixin):
     )
 
   @property
+  def plugin_traits(self) -> PluginTraits:
+    """
+    Feature flags for PaxML.
+    Inherits JAX functional behavior and purity enforcement.
+    """
+    return PluginTraits(
+      has_numpy_compatible_arrays=True,
+      requires_explicit_rng=True,
+      requires_functional_control_flow=True,
+      enforce_purity_analysis=True,
+    )
+
+  @property
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Static definitions to ensure core functionality even if discovery fails.
@@ -223,7 +239,7 @@ class PaxmlAdapter(JAXStackMixin):
 
   # --- Converter ---
 
-  def convert(self, data):
+  def convert(self, data: Any) -> Any:
     # Delegate to JAX core for array conversion
     return JaxCoreAdapter().convert(data)
 

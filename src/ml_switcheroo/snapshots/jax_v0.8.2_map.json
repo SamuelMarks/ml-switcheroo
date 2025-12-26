@@ -10,20 +10,8 @@
     "Acosh": {
       "api": "jax.numpy.acosh"
     },
-    "AdaBelief": {
-      "api": "optax.adabelief",
-      "requires_plugin": "optimizer_constructor"
-    },
-    "Adagrad": {
-      "api": "optax.adagrad",
-      "requires_plugin": "optimizer_constructor"
-    },
     "Adam": {
       "api": "optax.adam",
-      "requires_plugin": "optimizer_constructor"
-    },
-    "AdamW": {
-      "api": "optax.adamw",
       "requires_plugin": "optimizer_constructor"
     },
     "Add": {
@@ -58,15 +46,15 @@
       "api": "astype",
       "requires_plugin": "type_methods"
     },
+    "CastChar": {
+      "api": "astype",
+      "requires_plugin": "type_methods"
+    },
     "CastDouble": {
       "api": "astype",
       "requires_plugin": "type_methods"
     },
     "CastFloat": {
-      "api": "astype",
-      "requires_plugin": "type_methods"
-    },
-    "CastFloat32": {
       "api": "astype",
       "requires_plugin": "type_methods"
     },
@@ -153,8 +141,12 @@
       "api": "jax.numpy.exp"
     },
     "Flatten": {
-      "api": "jax.numpy.reshape",
-      "requires_plugin": "flatten_range"
+      "api": "jax.numpy.ndarray.flatten",
+      "args": {
+        "order": "order",
+        "out_sharding": "out_sharding",
+        "self": "self"
+      }
     },
     "Float16": {
       "api": "jnp.float16"
@@ -167,6 +159,9 @@
     },
     "Floor": {
       "api": "jax.numpy.floor"
+    },
+    "GELU": {
+      "api": "jax.nn.gelu"
     },
     "Gather": {
       "api": "jax.numpy.take_along_axis",
@@ -194,12 +189,12 @@
     "IsNaN": {
       "api": "jax.numpy.isnan"
     },
-    "LBFGS": {
-      "api": "optax.lbfgs",
-      "requires_plugin": "optimizer_constructor"
-    },
     "Less": {
       "api": "jax.numpy.less"
+    },
+    "Linear": {
+      "api": "optax.linear_schedule",
+      "args": {}
     },
     "LoadStateDict": {
       "api": "KeyMapper.from_torch",
@@ -254,8 +249,7 @@
       "api": "jax.numpy.pow"
     },
     "RMSprop": {
-      "api": "optax.rmsprop",
-      "requires_plugin": "optimizer_constructor"
+      "api": "optax.rmsprop"
     },
     "Reciprocal": {
       "api": "jax.numpy.reciprocal"
@@ -315,12 +309,6 @@
     "Tanh": {
       "api": "jax.numpy.tanh"
     },
-    "Tanhshrink": {
-      "api": "jax.numpy.tanh",
-      "args": {
-        "x": "x"
-      }
-    },
     "Tile": {
       "api": "jax.numpy.tile"
     },
@@ -337,6 +325,14 @@
     "UInt8": {
       "api": "jnp.uint8"
     },
+    "Unflatten": {
+      "api": "jax.numpy.ndarray.flatten",
+      "args": {
+        "order": "order",
+        "out_sharding": "out_sharding",
+        "self": "self"
+      }
+    },
     "Unique": {
       "api": "jax.numpy.unique"
     },
@@ -352,10 +348,6 @@
     },
     "Where": {
       "api": "jax.numpy.where"
-    },
-    "Yogi": {
-      "api": "optax.yogi",
-      "requires_plugin": "optimizer_constructor"
     },
     "__array_namespace_info__": {
       "api": "jax.numpy.__array_namespace_info__"
@@ -379,11 +371,14 @@
       "api": "jax.numpy.any"
     },
     "append": {
-      "api": "jax.numpy.append",
+      "api": "jax.numpy.append"
+    },
+    "apply": {
+      "api": "jax.numpy.apply_over_axes",
       "args": {
-        "arr": "arr",
-        "axis": "axis",
-        "values": "values"
+        "a": "a",
+        "axes": "axes",
+        "func": "func"
       }
     },
     "argmax": {
@@ -409,6 +404,12 @@
     },
     "bfloat16": {
       "api": "jax.numpy.bfloat16",
+      "args": {
+        "x": "x"
+      }
+    },
+    "bias": {
+      "api": "optax.bias_correction",
       "args": {}
     },
     "bitwise_and": {
@@ -456,10 +457,9 @@
       "api": "jax.numpy.conj"
     },
     "copy": {
-      "api": "jax.numpy.copy",
+      "api": "jax.numpy.ndarray.copy",
       "args": {
-        "a": "a",
-        "order": "order"
+        "self": "self"
       }
     },
     "copysign": {
@@ -494,12 +494,18 @@
     "diff": {
       "api": "jax.numpy.diff"
     },
+    "div_value": {
+      "api": "optax.tree.div",
+      "args": {}
+    },
     "divide": {
       "api": "jax.numpy.divide"
     },
     "double": {
       "api": "jax.numpy.double",
-      "args": {}
+      "args": {
+        "x": "x"
+      }
     },
     "eig": {
       "api": "jax.numpy.linalg.eig",
@@ -526,20 +532,11 @@
     "exp": {
       "api": "jax.numpy.exp"
     },
-    "exp2": {
-      "api": "jax.numpy.exp2",
-      "args": {
-        "x": "x"
-      }
-    },
     "expand_dims": {
       "api": "jax.numpy.expand_dims"
     },
     "expm1": {
-      "api": "jax.numpy.expm1",
-      "args": {
-        "x": "x"
-      }
+      "api": "jax.numpy.expm1"
     },
     "fft": {
       "api": "jax.numpy.fft.fft"
@@ -555,6 +552,12 @@
     },
     "flip": {
       "api": "jax.numpy.flip"
+    },
+    "float": {
+      "api": "jax.numpy.float_",
+      "args": {
+        "x": "x"
+      }
     },
     "floor": {
       "api": "jax.numpy.floor"
@@ -575,15 +578,6 @@
         "func": "fun"
       }
     },
-    "gradient_as_bucket_view": {
-      "api": "jax.numpy.gradient",
-      "args": {
-        "axis": "axis",
-        "edge_order": "edge_order",
-        "f": "f",
-        "varargs": "varargs"
-      }
-    },
     "greater": {
       "api": "jax.numpy.greater"
     },
@@ -595,12 +589,6 @@
     },
     "hypot": {
       "api": "jax.numpy.hypot"
-    },
-    "i0": {
-      "api": "jax.numpy.i0",
-      "args": {
-        "x": "x"
-      }
     },
     "ifft": {
       "api": "jax.numpy.fft.ifft"
@@ -630,19 +618,13 @@
       }
     },
     "int": {
-      "api": "jax.numpy.rint",
+      "api": "jax.numpy.uint",
       "args": {
         "x": "x"
       }
     },
     "inv": {
       "api": "jax.numpy.linalg.inv"
-    },
-    "invert_permutation": {
-      "api": "jax.numpy.invert",
-      "args": {
-        "x": "x"
-      }
     },
     "irfft": {
       "api": "jax.numpy.fft.irfft"
@@ -661,6 +643,13 @@
     },
     "isnan": {
       "api": "jax.numpy.isnan"
+    },
+    "items": {
+      "api": "jax.numpy.ndarray.item",
+      "args": {
+        "args": "args",
+        "self": "self"
+      }
     },
     "jit": {
       "api": "jax.jit",
@@ -688,13 +677,13 @@
       "api": "jax.numpy.log10"
     },
     "log1p": {
-      "api": "jax.numpy.log1p",
-      "args": {
-        "x": "x"
-      }
+      "api": "jax.numpy.log1p"
     },
     "log2": {
       "api": "jax.numpy.log2"
+    },
+    "log_softmax": {
+      "api": "jax.nn.log_softmax"
     },
     "logaddexp": {
       "api": "jax.numpy.logaddexp"
@@ -710,12 +699,6 @@
     },
     "logical_xor": {
       "api": "jax.numpy.logical_xor"
-    },
-    "long": {
-      "api": "jax.numpy.log",
-      "args": {
-        "x": "x"
-      }
     },
     "mask": {
       "api": "optax.masked",
@@ -768,6 +751,10 @@
     },
     "multiply": {
       "api": "jax.numpy.multiply"
+    },
+    "name": {
+      "api": "optax.named_chain",
+      "args": {}
     },
     "negative": {
       "api": "jax.numpy.negative"
@@ -864,6 +851,9 @@
       "api": "torch_register_parameter_to_nnx",
       "requires_plugin": "torch_register_parameter_to_nnx"
     },
+    "relu": {
+      "api": "jax.nn.relu"
+    },
     "remainder": {
       "api": "jax.numpy.remainder"
     },
@@ -872,6 +862,15 @@
     },
     "reshape": {
       "api": "jax.numpy.reshape"
+    },
+    "reshape_weight_to_matrix": {
+      "api": "jax.numpy.ndarray.reshape",
+      "args": {
+        "args": "args",
+        "order": "order",
+        "out_sharding": "out_sharding",
+        "self": "self"
+      }
     },
     "result_type": {
       "api": "jax.numpy.result_type"
@@ -904,12 +903,6 @@
     "sin": {
       "api": "jax.numpy.sin"
     },
-    "sinc": {
-      "api": "jax.numpy.sinc",
-      "args": {
-        "x": "x"
-      }
-    },
     "sinh": {
       "api": "jax.numpy.sinh"
     },
@@ -919,6 +912,10 @@
     },
     "slogdet": {
       "api": "jax.numpy.linalg.slogdet"
+    },
+    "softmax": {
+      "api": "optax.softmax_cross_entropy",
+      "args": {}
     },
     "solve": {
       "api": "jax.numpy.linalg.solve"
@@ -970,10 +967,7 @@
       "api": "jax.numpy.tan"
     },
     "tanh": {
-      "api": "jax.numpy.tanh",
-      "args": {
-        "x": "x"
-      }
+      "api": "jax.numpy.tanh"
     },
     "tensordot": {
       "api": "jax.numpy.tensordot"

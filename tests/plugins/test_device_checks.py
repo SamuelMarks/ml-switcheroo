@@ -20,6 +20,7 @@ def rewriter():
   op_def = {"variants": {"jax": {"api": "jax.devices", "requires_plugin": "cuda_is_available"}}}
 
   mgr.get_definition.return_value = ("cuda_is", op_def)
+  # Wiring: Only JAX has entries
   mgr.resolve_variant.side_effect = lambda aid, fw: op_def["variants"].get(fw)
 
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
@@ -39,9 +40,19 @@ def test_assignment_transform(rewriter):
 
 
 def test_ignore_wrong_target(rewriter):
+  """
+  Verify that targeting 'numpy' (which has no wiring for this op)
+  results in pass-through.
+  """
   rewriter.ctx._runtime_config.target_framework = "numpy"
   rewriter.ctx.target_fw = "numpy"
+
+  # Sync Rewriter state
+  rewriter.target_fw = "numpy"
+
+  # Ensure resolve returns None for numpy (Implicit via fixture, but explicit here for safety)
   rewriter.semantics.resolve_variant.side_effect = lambda a, f: None
 
   code = "x = torch.cuda.is_available()"
+  # Should preserve original code
   assert "torch.cuda" in rewrite_code(rewriter, code)

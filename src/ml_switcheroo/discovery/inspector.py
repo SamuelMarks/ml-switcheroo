@@ -5,23 +5,20 @@ This module provides the :class:`ApiInspector`, a hybrid static-dynamic analysis
 designed to extract API signatures (functions, classes, and attributes) from Python packages.
 
 It employs a two-stage strategy:
-
-1.  **Static Analysis (Griffe)**: Attempts to parse the source code first. This is safer
-    and preserves comments/docstrings better, but fails on compiled modules (C-Extensions).
+1.  **Static Analysis (Griffe)**: Attempts to parse the source code first.
 2.  **Runtime Introspection (Inspect)**: Falls back to importing the module and inspecting
-    live objects. This is required for frameworks like PyTorch, TensorFlow, and MLX which
-    rely heavily on compiled bindings.
+    live objects.
 
 **Memory Safety**:
-Includes recursion safeguards (visited set tracking) to prevent infinite loops
-or memory explosion when traversing circular references in large libraries like PyTorch.
-It also blacklists known heavy internals (`_C`, `distributed`, `cuda`) to prevent hangs during scanning.
+Includes recursion safeguards (visited set tracking) and an optional blacklist
+to prevent infinite loops or memory explosion when traversing circular references
+in large libraries like PyTorch or TensorFlow.
 """
 
 import inspect
 import importlib
 import logging
-from typing import Dict, Any, Set
+from typing import Dict, Any, Set, Optional
 
 import griffe
 
@@ -41,17 +38,20 @@ class ApiInspector:
     """Initializes the Inspector with an empty cache."""
     self._package_cache = {}
 
-  def inspect(self, package_name: str) -> Dict[str, Any]:
+  def inspect(self, package_name: str, unsafe_modules: Optional[Set[str]] = None) -> Dict[str, Any]:
     """
     Scans a package and returns a flat catalog of its public API.
 
     Args:
         package_name: The importable name of the package.
+        unsafe_modules: A set of submodule names to exclude from recursion
+                        (e.g., {'_C', 'distributed'}).
 
     Returns:
         Dict mapping 'fully.qualified.name' -> {metadata_dict}.
     """
     catalog = {}
+    ignore_set = unsafe_modules or set()
 
     # Strategy 1: Static Analysis (Best for Source Code / Docstrings)
     try:
@@ -74,7 +74,7 @@ class ApiInspector:
       module = importlib.import_module(package_name)
       # Track visited object IDs to prevent infinite recursion/memory explosion
       visited_ids = set()
-      self._recurse_runtime(module, package_name, catalog, visited=visited_ids)
+      self._recurse_runtime(module, package_name, catalog, visited=visited_ids, ignore_set=ignore_set)
     except ImportError:
       print(f"⚠️  Could not load package '{package_name}'. Is it installed?")
     except Exception as e:
@@ -113,7 +113,15 @@ class ApiInspector:
       except Exception:
         continue
 
-  def _recurse_runtime(self, obj: Any, path: str, catalog: Dict[str, Any], visited: Set[int], depth: int = 0):
+  def _recurse_runtime(
+    self,
+    obj: Any,
+    path: str,
+    catalog: Dict[str, Any],
+    visited: Set[int],
+    ignore_set: Set[str],
+    depth: int = 0,
+  ):
     """
     Recursively walks a live Python object to build the catalog.
 
@@ -122,6 +130,7 @@ class ApiInspector:
         path: The current dot-path (e.g. 'torch.nn').
         catalog: The accumulator dict.
         visited: Set of object IDs already processed.
+        ignore_set: Set of names to skip during recursion.
         depth: Recursion depth tracker.
     """
     # Safety Checks
@@ -139,45 +148,23 @@ class ApiInspector:
     except Exception:
       return
 
-    # Blacklist metadata for internal modules that cause crashes during inspection
-    # Updates: added '_C' (Torch binaries), 'distributed', 'cuda' (Prevent Hardware Init hangs)
-    unsafe_internals = {
-      "core",
-      "python",
-      "compiler",
-      "contrib",
-      "examples",
-      "tools",
-      "pywrap_tensorflow",
-      "_logging",
-      "_C",
-      "distributed",
-      "cuda",
-      "backends",
-      "fx",
-      "masked",
-      "ao",
-      "quantization",
-      "testing",
-    }
-
     for name, member in members:
       if name.startswith("_"):
         continue
 
-      if name in unsafe_internals:
+      # Dynamic Blacklist Check
+      if name in ignore_set:
         continue
 
       new_path = f"{path}.{name}"
 
       if inspect.ismodule(member):
         # Check integrity of package membership to avoid escaping to site-packages root
-        # Also ensure we don't re-scan the same module object if encountered via alias
         if id(member) in visited:
           continue
 
         if hasattr(member, "__package__") and member.__package__ and path.split(".")[0] in member.__package__:
-          self._recurse_runtime(member, new_path, catalog, visited, depth + 1)
+          self._recurse_runtime(member, new_path, catalog, visited, ignore_set, depth + 1)
 
       elif inspect.isclass(member) or inspect.isfunction(member) or inspect.isbuiltin(member) or inspect.ismethod(member):
         try:
@@ -192,8 +179,7 @@ class ApiInspector:
 
           if inspect.isclass(member):
             # Recurse into classes to find methods/nested classes
-            # but check visited to allow it if first time seeing this class
-            self._recurse_runtime(member, new_path, catalog, visited, depth + 1)
+            self._recurse_runtime(member, new_path, catalog, visited, ignore_set, depth + 1)
         except Exception:
           # C-ext fallback
           catalog[new_path] = {

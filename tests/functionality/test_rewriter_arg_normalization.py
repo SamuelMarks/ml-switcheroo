@@ -12,6 +12,7 @@ Coverage:
     5. Handling of Typed specifications (`("x", "int")`).
     6. Argument Injection (Feature: inject_args).
     7. Argument Value Mapping (Feature: arg_values).
+    8. **Dynamic Module Detection** (Replacing hardcoded sets).
 """
 
 import pytest
@@ -31,9 +32,15 @@ class MockArgSemantics(SemanticsManager):
     """Initializes with specific argument mapping scenarios."""
     self.data = {}
     self.import_data = {}
-    self.framework_configs = {}
     self._reverse_index = {}
     self._key_origins = {}
+
+    # NEW: Populate framework configs to support dynamic module detection
+    self.framework_configs = {
+      "torch": {"alias": {"module": "torch", "name": "torch"}},
+      "jax": {"alias": {"module": "jax.numpy", "name": "jnp"}},
+      "experimental_fw": {"alias": {"module": "exp.net", "name": "exp"}},
+    }
 
     # 1. Complex Renaming ('sum')
     # Source: sum(input, dim)
@@ -95,6 +102,17 @@ class MockArgSemantics(SemanticsManager):
       variants={
         "torch": {"api": "torch.reduce", "args": {"val": "reduction"}},
         "jax": {"api": "jax.reduce", "args": {"val": "mode"}, "arg_values": {"val": {"mean": "'avg'", "0": "'none'"}}},
+      },
+    )
+
+    # 6. Method Style Test ('method_op')
+    # Used to verify if _is_module_alias prevents receiver injection
+    self._inject_op(
+      op_name="method_op",
+      std_args=["x", "y"],
+      variants={
+        "torch": {"api": "torch.method_op"},
+        "jax": {"api": "jax.method_op"},
       },
     )
 
@@ -260,3 +278,54 @@ def test_argument_value_mapping_positional(engine: PivotRewriter) -> None:
   # For positional args, we update the value but don't add keywords unless logic forces it
   # Current NormalizationMixin keeps positional if source was positional
   assert "jax.reduce(x, 'avg')" in result
+
+
+def test_module_alias_detection(engine: PivotRewriter) -> None:
+  """
+  Test dynamic module alias detection logic.
+  Verify that `torch.method_op(y)` is NOT treated as `method_op(torch, y)`.
+  Verify that `var.method_op(y)` is treated as `method_op(var, y)`.
+  """
+  # Case 1: Framework call (torch defined in Mock)
+  # _is_module_alias('torch') should return True
+  code_fw = "torch.method_op(y)"
+  # BaseRewriter would rewrite this if configured, but here we check internal logic implicitly via output
+  # If treated as method, output would be jax.method_op(torch, y) which is wrong.
+  # If treated as function, output is jax.method_op(y).
+  res_fw = rewrite_code(engine, code_fw)
+  clean_fw = res_fw.replace(" ", "")
+  assert "(torch," not in clean_fw
+  assert "(y)" in clean_fw
+
+  # Case 2: Instance call
+  # _is_module_alias('my_obj') should return False (not in framework configs)
+  code_inst = "my_obj.method_op(y)"
+  # Should inject receiver 'my_obj' as first arg
+
+  # CRITICAL FIX: Ensure 'my_obj.method_op' maps to the definition in reverse index
+  # so that the rewriter engages the normalization logic.
+  # We grab the definition for 'method_op' first.
+  op_def = engine.semantics.data["method_op"]
+  engine.semantics._reverse_index["my_obj.method_op"] = ("method_op", op_def)
+
+  res_inst = rewrite_code(engine, code_inst)
+  clean_inst = res_inst.replace(" ", "")
+  # Assertion Fixed: verify my_obj is present as arg
+  # e.g. jax.method_op(my_obj, y)
+  assert "(my_obj,y)" in clean_inst
+
+  # Case 3: Experimental Framework (defined in Mock configs)
+  # Should behave like torch
+  code_exp = "exp.net.method_op(y)"
+  res_exp = rewrite_code(engine, code_exp)
+  # Should not inject exp.net as argument
+
+  # Temporarily injecting into rewriter instance map needed here too because
+  # 'exp.net.method_op' isn't standardly mapped in init
+  engine.semantics._reverse_index["exp.net.method_op"] = ("method_op", op_def)
+
+  res_exp = rewrite_code(engine, code_exp)
+  clean_exp = res_exp.replace(" ", "")
+  # Should be jax.method_op(y) NOT jax.method_op(exp.net, y)
+  assert "(exp.net," not in clean_exp
+  assert "(y)" in clean_exp

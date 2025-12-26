@@ -1,0 +1,118 @@
+{
+  "Avgpool": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "kernel_size",
+      "padding",
+      "stride"
+    ]
+  },
+  "Bilinear": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "bias"
+    ]
+  },
+  "Gaussiannll": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "eps",
+      "full",
+      "reduction"
+    ]
+  },
+  "Hardshrink": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": []
+  },
+  "Hardswish": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": []
+  },
+  "Kldiv": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "reduction"
+    ]
+  },
+  "L1": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "reduction"
+    ]
+  },
+  "Logsigmoid": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": []
+  },
+  "Marginranking": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "margin",
+      "reduction"
+    ]
+  },
+  "Maxpool": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "kernel_size",
+      "padding",
+      "stride"
+    ]
+  },
+  "Module": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": []
+  },
+  "Mse": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "reduction"
+    ]
+  },
+  "Nll": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "reduction"
+    ]
+  },
+  "Smoothl1": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "beta",
+      "reduction"
+    ]
+  },
+  "Softmin": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": []
+  },
+  "Transformer": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "activation",
+      "custom_decoder",
+      "custom_encoder",
+      "dropout",
+      "norm_first",
+      "num_decoder_layers",
+      "num_encoder_layers"
+    ]
+  },
+  "Transformerdecoder": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "activation",
+      "dropout",
+      "norm_first"
+    ]
+  },
+  "Transformerencoder": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "activation",
+      "dropout",
+      "norm_first"
+    ]
+  }
+}

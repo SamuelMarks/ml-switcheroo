@@ -10,7 +10,7 @@ from ml_switcheroo.enums import SemanticTier
 
 
 class MockInspector:
-  def inspect(self, fw):
+  def inspect(self, fw, **kwargs):
     # Handle modules
     return {
       "torch.nn.ReLU": {"name": "ReLU", "type": "class", "params": []},
@@ -35,6 +35,7 @@ def test_spec_driven_categorization(tmp_path):
 
   mock_adapter = MagicMock()
   mock_adapter.search_modules = None
+  mock_adapter.unsafe_submodules = set()
 
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     # Fix: Patch version detection to ensure deterministic filename
@@ -64,6 +65,7 @@ def test_heuristic_fallback_dynamic(tmp_path):
   mock_adapter = MagicMock()
   mock_adapter.discovery_heuristics = {"neural": [r"\\.custom\\."]}
   mock_adapter.search_modules = None
+  mock_adapter.unsafe_submodules = set()
 
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     with patch("ml_switcheroo.discovery.scaffolder.importlib.metadata.version", return_value="latest"):

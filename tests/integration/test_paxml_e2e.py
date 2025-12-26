@@ -27,6 +27,10 @@ class PaxE2ESemantics(SemanticsManager):
 
   def __init__(self):
     self.data = {}
+    # New attributes
+    self._providers = {}
+    self._source_registry = {}
+
     self.import_data = {}
     self._reverse_index = {}
     self._key_origins = {}
@@ -71,7 +75,12 @@ class PaxE2ESemantics(SemanticsManager):
     self._add_op("ReLU", [], torch="torch.nn.ReLU", pax="praxis.layers.ReLU", tier=SemanticTier.NEURAL)
 
     # Imports
-    self.import_data["torch.nn"] = {"variants": {"paxml": {"root": "praxis", "sub": "layers", "alias": "nn"}}}
+    self._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
+
+    if "paxml" not in self._providers:
+      self._providers["paxml"] = {}
+
+    self._providers["paxml"][SemanticTier.NEURAL] = {"root": "praxis", "sub": "layers", "alias": "nn"}
 
     # Abstract mapping for alias 'nn.Module'
     self._alias("nn.Module", "Module")

@@ -1,0 +1,116 @@
+{
+  "__framework__": "torch",
+  "mappings": {
+    "Avgpool": {
+      "api": "torch.nn.AvgPool3d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
+    },
+    "Bilinear": {
+      "api": "torch.nn.Bilinear",
+      "args": {
+        "bias": "bias"
+      }
+    },
+    "Gaussiannll": {
+      "api": "torch.nn.GaussianNLLLoss",
+      "args": {
+        "eps": "eps",
+        "full": "full",
+        "reduction": "reduction"
+      }
+    },
+    "Hardshrink": {
+      "api": "torch.nn.Hardshrink"
+    },
+    "Hardswish": {
+      "api": "torch.nn.Hardswish"
+    },
+    "Kldiv": {
+      "api": "torch.nn.KLDivLoss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "L1": {
+      "api": "torch.nn.L1Loss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "Logsigmoid": {
+      "api": "torch.nn.LogSigmoid"
+    },
+    "Marginranking": {
+      "api": "torch.nn.MarginRankingLoss",
+      "args": {
+        "margin": "margin",
+        "reduction": "reduction"
+      }
+    },
+    "Maxpool": {
+      "api": "torch.nn.MaxPool3d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
+    },
+    "Module": {
+      "api": "torch.nn.Module"
+    },
+    "Mse": {
+      "api": "torch.nn.MSELoss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "Nll": {
+      "api": "torch.nn.NLLLoss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "Smoothl1": {
+      "api": "torch.nn.SmoothL1Loss",
+      "args": {
+        "beta": "beta",
+        "reduction": "reduction"
+      }
+    },
+    "Softmin": {
+      "api": "torch.nn.Softmin"
+    },
+    "Transformer": {
+      "api": "torch.nn.Transformer",
+      "args": {
+        "activation": "activation",
+        "custom_decoder": "custom_decoder",
+        "custom_encoder": "custom_encoder",
+        "dropout": "dropout",
+        "norm_first": "norm_first",
+        "num_decoder_layers": "num_decoder_layers",
+        "num_encoder_layers": "num_encoder_layers"
+      }
+    },
+    "Transformerdecoder": {
+      "api": "torch.nn.TransformerDecoderLayer",
+      "args": {
+        "activation": "activation",
+        "dropout": "dropout",
+        "norm_first": "norm_first"
+      }
+    },
+    "Transformerencoder": {
+      "api": "torch.nn.TransformerEncoderLayer",
+      "args": {
+        "activation": "activation",
+        "dropout": "dropout",
+        "norm_first": "norm_first"
+      }
+    }
+  }
+}

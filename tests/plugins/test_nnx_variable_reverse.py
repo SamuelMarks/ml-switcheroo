@@ -43,7 +43,16 @@ def test_variable_conversion(rewriter):
 
 
 def test_ignore_wrong_target(rewriter):
+  """
+  Verify pass-through when targeting framework not wired for this plugin.
+  """
   rewriter.ctx._runtime_config.target_framework = "numpy"
   rewriter.ctx.target_fw = "numpy"
+
+  # Sync Rewriter
+  rewriter.target_fw = "numpy"
+
+  # Mock behavior: wiring not found
   rewriter.semantics.resolve_variant.side_effect = lambda a, f: None
+
   assert "nnx.Param" in rewrite_code(rewriter, "w = nnx.Param(x)")

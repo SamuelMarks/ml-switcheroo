@@ -58,7 +58,7 @@ def test_definition_hydration_from_adapter(empty_directories):
 def test_import_namespace_hydration(empty_directories):
   """
   Scenario: Adapter provides 'import_namespaces'.
-  Expectation: Manager merges these into self.import_data.
+  Expectation: Manager merges these into internal store.
   """
   sem = empty_directories / "semantics"
   snap = empty_directories / "snapshots"
@@ -76,11 +76,22 @@ def test_import_namespace_hydration(empty_directories):
     with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=snap):
       mgr = SemanticsManager()
 
-  # Verify Import Data
-  assert "standard.lib" in mgr.import_data
-  variants = mgr.import_data["standard.lib"]["variants"]
-  assert "import_fw" in variants
-  assert variants["import_fw"]["alias"] == "il"
+  # Verify Import Data via new Public access or internal check
+  # Check if 'standard.lib' is registered as a source
+  assert "standard.lib" in mgr._source_registry
+
+  # Check if 'import_fw' is registered as a provider for that tier
+  # infer_tier_from_path('standard.lib') -> likely None/Array/Extras depending on heuristic.
+  # Let's check the provider map directly if we know the inferred tier.
+  # standard.lib doesn't match 'nn', 'optim' etc. -> Defaults to ARRAY_API (math).
+  from ml_switcheroo.enums import SemanticTier
+
+  tier = mgr._infer_namespace_tier("standard.lib")
+
+  assert "import_fw" in mgr._providers
+  config = mgr._providers["import_fw"].get(tier)
+  assert config is not None
+  assert config["alias"] == "il"
 
 
 def test_clean_slate_if_registry_empty(empty_directories):

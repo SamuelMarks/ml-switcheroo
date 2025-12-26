@@ -1,5 +1,5 @@
 """
-Plugin Registry, Hook Context, and Dynamic Loader.
+Plugin Binding Infrastructure.
 
 This module provides the infrastructure for extending ml-switcheroo via plugins.
 It enables developers to intercept and modify the Abstract Syntax Tree (AST)
@@ -7,8 +7,8 @@ during the conversion process using a hook-based system.
 
 Refactor:
     - Added `auto_wire` support to the `register_hook` decorator.
-    - Plugins can now declare their own Semantic definitions, eliminating
-      the need to edit `standards_internal.py` or JSON files for self-contained features.
+    - Plugins can now declare their own Semantic definitions.
+    - HookContext now exposes `plugin_traits` and `current_variant` for data-driven logic.
 """
 
 import importlib
@@ -20,6 +20,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 # We import RuntimeConfig for type hinting
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.schema import PluginTraits, Variant
 
 # Validation that SemanticsManager is importable for type hinting
 SemanticsManagerType = Any
@@ -30,12 +31,28 @@ ArgInjectorType = Callable[[str, Optional[str]], None]
 PreambleInjectorType = Callable[[str], None]
 
 
+class AutoWireSpec(BaseModel):
+  """
+  Schema for plugin self-registration metadata.
+  Allows a plugin to define the Semantic Operation it satisfies.
+  """
+
+  model_config = ConfigDict(extra="allow")
+
+  ops: Dict[str, Dict[str, Any]] = Field(
+    default_factory=dict,
+    description="Dictionary of Abstract Operations to inject into SemanticsManager.",
+  )
+
+
+# Updated Type alias to allow arbitrary CSTNodes (e.g. For, Call)
 class HookContext:
   """
   Context object passed to every plugin hook during transcoding.
 
   Provides read-only access to global state and write access
   to specific injection points (signature args, function body preambles).
+  Now exposes `plugin_traits` and `current_variant` for data-driven decisions.
   """
 
   def __init__(
@@ -61,8 +78,53 @@ class HookContext:
 
     self.source_fw = config.source_framework
     self.target_fw = config.target_framework
+
+    # Plugin State
     self.metadata: Dict[str, Any] = {}
     self.current_op_id: Optional[str] = None
+
+  @property
+  def plugin_traits(self) -> PluginTraits:
+    """
+    Returns the capabilities of the current Target Framework.
+    This allows plugins to check functionality (e.g. has_numpy_compatible_arrays)
+    rather than checking the framework name string.
+    """
+    if not self.semantics:
+      return PluginTraits()
+
+    conf = self.semantics.get_framework_config(self.target_fw)
+    if not conf:
+      return PluginTraits()
+
+    # Handle dict or Pydantic object
+    traits = conf.get("plugin_traits")
+    if not traits:
+      return PluginTraits()
+
+    if isinstance(traits, dict):
+      return PluginTraits.model_validate(traits)
+    if isinstance(traits, PluginTraits):
+      return traits
+
+    return PluginTraits()
+
+  @property
+  def current_variant(self) -> Optional[Variant]:
+    """
+    Returns the Variant definition for the current operation/target.
+    Allows plugins to read extra metadata defined in the JSON (e.g. pack_to_tuple).
+    """
+    if not self.semantics or not self.current_op_id:
+      return None
+
+    # Access definition
+    # Use low-level retrieval to avoid recursion
+    data = self.semantics.resolve_variant(self.current_op_id, self.target_fw)
+    if not data:
+      return None
+
+    return Variant.model_validate(data)
 
   def inject_signature_arg(self, name: str, annotation: Optional[str] = None) -> None:
     """Requests injection of argument into the current function signature."""
@@ -84,8 +146,8 @@ class HookContext:
 
   def validate_settings(self, model: Type[T]) -> T:
     """Validates global config against a Plugin-specific Pydantic schema."""
-    relevant_keys = model.model_fields.keys()
-    subset = {k: v for k, v in self._runtime_config.plugin_settings.items() if k in relevant_keys}
+    relevant = model.model_fields.keys()
+    subset = {k: v for k, v in self._runtime_config.plugin_settings.items() if k in relevant}
     return model.model_validate(subset)
 
   def lookup_api(self, op_name: str) -> Optional[str]:
@@ -93,13 +155,9 @@ class HookContext:
     if not self.semantics:
       return None
 
-    known_apis = self.semantics.get_known_apis()
-    details = known_apis.get(op_name)
-    if not details:
-      return None
-
-    variants = details.get("variants", {})
-    target_variant = variants.get(self.target_fw)
+    # Use the inheritance-aware resolve_variant method
+    # instead of direct dict access to support child frameworks (e.g. flax_nnx -> jax mapping)
+    target_variant = self.semantics.resolve_variant(op_name, self.target_fw)
 
     if not target_variant:
       return None
@@ -110,8 +168,8 @@ class HookContext:
     """Retrieves standard argument list for a given operation."""
     if not self.semantics:
       return []
-    known_apis = self.semantics.get_known_apis()
-    details = known_apis.get(op_name)
+    # get_definition_by_id checks main data store
+    details = self.semantics.get_definition_by_id(op_name)
     if not details:
       return []
     std_args = details.get("std_args", [])
@@ -119,26 +177,16 @@ class HookContext:
     for item in std_args:
       if isinstance(item, (list, tuple)):
         cleaned_args.append(item[0])
+      elif isinstance(item, dict):
+        # Handle ParameterDef dict or object
+        name = item.get("name")
+        if name:
+          cleaned_args.append(name)
       else:
         cleaned_args.append(item)
     return cleaned_args
 
 
-class AutoWireSpec(BaseModel):
-  """
-  Schema for plugin self-registration metadata.
-  Allows a plugin to define the Semantic Operation it satisfies.
-  """
-
-  model_config = ConfigDict(extra="allow")
-
-  ops: Dict[str, Dict[str, Any]] = Field(
-    default_factory=dict,
-    description="Dictionary of Abstract Operations to inject into SemanticsManager.",
-  )
-
-
-# Updated Type alias to allow arbitrary CSTNodes (e.g. For, Call)
 HookFunction = Callable[[Any, HookContext], Any]
 
 # Global Registries
@@ -218,7 +266,7 @@ def load_plugins(plugins_dir: Optional[Path] = None, extra_dirs: Optional[List[P
   total_loaded = 0
 
   # 1. Load Defaults (Internal Package) if no specific override
-  if not _PLUGINS_LOADED and plugins_dir is None:
+  if not _PLUGINS_LOADED and not plugins_dir:
     try:
       import ml_switcheroo.plugins  # noqa: F401
 

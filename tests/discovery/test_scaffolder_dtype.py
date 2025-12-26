@@ -9,7 +9,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockAttributeInspector:
-  def inspect(self, fw):
+  def inspect(self, fw, **kwargs):
     if "torch" in fw:
       return {"torch.float32": {"name": "float32", "type": "attribute", "params": []}}
     return {}
@@ -33,6 +33,7 @@ def test_scaffolder_propagates_type_field(tmp_path):
   # Configure mock adapter safely
   mock_adapter = MagicMock()
   mock_adapter.search_modules = None  # Force simple scan
+  mock_adapter.unsafe_submodules = set()  # Safety Fix
 
   # Patch where it is DEFINED to affect all imports, since Scaffolder uses it internally
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):

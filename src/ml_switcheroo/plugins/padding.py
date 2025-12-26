@@ -6,10 +6,12 @@ Addresses the semantic mismatch between:
 2. JAX/NumPy (`pad(x, ((n_b, n_a), (c_b, c_a), ...))`): Explicit per-dimension tuples.
 
 This plugin transforms standard 4D tensor padding (images) into the explicit
-tuple-of-tuples format required by XLA compilers.
+tuple-of-tuples format required by XLA compilers and NumPy-compatible libraries.
+It relies on `PluginTraits` to detect if the target framework requires this format.
 """
 
 import libcst as cst
+from typing import Dict, Any
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -30,18 +32,71 @@ def _create_dim_pad(before: cst.BaseExpression, after: cst.BaseExpression) -> cs
   """Helper to create (before, after) tuple element."""
   return cst.Element(
     value=cst.Tuple(
-      elements=[cst.Element(before, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))), cst.Element(after)]
+      elements=[
+        cst.Element(before, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
+        cst.Element(after),
+      ]
     )
   )
+
+
+def _supports_numpy_padding(ctx: HookContext) -> bool:
+  """
+  Checks if the target framework supports explicit tuple-of-tuples padding
+  (NumPy/JAX style) via PluginTraits.
+
+  Decouples the plugin from hardcoded framework lists like ['jax', 'numpy'].
+
+  Args:
+      ctx: The hook context containing the semantics manager and target framework.
+
+  Returns:
+      bool: True if the target framework declares 'has_numpy_compatible_arrays'.
+  """
+  if not ctx.semantics:
+    return False
+
+  # Retrieve dict configuration for the active target framework
+  conf: Dict[str, Any] = ctx.semantics.get_framework_config(ctx.target_fw)
+  if not conf:
+    return False
+
+  # Navigate: config -> plugin_traits -> has_numpy_compatible_arrays
+  # We handle both dict access (from JSON) and object access (if hydrated objects are used)
+  traits = conf.get("plugin_traits")
+  if not traits:
+    return False
+
+  if isinstance(traits, dict):
+    return traits.get("has_numpy_compatible_arrays", False)
+
+  if hasattr(traits, "has_numpy_compatible_arrays"):
+    return getattr(traits, "has_numpy_compatible_arrays", False)
+
+  return False
 
 
 @register_hook("padding_converter")
 def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
-  Hook: Transforms padding coordinate format.
-  Trigger: Operations mapped to 'pad' with `requires_plugin: "padding_converter"`.
+  Hook: Transforms padding coordinate format from Torch style to NumPy style.
+
+  Trigger:
+      Operations mapped to 'pad' with `requires_plugin: "padding_converter"`.
+
+  Transformation:
+      Input:  `F.pad(x, (left, right, top, bottom))`
+      Output: `jax.numpy.pad(x, ((0, 0), (0, 0), (top, bottom), (left, right)))`
+
+  Args:
+      node: The original CST Call node.
+      ctx: Hook Context containing target framework metadata.
+
+  Returns:
+      The transformed CST Call node if the framework is compatible, else original.
   """
-  if ctx.target_fw not in ["jax", "numpy", "flax_nnx", "tensorflow"]:
+  # 0. Capability Check
+  if not _supports_numpy_padding(ctx):
     return node
 
   args = list(node.args)

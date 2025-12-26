@@ -13,12 +13,12 @@ from ml_switcheroo.frameworks.torch import TorchAdapter
 from ml_switcheroo.core.hooks import _HOOKS
 from ml_switcheroo.plugins.nnx_to_torch_params import transform_nnx_param
 
-SOURCE_FLAX_VARIABLE = textwrap.dedent(""" 
+SOURCE_FLAX_VARIABLE = textwrap.dedent("""
   import flax.nnx as nnx
   
-  class MyLayer(nnx.Module):
-    def __init__(self, rngs: nnx.Rngs):
-        self.param = nnx.Param(1.0)
+  class MyLayer(nnx.Module): 
+    def __init__(self, rngs: nnx.Rngs): 
+        self.param = nnx.Param(1.0) 
         self.var = nnx.Variable(2.0) 
         self.cache = nnx.Cache(3.0) 
 """)
@@ -81,8 +81,14 @@ def semantics():
   mgr.framework_configs["torch"] = {"traits": {"module_base": "torch.nn.Module", "forward_method": "forward"}}
 
   # Mock import data for torch.nn to trigger aliasing if used by ImportFixer
-  # We set this up to ensure consistent behavior with the real adapter
-  mgr.import_data["torch.nn"] = {"variants": {"torch": {"root": "torch", "sub": "nn", "alias": "nn"}}}
+  # New Logic
+  mgr._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
+
+  if "torch" not in mgr._providers:
+    mgr._providers["torch"] = {}
+
+  # Define provider for Torch self-conversion (preservation/aliasing)
+  mgr._providers["torch"][SemanticTier.NEURAL] = {"root": "torch", "sub": "nn", "alias": "nn"}
 
   return mgr
 

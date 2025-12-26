@@ -134,13 +134,17 @@ def test_parameters_transform(rewriter):
 
 
 def test_nontarget_passthrough(rewriter):
-  """Verify no change if target is not JAX."""
+  """Verify no change if target is not JAX via wiring check."""
   rewriter.ctx._runtime_config.target_framework = "torch"
   rewriter.ctx.target_fw = "torch"
-  # Ensure resolve returns None for torch
-  rewriter.semantics.resolve_variant.side_effect = lambda aid, fw: None
+
+  # Sync Rewriter state
+  rewriter.target_fw = "torch"
+
+  # Ensure resolve logic handles torch by returning None for these plugins
+  # (Already handled by side_effect mock logic provided in fixture)
 
   code = "model.state_dict()"
   res = rewrite_code(rewriter, code)
-  assert "max.state" not in res
+  assert "flax.nnx" not in res
   assert "model.state_dict()" in res

@@ -17,85 +17,98 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
     pytest.fail(f"Rewrite failed: {e}")
 
 
-@pytest.fixture
-def rewriter():
-  # Manually register the hook to ensure it's available for this test context,
-  # even though the main logic now uses DSL, the plugin file itself might still
-  # contain the hook registration decorator that tests rely on.
-  # If the plugin file was removed or emptied, this would fail, but we assume
-  # it persists for backward compatibility or is being tested in isolation.
-  if hasattr(hooks, "_HOOKS"):
-    hooks._HOOKS["pack_varargs"] = pack_varargs
-    hooks._PLUGINS_LOADED = True
+def get_rewriter_for_target(target_fw, pack_kw):
+  # Force reload of hooks to pick up any changes if necessary (though registry is global)
+  hooks._HOOKS["pack_varargs"] = pack_varargs
+  hooks._PLUGINS_LOADED = True
 
   mgr = MagicMock()
 
-  # Updated definition using DSL feature instead of plugin for JAX
-  # But keep plugin requirement for legacy test if needed?
-  # Actually, the failing tests are integration tests using DSL logic.
-  # This unit test specifically targeted the plugin function.
-  # Let's adjust this test fixture to match the NEW DSL-driven reality
-  # where the rewriter handles packing natively if 'pack_to_tuple' is set.
-
+  # Definition that requires plugin
   permute_def = {
-    # Must declare is_variadic on an argument for new logic to pick it up
     "std_args": ["x", {"name": "axes", "is_variadic": True}],
     "variants": {
       "torch": {"api": "torch.permute"},
-      "jax": {"api": "jax.numpy.transpose", "pack_to_tuple": "axes"},
+      target_fw: {"api": "target.transpose", "pack_to_tuple": pack_kw, "requires_plugin": "pack_varargs"},
     },
   }
 
+  # Mock lookup
   def get_def_side_effect(name):
     if name == "torch.permute":
       return "permute_dims", permute_def
     return None
 
   mgr.get_definition.side_effect = get_def_side_effect
+  mgr.get_definition_by_id.return_value = permute_def
   mgr.get_known_apis.return_value = {"permute_dims": permute_def}
   mgr.is_verified.return_value = True
 
-  def resolve_variant(abstract_id, target_fw):
-    if abstract_id == "permute_dims" and target_fw == "jax":
-      return permute_def["variants"]["jax"]
+  # Mock resolution
+  def resolve_variant(abstract_id, framework):
+    if abstract_id == "permute_dims" and framework == target_fw:
+      return permute_def["variants"][target_fw]
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant
 
-  cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
+  # Fix: Ensure get_framework_config returns safe defaults
+  mgr.get_framework_config.return_value = {}
+
+  cfg = RuntimeConfig(source_framework="torch", target_framework=target_fw)
   return PivotRewriter(semantics=mgr, config=cfg)
 
 
-def test_pack_permute_vars(rewriter):
+def test_generic_axis_packing():
+  """Verify default packing to 'axes' (JAX style)."""
+  rewriter = get_rewriter_for_target("jax", pack_kw="axes")
+
   code = "y = torch.permute(x, 2, 0, 1)"
   result = rewrite_code(rewriter, code)
-  assert "jax.numpy.transpose" in result
 
-  # Assert string exactness carefully with whitespace
+  assert "target.transpose" in result
+  # "y=target.transpose(x,axes=(2,0,1))"
   clean = result.replace(" ", "")
-  # "y=jax.numpy.transpose(x,axes=(2,0,1))"
   assert "axes=(2,0,1)" in clean
 
 
-def test_pack_single_dim(rewriter):
+def test_custom_perm_packing():
+  """Verify packing to 'perm' (TensorFlow style) driven by data, not hardcoded if."""
+  rewriter = get_rewriter_for_target("tensorflow", pack_kw="perm")
+
+  code = "y = torch.permute(x, 0, 2, 1)"
+  result = rewrite_code(rewriter, code)
+
+  clean = result.replace(" ", "")
+  assert "perm=(0,2,1)" in clean
+
+
+def test_pack_single_dim():
+  """Verify single arg packing."""
+  rewriter = get_rewriter_for_target("jax", pack_kw="axes")
+
   code = "y = torch.permute(x, 0)"
   result = rewrite_code(rewriter, code)
   clean = result.replace(" ", "")
   assert "axes=(0,)" in clean
 
 
-def test_preserve_input(rewriter):
-  code = "y = torch.permute(my_tensor, 1, 0)"
-  result = rewrite_code(rewriter, code)
-  assert "jax.numpy.transpose(my_tensor" in result
+def test_ignore_wrong_fw():
+  """
+  Verify plugin is NOT triggered if target framework has no mapping.
+  """
+  mgr = MagicMock()
+  # Resolve returns None
+  mgr.resolve_variant.return_value = None
+  mgr.get_definition.return_value = None
 
+  mgr.get_framework_config.return_value = {}
 
-def test_ignore_wrong_fw(rewriter):
-  rewriter.ctx._runtime_config.target_framework = "numpy"
-  rewriter.ctx.target_fw = "numpy"
-  # Ensure ignore via resolver
-  rewriter.semantics.resolve_variant.side_effect = lambda aid, fw: None
+  # Valid definition for Torch, but NO mapping for target 'numpy'
+  cfg = RuntimeConfig(source_framework="torch", target_framework="numpy")
+  rewriter = PivotRewriter(semantics=mgr, config=cfg)
 
   code = "y = torch.permute(x, 1, 0)"
+  # Should not crash, should return original (or rewriter logic skips it)
   result = rewrite_code(rewriter, code)
   assert "torch.permute" in result

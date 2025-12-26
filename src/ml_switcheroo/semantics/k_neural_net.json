@@ -315,6 +315,13 @@
       ]
     ]
   },
+  "Bilinear": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "bias"
+    ],
+    "type": "class"
+  },
   "BitShift": {
     "description": "Bitwise shift operator performs element-wise operation. For each input element, if the attribute \"direction\" is \"RIGHT\", this operator moves its binary representation toward the right side so that the input value is effectively decreased. If the attribute \"direction\" is \"LEFT\", bits of binary repres...",
     "from": "Operators.md",
@@ -680,11 +687,6 @@
         "List[int]"
       ]
     ]
-  },
-  "Conv2d": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
   },
   "ConvInteger": {
     "description": "The integer convolution operator consumes an input tensor, its zero-point, a filter, and its zero-point, and computes the output. The production MUST never overflow. The accumulation may overflow if and only if in 32 bits.",
@@ -1186,6 +1188,7 @@
   },
   "Gather": {
     "description": "Given `data` tensor of rank r >= 1, and `indices` tensor of rank q, gather entries of the axis dimension of `data` (by default outer-most one as axis=0) indexed by `indices`, and concatenates them in an output tensor of rank q + (r - 1). It is an indexing operation that indexes into the input `data`...",
+    "from": "Operators.md",
     "std_args": [
       [
         "data",
@@ -1199,8 +1202,7 @@
         "axis",
         "int"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "GatherElements": {
     "description": "GatherElements takes two inputs `data` and `indices` of the same rank r >= 1 and an optional attribute `axis` that identifies an axis of `data` (by default, the outer-most axis, that is axis 0). It is an indexing operation that produces its output by indexing into the input data tensor at index posi...",
@@ -1460,13 +1462,13 @@
   },
   "HardSwish": {
     "description": "HardSwish takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the HardSwish function, y = x * max(0, min(1, alpha * x + beta)) = x * HardSigmoid<alpha, beta>(x), where alpha = 1/6 and beta = 0.5, is applied to the tensor elementwise.",
+    "from": "Operators.md",
     "std_args": [
       [
         "X",
         "Tensor"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "Hardmax": {
     "description": "The operator computes the hardmax values for the given input: Hardmax(element in input, axis) = 1 if the element is the first maximum value along the specified axis, 0 otherwise The \"axis\" attribute indicates the dimension along which Hardmax will be performed. The output tensor has the same shape a...",
@@ -1481,6 +1483,16 @@
         "int"
       ]
     ]
+  },
+  "Hardshrink": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [],
+    "type": "class"
+  },
+  "Hardswish": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [],
+    "type": "class"
   },
   "Identity": {
     "description": "Identity operator",
@@ -1775,6 +1787,11 @@
     ],
     "type": "class"
   },
+  "Logsigmoid": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [],
+    "type": "class"
+  },
   "Loop": {
     "description": "Generic Looping construct. This loop has multiple termination conditions: 1) Trip count. Iteration count specified at runtime. Set by specifying the input M. Optional. Set to empty string to omit. Note that a static trip count (specified at graph construction time) can be specified by passing in a c...",
     "from": "Operators.md",
@@ -1937,11 +1954,6 @@
       ]
     ]
   },
-  "MaxPool2d": {
-    "description": "Auto-generated from torch_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
   "MaxRoiPool": {
     "description": "ROI max pool consumes an input tensor X and region of interests (RoIs) to apply max pooling across each RoI, to produce output 4-D tensor of shape (num_rois, channels, pooled_shape[0], pooled_shape[1]).",
     "from": "Operators.md",
@@ -2087,12 +2099,8 @@
     ]
   },
   "Module": {
-    "description": "Base class for all neural network modules.",
-    "std_args": [
-      "self",
-      "args",
-      "kwargs"
-    ],
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [],
     "type": "class"
   },
   "ModuleDict": {
@@ -2327,6 +2335,7 @@
   },
   "Pad": {
     "description": "Given a tensor containing the data to be padded (`data`), a tensor containing the number of start and end pad values for axis (`pads`), (optionally) a `mode`, and (optionally) `constant_value`, a padded tensor (`output`) is generated. The three supported `modes` are (similar to corresponding modes s...",
+    "from": "Operators.md",
     "std_args": [
       [
         "data",
@@ -2348,8 +2357,7 @@
         "mode",
         "str"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "Pow": {
     "description": "Pow takes input data (Tensor<T>) and exponent Tensor, and produces one output data (Tensor<T>) where the function `f(x) = x^exponent`, is applied to the data tensor elementwise. This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broa...",
@@ -3213,8 +3221,8 @@
   },
   "Scatter": {
     "description": "This operator is deprecated. Please use ScatterElements, which provides the same functionality. Scatter takes three inputs `data`, `updates`, and `indices` of the same rank r >= 1 and an optional attribute axis that identifies an axis of `data` (by default, the outer-most axis, that is axis 0). The ...",
-    "std_args": [],
-    "type": "function"
+    "from": "Operators.md",
+    "std_args": []
   },
   "ScatterElements": {
     "description": "ScatterElements takes three inputs `data`, `updates`, and `indices` of the same rank r >= 1 and an optional attribute axis that identifies an axis of `data` (by default, the outer-most axis, that is axis 0). The output of the operation is produced by creating a copy of the input `data`, and then upd...",
@@ -3527,6 +3535,11 @@
         "str"
       ]
     ]
+  },
+  "Softmin": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [],
+    "type": "class"
   },
   "Softplus": {
     "description": "Softplus takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the softplus function, y = ln(exp(x) + 1), is applied to the tensor elementwise.",
@@ -3877,6 +3890,19 @@
       ]
     ]
   },
+  "Transformer": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "activation",
+      "custom_decoder",
+      "custom_encoder",
+      "dropout",
+      "norm_first",
+      "num_decoder_layers",
+      "num_encoder_layers"
+    ],
+    "type": "class"
+  },
   "TransformerDecoderLayer": {
     "description": "TransformerDecoderLayer is made up of self-attn, multi-head-attn and feedforward network.",
     "std_args": [
@@ -3910,6 +3936,24 @@
       "bias",
       "device",
       "dtype"
+    ],
+    "type": "class"
+  },
+  "Transformerdecoder": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "activation",
+      "dropout",
+      "norm_first"
+    ],
+    "type": "class"
+  },
+  "Transformerencoder": {
+    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "std_args": [
+      "activation",
+      "dropout",
+      "norm_first"
     ],
     "type": "class"
   },
@@ -4054,11 +4098,6 @@
     "type": "function"
   },
   "is_multi_device_module": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "module": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"

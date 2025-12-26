@@ -13,7 +13,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspectorExtras:
-  def inspect(self, fw):
+  def inspect(self, fw, **kwargs):
     if "torch" in fw:
       return {
         # Should go to Extras (via dynamic regex)
@@ -43,6 +43,7 @@ def test_extras_scaffolding_dynamic(tmp_path):
     mock_adapter.discovery_heuristics = {"extras": [r"\.custom_util\.", r"\.my_hub\."]}
     # Force single Scan
     mock_adapter.search_modules = None
+    mock_adapter.unsafe_submodules = set()
 
     with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
       scaffolder.scaffold(["torch"], root_dir=tmp_path)
@@ -57,9 +58,6 @@ def test_extras_scaffolding_dynamic(tmp_path):
   # Check Routing
   assert "func" in extras_data  # Matches .custom_util.
   assert "save" in extras_data  # Matches .my_hub.
-
-  # Note: logic for 'abs' might default to extras if not in key ops.
-  # We relax the strict checking of abs location for this test as we focus on extras.
 
 
 def test_structurally_extra_logic_dynamic():

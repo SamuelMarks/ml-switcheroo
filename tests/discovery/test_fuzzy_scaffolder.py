@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector(ApiInspector):
-  def inspect(self, fw_name: str) -> dict:
+  def inspect(self, fw_name: str, **kwargs) -> dict:
     if fw_name == "source_fw":
       return {
         "source.absolute": {"name": "absolute", "params": ["x"]},
@@ -44,13 +44,6 @@ def test_fuzzy_match_success(tmp_path, clean_semantics):
   snap_dir = tmp_path / "snapshots"
   sem_dir.mkdir()
   snap_dir.mkdir()
-
-  # Explicitly path resolving isn't needed if we pass root_dir=tmp_path
-  # because Scaffolder appends /semantics and /snapshots automatically.
-  # Using tmp_path as root ensures files land in tmp_path/semantics and tmp_path/snapshots.
-
-  # Scaffolder.scaffold writes to importlib.metadata.version or 'latest'
-  # We need to expect 'latest' since frameworks aren't installed.
 
   scaffolder.scaffold(["source_fw", "target_fw"], root_dir=tmp_path)
 
@@ -87,7 +80,7 @@ def test_exact_match_priority(tmp_path, clean_semantics):
   scaffolder = Scaffolder(semantics=clean_semantics)
   scaffolder.inspector = MockInspector()
 
-  def inspect_side(fw_name):
+  def inspect_side(fw_name, **kwargs):
     if fw_name == "source_fw":
       return {"source.add": {"name": "add", "params": ["x", "y"]}}
     else:

@@ -1,6 +1,7 @@
 """
 Tests for Core Hooks API and Metadata Integrity.
 Verifies registration mechanism, Context object data structures, and Injection callbacks.
+Also tests Data-Driven logic access (PluginTraits, Variants).
 """
 
 import pytest
@@ -16,6 +17,7 @@ from ml_switcheroo.core.hooks import (
   _HOOKS,
 )
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.semantics.schema import PluginTraits
 
 
 # Mock object implies we don't need the full logic
@@ -213,3 +215,65 @@ def test_config_validation_success():
 
   assert model.epsilon == 0.001  # Overridden
   assert not hasattr(model, "ignored")  # Filtered
+
+
+def test_hook_context_traits_access():
+  """Verify plugins can access traits."""
+  mgr = MagicMock()
+  # Mock return value for get_framework_config
+  mgr.get_framework_config.return_value = {"plugin_traits": {"requires_explicit_rng": True}}
+
+  config = RuntimeConfig(target_framework="jax")
+  ctx = HookContext(mgr, config)
+
+  traits = ctx.plugin_traits
+  assert isinstance(traits, PluginTraits)
+  assert traits.requires_explicit_rng is True
+  # Default is False
+  assert traits.has_numpy_compatible_arrays is False
+
+
+def test_hook_context_traits_access_defaults():
+  """Verify plugins get defaults if no config/semantics."""
+  # Case 1: Semantics missing
+  config = RuntimeConfig(target_framework="jax")
+  ctx = HookContext(None, config)
+  assert ctx.plugin_traits.requires_explicit_rng is False
+
+  # Case 2: Config missing in Semantics
+  mgr = MagicMock()
+  mgr.get_framework_config.return_value = {}
+  ctx2 = HookContext(mgr, config)
+  assert ctx2.plugin_traits.requires_explicit_rng is False
+
+
+def test_hook_context_variant_lookup():
+  """Verify plugins can see current variant config via resolve_variant."""
+  mgr = MagicMock()
+  # resolve_variant returns a dict
+  mgr.resolve_variant.return_value = {"api": "foo", "pack_to_tuple": "axes"}
+
+  config = RuntimeConfig(target_framework="jax")
+  ctx = HookContext(mgr, config)
+  ctx.current_op_id = "Permute"
+
+  var = ctx.current_variant
+  assert var is not None
+  assert var.api == "foo"
+  assert var.pack_to_tuple == "axes"
+
+  # Verify that resolve_variant was called correctly
+  mgr.resolve_variant.assert_called_with("Permute", "jax")
+
+
+def test_hook_context_variant_lookup_missing():
+  """Verify variant lookup safely returns None if nothing found."""
+  mgr = MagicMock()
+  # Returns None
+  mgr.resolve_variant.return_value = None
+
+  config = RuntimeConfig(target_framework="jax")
+  ctx = HookContext(mgr, config)
+  ctx.current_op_id = "MissingOp"
+
+  assert ctx.current_variant is None

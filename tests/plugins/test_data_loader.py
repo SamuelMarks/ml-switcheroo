@@ -1,10 +1,10 @@
 """
-Tests for Data Loader Plugin.
+Tests for Data Loader Plugin (Decoupled Logic).
 
 Verifies:
-1. Torch -> Torch passthrough.
-2. Torch -> JAX rewrite (Injection of Shim class + Call rewrite).
-3. Argument mapping (positional/keyword preservation).
+1. Plugin execution is driven by Metadata, not Target string hardcoding.
+2. Correct Shim injection.
+3. Argument preservation logic.
 """
 
 import pytest
@@ -15,6 +15,7 @@ from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.data_loader import transform_dataloader
+from ml_switcheroo.frameworks.base import register_framework
 
 
 def rewrite_code(rewriter, code: str) -> str:
@@ -30,11 +31,15 @@ def rewriter_factory():
   hooks._PLUGINS_LOADED = True
 
   mgr = MagicMock()
-  # Mock definition
+
+  # Mock Definition: multiple frameworks request the plugin.
+  # This setup proves that the plugin runs blindly if requested,
+  # breaking the coupling where "torch" was formerly hardcoded to skip.
   dl_def = {
     "variants": {
-      "torch": {"api": "torch.utils.data.DataLoader", "requires_plugin": "convert_dataloader"},
+      "torch": {"api": "TorchShim", "requires_plugin": "convert_dataloader"},
       "jax": {"api": "GenericDataLoader", "requires_plugin": "convert_dataloader"},
+      "custom": {"api": "CustomShim", "requires_plugin": "convert_dataloader"},
     }
   }
 
@@ -42,33 +47,48 @@ def rewriter_factory():
   mgr.get_definition.side_effect = lambda n: ("DataLoader", dl_def) if "DataLoader" in n else None
   mgr.resolve_variant.side_effect = lambda aid, fw: dl_def["variants"].get(fw)
   mgr.is_verified.return_value = True
+  # Fix: Ensure fallback defaults for trait lookups
+  mgr.get_framework_config.return_value = {}
+
+  # --- FIX: Register dummy framework 'custom' to allow RuntimeConfig validation to pass ---
+  # We define it locally so it affects only tests consuming this fixture.
+  @register_framework("custom")
+  class CustomAdapter:
+    pass
 
   def create(target):
-    # We assume source is always torch for these tests
     cfg = RuntimeConfig(source_framework="torch", target_framework=target)
     return PivotRewriter(mgr, cfg)
 
   return create
 
 
-def test_torch_passthrough(rewriter_factory):
-  """Verify Torch -> Torch preserves the original API."""
+def test_blind_execution(rewriter_factory):
+  """
+  Verify that if 'torch' target explicitly requests the plugin (via mock semantics),
+  the plugin EXECUTES and injects the shim.
+  (Previously, this would return original node because of hardcoded 'if target==torch: return')
+  """
   rw = rewriter_factory("torch")
-  code = "loader = torch.utils.data.DataLoader(dataset, batch_size=32)"
+  # Wrap in function to ensure preamble injection works (FuncStructureMixin logic)
+  code = """ 
+def load_data(): 
+    loader = torch.utils.data.DataLoader(dataset) 
+"""
   res = rewrite_code(rw, code)
 
-  assert "torch.utils.data.DataLoader" in res
-  assert "GenericDataLoader" not in res
-  assert "class GenericDataLoader" not in res  # No preamble injection
+  # 1. Verify Transformation happened
+  assert "GenericDataLoader" in res
+  # 2. Verify Preamble Injection
+  assert "class GenericDataLoader" in res
 
 
 def test_jax_shim_injection(rewriter_factory):
-  """Verify Torch -> JAX injects the class and rewrites the call inside a function scope."""
+  """Verify Standard JAX replacement."""
   rw = rewriter_factory("jax")
-  # Wrap in function to ensure preamble injection works (FuncStructureMixin logic)
-  code = """
-def load_data():
-    loader = torch.utils.data.DataLoader(dataset, batch_size=32)
+  code = """ 
+def load_data(): 
+    loader = torch.utils.data.DataLoader(dataset, batch_size=32) 
 """
   res = rewrite_code(rw, code)
 
@@ -77,21 +97,17 @@ def load_data():
   assert "def __iter__(self):" in res
 
   # 2. Call Check
-  # Normalize spaces for robust check
   clean_res = res.replace(" = ", "=")
-  # Check for the correct call structure
   assert "GenericDataLoader(dataset" in clean_res
   assert "batch_size=32" in clean_res
-  assert "loader=" in clean_res  # Check assignment happened
 
 
 def test_dataloader_arg_extraction(rewriter_factory):
   """Verify positional args are correctly mapped."""
   rw = rewriter_factory("jax")
-  # Wrap in function
-  code = """
-def train():
-    dl = DataLoader(my_ds, batch_size=64, shuffle=True)
+  code = """ 
+def train(): 
+    dl = DataLoader(my_ds, batch_size=64, shuffle=True) 
 """
   res = rewrite_code(rw, code)
   clean = res.replace(" ", "")
@@ -101,16 +117,24 @@ def train():
   assert "shuffle=True" in clean
 
 
-def test_dataloader_only_injects_once(rewriter_factory):
+def test_dataloader_idempotent_injection(rewriter_factory):
   """Verify shim class isn't duplicated if multiple calls exist."""
   rw = rewriter_factory("jax")
-  code = """
-def run():
-    dl1 = DataLoader(d1)
-    dl2 = DataLoader(d2)
+  code = """ 
+def run(): 
+    dl1 = DataLoader(d1) 
+    dl2 = DataLoader(d2) 
 """
   res = rewrite_code(rw, code)
 
   # Should contain class definition only once
   assert res.count("class GenericDataLoader") == 1
   assert res.count("GenericDataLoader(") == 2
+
+
+def test_custom_target_execution(rewriter_factory):
+  """Verify unknown 'custom' target works if wired."""
+  rw = rewriter_factory("custom")
+  code = "dl = DataLoader(ds)"
+  res = rewrite_code(rw, code)
+  assert "GenericDataLoader" in res

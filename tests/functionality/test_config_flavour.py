@@ -8,7 +8,7 @@ Verifies:
 """
 
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -25,8 +25,10 @@ def test_effective_framework_resolution():
   # Case 2: Target Flavour Overrides
   c2 = RuntimeConfig(target_framework="jax", target_flavour="flax_nnx")
   assert c2.effective_target == "flax_nnx"
-  # Source stays default
-  assert c2.effective_source == "torch"
+  # Source stays default (dynamically resolved)
+  # We don't assert source is 'torch' here because it depends on registry state
+  # Instead we check that effective_source matches source_framework
+  assert c2.effective_source == c2.source_framework
 
   # Case 3: Source Flavour Overrides
   c3 = RuntimeConfig(source_framework="jax", source_flavour="paxml", target_framework="torch")

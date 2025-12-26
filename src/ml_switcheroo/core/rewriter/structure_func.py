@@ -3,13 +3,15 @@ Function Structure Rewriting Logic.
 
 Handles transformations relative to function definitions, specifically:
 1.  **Logic 5: Method Renaming**: Mapping `forward` <-> `__call__` <-> `call` using Configuration Traits.
+    *Decoupling Update*: Uses `known_inference_methods` set from traits to detect candidate methods,
+    allowing custom frameworks (like `fastai.predict`) to be recognized without editing core code.
 2.  Signature Modification: Injecting hooks or state arguments (Logic 2).
 3.  Body Injection: Preamble handling (super init, rng splitting).
 4.  Docstring Updating.
 """
 
 import re
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Set
 import libcst as cst
 from libcst import BaseSuite, SimpleStatementSuite, IndentedBlock, SimpleStatementLine
 
@@ -26,6 +28,7 @@ class FuncStructureMixin(BaseRewriter):
 
   def _get_traits(self) -> StructuralTraits:
     try:
+      # Access traits for the TARGET framework
       if hasattr(self.semantics, "get_framework_config"):
         config_dict = self.semantics.get_framework_config(self.target_fw)
         if config_dict and "traits" in config_dict:
@@ -33,6 +36,25 @@ class FuncStructureMixin(BaseRewriter):
     except Exception:
       pass
     return StructuralTraits()
+
+  def _get_source_inference_methods(self) -> Set[str]:
+    """
+    Lazily loads the set of known inference methods for the Source Framework.
+    This allows flexible detection (e.g. 'predict' vs 'forward') without hardcoding.
+    """
+    default_methods = {"forward", "__call__", "call"}
+
+    try:
+      if hasattr(self.semantics, "get_framework_config"):
+        config_dict = self.semantics.get_framework_config(self.source_fw)
+        if config_dict and "traits" in config_dict:
+          traits = StructuralTraits.model_validate(config_dict["traits"])
+          if traits.known_inference_methods:
+            return traits.known_inference_methods
+    except Exception:
+      pass
+
+    return default_methods
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
     self._enter_scope()
@@ -60,30 +82,33 @@ class FuncStructureMixin(BaseRewriter):
       return updated_node
 
     sig_ctx = self._signature_stack.pop()
-    traits = self._get_traits()
+    target_traits = self._get_traits()
 
     if sig_ctx.is_module_method:
       curr_name = updated_node.name.value
-      target_name = traits.forward_method
-      known_methods = {"forward", "__call__", "call"}
+      target_name = target_traits.forward_method
 
+      # DECOUPLING FIX: Use traits from Source Framework (or shared config) to detect candidates
+      known_methods = self._get_source_inference_methods()
+
+      # If current method is a known inference method (e.g. 'forward'), rename it to target (e.g. '__call__')
       if target_name and curr_name in known_methods and curr_name != target_name:
         updated_node = updated_node.with_changes(name=cst.Name(target_name))
 
-      if sig_ctx.is_init and traits.init_method_name and traits.init_method_name != "__init__":
-        updated_node = updated_node.with_changes(name=cst.Name(traits.init_method_name))
+      if sig_ctx.is_init and target_traits.init_method_name and target_traits.init_method_name != "__init__":
+        updated_node = updated_node.with_changes(name=cst.Name(target_traits.init_method_name))
 
     if sig_ctx.is_init and sig_ctx.is_module_method:
-      for arg_name, arg_type in traits.inject_magic_args:
+      for arg_name, arg_type in target_traits.inject_magic_args:
         if arg_name not in sig_ctx.existing_args:
           found = any(n == arg_name for n, _ in sig_ctx.injected_args)
           if not found:
             sig_ctx.injected_args.append((arg_name, arg_type))
 
-      for arg_name in traits.strip_magic_args:
+      for arg_name in target_traits.strip_magic_args:
         updated_node = self._strip_argument_from_signature(updated_node, arg_name)
 
-      if traits.requires_super_init:
+      if target_traits.requires_super_init:
         updated_node = self._ensure_super_init(updated_node)
       else:
         # Logic 3: Strip super() if not required

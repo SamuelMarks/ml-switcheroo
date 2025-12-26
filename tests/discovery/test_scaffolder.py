@@ -5,7 +5,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector:
-  def inspect(self, fw):
+  def inspect(self, fw, **kwargs):
     # Updated to handle search_modules iteration (e.g. 'jax.numpy')
     if "torch" in fw:
       return {"torch.abs": {"name": "abs", "type": "function", "params": ["x"]}}

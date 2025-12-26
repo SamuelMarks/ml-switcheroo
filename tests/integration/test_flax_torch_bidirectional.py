@@ -20,6 +20,7 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.enums import SemanticTier
 from tests.utils.ast_utils import cmp_ast
 
 # Fix: Import specific adapter for Neural traits to ensure test consistency
@@ -44,20 +45,20 @@ class Net(nnx.Module):
 # - 'import torch.nn.functional as F' alias injection.
 # - 'import torch.nn as nn' (Root Import style)
 # - 'F.relu(x)' replacing 'nnx.relu(x)'.
-torch_tier2_ex0 = """ 
+torch_tier2_ex0 = """
 import torch.nn.functional as F
 import torch.nn as nn
 
-class Net(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
         # State injection pattern
-        self.linear = nn.Linear(10, 10) 
+        self.linear = nn.Linear(10, 10)
 
-    def forward(self, x): 
-        x = self.linear(x) 
+    def forward(self, x):
+        x = self.linear(x)
         # Functional activation
-        return F.relu(x) 
+        return F.relu(x)
 """
 
 
@@ -146,11 +147,17 @@ class FixedSemantics(SemanticsManager):
     # NOTE: We do NOT add torch.nn -> flax.nnx here, confirming the fix
     # The default behavior logic comes from adapter.import_namespaces being loaded by manager
     # but here we are mocking, so we manually inject the fixed alias
-    self.import_data["torch.nn"] = {"variants": {"jax": {"root": "flax", "sub": "nnx", "alias": "nnx"}}}
+
+    self._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
+
+    if "jax" not in self._providers:
+      self._providers["jax"] = {}
+
+    self._providers["jax"][SemanticTier.NEURAL] = {"root": "flax", "sub": "nnx", "alias": "nnx"}
 
 
 def test_specific_abs_conversion():
-  input_torch = """ 
+  input_torch = """
 import torch
 import torch.nn as nn
 
@@ -158,7 +165,7 @@ class Model(nn.Module):
     def forward(self, x): 
         return torch.abs(x) 
 """
-  output_jax_flax = """ 
+  output_jax_flax = """
 import jax.numpy as jnp
 import flax.nnx as nnx
 

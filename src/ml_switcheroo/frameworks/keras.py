@@ -4,11 +4,7 @@ Keras (v3) Framework Adapter.
 This module provides the adapter for Keras 3+, enabling translation between
 Keras and other frameworks (JAX, Torch, TensorFlow).
 
-It implements:
-1.  **Layers**: Mapping `keras.layers` (e.g. Dense, Conv2D).
-2.  **Ops**: Mapping `keras.ops` (backend-agnostic math).
-3.  **String Types**: Mapping casting operations to string dtypes (`dtype="float32"`).
-4.  **Discovery**: Runtime introspection of Keras modules.
+It explicitly selects the `repack_attn_keras` strategy for Attention layers.
 """
 
 import inspect
@@ -31,6 +27,7 @@ from ml_switcheroo.frameworks.base import (
   StructuralTraits,
   StandardCategory,
   StandardMap,
+  ImportConfig,
   InitMode,
   GhostRef,
   load_snapshot_for_adapter,
@@ -49,13 +46,13 @@ class KerasAdapter:
   inherits_from: Optional[str] = None
   ui_priority: int = 25  # After JAX/Torch, before TF
 
-  def __init__(self):
+  def __init__(self) -> None:
     """
     Initializes the adapter.
     Detects installation status to toggle interaction mode.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data = {}
+    self._snapshot_data: Dict[str, Any] = {}
 
     if keras is None:
       self._mode = InitMode.GHOST
@@ -71,19 +68,27 @@ class KerasAdapter:
     return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]
 
   @property
+  def unsafe_submodules(self) -> Set[str]:
+    """Submodules safe to ignore during recursion."""
+    return set()
+
+  @property
   def import_alias(self) -> Tuple[str, str]:
     """Canonical import alias."""
     return ("keras", "keras")
 
   @property
-  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+  def import_namespaces(self) -> Dict[str, ImportConfig]:
     """
     Namespace remapping rules.
     Includes numpy alias to ensure `numpy.float32` -> `np.float32`.
     """
     return {
-      "keras": {"root": "keras", "sub": None, "alias": "keras"},
-      "numpy": {"root": "numpy", "sub": None, "alias": "np"},
+      # Changed Keras root to NEURAL tier to avoid conflict with generic EXTRAS providers like 'jax' or 'optax'
+      "keras": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="keras"),
+      "keras.ops": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="ops"),
+      "keras.layers": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="layers"),
+      "numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="np"),
     }
 
   @property
@@ -128,15 +133,20 @@ class KerasAdapter:
     )
 
   @property
+  def plugin_traits(self) -> Any:
+    from ml_switcheroo.semantics.schema import PluginTraits
+
+    return PluginTraits(
+      has_numpy_compatible_arrays=True,
+      requires_explicit_rng=False,
+      requires_functional_state=False,
+      requires_functional_control_flow=False,
+    )
+
+  @property
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Static definitions for Keras mappings.
-
-    Implements **Casting Strategy**:
-    Unlike JAX/NumPy (objects) or Torch (attributes), Keras APIs expect string dtypes
-    or backend-agnostic types (which often default to strings in the high-level API).
-    Standalone types map to NumPy types for compatibility, but Cast operations
-    inject string literals.
     """
     return {
       # --- Math ---
@@ -146,6 +156,10 @@ class KerasAdapter:
       "Sub": StandardMap(api="keras.ops.subtract", args={"x": "x1", "y": "x2"}),
       "Mul": StandardMap(api="keras.ops.multiply", args={"x": "x1", "y": "x2"}),
       "Div": StandardMap(api="keras.ops.divide", args={"x": "x1", "y": "x2"}),
+      "exp": StandardMap(api="keras.ops.exp"),
+      "log": StandardMap(api="keras.ops.log"),
+      "sqrt": StandardMap(api="keras.ops.sqrt"),
+      "square": StandardMap(api="keras.ops.square"),
       # --- Layers ---
       "Linear": StandardMap(api="keras.layers.Dense", args={"out_features": "units"}),
       "Flatten": StandardMap(api="keras.layers.Flatten"),
@@ -154,15 +168,19 @@ class KerasAdapter:
       "ArgMin": StandardMap(api="keras.ops.argmin", args={"dim": "axis"}),
       "MultiheadAttention": StandardMap(
         api="keras.layers.MultiHeadAttention",
+        # Maps 'embed_dim' to 'key_dim' natively for basic usage
         args={"embed_dim": "key_dim"},
-        requires_plugin="repack_attention_call",
+        # Select the Keras-specific repack strategy
+        requires_plugin="repack_attn_keras",
       ),
       "Embedding": StandardMap(
-        api="keras.layers.Embedding", args={"num_embeddings": "input_dim", "embedding_dim": "output_dim"}
+        api="keras.layers.Embedding",
+        args={"num_embeddings": "input_dim", "embedding_dim": "output_dim"},
       ),
       "Sequential": StandardMap(api="keras.Sequential", requires_plugin="keras_sequential_pack"),
       "LayerNorm": StandardMap(
-        api="keras.layers.LayerNormalization", args={"eps": "epsilon", "normalized_shape": "axis"}
+        api="keras.layers.LayerNormalization",
+        args={"eps": "epsilon", "normalized_shape": "axis"},
       ),
       "GELU": StandardMap(
         api="keras.layers.Activation",
@@ -182,8 +200,6 @@ class KerasAdapter:
       "Grayscale": StandardMap(api="lambda x: x", transformation_type="inline_lambda"),
       "Variable": StandardMap(api="keras.Variable", args={"value": "initializer"}),
       # --- Types ---
-      # Mapping standalone types to NumPy ensures interoperability in Keras constants
-      # required_imports helps ImportFixer know to pull in numpy
       "Float32": StandardMap(api="numpy.float32", required_imports=["import numpy"]),
       "Float64": StandardMap(api="numpy.float64", required_imports=["import numpy"]),
       "Float16": StandardMap(api="numpy.float16", required_imports=["import numpy"]),
@@ -193,8 +209,6 @@ class KerasAdapter:
       "UInt8": StandardMap(api="numpy.uint8", required_imports=["import numpy"]),
       "Bool": StandardMap(api="bool"),
       # --- Casting ---
-      # Functional casting using `keras.ops.cast(x, dtype='string')`
-      # We inject the dtype as a string argument.
       "CastFloat": StandardMap(api="keras.ops.cast", inject_args={"dtype": "float32"}),
       "CastDouble": StandardMap(api="keras.ops.cast", inject_args={"dtype": "float64"}),
       "CastHalf": StandardMap(api="keras.ops.cast", inject_args={"dtype": "float16"}),
@@ -235,7 +249,12 @@ class KerasAdapter:
       results.extend(self._scan_module(keras.losses, "keras.losses", kind="class", block_list={"Loss", "Container"}))
     elif category == StandardCategory.OPTIMIZER:
       results.extend(
-        self._scan_module(keras.optimizers, "keras.optimizers", kind="class", block_list={"Optimizer", "TFOptimizer"})
+        self._scan_module(
+          keras.optimizers,
+          "keras.optimizers",
+          kind="class",
+          block_list={"Optimizer", "TFOptimizer"},
+        )
       )
     elif category == StandardCategory.ACTIVATION:
       results.extend(self._scan_module(keras.activations, "keras.activations", kind="function"))
@@ -245,7 +264,11 @@ class KerasAdapter:
     return results
 
   def _scan_module(
-    self, module: Any, prefix: str, kind: str = "class", block_list: Optional[Set[str]] = None
+    self,
+    module: Any,
+    prefix: str,
+    kind: str = "class",
+    block_list: Optional[Set[str]] = None,
   ) -> List[GhostRef]:
     """Helper to scan Keras modules."""
     if not module:
@@ -282,7 +305,7 @@ class KerasAdapter:
     except (ImportError, AttributeError):
       return data
 
-  # --- IO Serialization ---
+  # --- Syntax Generation ---
 
   def get_serialization_imports(self) -> List[str]:
     """Imports for save/load."""
@@ -296,12 +319,21 @@ class KerasAdapter:
       return f"keras.saving.load_model({file_arg})"
     return ""
 
-  # --- Device Management ---
-
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Generates device scope syntax."""
     d_type = "gpu" if "cuda" in device_type.lower() else "cpu"
     return f"keras.name_scope('{d_type}')"
+
+  def get_device_check_syntax(self) -> str:
+    """Keras 3 backend-agnostic GPU check."""
+    return "len(keras.config.list_logical_devices('GPU')) > 0"
+
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """
+    Keras uses implicit RNG or SeedGenerators, not JAX-style splitting.
+    Returns no-op to allow blind injection without error.
+    """
+    return "pass"
 
   # --- Manual Wiring ---
 
@@ -320,28 +352,28 @@ class KerasAdapter:
       "tier1_math": """import keras
 from keras import ops
 
-def math_ops(x, y):
+def math_ops(x, y): 
   # Tier 1: Using keras.ops for backend-agnostic math
-  a = ops.abs(x)
-  b = ops.add(a, y)
-  return ops.mean(b)
+  a = ops.abs(x) 
+  b = ops.add(a, y) 
+  return ops.mean(b) 
 """,
       "tier2_neural": """import keras
 from keras import layers
 
-def build_model(input_shape):
+def build_model(input_shape): 
   # Tier 2: Functional Model API
-  inputs = keras.Input(shape=input_shape)
-  x = layers.Conv2D(32, 3, activation="relu")(inputs)
-  x = layers.Flatten()(x)
-  outputs = layers.Dense(10)(x)
-  return keras.Model(inputs, outputs)
+  inputs = keras.Input(shape=input_shape) 
+  x = layers.Conv2D(32, 3, activation="relu")(inputs) 
+  x = layers.Flatten()(x) 
+  outputs = layers.Dense(10)(x) 
+  return keras.Model(inputs, outputs) 
 """,
       "tier3_extras": """import keras
 from keras import random
 
-def generate_noise(shape):
-  seed_gen = random.SeedGenerator(42)
-  return random.normal(shape, seed=seed_gen)
+def generate_noise(shape): 
+  seed_gen = random.SeedGenerator(42) 
+  return random.normal(shape, seed=seed_gen) 
 """,
     }

@@ -16,6 +16,7 @@ from ml_switcheroo.cli import commands
 # Import direct handler for new 'define' command
 from ml_switcheroo.cli.handlers.define import handle_define
 from ml_switcheroo import __version__
+from ml_switcheroo.frameworks import available_frameworks
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -41,8 +42,8 @@ def main(argv: Optional[List[str]] = None) -> int:
   cmd_audit.add_argument(
     "--roots",
     nargs="+",
-    default=["torch", "flax_nnx", "tensorflow", "mlx", "keras"],
-    help="Framework roots to scan for (default: torch flax_nnx tensorflow mlx keras)",
+    default=None,
+    help="Framework roots to scan for (default: all installed/registered frameworks)",
   )
 
   # --- Command: CONVERT ---
@@ -167,7 +168,11 @@ def main(argv: Optional[List[str]] = None) -> int:
   args = parser.parse_args(argv)
 
   if args.command == "audit":
-    return commands.handle_audit(args.path, args.roots)
+    roots = args.roots
+    if roots is None:
+      # Dynamic Default logic: Scan all registered frameworks if none specified
+      roots = available_frameworks()
+    return commands.handle_audit(args.path, roots)
 
   elif args.command == "convert":
     settings = parse_cli_key_values(args.config)

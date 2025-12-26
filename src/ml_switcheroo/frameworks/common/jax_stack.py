@@ -1,13 +1,13 @@
 """
 JAX Stack Common Logic (Level 0 & Level 1).
 
-This module provides the `JAXStackMixin`, a reusable base for any Framework Adapter
+This module provides the ``JAXStackMixin``, a reusable base for any Framework Adapter
 built on top of the JAX ecosystem (e.g., Flax, PaxML, Haiku).
 
 It standardizes:
 
-1.  **Level 0 (Core)**: JIT compilation templates, Device syntax (`jax.devices`),
-    and Array API mappings (`jax.numpy`).
+1.  **Level 0 (Core)**: JIT compilation templates, Device syntax (``jax.devices``),
+    and Array API mappings (``jax.numpy``).
 2.  **Level 1 (Common Libs)**:
 
     - **Optax**: Optimization primitives and loss functions.
@@ -15,9 +15,7 @@ It standardizes:
 
 Usage:
     class MyJaxFramework(JAXStackMixin):
-        def apply_wiring(self, snapshot):
-            self._apply_stack_wiring(snapshot)
-            # ... custom logic ...
+        # ... logic ...
 """
 
 from typing import Dict, Any, List, Optional
@@ -63,7 +61,7 @@ class JAXStackMixin:
         device_index: Optional index string (e.g., "0").
 
     Returns:
-        Python code string constructing the device object: `jax.devices('gpu')[0]`.
+        Python code string constructing the device object: ``jax.devices('gpu')[0]``.
     """
     # Clean quotes if present to check value
     clean_type = device_type.strip("'\"").lower()
@@ -75,6 +73,20 @@ class JAXStackMixin:
 
     idx_code = device_index if device_index is not None else "0"
     return f"jax.devices({type_code})[{idx_code}]"
+
+  def get_device_check_syntax(self) -> str:
+    """
+    Returns JAX syntax for checking if GPUs are available.
+    Format: ``len(jax.devices('gpu')) > 0``
+    """
+    return "len(jax.devices('gpu')) > 0"
+
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """
+    Returns JAX syntax for splitting a PRNG key.
+    Format: ``rng, key = jax.random.split(rng)``
+    """
+    return f"{rng_var}, {key_var} = jax.random.split({rng_var})"
 
   # --- IO Serialization (Level 1 - Orbax) ---
 
@@ -100,7 +112,7 @@ class JAXStackMixin:
       return f"orbax.checkpoint.PyTreeCheckpointer().restore({file_arg})"
     return ""
 
-  # --- Manual Wiring (Semantics Injection) ---
+  # --- Manual Wiring (Semantics Injection / Legacy Support) ---
 
   def _apply_stack_wiring(self, snapshot: Dict[str, Any]) -> None:
     """
@@ -109,6 +121,9 @@ class JAXStackMixin:
     This method populates the semantic snapshot with rules for translating
     Torch/NumPy concepts to the JAX ecosystem equivalents.
 
+    NOTE: This is largely superseded by the static `definitions` property on the Adapter,
+    but preserved for dynamic wiring use cases (e.g. PaxML manual overlays).
+
     Args:
         snapshot: The semantic snapshot dictionary to mutate.
                   Expected structure: {'mappings': {}, 'templates': {}}
@@ -116,48 +131,25 @@ class JAXStackMixin:
     mappings = snapshot.setdefault("mappings", {})
     templates = snapshot.setdefault("templates", {})
 
-    # Inject test templates if not present
-    # Usually handled by handle_sync pulling from test_config,
-    # but populating here is a safe fallback for direct wiring calls.
     if not templates:
       templates.update(self.jax_test_config)
 
     # 1. Core JAX Operation rewrites (Level 0)
-    # Ensure 'Abs' (Capitalized Abstract) maps to 'jnp.abs'
     mappings["Abs"] = {"api": "jnp.abs"}
     mappings["abs"] = {"api": "jnp.abs"}
-
-    # Handle varargs packing for Permute/Transpose
-    # Now handled via DSL mapping
     mappings["permute_dims"] = {"api": "jnp.transpose", "pack_to_tuple": "axes"}
-
-    # Method -> Property swaps common in JAX arrays (e.g. .size() -> .shape)
     mappings["size"] = {"api": "shape", "requires_plugin": "method_to_property"}
     mappings["data_ptr"] = {"api": "data", "requires_plugin": "method_to_property"}
-
-    # Einsum normalization (Equation first)
     mappings["Einsum"] = {"api": "jnp.einsum", "requires_plugin": "einsum_normalizer"}
 
     # 2. Optax Wiring (Level 1)
-    # Maps generic imperative optimizer methods to functional equivalents or plugins
     mappings["step"] = {"requires_plugin": "optimizer_step"}
     mappings["zero_grad"] = {"requires_plugin": "optimizer_zero_grad"}
-
-    # Wire standard configurations for known optimizers
-    # PyTorch Optimizers (Class) -> Optax Optimizers (Factory Function)
-    for opt_name in ["Adam", "SGD", "RMSprop", "AdamW", "Adagrad", "LBFGS", "Yogi", "AdaBelief"]:
-      if opt_name not in mappings:
-        mappings[opt_name] = {}
-
-      # The 'optimizer_constructor' plugin strips the 'params' argument
-      # because Optax optimizers are initialized stateless (just hyperparameters).
-      mappings[opt_name]["requires_plugin"] = "optimizer_constructor"
-
-      # Default API path (e.g., optax.adam)
-      if "api" not in mappings[opt_name]:
-        mappings[opt_name]["api"] = f"optax.{opt_name.lower()}"
+    mappings["Adam"] = {
+      "api": "optax.adam",
+      "requires_plugin": "optimizer_constructor",
+    }
 
     # 3. Control Flow Templates (Level 0)
-    # Defines how loops are generated if an adapter requests structural rewrites
     templates["fori_loop"] = "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})"
     templates["scan"] = "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})"

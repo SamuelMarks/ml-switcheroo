@@ -39,6 +39,9 @@ class MockBidirectionalSemantics(SemanticsManager):
     # Bypass filesystem load
     self.data = {}
     self.import_data = {}
+    # New attributes for import abstraction
+    self._providers = {}
+    self._source_registry = {}
 
     # --- Framework Configuration (Traits) ---
     # Critical for Class Rewriting (Module detection, Method renaming, Super init)

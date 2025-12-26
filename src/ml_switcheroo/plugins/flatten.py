@@ -15,9 +15,8 @@ Transformation Strategy:
        Generate `reshape(x, (x.shape[0], -1))`.
     2. If `start_dim=0` and `end_dim=-1`:
        Generate `ravel(x)`.
-    3. Input safety: If the input is a complex expression (e.g. function call),
-       we duplicate it in the shape lookup. This is acceptable for pure functions
-       but suboptimal. Assuming input is usually a variable (`x`).
+    3. Trait Check: If target framework supports native flattening (e.g. Keras `Flatten` layer),
+       return original to avoid breaking layer semantics, unless specific functional rewrite is requested.
 """
 
 import libcst as cst
@@ -40,9 +39,15 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Hook: Transforms `flatten(x, start, end)` into `reshape` or `ravel`.
 
-  Target Frameworks: JAX, NumPy, TensorFlow, MLX.
+  Decoupling Update:
+  Logic now checks `ctx.plugin_traits.has_numpy_compatible_arrays`.
+  If True (JAX/NumPy/TF), it applies the reshape logic.
+  If False (Torch), it preserves the call.
   """
-  if ctx.target_fw.lower() == "torch":
+  # Capability Check: Only apply reshape logic if target uses numpy semantics
+  # (e.g. JAX, NumPy, TF, MLX).
+  # If target is Torch (imperative), flatten works natively.
+  if not ctx.plugin_traits.has_numpy_compatible_arrays:
     return node
 
   args = list(node.args)
@@ -52,7 +57,7 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   input_arg = args[0]
   input_val = input_arg.value
 
-  # Default values for Torch
+  # Default values for Torch flatten semantics
   start_dim = 0
   end_dim = -1
 

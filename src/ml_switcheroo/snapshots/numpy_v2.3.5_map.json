@@ -13,6 +13,12 @@
     "Add": {
       "api": "numpy.add"
     },
+    "ArgMax": {
+      "api": "numpy.argmax"
+    },
+    "ArgMin": {
+      "api": "numpy.argmin"
+    },
     "Asin": {
       "api": "numpy.asin"
     },
@@ -84,6 +90,11 @@
     "Det": {
       "api": "numpy.linalg.det"
     },
+    "Div": {
+      "api": "np.divide",
+      "operator": "/",
+      "transformation_type": "infix"
+    },
     "Einsum": {
       "api": "numpy.einsum"
     },
@@ -131,6 +142,9 @@
     "Int64": {
       "api": "numpy.int64"
     },
+    "IsInf": {
+      "api": "numpy.isinf"
+    },
     "IsNaN": {
       "api": "numpy.isnan"
     },
@@ -155,6 +169,15 @@
     },
     "Mod": {
       "api": "numpy.mod"
+    },
+    "Module": {
+      "api": "numpy.f2py.tests.util.F2PyTest.module",
+      "args": {}
+    },
+    "Mul": {
+      "api": "np.multiply",
+      "operator": "*",
+      "transformation_type": "infix"
     },
     "NonZero": {
       "api": "numpy.nonzero"
@@ -194,6 +217,11 @@
     },
     "Squeeze": {
       "api": "numpy.squeeze"
+    },
+    "Sub": {
+      "api": "np.subtract",
+      "operator": "-",
+      "transformation_type": "infix"
     },
     "Sum": {
       "api": "numpy.sum"
@@ -252,6 +280,9 @@
         "b": "b"
       }
     },
+    "arange": {
+      "api": "numpy.arange"
+    },
     "argmax": {
       "api": "numpy.argmax"
     },
@@ -260,6 +291,12 @@
     },
     "argsort": {
       "api": "numpy.argsort"
+    },
+    "array": {
+      "api": "numpy.array"
+    },
+    "asarray": {
+      "api": "numpy.asarray"
     },
     "asin": {
       "api": "numpy.asin"
@@ -349,14 +386,14 @@
       "api": "numpy.cross"
     },
     "data": {
-      "api": "numpy.f2py.symbolic.Expr.data",
+      "api": "numpy.ma.core.MaskedArray.data",
       "args": {}
     },
     "det": {
       "api": "numpy.linalg.det"
     },
     "diagonal": {
-      "api": "numpy.ma.core.diagonal",
+      "api": "numpy.ma.core.MaskedArray.diagonal",
       "args": {}
     },
     "diff": {
@@ -421,6 +458,9 @@
     },
     "floor_divide": {
       "api": "numpy.floor_divide"
+    },
+    "from_dlpack": {
+      "api": "numpy.from_dlpack"
     },
     "full": {
       "api": "numpy.full"
@@ -567,10 +607,6 @@
     },
     "mode": {
       "api": "numpy.memmap.mode",
-      "args": {}
-    },
-    "module": {
-      "api": "numpy.f2py.tests.util.F2PyTest.module",
       "args": {}
     },
     "moveaxis": {

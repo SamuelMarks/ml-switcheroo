@@ -3,18 +3,14 @@ Plugin for Functionalizing Batch Normalization (State Unwrapping).
 
 Addresses the semantic mismatch between:
 1.  **PyTorch (In-Place)**: `y = bn(x)`. Updates `running_mean`/`var` attributes on `bn` silently.
-2.  **JAX/Flax (Functional)**: `y, new_state = bn(x, mutable=['batch_stats'])`. State updates are returned explicitly.
+2.  **Functional Frameworks (JAX)**: `y, new_state = bn(x, mutable=['batch_stats'])`.
 
 This plugin:
-1.  Injects specific kwargs required by Flax (`use_running_average`, `mutable`).
+1.  Injects specific kwargs (`use_running_average`, `mutable`).
 2.  Adapts the return value to fit into an expression context by selecting the output tensor `[0]`.
 
-**Limitation**:
-This plugin solves the *Forward Pass* compatibility. It effectively discards the updated state
-(`new_state`), effectively turning the layer into inference-mode regarding state persistence,
-unless the surrounding code is manually refactored to handle the tuple return.
-This is a necessary compromise to allow `y = bn(x)` to compile in JAX without extensive
-dataflow analysis of the entire training loop.
+Decoupling Update:
+Checks `traits.requires_functional_state` instead of hardcoding target frameworks.
 """
 
 import libcst as cst
@@ -31,12 +27,11 @@ def transform_batch_norm(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       Output: `self.bn1(x, use_running_average=not training, mutable=['batch_stats'])[0]`
 
   Logic:
-      1.  **Mode Switching**: Injects `use_running_average=not training`.
-          This assumes a `training` boolean variable exists in the scope (commonly injected
-          by `src/ml_switcheroo/plugins/state_flag_injection.py`).
-      2.  **Mutability**: Injects `mutable=['batch_stats']` to allow tracking stats during training.
-      3.  **Unwrapping**: Applies `[0]` subscript to the result call. Flax returns `(tensor, updates)`,
-          we select `tensor` to maintain compatibility with operators expecting a single array (like `relu`).
+      1.  **Capability Check**: Verifies if the target framework requires
+          functional state processing via `plugin_traits.requires_functional_state`.
+      2.  **Mode Switching**: Injects `use_running_average=not training`.
+      3.  **Mutability**: Injects `mutable=['batch_stats']`.
+      4.  **Unwrapping**: Applies `[0]` subscript to return just the tensor.
 
   Args:
       node: The original CST Call node.
@@ -45,8 +40,8 @@ def transform_batch_norm(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   Returns:
       A CST Subscript node representing the tensor output of the BN call.
   """
-  # 0. Context Check
-  if ctx.target_fw not in ["jax", "flax", "flax_nnx"]:
+  # 0. Capability Check
+  if not ctx.plugin_traits.requires_functional_state:
     return node
 
   # 1. Prepare Arguments

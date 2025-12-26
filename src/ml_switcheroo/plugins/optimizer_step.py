@@ -1,25 +1,28 @@
 """
 Plugin for Optimizer Step Translation.
 
-Handles the conversion of imperative optimization steps (PyTorch) to
-functional state updates (JAX/Optax).
+Handles the conversion of imperative optimization steps (e.g., PyTorch) to
+functional state updates (e.g., JAX/Optax).
+
+This logic is **Wired-Only**: It executes blindly if the semantic map requests it.
 
 Transformations:
-1.  **Instantiation**: Strips `model.parameters()` from the constructor, as Optax
-    initializes state separately.
-    *   Input: `opt = torch.optim.Adam(model.parameters(), lr=0.01)`
-    *   Output: `opt = optax.adam(learning_rate=0.01)`
+1.  **Instantiation (`optimizer_constructor`)**:
+    - Strips the first argument (commonly `model.parameters()` in Torch) because
+      functional optimizers (Optax) are initialized stateless/factory-style.
+    - Input: `opt = torch.optim.Adam(model.parameters(), lr=0.01)`
+    - Output: `opt = optax.adam(lr=0.01)`
 
-2.  **Step Execution**: Rewrites `step()` to the Optax update/apply sequence.
-    *   Input: `optimizer.step()`
-    *   Output: `updates, opt_state = optimizer.update(grads, opt_state, params)`
-    *           `params = optax.apply_updates(params, updates)`
+2.  **Step Execution (`optimizer_step`)**:
+    - Flags `step()` calls as requiring manual intervention or functional rewrite.
+    - Output: An `EscapeHatch` warning block suggesting the update pattern.
 
-3.  **Zero Grad**: Strips `zero_grad()` as JAX handles gradients explicitly via `grad` or `value_and_grad`.
+3.  **Zero Grad (`optimizer_zero_grad`)**:
+    - Strips the call completely (No-Op), as functional gradients don't accumulate state.
 """
 
 import libcst as cst
-from typing import Union, List, Optional
+from typing import Union
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -38,20 +41,14 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Hook to rewrite Optimizer instantiation.
-  Removes the first argument (parameters) if targeting JAX, as Optax is functional.
+  Removes the first argument (parameters) to support factory-pattern initialization.
   """
-  if ctx.target_fw != "jax":
-    return node
-
-  # PyTorch optimizers take 'params' as the first argument.
-  # JAX (Optax) optimizers are factory functions that take hyperparameters only.
-  # We strip the first argument if it looks like parameters (not a kwarg).
+  # Heuristic: Skip first arg if it's positional (params).
+  # torch.optim.Adam(params, lr=...) -> optax.adam(lr=...)
 
   new_args = []
-
-  # Heuristic: Skip first arg if it's positional.
-  # torch.optim.Adam(params, lr=...)
   start_index = 0
+
   if len(node.args) > 0 and node.args[0].keyword is None:
     start_index = 1
 
@@ -65,31 +62,17 @@ def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel]:
   """Hook to rewrite ``optimizer.step()``.
 
-  **JAX Target**
-
-  - Emits the functional update pattern.
-  - Assumes existence of ``grads``, ``opt_state``, ``params`` variables in the local scope.
-  - Use EscapeHatch to warn user if variables can't be inferred.
+  Since `step()` logic implies side-effects on the optimizer state and parameters,
+  which doesn't translate 1:1 to functional updates without knowing variable names
+  (params, grads, opt_state), this hook emits a specialized Escape Hatch.
   """
-  if ctx.target_fw != "jax":
-    return node
-
-  # Heuristic check for the receiver name
-  optimizer_name = "optimizer"
-  if isinstance(node.func, cst.Attribute) and isinstance(node.func.value, cst.Name):
-    optimizer_name = node.func.value.value
-
-  # We cannot validly replace a Call expression with multiple statements (Assign + Assign)
-  # inside an expression context. This hook is best effort for Statement-level calls.
-  # We generate a code block that performs the update.
-
   # Pattern:
   # updates, opt_state = optimizer.update(grads, opt_state, params)
   # params = optax.apply_updates(params, updates)
 
   reason = (
-    "Imperative optimizer.step() cannot be automatically converted to JAX functional update. "
-    "Manual intervention required: `updates, opt_state = optimizer.update(grads, opt_state, params)`"
+    f"Imperative `{_get_func_name(node)}` cannot be automatically converted to functional update. "
+    "Manual intervention required (e.g. `updates, state = opt.update(grads, state)`)."
   )
   return EscapeHatch.mark_failure(node, reason)
 
@@ -98,12 +81,14 @@ def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call
 def strip_zero_grad(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """Hook for ``optimizer.zero_grad()``.
 
-  **JAX Target**
-
-  Removes the call (No-op), as JAX gradients are not accumulated by default.
+  Removes the call (No-op), as gradient accumulation is generally explicit
+  in functional frameworks.
   """
-  if ctx.target_fw != "jax":
-    return node
-
   # Transform to `None` (Effective No-Op in statement context)
   return node.with_changes(func=cst.Name("None"), args=[])
+
+
+def _get_func_name(node: cst.Call) -> str:
+  if isinstance(node.func, cst.Attribute):
+    return node.func.attr.value
+  return "step"

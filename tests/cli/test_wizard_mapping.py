@@ -20,7 +20,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector:
-  def inspect(self, _pkg):
+  def inspect(self, _pkg, **kwargs):
     return {
       "torch.full_op": {
         "name": "full_op",

@@ -14,25 +14,10 @@ This ensures that `torch.gather(x, 1, idx)` correctly becomes `jnp.take_along_ax
 """
 
 import libcst as cst
-from typing import List, Optional
+from typing import List
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
-
-
-def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  parts = name_str.split(".")
-  node = cst.Name(parts[0])
-  for part in parts[1:]:
-    node = cst.Attribute(value=node, attr=cst.Name(part))
-  return node
-
-
-def _is_framework_module(node: cst.CSTNode) -> bool:
-  """Detects if a node refers to a framework module rather than a tensor object."""
-  if isinstance(node, cst.Name):
-    # List of common roots to treat as modules
-    return node.value in {"torch", "jax", "tensorflow", "tf", "numpy", "np", "flax", "nn"}
-  return False
+from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_node
 
 
 @register_hook("gather_adapter")
@@ -53,8 +38,8 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   is_method_call = False
   if isinstance(node.func, cst.Attribute):
-    # Distinguish x.gather vs torch.gather
-    if not _is_framework_module(node.func.value):
+    # Distinguish x.gather vs torch.gather using centralized util
+    if not is_framework_module_node(node.func.value, ctx):
       is_method_call = True
 
   # Placeholders
@@ -117,8 +102,7 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
   new_args.append(clean_input)
 
   # Arg 1: indices (Index)
-  # Strip keyword 'index' effectively, or map to 'indices' if we want to be explicit
-  # JAX supports positional here. Let's use positional for safety.
+  # Strip keyword 'index' effectively
   clean_index = index_arg.with_changes(
     keyword=None,
     equal=cst.MaybeSentinel.DEFAULT,
@@ -134,12 +118,12 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
       keyword=None,
       equal=cst.MaybeSentinel.DEFAULT,
       comma=cst.MaybeSentinel.DEFAULT,
-      # Last arg, no comma generally unless tuple style
+      # Last arg, no comma generally
     )
     new_args.append(clean_dim)
 
   # 4. Change Function Name
   target_api = ctx.lookup_api("Gather") or "jax.numpy.take_along_axis"
-  new_func = _create_dotted_name(target_api)
+  new_func = create_dotted_name(target_api)
 
   return node.with_changes(func=new_func, args=new_args)

@@ -6,12 +6,11 @@ to a high-level neural network library like Flax or Haiku. It maps:
 1.  **Level 0 (Core)**: JAX Array API (jnp), Activations (jax.nn), and Types.
 2.  **Level 1 (Common Libs)**: Optax (Optimization) and Orbax (Checkpointing).
 
-It now includes strict type mappings (e.g. `Float32` -> `jnp.float32`) to support
-data-driven casting logic.
+It specifically enables `requires_explicit_rng` in plugin traits.
 """
 
 import logging
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Any, Optional, Set
 
 try:
   import jax
@@ -23,12 +22,15 @@ except ImportError:
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
+  PluginTraits,
   InitMode,
   StandardCategory,
   StandardMap,
+  ImportConfig,
   GhostRef,
   load_snapshot_for_adapter,
 )
+from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.ghost import GhostInspector
 from ml_switcheroo.frameworks.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
@@ -50,13 +52,13 @@ class JaxCoreAdapter(JAXStackMixin):
   inherits_from: Optional[str] = None
   ui_priority: int = 10
 
-  def __init__(self):
+  def __init__(self) -> None:
     """
     Initializes the JAX adapter.
     Detects installation status to toggle between LIVE and GHOST modes.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data = {}
+    self._snapshot_data: Dict[str, Any] = {}
 
     if jax is None:
       self._mode = InitMode.GHOST
@@ -64,32 +66,29 @@ class JaxCoreAdapter(JAXStackMixin):
       if not self._snapshot_data:
         logging.warning("JAX not installed and no snapshot found. Scanning unavailable.")
 
-  # --- Metadata ---
+  # --- Metadata & Imports ---
 
   @property
   def search_modules(self) -> List[str]:
-    """
-    Scans only core math and optimization libraries (no neural layers).
-    """
+    """Scans only core math and optimization libraries (no neural layers)."""
     return ["jax.numpy", "jax.numpy.linalg", "jax.numpy.fft", "optax"]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """
-    Defines the canonical import alias for the framework root.
-    Ensures `import jax.numpy as jnp` is generated.
-    """
+    """Defines the canonical import alias ('jax.numpy', 'jnp')."""
     return ("jax.numpy", "jnp")
 
   @property
-  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+  def import_namespaces(self) -> Dict[str, ImportConfig]:
     """
-    Maps source namespaces to JAX equivalents.
-    Example: `torch.nn.functional` -> `jax.nn`.
+    Self-declared namespace roles.
     """
     return {
-      "torch.nn.functional": {"root": "jax", "sub": "nn", "alias": None},
-      "keras.ops": {"root": "jax.numpy", "sub": None, "alias": "jnp"},
+      "jax": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="jax"),
+      "jax.numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="jnp"),
+      "optax": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="optax"),
+      # jax.nn maps to Functional Neural Ops (e.g. activations)
+      "jax.nn": ImportConfig(tier=SemanticTier.NEURAL_OPS, recommended_alias="nn"),
     }
 
   @property
@@ -119,9 +118,32 @@ class JaxCoreAdapter(JAXStackMixin):
     )
 
   @property
+  def plugin_traits(self) -> PluginTraits:
+    """
+    Defines logic capabilities for plugins.
+    Enables NumPy compatibility and explicit RNG threading.
+
+    IMPORTANT: Enforces Purity Analysis to catch side-effects unsafe for functional trace.
+    """
+    return PluginTraits(
+      has_numpy_compatible_arrays=True,
+      requires_explicit_rng=True,
+      requires_functional_control_flow=True,
+      enforce_purity_analysis=True,
+    )
+
+  @property
+  def rng_seed_methods(self) -> List[str]:
+    """JAX does not use global seeding methods in the imperative sense."""
+    return []
+
+  # --- Semantic Definitions (The Spoke) ---
+
+  @property
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Static Definitions for JAX Core, Optax, Orbax, and Types.
+    Moved from `standards_internal.py` for decoupling.
     """
     return {
       # --- Math / Array ---
@@ -133,6 +155,11 @@ class JaxCoreAdapter(JAXStackMixin):
       "Sub": StandardMap(api="jnp.subtract"),
       "Mul": StandardMap(api="jnp.multiply"),
       "Div": StandardMap(api="jnp.divide"),
+      "Pow": StandardMap(api="jnp.power"),
+      "exp": StandardMap(api="jnp.exp"),
+      "log": StandardMap(api="jnp.log"),
+      "sqrt": StandardMap(api="jnp.sqrt"),
+      "square": StandardMap(api="jnp.square"),
       "randn": StandardMap(api="jax.random.normal", requires_plugin="inject_prng"),
       "Clamp": StandardMap(api="jax.numpy.clip", args={"min": "a_min", "max": "a_max", "input": "a"}),
       "Gather": StandardMap(api="jax.numpy.take_along_axis", requires_plugin="gather_adapter"),
@@ -150,6 +177,11 @@ class JaxCoreAdapter(JAXStackMixin):
       "permute_dims": StandardMap(api="jnp.transpose", pack_to_tuple="axes"),
       "size": StandardMap(api="shape", requires_plugin="method_to_property"),
       "OneHot": StandardMap(api="jax.nn.one_hot", args={"tensor": "x", "input": "x"}),
+      # --- Activation (Math Tier) ---
+      "relu": StandardMap(api="jax.nn.relu"),
+      "softmax": StandardMap(api="jax.nn.softmax"),
+      "log_softmax": StandardMap(api="jax.nn.log_softmax"),
+      "GELU": StandardMap(api="jax.nn.gelu"),
       # --- Optimization (Optax) ---
       "Adam": StandardMap(api="optax.adam", requires_plugin="optimizer_constructor"),
       "SGD": StandardMap(api="optax.sgd", requires_plugin="optimizer_constructor"),
@@ -174,14 +206,10 @@ class JaxCoreAdapter(JAXStackMixin):
       "Int64": StandardMap(api="jnp.int64"),
       "Int32": StandardMap(api="jnp.int32"),
       "Int16": StandardMap(api="jnp.int16"),
-      # JAX uses 'int8' for bytes if uint8 not specified, but let's map precise
       "UInt8": StandardMap(api="jnp.uint8"),
       "Bool": StandardMap(api="jnp.bool_"),
       # --- Casting (via Plugin) ---
-      # These map abstract cast operations to .astype(), relying on the
-      # plugin to look up the target type from the definitions above.
-      "CastFloat32": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastFloat": StandardMap(api="astype", requires_plugin="type_methods"),  # Alias
+      "CastFloat": StandardMap(api="astype", requires_plugin="type_methods"),
       "CastDouble": StandardMap(api="astype", requires_plugin="type_methods"),
       "CastHalf": StandardMap(api="astype", requires_plugin="type_methods"),
       "CastLong": StandardMap(api="astype", requires_plugin="type_methods"),
@@ -189,12 +217,13 @@ class JaxCoreAdapter(JAXStackMixin):
       "CastShort": StandardMap(api="astype", requires_plugin="type_methods"),
       "CastByte": StandardMap(api="astype", requires_plugin="type_methods"),
       "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
+      "CastChar": StandardMap(api="astype", requires_plugin="type_methods"),
       # --- Extras & Contexts ---
       "no_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
       "enable_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
       "DataLoader": StandardMap(api="GenericDataLoader", requires_plugin="convert_dataloader"),
       "LoadStateDict": StandardMap(api="KeyMapper.from_torch", requires_plugin="checkpoint_mapper"),
-      # Stub hooks for State Container plugins (used by JAX-based Neural libs)
+      # Stub hooks for State Container plugins (used by JAX-based Neural libs via inheritance)
       "register_buffer": StandardMap(api="torch_register_buffer_to_nnx", requires_plugin="torch_register_buffer_to_nnx"),
       "register_parameter": StandardMap(
         api="torch_register_parameter_to_nnx", requires_plugin="torch_register_parameter_to_nnx"
@@ -207,11 +236,6 @@ class JaxCoreAdapter(JAXStackMixin):
       "grad": StandardMap(api="jax.grad", args={"func": "fun"}),
       "jit": StandardMap(api="jax.jit", args={"func": "fun"}),
     }
-
-  @property
-  def rng_seed_methods(self) -> List[str]:
-    """JAX does not use global seeding methods in the imperative sense."""
-    return []
 
   # --- Discovery ---
 
@@ -280,6 +304,7 @@ class JaxCoreAdapter(JAXStackMixin):
       import jax.numpy as jnp
     except ImportError:
       return data
+
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       return jnp.array(data)
     return data
@@ -297,6 +322,14 @@ class JaxCoreAdapter(JAXStackMixin):
   def get_example_code(cls) -> str:
     """Returns a generic JAX example."""
     return """import jax.numpy as jnp\nfrom jax import grad, jit\n\ndef predict(params, x):\n  return jnp.dot(x, params['w']) + params['b']"""
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """Provides default tiered examples for the base adapter."""
+    return {
+      "tier1_math": self.get_example_code(),
+      "tier2_neural": "# JAX (Core) does not include a neural network layer library.\n# Use Flax or Haiku for layer abstractions.",
+      "tier3_extras": "# Use Optax for optimization:\nimport optax\noptimizer = optax.adam(learning_rate=0.01)",
+    }
 
 
 # Backwards compatibility alias

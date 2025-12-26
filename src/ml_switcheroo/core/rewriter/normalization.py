@@ -11,6 +11,7 @@ Updates:
 - Fix: Robustly injects method receiver as first argument when rewriting
   methods to functions (e.g. `x.float()` -> `tf.cast(x, ...)`), even if
   argument maps are empty or implicit.
+- Fix: Replaced hardcoded `common_roots` with dynamic lookup from SemanticsManager.
 """
 
 from typing import List, Dict, Any, Union, Optional
@@ -21,6 +22,10 @@ from ml_switcheroo.core.rewriter.base import BaseRewriter
 class NormalizationMixin(BaseRewriter):
   """
   Mixin class providing argument normalization and operator transformation logic.
+
+  Dependencies:
+      Requires `self.semantics` (SemanticsManager) and `self.config` (RuntimeConfig)
+      to be available on the instance (inherited from BaseRewriter).
   """
 
   def _is_module_alias(self, node: cst.CSTNode) -> bool:
@@ -29,6 +34,11 @@ class NormalizationMixin(BaseRewriter):
     Used to prevent injecting the module itself as 'self' argument.
 
     Handles both simple names ('torch') and dotted paths ('flax.nnx').
+
+    Logic:
+    1. Checks local import aliases discovered in this file (`self._alias_map`).
+    2. Checks registered frameworks in `self.semantics`.
+    3. Checks source/target frameworks in `self.config`.
     """
     # Resolve node to string representation (e.g. "torch.nn")
     name = self._cst_to_string(node)
@@ -39,30 +49,43 @@ class NormalizationMixin(BaseRewriter):
     if hasattr(self, "_alias_map") and name in self._alias_map:
       return True
 
-    # 2. Check Common Roots
-    root = name.split(".")[0]
-    common_roots = {
-      "torch",
-      "jax",
-      "tensorflow",
-      "tf",
-      "np",
-      "numpy",
-      "mx",
-      "flax",
-      "nn",
-      "nnx",
-      "F",
-      "optim",
-      "keras",
-      "pl",
-      "optax",
-      "praxis",
-      "orbax",
-      "msgpack",
-    }
+    # 2. Check Dynamic Registry (Semantic Knowledge Base)
+    # We gather all known roots (e.g., 'torch', 'jax', 'tensorflow') dynamically.
+    known_roots = set()
 
-    return root in common_roots
+    # A. From Configuration (Source/Target are definitely frameworks)
+    if hasattr(self, "config") and self.config:
+      known_roots.add(self.config.source_framework)
+      known_roots.add(self.config.target_framework)
+      if self.config.source_flavour:
+        known_roots.add(self.config.source_flavour.split(".")[0])
+      if self.config.target_flavour:
+        known_roots.add(self.config.target_flavour.split(".")[0])
+
+    # B. From Semantics Manager (Registered Adapters)
+    if hasattr(self, "semantics") and self.semantics:
+      # framework_configs keys are framework IDs (e.g. 'torch', 'flax_nnx')
+      configs = getattr(self.semantics, "framework_configs", {})
+      for fw_key, conf in configs.items():
+        known_roots.add(fw_key)
+
+        # Check alias config (e.g. module='jax.numpy', name='jnp')
+        alias_conf = conf.get("alias")
+        if alias_conf and isinstance(alias_conf, dict):
+          mod = alias_conf.get("module")
+          if mod:
+            known_roots.add(mod.split(".")[0])
+
+      # Check import_data keys (keys are module paths like 'torch.nn')
+      import_data = getattr(self.semantics, "import_data", {})
+      for mod_path in import_data.keys():
+        known_roots.add(mod_path.split(".")[0])
+
+    # 3. Validation
+    # Check if the root of the expression matches any known framework root
+    root = name.split(".")[0]
+
+    return root in known_roots
 
   def _extract_primitive_key(self, node: cst.BaseExpression) -> Optional[str]:
     """

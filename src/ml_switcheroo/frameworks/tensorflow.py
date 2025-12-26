@@ -1,19 +1,22 @@
 """
 TensorFlow Framework Adapter.
 
-This module provides the adapter for TensorFlow, supporting both core TF operations
-and legacy Keras integration if present within the TF namespace.
-
-It implements core Math, Neural, and Extra tiers, and specifically handles
-TensorFlow's unique casting syntax (`tf.cast(x, dtype)`) which differs from
-the NumPy/JAX/Torch shorthand or `.astype()` conventions.
+This module implements the adapter for TensorFlow (Core & Keras), providing
+mappings for math operations, neural layers, and IO.
 """
 
 import sys
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Tuple, Optional, Dict, Any, Set
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, StandardCategory, StandardMap
+from ml_switcheroo.frameworks.base import (
+  register_framework,
+  StructuralTraits,
+  PluginTraits,
+  StandardCategory,
+  StandardMap,
+  ImportConfig,
+)
 
 try:
   import tensorflow as tf
@@ -25,24 +28,32 @@ except ImportError:
 class TensorFlowAdapter:
   """
   Adapter for TensorFlow (Core & Keras).
-
-  Supports:
-  1.  **Math**: Low-level `tf.math` operations.
-  2.  **Types**: `tf.float32`, etc.
-  3.  **Casting**: `tf.cast` (Functional API via `args` remapping).
-  4.  **Data**: `tf.data` pipelines via plugins.
   """
 
   display_name: str = "TensorFlow"
   inherits_from: Optional[str] = None
   ui_priority: int = 30
 
-  def __init__(self):
+  def __init__(self) -> None:
     pass
+
+  # --- Metadata ---
+
+  @property
+  def unsafe_submodules(self) -> Set[str]:
+    """Prevent scanning of C-Extensions."""
+    return {
+      "pywrap_tensorflow",
+      "python",
+      "core",
+      "compiler",
+      "contrib",
+      "examples",
+      "tools",
+    }
 
   @property
   def search_modules(self) -> List[str]:
-    """Modules to scan during discovery."""
     return [
       "tensorflow",
       "tensorflow.math",
@@ -54,17 +65,18 @@ class TensorFlowAdapter:
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Returns standard alias ('tensorflow', 'tf')."""
     return ("tensorflow", "tf")
 
   @property
-  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
-    """Remaps imports to 'tf' alias."""
-    return {"tensorflow": {"root": "tensorflow", "sub": None, "alias": "tf"}}
+  def import_namespaces(self) -> Dict[str, ImportConfig]:
+    """Self-declaration of namespaces."""
+    return {
+      "tensorflow": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="tf"),
+      "tensorflow.data": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="tf.data"),
+    }
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Categorization regexes."""
     return {
       "neural": [r"\\.keras\\.", r"Layer$"],
       "extras": [r"\\.io\\.", r"\\.data\\."],
@@ -72,7 +84,6 @@ class TensorFlowAdapter:
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Test templates."""
     return {
       "import": "import tensorflow as tf",
       "convert_input": "tf.convert_to_tensor({np_var})",
@@ -81,7 +92,6 @@ class TensorFlowAdapter:
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """Defines Class/Function structure logic."""
     return StructuralTraits(
       module_base="keras.Layer",
       forward_method="call",
@@ -90,31 +100,39 @@ class TensorFlowAdapter:
     )
 
   @property
+  def plugin_traits(self) -> PluginTraits:
+    return PluginTraits(
+      has_numpy_compatible_arrays=True,  # Supports .astype via TF/Keras ops
+      requires_explicit_rng=False,  # TF handles RNG statefully (usually)
+      requires_functional_state=False,
+      requires_functional_control_flow=False,
+    )
+
+  @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """Returns supported tiers."""
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """
-    Static definitions for core operations.
-    Includes Types and Functional Casting logic.
-    """
+    """Static definitions for TensorFlow."""
     return {
-      # --- Math / Array ---
       "Abs": StandardMap(api="tf.abs"),
       "Mean": StandardMap(api="tf.math.reduce_mean"),
       "Sum": StandardMap(api="tf.math.reduce_sum"),
       "exp": StandardMap(api="tf.math.exp"),
       "log": StandardMap(api="tf.math.log"),
       "square": StandardMap(api="tf.math.square"),
+      "Add": StandardMap(api="tf.math.add"),
+      "Sub": StandardMap(api="tf.math.subtract"),
+      "Mul": StandardMap(api="tf.math.multiply"),
+      "Div": StandardMap(api="tf.math.divide"),
+      # Explicitly define pack_to_tuple as 'perm' for TF logic
       "permute_dims": StandardMap(api="tf.transpose", pack_to_tuple="perm"),
-      # --- Extras & Utils ---
       "randn": StandardMap(api="tf.random.normal"),
       "ArgMax": StandardMap(api="tf.math.argmax"),
       "ArgMin": StandardMap(api="tf.math.argmin"),
       "DataLoader": StandardMap(api="tf.data.Dataset", requires_plugin="tf_data_loader"),
-      # --- Types ---
+      # Types
       "Float32": StandardMap(api="tf.float32"),
       "Float64": StandardMap(api="tf.float64"),
       "Float16": StandardMap(api="tf.float16"),
@@ -123,11 +141,7 @@ class TensorFlowAdapter:
       "Int16": StandardMap(api="tf.int16"),
       "UInt8": StandardMap(api="tf.uint8"),
       "Bool": StandardMap(api="tf.bool"),
-      # --- Casting (Functional Rewrite) ---
-      # Unlike JAX/NumPy which use .astype(), TensorFlow uses tf.cast(x, dtype).
-      # We map abstract operations like CastFloat to `tf.cast`.
-      # We inject the specific target dtype as a keyword argument `dtype`.
-      # The BaseRewriter logic will combine `x` (from source) and the injected `dtype`.
+      # Casting
       "CastFloat": StandardMap(api="tf.cast", inject_args={"dtype": "tf.float32"}),
       "CastDouble": StandardMap(api="tf.cast", inject_args={"dtype": "tf.float64"}),
       "CastHalf": StandardMap(api="tf.cast", inject_args={"dtype": "tf.float16"}),
@@ -140,11 +154,9 @@ class TensorFlowAdapter:
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Global seed methods."""
     return ["set_seed", "random.set_seed"]
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Runtime inspection logic."""
     results = []
     try:
       import tensorflow as tf
@@ -164,7 +176,6 @@ class TensorFlowAdapter:
             results.append(GhostInspector.inspect(getattr(tf.nn, name), f"tf.nn.{name}"))
 
       elif category == StandardCategory.LAYER:
-        # Check for Keras integration inside TF
         is_keras_available = hasattr(tf, "keras") and hasattr(tf.keras, "layers")
         if is_keras_available:
           import inspect
@@ -177,38 +188,27 @@ class TensorFlowAdapter:
       pass
     return results
 
-  # --- Manual Wiring ---
-
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """No complex wiring needed as definitions handle it."""
     pass
-
-  # --- Verification ---
 
   @classmethod
   def get_example_code(cls) -> str:
-    """Returns standard example."""
     return cls().get_tiered_examples()["tier2_neural"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Provides execution examples for verification tests."""
     return {
       "tier1_math": """import tensorflow as tf
 
 def math_ops(x, y): 
     # Tier 1: Core TensorFlow Math
-    # Maps to tf.math or root alias tf.* 
     a = tf.abs(x) 
     b = tf.math.add(a, y) 
-
-    # Reduction
     return tf.math.reduce_mean(b) 
 """,
       "tier2_neural": """import tensorflow as tf
 
 class Model(tf.Module): 
     # Tier 2: Low-level TF Module (Not Keras) 
-    # Demonstrates manual variable management
     def __init__(self, in_features, out_features): 
         super().__init__() 
         self.w = tf.Variable(tf.random.normal([in_features, out_features])) 
@@ -221,15 +221,16 @@ class Model(tf.Module):
 
 def data_pipeline(tensors, batch_size=32): 
     # Tier 3: tf.data Input Pipeline
-    # Valid TensorFlow dataset construction
     dataset = tf.data.Dataset.from_tensor_slices(tensors) 
     loader = dataset.shuffle(1024).batch(batch_size) 
     return loader
 """,
     }
 
+  # --- Syntax Generators ---
+
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """Generates tf.device context syntax."""
+    """Generates TF device context scope string."""
     clean_type = device_type.strip("'\"").lower()
     tf_type = "CPU"
     if clean_type in ("cuda", "gpu", "mps"):
@@ -244,12 +245,21 @@ def data_pipeline(tensors, batch_size=32):
 
     return f"tf.device('{tf_type}:{idx_str}')"
 
+  def get_device_check_syntax(self) -> str:
+    """Return syntax to check if GPU is available."""
+    return "len(tf.config.list_physical_devices('GPU')) > 0"
+
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """
+    Returns no-op (pass) as TF uses internal state or generator objects
+    not needing explicit splitting in the JAX style.
+    """
+    return "pass"
+
   def get_serialization_imports(self) -> List[str]:
-    """Imports for TF IO."""
     return ["import tensorflow as tf"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Syntax for raw file IO."""
     if op == "save" and object_arg:
       return f"tf.io.write_file({file_arg}, {object_arg})"
     elif op == "load":
@@ -257,7 +267,6 @@ def data_pipeline(tensors, batch_size=32):
     return ""
 
   def convert(self, data: Any) -> Any:
-    """Converts input to TF Tensor."""
     try:
       import tensorflow as tf
 

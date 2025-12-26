@@ -12,6 +12,7 @@ import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
+from typing import Dict, Tuple, Optional, Any
 
 
 class MockVmapSemantics(SemanticsManager):
@@ -20,7 +21,10 @@ class MockVmapSemantics(SemanticsManager):
   def __init__(self):
     # Skip file loading to stay isolated
     self.data = {}
-    self.import_data = {}
+    # New attributes
+    self._providers = {}
+    self._source_registry = {}
+
     self.framework_configs = {}
     self._reverse_index = {}
     self._key_origins = {}
@@ -39,6 +43,15 @@ class MockVmapSemantics(SemanticsManager):
     self.data["vmap"] = vmap_def
     self._reverse_index["torch.vmap"] = ("vmap", vmap_def)
     self._reverse_index["jax.vmap"] = ("vmap", vmap_def)
+
+  def get_all_rng_methods(self):
+    return self._known_rng_methods
+
+  def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    return {}
+
+  def get_framework_config(self, framework: str) -> Dict[str, Any]:
+    return {}
 
 
 @pytest.fixture

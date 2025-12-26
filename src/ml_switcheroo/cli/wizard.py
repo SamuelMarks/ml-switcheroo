@@ -24,6 +24,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.discovery.inspector import ApiInspector
 from ml_switcheroo.utils.console import console, log_info, log_success
+from ml_switcheroo.frameworks import get_adapter
 
 
 class MappingWizard:
@@ -55,7 +56,13 @@ class MappingWizard:
     log_info(f"Scanning [code]{package_name}[/code] for unmapped APIs...")
 
     inspector = ApiInspector()
-    catalog = inspector.inspect(package_name)
+
+    # Resolve unsafe modules via Adapter if available to prevent crashes
+    fw_key = package_name.split(".")[0]
+    adapter = get_adapter(fw_key)
+    blacklist = getattr(adapter, "unsafe_submodules", set()) if adapter else set()
+
+    catalog = inspector.inspect(package_name, unsafe_modules=blacklist)
 
     missing = self._find_unmapped_apis(catalog)
     total = len(missing)
@@ -134,12 +141,6 @@ class MappingWizard:
   def _render_card(self, api_path: str, details: Dict[str, Any], idx: int, total: int) -> None:
     """
     Renders a UI card with API details.
-
-    Args:
-        api_path (str): The fully qualified name (e.g. 'torch.abs').
-        details (Dict): Metadata from inspector (signature, docstring).
-        idx (int): Current index.
-        total (int): Total items.
     """
     sig = str(details.get("detected_sig", details.get("params", [])))
     doc = details.get("doc_summary", "No documentation available.")
@@ -156,12 +157,6 @@ class MappingWizard:
     self.console.print(Panel(content, title=f"Item {idx + 1}/{total}", border_style="blue"))
 
   def _prompt_tier_decision(self) -> str:
-    """
-    Prompts the user to categorize the operation.
-
-    Returns:
-        str: One of 'math', 'neural', 'extras', or 'skip'.
-    """
     choices = ["[M]ath", "[N]eural", "[E]xtras", "[S]kip"]
     options_text = " / ".join(choices)
     while True:
@@ -174,16 +169,6 @@ class MappingWizard:
       return mapping[resp]
 
   def _prompt_arg_normalization(self, detected_args: List[str], ctx_label: str) -> tuple[List[str], Dict[str, str]]:
-    """
-    Prompts user to rename arguments to standard names.
-
-    Args:
-        detected_args (List[str]): List of argument names found in source.
-        ctx_label (str): Label for the UI context (e.g. "Source (torch)").
-
-    Returns:
-        tuple: (List of Standard Args, Map {standard_arg -> source_arg}).
-    """
     if not detected_args:
       return [], {}
     self.console.print(f"[dim]Normalizing arguments for {ctx_label}... (Press Enter to keep original)[/dim]")
@@ -199,15 +184,6 @@ class MappingWizard:
     return std_args, mapping
 
   def _prompt_target_mapping(self, std_args: List[str]) -> Optional[Dict[str, Any]]:
-    """
-    Prompts user to define the target framework implementation immediately.
-
-    Args:
-        std_args (List[str]): The standard argument names defined in the previous step.
-
-    Returns:
-        Optional[Dict]: Target mapping definition or None if skipped.
-    """
     if not Confirm.ask("Map to a Target Framework (e.g. JAX) now?", default=False):
       return None
     target_fw = Prompt.ask("Target Framework", default="jax")
@@ -249,19 +225,6 @@ class MappingWizard:
     source_arg_map: Dict[str, str],
     target_variant: Optional[Dict[str, Any]],
   ) -> None:
-    """
-    Persists the wizard results to disk, splitting Spec and Mapping data.
-    Writes to Spec file AND Snapshot files.
-
-    Args:
-        filename (str): Target semantics spec file (e.g. 'k_neural_net.json').
-        api_path (str): The source API path (e.g. 'torch.nn.Linear').
-        doc_summary (str): Documentation string.
-        std_args (List[str]): List of standardized argument names.
-        source_fw (str): Source framework key (e.g. 'torch').
-        source_arg_map (Dict): Mapping for source arguments.
-        target_variant (Optional[Dict]): Details for the optional target mapping.
-    """
     sem_dir = resolve_semantics_dir()
     snap_dir = resolve_snapshots_dir()
 
@@ -297,7 +260,6 @@ class MappingWizard:
     self.console.print(f"[green]Saved {abstract_id} to distributed mappings[/green]")
 
   def _write_to_file(self, path: Path, key: str, data: Dict) -> None:
-    """Helper to read-update-write a JSON file."""
     current = {}
     if path.exists():
       try:
@@ -315,7 +277,6 @@ class MappingWizard:
       json.dump(current, f, indent=2, sort_keys=True)
 
   def _write_to_snapshot(self, snap_dir: Path, fw: str, key: str, data: Dict) -> None:
-    """Helper to write to framework-specific snapshot using 'latest' version."""
     path = snap_dir / f"{fw}_vlatest_map.json"
     current = {"__framework__": fw, "mappings": {}}
 
@@ -335,21 +296,9 @@ class MappingWizard:
       json.dump(current, f, indent=2, sort_keys=True)
 
   def _save_entry(self, api_path: str, details: Dict[str, Any], filename: str) -> None:
-    """
-    Legacy compatibility wrapper for direct saving.
-
-    Args:
-        api_path: Source API string.
-        details: Metadata dict.
-        filename: Target spec file.
-    """
     summary = details.get("doc_summary", "")
     sig = details.get("detected_sig", details.get("params", []))
-
-    # infer source framework from api path prefix
     source_fw = api_path.split(".")[0]
-
-    # Fix for test mock data which often implies 'pkg' is framework
     if not source_fw:
       source_fw = "unknown"
 

@@ -1,12 +1,19 @@
 """
-PyTorch Adapter with Dynamic Introspection.
+PyTorch Framework Adapter.
+
+This module implements the `FrameworkAdapter` protocol for PyTorch.
+It provides:
+1.  **Import Abstraction**: Self-declared namespace mappings (e.g. `torch.nn` is `NEURAL`).
+2.  **Semantic Definitions**: A comprehensive mapping of Abstract Operations to `torch.*` APIs.
+    This moves the "Golden Set" logic out of the central hub and into this file.
+3.  **Discovery**: Heuristics and logic for scanning the installed `torch` library
+    to discover new operations dynamically.
 """
 
 import inspect
-import sys
 import logging
-import numpy as np
-from typing import List, Tuple, Dict, Any, Optional
+import sys
+from typing import List, Tuple, Dict, Any, Optional, Set
 
 try:
   import torch
@@ -18,10 +25,12 @@ except ImportError:
   optim = None
 
 from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.semantics.schema import PluginTraits
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
   StandardMap,
+  ImportConfig,
   StandardCategory,
   InitMode,
   GhostRef,
@@ -33,40 +42,57 @@ from ml_switcheroo.core.ghost import GhostInspector
 @register_framework("torch")
 class TorchAdapter:
   """
-  Adapter for PyTorch.
+  Adapter for PyTorch (Meta).
 
-  Handles mapping of:
-  1.  **Neural Networks**: `torch.nn.*` layers and containers.
-  2.  **Math**: `torch.*` tensor operations.
-  3.  **Types**: `torch.float32`, etc.
-  4.  **Casting**: `.float()`, `.long()`, etc. mapped to Abstract Casts.
-  5.  **Optimization**: `torch.optim.*`.
+  Handles Source and Target translation rules for PyTorch, including
+  `torch.nn`, `torch.optim`, and `torch.func` (vmap/grad).
   """
 
   display_name: str = "PyTorch"
-  inherits_from: None = None
+  inherits_from: Optional[str] = None
   ui_priority: int = 0
 
-  def __init__(self):
+  def __init__(self) -> None:
     """
     Initializes the adapter.
-    Checks for Torch installation to determine Live vs Ghost mode.
+    Detects if PyTorch is installed to switch between LIVE inspection
+    and GHOST snapshot loading.
     """
     self._mode = InitMode.LIVE
-    self._snapshot_data = {}
+    self._snapshot_data: Dict[str, Any] = {}
     if torch is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("torch")
       if not self._snapshot_data:
         logging.warning("PyTorch not installed and no snapshot found. Scanning unavailable.")
 
-  # --- Metadata & Discovery Config ---
+  # --- Import Abstraction (Self-Declaration) ---
+
+  @property
+  def import_alias(self) -> Tuple[str, str]:
+    """Returns the primary root import alias ('torch', 'torch')."""
+    return ("torch", "torch")
+
+  @property
+  def import_namespaces(self) -> Dict[str, ImportConfig]:
+    """
+    Defines the semantic roles of PyTorch namespaces.
+    Used by the SemanticsManager to link Source imports to Target imports.
+    """
+    return {
+      "torch": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="torch"),
+      "torch.nn": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="nn"),
+      "torch.nn.functional": ImportConfig(tier=SemanticTier.NEURAL_OPS, recommended_alias="F"),
+      "torch.optim": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="optim"),
+      "torch.utils.data": ImportConfig(tier=SemanticTier.EXTRAS),
+      "torchvision.transforms": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="T"),
+    }
+
+  # --- Discovery Configuration ---
 
   @property
   def search_modules(self) -> List[str]:
-    """
-    Search targets for discovery.
-    """
+    """Modules to scan during `scaffold` or `sync` operations."""
     return [
       "torch.nn",
       "torch.linalg",
@@ -77,35 +103,34 @@ class TorchAdapter:
     ]
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
-    """Returns standard alias ('torch', 'torch')."""
-    return ("torch", "torch")
-
-  @property
-  def supported_tiers(self) -> List[SemanticTier]:
-    """Returns supported semantic tiers."""
-    return [SemanticTier.NEURAL, SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
-
-  @property
-  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+  def unsafe_submodules(self) -> Set[str]:
     """
-    Defines how to import specific submodules.
-
-    Examples:
-        "torch.nn" -> `import torch.nn as nn`
-        "torch.nn.functional" -> `import torch.nn.functional as F`
+    Submodules that cause recursion depth errors or C-Extension crashes
+    during dynamic introspection.
     """
     return {
-      "torch.nn": {"root": "torch.nn", "alias": "nn", "sub": None},
-      "torch.nn.functional": {"root": "torch.nn.functional", "alias": "F", "sub": None},
-      "torchvision": {"root": "torchvision", "alias": None},
-      "torchvision.transforms": {"root": "torchvision", "sub": "transforms", "alias": "T"},
-      "flax.nnx": {"root": "torch.nn", "sub": None, "alias": "nn"},
+      "_C",
+      "distributed",
+      "cuda",
+      "backends",
+      "fx",
+      "masked",
+      "ao",
+      "quantization",
+      "testing",
+      "compiler",
+      "contrib",
+      "examples",
+      "tools",
+      "utils",
+      "autograd",
+      "onnx",
+      "jit",
     }
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Regex patterns for categorizing APIs."""
+    """Regex patterns (strings) to categorize discovered APIs."""
     return {
       "neural": [r"\\.nn\\.", r"\\.modules\\.", r"\\.layers\\.", r"Module$"],
       "extras": [
@@ -119,9 +144,16 @@ class TorchAdapter:
       ],
     }
 
+  # --- Code Generation Traits ---
+
+  @property
+  def supported_tiers(self) -> List[SemanticTier]:
+    """Returns the semantic tiers fully supported by this adapter."""
+    return [SemanticTier.NEURAL, SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
+
   @property
   def test_config(self) -> Dict[str, str]:
-    """Templates for generating physical verification tests."""
+    """Templates used by `gen-tests` to create physical verification files."""
     return {
       "import": "import torch",
       "convert_input": "torch.tensor({np_var})",
@@ -131,38 +163,77 @@ class TorchAdapter:
   @property
   def structural_traits(self) -> StructuralTraits:
     """
-    Defines PyTorch structural patterns.
-    Includes lifecycle method stripping (e.g. .cuda(), .detach()).
+    Defines how classes and functions are rewritten when targeting PyTorch.
     """
     return StructuralTraits(
       module_base="torch.nn.Module",
       forward_method="forward",
       requires_super_init=True,
-      strip_magic_args=["rngs"],
-      lifecycle_strip_methods=["to", "cpu", "cuda", "detach", "clone", "requires_grad_", "share_memory_"],
+      strip_magic_args=["rngs", "key"],  # Remove JAX-specific state keys
+      lifecycle_strip_methods=[
+        "to",
+        "cpu",
+        "cuda",
+        "detach",
+        "clone",
+        "requires_grad_",
+        "share_memory_",
+      ],
       lifecycle_warn_methods=["eval", "train"],
-      # .half, .float, .double, .type removed from warn list as they are handled via Casting Plugin now
-      impurity_methods=["add_", "sub_", "mul_", "div_", "pow_", "zero_", "copy_", "fill_"],
+      impurity_methods=[
+        "add_",
+        "sub_",
+        "mul_",
+        "div_",
+        "pow_",
+        "zero_",
+        "copy_",
+        "fill_",
+      ],
+      jit_static_args=[],  # Torch imperative doesn't require static args annotations
     )
+
+  @property
+  def plugin_traits(self) -> PluginTraits:
+    """
+    Capabilities flags. PyTorch uses imperative state and eager execution.
+    """
+    return PluginTraits(
+      has_numpy_compatible_arrays=False,  # Uses .to() not .astype()
+      requires_explicit_rng=False,
+      requires_functional_state=False,
+      requires_functional_control_flow=False,
+    )
+
+  @property
+  def rng_seed_methods(self) -> List[str]:
+    """Global seed setting methods detected as impure side-effects."""
+    return ["manual_seed", "seed"]
+
+  # --- Semantic Definitions (The Spoke) ---
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """
-    Comprehensive distributed definitions for PyTorch mappings.
-    Maps source API calls to Abstract Operations defined in the Hub.
+    The definitive mapping of Abstract Operations to PyTorch APIs.
+    Moved from `standards_internal.py` to decouple the Core from Frameworks.
     """
     return {
+      # --- 1. Math / Array Operations ---
       "TorchFunctional": StandardMap(api="torch.nn.functional"),
-      # --- Optimization ---
-      "Adam": StandardMap(api="torch.optim.Adam"),
-      "SGD": StandardMap(api="torch.optim.SGD"),
-      "RMSprop": StandardMap(api="torch.optim.RMSprop"),
-      "StepLR": StandardMap(api="torch.optim.lr_scheduler.StepLR"),
-      "CosineAnnealingLR": StandardMap(api="torch.optim.lr_scheduler.CosineAnnealingLR"),
-      "ClipGradNorm": StandardMap(api="torch.nn.utils.clip_grad_norm_"),
-      "step": StandardMap(api="optimizer.step"),
-      "zero_grad": StandardMap(api="optimizer.zero_grad"),
-      # --- Array / Math ---
+      "Abs": StandardMap(api="torch.abs"),
+      "Mean": StandardMap(api="torch.mean"),
+      "Sum": StandardMap(api="torch.sum"),
+      "Add": StandardMap(api="torch.add"),
+      "Sub": StandardMap(api="torch.sub"),
+      "Mul": StandardMap(api="torch.mul"),
+      "Div": StandardMap(api="torch.div"),
+      "Pow": StandardMap(api="torch.pow"),
+      "exp": StandardMap(api="torch.exp"),
+      "log": StandardMap(api="torch.log"),
+      "sqrt": StandardMap(api="torch.sqrt"),
+      "square": StandardMap(api="torch.square"),
+      # --- 2. Tensor Manipulation ---
       "randn": StandardMap(api="torch.randn"),
       "Clamp": StandardMap(api="torch.clamp"),
       "Gather": StandardMap(api="torch.gather"),
@@ -178,11 +249,9 @@ class TorchAdapter:
       "Pad": StandardMap(api="torch.nn.functional.pad"),
       "Einsum": StandardMap(api="torch.einsum"),
       "permute_dims": StandardMap(api="torch.permute"),
-      "Abs": StandardMap(api="torch.abs"),
-      "Mean": StandardMap(api="torch.mean"),
-      "Sum": StandardMap(api="torch.sum"),
       "size": StandardMap(api="torch.Tensor.size"),
-      # --- Types ---
+      "OneHot": StandardMap(api="torch.nn.functional.one_hot"),
+      # --- 3. Types (Target Mapping) ---
       "Float32": StandardMap(api="torch.float32"),
       "Float64": StandardMap(api="torch.float64"),
       "Float16": StandardMap(api="torch.float16"),
@@ -191,9 +260,8 @@ class TorchAdapter:
       "Int16": StandardMap(api="torch.int16"),
       "UInt8": StandardMap(api="torch.uint8"),
       "Bool": StandardMap(api="torch.bool"),
-      # --- Casting (Shorthands) ---
-      # These map the source method (e.g. .float()) to the Abstract Cast Operation (e.g. CastFloat).
-      # The Casting Plugin uses the 'target_type' metadata on CastFloat to determine the target API.
+      # --- 4. Casting Logic ---
+      # Note: Torch casting is usually a method call `.float()`
       "CastFloat": StandardMap(api="torch.Tensor.float"),
       "CastDouble": StandardMap(api="torch.Tensor.double"),
       "CastHalf": StandardMap(api="torch.Tensor.half"),
@@ -203,21 +271,33 @@ class TorchAdapter:
       "CastByte": StandardMap(api="torch.Tensor.byte"),
       "CastBool": StandardMap(api="torch.Tensor.bool"),
       "CastChar": StandardMap(api="torch.Tensor.char"),
-      # --- Neural Layers ---
+      # --- 5. Optimization ---
+      "Adam": StandardMap(api="torch.optim.Adam"),
+      "SGD": StandardMap(api="torch.optim.SGD"),
+      "RMSprop": StandardMap(api="torch.optim.RMSprop"),
+      "StepLR": StandardMap(api="torch.optim.lr_scheduler.StepLR"),
+      "CosineAnnealingLR": StandardMap(api="torch.optim.lr_scheduler.CosineAnnealingLR"),
+      "ClipGradNorm": StandardMap(api="torch.nn.utils.clip_grad_norm_"),
+      "step": StandardMap(api="optimizer.step"),
+      "zero_grad": StandardMap(api="optimizer.zero_grad"),
+      # --- 6. Neural Layers ---
+      "Linear": StandardMap(api="torch.nn.Linear"),
+      "Conv2d": StandardMap(api="torch.nn.Conv2d"),
+      "MaxPool2d": StandardMap(api="torch.nn.MaxPool2d"),
       "MultiheadAttention": StandardMap(api="torch.nn.MultiheadAttention"),
       "Embedding": StandardMap(api="torch.nn.Embedding"),
-      "Linear": StandardMap(api="torch.nn.Linear"),
       "Sequential": StandardMap(api="torch.nn.Sequential"),
       "BatchNorm": StandardMap(api="torch.nn.BatchNorm2d"),
       "LayerNorm": StandardMap(api="torch.nn.LayerNorm"),
+      "Dropout": StandardMap(api="torch.nn.Dropout"),
+      # --- 7. Activations & Loss ---
       "GELU": StandardMap(api="torch.nn.GELU"),
-      "OneHot": StandardMap(api="torch.nn.functional.one_hot"),
+      "relu": StandardMap(api="torch.nn.functional.relu"),
+      "softmax": StandardMap(api="torch.nn.functional.softmax"),
+      "log_softmax": StandardMap(api="torch.nn.functional.log_softmax"),
       "CrossEntropyLoss": StandardMap(api="torch.nn.functional.cross_entropy"),
       "MSELoss": StandardMap(api="torch.nn.functional.mse_loss"),
-      "Conv2d": StandardMap(api="torch.nn.Conv2d"),
-      "relu": StandardMap(api="torch.nn.functional.relu"),
-      "MaxPool2d": StandardMap(api="torch.nn.MaxPool2d"),
-      # --- Vision ---
+      # --- 8. Vision Transforms ---
       "Resize": StandardMap(api="torchvision.transforms.Resize"),
       "Normalize": StandardMap(api="torchvision.transforms.Normalize"),
       "ToTensor": StandardMap(api="torchvision.transforms.ToTensor"),
@@ -226,7 +306,7 @@ class TorchAdapter:
       "RandomHorizontalFlip": StandardMap(api="torchvision.transforms.RandomHorizontalFlip"),
       "RandomVerticalFlip": StandardMap(api="torchvision.transforms.RandomVerticalFlip"),
       "Grayscale": StandardMap(api="torchvision.transforms.Grayscale"),
-      # --- State & Extras ---
+      # --- 9. State Management & Extras ---
       "no_grad": StandardMap(api="torch.no_grad"),
       "enable_grad": StandardMap(api="torch.enable_grad"),
       "register_buffer": StandardMap(api="torch.nn.Module.register_buffer"),
@@ -235,39 +315,118 @@ class TorchAdapter:
       "load_state_dict": StandardMap(api="torch.nn.Module.load_state_dict"),
       "parameters": StandardMap(api="torch.nn.Module.parameters"),
       "DataLoader": StandardMap(api="torch.utils.data.DataLoader"),
+      # --- 10. Container Logic (Reverse Mapping from Flax NNX) ---
       "Param": StandardMap(api="torch.nn.Parameter"),
       "Variable": StandardMap(api="torch.nn.Parameter", requires_plugin="nnx_param_to_torch"),
-      "Cache": StandardMap(api="torch.nn.Parameter", args={}, requires_plugin="nnx_param_to_torch"),
-      # --- Functional Transforms ---
-      "vmap": StandardMap(api="torch.vmap", args={"func": "func", "in_axes": "in_dims", "out_axes": "out_dims"}),
+      "Cache": StandardMap(api="torch.nn.Parameter", requires_plugin="nnx_param_to_torch"),
+      # --- 11. Functional Transforms ---
+      "vmap": StandardMap(
+        api="torch.vmap",
+        args={"func": "func", "in_axes": "in_dims", "out_axes": "out_dims"},
+      ),
       "grad": StandardMap(api="torch.func.grad"),
       "jit": StandardMap(api="torch.compile"),
       "Compile": StandardMap(api="torch.compile"),
       "Synchronize": StandardMap(api="torch.cuda.synchronize"),
     }
 
-  @property
-  def rng_seed_methods(self) -> List[str]:
-    """Returns list of RNG seeding methods."""
-    return ["manual_seed", "seed"]
+  # --- Dynamic Syntax Generators ---
 
-  # --- Discovery Logic (Dynamic) ---
+  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+    """
+    Generates code for device creation.
+    Example: "torch.device('cuda', 0)"
+    """
+    args = [str(device_type)]
+    if device_index:
+      args.append(str(device_index))
+    arg_str = ", ".join(args)
+    return f"torch.device({arg_str})"
+
+  def get_device_check_syntax(self) -> str:
+    """
+    Returns PyTorch syntax for checking CUDA availability.
+    """
+    return "torch.cuda.is_available()"
+
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """
+    PyTorch uses global state-based randomness, so explicit splitting is a no-op.
+    Returns 'pass' to maintain valid block syntax if injected blindly.
+    """
+    return "pass"
+
+  def get_serialization_imports(self) -> List[str]:
+    return ["import torch"]
+
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+    """
+    Generates save/load syntax.
+    """
+    if op == "save" and object_arg:
+      return f"torch.save({object_arg}, {file_arg})"
+    elif op == "load":
+      return f"torch.load({file_arg})"
+    return ""
+
+  @classmethod
+  def get_example_code(cls) -> str:
+    """Default example for documentation."""
+    return cls().get_tiered_examples()["tier1_math"]
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """
+    Provides code snippets for "Wizard" or "Demo" usage.
+    """
+    return {
+      "tier1_math": """import torch\n\ndef math_ops(x, y):\n    # Tier 1: Core Tensor Operations\n    a = torch.abs(x)\n    b = torch.add(a, y)\n    \n    # Reduction\n    return torch.mean(b)\n""",
+      "tier2_neural_simple": """import torch\nimport torch.nn as nn\n\nclass Net(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.fc = nn.Linear(10, 10)\n        \n    def forward(self, x):\n        x = self.fc(x)\n        return nn.functional.relu(x)\n""",
+      "tier2_neural_cnn": """import torch\nimport torch.nn as nn\n\nclass ConvNet(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.conv = nn.Conv2d(1, 32, 3)\n        self.fc = nn.Linear(32 * 26 * 26, 10)\n\n    def forward(self, x):\n        x = self.conv(x)\n        x = torch.flatten(x, 1)\n        return self.fc(x)\n""",
+      "tier3_extras_dataloader": """import torch\nfrom torch.utils.data import DataLoader, TensorDataset\n\ndef create_loader(data, targets):\n    # Tier 3: Data Loader\n    ds = TensorDataset(data, targets)\n    return DataLoader(ds, batch_size=32, num_workers=4)\n""",
+    }
+
+  def convert(self, data: Any) -> Any:
+    """
+    Converts input data (numpy, lists) into PyTorch Tensors for verification runners.
+    """
+    try:
+      import torch
+      import numpy as np
+    except ImportError:
+      return data
+
+    if isinstance(data, (np.ndarray, np.generic)):
+      try:
+        return torch.from_numpy(data)
+      except Exception:
+        return torch.tensor(data)
+
+    if isinstance(data, (list, tuple)):
+      try:
+        return torch.tensor(data)
+      except Exception:
+        pass
+    return data
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """
-    Collects API signatures dynamically.
+    Implementation of the Ghost Protocol.
+    Scans the locally installed PyTorch library for API definitions corresponding
+    to the requested category (Loss, Layer, etc.).
     """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
     return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
+    """Loads definitions from JSON snapshot."""
     if not self._snapshot_data:
       return []
     raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
     return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
+    """Introspects live torch modules."""
     results = []
     if category == StandardCategory.LOSS:
       results.extend(self._scan_losses())
@@ -283,7 +442,6 @@ class TorchAdapter:
     if not nn:
       return []
     found = []
-    # Dynamic scan of torch.nn for Loss classes
     for name, obj in inspect.getmembers(nn):
       if inspect.isclass(obj) and name.endswith("Loss") and name != "_Loss":
         if issubclass(obj, nn.Module):
@@ -294,7 +452,6 @@ class TorchAdapter:
     if not optim:
       return []
     found = []
-    # Dynamic scan of torch.optim for Optimizer subclasses
     for name, obj in inspect.getmembers(optim):
       if inspect.isclass(obj) and name != "Optimizer":
         try:
@@ -305,9 +462,7 @@ class TorchAdapter:
     return found
 
   def _scan_activations(self) -> List[GhostRef]:
-    """Scans for Activations (both Class and Functional)."""
     found = []
-    # Allowlist of known activations to prevent layers like Conv2d or losses leaking in
     known_names = {
       "ReLU",
       "GELU",
@@ -333,161 +488,45 @@ class TorchAdapter:
       "Hardsigmoid",
       "Hardtanh",
     }
-
-    # 1. Class-based Activations (torch.nn.modules.activation)
     try:
       import torch.nn.modules.activation as activ
 
       for name, obj in inspect.getmembers(activ):
         if inspect.isclass(obj) and issubclass(obj, nn.Module):
-          # Ensure strict filtering for unexpected leaks (even in dedicated module)
-          # Only accept known activation names
           if name in known_names:
             found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
     except ImportError:
-      # Fallback scan of nn
       if nn:
         for name, obj in inspect.getmembers(nn):
           if name in known_names and inspect.isclass(obj):
             found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
-
-    # 2. Functional Activations
     try:
       import torch.nn.functional as F
 
       for name, obj in inspect.getmembers(F):
-        if name.startswith("_"):
+        if name.startswith("_") or not inspect.isfunction(obj):
           continue
-        if not inspect.isfunction(obj):
-          continue
-
-        if name in [
-          "relu",
-          "gelu",
-          "sigmoid",
-          "tanh",
-          "softmax",
-          "log_softmax",
-          "silu",
-          "elu",
-          "leaky_relu",
-          "hardswish",
-          "mish",
-        ]:
+        if name.lower() in [k.lower() for k in known_names]:
           found.append(GhostInspector.inspect(obj, f"torch.nn.functional.{name}"))
     except ImportError:
       pass
-
     return found
 
   def _scan_layers(self) -> List[GhostRef]:
-    """Scans for general Neural Layers (Linear, Conv, RNN, etc)."""
     if not nn:
       return []
     found = []
-
-    # Broad scan of nn
     for name, obj in inspect.getmembers(nn):
       if inspect.isclass(obj) and issubclass(obj, nn.Module):
-        # Filter out Losses (handled separately) and Activations (handled separately)
         if name.endswith("Loss") or name.startswith("_"):
           continue
-
-        # We assume anything else is a Layer (or Container)
         found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
     return found
 
-  # --- Syntax & Conversion ---
-
-  def get_device_syntax(self, device_type: str, device_index: None | str = None) -> str:
-    args = [str(device_type)]
-    if device_index:
-      args.append(str(device_index))
-    arg_str = ", ".join(args)
-    return f"torch.device({arg_str})"
-
-  def get_serialization_imports(self) -> List[str]:
-    return ["import torch"]
-
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: None | str = None) -> str:
-    if op == "save" and object_arg:
-      return f"torch.save({object_arg}, {file_arg})"
-    elif op == "load":
-      return f"torch.load({file_arg})"
-    return ""
-
-  @classmethod
-  def get_example_code(cls) -> str:
-    return cls().get_tiered_examples()["tier1_math"]
-
-  def get_tiered_examples(self) -> Dict[str, str]:
-    return {
-      "tier1_math": """import torch
-
-def math_ops(x, y):
-    # Tier 1: Core Tensor Operations
-    a = torch.abs(x)
-    b = torch.add(a, y)
-    
-    # Reduction
-    return torch.mean(b)
-""",
-      "tier2_neural_simple": """import torch
-import torch.nn as nn
-
-class Net(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.fc = nn.Linear(10, 10)
-        
-    def forward(self, x):
-        x = self.fc(x)
-        return nn.functional.relu(x)
-""",
-      "tier2_neural_cnn": """import torch
-import torch.nn as nn
-
-class ConvNet(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv = nn.Conv2d(1, 32, 3)
-        self.fc = nn.Linear(32 * 26 * 26, 10)
-
-    def forward(self, x):
-        x = self.conv(x)
-        x = torch.flatten(x, 1)
-        return self.fc(x)
-""",
-      "tier3_extras_dataloader": """import torch
-from torch.utils.data import DataLoader, TensorDataset
-
-def create_loader(data, targets):
-    # Tier 3: Data Loader
-    ds = TensorDataset(data, targets)
-    return DataLoader(ds, batch_size=32, num_workers=4)
-""",
-    }
-
-  def convert(self, data):
-    try:
-      import torch
-    except ImportError:
-      return data
-    if isinstance(data, (np.ndarray, np.generic)):
-      try:
-        return torch.from_numpy(data)
-      except Exception:
-        return torch.tensor(data)
-    if isinstance(data, (list, tuple)):
-      try:
-        return torch.tensor(data)
-      except Exception:
-        pass
-    return data
-
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies manual fixes."""
+    """
+    Apply manual patches to the standard mappings if necessary.
+    """
     mappings = snapshot.setdefault("mappings", {})
-
     if "sort" in mappings:
       mappings["sort"]["output_adapter"] = "lambda x: x.values"

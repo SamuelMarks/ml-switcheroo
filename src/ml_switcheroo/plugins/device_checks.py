@@ -1,11 +1,18 @@
 """
 Plugin for translating Device Availability Checks.
 
-Maps `torch.cuda.is_available()` to JAX's `len(jax.devices('gpu')) > 0`.
+This module maps framework-specific availability checks (e.g., ``torch.cuda.is_available()``)
+to the target framework's equivalent by querying the active ``FrameworkAdapter``.
+
+Decoupling:
+Instead of hardcoding JAX or TensorFlow logic, this plugin delegates syntax generation
+to ``adapter.get_device_check_syntax()``.
 """
 
 import libcst as cst
+
 from ml_switcheroo.core.hooks import register_hook, HookContext
+from ml_switcheroo.frameworks import get_adapter
 
 
 @register_hook("cuda_is_available")
@@ -14,37 +21,44 @@ def transform_cuda_check(node: cst.Call, ctx: HookContext) -> cst.BaseExpression
   Plugin Hook: Transforms CUDA availability check.
 
   Triggers:
-      `torch.cuda.is_available()` via 'cuda_is_available' plugin key.
+      ``torch.cuda.is_available()`` via 'cuda_is_available' plugin key.
 
   Transformation:
-      Input:  `torch.cuda.is_available()`
-      Output: `len(jax.devices('gpu')) > 0`
+      Input:  ``torch.cuda.is_available()``
+       Output (JAX):   ``len(jax.devices('gpu')) > 0``
+       Output (Keras): ``len(keras.config.list_logical_devices('GPU')) > 0``
+       Output (NumPy): ``False``
 
-  Note: usage of 'gpu' backend string is hardcoded as per standard JAX idiom for CUDA.
+  Args:
+      node: The original CST Call node.
+      ctx: HookContext for target framework access.
+
+  Returns:
+      A CST Expression representing the boolean check.
   """
-  if ctx.target_fw != "jax":
+  # 1. Retrieve Target Adapter
+  target_fw = ctx.target_fw
+  adapter = get_adapter(target_fw)
+
+  if not adapter:
+    # Fallback to original if adapter not found
     return node
 
-  # 1. Construct: jax.devices('gpu')
-  # We use a direct construction to ensure 'gpu' string is used
-  devices_call = cst.Call(
-    func=cst.Attribute(value=cst.Name("jax"), attr=cst.Name("devices")),
-    args=[cst.Arg(value=cst.SimpleString("'gpu'"))],
-  )
+  # 2. Get Syntax String from Adapter
+  try:
+    check_code = adapter.get_device_check_syntax()
+  except NotImplementedError:
+    return node
+  except Exception:
+    # Safety catch for adapter logic errors
+    return node
 
-  # 2. Construct: len(jax.devices('gpu'))
-  len_call = cst.Call(func=cst.Name("len"), args=[cst.Arg(value=devices_call)])
+  if not check_code:
+    return node
 
-  # 3. Construct: ... > 0
-  # Comparison wraps the expression
-  comparison = cst.Comparison(
-    left=len_call,
-    comparisons=[
-      cst.ComparisonTarget(
-        operator=cst.GreaterThan(),
-        comparator=cst.Integer("0"),
-      )
-    ],
-  )
-
-  return comparison
+  # 3. Parse into CST
+  try:
+    new_expression = cst.parse_expression(check_code)
+    return new_expression
+  except cst.ParserSyntaxError:
+    return node

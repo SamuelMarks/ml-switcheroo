@@ -9,16 +9,12 @@ This plugin converts:
 - `x.scatter_(dim, index, src)` -> `x.at[index].set(src)` (Simple Case)
 - `x.scatter(dim, index, src)` -> `x.at[index].set(src)` (Out-of-place)
 
-Warning:
-This plugin currently handles the primary case where indices match the tensor rank
-or simple 1D scattering. Complex `dim` arguments often require `jax.lax.scatter`
-which has a very different signature closer to `tf.scatter_nd`.
-This implementation maps to the high-level `at[].set()` utility which covers
-the majority of user-facing logic (e.g. masking, simple updates).
+Decoupling Logic:
+    Removed framework checks. This logic executes if the operation is mapped
+    via `requires_plugin="scatter_indexer"`.
 """
 
 import libcst as cst
-from typing import Optional
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -26,10 +22,9 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 @register_hook("scatter_indexer")
 def transform_scatter(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
-  Hook: Transforms scatter method calls into JAX index-update syntax.
+  Hook: Transforms scatter method calls into index-update syntax (JAX style).
 
   Trigger: Operations mapped with `requires_plugin: "scatter_indexer"`.
-  Target: JAX/Flax.
 
   Transformation:
       Input:  `tensor.scatter_(dim, index, src)`
@@ -38,16 +33,15 @@ def transform_scatter(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   Note regarding `dim`:
   JAX's `at[index]` syntax implies the indices are fully specified or slicing.
   PyTorch's `scatter` applies along a `dim`.
-  Simply swapping `scatter(dim, idx, src)` to `at[idx].set(src)` is only valid if
-  `idx` is compatible with JAX advanced indexing for that shape.
+  This transformation maps to the high-level `at[idx].set(src)` utility.
 
-  However, for the purpose of structural transpilation, `at[idx].set(src)` is the
-  nearest syntactic equivalent. Proper dimension handling often requires `take_along_axis`
-  generics or `jax.lax.scatter_add` which is lower level.
+  Args:
+      node: The original CST Call (scatter).
+      ctx: The hook context.
+
+  Returns:
+      The transformed CST Call (at[].set()).
   """
-  if ctx.target_fw.lower() not in ["jax", "flax", "flax_nnx"]:
-    return node
-
   # We expect 3 arguments: dim, index, src
   # Or 4: dim, index, src, reduce
   args = list(node.args)
@@ -83,7 +77,7 @@ def transform_scatter(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   # Construct: .at[index]
   # We strip the "dim" argument. This is semantic lossy if dim != 0!
-  # But for 1D/2D embeddinglookups often used, it suffices.
+  # But for 1D/2D embedding lookups often used, it suffices.
   at_item = cst.Subscript(value=at_attr, slice=[cst.SubscriptElement(slice=cst.Index(value=index_arg))])
 
   # Construct: .set(src)

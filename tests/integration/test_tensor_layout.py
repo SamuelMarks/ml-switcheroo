@@ -15,27 +15,31 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.enums import SemanticTier
 
-SOURCE_LAYOUT = """ 
+SOURCE_LAYOUT = """
 import torch
 
-def process_image(x): 
+def process_image(x):
     # Assume source is NCHW
-    return torch.conv2d(x, w) 
+    return torch.conv2d(x, w)
 """
 
 # Target expectation: JAX uses NHWC sometimes implicitly but let's assume we map to NHWC op
-EXPECTED_OUTPUT = """ 
+EXPECTED_OUTPUT = """
 import jax.numpy as jnp
 
-def process_image(x): 
+def process_image(x):
     # Assume source is NCHW
-    return jnp.transpose(jax.lax.conv(jnp.transpose(x, axes=(0, 2, 3, 1)), w), axes=(0, 3, 1, 2)) 
+    return jnp.transpose(jax.lax.conv(jnp.transpose(x, axes=(0, 2, 3, 1)), w), axes=(0, 3, 1, 2))
 """
 
 
 class LayoutSemantics(SemanticsManager):
   def __init__(self):
     self.data = {}
+    # New attributes
+    self._providers = {}
+    self._source_registry = {}
+
     self.import_data = {}
     self.framework_configs = {}
     self._reverse_index = {}

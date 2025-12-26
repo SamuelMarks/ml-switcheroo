@@ -35,6 +35,9 @@ def rewriter():
   mgr.get_known_apis.return_value = {"Gather": gather_def}
   mgr.is_verified.return_value = True
 
+  # FIX: Populate framework configs for dynamic detection in utils.py
+  mgr.framework_configs = {"torch": {}, "jax": {}, "tensorflow": {}, "numpy": {}}
+
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 

@@ -14,22 +14,22 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-SOURCE_CODE = """ 
+SOURCE_CODE = """
 import torch
 
-def activation(x): 
-    s = torch.swish(x) 
-    m = torch.mish(x) 
+def activation(x):
+    s = torch.swish(x)
+    m = torch.mish(x)
     return s, m
 """
 
-EXPECTED_JAX = """ 
+EXPECTED_JAX = """
 import jax.numpy as jnp
 import jax.nn as nn
 
-def activation(x): 
-    s = x * nn.sigmoid(x) 
-    m = x * jnp.tanh(nn.softplus(x)) 
+def activation(x):
+    s = x * nn.sigmoid(x)
+    m = x * jnp.tanh(nn.softplus(x))
     return s, m
 """
 
@@ -37,7 +37,10 @@ def activation(x):
 class MacroSemantics(SemanticsManager):
   def __init__(self):
     self.data = {}
-    self.import_data = {}
+    # New attributes
+    self._providers = {}
+    self._source_registry = {}
+
     self.framework_configs = {}
     self._reverse_index = {}
     self._key_origins = {}
@@ -107,7 +110,8 @@ def test_macro_argument_rename():
   }
   mgr._reverse_index = {"torch.swish": ("Swish", mgr.data["Swish"])}
   mgr._key_origins = {}
-  mgr.import_data = {}
+  mgr._providers = {}
+  mgr._source_registry = {}
   mgr.framework_configs = {}
   mgr._known_rng_methods = set()
   mgr.get_all_rng_methods = lambda: set()

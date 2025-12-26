@@ -1,6 +1,6 @@
 """
 Runtime Configuration Store.
-Updated to support Framework Flavours (Hierarchical Selection).
+Updated to support Framework Flavours (Hierarchical Selection) and Dynamic Defaults.
 """
 
 import sys
@@ -57,13 +57,39 @@ def get_framework_priority_order() -> List[str]:
   return sorted(frameworks, key=sort_key)
 
 
+def _resolve_default_source() -> str:
+  """
+  Resolves the default source framework.
+  Returns the first alphanumeric framework in the registry.
+  """
+  fws = sorted(available_frameworks())
+  return fws[0] if fws else "source_placeholder"
+
+
+def _resolve_default_target() -> str:
+  """
+  Resolves the default target framework.
+  Returns the second alphanumeric framework in the registry, or the first if only one exists.
+  """
+  fws = sorted(available_frameworks())
+  if len(fws) >= 2:
+    return fws[1]
+  return fws[0] if fws else "target_placeholder"
+
+
 class RuntimeConfig(BaseModel):
   """
   Global configuration container for the translation engine.
   """
 
-  source_framework: str = Field("torch", description="The primary source framework key (e.g., 'torch').")
-  target_framework: str = Field("jax", description="The primary target framework key (e.g., 'jax').")
+  source_framework: str = Field(
+    default_factory=_resolve_default_source,
+    description="The primary source framework key.",
+  )
+  target_framework: str = Field(
+    default_factory=_resolve_default_target,
+    description="The primary target framework key.",
+  )
 
   # Feature 06: Framework Flavours
   # Used to specify sub-frameworks (e.g. 'flax_nnx') when the main selection is generic ('jax').
@@ -93,7 +119,8 @@ class RuntimeConfig(BaseModel):
     v_clean = v.lower().strip()
     known = available_frameworks()
     # We allow unregistered frameworks if the registry is empty (bootstrap/test mode)
-    if known and v_clean not in known:
+    # or if the value is a placeholder from defaults when registry is empty.
+    if known and v_clean not in known and v_clean not in ["source_placeholder", "target_placeholder"]:
       raise ValueError(f"Unknown framework: '{v_clean}'. Supported frameworks: {known}")
     return v_clean
 
@@ -148,6 +175,7 @@ class RuntimeConfig(BaseModel):
   ) -> "RuntimeConfig":
     """
     Loads configuration from pyproject.toml and overrides with CLI arguments.
+    Defaults are calculated dynamically from the registry if not provided.
 
     Args:
         source (Optional[str]): Override for source framework.
@@ -165,9 +193,12 @@ class RuntimeConfig(BaseModel):
     start_dir = search_path or Path.cwd()
     toml_config, toml_dir = _load_toml_settings(start_dir)
 
-    # 1. Framework Defaults
-    final_source = source or toml_config.get("source_framework", "torch")
-    final_target = target or toml_config.get("target_framework", "jax")
+    # 1. Framework Defaults (Dynamic)
+    def_source = _resolve_default_source()
+    def_target = _resolve_default_target()
+
+    final_source = source or toml_config.get("source_framework", def_source)
+    final_target = target or toml_config.get("target_framework", def_target)
 
     # 1b. Flavours
     final_src_flavour = source_flavour or toml_config.get("source_flavour")

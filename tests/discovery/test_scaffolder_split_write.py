@@ -11,7 +11,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector:
-  def inspect(self, fw):
+  def inspect(self, fw, **kwargs):
     # Robust return for any submodule calls
     return {
       "torch.abs": {"name": "abs", "params": ["x"], "docstring_summary": "Abs"},
@@ -54,6 +54,7 @@ def test_scaffold_splits_data(env_paths, tmp_path):
       mock_adapter.discovery_heuristics = {"neural": [r"\\.nn\\."]}
       # Explicitly disable search modules traversal
       mock_adapter.search_modules = None
+      mock_adapter.unsafe_submodules = set()
 
       with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
         with patch.dict("sys.modules", {"torch": MagicMock(__version__="latest")}):
@@ -102,6 +103,7 @@ def test_scaffolder_caches_existing_specs(env_paths, tmp_path):
 
   mock_adapter = MagicMock()
   mock_adapter.search_modules = None
+  mock_adapter.unsafe_submodules = set()
 
   with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
     with patch("ml_switcheroo.discovery.scaffolder.importlib.metadata.version", return_value="latest"):

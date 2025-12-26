@@ -460,7 +460,7 @@
           {
             "name": "reduce_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<function mean at 0x76c147904040>",
+            "default": "<function mean at 0x111af7240>",
             "annotation": "Optional"
           }
         ],

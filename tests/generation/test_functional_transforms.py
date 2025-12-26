@@ -10,6 +10,7 @@ Verifies:
 """
 
 import pytest
+from typing import Dict, Tuple, Optional, Any
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -20,18 +21,21 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 class FunctionalSemantics(SemanticsManager):
   def __init__(self):
     self.data = {}
-    self.import_data = {}
     self.framework_configs = {}
     self._reverse_index = {}
     self._key_origins = {}
     self._validation_status = {}
     self._known_rng_methods = set()
 
+    # New attributes
+    self._providers = {}
+    self._source_registry = {}
+
     # Define 'vmap' Abstract Spec
     self.data["vmap"] = {
       "std_args": ["func", "in_axes", "out_axes"],
       "variants": {
-        "torch": {"api": "torch.vmap", "args": {"in_axes": "in_dims", "out_axes": "out_dims"}},
+        "torch": {"api": "torch.vmap", "args": {"func": "func", "in_axes": "in_dims", "out_axes": "out_dims"}},
         "jax": {"api": "jax.vmap", "args": {"func": "fun"}},
       },
     }
@@ -51,6 +55,12 @@ class FunctionalSemantics(SemanticsManager):
 
   def get_all_rng_methods(self):
     return set()
+
+  def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    return {}
+
+  def get_framework_config(self, framework: str) -> Dict[str, Any]:
+    return {}
 
 
 @pytest.fixture

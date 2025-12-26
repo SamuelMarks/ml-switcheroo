@@ -3,11 +3,11 @@ Apple MLX Framework Adapter.
 
 This module provides the adapter for Apple's MLX array framework.
 It supports:
-1.  **Unified Memory math**: Mapping `mlx.core` operations.
-2.  **Neural Networks**: Mapping `mlx.nn` layers and containers.
+1.  **Unified Memory math**: Mapping ``mlx.core`` operations.
+2.  **Neural Networks**: Mapping ``mlx.nn`` layers and containers.
 3.  **Discovery**: Runtime introspection of the MLX API surface.
-4.  **Types**: Mapping Abstract Types to `mlx.core` dtypes (e.g. `mx.float32`).
-5.  **Casting**: Generic casting plugin integration via `.astype()`.
+4.  **Types**: Mapping Abstract Types to ``mlx.core`` dtypes (e.g. ``mx.float32``).
+5.  **Casting**: Generic casting plugin integration via ``.astype()``.
 
 Refactor: Distributed definitions populated for MLX specific Layers, Ops, Optimizers, and Types.
 """
@@ -19,7 +19,14 @@ import numpy as np
 
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, StandardCategory, StandardMap
+from ml_switcheroo.frameworks.base import (
+  register_framework,
+  StructuralTraits,
+  PluginTraits,
+  StandardCategory,
+  StandardMap,
+  ImportConfig,
+)
 
 # Conditional import to allow loading in environments without MLX
 try:
@@ -45,25 +52,31 @@ class MLXAdapter:
     """
     Returns list of MLX submodules to scan during discovery.
     """
-    return ["mlx.core", "mlx.nn", "mlx.optimizers", "mlx.core.fft", "mlx.core.linalg", "mlx.core.random"]
+    return [
+      "mlx.core",
+      "mlx.nn",
+      "mlx.optimizers",
+      "mlx.core.fft",
+      "mlx.core.linalg",
+      "mlx.core.random",
+    ]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
     """
-    Default alias for core array operations: `import mlx.core as mx`.
+    Default alias for core array operations: ``import mlx.core as mx``.
     """
     return ("mlx.core", "mx")
 
   @property
-  def import_namespaces(self) -> Dict[str, Dict[str, str]]:
+  def import_namespaces(self) -> Dict[str, ImportConfig]:
     """
-    Defines namespace mapping for source-to-target imports.
-    Maps `torch.nn` -> `mlx.nn` (aliased as `nn`) and `mlx.core` mappings.
+    Self-declaration of namespaces.
     """
     return {
-      "torch.nn": {"root": "mlx", "sub": "nn", "alias": "nn"},
-      "flax.nnx": {"root": "mlx", "sub": "nn", "alias": "nn"},
-      "mlx.core": {"root": "mlx", "sub": "core", "alias": "mx"},
+      "mlx.core": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="mx"),
+      "mlx.nn": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="nn"),
+      "mlx.optimizers": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="optim"),
     }
 
   @property
@@ -71,7 +84,11 @@ class MLXAdapter:
     """
     Regex patterns for categorizing discovered APIs into Tiers.
     """
-    return {"neural": [r"\\.nn\\."], "extras": [r"random\\."], "optimizer": [r"\\.optimizers\\."]}
+    return {
+      "neural": [r"\\.nn\\."],
+      "extras": [r"random\\."],
+      "optimizer": [r"\\.optimizers\\."],
+    }
 
   @property
   def test_config(self) -> Dict[str, str]:
@@ -100,7 +117,19 @@ class MLXAdapter:
     handles initialization statefully/eagerly.
     """
     return StructuralTraits(
-      module_base="mlx.nn.Module", forward_method="__call__", requires_super_init=True, strip_magic_args=["rngs"]
+      module_base="mlx.nn.Module",
+      forward_method="__call__",
+      requires_super_init=True,
+      strip_magic_args=["rngs"],
+    )
+
+  @property
+  def plugin_traits(self) -> PluginTraits:
+    return PluginTraits(
+      has_numpy_compatible_arrays=True,
+      requires_explicit_rng=False,  # MLX uses implicit RNG in mlx.core.random usually
+      requires_functional_state=False,
+      requires_functional_control_flow=False,
     )
 
   @property
@@ -112,11 +141,26 @@ class MLXAdapter:
     return {
       "Abs": StandardMap(api="mx.abs"),
       "Mean": StandardMap(api="mx.mean"),
-      "Linear": StandardMap(api="mlx.nn.Linear", args={"in_features": "input_dims", "out_features": "output_dims"}),
+      "Add": StandardMap(api="mx.add"),
+      "Sub": StandardMap(api="mx.subtract"),
+      "Mul": StandardMap(api="mx.multiply"),
+      "Div": StandardMap(api="mx.divide"),
+      "Linear": StandardMap(
+        api="mlx.nn.Linear",
+        args={"in_features": "input_dims", "out_features": "output_dims"},
+      ),
       "permute_dims": StandardMap(api="mx.transpose", pack_to_tuple="axes"),
       # --- Optimization ---
-      "Adam": StandardMap(api="mlx.optimizers.Adam", args={"lr": "learning_rate"}, requires_plugin="mlx_optimizer_init"),
-      "SGD": StandardMap(api="mlx.optimizers.SGD", args={"lr": "learning_rate"}, requires_plugin="mlx_optimizer_init"),
+      "Adam": StandardMap(
+        api="mlx.optimizers.Adam",
+        args={"lr": "learning_rate"},
+        requires_plugin="mlx_optimizer_init",
+      ),
+      "SGD": StandardMap(
+        api="mlx.optimizers.SGD",
+        args={"lr": "learning_rate"},
+        requires_plugin="mlx_optimizer_init",
+      ),
       "step": StandardMap(api="optimizer_step", requires_plugin="mlx_optimizer_step"),
       "zero_grad": StandardMap(api="optimizer_zero_grad", requires_plugin="mlx_zero_grad"),
       # --- Arrays ---
@@ -182,7 +226,15 @@ class MLXAdapter:
             results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))
 
       if category == StandardCategory.ACTIVATION:
-        target_names = {"relu", "gelu", "silu", "sigmoid", "tanh", "softmax", "elu"}
+        target_names = {
+          "relu",
+          "gelu",
+          "silu",
+          "sigmoid",
+          "tanh",
+          "softmax",
+          "elu",
+        }
         for name, obj in inspect.getmembers(mlx.nn):
           if name.lower() in target_names:
             results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))
@@ -211,7 +263,6 @@ class MLXAdapter:
     """
     try:
       import mlx.core as mx
-      # import numpy as np # already imported globally
 
       if isinstance(data, (np.ndarray, list, tuple, np.generic)):
         return mx.array(data)
@@ -278,6 +329,8 @@ def compute_on_gpu(x):
 """,
     }
 
+  # --- Syntax Generators ---
+
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Returns device constructor syntax."""
     clean_type = device_type.strip("'\"").lower()
@@ -289,6 +342,20 @@ def compute_on_gpu(x):
     if device_index:
       args.append(str(device_index))
     return f"mx.Device({', '.join(args)})"
+
+  def get_device_check_syntax(self) -> str:
+    """
+    Check if default device is GPU.
+    Note: MLX Unified Memory doesn't have strict 'is_available' but we check backend.
+    """
+    return "mx.default_device() == mx.gpu"
+
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """
+    MLX usually uses implicit state, but if explicit mode is requested,
+    return 'pass' as split logic differs significantly.
+    """
+    return "pass"
 
   def get_serialization_imports(self) -> List[str]:
     """Returns imports for serialization."""
@@ -307,6 +374,4 @@ def compute_on_gpu(x):
     Applies manual wiring for MLX.
     Overrides/Patches snapshot items that cannot be statically defined.
     """
-    # Wiring is primarily handled by definitions property now.
-    # Only dynamic adjustments or complex conditional logic would go here.
     pass

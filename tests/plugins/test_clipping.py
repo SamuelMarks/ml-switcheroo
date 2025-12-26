@@ -10,6 +10,7 @@ from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.clipping import transform_grad_clipping
+from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def rewrite_code(rewriter, code):
@@ -28,7 +29,7 @@ def rewriter():
     "variants": {
       "torch": {"api": "torch.nn.utils.clip_grad_norm_"},
       "jax": {
-        "api": "optax.clip_by_global_norm",  # Nominal
+        "api": "optax.clip_by_global_norm",
         "requires_plugin": "grad_clipper",
       },
     }
@@ -38,6 +39,9 @@ def rewriter():
   mgr.resolve_variant.side_effect = lambda aid, fw: clip_def["variants"]["jax"]
   mgr.get_known_apis.return_value = {"ClipGrads": clip_def}
   mgr.is_verified.return_value = True
+
+  # FIX: Enable functional state trait
+  mgr.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_functional_state=True)}
 
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
@@ -68,17 +72,12 @@ def test_clip_with_variable_args(rewriter):
   assert "update(g," in res
 
 
-def test_ignores_if_target_torch(rewriter):
-  rewriter.ctx._runtime_config.target_framework = "torch"
-  rewriter.ctx.target_fw = "torch"
+def test_ignores_if_traits_missing(rewriter):
+  # Disable traits
+  rewriter.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_functional_state=False)}
 
   code = "torch.nn.utils.clip_grad_norm_(g, 1.0)"
   res = rewrite_code(rewriter, code)
 
-  # Should perform basic mapping if defined in definitions, but plugin won't run logic
-  # Since rewrite_code invokes plugin directly logic in tests usually? No, via rewriter.
-  # PivotRewriter would rename API if strict map, but our mock might be skipped if we assume
-  # Torch->Torch.
-  # Plugin logic explicitly returns node if target != jax/flax.
-
+  # Should NOT transform to optax
   assert "optax" not in res

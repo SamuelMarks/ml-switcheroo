@@ -29,7 +29,6 @@ def rewriter():
   mgr = MagicMock()
 
   # Define Reshape and View
-  # Both map to the same target logic
   def_map = {
     "variants": {
       "torch": {"api": "torch.Tensor.view"},
@@ -43,7 +42,6 @@ def rewriter():
   def resolve(aid, fw):
     return def_map["variants"]["jax"]
 
-  # We patch get_definition to catch "view" method call on tensor
   def get_def(name):
     if "view" in name or "reshape" in name:
       return ("Reshape", def_map)
@@ -52,6 +50,9 @@ def rewriter():
   mgr.get_definition.side_effect = get_def
   mgr.resolve_variant.side_effect = resolve
   mgr.is_verified.return_value = True
+
+  # FIX: Populate framework configs for checking module nodes
+  mgr.framework_configs = {"torch": {}, "jax": {}, "numpy": {}, "tensorflow": {}, "mlx": {}, "flax": {}}
 
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
@@ -108,8 +109,6 @@ def test_function_style_unpacking(rewriter):
   Input: torch.reshape(x, a, b) -- if supported by source
   Output: jnp.reshape(x, (a, b))
   """
-  # Note: torch.reshape usually requires tuple for shape, but if user made wrapper...
-  # Plugin supports arbitrary callable structure
   code = "y = torch.reshape(x, a, b)"
   res = rewrite_code(rewriter, code)
   assert "jnp.reshape(x, (a, b))" in res

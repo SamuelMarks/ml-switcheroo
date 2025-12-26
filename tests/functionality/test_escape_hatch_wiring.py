@@ -3,11 +3,12 @@ Tests for Escape Hatch Wiring in AST Translation.
 """
 
 import pytest
-from typing import Set
+from typing import Set, Dict, Any, Tuple, Optional
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.enums import SemanticTier
 
 
 class MockSemantics(SemanticsManager):
@@ -23,8 +24,11 @@ class MockSemantics(SemanticsManager):
         },
       },
     }
-    self.import_data = {}
     self.framework_configs = {}
+    # Initialize required attributes for newer manager logic
+    self._providers = {}
+    self._source_registry = {}
+
     # FIX: Initialize required RNG set for PurityScanner
     self._known_rng_methods = {"seed", "manual_seed"}
 
@@ -49,6 +53,9 @@ class MockSemantics(SemanticsManager):
 
   def is_verified(self, _id):
     return True
+
+  def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    return {}
 
 
 @pytest.fixture

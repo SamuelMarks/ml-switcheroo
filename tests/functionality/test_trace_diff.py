@@ -6,7 +6,7 @@ Verifies that the engine produces trace events with populated
 """
 
 import pytest
-from typing import Set, Dict, Any
+from typing import Set, Dict, Any, Tuple, Optional
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.core.tracer import TraceEventType, TraceLogger
 from ml_switcheroo.config import RuntimeConfig
@@ -17,11 +17,14 @@ class MockSemantics(SemanticsManager):
   def __init__(self):
     self.data = {}
     self._reverse_index = {}
-    self.import_data = {}
     self.framework_configs = {}
     self._validation_status = {}
     self._key_origins = {}
     self._known_rng_methods = set()
+
+    # New attributes
+    self._providers = {}
+    self._source_registry = {}
 
     # Inject "torch.abs" -> "jax.numpy.abs"
     self.data["abs"] = {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}, "std_args": ["x"]}
@@ -42,6 +45,9 @@ class MockSemantics(SemanticsManager):
 
   def get_framework_config(self, framework: str) -> Dict[str, Any]:
     return self.framework_configs.get(framework, {})
+
+  def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    return {}
 
 
 def test_conversion_trace_contains_diffs():

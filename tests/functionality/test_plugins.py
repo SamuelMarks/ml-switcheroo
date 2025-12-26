@@ -5,7 +5,7 @@ Tests for Plugin Logic and Hook Execution.
 import libcst as cst
 import pytest
 from unittest.mock import MagicMock
-from typing import Set
+from typing import Set, Dict, Tuple, Optional
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -26,11 +26,14 @@ class MockSemantics(SemanticsManager):
     # Do NOT call super().__init__(), it loads real files and resets data
     self.data = {}
     self._reverse_index = {}
-    self.import_data = {}
     self.framework_configs = {}
     self._key_origins = {}
     self._validation_status = {}
     self._known_rng_methods = set()
+
+    # New attributes for import abstraction
+    self._providers = {}
+    self._source_registry = {}
 
     # 1. 'special_add'
     special_def = {
@@ -62,6 +65,9 @@ class MockSemantics(SemanticsManager):
 
   def is_verified(self, _id):
     return True
+
+  def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    return {}
 
 
 @register_hook("mock_alpha_rewrite")

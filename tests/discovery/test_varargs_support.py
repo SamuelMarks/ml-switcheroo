@@ -11,7 +11,7 @@ from ml_switcheroo.discovery.inspector import ApiInspector
 
 
 class MockVarargsInspector(ApiInspector):
-  def inspect(self, fw_name):
+  def inspect(self, fw_name, **kwargs):
     if fw_name == "source_fw":
       return {"source.add": {"name": "add", "params": ["x", "y"], "has_varargs": False}}
     if fw_name == "target_fw":
@@ -28,14 +28,23 @@ def test_scaffolder_skips_penalty_for_varargs(tmp_path):
   scaffolder = Scaffolder(semantics=clean_semantics, similarity_threshold=0.8, arity_penalty=0.5)
   scaffolder.inspector = MockVarargsInspector()
 
-  sem_dir = tmp_path / "semantics"
-  snap_dir = tmp_path / "snapshots"
-  sem_dir.mkdir()
-  snap_dir.mkdir()
+  # Configure mock adapter with safe defaults
+  mock_adapter = MagicMock()
+  mock_adapter.search_modules = None
 
-  scaffolder.scaffold(["source_fw", "target_fw"], root_dir=tmp_path)
+  # Patch adapter getter to prevent crash on unsafe_modules access
+  with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
+    with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["source_fw", "target_fw"]):
+      # Patch version to ensure filename is correct
+      with patch("ml_switcheroo.discovery.scaffolder.importlib.metadata.version", return_value="latest"):
+        sem_dir = tmp_path / "semantics"
+        snap_dir = tmp_path / "snapshots"
+        sem_dir.mkdir()
+        snap_dir.mkdir()
 
-  target_map = json.loads((snap_dir / "target_fw_vlatest_map.json").read_text())
+        scaffolder.scaffold(["source_fw", "target_fw"], root_dir=tmp_path)
 
-  assert "add" in target_map["mappings"]
-  assert target_map["mappings"]["add"]["api"] == "target.poly.add"
+        target_map = json.loads((snap_dir / "target_fw_vlatest_map.json").read_text())
+
+        assert "add" in target_map["mappings"]
+        assert target_map["mappings"]["add"]["api"] == "target.poly.add"

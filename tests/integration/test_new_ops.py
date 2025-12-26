@@ -9,6 +9,7 @@ import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.enums import SemanticTier
 
 # --- Source PyTorch Code ---
 SOURCE_TORCH_NN = """
@@ -137,14 +138,24 @@ def semantics():
   }
 
   # Import Maps (Mocked for isolation)
-  mgr.import_data["torch.nn"] = {
-    "variants": {
-      "flax_nnx": {"root": "flax", "sub": "nnx", "alias": "nnx"},
-      "mlx": {"root": "mlx", "sub": "nn", "alias": "nn"},
-    }
+
+  # Register Sources
+  mgr._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
+  mgr._source_registry["jnp"] = ("jax", SemanticTier.ARRAY_API)  # Assuming source use
+  mgr._source_registry["torch"] = ("torch", SemanticTier.ARRAY_API)
+
+  # Register providers
+  # Flax NNX
+  mgr._providers["flax_nnx"] = {
+    SemanticTier.NEURAL: {"root": "flax", "sub": "nnx", "alias": "nnx"},
+    SemanticTier.ARRAY_API: {"root": "jax", "sub": "numpy", "alias": "jnp"},
   }
-  mgr.import_data["jnp"] = {"variants": {"flax_nnx": {"root": "jax", "sub": "numpy", "alias": "jnp"}}}
-  mgr.import_data["torch"] = {"variants": {"mlx": {"root": "mlx", "sub": "core", "alias": "mx"}}}
+
+  # MLX
+  mgr._providers["mlx"] = {
+    SemanticTier.NEURAL: {"root": "mlx", "sub": "nn", "alias": "nn"},
+    SemanticTier.ARRAY_API: {"root": "mlx", "sub": "core", "alias": "mx"},
+  }
 
   # Special case: Map torch.nn.functional to nothing for MLX to allow cleaning if unused, or map it if used.
   # In source: 'import torch.nn.functional as F'. F is unused in logic, so ImportFixer should prune it.

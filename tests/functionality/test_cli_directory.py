@@ -22,7 +22,10 @@ class MockSemantics(SemanticsManager):
     # We assume a clean state
     self.data = {}
     self._reverse_index = {}
-    self.import_data = {}
+    # New attributes for import abstraction
+    self._providers = {}
+    self._source_registry = {}
+
     # Prepopulate the framework configs to allow alias resolution
     self.framework_configs = {
       "jax": {"alias": {"module": "jax.numpy", "name": "jnp"}},

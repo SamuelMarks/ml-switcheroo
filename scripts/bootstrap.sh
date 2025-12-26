@@ -5,10 +5,13 @@
 # This script hydrates the Semantic Knowledge Base (Hub) and Framework
 # Implementation Maps (Spokes) from upstream sources and the local environment.
 #
+# It dynamically queries the 'ml_switcheroo' package to discover all supported
+# frameworks (including new plugins added to src/ml_switcheroo/frameworks/).
+#
 # Stages:
 # 1. Ingestion: Import external specs (Array API, ONNX).
-# 2. Discovery: Find consensus standards across frameworks.
-# 3. Scaffolding: Heuristic mapping.
+# 2. Discovery: Find consensus standards across ALL registered frameworks.
+# 3. Scaffolding: Heuristic mapping for ALL registered frameworks.
 # 4. Snapshots: Capture API signatures for Ghost Mode.
 # 5. Sync: Link implementations to abstract standards.
 # ==============================================================================
@@ -29,126 +32,139 @@ TEMP_DIR="_bootstrap_temp"
 SEMANTICS_DIR="$ROOT_DIR"'/src/ml_switcheroo/semantics'
 SNAPSHOTS_DIR="$ROOT_DIR"'/src/ml_switcheroo/snapshots'
 
-echo "${BOLD}🔥 Initiating Knowledge Base Bootstrap${NC}"
+echo "${BOLD}🔥 Initiating Knowledge Base Bootstrap (Dynamic)${NC}"
 echo "----------------------------------------"
 
 # ------------------------------------------------------------------------------
-# 0. DESTRUCTIVE CLEANUP
+# 0. SETUP & CLEANUP
 # ------------------------------------------------------------------------------
-echo "${BLUE}[0/6] Cleaning existing JSON artifacts...${NC}"
-rm -f "$SEMANTICS_DIR"/k_*.json
-# Cleaning the specific Discovered/Pending standards filename
-rm -f "$SEMANTICS_DIR"/k_discovered.json
-# Clean Overlays (*_map.json)
-rm -f "$SNAPSHOTS_DIR"/*_map.json
-# Clean Snapshots (*_v*.json) to ensure fresh capture
-rm -f "$SNAPSHOTS_DIR"/*_v*.json
-echo "   ${GREEN}✔ Cleaned JSONs${NC}"
+echo "${BLUE}[0/6] Preparing Workspace...${NC}"
 
-# 0b. Prepare Workspace
+# Clean existing JSON artifacts to force regeneration
+rm -f "$SEMANTICS_DIR"/k_*.json
+rm -f "$SNAPSHOTS_DIR"/*_map.json
+rm -f "$SNAPSHOTS_DIR"/*_v*.json
+
+# Prepare temp dir
 rm -rf "$TEMP_DIR"
 mkdir -p "$TEMP_DIR"
 
+# Install ml-switcheroo in customizable mode to ensure we can query it
+if command -v uv >/dev/null 2>&1; then
+    uv pip install -e . > /dev/null 2>&1
+else
+    python3 -m pip install -e . > /dev/null 2>&1
+fi
+
 # ------------------------------------------------------------------------------
-# 1. IMPORT TIER A: MATH (Array API Standard)
+# 1. DYNAMIC DISCOVERY OF FRAMEWORKS
 # ------------------------------------------------------------------------------
-echo "\n${BLUE}[1/6] Importing Tier A (Array API)...${NC}"
-git clone --depth 1 --branch 2024.12 https://github.com/data-apis/array-api "$TEMP_DIR/array-api" > /dev/null 2>&1
-echo "   Parsing stubs..."
+echo "\n${BLUE}[1/6] querying registered frameworks...${NC}"
+
+# We use python to inspect the registry. This picks up any file added to
+# src/ml_switcheroo/frameworks/ provided it has the @register_framework decorator.
+# We set PYTHONPATH to src to ensure we load the local version.
+REGISTERED_FWS=$(PYTHONPATH=src python3 -c "from ml_switcheroo.frameworks import available_frameworks; print(' '.join(available_frameworks()))")
+
+if [ -z "$REGISTERED_FWS" ]; then
+    echo "${RED}❌ No frameworks found! Check src/ml_switcheroo/frameworks/__init__.py${NC}"
+    exit 1
+fi
+
+echo "   🔍 Detected adapters: ${YELLOW}$REGISTERED_FWS${NC}"
+
+# Attempt to install corresponding libraries for live scanning
+echo "   📦 Attempting to install libraries for live scanning..."
+# Note: failure here is tolerabe (Ghost Mode fallback), so we use || true
+if command -v uv >/dev/null 2>&1; then
+    uv pip install torch jax flax tensorflow keras mlx numpy || true
+else
+    python3 -m pip install torch jax flax tensorflow keras mlx numpy || true
+fi
+
+# ------------------------------------------------------------------------------
+# 2. IMPORT UPSTREAM SPECS (Hub Population)
+# ------------------------------------------------------------------------------
+echo "\n${BLUE}[2/6] Importing Upstream Specifications...${NC}"
+
+# Tier A: Array API
+if [ ! -d "$TEMP_DIR/array-api" ]; then
+    git clone --depth 1 --branch 2024.12 https://github.com/data-apis/array-api "$TEMP_DIR/array-api" > /dev/null 2>&1
+fi
+echo "   Parsing Array API Stubs..."
 ml_switcheroo import-spec "$TEMP_DIR/array-api/src/array_api_stubs/_2024_12"
 
-# ------------------------------------------------------------------------------
-# 2. IMPORT TIER B: NEURAL (ONNX Operators)
-# ------------------------------------------------------------------------------
-echo "\n${BLUE}[2/6] Importing Tier B (ONNX Neural)...${NC}"
-git clone --depth 1 --branch v1.20.0 https://github.com/onnx/onnx "$TEMP_DIR/onnx" > /dev/null 2>&1
-echo "   Parsing Operators.md..."
+# Tier B: ONNX Neural
+if [ ! -d "$TEMP_DIR/onnx" ]; then
+    git clone --depth 1 --branch v1.20.0 https://github.com/onnx/onnx "$TEMP_DIR/onnx" > /dev/null 2>&1
+fi
+echo "   Parsing ONNX Operators..."
 ml_switcheroo import-spec "$TEMP_DIR/onnx/docs/Operators.md"
 
-# ------------------------------------------------------------------------------
-# 3. INTERSECTION DISCOVERY (THE FIX)
-# ------------------------------------------------------------------------------
-echo "\n${BLUE}[3/6] Auto-Discovering Standards via Consensus...${NC}"
-
-# Ensure environment has libraries installed
-if [ -d "$VENV_DIR"'/.venv-pyenv-3-12' ]; then
-    . "$VENV_DIR"'/.venv-pyenv-3-12/bin/activate'
-    python3 -m pip install -e . > /dev/null 2>&1
-    # Adding flax explicitly
-    python3 -m pip install torch jax flax numpy tensorflow keras mlx > /dev/null 2>&1
-else
-    # Fallback / Generic
-    if command -v uv >/dev/null 2>&1; then
-        uv pip install -e . > /dev/null 2>&1
-        uv pip install torch jax flax numpy tensorflow keras mlx > /dev/null 2>&1
-    else
-        python3 -m pip install -e . > /dev/null 2>&1
-        python3 -m pip install torch jax flax numpy tensorflow keras mlx > /dev/null 2>&1
-    fi
-fi
-
-# Run Consensus Discovery via CLI (Generates k_discovered.json)
-# We explicitly target layers, activations, losses, and optimizers
-ml_switcheroo sync-standards --categories layer activation loss optimizer
-
-# ------------------------------------------------------------------------------
-# 3b. HEURISTIC SCAFFOLDING (The Wire-in)
-# ------------------------------------------------------------------------------
-echo "\n${BLUE}[3b/6] Scaffolding via Heuristics (Regex Mapping)...${NC}"
-# Activates the dormant 'discovery_heuristics' logic in FrameworkAdapters.
-# Populates snapshots with mappings derived from naming conventions.
-# Note: We skip 'flax_nnx' here as it is an adapter key, not a package name valid for inspection.
-if [ "$(uname)" = 'Linux' ]; then
-  ml_switcheroo scaffold --frameworks torch jax numpy keras mlx
-else
-  # TODO: Fix tensorflow on Linux
-  ml_switcheroo scaffold --frameworks torch jax numpy keras mlx tensorflow
-fi
-# ------------------------------------------------------------------------------
-# 4. IMPORT TIER C: INTERNAL
-# ------------------------------------------------------------------------------
-echo "\n${BLUE}[4/6] Importing Internal Extras...${NC}"
+# Tier C: Internals
+echo "   Importing Internals..."
 ml_switcheroo import-spec internal
 
 # ------------------------------------------------------------------------------
-# 5. GHOST SNAPSHOT CAPTURE (New)
+# 3. CONSENSUS & SCAFFOLDING (Spoke Population)
 # ------------------------------------------------------------------------------
-echo "\n${BLUE}[5/6] Capturing API Snapshots (Ghost Mode)...${NC}"
-# Dumps raw API signatures (e.g. torch_v2.1.0.json) for client-side usage
+echo "\n${BLUE}[3/6] Discovering & Scaffolding Standards...${NC}"
+
+# Consensus: Find intersection of APIs across ALL registered frameworks
+# Explicitly expand the python list to space-separated args
+echo "   🤝 Running Consensus on: $REGISTERED_FWS"
+# shellcheck disable=SC2086
+ml_switcheroo sync-standards --categories layer activation loss optimizer --frameworks $REGISTERED_FWS
+
+# Scaffolding: Apply heuristics for ALL registered frameworks
+echo "   🏗️  Scaffolding Heuristics..."
+# shellcheck disable=SC2086
+ml_switcheroo scaffold --frameworks $REGISTERED_FWS
+
+# ------------------------------------------------------------------------------
+# 4. GHOST SNAPSHOT CAPTURE
+# ------------------------------------------------------------------------------
+echo "\n${BLUE}[4/6] Capturing API Snapshots (Ghost Mode)...${NC}"
+# Dumps raw API signatures for client-side usage (WASM)
 ml_switcheroo snapshot --out-dir "$SNAPSHOTS_DIR"
 
 # ------------------------------------------------------------------------------
-# 6. IMPLEMENTATION SYNC
+# 5. IMPLEMENTATION SYNC
 # ------------------------------------------------------------------------------
-echo "\n${BLUE}[6/6] Syncing Framework Mappings...${NC}"
+echo "\n${BLUE}[5/6] Syncing Maps...${NC}"
 
-# Iterate frameworks. IMPORTANT: flax_nnx must be synced to generate the map for the test.
-for fw in torch jax flax_nnx numpy tensorflow keras mlx; do
+# Iterate dynamically discovered list
+for fw in $REGISTERED_FWS; do
     printf '   👉 Syncing %s... ' "$fw"
     if ml_switcheroo sync "$fw" > /dev/null 2>&1; then
         echo "${GREEN}✔ Done${NC}"
     else
-        echo "${RED}Skipped${NC}"
+        echo "${RED}Skipped (Sync Failed)${NC}"
     fi
 done
 
-# PaxML Special Case (Python 3.10)
-if [ -d "$VENV_DIR"'/.venv-pyenv-3-10' ] || [ -d "$VENV_DIR"'/.venv-uv-3-10' ]; then
-    printf '   👉 Syncing paxml... '
-    if [ -d "$VENV_DIR"'/.venv-pyenv-3-10' ]; then
-        . "$VENV_DIR"'/.venv-pyenv-3-10/bin/activate'
-        python3 -m pip install paxml jaxlib=='0.4.26' > /dev/null 2>&1
-    else
-        . "$VENV_DIR"'/.venv-uv-3-10/bin/activate'
-        uv pip install paxml jaxlib=='0.4.26' > /dev/null 2>&1
+# ------------------------------------------------------------------------------
+# 6. OPTIONAL EXTRAS (PaxML handling)
+# ------------------------------------------------------------------------------
+# PaxML often requires specific python versions (3.10).
+# If available in the environment, it is already handled by the loop above.
+# If not, we try specific venvs only if they exist.
+if echo "$REGISTERED_FWS" | grep -q "paxml"; then
+    if [ -d "$VENV_DIR"'/.venv-pyenv-3-10' ] || [ -d "$VENV_DIR"'/.venv-uv-3-10' ]; then
+        echo "\n${BLUE}[Optional] Syncing PaxML via Py3.10 venv...${NC}"
+        # Temporarily switch context
+        if [ -d "$VENV_DIR"'/.venv-pyenv-3-10' ]; then
+            . "$VENV_DIR"'/.venv-pyenv-3-10/bin/activate'
+        else
+            . "$VENV_DIR"'/.venv-uv-3-10/bin/activate'
+        fi
+
+        # Install deps if needed
+        python3 -m pip install paxml jaxlib=='0.4.26' > /dev/null 2>&1 || true
+
+        ml_switcheroo sync paxml
+        echo "   ${GREEN}✔ PaxML Synced${NC}"
     fi
-    if ml_switcheroo sync paxml > /dev/null 2>&1; then
-        echo "${GREEN}✔ Done${NC}"
-    else
-        echo "${RED}Failed${NC}"
-    fi
-else
-     echo "${YELLOW}Skipping paxml${NC}"
 fi
 
 # ------------------------------------------------------------------------------

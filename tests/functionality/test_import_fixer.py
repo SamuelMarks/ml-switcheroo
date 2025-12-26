@@ -139,7 +139,7 @@ def test_preserve_submodule_if_used_unmapped():
 def test_transform_from_import_to_root_import():
   """
   Scenario: 'from flax import nnx' -> Mapped to 'torch.nn' (root='torch.nn', sub=None).
-  Expect: 'import torch.nn as nnx' (or alias if specified).
+  Expect: 'import torch.nn as nn' (or alias if specified).
   """
   code = "from flax import nnx"
   # Using the 'flax.nnx' mapping defined in TEST_MAP above which maps to (torch.nn, None, nn)

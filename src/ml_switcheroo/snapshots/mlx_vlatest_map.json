@@ -1,0 +1,116 @@
+{
+  "__framework__": "mlx",
+  "mappings": {
+    "Avgpool": {
+      "api": "mlx.nn.AvgPool3d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
+    },
+    "Bilinear": {
+      "api": "mlx.nn.Bilinear",
+      "args": {
+        "bias": "bias"
+      }
+    },
+    "Gaussiannll": {
+      "api": "mlx.nn.losses.gaussian_nll_loss",
+      "args": {
+        "eps": "eps",
+        "full": "full",
+        "reduction": "reduction"
+      }
+    },
+    "Hardshrink": {
+      "api": "mlx.nn.HardShrink"
+    },
+    "Hardswish": {
+      "api": "mlx.nn.Hardswish"
+    },
+    "Kldiv": {
+      "api": "mlx.nn.losses.kl_div_loss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "L1": {
+      "api": "mlx.nn.losses.l1_loss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "Logsigmoid": {
+      "api": "mlx.nn.LogSigmoid"
+    },
+    "Marginranking": {
+      "api": "mlx.nn.losses.margin_ranking_loss",
+      "args": {
+        "margin": "margin",
+        "reduction": "reduction"
+      }
+    },
+    "Maxpool": {
+      "api": "mlx.nn.MaxPool3d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
+    },
+    "Module": {
+      "api": "mlx.nn.Module"
+    },
+    "Mse": {
+      "api": "mlx.nn.losses.mse_loss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "Nll": {
+      "api": "mlx.nn.losses.nll_loss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "Smoothl1": {
+      "api": "mlx.nn.losses.smooth_l1_loss",
+      "args": {
+        "beta": "beta",
+        "reduction": "reduction"
+      }
+    },
+    "Softmin": {
+      "api": "mlx.nn.Softmin"
+    },
+    "Transformer": {
+      "api": "mlx.nn.Transformer",
+      "args": {
+        "activation": "activation",
+        "custom_decoder": "custom_decoder",
+        "custom_encoder": "custom_encoder",
+        "dropout": "dropout",
+        "norm_first": "norm_first",
+        "num_decoder_layers": "num_decoder_layers",
+        "num_encoder_layers": "num_encoder_layers"
+      }
+    },
+    "Transformerdecoder": {
+      "api": "mlx.nn.TransformerDecoderLayer",
+      "args": {
+        "activation": "activation",
+        "dropout": "dropout",
+        "norm_first": "norm_first"
+      }
+    },
+    "Transformerencoder": {
+      "api": "mlx.nn.TransformerEncoderLayer",
+      "args": {
+        "activation": "activation",
+        "dropout": "dropout",
+        "norm_first": "norm_first"
+      }
+    }
+  }
+}

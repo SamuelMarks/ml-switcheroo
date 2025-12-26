@@ -65,6 +65,9 @@
         "self": "self"
       }
     },
+    "Add": {
+      "api": "torch.add"
+    },
     "Alphadropout": {
       "api": "torch.nn.modules.dropout.AlphaDropout",
       "args": {
@@ -277,7 +280,6 @@
     },
     "Cache": {
       "api": "torch.nn.Parameter",
-      "args": {},
       "requires_plugin": "nnx_param_to_torch"
     },
     "CastBool": {
@@ -630,8 +632,11 @@
         "static_graph": "static_graph"
       }
     },
+    "Div": {
+      "api": "torch.div"
+    },
     "Dropout": {
-      "api": "torch.nn.modules.activation.MultiheadAttention.dropout",
+      "api": "torch.nn.modules.rnn.RNNBase.dropout",
       "args": {}
     },
     "Dropout1d": {
@@ -815,7 +820,8 @@
       }
     },
     "Gelu": {
-      "api": "torch.nn.GELU"
+      "api": "torch.nn.functional.gelu",
+      "args": {}
     },
     "Glu": {
       "api": "torch.nn.modules.activation.GLU",
@@ -858,16 +864,19 @@
       }
     },
     "HardSwish": {
-      "api": "torch.nn.modules.activation.Hardswish",
-      "args": {
-        "inplace": "inplace",
-        "self": "self"
-      }
+      "api": "torch.nn.Hardswish"
     },
     "Hardshrink": {
       "api": "torch.nn.modules.activation.Hardshrink",
       "args": {
         "lambd": "lambd",
+        "self": "self"
+      }
+    },
+    "Hardswish": {
+      "api": "torch.nn.modules.activation.Hardswish",
+      "args": {
+        "inplace": "inplace",
         "self": "self"
       }
     },
@@ -1267,18 +1276,18 @@
         "size": "size"
       }
     },
-    "LogSigmoid": {
-      "api": "torch.nn.modules.activation.LogSigmoid",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs",
-        "self": "self"
-      }
-    },
     "LogSoftmax": {
       "api": "torch.nn.modules.activation.LogSoftmax",
       "args": {
         "dim": "dim",
+        "self": "self"
+      }
+    },
+    "Logsigmoid": {
+      "api": "torch.nn.modules.activation.LogSigmoid",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs",
         "self": "self"
       }
     },
@@ -1421,6 +1430,9 @@
         "cpp_module": "cpp_module",
         "self": "self"
       }
+    },
+    "Mul": {
+      "api": "torch.mul"
     },
     "MultiLabelMarginLoss": {
       "api": "torch.nn.modules.loss.MultiLabelMarginLoss",
@@ -1635,6 +1647,9 @@
         "size_average": "size_average"
       }
     },
+    "Pow": {
+      "api": "torch.pow"
+    },
     "PruningContainer": {
       "api": "torch.nn.utils.prune.PruningContainer",
       "args": {
@@ -1745,7 +1760,11 @@
       }
     },
     "Relu": {
-      "api": "torch.nn.ReLU"
+      "api": "torch.nn.modules.activation.ReLU",
+      "args": {
+        "inplace": "inplace",
+        "self": "self"
+      }
     },
     "Relu6": {
       "api": "torch.nn.modules.activation.ReLU6",
@@ -1881,7 +1900,11 @@
       }
     },
     "Softmax": {
-      "api": "torch.nn.Softmax"
+      "api": "torch.nn.modules.activation.Softmax",
+      "args": {
+        "dim": "dim",
+        "self": "self"
+      }
     },
     "Softmax2d": {
       "api": "torch.nn.modules.activation.Softmax2d",
@@ -1951,6 +1974,9 @@
     "StepLR": {
       "api": "torch.optim.lr_scheduler.StepLR"
     },
+    "Sub": {
+      "api": "torch.sub"
+    },
     "Sum": {
       "api": "torch.sum"
     },
@@ -1972,7 +1998,7 @@
       "api": "torch.cuda.synchronize"
     },
     "T": {
-      "api": "torch.nn.parallel.scatter_gather.T",
+      "api": "torch.nn.modules.module.T",
       "args": {}
     },
     "T_destination": {
@@ -2032,15 +2058,6 @@
         "self": "self"
       }
     },
-    "TransformerDecoder": {
-      "api": "torch.nn.modules.transformer.TransformerDecoder",
-      "args": {
-        "decoder_layer": "decoder_layer",
-        "norm": "norm",
-        "num_layers": "num_layers",
-        "self": "self"
-      }
-    },
     "TransformerDecoderLayer": {
       "api": "torch.nn.modules.transformer.TransformerDecoderLayer",
       "args": {
@@ -2058,17 +2075,6 @@
         "self": "self"
       }
     },
-    "TransformerEncoder": {
-      "api": "torch.nn.modules.transformer.TransformerEncoder",
-      "args": {
-        "enable_nested_tensor": "enable_nested_tensor",
-        "encoder_layer": "encoder_layer",
-        "mask_check": "mask_check",
-        "norm": "norm",
-        "num_layers": "num_layers",
-        "self": "self"
-      }
-    },
     "TransformerEncoderLayer": {
       "api": "torch.nn.modules.transformer.TransformerEncoderLayer",
       "args": {
@@ -2083,6 +2089,26 @@
         "layer_norm_eps": "layer_norm_eps",
         "nhead": "nhead",
         "norm_first": "norm_first",
+        "self": "self"
+      }
+    },
+    "Transformerdecoder": {
+      "api": "torch.nn.modules.transformer.TransformerDecoder",
+      "args": {
+        "decoder_layer": "decoder_layer",
+        "norm": "norm",
+        "num_layers": "num_layers",
+        "self": "self"
+      }
+    },
+    "Transformerencoder": {
+      "api": "torch.nn.modules.transformer.TransformerEncoder",
+      "args": {
+        "enable_nested_tensor": "enable_nested_tensor",
+        "encoder_layer": "encoder_layer",
+        "mask_check": "mask_check",
+        "norm": "norm",
+        "num_layers": "num_layers",
         "self": "self"
       }
     },
@@ -2426,7 +2452,7 @@
       "args": {}
     },
     "batch_first": {
-      "api": "torch.nn.modules.activation.MultiheadAttention.batch_first",
+      "api": "torch.nn.modules.rnn.RNNBase.batch_first",
       "args": {}
     },
     "batch_norm": {
@@ -2473,7 +2499,7 @@
       }
     },
     "bias": {
-      "api": "torch.nn.modules.normalization.GroupNorm.bias",
+      "api": "torch.nn.modules.rnn.RNNCellBase.bias",
       "args": {}
     },
     "bias_hh": {
@@ -2490,10 +2516,6 @@
     },
     "bias_v": {
       "api": "torch.nn.modules.activation.MultiheadAttention.bias_v",
-      "args": {}
-    },
-    "bilinear": {
-      "api": "torch.nn.functional.bilinear",
       "args": {}
     },
     "binary_cross_entropy": {
@@ -2711,7 +2733,7 @@
       }
     },
     "cls_to_become": {
-      "api": "torch.nn.modules.linear.LazyLinear.cls_to_become",
+      "api": "torch.nn.modules.lazy.LazyModuleMixin.cls_to_become",
       "args": {}
     },
     "common_notes": {
@@ -3056,7 +3078,7 @@
       "args": {}
     },
     "dim": {
-      "api": "torch.nn.parallel.distributed.DistributedDataParallel.dim",
+      "api": "torch.nn.modules.activation.LogSoftmax.dim",
       "args": {}
     },
     "dirac": {
@@ -3224,6 +3246,9 @@
         "self": "self"
       }
     },
+    "exp": {
+      "api": "torch.exp"
+    },
     "exp2": {
       "api": "torch.special.exp2",
       "args": {}
@@ -3244,7 +3269,7 @@
       }
     },
     "extra_repr": {
-      "api": "torch.nn.modules.module.Module.extra_repr",
+      "api": "torch.nn.modules.fold.Unfold.extra_repr",
       "args": {
         "self": "self"
       }
@@ -3341,10 +3366,9 @@
       }
     },
     "forward": {
-      "api": "torch.nn.parallel.distributed.DistributedDataParallel.forward",
+      "api": "torch.nn.modules.fold.Unfold.forward",
       "args": {
-        "inputs": "inputs",
-        "kwargs": "kwargs",
+        "input": "input",
         "self": "self"
       }
     },
@@ -3634,10 +3658,6 @@
         "self": "self"
       }
     },
-    "hardshrink": {
-      "api": "torch.nn.functional.hardshrink",
-      "args": {}
-    },
     "hardtanh_": {
       "api": "torch.nn.functional.hardtanh_",
       "args": {}
@@ -3770,7 +3790,7 @@
       "args": {}
     },
     "in_features": {
-      "api": "torch.nn.modules.linear.Linear.in_features",
+      "api": "torch.nn.modules.adaptive.AdaptiveLogSoftmaxWithLoss.in_features",
       "args": {}
     },
     "in_proj_bias": {
@@ -3790,9 +3810,10 @@
       "args": {}
     },
     "initialize_parameters": {
-      "api": "torch.nn.modules.linear.LazyLinear.initialize_parameters",
+      "api": "torch.nn.modules.lazy.LazyModuleMixin.initialize_parameters",
       "args": {
-        "input": "input",
+        "args": "args",
+        "kwargs": "kwargs",
         "self": "self"
       }
     },
@@ -4141,6 +4162,9 @@
         "size": "size"
       }
     },
+    "log": {
+      "api": "torch.log"
+    },
     "log1p": {
       "api": "torch.special.log1p",
       "args": {}
@@ -4174,10 +4198,6 @@
     },
     "logit": {
       "api": "torch.special.logit",
-      "args": {}
-    },
-    "logsigmoid": {
-      "api": "torch.nn.functional.logsigmoid",
       "args": {}
     },
     "long": {
@@ -4415,7 +4435,7 @@
       "args": {}
     },
     "mode": {
-      "api": "torch.nn.modules.sparse.EmbeddingBag.mode",
+      "api": "torch.nn.modules.rnn.RNNBase.mode",
       "args": {}
     },
     "modified_bessel_i0": {
@@ -4432,10 +4452,6 @@
     },
     "modified_bessel_k1": {
       "api": "torch.special.modified_bessel_k1",
-      "args": {}
-    },
-    "module": {
-      "api": "torch.nn.parallel.distributed.DistributedDataParallel.module",
       "args": {}
     },
     "modules": {
@@ -4707,7 +4723,7 @@
       "args": {}
     },
     "num_layers": {
-      "api": "torch.nn.modules.transformer.TransformerDecoder.num_layers",
+      "api": "torch.nn.modules.rnn.RNNBase.num_layers",
       "args": {}
     },
     "num_parameters": {
@@ -4944,7 +4960,7 @@
       }
     },
     "process_group": {
-      "api": "torch.nn.parallel.distributed.DistributedDataParallel.process_group",
+      "api": "torch.nn.modules.batchnorm.SyncBatchNorm.process_group",
       "args": {}
     },
     "proj_size": {
@@ -5182,10 +5198,10 @@
       }
     },
     "relu": {
-      "api": "torch.nn.modules.activation.ReLU",
+      "api": "torch.nn.functional.relu",
       "args": {
         "inplace": "inplace",
-        "self": "self"
+        "input": "input"
       }
     },
     "relu_": {
@@ -5245,7 +5261,7 @@
       }
     },
     "reset_parameters": {
-      "api": "torch.nn.modules.sparse.EmbeddingBag.reset_parameters",
+      "api": "torch.nn.modules.rnn.RNNCellBase.reset_parameters",
       "args": {
         "self": "self"
       }
@@ -5476,15 +5492,6 @@
       "api": "torch.special.softmax",
       "args": {}
     },
-    "softmin": {
-      "api": "torch.nn.functional.softmin",
-      "args": {
-        "_stacklevel": "_stacklevel",
-        "dim": "dim",
-        "dtype": "dtype",
-        "input": "input"
-      }
-    },
     "solve": {
       "api": "torch.linalg.solve",
       "args": {}
@@ -5533,6 +5540,12 @@
     "spherical_bessel_j0": {
       "api": "torch.special.spherical_bessel_j0",
       "args": {}
+    },
+    "sqrt": {
+      "api": "torch.sqrt"
+    },
+    "square": {
+      "api": "torch.square"
     },
     "src_device_obj": {
       "api": "torch.nn.parallel.data_parallel.DataParallel.src_device_obj",
@@ -5639,7 +5652,7 @@
       }
     },
     "train": {
-      "api": "torch.nn.parallel.distributed.DistributedDataParallel.train",
+      "api": "torch.nn.modules.module.Module.train",
       "args": {
         "mode": "mode",
         "self": "self"
@@ -5850,7 +5863,7 @@
       "args": {}
     },
     "weight": {
-      "api": "torch.nn.modules.sparse.EmbeddingBag.weight",
+      "api": "torch.nn.modules.normalization.RMSNorm.weight",
       "args": {}
     },
     "weight_hh": {

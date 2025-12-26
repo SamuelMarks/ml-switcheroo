@@ -12,24 +12,25 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.dsl import OpType
+from ml_switcheroo.enums import SemanticTier
 
 # Source Code
-SOURCE_TORCH = """ 
+SOURCE_TORCH = """
 import torch
 
-def evaluate(model, x): 
-    with torch.no_grad(): 
-        return model(x) 
+def evaluate(model, x):
+    with torch.no_grad():
+        return model(x)
 """
 
 # Expected JAX
-EXPECTED_JAX = """ 
+EXPECTED_JAX = """
 import contextlib
 import torch
 
-def evaluate(model, x): 
-    with contextlib.nullcontext(): 
-        return model(x) 
+def evaluate(model, x):
+    with contextlib.nullcontext():
+        return model(x)
 """
 
 
@@ -52,7 +53,12 @@ def manager():
   mgr._reverse_index["torch.no_grad"] = ("no_grad", no_grad_def)
 
   # Ensure import map for contextlib
-  mgr.import_data["contextlib"] = {"variants": {"jax": {"root": "contextlib", "alias": None, "sub": None}}}
+  mgr._source_registry["contextlib"] = ("python", SemanticTier.EXTRAS)
+
+  if "jax" not in mgr._providers:
+    mgr._providers["jax"] = {}
+
+  mgr._providers["jax"][SemanticTier.EXTRAS] = {"root": "contextlib", "alias": None, "sub": None}
 
   return mgr
 

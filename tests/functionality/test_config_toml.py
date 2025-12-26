@@ -9,6 +9,7 @@ Verifies that:
 """
 
 import pytest
+from unittest.mock import patch
 from ml_switcheroo.config import RuntimeConfig
 
 
@@ -16,16 +17,16 @@ from ml_switcheroo.config import RuntimeConfig
 def toml_file(tmp_path):
   """Creates a dummy pyproject.toml in the temp dir."""
   fpath = tmp_path / "pyproject.toml"
-  content = """ 
-[tool.ml_switcheroo] 
-source_framework = "tensorflow" 
-target_framework = "mlx" 
+  content = """
+[tool.ml_switcheroo]
+source_framework = "tensorflow"
+target_framework = "mlx"
 strict_mode = true
 
-[tool.ml_switcheroo.plugin_settings] 
+[tool.ml_switcheroo.plugin_settings]
 epsilon = 0.005
 use_gpu = false
-debug_level = "info" 
+debug_level = "info"
 """
   fpath.write_text(content, encoding="utf-8")
   return fpath
@@ -96,15 +97,19 @@ def test_hierarchical_search(tmp_path, toml_file):
 def test_no_toml_fallback(tmp_path):
   """
   Scenario: No pyproject.toml exists.
-  Expect: Default hardcoded values (torch -> jax).
+  Expect: Default hardcoded values are derived from registry.
+  Note: Config logic sorts options alphabetically ['jax', 'torch'].
   """
-  # Ensure no file exists
-  config = RuntimeConfig.load(search_path=tmp_path)
+  # We patch available_frameworks to ensure deterministic defaults for the test
+  with patch("ml_switcheroo.config.available_frameworks", return_value=["torch", "jax"]):
+    # Ensure no file exists
+    config = RuntimeConfig.load(search_path=tmp_path)
 
-  assert config.source_framework == "torch"
-  assert config.target_framework == "jax"
-  assert config.strict_mode is False
-  assert config.plugin_settings == {}
+    # Defaults logic in config.py: sorted() -> ['jax', 'torch'] -> source='jax', target='torch'
+    assert config.source_framework == "jax"
+    assert config.target_framework == "torch"
+    assert config.strict_mode is False
+    assert config.plugin_settings == {}
 
 
 def test_malformed_toml_is_ignored(tmp_path):
@@ -115,7 +120,10 @@ def test_malformed_toml_is_ignored(tmp_path):
   fpath = tmp_path / "pyproject.toml"
   fpath.write_text("[tool.ml_switcheroo\nbad_syntax_here", encoding="utf-8")
 
-  config = RuntimeConfig.load(search_path=tmp_path)
+  # Force defaults
+  with patch("ml_switcheroo.config.available_frameworks", return_value=["torch", "jax"]):
+    config = RuntimeConfig.load(search_path=tmp_path)
 
-  # Should fall back to defaults rather than crashing
-  assert config.source_framework == "torch"
+    # Should fall back to defaults rather than crashing
+    # Sorted defaults: source='jax'
+    assert config.source_framework == "jax"

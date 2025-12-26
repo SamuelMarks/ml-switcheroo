@@ -8,38 +8,43 @@ Verifies that:
 """
 
 import pytest
+from unittest.mock import MagicMock
 from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class MockSemantics(SemanticsManager):
-  def __init__(self):
-    # Override to provide deterministic data
-    self.data = {
-      "add": {
-        "std_args": ["x1", "x2"],
-        "variants": {"jax": {"api": "jax.numpy.add"}, "numpy": {"api": "numpy.add"}, "torch": {"api": "torch.add"}},
-      },
-      "abs": {
-        "std_args": [("x", "Array")],  # Typed tuple format
-        "variants": {},
-      },
-      "complex": {
-        "variants": {
-          "jax": {"requires_plugin": "magic"}
-          # No explicit API string
-        }
-      },
-    }
-
-  def get_known_apis(self):
-    return self.data
-
-
+# Use MagicMock instead of partial class mock to ensure attributes exist
 @pytest.fixture
 def mock_semantics():
-  return MockSemantics()
+  mgr = MagicMock(spec=SemanticsManager)
+
+  # Data definitions
+  data = {
+    "add": {
+      "std_args": ["x1", "x2"],
+      "variants": {"jax": {"api": "jax.numpy.add"}, "numpy": {"api": "numpy.add"}},
+    },
+    "abs": {
+      "std_args": [("x", "Array")],
+      "variants": {},
+    },
+    "complex": {"variants": {"jax": {"requires_plugin": "magic"}}},
+  }
+
+  # Wire methods
+  def resolve(aid, fw):
+    if aid in data and fw in data[aid]["variants"]:
+      return data[aid]["variants"][fw]
+    return None
+
+  mgr.resolve_variant.side_effect = resolve
+  mgr.get_definition_by_id.side_effect = lambda aid: data.get(aid)
+
+  # Ensure attributes accessed by context properties don't crash
+  mgr.get_framework_config.return_value = {}
+
+  return mgr
 
 
 def test_lookup_api_success(mock_semantics):

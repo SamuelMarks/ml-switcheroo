@@ -25,19 +25,33 @@ def rewriter():
   mgr.resolve_variant.side_effect = lambda a, f: onehot_def["variants"]["jax"] if a == "OneHot" and f == "jax" else None
   mgr.is_verified.return_value = True
   mgr.get_known_apis.return_value = {"OneHot": onehot_def}
+
+  # FIX: Populate framework aliases for dynamic module detection
+  mgr.framework_configs = {"torch": {"alias": {"module": "torch.nn.functional", "name": "F"}}, "jax": {}}
+
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 
 
 def test_onehot_positional(rewriter):
-  code = "y = F.one_hot(x, 10)"
+  # Added imports to allow BaseRewriter to track alias 'F',
+  # or rely on framework_configs mock above.
+  # NormalizationMixin uses self.semantics.framework_configs OR self._alias_map.
+  # BaseRewriter only populates _alias_map if it visits imports.
+  # But NormalizationMixin also checks semantics.framework_configs directly.
+  # Mock above sets 'F' as alias for 'torch'.
+
+  code = "import torch.nn.functional as F\ny = F.one_hot(x, 10)"
   res = rewrite_code(rewriter, code)
+
   assert "jax.nn.one_hot" in res
+  # Should be cleanly rewritten arguments (x, 10)
+  # If F was injected as arg 0, it would look like (F, x, 10)
   assert "(x,10)" in res.replace(" ", "")
 
 
 def test_onehot_kwargs(rewriter):
-  code = "y = F.one_hot(tensor=x, num_classes=5)"
+  code = "import torch.nn.functional as F\ny = F.one_hot(tensor=x, num_classes=5)"
   res = rewrite_code(rewriter, code)
   assert "jax.nn.one_hot" in res
   # Ensure x=x mapping

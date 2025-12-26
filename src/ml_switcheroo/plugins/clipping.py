@@ -5,23 +5,11 @@ Addresses the mismatch between:
 1. PyTorch: `torch.nn.utils.clip_grad_norm_(parameters, max_norm)` (In-place, returns norm).
 2. JAX/Optax: `optax.clip_by_global_norm(max_norm).update(grads, state)` (Functional, returns updates).
 
-Transformation:
-    Input:  `clip_grad_norm_(grads, 1.0)`
-    Output: `optax.clip_by_global_norm(1.0).update(grads, None)[0]`
-
-Limitations:
-    - **In-place mutation**: PyTorch modifies gradients in-place. JAX requires reassignment (`grads = ...`).
-      This plugin generates the expression for the clipped gradients. It relies on the user or
-      surrounding rewriting logic to ensure this result is assigned back to `grads`.
-    - **Return Value**: PyTorch returns the Total Norm. Optax returns the Clipped Gradients.
-      If the original code uses the return value (e.g. for logging `total_norm`), this translation
-      changes semantics.
-    - **Parameters**: Assumes the first argument passed corresponds to the gradient PyTree in JAX.
+Decoupling Update:
+Checks `traits.requires_functional_state` logic.
 """
 
 import libcst as cst
-from typing import Optional
-
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
@@ -31,9 +19,21 @@ def transform_grad_clipping(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   Hook: Transforms imperative clipping to Optax functional clipping.
 
   Trigger: `clip_grad_norm_` operation.
-  Target: JAX, Flax.
+  Target: Frameworks with `requires_functional_state=True` (e.g. JAX, Flax).
+
+  Transformation:
+      Input:  `clip_grad_norm_(grads, 1.0)`
+      Output: `optax.clip_by_global_norm(1.0).update(grads, None)[0]`
+
+  Args:
+      node (cst.Call): The source call.
+      ctx (HookContext): Execution context with traits.
+
+  Returns:
+      The transformed node or original if trait not met.
   """
-  if ctx.target_fw not in ["jax", "flax", "flax_nnx"]:
+  # 0. Capability Check
+  if not ctx.plugin_traits.requires_functional_state:
     return node
 
   args = list(node.args)
@@ -48,7 +48,6 @@ def transform_grad_clipping(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   max_norm_node = args[1].value
 
   # We ignore Arg 2 (norm_type) as Optax defaults to L2 global norm usually.
-  # Supporting custom norms requires building a custom chain, out of scope for basic map.
 
   # Construct: optax.clip_by_global_norm(max_norm)
   clip_fn = cst.Call(
@@ -57,9 +56,6 @@ def transform_grad_clipping(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   # Construct: .update(grads, None)
   # Note: clip_by_global_norm returns a GradientTransformation (init, update).
-  # We essentially call the update method on the tuple's namedtuple?
-  # Actually Optax transforms are namedtuples of (init, update).
-  # So `optax.clip...` returns the tuple. We need to access `.update`.
 
   update_attr = cst.Attribute(value=clip_fn, attr=cst.Name("update"))
 
