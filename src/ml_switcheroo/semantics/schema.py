@@ -66,6 +66,14 @@ class PluginTraits(BaseModel):
     description="If True, the Engine runs PurityScanner to detect side-effects (globals, IO) before transpilation.",
   )
 
+  # --- Execution Model ---
+  # Does the framework use lazy execution that requires explicit blocking for timing tests?
+  # Used by: Reshape/View plugin in strict mode.
+  # Value: Name of the method to call (e.g., "block_until_ready") or None.
+  strict_materialization_method: Optional[str] = Field(
+    None, description="Method name to force materialization in strict mode (e.g. 'block_until_ready')."
+  )
+
 
 class StructuralTraits(BaseModel):
   """
@@ -83,13 +91,20 @@ class StructuralTraits(BaseModel):
   # e.g. "__call__" (JAX/Flax) vs "forward" (PyTorch) vs "call" (Keras)
   forward_method: Optional[str] = Field(None, description="Standard method name for forward pass.")
 
-  # --- Known Inference Methods (New) ---
+  # --- Known Inference Methods ---
   # List of method names that are treated as 'forward/inference' methods across frameworks.
   # This allows detecting 'predict', 'run', etc. in custom frameworks.
-  # Default covers standard libs.
   known_inference_methods: Set[str] = Field(
     default={"forward", "__call__", "call"},
     description="Set of method names recognized as model inference entry points.",
+  )
+
+  # --- Functional Execution ---
+  # Name of the method used to execute a module functionally (passing state explicitly).
+  # e.g. "apply" for Flax Linen/Haiku. The Rewriter looks for this to unwrap it into OOP calls.
+  functional_execution_method: Optional[str] = Field(
+    "apply",
+    description="Method name used for functional execution (e.g. 'apply'). Rewriter unwraps this pattern.",
   )
 
   # --- Constructor Logic ---
@@ -103,7 +118,12 @@ class StructuralTraits(BaseModel):
   )
   # e.g. ["rngs", "key"]
   strip_magic_args: List[str] = Field(
-    default_factory=list, description="List of argument names to remove from signatures."
+    default_factory=list, description="Explicit list of argument names to remove from signatures."
+  )
+  # NEW: Auto-Strip logic
+  auto_strip_magic_args: bool = Field(
+    False,
+    description="If True, automatically strips all magic arguments (built from the global registry) not used by this framework.",
   )
 
   # --- Lifecycle Method Handling ---

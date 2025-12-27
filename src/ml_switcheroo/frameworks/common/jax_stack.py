@@ -39,12 +39,18 @@ class JAXStackMixin:
   def jax_test_config(self) -> Dict[str, str]:
     """
     Returns standard JAX test generation templates using JIT wrapping.
+
+    Defines:
+    - `import`: Libraries to import.
+    - `convert_input`: Syntax to convert Numpy array to JAX array.
+    - `to_numpy`: Syntax to convert JAX array back to Numpy.
+    - `jit_template`: Detailed JAX JIT syntax with static argument support.
     """
     return {
       "import": "import jax\nimport jax.numpy as jnp",
       "convert_input": "jnp.array({np_var})",
       "to_numpy": "np.array({res_var})",
-      "jit_wrap": "True",  # Enable experimental JIT wrapper generation
+      "jit_template": "jax.jit({fn}, static_argnums={static_argnums})",
     }
 
   # --- Hardware Abstraction (Level 0) ---

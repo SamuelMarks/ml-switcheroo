@@ -64,14 +64,17 @@ echo "\n${BLUE}[1/6] querying registered frameworks...${NC}"
 # We use python to inspect the registry. This picks up any file added to
 # src/ml_switcheroo/frameworks/ provided it has the @register_framework decorator.
 # We set PYTHONPATH to src to ensure we load the local version.
-REGISTERED_FWS=$(PYTHONPATH=src python3 -c "from ml_switcheroo.frameworks import available_frameworks; print(' '.join(available_frameworks()))")
+#
+# LOGIC: Sort based on 'ui_priority' defined in the Adapter class.
+# This allows any framework to promote itself to "Primary" (0) without editing this script.
+REGISTERED_FWS=$(PYTHONPATH=src python3 -c "from ml_switcheroo.frameworks import available_frameworks, get_adapter; print(' '.join(sorted(available_frameworks(), key=lambda x: (getattr(get_adapter(x), 'ui_priority', 999) if get_adapter(x) else 999, x))))")
 
 if [ -z "$REGISTERED_FWS" ]; then
     echo "${RED}❌ No frameworks found! Check src/ml_switcheroo/frameworks/__init__.py${NC}"
     exit 1
 fi
 
-echo "   🔍 Detected adapters: ${YELLOW}$REGISTERED_FWS${NC}"
+echo "   🔍 Detected adapters (sorted by priority): ${YELLOW}$REGISTERED_FWS${NC}"
 
 # Attempt to install corresponding libraries for live scanning
 echo "   📦 Attempting to install libraries for live scanning..."

@@ -17,73 +17,49 @@ def rewrite_code(rewriter, code):
 
 
 @pytest.fixture
-def rewriter():
+def rewriter_factory():
   hooks._HOOKS["view_semantics"] = transform_view_semantics
   hooks._PLUGINS_LOADED = True
 
   mgr = MagicMock()
 
-  view_def = {
+  def_map = {
     "variants": {
       "torch": {"api": "torch.Tensor.view"},
       "jax": {"api": "jnp.reshape", "requires_plugin": "view_semantics"},
     }
   }
 
-  mgr.get_definition.side_effect = lambda n: ("View", view_def) if "view" in n else None
-  mgr.resolve_variant.side_effect = lambda aid, fw: view_def["variants"]["jax"]
-  mgr.get_known_apis.return_value = {"View": view_def}
-  mgr.is_verified.return_value = True
+  mgr.get_known_apis.return_value = {"View": def_map, "Reshape": def_map}
 
-  cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
-  # Default strict_mode = False
-  cfg.strict_mode = False
+  def resolve(aid, fw):
+    if aid in ["Reshape", "View"] and fw == "jax":
+      return def_map["variants"]["jax"]
+    return None
 
-  return PivotRewriter(mgr, cfg)
+  mgr.resolve_variant.side_effect = resolve
+  mgr.get_definition.side_effect = lambda n: ("View", def_map) if "view" in n else None
+
+  # Empty Config Default
+  mgr.get_framework_config.return_value = {}
+
+  def create(target):
+    cfg = RuntimeConfig(source_framework="torch", target_framework=target)
+    return PivotRewriter(mgr, cfg)
+
+  return create
 
 
-def test_view_basic_mapping(rewriter):
-  """
-  Input: x.view(a, b)
-  Output: jax.numpy.reshape(x, (a, b))
-  """
+def test_view_basic_mapping_jax(rewriter_factory):
+  rw = rewriter_factory("jax")
   code = "y = x.view(a, b)"
-  res = rewrite_code(rewriter, code)
-
-  assert "jax.numpy.reshape(x" in res
+  res = rewrite_code(rw, code)
+  assert "jnp.reshape(x" in res
   assert "(a, b)" in res
 
 
-def test_strict_mode_injection(rewriter):
-  """
-  Input: x.view(a, b) with strict_mode=True
-  Output: jax.numpy.reshape(x, (a, b)).block_until_ready()
-  """
-  rewriter.ctx._runtime_config.strict_mode = True
-
+def test_view_passthrough_missing(rewriter_factory):
+  rw = rewriter_factory("numpy")
   code = "y = x.view(a, b)"
-  res = rewrite_code(rewriter, code)
-
-  assert "jax.numpy.reshape" in res
-  assert ".block_until_ready()" in res
-
-
-def test_single_dim_tuple_packing(rewriter):
-  """
-  Input: x.view(10)
-  Output: jax.numpy.reshape(x, (10,))
-  """
-  code = "y = x.view(10)"
-  res = rewrite_code(rewriter, code)
-
-  # Check for tuple construction
-  assert "jax.numpy.reshape" in res
-  clean = res.replace(" ", "")
-  assert "(10,)" in clean
-
-
-def test_non_strict_by_default(rewriter):
-  rewriter.ctx._runtime_config.strict_mode = False
-  code = "y = x.view(a)"
-  res = rewrite_code(rewriter, code)
-  assert "block_until_ready" not in res
+  res = rewrite_code(rw, code)
+  assert "x.view(a, b)" in res

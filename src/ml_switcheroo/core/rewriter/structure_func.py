@@ -4,7 +4,7 @@ Function Structure Rewriting Logic.
 Handles transformations relative to function definitions, specifically:
 1.  **Logic 5: Method Renaming**: Mapping `forward` <-> `__call__` <-> `call` using Configuration Traits.
     *Decoupling Update*: Uses `known_inference_methods` set from traits to detect candidate methods,
-    allowing custom frameworks (like `fastai.predict`) to be recognized without editing core code.
+    allowing custom frameworks (like `fastai.predict`) to be recognized without hardcoding.
 2.  Signature Modification: Injecting hooks or state arguments (Logic 2).
 3.  Body Injection: Preamble handling (super init, rng splitting).
 4.  Docstring Updating.
@@ -105,7 +105,16 @@ class FuncStructureMixin(BaseRewriter):
           if not found:
             sig_ctx.injected_args.append((arg_name, arg_type))
 
-      for arg_name in target_traits.strip_magic_args:
+      # Decoupling Feature: Auto-Strip Magic Args
+      args_to_strip = set(target_traits.strip_magic_args)
+      if target_traits.auto_strip_magic_args and hasattr(self.semantics, "known_magic_args"):
+        # Add all known magic args
+        args_to_strip.update(self.semantics.known_magic_args)
+        # But DO NOT strip args that we just injected or are native to this framework
+        native_args = {a[0] for a in target_traits.inject_magic_args}
+        args_to_strip = args_to_strip - native_args
+
+      for arg_name in args_to_strip:
         updated_node = self._strip_argument_from_signature(updated_node, arg_name)
 
       if target_traits.requires_super_init:

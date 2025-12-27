@@ -2,31 +2,52 @@
 Plugin for handling Stateful Container Logic.
 
 Handles mapping of container management methods between frameworks, particularly
-impedance mismatches between PyTorch's imperative `register_buffer`/`parameters` system
-and Flax NNX's explicit state management.
+impedance mismatches between imperative usage (PyTorch's `register_buffer`) and
+functional explicit state management (JAX/Flax/MLX).
 
-Mappings (Torch -> JAX/NNX):
+This module converts:
+1. `self.register_buffer("name", t)` -> `setattr(self, "name", Wrapper(t))`
+2. `self.register_parameter("name", p)` -> `setattr(self, "name", ParamWrapper(p))`
+3. `model.state_dict()` -> `StateFunc(model).to_pure_dict()`
+4. `model.load_state_dict(sd)` -> `UpdateFunc(model, sd)`
+5. `model.parameters()` -> `StateFunc(model, ParamWrapper).values()`
 
-1. `self.register_buffer("name", t)` -> `setattr(self, "name", flax.nnx.BatchStat(t))`
-2. `self.register_parameter("name", p)` -> `setattr(self, "name", flax.nnx.Param(p))`
-3. `model.state_dict()` -> `flax.nnx.state(model).to_pure_dict()`
-4. `model.load_state_dict(sd)` -> `flax.nnx.update(model, sd)`
-5. `model.parameters()` -> `flax.nnx.state(model, flax.nnx.Param).values()`
+Decoupling:
+    The specific wrapper definitions (e.g. `flax.nnx.BatchStat` or `custom.State`)
+    must be defined in the Semantic Knowledge Base. Lookups are strict; if no
+    mapping exists for the Abstract Operation (e.g. 'BatchStat'), the hook
+    aborts and preserves the original code.
 """
 
 import libcst as cst
+from typing import Optional, List
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_node(code: str) -> cst.BaseExpression:
   """Helper to parse a simple expression string into a CST node."""
-  return cst.parse_expression(code)
+  try:
+    return cst.parse_expression(code)
+  except Exception:
+    # Fallback for simple identifiers if expression parsing fails
+    return cst.Name(code)
+
+
+def _get_receiver(node: cst.Call) -> Optional[cst.BaseExpression]:
+  """Helper to extract the object instance being called (e.g. 'self' or 'model')."""
+  if isinstance(node.func, cst.Attribute):
+    return node.func.value
+  return None
 
 
 @register_hook("torch_register_buffer_to_nnx")
 def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
-  Transforms `self.register_buffer('name', tensor)` -> `setattr(self, 'name', nnx.BatchStat(tensor))`.
+  Transforms `register_buffer`.
+
+  Target: `setattr(self, 'name', Wrapper(tensor))`
+
+  Abstract Op Lookup: "BatchStat"
   """
   # Check args: expected (name, tensor)
   if len(node.args) < 2:
@@ -35,27 +56,25 @@ def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
   name_arg = node.args[0].value
   tensor_arg = node.args[1].value
 
-  # Check receiver (usually 'self')
-  receiver = None
-  if isinstance(node.func, cst.Attribute):
-    receiver = node.func.value
-
+  receiver = _get_receiver(node)
   if not receiver:
     return node
 
-  # Construct setattr(receiver, name, nnx.BatchStat(tensor))
+  # Strict Lookup: Abort if knowledge base doesn't define 'BatchStat' for target
+  wrapper_api = ctx.lookup_api("BatchStat")
+  if not wrapper_api:
+    return node
 
-  # 1. Wrap tensor in BatchStat
-  # nnx.BatchStat(tensor)
-  batch_stat_call = cst.Call(func=_create_node("flax.nnx.BatchStat"), args=[cst.Arg(value=tensor_arg)])
+  # 1. Wrap tensor: Wrapper(tensor)
+  wrapper_call = cst.Call(func=_create_node(wrapper_api), args=[cst.Arg(value=tensor_arg)])
 
-  # 2. Construct setattr
+  # 2. Construct setattr(receiver, name, wrapper_call)
   new_call = cst.Call(
     func=cst.Name("setattr"),
     args=[
       cst.Arg(value=receiver, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
       cst.Arg(value=name_arg, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
-      cst.Arg(value=batch_stat_call),
+      cst.Arg(value=wrapper_call),
     ],
   )
 
@@ -65,7 +84,11 @@ def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
 @register_hook("torch_register_parameter_to_nnx")
 def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
-  Transforms `self.register_parameter('name', param)` -> `setattr(self, 'name', nnx.Param(param))`.
+  Transforms `register_parameter`.
+
+  Target: `setattr(self, 'name', ParamWrapper(param))`
+
+  Abstract Op Lookup: "Param"
   """
   if len(node.args) < 2:
     return node
@@ -73,12 +96,17 @@ def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
   name_arg = node.args[0].value
   tensor_arg = node.args[1].value
 
-  receiver = node.func.value if isinstance(node.func, cst.Attribute) else None
+  receiver = _get_receiver(node)
   if not receiver:
     return node
 
-  # nnx.Param(tensor)
-  param_call = cst.Call(func=_create_node("flax.nnx.Param"), args=[cst.Arg(value=tensor_arg)])
+  # Strict Lookup
+  wrapper_api = ctx.lookup_api("Param")
+  if not wrapper_api:
+    return node
+
+  # Wrapper(tensor)
+  param_call = cst.Call(func=_create_node(wrapper_api), args=[cst.Arg(value=tensor_arg)])
 
   new_call = cst.Call(
     func=cst.Name("setattr"),
@@ -94,15 +122,23 @@ def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
 @register_hook("torch_state_dict_to_nnx")
 def convert_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
-  Transforms `model.state_dict()` -> `flax.nnx.state(model).to_pure_dict()`.
+  Transforms `state_dict`.
+
+  Target: `StateFunc(model).to_pure_dict()`
+
+  Abstract Op Lookup: "ModuleState"
   """
-  receiver = node.func.value if isinstance(node.func, cst.Attribute) else None
+  receiver = _get_receiver(node)
   if not receiver:
     return node
 
-  # Pattern: flax.nnx.state(model).to_pure_dict()
-  # 1. flax.nnx.state(model)
-  inner_call = cst.Call(func=_create_node("flax.nnx.state"), args=[cst.Arg(value=receiver)])
+  # Strict Lookup
+  state_api = ctx.lookup_api("ModuleState")
+  if not state_api:
+    return node
+
+  # 1. StateFunc(model)
+  inner_call = cst.Call(func=_create_node(state_api), args=[cst.Arg(value=receiver)])
 
   # 2. .to_pure_dict()
   outer_call = cst.Call(func=cst.Attribute(value=inner_call, attr=cst.Name("to_pure_dict")), args=[])
@@ -112,9 +148,13 @@ def convert_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
 @register_hook("torch_load_state_dict_to_nnx")
 def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
-  Transforms `model.load_state_dict(state)` -> `flax.nnx.update(model, state)`.
+  Transforms `load_state_dict`.
+
+  Target: `UpdateFunc(model, state)`
+
+  Abstract Op Lookup: "UpdateState"
   """
-  receiver = node.func.value if isinstance(node.func, cst.Attribute) else None
+  receiver = _get_receiver(node)
   if not receiver:
     return node
 
@@ -122,9 +162,14 @@ def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
     return node
   state_arg = node.args[0].value
 
-  # flax.nnx.update(model, state)
+  # Strict Lookup
+  update_api = ctx.lookup_api("UpdateState")
+  if not update_api:
+    return node
+
+  # UpdateFunc(model, state)
   new_call = cst.Call(
-    func=_create_node("flax.nnx.update"),
+    func=_create_node(update_api),
     args=[
       cst.Arg(value=receiver, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
       cst.Arg(value=state_arg),
@@ -136,18 +181,29 @@ def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
 @register_hook("torch_parameters_to_nnx")
 def convert_parameters(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
-  Transforms `model.parameters()` -> `flax.nnx.state(model, flax.nnx.Param).values()`.
+  Transforms `parameters`.
+
+  Target: `StateFunc(model, ParamType).values()`
+
+  Abstract Op Lookup: "ModuleState", "Param"
   """
-  receiver = node.func.value if isinstance(node.func, cst.Attribute) else None
+  receiver = _get_receiver(node)
   if not receiver:
     return node
 
-  # flax.nnx.state(model, flax.nnx.Param)
+  # Strict Lookup for both required components
+  state_api = ctx.lookup_api("ModuleState")
+  param_api = ctx.lookup_api("Param")
+
+  if not state_api or not param_api:
+    return node
+
+  # StateFunc(model, ParamType)
   state_call = cst.Call(
-    func=_create_node("flax.nnx.state"),
+    func=_create_node(state_api),
     args=[
       cst.Arg(value=receiver, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
-      cst.Arg(value=_create_node("flax.nnx.Param")),
+      cst.Arg(value=_create_node(param_api)),
     ],
   )
 

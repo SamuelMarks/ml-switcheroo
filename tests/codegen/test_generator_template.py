@@ -102,7 +102,7 @@ def test_custom_backend_template(tmp_path, semantics_data):
 
 def test_jit_config_via_template(tmp_path):
   """
-  Scenario: Enable JIT via template flag "jit_wrap": "True".
+  Scenario: Enable JIT via explicitly providing `jit_template`.
   """
   data = {
     "add": {
@@ -119,7 +119,8 @@ def test_jit_config_via_template(tmp_path):
       "import": "import lib",
       "convert_input": "{np_var}",
       "to_numpy": "{res_var}",
-      "jit_wrap": "True",  # String or Bool
+      # Valid template required now (legacy boolean flag is ignored)
+      "jit_template": "jax.jit({fn})",
     },
     "other": {
       "import": "import other",
@@ -136,7 +137,7 @@ def test_jit_config_via_template(tmp_path):
   content = out_file.read_text()
 
   assert "Framework: custom_jit" in content
-  assert "jax.jit(fn" in content  # Currently hardcoded to use jax.jit if flag is true
+  assert "jax.jit(fn)" in content
 
 
 def test_invalid_framework_skipped(tmp_path, semantics_data):

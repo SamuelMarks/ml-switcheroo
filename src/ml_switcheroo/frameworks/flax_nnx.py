@@ -1,17 +1,17 @@
 """
 Flax NNX Framework Adapter (Level 2).
 
-This adapter builds upon the core JAX stack to support the **Flax NNX**
-neural network library. It inherits math/optimizer logic from ``JAXStackMixin``
-but implements dynamic discovery for NNX Modules.
+Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 
-It explicitly selects the `repack_attn_flax` strategy for Attention layers.
+- Uses dynamic or snapshot mode discovery.
+- Provides clear import alias for `from flax import nnx`.
+- Defines the correct base class `flax.nnx.Module`.
+- Wires important plugins and structural traits.
 """
 
 import logging
+import textwrap
 from typing import List, Tuple, Dict, Any, Optional
-
-import numpy as np
 
 try:
   import flax.nnx
@@ -32,17 +32,18 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.ghost import GhostInspector
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
-
-# Import core adapter for shared validation/conversion logic
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 
 
 @register_framework("flax_nnx")
 class FlaxNNXAdapter(JAXStackMixin):
   """
-  Adapter for the Flax NNX Framework (The Object-Oriented JAX API).
+  Adapter class for Flax NNX.
 
-  Links standard Neural Layer definitions to ``flax.nnx.*``.
+  Inherits from JAXStackMixin for core math/optax behavior and adds:
+  - Explicit neural network layers and activations.
+  - Correct import aliasing for `from flax import nnx`.
+  - Structural traits targeting Flax's nnx Module base.
   """
 
   display_name: str = "Flax NNX"
@@ -50,12 +51,17 @@ class FlaxNNXAdapter(JAXStackMixin):
   ui_priority: int = 15
 
   def __init__(self) -> None:
-    """Initializes adapter, checking if Flax is installed."""
+    """
+    Initializes the adapter.
+
+    - Chooses LIVE mode if `flax.nnx` can be imported.
+    - Otherwise, falls back to GHOST mode and loads an API snapshot.
+    """
     self._mode = InitMode.LIVE
     self._snapshot_data: Dict[str, Any] = {}
 
     try:
-      import flax.nnx
+      import flax.nnx  # noqa: F401
 
       self._flax_available = True
     except ImportError:
@@ -65,29 +71,27 @@ class FlaxNNXAdapter(JAXStackMixin):
       if not self._snapshot_data:
         logging.warning("Flax NNX not installed and no snapshot found.")
 
-  # --- Discovery (Dynamic Introspection) ---
-
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """
-    Collects API definitions.
+    Collect API definitions for discovery.
+
+    Args:
+        category (StandardCategory): The API category (layer, activation, etc.)
+
+    Returns:
+        List[GhostRef]: List of found API references.
     """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
 
-    # Live Scanning
-    results = []
-
-    # 1. Use Core JAX capabilities (Optimization/Loss/Activations)
-    # We instantiate a temporary core adapter to reuse its scanning logic
+    results: List[GhostRef] = []
     core = JaxCoreAdapter()
-    if category in [
-      StandardCategory.LOSS,
-      StandardCategory.OPTIMIZER,
-      StandardCategory.ACTIVATION,
-    ]:
+
+    # Use core JAX scanning for losses, optimizers, activations
+    if category in [StandardCategory.LOSS, StandardCategory.OPTIMIZER, StandardCategory.ACTIVATION]:
       results.extend(core.collect_api(category))
 
-    # 2. Add Flax Specifics (Layers)
+    # Add Flax-specific neural layers
     if category == StandardCategory.LAYER:
       results.extend(self._scan_nnx_layers())
 
@@ -95,12 +99,15 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   def _scan_nnx_layers(self) -> List[GhostRef]:
     """
-    Dynamically scans ``flax.nnx`` for Module subclasses.
+    Scan `flax.nnx` module for classes inheriting from `nnx.Module`, excluding the base Module class.
+
+    Returns:
+        List[GhostRef]: Found references.
     """
     if not self._flax_available:
       return []
 
-    found = []
+    found: List[GhostRef] = []
     try:
       from flax import nnx
       import inspect
@@ -108,41 +115,60 @@ class FlaxNNXAdapter(JAXStackMixin):
       for name, obj in inspect.getmembers(nnx):
         if name.startswith("_"):
           continue
-
-        if inspect.isclass(obj):
-          if issubclass(obj, nnx.Module) and name != "Module":
+        try:
+          if inspect.isclass(obj) and issubclass(obj, nnx.Module) and name != "Module":
             found.append(GhostInspector.inspect(obj, f"flax.nnx.{name}"))
-
+        except Exception:
+          continue
     except Exception as e:
       logging.debug(f"Error scanning flax.nnx: {e}")
 
     return found
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
+    """
+    Hydrate API ghosts from snapshot data.
+
+    Args:
+        category (StandardCategory): Category to filter.
+
+    Returns:
+        List[GhostRef]: Hydrated ghost references.
+    """
     if not self._snapshot_data:
       return []
     raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
     return [GhostInspector.hydrate(item) for item in raw_list]
 
-  # --- Metadata ---
-
   @property
   def search_modules(self) -> List[str]:
+    """
+    Modules to scan for discovery.
+
+    Returns:
+        List[str]: Ordered list of module names.
+    """
     return ["jax.numpy", "flax.nnx", "optax"]
 
   @property
   def import_alias(self) -> Tuple[str, str]:
+    """
+    Returns the base package and alias to guide import injection.
+    Used by ImportFixer to map `flax.nnx` root usage to `nnx` alias.
+
+    Returns:
+        Tuple[str, str]: (root_package, alias)
+    """
     return ("flax.nnx", "nnx")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
     """
-    Self-declared namespace roles for Flax NNX.
-    Inherits JAX imports via delegation logic in Manager, but exposes its own here.
+    Declares self namespaces with tiers and recommended aliases.
+
+    Returns:
+        Dict[str, ImportConfig]: Mapping of package paths to configs.
     """
-    # NOTE: Order matters for hydration overwrite!
-    # Ensure flax.nnx is processed LAST so it wins the NEURAL tier provider slot.
-    # This prevents 'from flax import linen as nn' when 'nnx' is desired.
     return {
       "flax.linen": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="nn"),
       "flax.nnx": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="nnx"),
@@ -150,22 +176,70 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
+    """
+    Regex patterns for heuristic category assignment during scaffolding.
+
+    Returns:
+        Dict[str, List[str]]: Mapping of tiers to regex lists.
+    """
     return {"neural": [r"\\.nnx\\.", r"\\.linen\\."], "extras": [r"random\\."]}
 
   @property
   def test_config(self) -> Dict[str, str]:
+    """
+    Test code templates extended from JAX core.
+
+    Returns:
+        Dict[str, str]: Test harness code snippets/templates.
+    """
     conf = self.jax_test_config.copy()
     conf["import"] = conf["import"] + "\nimport flax.nnx as nnx"
     return conf
 
+  # --- Verification Harness Protocol ---
+
+  @property
+  def harness_imports(self) -> List[str]:
+    """Imports for Harness generation."""
+    return ["from flax import nnx"]
+
+  def get_harness_init_code(self) -> str:
+    """Logic to create Flax NNX Rngs."""
+    return textwrap.dedent(""" 
+        def _make_flax_rngs(seed): 
+            "Attempts to create a Flax NNX Rngs object." 
+            try: 
+                return nnx.Rngs(seed) 
+            except (ImportError, AttributeError): 
+                return "mock_flax_rngs" 
+    """).strip()
+
   @property
   def supported_tiers(self) -> List[SemanticTier]:
+    """
+    Semantic tiers supported by this adapter.
+
+    Returns:
+        List[SemanticTier]: Supported tiers.
+    """
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
+  def declared_magic_args(self) -> List[str]:
+    return ["rngs"]
+
+  @property
   def structural_traits(self) -> StructuralTraits:
+    """
+    Structural rewriting traits guiding the pivot rewriter.
+    Explicitly defines `flax.nnx.Module` to ensure clean inheritance rewriting
+    without internal submodule leakage.
+
+    Returns:
+        StructuralTraits: Configuration of base class, methods, and injections.
+    """
     return StructuralTraits(
-      module_base="nnx.Module",
+      module_base="flax.nnx.Module",
       forward_method="__call__",
       inject_magic_args=[("rngs", "nnx.Rngs")],
       requires_super_init=False,
@@ -183,8 +257,10 @@ class FlaxNNXAdapter(JAXStackMixin):
   @property
   def plugin_traits(self) -> PluginTraits:
     """
-    Capabilities of Flax NNX.
-    Opt-in to Purity Analysis as it runs on JAX.
+    Plugin capabilities indicating required behaviors in the target framework.
+
+    Returns:
+        PluginTraits: Flags controlling plugin execution.
     """
     return PluginTraits(
       has_numpy_compatible_arrays=True,
@@ -192,27 +268,29 @@ class FlaxNNXAdapter(JAXStackMixin):
       requires_functional_state=True,
       requires_functional_control_flow=True,
       enforce_purity_analysis=True,
+      strict_materialization_method="block_until_ready",
     )
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """
-    Static definitions for Flax NNX.
-    Only defines Neural Layers; delegates Math/Opt to Jax Core.
+    Static standard operation definitions specific to Flax NNX.
+
+    Returns:
+        Dict[str, StandardMap]: Mapping of standard op names to framework implementations.
     """
     return {
       "Linear": StandardMap(
         api="flax.nnx.Linear",
         args={"in_features": "in_features", "out_features": "out_features", "bias": "use_bias"},
+        inject_args={"rngs": "rngs"},
       ),
       "Flatten": StandardMap(api="flax.nnx.Flatten"),
-      # --- Modular Attention Plugin Selection ---
       "MultiheadAttention": StandardMap(api="flax.nnx.MultiHeadAttention", requires_plugin="repack_attn_flax"),
       "Embedding": StandardMap(api="flax.nnx.Embed", args={"embedding_dim": "features"}),
       "Sequential": StandardMap(api="flax.nnx.Sequential"),
       "BatchNorm": StandardMap(api="flax.nnx.BatchNorm", args={"eps": "epsilon"}, requires_plugin="batch_norm_unwrap"),
       "LayerNorm": StandardMap(api="flax.nnx.LayerNorm", args={"normalized_shape": "num_features", "eps": "epsilon"}),
-      # Alias for methods that might be called functionally via nnx.*
       "GELU": StandardMap(api="flax.nnx.gelu"),
       "relu": StandardMap(api="flax.nnx.relu"),
       "softmax": StandardMap(api="flax.nnx.softmax"),
@@ -220,53 +298,74 @@ class FlaxNNXAdapter(JAXStackMixin):
       "Conv2d": StandardMap(api="flax.nnx.Conv"),
       "Dropout": StandardMap(api="flax.nnx.Dropout"),
       "MaxPool2d": StandardMap(api="flax.nnx.max_pool"),
-      # Container Mapping
       "Param": StandardMap(api="flax.nnx.Param"),
       "Variable": StandardMap(api="flax.nnx.Variable"),
       "Cache": StandardMap(api="flax.nnx.Cache"),
+      # --- State Management (Targeting Flax -> Torch) ---
+      # This enables converting nnx code back to torch.
+      # nnx.BatchStat maps to "Variable" abstract op or dedicated key if defined
+      "BatchStat": StandardMap(api="flax.nnx.BatchStat"),
+      # --- State Management (Targeting Torch -> Flax) ---
+      # Plugins formerly in JaxCore are now correctly placed here in the Neural adapter
+      "register_buffer": StandardMap(api="torch_register_buffer_to_nnx", requires_plugin="torch_register_buffer_to_nnx"),
+      "register_parameter": StandardMap(
+        api="torch_register_parameter_to_nnx", requires_plugin="torch_register_parameter_to_nnx"
+      ),
+      "state_dict": StandardMap(api="torch_state_dict_to_nnx", requires_plugin="torch_state_dict_to_nnx"),
+      "load_state_dict": StandardMap(api="torch_load_state_dict_to_nnx", requires_plugin="torch_load_state_dict_to_nnx"),
+      "parameters": StandardMap(api="torch_parameters_to_nnx", requires_plugin="torch_parameters_to_nnx"),
     }
 
-  @property
-  def rng_seed_methods(self) -> List[str]:
-    return []
-
-  # --- Converter ---
-
   def convert(self, data: Any) -> Any:
-    return JaxCoreAdapter().convert(data)
+    """
+    Converts generic data to framework-specific Pytree/arrays.
 
-  # --- Wiring ---
+    Returns:
+        Converted data tailored to JAX/Flax ecosystem.
+    """
+    return JaxCoreAdapter().convert(data)
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """
-    Applies manual wiring specific to Flax.
+    Applies manual wiring and modifies the snapshot to alias 'flax.nnx.' to 'nnx.'.
+
+    Adds plugin wiring for key interface methods.
+
+    Args:
+        snapshot (Dict[str, Any]): The mapping snapshot dictionary.
     """
     self._apply_stack_wiring(snapshot)
     mappings = snapshot.setdefault("mappings", {})
 
-    # Aliases
+    # Replace long module prefix to use alias 'nnx.'
     for key, variant in mappings.items():
       if variant and "api" in variant:
         api = variant["api"]
         if api.startswith("flax.nnx."):
           mappings[key]["api"] = api.replace("flax.nnx.", "nnx.")
 
-    # Plugins
+    # Ensure forwarding methods have proper plugin wiring for training flag injection
     for op in ["forward", "__call__", "call"]:
       if op not in mappings or "api" not in mappings[op]:
         mappings[op] = {"requires_plugin": "inject_training_flag"}
 
-    # Containers
-    mappings["register_buffer"] = {"requires_plugin": "torch_register_buffer_to_nnx"}
-    mappings["register_parameter"] = {"requires_plugin": "torch_register_parameter_to_nnx"}
-    mappings["state_dict"] = {"requires_plugin": "torch_state_dict_to_nnx"}
-    mappings["load_state_dict"] = {"requires_plugin": "torch_load_state_dict_to_nnx"}
-    mappings["parameters"] = {"requires_plugin": "torch_parameters_to_nnx"}
-
-  # --- Examples ---
+    # Note: Plugins for container state (register_buffer, etc.) are now statically defined in definitions
+    # so we don't need to manually wire them here if definitions are merged.
+    # We keep the fallback wiring just in case Ghost Mode lacks static defs.
+    mappings.setdefault("register_buffer", {"requires_plugin": "torch_register_buffer_to_nnx"})
+    mappings.setdefault("register_parameter", {"requires_plugin": "torch_register_parameter_to_nnx"})
+    mappings.setdefault("state_dict", {"requires_plugin": "torch_state_dict_to_nnx"})
+    mappings.setdefault("load_state_dict", {"requires_plugin": "torch_load_state_dict_to_nnx"})
+    mappings.setdefault("parameters", {"requires_plugin": "torch_parameters_to_nnx"})
 
   @classmethod
   def get_example_code(cls) -> str:
+    """
+    Example neural network showcasing Flax NNX idiomatic usage.
+
+    Returns:
+        str: Example source code string.
+    """
     return """from flax import nnx
 import jax.numpy as jnp
 
@@ -280,6 +379,12 @@ class Net(nnx.Module):
 """
 
   def get_tiered_examples(self) -> Dict[str, str]:
+    """
+    Provides tier-specific example usages for documentation and tests.
+
+    Returns:
+        Dict[str, str]: Dictionary mapping tier names to code snippets.
+    """
     return {
       "tier2_neural": self.get_example_code(),
       "tier3_extras": "# Flax NNX State Management\n# See repo for details on nnx.Variable interactions.",

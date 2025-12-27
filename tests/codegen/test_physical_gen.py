@@ -27,12 +27,13 @@ class MockSemantics(SemanticsManager):
   def __init__(self):
     self.data = {}
     # Templates for JAX (with JIT) and Torch (Standard)
+    # Updated: Explicit JIT Template required for JAX in decoupled architecture
     self.test_templates = {
       "jax": {
         "import": "import jax\nimport jax.numpy as jnp",
         "convert_input": "jnp.array({np_var})",
         "to_numpy": "np.array({res_var})",
-        "jit_wrap": "True",
+        "jit_template": "jax.jit({fn}, static_argnums={static_argnums})",
       },
       "torch": {"import": "import torch", "convert_input": "torch.tensor({np_var})", "to_numpy": "{res_var}.numpy()"},
     }

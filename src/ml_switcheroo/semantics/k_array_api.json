@@ -1008,6 +1008,13 @@
       ]
     ]
   },
+  "full_op": {
+    "description": "",
+    "std_args": [
+      "x",
+      "axis"
+    ]
+  },
   "greater": {
     "description": "Computes the truth value of ``x1_i > x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
     "from": "_2024_12/elementwise_functions.py",

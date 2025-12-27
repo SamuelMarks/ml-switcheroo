@@ -10,26 +10,26 @@ Verifies that:
 import sys
 import subprocess
 import os
-import shutil
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 import pytest
 
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
-from ml_switcheroo.frameworks import register_framework, FrameworkAdapter
+from ml_switcheroo.frameworks import register_framework
 
 
 # --- Mock Adapter for Dynamic Test ---
 class DynKerasAdapter:
   """Mock Keras Adapter with specific convert logic."""
 
-  def convert(self, data):
-    try:
-      import keras
+  declared_magic_args = []
+  harness_imports = []
 
-      return keras.ops.convert_to_tensor(data)
-    except ImportError:
-      return "KerasMock(" + str(data) + ")"
+  def get_harness_init_code(self):
+    return ""
+
+  def convert(self, data):
+    return "KerasMock(" + str(data) + ")"
 
 
 def _run_harness(path: Path) -> subprocess.CompletedProcess:
@@ -62,7 +62,6 @@ def test_dynamic_shim_generation(tmp_path):
 
   # Verify extraction of converting logic
   assert 'return "KerasMock(" + str(data) + ")"' in content
-  assert "import keras" in content
 
 
 def test_harness_execution_match(tmp_path):

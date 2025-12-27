@@ -6,15 +6,14 @@ specification files (JSONs) into a unified Knowledge Graph.
 
 Updates:
 - **Import Abstraction**: Implements a Tier-based subscription model.
-  It *dynamically links* Source namespaces to Target namespaces by matching
-  their declared Semantic Tiers, removing the need for hardcoded heuristics
-  or cross-framework mappings in adapter files.
+- **Protocol Upgrade**: Hydrates `specifications` from Adapters.
+- **Test Config**: Hydrates `test_templates` from Adapters to support `gen-tests`.
 """
 
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Any, List, Set
+from typing import Dict, Optional, Tuple, Any, List, Set, Union
 from pydantic import ValidationError
 
 from ml_switcheroo.enums import SemanticTier
@@ -46,12 +45,13 @@ class SemanticsManager:
     self.framework_configs: Dict[str, Dict] = {}
     self.test_templates: Dict[str, Dict] = {}
     self._known_rng_methods: Set[str] = set()
+    self.known_magic_args: Set[str] = set()  # Feature: Dynamic Magic Args
 
     self._reverse_index: Dict[str, Tuple[str, Dict]] = {}
     self._key_origins: Dict[str, str] = {}
     self._validation_status: Dict[str, bool] = {}
 
-    # --- Import Abstraction Stores (Updated for Tier Linking) ---
+    # --- Import Abstraction Stores ---
     # Map[Framework, Map[Tier, NamespaceConfig]]
     # Config example: {'root': 'flax', 'sub': 'nnx', 'alias': 'nnx'}
     self._providers: Dict[str, Dict[SemanticTier, Dict[str, str]]] = {}
@@ -62,7 +62,6 @@ class SemanticsManager:
     # ---------------------------------
 
     # 1. Load Internal Defaults (Golden Set)
-    # Merged as EXTRAS tier but serves as foundational specs.
     merge_tier_data(
       data=self.data,
       key_origins=self._key_origins,
@@ -81,7 +80,7 @@ class SemanticsManager:
   def _hydrate_defaults_from_registry(self) -> None:
     """
     Iterates over FrameWork Adapters and Plugin Hooks to extract configuration.
-    Populates the Tier-Based Import System dynamically via Self-Declaration.
+    Populates Traits, Specifications, Mappings, and Test Templates from Python code.
     """
     # --- A. Framework Adapters ---
     for fw_name in available_frameworks():
@@ -114,12 +113,47 @@ class SemanticsManager:
       if hasattr(adapter, "rng_seed_methods") and adapter.rng_seed_methods:
         self._known_rng_methods.update(adapter.rng_seed_methods)
 
-      # **Merge Code-Defined Definitions**
+      if hasattr(adapter, "declared_magic_args") and adapter.declared_magic_args:
+        self.known_magic_args.update(adapter.declared_magic_args)
+
+      # **Merge Test Templates (Hydration for gen-tests)**
+      if hasattr(adapter, "test_config") and adapter.test_config:
+        # Code-based config overrides loaded JSON snapshots
+        self.test_templates[fw_name] = adapter.test_config
+
+      # **Merge Adapter-Defined Specifications (The Hub)**
+      # This allows frameworks to introduce new abstract operations.
+      if hasattr(adapter, "specifications"):
+        specs = adapter.specifications
+        if specs:
+          # Determine Tier for this batch.
+          # Adapter-injected specs default to EXTRAS unless overridden or inferred.
+          tier = SemanticTier.EXTRAS
+
+          # Convert OpDefinition objects to Dicts
+          spec_content = {}
+          for op_key, op_model in specs.items():
+            spec_content[op_key] = op_model.model_dump(by_alias=True, exclude_unset=True)
+
+            # Apply heuristic to classify if Tier not explicit
+            if op_key[0].isupper():
+              tier = SemanticTier.NEURAL
+
+          merge_tier_data(
+            data=self.data,
+            key_origins=self._key_origins,
+            import_data={},
+            framework_configs=self.framework_configs,
+            new_content=spec_content,
+            tier=tier,
+          )
+
+      # **Merge Code-Defined Mappings (The Spoke)**
       if hasattr(adapter, "definitions"):
         defs = adapter.definitions
         if defs:
           mappings = {k: v.model_dump(exclude_unset=True) for k, v in defs.items()}
-          # Pre-label Tiers based on Naming Convention
+          # Pre-label Tiers based on Naming Convention if not already set by Specs
           for op_key in mappings.keys():
             if op_key not in self._key_origins:
               if op_key[0].isupper():
@@ -129,6 +163,10 @@ class SemanticsManager:
 
           # Create a virtual snapshot structure
           virtual_snap = {"__framework__": fw_name, "mappings": mappings}
+
+          # Pass the templates manager to ensure overlays from file don't
+          # accidentally overwrite code-based test templates if merged order varies.
+          # Note: merge_overlay_data updates in-place.
           merge_overlay_data(
             data=self.data,
             key_origins=self._key_origins,
@@ -144,20 +182,17 @@ class SemanticsManager:
         ns_map = adapter.import_namespaces
         if ns_map:
           for path, config_obj in ns_map.items():
-            # Support legacy Dict format or new ImportConfig object logic
             tier = None
             alias = None
 
-            if isinstance(config_obj, dict):
-              # Legacy format: We infer tier using deprecated Heuristic for backward compat
-              tier = self._infer_namespace_tier_legacy(path)
-              # Correctly extract alias from legacy dict structure if present
-              # Legacy structure: {"root": ..., "sub": ..., "alias": ...}
-              alias = config_obj.get("alias")
-            elif isinstance(config_obj, ImportConfig):
+            if isinstance(config_obj, ImportConfig):
               # New Self-Declaration Format
               tier = config_obj.tier
               alias = config_obj.recommended_alias
+            elif isinstance(config_obj, dict):
+              # Legacy format fallback: Default to EXTRAS if not specified
+              tier = SemanticTier.EXTRAS
+              alias = config_obj.get("alias")
 
             if tier:
               # 1. Register PROVIDER capabilities
@@ -165,10 +200,17 @@ class SemanticsManager:
               if fw_name not in self._providers:
                 self._providers[fw_name] = {}
 
-              # We register it as a "root" provider for this tier.
-              # Logic: If requested, inject 'import full.path as alias'
-              # 'sub' is set to None because we treat Declared Paths as the atomic import unit.
-              self._providers[fw_name][tier] = {"root": path, "sub": None, "alias": alias}
+              # Determine proper split for Cleaner Imports (prefer "from X import Y")
+              root = path
+              sub = None
+
+              if alias and "." in path:
+                parts = path.rsplit(".", 1)
+                if len(parts) == 2 and alias == parts[1]:
+                  root = parts[0]
+                  sub = parts[1]
+
+              self._providers[fw_name][tier] = {"root": root, "sub": sub, "alias": alias}
 
               # 2. Register SOURCE identification
               # If this framework is selected as SOURCE, usage of 'path' signifies this Tier.
@@ -207,48 +249,9 @@ class SemanticsManager:
     # Rebuild index
     self._build_index()
 
-  def _infer_namespace_tier_legacy(self, path: str) -> Optional[SemanticTier]:
-    """
-    Legacy Heuristic (Deprecated).
-    Used only if adapter returns old-style Dicts in import_namespaces.
-    """
-    if "functional" in path or "jax.nn" in path:
-      return SemanticTier.NEURAL_OPS
-
-    if "nn" in path or "layer" in path or "keras" in path:
-      return SemanticTier.NEURAL
-
-    if "ops" in path or "math" in path or "numpy" in path:
-      return SemanticTier.ARRAY_API
-
-    if "optim" in path:
-      return SemanticTier.EXTRAS
-
-    if "." not in path:
-      return SemanticTier.ARRAY_API
-
-    return SemanticTier.EXTRAS
-
-  def _infer_namespace_tier(self, path: str) -> Optional[SemanticTier]:
-    """
-    Alias for legacy inference to satisfy test suites.
-    """
-    return self._infer_namespace_tier_legacy(path)
-
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
     """
     Generates the import mapping for the ImportFixer based on Tier linking.
-
-    Logic:
-    1. Identify source usage (e.g. 'torch.nn' -> NEURAL).
-    2. Lookup TARGET provider for that Tier (e.g. 'flax.nnx').
-    3. Map source -> target.
-
-    Args:
-        target_fw: The framework key we are converting TO.
-
-    Returns:
-        Dict mapping source_path -> (target_root, target_sub, target_alias).
     """
     result = {}
     target_providers = self._providers.get(target_fw, {})
@@ -438,7 +441,7 @@ class SemanticsManager:
     merge_overlay_data(
       data=self.data,
       key_origins=self._key_origins,
-      import_data={},  # Legacy imports disabled
+      import_data={},
       framework_configs=self.framework_configs,
       test_templates=self.test_templates,
       content=content,

@@ -1,5 +1,5 @@
 """
-Tests for MLX Compilation Plugin.
+Tests for MLX Extras Plugin (Decoupled).
 """
 
 import pytest
@@ -10,97 +10,103 @@ from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.mlx_extras import transform_compiler, transform_synchronize
+from ml_switcheroo.frameworks.base import register_framework
 
 
-def rewrite(code):
+@pytest.fixture
+def rewriter():
   hooks._HOOKS["mlx_compiler"] = transform_compiler
   hooks._HOOKS["mlx_synchronize"] = transform_synchronize
   hooks._PLUGINS_LOADED = True
 
   mgr = MagicMock()
 
-  # Mock definitions
-  comp_def = {"variants": {"torch": {"api": "torch.compile"}, "mlx": {"requires_plugin": "mlx_compiler"}}}
-  sync_def = {"variants": {"torch": {"api": "torch.cuda.synchronize"}, "mlx": {"requires_plugin": "mlx_synchronize"}}}
+  # Mock definitions for a generic "custom_fw" target
+  comp_def = {"variants": {"custom_fw": {"api": "custom.jit", "requires_plugin": "mlx_compiler"}}}
+
+  sync_def = {"variants": {"custom_fw": {"requires_plugin": "mlx_synchronize"}}}
 
   def get_def(name):
     if "compile" in name:
-      return "compile", comp_def
+      return "Compile", comp_def
     if "synchronize" in name:
-      return "sync", sync_def
+      return "Synchronize", sync_def
     return None
 
   mgr.get_definition.side_effect = get_def
-  mgr.resolve_variant.side_effect = lambda a, f: comp_def["variants"]["mlx"] if f == "mlx" else None
 
-  cfg = RuntimeConfig(source_framework="torch", target_framework="mlx")
+  def resolve(aid, fw):
+    if aid == "Compile":
+      return comp_def["variants"].get(fw)
+    if aid == "Synchronize":
+      return sync_def["variants"].get(fw)
+    return None
 
-  # We need to manually execute the visitor logic on Decorators because
-  # PivotRewriter's DecoratorMixin usually handles renaming logic.
-  # But for Plugins, we rely on the specific hook triggering.
-  # The DecoratorMixin DOES trigger plugins?
-  # Currently DecoratorMixin logic only checks if target variant is None/API string.
-  # It does NOT call hook dispatch.
-  # **Fix**: The test must setup a custom visitor or modify DecoratorMixin logic.
-  #
-  # However, `CoreRewriter` mixes in `DecoratorMixin`.
-  # If the `DecoratorMixin` sees `requires_plugin`, does it dispatch?
-  # We assumed so in architecture. If not, this plugin logic needs to be integrated.
+  mgr.resolve_variant.side_effect = resolve
 
-  # Assume we patch DecoratorMixin to dispatch hooks if present.
-  # For this unit test, we'll invoke the plugin function directly on CST nodes
-  # to verify the logic, bypassing the mixin wiring details for now.
-  pass
+  # --- FIX: Register dummy framework ---
+  @register_framework("custom_fw")
+  class CustomFW:
+    pass
+
+  cfg = RuntimeConfig(source_framework="torch", target_framework="custom_fw")
+  return PivotRewriter(mgr, cfg)
 
 
-def test_compiler_with_args():
-  # Input
-  code = "@torch.compile(fullgraph=True, backend='inductor')\ndef f(x): pass"
+def rewrite(rewriter, code):
+  mod = cst.parse_module(code)
+  return mod.visit(rewriter).code
+
+
+def test_compiler_decorator(rewriter):
+  """
+  Verify decorator replacement using looked up API.
+  Input: @torch.compile(args)
+  Output: @custom.jit
+  """
+  code = "@torch.compile(fullgraph=True)\ndef f(x): pass"
+
+  # Manually invoke hook because DecoratorMixin integration isn't fully stubbed
   module = cst.parse_module(code)
+  # Access decorator node: body[0] is FunctionDef, decorators[0] is Decorator
   decorator = module.body[0].decorators[0]
 
-  # Execute Hook
-  ctx = MagicMock()
-  ctx.target_fw = "mlx"
+  rewriter.ctx.lookup_api = MagicMock(return_value="custom.jit")
 
-  new_dec = transform_compiler(decorator, ctx)
+  new_dec = transform_compiler(decorator, rewriter.ctx)
 
-  # Verify name swap (mlx.core.compile)
-  attr = new_dec.decorator
-  assert isinstance(attr, cst.Attribute)
-  assert attr.attr.value == "compile"
-  assert attr.value.attr.value == "core"
+  # Render result
+  res = cst.Module(body=[module.body[0].with_changes(decorators=[new_dec])]).code
 
-  # Verify arg stripping (Should be just the name, no Call)
-  # Why? MLX compile is often used as @mx.compile
-  # The plugin returns `decorator=new_func` where new_func is the Name node.
-  # It removes the Call wrapper entirely.
-  assert not isinstance(new_dec.decorator, cst.Call)
+  assert "@custom.jit" in res
+  assert "fullgraph" not in res  # Args stripped
 
 
-def test_compiler_simple():
-  # Input
-  code = "@torch.compile\ndef f(x): pass"
-  decorator = cst.parse_module(code).body[0].decorators[0]
+def test_compiler_functional(rewriter):
+  """Verify functional wrapper replacement via direct hook."""
+  code = "opt_fn = torch.compile(fn)"
+  # Access Call node inside Assign
+  # module.body[0] is SimpleStatementLine
+  # module.body[0].body[0] is Assign
+  # Assign.value is the Call node (torch.compile(fn))
+  call_node = cst.parse_module(code).body[0].body[0].value
 
-  ctx = MagicMock()
-  ctx.target_fw = "mlx"
+  rewriter.ctx.lookup_api = MagicMock(return_value="custom.jit")
 
-  new_dec = transform_compiler(decorator, ctx)
+  res_node = transform_compiler(call_node, rewriter.ctx)
 
-  assert "mlx.core.compile" in cst.parse_module("").code_for_node(new_dec)
+  res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])]).code
+
+  assert "custom.jit(fn)" in res
 
 
-def test_sync_to_print_trace():
-  # Input
+def test_sync_warning(rewriter):
+  """Verify sync becomes a print warning."""
   code = "torch.cuda.synchronize()"
   call_node = cst.parse_expression(code)
 
-  ctx = MagicMock()
-  ctx.target_fw = "mlx"
+  res_node = transform_synchronize(call_node, rewriter.ctx)
+  res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])]).code
 
-  res = transform_synchronize(call_node, ctx)
-
-  assert isinstance(res, cst.Call)
-  assert res.func.value == "print"
-  assert "Global sync requires explicit" in res.args[0].value.value
+  assert "print(" in res
+  assert "Global sync requires explicit" in res

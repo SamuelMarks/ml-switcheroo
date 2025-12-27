@@ -1,7 +1,7 @@
 """
 Plugin for MLX Optimizer translation.
 
-Handles impedance mismatches between PyTorch and Apple MLX optimizers.
+Handles impedance mismatches for Functional Optimizers.
 """
 
 import libcst as cst
@@ -21,17 +21,27 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("mlx_optimizer_init")
 def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
-  if ctx.target_fw != "mlx":
-    return node
+  """
+  Hook: Transforms Optimizer Constructor.
 
+  1. Renames API based on context lookup or dynamic class construction.
+  2. Strips parameter argument (Arg 0).
+  3. Renames `lr` -> `learning_rate`.
+  """
   # 1. Rename API
-  old_name = ""
-  if isinstance(node.func, cst.Name):
-    old_name = node.func.value
-  elif isinstance(node.func, cst.Attribute):
-    old_name = node.func.attr.value
+  # Try strict lookup first
+  op_id = ctx.current_op_id or "Adam"
+  target_api = ctx.lookup_api(op_id)
 
-  target_api = f"mlx.optimizers.{old_name}"
+  if not target_api:
+    # Fallback: Construct 'mlx.optimizers.<Name>' if source was 'optim.<Name>'
+    old_name = ""
+    if isinstance(node.func, cst.Name):
+      old_name = node.func.value
+    elif isinstance(node.func, cst.Attribute):
+      old_name = node.func.attr.value
+    target_api = f"mlx.optimizers.{old_name}"
+
   new_func = _create_dotted_name(target_api)
 
   # 2. Filter Args & Rename Keywords
@@ -46,8 +56,6 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
     arg = node.args[i]
 
     # Explicit Rename: lr -> learning_rate
-    # This handles cases where the core argument rewriter might not have triggered
-    # (e.g. in partial mock tests) or for robust enforcement.
     if arg.keyword and arg.keyword.value == "lr":
       arg = arg.with_changes(keyword=cst.Name("learning_rate"))
 
@@ -58,9 +66,10 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("mlx_optimizer_step")
 def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel]:
-  if ctx.target_fw != "mlx":
-    return node
-
+  """
+  Hook: Transforms `optimizer.step()` into an EscapeHatch pattern.
+  Functional optimizers (like MLX/Optax) require explicit update calls `opt.update(model, state)`.
+  """
   optimizer_var = None
   if isinstance(node.func, cst.Attribute):
     optimizer_var = node.func.value
@@ -74,12 +83,13 @@ def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.
   ]
   new_call = cst.Call(func=new_func, args=args)
 
-  reason = "MLX requires explicit `update(model, grads)`. Variables inferred placeholders."
+  reason = "Functional optimizers require explicit `update(model, grads)`. Variables inferred placeholders."
   return EscapeHatch.mark_failure(new_call, reason)
 
 
 @register_hook("mlx_zero_grad")
 def transform_mlx_zero_grad(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  if ctx.target_fw != "mlx":
-    return node
-  return node.with_changes(func=cst.Name("None"), args=[])
+  """
+  Hook: Transforms `optimizer.zero_grad()` into `None` (No-Op).
+  """
+  return cst.Name("None")

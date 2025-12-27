@@ -16,10 +16,13 @@ Simple String Conversion
 .. code-block:: python
 
     import ml_switcheroo as mls
+    # Auto-detects defaults based on installed libraries (e.g. Torch -> JAX)
     code = "y = torch.abs(x)"
-    result = mls.convert(code, source="torch", target="jax")
+    result = mls.convert(code)
     print(result)
-    # y = jax.numpy.abs(x)
+
+    # Explicit conversion
+    result = mls.convert(code, source="torch", target="jax")
 
 Advanced Usage (AST Engine)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -50,8 +53,8 @@ __version__ = "0.0.1"
 
 def convert(
   code: str,
-  source: str = "torch",
-  target: str = "jax",
+  source: Optional[str] = None,
+  target: Optional[str] = None,
   strict: bool = False,
   plugin_settings: Optional[Dict[str, Any]] = None,
   semantics: Optional[SemanticsManager] = None,
@@ -65,8 +68,10 @@ def convert(
 
   Args:
       code (str): The source code to convert.
-      source (str): The source framework key (e.g., "torch", "jax").
-      target (str): The target framework key (e.g., "jax", "tensorflow").
+      source (str, optional): The source framework key (e.g., "torch").
+          If None, determined dynamically by priority via `RuntimeConfig`.
+      target (str, optional): The target framework key (e.g., "jax").
+          If None, determined dynamically by priority via `RuntimeConfig`.
       strict (bool): If True, the engine will return an error if an API
                      cannot be mapped. If False (default), the original code
                      is preserved wrapped in escape hatch comments.
@@ -82,9 +87,10 @@ def convert(
       ValueError: If the conversion fails (e.g. syntax errors or strict mode violations).
   """
   # 1. Configure
-  config = RuntimeConfig(
-    source_framework=source,
-    target_framework=target,
+  # RuntimeConfig.load handles dynamic resolution if source/target are None
+  config = RuntimeConfig.load(
+    source=source,
+    target=target,
     strict_mode=strict,
     plugin_settings=plugin_settings or {},
   )

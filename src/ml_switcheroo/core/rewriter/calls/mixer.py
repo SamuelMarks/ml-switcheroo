@@ -4,9 +4,14 @@ CallMixin Definition.
 The primary visitor logic for handling `Call` and `Assign` nodes in the AST.
 This module orchestrates the transformation pipeline by delegating specific tasks
 (dispatch, reshaping, lifecycle management) to helper modules.
+
+Updates:
+- Implemented `auto_strip_magic_args` logic in `leave_Call` to dynamically
+  remove state arguments (rngs, key) based on global knowledge base aggregation.
+- Implemented dynamic detection of functional execution patterns via `StructuralTraits.functional_execution_method`.
 """
 
-from typing import Union, Set, Tuple, List, Dict, Any
+from typing import Union, Set, Tuple, List
 import libcst as cst
 
 from ml_switcheroo.core.hooks import get_hook
@@ -29,7 +34,7 @@ from ml_switcheroo.core.rewriter.calls.transformers import (
 from ml_switcheroo.core.rewriter.calls.utils import (
   is_functional_apply,
   rewrite_stateful_call,
-  inject_rngs_kwarg,
+  inject_kwarg,
   strip_kwarg,
   is_super_call,
   is_builtin,
@@ -44,7 +49,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
   Mixin for transforming Call nodes and unpacking Assignments.
 
   Responsible for:
-  1.  Handling functional `apply` patterns (Flax).
+  1.  Handling functional `apply` patterns (Flax/Custom).
   2.  Lifecycle method stripping (`.to()`, `.cuda()`).
   3.  Plugin dispatch.
   4.  Standard API pivoting (Lookup -> Normalize -> Rewrite).
@@ -55,27 +60,28 @@ class CallMixin(NormalizationMixin, BaseRewriter):
   _cached_source_traits: StructuralTraits = None
   _cached_target_traits: StructuralTraits = None
 
-  def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
+  def _get_source_traits(self) -> StructuralTraits:
     """
-    Lazily loads the lifecycle strip/warn lists from the SOURCE framework config.
+    Lazily loads and caches the StructuralTraits of the SOURCE framework.
     """
     if self._cached_source_traits:
-      return (
-        set(self._cached_source_traits.lifecycle_strip_methods),
-        set(self._cached_source_traits.lifecycle_warn_methods),
-      )
+      return self._cached_source_traits
 
-    # Look up config for the Source Framework (e.g. 'torch')
     config_dict = self.semantics.get_framework_config(self.source_fw)
-
     if config_dict and "traits" in config_dict:
       self._cached_source_traits = StructuralTraits.model_validate(config_dict["traits"])
     else:
       self._cached_source_traits = StructuralTraits()
+    return self._cached_source_traits
 
+  def _get_source_lifecycle_lists(self) -> Tuple[Set[str], Set[str]]:
+    """
+    Lazily loads the lifecycle strip/warn lists from the SOURCE framework config.
+    """
+    traits = self._get_source_traits()
     return (
-      set(self._cached_source_traits.lifecycle_strip_methods),
-      set(self._cached_source_traits.lifecycle_warn_methods),
+      set(traits.lifecycle_strip_methods),
+      set(traits.lifecycle_warn_methods),
     )
 
   def _get_target_traits(self) -> StructuralTraits:
@@ -97,11 +103,17 @@ class CallMixin(NormalizationMixin, BaseRewriter):
 
     Scenario: `y, updates = layer.apply(vars, x)`
     Target:   `y = layer(x)` (NNX/Torch style)
+
+    Reads `functional_execution_method` from Source Traits to detect pattern.
     """
     if not isinstance(original_node.value, cst.Call):
       return super().leave_Assign(original_node, updated_node)
 
-    if is_functional_apply(original_node.value):
+    # Dynamic detection based on source trait (e.g. "apply", "call_fn")
+    source_traits = self._get_source_traits()
+    unwrap_method = source_traits.functional_execution_method
+
+    if is_functional_apply(original_node.value, unwrap_method):
       if len(updated_node.targets) == 1:
         target = updated_node.targets[0].target
         if isinstance(target, (cst.Tuple, cst.List)):
@@ -131,10 +143,14 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     result_node = updated
     func_name = self._get_qualified_name(original.func)
 
-    # 0a. Functional 'apply' unwrapping
-    if is_functional_apply(original):
+    # 0a. Functional 'apply' unwrapping (Dynamic Trait)
+    source_traits = self._get_source_traits()
+    unwrap_method = source_traits.functional_execution_method
+
+    if is_functional_apply(original, unwrap_method):
       if isinstance(updated.func, cst.Attribute):
         receiver = updated.func.value
+        # Functional pattern: apply(variables, x) -> x, so we strip variables (arg 0)
         new_args = updated.args[1:] if len(updated.args) > 0 else []
         result_node = updated.with_changes(func=receiver, args=new_args)
         log_diff("Functional Unwrap", original, result_node)
@@ -199,7 +215,7 @@ class CallMixin(NormalizationMixin, BaseRewriter):
       # Try to recover: if this is a method call on an unknown object, try resolving just the method name
       # This enables x.float() -> CastFloat without knowing x is a Tensor
       if isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
-        func_name = f"__method_fallback__.{original.func.attr.value}"  # Placeholder to skip next check logic
+        func_name = f"__method_fallback__.{original.func.attr.value}"  # Placeholder
       else:
         if self.strict_mode:
           self._report_failure("Could not resolve function name")
@@ -209,9 +225,6 @@ class CallMixin(NormalizationMixin, BaseRewriter):
     mapping = self._get_mapping(func_name)
 
     # FIX: Fallback lookup for methods on unknown objects (e.g. x.float() where x is unknown type)
-    # We check if the leaf name (float, long) is mapped in the semantics specifically for casting/util behavior.
-    # Guard: Do NOT apply if receiver is 'self' (likely a module call, not tensor operation like .float())
-    # Also prevent trying to look up module aliases as method calls (e.g. torch.bad(1))
     if not mapping and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
       receiver = original.func.value
       is_self = isinstance(receiver, cst.Name) and receiver.value == "self"
@@ -222,8 +235,6 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         full_api_guess = f"torch.Tensor.{leaf_method}"
         mapping = self._get_mapping(full_api_guess, silent=True)
         if mapping:
-          # If we found a mapping logic via assumption, we use the guessed name for definition lookup too
-          # This ensures plugins like 'type_methods' find the metadata they need
           func_name = full_api_guess
 
     if not mapping:
@@ -235,7 +246,6 @@ class CallMixin(NormalizationMixin, BaseRewriter):
           detail="No Entry in Semantics Knowledge Base",
         )
       # Re-check strict failure reporting for the ORIGINAL name if we skipped fallback reporting
-      # This covers the case where func_name exists but has no mapping
       if self.strict_mode and func_name and func_name.startswith(f"{self.source_fw}."):
         self._report_failure(f"API '{func_name}' not found in semantics.")
 
@@ -345,7 +355,12 @@ class CallMixin(NormalizationMixin, BaseRewriter):
                 if perm_indices and idx < len(modified_args):
                   # Wrap input
                   original_arg = modified_args[idx]
-                  wrapped_val = inject_permute_call(original_arg.value, perm_indices, self.semantics, self.target_fw)
+                  wrapped_val = inject_permute_call(
+                    original_arg.value,
+                    perm_indices,
+                    self.semantics,
+                    self.target_fw,
+                  )
                   modified_args[idx] = original_arg.with_changes(value=wrapped_val)
 
             idx += 1
@@ -359,7 +374,12 @@ class CallMixin(NormalizationMixin, BaseRewriter):
               src_l, tgt_l = rule.split("->")
               perm_indices = compute_permutation(src_l.strip(), tgt_l.strip())
               if perm_indices:
-                result_node = inject_permute_call(result_node, perm_indices, self.semantics, self.target_fw)
+                result_node = inject_permute_call(
+                  result_node,
+                  perm_indices,
+                  self.semantics,
+                  self.target_fw,
+                )
 
       except ValueError:
         self._report_failure("Argument normalization failed")
@@ -386,36 +406,57 @@ class CallMixin(NormalizationMixin, BaseRewriter):
         type_node = self._create_dotted_name(mapping["output_cast"])
         # Wrap result_node.astype(type_node)
         result_node = cst.Call(
-          func=cst.Attribute(value=result_node, attr=cst.Name("astype")), args=[cst.Arg(value=type_node)]
+          func=cst.Attribute(value=result_node, attr=cst.Name("astype")),
+          args=[cst.Arg(value=type_node)],
         )
       except Exception as e:
         self._report_failure(f"Output casting failed: {e}")
         return updated
 
-    # 4. Class Construction Logic (Logic 4 implementation)
+    # 4. Class Construction Logic (Generic State Threading)
+    # Check if we are inside an __init__ method of what looks like a Framework Class (Module)
     if self._signature_stack and self._signature_stack[-1].is_init and self._signature_stack[-1].is_module_method:
       origins = getattr(self.semantics, "_key_origins", {})
       tier = origins.get(abstract_id)
       traits = self._get_target_traits()
 
       is_neural_candidate = tier == SemanticTier.NEURAL.value
-      force_strip = False
+      force_detect = False
 
-      for bad_arg in traits.strip_magic_args:
+      # Check if any argument in the call matches a 'strip' target,
+      # which implies this call creates a sub-layer that needs handling
+      if isinstance(result_node, cst.Call):
+        # Build set of magic args to check against
+        magic_args = set(traits.strip_magic_args)
+        if traits.auto_strip_magic_args and hasattr(self.semantics, "known_magic_args"):
+          magic_args.update(self.semantics.known_magic_args)
+
+        for arg in result_node.args:
+          if arg.keyword and arg.keyword.value in magic_args:
+            force_detect = True
+            break
+
+      if is_neural_candidate or force_detect:
         if isinstance(result_node, cst.Call):
-          for arg in result_node.args:
-            if arg.keyword and arg.keyword.value == bad_arg:
-              force_strip = True
-              break
+          # Inject Generic Magic Args (e.g. rngs=rngs, ctx=ctx)
+          # We iterate over the configured list of (arg_name, type)
+          for arg_name, _ in traits.inject_magic_args:
+            # Assume the variable name in scope matches the keyword -> arg=arg
+            result_node = inject_kwarg(result_node, arg_name, arg_name)
 
-      if is_neural_candidate or force_strip:
-        if any(name == "rngs" for name, _ in traits.inject_magic_args):
-          if isinstance(result_node, cst.Call):
-            result_node = inject_rngs_kwarg(result_node)
+          # Strip Generic Magic Args (e.g. rngs, key)
+          # Implement Decoupled Auto-Strip Logic logic
+          args_to_strip = set(traits.strip_magic_args)
+          if traits.auto_strip_magic_args and hasattr(self.semantics, "known_magic_args"):
+            # Aggregated list from all frameworks
+            args_to_strip.update(self.semantics.known_magic_args)
 
-        elif "rngs" in traits.strip_magic_args:
-          if isinstance(result_node, cst.Call):
-            result_node = strip_kwarg(result_node, "rngs")
+            # IMPORTANT: Do not strip args that are native/required for THIS framework
+            native_args = {a[0] for a in traits.inject_magic_args}
+            args_to_strip = args_to_strip - native_args
+
+          for arg_name in args_to_strip:
+            result_node = strip_kwarg(result_node, arg_name)
 
     log_diff(f"Operation ({abstract_id})", original, result_node)
 

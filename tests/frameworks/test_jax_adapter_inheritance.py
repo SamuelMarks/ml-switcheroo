@@ -40,7 +40,9 @@ def test_flax_nnx_inheritance():
   assert adapter.inherits_from == "jax"
 
   # 2. Traits must be Neural (NNX)
-  assert adapter.structural_traits.module_base == "nnx.Module"
+  # Note: Updated expected value from "nnx.Module" to "flax.nnx.Module"
+  # to reflect full path configuration in the adapter
+  assert adapter.structural_traits.module_base == "flax.nnx.Module"
   assert "rngs" in adapter.structural_traits.inject_magic_args[0]
 
   # 3. Wiring should be additive (Stack + NNX)

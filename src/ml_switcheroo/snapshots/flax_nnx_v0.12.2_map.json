@@ -1053,7 +1053,15 @@
       "args": {}
     },
     "parameters": {
-      "requires_plugin": "torch_parameters_to_nnx"
+      "api": "nnx.bridge.module.Module.param",
+      "args": {
+        "init_args": "init_args",
+        "init_fn": "init_fn",
+        "init_kwargs": "init_kwargs",
+        "name": "name",
+        "self": "self",
+        "unbox": "unbox"
+      }
     },
     "permute_dims": {
       "api": "jnp.transpose",
@@ -1171,7 +1179,11 @@
       "args": {}
     },
     "state_dict": {
-      "requires_plugin": "torch_state_dict_to_nnx"
+      "api": "nnx.graph.state",
+      "args": {
+        "filters": "filters",
+        "node": "node"
+      }
     },
     "static_graph": {
       "api": "nnx.pytreelib.Static",

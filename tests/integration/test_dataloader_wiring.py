@@ -2,14 +2,16 @@
 Integration Tests for DataLoader Plugin Wiring (Updated for Distributed Semantics).
 
 Verifies that:
-1. Scaffolder injects Abstract Definitions from Python code into semantics JSON.
+1. `import-spec internal` hydrates the Abstract Definitions from `standards_internal.py`.
 2. The system correctly respects Implementation Variants provided in existing snapshots.
 """
 
 import json
 import sys
 from unittest.mock import patch, MagicMock
-from ml_switcheroo.discovery.scaffolder import Scaffolder
+from pathlib import Path
+
+from ml_switcheroo.cli.commands import handle_import_spec
 from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir
 
 
@@ -27,28 +29,16 @@ def test_generation_and_execution_flow(tmp_path):
   }
   (snap_dir / "jax_vlatest_map.json").write_text(json.dumps(jax_snapshot_content), encoding="utf-8")
 
-  # 2. Setup Scaffolder
-  empty_mgr = SemanticsManager()
-  # Bypass internal loading logic to ensure test isolation
-  empty_mgr._reverse_index = {}
-  empty_mgr.data = {}
-  # Note: Scaffolder calls get_dataloader_semantics() internally to populate Abstract Specs
+  # 2. Patch paths for CLI commands
+  with patch("ml_switcheroo.cli.handlers.discovery.resolve_semantics_dir", return_value=sem_dir):
+    # 3. Execution: Hydrate Hub (Specs)
+    # Instead of Scaffolder heuristic injection, we use the standard 'import-spec internal' flow
+    ret = handle_import_spec(Path("internal"))
 
-  scaffolder = Scaffolder(semantics=empty_mgr)
-  scaffolder.inspector.inspect = MagicMock(return_value={})
-
-  # 3. Execution
-  # Pass tmp_path as root
-  # Mock adapter for 'torch' to prevent scan fail return
-  mock_adapter = MagicMock()
-  mock_adapter.search_modules = None  # Scan root only
-
-  with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["torch"]):
-    with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
-      scaffolder.scaffold(["torch"], root_dir=tmp_path)
+  assert ret == 0
 
   # 4. Verify Abstract Spec Creation (semantics/k_framework_extras.json)
-  # This comes from the python file (common/data.py)
+  # This comes from standards_internal.py via handle_import_spec
   extra_spec = sem_dir / "k_framework_extras.json"
   assert extra_spec.exists()
   spec_data = json.loads(extra_spec.read_text())
@@ -59,7 +49,7 @@ def test_generation_and_execution_flow(tmp_path):
   assert "std_args" in spec_data["DataLoader"]
 
   # 5. Verify Implementation Persistence (snapshots/jax_vlatest_map.json)
-  # Ensure the pre-seeded mapping was preserved
+  # Ensure the pre-seeded mapping was preserved in snapshots/
   jax_map = snap_dir / "jax_vlatest_map.json"
   assert jax_map.exists()
   jax_data = json.loads(jax_map.read_text())

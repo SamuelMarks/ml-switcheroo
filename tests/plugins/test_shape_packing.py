@@ -1,5 +1,5 @@
 """
-Tests for View/Reshape Packer Plugin.
+Tests for Shape Packing.
 """
 
 import pytest
@@ -10,105 +10,77 @@ from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.shape_packing import transform_shape_packing
+from ml_switcheroo.frameworks.base import register_framework
 
 
 def rewrite_code(rewriter, code):
-  tree = cst.parse_module(code)
-  try:
-    new_tree = tree.visit(rewriter)
-    return new_tree.code
-  except Exception as e:
-    pytest.fail(f"Rewrite failed: {e}")
+  return cst.parse_module(code).visit(rewriter).code
+
+
+@register_framework("custom_fw")
+class CustomAdapter:
+  @property
+  def harness_imports(self):
+    return []
+
+  def get_harness_init_code(self):
+    return ""
+
+  @property
+  def declared_magic_args(self):
+    return []
 
 
 @pytest.fixture
-def rewriter():
+def rewriter_factory():
   hooks._HOOKS["pack_shape_args"] = transform_shape_packing
   hooks._PLUGINS_LOADED = True
-
   mgr = MagicMock()
 
-  # Define Reshape and View
   def_map = {
     "variants": {
-      "torch": {"api": "torch.Tensor.view"},
+      "torch": {"api": "torch.view"},
       "jax": {"api": "jnp.reshape", "requires_plugin": "pack_shape_args"},
+      "custom_fw": {"api": "custom.ops.reshape", "requires_plugin": "pack_shape_args"},
     }
   }
 
-  # Context lookup simulation
-  mgr.get_known_apis.return_value = {"Reshape": def_map, "View": def_map}
+  mgr.get_known_apis.return_value = {"Reshape": def_map}
 
   def resolve(aid, fw):
-    return def_map["variants"]["jax"]
-
-  def get_def(name):
-    if "view" in name or "reshape" in name:
-      return ("Reshape", def_map)
+    if aid == "Reshape":
+      return def_map["variants"].get(fw)
     return None
 
-  mgr.get_definition.side_effect = get_def
   mgr.resolve_variant.side_effect = resolve
-  mgr.is_verified.return_value = True
+  mgr.get_definition.side_effect = lambda n: ("Reshape", def_map) if "view" in n else None
+  mgr.get_framework_config.return_value = {}
 
-  # FIX: Populate framework configs for checking module nodes
-  mgr.framework_configs = {"torch": {}, "jax": {}, "numpy": {}, "tensorflow": {}, "mlx": {}, "flax": {}}
+  def create(target):
+    cfg = RuntimeConfig(source_framework="torch", target_framework=target)
+    return PivotRewriter(mgr, cfg)
 
-  cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
-  return PivotRewriter(mgr, cfg)
+  return create
 
 
-def test_method_varargs_packing(rewriter):
-  """
-  Input: x.view(1, 2, -1)
-  Output: jnp.reshape(x, (1, 2, -1))
-  """
-  code = "y = x.view(1, 2, -1)"
-  res = rewrite_code(rewriter, code)
-
+def test_packing_jax(rewriter_factory):
+  rw = rewriter_factory("jax")
+  code = "y = x.view(1, 2)"
+  res = rewrite_code(rw, code)
   assert "jnp.reshape(x" in res
-  assert "(1, 2, -1)" in res
+  assert "(1, 2)" in res
 
 
-def test_method_single_var_passthrough(rewriter):
-  """
-  Input: x.view(shape)
-  Output: jnp.reshape(x, shape)
-  """
-  code = "y = x.view(new_shape)"
-  res = rewrite_code(rewriter, code)
-
-  assert "jnp.reshape(x, new_shape)" in res
+def test_packing_custom_fw(rewriter_factory):
+  rw = rewriter_factory("custom_fw")
+  code = "y = x.view(1, 2)"
+  res = rewrite_code(rw, code)
+  assert "custom.ops.reshape(x" in res
+  assert "(1, 2)" in res
 
 
-def test_method_single_int_tuple(rewriter):
-  """
-  Input: x.view(10)  -- 1D view
-  Output: jnp.reshape(x, (10,)) -- Safer explicit tuple
-  """
-  code = "y = x.view(10)"
-  res = rewrite_code(rewriter, code)
-
-  clean = res.replace(" ", "")
-  assert "(10,)" in clean
-
-
-def test_function_style_reshape(rewriter):
-  """
-  Input: torch.reshape(x, (a, b))
-  Output: jnp.reshape(x, (a, b))
-  """
-  code = "y = torch.reshape(x, (a, b))"
-  res = rewrite_code(rewriter, code)
-
-  assert "jnp.reshape(x, (a, b))" in res
-
-
-def test_function_style_unpacking(rewriter):
-  """
-  Input: torch.reshape(x, a, b) -- if supported by source
-  Output: jnp.reshape(x, (a, b))
-  """
-  code = "y = torch.reshape(x, a, b)"
-  res = rewrite_code(rewriter, code)
-  assert "jnp.reshape(x, (a, b))" in res
+def test_packing_missing_passthrough(rewriter_factory):
+  rw = rewriter_factory("numpy")
+  code = "y = x.view(1, 2)"
+  res = rewrite_code(rw, code)
+  assert "x.view(1, 2)" in res

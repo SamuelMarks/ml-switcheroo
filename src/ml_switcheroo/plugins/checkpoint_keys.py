@@ -2,22 +2,24 @@
 Plugin for Checkpoint Key Remapping.
 
 Handles the runtime impedance mismatch between PyTorch state dictionaries and
-flattened parameter trees (e.g., JAX/Flax).
+flattened parameter trees.
 
 Logic:
-This plugin blindly converts `load_state_dict(state)` calls into usage of a
+This plugin converts `load_state_dict(state)` calls into usage of a
 generated runtime utility `KeyMapper.from_torch(state)`.
 
-It does **not** check the target framework. If a semantic map points to
-`requires_plugin="checkpoint_mapper"`, the transformation is applied.
+Decoupling Logic:
+The injected `KeyMapper` utility now outputs **NumPy** arrays.
+This ensures compatibility with JAX, TensorFlow, MLX, and others without
+forcing a hard dependency on `jax` in the generated code.
 """
 
 import libcst as cst
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
-# The runtime utility source code to be injected by the transpiler
+# The runtime utility source code to be injected by the transpiler.
+# Updated to use pure NumPy, removing the hard JAX dependency.
 KEY_MAPPER_SOURCE = r""" 
-import jax.numpy as jnp
 import numpy as np
 import re
 
@@ -47,7 +49,11 @@ class KeyMapper:
   @staticmethod
   def map_value(key, val): 
     try: 
-        val = np.array(val) 
+        # Convert Torch tensors or other formats to numpy
+        if hasattr(val, 'cpu'): 
+            val = val.detach().cpu().numpy() 
+        else: 
+            val = np.array(val) 
     except: 
         return val # Fallback
 
@@ -59,7 +65,9 @@ class KeyMapper:
       elif val.ndim == 4: 
         # Conv2d: (O, I, H, W) -> (H, W, I, O) 
         val = val.transpose((2, 3, 1, 0)) 
-    return jnp.array(val) 
+    
+    # Return as numpy array. Target frameworks (JAX, TF, etc) handle numpy inputs. 
+    return val
 
   @classmethod
   def from_torch(cls, state_dict): 
@@ -79,7 +87,8 @@ def transform_checkpoint_keys(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   **Transformation**
   `model.load_state_dict(state, strict=True)` -> `KeyMapper.from_torch(state)`
 
-  Triggers blindly if mapped. Injects KeyMapper source code once.
+  Triggers if mapped via `requires_plugin="checkpoint_mapper"`.
+  Injects KeyMapper source code once per file.
   """
   # 1. Identify 'state_dict' argument (usually arg 0)
   args = list(node.args)

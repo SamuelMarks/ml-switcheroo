@@ -97,17 +97,18 @@ def test_hierarchical_search(tmp_path, toml_file):
 def test_no_toml_fallback(tmp_path):
   """
   Scenario: No pyproject.toml exists.
-  Expect: Default hardcoded values are derived from registry.
-  Note: Config logic sorts options alphabetically ['jax', 'torch'].
+  Expect: Default values are derived from registry.
+  Note: Config logic prioritizes 'torch' as source.
   """
-  # We patch available_frameworks to ensure deterministic defaults for the test
+  # We patch available_frameworks to ensure deterministic defaults for the test.
+  # Logic: sorted(['jax', 'torch']) -> ['jax', 'torch'].
+  # _resolve_default_source swaps them -> ['torch', 'jax'].
   with patch("ml_switcheroo.config.available_frameworks", return_value=["torch", "jax"]):
     # Ensure no file exists
     config = RuntimeConfig.load(search_path=tmp_path)
 
-    # Defaults logic in config.py: sorted() -> ['jax', 'torch'] -> source='jax', target='torch'
-    assert config.source_framework == "jax"
-    assert config.target_framework == "torch"
+    assert config.source_framework == "torch"  # Changed from 'jax' to match new priority
+    assert config.target_framework == "jax"  # Second priority
     assert config.strict_mode is False
     assert config.plugin_settings == {}
 
@@ -125,5 +126,4 @@ def test_malformed_toml_is_ignored(tmp_path):
     config = RuntimeConfig.load(search_path=tmp_path)
 
     # Should fall back to defaults rather than crashing
-    # Sorted defaults: source='jax'
-    assert config.source_framework == "jax"
+    assert config.source_framework == "torch"

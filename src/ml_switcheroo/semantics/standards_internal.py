@@ -1,12 +1,13 @@
 """
 Internal Standards Definition (Hub of the Knowledge Base).
 
-This module defines the "Golden Set" of abstract operations.
+This module defines the "Golden Set" of abstract operations (The Hub).
 It defines the **Abstract Schema**: Standard argument names (`std_args`) and docstrings.
 
-Architectural Note:
-    Implementation details (variants) have been moved to the Framework Adapters
-    in `src/ml_switcheroo/frameworks/`. This file must remain framework-agnostic.
+**Decoupling Note:**
+Implementation details (`variants`) have been purged from this file.
+Implementations are exclusively provided by Framework Adapters
+(e.g., `src/ml_switcheroo/frameworks/torch.py`) via their `definitions` property.
 """
 
 from ml_switcheroo.core.dsl import OpType
@@ -67,7 +68,7 @@ INTERNAL_OPS = {
     "std_args": ["input", "min", "max"],
   },
   "View": {
-    "description": "Returns a new tensor with the same data as the self tensor but of a different shape.",
+    "description": "Returns a new tensor with the same data and elements but different shape.",
     "std_args": ["input", "shape"],
   },
   "permute_dims": {
@@ -122,7 +123,10 @@ INTERNAL_OPS = {
     "description": "Square.",
     "std_args": ["x"],
   },
-  "Gather": {"description": "Gathers values along an axis specified by dim.", "std_args": ["input", "dim", "index"]},
+  "Gather": {
+    "description": "Gathers values along an axis specified by dim.",
+    "std_args": ["input", "dim", "index"],
+  },
   "Scatter": {
     "description": "Writes all values from the tensor src into indices specified.",
     "std_args": ["input", "dim", "index", "src"],
@@ -155,7 +159,10 @@ INTERNAL_OPS = {
     "description": "Returns the indices of the minimum value of all elements in the input tensor.",
     "std_args": ["input", "dim", "keepdim"],
   },
-  "Pad": {"description": "Pads input tensor.", "std_args": ["input", "pad", "mode", "value"]},
+  "Pad": {
+    "description": "Pads input tensor.",
+    "std_args": ["input", "pad", "mode", "value"],
+  },
   "Einsum": {
     "description": "Sums the product of the elements of the input operands along dimensions specified using a notation.",
     "std_args": ["equation", "operands"],
@@ -221,7 +228,7 @@ INTERNAL_OPS = {
     "metadata": {"target_type": "Bool"},
   },
   "CastChar": {
-    "description": "Cast tensor to int8/char (Keras context)",
+    "description": "Cast tensor to int8/char",
     "std_args": ["x"],
     "metadata": {"target_type": "Int8"},
   },
@@ -384,8 +391,25 @@ INTERNAL_OPS = {
     "std_args": ["recurse"],
   },
   "DataLoader": {
-    "description": "Data loading utility.",
-    "std_args": ["dataset"],
+    "description": "Foundational PyTorch Data Loader. Mapped to GenericDataLoader shim via Plugin.",
+    "std_args": [
+      "dataset",
+      "batch_size",
+      "shuffle",
+      "sampler",
+      "batch_sampler",
+      "num_workers",
+      "collate_fn",
+      "pin_memory",
+      "drop_last",
+      "timeout",
+      "worker_init_fn",
+      "multiprocessing_context",
+      "generator",
+      "prefetch_factor",
+      "persistent_workers",
+      "pin_memory_device",
+    ],
   },
   "LoadStateDict": {
     "description": "Loading state utility for mappings.",
@@ -402,6 +426,14 @@ INTERNAL_OPS = {
   "Cache": {
     "description": "Container for mutable state.",
     "std_args": ["value"],
+  },
+  "torch.utils": {
+    "description": "Torch Utilities Namespace",
+    "std_args": [],
+  },
+  "torch.utils.data": {
+    "description": "Torch Data Utilities Namespace",
+    "std_args": [],
   },
   # ============================================================================
   # 9. Functional Transforms

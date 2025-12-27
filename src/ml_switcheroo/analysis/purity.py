@@ -52,14 +52,14 @@ class PurityScanner(cst.CSTTransformer):
   # Fallback only if semantics not provided
   _DEFAULT_RNG_METHODS: Set[str] = {"seed"}
 
-  def __init__(self, semantics: Any = None, source_fw: str = "torch"):
+  def __init__(self, semantics: Any = None, source_fw: Optional[str] = None):
     """
     Initializes the PurityScanner.
 
     Args:
         semantics: SemanticsManager instance to load dynamic configs.
         source_fw: The framework being analyzed (to load specific impure methods).
-                   Use legacy 'torch' default if not provided for safety.
+                   If None, framework-specific impurity checks are skipped.
     """
     self._current_violations: List[str] = []
     self.source_fw = source_fw
@@ -75,7 +75,7 @@ class PurityScanner(cst.CSTTransformer):
         self._global_rng_methods.update(semantics.get_all_rng_methods())
 
       # B. Source Framework Specific Impurities (e.g. add_, copy_)
-      if hasattr(semantics, "get_framework_config"):
+      if source_fw and hasattr(semantics, "get_framework_config"):
         conf = semantics.get_framework_config(source_fw)
         if conf and "traits" in conf:
           traits = StructuralTraits.model_validate(conf["traits"])

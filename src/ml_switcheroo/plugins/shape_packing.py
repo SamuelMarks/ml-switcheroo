@@ -1,5 +1,17 @@
 """
 Plugin for Packing Shape Arguments.
+
+This transformation converts variable-argument shape definitions into
+explicit tuple arguments required by certain frameworks.
+
+Example:
+    Source: `x.view(1, 2, -1)` (PyTorch style)
+    Target: `jnp.reshape(x, (1, 2, -1))` (JAX/NumPy style)
+
+Decoupling Logic:
+    This plugin does NOT enforce a framework whitelist. It executes unconditionally
+    if wired. However, it relies on looking up "Reshape" or "View" in the semantics.
+    If those definitions are missing for the target framework, it aborts.
 """
 
 import libcst as cst
@@ -11,7 +23,30 @@ from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_
 
 @register_hook("pack_shape_args")
 def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
-  if ctx.target_fw not in ["jax", "numpy", "tensorflow", "mlx"]:
+  """
+  Hook: Packs trailing positional arguments into a shape tuple.
+
+  Logic:
+  1.  Resolve Target API via "Reshape" or "View". Abort if missing.
+  2.  Packs arguments.
+
+  Args:
+      node: The original CST Call node.
+      ctx: The hook execution context.
+
+  Returns:
+      cst.Call: The transformed call with packed shape arguments.
+  """
+  # 0. Resolve Target API (Strict)
+  # Attempt to use specific OP ID set by Rewriter, or fallback
+  op_name = ctx.current_op_id or "Reshape"
+
+  target_api = ctx.lookup_api(op_name)
+  if not target_api and op_name == "Reshape":
+    # Try alternate key
+    target_api = ctx.lookup_api("View")
+
+  if not target_api:
     return node
 
   # 1. Determine Input Tensor & Shape Args
@@ -20,19 +55,15 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   is_method = False
   if isinstance(node.func, cst.Attribute):
-    # Distinguish x.view() from torch.reshape() via centralized check
     if is_framework_module_node(node.func.value, ctx):
-      # It's a function call (torch.reshape)
       is_method = False
     else:
       is_method = True
 
   if is_method:
-    # Case: x.view(...) -> Input is x
     input_tensor = node.func.value
     shape_args = list(node.args)
   else:
-    # Case: view(x, ...) -> Input is arg 0
     if not node.args:
       return node
     input_tensor = node.args[0].value
@@ -42,14 +73,10 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
   packed_shape_val: Union[cst.BaseExpression, None] = None
 
   if len(shape_args) > 1:
-    # Multiple args: Pack into Tuple -> (arg1, arg2, ...)
-    elements = []
-    for arg in shape_args:
-      elements.append(cst.Element(value=arg.value))
+    elements = [cst.Element(value=arg.value) for arg in shape_args]
     packed_shape_val = cst.Tuple(elements=elements)
 
   elif len(shape_args) == 1:
-    # Single arg: Check if it needs wrapping logic similar to before
     val = shape_args[0].value
     if isinstance(val, cst.Integer):
       packed_shape_val = cst.Tuple(
@@ -58,7 +85,6 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
     else:
       packed_shape_val = val
   else:
-    # No shape args? Illegal. Return original.
     return node
 
   # 3. Construct New Call Arguments
@@ -67,9 +93,7 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
   if packed_shape_val:
     new_args.append(cst.Arg(value=packed_shape_val))
 
-  # 4. Resolve Target API
-  op_name = "Reshape"
-  target_api = ctx.lookup_api(op_name) or "jax.numpy.reshape"
+  # 4. Create Call
   new_func = create_dotted_name(target_api)
 
   return node.with_changes(func=new_func, args=new_args)

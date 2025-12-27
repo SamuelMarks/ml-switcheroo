@@ -25,6 +25,7 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapsho
 from ml_switcheroo.discovery.inspector import ApiInspector
 from ml_switcheroo.utils.console import console, log_info, log_success
 from ml_switcheroo.frameworks import get_adapter
+from ml_switcheroo.config import RuntimeConfig
 
 
 class MappingWizard:
@@ -41,6 +42,13 @@ class MappingWizard:
     """
     self.semantics = semantics
     self.console = console
+
+    # Resolve dynamic defaults from configuration
+    # This respects registry priority (e.g. favoring installed frameworks like JAX)
+    try:
+      self.default_target = RuntimeConfig().target_framework
+    except Exception:
+      self.default_target = "jax"  # Fallback
 
   def start(self, package_name: str) -> None:
     """
@@ -184,13 +192,17 @@ class MappingWizard:
     return std_args, mapping
 
   def _prompt_target_mapping(self, std_args: List[str]) -> Optional[Dict[str, Any]]:
-    if not Confirm.ask("Map to a Target Framework (e.g. JAX) now?", default=False):
+    # Decoupled default: uses self.default_target (e.g. from config)
+    if not Confirm.ask("Map to a Target Framework?", default=False):
       return None
-    target_fw = Prompt.ask("Target Framework", default="jax")
+
+    target_fw = Prompt.ask("Target Framework", default=self.default_target)
     target_api = Prompt.ask("Target API Path", default=f"{target_fw}.numpy.???")
+
     plugin_name = None
     if Confirm.ask("Does this mapping require a plugin (e.g. decompose)?", default=False):
       plugin_name = Prompt.ask("Plugin Trigger Name (e.g. 'decompose_alpha')")
+
     target_arg_map = {}
     if std_args:
       self.console.print(f"[dim]Map Standard Args to {target_fw} params...[/dim]")
@@ -294,20 +306,3 @@ class MappingWizard:
 
     with open(path, "w", encoding="utf-8") as f:
       json.dump(current, f, indent=2, sort_keys=True)
-
-  def _save_entry(self, api_path: str, details: Dict[str, Any], filename: str) -> None:
-    summary = details.get("doc_summary", "")
-    sig = details.get("detected_sig", details.get("params", []))
-    source_fw = api_path.split(".")[0]
-    if not source_fw:
-      source_fw = "unknown"
-
-    self._save_complex_entry(
-      filename=filename,
-      api_path=api_path,
-      doc_summary=summary,
-      std_args=sig,
-      source_fw=source_fw,
-      source_arg_map={},
-      target_variant=None,
-    )

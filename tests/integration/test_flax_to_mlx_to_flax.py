@@ -30,7 +30,7 @@ from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.mlx import MLXAdapter
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
-# Input: Flax NNX Code
+# Input: Flax NNX Code (with correct module usage)
 FLAX_SOURCE = textwrap.dedent(""" 
 from flax import nnx
 
@@ -45,7 +45,7 @@ class Net(nnx.Module):
 """).strip()
 
 # Import variant that might occur due to aliasing config priorities
-FLAX_SOURCE_RELAXED = textwrap.dedent("""
+FLAX_SOURCE_RELAXED = textwrap.dedent(""" 
 import flax.nnx as nnx
 
 class Net(nnx.Module): 
@@ -179,6 +179,10 @@ def test_flax_to_mlx_roundtrip(semantics):
   norm_actual = normalize_ws(flax_code)
   norm_expected = normalize_ws(FLAX_SOURCE)
   norm_relaxed = normalize_ws(FLAX_SOURCE_RELAXED)
+
+  # Assertion updated to ensure we are correctly matching 'nnx.Module' (not module.Module)
+  class_line = next(line.rstrip() for line in flax_code.splitlines() if "class Net" in line)
+  assert "class Net(nnx.Module):" == class_line, f"Incorrect Base Class generated: {class_line}"
 
   assert norm_actual == norm_expected or norm_actual == norm_relaxed, (
     f"Roundtrip failed. Got:\n{flax_code}\nExpected:\n{FLAX_SOURCE}"

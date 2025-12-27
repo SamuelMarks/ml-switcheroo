@@ -33,6 +33,7 @@ try:
   import mlx.core
   import mlx.nn
   import mlx.optimizers
+  import mlx.utils
 except ImportError:
   pass
 
@@ -101,12 +102,26 @@ class MLXAdapter:
       "to_numpy": "np.array({res_var})",
     }
 
+  # --- Harness Protocol ---
+
+  @property
+  def harness_imports(self) -> List[str]:
+    return []
+
+  def get_harness_init_code(self) -> str:
+    return ""
+
   @property
   def supported_tiers(self) -> List[SemanticTier]:
     """
     Returns supported semantic tiers (Array, Neural, Extras).
     """
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
+
+  @property
+  def declared_magic_args(self) -> List[str]:
+    """Implicit RNG."""
+    return []
 
   @property
   def structural_traits(self) -> StructuralTraits:
@@ -120,7 +135,7 @@ class MLXAdapter:
       module_base="mlx.nn.Module",
       forward_method="__call__",
       requires_super_init=True,
-      strip_magic_args=["rngs"],
+      auto_strip_magic_args=True,  # Decoupled
     )
 
   @property

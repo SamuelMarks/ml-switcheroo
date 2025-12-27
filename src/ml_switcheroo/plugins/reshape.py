@@ -3,19 +3,14 @@ Plugin for "View" Semantics and Reshape strictness.
 
 Addresses:
     PyTorch `tensor.view(*shape)` requires contiguous memory and shares data.
-    JAX `jnp.reshape(arr, shape)` works on any array, copying if necessary, producing immutable output.
-
-Semantic Mismatch:
-    In PyTorch, `view` is often used as an assertion of zero-copy reshaping.
-    In JAX, copy/view distinction is less relevant for correctness due to immutability,
-    but relevant for performance.
+    JAX/NumPy `reshape(arr, shape)` works on any array.
 
 Plugin Logic:
     1.  **Strict Mode**: If `config.strict_mode` is enabled, this plugin can inject
-        synchronization (`block_until_ready()`) or explicit copies to isolate performance artifacts,
-        depending on the configuration policy. (Prompt request: injects block/copy).
-    2.  **Argument Packing**: Handles the conversion from varargs `view(a, b)` to tuple `reshape((a, b))`
-        if not already handled by a prior pass.
+        synchronization (e.g. `block_until_ready()`).
+    2.  **Argument Packing**: Packs varargs `view(a, b)` -> `reshape((a, b))`.
+    3.  **Decoupling**: Strictly relies on lookup API. If `Reshape` or `View` are
+        not mapped in semantics for the target framework, returns original node.
 """
 
 import libcst as cst
@@ -25,6 +20,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
+  """Helper to create a CST Attribute chain from string."""
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -39,27 +35,33 @@ def transform_view_semantics(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Transformation:
       Input: `x.view(a, b)`
-      Standard Output: `jax.numpy.reshape(x, (a, b))`
-      Strict Output:   `jax.numpy.reshape(x, (a, b)).block_until_ready()`
+      Standard Output: `target_api(x, (a, b))`
+      Strict Output:   `target_api(x, (a, b)).block_until_ready()` [If defined in Traits]
+
+  Decoupling:
+      Lookup precedence: "Reshape" -> "View".
+      If lookup fails, aborts transformation.
   """
-  if ctx.target_fw not in ["jax", "numpy", "flax"]:
+  # 0. Resolve Target API
+  target_api = ctx.lookup_api("Reshape") or ctx.lookup_api("View")
+  if not target_api:
+    # Fail safe if target framework has no mapping
     return node
 
-  # 1. Normalize Arguments (Pack Varargs)
-  # Similar logic to shape_packing.py, but specific here to ensure View works standalone
+  # 1. Normalize Arguments (Pack Varargs -> Tuple)
   input_tensor = None
-  shape_elements = []
+  orig_args = []
 
   if isinstance(node.func, cst.Attribute):
     # Method call x.view(...)
     input_tensor = node.func.value
-    orig_args = node.args
+    orig_args = list(node.args)
   else:
-    # Function call view(x, ...) - uncommon for view, but standard for reshape
+    # Function call view(x, ...)
     if not node.args:
       return node
     input_tensor = node.args[0].value
-    orig_args = node.args[1:]
+    orig_args = list(node.args[1:])
 
   # Check if args need packing (multiple args or single int arg)
   needs_tuple = False
@@ -79,33 +81,28 @@ def transform_view_semantics(node: cst.Call, ctx: HookContext) -> cst.Call:
       cst.Arg(value=shape_arg_val),
     ]
   else:
-    # Already likely a tuple or var
+    # Args are already likely a tuple or singular var.
     # Just ensure input tensor is first arg if converting method->func
     if isinstance(node.func, cst.Attribute):
-      new_args = [cst.Arg(value=input_tensor, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))), orig_args[0]]
+      # method x.view(shape) -> func(x, shape)
+      new_args = [cst.Arg(value=input_tensor, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))]
+      if orig_args:
+        new_args.append(orig_args[0])
     else:
       new_args = list(node.args)
 
   # 2. Rename Function
-  target_api = "jax.numpy.reshape"
   new_func = _create_dotted_name(target_api)
-
   reshape_call = node.with_changes(func=new_func, args=new_args)
 
-  # 3. Handle Strict Mode
-  # If config says be strict about execution (or mimicking sync behavior of some Torch ops contexts)
-  # The prompt specifically asked for ".block_until_ready() or copies"
-
-  # We check a hypothetical boolean in runtime config.
-  # Current RuntimeConfig might not have 'strict_mode' field defined in types yet,
-  # but Python allows attribute access or dictionary lookup if we treat it dynamically.
+  # 3. Handle Strict Mode (Optional Blocking)
+  # Read strict mode from config and trait method from context
   is_strict = getattr(ctx._runtime_config, "strict_mode", False)
 
   if is_strict:
-    # Append .block_until_ready()
-    # Allows for precise timing benchmarks matching "contiguity" checks overhead?
-    # Or simply forces materialization.
-    strict_call = cst.Call(func=cst.Attribute(value=reshape_call, attr=cst.Name("block_until_ready")), args=[])
-    return strict_call
+    trait_method = ctx.plugin_traits.strict_materialization_method
+    if trait_method:
+      strict_call = cst.Call(func=cst.Attribute(value=reshape_call, attr=cst.Name(trait_method)), args=[])
+      return strict_call
 
   return reshape_call

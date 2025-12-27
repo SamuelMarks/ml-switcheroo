@@ -5,6 +5,7 @@ Verifies that:
 1. INTERNAL_OPS contains expected functional primitives (vmap, grad).
 2. Standard arguments match expected signatures.
 3. No syntax errors in the static dictionary definition.
+4. **No Variants are present** (Decoupling Enforcement).
 """
 
 import pytest
@@ -42,6 +43,18 @@ def test_optimizer_standards():
 
 def test_vision_standards():
   """Verify vision transforms are preserved."""
-  # Updated: Check CenterCrop instead of Resize to avoid conflict with ONNX
   assert "CenterCrop" in INTERNAL_OPS
   assert "size" in INTERNAL_OPS["CenterCrop"]["std_args"]
+
+
+def test_decoupling_enforcement():
+  """
+  Critical Check: Ensure NO variants/implementations are in the Hub.
+  This forces developers to put mappings in the Adapters (Spokes).
+  """
+  for op_name, details in INTERNAL_OPS.items():
+    if op_name == "__imports__":
+      continue
+    # variants should not exist, or be empty dicts if refactoring kept keys but empty
+    if "variants" in details:
+      assert not details["variants"], f"Found lingering variants in {op_name}. Move to Framework Adapter."

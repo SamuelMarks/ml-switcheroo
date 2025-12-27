@@ -7,16 +7,14 @@ a specific range of dimensions. JAX and NumPy rely on:
 2. `reshape()`: Flattens dimensions if the new shape is calculated correctly.
 
 Common Use Case:
-    `x = torch.flatten(x, 1)` -> Flattens from dim 1 to end (preserving batch).
-    Used in almost every CNN classifier head.
+    `x = torch.flatten(x, 1)` -> reshaping `(x.shape[0], -1)`.
 
 Transformation Strategy:
     1. If `start_dim=1` and `end_dim=-1` (or implicit):
-       Generate `reshape(x, (x.shape[0], -1))`.
+       Generate `target_reshape(x, (x.shape[0], -1))`.
     2. If `start_dim=0` and `end_dim=-1`:
-       Generate `ravel(x)`.
-    3. Trait Check: If target framework supports native flattening (e.g. Keras `Flatten` layer),
-       return original to avoid breaking layer semantics, unless specific functional rewrite is requested.
+       Generate `target_ravel(x)`.
+    3. Decoupling: If target APIs are not found in semantics, returns original node.
 """
 
 import libcst as cst
@@ -40,13 +38,10 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   Hook: Transforms `flatten(x, start, end)` into `reshape` or `ravel`.
 
   Decoupling Update:
-  Logic now checks `ctx.plugin_traits.has_numpy_compatible_arrays`.
-  If True (JAX/NumPy/TF), it applies the reshape logic.
-  If False (Torch), it preserves the call.
+  Logic checks `ctx.plugin_traits.has_numpy_compatible_arrays`.
+  Strictly looks up `flatten_full` or `flatten_range` abstract ops.
   """
-  # Capability Check: Only apply reshape logic if target uses numpy semantics
-  # (e.g. JAX, NumPy, TF, MLX).
-  # If target is Torch (imperative), flatten works natively.
+  # Capability Check: Only apply logic if target uses numpy semantics
   if not ctx.plugin_traits.has_numpy_compatible_arrays:
     return node
 
@@ -64,11 +59,10 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   # extract positional args
   if len(args) > 1:
     try:
-      # We only handle integer literals for structural rewriting
       if isinstance(args[1].value, cst.Integer):
         start_dim = int(args[1].value.value)
     except ValueError:
-      pass  # Keep default 0 implies full flatten? No, partial.
+      pass
 
   if len(args) > 2:
     try:
@@ -80,52 +74,45 @@ def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
   # Check keyword args (override positional if present)
   for arg in args:
     if arg.keyword:
-      if arg.keyword.value == "start_dim":
-        if isinstance(arg.value, cst.Integer):
-          start_dim = int(arg.value.value)
-      if arg.keyword.value == "end_dim":
-        if isinstance(arg.value, cst.Integer):
-          end_dim = int(arg.value.value)
+      if arg.keyword.value == "start_dim" and isinstance(arg.value, cst.Integer):
+        start_dim = int(arg.value.value)
+      if arg.keyword.value == "end_dim" and isinstance(arg.value, cst.Integer):
+        end_dim = int(arg.value.value)
 
   # Strategy 1: Full Flatten (ravel)
   if start_dim == 0 and end_dim == -1:
-    target_api = ctx.lookup_api("flatten_full") or "jax.numpy.ravel"
-    new_func = _create_dotted_name(target_api)
-    return node.with_changes(func=new_func, args=[input_arg])
+    # Strict ID lookup: expect mapping for 'flatten_full'
+    target_api = ctx.lookup_api("flatten_full")
+    if target_api:
+      new_func = _create_dotted_name(target_api)
+      return node.with_changes(func=new_func, args=[input_arg])
 
   # Strategy 2: Batch-Preserving Flatten (Reshape)
   # Case: flatten(x, 1) -> reshape(x, (x.shape[0], -1))
   if start_dim == 1 and end_dim == -1:
-    target_api = ctx.lookup_api("flatten_range") or "jax.numpy.reshape"
-    new_func = _create_dotted_name(target_api)
+    # Strict ID lookup
+    target_api = ctx.lookup_api("flatten_range")
+    if target_api:
+      new_func = _create_dotted_name(target_api)
 
-    # Construct shape tuple: (x.shape[0], -1)
+      # Construct shape tuple: (x.shape[0], -1)
+      shape_attr = cst.Attribute(value=input_val, attr=cst.Name("shape"))
+      batch_dim = cst.Subscript(value=shape_attr, slice=[cst.SubscriptElement(slice=cst.Index(value=cst.Integer("0")))])
+      neg_one = cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer("1"))
 
-    # 1. x.shape[0]
-    # We access the 'value' of the input argument directly.
-    # Warning: If input_val is 'call()', generated code is 'call().shape[0]'.
-    shape_attr = cst.Attribute(value=input_val, attr=cst.Name("shape"))
-    batch_dim = cst.Subscript(value=shape_attr, slice=[cst.SubscriptElement(slice=cst.Index(value=cst.Integer("0")))])
+      shape_tuple = cst.Tuple(
+        elements=[
+          cst.Element(value=batch_dim, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
+          cst.Element(value=neg_one),
+        ]
+      )
 
-    # 2. -1
-    neg_one = cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer("1"))
+      # Ensure comma on input arg
+      if input_arg.comma == cst.MaybeSentinel.DEFAULT:
+        input_arg = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
-    shape_tuple = cst.Tuple(
-      elements=[
-        cst.Element(value=batch_dim, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
-        cst.Element(value=neg_one),
-      ]
-    )
+      new_args = [input_arg, cst.Arg(value=shape_tuple)]
+      return node.with_changes(func=new_func, args=new_args)
 
-    # New Args: (input, shape_tuple)
-    # Ensure comma on input arg
-    if input_arg.comma == cst.MaybeSentinel.DEFAULT:
-      input_arg = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
-
-    new_args = [input_arg, cst.Arg(value=shape_tuple)]
-
-    return node.with_changes(func=new_func, args=new_args)
-
-  # Fallback: Untranslatable complex slicing (e.g. flatten(x, 2, 3)) without knowing rank.
-  # Return original node to trigger escape hatch if configured, or pass through.
+  # Fallback: Untranslatable or missing specific mapping
   return node

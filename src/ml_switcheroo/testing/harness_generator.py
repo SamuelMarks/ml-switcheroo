@@ -5,30 +5,24 @@ This module creates self-contained Python scripts for verifying transpilation ac
 It dynamically extracts source code from the live system to ensure that generated
 harnesses support ALL registered frameworks (Torch, JAX, Keras, etc.) without
 hardcoding switch statements.
-
-Capabilities:
-
-1. **Dynamic Shim Generation**: Reads `convert()` methods from all registered
-   Framework Adapters and synthesizes a standalone `get_adapter` function.
-2. **Fuzzer Inlining**: Extracts the `InputFuzzer` class source code.
-3. **Isolation**: Generated scripts run without `ml_switcheroo` installed.
 """
 
 import json
 import inspect
 import textwrap
+import re
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
 from ml_switcheroo.testing.harness_generator_template import HARNESS_TEMPLATE
 from ml_switcheroo.testing.fuzzer import InputFuzzer
 from ml_switcheroo.utils.code_extractor import CodeExtractor
-from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, FrameworkAdapter
+from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, get_adapter
 
 
 class HarnessGenerator:
   """
-  Generates standalone verification scripts.
+  Generates standalone verification scripts tailored to the target framework.
   """
 
   def __init__(self) -> None:
@@ -45,6 +39,14 @@ class HarnessGenerator:
   ) -> None:
     """
     Writes the standalone verification script to disk.
+
+    Args:
+        source_file: Path to original source.
+        target_file: Path to transpiled result.
+        output_harness: Destination path.
+        source_fw: Key of source framework.
+        target_fw: Key of target framework.
+        semantics: Optional dictionary of semantic definitions (for type hints).
     """
     # 1. Extract Fuzzer Logic
     fuzzer_code = self.extractor.extract_class(InputFuzzer)
@@ -64,11 +66,9 @@ class HarnessGenerator:
     hints_json = json.dumps(hints_map).replace("'", '"')
 
     # 3. Generate Dynamic Adapter Shim
-    # This introspects all registered adapters (including Keras)
-    # and builds a comprehensive switch statement.
     adapter_shim = self._generate_adapter_shim()
 
-    # 4. Assemble Code Block
+    # 4. Assemble Fuzzer Block
     fuzzer_block = (
       f"{adapter_shim}\n\n"
       f"{fuzzer_code}\n\n"
@@ -77,7 +77,10 @@ class HarnessGenerator:
       "    pass\n"
     )
 
-    # 5. Populate Template
+    # 5. Build Dynamic Init Logic (Decoupling Step)
+    imports_block, init_helpers_block, injection_logic_block = self._build_dynamic_init(target_fw)
+
+    # 6. Populate Template
     script_content = HARNESS_TEMPLATE.format(
       source_path=source_file.resolve().as_posix(),
       target_path=target_file.resolve().as_posix(),
@@ -85,27 +88,75 @@ class HarnessGenerator:
       target_fw=target_fw,
       hints_json=hints_json,
       fuzzer_implementation=fuzzer_block,
+      # New Injection Points
+      imports=imports_block,
+      init_helpers=init_helpers_block,
+      param_injection_logic=injection_logic_block,
     )
 
-    # 6. Write to Disk
+    # 7. Write to Disk
     output_harness.parent.mkdir(parents=True, exist_ok=True)
     with open(output_harness, "wt", encoding="utf-8") as f:
       f.write(script_content)
 
+  def _build_dynamic_init(self, target_fw: str) -> tuple[str, str, str]:
+    """
+    Queries the target adapter to construct framework-specific initialization logic.
+
+    Returns:
+        (imports_str, helper_functions_str, injection_logic_str)
+    """
+    adapter = get_adapter(target_fw)
+
+    # Defaults (Empty)
+    if not adapter:
+      return "", "", "pass"
+
+    # A. Imports
+    imports = getattr(adapter, "harness_imports", [])
+    imports_str = "\n".join(imports)
+
+    # B. Helper Code
+    init_code = getattr(adapter, "get_harness_init_code", lambda: "")()
+
+    # Extract function name from the code string (e.g. def _make_jax_key)
+    match = re.search(r"def\s+([a-zA-Z0-9_]+)\s*\(", init_code)
+    helper_name = match.group(1) if match else None
+
+    # C. Injection Logic (The loop body)
+    magic_args = getattr(adapter, "declared_magic_args", [])
+
+    injection_lines = []
+
+    if magic_args and helper_name:
+      # Construct dispatch: if parameter matches any magic arg, call helper
+      quoted_args = [f'"{a}"' for a in magic_args]
+      list_str = "[" + ", ".join(quoted_args) + "]"
+
+      # Indentation matches context in template logic
+      injection_lines.append(f"val = None")
+      injection_lines.append(f"if tp in {list_str}:")
+      injection_lines.append(f"    val = {helper_name}(seed=42)")
+      injection_lines.append(f"if val is not None:")
+      injection_lines.append(f"    tgt_inputs[tp] = val")
+    else:
+      injection_lines.append("pass")
+
+    final_logic = injection_lines[0]
+    for line in injection_lines[1:]:
+      final_logic += "\n                    " + line
+
+    return imports_str, init_code, final_logic
+
   def _generate_adapter_shim(self) -> str:
     """
     Introspects registered frameworks to build the `get_adapter` function.
-
-    It extracts the body of the `convert(self, data)` method from each
-    registered adapter class and inlines it into an `if/elif` block.
     """
-    # Base template for the shim
     shim_lines = [
       "# Shim for missing ml_switcheroo.frameworks.get_adapter",
       "def get_adapter(framework):",
       "    class GenericAdapter:",
       "        def convert(self, data):",
-      "            # Passthrough non-arrays",
       "            try:",
       "                import numpy as np",
       "                if not isinstance(data, (np.ndarray, np.generic)) and not isinstance(data, (list, tuple)):",
@@ -115,32 +166,22 @@ class HarnessGenerator:
       "",
     ]
 
-    # Iterate all registered frameworks (e.g. torch, jax, keras, tensorflow)
-    # Sorting ensures deterministic output
     frameworks = sorted(_ADAPTER_REGISTRY.keys())
-
     first = True
     for fw_name in frameworks:
       adapter_cls = _ADAPTER_REGISTRY[fw_name]
 
-      # Skip if abstract or missing convert (shouldn't happen for valid adapters)
+      # Skip if abstract/incomplete
       if not hasattr(adapter_cls, "convert"):
         continue
 
-      # Extract the raw source of the convert method
       try:
         method_source = inspect.getsource(adapter_cls.convert)
       except OSError:
-        continue  # Cannot extract (e.g. dynamic class)
+        continue
 
-      # Clean indentation: The extracted source includes 'def convert(self, data):'
-      # We want just the body.
-
-      # Dedent the block
       clean_block = textwrap.dedent(method_source)
       lines = clean_block.splitlines()
-
-      # Find body start (skip decorator if any, and def line)
       body_start = 0
       for i, line in enumerate(lines):
         if line.strip().startswith("def convert"):
@@ -151,37 +192,18 @@ class HarnessGenerator:
       if not body_lines:
         continue
 
-      # Check logic for 'if' block
       condition_kw = "if" if first else "elif"
       shim_lines.append(f"            {condition_kw} framework == '{fw_name}':")
 
-      # Indent the body lines by 16 spaces (3 levels deep + if block)
-      for line in body_lines:
-        # We need to re-indent relative to the if block
-        # The extracted body lines have indentation relative to the class method
-        # We strip common indentation then add our own
-        stripped = line.strip()
-        if stripped:
-          # Calculate original indent depth relative to 'def'
-          # But simple strip/reindent is safer for generated code
-          # NOTE: This assumes convert methods are relatively flat.
-          # Complex logic might break with naive strip.
-          # Better approach: textwrap.indent
-          pass
-
-      # Robust Re-indentation using textwrap
-      base_indent = " " * 16  # Align with the if block
-      body_block = textwrap.dedent("\n".join(body_lines))
-      indented_body = textwrap.indent(body_block, base_indent)
+      base_indent = " " * 16
+      body_str = textwrap.dedent("\n".join(body_lines))
+      indented_body = textwrap.indent(body_str, base_indent)
       shim_lines.append(indented_body)
 
       first = False
 
-    # Fallback
     shim_lines.append("")
-    shim_lines.append("            # Default/NumPy")
     shim_lines.append("            return data")
     shim_lines.append("")
     shim_lines.append("    return GenericAdapter()")
-
     return "\n".join(shim_lines)

@@ -13,6 +13,7 @@ from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
+  PluginTraits,
   StandardCategory,
   StandardMap,
   ImportConfig,
@@ -67,6 +68,15 @@ class NumpyAdapter:
       "to_numpy": "{res_var}",  # Identity
     }
 
+  # --- Harness Protocol ---
+
+  @property
+  def harness_imports(self) -> List[str]:
+    return []
+
+  def get_harness_init_code(self) -> str:
+    return ""
+
   @property
   def supported_tiers(self) -> List[SemanticTier]:
     """
@@ -76,14 +86,21 @@ class NumpyAdapter:
     return [SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
 
   @property
-  def structural_traits(self) -> StructuralTraits:
-    """Returns default structural traits (no class rewriting)."""
-    return StructuralTraits()
+  def declared_magic_args(self) -> List[str]:
+    return []
 
   @property
-  def plugin_traits(self) -> Any:
-    from ml_switcheroo.semantics.schema import PluginTraits
+  def structural_traits(self) -> StructuralTraits:
+    """Returns default structural traits (no class rewriting)."""
+    return StructuralTraits(
+      auto_strip_magic_args=True  # NumPy doesn't support random keys or context args
+    )
 
+  @property
+  def plugin_traits(self) -> PluginTraits:
+    """
+    Plugin capabilities.
+    """
     return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=False,

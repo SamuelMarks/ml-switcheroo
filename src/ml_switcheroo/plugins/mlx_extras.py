@@ -3,8 +3,7 @@ Plugin for MLX Ecosystem Mapping.
 
 Handles:
 1. Compilation: `@torch.compile` -> `@mx.compile`.
-2. Eager Evaluation: `torch.cuda.synchronize()` -> `mx.eval(state)`.
-3. Streams: `torch.cuda.stream` -> `mx.stream(mx.gpu)`.
+2. Eager Evaluation: `torch.cuda.synchronize()` -> Warning/No-op.
 """
 
 import libcst as cst
@@ -27,71 +26,49 @@ def transform_compiler(node: Union[cst.Decorator, cst.Call], ctx: HookContext) -
   """
   Hook: Maps JIT compilation decorators.
 
-  Triggers: `torch.compile` (via `requires_plugin: "mlx_compiler"`).
+  Triggers: Operations mapped with `requires_plugin: "mlx_compiler"`.
 
   Transformation:
       Input:  `@torch.compile(fullgraph=True, dynamic=True)`
       Output: `@mx.compile` (stripping incompatible kwargs).
 
-  Note: MLX's compiler (`mx.compile`) is largely drop-in but does not support
-  PyTorch specific flags like `fullgraph` or `backend`.
+  Decoupling:
+      Looks up the `Compile` operation API in semantics (e.g. `mlx.core.compile`).
   """
-  if ctx.target_fw != "mlx":
-    return node
-
-  # Handling Decorator Node
-  # Structure: Decorator(decorator=Call(...)) or Decorator(decorator=Name(...))
-
-  decorator_expr = node.decorator
-
-  # New API
-  target_api = "mlx.core.compile"  # Aliased usually as mx.compile
+  # Resolve Target API dynamically
+  target_api = ctx.lookup_api("Compile") or "mlx.core.compile"
   new_func = _create_dotted_name(target_api)
 
-  # If explicit call `@torch.compile(...)`
-  if isinstance(decorator_expr, cst.Call):
-    # MLX compile takes function as first arg (if used as wrapper) or acts as decorator.
-    # But `@mx.compile(f)` is valid? No, usually `@mx.compile` without parens
-    # or `@partial(mx.compile, static_argnums=...)` pattern via functools.
-    # Standard usage: `@mx.compile`
-
-    # We strip arguments completely because Torch kwargs (backend="inductor")
+  # Validating Input Type
+  # Is it a Decorator node?
+  if hasattr(node, "decorator"):
+    # Strip arguments completely because Torch kwargs (backend="inductor")
     # are invalid in MLX.
-    # Returning `mx.compile` without parens as the decorator expression.
+    # Return decorator with just the function name (no Call node)
     return node.with_changes(decorator=new_func)
 
-  # If implicit call `@torch.compile`
-  return node.with_changes(decorator=new_func)
+  # If it's a Call node (e.g. used as functional wrapper `c_fn = torch.compile(fn)`),
+  # strip kwargs and just return `mx.compile(fn)`.
+  if isinstance(node, cst.Call):
+    # Keep positional arg 0 (the function)
+    new_args = []
+    if node.args:
+      new_args.append(node.args[0])
+    return node.with_changes(func=new_func, args=new_args)
+
+  return node
 
 
 @register_hook("mlx_synchronize")
 def transform_synchronize(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
-  Hook: Maps barrier synchronization.
+  Hook: Maps barrier synchronization to a warning.
 
-  Input:  `torch.cuda.synchronize()`
-  Output: `mx.eval(state_vars)` or `mx.async_eval()`?
-
-  MLX is lazy. Correct sync is `mx.eval(tensors)`.
-  Since `synchronize()` in Torch catches up everything globally,
-  we map it to a comment or specific stream sync if possible.
-
-  Strict mapping: `mx.eval()` requires arguments (what to eval).
-  If we can't find arguments, we emit a comment.
+  MLX is lazy, but `torch.cuda.synchronize()` implies a global device barrier.
+  Equivalent `mx.eval()` requires arguments. Since we cannot infer state variables here,
+  we replace the call with a print statement to alert the user.
   """
-  if ctx.target_fw != "mlx":
-    return node
+  message_str = "# [Switcheroo] Global sync requires explicit tensor args in target framework."
 
-  # Construct comment node logic?
-  # BaseRewriter supports swapping nodes. Escaping to comment requires wrapping.
-  # Plugin can return `cst.Expr(value=cst.Ellipsis())` with attached comment.
-  # Or simply return a pass `cst.Pass()`.
-
-  message = "# [MLX] Global sync requires explicit tensor args: mx.eval(tensors)"
-
-  # We return a `None` call which rewriter handles, or pass.
-  # Let's start with a Pass node placeholder.
-  # BUT hooks replace Expressions usually. Pass is a Statement.
-  # Valid replacement for `f()` expression is `None`.
-
-  return cst.Call(func=cst.Name("print"), args=[cst.Arg(value=cst.SimpleString(f"'{message}'"))])
+  # Return a print call: print("...")
+  return cst.Call(func=cst.Name("print"), args=[cst.Arg(value=cst.SimpleString(f"'{message_str}'"))])

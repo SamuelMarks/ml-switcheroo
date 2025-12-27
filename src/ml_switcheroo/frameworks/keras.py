@@ -1,14 +1,10 @@
 """
 Keras (v3) Framework Adapter.
-
-This module provides the adapter for Keras 3+, enabling translation between
-Keras and other frameworks (JAX, Torch, TensorFlow).
-
-It explicitly selects the `repack_attn_keras` strategy for Attention layers.
 """
 
 import inspect
 import logging
+import textwrap
 from typing import List, Tuple, Dict, Optional, Any, Set
 
 try:
@@ -38,19 +34,11 @@ from ml_switcheroo.enums import SemanticTier
 
 @register_framework("keras")
 class KerasAdapter:
-  """
-  Adapter for Keras 3+ (Multi-backend).
-  """
-
   display_name: str = "Keras"
   inherits_from: Optional[str] = None
-  ui_priority: int = 25  # After JAX/Torch, before TF
+  ui_priority: int = 25
 
   def __init__(self) -> None:
-    """
-    Initializes the adapter.
-    Detects installation status to toggle interaction mode.
-    """
     self._mode = InitMode.LIVE
     self._snapshot_data: Dict[str, Any] = {}
 
@@ -58,33 +46,23 @@ class KerasAdapter:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("keras")
       if not self._snapshot_data:
-        logging.warning("Keras not installed and no snapshot found. Scanning unavailable.")
-
-  # --- Discovery Configuration ---
+        logging.warning("Keras not installed and no snapshot found.")
 
   @property
   def search_modules(self) -> List[str]:
-    """Modules to scan during discovery."""
     return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]
 
   @property
   def unsafe_submodules(self) -> Set[str]:
-    """Submodules safe to ignore during recursion."""
     return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Canonical import alias."""
     return ("keras", "keras")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """
-    Namespace remapping rules.
-    Includes numpy alias to ensure `numpy.float32` -> `np.float32`.
-    """
     return {
-      # Changed Keras root to NEURAL tier to avoid conflict with generic EXTRAS providers like 'jax' or 'optax'
       "keras": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="keras"),
       "keras.ops": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="ops"),
       "keras.layers": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="layers"),
@@ -93,7 +71,6 @@ class KerasAdapter:
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Regex patterns for categorizing APIs."""
     return {
       "neural": [r"\\.layers\\.", r"Layer$", r"Model$"],
       "array": [r"\\.ops\\.", r"\\.math\\."],
@@ -102,7 +79,6 @@ class KerasAdapter:
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Templates for generating tests."""
     return {
       "import": "import keras\nfrom keras import ops",
       "convert_input": "keras.ops.convert_to_tensor({np_var})",
@@ -110,24 +86,29 @@ class KerasAdapter:
     }
 
   @property
+  def harness_imports(self) -> List[str]:
+    return []
+
+  def get_harness_init_code(self) -> str:
+    return ""
+
+  @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """Supported capability tiers."""
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
-  # --- Structural Traits ---
+  @property
+  def declared_magic_args(self) -> List[str]:
+    return []
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """
-    Defines Keras structural patterns.
-    """
     return StructuralTraits(
       module_base="keras.Layer",
       forward_method="call",
       requires_super_init=True,
       init_method_name="__init__",
       inject_magic_args=[],
-      strip_magic_args=["rngs"],
+      auto_strip_magic_args=True,
       lifecycle_strip_methods=[],
       impurity_methods=["fit", "compile"],
     )
@@ -145,11 +126,7 @@ class KerasAdapter:
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """
-    Static definitions for Keras mappings.
-    """
     return {
-      # --- Math ---
       "Abs": StandardMap(api="keras.ops.abs"),
       "Mean": StandardMap(api="keras.ops.mean"),
       "Add": StandardMap(api="keras.ops.add", args={"x": "x1", "y": "x2"}),
@@ -160,7 +137,6 @@ class KerasAdapter:
       "log": StandardMap(api="keras.ops.log"),
       "sqrt": StandardMap(api="keras.ops.sqrt"),
       "square": StandardMap(api="keras.ops.square"),
-      # --- Layers ---
       "Linear": StandardMap(api="keras.layers.Dense", args={"out_features": "units"}),
       "Flatten": StandardMap(api="keras.layers.Flatten"),
       "Reshape": StandardMap(api="keras.ops.reshape", args={"shape": "newshape"}),
@@ -168,19 +144,15 @@ class KerasAdapter:
       "ArgMin": StandardMap(api="keras.ops.argmin", args={"dim": "axis"}),
       "MultiheadAttention": StandardMap(
         api="keras.layers.MultiHeadAttention",
-        # Maps 'embed_dim' to 'key_dim' natively for basic usage
         args={"embed_dim": "key_dim"},
-        # Select the Keras-specific repack strategy
         requires_plugin="repack_attn_keras",
       ),
       "Embedding": StandardMap(
-        api="keras.layers.Embedding",
-        args={"num_embeddings": "input_dim", "embedding_dim": "output_dim"},
+        api="keras.layers.Embedding", args={"num_embeddings": "input_dim", "embedding_dim": "output_dim"}
       ),
       "Sequential": StandardMap(api="keras.Sequential", requires_plugin="keras_sequential_pack"),
       "LayerNorm": StandardMap(
-        api="keras.layers.LayerNormalization",
-        args={"eps": "epsilon", "normalized_shape": "axis"},
+        api="keras.layers.LayerNormalization", args={"eps": "epsilon", "normalized_shape": "axis"}
       ),
       "GELU": StandardMap(
         api="keras.layers.Activation",
@@ -189,7 +161,6 @@ class KerasAdapter:
         operator="keras.activations.gelu",
       ),
       "log_softmax": StandardMap(api="keras.activations.log_softmax"),
-      # --- Vision ---
       "Resize": StandardMap(api="keras.layers.Resizing", args={"size": "height"}),
       "Normalize": StandardMap(api="keras.layers.Normalization", args={"std": "variance", "mean": "mean"}),
       "ToTensor": StandardMap(api="keras.ops.convert_to_tensor"),
@@ -199,7 +170,6 @@ class KerasAdapter:
       "RandomVerticalFlip": StandardMap(api="keras.layers.RandomFlip"),
       "Grayscale": StandardMap(api="lambda x: x", transformation_type="inline_lambda"),
       "Variable": StandardMap(api="keras.Variable", args={"value": "initializer"}),
-      # --- Types ---
       "Float32": StandardMap(api="numpy.float32", required_imports=["import numpy"]),
       "Float64": StandardMap(api="numpy.float64", required_imports=["import numpy"]),
       "Float16": StandardMap(api="numpy.float16", required_imports=["import numpy"]),
@@ -208,7 +178,6 @@ class KerasAdapter:
       "Int16": StandardMap(api="numpy.int16", required_imports=["import numpy"]),
       "UInt8": StandardMap(api="numpy.uint8", required_imports=["import numpy"]),
       "Bool": StandardMap(api="bool"),
-      # --- Casting ---
       "CastFloat": StandardMap(api="keras.ops.cast", inject_args={"dtype": "float32"}),
       "CastDouble": StandardMap(api="keras.ops.cast", inject_args={"dtype": "float64"}),
       "CastHalf": StandardMap(api="keras.ops.cast", inject_args={"dtype": "float16"}),
@@ -222,15 +191,9 @@ class KerasAdapter:
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Global seed methods."""
     return ["utils.set_random_seed"]
 
-  # --- Ghost Protocol Implementation ---
-
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Dynamically collects API for Consensus.
-    """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
     return self._collect_live(category)
@@ -244,10 +207,10 @@ class KerasAdapter:
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
     results = []
-
     if category == StandardCategory.LOSS:
       results.extend(self._scan_module(keras.losses, "keras.losses", kind="class", block_list={"Loss", "Container"}))
     elif category == StandardCategory.OPTIMIZER:
+      # Fixed duplication bug here
       results.extend(
         self._scan_module(
           keras.optimizers,
@@ -264,13 +227,8 @@ class KerasAdapter:
     return results
 
   def _scan_module(
-    self,
-    module: Any,
-    prefix: str,
-    kind: str = "class",
-    block_list: Optional[Set[str]] = None,
+    self, module: Any, prefix: str, kind: str = "class", block_list: Optional[Set[str]] = None
   ) -> List[GhostRef]:
-    """Helper to scan Keras modules."""
     if not module:
       return []
     block_list = block_list or set()
@@ -294,10 +252,7 @@ class KerasAdapter:
 
     return found
 
-  # --- Verification Support ---
-
   def convert(self, data: Any) -> Any:
-    """Converts input object to Keras Tensor."""
     try:
       import keras
 
@@ -305,14 +260,10 @@ class KerasAdapter:
     except (ImportError, AttributeError):
       return data
 
-  # --- Syntax Generation ---
-
   def get_serialization_imports(self) -> List[str]:
-    """Imports for save/load."""
     return ["import keras"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Syntax for save/load."""
     if op == "save" and object_arg:
       return f"{object_arg}.save({file_arg})"
     elif op == "load":
@@ -320,60 +271,25 @@ class KerasAdapter:
     return ""
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """Generates device scope syntax."""
     d_type = "gpu" if "cuda" in device_type.lower() else "cpu"
     return f"keras.name_scope('{d_type}')"
 
   def get_device_check_syntax(self) -> str:
-    """Keras 3 backend-agnostic GPU check."""
     return "len(keras.config.list_logical_devices('GPU')) > 0"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """
-    Keras uses implicit RNG or SeedGenerators, not JAX-style splitting.
-    Returns no-op to allow blind injection without error.
-    """
     return "pass"
 
-  # --- Manual Wiring ---
-
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies manual wiring not covered by definitions."""
     pass
 
   @classmethod
   def get_example_code(cls) -> str:
-    """Returns standard example."""
     return cls().get_tiered_examples()["tier2_neural"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns Keras examples."""
     return {
-      "tier1_math": """import keras
-from keras import ops
-
-def math_ops(x, y): 
-  # Tier 1: Using keras.ops for backend-agnostic math
-  a = ops.abs(x) 
-  b = ops.add(a, y) 
-  return ops.mean(b) 
-""",
-      "tier2_neural": """import keras
-from keras import layers
-
-def build_model(input_shape): 
-  # Tier 2: Functional Model API
-  inputs = keras.Input(shape=input_shape) 
-  x = layers.Conv2D(32, 3, activation="relu")(inputs) 
-  x = layers.Flatten()(x) 
-  outputs = layers.Dense(10)(x) 
-  return keras.Model(inputs, outputs) 
-""",
-      "tier3_extras": """import keras
-from keras import random
-
-def generate_noise(shape): 
-  seed_gen = random.SeedGenerator(42) 
-  return random.normal(shape, seed=seed_gen) 
-""",
+      "tier1_math": "import keras\nfrom keras import ops\n\ndef math_ops(x, y):\n  # Tier 1\n  a = ops.abs(x)\n  b = ops.add(a, y)\n  return ops.mean(b)\n",
+      "tier2_neural": 'import keras\nfrom keras import layers\n\ndef build_model(input_shape):\n  inputs = keras.Input(shape=input_shape)\n  x = layers.Conv2D(32, 3, activation="relu")(inputs)\n  x = layers.Flatten()(x)\n  outputs = layers.Dense(10)(x)\n  return keras.Model(inputs, outputs)\n',
+      "tier3_extras": "import keras\nfrom keras import random\n\ndef generate_noise(shape):\n  seed_gen = random.SeedGenerator(42)\n  return random.normal(shape, seed=seed_gen)\n",
     }

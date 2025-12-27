@@ -10,8 +10,8 @@ Key Capabilities (Hybrid Loading):
 - In **LIVE** mode, they introspect installed packages module-by-module.
 - In **GHOST** mode, they load cached JSON snapshots.
 
-The ``definitions`` and ``import_namespaces`` properties allow adapters to
-self-declare their capabilities and import requirements to the SemanticsManager.
+The ``definitions`` and ``specifications`` properties allow adapters to
+self-declare their capabilities and new standards to the SemanticsManager.
 """
 
 import json
@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any, Protocol, Type, Dict, List, Tuple, Optional, Union, Set
 from pydantic import BaseModel, Field
 
-from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
+from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits, OpDefinition
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
 from ml_switcheroo.enums import SemanticTier
 
@@ -103,6 +103,16 @@ class StandardMap(BaseModel):
     default=None,
     description="Target Dtype string (e.g. 'jnp.int64') to cast the output to via .astype().",
   )
+  # --- Feature: Value Mapping ---
+  arg_values: Optional[Dict[str, Dict[str, str]]] = Field(
+    default=None,
+    description="Map of {StandardArg: {SourceValue: TargetValue}} for enum value translation.",
+  )
+  # --- Feature: Dynamic Imports ---
+  required_imports: List[Union[str, Any]] = Field(
+    default_factory=list,
+    description="List of imports required by this variant.",
+  )
 
 
 class FrameworkAdapter(Protocol):
@@ -130,6 +140,23 @@ class FrameworkAdapter(Protocol):
   @property
   def test_config(self) -> Dict[str, str]:
     """Templates for generating physical test files (imports, conversions)."""
+    ...
+
+  # --- New Protocol: Harness Decoupling ---
+
+  @property
+  def harness_imports(self) -> List[str]:
+    """
+    Returns a list of import statements required for the verification harness initialization logic.
+    E.g. ["import jax", "import jax.random"]
+    """
+    ...
+
+  def get_harness_init_code(self) -> str:
+    """
+    Returns Python code to define initialization helpers for the verification harness.
+    Used to inject framework-specific PRNG key generation logic into the generated test script.
+    """
     ...
 
   @property
@@ -185,6 +212,15 @@ class FrameworkAdapter(Protocol):
     """List of global RNG seeding method names."""
     ...
 
+  @property
+  def declared_magic_args(self) -> List[str]:
+    """
+    List of state/context argument names this framework injects/uses
+    (e.g., ['rngs'] for Flax, ['key'] for JAX).
+    Used to build the global list of arguments to strip from other frameworks.
+    """
+    ...
+
   # --- Safety ---
   @property
   def unsafe_submodules(self) -> Set[str]:
@@ -235,6 +271,14 @@ class FrameworkAdapter(Protocol):
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """Returns the framework's static implementation of Middle Layer Operations."""
+    ...
+
+  @property
+  def specifications(self) -> Dict[str, OpDefinition]:
+    """
+    Returns the framework's DEFINITION of operations (The Hub reference).
+    Allows adapters to introduce new Abstract Standards to the system.
+    """
     ...
 
   @property

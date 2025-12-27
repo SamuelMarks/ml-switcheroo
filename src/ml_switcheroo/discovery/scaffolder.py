@@ -27,8 +27,6 @@ from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.utils.console import console, log_info, log_success
 from ml_switcheroo.frameworks import get_adapter
 
-from ml_switcheroo.frameworks.common.data import get_dataloader_semantics
-
 
 class Scaffolder:
   """
@@ -139,18 +137,6 @@ class Scaffolder:
 
       catalogs[fw] = fw_catalog
       self._build_catalog_index(fw, catalogs[fw])
-
-    # Strategy 3: Static Injection
-    dataloader_defaults = get_dataloader_semantics()
-    for op, defn in dataloader_defaults.items():
-      self.staged_specs["k_framework_extras.json"][op] = {
-        "description": defn.get("description"),
-        "std_args": defn.get("std_args", []),
-      }
-      if "variants" in defn:
-        for fw, variant in defn["variants"].items():
-          if variant is not None:
-            self.staged_mappings[fw][op] = variant
 
     primary_fw = "torch" if "torch" in frameworks else frameworks[0]
 

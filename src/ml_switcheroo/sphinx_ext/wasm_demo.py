@@ -9,8 +9,8 @@ metadata to the client-side JS for filtering invalid conversion pairs.
 Features:
 - **Hierarchy Detection**: Checks `inherits_from` metadata on adapters.
 - **Tier Detection**: Checks `supported_tiers` on adapters.
-- **Dynamic HTML**: Generates nested `<select>` elements hidden/shown via JS.
-- **Flavour Routing**: Associates `flax_nnx` with the parent `jax` key.
+- **Dynamic Priority**: Uses `config.get_framework_priority_order()` to determine
+  default selections and example targets, removing hardcoded framework preferences.
 - **Example Injection**: Preloads tiered examples from all registered adapters.
 - **Retro Mode**: Adds UI toggle for CRT/Matrix visualization style.
 - **AST Visualizer**: Creates DOM container for interactive Tree diagrams.
@@ -27,6 +27,7 @@ from docutils import nodes
 from docutils.parsers.rst import Directive
 
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
+from ml_switcheroo.config import get_framework_priority_order
 
 # Map of Parent Key -> List of {key, label} for children
 HierarchyMap = Dict[str, List[Dict[str, str]]]
@@ -74,16 +75,28 @@ class SwitcherooDemo(Directive):
     src_flavours_html = self._render_flavour_dropdown("src", hierarchy)
     tgt_flavours_html = self._render_flavour_dropdown("tgt", hierarchy)
 
-    # Pre-select JAX/Torch for demo defaults
-    opts_src = primary_opts.replace('value="torch"', 'value="torch" selected')
-    # Default target to JAX to show off the hierarchy
-    opts_tgt = primary_opts.replace('value="jax"', 'value="jax" selected')
+    # 4. Determine Defaults dynamically from Config Priority
+    priority_order = get_framework_priority_order()
 
-    html = f""" 
+    # Default Source: First priority framework (or fallback 'torch')
+    def_source = priority_order[0] if priority_order else "torch"
+
+    # Default Target: Second priority framework, or first if only one exists (or fallback 'jax')
+    if len(priority_order) > 1:
+      def_target = priority_order[1]
+    elif priority_order:
+      def_target = priority_order[0]
+    else:
+      def_target = "jax"
+
+    opts_src = primary_opts.replace(f'value="{def_source}"', f'value="{def_source}" selected')
+    opts_tgt = primary_opts.replace(f'value="{def_target}"', f'value="{def_target}" selected')
+
+    html = f"""
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
             <script>
-                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
-                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json}; 
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json};
+                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json};
             </script>
 
             <div class="demo-header">
@@ -108,14 +121,14 @@ class SwitcherooDemo(Directive):
                     <div class="select-wrapper">
                         <select id="select-src" class="material-select">{opts_src}</select>
                         <div id="src-flavour-region" style="display:none; margin-left:10px;">
-                            {src_flavours_html} 
+                            {src_flavours_html}
                         </div>
                     </div>
                     <button id="btn-swap" class="swap-icon-btn" title="Swap Languages">⇄</button>
                     <div class="select-wrapper">
                         <select id="select-tgt" class="material-select">{opts_tgt}</select>
                          <div id="tgt-flavour-region" style="display:none; margin-left:10px;">
-                            {tgt_flavours_html} 
+                            {tgt_flavours_html}
                         </div>
                     </div>
                 </div>
@@ -134,8 +147,8 @@ class SwitcherooDemo(Directive):
                         <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Source code...">import torch
 import torch.nn as nn
 
-class Model(nn.Module): 
-    def forward(self, x): 
+class Model(nn.Module):
+    def forward(self, x):
         return torch.abs(x)</textarea>
                     </div>
                     <div class="editor-group target-group">
@@ -202,6 +215,7 @@ class Model(nn.Module):
             - JSON string of framework tiers.
     """
     fws = available_frameworks()
+    priorities = get_framework_priority_order()
 
     # 1. Build Node Map
     hierarchy: HierarchyMap = defaultdict(list)
@@ -237,11 +251,10 @@ class Model(nn.Module):
     # 2. Convert to Render-Ready structures & Gather Examples
     examples = {}
 
-    # Ensure we iterate roots sorted by priority
-    main_priority = ["torch", "jax", "tensorflow", "numpy"]
+    # Ensure we iterate roots sorted by priority provided by config
     sorted_roots = sorted(
       list(roots),
-      key=lambda x: (main_priority.index(x) if x in main_priority else 99, x),
+      key=lambda x: priorities.index(x) if x in priorities else 999,
     )
 
     final_hierarchy = {root: sorted(hierarchy.get(root, []), key=lambda x: x["label"]) for root in sorted_roots}
@@ -266,8 +279,6 @@ class Model(nn.Module):
             src_flavour = None
 
           # Use tier_name to deduce required tier.
-          # "tier1_math" -> "array"
-          # "tier2_neural" -> "neural"
           req_tier = "extras"
           if "math" in tier_name:
             req_tier = "array"
@@ -283,17 +294,37 @@ class Model(nn.Module):
           display_fw = getattr(adapter, "display_name", key.title())
           label = f"{display_fw}: {clean_label}"
 
-          # Target Heuristic
-          tgt_fw = "jax"
-          if "jax" in src_fw:
-            tgt_fw = "torch"
+          # Dynamic Target Heuristic: Next available in priority list
+          tgt_fw = None
+          tgt_flavour = None
+
+          # Filter candidates: Must not be source, and not be parent of source
+          candidates = [fw for fw in priorities if fw != src_fw and fw != parent_key and fw != src_flavour]
+
+          # Pick the first viable candidate, searching forward from current src position if possible
+          # This creates a logical rotation effect (A -> B, B -> C, C -> A)
+          if candidates:
+            try:
+              curr_idx = priorities.index(src_fw)
+              # Create round robin slice
+              rotated = priorities[curr_idx + 1 :] + priorities[:curr_idx]
+              for c in rotated:
+                if c in candidates:
+                  tgt_fw = c
+                  break
+            except ValueError:
+              tgt_fw = candidates[0]
+
+          # Ultimate fallback
+          if not tgt_fw:
+            tgt_fw = "target_placeholder"
 
           examples[uid] = {
             "label": label,
             "srcFw": src_fw,
             "srcFlavour": src_flavour,
             "tgtFw": tgt_fw,
-            "tgtFlavour": None,
+            "tgtFlavour": tgt_flavour,
             "code": code,
             "requiredTier": req_tier,
           }
@@ -314,25 +345,29 @@ class Model(nn.Module):
   def _render_flavour_dropdown(self, side: str, hierarchy: HierarchyMap) -> str:
     """
     Renders the secondary dropdown for Framework Flavours.
+    It attempts to default to the first hierarchy parent found, resolving dynamic lookup.
     """
-    children = hierarchy.get("jax", [])
-    # Always render the select element even if empty, to ensure JS logic for ID lookup doesn't fail
-    # or populate it with a default dummy if hierarchy is not yet loaded.
+    # Dynamically find which framework has children to render defaults logic
+    target_parent = "jax"  # Fallback
+    if hierarchy:
+      # Pick first available parent key
+      target_parent = next(iter(hierarchy.keys()))
+
+    children = hierarchy.get(target_parent, [])
 
     opts = []
     if children:
-      # Standard logic
-      default_child = "flax_nnx"
-      for child in children:
-        sel = "selected" if child["key"] == default_child else ""
+      # Pick first as default selected
+      for i, child in enumerate(children):
+        sel = "selected" if i == 0 else ""
         opts.append(f'<option value="{child["key"]}" {sel}>{child["label"]}</option>')
     else:
       # Fallback for empty state or tests
       opts.append('<option value="" disabled selected>No Flavours</option>')
 
-    return f""" 
+    return f"""
         <select id="{side}-flavour" class="material-select-sm" style="background:#f0f4c3;">
-            {"".join(opts)} 
+            {"".join(opts)}
         </select>
         """
 

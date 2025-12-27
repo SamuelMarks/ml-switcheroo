@@ -9,8 +9,8 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.hooks import _HOOKS
 
-# FIX: Import the dispatch function instead of the removed monolithic function
-from ml_switcheroo.plugins.attention_packing import repack_attention_dispatch
+# FIX: Import the specific strategies instead of the removed dispatch function
+from ml_switcheroo.plugins.attention_packing import repack_attn_keras, repack_attn_flax
 
 SOURCE_TORCH = """ 
 import torch.nn as nn
@@ -28,8 +28,10 @@ class MyAttn(nn.Module):
 
 @pytest.fixture
 def attn_semantics():
-  # FIX: Register the dispatch handler under the name used in this test's mock definitions
-  _HOOKS["repack_attention_call"] = repack_attention_dispatch
+  # FIX: Register specific strategies
+  _HOOKS["repack_attn_keras"] = repack_attn_keras
+  _HOOKS["repack_attn_flax"] = repack_attn_flax
+
   mgr = SemanticsManager()
 
   mgr.data["MultiheadAttention"] = {
@@ -39,10 +41,14 @@ def attn_semantics():
       "keras": {
         "api": "keras.layers.MultiHeadAttention",
         "args": {"embed_dim": "key_dim"},
-        # Using the legacy/generic plugin name defined in this test fixture
-        "requires_plugin": "repack_attention_call",
+        # Wired to specific strategy
+        "requires_plugin": "repack_attn_keras",
       },
-      "flax_nnx": {"api": "flax.nnx.MultiHeadAttention", "requires_plugin": "repack_attention_call"},
+      "flax_nnx": {
+        "api": "flax.nnx.MultiHeadAttention",
+        # Wired to specific strategy
+        "requires_plugin": "repack_attn_flax",
+      },
     },
   }
 

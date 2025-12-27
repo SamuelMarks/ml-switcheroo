@@ -16,12 +16,14 @@ It operations in two stages:
     - Compare outputs using `np.allclose`.
     - **Verify Output Shape** if `output_shape_calc` is defined in the ODL.
 
-JIT Logic:
-    If a template specifies `jit_wrap: True` (e.g., JAX), the generator inspects the
-    framework traits to identify `static_argnums` (arguments like `axis` or `keepdims`)
-    and generates valid `jax.jit(fn, static_argnums=(...))` wrappers.
+JIT Logic (Decoupled):
+    If a template specifies a `jit_template`, the generator wraps the execution call.
+    It resolves `{fn}` to the closure logic and `{static_argnums}` to the indices
+    of static arguments. Hardcoded JAX fallbacks have been removed; frameworks must
+    supply valid templates.
 """
 
+import logging
 from pathlib import Path
 from typing import Dict, Any, List, Set, Tuple, Optional, Union
 
@@ -217,8 +219,13 @@ class TestGenerator:
 
       call_str = ", ".join(call_args)
 
-      # JIT Wrapping Check (Boolean logic handling string "True" from JSON)
-      should_jit = str(template.get("jit_wrap", "False")).lower() == "true"
+      # JIT Wrapping Check
+      # We check for template presence. Legacy boolean flag is tolerated but
+      # ignored if no template string is provided.
+      jit_tmpl = template.get("jit_template")
+
+      # If template provided, we wrap.
+      should_jit = jit_tmpl is not None
 
       if should_jit:
         lines.append("        # JIT Compilation Check")
@@ -236,16 +243,26 @@ class TestGenerator:
           if name in static_keywords:
             static_indices.append(str(idx))
 
-        jit_kwargs = ""
+        # Format 'static_argnums' logic only if indices found
+        static_argnums_val = ""
         if static_indices:
-          # e.g. static_argnums=(1,)
           idx_str = ", ".join(static_indices)
           if len(static_indices) == 1:
             idx_str += ","
-          jit_kwargs = f", static_argnums=({idx_str})"
+          static_argnums_val = f"({idx_str})"
+
+        # Resolve Template Logic
+        # Usage: "jax.jit({fn}, static_argnums={static_argnums})"
+        rendered_jit = jit_tmpl.replace("{fn}", "fn")
+
+        if "{static_argnums}" in rendered_jit:
+          # Template explicitly requests static args
+          # Use None if no static args present, otherwise tuple
+          val = static_argnums_val if static_argnums_val else "None"
+          rendered_jit = rendered_jit.replace("{static_argnums}", val)
 
         lines.append(f"        fn = lambda {lambda_args}: {api_call}({lambda_call})")
-        lines.append(f"        jitted_fn = jax.jit(fn{jit_kwargs})")
+        lines.append(f"        jitted_fn = {rendered_jit}")
         lines.append(f"        res = jitted_fn({call_str})")
 
       else:

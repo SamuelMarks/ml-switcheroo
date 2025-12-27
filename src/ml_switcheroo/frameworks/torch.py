@@ -25,10 +25,10 @@ except ImportError:
   optim = None
 
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.schema import PluginTraits
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
+  PluginTraits,
   StandardMap,
   ImportConfig,
   StandardCategory,
@@ -161,6 +161,15 @@ class TorchAdapter:
     }
 
   @property
+  def harness_imports(self) -> List[str]:
+    """No special imports needed for harness initialization."""
+    return []
+
+  def get_harness_init_code(self) -> str:
+    """No special initialization helpers needed."""
+    return ""
+
+  @property
   def structural_traits(self) -> StructuralTraits:
     """
     Defines how classes and functions are rewritten when targeting PyTorch.
@@ -169,7 +178,7 @@ class TorchAdapter:
       module_base="torch.nn.Module",
       forward_method="forward",
       requires_super_init=True,
-      strip_magic_args=["rngs", "key"],  # Remove JAX-specific state keys
+      auto_strip_magic_args=True,  # Decoupled
       lifecycle_strip_methods=[
         "to",
         "cpu",
@@ -209,6 +218,11 @@ class TorchAdapter:
   def rng_seed_methods(self) -> List[str]:
     """Global seed setting methods detected as impure side-effects."""
     return ["manual_seed", "seed"]
+
+  @property
+  def declared_magic_args(self) -> List[str]:
+    """Torch emits no magic args, all state is implicit."""
+    return []
 
   # --- Semantic Definitions (The Spoke) ---
 
@@ -251,6 +265,8 @@ class TorchAdapter:
       "permute_dims": StandardMap(api="torch.permute"),
       "size": StandardMap(api="torch.Tensor.size"),
       "OneHot": StandardMap(api="torch.nn.functional.one_hot"),
+      "max": StandardMap(api="torch.max"),
+      "min": StandardMap(api="torch.min"),
       # --- 3. Types (Target Mapping) ---
       "Float32": StandardMap(api="torch.float32"),
       "Float64": StandardMap(api="torch.float64"),
@@ -262,6 +278,8 @@ class TorchAdapter:
       "Bool": StandardMap(api="torch.bool"),
       # --- 4. Casting Logic ---
       # Note: Torch casting is usually a method call `.float()`
+      # These mappings allow `CastFloat(x)` -> `x.float()` via transformation types if plugins support it,
+      # otherwise they map to `torch.Tensor.float` which rewriter handles as methods.
       "CastFloat": StandardMap(api="torch.Tensor.float"),
       "CastDouble": StandardMap(api="torch.Tensor.double"),
       "CastHalf": StandardMap(api="torch.Tensor.half"),

@@ -1,179 +1,169 @@
 """
-Tests for Compatibility Matrix Generation.
+Tests for Compatibility Matrix UI (Dynamic Generation).
 
 Verifies:
-1. `render()` outputs formatted text to stdout.
-2. `get_json()` returns structured data.
-3. Logic sorts based on adapter dynamic priorities.
+1. Dynamic Column Discovery using `get_framework_priority_order`.
+2. Sorting Priorities (Mocked Adapters).
+3. Status Icon Logic (Direct vs Plugin vs Missing).
+4. JSON Export Structure.
 """
 
-from unittest.mock import patch, MagicMock
+import pytest
+from unittest.mock import MagicMock, patch
+from rich.console import Console
+
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class MockSemantics(SemanticsManager):
+class MockMatrixSemantics(SemanticsManager):
   """
-  Mock Manager that bypasses file loading.
+  Mock Manager providing deterministic API definitions for the matrix.
+  Bypasses file system loading.
   """
 
   def __init__(self) -> None:
-    # Skip file loading
+    # Skip super init
     self.data = {
-      "abs": {
+      "Abs": {
         "variants": {
           "torch": {"api": "torch.abs"},
           "jax": {"api": "jax.numpy.abs"},
         }
       },
-      "complex_op": {
+      "ComplexOp": {
         "variants": {
           "torch": {"api": "torch.complex"},
-          "jax": {"requires_plugin": "magic_fix"},
+          "jax": {"requires_plugin": "magic_fix"},  # Plugin
         }
       },
-      "missing_op": {"variants": {"torch": {"api": "torch.foo"}}},
+      "MissingOp": {
+        "variants": {
+          "torch": {"api": "torch.foo"}
+          # JAX Missing
+        }
+      },
     }
-    self.import_data = {}
-    self.framework_configs = {}
-    self._reverse_index = {}
-    self._key_origins = {}
+    self._key_origins = {"Abs": "array", "ComplexOp": "neural", "MissingOp": "extras"}
 
   def get_known_apis(self) -> dict:
-    """Return the mocked data dictionary."""
     return self.data
 
 
-def test_matrix_rendering(capsys) -> None:
-  """
-  Verify that the matrix renders to stdout and contains expected text.
-  """
-  semantics = MockSemantics()
-  matrix = CompatibilityMatrix(semantics)
-
-  # Render
-  matrix.render()
-
-  # Capture Output
-  captured = capsys.readouterr()
-  stdout = captured.out
-
-  # Assertions
-  # 1. Check Table Headers
-  assert "Operation" in stdout
-  assert "Tier" in stdout
-  # Verify at least one framework column is present (assuming frameworks exist in registry)
-
-  # 2. Check Row Content
-  assert "abs" in stdout
-  assert "complex_op" in stdout
+@pytest.fixture
+def semantics() -> SemanticsManager:
+  return MockMatrixSemantics()
 
 
-def test_matrix_get_json_structure() -> None:
-  """
-  Verify `get_json` returns a list of dicts with correct keys and values.
-  """
-  semantics = MockSemantics()
-  matrix = CompatibilityMatrix(semantics)
-
-  # We mock available_frameworks to ensure deterministic columns for this test
-  # The updated logic calls get_framework_priority_order which calls available_frameworks
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["torch", "jax"]):
-    # We also need to mock get_adapter to return adapter objects with ui_priority property
-    mock_torch = MagicMock()
-    mock_torch.ui_priority = 0
-    mock_jax = MagicMock()
-    mock_jax.ui_priority = 10
-
-    def mock_get(name):
-      if name == "torch":
-        return mock_torch
-      if name == "jax":
-        return mock_jax
-      return None
-
-    # Patch the source definition used by config.py
-    with patch("ml_switcheroo.frameworks.get_adapter", side_effect=mock_get):
-      result = matrix.get_json()
-
-  assert isinstance(result, list)
-  assert len(result) == 3
-
-  # Find specific rows
-  abs_row = next(r for r in result if r["operation"] == "abs")
-  complex_row = next(r for r in result if r["operation"] == "complex_op")
-  missing_row = next(r for r in result if r["operation"] == "missing_op")
-
-  # 1. Standard Mapping
-  assert abs_row["torch"] == "✅"
-  assert abs_row["jax"] == "✅"
-
-  # 2. Plugin Mapping
-  assert complex_row["torch"] == "✅"
-  assert complex_row["jax"] == "🧩"  # Plugin icon
-
-  # 3. Missing Variant
-  assert missing_row["torch"] == "✅"
-  assert missing_row["jax"] == "❌"
+@pytest.fixture
+def matrix(semantics) -> CompatibilityMatrix:
+  mat = CompatibilityMatrix(semantics)
+  # Use capture console
+  mat.console = Console(file=None, force_terminal=True, width=200, record=True)
+  return mat
 
 
-def test_status_icon_logic() -> None:
-  """
-  Verify internal status resolution logic directly.
-  """
-  semantics = MockSemantics()
-  matrix = CompatibilityMatrix(semantics)
-
-  # Standard
+def test_status_icon_resolution(matrix):
+  """Verify icon logic maps states correctly."""
+  # Direct
   assert matrix._get_status_icon({"api": "foo"}) == "✅"
-
   # Plugin
   assert matrix._get_status_icon({"requires_plugin": "foo"}) == "🧩"
-
   # Missing / None
   assert matrix._get_status_icon(None) == "❌"
   assert matrix._get_status_icon({}) == "❌"
 
 
-def test_sorting_logic_priorities():
+# Fix: Patch get_adapter WHERE IT IS USED (in config.py)
+# Also patch available_frameworks in config.py
+@patch("ml_switcheroo.config.available_frameworks")
+@patch("ml_switcheroo.config.get_adapter")
+def test_dynamic_column_sorting(mock_get_adapter, mock_avail, matrix):
   """
-  Verify that _get_sorted_engines sorts based on dynamic adapter priority.
+  Verify that columns are ordered by Adapter UI priority.
   """
-  semantics = MockSemantics()
-  matrix = CompatibilityMatrix(semantics)
+  # 1. Setup Mock Registry
+  # Unsorted list
+  mock_avail.return_value = ["beta", "alpha", "gamma"]
 
-  # Inputs
-  fws = ["alpha", "torch", "beta", "jax"]
+  # 2. Setup Adapters with priorities
+  # alpha=10, beta=50, gamma=5
+  # Expected Order: Gamma (5), Alpha (10), Beta (50)
+  adapter_alpha = MagicMock(ui_priority=10, inherits_from=None)
+  adapter_beta = MagicMock(ui_priority=50, inherits_from=None)
+  adapter_gamma = MagicMock(ui_priority=5, inherits_from=None)
 
-  # Create mock adapters with priorities
-  # Torch (0), Jax (10), Alpha (50), Beta (Unknown/999)
-  mock_torch = MagicMock()
-  mock_torch.ui_priority = 0
-
-  mock_jax = MagicMock()
-  mock_jax.ui_priority = 10
-
-  mock_alpha = MagicMock()
-  mock_alpha.ui_priority = 50
-
-  # Beta has no adapter logic (simulate unknown/legacy)
-
-  def mock_get(name):
-    if name == "torch":
-      return mock_torch
-    if name == "jax":
-      return mock_jax
+  def get_adp(name):
     if name == "alpha":
-      return mock_alpha
-    return None  # Beta
+      return adapter_alpha
+    if name == "beta":
+      return adapter_beta
+    if name == "gamma":
+      return adapter_gamma
+    return None
 
-  with patch("ml_switcheroo.config.available_frameworks", return_value=fws):
-    # Patch the source definition used by config.py
-    with patch("ml_switcheroo.frameworks.get_adapter", side_effect=mock_get):
-      sorted_list = matrix._get_sorted_engines()
+  mock_get_adapter.side_effect = get_adp
 
-  # Expected: torch (0), jax (10), alpha (50), beta (999)
-  assert sorted_list[0] == "torch"
-  assert sorted_list[1] == "jax"
-  assert sorted_list[2] == "alpha"
-  assert sorted_list[3] == "beta"
+  # 3. Get JSON
+  # get_json() calls _get_sorted_engines() which calls config.get_framework_priority_order()
+  rows = matrix.get_json()
+
+  # 4. Infer order from keys presence in dict
+  # But rows are dicts. We need to check if the sorting function works.
+  engines = matrix._get_sorted_engines()
+  assert engines == ["gamma", "alpha", "beta"]
+
+  # Confirm JSON has these keys
+  row0 = rows[0]
+  assert "gamma" in row0
+  assert "alpha" in row0
+  assert "beta" in row0
+
+
+# Fix: Patch where used
+@patch("ml_switcheroo.config.available_frameworks")
+@patch("ml_switcheroo.config.get_adapter")
+def test_render_output_contains_headers(mock_get_adapter, mock_avail, matrix):
+  """
+  Verify Rich Table rendering includes dynamic headers.
+  """
+  mock_avail.return_value = ["torch", "jax"]
+  # Simple priority to enforce order
+  mock_get_adapter.side_effect = lambda n: MagicMock(ui_priority=0 if n == "torch" else 10, inherits_from=None)
+
+  matrix.render()
+  output = matrix.console.export_text()
+
+  # Check Headers (Uppercase)
+  assert "TORCH" in output
+  assert "JAX" in output
+
+  # Check Content
+  assert "Abs" in output
+  assert "Array" in output
+  assert "✅" in output  # Torch/Jax match
+  assert "🧩" in output  # ComplexOp Jax
+  assert "❌" in output  # MissingOp Jax
+
+
+# Fix: Patch where used
+@patch("ml_switcheroo.config.available_frameworks")
+@patch("ml_switcheroo.config.get_adapter")
+def test_inheritance_hiding_logic(mock_get_adapter, mock_avail, matrix):
+  """
+  Verify that frameworks inheriting from others (Children/Flavours) are
+  sorted to the end (priority 9999) to keep the main table clean.
+  """
+  mock_avail.return_value = ["jax", "flax_nnx"]
+
+  # Jax = 10, Flax = inherits
+  adp_jax = MagicMock(ui_priority=10, inherits_from=None)
+  adp_flax = MagicMock(ui_priority=15, inherits_from="jax")
+
+  mock_get_adapter.side_effect = lambda n: adp_jax if n == "jax" else adp_flax
+
+  engines = matrix._get_sorted_engines()
+
+  # Even though Flax has priority 15, inheritance logic in config pushes it to end
+  assert engines[-1] == "flax_nnx"
+  assert "jax" in engines

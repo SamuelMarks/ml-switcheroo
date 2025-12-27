@@ -1,11 +1,12 @@
 """
-Tests for Wizard Mapping Logic (Including Plugin Support).
+Tests for Wizard Mapping Logic (Including Plugin Support & Dynamic Defaults).
 
 Verifies that:
 1. Users can rename detected arguments to Standard names.
 2. Source mapping ({std: source}) is generated correctly.
 3. Target mapping (JAX) can be defined inline.
-4. **Plugin assignments** are correctly prompted and saved.
+4. Plugin assignments are correctly prompted and saved.
+5. Dynamic Defaults are respected from RuntimeConfig.
 """
 
 import json
@@ -15,6 +16,7 @@ from unittest.mock import patch, MagicMock
 
 from ml_switcheroo.cli.wizard import MappingWizard
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.config import RuntimeConfig
 
 # --- Mocks ---
 
@@ -65,10 +67,6 @@ def test_arg_normalization_flow(wizard, tmp_path):
       std_args: ["x", "axis"]
       variants.torch: { "api": "...", "args": {"x": "input", "axis": "dim"} }
   """
-  # Prompt Sequence (Strings):
-  # 1. Bucket -> 'm'
-  # 2. Rename 'input' -> 'x'
-  # 3. Rename 'dim' -> 'axis'
   prompts = ["m", "x", "axis"]
 
   with patch("ml_switcheroo.cli.wizard.ApiInspector", return_value=MockInspector()):
@@ -110,29 +108,16 @@ def test_full_bidirectional_flow(wizard, tmp_path):
           - Tgt Arg 'x': 'a'
           ...
   """
-  # Mock has params=["input", "dim"]
-
-  # Prompt sequence (Text):
-  # 1. Tier: 'm'
-  # 2. Source norm 1: 'x'
-  # 3. Source norm 2: 'axis'
-  # 4. Tgt FW: 'jax'
-  # 5. Tgt API: 'jax.numpy.op'
-  # 6. Tgt map 1: 'a'
-  # 7. Tgt map 2: 'axis'
   prompt_side_effect = [
     "m",  # Tier
     "x",  # Source norm 1
     "axis",  # Source norm 2
-    "jax",  # Tgt FW
+    "jax",  # Tgt FW (Default accepted or typed)
     "jax.numpy.op",  # Tgt API
     "a",  # Tgt map 1
     "axis",  # Tgt map 2
   ]
 
-  # Confirm sequence (Bool):
-  # 1. Map Target? -> True
-  # 2. Plugin?     -> False
   confirm_side_effect = [True, False]
 
   with patch("ml_switcheroo.cli.wizard.ApiInspector", return_value=MockInspector()):
@@ -167,15 +152,6 @@ def test_wizard_plugin_assignment(wizard, tmp_path):
   Expectation:
       JSON variant for JAX contains "requires_plugin": "decompose_alpha"
   """
-  # Prompt sequence:
-  # 1. m
-  # 2. x
-  # 3. axis
-  # 4. jax
-  # 5. jax.numpy.op
-  # 6. decompose_alpha  <-- New Prompt because Plugin=True
-  # 7. a
-  # 8. axis
   prompt_side_effect = [
     "m",
     "x",
@@ -187,9 +163,6 @@ def test_wizard_plugin_assignment(wizard, tmp_path):
     "axis",
   ]
 
-  # Confirm sequence:
-  # 1. Map Target? -> True
-  # 2. Plugin?     -> True
   confirm_side_effect = [True, True]
 
   with patch("ml_switcheroo.cli.wizard.ApiInspector", return_value=MockInspector()):
@@ -212,3 +185,52 @@ def test_skipping_logic_preserved(wizard, tmp_path):
 
   # No Spec file
   assert not (tmp_path / "semantics" / "k_array_api.json").exists()
+
+
+def test_dynamic_default_target_in_prompt(tmp_path):
+  """
+  Verify that the wizard uses the RuntimeConfig default in the prompt.
+  This ensures we don't hardcode 'jax' in the logic.
+  """
+  mock_config = MagicMock()
+  mock_config.target_framework = "dynamic_target"
+
+  sem_dir = tmp_path / "semantics"
+  snap_dir = tmp_path / "snapshots"
+  sem_dir.mkdir()
+  snap_dir.mkdir()
+
+  mgr = SemanticsManager()
+
+  with patch("ml_switcheroo.cli.wizard.RuntimeConfig", return_value=mock_config):
+    # Initialize Wizard inside patch to pick up default
+    w = MappingWizard(mgr)
+
+    assert w.default_target == "dynamic_target"
+
+    # Now run a flow that triggers _prompt_target_mapping
+    prompts = [
+      "m",
+      "x",
+      "axis",
+      "dynamic_target",  # Prompt: Target Framework
+      "dynamic_target.api",  # Prompt: Target API Path
+      "a",  # Tgt map 1 (std 'x' -> 'a')
+      "axis",  # Tgt map 2 (std 'axis' -> 'axis')
+    ]
+
+    with patch("ml_switcheroo.cli.wizard.ApiInspector", return_value=MockInspector()):
+      with patch("rich.prompt.Prompt.ask", side_effect=prompts) as mock_prompt_ask:
+        with patch("rich.prompt.Confirm.ask", side_effect=[True, False]):
+          w.start("torch")
+
+          target_fw_call = None
+          for call in mock_prompt_ask.call_args_list:
+            args, kwargs = call
+            if args and "Target Framework" in args[0]:
+              target_fw_call = call
+              break
+
+          assert target_fw_call is not None
+          _, kwargs = target_fw_call
+          assert kwargs["default"] == "dynamic_target"

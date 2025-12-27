@@ -90,13 +90,26 @@ class TensorFlowAdapter:
       "to_numpy": "{res_var}.numpy()",
     }
 
+  # --- Harness Protocol ---
+
+  @property
+  def harness_imports(self) -> List[str]:
+    return []
+
+  def get_harness_init_code(self) -> str:
+    return ""
+
+  @property
+  def declared_magic_args(self) -> List[str]:
+    return []
+
   @property
   def structural_traits(self) -> StructuralTraits:
     return StructuralTraits(
       module_base="keras.Layer",
       forward_method="call",
       requires_super_init=True,
-      strip_magic_args=["rngs"],
+      auto_strip_magic_args=True,  # Decoupled
     )
 
   @property

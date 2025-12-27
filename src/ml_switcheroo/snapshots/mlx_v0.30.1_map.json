@@ -231,10 +231,7 @@
       }
     },
     "Gelu": {
-      "api": "mlx.nn.layers.activations.gelu",
-      "args": {
-        "x": "x"
-      }
+      "api": "mlx.nn.GELU"
     },
     "Glu": {
       "api": "mlx.nn.layers.activations.glu",
@@ -478,12 +475,6 @@
     },
     "Reciprocal": {
       "api": "mlx.core.reciprocal"
-    },
-    "Relu": {
-      "api": "mlx.nn.layers.activations.relu",
-      "args": {
-        "x": "x"
-      }
     },
     "Relu6": {
       "api": "mlx.nn.layers.activations.relu6",

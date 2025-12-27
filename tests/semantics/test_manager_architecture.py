@@ -67,6 +67,7 @@ def test_import_namespace_hydration(empty_directories):
   class ImportAdapter:
     @property
     def import_namespaces(self):
+      # Provide legacy dict format
       return {"standard.lib": {"root": "import_fw", "sub": "lib", "alias": "il"}}
 
     def convert(self, x):
@@ -81,12 +82,10 @@ def test_import_namespace_hydration(empty_directories):
   assert "standard.lib" in mgr._source_registry
 
   # Check if 'import_fw' is registered as a provider for that tier
-  # infer_tier_from_path('standard.lib') -> likely None/Array/Extras depending on heuristic.
-  # Let's check the provider map directly if we know the inferred tier.
-  # standard.lib doesn't match 'nn', 'optim' etc. -> Defaults to ARRAY_API (math).
+  # Legacy dicts default to EXTRAS in the new logic
   from ml_switcheroo.enums import SemanticTier
 
-  tier = mgr._infer_namespace_tier("standard.lib")
+  tier = SemanticTier.EXTRAS
 
   assert "import_fw" in mgr._providers
   config = mgr._providers["import_fw"].get(tier)

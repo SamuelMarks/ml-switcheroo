@@ -111,6 +111,13 @@
         "dropout": "dropout",
         "norm_first": "norm_first"
       }
+    },
+    "full_op": {
+      "api": "torch.full_op",
+      "args": {
+        "axis": "dim",
+        "x": "input"
+      }
     }
   }
 }

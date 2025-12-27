@@ -85,8 +85,8 @@ class ASTEngine:
     semantics: SemanticsManager = None,
     config: Optional[RuntimeConfig] = None,
     # Legacy parameters for backward compat
-    source: str = "torch",
-    target: str = "jax",
+    source: Optional[str] = None,
+    target: Optional[str] = None,
     strict_mode: bool = False,
     plugin_config: Optional[Dict[str, Any]] = None,
   ):
@@ -94,13 +94,14 @@ class ASTEngine:
     Initializes the Engine.
 
     Populates `self.source` and `self.target` with the effective (flavour-resolved)
-    framework keys to ensure specialized adapters are used.
+    framework keys to ensure specialized adapters are used. If `config` is not provided,
+    it builds one using the optional args or dynamic defaults if they are None.
 
     Args:
         semantics (SemanticsManager, optional): The knowledge base manager. Creates new if None.
         config (RuntimeConfig, optional): The runtime configuration object.
-        source (str): Legacy override for source framework key (default: 'torch').
-        target (str): Legacy override for target framework key (default: 'jax').
+        source (str, optional): Legacy override for source framework key.
+        target (str, optional): Legacy override for target framework key.
         strict_mode (bool): Legacy override for strict mode.
         plugin_config (Dict, optional): Legacy override for plugin settings.
     """
@@ -109,9 +110,9 @@ class ASTEngine:
     if config:
       self.config = config
     else:
-      self.config = RuntimeConfig(
-        source_framework=source,
-        target_framework=target,
+      self.config = RuntimeConfig.load(
+        source=source,
+        target=target,
         strict_mode=strict_mode,
         plugin_settings=plugin_config or {},
       )
@@ -161,9 +162,6 @@ class ASTEngine:
     try:
       viz = MermaidGenerator()
       graph = viz.generate(tree)
-
-      # Sanity check graph size
-      # graph_lines = len(graph.splitlines())
 
       tracer.log_snapshot(phase_label, graph)
     except Exception as e:

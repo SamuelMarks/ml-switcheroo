@@ -961,14 +961,6 @@
     ],
     "type": "class"
   },
-  "Gelu": {
-    "description": "Auto-discovered via Consensus (Score: 4.0)",
-    "std_args": [
-      "approximate",
-      "x"
-    ],
-    "type": "attribute"
-  },
   "Glu": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
@@ -1884,11 +1876,6 @@
       "self",
       "padding"
     ],
-    "type": "class"
-  },
-  "Relu": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
     "type": "class"
   },
   "Relu6": {
@@ -5627,7 +5614,7 @@
     "std_args": [
       "input"
     ],
-    "type": "function"
+    "type": "class"
   },
   "relu_": {
     "description": "The class representing a Python module/class/instance attribute.",

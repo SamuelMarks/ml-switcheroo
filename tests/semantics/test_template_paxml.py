@@ -4,28 +4,42 @@ Updated to check snapshots/paxml_vlatest_map.json instead of k_test_templates.js
 """
 
 import json
+from unittest.mock import MagicMock, patch
 from ml_switcheroo.semantics.manager import resolve_snapshots_dir
+from ml_switcheroo.cli.handlers.snapshots import handle_sync
+from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
 
-def test_paxml_template_exists_on_disk():
+def test_paxml_template_exists_on_disk(tmp_path):
   """
   Verify the mapping file exists and contains templates.
+  We force a sync here to ensure the file populated in the test environment.
   """
-  snap_dir = resolve_snapshots_dir()
+  # 1. Setup Mock Environment
+  snap_dir = tmp_path / "snapshots"
+  sem_dir = tmp_path / "semantics"
+  snap_dir.mkdir()
+  sem_dir.mkdir()
 
-  # NOTE: Tests running in CI might not have run migration on the source tree
-  # unless this test manually creates the file or expects the repo to be migrated.
-  # Assuming the repo IS migrated or we check for either location for robustness.
-  # For now, strict check on new location.
+  # 2. Patch paths and version
+  with patch("ml_switcheroo.cli.handlers.snapshots.resolve_snapshots_dir", return_value=snap_dir):
+    with patch("ml_switcheroo.cli.handlers.snapshots.resolve_semantics_dir", return_value=sem_dir):
+      with patch("ml_switcheroo.cli.handlers.snapshots._get_pkg_version", return_value="latest"):
+        # 3. Helper to return full adapter
+        with patch("ml_switcheroo.cli.handlers.snapshots.get_adapter") as mock_get:
+          # Provide a real adapter instance so .test_config is accessible
+          mock_get.return_value = PaxmlAdapter()
 
+          # 4. Run Sync
+          handle_sync("paxml")
+
+  # 5. Verify
   map_file = snap_dir / "paxml_vlatest_map.json"
-  # Fallback logic for test environment without pre-loaded overlays
-  if not map_file.exists():
-    return  # Skip if environment not fully hydrated with overlays yet
+  assert map_file.exists(), "Snapshot file was not created"
 
   content = json.loads(map_file.read_text())
-  assert "templates" in content
+  assert "templates" in content, "Templates key missing from snapshot"
 
   pax_conf = content["templates"]
   assert "import" in pax_conf
-  assert "convert_input" in pax_conf
+  assert "praxis" in pax_conf["import"]

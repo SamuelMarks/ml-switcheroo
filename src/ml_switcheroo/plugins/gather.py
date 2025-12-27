@@ -3,14 +3,16 @@ Plugin for Gather Semantics Adaptation.
 
 Addresses the signature mismatch between:
 1. PyTorch: `torch.gather(input, dim, index, *, sparse_grad=False, out=None)`
-2. JAX/NumPy: `jax.numpy.take_along_axis(arr, indices, axis)`
+2. Target Framework (e.g. JAX/NumPy): `target.take_along_axis(arr, indices, axis)`
 
 Transformation:
 - Reorders positional arguments: `(input, dim, index)` -> `(input, index, dim)`.
 - Maps keyword arguments: `dim` -> `axis`, `index` -> `indices`.
 - Strips unsupported kwargs like `sparse_grad` or `out`.
 
-This ensures that `torch.gather(x, 1, idx)` correctly becomes `jnp.take_along_axis(x, idx, 1)`.
+Decoupling Logic:
+- Removes hardcoded framework checks.
+- Strict lookup: If `Gather` is not mapped in semantics, preserves original call.
 """
 
 import libcst as cst
@@ -25,15 +27,24 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Hook: Adapts gather calls to take_along_axis semantics.
 
-  Target Frameworks: JAX, NumPy.
+  Target API Convention: `func(input, indices, axis)`.
+  Source (Torch) Convention: `func(input, dim, index)`.
+
+  Args:
+      node: The original CST Call node.
+      ctx: Hook Context containing semantic definitions.
+
+  Returns:
+      Transformed Call node if API mapping exists, else original node.
   """
-  if ctx.target_fw.lower() not in ["jax", "numpy"]:
+  # 0. API Resolution (Strict)
+  target_api = ctx.lookup_api("Gather")
+  if not target_api:
+    # Fail safe if target framework has no mapping for 'Gather'
     return node
 
-  args = list(node.args)
-
   # 1. Identify Input Wrapper
-  # If called as method `x.gather(...)`, input is implicit `x`.
+  # If called as method `x.gather(...)`, input is implicit `x` (Attributes).
   # If called as function `torch.gather(x, ...)`, input is arg 0.
 
   is_method_call = False
@@ -47,6 +58,7 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
   dim_arg = None
   index_arg = None
 
+  args = list(node.args)
   current_idx = 0
 
   # Handle Input Arg
@@ -60,12 +72,6 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
     input_arg = cst.Arg(value=node.func.value)
 
   # 2. Parse remaining args (dim, index)
-  # They might be positional or keyword
-
-  # Heuristic for positional:
-  # torch.gather(dim, index) <-- Method signature usually
-  # torch.gather(input, dim, index) <-- Function signature
-
   # Search for keywords first
   for arg in args:
     if arg.keyword:
@@ -75,7 +81,7 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
       elif kw == "index":
         index_arg = arg
 
-  # Fill gaps with positionals
+  # Fill gaps with remaining positionals
   remaining_pos = [a for a in args[current_idx:] if not a.keyword]
 
   if len(remaining_pos) > 0 and dim_arg is None:
@@ -87,7 +93,7 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   # 3. Construct New Argument List for take_along_axis(arr, indices, axis)
   if not input_arg or not index_arg:
-    # Cannot safely transform without critical args
+    # Cannot safely transform without critical args, fail-open (return original)
     return node
 
   new_args = []
@@ -123,7 +129,5 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
     new_args.append(clean_dim)
 
   # 4. Change Function Name
-  target_api = ctx.lookup_api("Gather") or "jax.numpy.take_along_axis"
   new_func = create_dotted_name(target_api)
-
   return node.with_changes(func=new_func, args=new_args)

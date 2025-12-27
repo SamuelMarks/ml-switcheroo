@@ -10,7 +10,8 @@ It specifically enables `requires_explicit_rng` in plugin traits.
 """
 
 import logging
-from typing import List, Tuple, Dict, Any, Optional, Set
+import textwrap
+from typing import List, Tuple, Dict, Any, Optional
 
 try:
   import jax
@@ -101,6 +102,30 @@ class JaxCoreAdapter(JAXStackMixin):
     """Returns standard JIT-enabled test templates."""
     return self.jax_test_config
 
+  # --- Verification Harness Protocol ---
+
+  @property
+  def harness_imports(self) -> List[str]:
+    """Imports required for JAX initialization logic."""
+    return ["import jax", "import jax.random"]
+
+  def get_harness_init_code(self) -> str:
+    """
+    Returns logic to create JAX PRNG Keys.
+    """
+    return textwrap.dedent(""" 
+        def _make_jax_key(seed): 
+            "Attempts to create a JAX PRNGKey." 
+            try: 
+                return jax.random.PRNGKey(seed) 
+            except (ImportError, AttributeError): 
+                return "mock_jax_key" 
+    """).strip()
+
+  @property
+  def declared_magic_args(self) -> List[str]:
+    return ["key"]
+
   @property
   def structural_traits(self) -> StructuralTraits:
     """
@@ -130,6 +155,7 @@ class JaxCoreAdapter(JAXStackMixin):
       requires_explicit_rng=True,
       requires_functional_control_flow=True,
       enforce_purity_analysis=True,
+      strict_materialization_method="block_until_ready",
     )
 
   @property
@@ -177,6 +203,8 @@ class JaxCoreAdapter(JAXStackMixin):
       "permute_dims": StandardMap(api="jnp.transpose", pack_to_tuple="axes"),
       "size": StandardMap(api="shape", requires_plugin="method_to_property"),
       "OneHot": StandardMap(api="jax.nn.one_hot", args={"tensor": "x", "input": "x"}),
+      "max": StandardMap(api="jnp.max"),
+      "min": StandardMap(api="jnp.min"),
       # --- Activation (Math Tier) ---
       "relu": StandardMap(api="jax.nn.relu"),
       "softmax": StandardMap(api="jax.nn.softmax"),
@@ -223,14 +251,6 @@ class JaxCoreAdapter(JAXStackMixin):
       "enable_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
       "DataLoader": StandardMap(api="GenericDataLoader", requires_plugin="convert_dataloader"),
       "LoadStateDict": StandardMap(api="KeyMapper.from_torch", requires_plugin="checkpoint_mapper"),
-      # Stub hooks for State Container plugins (used by JAX-based Neural libs via inheritance)
-      "register_buffer": StandardMap(api="torch_register_buffer_to_nnx", requires_plugin="torch_register_buffer_to_nnx"),
-      "register_parameter": StandardMap(
-        api="torch_register_parameter_to_nnx", requires_plugin="torch_register_parameter_to_nnx"
-      ),
-      "state_dict": StandardMap(api="torch_state_dict_to_nnx", requires_plugin="torch_state_dict_to_nnx"),
-      "load_state_dict": StandardMap(api="torch_load_state_dict_to_nnx", requires_plugin="torch_load_state_dict_to_nnx"),
-      "parameters": StandardMap(api="torch_parameters_to_nnx", requires_plugin="torch_parameters_to_nnx"),
       # --- Functional Transforms ---
       "vmap": StandardMap(api="jax.vmap", args={"func": "fun"}),
       "grad": StandardMap(api="jax.grad", args={"func": "fun"}),

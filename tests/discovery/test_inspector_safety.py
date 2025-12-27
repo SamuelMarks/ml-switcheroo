@@ -22,13 +22,6 @@ def test_inspector_skips_blacklisted_module():
   """
   # Setup a trap object that fails if inspected
   trap = MagicMock()
-  # If inspected, accessing __module__ or similar attributes works,
-  # but recursion logic will try to getmembers(trap).
-  # We simulate crash if touched.
-
-  # Note: ApiInspector uses inspect.getmembers(obj).
-  # We can't easily trap access on a mock unless we define properties.
-  # Instead, we just verify it is NOT in the catalog.
 
   mod = MagicMock()
   mod.dangerous = trap
@@ -51,23 +44,7 @@ def test_inspector_skips_blacklisted_module():
       # Execute with blacklist
       catalog = inspector.inspect("pkg", unsafe_modules={"dangerous"})
 
-      # Verify safe function is present (if logic allows)
-      # Or verify dangerous is ABSENT from further processing recursion
-      # Our mock get_members returns tuple (name, obj)
-      # Logic: if name in ignore_set -> continue
-
-      # We verify that recurse_runtime logic was NOT called for 'dangerous'
-      # We can check catalog keys.
-      # If 'dangerous' was skipped, it should not be in catalog unless it was identified as leaf.
-      # Wait, skipping happens inside the loop iterating members.
-      pass
-
-  # Since we can't easily spy on internal methods without complexity,
-  # we rely on the logic test: if ignored, it's not processed.
-  # Let's inspect the side effect on catalog construction.
-
-  # If not skipped, 'pkg.dangerous' would be added to catalog if identifiable.
-  # If skipped, it won't be there.
+  # If skipped, it won't be in the catalog
   assert "pkg.dangerous" not in catalog
 
 
@@ -90,9 +67,8 @@ def test_scaffolder_integration(tmp_path):
   # Mock dependencies
   with patch("ml_switcheroo.discovery.scaffolder.get_adapter", return_value=mock_adapter):
     with patch("ml_switcheroo.frameworks.available_frameworks", return_value=["pkg"]):
-      with patch("ml_switcheroo.discovery.scaffolder.get_dataloader_semantics", return_value={}):
-        # Run
-        scaffolder.scaffold(["pkg"], root_dir=tmp_path)
+      # Run
+      scaffolder.scaffold(["pkg"], root_dir=tmp_path)
 
-        # Assert
-        mock_inspector.inspect.assert_called_with("pkg", unsafe_modules={"_C", "internal"})
+      # Assert
+      mock_inspector.inspect.assert_called_with("pkg", unsafe_modules={"_C", "internal"})

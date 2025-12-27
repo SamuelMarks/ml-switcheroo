@@ -1,25 +1,21 @@
 """
 Plugin for MultiHead Attention Strategy Selection.
 
-This module provides modular hooks for transforming MultiHeadAttention API calls.
-Unlike a monolithic function, it splits logic into discrete strategies (`repack_attn_keras`
-and `repack_attn_flax`).
+This module provides modular hooks for transforming MultiHeadAttention API calls
+between frameworks. Logic is split into discrete argument-mapping strategies
+(`repack_attn_keras` and `repack_attn_flax`).
 
-The main entry point `repack_attention_dispatch` uses the Abstract Operation definition
-to select the appropriate strategy defined in the framework's JSON mapping.
-
-Strategies:
-1.  **Keras**: `repack_attn_keras`
-    - Maps constructor: `embed_dim` -> `key_dim`.
-    - Maps call: `(q, k, v, mask)` -> `(q, v, key=k, attention_mask=mask)`.
-
-2.  **Flax/JAX**: `repack_attn_flax`
-    - Maps constructor: Standard rename.
-    - Maps call: `key_padding_mask` -> `mask`.
+Decoupling Logic:
+    - **No Hardcoded Frameworks:** The plugin does not contain strings like
+      `flax.nnx` or `keras.layers`.
+    - **Strict Lookup:** Target class names are resolved via `ctx.lookup_api`.
+    - **Safety:** If the Knowledge Base is missing a mapping for "MultiheadAttention",
+      constructor transformations are aborted to prevent hallucination.
 """
 
 import libcst as cst
-from ml_switcheroo.core.hooks import register_hook, HookContext, get_hook
+from typing import Optional
+from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
@@ -31,32 +27,34 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
   return node
 
 
-@register_hook("repack_attention_dispatch")
-def repack_attention_dispatch(node: cst.Call, ctx: HookContext) -> cst.Call:
+def _resolve_target_class(ctx: HookContext) -> Optional[cst.BaseExpression]:
   """
-  Dispatch Entry Point.
-  Reads the `requires_plugin` field from the Semantics to determine the concrete strategy.
+  Look up 'MultiheadAttention' implementation from the Knowledge Base.
 
-  If the variant specifies "repack_attention_dispatch" (itself), it attempts to
-  guess based on target framework or fall through. However, modern adapters
-  should point directly to `repack_attn_keras` or `repack_attn_flax`.
+  Returns:
+      CST Node for the target class, or None if mapping is missing.
   """
-  # Check if the variant specifies a specific sub-strategy
-  # e.g. "requires_plugin": "repack_attn_keras"
-  # But if this hook was called, it means "requires_plugin" was likely "repack_attention_dispatch"
-  # or the rewriter resolved an alias.
+  api = ctx.lookup_api("MultiheadAttention")
+  if not api:
+    return None
+  return _create_dotted_name(api)
 
-  # We allow adapters to point to specific strategies directly in JSON.
-  # If they point here, we dispatch based on target framework name (Legacy Backcompat).
 
-  target_fw = ctx.target_fw.lower()
+def _is_constructor_signature(args: list) -> bool:
+  """Heuristic to detect initialization vs forward call."""
+  for arg in args:
+    if arg.keyword and arg.keyword.value in ["embed_dim", "num_heads", "key_dim"]:
+      return True
 
-  if "keras" in target_fw:
-    return repack_attn_keras(node, ctx)
-  elif "flax" in target_fw or "jax" in target_fw:
-    return repack_attn_flax(node, ctx)
+  # Fallback: very short positional args usually implies constructor
+  # (embed_dim, num_heads) vs (q, k, v)
+  # Constructor usually takes ints
+  if len(args) == 2 and not any(a.keyword for a in args):
+    # Check if values are Integers
+    if isinstance(args[0].value, cst.Integer):
+      return True
 
-  return node
+  return False
 
 
 @register_hook("repack_attn_keras")
@@ -64,20 +62,29 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   Strategy: Keras Attention Packing.
 
-  Constructor:
-      torch: MultiheadAttention(embed_dim, num_heads)
-      keras: MultiHeadAttention(num_heads, key_dim)
+  **Constructor:**
+  - Requires 'MultiheadAttention' mapping in Semantics.
+  - Renames `embed_dim` -> `key_dim` recursively.
 
-  Call:
-      torch: forward(q, k, v, mask)
-      keras: call(q, v, key=k, attention_mask=mask)
+  **Call (Inference):**
+  - Remaps typical Torch signature `(q, k, v, mask)` to Keras `(q, v, key=k, attention_mask=mask)`.
+
+  Args:
+      node: Original Call node.
+      ctx: HookContext for API lookup.
+
+  Returns:
+      Transformed Call node, or original if dependencies missing.
   """
   args = list(node.args)
 
   # --- Constructor Detection ---
-  # Keras specific renaming logic
   if _is_constructor_signature(args):
-    new_func = _create_dotted_name("keras.layers.MultiHeadAttention")
+    # Strict Decoupling: Helper returns None if no mapping exists
+    new_func = _resolve_target_class(ctx)
+    if not new_func:
+      return node
+
     new_args = []
     for arg in args:
       if arg.keyword:
@@ -112,10 +119,12 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
       k_kw = cst.Arg(
         keyword=cst.Name("key"),
         value=k_val,
-        equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
+        equal=cst.AssignEqual(
+          whitespace_before=cst.SimpleWhitespace(""),
+          whitespace_after=cst.SimpleWhitespace(""),
+        ),
         comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
       )
-      # ensure comma on previous (v_arg_clean handled it)
       new_args.append(k_kw)
 
     # Map rest
@@ -139,19 +148,29 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
 @register_hook("repack_attn_flax")
 def repack_attn_flax(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
-  Strategy: Flax Attention Packing.
+  Strategy: Flax/JAX Attention Packing.
 
-  Constructor:
-      Standardizes to `flax.nnx.MultiHeadAttention`.
+  **Constructor:**
+  - Requires 'MultiheadAttention' mapping in Semantics.
 
-  Call:
-      Maps `key_padding_mask` -> `mask`.
+  **Call (Inference):**
+  - Maps `key_padding_mask` -> `mask`.
+
+  Args:
+      node: Original Call node.
+      ctx: HookContext for API lookup.
+
+  Returns:
+      Transformed Call node, or original if dependencies missing.
   """
   args = list(node.args)
 
   # Constructor
   if _is_constructor_signature(args):
-    new_func = _create_dotted_name("flax.nnx.MultiHeadAttention")
+    # Strict Decoupling: Helper returns None if no mapping exists
+    new_func = _resolve_target_class(ctx)
+    if not new_func:
+      return node
     return node.with_changes(func=new_func)
 
   # Call
@@ -172,20 +191,3 @@ def repack_attn_flax(node: cst.Call, ctx: HookContext) -> cst.Call:
     return node.with_changes(args=new_args)
 
   return node
-
-
-def _is_constructor_signature(args: list) -> bool:
-  """Heuristic to detect initialization vs forward call."""
-  for arg in args:
-    if arg.keyword and arg.keyword.value in ["embed_dim", "num_heads", "key_dim"]:
-      return True
-
-  # Fallback: very short positional args usually implies constructor
-  # (embed_dim, num_heads) vs (q, k, v)
-  if len(args) == 2 and not any(a.keyword for a in args):
-    # Check if values are Integers?
-    # If literals, safer guess.
-    if isinstance(args[0].value, cst.Integer):
-      return True
-
-  return False

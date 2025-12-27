@@ -37,7 +37,7 @@ class FixedSemantics(SemanticsManager):
     # 3. Add base definitions for Module (Neural) and Abs (Math)
     self.data["Abs"] = {
       "std_args": ["x"],
-      "variants": {"torch": {"api": "torch.abs"}, "jax": snapshot.get("mappings", {}).get("Abs")},
+      "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}},
     }
 
     # Neural Module Definition
@@ -66,7 +66,7 @@ class FixedSemantics(SemanticsManager):
 
 
 def test_specific_abs_conversion():
-  input_torch = """
+  input_torch = """ 
 import torch
 import torch.nn as nn
 
@@ -74,7 +74,7 @@ class Model(nn.Module):
     def forward(self, x): 
         return torch.abs(x) 
 """
-  output_jax_flax = """
+  output_jax_flax = """ 
 import jax.numpy as jnp
 import flax.nnx as nnx
 

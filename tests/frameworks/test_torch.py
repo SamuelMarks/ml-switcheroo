@@ -1,10 +1,12 @@
 """
 Tests for the PyTorch Adapter (Ghost Protocol Compliance).
+Updated to verify Distributed Semantics definitions.
 
 Verifies:
 1. Dynamic Discovery via mocked torch environment.
 2. Ghost Mode fallback when torch is missing.
 3. Correct linkage of definitions and imports.
+4. Completeness of static definitions (Math, Neural, Optim).
 """
 
 import sys
@@ -157,9 +159,6 @@ def test_ghost_mode_fallback():
     # Ensure import fails
     if "torch" in sys.modules:
       del sys.modules["torch"]
-    # We mock 'ml_switcheroo.frameworks.torch' loading behavior?
-    # Actually, if we reload, it will try to import 'torch'.
-    # We want it to FAIL inside the reload/import.
 
     # We patch built-in import to fail for 'torch'
     original_import = __import__
@@ -173,8 +172,6 @@ def test_ghost_mode_fallback():
       try:
         importlib.reload(ml_switcheroo.frameworks.torch)
       except ImportError:
-        # If reload fails completely (it shouldn't, due to catch block), good.
-        # The module catches ImportError and sets variables to None.
         pass
 
     # Now verify the module state (globals should be None)
@@ -187,12 +184,46 @@ def test_ghost_mode_fallback():
       assert results[0].name == "GhostLoss"
 
 
-def test_definitions_exist():
-  """Verify static definitions."""
+def test_definitions_completeness():
+  """
+  Verify static definitions have been migrated from the Hub.
+  Checks key operations for each tier.
+  """
   adapter = TorchAdapter()
   defs = adapter.definitions
+
+  # 1. Math
+  assert "Abs" in defs
+  assert defs["Abs"].api == "torch.abs"
+  assert "Einsum" in defs
+  assert defs["Einsum"].api == "torch.einsum"
+
+  # 2. Neural Layers
   assert "Linear" in defs
   assert defs["Linear"].api == "torch.nn.Linear"
+  assert "Conv2d" in defs
+  assert defs["Conv2d"].api == "torch.nn.Conv2d"
+
+  # 3. Activations
+  assert "relu" in defs
+  assert defs["relu"].api == "torch.nn.functional.relu"
+
+  # 4. Optimization
+  assert "Adam" in defs
+  assert defs["Adam"].api == "torch.optim.Adam"
+  assert "ClipGradNorm" in defs
+
+  # 5. Types & Casting
+  assert "Float32" in defs
+  assert defs["Float32"].api == "torch.float32"
+  assert "CastFloat" in defs
+  assert defs["CastFloat"].api == "torch.Tensor.float"
+
+  # 6. Extras / Functional
+  assert "vmap" in defs
+  assert defs["vmap"].args["in_axes"] == "in_dims"
+  assert "no_grad" in defs
+  assert defs["no_grad"].api == "torch.no_grad"
 
 
 def test_imports_exist():
@@ -200,3 +231,7 @@ def test_imports_exist():
   adapter = TorchAdapter()
   ns = adapter.import_namespaces
   assert "torch.nn" in ns
+  assert "torch.nn.functional" in ns
+  # Verify alias suggestions
+  assert ns["torch.nn"].recommended_alias == "nn"
+  assert ns["torch.nn.functional"].recommended_alias == "F"

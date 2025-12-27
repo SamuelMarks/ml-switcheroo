@@ -1,6 +1,10 @@
 """
 Runtime Configuration Store.
-Updated to support Framework Flavours (Hierarchical Selection) and Dynamic Defaults.
+Supports Dynamic Defaults, TOML loading, and Framework Flavours.
+
+This module resolves default Source and Target frameworks by querying the
+`ui_priority` of registered adapters, ensuring the logic is completely agnotistic
+to the specific libraries installed.
 """
 
 import sys
@@ -10,6 +14,7 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from ml_switcheroo.frameworks import available_frameworks, get_adapter
 
+# Optional TOML support
 if sys.version_info >= (3, 11):
   import tomllib
 else:
@@ -26,7 +31,9 @@ def get_framework_priority_order() -> List[str]:
   Returns a list of framework keys sorted by UI Priority.
 
   The sort order is determined by the `ui_priority` attribute of the
-  registered FrameworkAdapter. Lower numbers appear first.
+  registered FrameworkAdapter. Lower numbers appear first (Source default).
+
+  If no priority is defined, defaults to 999.
 
   Returns:
       List[str]: Sorted list of framework identifiers (e.g. ['torch', 'jax']).
@@ -39,19 +46,22 @@ def get_framework_priority_order() -> List[str]:
     is_child = False
 
     if adapter:
+      # Check hierarchy to push flavours/children to the end
       if hasattr(adapter, "inherits_from") and adapter.inherits_from:
         is_child = True
 
+      # Extract priority
       if hasattr(adapter, "ui_priority"):
         try:
           priority = int(adapter.ui_priority)
         except (ValueError, TypeError):
           pass
 
-    # Move children (flavours) to the very end or filter them out in UI logic
+    # Move children (flavours) to the very end for UI clarity
     if is_child:
       priority = 9999
 
+    # Tuple sort: Priority first, then Alphabetical tie-break
     return (priority, name)
 
   return sorted(frameworks, key=sort_key)
@@ -60,18 +70,19 @@ def get_framework_priority_order() -> List[str]:
 def _resolve_default_source() -> str:
   """
   Resolves the default source framework.
-  Returns the first alphanumeric framework in the registry.
+  Returns the highest priority framework (Index 0 in sorted list).
   """
-  fws = sorted(available_frameworks())
+  fws = get_framework_priority_order()
   return fws[0] if fws else "source_placeholder"
 
 
 def _resolve_default_target() -> str:
   """
   Resolves the default target framework.
-  Returns the second alphanumeric framework in the registry, or the first if only one exists.
+  Returns the second highest priority framework (Index 1),
+  or the first if only one exists.
   """
-  fws = sorted(available_frameworks())
+  fws = get_framework_priority_order()
   if len(fws) >= 2:
     return fws[1]
   return fws[0] if fws else "target_placeholder"
@@ -91,12 +102,11 @@ class RuntimeConfig(BaseModel):
     description="The primary target framework key.",
   )
 
-  # Feature 06: Framework Flavours
-  # Used to specify sub-frameworks (e.g. 'flax_nnx') when the main selection is generic ('jax').
-  source_flavour: Optional[str] = Field(None, description="Detailed source sub-framework (e.g. 'flax_nnx').")
+  # Framework Flavours (e.g. 'flax_nnx' when main is 'jax')
+  source_flavour: Optional[str] = Field(None, description="Detailed source sub-framework.")
   target_flavour: Optional[str] = Field(None, description="Detailed target sub-framework.")
 
-  strict_mode: bool = Field(False, description="If True, fail on unknown APIs. If False, pass through.")
+  strict_mode: bool = Field(False, description="If True, fail on unknown APIs.")
   plugin_settings: Dict[str, Any] = Field(default_factory=dict, description="Configuration passed to plugins.")
   plugin_paths: List[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
   validation_report: Optional[Path] = Field(None, description="Path to a verification lockfile.")
@@ -106,55 +116,28 @@ class RuntimeConfig(BaseModel):
   def validate_framework(cls, v: str) -> str:
     """
     Ensures the framework is registered in the system.
-
-    Args:
-        v (str): The framework key to validate.
-
-    Returns:
-        str: The normalized (lowercase) framework key.
-
-    Raises:
-        ValueError: If the framework is not found in the registry.
     """
     v_clean = v.lower().strip()
     known = available_frameworks()
-    # We allow unregistered frameworks if the registry is empty (bootstrap/test mode)
-    # or if the value is a placeholder from defaults when registry is empty.
+    # Allow unregistered checks if registry is empty (bootstrap/test mode)
+    # or if using the placeholders generated when empty.
     if known and v_clean not in known and v_clean not in ["source_placeholder", "target_placeholder"]:
       raise ValueError(f"Unknown framework: '{v_clean}'. Supported frameworks: {known}")
     return v_clean
 
   @property
   def effective_source(self) -> str:
-    """
-    Resolves the specific framework key to use for source logic.
-
-    If a flavour (e.g. 'flax_nnx') is provided, it overrides the general framework ('jax').
-
-    Returns:
-        str: The active source framework key.
-    """
+    """Returns source flavour if present, else source framework."""
     return self.source_flavour if self.source_flavour else self.source_framework
 
   @property
   def effective_target(self) -> str:
-    """
-    Resolves the specific framework key to use for target logic.
-
-    Returns:
-        str: The active target framework key.
-    """
+    """Returns target flavour if present, else target framework."""
     return self.target_flavour if self.target_flavour else self.target_framework
 
   def parse_plugin_settings(self, schema: Type[T]) -> T:
     """
-    Validates the raw plugin settings dictionary against a specific Pydantic model.
-
-    Args:
-        schema (Type[T]): The Pydantic model class defining expected settings.
-
-    Returns:
-        T: An instance of the schema model populated with runtime values.
+    Validates plugin settings against a Pydantic model.
     """
     try:
       return schema.model_validate(self.plugin_settings)
@@ -174,31 +157,15 @@ class RuntimeConfig(BaseModel):
     search_path: Optional[Path] = None,
   ) -> "RuntimeConfig":
     """
-    Loads configuration from pyproject.toml and overrides with CLI arguments.
-    Defaults are calculated dynamically from the registry if not provided.
-
-    Args:
-        source (Optional[str]): Override for source framework.
-        target (Optional[str]): Override for target framework.
-        source_flavour (Optional[str]): Override for source flavour.
-        target_flavour (Optional[str]): Override for target flavour.
-        strict_mode (Optional[bool]): Override for strict mode setting.
-        plugin_settings (Optional[Dict]): Additional CLI plugin settings.
-        validation_report (Optional[Path]): Override for validation report path.
-        search_path (Optional[Path]): Directory to start searching for TOML config.
-
-    Returns:
-        RuntimeConfig: The fully resolved configuration object.
+    Loads configuration from pyproject.toml, overriding with CLI arguments.
+    Defaults are calculated dynamically via factory methods if not found.
     """
     start_dir = search_path or Path.cwd()
     toml_config, toml_dir = _load_toml_settings(start_dir)
 
-    # 1. Framework Defaults (Dynamic)
-    def_source = _resolve_default_source()
-    def_target = _resolve_default_target()
-
-    final_source = source or toml_config.get("source_framework", def_source)
-    final_target = target or toml_config.get("target_framework", def_target)
+    # 1. Framework Defaults
+    final_source = source if source else toml_config.get("source_framework", _resolve_default_source())
+    final_target = target if target else toml_config.get("target_framework", _resolve_default_target())
 
     # 1b. Flavours
     final_src_flavour = source_flavour or toml_config.get("source_flavour")
@@ -210,7 +177,7 @@ class RuntimeConfig(BaseModel):
     else:
       final_strict = toml_config.get("strict_mode", False)
 
-    # 3. Plugin Settings
+    # 3. Plugin Settings (Merge TOML + CLI, CLI wins)
     toml_plugins = toml_config.get("plugin_settings", {})
     cli_plugins = plugin_settings or {}
     final_plugins = {**toml_plugins, **cli_plugins}
@@ -245,28 +212,25 @@ class RuntimeConfig(BaseModel):
 def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path]]:
   """
   Recursively searches parents for 'pyproject.toml' and extracts config.
-
-  Args:
-      start_path (Path): Directory to start search from.
-
-  Returns:
-      Tuple[Dict, Optional[Path]]: The config dict and the directory definition was found in.
+  Returns (ConfigDict, ConfigFileDirectory).
   """
   if not tomllib:
     return {}, None
 
   current = start_path.resolve()
 
-  for parent in [current, *current.parents]:
-    toml_path = parent / "pyproject.toml"
+  # Iterate current and parents
+  for path in [current, *current.parents]:
+    toml_path = path / "pyproject.toml"
     if toml_path.exists() and toml_path.is_file():
       try:
         with open(toml_path, "rb") as f:
           data = tomllib.load(f)
 
         tool_section = data.get("tool", {})
-        return tool_section.get("ml_switcheroo", {}), parent
+        return tool_section.get("ml_switcheroo", {}), path
       except Exception:
+        # Malformed TOML or permission error implies skip
         return {}, None
 
   return {}, None
@@ -274,15 +238,7 @@ def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path
 
 def parse_cli_key_values(items: Optional[List[str]]) -> Dict[str, Any]:
   """
-  Parses a list of 'key=value' strings into a dictionary.
-
-  Types are inferred (int, float, bool, or string).
-
-  Args:
-      items (Optional[List[str]]): List of raw CLI strings directly from argparse.
-
-  Returns:
-      Dict[str, Any]: Parsed dictionary.
+  Parses a list of 'key=value' strings into a dictionary with type inference.
   """
   if not items:
     return {}
@@ -299,13 +255,15 @@ def parse_cli_key_values(items: Optional[List[str]]) -> Dict[str, Any]:
 
     final_val: Any = val_str
 
-    if val_str.lower() == "true":
+    # Basic type inference
+    lower_val = val_str.lower()
+    if lower_val == "true":
       final_val = True
-    elif val_str.lower() == "false":
+    elif lower_val == "false":
       final_val = False
     else:
       try:
-        if "." in val_str or "e" in val_str:
+        if "." in val_str or "e" in lower_val:
           final_val = float(val_str)
         else:
           final_val = int(val_str)
