@@ -8,6 +8,8 @@ Verifies that:
 """
 
 import pytest
+import sys
+from unittest.mock import MagicMock, patch
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
@@ -63,11 +65,15 @@ def test_flax_nnx_inheritance():
 def test_discovery_segmentation():
   """Verify adapters look for different things."""
   core = JaxCoreAdapter()
-  flax = FlaxNNXAdapter()
 
-  # Core should not look for Linen/NNX
-  assert "flax.nnx" not in core.search_modules
+  # Mock flax.nnx presence to force LIVE mode initialization in FlaxNNXAdapter
+  # This ensures search_modules is populated even if library is missing in CI
+  with patch.dict(sys.modules, {"flax.nnx": MagicMock()}):
+    flax = FlaxNNXAdapter()
 
-  # Flax should look for both (or at least NNX)
-  assert "flax.nnx" in flax.search_modules
-  assert "jax.numpy" in flax.search_modules
+    # Core should not look for Linen/NNX
+    assert "flax.nnx" not in core.search_modules
+
+    # Flax should look for both (or at least NNX)
+    assert "flax.nnx" in flax.search_modules
+    assert "jax.numpy" in flax.search_modules

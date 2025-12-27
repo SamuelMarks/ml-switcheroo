@@ -32,6 +32,9 @@ class HarnessGenerator:
   """
 
   def __init__(self) -> None:
+    """
+    Initializes the generator instance and its code extractor utility.
+    """
     self.extractor = CodeExtractor()
 
   def generate(
@@ -49,9 +52,9 @@ class HarnessGenerator:
     Args:
         source_file: Path to original source.
         target_file: Path to transpiled result.
-        output_harness: Destination path.
-        source_fw: Key of source framework.
-        target_fw: Key of target framework.
+        output_harness: Destination path for the generated script.
+        source_fw: Key of source framework (e.g. 'torch').
+        target_fw: Key of target framework (e.g. 'jax').
         semantics: Optional dictionary of semantic definitions (for type hints).
     """
     # 1. Extract Fuzzer Logic & Dependencies
@@ -113,6 +116,13 @@ class HarnessGenerator:
     """
     Extracts all helper functions required by InputFuzzer to allow it to run
     standalone without importing ml_switcheroo modules.
+
+    It iterates through various fuzzer submodules (generators, parser, heuristics),
+    extracts their source code via inspection, and bundles them into a single string
+    to be injected into the harness template.
+
+    Returns:
+        str: A large block of Python source code containing all dependencies.
     """
     deps = []
 
@@ -145,6 +155,18 @@ class HarnessGenerator:
   def _build_dynamic_init(self, target_fw: str) -> tuple[str, str, str]:
     """
     Queries the target adapter to construct framework-specific initialization logic.
+
+    This includes imports (e.g. `import jax`), init helpers (e.g. PRNG key creation),
+    and parameter injection logic (e.g. checking for 'rngs' argument).
+
+    Args:
+        target_fw: The framework key to generate initialization code for.
+
+    Returns:
+        tuple[str, str, str]: A tuple containing:
+            - imports_str: Framework imports.
+            - init_code: Helper function definitions.
+            - final_logic: The injection logic block for the loop body.
     """
     adapter = get_adapter(target_fw)
 
@@ -192,12 +214,15 @@ class HarnessGenerator:
     """
     Constructs the `to_numpy` logic by aggregating snippets from adapters.
 
+    This ensures that the result verification can convert tensors from any registered
+    framework back to NumPy for numeric comparison.
+
     Args:
         source_fw: The source framework key.
         target_fw: The target framework key.
 
     Returns:
-        A string body of code to be injected into `to_numpy`.
+        str: A string body of code to be injected into `to_numpy`.
     """
     blocks = []
 
@@ -245,7 +270,14 @@ class HarnessGenerator:
 
   def _generate_adapter_shim(self) -> str:
     """
-    Introspects registered frameworks to build the `get_adapter` function.
+    Introspects registered frameworks to build the `get_adapter` function shim.
+
+    This shim allows the generated script to perform basic type conversion (e.g.
+    Torch Tensor -> Numpy) without importing the actual `ml_switcheroo` package
+    or the heavy framework libraries unless they are actually present.
+
+    Returns:
+        str: Source code for the `get_adapter` function to be embedded in the harness.
     """
     shim_lines = [
       "# Shim for missing ml_switcheroo.frameworks.get_adapter",
