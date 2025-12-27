@@ -17,6 +17,7 @@ Dependencies:
     - `LibCST` for robust AST transformation.
 """
 
+import fileinput
 import sys
 import inspect
 from pathlib import Path
@@ -54,35 +55,42 @@ def handle_define(yaml_path: Path) -> int:
     log_error("PyYAML is not installed. Please run `pip install PyYAML`.")
     return 1
 
-  if not yaml_path.exists():
+  if not yaml_path.exists() and not yaml_path.name == "-":
     log_error(f"File not found: {yaml_path}")
     return 1
 
   try:
-    content = yaml_path.read_text("utf-8")
-    data = yaml.safe_load(content)
-    op_def = OperationDef(**data)
+    with fileinput.FileInput(str(yaml_path), mode="r", encoding="utf-8") as content:
+      data = yaml.safe_load("".join(content))
+
+    # Handle both Single Object and List of Objects
+    if isinstance(data, list):
+      ops = [OperationDef(**d) for d in data]
+    else:
+      ops = [OperationDef(**data)]
+
   except Exception as e:
     log_error(f"Failed to valid ODL YAML: {e}")
     return 1
 
-  log_info(f"Defining Operation: {op_def.operation}...")
+  for op_def in ops:
+    log_info(f"Defining Operation: {op_def.operation}...")
 
-  # 1. Auto-Inference Resolution
-  # Resolves any 'infer' API placeholders before code generation
-  _resolve_inferred_apis(op_def)
+    # 1. Auto-Inference Resolution
+    _resolve_inferred_apis(op_def)
 
-  # 2. Hub Injection (Abstract Standard)
-  if not _inject_hub(op_def):
-    return 1
+    # 2. Hub Injection (Abstract Standard)
+    if not _inject_hub(op_def):
+      return 1
 
-  # 3. Spoke Injection (Framework Adapters)
-  _inject_spokes(op_def)
+    # 3. Spoke Injection (Framework Adapters)
+    _inject_spokes(op_def)
 
-  # 4. Plugin Scaffolding (New Hooks)
-  _scaffold_plugins(op_def)
+    # 4. Plugin Scaffolding (New Hooks)
+    _scaffold_plugins(op_def)
 
-  log_success(f"Operation '{op_def.operation}' defined successfully.")
+    log_success(f"Operation '{op_def.operation}' defined successfully.")
+
   return 0
 
 
@@ -92,16 +100,12 @@ def _resolve_inferred_apis(op_def: OperationDef) -> None:
   Updates the OperationDef object in-place.
   """
   for fw_key, variant in op_def.variants.items():
-    if variant.api.lower() == "infer":
+    if variant and variant.api and variant.api.lower() == "infer":
       log_info(f"Inferring API for {op_def.operation} in {fw_key}...")
-
       reflector = SimulatedReflection(fw_key)
       discovered = reflector.discover(op_def.operation)
-
       if discovered:
         variant.api = discovered
-        # Fix: If args mapping was identity/default, we keep it.
-        # Inference only finds the function name, it does not infer argument structure (yet).
         log_success(f"  Result: {discovered}")
       else:
         log_warning(f"  Failed: Could not infer API for {op_def.operation} in {fw_key}. Keeping 'infer'.")
@@ -116,25 +120,19 @@ def _inject_hub(op_def: OperationDef) -> bool:
     if not spec_file.exists():
       log_error(f"Could not locate standards source file: {spec_file}")
       return False
-
     source_code = spec_file.read_text("utf-8")
     tree = cst.parse_module(source_code)
-
     transformer = StandardsInjector(op_def)
     new_tree = tree.visit(transformer)
-
     if not transformer.found:
       log_warning("Could not find `INTERNAL_OPS` dictionary in source. Skipping Hub injection.")
       return False
-
     if new_tree.code != source_code:
       spec_file.write_text(new_tree.code, "utf-8")
       log_success(f"Updated Hub: {spec_file.name}")
     else:
       log_info(f"Hub unchanged: {spec_file.name}")
-
     return True
-
   except Exception as e:
     log_error(f"Hub Injection failed: {e}")
     return False
@@ -145,42 +143,35 @@ def _inject_spokes(op_def: OperationDef) -> None:
   Iterates variants and injects mappings into framework adapter files.
   """
   for fw_key, variant in op_def.variants.items():
-    # Skip if API is still 'infer' (lookup failed)
-    if variant.api.lower() == "infer":
+    # Helper: Check if variant is null or api is None (supported by new base.py)
+    if not variant:
+      continue
+
+    if variant.api and variant.api.lower() == "infer":
       log_warning(f"Skipping '{fw_key}' spoke injection: API is unresolved ('infer').")
       continue
-
     adapter = get_adapter(fw_key)
     if not adapter:
-      log_warning(f"Skipping '{fw_key}': Adapter not registered or installed.")
+      # log_warning(f"Skipping '{fw_key}': Adapter not registered or installed.")
       continue
-
     try:
-      # Locate the source file of the adapter class
       adapter_cls = type(adapter)
       adapter_file = Path(inspect.getfile(adapter_cls))
-
       if not adapter_file.exists() or not adapter_file.name.endswith(".py"):
         log_warning(f"Skipping '{fw_key}': Cannot verify source file ({adapter_file}).")
         continue
-
       source_code = adapter_file.read_text("utf-8")
       tree = cst.parse_module(source_code)
-
-      # Apply framework injection logic
       injector = FrameworkInjector(target_fw=fw_key, op_name=op_def.operation, variant=variant)
       new_tree = tree.visit(injector)
-
       if not injector.found:
         log_warning(f"Skipping '{fw_key}': Could not locate `definitions` property in {adapter_cls.__name__}.")
         continue
-
       if new_tree.code != source_code:
         adapter_file.write_text(new_tree.code, "utf-8")
         log_success(f"Updated Spoke ({fw_key}): {adapter_file.name}")
       else:
         log_info(f"Spoke unchanged ({fw_key}): {adapter_file.name}")
-
     except Exception as e:
       log_warning(f"Failed to update {fw_key}: {e}")
 
@@ -191,17 +182,12 @@ def _scaffold_plugins(op_def: OperationDef) -> None:
   """
   if not op_def.scaffold_plugins:
     return
-
   try:
-    # Locate plugins dir relative to the package structure
     if ml_switcheroo.plugins.__file__:
       plugins_pkg_dir = Path(ml_switcheroo.plugins.__file__).parent
     else:
-      # Fallback if __init__.py not found (namespace pkg), though unlikely given project struct
       plugins_pkg_dir = Path(__file__).resolve().parents[2] / "plugins"
-
     generator = PluginGenerator(plugins_pkg_dir)
-
     for plug_def in op_def.scaffold_plugins:
       try:
         created = generator.generate(plug_def)
@@ -211,6 +197,5 @@ def _scaffold_plugins(op_def: OperationDef) -> None:
           log_info(f"Plugin already exists (skipped): plugins/{plug_def.name}.py")
       except Exception as e:
         log_error(f"Failed to generate plugin {plug_def.name}: {e}")
-
   except Exception as e:
     log_error(f"Plugin scaffolding process error: {e}")

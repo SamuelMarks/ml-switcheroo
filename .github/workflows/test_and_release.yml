@@ -48,40 +48,43 @@ jobs:
           source .venv/bin/activate
           pytest tests
 
-      - name: Doc build
-        run: |
-          source .venv/bin/activate
-          uv pip install -r docs/requirements.txt
-          python3 scripts/build_docs.py
-
-      - name: Doc build
-        run: |
-          source .venv/bin/activate
-          uv pip install -r docs/requirements.txt
-          python3 scripts/build_docs.py
-          cp -r docs/_build/html ${GITHUB_WORKSPACE}/ml-switcheroo-docs
-
-      - name: Checkout source code
-        uses: actions/checkout@v6
-        with:
-          repository: 'SamuelMarks/samuelmarks.github.io'
-          path: 'samuelmarks.github.io'
-
-      - name: Release docs
-        env:
-          GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-        run: |
-          cd "${GITHUB_WORKSPACE}"'/samuelmarks.github.io'
-          rm -rf 'ml-switcheroo'
-          cp -r "${GITHUB_WORKSPACE}"'/ml-switcheroo-docs' 'ml-switcheroo'
-
-          email_author="$(git log -1 --pretty=format:'%an <%ce>')"
-          author="${email_author% *}"
-          git config --global user.name "${author}"
-          email="${email_author#*<}"; email="${email::-1}"
-          git config --global user.email "${email}"
-
-          git add 'ml-switcheroo'
-          git commit -m '[ml-switcheroo] Add/update docs'
-          # git push origin master # TODO
+# This code works but is disabled as I'm doing manual doc releases:
+#
+#      - name: Doc build
+#        run: |
+#          source .venv/bin/activate
+#          uv pip install -r docs/requirements.txt
+#          python3 scripts/build_docs.py
+#
+#      - name: Doc build
+#        run: |
+#          source .venv/bin/activate
+#          uv pip install -r docs/requirements.txt
+#          python3 scripts/build_docs.py
+#          cp -r docs/_build/html ${GITHUB_WORKSPACE}/ml-switcheroo-docs
+#
+#      - name: Checkout source code
+#        uses: actions/checkout@v6
+#        with:
+#          repository: 'SamuelMarks/samuelmarks.github.io'
+#          path: 'samuelmarks.github.io'
+#
+#      - name: Release docs
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+#          GH_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+#        run: |
+#          cd "${GITHUB_WORKSPACE}"'/samuelmarks.github.io'
+#          rm -rf 'ml-switcheroo'
+#          cp -r "${GITHUB_WORKSPACE}"'/ml-switcheroo-docs' 'ml-switcheroo'
+#
+#          email_author="$(git log -1 --pretty=format:'%an <%ce>')"
+#          author="${email_author% *}"
+#          git config --global user.name "${author}"
+#          email="${email_author#*<}"; email="${email::-1}"
+#          git config --global user.email "${email}"
+#
+#          git add 'ml-switcheroo'
+#          git commit -m '[ml-switcheroo] Add/update docs'
+#          # git push origin master # TODO
+#
