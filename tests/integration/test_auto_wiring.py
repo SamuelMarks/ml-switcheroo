@@ -15,6 +15,7 @@ from ml_switcheroo.core.hooks import register_hook, clear_hooks, HookContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
+import ml_switcheroo.semantics.paths
 
 
 @pytest.fixture(autouse=True)
@@ -64,10 +65,12 @@ def test_auto_wired_plugin_flow(tmp_path):
 
   # 2. Initialize Manager (Should hydrate from registry)
   # We patch resolve methods to point to empty dirs so no JSONs interfere
-  with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=tmp_path):
-    with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=tmp_path):
-      # Patch available_frameworks to prevent standard adapter loading noise
-      with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
+  with patch("ml_switcheroo.semantics.paths.resolve_semantics_dir", return_value=tmp_path):
+    with patch("ml_switcheroo.semantics.paths.resolve_snapshots_dir", return_value=tmp_path):
+      # Patch available_frameworks on 'registry_loader' since Manager delegates to it
+      # Or rely on Manager only loading explicit hooks.
+      # SemanticsManager.__init__ calls RegistryLoader.hydrate() which calls available_frameworks.
+      with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
         mgr = SemanticsManager()
 
   # 3. Verify Manager State

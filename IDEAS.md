@@ -29,3 +29,10 @@ each ML framework, in order to confidently—and with evidence—make haughty cl
 ### Math for theorem provers
 
 To/fro Lean or Coq. Maybe u
+
+## Mobile friendly doc
+
+Show always-on-top selection of target, source framework
+Show always-on-top selection of example
+Show two tabs, source target
+Activate target tab when "Translate" clicked

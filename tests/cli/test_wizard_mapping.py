@@ -42,15 +42,20 @@ def wizard(tmp_path):
   sem_dir.mkdir()
   snap_dir.mkdir()
 
-  # FIX: Patch where it is used (cli.wizard)
+  # FIX: Patch where it is IMPORTED (cli.wizard) to catch direct usage
   with patch("ml_switcheroo.cli.wizard.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.cli.wizard.resolve_snapshots_dir", return_value=snap_dir):
-      mgr = SemanticsManager()
-      mgr._reverse_index = {}
-      w = MappingWizard(mgr)
-      mgr.data = {}
-      mgr._reverse_index = {}
-      yield w
+      # Also patch file loader used by Manager to ensure clean state
+      with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
+        with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap_dir):
+          # Avoid loading defaults
+          with patch("ml_switcheroo.semantics.file_loader.KnowledgeBaseLoader.load_knowledge_graph"):
+            mgr = SemanticsManager()
+            mgr._reverse_index = {}
+            mgr.data = {}
+            # Create wizard with clean manager
+            w = MappingWizard(mgr)
+            yield w
 
 
 def test_arg_normalization_flow(wizard, tmp_path):
@@ -62,10 +67,6 @@ def test_arg_normalization_flow(wizard, tmp_path):
           - Arg 'input': Rename to 'x'
           - Arg 'dim': Rename to 'axis'
           - Map Target? No
-  Expectation:
-      k_array_api.json entry:
-      std_args: ["x", "axis"]
-      variants.torch: { "api": "...", "args": {"x": "input", "axis": "dim"} }
   """
   prompts = ["m", "x", "axis"]
 
@@ -149,8 +150,6 @@ def test_wizard_plugin_assignment(wizard, tmp_path):
           - **Plugin? Yes**
           - **Plugin Name: 'decompose_alpha'**
           ...
-  Expectation:
-      JSON variant for JAX contains "requires_plugin": "decompose_alpha"
   """
   prompt_side_effect = [
     "m",
@@ -190,7 +189,6 @@ def test_skipping_logic_preserved(wizard, tmp_path):
 def test_dynamic_default_target_in_prompt(tmp_path):
   """
   Verify that the wizard uses the RuntimeConfig default in the prompt.
-  This ensures we don't hardcode 'jax' in the logic.
   """
   mock_config = MagicMock()
   mock_config.target_framework = "dynamic_target"
@@ -200,37 +198,47 @@ def test_dynamic_default_target_in_prompt(tmp_path):
   sem_dir.mkdir()
   snap_dir.mkdir()
 
-  mgr = SemanticsManager()
+  # Patch logic: wizard.py imports paths; file_loader.py imports paths.
+  # We patch both consumers to be safe.
+  with patch("ml_switcheroo.cli.wizard.resolve_semantics_dir", return_value=sem_dir):
+    with patch("ml_switcheroo.cli.wizard.resolve_snapshots_dir", return_value=snap_dir):
+      with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
+        # Patch KnowledgeBaseLoader to prevent loading real files
+        with patch("ml_switcheroo.semantics.file_loader.KnowledgeBaseLoader.load_knowledge_graph"):
+          mgr = SemanticsManager()
 
-  with patch("ml_switcheroo.cli.wizard.RuntimeConfig", return_value=mock_config):
-    # Initialize Wizard inside patch to pick up default
-    w = MappingWizard(mgr)
+          with patch("ml_switcheroo.cli.wizard.RuntimeConfig", return_value=mock_config):
+            # Initialize Wizard inside patch to pick up default
+            w = MappingWizard(mgr)
 
-    assert w.default_target == "dynamic_target"
+            assert w.default_target == "dynamic_target"
 
-    # Now run a flow that triggers _prompt_target_mapping
-    prompts = [
-      "m",
-      "x",
-      "axis",
-      "dynamic_target",  # Prompt: Target Framework
-      "dynamic_target.api",  # Prompt: Target API Path
-      "a",  # Tgt map 1 (std 'x' -> 'a')
-      "axis",  # Tgt map 2 (std 'axis' -> 'axis')
-    ]
+            # Now run a flow that triggers _prompt_target_mapping
+            prompts = [
+              "m",
+              "x",
+              "axis",
+              "dynamic_target",  # Prompt: Target Framework (matches default)
+              "dynamic_target.api",  # Prompt: Target API Path
+              "a",  # Tgt map 1
+              "axis",  # Tgt map 2
+            ]
 
-    with patch("ml_switcheroo.cli.wizard.ApiInspector", return_value=MockInspector()):
-      with patch("rich.prompt.Prompt.ask", side_effect=prompts) as mock_prompt_ask:
-        with patch("rich.prompt.Confirm.ask", side_effect=[True, False]):
-          w.start("torch")
+            with patch("ml_switcheroo.cli.wizard.ApiInspector", return_value=MockInspector()):
+              with patch("rich.prompt.Prompt.ask", side_effect=prompts) as mock_prompt_ask:
+                # Confirm: "Map target?" -> True, "Plugin?" -> False
+                with patch("rich.prompt.Confirm.ask", side_effect=[True, False]):
+                  w.start("torch")
 
-          target_fw_call = None
-          for call in mock_prompt_ask.call_args_list:
-            args, kwargs = call
-            if args and "Target Framework" in args[0]:
-              target_fw_call = call
-              break
+                  target_fw_call = None
+                  for call in mock_prompt_ask.call_args_list:
+                    args, kwargs = call
+                    if args and "Target Framework" in args[0]:
+                      target_fw_call = call
+                      break
 
-          assert target_fw_call is not None
-          _, kwargs = target_fw_call
-          assert kwargs["default"] == "dynamic_target"
+                  assert target_fw_call is not None, (
+                    f"Prompt 'Target Framework' not found. Calls: {mock_prompt_ask.call_args_list}"
+                  )
+                  _, kwargs = target_fw_call
+                  assert kwargs["default"] == "dynamic_target"

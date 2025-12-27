@@ -6,6 +6,7 @@ mappings for math operations, neural layers, and IO.
 """
 
 import sys
+import logging
 from typing import List, Tuple, Optional, Dict, Any, Set
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
 from ml_switcheroo.enums import SemanticTier
@@ -16,12 +17,14 @@ from ml_switcheroo.frameworks.base import (
   StandardCategory,
   StandardMap,
   ImportConfig,
+  InitMode,
+  load_snapshot_for_adapter,
 )
 
 try:
   import tensorflow as tf
 except ImportError:
-  pass
+  tf = None
 
 
 @register_framework("tensorflow")
@@ -35,7 +38,17 @@ class TensorFlowAdapter:
   ui_priority: int = 30
 
   def __init__(self) -> None:
-    pass
+    """
+    Initializes the adapter.
+    """
+    self._mode = InitMode.LIVE
+    self._snapshot_data: Dict[str, Any] = {}
+
+    if tf is None:
+      self._mode = InitMode.GHOST
+      self._snapshot_data = load_snapshot_for_adapter("tensorflow")
+      if not self._snapshot_data:
+        logging.debug("TensorFlow not installed and no snapshot found.")
 
   # --- Metadata ---
 
@@ -54,6 +67,8 @@ class TensorFlowAdapter:
 
   @property
   def search_modules(self) -> List[str]:
+    if self._mode == InitMode.GHOST:
+      return []
     return [
       "tensorflow",
       "tensorflow.math",
@@ -170,6 +185,17 @@ class TensorFlowAdapter:
     return ["set_seed", "random.set_seed"]
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    if self._mode == InitMode.GHOST:
+      return self._collect_ghost(category)
+    return self._collect_live(category)
+
+  def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
+    if not self._snapshot_data:
+      return []
+    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    return [GhostInspector.hydrate(item) for item in raw_list]
+
+  def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
     results = []
     try:
       import tensorflow as tf

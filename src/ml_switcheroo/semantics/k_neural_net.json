@@ -259,6 +259,13 @@
       ]
     ]
   },
+  "BatchNorm": {
+    "description": "Batch Normalization.",
+    "std_args": [
+      "input",
+      "eps"
+    ]
+  },
   "BatchNormalization": {
     "description": "Carries out batch normalization as described in the paper https://arxiv.org/abs/1502.03167. Depending on the mode it is being run, There are five required inputs 'X', 'scale', 'B', 'input_mean' and 'input_var'. Note that 'input_mean' and 'input_var' are expected to be the estimated statistics in inf...",
     "from": "Operators.md",
@@ -408,6 +415,12 @@
         "periodic",
         "int"
       ]
+    ]
+  },
+  "Cache": {
+    "description": "Container for mutable state.",
+    "std_args": [
+      "value"
     ]
   },
   "Cast": {
@@ -596,6 +609,7 @@
   },
   "Constant": {
     "description": "This operator produces a constant tensor. Exactly one of the provided attributes, either value, sparse_value, or value_* must be specified.",
+    "from": "Operators.md",
     "std_args": [
       [
         "sparse_value",
@@ -629,8 +643,7 @@
         "value_strings",
         "List[str]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "ConstantOfShape": {
     "description": "Generate a tensor with given value and shape.",
@@ -686,6 +699,20 @@
         "strides",
         "List[int]"
       ]
+    ]
+  },
+  "Conv2d": {
+    "description": "Applies a 2D convolution over an input signal composed of several input planes.",
+    "std_args": [
+      "in_channels",
+      "out_channels",
+      "kernel_size",
+      "stride",
+      "padding",
+      "dilation",
+      "groups",
+      "bias",
+      "padding_mode"
     ]
   },
   "ConvInteger": {
@@ -802,6 +829,14 @@
         "input",
         "Tensor"
       ]
+    ]
+  },
+  "CrossEntropyLoss": {
+    "description": "Cross Entropy Loss.",
+    "std_args": [
+      "input",
+      "target",
+      "weight"
     ]
   },
   "CumSum": {
@@ -952,13 +987,13 @@
   },
   "Det": {
     "description": "Det calculates determinant of a square matrix or batches of square matrices. Det takes one input tensor of shape `[*, M, M]`, where `*` is zero or more batch dimensions, and the inner-most 2 dimensions form square matrices. The output is a tensor of shape `[*]`, containing the determinants of all in...",
+    "from": "Operators.md",
     "std_args": [
       [
         "X",
         "Tensor"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "Div": {
     "description": "Performs element-wise binary division (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md). (Opset 14 change): Extend supported types to include uint8, int8, uint16, and int16.",
@@ -975,25 +1010,10 @@
     ]
   },
   "Dropout": {
-    "description": "Dropout takes an input floating-point tensor, an optional input ratio (floating-point scalar) and an optional input training_mode (boolean scalar). It produces two tensor outputs, output (floating-point tensor) and mask (optional `Tensor<bool>`). If `training_mode` is true then the output Y will be ...",
-    "from": "Operators.md",
+    "description": "During training, randomly zeroes some of the elements of the input tensor with probability p.",
     "std_args": [
-      [
-        "data",
-        "Tensor"
-      ],
-      [
-        "ratio",
-        "Any"
-      ],
-      [
-        "training_mode",
-        "Any"
-      ],
-      [
-        "seed",
-        "int"
-      ]
+      "p",
+      "inplace"
     ]
   },
   "DynamicQuantizeLinear": {
@@ -1034,6 +1054,18 @@
       ]
     ]
   },
+  "Embedding": {
+    "description": "Lookup table for storing embeddings.",
+    "std_args": [
+      "num_embeddings",
+      "embedding_dim",
+      "padding_idx",
+      "max_norm",
+      "norm_type",
+      "scale_grad_by_freq",
+      "sparse"
+    ]
+  },
   "Equal": {
     "description": "Returns the tensor resulted from performing the `equal` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
     "from": "Operators.md",
@@ -1050,13 +1082,13 @@
   },
   "Erf": {
     "description": "Computes the error function of the given input tensor element-wise.",
+    "from": "Operators.md",
     "std_args": [
       [
         "input",
         "Tensor"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "Exp": {
     "description": "Calculates the exponential of the given input tensor, element-wise.",
@@ -1124,8 +1156,15 @@
       ]
     ]
   },
+  "GELU": {
+    "description": "Gaussian Error Linear Unit.",
+    "std_args": [
+      "input"
+    ]
+  },
   "GRU": {
     "description": "Computes an one-layer GRU. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `z` - update gate * `r` - reset gate * `h` - hidden gate * `t` - time step (t-1 means previous time step) * `W[zrh]` - W parameter weight matrix for update, r...",
+    "from": "Operators.md",
     "std_args": [
       [
         "X",
@@ -1183,8 +1222,7 @@
         "linear_before_reset",
         "int"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "Gather": {
     "description": "Given `data` tensor of rank r >= 1, and `indices` tensor of rank q, gather entries of the axis dimension of `data` (by default outer-most one as axis=0) indexed by `indices`, and concatenates them in an output tensor of rank q + (r - 1). It is an indexing operation that indexes into the input `data`...",
@@ -1444,6 +1482,7 @@
   },
   "HardSigmoid": {
     "description": "HardSigmoid takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the HardSigmoid function, y = max(0, min(1, alpha * x + beta)), is applied to the tensor elementwise.",
+    "from": "Operators.md",
     "std_args": [
       [
         "X",
@@ -1457,8 +1496,7 @@
         "beta",
         "float"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "HardSwish": {
     "description": "HardSwish takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the HardSwish function, y = x * max(0, min(1, alpha * x + beta)) = x * HardSigmoid<alpha, beta>(x), where alpha = 1/6 and beta = 0.5, is applied to the tensor elementwise.",
@@ -1614,6 +1652,7 @@
   },
   "LSTM": {
     "description": "Computes an one-layer LSTM. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `i` - input gate * `o` - output gate * `f` - forget gate * `c` - cell gate * `t` - time step (t-1 means previous time step) * `W[iofc]` - W parameter weight ...",
+    "from": "Operators.md",
     "std_args": [
       [
         "X",
@@ -1679,8 +1718,16 @@
         "layout",
         "int"
       ]
-    ],
-    "type": "class"
+    ]
+  },
+  "LayerNorm": {
+    "description": "Applies Layer Normalization over a mini-batch of inputs.",
+    "std_args": [
+      "normalized_shape",
+      "eps",
+      "elementwise_affine",
+      "bias"
+    ]
   },
   "LayerNormalization": {
     "description": "This is layer normalization defined in ONNX as function. The overall computation can be split into two stages. The first stage is standardization, which makes the normalized elements have zero mean and unit variances. The computation required by standardization can be described by the following equa...",
@@ -1723,6 +1770,7 @@
   },
   "LeakyRelu": {
     "description": "LeakyRelu takes input data (Tensor<T>) and an argument alpha, and produces one output data (Tensor<T>) where the function `f(x) = alpha * x for x < 0`, `f(x) = x for x >= 0`, is applied to the data tensor elementwise.",
+    "from": "Operators.md",
     "std_args": [
       [
         "X",
@@ -1732,8 +1780,7 @@
         "alpha",
         "float"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "Less": {
     "description": "Returns the tensor resulted from performing the `less` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
@@ -1763,6 +1810,18 @@
       ]
     ]
   },
+  "Linear": {
+    "description": "Applies a linear transformation to the incoming data",
+    "std_args": [
+      "in_features",
+      "out_features",
+      "bias"
+    ]
+  },
+  "LoadStateDict": {
+    "description": "Loading state utility for mappings.",
+    "std_args": []
+  },
   "Log": {
     "description": "Calculates the natural log of the given input tensor, element-wise.",
     "from": "Operators.md",
@@ -1775,6 +1834,7 @@
   },
   "LogSoftmax": {
     "description": "The operator computes the log of softmax values for the given input: LogSoftmax(input, axis) = Log(Softmax(input, axis=axis)) The \"axis\" attribute indicates the dimension along which LogSoftmax will be performed. The output tensor has the same shape and contains the LogSoftmax values of the correspo...",
+    "from": "Operators.md",
     "std_args": [
       [
         "input",
@@ -1784,8 +1844,7 @@
         "axis",
         "int"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "Logsigmoid": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
@@ -1870,8 +1929,16 @@
       ]
     ]
   },
+  "MSELoss": {
+    "description": "Mean Squared Error.",
+    "std_args": [
+      "input",
+      "target"
+    ]
+  },
   "MatMul": {
     "description": "Matrix product that behaves like [numpy.matmul](https://numpy.org/doc/stable/reference/generated/numpy.matmul.html).",
+    "from": "Operators.md",
     "std_args": [
       [
         "A",
@@ -1881,8 +1948,7 @@
         "B",
         "Tensor"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "MatMulInteger": {
     "description": "Matrix product that behaves like [numpy.matmul](https://numpy.org/doc/stable/reference/generated/numpy.matmul.html). The production MUST never overflow. The accumulation may overflow if and only if in 32 bits.",
@@ -1952,6 +2018,17 @@
         "strides",
         "List[int]"
       ]
+    ]
+  },
+  "MaxPool2d": {
+    "description": "Applies a 2D max pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "kernel_size",
+      "stride",
+      "padding",
+      "dilation",
+      "return_indices",
+      "ceil_mode"
     ]
   },
   "MaxRoiPool": {
@@ -2141,6 +2218,20 @@
       ]
     ]
   },
+  "MultiheadAttention": {
+    "description": "Multi-head attention mechanism.",
+    "std_args": [
+      "embed_dim",
+      "num_heads",
+      "dropout",
+      "bias",
+      "add_bias_kv",
+      "add_zero_attn",
+      "kdim",
+      "vdim",
+      "batch_first"
+    ]
+  },
   "Multinomial": {
     "description": "Generate a tensor of samples from a multinomial distribution according to the probabilities of each of the possible outcomes.",
     "from": "Operators.md",
@@ -2321,6 +2412,7 @@
   },
   "PRelu": {
     "description": "PRelu takes input data (Tensor<T>) and slope tensor as input, and produces one output data (Tensor<T>) where the function `f(x) = slope * x for x < 0`, `f(x) = x for x >= 0`., is applied to the data tensor elementwise. This operator supports **unidirectional broadcasting** (tensor slope should be un...",
+    "from": "Operators.md",
     "std_args": [
       [
         "X",
@@ -2330,8 +2422,7 @@
         "slope",
         "Tensor"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "Pad": {
     "description": "Given a tensor containing the data to be padded (`data`), a tensor containing the number of start and end pad values for axis (`pads`), (optionally) a `mode`, and (optionally) `constant_value`, a padded tensor (`output`) is generated. The three supported `modes` are (similar to corresponding modes s...",
@@ -2357,6 +2448,12 @@
         "mode",
         "str"
       ]
+    ]
+  },
+  "Param": {
+    "description": "Container for trainable parameter.",
+    "std_args": [
+      "value"
     ]
   },
   "Pow": {
@@ -2543,6 +2640,7 @@
   },
   "RNN": {
     "description": "Computes an one-layer simple RNN. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `i` - input gate * `t` - time step (t-1 means previous time step) * `Wi` - W parameter weight matrix for input gate * `Ri` - R recurrence weight matrix...",
+    "from": "Operators.md",
     "std_args": [
       [
         "X",
@@ -2596,8 +2694,7 @@
         "layout",
         "int"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "RandomNormal": {
     "description": "Generate a tensor with random values drawn from a normal distribution. The shape of the tensor is specified by the `shape` argument and the parameter of the normal distribution specified by `mean` and `scale`. The data type is specified by the 'dtype' argument. The 'dtype' argument must be one of th...",
@@ -3151,13 +3248,13 @@
   },
   "Round": {
     "description": "Round takes one input Tensor and rounds the values, element-wise, meaning it finds the nearest integer for each value. In case of halves, the rule is to round them to the nearest even integer. If input x is integral, +0, -0, NaN,  or infinite, x itself is returned. The output tensor has the same sha...",
+    "from": "Operators.md",
     "std_args": [
       [
         "X",
         "Tensor"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "STFT": {
     "description": "Computes the Short-time Fourier Transform of the signal.",
@@ -3384,8 +3481,15 @@
       ]
     ]
   },
+  "Sequential": {
+    "description": "A sequential container.",
+    "std_args": [
+      "layers"
+    ]
+  },
   "Shape": {
     "description": "Takes a tensor as input and outputs an 1D int64 tensor containing the shape of the input tensor. Optional attributes start and end can be used to compute a slice of the input tensor's shape. If start axis is omitted, the slice starts from axis 0. The end axis, if specified, is exclusive (and the ret...",
+    "from": "Operators.md",
     "std_args": [
       [
         "data",
@@ -3399,8 +3503,7 @@
         "start",
         "int"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "Shrink": {
     "description": "Shrink takes one input data (Tensor<numeric>) and produces one Tensor output, having same datatype and shape with input. It has two attributes, lambd and bias. The formula of this operator is: If x < -lambd, y = x + bias; If x > lambd, y = x - bias; Otherwise, y = 0.",
@@ -3462,13 +3565,13 @@
   },
   "Size": {
     "description": "Takes a tensor as input and outputs a int64 scalar that equals to the total number of elements of the input tensor.",
+    "from": "Operators.md",
     "std_args": [
       [
         "data",
         "Tensor"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "Slice": {
     "description": "Produces a slice of the input tensor along multiple axes. Similar to numpy: https://numpy.org/doc/stable/user/basics.indexing.html?highlight=slice#slicing-and-striding Slice uses the `starts`, `ends`, `axes` and `steps` inputs to select a sub-tensor of its input `data` tensor. An effective `starts[i...",
@@ -4023,8 +4126,14 @@
   },
   "Upsample": {
     "description": "Upsample the input tensor. Each dimension value of the output tensor is: output_dimension = floor(input_dimension * scale).",
-    "std_args": [],
-    "type": "class"
+    "from": "Operators.md",
+    "std_args": []
+  },
+  "Variable": {
+    "description": "Generic state container.",
+    "std_args": [
+      "value"
+    ]
   },
   "Where": {
     "description": "Return elements, either from X or Y, depending on condition. Where behaves like [numpy.where](https://docs.scipy.org/doc/numpy/reference/generated/numpy.where.html) with three parameters. This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the...",
@@ -4102,6 +4211,34 @@
     "std_args": [],
     "type": "attribute"
   },
+  "load_state_dict": {
+    "description": "Copies parameters and buffers from state_dict into this module.",
+    "std_args": [
+      "state_dict",
+      "strict"
+    ]
+  },
+  "log_softmax": {
+    "description": "Applies the LogSoftmax function to an n-dimensional input Tensor.",
+    "std_args": [
+      "input",
+      "dim"
+    ]
+  },
+  "parameters": {
+    "description": "Returns an iterator over module parameters.",
+    "std_args": [
+      "recurse"
+    ]
+  },
+  "register_buffer": {
+    "description": "Registers a persistent buffer.",
+    "std_args": [
+      "name",
+      "tensor",
+      "persistent"
+    ]
+  },
   "register_module": {
     "description": "Alias for :func:`add_module`.",
     "std_args": [
@@ -4110,6 +4247,19 @@
       "module"
     ],
     "type": "function"
+  },
+  "register_parameter": {
+    "description": "Registers a learnable parameter.",
+    "std_args": [
+      "name",
+      "param"
+    ]
+  },
+  "relu": {
+    "description": "Rectified Linear Unit.",
+    "std_args": [
+      "input"
+    ]
   },
   "set_submodule": {
     "description": "Set the submodule given by ``target`` if it exists, otherwise throw an error.",
@@ -4120,5 +4270,20 @@
       "strict"
     ],
     "type": "function"
+  },
+  "softmax": {
+    "description": "Applies the Softmax function to an n-dimensional input Tensor.",
+    "std_args": [
+      "input",
+      "dim"
+    ]
+  },
+  "state_dict": {
+    "description": "Returns a dictionary containing a whole state of the module.",
+    "std_args": [
+      "destination",
+      "prefix",
+      "keep_vars"
+    ]
   }
 }

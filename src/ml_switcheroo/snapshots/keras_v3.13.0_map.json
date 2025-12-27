@@ -26,6 +26,14 @@
     "Bool": {
       "api": "bool"
     },
+    "CTCLoss": {
+      "api": "keras.src.ops.nn.CTCLoss",
+      "args": {
+        "mask_index": "mask_index",
+        "name": "name",
+        "self": "self"
+      }
+    },
     "CastBool": {
       "api": "keras.ops.cast",
       "inject_args": {
@@ -80,10 +88,42 @@
         "dtype": "int16"
       }
     },
+    "Celu": {
+      "api": "keras.src.ops.nn.Celu",
+      "args": {
+        "alpha": "alpha",
+        "name": "name",
+        "self": "self"
+      }
+    },
     "CenterCrop": {
       "api": "keras.layers.CenterCrop",
       "args": {
         "size": "height"
+      }
+    },
+    "CosineSimilarity": {
+      "api": "keras.src.metrics.regression_metrics.CosineSimilarity",
+      "args": {
+        "axis": "axis",
+        "dtype": "dtype",
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "DataParallel": {
+      "api": "keras.src.distribution.distribution_lib.DataParallel",
+      "args": {
+        "auto_shard_dataset": "auto_shard_dataset",
+        "device_mesh": "device_mesh",
+        "devices": "devices",
+        "self": "self"
+      }
+    },
+    "Det": {
+      "api": "keras.src.backend.torch.linalg.det",
+      "args": {
+        "x": "x"
       }
     },
     "Div": {
@@ -93,45 +133,145 @@
         "y": "x2"
       }
     },
-    "Embedding": {
-      "api": "keras.layers.Embedding",
+    "Dropout": {
+      "api": "keras.src.layers.attention.grouped_query_attention.GroupedQueryAttention.dropout",
+      "args": {}
+    },
+    "Elu": {
+      "api": "keras.src.layers.activations.elu.ELU",
       "args": {
-        "embedding_dim": "output_dim",
-        "num_embeddings": "input_dim"
+        "alpha": "alpha",
+        "kwargs": "kwargs",
+        "self": "self"
+      }
+    },
+    "Embedding": {
+      "api": "keras.src.layers.core.embedding.Embedding",
+      "args": {
+        "embeddings_constraint": "embeddings_constraint",
+        "embeddings_initializer": "embeddings_initializer",
+        "embeddings_regularizer": "embeddings_regularizer",
+        "input_dim": "input_dim",
+        "kwargs": "kwargs",
+        "lora_alpha": "lora_alpha",
+        "lora_rank": "lora_rank",
+        "mask_zero": "mask_zero",
+        "output_dim": "output_dim",
+        "quantization_config": "quantization_config",
+        "self": "self",
+        "weights": "weights"
+      }
+    },
+    "Erf": {
+      "api": "keras.src.backend.torch.math.erf",
+      "args": {
+        "x": "x"
       }
     },
     "Flatten": {
-      "api": "keras.layers.Flatten"
+      "api": "keras.src.layers.reshaping.flatten.Flatten",
+      "args": {
+        "data_format": "data_format",
+        "kwargs": "kwargs",
+        "self": "self"
+      }
     },
     "Float16": {
-      "api": "numpy.float16"
+      "api": "numpy.float16",
+      "required_imports": [
+        "import numpy"
+      ]
     },
     "Float32": {
-      "api": "numpy.float32"
+      "api": "numpy.float32",
+      "required_imports": [
+        "import numpy"
+      ]
     },
     "Float64": {
-      "api": "numpy.float64"
+      "api": "numpy.float64",
+      "required_imports": [
+        "import numpy"
+      ]
     },
     "GELU": {
-      "api": "keras.layers.Activation",
+      "api": "keras.src.activations.activations.gelu",
       "args": {
-        "input": "gelu"
-      },
-      "operator": "keras.activations.gelu",
-      "transformation_type": "inline_lambda"
+        "approximate": "approximate",
+        "x": "x"
+      }
+    },
+    "GRU": {
+      "api": "keras.src.backend.torch.rnn.gru",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Gather": {
+      "api": "keras.src.legacy.backend.gather",
+      "args": {
+        "indices": "indices",
+        "reference": "reference"
+      }
+    },
+    "Glu": {
+      "api": "keras.src.activations.activations.glu",
+      "args": {
+        "axis": "axis",
+        "x": "x"
+      }
     },
     "Grayscale": {
       "api": "lambda x: x",
       "transformation_type": "inline_lambda"
     },
+    "HardSigmoid": {
+      "api": "keras.src.ops.nn.HardSigmoid",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "Hardshrink": {
+      "api": "keras.src.ops.nn.HardShrink",
+      "args": {
+        "name": "name",
+        "self": "self",
+        "threshold": "threshold"
+      }
+    },
+    "Identity": {
+      "api": "keras.src.layers.core.identity.Identity",
+      "args": {
+        "kwargs": "kwargs",
+        "self": "self"
+      }
+    },
     "Int16": {
-      "api": "numpy.int16"
+      "api": "numpy.int16",
+      "required_imports": [
+        "import numpy"
+      ]
     },
     "Int32": {
-      "api": "numpy.int32"
+      "api": "numpy.int32",
+      "required_imports": [
+        "import numpy"
+      ]
     },
     "Int64": {
-      "api": "numpy.int64"
+      "api": "numpy.int64",
+      "required_imports": [
+        "import numpy"
+      ]
+    },
+    "LSTM": {
+      "api": "keras.src.backend.openvino.rnn.lstm",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
     },
     "LayerNorm": {
       "api": "keras.layers.LayerNormalization",
@@ -140,14 +280,48 @@
         "normalized_shape": "axis"
       }
     },
-    "Linear": {
-      "api": "keras.layers.Dense",
+    "LeakyRelu": {
+      "api": "keras.src.layers.activations.leaky_relu.LeakyReLU",
       "args": {
-        "out_features": "units"
+        "kwargs": "kwargs",
+        "negative_slope": "negative_slope",
+        "self": "self"
+      }
+    },
+    "Linear": {
+      "api": "keras.src.activations.activations.linear",
+      "args": {
+        "x": "x"
+      }
+    },
+    "LogSoftmax": {
+      "api": "keras.src.ops.nn.LogSoftmax",
+      "args": {
+        "axis": "axis",
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "Logsigmoid": {
+      "api": "keras.src.ops.nn.LogSigmoid",
+      "args": {
+        "name": "name",
+        "self": "self"
       }
     },
     "Mean": {
       "api": "keras.ops.mean"
+    },
+    "Mish": {
+      "api": "keras.src.activations.activations.Mish",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "Module": {
+      "api": "keras.src.utils.jax_layer.FlaxLayer.module",
+      "args": {}
     },
     "Mul": {
       "api": "keras.ops.multiply",
@@ -164,10 +338,33 @@
       "requires_plugin": "repack_attn_keras"
     },
     "Normalize": {
-      "api": "keras.layers.Normalization",
+      "api": "keras.src.ops.nn.Normalize",
       "args": {
-        "mean": "mean",
-        "std": "variance"
+        "axis": "axis",
+        "epsilon": "epsilon",
+        "name": "name",
+        "order": "order",
+        "self": "self"
+      }
+    },
+    "PRelu": {
+      "api": "keras.src.layers.activations.prelu.PReLU",
+      "args": {
+        "alpha_constraint": "alpha_constraint",
+        "alpha_initializer": "alpha_initializer",
+        "alpha_regularizer": "alpha_regularizer",
+        "kwargs": "kwargs",
+        "self": "self",
+        "shared_axes": "shared_axes"
+      }
+    },
+    "Pad": {
+      "api": "keras.src.layers.preprocessing.image_preprocessing.bounding_boxes.bounding_box.BoundingBox.pad",
+      "args": {
+        "boxes": "boxes",
+        "left": "left",
+        "self": "self",
+        "top": "top"
       }
     },
     "RandomCrop": {
@@ -182,6 +379,13 @@
     "RandomVerticalFlip": {
       "api": "keras.layers.RandomFlip"
     },
+    "Relu6": {
+      "api": "keras.src.ops.nn.Relu6",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
     "Reshape": {
       "api": "keras.ops.reshape",
       "args": {
@@ -194,9 +398,81 @@
         "size": "height"
       }
     },
+    "Round": {
+      "api": "keras.src.legacy.backend.round",
+      "args": {
+        "x": "x"
+      }
+    },
+    "Scatter": {
+      "api": "keras.src.backend.torch.core.scatter",
+      "args": {
+        "indices": "indices",
+        "shape": "shape",
+        "values": "values"
+      }
+    },
+    "Selu": {
+      "api": "keras.src.ops.nn.Selu",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
     "Sequential": {
       "api": "keras.Sequential",
       "requires_plugin": "keras_sequential_pack"
+    },
+    "Shape": {
+      "api": "keras.src.layers.input_spec.InputSpec.shape",
+      "args": {}
+    },
+    "Sigmoid": {
+      "api": "keras.src.ops.nn.Sigmoid",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "Silu": {
+      "api": "keras.src.ops.nn.Silu",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "Size": {
+      "api": "keras.src.layers.reshaping.up_sampling3d.UpSampling3D.size",
+      "args": {}
+    },
+    "Softmax": {
+      "api": "keras.src.activations.activations.softmax",
+      "args": {
+        "axis": "axis",
+        "x": "x"
+      }
+    },
+    "Softplus": {
+      "api": "keras.src.ops.nn.Softplus",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "Softshrink": {
+      "api": "keras.src.ops.nn.SoftShrink",
+      "args": {
+        "name": "name",
+        "self": "self",
+        "threshold": "threshold"
+      }
+    },
+    "Softsign": {
+      "api": "keras.src.ops.nn.Softsign",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
     },
     "Sub": {
       "api": "keras.ops.subtract",
@@ -205,11 +481,42 @@
         "y": "x2"
       }
     },
+    "Tanh": {
+      "api": "keras.src.ops.numpy.Tanh",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "Tanhshrink": {
+      "api": "keras.src.ops.nn.TanhShrink",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "Threshold": {
+      "api": "keras.src.activations.activations.ReLU.threshold",
+      "args": {}
+    },
     "ToTensor": {
       "api": "keras.ops.convert_to_tensor"
     },
     "UInt8": {
-      "api": "numpy.uint8"
+      "api": "numpy.uint8",
+      "required_imports": [
+        "import numpy"
+      ]
+    },
+    "Unfold": {
+      "api": "keras.src.backend.torch.nn.unfold",
+      "args": {
+        "dilation": "dilation",
+        "input": "input",
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
     },
     "Variable": {
       "api": "keras.Variable",
@@ -217,20 +524,435 @@
         "value": "initializer"
       }
     },
+    "activation": {
+      "api": "keras.src.layers.activations.activation.Activation.activation",
+      "args": {}
+    },
+    "alpha": {
+      "api": "keras.src.losses.losses.BinaryFocalCrossentropy.alpha",
+      "args": {}
+    },
+    "append": {
+      "api": "keras.src.utils.tracking.TrackedList.append",
+      "args": {
+        "self": "self",
+        "value": "value"
+      }
+    },
+    "apply": {
+      "api": "keras.src.optimizers.base_optimizer.BaseOptimizer.apply",
+      "args": {
+        "grads": "grads",
+        "self": "self",
+        "trainable_variables": "trainable_variables"
+      }
+    },
+    "approximate": {
+      "api": "keras.src.ops.nn.Gelu.approximate",
+      "args": {}
+    },
+    "beta": {
+      "api": "keras.src.metrics.f_score_metrics.FBetaScore.beta",
+      "args": {}
+    },
+    "clear": {
+      "api": "keras.src.utils.tracking.TrackedList.clear",
+      "args": {
+        "self": "self"
+      }
+    },
+    "compute_mask": {
+      "api": "keras.src.layers.layer.Layer.compute_mask",
+      "args": {
+        "inputs": "inputs",
+        "previous_mask": "previous_mask",
+        "self": "self"
+      }
+    },
+    "cond": {
+      "api": "keras.src.ops.core.WhileLoop.cond",
+      "args": {}
+    },
+    "copy": {
+      "api": "keras.src.backend.torch.numpy.copy",
+      "args": {
+        "x": "x"
+      }
+    },
+    "data": {
+      "api": "keras.src.legacy.preprocessing.sequence.TimeseriesGenerator.data",
+      "args": {}
+    },
+    "device": {
+      "api": "keras.src.backend.device",
+      "args": {
+        "device_name": "device_name"
+      }
+    },
+    "device_mesh": {
+      "api": "keras.src.distribution.distribution_lib.TensorLayout.device_mesh",
+      "args": {}
+    },
+    "dilation": {
+      "api": "keras.src.ops.nn.Unfold.dilation",
+      "args": {}
+    },
+    "eig": {
+      "api": "keras.src.backend.torch.linalg.eig",
+      "args": {
+        "x": "x"
+      }
+    },
+    "eigh": {
+      "api": "keras.src.backend.torch.linalg.eigh",
+      "args": {
+        "x": "x"
+      }
+    },
+    "encoder": {
+      "api": "keras.src.legacy.saving.json_utils.Encoder",
+      "args": {}
+    },
+    "erfinv": {
+      "api": "keras.src.backend.torch.math.erfinv",
+      "args": {
+        "x": "x"
+      }
+    },
+    "eval": {
+      "api": "keras.src.legacy.backend.eval",
+      "args": {
+        "x": "x"
+      }
+    },
     "exp": {
       "api": "keras.ops.exp"
+    },
+    "exp2": {
+      "api": "keras.src.backend.torch.numpy.exp2",
+      "args": {
+        "x": "x"
+      }
+    },
+    "expm1": {
+      "api": "keras.src.backend.torch.numpy.expm1",
+      "args": {
+        "x": "x"
+      }
+    },
+    "extend": {
+      "api": "keras.src.utils.tracking.TrackedList.extend",
+      "args": {
+        "self": "self",
+        "values": "values"
+      }
+    },
+    "fft": {
+      "api": "keras.src.backend.torch.math.fft",
+      "args": {
+        "x": "x"
+      }
+    },
+    "fft2": {
+      "api": "keras.src.backend.torch.math.fft2",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float": {
+      "api": "keras.src.layers.preprocessing.feature_space.FeatureSpace.float",
+      "args": {
+        "cls": "cls",
+        "name": "name"
+      }
+    },
+    "fn": {
+      "api": "keras.src.losses.losses.LossFunctionWrapper.fn",
+      "args": {}
+    },
+    "forward": {
+      "api": "keras.src.backend.torch.core.CustomGradientFunction.forward",
+      "args": {
+        "args": "args",
+        "ctx": "ctx",
+        "forward_fn": "forward_fn",
+        "kwargs": "kwargs"
+      }
+    },
+    "freeze": {
+      "api": "keras.src.utils.config.Config.freeze",
+      "args": {
+        "self": "self"
+      }
+    },
+    "get": {
+      "api": "keras.src.utils.config.Config.get",
+      "args": {
+        "keyname": "keyname",
+        "self": "self",
+        "value": "value"
+      }
+    },
+    "groups": {
+      "api": "keras.src.layers.normalization.group_normalization.GroupNormalization.groups",
+      "args": {}
+    },
+    "head_dim": {
+      "api": "keras.src.layers.attention.grouped_query_attention.GroupedQueryAttention.head_dim",
+      "args": {}
+    },
+    "ifft2": {
+      "api": "keras.src.backend.torch.math.ifft2",
+      "args": {
+        "x": "x"
+      }
+    },
+    "insert": {
+      "api": "keras.src.utils.tracking.TrackedList.insert",
+      "args": {
+        "index": "index",
+        "self": "self",
+        "value": "value"
+      }
+    },
+    "inv": {
+      "api": "keras.src.backend.torch.linalg.inv",
+      "args": {
+        "x": "x"
+      }
+    },
+    "is_tensor": {
+      "api": "keras.src.backend.torch.core.is_tensor",
+      "args": {
+        "x": "x"
+      }
+    },
+    "items": {
+      "api": "keras.src.utils.config.Config.items",
+      "args": {
+        "self": "self"
+      }
+    },
+    "join": {
+      "api": "keras.src.utils.file_utils.join",
+      "args": {
+        "path": "path",
+        "paths": "paths"
+      }
+    },
+    "k": {
+      "api": "keras.src.metrics.accuracy_metrics.TopKCategoricalAccuracy.k",
+      "args": {}
+    },
+    "kernel_size": {
+      "api": "keras.src.layers.convolutional.base_depthwise_conv.BaseDepthwiseConv.kernel_size",
+      "args": {}
+    },
+    "keys": {
+      "api": "keras.src.utils.config.Config.keys",
+      "args": {
+        "self": "self"
+      }
+    },
+    "label_smoothing": {
+      "api": "keras.src.metrics.probabilistic_metrics.BinaryCrossentropy.label_smoothing",
+      "args": {}
+    },
+    "layers": {
+      "api": "keras.src.layers.preprocessing.pipeline.Pipeline.layers",
+      "args": {}
+    },
+    "leaky_relu": {
+      "api": "keras.src.activations.activations.leaky_relu",
+      "args": {
+        "negative_slope": "negative_slope",
+        "x": "x"
+      }
     },
     "log": {
       "api": "keras.ops.log"
     },
+    "log1p": {
+      "api": "keras.src.backend.torch.numpy.log1p",
+      "args": {
+        "x": "x"
+      }
+    },
     "log_softmax": {
       "api": "keras.activations.log_softmax"
+    },
+    "lower": {
+      "api": "keras.src.legacy.preprocessing.text.Tokenizer.lower",
+      "args": {}
+    },
+    "lu_factor": {
+      "api": "keras.src.backend.torch.linalg.lu_factor",
+      "args": {
+        "x": "x"
+      }
+    },
+    "margin": {
+      "api": "keras.src.losses.losses.Circle.margin",
+      "args": {}
+    },
+    "mask": {
+      "api": "keras.src.layers.core.lambda_layer.Lambda.mask",
+      "args": {}
+    },
+    "max_val": {
+      "api": "keras.src.ops.nn.PSNR.max_val",
+      "args": {}
+    },
+    "mode": {
+      "api": "keras.src.layers.preprocessing.stft_spectrogram.STFTSpectrogram.mode",
+      "args": {}
+    },
+    "n": {
+      "api": "keras.src.layers.reshaping.repeat_vector.RepeatVector.n",
+      "args": {}
+    },
+    "name": {
+      "api": "keras.src.metrics.metric.Metric.name",
+      "args": {}
+    },
+    "named_parameters": {
+      "api": "keras.src.backend.torch.layer.TorchLayer.named_parameters",
+      "args": {
+        "prefix": "prefix",
+        "recurse": "recurse",
+        "remove_duplicate": "remove_duplicate",
+        "self": "self"
+      }
+    },
+    "negative_slope": {
+      "api": "keras.src.activations.activations.ReLU.negative_slope",
+      "args": {}
+    },
+    "num_heads": {
+      "api": "keras.src.layers.attention.multi_head_attention.MultiHeadAttention.num_heads",
+      "args": {}
+    },
+    "orthogonal": {
+      "api": "keras.src.initializers.random_initializers.Orthogonal",
+      "args": {
+        "gain": "gain",
+        "seed": "seed",
+        "self": "self"
+      }
+    },
+    "output_size": {
+      "api": "keras.src.layers.pooling.base_adaptive_pooling.BaseAdaptivePooling.output_size",
+      "args": {}
+    },
+    "padding": {
+      "api": "keras.src.layers.reshaping.zero_padding3d.ZeroPadding3D.padding",
+      "args": {}
+    },
+    "parameters": {
+      "api": "keras.src.utils.torch_utils.TorchModuleWrapper.parameters",
+      "args": {
+        "recurse": "recurse",
+        "self": "self"
+      }
+    },
+    "pop": {
+      "api": "keras.src.utils.config.Config.pop",
+      "args": {
+        "args": "args",
+        "self": "self"
+      }
+    },
+    "popitem": {
+      "api": "keras.src.utils.tracking.TrackedDict.popitem",
+      "args": {
+        "self": "self"
+      }
+    },
+    "predict": {
+      "api": "keras.src.wrappers.sklearn_wrapper.SKLBase.predict",
+      "args": {
+        "X": "X",
+        "self": "self"
+      }
+    },
+    "relu": {
+      "api": "keras.src.ops.nn.Relu",
+      "args": {
+        "name": "name",
+        "self": "self"
+      }
+    },
+    "remove": {
+      "api": "keras.src.utils.tracking.TrackedList.remove",
+      "args": {
+        "self": "self",
+        "value": "value"
+      }
+    },
+    "slogdet": {
+      "api": "keras.src.backend.torch.numpy.slogdet",
+      "args": {
+        "x": "x"
+      }
+    },
+    "softmax": {
+      "api": "keras.src.layers.activations.softmax.Softmax",
+      "args": {
+        "axis": "axis",
+        "kwargs": "kwargs",
+        "self": "self"
+      }
+    },
+    "sparse": {
+      "api": "keras.src.layers.core.input_layer.InputLayer.sparse",
+      "args": {}
     },
     "sqrt": {
       "api": "keras.ops.sqrt"
     },
     "square": {
       "api": "keras.ops.square"
+    },
+    "stride": {
+      "api": "keras.src.legacy.preprocessing.sequence.TimeseriesGenerator.stride",
+      "args": {}
+    },
+    "to_dense": {
+      "api": "keras.src.legacy.backend.to_dense",
+      "args": {
+        "tensor": "tensor"
+      }
+    },
+    "unfold": {
+      "api": "keras.src.backend.torch.nn.unfold",
+      "args": {
+        "dilation": "dilation",
+        "input": "input",
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
+    },
+    "update": {
+      "api": "keras.src.legacy.backend.update",
+      "args": {
+        "new_x": "new_x",
+        "x": "x"
+      }
+    },
+    "upper": {
+      "api": "keras.src.ops.core.ForiLoop.upper",
+      "args": {}
+    },
+    "value": {
+      "api": "keras.src.metrics.confusion_metrics.SensitivitySpecificityBase.value",
+      "args": {}
+    },
+    "values": {
+      "api": "keras.src.utils.config.Config.values",
+      "args": {
+        "self": "self"
+      }
     }
   },
   "templates": {

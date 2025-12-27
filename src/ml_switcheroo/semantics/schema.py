@@ -141,6 +141,14 @@ class StructuralTraits(BaseModel):
   # e.g. ["add_", "copy_", "zero_"]
   impurity_methods: List[str] = Field(default_factory=list, description="List of method names considered side-effects.")
 
+  # --- Resolution: Implicit Methods ---
+  # List of base classes that might own methods called on generic objects.
+  # Used to guess API paths for methods like `x.float()`.
+  # e.g. ["torch.Tensor"] -> `x.float()` -> `torch.Tensor.float()`
+  implicit_method_roots: List[str] = Field(
+    default_factory=list, description="List of fully qualified class names to try as prefixes for method calls."
+  )
+
   # --- JIT Configuration ---
   # Methods argument names that must be static during JIT compilation
   # e.g. ["axis", "dims", "keepdims"]

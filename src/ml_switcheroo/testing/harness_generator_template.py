@@ -9,6 +9,7 @@ Key placeholders:
 - {init_helpers}: Framework-specific helper function definitions (e.g., '_make_jax_key').
 - {param_injection_logic}: Dynamic dispatch logic to inject state/rng args.
 - {fuzzer_implementation}: The extracted source code of the InputFuzzer class.
+- {to_numpy_logic}: Dynamic tensor-to-numpy conversion snippets.
 """
 
 HARNESS_TEMPLATE = r""" 
@@ -41,12 +42,10 @@ def to_numpy(obj):
     except ImportError: 
         return obj
 
-    if hasattr(obj, "detach"): # Torch
-        return obj.detach().cpu().numpy() 
-    if hasattr(obj, "__array__"): # JAX/Numpy
-        return np.array(obj) 
-    if hasattr(obj, "numpy"): # TF
-        return obj.numpy() 
+    # --- DYNAMIC TENSOR CONVERSION --- 
+    {to_numpy_logic} 
+
+    # --- GENERIC CONTAINER RECURSION --- 
     if isinstance(obj, (list, tuple)): 
          return [to_numpy(x) for x in obj] 
     return obj
@@ -162,6 +161,9 @@ def run_verification(source_path, target_path, source_fw, target_fw, hints_json_
                 passes += 1
             else: 
                 print(f"❌ {{func_name}}: Mismatch") 
+                # Print debug info on mismatch
+                # print(f"Src: {{val_src}}") 
+                # print(f"Tgt: {{val_tgt}}") 
                 failures += 1
 
         except Exception as e: 

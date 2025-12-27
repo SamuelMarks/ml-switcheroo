@@ -10,7 +10,7 @@ Verifies:
 import json
 import pytest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from ml_switcheroo.semantics.autogen import SemanticPersister
 from ml_switcheroo.discovery.consensus import CandidateStandard
@@ -48,7 +48,8 @@ def mock_fs(tmp_path):
   return sem_dir, snap_dir
 
 
-def test_persist_hub_creation(persister, sample_candidate, mock_fs):
+@patch("ml_switcheroo.semantics.autogen.importlib.metadata.version", return_value="latest")
+def test_persist_hub_creation(mock_ver, persister, sample_candidate, mock_fs):
   """
   Scenario: Target spec file does not exist.
   Expectation:
@@ -76,7 +77,8 @@ def test_persist_hub_creation(persister, sample_candidate, mock_fs):
   assert "variants" not in entry
 
 
-def test_persist_spoke_creation(persister, sample_candidate, mock_fs):
+@patch("ml_switcheroo.semantics.autogen.importlib.metadata.version", return_value="latest")
+def test_persist_spoke_creation(mock_ver, persister, sample_candidate, mock_fs):
   """
   Scenario: Snapshots directory is empty.
   Expectation:
@@ -108,7 +110,8 @@ def test_persist_spoke_creation(persister, sample_candidate, mock_fs):
   assert j_data["mappings"]["Huber"]["args"]["reduction"] == "reduction_mode"
 
 
-def test_manual_override_protection(persister, sample_candidate, mock_fs):
+@patch("ml_switcheroo.semantics.autogen.importlib.metadata.version", return_value="latest")
+def test_manual_override_protection(mock_ver, persister, sample_candidate, mock_fs):
   """
   Scenario: 'Huber' exists in Spec (Hub) and Torch Snapshot (Spoke).
   Expectation:
@@ -146,7 +149,8 @@ def test_manual_override_protection(persister, sample_candidate, mock_fs):
   assert "Huber" in new_jax["mappings"]
 
 
-def test_corrupt_file_handling(persister, sample_candidate, mock_fs):
+@patch("ml_switcheroo.semantics.autogen.importlib.metadata.version", return_value="latest")
+def test_corrupt_file_handling(mock_ver, persister, sample_candidate, mock_fs):
   """
   Verify empty-dict fallback on corrupt JSON (robustness).
   """

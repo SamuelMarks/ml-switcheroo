@@ -1,44 +1,64 @@
 """
 Keras (v3) Framework Adapter.
+
+This module implements the adapter for the Keras 3 framework, supporting
+multi-backend translation (JAX/Torch/TensorFlow).
+
+It handles:
+1.  **Math**: Mapping `keras.ops.*` (backend-agnostic math).
+2.  **Layers**: Mapping `keras.layers.*`.
+3.  **Discovery**: Runtime introspection of the Keras API surface.
+4.  **Ghost Mode**: Silent fallback when Keras is not installed.
 """
 
 import inspect
 import logging
 import textwrap
-from typing import List, Tuple, Dict, Optional, Any, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 try:
   import keras
-  import keras.ops
+  import keras.activations
   import keras.layers
   import keras.losses
+  import keras.ops
   import keras.optimizers
-  import keras.activations
   import keras.random
 except ImportError:
   keras = None
 
+from ml_switcheroo.core.ghost import GhostInspector, GhostRef
+from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import (
-  register_framework,
-  StructuralTraits,
-  StandardCategory,
-  StandardMap,
   ImportConfig,
   InitMode,
-  GhostRef,
+  StandardCategory,
+  StandardMap,
+  StructuralTraits,
   load_snapshot_for_adapter,
+  register_framework,
 )
-from ml_switcheroo.core.ghost import GhostInspector
-from ml_switcheroo.enums import SemanticTier
 
 
 @register_framework("keras")
 class KerasAdapter:
+  """
+  Adapter for Keras v3 (Multi-backend).
+
+  Provides definitions for Keras Core Ops, Layers, and Models.
+  """
+
   display_name: str = "Keras"
   inherits_from: Optional[str] = None
   ui_priority: int = 25
 
   def __init__(self) -> None:
+    """
+    Initializes the adapter.
+
+    Detects if Keras is installed. If not, attempts to load a static snapshot
+    for Ghost Mode operation. Logs at DEBUG level if missing to avoid CLI noise.
+    """
     self._mode = InitMode.LIVE
     self._snapshot_data: Dict[str, Any] = {}
 
@@ -46,22 +66,34 @@ class KerasAdapter:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("keras")
       if not self._snapshot_data:
-        logging.warning("Keras not installed and no snapshot found.")
+        # Downgraded from WARNING to DEBUG to prevent CLI spam on bootstrap
+        logging.debug("Keras not installed and no snapshot found. Adapter disabled.")
 
   @property
   def search_modules(self) -> List[str]:
+    """
+    Returns list of search modules.
+
+    If in Ghost Mode, returns empty list to prevent Scaffolder
+    from attempting to import missing modules.
+    """
+    if self._mode == InitMode.GHOST:
+      return []
     return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]
 
   @property
   def unsafe_submodules(self) -> Set[str]:
+    """Submodules to exclude from recursive scans."""
     return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
+    """Default import alias."""
     return ("keras", "keras")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
+    """Namespace mapping for import fixer."""
     return {
       "keras": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="keras"),
       "keras.ops": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="ops"),
@@ -71,6 +103,7 @@ class KerasAdapter:
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
+    """Regex patterns for scaffold categorization."""
     return {
       "neural": [r"\\.layers\\.", r"Layer$", r"Model$"],
       "array": [r"\\.ops\\.", r"\\.math\\."],
@@ -79,6 +112,7 @@ class KerasAdapter:
 
   @property
   def test_config(self) -> Dict[str, str]:
+    """Templates for test code generation."""
     return {
       "import": "import keras\nfrom keras import ops",
       "convert_input": "keras.ops.convert_to_tensor({np_var})",
@@ -87,21 +121,26 @@ class KerasAdapter:
 
   @property
   def harness_imports(self) -> List[str]:
+    """Imports for verification harness."""
     return []
 
   def get_harness_init_code(self) -> str:
+    """Init code for verification harness."""
     return ""
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
+    """Supported semantic tiers."""
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
   def declared_magic_args(self) -> List[str]:
+    """List of framework-specific magic arguments."""
     return []
 
   @property
   def structural_traits(self) -> StructuralTraits:
+    """Structural transformation rules."""
     return StructuralTraits(
       module_base="keras.Layer",
       forward_method="call",
@@ -115,6 +154,7 @@ class KerasAdapter:
 
   @property
   def plugin_traits(self) -> Any:
+    """Plugin behavior flags."""
     from ml_switcheroo.semantics.schema import PluginTraits
 
     return PluginTraits(
@@ -126,6 +166,7 @@ class KerasAdapter:
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
+    """Static mappings for Keras."""
     return {
       "Abs": StandardMap(api="keras.ops.abs"),
       "Mean": StandardMap(api="keras.ops.mean"),
@@ -191,14 +232,19 @@ class KerasAdapter:
 
   @property
   def rng_seed_methods(self) -> List[str]:
+    """Global seed methods."""
     return ["utils.set_random_seed"]
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    """
+    Collects API definitions via introspection or snapshot.
+    """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
     return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
+    """Loads from snapshot data."""
     if not self._snapshot_data:
       return []
 
@@ -206,11 +252,11 @@ class KerasAdapter:
     return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
+    """Scans live modules."""
     results = []
     if category == StandardCategory.LOSS:
       results.extend(self._scan_module(keras.losses, "keras.losses", kind="class", block_list={"Loss", "Container"}))
     elif category == StandardCategory.OPTIMIZER:
-      # Fixed duplication bug here
       results.extend(
         self._scan_module(
           keras.optimizers,
@@ -229,30 +275,35 @@ class KerasAdapter:
   def _scan_module(
     self, module: Any, prefix: str, kind: str = "class", block_list: Optional[Set[str]] = None
   ) -> List[GhostRef]:
+    """Reflectively scans a Keras module."""
     if not module:
       return []
     block_list = block_list or set()
     found = []
 
-    for name, obj in inspect.getmembers(module):
-      if name.startswith("_"):
-        continue
-      if name in block_list:
-        continue
+    try:
+      for name, obj in inspect.getmembers(module):
+        if name.startswith("_"):
+          continue
+        if name in block_list:
+          continue
 
-      if kind == "class" and inspect.isclass(obj):
-        is_keras_object = hasattr(obj, "get_config") or hasattr(obj, "from_config")
-        if is_keras_object:
+        if kind == "class" and inspect.isclass(obj):
+          is_keras_object = hasattr(obj, "get_config") or hasattr(obj, "from_config")
+          if is_keras_object:
+            ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
+            found.append(ref)
+
+        elif kind == "function" and inspect.isfunction(obj):
           ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
           found.append(ref)
-
-      elif kind == "function" and inspect.isfunction(obj):
-        ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
-        found.append(ref)
+    except Exception:
+      pass
 
     return found
 
   def convert(self, data: Any) -> Any:
+    """Converts input data to Keras Tensor."""
     try:
       import keras
 
@@ -261,9 +312,11 @@ class KerasAdapter:
       return data
 
   def get_serialization_imports(self) -> List[str]:
+    """Imports for saving/loading."""
     return ["import keras"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+    """Syntax for saving/loading models."""
     if op == "save" and object_arg:
       return f"{object_arg}.save({file_arg})"
     elif op == "load":
@@ -271,23 +324,29 @@ class KerasAdapter:
     return ""
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+    """Syntax for device scoping."""
     d_type = "gpu" if "cuda" in device_type.lower() else "cpu"
     return f"keras.name_scope('{d_type}')"
 
   def get_device_check_syntax(self) -> str:
+    """Syntax for checking GPU availability."""
     return "len(keras.config.list_logical_devices('GPU')) > 0"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """Keras handles RNG state internally."""
     return "pass"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """Applies configuration wiring."""
     pass
 
   @classmethod
   def get_example_code(cls) -> str:
+    """Returns example code."""
     return cls().get_tiered_examples()["tier2_neural"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
+    """Returns tiered examples."""
     return {
       "tier1_math": "import keras\nfrom keras import ops\n\ndef math_ops(x, y):\n  # Tier 1\n  a = ops.abs(x)\n  b = ops.add(a, y)\n  return ops.mean(b)\n",
       "tier2_neural": 'import keras\nfrom keras import layers\n\ndef build_model(input_shape):\n  inputs = keras.Input(shape=input_shape)\n  x = layers.Conv2D(32, 3, activation="relu")(inputs)\n  x = layers.Flatten()(x)\n  outputs = layers.Dense(10)(x)\n  return keras.Model(inputs, outputs)\n',

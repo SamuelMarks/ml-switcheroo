@@ -1,4 +1,284 @@
 {
+  "Abs": {
+    "description": "Calculates the absolute value.",
+    "std_args": [
+      "x"
+    ]
+  },
+  "Add": {
+    "description": "Element-wise addition.",
+    "std_args": [
+      "x",
+      "y"
+    ]
+  },
+  "ArgMax": {
+    "description": "Returns the indices of the maximum value of all elements in the input tensor.",
+    "std_args": [
+      "input",
+      "dim",
+      "keepdim"
+    ]
+  },
+  "ArgMin": {
+    "description": "Returns the indices of the minimum value of all elements in the input tensor.",
+    "std_args": [
+      "input",
+      "dim",
+      "keepdim"
+    ]
+  },
+  "Bool": {
+    "description": "Boolean type.",
+    "std_args": []
+  },
+  "CastBool": {
+    "description": "Cast tensor to bool",
+    "metadata": {
+      "target_type": "Bool"
+    },
+    "std_args": [
+      "x"
+    ]
+  },
+  "CastByte": {
+    "description": "Cast tensor to uint8",
+    "metadata": {
+      "target_type": "UInt8"
+    },
+    "std_args": [
+      "x"
+    ]
+  },
+  "CastChar": {
+    "description": "Cast tensor to int8/char",
+    "metadata": {
+      "target_type": "Int8"
+    },
+    "std_args": [
+      "x"
+    ]
+  },
+  "CastDouble": {
+    "description": "Cast tensor to float64",
+    "metadata": {
+      "target_type": "Float64"
+    },
+    "std_args": [
+      "x"
+    ]
+  },
+  "CastFloat": {
+    "description": "Cast tensor to float32",
+    "metadata": {
+      "target_type": "Float32"
+    },
+    "std_args": [
+      "x"
+    ]
+  },
+  "CastHalf": {
+    "description": "Cast tensor to float16",
+    "metadata": {
+      "target_type": "Float16"
+    },
+    "std_args": [
+      "x"
+    ]
+  },
+  "CastInt": {
+    "description": "Cast tensor to int32",
+    "metadata": {
+      "target_type": "Int32"
+    },
+    "std_args": [
+      "x"
+    ]
+  },
+  "CastLong": {
+    "description": "Cast tensor to int64",
+    "metadata": {
+      "target_type": "Int64"
+    },
+    "std_args": [
+      "x"
+    ]
+  },
+  "CastShort": {
+    "description": "Cast tensor to int16",
+    "metadata": {
+      "target_type": "Int16"
+    },
+    "std_args": [
+      "x"
+    ]
+  },
+  "Clamp": {
+    "description": "Clamp all elements in input into the range [min, max].",
+    "std_args": [
+      "input",
+      "min",
+      "max"
+    ]
+  },
+  "Div": {
+    "description": "Element-wise division.",
+    "std_args": [
+      "x",
+      "y"
+    ]
+  },
+  "Einsum": {
+    "description": "Sums the product of the elements of the input operands along dimensions specified using a notation.",
+    "std_args": [
+      "equation",
+      "operands"
+    ]
+  },
+  "Flatten": {
+    "description": "Flattens input by reshaping it into a one-dimensional tensor.",
+    "std_args": [
+      "input",
+      "start_dim",
+      "end_dim"
+    ]
+  },
+  "Float16": {
+    "description": "16-bit floating point type (Half).",
+    "std_args": []
+  },
+  "Float32": {
+    "description": "32-bit floating point type.",
+    "std_args": []
+  },
+  "Float64": {
+    "description": "64-bit floating point type (Double).",
+    "std_args": []
+  },
+  "Gather": {
+    "description": "Gathers values along an axis specified by dim.",
+    "std_args": [
+      "input",
+      "dim",
+      "index"
+    ]
+  },
+  "Int16": {
+    "description": "16-bit signed integer type (Short).",
+    "std_args": []
+  },
+  "Int32": {
+    "description": "32-bit signed integer type (Int).",
+    "std_args": []
+  },
+  "Int64": {
+    "description": "64-bit signed integer type (Long).",
+    "std_args": []
+  },
+  "Mean": {
+    "description": "Calculates the mean value.",
+    "std_args": [
+      "x"
+    ]
+  },
+  "Mul": {
+    "description": "Element-wise multiplication.",
+    "std_args": [
+      "x",
+      "y"
+    ]
+  },
+  "OneHot": {
+    "description": "Takes LongTensor with index values of shape (*) and returns a tensor of shape (*, num_classes).",
+    "std_args": [
+      "tensor",
+      "num_classes"
+    ]
+  },
+  "Pad": {
+    "description": "Pads input tensor.",
+    "std_args": [
+      "input",
+      "pad",
+      "mode",
+      "value"
+    ]
+  },
+  "Pow": {
+    "description": "Element-wise power.",
+    "std_args": [
+      "x",
+      "y"
+    ]
+  },
+  "Reshape": {
+    "description": "Returns a tensor with the same data and number of elements as input, but with the specified shape.",
+    "std_args": [
+      "input",
+      "shape"
+    ]
+  },
+  "Scatter": {
+    "description": "Writes all values from the tensor src into indices specified.",
+    "std_args": [
+      "input",
+      "dim",
+      "index",
+      "src"
+    ]
+  },
+  "Squeeze": {
+    "description": "Returns a tensor with all the dimensions of input of size 1 removed.",
+    "std_args": [
+      "input",
+      "dim"
+    ]
+  },
+  "Sub": {
+    "description": "Element-wise subtraction.",
+    "std_args": [
+      "x",
+      "y"
+    ]
+  },
+  "Sum": {
+    "description": "Calculates the sum value.",
+    "std_args": [
+      "x"
+    ]
+  },
+  "TopK": {
+    "description": "Returns the k largest elements of the given input tensor along a given dimension.",
+    "std_args": [
+      "input",
+      "k",
+      "dim",
+      "largest",
+      "sorted"
+    ]
+  },
+  "TorchFunctional": {
+    "description": "Abstract Functional Namespace (e.g. F in torch.nn.functional)",
+    "std_args": []
+  },
+  "UInt8": {
+    "description": "8-bit unsigned integer type (Byte).",
+    "std_args": []
+  },
+  "Unsqueeze": {
+    "description": "Returns a new tensor with a dimension of size one inserted at the specified position.",
+    "std_args": [
+      "input",
+      "dim"
+    ]
+  },
+  "View": {
+    "description": "Returns a new tensor with the same data and elements but different shape.",
+    "std_args": [
+      "input",
+      "shape"
+    ]
+  },
   "__array_namespace_info__": {
     "description": "Returns a namespace with Array API namespace inspection utilities.",
     "from": "_2024_12/info.py",
@@ -416,6 +696,7 @@
   },
   "cholesky": {
     "description": "Returns the lower (upper) Cholesky decomposition of a complex Hermitian or real symmetric positive-definite matrix ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -425,8 +706,7 @@
         "upper",
         "bool"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "clip": {
     "description": "Clamps each element ``x_i`` of the input array ``x`` to the range ``[min, max]``.",
@@ -524,6 +804,7 @@
   },
   "cross": {
     "description": "Returns the cross product of 3-element vectors.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x1",
@@ -537,8 +818,7 @@
         "axis",
         "int"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "cumulative_prod": {
     "description": "Calculates the cumulative product of elements in the input array ``x``.",
@@ -584,6 +864,10 @@
       ]
     ]
   },
+  "data_ptr": {
+    "description": "Get valid data pointer or buffer access.",
+    "std_args": []
+  },
   "default_device": {
     "description": "Returns the default device.",
     "from": "_2024_12/info.py",
@@ -616,6 +900,7 @@
   },
   "diagonal": {
     "description": "Returns the specified diagonals of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -625,8 +910,7 @@
         "offset",
         "int"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "diff": {
     "description": "Calculates the n-th discrete forward difference along a specified axis.",
@@ -690,23 +974,23 @@
   },
   "eigh": {
     "description": "Returns an eigenvalue decomposition of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "eigvalsh": {
     "description": "Returns the eigenvalues of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "empty": {
     "description": "Returns an uninitialized array having a specified `shape`.",
@@ -759,13 +1043,9 @@
     ]
   },
   "exp": {
-    "description": "Calculates an implementation-dependent approximation to the exponential function for each element ``x_i`` of the input array ``x`` (``e`` raised to the power of ``x_i``, where ``e`` is the base of the natural logarithm).",
-    "from": "_2024_12/elementwise_functions.py",
+    "description": "Exponential.",
     "std_args": [
-      [
-        "x",
-        "array"
-      ]
+      "x"
     ]
   },
   "expand_dims": {
@@ -784,16 +1064,17 @@
   },
   "expm1": {
     "description": "Calculates an implementation-dependent approximation to ``exp(x)-1`` for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "eye": {
     "description": "Returns a two-dimensional array with ones on the ``k``\\th diagonal and zeros elsewhere.",
+    "from": "_2024_12/creation_functions.py",
     "std_args": [
       [
         "n_rows",
@@ -815,11 +1096,11 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "fft": {
     "description": "Computes the one-dimensional discrete Fourier transform.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -837,11 +1118,11 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "fftfreq": {
     "description": "Computes the discrete Fourier transform sample frequencies.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "n",
@@ -859,11 +1140,11 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "fftn": {
     "description": "Computes the n-dimensional discrete Fourier transform.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -881,11 +1162,11 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "fftshift": {
     "description": "Shifts the zero-frequency component to the center of the spectrum.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -895,8 +1176,7 @@
         "axes",
         "Optional[Union[int, Sequence[int]]]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "finfo": {
     "description": "Machine limits for floating-point data types.",
@@ -966,6 +1246,7 @@
   },
   "full": {
     "description": "Returns a new array having a specified ``shape`` and filled with ``fill_value``.",
+    "from": "_2024_12/creation_functions.py",
     "std_args": [
       [
         "shape",
@@ -983,8 +1264,7 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "full_like": {
     "description": "Returns a new array filled with ``fill_value`` and having the same ``shape`` as an input array ``x``.",
@@ -1006,13 +1286,6 @@
         "device",
         "Optional[device]"
       ]
-    ]
-  },
-  "full_op": {
-    "description": "",
-    "std_args": [
-      "x",
-      "axis"
     ]
   },
   "greater": {
@@ -1045,6 +1318,7 @@
   },
   "hfft": {
     "description": "Computes the one-dimensional discrete Fourier transform of a signal with Hermitian symmetry.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -1062,8 +1336,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "hypot": {
     "description": "Computes the square root of the sum of squares for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -1081,6 +1354,7 @@
   },
   "ifft": {
     "description": "Computes the one-dimensional inverse discrete Fourier transform.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -1098,11 +1372,11 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "ifftn": {
     "description": "Computes the n-dimensional inverse discrete Fourier transform.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -1120,11 +1394,11 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "ifftshift": {
     "description": "Inverse of ``fftshift``.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -1134,11 +1408,11 @@
         "axes",
         "Optional[Union[int, Sequence[int]]]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "ihfft": {
     "description": "Computes the one-dimensional inverse discrete Fourier transform of a signal with Hermitian symmetry.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -1156,8 +1430,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "iinfo": {
     "description": "Machine limits for integer data types.",
@@ -1187,16 +1460,17 @@
   },
   "inv": {
     "description": "Returns the multiplicative inverse of a square matrix (or a stack of square matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "irfft": {
     "description": "Computes the one-dimensional inverse of ``rfft`` for complex-valued input.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -1214,11 +1488,11 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "irfftn": {
     "description": "Computes the n-dimensional inverse of ``rfftn`` for complex-valued input.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -1236,8 +1510,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "isdtype": {
     "description": "Returns a boolean indicating whether a provided dtype is of a specified data type \"kind\".",
@@ -1342,13 +1615,9 @@
     ]
   },
   "log": {
-    "description": "Calculates an implementation-dependent approximation to the natural (base ``e``) logarithm for each element ``x_i`` of the input array ``x``.",
-    "from": "_2024_12/elementwise_functions.py",
+    "description": "Logarithm.",
     "std_args": [
-      [
-        "x",
-        "array"
-      ]
+      "x"
     ]
   },
   "log10": {
@@ -1363,13 +1632,13 @@
   },
   "log1p": {
     "description": "Calculates an implementation-dependent approximation to ``log(1+x)``, where ``log`` refers to the natural (base ``e``) logarithm, for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "log2": {
     "description": "Calculates an implementation-dependent approximation to the base ``2`` logarithm for each element ``x_i`` of the input array ``x``.",
@@ -1463,6 +1732,7 @@
   },
   "matrix_norm": {
     "description": "Computes the matrix norm of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -1476,11 +1746,11 @@
         "ord",
         "Optional[Union[int, float, Literal[inf, Any, fro, nuc]]]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "matrix_power": {
     "description": "Raises a square matrix (or a stack of square matrices) ``x`` to an integer power ``n``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -1490,11 +1760,11 @@
         "n",
         "int"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "matrix_rank": {
     "description": "Returns the rank (i.e., number of non-zero singular values) of a matrix (or a stack of matrices).",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -1504,8 +1774,7 @@
         "rtol",
         "Optional[Union[float, array]]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "matrix_transpose": {
     "description": "Transposes a matrix (or a stack of matrices) ``x``.",
@@ -1518,21 +1787,9 @@
     ]
   },
   "max": {
-    "description": "Calculates the maximum value of the input array ``x``.",
-    "from": "_2024_12/statistical_functions.py",
+    "description": "Element-wise maximum or reduction.",
     "std_args": [
-      [
-        "x",
-        "array"
-      ],
-      [
-        "axis",
-        "Optional[Union[int, Tuple[int, Ellipsis]]]"
-      ],
-      [
-        "keepdims",
-        "bool"
-      ]
+      "x"
     ]
   },
   "maximum": {
@@ -1578,21 +1835,9 @@
     ]
   },
   "min": {
-    "description": "Calculates the minimum value of the input array ``x``.",
-    "from": "_2024_12/statistical_functions.py",
+    "description": "Element-wise minimum or reduction.",
     "std_args": [
-      [
-        "x",
-        "array"
-      ],
-      [
-        "axis",
-        "Optional[Union[int, Tuple[int, Ellipsis]]]"
-      ],
-      [
-        "keepdims",
-        "bool"
-      ]
+      "x"
     ]
   },
   "minimum": {
@@ -1752,17 +1997,14 @@
     ]
   },
   "permute_dims": {
-    "description": "Permutes the axes (dimensions) of an array ``x``.",
-    "from": "_2024_12/manipulation_functions.py",
+    "description": "Permutes tensor dimensions.",
     "std_args": [
-      [
-        "x",
-        "array"
-      ],
-      [
-        "axes",
-        "Tuple[int, Ellipsis]"
-      ]
+      "input",
+      {
+        "is_variadic": true,
+        "name": "dims",
+        "type": "int"
+      }
     ]
   },
   "pi": {
@@ -1773,6 +2015,7 @@
   },
   "pinv": {
     "description": "Returns the (Moore-Penrose) pseudo-inverse of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -1782,8 +2025,7 @@
         "rtol",
         "Optional[Union[float, array]]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "positive": {
     "description": "Computes the numerical positive of each element ``x_i`` (i.e., ``y_i = +x_i``) of the input array ``x``.",
@@ -1833,6 +2075,7 @@
   },
   "qr": {
     "description": "Returns the QR decomposition of a full column rank matrix (or a stack of matrices).",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -1842,8 +2085,13 @@
         "mode",
         "Literal[reduced, complete]"
       ]
-    ],
-    "type": "attribute"
+    ]
+  },
+  "randn": {
+    "description": "Returns a tensor filled with random numbers from a normal distribution.",
+    "std_args": [
+      "shape"
+    ]
   },
   "real": {
     "description": "Returns the real component of a complex number for each element ``x_i`` of the input array ``x``.",
@@ -1922,6 +2170,7 @@
   },
   "rfft": {
     "description": "Computes the one-dimensional discrete Fourier transform for real-valued input.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -1939,11 +2188,11 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "rfftfreq": {
     "description": "Computes the discrete Fourier transform sample frequencies (for ``rfft`` and ``irfft``).",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "n",
@@ -1961,11 +2210,11 @@
         "device",
         "Optional[device]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "rfftn": {
     "description": "Computes the n-dimensional discrete Fourier transform for real-valued input.",
+    "from": "_2024_12/fft.py",
     "std_args": [
       [
         "x",
@@ -1983,8 +2232,7 @@
         "norm",
         "Literal[backward, ortho, forward]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "roll": {
     "description": "Rolls array elements along a specified axis. Array elements that roll beyond the last position are re-introduced at the first position. Array elements that roll beyond the first position are re-introduced at the last position.",
@@ -2076,18 +2324,23 @@
       ]
     ]
   },
+  "size": {
+    "description": "Get tensor shape",
+    "std_args": []
+  },
   "slogdet": {
     "description": "Returns the sign and the natural logarithm of the absolute value of the determinant of a square matrix (or a stack of square matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "solve": {
     "description": "Returns the solution of a square system of linear equations with a unique solution.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x1",
@@ -2097,8 +2350,7 @@
         "x2",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "sort": {
     "description": "Returns a sorted copy of an input array ``x``.",
@@ -2123,23 +2375,15 @@
     ]
   },
   "sqrt": {
-    "description": "Calculates the principal square root for each element ``x_i`` of the input array ``x``.",
-    "from": "_2024_12/elementwise_functions.py",
+    "description": "Square root.",
     "std_args": [
-      [
-        "x",
-        "array"
-      ]
+      "x"
     ]
   },
   "square": {
-    "description": "Squares each element ``x_i`` of the input array ``x``.",
-    "from": "_2024_12/elementwise_functions.py",
+    "description": "Square.",
     "std_args": [
-      [
-        "x",
-        "array"
-      ]
+      "x"
     ]
   },
   "squeeze": {
@@ -2230,6 +2474,7 @@
   },
   "svd": {
     "description": "Returns a singular value decomposition (SVD) of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -2239,18 +2484,17 @@
         "full_matrices",
         "bool"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "svdvals": {
     "description": "Returns the singular values of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "take": {
     "description": "Returns elements of an array along an axis.",
@@ -2300,13 +2544,13 @@
   },
   "tanh": {
     "description": "Calculates an implementation-dependent approximation to the hyperbolic tangent for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "tensordot": {
     "description": "Returns a tensor contraction of ``x1`` and ``x2`` over specific axes.",
@@ -2474,6 +2718,7 @@
   },
   "vecdot": {
     "description": "Computes the (vector) dot product of two arrays.",
+    "from": "_2024_12/linear_algebra_functions.py",
     "std_args": [
       [
         "x1",
@@ -2487,11 +2732,11 @@
         "axis",
         "int"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "vector_norm": {
     "description": "Computes the vector norm of a vector (or batch of vectors) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -2509,8 +2754,7 @@
         "ord",
         "Union[int, float, Literal[inf, Any]]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "where": {
     "description": "Returns elements chosen from ``x1`` or ``x2`` depending on ``condition``.",

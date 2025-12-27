@@ -3,62 +3,14 @@ Internal Standards Definition (Hub of the Knowledge Base).
 
 This module defines the "Golden Set" of abstract operations (The Hub).
 It defines the **Abstract Schema**: Standard argument names (`std_args`) and docstrings.
-
-**Decoupling Note:**
-Implementation details (`variants`) have been purged from this file.
-Implementations are exclusively provided by Framework Adapters
-(e.g., `src/ml_switcheroo/frameworks/torch.py`) via their `definitions` property.
 """
 
 from ml_switcheroo.core.dsl import OpType
 
-INTERNAL_OPS = {
-  # ============================================================================
-  # 1. Config & Namespaces (Infrastructure)
-  # ============================================================================
-  "__imports__": {},
-  "TorchFunctional": {
-    "description": "Abstract Functional Namespace (e.g. F in torch.nn.functional)",
-    "std_args": [],
-  },
-  # ============================================================================
-  # 2. Optimization & Learning Rate Schedulers
-  # ============================================================================
-  "Adam": {
-    "description": "Adaptive Moment Estimation optimizer.",
-    "std_args": ["params", "lr", "beta1", "beta2", "eps", "weight_decay", "amsgrad"],
-  },
-  "SGD": {
-    "description": "Stochastic Gradient Descent optimizer.",
-    "std_args": ["params", "lr", "momentum", "dampening", "weight_decay", "nesterov"],
-  },
-  "RMSprop": {
-    "description": "Root Mean Square Propagation optimizer.",
-    "std_args": ["params", "lr", "rho", "eps", "weight_decay", "momentum", "centered"],
-  },
-  "StepLR": {
-    "description": "Decays the learning rate of each parameter group by gamma every step_size epochs.",
-    "std_args": ["optimizer", "step_size", "gamma"],
-  },
-  "CosineAnnealingLR": {
-    "description": "Set the learning rate of each parameter group using a cosine annealing schedule.",
-    "std_args": ["optimizer", "T_max"],
-  },
-  "ClipGradNorm": {
-    "description": "Clips gradient norm of an iterable of parameters.",
-    "std_args": ["parameters", "max_norm"],
-  },
-  "step": {
-    "description": "Performs a single optimization step.",
-    "std_args": [],
-  },
-  "zero_grad": {
-    "description": "Sets the gradients of all optimized parameters to zero.",
-    "std_args": [],
-  },
-  # ============================================================================
-  # 3. Array API Overrides & Utilities
-  # ============================================================================
+# ============================================================================
+# 1. Array API (Math)
+# ============================================================================
+MATH_OPS = {
   "randn": {
     "description": "Returns a tensor filled with random numbers from a normal distribution.",
     "std_args": ["shape"],
@@ -173,9 +125,10 @@ INTERNAL_OPS = {
   },
   "max": {"description": "Element-wise maximum or reduction.", "std_args": ["x"]},
   "min": {"description": "Element-wise minimum or reduction.", "std_args": ["x"]},
-  # ============================================================================
-  # 4. Standard Types (Abstract Dtypes)
-  # ============================================================================
+  "TorchFunctional": {
+    "description": "Abstract Functional Namespace (e.g. F in torch.nn.functional)",
+    "std_args": [],
+  },
   "Float32": {"description": "32-bit floating point type.", "std_args": []},
   "Float64": {"description": "64-bit floating point type (Double).", "std_args": []},
   "Float16": {"description": "16-bit floating point type (Half).", "std_args": []},
@@ -184,62 +137,23 @@ INTERNAL_OPS = {
   "Int16": {"description": "16-bit signed integer type (Short).", "std_args": []},
   "UInt8": {"description": "8-bit unsigned integer type (Byte).", "std_args": []},
   "Bool": {"description": "Boolean type.", "std_args": []},
-  # ============================================================================
-  # 5. Casting (Type Mapping)
-  # ============================================================================
-  "CastFloat": {
-    "description": "Cast tensor to float32",
-    "std_args": ["x"],
-    "metadata": {"target_type": "Float32"},
-  },
-  "CastDouble": {
-    "description": "Cast tensor to float64",
-    "std_args": ["x"],
-    "metadata": {"target_type": "Float64"},
-  },
-  "CastHalf": {
-    "description": "Cast tensor to float16",
-    "std_args": ["x"],
-    "metadata": {"target_type": "Float16"},
-  },
-  "CastLong": {
-    "description": "Cast tensor to int64",
-    "std_args": ["x"],
-    "metadata": {"target_type": "Int64"},
-  },
-  "CastInt": {
-    "description": "Cast tensor to int32",
-    "std_args": ["x"],
-    "metadata": {"target_type": "Int32"},
-  },
-  "CastShort": {
-    "description": "Cast tensor to int16",
-    "std_args": ["x"],
-    "metadata": {"target_type": "Int16"},
-  },
-  "CastByte": {
-    "description": "Cast tensor to uint8",
-    "std_args": ["x"],
-    "metadata": {"target_type": "UInt8"},
-  },
-  "CastBool": {
-    "description": "Cast tensor to bool",
-    "std_args": ["x"],
-    "metadata": {"target_type": "Bool"},
-  },
-  "CastChar": {
-    "description": "Cast tensor to int8/char",
-    "std_args": ["x"],
-    "metadata": {"target_type": "Int8"},
-  },
-  "size": {
-    "description": "Get tensor shape",
-    "std_args": [],
-  },
+  "size": {"description": "Get tensor shape", "std_args": []},
   "data_ptr": {"description": "Get valid data pointer or buffer access.", "std_args": []},
-  # ============================================================================
-  # 6. Neural Layers
-  # ============================================================================
+  "CastFloat": {"description": "Cast tensor to float32", "std_args": ["x"], "metadata": {"target_type": "Float32"}},
+  "CastDouble": {"description": "Cast tensor to float64", "std_args": ["x"], "metadata": {"target_type": "Float64"}},
+  "CastHalf": {"description": "Cast tensor to float16", "std_args": ["x"], "metadata": {"target_type": "Float16"}},
+  "CastLong": {"description": "Cast tensor to int64", "std_args": ["x"], "metadata": {"target_type": "Int64"}},
+  "CastInt": {"description": "Cast tensor to int32", "std_args": ["x"], "metadata": {"target_type": "Int32"}},
+  "CastShort": {"description": "Cast tensor to int16", "std_args": ["x"], "metadata": {"target_type": "Int16"}},
+  "CastByte": {"description": "Cast tensor to uint8", "std_args": ["x"], "metadata": {"target_type": "UInt8"}},
+  "CastBool": {"description": "Cast tensor to bool", "std_args": ["x"], "metadata": {"target_type": "Bool"}},
+  "CastChar": {"description": "Cast tensor to int8/char", "std_args": ["x"], "metadata": {"target_type": "Int8"}},
+}
+
+# ============================================================================
+# 2. Neural (Layers/Model/State)
+# ============================================================================
+NEURAL_OPS = {
   "MultiheadAttention": {
     "description": "Multi-head attention mechanism.",
     "std_args": [
@@ -325,9 +239,91 @@ INTERNAL_OPS = {
     "description": "Mean Squared Error.",
     "std_args": ["input", "target"],
   },
-  # ============================================================================
-  # 7. Vision Transforms
-  # ============================================================================
+  "register_buffer": {
+    "description": "Registers a persistent buffer.",
+    "std_args": ["name", "tensor", "persistent"],
+  },
+  "register_parameter": {
+    "description": "Registers a learnable parameter.",
+    "std_args": ["name", "param"],
+  },
+  "state_dict": {
+    "description": "Returns a dictionary containing a whole state of the module.",
+    "std_args": ["destination", "prefix", "keep_vars"],
+  },
+  "load_state_dict": {
+    "description": "Copies parameters and buffers from state_dict into this module.",
+    "std_args": ["state_dict", "strict"],
+  },
+  "parameters": {
+    "description": "Returns an iterator over module parameters.",
+    "std_args": ["recurse"],
+  },
+  "LoadStateDict": {
+    "description": "Loading state utility for mappings.",
+    "std_args": [],
+  },
+  "Param": {
+    "description": "Container for trainable parameter.",
+    "std_args": ["value"],
+  },
+  "Variable": {
+    "description": "Generic state container.",
+    "std_args": ["value"],
+  },
+  "Cache": {
+    "description": "Container for mutable state.",
+    "std_args": ["value"],
+  },
+}
+
+# ============================================================================
+# 3. Extras (Optimizers, Contexts, IO)
+# ============================================================================
+EXTRAS_OPS = {
+  "__imports__": {},
+  "Adam": {
+    "description": "Adaptive Moment Estimation optimizer.",
+    "std_args": ["params", "lr", "beta1", "beta2", "eps", "weight_decay", "amsgrad"],
+  },
+  "SGD": {
+    "description": "Stochastic Gradient Descent optimizer.",
+    "std_args": ["params", "lr", "momentum", "dampening", "weight_decay", "nesterov"],
+  },
+  "RMSprop": {
+    "description": "Root Mean Square Propagation optimizer.",
+    "std_args": ["params", "lr", "rho", "eps", "weight_decay", "momentum", "centered"],
+  },
+  "StepLR": {
+    "description": "Decays the learning rate of each parameter group by gamma every step_size epochs.",
+    "std_args": ["optimizer", "step_size", "gamma"],
+  },
+  "CosineAnnealingLR": {
+    "description": "Set the learning rate of each parameter group using a cosine annealing schedule.",
+    "std_args": ["optimizer", "T_max"],
+  },
+  "ClipGradNorm": {
+    "description": "Clips gradient norm of an iterable of parameters.",
+    "std_args": ["parameters", "max_norm"],
+  },
+  "step": {
+    "description": "Performs a single optimization step.",
+    "std_args": [],
+  },
+  "zero_grad": {
+    "description": "Sets the gradients of all optimized parameters to zero.",
+    "std_args": [],
+  },
+  "no_grad": {
+    "description": "Context-manager that disabled gradient calculation.",
+    "op_type": OpType.CONTEXT,
+    "std_args": [],
+  },
+  "enable_grad": {
+    "description": "Context-manager that enables gradient calculation.",
+    "op_type": OpType.CONTEXT,
+    "std_args": [],
+  },
   "Resize": {"description": "Resize the input image to the given size.", "std_args": ["size"]},
   "Normalize": {
     "description": "Normalize a tensor image with mean and standard deviation.",
@@ -357,39 +353,6 @@ INTERNAL_OPS = {
     "description": "Convert image to grayscale.",
     "std_args": ["num_output_channels"],
   },
-  # ============================================================================
-  # 8. State Containers & Extras
-  # ============================================================================
-  "no_grad": {
-    "description": "Context-manager that disabled gradient calculation.",
-    "op_type": OpType.CONTEXT,
-    "std_args": [],
-  },
-  "enable_grad": {
-    "description": "Context-manager that enables gradient calculation.",
-    "op_type": OpType.CONTEXT,
-    "std_args": [],
-  },
-  "register_buffer": {
-    "description": "Registers a persistent buffer.",
-    "std_args": ["name", "tensor", "persistent"],
-  },
-  "register_parameter": {
-    "description": "Registers a learnable parameter.",
-    "std_args": ["name", "param"],
-  },
-  "state_dict": {
-    "description": "Returns a dictionary containing a whole state of the module.",
-    "std_args": ["destination", "prefix", "keep_vars"],
-  },
-  "load_state_dict": {
-    "description": "Copies parameters and buffers from state_dict into this module.",
-    "std_args": ["state_dict", "strict"],
-  },
-  "parameters": {
-    "description": "Returns an iterator over module parameters.",
-    "std_args": ["recurse"],
-  },
   "DataLoader": {
     "description": "Foundational PyTorch Data Loader. Mapped to GenericDataLoader shim via Plugin.",
     "std_args": [
@@ -411,22 +374,6 @@ INTERNAL_OPS = {
       "pin_memory_device",
     ],
   },
-  "LoadStateDict": {
-    "description": "Loading state utility for mappings.",
-    "std_args": [],
-  },
-  "Param": {
-    "description": "Container for trainable parameter.",
-    "std_args": ["value"],
-  },
-  "Variable": {
-    "description": "Generic state container.",
-    "std_args": ["value"],
-  },
-  "Cache": {
-    "description": "Container for mutable state.",
-    "std_args": ["value"],
-  },
   "torch.utils": {
     "description": "Torch Utilities Namespace",
     "std_args": [],
@@ -435,9 +382,6 @@ INTERNAL_OPS = {
     "description": "Torch Data Utilities Namespace",
     "std_args": [],
   },
-  # ============================================================================
-  # 9. Functional Transforms
-  # ============================================================================
   "vmap": {
     "description": "Vectorizing map.",
     "std_args": ["func", "in_axes", "out_axes", "randomness"],
@@ -463,3 +407,6 @@ INTERNAL_OPS = {
     "std_args": [],
   },
 }
+
+# Merged Defaults for Backwards Compatibility
+INTERNAL_OPS = {**MATH_OPS, **NEURAL_OPS, **EXTRAS_OPS}

@@ -12,11 +12,11 @@ It handles:
 
 import json
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
-from ml_switcheroo.semantics.standards_internal import INTERNAL_OPS
+from ml_switcheroo.semantics.standards_internal import MATH_OPS, NEURAL_OPS, EXTRAS_OPS
 from ml_switcheroo.discovery.scaffolder import Scaffolder
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
@@ -73,46 +73,64 @@ def handle_import_spec(target: Path) -> int:
   Returns:
       int: Exit code.
   """
-  # 1. Internal Standards (Tier C)
+  out_dir = resolve_semantics_dir()
+  out_dir.mkdir(parents=True, exist_ok=True)
+
+  # 1. Internal Standards (Split by Tier)
   if str(target) == "internal":
-    log_info("Loading Internal Standards Spec (Optimizers, Vision, State)...")
-    data = INTERNAL_OPS
-    out_json = "k_framework_extras.json"
+    log_info("Loading Internal Standards Spec (Math, Neural, Extras)...")
+
+    # Process MATH
+    _save_spec(out_dir, "k_array_api.json", MATH_OPS)
+
+    # Process NEURAL
+    _save_spec(out_dir, "k_neural_net.json", NEURAL_OPS)
+
+    # Process EXTRAS
+    _save_spec(out_dir, "k_framework_extras.json", EXTRAS_OPS)
+
+    log_success("Hydrated internal specs to semantics folder.")
+    return 0
 
   # 2. ONNX Spec (Tier B)
   elif target.is_file() and target.suffix == ".md":
     log_info(f"Detected ONNX Markdown Spec: {target.name}")
     importer = OnnxSpecImporter()
     data = importer.parse_file(target)
-    out_json = "k_neural_net.json"
+    _save_spec(out_dir, "k_neural_net.json", data)
+    return 0
 
   # 3. Array API Stubs (Tier A)
   elif target.is_dir():
     log_info("Detected Array API Stubs Directory")
     importer = ArrayApiSpecImporter()
     data = importer.parse_folder(target)
-    out_json = "k_array_api.json"
+    _save_spec(out_dir, "k_array_api.json", data)
+    return 0
 
   else:
     log_error("Invalid input. Must be 'internal', .md (ONNX), or dir of stubs (Array API).")
     return 1
 
-  # Merge and Save
-  out_dir = resolve_semantics_dir()
-  out_dir.mkdir(parents=True, exist_ok=True)
-  out_p = out_dir / out_json
+
+def _save_spec(out_dir: Path, filename: str, data: Dict[str, Any]) -> None:
+  """Helper to persist JSON spec data."""
+  out_p = out_dir / filename
+  final_data = data
 
   if out_p.exists():
-    with open(out_p, "rt", encoding="utf-8") as f:
-      existing = json.load(f)
-    log_info(f"Merging with existing {len(existing)} entries...")
-    existing.update(data)
-    data = existing
+    try:
+      with open(out_p, "rt", encoding="utf-8") as f:
+        existing = json.load(f)
+      log_info(f"Merging {filename} with existing {len(existing)} entries...")
+      existing.update(data)
+      final_data = existing
+    except Exception as e:
+      log_warning(f"Could not load existing {filename}: {e}. Overwriting.")
 
   with open(out_p, "wt", encoding="utf-8") as f:
-    json.dump(data, f, indent=2, sort_keys=True)
-  log_success(f"Saved {len(data)} operations to [path]{out_p}[/path]")
-  return 0
+    json.dump(final_data, f, indent=2, sort_keys=True)
+  log_success(f"Saved {len(final_data)} operations to [path]{out_p}[/path]")
 
 
 def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]], dry_run: bool) -> int:

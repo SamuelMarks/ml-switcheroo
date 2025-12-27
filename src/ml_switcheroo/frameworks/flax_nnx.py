@@ -148,6 +148,8 @@ class FlaxNNXAdapter(JAXStackMixin):
     Returns:
         List[str]: Ordered list of module names.
     """
+    if self._mode == InitMode.GHOST:
+      return []
     return ["jax.numpy", "flax.nnx", "optax"]
 
   @property
@@ -283,7 +285,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       "Linear": StandardMap(
         api="flax.nnx.Linear",
         args={"in_features": "in_features", "out_features": "out_features", "bias": "use_bias"},
-        inject_args={"rngs": "rngs"},
+        # Removed inject_args for rngs: Relying on structural_traits.inject_magic_args for dynamic variable injection
       ),
       "Flatten": StandardMap(api="flax.nnx.Flatten"),
       "MultiheadAttention": StandardMap(api="flax.nnx.MultiHeadAttention", requires_plugin="repack_attn_flax"),

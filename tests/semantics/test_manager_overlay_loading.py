@@ -7,6 +7,9 @@ Verifies that:
 3. Variants in overlay files are merged into the main knowledge definition.
 4. New operations in overlays (not in specs) are created as Extras.
 5. Metadata (`__framework__`) in overlays is respected to assign variants.
+
+Fixes:
+- Patched resolved paths in `ml_switcheroo.semantics.file_loader` instead of `manager`.
 """
 
 import json
@@ -69,13 +72,13 @@ def mock_root_tree(tmp_path):
 def manager(mock_root_tree):
   """Initializes manager with patched path resolution."""
 
-  # FIX: Patch both semantics dir AND snapshots dir to ensure coherent loading
-  # SemanticsManager._load_knowledge_graph calls resolve_semantics_dir
-  # SemanticsManager._load_overlays calls resolve_snapshots_dir
-  with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=mock_root_tree):
-    with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=mock_root_tree.parent / "snapshots"):
-      # Must patch available_frameworks to prevent loading defaults from real registry
-      with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
+  # FIX: Patch file_loader directly as that is where resolve_* functions are used
+  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=mock_root_tree):
+    with patch(
+      "ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=mock_root_tree.parent / "snapshots"
+    ):
+      # Must patch available_frameworks in registry_loader to prevent loading defaults from real registry
+      with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
         yield SemanticsManager()
 
 
@@ -132,9 +135,10 @@ def test_filename_framework_inference(tmp_path):
   numpy_map = {"mappings": {"Sin": {"api": "numpy.sin"}}}
   (snap_dir / "numpy_vlatest_map.json").write_text(json.dumps(numpy_map))
 
-  with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=sem_dir):
-    with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=snap_dir):
-      with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
+  # FIX: Patch file_loader directly
+  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
+    with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap_dir):
+      with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
         mgr = SemanticsManager()
         mgr._reverse_index = {}
 

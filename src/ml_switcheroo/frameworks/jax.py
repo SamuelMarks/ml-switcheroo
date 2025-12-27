@@ -51,6 +51,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
   display_name: str = "JAX (Core)"
   inherits_from: Optional[str] = None
+  # Set to 10 to ensure it is sorted after Torch (0) but before Numpy (20)
   ui_priority: int = 10
 
   def __init__(self) -> None:
@@ -72,6 +73,8 @@ class JaxCoreAdapter(JAXStackMixin):
   @property
   def search_modules(self) -> List[str]:
     """Scans only core math and optimization libraries (no neural layers)."""
+    if self._mode == InitMode.GHOST:
+      return []
     return ["jax.numpy", "jax.numpy.linalg", "jax.numpy.fft", "optax"]
 
   @property

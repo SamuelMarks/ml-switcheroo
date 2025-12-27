@@ -125,6 +125,14 @@
         "stride": "stride"
       }
     },
+    "Avgpool": {
+      "api": "torch.nn.AvgPool3d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
+    },
     "BCELoss": {
       "api": "torch.nn.modules.loss.BCELoss",
       "args": {
@@ -819,8 +827,17 @@
         "self": "self"
       }
     },
+    "Gaussiannll": {
+      "api": "torch.nn.GaussianNLLLoss",
+      "args": {
+        "eps": "eps",
+        "full": "full",
+        "reduction": "reduction"
+      }
+    },
     "Gelu": {
-      "api": "torch.nn.GELU"
+      "api": "torch.nn.functional.gelu",
+      "args": {}
     },
     "Glu": {
       "api": "torch.nn.modules.activation.GLU",
@@ -863,7 +880,11 @@
       }
     },
     "HardSwish": {
-      "api": "torch.nn.Hardswish"
+      "api": "torch.nn.functional.hardswish",
+      "args": {
+        "inplace": "inplace",
+        "input": "input"
+      }
     },
     "Hardshrink": {
       "api": "torch.nn.modules.activation.Hardshrink",
@@ -972,6 +993,18 @@
         "reduction": "reduction",
         "self": "self",
         "size_average": "size_average"
+      }
+    },
+    "Kldiv": {
+      "api": "torch.nn.KLDivLoss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "L1": {
+      "api": "torch.nn.L1Loss",
+      "args": {
+        "reduction": "reduction"
       }
     },
     "L1Loss": {
@@ -1324,6 +1357,13 @@
         "size_average": "size_average"
       }
     },
+    "Marginranking": {
+      "api": "torch.nn.MarginRankingLoss",
+      "args": {
+        "margin": "margin",
+        "reduction": "reduction"
+      }
+    },
     "MatMul": {
       "api": "torch.linalg.matmul",
       "args": {}
@@ -1391,6 +1431,14 @@
         "stride": "stride"
       }
     },
+    "Maxpool": {
+      "api": "torch.nn.MaxPool3d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
+    },
     "Mean": {
       "api": "torch.mean"
     },
@@ -1428,6 +1476,12 @@
       "args": {
         "cpp_module": "cpp_module",
         "self": "self"
+      }
+    },
+    "Mse": {
+      "api": "torch.nn.MSELoss",
+      "args": {
+        "reduction": "reduction"
       }
     },
     "Mul": {
@@ -1506,6 +1560,12 @@
     "NamedShape": {
       "api": "torch.nn.modules.flatten.Unflatten.NamedShape",
       "args": {}
+    },
+    "Nll": {
+      "api": "torch.nn.NLLLoss",
+      "args": {
+        "reduction": "reduction"
+      }
     },
     "NonDynamicallyQuantizableLinear": {
       "api": "torch.nn.modules.linear.NonDynamicallyQuantizableLinear",
@@ -1759,7 +1819,11 @@
       }
     },
     "Relu": {
-      "api": "torch.nn.ReLU"
+      "api": "torch.nn.modules.activation.ReLU",
+      "args": {
+        "inplace": "inplace",
+        "self": "self"
+      }
     },
     "Relu6": {
       "api": "torch.nn.modules.activation.ReLU6",
@@ -1885,6 +1949,13 @@
         "size_average": "size_average"
       }
     },
+    "Smoothl1": {
+      "api": "torch.nn.SmoothL1Loss",
+      "args": {
+        "beta": "beta",
+        "reduction": "reduction"
+      }
+    },
     "SoftMarginLoss": {
       "api": "torch.nn.modules.loss.SoftMarginLoss",
       "args": {
@@ -2005,7 +2076,12 @@
       "args": {}
     },
     "Tanh": {
-      "api": "torch.nn.Tanh"
+      "api": "torch.nn.modules.activation.Tanh",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs",
+        "self": "self"
+      }
     },
     "Tanhshrink": {
       "api": "torch.nn.modules.activation.Tanhshrink",
@@ -4319,6 +4395,9 @@
       "api": "torch.linalg.matrix_rank",
       "args": {}
     },
+    "max": {
+      "api": "torch.max"
+    },
     "max_norm": {
       "api": "torch.nn.modules.sparse.EmbeddingBag.max_norm",
       "args": {}
@@ -4420,6 +4499,9 @@
         "query": "query",
         "self": "self"
       }
+    },
+    "min": {
+      "api": "torch.min"
     },
     "min_val": {
       "api": "torch.nn.modules.activation.Hardtanh.min_val",
@@ -5588,12 +5670,7 @@
       "args": {}
     },
     "tanh": {
-      "api": "torch.nn.modules.activation.Tanh",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs",
-        "self": "self"
-      }
+      "api": "torch.nn.Tanh"
     },
     "tensorinv": {
       "api": "torch.linalg.tensorinv",

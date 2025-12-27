@@ -1,10 +1,4 @@
 {
-  "Abs": {
-    "description": "Calculates the absolute value.",
-    "std_args": [
-      "x"
-    ]
-  },
   "Adam": {
     "description": "Adaptive Moment Estimation optimizer.",
     "std_args": [
@@ -82,33 +76,10 @@
     ],
     "type": "class"
   },
-  "Add": {
-    "description": "Element-wise addition.",
-    "std_args": [
-      "x",
-      "y"
-    ]
-  },
   "Alphadropout": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [],
     "type": "class"
-  },
-  "ArgMax": {
-    "description": "Returns the indices of the maximum value of all elements in the input tensor.",
-    "std_args": [
-      "input",
-      "dim",
-      "keepdim"
-    ]
-  },
-  "ArgMin": {
-    "description": "Returns the indices of the minimum value of all elements in the input tensor.",
-    "std_args": [
-      "input",
-      "dim",
-      "keepdim"
-    ]
   },
   "AuxOutput": {
     "description": "Auxiliary outputs from flex_attention operation.",
@@ -226,13 +197,6 @@
     "std_args": [],
     "type": "class"
   },
-  "BatchNorm": {
-    "description": "Batch Normalization.",
-    "std_args": [
-      "input",
-      "eps"
-    ]
-  },
   "BatchNorm1d": {
     "description": "Applies Batch Normalization over a 2D or 3D input.",
     "std_args": [
@@ -298,10 +262,6 @@
     ],
     "type": "class"
   },
-  "Bool": {
-    "description": "Boolean type.",
-    "std_args": []
-  },
   "Buffer": {
     "description": "A kind of Tensor that should not be considered a model",
     "std_args": [
@@ -322,93 +282,6 @@
     ],
     "type": "class"
   },
-  "Cache": {
-    "description": "Container for mutable state.",
-    "std_args": [
-      "value"
-    ]
-  },
-  "CastBool": {
-    "description": "Cast tensor to bool",
-    "metadata": {
-      "target_type": "Bool"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastByte": {
-    "description": "Cast tensor to uint8",
-    "metadata": {
-      "target_type": "UInt8"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastChar": {
-    "description": "Cast tensor to int8/char (Keras context)",
-    "metadata": {
-      "target_type": "Int8"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastDouble": {
-    "description": "Cast tensor to float64",
-    "metadata": {
-      "target_type": "Float64"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastFloat": {
-    "description": "Cast tensor to float32",
-    "metadata": {
-      "target_type": "Float32"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastHalf": {
-    "description": "Cast tensor to float16",
-    "metadata": {
-      "target_type": "Float16"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastInt": {
-    "description": "Cast tensor to int32",
-    "metadata": {
-      "target_type": "Int32"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastLong": {
-    "description": "Cast tensor to int64",
-    "metadata": {
-      "target_type": "Int64"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastShort": {
-    "description": "Cast tensor to int16",
-    "metadata": {
-      "target_type": "Int16"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
   "CausalBias": {
     "description": "A bias representing causal attention patterns. For an overview of the bias structure, see the :class:`CausalVariant` enum.",
     "std_args": [
@@ -422,13 +295,6 @@
   "CausalVariant": {
     "description": "Enum for causal variants used in attention mechanisms.",
     "std_args": [],
-    "type": "class"
-  },
-  "Celu": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "alpha"
-    ],
     "type": "class"
   },
   "CenterCrop": {
@@ -469,14 +335,6 @@
     ],
     "type": "class"
   },
-  "Clamp": {
-    "description": "Clamp all elements in input into the range [min, max].",
-    "std_args": [
-      "input",
-      "min",
-      "max"
-    ]
-  },
   "ClipGradNorm": {
     "description": "Clips gradient norm of an iterable of parameters.",
     "std_args": [
@@ -488,8 +346,7 @@
     "description": "JIT Alias.",
     "std_args": [
       "func"
-    ],
-    "type": "function"
+    ]
   },
   "ConstantPad1d": {
     "description": "Pads the input tensor boundaries with a constant value.",
@@ -541,21 +398,6 @@
       "padding_mode",
       "device",
       "dtype"
-    ],
-    "type": "class"
-  },
-  "Conv2d": {
-    "description": "Applies a 2D convolution over an input signal composed of several input planes.",
-    "std_args": [
-      "in_channels",
-      "out_channels",
-      "kernel_size",
-      "stride",
-      "padding",
-      "dilation",
-      "groups",
-      "bias",
-      "padding_mode"
     ],
     "type": "class"
   },
@@ -666,15 +508,6 @@
     ],
     "type": "class"
   },
-  "CrossEntropyLoss": {
-    "description": "Cross Entropy Loss.",
-    "std_args": [
-      "input",
-      "target",
-      "weight"
-    ],
-    "type": "class"
-  },
   "CrossMapLRN2d": {
     "description": "The class representing a Python class.",
     "std_args": [
@@ -774,20 +607,6 @@
     ],
     "type": "class"
   },
-  "Div": {
-    "description": "Element-wise division.",
-    "std_args": [
-      "x",
-      "y"
-    ]
-  },
-  "Dropout": {
-    "description": "Auto-discovered via Consensus (Score: 3.0)",
-    "std_args": [
-      "lr"
-    ],
-    "type": "attribute"
-  },
   "Dropout1d": {
     "description": "Randomly zero out entire channels.",
     "std_args": [
@@ -813,25 +632,6 @@
       "p",
       "inplace"
     ],
-    "type": "class"
-  },
-  "Einsum": {
-    "description": "Sums the product of the elements of the input operands along dimensions specified using a notation.",
-    "std_args": [
-      "equation",
-      "operands"
-    ]
-  },
-  "Elu": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "alpha"
-    ],
-    "type": "class"
-  },
-  "Embedding": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
     "type": "class"
   },
   "EmbeddingBag": {
@@ -867,27 +667,10 @@
     ],
     "type": "class"
   },
-  "Flatten": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
-    "type": "class"
-  },
   "FlexKernelOptions": {
     "description": "Options for controlling the behavior of FlexAttention kernels.",
     "std_args": [],
     "type": "class"
-  },
-  "Float16": {
-    "description": "16-bit floating point type (Half).",
-    "std_args": []
-  },
-  "Float32": {
-    "description": "32-bit floating point type.",
-    "std_args": []
-  },
-  "Float64": {
-    "description": "64-bit floating point type (Double).",
-    "std_args": []
   },
   "Fold": {
     "description": "Combines an array of sliding local blocks into a large containing tensor.",
@@ -925,13 +708,6 @@
     ],
     "type": "class"
   },
-  "GELU": {
-    "description": "Gaussian Error Linear Unit.",
-    "std_args": [
-      "input"
-    ],
-    "type": "class"
-  },
   "GRID_SAMPLE_INTERPOLATION_MODES": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -941,15 +717,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "Gather": {
-    "description": "Gathers values along an axis specified by dim.",
-    "std_args": [
-      "input",
-      "dim",
-      "index"
-    ],
-    "type": "function"
   },
   "GaussianNLLLoss": {
     "description": "Gaussian negative log likelihood loss.",
@@ -1015,13 +782,6 @@
     ],
     "type": "class"
   },
-  "Identity": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "kwargs"
-    ],
-    "type": "class"
-  },
   "InstanceNorm1d": {
     "description": "Applies Instance Normalization.",
     "std_args": [
@@ -1063,18 +823,6 @@
       "dtype"
     ],
     "type": "class"
-  },
-  "Int16": {
-    "description": "16-bit signed integer type (Short).",
-    "std_args": []
-  },
-  "Int32": {
-    "description": "32-bit signed integer type (Int).",
-    "std_args": []
-  },
-  "Int64": {
-    "description": "64-bit signed integer type (Long).",
-    "std_args": []
   },
   "KLDivLoss": {
     "description": "The Kullback-Leibler divergence loss.",
@@ -1140,16 +888,6 @@
       "kernel_size",
       "stride",
       "ceil_mode"
-    ],
-    "type": "class"
-  },
-  "LayerNorm": {
-    "description": "Applies Layer Normalization over a mini-batch of inputs.",
-    "std_args": [
-      "normalized_shape",
-      "eps",
-      "elementwise_affine",
-      "bias"
     ],
     "type": "class"
   },
@@ -1347,15 +1085,6 @@
     ],
     "type": "class"
   },
-  "Linear": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "dtype",
-      "in_features",
-      "out_features"
-    ],
-    "type": "class"
-  },
   "LinearT": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -1370,10 +1099,6 @@
       "dim"
     ],
     "type": "class"
-  },
-  "LoadStateDict": {
-    "description": "Loading state utility for mappings.",
-    "std_args": []
   },
   "LocalResponseNorm": {
     "description": "Applies local response normalization over an input signal.",
@@ -1405,14 +1130,6 @@
     ],
     "type": "class"
   },
-  "MSELoss": {
-    "description": "Mean Squared Error.",
-    "std_args": [
-      "input",
-      "target"
-    ],
-    "type": "class"
-  },
   "MarginRankingLoss": {
     "description": "Creates a criterion that measures the loss given",
     "std_args": [
@@ -1428,18 +1145,6 @@
     "description": "Applies a 1D max pooling over an input signal composed of several input planes.",
     "std_args": [
       "self",
-      "kernel_size",
-      "stride",
-      "padding",
-      "dilation",
-      "return_indices",
-      "ceil_mode"
-    ],
-    "type": "class"
-  },
-  "MaxPool2d": {
-    "description": "Applies a 2D max pooling over an input signal composed of several input planes.",
-    "std_args": [
       "kernel_size",
       "stride",
       "padding",
@@ -1492,26 +1197,6 @@
     ],
     "type": "class"
   },
-  "Mean": {
-    "description": "Calculates the mean value.",
-    "std_args": [
-      "x"
-    ]
-  },
-  "Mish": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "x"
-    ],
-    "type": "class"
-  },
-  "Mul": {
-    "description": "Element-wise multiplication.",
-    "std_args": [
-      "x",
-      "y"
-    ]
-  },
   "MultiLabelMarginLoss": {
     "description": "Creates a criterion that optimizes a multi-class multi-classification",
     "std_args": [
@@ -1543,21 +1228,6 @@
       "size_average",
       "reduce",
       "reduction"
-    ],
-    "type": "class"
-  },
-  "MultiheadAttention": {
-    "description": "Multi-head attention mechanism.",
-    "std_args": [
-      "embed_dim",
-      "num_heads",
-      "dropout",
-      "bias",
-      "add_bias_kv",
-      "add_zero_attn",
-      "kdim",
-      "vdim",
-      "batch_first"
     ],
     "type": "class"
   },
@@ -1608,14 +1278,6 @@
       "mean",
       "std",
       "inplace"
-    ],
-    "type": "function"
-  },
-  "OneHot": {
-    "description": "Takes LongTensor with index values of shape (*) and returns a tensor of shape (*, num_classes).",
-    "std_args": [
-      "tensor",
-      "num_classes"
     ]
   },
   "OrderedDictWrapper": {
@@ -1647,16 +1309,6 @@
     "std_args": [],
     "type": "class"
   },
-  "Pad": {
-    "description": "Pads input tensor.",
-    "std_args": [
-      "input",
-      "pad",
-      "mode",
-      "value"
-    ],
-    "type": "function"
-  },
   "PairwiseDistance": {
     "description": "Computes the pairwise distance between input vectors, or between columns of input matrices.",
     "std_args": [
@@ -1666,12 +1318,6 @@
       "keepdim"
     ],
     "type": "class"
-  },
-  "Param": {
-    "description": "Container for trainable parameter.",
-    "std_args": [
-      "value"
-    ]
   },
   "Parameter": {
     "description": "A kind of Tensor that is to be considered a module parameter.",
@@ -1736,13 +1382,6 @@
       "reduction"
     ],
     "type": "class"
-  },
-  "Pow": {
-    "description": "Element-wise power.",
-    "std_args": [
-      "x",
-      "y"
-    ]
   },
   "PruningContainer": {
     "description": "Container holding a sequence of pruning methods for iterative pruning.",
@@ -1907,13 +1546,6 @@
     ],
     "type": "class"
   },
-  "Reshape": {
-    "description": "Returns a tensor with the same data and number of elements as input, but with the specified shape.",
-    "std_args": [
-      "input",
-      "shape"
-    ]
-  },
   "Resize": {
     "description": "Resize the input image to the given size.",
     "std_args": [
@@ -1949,33 +1581,6 @@
       "nesterov"
     ]
   },
-  "Scatter": {
-    "description": "Writes all values from the tensor src into indices specified.",
-    "std_args": [
-      "input",
-      "dim",
-      "index",
-      "src"
-    ],
-    "type": "function"
-  },
-  "Selu": {
-    "description": "Auto-discovered via Consensus (Score: 3.0)",
-    "std_args": [],
-    "type": "class"
-  },
-  "Sequential": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
-    "type": "class"
-  },
-  "Sigmoid": {
-    "description": "Auto-discovered via Consensus (Score: 3.0)",
-    "std_args": [
-      "x"
-    ],
-    "type": "class"
-  },
   "Silu": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
@@ -2004,13 +1609,6 @@
     ],
     "type": "class"
   },
-  "Softmax": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "kwargs"
-    ],
-    "type": "class"
-  },
   "Softmax2d": {
     "description": "Applies SoftMax over features to each spatial location.",
     "std_args": [
@@ -2020,17 +1618,7 @@
     ],
     "type": "class"
   },
-  "Softplus": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
-    "type": "class"
-  },
   "Softshrink": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
-    "type": "class"
-  },
-  "Softsign": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [],
     "type": "class"
@@ -2062,32 +1650,12 @@
     ],
     "type": "class"
   },
-  "Squeeze": {
-    "description": "Returns a tensor with all the dimensions of input of size 1 removed.",
-    "std_args": [
-      "input",
-      "dim"
-    ]
-  },
   "StepLR": {
     "description": "Decays the learning rate of each parameter group by gamma every step_size epochs.",
     "std_args": [
       "optimizer",
       "step_size",
       "gamma"
-    ]
-  },
-  "Sub": {
-    "description": "Element-wise subtraction.",
-    "std_args": [
-      "x",
-      "y"
-    ]
-  },
-  "Sum": {
-    "description": "Calculates the sum value.",
-    "std_args": [
-      "x"
     ]
   },
   "SyncBatchNorm": {
@@ -2140,20 +1708,6 @@
     "description": "Convert a PIL Image or numpy.ndarray to tensor.",
     "std_args": []
   },
-  "TopK": {
-    "description": "Returns the k largest elements of the given input tensor along a given dimension.",
-    "std_args": [
-      "input",
-      "k",
-      "dim",
-      "largest",
-      "sorted"
-    ]
-  },
-  "TorchFunctional": {
-    "description": "Abstract Functional Namespace (e.g. F in torch.nn.functional)",
-    "std_args": []
-  },
   "TripletMarginLoss": {
     "description": "Creates a criterion that measures the triplet loss given an input",
     "std_args": [
@@ -2178,10 +1732,6 @@
       "reduction"
     ],
     "type": "class"
-  },
-  "UInt8": {
-    "description": "8-bit unsigned integer type (Byte).",
-    "std_args": []
   },
   "UPPER_LEFT": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -2237,13 +1787,6 @@
     "std_args": [],
     "type": "class"
   },
-  "Unsqueeze": {
-    "description": "Returns a new tensor with a dimension of size one inserted at the specified position.",
-    "std_args": [
-      "input",
-      "dim"
-    ]
-  },
   "UpsamplingBilinear2d": {
     "description": "Applies a 2D bilinear upsampling to an input signal composed of several input channels.",
     "std_args": [
@@ -2261,19 +1804,6 @@
       "scale_factor"
     ],
     "type": "class"
-  },
-  "Variable": {
-    "description": "Generic state container.",
-    "std_args": [
-      "value"
-    ]
-  },
-  "View": {
-    "description": "Returns a new tensor with the same data as the self tensor but of a different shape.",
-    "std_args": [
-      "input",
-      "shape"
-    ]
   },
   "WARN_FOR_UNFUSED_KERNELS": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -3194,10 +2724,6 @@
     ],
     "type": "function"
   },
-  "data_ptr": {
-    "description": "Get valid data pointer or buffer access.",
-    "std_args": []
-  },
   "decoder": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -3431,12 +2957,6 @@
       "self"
     ],
     "type": "function"
-  },
-  "exp": {
-    "description": "Exponential.",
-    "std_args": [
-      "x"
-    ]
   },
   "exp2": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -4400,14 +3920,6 @@
     ],
     "type": "function"
   },
-  "load_state_dict": {
-    "description": "Copies parameters and buffers from state_dict into this module.",
-    "std_args": [
-      "state_dict",
-      "strict"
-    ],
-    "type": "function"
-  },
   "local_response_norm": {
     "description": "Apply local response normalization over an input signal.",
     "std_args": [
@@ -4418,12 +3930,6 @@
       "k"
     ],
     "type": "function"
-  },
-  "log": {
-    "description": "Logarithm.",
-    "std_args": [
-      "x"
-    ]
   },
   "log_input": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -4442,14 +3948,6 @@
       "input"
     ],
     "type": "function"
-  },
-  "log_softmax": {
-    "description": "Applies the LogSoftmax function to an n-dimensional input Tensor.",
-    "std_args": [
-      "input",
-      "dim"
-    ],
-    "type": "attribute"
   },
   "log_target": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -4594,12 +4092,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "max": {
-    "description": "Element-wise maximum or reduction.",
-    "std_args": [
-      "x"
-    ]
-  },
   "max_norm": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -4714,12 +4206,6 @@
       "query"
     ],
     "type": "function"
-  },
-  "min": {
-    "description": "Element-wise minimum or reduction.",
-    "std_args": [
-      "x"
-    ]
   },
   "min_val": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -5236,13 +4722,6 @@
     ],
     "type": "function"
   },
-  "parameters": {
-    "description": "Returns an iterator over module parameters.",
-    "std_args": [
-      "recurse"
-    ],
-    "type": "function"
-  },
   "parameters_to_ignore": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -5259,17 +4738,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "permute_dims": {
-    "description": "Permutes tensor dimensions.",
-    "std_args": [
-      "input",
-      {
-        "is_variadic": true,
-        "name": "dims",
-        "type": "int"
-      }
-    ]
   },
   "permute_hidden": {
     "description": "The class representing a Python function.",
@@ -5389,12 +4857,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "randn": {
-    "description": "Returns a tensor filled with random numbers from a normal distribution.",
-    "std_args": [
-      "shape"
-    ]
-  },
   "random_structured": {
     "description": "Prune tensor by removing random channels along the specified dimension.",
     "std_args": [
@@ -5441,15 +4903,6 @@
     "std_args": [
       "self",
       "hook"
-    ],
-    "type": "function"
-  },
-  "register_buffer": {
-    "description": "Registers a persistent buffer.",
-    "std_args": [
-      "name",
-      "tensor",
-      "persistent"
     ],
     "type": "function"
   },
@@ -5575,14 +5028,6 @@
     ],
     "type": "function"
   },
-  "register_parameter": {
-    "description": "Registers a learnable parameter.",
-    "std_args": [
-      "name",
-      "param"
-    ],
-    "type": "function"
-  },
   "register_parametrization": {
     "description": "Register a parametrization to a tensor in a module.",
     "std_args": [
@@ -5608,13 +5053,6 @@
       "hook"
     ],
     "type": "function"
-  },
-  "relu": {
-    "description": "Rectified Linear Unit.",
-    "std_args": [
-      "input"
-    ],
-    "type": "class"
   },
   "relu_": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -5876,10 +5314,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "size": {
-    "description": "Get tensor shape",
-    "std_args": []
-  },
   "skip_all_reduce_unused_params": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -5916,14 +5350,6 @@
       "reduction"
     ],
     "type": "function"
-  },
-  "softmax": {
-    "description": "Applies the Softmax function to an n-dimensional input Tensor.",
-    "std_args": [
-      "input",
-      "dim"
-    ],
-    "type": "attribute"
   },
   "solve_ex": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -5978,18 +5404,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "sqrt": {
-    "description": "Square root.",
-    "std_args": [
-      "x"
-    ]
-  },
-  "square": {
-    "description": "Square.",
-    "std_args": [
-      "x"
-    ]
-  },
   "src_device_obj": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -5999,15 +5413,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "state_dict": {
-    "description": "Returns a dictionary containing a whole state of the module.",
-    "std_args": [
-      "destination",
-      "prefix",
-      "keep_vars"
-    ],
-    "type": "function"
   },
   "static_graph": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -6422,8 +5827,7 @@
   },
   "zero_grad": {
     "description": "Sets the gradients of all optimized parameters to zero.",
-    "std_args": [],
-    "type": "function"
+    "std_args": []
   },
   "zero_infinity": {
     "description": "The class representing a Python module/class/instance attribute.",

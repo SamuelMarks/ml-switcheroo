@@ -26,6 +26,7 @@ from ml_switcheroo.frameworks.base import (
   StandardCategory,
   StandardMap,
   ImportConfig,
+  InitMode,
 )
 
 # Conditional import to allow loading in environments without MLX

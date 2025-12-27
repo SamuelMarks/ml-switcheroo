@@ -32,7 +32,8 @@ def test_scaffold_splits_data(env_paths, tmp_path):
   sem_dir, snap_dir = env_paths
 
   # Prevent file loading during init for speed and isolation
-  with patch("ml_switcheroo.semantics.manager.SemanticsManager._load_knowledge_graph"):
+  # Updates: Patch KnowledgeBaseLoader instead of removed _load_knowledge_graph method
+  with patch("ml_switcheroo.semantics.file_loader.KnowledgeBaseLoader.load_knowledge_graph"):
     mgr = SemanticsManager()
     mgr._reverse_index = {}
     mgr.data = {}
@@ -91,7 +92,8 @@ def test_scaffolder_caches_existing_specs(env_paths, tmp_path):
   existing_spec = {"abs": {"description": "Manual", "std_args": ["x"]}}
   (sem_dir / "k_array_api.json").write_text(json.dumps(existing_spec))
 
-  with patch("ml_switcheroo.semantics.manager.SemanticsManager._load_knowledge_graph"):
+  # Updates: Patch correct loader method
+  with patch("ml_switcheroo.semantics.file_loader.KnowledgeBaseLoader.load_knowledge_graph"):
     mgr = SemanticsManager()
     mgr._reverse_index = {}
     mgr.data = existing_spec

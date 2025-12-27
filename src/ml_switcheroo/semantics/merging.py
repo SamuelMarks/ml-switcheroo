@@ -1,10 +1,15 @@
 """
 Merging Logic for Semantic Knowledge Base.
 
+This module handles the aggregation of disparate knowledge sources (Specs, Snapshots)
+into the central SemanticsManager. It resolves conflicts based on Tier Precedence
+and merges framework-specific configurations.
+
 Handles:
 - Merging Specification Tiers (Math, Neural, Extras).
 - Merging Snapshot Overlays (Framework mappings).
-- Conflict resolution and prioritization.
+- Conflict resolution and prioritization (Warning vs Silencing).
+- Merging Framework Traits and Import Maps.
 """
 
 import warnings
@@ -14,6 +19,17 @@ from pydantic import ValidationError
 
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.semantics.schema import OpDefinition
+
+# Hierarchy of tier importance for overwriting checks
+# Higher numbers mean higher importance (harder to overwrite the Tier Origin)
+# EXTRAS is lowest (1) to ensure that if a Neural/Math op is patched in Extras,
+# it retains its original high-value semantic tag (e.g. Neural for state injection).
+TIER_PRECEDENCE = {
+  SemanticTier.NEURAL.value: 3,
+  SemanticTier.ARRAY_API.value: 2,
+  SemanticTier.NEURAL_OPS.value: 2,
+  SemanticTier.EXTRAS.value: 1,
+}
 
 
 def infer_tier_from_priority(priority: int) -> SemanticTier:
@@ -37,6 +53,10 @@ def merge_imports(master_import_data: Dict[str, Dict], new_imports: Dict[str, An
   """
   Merges new import definitions (from __imports__ block) into the master dictionary.
   Updates in-place.
+
+  Args:
+      master_import_data: The central import dictionary.
+      new_imports: Dictionary of new import rules to merge.
   """
   for src_mod, details in new_imports.items():
     if src_mod not in master_import_data:
@@ -52,6 +72,10 @@ def merge_frameworks(master_configs: Dict[str, Dict], new_configs: Dict[str, Any
   """
   Merges new framework configurations (from __frameworks__ block) into the master.
   Updates in-place.
+
+  Args:
+      master_configs: The central framework definitions dictionary.
+      new_configs: Dictionary of framework traits to merge.
   """
   for fw_name, traits in new_configs.items():
     if fw_name not in master_configs:
@@ -81,6 +105,10 @@ def merge_tier_data(
   """
   Merges content from a Specification file (hub) into the manager state.
 
+  Handles precedence logic: Neural definitions overwrite Array definitions silently
+  for upgrades. Duplicate definitions at the same tier level with conflicting signatures
+  trigger warnings.
+
   Args:
       data: Master dictionary of operations.
       key_origins: Dict tracking where an op was defined (Math vs Neural).
@@ -98,20 +126,60 @@ def merge_tier_data(
     merge_frameworks(framework_configs, data_copy.pop("__frameworks__"))
 
   for op_name, details in data_copy.items():
-    if op_name in data:
-      if tier != SemanticTier.EXTRAS:
-        prev_tier = key_origins.get(op_name, "unknown")
-        # Warn on collision even if tier matches, to flag duplicate definitions in specs.
-        warnings.warn(
-          f"Conflict detected for '{op_name}': Defined in '{prev_tier}' but overwritten by '{tier.value}' in load.",
-          UserWarning,
-        )
+    should_update_origin = True
 
     try:
       validated_op = OpDefinition.model_validate(details)
       stored_dict = validated_op.model_dump(by_alias=True, exclude_unset=True)
+
+      if op_name in data:
+        # Idempotency Check: If the new definition is identical to existing, skip
+        if data[op_name] == stored_dict:
+          continue
+
+        existing_entry = data[op_name]
+        prev_tier_val = key_origins.get(op_name, "unknown")
+
+        # Determine precedence
+        prev_prec = TIER_PRECEDENCE.get(prev_tier_val, 0)
+        curr_prec = TIER_PRECEDENCE.get(tier.value, 0)
+
+        # Downgrade Protection: Don't let low-priority spec overwrite high-priority origin tag
+        if curr_prec < prev_prec:
+          should_update_origin = False
+
+        # Intelligent Merging:
+        # If we are in the same tier, or upgrading, we should try to preserve existing variants
+        # unless the new spec is radically different.
+        if curr_prec >= prev_prec:
+          existing_variants = existing_entry.get("variants", {})
+          new_variants = stored_dict.get("variants", {})
+
+          # Merge variants: New variants overwrite existing ones for the same framework key
+          existing_variants.update(new_variants)
+          stored_dict["variants"] = existing_variants
+
+          # Warning Logic:
+          # Warn only if a meaningful conflict (signature mismatch) exists at the same tier.
+          # Upgrades (e.g. Array->Neural) are silent.
+          # Same-Tier with identical args (e.g. doc-only update) are silent.
+          if tier != SemanticTier.EXTRAS and should_update_origin:
+            if curr_prec == prev_prec:
+              old_args = existing_entry.get("std_args", [])
+              new_args = stored_dict.get("std_args", [])
+              if old_args != new_args:
+                warnings.warn(
+                  f"Conflict detected for '{op_name}': Signature mismatch within '{tier.value}'. Overwriting.",
+                  UserWarning,
+                )
+
+      # Merge dictionaries (Overwrite properties with new spec, but variants are merged above)
       data[op_name] = stored_dict
-      key_origins[op_name] = tier.value
+
+      # Only update the Tier Origin if precedence allows
+      if should_update_origin:
+        key_origins[op_name] = tier.value
+
     except ValidationError as e:
       print(f"⚠️  Skipping invalid definition '{op_name}' in {tier.value}: {e}")
       continue
@@ -128,6 +196,9 @@ def merge_overlay_data(
 ) -> None:
   """
   Merges a mapping overlay file (snapshot) into the main data.
+
+  Snapshots contain framework-specific implementation overlays ("Spokes")
+  that attach to the Abstract Operations ("Hub").
 
   Args:
       data: Master dictionary of operations.
@@ -180,10 +251,7 @@ def merge_overlay_data(
         "std_args": [],  # Unknown if not in Spec
         "variants": {},
       }
-      # FIX: Apply Heuristics for Tier Detection
-      # If an operation is found in an Overlay but NOT in a Spec, we must guess its Tier.
-      # 1. Uppercase usually implies Class-based Neural layers (Linear, Conv2d).
-      # 2. Lowercase usually implies Array/Math operations or Extras.
+      # Heuristic Tier Detection for orphan mappings
       if op_name not in key_origins:
         if op_name and op_name[0].isupper():
           key_origins[op_name] = SemanticTier.NEURAL.value

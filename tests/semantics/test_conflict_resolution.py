@@ -3,14 +3,15 @@ Tests for Semantics Conflict Resolution.
 
 Verifies that:
 1. Loading defines origins.
-2. Extras override Array/Neural without standard warnings (or handled gracefully).
-3. Array vs Neural conflicts trigger warnings.
-4. Data is actually updated (last write wins).
+2. Extras override Array/Neural without standard warnings, BUT preserve high-value tiers.
+3. Array vs Neural conflicts handle upgrades silently.
+4. Genuine signature mismatches trigger warnings.
 """
 
 import pytest
 import warnings
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.merging import merge_tier_data
 from ml_switcheroo.enums import SemanticTier
 
 
@@ -32,66 +33,168 @@ def test_merge_clean_insert():
   mgr = TestSemanticsManager()
 
   data = {"abs": {"doc": "Math"}}
-  mgr._merge_tier(data, SemanticTier.ARRAY_API)
+
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content=data,
+    tier=SemanticTier.ARRAY_API,
+  )
 
   assert "abs" in mgr.data
   assert mgr._key_origins["abs"] == SemanticTier.ARRAY_API.value
 
 
-def test_conflict_array_vs_neural_warning():
+def test_array_vs_neural_silent_upgrade():
   """
-  Scenario: 'sigmoid' defined in Array API, then redefined in Neural.
-  Expectation: Warning issued, data updated to Neural version.
+  Scenario: 'sigmoid' defined in Array API, then upgraded in Neural.
+  Expectation: Content updated, Tier Origin updated to Neural, NO warning emitted (Refinement upgrade).
   """
   mgr = TestSemanticsManager()
 
   # 1. Load Array
-  mgr._merge_tier({"sigmoid": {"type": "math"}}, SemanticTier.ARRAY_API)
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content={"sigmoid": {"type": "math"}},
+    tier=SemanticTier.ARRAY_API,
+  )
 
-  # 2. Load Neural (Collision)
-  with pytest.warns(UserWarning, match="Conflict detected"):
-    mgr._merge_tier({"sigmoid": {"type": "layer"}}, SemanticTier.NEURAL)
+  # 2. Load Neural (Upgrade)
+  with warnings.catch_warnings(record=True) as w:
+    warnings.simplefilter("always")
+    merge_tier_data(
+      data=mgr.data,
+      key_origins=mgr._key_origins,
+      import_data=mgr.import_data,
+      framework_configs=mgr.framework_configs,
+      new_content={"sigmoid": {"type": "layer"}},
+      tier=SemanticTier.NEURAL,
+    )
 
-  # 3. Verify Overwrite occurred
+    # Assert no "Conflict detected" warning for legitimate upgrade
+    relevant = [x for x in w if "Conflict detected" in str(x.message)]
+    assert len(relevant) == 0
+
+  # 3. Verify Overwrite
   assert mgr.data["sigmoid"]["type"] == "layer"
   assert mgr._key_origins["sigmoid"] == SemanticTier.NEURAL.value
 
 
 def test_extras_override_silence():
   """
-  Scenario: 'DataLoader' defined in Neural (hypothetically), overridden in Extras.
-  Expectation: No Warning (or distinct log), data updated.
+  Scenario: 'DataLoader' defined in Neural (high precedence), overridden in Extras (low precedence).
+
+  Expectation:
+  1. Data matches Extras (Patching allowed).
+  2. Tier remains Neural (Downgrade protection).
+  3. No Warning issued (Extras are silent patchers).
   """
   mgr = TestSemanticsManager()
 
-  # 1. Load Base
-  mgr._merge_tier({"DataLoader": {"ver": 1}}, SemanticTier.NEURAL)
+  # 1. Load Base (Precedence 3)
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content={"DataLoader": {"ver": 1}},
+    tier=SemanticTier.NEURAL,
+  )
 
-  # 2. Load Extras (Override)
+  # 2. Load Extras (Override, Precedence 1)
   # catch_warnings(record=True) checks that NO warning is issued
   with warnings.catch_warnings(record=True) as w:
     warnings.simplefilter("always")  # Cause all warnings to always be triggered.
-    mgr._merge_tier({"DataLoader": {"ver": 2}}, SemanticTier.EXTRAS)
+    merge_tier_data(
+      data=mgr.data,
+      key_origins=mgr._key_origins,
+      import_data=mgr.import_data,
+      framework_configs=mgr.framework_configs,
+      new_content={"DataLoader": {"ver": 2}},
+      tier=SemanticTier.EXTRAS,
+    )
 
     # Filter for our specific warning type to be sure
     relevant = [x for x in w if "Conflict detected" in str(x.message)]
     assert len(relevant) == 0, "Extras override should not trigger conflict warning"
 
-  # 3. Verify Overwrite
+  # 3. Verify Data Overwrite (Content patched)
   assert mgr.data["DataLoader"]["ver"] == 2
-  assert mgr._key_origins["DataLoader"] == SemanticTier.EXTRAS.value
+
+  # 4. Verify Tier Preservation (Critical for state injection logic)
+  # Must remain NEURAL
+  assert mgr._key_origins["DataLoader"] == SemanticTier.NEURAL.value
 
 
-def test_duplicate_same_tier_warning():
+def test_duplicate_same_tier_signature_mismatch_warning():
   """
-  Scenario: Same key appears twice in processes labeled as same Tier.
-  Expectation: Warning.
+  Scenario: Same key appears twice in same Tier with CONFLICTING signatures.
+  Expectation: Warning issued.
   """
   mgr = TestSemanticsManager()
-  mgr._merge_tier({"add": {}}, SemanticTier.ARRAY_API)
 
-  with pytest.warns(UserWarning, match="overwritten by"):
-    mgr._merge_tier({"add": {}}, SemanticTier.ARRAY_API)
+  content_a = {"add": {"std_args": ["a"]}}
+  content_b = {"add": {"std_args": ["x", "y"]}}
+
+  # 1. Load First
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content=content_a,
+    tier=SemanticTier.ARRAY_API,
+  )
+
+  # 2. Load Second (Collision with different signature)
+  with pytest.warns(UserWarning, match="Signature mismatch"):
+    merge_tier_data(
+      data=mgr.data,
+      key_origins=mgr._key_origins,
+      import_data=mgr.import_data,
+      framework_configs=mgr.framework_configs,
+      new_content=content_b,
+      tier=SemanticTier.ARRAY_API,
+    )
+
+
+def test_duplicate_same_tier_identical_is_silent():
+  """
+  Scenario: Content is reloaded (identical or minor metadata change only).
+  Expectation: No warning.
+  """
+  mgr = TestSemanticsManager()
+
+  # Same signature, different descriptions (minor update)
+  content_a = {"add": {"std_args": ["x"], "description": "v1"}}
+  content_b = {"add": {"std_args": ["x"], "description": "v2"}}  # Same args
+
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content=content_a,
+    tier=SemanticTier.ARRAY_API,
+  )
+
+  with warnings.catch_warnings(record=True) as w:
+    warnings.simplefilter("always")
+    merge_tier_data(
+      data=mgr.data,
+      key_origins=mgr._key_origins,
+      import_data=mgr.import_data,
+      framework_configs=mgr.framework_configs,
+      new_content=content_b,
+      tier=SemanticTier.ARRAY_API,
+    )
+    relevant = [x for x in w if "Conflict detected" in str(x.message)]
+    assert len(relevant) == 0
 
 
 def test_build_index_refresh():
@@ -107,21 +210,30 @@ def test_build_index_refresh():
   data_c = {"abs": {"variants": {"torch": {"api": "torch.absolute"}}}}
 
   # 1. Process A
-  mgr._merge_tier(data_a, SemanticTier.ARRAY_API)
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content=data_a,
+    tier=SemanticTier.ARRAY_API,
+  )
   mgr._build_index()
   assert mgr.get_definition("torch.abs")[0] == "abs"
 
   # 2. Process C
-  mgr._merge_tier(data_c, SemanticTier.EXTRAS)
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content=data_c,
+    tier=SemanticTier.EXTRAS,
+  )
   mgr._build_index()
-
-  # Old mapping should be arguably gone if the data object was replaced?
-  # Yes, _build_index clears _reverse_index and rebuilds from self.data.
-  # self.data["abs"] is now the object from data_c.
 
   # New mapping exists
   assert mgr.get_definition("torch.absolute")[0] == "abs"
 
-  # Old mapping check:
-  # Since 'torch.abs' is NOT in data_c's variant list, it should point to nothing.
+  # Old mapping check
   assert mgr.get_definition("torch.abs") is None

@@ -11,6 +11,7 @@ import libcst as cst
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.merging import merge_tier_data
 from ml_switcheroo.core.import_fixer import ImportFixer
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks import register_framework, get_adapter
@@ -68,6 +69,8 @@ def test_manager_parses_json_alias_override():
   # 1. Setup Manager (loads adapters implicitly)
   mgr = SemanticsManager()
   mgr._reverse_index = {}
+  if not hasattr(mgr, "import_data"):
+    mgr.import_data = {}
 
   # 2. Inject JSON override via internal merge method
   mock_data = {
@@ -79,7 +82,15 @@ def test_manager_parses_json_alias_override():
     }
   }
 
-  mgr._merge_tier(mock_data, SemanticTier.EXTRAS)
+  # Fix: Use merge_tier_data utility instead of removed method
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content=mock_data,
+    tier=SemanticTier.EXTRAS,
+  )
 
   aliases = mgr.get_framework_aliases()
 

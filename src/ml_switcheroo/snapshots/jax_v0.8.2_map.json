@@ -666,10 +666,6 @@
     "linspace": {
       "api": "jax.numpy.linspace"
     },
-    "load_state_dict": {
-      "api": "torch_load_state_dict_to_nnx",
-      "requires_plugin": "torch_load_state_dict_to_nnx"
-    },
     "log": {
       "api": "jax.numpy.log"
     },
@@ -806,10 +802,6 @@
     "outer": {
       "api": "jax.numpy.outer"
     },
-    "parameters": {
-      "api": "torch_parameters_to_nnx",
-      "requires_plugin": "torch_parameters_to_nnx"
-    },
     "permute_dims": {
       "api": "jnp.transpose",
       "pack_to_tuple": "axes"
@@ -842,14 +834,6 @@
     },
     "reciprocal": {
       "api": "jax.numpy.reciprocal"
-    },
-    "register_buffer": {
-      "api": "torch_register_buffer_to_nnx",
-      "requires_plugin": "torch_register_buffer_to_nnx"
-    },
-    "register_parameter": {
-      "api": "torch_register_parameter_to_nnx",
-      "requires_plugin": "torch_register_parameter_to_nnx"
     },
     "relu": {
       "api": "jax.nn.relu"
@@ -931,10 +915,6 @@
     },
     "stack": {
       "api": "jax.numpy.stack"
-    },
-    "state_dict": {
-      "api": "torch_state_dict_to_nnx",
-      "requires_plugin": "torch_state_dict_to_nnx"
     },
     "std": {
       "api": "jax.numpy.std"
@@ -1022,7 +1002,7 @@
     "convert_input": "jnp.array({np_var})",
     "fori_loop": "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})",
     "import": "import jax\nimport jax.numpy as jnp",
-    "jit_wrap": "True",
+    "jit_template": "jax.jit({fn}, static_argnums={static_argnums})",
     "scan": "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})",
     "to_numpy": "np.array({res_var})"
   }

@@ -25,6 +25,14 @@
     "AvgPool3d": {
       "api": "mlx.nn.AvgPool3d"
     },
+    "Avgpool": {
+      "api": "mlx.nn.AvgPool3d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
+    },
     "BLOCK_M": {
       "api": "mlx.core.block_masked_mm",
       "args": {
@@ -37,6 +45,12 @@
     },
     "Bernoulli": {
       "api": "mlx.core.random.bernoulli"
+    },
+    "Bilinear": {
+      "api": "mlx.nn.Bilinear",
+      "args": {
+        "bias": "bias"
+      }
     },
     "Bool": {
       "api": "mx.bool_"
@@ -230,8 +244,19 @@
         "kwargs": "kwargs"
       }
     },
+    "Gaussiannll": {
+      "api": "mlx.nn.losses.gaussian_nll_loss",
+      "args": {
+        "eps": "eps",
+        "full": "full",
+        "reduction": "reduction"
+      }
+    },
     "Gelu": {
-      "api": "mlx.nn.GELU"
+      "api": "mlx.nn.layers.activations.gelu",
+      "args": {
+        "x": "x"
+      }
     },
     "Glu": {
       "api": "mlx.nn.layers.activations.glu",
@@ -252,6 +277,12 @@
         "num_groups": "num_groups",
         "pytorch_compatible": "pytorch_compatible",
         "self": "self"
+      }
+    },
+    "HardSwish": {
+      "api": "mlx.nn.layers.activations.hardswish",
+      "args": {
+        "x": "x"
       }
     },
     "Hardshrink": {
@@ -287,6 +318,18 @@
     },
     "IsNaN": {
       "api": "mlx.core.isnan"
+    },
+    "Kldiv": {
+      "api": "mlx.nn.losses.kl_div_loss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
+    "L1": {
+      "api": "mlx.nn.losses.l1_loss",
+      "args": {
+        "reduction": "reduction"
+      }
     },
     "LSTM": {
       "api": "mlx.nn.layers.recurrent.LSTM",
@@ -367,6 +410,13 @@
         "targets": "targets"
       }
     },
+    "Marginranking": {
+      "api": "mlx.nn.losses.margin_ranking_loss",
+      "args": {
+        "margin": "margin",
+        "reduction": "reduction"
+      }
+    },
     "MatMul": {
       "api": "mlx.core.matmul",
       "args": {
@@ -413,6 +463,14 @@
         "stride": "stride"
       }
     },
+    "Maxpool": {
+      "api": "mlx.nn.MaxPool3d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "stride": "stride"
+      }
+    },
     "Mean": {
       "api": "mlx.core.mean"
     },
@@ -431,11 +489,23 @@
         "self": "self"
       }
     },
+    "Mse": {
+      "api": "mlx.nn.losses.mse_loss",
+      "args": {
+        "reduction": "reduction"
+      }
+    },
     "Mul": {
       "api": "mx.multiply"
     },
     "MultiheadAttention": {
       "api": "mlx.nn.MultiHeadAttention"
+    },
+    "Nll": {
+      "api": "mlx.nn.losses.nll_loss",
+      "args": {
+        "reduction": "reduction"
+      }
     },
     "Normalize": {
       "api": "mlx.core.linalg.norm",
@@ -475,6 +545,12 @@
     },
     "Reciprocal": {
       "api": "mlx.core.reciprocal"
+    },
+    "Relu": {
+      "api": "mlx.nn.layers.activations.relu",
+      "args": {
+        "x": "x"
+      }
     },
     "Relu6": {
       "api": "mlx.nn.layers.activations.relu6",
@@ -540,6 +616,13 @@
     },
     "Slice": {
       "api": "mlx.core.slice"
+    },
+    "Smoothl1": {
+      "api": "mlx.nn.losses.smooth_l1_loss",
+      "args": {
+        "beta": "beta",
+        "reduction": "reduction"
+      }
     },
     "Softmax": {
       "api": "mlx.core.softmax",
@@ -607,7 +690,11 @@
       "api": "mlx.core.tan"
     },
     "Tanh": {
-      "api": "mlx.core.tanh"
+      "api": "mlx.core.tanh",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
     },
     "Tanhshrink": {
       "api": "mlx.core.tanh",
@@ -634,7 +721,16 @@
       "api": "mlx.core.topk"
     },
     "Transformer": {
-      "api": "mlx.nn.Transformer"
+      "api": "mlx.nn.Transformer",
+      "args": {
+        "activation": "activation",
+        "custom_decoder": "custom_decoder",
+        "custom_encoder": "custom_encoder",
+        "dropout": "dropout",
+        "norm_first": "norm_first",
+        "num_decoder_layers": "num_decoder_layers",
+        "num_encoder_layers": "num_encoder_layers"
+      }
     },
     "TransformerDecoderLayer": {
       "api": "mlx.nn.TransformerDecoderLayer"
@@ -642,8 +738,21 @@
     "TransformerEncoderLayer": {
       "api": "mlx.nn.TransformerEncoderLayer"
     },
+    "Transformerdecoder": {
+      "api": "mlx.nn.TransformerDecoderLayer",
+      "args": {
+        "activation": "activation",
+        "dropout": "dropout",
+        "norm_first": "norm_first"
+      }
+    },
     "Transformerencoder": {
-      "api": "mlx.nn.TransformerEncoder"
+      "api": "mlx.nn.TransformerEncoderLayer",
+      "args": {
+        "activation": "activation",
+        "dropout": "dropout",
+        "norm_first": "norm_first"
+      }
     },
     "Transpose": {
       "api": "mlx.core.transpose"
@@ -1636,11 +1745,7 @@
       "api": "mlx.core.tan"
     },
     "tanh": {
-      "api": "mlx.core.tanh",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.tanh"
     },
     "tensordot": {
       "api": "mlx.core.tensordot"

@@ -159,6 +159,16 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
+  def get_to_numpy_code(self) -> str:
+    """
+    Returns a python code snippet that checks if an object 'obj' is a tensor of this framework
+    and returns its numpy representation.
+
+    Example:
+        return "if hasattr(obj, 'numpy'): return obj.numpy()"
+    """
+    ...
+
   @property
   def search_modules(self) -> List[str]:
     """List of module names to scan during discovery."""

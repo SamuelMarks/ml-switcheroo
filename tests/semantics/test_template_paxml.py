@@ -4,8 +4,7 @@ Updated to check snapshots/paxml_vlatest_map.json instead of k_test_templates.js
 """
 
 import json
-from unittest.mock import MagicMock, patch
-from ml_switcheroo.semantics.manager import resolve_snapshots_dir
+from unittest.mock import patch
 from ml_switcheroo.cli.handlers.snapshots import handle_sync
 from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 

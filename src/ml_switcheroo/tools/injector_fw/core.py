@@ -1,22 +1,21 @@
 """
-LibCST Transformer for Injecting Framework Mappings.
+Core Logic for Framework Adapter AST Transformer.
 
-This module provides the logic to modify framework adapter files (e.g. `torch.py`)
-by locating the specific class registered for a framework and injecting a new
-`StandardMap` definition into its `definitions` property.
-
-It handles:
-
-1.  **Definitions Injection**: Appending the mapping to the definitions dictionary.
-2.  **Smart Import Injection**: Analyzing the target API path (e.g. `scipy.special.erf`)
-    and injecting necessary top-level imports (`import scipy`) if missing.
-3.  **Variant Parameter Injection**: Supporting `inject_args` for adding fixed arguments.
-4.  **Complex Literal Support**: Recursively converting Lists, Tuples, and Dicts to CST nodes.
+This module defines the `FrameworkInjector` class, which handles the localized
+insertion of new Semantic Operations into existing Python framework adapter files.
 """
 
+from typing import List, Optional, Set, Union
+
 import libcst as cst
-from typing import Optional, Union, List, Set, Any
+
 from ml_switcheroo.core.dsl import FrameworkVariant
+from ml_switcheroo.tools.injector_fw.utils import (
+  convert_to_cst_literal,
+  get_import_root,
+  is_docstring,
+  is_future_import,
+)
 
 
 class FrameworkInjector(cst.CSTTransformer):
@@ -70,14 +69,14 @@ class FrameworkInjector(cst.CSTTransformer):
     """Tracks existing top-level imports."""
     for alias in node.names:
       # "import scipy.special" -> tracks "scipy"
-      root = _get_import_root(alias.name)
+      root = get_import_root(alias.name)
       self._existing_roots.add(root)
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
     """Tracks existing from-imports."""
     if node.module:
       # "from scipy import special" -> tracks "scipy"
-      root = _get_import_root(node.module)
+      root = get_import_root(node.module)
       self._existing_roots.add(root)
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
@@ -172,10 +171,10 @@ class FrameworkInjector(cst.CSTTransformer):
     insert_idx = 0
 
     for i, stmt in enumerate(body):
-      if _is_docstring(stmt, i):
+      if is_docstring(stmt, i):
         insert_idx = i + 1
         continue
-      if _is_future_import(stmt):
+      if is_future_import(stmt):
         insert_idx = i + 1
         continue
       break
@@ -251,7 +250,7 @@ class FrameworkInjector(cst.CSTTransformer):
       dict_elements = []
       for k, v in self.variant.inject_args.items():
         # Handle types for the value (Recursive)
-        val_node = _convert_to_cst_literal(v)
+        val_node = convert_to_cst_literal(v)
 
         dict_elements.append(
           cst.DictElement(
@@ -327,11 +326,16 @@ class FrameworkInjector(cst.CSTTransformer):
         # Convert to CST using our generic literal converter
         # If it's an object use model_dump
         if hasattr(item, "model_dump"):
-          val_node = _convert_to_cst_literal(item.model_dump())
+          val_node = convert_to_cst_literal(item.model_dump())
         else:
-          val_node = _convert_to_cst_literal(item)
+          val_node = convert_to_cst_literal(item)
 
-        req_elements.append(cst.Element(value=val_node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
+        req_elements.append(
+          cst.Element(
+            value=val_node,
+            comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+          )
+        )
 
       # Clean trailing comma
       if req_elements:
@@ -353,98 +357,3 @@ class FrameworkInjector(cst.CSTTransformer):
       args_list[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
     return cst.Call(func=cst.Name("StandardMap"), args=args_list)
-
-
-# --- Helpers ---
-
-
-def _get_import_root(node: Union[cst.Name, cst.Attribute]) -> str:
-  """Recursively extracts the root package name."""
-  if isinstance(node, cst.Name):
-    return node.value
-  if isinstance(node, cst.Attribute):
-    return _get_import_root(node.value)
-  return ""
-
-
-def _is_docstring(node: cst.CSTNode, idx: int) -> bool:
-  """Checks if statement is a module docstring."""
-  if idx != 0:
-    return False
-  if isinstance(node, cst.SimpleStatementLine) and len(node.body) == 1:
-    expr = node.body[0]
-    if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
-      return True
-  return False
-
-
-def _is_future_import(node: cst.CSTNode) -> bool:
-  """Checks if statement is `from __future__ import ...`."""
-  if isinstance(node, cst.SimpleStatementLine):
-    for stmt in node.body:
-      if isinstance(stmt, cst.ImportFrom):
-        if stmt.module and isinstance(stmt.module, cst.Name) and stmt.module.value == "__future__":
-          return True
-  return False
-
-
-def _convert_to_cst_literal(val: Any) -> cst.BaseExpression:
-  """
-  Recursively converts a python primitive or container to a CST node.
-  Supports: int, float, bool, str, list, tuple, dict.
-  """
-  # 1. Container Recursion (List/Tuple)
-  if isinstance(val, (list, tuple)):
-    elements = []
-    for item in val:
-      node = _convert_to_cst_literal(item)
-      elements.append(cst.Element(value=node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
-
-    # Strip trailing comma from last element for cleanliness
-    if elements:
-      last = elements[-1]
-      elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
-
-    if isinstance(val, list):
-      return cst.List(elements=elements)
-    else:
-      return cst.Tuple(elements=elements)
-
-  # 2. Key-Value Recursion (Dict)
-  if isinstance(val, dict):
-    elements = []
-    for k, v in val.items():
-      k_node = _convert_to_cst_literal(k)
-      v_node = _convert_to_cst_literal(v)
-
-      elements.append(
-        cst.DictElement(
-          key=k_node,
-          value=v_node,
-          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-        )
-      )
-
-    if elements:
-      last = elements[-1]
-      elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
-
-    return cst.Dict(elements=elements)
-
-  # 3. Primitives
-  if isinstance(val, bool):
-    return cst.Name("True") if val else cst.Name("False")
-  elif isinstance(val, int):
-    return cst.Integer(str(val))
-  elif isinstance(val, float):
-    return cst.Float(str(val))
-  elif isinstance(val, str):
-    # Basic quote escaping
-    s = val.replace('"', '\\"')
-    return cst.SimpleString(f'"{s}"')
-  elif val is None:
-    return cst.Name("None")
-  else:
-    # Fallback
-    s = str(val).replace('"', '\\"')
-    return cst.SimpleString(f'"{s}"')

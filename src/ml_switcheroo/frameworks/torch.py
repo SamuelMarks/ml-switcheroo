@@ -50,6 +50,7 @@ class TorchAdapter:
 
   display_name: str = "PyTorch"
   inherits_from: Optional[str] = None
+  # Explicitly set Priority 0 to ensure it is the Default Source
   ui_priority: int = 0
 
   def __init__(self) -> None:
@@ -93,6 +94,8 @@ class TorchAdapter:
   @property
   def search_modules(self) -> List[str]:
     """Modules to scan during `scaffold` or `sync` operations."""
+    if self._mode == InitMode.GHOST:
+      return []
     return [
       "torch.nn",
       "torch.linalg",
@@ -200,6 +203,7 @@ class TorchAdapter:
         "fill_",
       ],
       jit_static_args=[],  # Torch imperative doesn't require static args annotations
+      implicit_method_roots=["torch.Tensor"],  # Explicitly declare implicit method roots
     )
 
   @property
@@ -348,7 +352,7 @@ class TorchAdapter:
       "Synchronize": StandardMap(api="torch.cuda.synchronize"),
     }
 
-  # --- Dynamic Syntax Generators ---
+  # --- Syntax Generators ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """

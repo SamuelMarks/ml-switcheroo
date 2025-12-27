@@ -234,7 +234,8 @@
       "api": "numpy.tan"
     },
     "Tanh": {
-      "api": "numpy.tanh"
+      "api": "numpy.tanh",
+      "args": {}
     },
     "Tile": {
       "api": "numpy.tile"
@@ -768,8 +769,7 @@
       "api": "numpy.tan"
     },
     "tanh": {
-      "api": "numpy.tanh",
-      "args": {}
+      "api": "numpy.tanh"
     },
     "tensordot": {
       "api": "numpy.tensordot"

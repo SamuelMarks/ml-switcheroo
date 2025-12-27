@@ -11,13 +11,14 @@ Verifies:
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.merging import merge_overlay_data
 from ml_switcheroo.enums import SemanticTier
 
 # Fix: Import specific adapter for Neural traits
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
 
-# We use a SemanticsManager pointing to mocks to simulate the fix
+# We reuse a SemanticsManager pointing to mocks to simulate the fix
 # without relying on the file system state purely.
 class FixedSemantics(SemanticsManager):
   def __init__(self):
@@ -32,7 +33,20 @@ class FixedSemantics(SemanticsManager):
     adapter.apply_wiring(snapshot)
 
     # 2. Inject result into manager data structures
-    self._merge_overlay(snapshot, "jax_vlatest_map.json")
+    # Fix: Replacement for removed _merge_overlay method
+    # Ensure import_data exists if SemanticsManager doesn't create it anymore
+    if not hasattr(self, "import_data"):
+      self.import_data = {}
+
+    merge_overlay_data(
+      data=self.data,
+      key_origins=self._key_origins,
+      import_data=self.import_data,
+      framework_configs=self.framework_configs,
+      test_templates=self.test_templates,
+      content=snapshot,
+      filename="jax_vlatest_map.json",
+    )
 
     # 3. Add base definitions for Module (Neural) and Abs (Math)
     self.data["Abs"] = {

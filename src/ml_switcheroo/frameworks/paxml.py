@@ -117,6 +117,8 @@ class PaxmlAdapter(JAXStackMixin):
 
   @property
   def search_modules(self) -> List[str]:
+    if self._mode == InitMode.GHOST:
+      return []
     return [
       "praxis.layers",
       "praxis.base_layer",

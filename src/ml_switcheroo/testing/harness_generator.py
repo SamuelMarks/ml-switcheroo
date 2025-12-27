@@ -19,6 +19,12 @@ from ml_switcheroo.testing.fuzzer import InputFuzzer
 from ml_switcheroo.utils.code_extractor import CodeExtractor
 from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, get_adapter
 
+# Imports needed for bundling the fuzzer logic
+import ml_switcheroo.testing.fuzzer.generators
+import ml_switcheroo.testing.fuzzer.parser
+import ml_switcheroo.testing.fuzzer.heuristics
+import ml_switcheroo.testing.fuzzer.utils
+
 
 class HarnessGenerator:
   """
@@ -48,8 +54,8 @@ class HarnessGenerator:
         target_fw: Key of target framework.
         semantics: Optional dictionary of semantic definitions (for type hints).
     """
-    # 1. Extract Fuzzer Logic
-    fuzzer_code = self.extractor.extract_class(InputFuzzer)
+    # 1. Extract Fuzzer Logic & Dependencies
+    fuzzer_code = self._bundle_fuzzer_dependencies()
 
     # 2. Serialize Hints
     hints_map = {}
@@ -80,7 +86,11 @@ class HarnessGenerator:
     # 5. Build Dynamic Init Logic (Decoupling Step)
     imports_block, init_helpers_block, injection_logic_block = self._build_dynamic_init(target_fw)
 
-    # 6. Populate Template
+    # 6. Build Dynamic to_numpy() Logic (Result Normalization)
+    # We only need normalization logic for the source and target frameworks involved.
+    to_numpy_block = self._build_result_normalization(source_fw, target_fw)
+
+    # 7. Populate Template
     script_content = HARNESS_TEMPLATE.format(
       source_path=source_file.resolve().as_posix(),
       target_path=target_file.resolve().as_posix(),
@@ -88,23 +98,53 @@ class HarnessGenerator:
       target_fw=target_fw,
       hints_json=hints_json,
       fuzzer_implementation=fuzzer_block,
-      # New Injection Points
       imports=imports_block,
       init_helpers=init_helpers_block,
       param_injection_logic=injection_logic_block,
+      to_numpy_logic=to_numpy_block,
     )
 
-    # 7. Write to Disk
+    # 8. Write to Disk
     output_harness.parent.mkdir(parents=True, exist_ok=True)
     with open(output_harness, "wt", encoding="utf-8") as f:
       f.write(script_content)
 
+  def _bundle_fuzzer_dependencies(self) -> str:
+    """
+    Extracts all helper functions required by InputFuzzer to allow it to run
+    standalone without importing ml_switcheroo modules.
+    """
+    deps = []
+
+    # Helper to extract all functions from a module
+    def extract_module_functions(module):
+      funcs = inspect.getmembers(module, inspect.isfunction)
+      for name, func in funcs:
+        # Only extract functions actually defined in this module
+        if func.__module__ == module.__name__:
+          try:
+            source = inspect.getsource(func)
+            deps.append(textwrap.dedent(source))
+          except OSError:
+            pass
+
+    # Extract Utils first (deps)
+    extract_module_functions(ml_switcheroo.testing.fuzzer.utils)
+    # Extract Generators
+    extract_module_functions(ml_switcheroo.testing.fuzzer.generators)
+    # Extract Heuristics
+    extract_module_functions(ml_switcheroo.testing.fuzzer.heuristics)
+    # Extract Parser
+    extract_module_functions(ml_switcheroo.testing.fuzzer.parser)
+
+    # Extract Class
+    fuzzer_class = self.extractor.extract_class(InputFuzzer)
+
+    return "\n\n".join(deps + [fuzzer_class])
+
   def _build_dynamic_init(self, target_fw: str) -> tuple[str, str, str]:
     """
     Queries the target adapter to construct framework-specific initialization logic.
-
-    Returns:
-        (imports_str, helper_functions_str, injection_logic_str)
     """
     adapter = get_adapter(target_fw)
 
@@ -147,6 +187,61 @@ class HarnessGenerator:
       final_logic += "\n                    " + line
 
     return imports_str, init_code, final_logic
+
+  def _build_result_normalization(self, source_fw: str, target_fw: str) -> str:
+    """
+    Constructs the `to_numpy` logic by aggregating snippets from adapters.
+
+    Args:
+        source_fw: The source framework key.
+        target_fw: The target framework key.
+
+    Returns:
+        A string body of code to be injected into `to_numpy`.
+    """
+    blocks = []
+
+    # Legacy Fallbacks (ensure we don't break existing FWs before they implement new protocol)
+    legacy_defaults = {
+      "torch": "if hasattr(obj, 'detach'): return obj.detach().cpu().numpy()",
+      "jax": "if hasattr(obj, '__array__'): return np.array(obj)",
+      "flax": "if hasattr(obj, '__array__'): return np.array(obj)",
+      "flax_nnx": "if hasattr(obj, '__array__'): return np.array(obj)",
+      "tensorflow": "if hasattr(obj, 'numpy'): return obj.numpy()",
+      "keras": "if hasattr(obj, 'numpy'): return obj.numpy()",
+      "mlx": "if hasattr(obj, 'tolist'): return np.array(obj.tolist())",
+      # MLX arrays have tolist() but not always __array__ depending on version
+    }
+
+    # We collect configs for both Source and Target to ensure full coverage
+    # (e.g. if we verify Torch -> JAX, we need to convert both Torch Output and JAX output)
+    unique_fws = set([source_fw, target_fw])
+
+    # Expand flavours
+    if "flax_nnx" in unique_fws:
+      unique_fws.add("jax")
+
+    for fw in unique_fws:
+      adapter = get_adapter(fw)
+      code = None
+
+      # 1. Try new protocol method
+      if adapter and hasattr(adapter, "get_to_numpy_code"):
+        try:
+          code = adapter.get_to_numpy_code()
+        except Exception:
+          pass
+
+      # 2. Fallback to legacy map
+      if not code and fw in legacy_defaults:
+        code = legacy_defaults[fw]
+
+      if code:
+        # Indent consistency for injection
+        indented = textwrap.indent(code, "    ")
+        blocks.append(f"# Framework: {fw}\n{indented}")
+
+    return "\n    ".join(blocks)
 
   def _generate_adapter_shim(self) -> str:
     """

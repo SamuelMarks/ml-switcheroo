@@ -48,10 +48,11 @@ def isolated_manager(mock_specs):
   sem = mock_specs / "semantics"
   snap = mock_specs / "snapshots"
 
-  with patch("ml_switcheroo.semantics.manager.resolve_semantics_dir", return_value=sem):
-    with patch("ml_switcheroo.semantics.manager.resolve_snapshots_dir", return_value=snap):
+  # FIX: Patch file_loader explicitly because resolve functions are imported there
+  with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem):
+    with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap):
       # Prevent default registry loading from polluting test
-      with patch("ml_switcheroo.semantics.manager.available_frameworks", return_value=[]):
+      with patch("ml_switcheroo.semantics.registry_loader.available_frameworks", return_value=[]):
         return SemanticsManager()
 
 

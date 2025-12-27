@@ -9,10 +9,9 @@ It implements the **Hub-and-Spoke** write strategy:
 1.  **Hub (Specs)**: Writes Abstract Definitions (`std_args`, `description`)
     to the target spec file in `semantics/`.
 2.  **Spokes (Snapshots)**: Writes Implementation Details (`api`, `args`)
-    to `snapshots/{framework}_vlatest_map.json`.
+    to `snapshots/{framework}_v{version}_map.json`.
 
 Policy:
-
 - **Do Not Harm**: Existing keys in Specs or Snapshots (implying manual curation)
   are skipped to prevent overwriting high-quality manual edits.
 - **Additive**: New discoveries are added.
@@ -20,6 +19,7 @@ Policy:
 """
 
 import json
+import importlib.metadata
 from pathlib import Path
 from typing import Dict, List, Any, DefaultDict
 from collections import defaultdict
@@ -90,7 +90,9 @@ class SemanticPersister:
 
     # 4. Persist Spokes (Snapshot Files)
     for fw_name, new_mappings in snapshot_updates.items():
-      snap_path = snapshots_dir / f"{fw_name}_vlatest_map.json"
+      # Determine version string dynamically for filename
+      version = self._get_version(fw_name)
+      snap_path = snapshots_dir / f"{fw_name}_v{version}_map.json"
 
       # Load existing snapshot to check collisions
       existing_snap = self._load_json(snap_path)
@@ -124,6 +126,15 @@ class SemanticPersister:
       )
     else:
       log_info("No new non-conflicting standards found to persist.")
+
+  def _get_version(self, fw_name: str) -> str:
+    """Helper to get package version or fallback to 'unknown'."""
+    try:
+      # Handle special package names
+      pkg = "flax" if fw_name == "flax_nnx" else fw_name
+      return importlib.metadata.version(pkg)
+    except Exception:
+      return "unknown"
 
   def _load_json(self, path: Path) -> Dict[str, Any]:
     """Safely loads JSON from disk, returning empty dict if missing or corrupt."""

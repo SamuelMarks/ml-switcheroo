@@ -1,0 +1,251 @@
+"""
+HTML Rendering logic for the WASM demo.
+
+This module constructs the interactive HTML template embedded in the Sphinx
+documentation. It dynamically populates dropdowns and configuration based
+on the scanned registry data.
+"""
+
+import os
+from pathlib import Path
+from typing import List
+
+from ml_switcheroo.config import get_framework_priority_order
+from ml_switcheroo.frameworks import get_adapter
+from ml_switcheroo.sphinx_ext.types import HierarchyMap
+
+
+def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_json: str) -> str:
+  """
+  Constructs the full HTML block for the switcheroo demo.
+
+  Locates the most recent wheel file in the dist/ directory to serve to the
+  browser-based Pyodide environment.
+
+  Args:
+      hierarchy: The framework parent-child relationship map.
+      examples_json: Serialized examples data.
+      tier_metadata_json: Serialized tier capabilities data.
+
+  Returns:
+      str: The complete HTML/JS block.
+  """
+  # 1. Locate Wheel
+  # We resolve relative to this file inside 'src/ml_switcheroo/sphinx_ext'
+  root_dir = Path(__file__).parents[3]
+  dist_dir = root_dir / "dist"
+  wheel_name = "ml_switcheroo-latest-py3-none-any.whl"
+
+  if dist_dir.exists():
+    wheels = list(dist_dir.glob("*.whl"))
+    if wheels:
+      latest = sorted(wheels, key=os.path.getmtime)[-1]
+      wheel_name = latest.name
+
+  # 2. Determine Defaults (Explicit Preferences)
+  # We prefer Torch -> JAX as the default demo flow if available.
+  priority_order = get_framework_priority_order()
+  available_roots = set(hierarchy.keys())
+
+  # Logic: Prefer 'torch', fallback to priority 0
+  if "torch" in available_roots:
+    def_source = "torch"
+  else:
+    def_source = priority_order[0] if priority_order else "source_placeholder"
+
+  # Logic: Prefer 'jax', fallback to priority 1 (or 0 if unique)
+  if "jax" in available_roots and def_source != "jax":
+    def_target = "jax"
+  else:
+    # Pick first available non-source framework
+    candidates = [fw for fw in priority_order if fw != def_source]
+    def_target = candidates[0] if candidates else def_source
+
+  # 3. Generate HTML Blocks with Defaults selection
+  primary_opts = _render_primary_options(hierarchy)
+
+  # We explicitly inject 'selected' attribute into the options HTML string
+  opts_src = primary_opts.replace(f'value="{def_source}"', f'value="{def_source}" selected')
+  opts_tgt = primary_opts.replace(f'value="{def_target}"', f'value="{def_target}" selected')
+
+  # Flavour Dropdowns
+  src_flavours_html = _render_flavour_dropdown("src", hierarchy, def_source)
+  tgt_flavours_html = _render_flavour_dropdown("tgt", hierarchy, def_target)
+
+  return f""" 
+        <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
+            <script>
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
+                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json}; 
+            </script>
+
+            <div class="demo-header">
+                <div>
+                    <h3 style="margin:0">Live Transpiler Demo</h3>
+                    <small style="color:#666">Client-side WebAssembly Engine</small>
+                </div>
+                <span id="engine-status" class="status-badge">Offline</span>
+            </div>
+
+            <!-- Splash Screen -->
+            <div id="demo-splash" class="splash-screen">
+                <p>Initialize the engine to translate code between frameworks locally.</p>
+                <button id="btn-load-engine" class="md-btn md-btn-primary">
+                    ⚡ Initialize Engine
+                </button>
+            </div>
+
+            <div id="demo-interface" style="display:none;">
+                <!-- Toolbar -->
+                <div class="translate-toolbar">
+                    <div class="select-wrapper">
+                        <select id="select-src" class="material-select">{opts_src}</select>
+                        <div id="src-flavour-region" style="background:transparent; margin-left:5px;">
+                            {src_flavours_html} 
+                        </div>
+                    </div>
+                    <button id="btn-swap" class="swap-icon-btn" title="Swap Languages">⇄</button>
+                    <div class="select-wrapper">
+                        <select id="select-tgt" class="material-select">{opts_tgt}</select>
+                         <div id="tgt-flavour-region" style="background:transparent; margin-left:5px;">
+                            {tgt_flavours_html} 
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Examples -->
+                <div class="example-toolbar">
+                    <span class="label">Load Example:</span>
+                    <select id="select-example" class="material-select-sm">
+                        <option value="" disabled selected>-- Select a Pattern --</option>
+                    </select>
+                </div>
+
+                <!-- Editors -->
+                <div class="editor-grid">
+                    <div class="editor-group source-group">
+                        <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Source code...">import torch
+import torch.nn as nn
+
+class Model(nn.Module): 
+    def forward(self, x): 
+        return torch.abs(x)</textarea>
+                    </div>
+                    <div class="editor-group target-group">
+                        <textarea id="code-target" readonly class="material-input output-bg" placeholder="Translation..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="controls-bar">
+                    <button type="button" id="btn-retro" class="icon-btn" title="Matrix Mode">🕶️</button>
+
+                    <label class="md-switch" title="Strict Mode: Fail on unknown APIs.">
+                        <input type="checkbox" id="chk-strict-mode">
+                        <span class="md-switch-track"><span class="md-switch-thumb"></span></span>
+                        <span class="md-switch-text">Strict Mode</span>
+                    </label>
+
+                    <button id="btn-convert" class="md-btn md-btn-accent" disabled>Run Translation</button>
+                </div>
+
+                <!-- Three Tabs: Console, Mermaid, Timeline -->
+                <div class="output-tabs">
+                    <input type="radio" name="wm-tabs" id="tab-console">
+                    <label for="tab-console" class="tab-label"><span class="tab-icon">💻</span> Console</label>
+
+                    <input type="radio" name="wm-tabs" id="tab-mermaid">
+                    <label for="tab-mermaid" class="tab-label"><span class="tab-icon">🌳</span> AST visualisation</label>
+
+                    <input type="radio" name="wm-tabs" id="tab-trace" checked>
+                    <label for="tab-trace" class="tab-label"><span class="tab-icon">⏱️</span> Timeline</label>
+
+                    <div class="tab-panel" id="panel-console">
+                        <pre id="console-output">Waiting for engine...</pre>
+                    </div>
+
+                    <div class="tab-panel" id="panel-mermaid">
+                        <div class="ast-toolbar">
+                            <button id="btn-ast-prev" class="md-btn md-btn-primary" style="padding:4px 10px; font-size:12px;">Before Pivot</button>
+                            <button id="btn-ast-next" class="md-btn md-btn-primary" style="padding:4px 10px; font-size:12px; opacity:0.6;">After Pivot</button>
+                        </div>
+                        <div id="ast-mermaid-target" class="mermaid" style="text-align:center; overflow-x:auto;">
+                            <em style="color:#999">Run a translation to generate the AST graph.</em>
+                        </div>
+                    </div>
+
+                    <div class="tab-panel" id="panel-trace">
+                        <div id="trace-visualizer" class="trace-container"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        """
+
+
+def _render_primary_options(hierarchy: HierarchyMap) -> str:
+  """
+  Renders the top-level <option> elements for root frameworks.
+
+  Args:
+      hierarchy: Map of parent keys to children, identifying roots.
+
+  Returns:
+      str: HTML string of option elements.
+  """
+  html = []
+  for root in hierarchy.keys():
+    adapter = get_adapter(root)
+    label = getattr(adapter, "display_name", root.capitalize())
+    html.append(f'<option value="{root}">{label}</option>')
+  return "\n".join(html)
+
+
+def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: str) -> str:
+  """
+  Renders the secondary dropdown for Framework Flavours.
+
+  The JS logic in 'switcheroo_demo.js' toggles visibility based on whether the
+  actively selected framework matches a hardcoded list (currently 'jax').
+
+  To support the requested default state (JAX + Flax NNX), we pre-populate this
+  dropdown with children of the currently active default root.
+
+  Args:
+      side: "src" or "tgt" (Source vs Target ID prefix).
+      hierarchy: The framework hierarchy map.
+      active_root: The framework key currently selected as default for this side.
+
+  Returns:
+      str: HTML string for the select element container.
+  """
+  children = hierarchy.get(active_root, [])
+
+  # CSS styling to hide dropdown if no children exist for default selection
+  # JS will toggle this later, but we set initial state to avoid flicker
+  style = "display:inline-block;" if children else "display:none;"
+  style += " background:#f0f4c3;"
+
+  opts = []
+  if children:
+    # Pick first child as default selected
+    # (e.g., flax_nnx comes before paxml alphabetically usually, or use priority sort in registry.py)
+    for i, child in enumerate(children):
+      sel = "selected" if i == 0 else ""
+      opts.append(f'<option value="{child["key"]}" {sel}>{child["label"]}</option>')
+  else:
+    # If no children, populate JAX defaults as fallback to ensure the element exists
+    # for JS to populate later if user switches to JAX.
+    jax_kids = hierarchy.get("jax", [])
+    if jax_kids:
+      for i, child in enumerate(jax_kids):
+        opts.append(f'<option value="{child["key"]}">{child["label"]}</option>')
+    else:
+      opts.append('<option value="" disabled selected>No Flavours</option>')
+
+  return f""" 
+        <select id="{side}-flavour" class="material-select-sm" style="{style}">
+            {"".join(opts)} 
+        </select>
+        """

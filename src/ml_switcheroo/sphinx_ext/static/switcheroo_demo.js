@@ -172,8 +172,8 @@ function initExampleSelector() {
     }
     sel.onchange = (e) => loadExample(e.target.value);
 
-    // Set default example to Flax NNX if available, otherwise first alphabetical
-    const preferred = "flax_nnx_tier2_neural";
+    // FIX: Set default example to Torch CNN ("PyTorch: Cnn") per user preference
+    const preferred = "torch_tier2_neural_cnn";
     if (Object.prototype.hasOwnProperty.call(EXAMPLES, preferred)) {
         sel.value = preferred;
         loadExample(preferred);
@@ -199,12 +199,25 @@ function loadExample(key) {
     if (!ex) return;
     srcEditor.setValue(ex.code);
     tgtEditor.setValue("");
+
+    // Set Source
     setSelectValue(document.getElementById("select-src"), ex.srcFw);
+
+    // Set Target
     filterTargetOptions(ex.requiredTier);
     setSelectValue(document.getElementById("select-tgt"), ex.tgtFw);
-    // Trigger flavour logic
+
+    // Trigger display logic for flavor dropdowns (hidden/visible)
     document.getElementById("select-src").dispatchEvent(new Event('change'));
     document.getElementById("select-tgt").dispatchEvent(new Event('change'));
+
+    // FIX: Set Flavours explicitly if defined in example metadata
+    if (ex.srcFlavour) {
+        setSelectValue(document.getElementById("src-flavour"), ex.srcFlavour);
+    }
+    if (ex.tgtFlavour) {
+        setSelectValue(document.getElementById("tgt-flavour"), ex.tgtFlavour);
+    }
 }
 
 function filterTargetOptions(tier) {
@@ -214,6 +227,7 @@ function filterTargetOptions(tier) {
 }
 
 function setSelectValue(el, val) {
+    if (!el) return;
     for (let i=0; i<el.options.length; i++) {
         if (el.options[i].value === val) {
             el.selectedIndex = i;
@@ -225,9 +239,21 @@ function setSelectValue(el, val) {
 function swapContext() {
     const s = document.getElementById("select-src");
     const t = document.getElementById("select-tgt");
-    [s.value, t.value] = [t.value, s.value];
+
+    const sVal = s.value;
+    const tVal = t.value;
+
+    // Swap Roots
+    [s.value, t.value] = [tVal, sVal];
+
+    // Re-trigger GUI update
     s.dispatchEvent(new Event("change"));
     t.dispatchEvent(new Event("change"));
+
+    // Swap Flavours if applicable (JAX side)
+    // If Source became JAX, check if Target was using a JAX flavour and move it?
+    // Simple logic: Just swap text
+
     const tmp = srcEditor.getValue();
     srcEditor.setValue(tgtEditor.getValue());
     tgtEditor.setValue(tmp);
