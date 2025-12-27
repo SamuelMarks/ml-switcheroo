@@ -1,20 +1,18 @@
 """
 Function Invocation Rewriter.
 
-This module provides the ``InvocationMixin``, the core component responsible for
-rewriting `Call` nodes. It orchestrates a complex pipeline of transformations:
+This module provides the :class:`InvocationMixin`, a component of the
+:class:`PivotRewriter` responsible for transforming function call nodes within
+the Abstract Syntax Tree (AST).
 
-1.  **Functional Unwrapping**: Removing `apply` or `call_fn` wrappers.
-2.  **Plugin Dispatch**: Delegating complex logic to registered hooks.
-3.  **Lifecycle Management**: Stripping framework-specific methods like `.to()` or `.cuda()`.
-4.  **State Management**: Rewriting calls to stateful objects/layers.
-5.  **Standard API Pivoting**:
-    -   Resolving abstract operations.
-    -   Evaluating conditional dispatch rules.
-    -   Normalizing arguments via the Semantic Specification.
-    -   Applying Tensor Layout Permutations.
-6.  **Output Transformation**: Applying casting or indexing adapters to the result.
-7.  **State Threading**: Injecting state arguments (like `rngs`) in constructors.
+It handles:
+1.  **Functional Unwrapping**: Converting legacy `apply` patterns to object calls.
+2.  **Plugin Dispatch**: Delegating complex logic to registered hook functions.
+3.  **Lifecycle Management**: Stripping or warning about framework-specific methods.
+4.  **Stateful Calls**: Rewriting object calls that manage internal state.
+5.  **API Mapping**: Renaming functions based on semantic definitions.
+6.  **Argument Normalization**: Reordering and renaming arguments.
+7.  **Syntax Transformation**: Converting calls to infix operators, lambdas, or macros.
 """
 
 from typing import Union
@@ -49,33 +47,49 @@ from ml_switcheroo.enums import SemanticTier
 
 class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
   """
-  Mixin for transforming Call nodes (`func(...)`).
+  Mixin for transforming :class:`libcst.Call` nodes.
 
-  This class contains the primary logic for mapping function calls between frameworks.
-  It relies on `NormalizationMixin` for argument mapping and `TraitsCachingMixin` for
-  accessing framework configurations.
+  This class centralizes the logic for rewriting function invocations (`func(...)`).
+  It integrates normalization, trait lookup, and various transformation strategies
+  defined in the Semantic Knowledge Base.
   """
 
   def leave_Call(
     self, original: cst.Call, updated: cst.Call
   ) -> Union[cst.Call, cst.BinaryOperation, cst.UnaryOperation, cst.CSTNode]:
     """
-    Rewrites function calls with detailed Trace Logging.
+    Visits and rewrites a function call node.
 
-    The transformation pipeline proceeds in stages:
-    1.  **Structure**: Unwrap functional `apply` calls, handle plugins, handle lifecycle methods.
-    2.  **API Resolution**: Lookup the function name in the Semantic Knowledge Base.
-    3.  **Argument Rewrite**: Normalize arguments, check dispatch rules, applying pivots.
-    4.  **Transformation**: Rewrites call as Infix, Inline Lambda, Macro, or Standard Call.
-    5.  **Output**: Applies indexing, output adapters, or casting.
-    6.  **Context**: Helper logic for specific contexts like `__init__` (state threading).
+    The transformation pipeline proceeds as follows:
+
+    1.  **Functional Unwrapping**: Checks if the call matches a functional execution
+        pattern (e.g., ``layer.apply(...)``) and unwraps it if required by the
+        source framework traits.
+    2.  **Plugin & Heuristics**: Checks if specific plugins (e.g., in-place unrolling)
+        need to intervene before standard semantic lookup.
+    3.  **Lifecycle Handling**: Strips or warns about framework-specific lifecycle
+        methods (e.g., ``.cuda()``, ``.eval()``) based on source traits.
+    4.  **Stateful Object Calls**: Rewrites calls to stateful objects if required
+        by the target framework configuration.
+    5.  **Semantic Lookup**: Resolves the function name to an Abstract Operation ID.
+        If no mapping is found, attempts implicit method resolution or returns early.
+    6.  **Dispatch Rules**: Evaluates conditional logic to dynamically switch the
+        target API based on argument values.
+    7.  **Transformation Strategy**: Applies specific rewriting logic:
+        *   **Infix**: Converts to operator syntax (e.g., ``add(a, b)`` -> ``a + b``).
+        *   **Inline Lambda**: Wraps arguments in a lambda expression.
+        *   **Plugin**: Delegates to a named plugin hook.
+        *   **Macro**: Expands a template string.
+        *   **Standard**: Renames the function and normalizes arguments.
+    8.  **Output Processing**: Applies output adapters (indexing, casting) if defined.
+    9.  **Init Logic**: Handles state threading for constructor calls if active.
 
     Args:
-        original: The original CST node (before children were visited).
-        updated: The CST node with transformed children (arguments processed).
+        original: The original CST node before child transformations.
+        updated: The CST node after children have been visited/transformed.
 
     Returns:
-        The transformed CST node (Call, Expr, or other).
+        The transformed CST node (Call, BinaryOperation, or other expression).
     """
     result_node = updated
     func_name = self._get_qualified_name(original.func)
@@ -87,7 +101,6 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
     if is_functional_apply(original, unwrap_method):
       if isinstance(updated.func, cst.Attribute):
         receiver = updated.func.value
-        # Functional pattern: apply(variables, x) -> x, so we strip variables (arg 0)
         new_args = updated.args[1:] if len(updated.args) > 0 else []
         result_node = updated.with_changes(func=receiver, args=new_args)
         log_diff("Functional Unwrap", original, result_node)
@@ -107,7 +120,6 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
         new_node = hook(updated, self.ctx)
         if new_node != updated:
           log_diff("In-place Unroll (Heuristic)", updated, new_node)
-          # If helper returned a BinaryOperation (e.g. x + y), we cannot process it as Call further
           if not isinstance(new_node, cst.Call):
             return new_node
           updated = new_node
@@ -115,7 +127,7 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
             updated.operator if isinstance(updated, cst.BinaryOperation) else updated.func
           )
 
-    # 0c. Lifecycle Method Handling (Data-Driven via Source Framework Traits)
+    # 0c. Lifecycle Method Handling
     strip_set, warn_set = self._get_source_lifecycle_lists()
 
     if not plugin_claim and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
@@ -147,12 +159,8 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
     # 2. Standard API Rewrite Setup
     mapping = self._get_mapping(func_name) if func_name else None
 
-    # --- FALLBACK LOGIC: Implicit Methods (Decoupled) ---
-    # If mapping not found, check if this is a method call on a generic object
-    # that matches an implicit root defined by the source framework traits.
-    # e.g. x.float() -> check implicit method root "torch.Tensor" -> look up "torch.Tensor.float"
+    # --- FALLBACK LOGIC: Implicit Methods ---
     if not mapping and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
-      # Ensure it's not a self-call or known module call
       receiver = original.func.value
       is_self = isinstance(receiver, cst.Name) and receiver.value == "self"
 
@@ -167,7 +175,6 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
           if candidate_mapping:
             mapping = candidate_mapping
             func_name = candidate_api
-            # Update context op ID for plugins so they can read metadata
             definition = self.semantics.get_definition(candidate_api)
             if definition:
               self.ctx.current_op_id = definition[0]
@@ -175,7 +182,6 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
 
     # 3. Final Check
     if not mapping:
-      # Fix super() strict error
       if is_super_call(original):
         return updated
 
@@ -199,7 +205,6 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
     abstract_id, details = lookup
     self.ctx.current_op_id = abstract_id
 
-    # Dynamic Imports
     self._handle_variant_imports(mapping)
 
     # Dispatch Rules
@@ -209,7 +214,6 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
         mapping = mapping.copy()
         mapping["api"] = dispatched_api
 
-    # Execute Transformation based on Type
     trans_type = mapping.get("transformation_type")
 
     if trans_type == "infix":
@@ -255,9 +259,17 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
 
     else:
       # Standard Rewrite
+      target_api = mapping.get("api")
+
+      # FIX: Handle missing API (unsupported ops) gracefully
+      if not target_api:
+        msg = mapping.get("missing_message", f"No mapping available for '{func_name}' -> '{self.target_fw}'")
+        self._report_failure(msg)
+        return updated
+
       try:
         norm_args = self._normalize_arguments(original, updated, details, mapping)
-        new_func = self._create_name_node(mapping["api"])
+        new_func = self._create_name_node(target_api)
         result_node = updated.with_changes(func=new_func, args=norm_args)
 
         # Layout Permutation
@@ -284,7 +296,6 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
 
           result_node = result_node.with_changes(args=modified_args)
 
-          # Return Permutation
           if "return" in layout_map:
             rule = layout_map["return"]
             if "->" in rule:

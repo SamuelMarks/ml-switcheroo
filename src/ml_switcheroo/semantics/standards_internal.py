@@ -409,4 +409,33 @@ EXTRAS_OPS = {
 }
 
 # Merged Defaults for Backwards Compatibility
-INTERNAL_OPS = {**MATH_OPS, **NEURAL_OPS, **EXTRAS_OPS}
+INTERNAL_OPS = {
+  **MATH_OPS,
+  **NEURAL_OPS,
+  **EXTRAS_OPS,
+  "SiLU": {
+    "description": "Sigmoid Linear Unit activation function.",
+    "std_args": [
+      {
+        "name": "x",
+        "type": "Tensor",
+      },
+    ],
+    "variants": {},
+  },
+  "ModuleList": {
+    "description": "Holds submodules in a list.",
+    "std_args": [
+      {
+        "name": "modules",
+        "type": "List[Module]",
+      },
+    ],
+    "variants": {},
+  },
+  "TensorType": {
+    "description": "Abstract Type Annotation for Tensors/Arrays.",
+    "std_args": [],
+    "variants": {},
+  },
+}

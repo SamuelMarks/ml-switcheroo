@@ -152,6 +152,8 @@ class NumpyAdapter:
       "CastShort": StandardMap(api="astype", requires_plugin="type_methods"),
       "CastByte": StandardMap(api="astype", requires_plugin="type_methods"),
       "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
+      "SiLU": StandardMap(macro_template="{x} * (1 / (1 + np.exp(-{x})))", required_imports=["import numpy as np"]),
+      "TensorType": StandardMap(api="numpy.ndarray"),
     }
 
   @property

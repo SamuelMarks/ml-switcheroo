@@ -228,6 +228,8 @@ class KerasAdapter:
       "CastByte": StandardMap(api="keras.ops.cast", inject_args={"dtype": "uint8"}),
       "CastBool": StandardMap(api="keras.ops.cast", inject_args={"dtype": "bool"}),
       "CastChar": StandardMap(api="keras.ops.cast", inject_args={"dtype": "int8"}),
+      "SiLU": StandardMap(api="keras.activations.silu"),
+      "ModuleList": StandardMap(),
     }
 
   @property

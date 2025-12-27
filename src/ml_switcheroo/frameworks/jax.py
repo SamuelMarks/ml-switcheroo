@@ -258,6 +258,9 @@ class JaxCoreAdapter(JAXStackMixin):
       "vmap": StandardMap(api="jax.vmap", args={"func": "fun"}),
       "grad": StandardMap(api="jax.grad", args={"func": "fun"}),
       "jit": StandardMap(api="jax.jit", args={"func": "fun"}),
+      "SiLU": StandardMap(api="jax.nn.silu"),
+      "ModuleList": StandardMap(),
+      "TensorType": StandardMap(api="jax.Array"),
     }
 
   # --- Discovery ---

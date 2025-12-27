@@ -218,6 +218,8 @@ class MLXAdapter:
       "CastShort": StandardMap(api="astype", requires_plugin="type_methods"),
       "CastByte": StandardMap(api="astype", requires_plugin="type_methods"),
       "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
+      "SiLU": StandardMap(api="mlx.nn.silu"),
+      "TensorType": StandardMap(api="mlx.core.array"),
     }
 
   @property

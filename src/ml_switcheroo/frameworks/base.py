@@ -62,7 +62,10 @@ class StandardMap(BaseModel):
   Used for declaring static definitions in adapters.
   """
 
-  api: str = Field(description="Fully qualified API path in the target framework.")
+  api: Optional[str] = Field(
+    default=None,
+    description="Fully qualified API path in the target framework. If None, implies missing/unsupported functionality.",
+  )
   args: Optional[Dict[str, str]] = Field(
     default=None,
     description="Map of {StandardArg: FrameworkArg}. Keys must match the Abstract Standard.",
@@ -75,7 +78,6 @@ class StandardMap(BaseModel):
     default=None,
     description="Name of the plugin hook required to handle this operation.",
   )
-  # --- Feature 08 Updates: Complex Rewrites ---
   output_adapter: Optional[str] = Field(
     default=None,
     description="Lambda string to wrap result (e.g. 'lambda x: x[0]').",
@@ -88,30 +90,29 @@ class StandardMap(BaseModel):
     default=None,
     description="Infix operator symbol if transformation_type='infix'.",
   )
-  # --- Feature 09: Argument Packing ---
   pack_to_tuple: Optional[str] = Field(
     default=None,
     description="If set (e.g. 'axes'), collects variadic positional args into a tuple kwargs.",
   )
-  # --- Feature: Macros ---
   macro_template: Optional[str] = Field(
     default=None,
     description="Expression template for composite ops (e.g. '{x} * functional.sigmoid({x})').",
   )
-  # --- Feature: Output Dtype Casting (Limitation 12) ---
   output_cast: Optional[str] = Field(
     default=None,
     description="Target Dtype string (e.g. 'jnp.int64') to cast the output to via .astype().",
   )
-  # --- Feature: Value Mapping ---
   arg_values: Optional[Dict[str, Dict[str, str]]] = Field(
     default=None,
     description="Map of {StandardArg: {SourceValue: TargetValue}} for enum value translation.",
   )
-  # --- Feature: Dynamic Imports ---
   required_imports: List[Union[str, Any]] = Field(
     default_factory=list,
     description="List of imports required by this variant.",
+  )
+  missing_message: Optional[str] = Field(
+    default=None,
+    description="Custom error message to display if this mapping fails or is explicitly unsupported.",
   )
 
 
@@ -141,8 +142,6 @@ class FrameworkAdapter(Protocol):
   def test_config(self) -> Dict[str, str]:
     """Templates for generating physical test files (imports, conversions)."""
     ...
-
-  # --- New Protocol: Harness Decoupling ---
 
   @property
   def harness_imports(self) -> List[str]:
@@ -231,7 +230,6 @@ class FrameworkAdapter(Protocol):
     """
     ...
 
-  # --- Safety ---
   @property
   def unsafe_submodules(self) -> Set[str]:
     """
@@ -239,8 +237,6 @@ class FrameworkAdapter(Protocol):
     Prevents crashes on C-extensions or internals (e.g., '_C', 'distributed').
     """
     ...
-
-  # --- Syntax Generators ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Generates code for device object creation."""
@@ -255,7 +251,7 @@ class FrameworkAdapter(Protocol):
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """
-    Returns syntax for splitting an RNG state (Preamble Injection).
+    Returns syntax for splitting RNG state (Preamble Injection).
     Example: ``rng, key = jax.random.split(rng)``.
     """
     ...
@@ -277,7 +273,6 @@ class FrameworkAdapter(Protocol):
     """Returns examples for each supported tier."""
     ...
 
-  # --- Distributed Semantics ---
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """Returns the framework's static implementation of Middle Layer Operations."""
@@ -314,7 +309,15 @@ class FrameworkAdapter(Protocol):
 
 
 def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
-  """Locates the most recent snapshot for a given framework key."""
+  """
+  Locates the most recent snapshot for a given framework key.
+
+  Args:
+      fw_key: The framework identifier.
+
+  Returns:
+      The loaded JSON dictionary or an empty dict if not found.
+  """
   if not SNAPSHOT_DIR.exists():
     return {}
   candidates = sorted(list(SNAPSHOT_DIR.glob(f"{fw_key}_v*.json")))
@@ -333,7 +336,12 @@ _ADAPTER_REGISTRY: Dict[str, Type[FrameworkAdapter]] = {}
 
 
 def register_framework(name: str):
-  """Decorator to register a framework adapter class."""
+  """
+  Decorator to register a framework adapter class.
+
+  Args:
+      name: The unique key for the framework (e.g., 'torch').
+  """
 
   def wrapper(cls):
     _ADAPTER_REGISTRY[name] = cls
@@ -343,7 +351,15 @@ def register_framework(name: str):
 
 
 def get_adapter(name: str) -> Optional[FrameworkAdapter]:
-  """Factory to retrieve an instantiated adapter."""
+  """
+  Factory to retrieve an instantiated adapter.
+
+  Args:
+      name: The framework key.
+
+  Returns:
+      An instance of the registered adapter, or None if not found.
+  """
   cls = _ADAPTER_REGISTRY.get(name)
   if cls:
     return cls()

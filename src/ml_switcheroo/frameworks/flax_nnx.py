@@ -9,6 +9,8 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 - Wires important plugins and structural traits.
 """
 
+import jax
+
 import logging
 import textwrap
 from typing import List, Tuple, Dict, Any, Optional
@@ -316,6 +318,9 @@ class FlaxNNXAdapter(JAXStackMixin):
       "state_dict": StandardMap(api="torch_state_dict_to_nnx", requires_plugin="torch_state_dict_to_nnx"),
       "load_state_dict": StandardMap(api="torch_load_state_dict_to_nnx", requires_plugin="torch_load_state_dict_to_nnx"),
       "parameters": StandardMap(api="torch_parameters_to_nnx", requires_plugin="torch_parameters_to_nnx"),
+      "SiLU": StandardMap(api="flax.nnx.silu"),
+      "ModuleList": StandardMap(api="flax.nnx.List"),
+      "TensorType": StandardMap(api="jax.Array"),
     }
 
   def convert(self, data: Any) -> Any:

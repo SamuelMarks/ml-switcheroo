@@ -296,6 +296,8 @@ class TensorFlowAdapter:
       "CastShort": StandardMap(api="tf.cast", inject_args={"dtype": "tf.int16"}),
       "CastByte": StandardMap(api="tf.cast", inject_args={"dtype": "tf.uint8"}),
       "CastBool": StandardMap(api="tf.cast", inject_args={"dtype": "tf.bool"}),
+      "SiLU": StandardMap(api="tensorflow.nn.silu"),
+      "TensorType": StandardMap(api="tensorflow.Tensor"),
     }
 
   @property

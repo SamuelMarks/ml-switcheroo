@@ -350,6 +350,9 @@ class TorchAdapter:
       "jit": StandardMap(api="torch.compile"),
       "Compile": StandardMap(api="torch.compile"),
       "Synchronize": StandardMap(api="torch.cuda.synchronize"),
+      "SiLU": StandardMap(api="torch.nn.functional.silu"),
+      "ModuleList": StandardMap(api="torch.nn.ModuleList"),
+      "TensorType": StandardMap(api="torch.Tensor"),
     }
 
   # --- Syntax Generators ---
