@@ -5,9 +5,12 @@ This module provides the :class:`ApiInspector`, a hybrid static-dynamic analysis
 designed to extract API signatures (functions, classes, and attributes) from Python packages.
 
 It employs a two-stage strategy:
-1.  **Static Analysis (Griffe)**: Attempts to parse the source code first.
+1.  **Static Analysis (Griffe)**: Attempts to parse the source code first. This is
+    safer and provides richer information (like docstrings and parameter names) without
+    executing code.
 2.  **Runtime Introspection (Inspect)**: Falls back to importing the module and inspecting
-    live objects.
+    live objects. This is necessary for C-extensions or dynamic imports that static
+    analysis misses.
 
 **Memory Safety**:
 Includes recursion safeguards (visited set tracking) and an optional blacklist
@@ -31,7 +34,8 @@ class ApiInspector:
   A robust inspector for discovering API surfaces of installed libraries.
 
   Attributes:
-      _package_cache (Dict[str, griffe.Object]): Cache of statically parsed Griffe trees.
+      _package_cache (Dict[str, griffe.Object]): Cache of statically parsed Griffe trees
+                                                 to avoid re-parsing large packages.
   """
 
   def __init__(self):
@@ -42,13 +46,16 @@ class ApiInspector:
     """
     Scans a package and returns a flat catalog of its public API.
 
+    Attempts static analysis first, then falls back to runtime inspection.
+
     Args:
-        package_name: The importable name of the package.
+        package_name: The importable name of the package (e.g. 'torch', 'jax').
         unsafe_modules: A set of submodule names to exclude from recursion
                         (e.g., {'_C', 'distributed'}).
 
     Returns:
         Dict mapping 'fully.qualified.name' -> {metadata_dict}.
+        Metadata dict contains 'name', 'type', 'params', etc.
     """
     catalog = {}
     ignore_set = unsafe_modules or set()
@@ -85,6 +92,10 @@ class ApiInspector:
   def _recurse_griffe(self, obj: griffe.Object, catalog: Dict[str, Any]):
     """
     Recursively walks a Griffe object tree to build the catalog.
+
+    Args:
+        obj: The current Griffe object being visited.
+        catalog: The accumulator dictionary.
     """
     for member_name, member in obj.members.items():
       if member_name.startswith("_"):
@@ -202,6 +213,16 @@ class ApiInspector:
           }
 
   def _extract_griffe_sig(self, func: griffe.Object, kind: str) -> Dict[str, Any]:
+    """
+    Extracts signature metadata from a Griffe object.
+
+    Args:
+        func: The Griffe function/class object.
+        kind: "function" or "class".
+
+    Returns:
+        Dict containing signature details.
+    """
     params = []
     has_varargs = False
     try:
@@ -225,7 +246,13 @@ class ApiInspector:
 
   def _extract_attribute_info(self, attr: griffe.Attribute) -> Dict[str, Any]:
     """
-    Serializes an Attribute (Constant/Type).
+    Serializes a Griffe Attribute (Constant/Type).
+
+    Args:
+        attr: The Griffe attribute object.
+
+    Returns:
+        Metadata dict.
     """
     return {
       "name": attr.name,
@@ -236,6 +263,17 @@ class ApiInspector:
     }
 
   def _extract_runtime_sig(self, obj: Any, name: str, kind: str) -> Dict[str, Any]:
+    """
+    Extracts signature metadata from a live runtime object using inspect.
+
+    Args:
+        obj: The live object.
+        name: Object name.
+        kind: "function" or "class".
+
+    Returns:
+        Metadata dict based on inspection.
+    """
     params = []
     has_varargs = False
     try:
@@ -256,6 +294,16 @@ class ApiInspector:
     }
 
   def _get_doc_summary(self, obj: Any) -> str:
+    """
+    Helper to extract the first line of a docstring from either
+    Griffe object or runtime object.
+
+    Args:
+        obj: The object to inspect.
+
+    Returns:
+        The first line of the docstring.
+    """
     doc = ""
     if hasattr(obj, "docstring") and obj.docstring:
       full_doc = obj.docstring.value or ""

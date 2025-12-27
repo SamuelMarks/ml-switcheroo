@@ -1,3 +1,5 @@
+"""CLI handlers for dev module."""
+
 from pathlib import Path
 
 from ml_switcheroo.semantics.manager import SemanticsManager

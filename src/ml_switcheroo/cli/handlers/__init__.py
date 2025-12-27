@@ -1,3 +1,5 @@
+"""CLI handlers module."""
+
 from .convert import handle_convert, _convert_single_file, _print_batch_summary
 from .discovery import (
   handle_scaffold,

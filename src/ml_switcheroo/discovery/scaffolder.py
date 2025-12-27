@@ -1,15 +1,15 @@
 """
 Scaffolding Tool for Knowledge Base Discovery.
 
-This module provides the `Scaffolder` class, which inspects installed
-libraries (Torch, JAX, etc.) and aligns them against the Specification-Guided
-Knowledge Base.
+This module provides the `Scaffolder` class, which automates the population of
+the Semantic Knowledge Base by scanning installed libraries (e.g., Torch, JAX).
+It uses heuristic pattern matching to categorize discovered APIs into semantic
+tiers (Neural vs Math vs Extras) and persists them into the `semantics/` JSON
+specifications and `snapshots/` mapping overlays.
 
 Optimization Update:
 - Implements Indexing for Catalog Lookups to prevent O(N^2) complexity.
 - Uses pre-computed indices keyed by lowercase API names for fast retrieval.
-- Refactor: Uses `adapter.search_modules` to scan specific submodules.
-- Fix: Fetches `unsafe_submodules` from adapter to prevent inspector crashes.
 """
 
 import json
@@ -31,6 +31,10 @@ from ml_switcheroo.frameworks import get_adapter
 class Scaffolder:
   """
   Automated discovery tool that aligns framework APIs.
+
+  This class scans multiple frameworks, identifies common operations based
+  on name similarity (e.g., 'torch.abs' == 'jax.numpy.abs'), and generates
+  the initial JSON mappings required for the transpiler.
   """
 
   def __init__(
@@ -39,6 +43,14 @@ class Scaffolder:
     similarity_threshold: float = 0.8,
     arity_penalty: float = 0.3,
   ):
+    """
+    Initializes the scaffolder.
+
+    Args:
+        semantics: Existing knowledge base to check against (optional).
+        similarity_threshold: Levenshtein distance threshold (0.0 - 1.0) for fuzzy matching.
+        arity_penalty: Score penalty for operations with differing argument counts.
+    """
     self.inspector = ApiInspector()
     self.console = console
     self.semantics = semantics or SemanticsManager()
@@ -58,6 +70,12 @@ class Scaffolder:
     self._catalog_indices: Dict[str, Dict[str, List[Tuple[str, Dict]]]] = {}
 
   def _lazy_load_heuristics(self) -> Dict[str, List[re.Pattern]]:
+    """
+    Loads regex heuristics from all registered framework adapters.
+
+    Returns:
+        A dictionary mapping Sematic Tier names to lists of compiled regex patterns.
+    """
     if self._cached_heuristics is not None:
       return self._cached_heuristics
 
@@ -84,7 +102,13 @@ class Scaffolder:
     return compiled
 
   def _build_catalog_index(self, fw: str, catalog: Dict[str, Any]):
-    """Creates a fast lookup index for a framework catalog."""
+    """
+    Creates a fast lookup index for a framework catalog.
+
+    Args:
+        fw: Framework key.
+        catalog: The raw catalog dictionary from the Inspector.
+    """
     index = defaultdict(list)
     for path, details in catalog.items():
       name = details["name"].lower()
@@ -94,6 +118,15 @@ class Scaffolder:
   def scaffold(self, frameworks: List[str], root_dir: Optional[Path] = None):
     """
     Main entry point. Scans frameworks and builds/updates JSON mappings.
+
+    1. Scans all requested frameworks using `ApiInspector`.
+    2. Aligns APIs against known standards (Specs).
+    3. Uses fuzzy matching to align APIs between frameworks.
+    4. Writes results to disk (semantics/ and snapshots/).
+
+    Args:
+        frameworks: List of framework keys to scan (e.g. `['torch', 'jax']`).
+        root_dir: Optional root directory path. Defaults to package paths.
     """
     if root_dir:
       semantics_path = root_dir / "semantics"
@@ -154,17 +187,38 @@ class Scaffolder:
       # Strategy 1: Spec Validation
       neural_match = self._match_spec_op(name, known_neural_ops)
       if neural_match:
-        self._register_entry("k_neural_net.json", neural_match, primary_fw, api_path, details, catalogs)
+        self._register_entry(
+          "k_neural_net.json",
+          neural_match,
+          primary_fw,
+          api_path,
+          details,
+          catalogs,
+        )
         continue
 
       math_match = self._match_spec_op(name, known_math_ops)
       if math_match:
-        self._register_entry("k_array_api.json", math_match, primary_fw, api_path, details, catalogs)
+        self._register_entry(
+          "k_array_api.json",
+          math_match,
+          primary_fw,
+          api_path,
+          details,
+          catalogs,
+        )
         continue
 
       extras_match = self._match_spec_op(name, known_extras_ops)
       if extras_match:
-        self._register_entry("k_framework_extras.json", extras_match, primary_fw, api_path, details, catalogs)
+        self._register_entry(
+          "k_framework_extras.json",
+          extras_match,
+          primary_fw,
+          api_path,
+          details,
+          catalogs,
+        )
         continue
 
       # Strategy 2: Heuristic Fallback
@@ -173,7 +227,14 @@ class Scaffolder:
         continue
 
       if self._is_structurally_extra(api_path, name):
-        self._register_entry("k_framework_extras.json", name, primary_fw, api_path, details, catalogs)
+        self._register_entry(
+          "k_framework_extras.json",
+          name,
+          primary_fw,
+          api_path,
+          details,
+          catalogs,
+        )
         continue
 
       self._register_entry("k_framework_extras.json", name, primary_fw, api_path, details, catalogs)
@@ -203,11 +264,17 @@ class Scaffolder:
         self._write_json(snapshots_path / f"{fw}_v{ver}_map.json", file_data, merge=True)
 
   def _get_ops_by_tier(self, tier: SemanticTier) -> Set[str]:
+    """
+    Retrieves known operations belonging to a specific semantic tier.
+    """
     if not hasattr(self.semantics, "_key_origins"):
       return set()
     return {k for k, v in self.semantics._key_origins.items() if v == tier.value}
 
   def _match_spec_op(self, api_name: str, spec_ops: Set[str]) -> Optional[str]:
+    """
+    Checks if an API name exists in a set of known spec operations using fuzzy matching.
+    """
     if api_name in spec_ops:
       return api_name
     lower_map = {k.lower(): k for k in spec_ops}
@@ -220,6 +287,9 @@ class Scaffolder:
     return None
 
   def _is_structurally_neural(self, api_path: str, kind: str) -> bool:
+    """
+    Determines if an API looks like a Neural Network layer/component via regex heuristics.
+    """
     heuristics = self._lazy_load_heuristics()
     patterns = heuristics.get("neural", [])
     for pat in patterns:
@@ -230,6 +300,9 @@ class Scaffolder:
     return False
 
   def _is_structurally_extra(self, api_path: str, name: str) -> bool:
+    """
+    Determines if an API looks like a Utility/Extra via regex heuristics.
+    """
     heuristics = self._lazy_load_heuristics()
     patterns = heuristics.get("extras", [])
     for pat in patterns:
@@ -241,8 +314,18 @@ class Scaffolder:
     return False
 
   def _register_entry(
-    self, target_filename: str, op_name: str, primary_fw: str, primary_path: str, details: Dict, catalogs: Dict[str, Dict]
+    self,
+    target_filename: str,
+    op_name: str,
+    primary_fw: str,
+    primary_path: str,
+    details: Dict,
+    catalogs: Dict[str, Dict],
   ):
+    """
+    Registers a found operation into the Staging Areas.
+    Attempts to find matching variants in other frameworks.
+    """
     existing_def = self.semantics.data.get(op_name, {})
 
     spec_entry = {
@@ -252,7 +335,10 @@ class Scaffolder:
     }
 
     self.staged_specs[target_filename][op_name] = spec_entry
-    self.staged_mappings[primary_fw][op_name] = {"api": primary_path, "args": {p: p for p in details.get("params", [])}}
+    self.staged_mappings[primary_fw][op_name] = {
+      "api": primary_path,
+      "args": {p: p for p in details.get("params", [])},
+    }
 
     primary_params = details.get("params", [])
 
@@ -270,11 +356,23 @@ class Scaffolder:
         self._register_mapping(op_name, other_fw, path, d)
 
   def _register_mapping(self, op_name: str, fw: str, path: str, details: Dict):
-    self.staged_mappings[fw][op_name] = {"api": path, "args": {p: p for p in details.get("params", [])}}
+    """Helper to stage a mapping."""
+    self.staged_mappings[fw][op_name] = {
+      "api": path,
+      "args": {p: p for p in details.get("params", [])},
+    }
 
   def _find_fuzzy_match(
-    self, catalog: Dict, target_name: str, reference_params: List[str], fw_key: str = None
+    self,
+    catalog: Dict,
+    target_name: str,
+    reference_params: List[str],
+    fw_key: str = None,
   ) -> Optional[Tuple[str, Dict]]:
+    """
+    Finds the closest matching API in a catalog to the target name.
+    Uses indexed lookup first, then fuzzy scoring with arity penalties.
+    """
     target_lower = target_name.lower()
     candidates = []
     using_fuzzy_score = False
@@ -350,6 +448,9 @@ class Scaffolder:
     return None
 
   def _write_json(self, path: Path, new_data: Dict, merge: bool = False):
+    """
+    Persists JSON data to disk, merging with existing files if requested.
+    """
     if merge and path.exists():
       try:
         with open(path, "rt", encoding="utf-8") as f:

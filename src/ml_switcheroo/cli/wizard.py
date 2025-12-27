@@ -14,7 +14,7 @@ It guides the user through:
 """
 
 import json
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from pathlib import Path
 
 from rich.prompt import Prompt, Confirm
@@ -31,6 +31,10 @@ from ml_switcheroo.config import RuntimeConfig
 class MappingWizard:
   """
   Interactive tool to build robust semantic mappings.
+
+  This class handles the CLI workflow for identifying framework functions,
+  normalizing them into abstract specifications, and generating the necessary
+  JSON storage files for the Hub/Spoke architecture.
   """
 
   def __init__(self, semantics: SemanticsManager):
@@ -38,7 +42,8 @@ class MappingWizard:
     Initializes the Wizard.
 
     Args:
-        semantics (SemanticsManager): The loaded semantics manager.
+        semantics (SemanticsManager): The loaded semantics manager used to
+            check against existing mappings.
     """
     self.semantics = semantics
     self.console = console
@@ -130,10 +135,10 @@ class MappingWizard:
     Filters the catalog for items not present in the semantics.
 
     Args:
-        catalog (Dict): Results from ApiInspector.inspect().
+        catalog (Dict[str, Any]): Results from ApiInspector.inspect().
 
     Returns:
-        Dict: Subset of catalog containing only unmapped APIs.
+        Dict[str, Any]: Subset of catalog containing only unmapped APIs.
     """
     known_apis = set()
     # Reverse index maps API paths (src) to abstracts
@@ -148,7 +153,13 @@ class MappingWizard:
 
   def _render_card(self, api_path: str, details: Dict[str, Any], idx: int, total: int) -> None:
     """
-    Renders a UI card with API details.
+    Renders a UI card with API details via Rich.
+
+    Args:
+        api_path (str): The full dot-path of the API being inspected.
+        details (Dict[str, Any]): Metadata about the API (args, docs).
+        idx (int): Current index in the processing loop.
+        total (int): Total number of APIs to caption.
     """
     sig = str(details.get("detected_sig", details.get("params", [])))
     doc = details.get("doc_summary", "No documentation available.")
@@ -165,6 +176,12 @@ class MappingWizard:
     self.console.print(Panel(content, title=f"Item {idx + 1}/{total}", border_style="blue"))
 
   def _prompt_tier_decision(self) -> str:
+    """
+    Prompts the user to categorize the API into a semantic tier.
+
+    Returns:
+        str: The selected category name ('math', 'neural', 'extras', 'skip').
+    """
     choices = ["[M]ath", "[N]eural", "[E]xtras", "[S]kip"]
     options_text = " / ".join(choices)
     while True:
@@ -176,7 +193,20 @@ class MappingWizard:
       mapping = {"m": "math", "n": "neural", "e": "extras", "s": "skip"}
       return mapping[resp]
 
-  def _prompt_arg_normalization(self, detected_args: List[str], ctx_label: str) -> tuple[List[str], Dict[str, str]]:
+  def _prompt_arg_normalization(self, detected_args: List[str], ctx_label: str) -> Tuple[List[str], Dict[str, str]]:
+    """
+    Prompts the user to normalize source arguments to standard names.
+
+    Args:
+        detected_args (List[str]): Arguments detected in the source signature.
+        ctx_label (str): Label for the prompt context (e.g. framework name).
+
+    Returns:
+        Tuple[List[str], Dict[str, str]]: A tuple containing:
+            1. A list of standardized argument names.
+            2. A dictionary mapping standard names to source names
+               (only for arguments that were renamed).
+    """
     if not detected_args:
       return [], {}
     self.console.print(f"[dim]Normalizing arguments for {ctx_label}... (Press Enter to keep original)[/dim]")
@@ -192,6 +222,20 @@ class MappingWizard:
     return std_args, mapping
 
   def _prompt_target_mapping(self, std_args: List[str]) -> Optional[Dict[str, Any]]:
+    """
+    Prompts the user to define a mapping to a target framework.
+
+    Args:
+        std_args (List[str]): The list of standardized arguments determined in the previous step.
+
+    Returns:
+        Optional[Dict[str, Any]]: A dictionary defining the target mapping logic if confirmed,
+        otherwise None. Structure:
+        {
+           "framework": str,
+           "data": { "api": str, "args": dict, "requires_plugin": str|None }
+        }
+    """
     # Decoupled default: uses self.default_target (e.g. from config)
     if not Confirm.ask("Map to a Target Framework?", default=False):
       return None
@@ -220,7 +264,15 @@ class MappingWizard:
     }
 
   def _resolve_target_file(self, choice: str) -> str:
-    """Helper to map user choice to filename."""
+    """
+    Resolves the user's tier choice to a specific spec filename.
+
+    Args:
+        choice (str): The tier selection ('math', 'neural', 'extras').
+
+    Returns:
+        str: The filename for the semantic spec (e.g., 'k_array_api.json').
+    """
     if choice == "math":
       return "k_array_api.json"
     if choice == "neural":
@@ -237,6 +289,21 @@ class MappingWizard:
     source_arg_map: Dict[str, str],
     target_variant: Optional[Dict[str, Any]],
   ) -> None:
+    """
+    Persists the semantic mapping to distributed storage.
+
+    Updates the Abstract Spec (Semantics) and the Snapshot mappings
+    (Source and optional Target).
+
+    Args:
+        filename (str): The target spec filename.
+        api_path (str): The source API path (e.g. 'torch.sin').
+        doc_summary (str): Brief documentation summary.
+        std_args (List[str]): List of standardized argument names.
+        source_fw (str): The source framework name (e.g. 'torch').
+        source_arg_map (Dict[str, str]): Mapping from std args to source args.
+        target_variant (Optional[Dict[str, Any]]): Data for target framework mapping if defined.
+    """
     sem_dir = resolve_semantics_dir()
     snap_dir = resolve_snapshots_dir()
 
@@ -249,7 +316,11 @@ class MappingWizard:
 
     # 1. Update Spec (Semantics)
     spec_path = sem_dir / filename
-    self._write_to_file(spec_path, abstract_id, {"description": doc_summary, "std_args": std_args})
+    self._write_to_file(
+      spec_path,
+      abstract_id,
+      {"description": doc_summary, "std_args": std_args},
+    )
 
     # 2. Update Source Mapping (Snapshot)
     source_mapping = {"api": api_path}
@@ -272,6 +343,14 @@ class MappingWizard:
     self.console.print(f"[green]Saved {abstract_id} to distributed mappings[/green]")
 
   def _write_to_file(self, path: Path, key: str, data: Dict) -> None:
+    """
+    Helper method to safely update a JSON spec file.
+
+    Args:
+        path (Path): The filesystem path to the JSON file.
+        key (str): The abstract ID (dictionary key) to update or create.
+        data (Dict): The content dictionary to associate with the key.
+    """
     current = {}
     if path.exists():
       try:
@@ -289,6 +368,15 @@ class MappingWizard:
       json.dump(current, f, indent=2, sort_keys=True)
 
   def _write_to_snapshot(self, snap_dir: Path, fw: str, key: str, data: Dict) -> None:
+    """
+    Helper method to safely update a framework snapshot mapping file.
+
+    Args:
+        snap_dir (Path): The directory containing snapshot files.
+        fw (str): The framework name (used to construct the filename).
+        key (str): The abstract ID (dictionary key) to update or create.
+        data (Dict): The mapping data to associate with the key.
+    """
     path = snap_dir / f"{fw}_vlatest_map.json"
     current = {"__framework__": fw, "mappings": {}}
 

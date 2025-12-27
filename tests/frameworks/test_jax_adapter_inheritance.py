@@ -67,8 +67,10 @@ def test_discovery_segmentation():
   core = JaxCoreAdapter()
 
   # Mock flax.nnx presence to force LIVE mode initialization in FlaxNNXAdapter
-  # This ensures search_modules is populated even if library is missing in CI
-  with patch.dict(sys.modules, {"flax.nnx": MagicMock()}):
+  # This ensures search_modules is populated even if library is missing in CI.
+  # We must mock both the parent 'flax' and the submodule 'flax.nnx' to ensure
+  # the runtime import inside __init__ succeeds.
+  with patch.dict(sys.modules, {"flax": MagicMock(), "flax.nnx": MagicMock()}):
     flax = FlaxNNXAdapter()
 
     # Core should not look for Linen/NNX

@@ -6,7 +6,8 @@ Addresses semantic mismatch:
 2.  **JAX**: `values, indices = jax.lax.top_k(x, k)` (Returns tuple).
 
 Transformation:
-Wraps the target function call in a `collections.namedtuple` factory construction.
+Wraps the target function call in a `collections.namedtuple` factory construction to maintain
+attribute access (e.g. `.values`, `.indices`) while using a backend that returns raw tuples.
 
 Decoupling Logic:
 - Strict API lookup for "TopK".
@@ -18,6 +19,15 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
+  """
+  Creates a CST node structure representing a dotted path.
+
+  Args:
+      name_str: The dotted string (e.g. 'collections.namedtuple').
+
+  Returns:
+      A LibCST node (Name or nested Attribute).
+  """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -30,9 +40,16 @@ def transform_topk(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
   Hook: Wraps target top_k call in a NamedTuple constructor.
 
+  Orchestrates the following:
+  1. Looks up the target API for "TopK" (e.g., `jax.lax.top_k`).
+  2. Strips arguments not supported by the target (e.g., `largest`, `sorted`).
+  3. Injects `import collections` into the file preamble.
+  4. Wraps the call execution in a `collections.namedtuple` factory to restore
+     `.values` and `.indices` accessors expected by Torch code.
+
   Args:
       node: The original CST Call node.
-      ctx: HookContext for API lookup.
+      ctx: HookContext for API lookup and preamble injection.
 
   Returns:
       cst.Call: The transformed call.
@@ -67,7 +84,10 @@ def transform_topk(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   fields_list = cst.List(
     elements=[
       cst.Element(value=cst.SimpleString('"values"')),
-      cst.Element(value=cst.SimpleString('"indices"'), comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))),
+      cst.Element(
+        value=cst.SimpleString('"indices"'),
+        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+      ),
     ]
   )
   factory_args = [

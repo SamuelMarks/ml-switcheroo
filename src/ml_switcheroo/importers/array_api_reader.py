@@ -25,7 +25,8 @@ class ArrayApiSpecImporter:
     Parses Array API Python Stubs (``*.py``) in the target directory.
 
     Args:
-        root_dir: Path to the folder containing .py stubs (e.g. ``src/array_api_stubs/_2023_12``).
+        root_dir: Path to the folder containing .py stubs
+                  (e.g. ``src/array_api_stubs/_2023_12``).
 
     Returns:
         Dict mapping function/constant names to their definitions.
@@ -42,6 +43,15 @@ class ArrayApiSpecImporter:
   def _parse_stubs(self, files: List[Path], root: Path) -> Dict[str, Any]:
     """
     Iterates over files and extracts AST nodes.
+
+    Processes both function definitions and constant assignments (e.g. math constants).
+
+    Args:
+        files: List of file paths to parse.
+        root: Root directory for relative path calculation.
+
+    Returns:
+        A dictionary of parsed semantic definitions.
     """
     semantics = {}
 
@@ -76,7 +86,11 @@ class ArrayApiSpecImporter:
           # Extract typed arguments (name, type_str)
           args = self._extract_args(node.args)
 
-          semantics[op_name] = {"from": rel_path, "description": summary, "std_args": args}
+          semantics[op_name] = {
+            "from": rel_path,
+            "description": summary,
+            "std_args": args,
+          }
 
         # --- CASE 2: CONSTANTS (e.g., e = 2.718) ---
         elif isinstance(node, (ast.Assign, ast.AnnAssign)):
@@ -105,6 +119,9 @@ class ArrayApiSpecImporter:
     """
     Combines Positional-Only, Standard, and Keyword-Only args alongside their type hints.
 
+    Args:
+        args: The arguments node from a function definition.
+
     Returns:
         List of tuples: ``[("x", "Array"), ("axis", "int | None"), ...]``
     """
@@ -130,6 +147,12 @@ class ArrayApiSpecImporter:
     Recursively resolves AST type annotations to a readable string string.
     e.g. ``Name('int')`` -> 'int'
          ``BinOp(Subscript('Optional'), 'int')`` -> 'Optional[int]'  (simplified)
+
+    Args:
+        annotation: The AST node representing the type annotation.
+
+    Returns:
+        A string representation of the type.
     """
     if annotation is None:
       return "Any"
@@ -169,7 +192,15 @@ class ArrayApiSpecImporter:
     return "Any"  # Fallback for complex structures
 
   def _get_assignment_name(self, node: ast.AST) -> Optional[str]:
-    """Extracts variable name from Assign (x=1) or AnnAssign (x:int=1)"""
+    """
+    Extracts variable name from Assign (x=1) or AnnAssign (x:int=1).
+
+    Args:
+        node: The assignment node.
+
+    Returns:
+        The variable name or None.
+    """
     if isinstance(node, ast.Assign):
       if node.targets and isinstance(node.targets[0], ast.Name):
         return node.targets[0].id
@@ -179,6 +210,15 @@ class ArrayApiSpecImporter:
     return None
 
   def _clean_docstring(self, doc: Optional[str]) -> str:
+    """
+    Cleans up a docstring return just the first paragraph summary.
+
+    Args:
+        doc: The full docstring.
+
+    Returns:
+        A single-line summary string.
+    """
     if not doc:
       return ""
     # Take just the first paragraph (up to empty line)
