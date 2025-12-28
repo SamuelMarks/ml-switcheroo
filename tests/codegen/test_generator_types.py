@@ -1,5 +1,6 @@
 """
 Tests for Type-Aware Test Generation logic.
+Includes validation for Return Types (Output Verification).
 """
 
 import pytest
@@ -129,3 +130,61 @@ def test_generate_integration_typed_args(gen, tmp_path):
 
   # Ensure no naive array generation happened for these inputs
   assert "np_low = np.random.randn" not in content
+
+
+def test_return_type_verification_int(gen, tmp_path):
+  """
+  Test generation of assertions for 'int' return type.
+  """
+  semantics = {
+    "size_op": {
+      "std_args": ["x"],
+      "return_type": "int",
+      "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}},
+    }
+  }
+
+  gen.generate(semantics, tmp_path / "test_int.py")
+  content = (tmp_path / "test_int.py").read_text()
+
+  assert "assert np.issubdtype(np.array(val).dtype, np.integer)" in content
+  assert "or isinstance(val, int)" in content
+  assert "Expected int" in content
+
+
+def test_return_type_verification_bool(gen, tmp_path):
+  """
+  Test generation of assertions for 'bool' return type.
+  """
+  semantics = {
+    "is_nan": {
+      "std_args": ["x"],
+      "return_type": "bool",
+      "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}},
+    }
+  }
+
+  gen.generate(semantics, tmp_path / "test_bool.py")
+  content = (tmp_path / "test_bool.py").read_text()
+
+  assert "assert np.issubdtype(np.array(val).dtype, bool)" in content
+  assert "or isinstance(val, bool)" in content
+
+
+def test_return_type_verification_tensor(gen, tmp_path):
+  """
+  Test generation of assertions for 'Tensor' return type.
+  """
+  semantics = {
+    "add": {
+      "std_args": ["x"],
+      "return_type": "Tensor",
+      "variants": {"torch": {"api": "foo"}, "jax": {"api": "bar"}},
+    }
+  }
+
+  gen.generate(semantics, tmp_path / "test_tensor.py")
+  content = (tmp_path / "test_tensor.py").read_text()
+
+  assert "assert isinstance(val, (np.ndarray, np.generic))" in content
+  assert "Expected Array/Tensor" in content

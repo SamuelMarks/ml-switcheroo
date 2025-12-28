@@ -5,6 +5,7 @@ This adapter provides support for the functional JAX ecosystem *without* binding
 to a high-level neural network library like Flax or Haiku. It maps:
 1.  **Level 0 (Core)**: JAX Array API (jnp), Activations (jax.nn), and Types.
 2.  **Level 1 (Common Libs)**: Optax (Optimization) and Orbax (Checkpointing).
+3.  **IO & Devices**: Handles `save`/`load` via Orbax and `jax.devices` mapping.
 
 It specifically enables `requires_explicit_rng` in plugin traits.
 """
@@ -98,7 +99,10 @@ class JaxCoreAdapter(JAXStackMixin):
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
     """Regex patterns for identifying API categories."""
-    return {"array": [r"jax\\.numpy\\.", r"jnp\\."], "extras": [r"jax\\.random\\.", r"jax\\.lax\\.", r"optax\\."]}
+    return {
+      "array": [r"jax\\.numpy\\.", r"jnp\\."],
+      "extras": [r"jax\\.random\\.", r"jax\\.lax\\.", r"optax\\."],
+    }
 
   @property
   def test_config(self) -> Dict[str, str]:
@@ -117,16 +121,17 @@ class JaxCoreAdapter(JAXStackMixin):
     Returns logic to create JAX PRNG Keys.
     """
     return textwrap.dedent(""" 
-        def _make_jax_key(seed): 
-            "Attempts to create a JAX PRNGKey." 
-            try: 
-                return jax.random.PRNGKey(seed) 
-            except (ImportError, AttributeError): 
-                return "mock_jax_key" 
-    """).strip()
+            def _make_jax_key(seed): 
+                "Attempts to create a JAX PRNGKey." 
+                try: 
+                    return jax.random.PRNGKey(seed) 
+                except (ImportError, AttributeError): 
+                    return "mock_jax_key" 
+        """).strip()
 
   @property
   def declared_magic_args(self) -> List[str]:
+    """Returns `key` as a magic state argument."""
     return ["key"]
 
   @property
@@ -142,7 +147,17 @@ class JaxCoreAdapter(JAXStackMixin):
       requires_super_init=False,
       lifecycle_strip_methods=[],
       lifecycle_warn_methods=[],
-      jit_static_args=["axis", "axes", "dim", "dims", "keepdim", "keepdims", "ord", "mode", "dtype"],
+      jit_static_args=[
+        "axis",
+        "axes",
+        "dim",
+        "dims",
+        "keepdim",
+        "keepdims",
+        "ord",
+        "mode",
+        "dtype",
+      ],
     )
 
   @property
@@ -254,6 +269,12 @@ class JaxCoreAdapter(JAXStackMixin):
       "enable_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
       "DataLoader": StandardMap(api="GenericDataLoader", requires_plugin="convert_dataloader"),
       "LoadStateDict": StandardMap(api="KeyMapper.from_torch", requires_plugin="checkpoint_mapper"),
+      # --- Wired Orphans ---
+      "Save": StandardMap(api="save", requires_plugin="io_handler", required_imports=["import orbax.checkpoint"]),
+      "Load": StandardMap(api="load", requires_plugin="io_handler", required_imports=["import orbax.checkpoint"]),
+      "Device": StandardMap(api="jax.devices", requires_plugin="device_allocator"),
+      "CudaAvailable": StandardMap(api="jax.devices", requires_plugin="cuda_is_available"),  # <--- NEW: Wired Orphan
+      # -------------------------------
       # --- Functional Transforms ---
       "vmap": StandardMap(api="jax.vmap", args={"func": "fun"}),
       "grad": StandardMap(api="jax.grad", args={"func": "fun"}),

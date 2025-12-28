@@ -5,7 +5,6 @@ from unittest.mock import MagicMock
 from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.arg_packing import pack_varargs
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:

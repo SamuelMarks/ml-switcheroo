@@ -1,12 +1,12 @@
-""" 
-Plugin Scaffolder. 
+"""
+Plugin Scaffolder.
 
-Generates valid Python source files for new hooks in the plugins directory. 
-Used by the CLI to provide a starting point for complex logic implementations. 
-Feature 083: Supports compiling declarative rules including complex operators into switch statements. 
-Feature 084: Supports Preservative Updates (Body Extraction). 
-Feature 085: Enforces PEP8 Filenaming (Snake Case). 
-Feature 086: Auto-Wire Dictionary injection. 
+Generates valid Python source files for new hooks in the plugins directory.
+Used by the CLI to provide a starting point for complex logic implementations.
+Feature 083: Supports compiling declarative rules including complex operators into switch statements.
+Feature 084: Supports Preservative Updates (Body Extraction).
+Feature 085: Enforces PEP8 Filenaming (Snake Case).
+Feature 086: Auto-Wire Dictionary injection.
 """
 
 import re
@@ -46,7 +46,9 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 """
 
 # Adjusted templates to ensure exact whitespace control (no trailing spaces)
-TEMPLATE_HEADER = '"""\n{doc}\n"""\nimport libcst as cst\nfrom ml_switcheroo.core.hooks import register_hook, HookContext\n\n'
+TEMPLATE_HEADER = (
+  '"""\n{doc}\n"""\nimport libcst as cst\nfrom ml_switcheroo.core.hooks import register_hook, HookContext\n\n'
+)
 
 TEMPLATE_FUNC_DEF_AUTO_WIRE = '@register_hook(trigger="{name}", auto_wire={auto_wire})\ndef {name}(node: {node_type}, ctx: HookContext) -> cst.CSTNode:\n    """\n    Plugin Hook: {doc}\n    """\n'
 
@@ -54,9 +56,9 @@ TEMPLATE_FUNC_DEF = '@register_hook("{name}")\ndef {name}(node: {node_type}, ctx
 
 
 class BodyExtractor(cst.CSTVisitor):
-  """ 
-  Extracts the body of a specific function definition. 
-  Used to preserve user implementation logic during scaffolding updates. 
+  """
+  Extracts the body of a specific function definition.
+  Used to preserve user implementation logic during scaffolding updates.
   """
 
   def __init__(self, func_name: str):
@@ -65,9 +67,9 @@ class BodyExtractor(cst.CSTVisitor):
     self.found = False
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """ 
-    Visits function definitions to find the target hook. 
-    If found, captures the body and stops recursion. 
+    """
+    Visits function definitions to find the target hook.
+    If found, captures the body and stops recursion.
     """
     if node.name.value == self.func_name:
       self.body_node = node.body
@@ -77,46 +79,46 @@ class BodyExtractor(cst.CSTVisitor):
 
 
 class PluginGenerator:
-  """ 
-  Writes Python plugin files to disk based on scaffold definitions. 
+  """
+  Writes Python plugin files to disk based on scaffold definitions.
   """
 
   def __init__(self, plugins_dir: Path):
-    """ 
-    Initializes the generator. 
+    """
+    Initializes the generator.
 
-    Args: 
-        plugins_dir: Target directory path. 
+    Args:
+        plugins_dir: Target directory path.
     """
     self.plugins_dir = plugins_dir
 
   def _to_snake_case(self, name: str) -> str:
-    """ 
-    Converts PascalCase or camelCase to snake_case for filenames. 
-    e.g. MyPlugin -> my_plugin, HTTPResponse -> http_response 
+    """
+    Converts PascalCase or camelCase to snake_case for filenames.
+    e.g. MyPlugin -> my_plugin, HTTPResponse -> http_response
     """
     # Handle simple lowercase existing
     if "_" in name and name.islower():
       return name
 
       # 1. Add underscore before capitals preceded by lowercase
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    # 2. Add underscore before capitals preceded by uppercase/numbers 
-    s2 = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
+    # 2. Add underscore before capitals preceded by uppercase/numbers
+    s2 = re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
     return s2
 
   def generate(self, scaffold: PluginScaffoldDef) -> bool:
-    """ 
-    Creates or updates a plugin file. 
+    """
+    Creates or updates a plugin file.
 
     If the file exists, it attempts to preserve the existing function body logic
-    while updating the wrapper (docstrings/decorators/imports). 
+    while updating the wrapper (docstrings/decorators/imports).
 
-    Args: 
-        scaffold: Definition model containing name, type, docs, and rules. 
+    Args:
+        scaffold: Definition model containing name, type, docs, and rules.
 
-    Returns: 
-        bool: True if file was written/updated. 
+    Returns:
+        bool: True if file was written/updated.
     """
     clean_filename = self._to_snake_case(scaffold.name)
     filename = f"{clean_filename}.py"
@@ -145,14 +147,14 @@ class PluginGenerator:
     return True
 
   def _render_body_without_docstring(self, body_node: cst.BaseSuite) -> str:
-    """ 
-    Serializes a Body Node into source code string, stripping the docstring. 
+    """
+    Serializes a Body Node into source code string, stripping the docstring.
 
-    Args: 
-        body_node: The function body (IndentedBlock or SimpleStatementSuite). 
+    Args:
+        body_node: The function body (IndentedBlock or SimpleStatementSuite).
 
-    Returns: 
-        str: The indented source code of the body logic. 
+    Returns:
+        str: The indented source code of the body logic.
     """
     stmts = []
     if isinstance(body_node, cst.IndentedBlock):
@@ -197,8 +199,8 @@ class PluginGenerator:
     # 1. Header
     parts.append(TEMPLATE_HEADER.format(doc=scaffold.doc))
 
-    # 2. Helpers (only if rules present or preserved code relied on them?) 
-    # Simplest strategy: Always include helpers if rules are defined in scaffold. 
+    # 2. Helpers (only if rules present or preserved code relied on them?)
+    # Simplest strategy: Always include helpers if rules are defined in scaffold.
     if scaffold.rules:
       parts.append(HELPER_LOGIC)
 
@@ -209,16 +211,14 @@ class PluginGenerator:
       # Use json dumps to get double quotes matching test expectations
       # and generally being standard for JSON-like config in Python.
       import json
+
       json_str = json.dumps(scaffold.auto_wire)
       # Fix Python literals
       safe_repr = json_str.replace("true", "True").replace("false", "False").replace("null", "None")
 
-      parts.append(TEMPLATE_FUNC_DEF_AUTO_WIRE.format(
-        name=scaffold.name,
-        doc=scaffold.doc,
-        node_type=node_type,
-        auto_wire=safe_repr
-      ))
+      parts.append(
+        TEMPLATE_FUNC_DEF_AUTO_WIRE.format(name=scaffold.name, doc=scaffold.doc, node_type=node_type, auto_wire=safe_repr)
+      )
     else:
       parts.append(TEMPLATE_FUNC_DEF.format(name=scaffold.name, doc=scaffold.doc, node_type=node_type))
 

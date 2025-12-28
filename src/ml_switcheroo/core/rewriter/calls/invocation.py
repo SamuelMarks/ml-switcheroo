@@ -30,6 +30,7 @@ from ml_switcheroo.core.rewriter.calls.pre import (
 from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
 
+
 class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
   """
   Mixin for transforming :class:`libcst.Call` nodes.
@@ -86,7 +87,7 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
     version_warning = self.check_version_constraints(min_v, max_v)
 
     if version_warning:
-        self._report_warning(version_warning)
+      self._report_warning(version_warning)
 
     # 5b. Retrieve Definition Details
     lookup = self.semantics.get_definition(func_name)
@@ -97,10 +98,10 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
 
     # 5c. Deprecation Check (Feature)
     if details.get("deprecated", False):
-        msg = f"Usage of deprecated operation '{abstract_id}'."
-        if details.get("replaced_by"):
-            msg += f" Consider using '{details['replaced_by']}' instead."
-        self._report_warning(msg)
+      msg = f"Usage of deprecated operation '{abstract_id}'."
+      if details.get("replaced_by"):
+        msg += f" Consider using '{details['replaced_by']}' instead."
+      self._report_warning(msg)
 
     # 6. EXECUTE REWRITE STRATEGY
     # Handles: Imports, Dispatch, Infix, Lambda, Plugin, Macro, Standard

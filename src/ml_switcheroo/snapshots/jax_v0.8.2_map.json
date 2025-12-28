@@ -196,6 +196,9 @@
       "api": "optax.linear_schedule",
       "args": {}
     },
+    "Load": {
+      "api": "jax.numpy.load"
+    },
     "LoadStateDict": {
       "api": "KeyMapper.from_torch",
       "requires_plugin": "checkpoint_mapper"
@@ -264,6 +267,9 @@
     "SGD": {
       "api": "optax.sgd",
       "requires_plugin": "optimizer_constructor"
+    },
+    "Save": {
+      "api": "jax.numpy.save"
     },
     "Scatter": {
       "api": "jax.ops.index_update",

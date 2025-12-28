@@ -155,6 +155,8 @@ class MLXAdapter:
     Covers Optimization, Math, Layers, Compilation, Types, and Casting.
     """
     return {
+      "Save": StandardMap(api="save", requires_plugin="io_handler", required_imports=["import mlx.core as mx"]),
+      "Load": StandardMap(api="load", requires_plugin="io_handler", required_imports=["import mlx.core as mx"]),
       "Abs": StandardMap(api="mx.abs"),
       "Mean": StandardMap(api="mx.mean"),
       "Add": StandardMap(api="mx.add"),

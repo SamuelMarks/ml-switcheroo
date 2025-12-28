@@ -48,7 +48,8 @@ def test_load_plugins_from_custom_dir(mock_plugin_dir):
 
 def test_load_plugins_default_location(monkeypatch):
   """
-  Verify argument-less call attempts to resolve swithcheroo/plugins.
+  Verify argument-less call attempts to resolve ml_switcheroo/plugins.
+
   We mock Path.exists to fail safely since we can't easily rely on
   installed package state in unit tests without side effects.
   """
@@ -74,40 +75,37 @@ def test_lazy_loading_in_get_hook(monkeypatch):
   Verify get_hook triggers load_plugins if not loaded.
 
   Since we cannot guarantee 'ml_switcheroo.plugins' is resolvable in the test runner's
-  sys.modules state without explicit install, we manually set the plugins_dir
-  to the real source location using pathlib relative to this test file.
-  test is in: tests/core/test_hooks_loader.py
-  src is in:  src/ml_switcheroo/plugins
+  sys.modules state without explicit install (or if it was cached by previous tests),
+  we manually cleanup sys.modules to force a fresh import of the plugins package.
   """
   clear_hooks()
 
   # Resolve real source path
   # tests/core -> tests -> root -> src -> ml_switcheroo -> plugins
-  root_dir = Path(__file__).resolve().parent.parent.parent
+  root_dir = Path(__file__).resolve().parent.parent
   real_plugins_dir = root_dir / "src" / "ml_switcheroo" / "plugins"
 
   if not real_plugins_dir.exists():
     pytest.skip("Skipping integration test: 'src/ml_switcheroo/plugins' not found on disk.")
 
-  # We patch the default resolution inside load_plugins to use this explicit path
-  # OR we just call load_plugins first? No, we checking LAZY load.
+  # Force unload of plugins to verify auto-discovery actually works
+  # If we don't do this, 'import ml_switcheroo.plugins' inside load_plugins() is a no-op
+  # if previously imported, skipping the __init__.py scanning logic.
+  mods_to_remove = [m for m in sys.modules if m.startswith("ml_switcheroo.plugins")]
+  for m in mods_to_remove:
+    del sys.modules[m]
 
-  # The `load_plugins()` call inside `get_hook` takes no args, meaning it calculates path via `__file__`.
-  # `src/ml_switcheroo/core/hooks.py` uses `Path(__file__).parent.parent / "plugins"`.
-  # This calculation IS correct if the file exists on disk.
-
-  # Why did it fail? importlib might fail if "ml_switcheroo" isn't a top-level package in sys.path.
-  # We ensure src is in python path.
+  # We ensure src is in python path to allow importlib to work on "ml_switcheroo.plugins"
   sys.path.insert(0, str(root_dir / "src"))
 
   try:
-    # Verify decompose_alpha (known real hook)
-    hook = get_hook("decompose_alpha")
+    # Verify a known real hook exists in the codebase.
+    # We use 'batch_norm_unwrap' (from plugins/batch_norm.py) as it is a core feature.
+    # Calling get_hook should trigger load_plugins() which scans and imports.
+    hook = get_hook("batch_norm_unwrap")
 
-    # If still None, it means the import failed, possibly due to module name resolution.
-    # But importlib fallback handles file spec loading too.
-
-    assert hook is not None, "Failed to auto-discover standard decompositions"
+    assert hook is not None, "Failed to auto-discover standard plugins (batch_norm)"
   finally:
     # Cleanup path
-    sys.path.pop(0)
+    if str(root_dir / "src") in sys.path:
+      sys.path.remove(str(root_dir / "src"))

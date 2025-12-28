@@ -381,6 +381,9 @@
       "api": "mlx.nn.layers.transformer.TransformerEncoderLayer.linear2",
       "args": {}
     },
+    "Load": {
+      "api": "mlx.core.load"
+    },
     "Log": {
       "api": "mlx.core.log"
     },
@@ -570,6 +573,9 @@
     },
     "SGD": {
       "api": "mlx.optimizers.SGD"
+    },
+    "Save": {
+      "api": "mlx.core.save"
     },
     "Selu": {
       "api": "mlx.nn.layers.activations.selu",

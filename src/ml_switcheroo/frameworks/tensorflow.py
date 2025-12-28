@@ -65,7 +65,7 @@ class TensorFlowAdapter:
       if not self._snapshot_data:
         logging.debug("TensorFlow not installed and no snapshot found.")
 
-  # --- Metadata ---
+        # --- Metadata ---
 
   @property
   def unsafe_submodules(self) -> Set[str]:
@@ -169,7 +169,7 @@ class TensorFlowAdapter:
       "to_numpy": "{res_var}.numpy()",
     }
 
-  # --- Harness Protocol ---
+    # --- Harness Protocol ---
 
   @property
   def harness_imports(self) -> List[str]:
@@ -261,6 +261,8 @@ class TensorFlowAdapter:
         Dict[str, StandardMap]: The mapping dictionary.
     """
     return {
+      "Save": StandardMap(api="save", requires_plugin="io_handler", required_imports=["import tensorflow as tf"]),
+      "Load": StandardMap(api="load", requires_plugin="io_handler", required_imports=["import tensorflow as tf"]),
       "Abs": StandardMap(api="tf.abs"),
       "Mean": StandardMap(api="tf.math.reduce_mean"),
       "Sum": StandardMap(api="tf.math.reduce_sum"),
@@ -297,6 +299,8 @@ class TensorFlowAdapter:
       "CastBool": StandardMap(api="tf.cast", inject_args={"dtype": "tf.bool"}),
       "SiLU": StandardMap(api="tensorflow.nn.silu"),
       "TensorType": StandardMap(api="tensorflow.Tensor"),
+      "CudaAvailable": StandardMap(api="tf.config.list_physical_devices", requires_plugin="cuda_is_available"),
+      # <--- NEW: Wired Orphan
     }
 
   @property
@@ -418,35 +422,35 @@ class TensorFlowAdapter:
     return {
       "tier1_math": """import tensorflow as tf
 
-def math_ops(x, y):
-    # Tier 1: Core TensorFlow Math
-    a = tf.abs(x)
-    b = tf.math.add(a, y)
-    return tf.math.reduce_mean(b)
+def math_ops(x, y): 
+  # Tier 1: Core TensorFlow Math
+  a = tf.abs(x) 
+  b = tf.math.add(a, y) 
+  return tf.math.reduce_mean(b) 
 """,
       "tier2_neural": """import tensorflow as tf
 
-class Model(tf.Module):
-    # Tier 2: Low-level TF Module (Not Keras)
-    def __init__(self, in_features, out_features):
-        super().__init__()
-        self.w = tf.Variable(tf.random.normal([in_features, out_features]))
-        self.b = tf.Variable(tf.zeros([out_features]))
+class Model(tf.Module): 
+  # Tier 2: Low-level TF Module (Not Keras) 
+  def __init__(self, in_features, out_features): 
+    super().__init__() 
+    self.w = tf.Variable(tf.random.normal([in_features, out_features])) 
+    self.b = tf.Variable(tf.zeros([out_features])) 
 
-    def __call__(self, x):
-        return tf.matmul(x, self.w) + self.b
-""",
+  def __call__(self, x): 
+    return tf.matmul(x, self.w) + self.b
+  """,
       "tier3_extras": """import tensorflow as tf
 
-def data_pipeline(tensors, batch_size=32):
-    # Tier 3: tf.data Input Pipeline
-    dataset = tf.data.Dataset.from_tensor_slices(tensors)
-    loader = dataset.shuffle(1024).batch(batch_size)
-    return loader
+def data_pipeline(tensors, batch_size=32): 
+  # Tier 3: tf.data Input Pipeline
+  dataset = tf.data.Dataset.from_tensor_slices(tensors) 
+  loader = dataset.shuffle(1024).batch(batch_size) 
+  return loader
 """,
     }
 
-  # --- Syntax Generators ---
+    # --- Syntax Generators ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """

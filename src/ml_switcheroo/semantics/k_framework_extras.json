@@ -1100,6 +1100,12 @@
     ],
     "type": "class"
   },
+  "Load": {
+    "description": "Deserialize object from disk.",
+    "std_args": [
+      "f"
+    ]
+  },
   "LocalResponseNorm": {
     "description": "Applies local response normalization over an input signal.",
     "std_args": [
@@ -1579,6 +1585,13 @@
       "dampening",
       "weight_decay",
       "nesterov"
+    ]
+  },
+  "Save": {
+    "description": "Serialize object to disk.",
+    "std_args": [
+      "obj",
+      "f"
     ]
   },
   "Silu": {

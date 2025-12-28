@@ -278,7 +278,7 @@ NEURAL_OPS = {
 }
 
 # ============================================================================
-# 3. Extras (Optimizers, Contexts, IO)
+# 3. Extras (Optimizers, Contexts, IO, Device)
 # ============================================================================
 EXTRAS_OPS = {
   "__imports__": {},
@@ -353,6 +353,26 @@ EXTRAS_OPS = {
     "description": "Convert image to grayscale.",
     "std_args": ["num_output_channels"],
   },
+  # --- IO Operations ---
+  "Save": {
+    "description": "Serialize object to disk.",
+    "std_args": ["obj", "f"],
+  },
+  "Load": {
+    "description": "Deserialize object from disk.",
+    "std_args": ["f"],
+  },
+  # --- Device Management ---
+  "Device": {
+    "description": "Abstract Device placement context.",
+    "std_args": ["type", "index"],
+  },
+  "CudaAvailable": {  # <--- NEW: Wired Orphan
+    "description": "Checks if a CUDA device is available.",
+    "std_args": [],
+    "return_type": "bool",
+  },
+  # ---------------------
   "DataLoader": {
     "description": "Foundational PyTorch Data Loader. Mapped to GenericDataLoader shim via Plugin.",
     "std_args": [

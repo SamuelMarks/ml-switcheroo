@@ -1,16 +1,16 @@
 """
 Execution Engine for Semantics Verification.
 
-This module provides the `EquivalenceRunner`, which executes operations across
+This module provides the ``EquivalenceRunner``, which executes operations across
 multiple frameworks (PyTorch, JAX, etc.) to verify behavioral equivalence.
 It handles input generation, type adaptation, and crucially, **argument mapping**
 to ensure that standard inputs are passed to frameworks using their specific
-parameter names (e.g., mapping `axis` to `dim`).
+parameter names (e.g., mapping ``axis`` to ``dim``).
 
 Updates:
-
-- Added support for `shape_calc` lambda verification (Feature 20).
-- Uses central registry for output normalization.
+    - Added support for ``shape_calc`` lambda verification (Feature 20).
+    - Uses central registry for output normalization.
+    - **Dynamic Tolerances**: Supports per-operation ``rtol`` / ``atol`` thresholds (Feature 028).
 """
 
 import importlib
@@ -39,29 +39,33 @@ class EquivalenceRunner:
     hints: Optional[Dict[str, str]] = None,
     constraints: Optional[Dict[str, Dict]] = None,
     shape_calc: Optional[str] = None,
+    rtol: float = 1e-3,
+    atol: float = 1e-4,
   ) -> Tuple[bool, str]:
     """
     Runs the operation across all defined variants and compares results.
 
     This process includes:
 
-    1. Fuzzing: Generates standard NumPy inputs based on `params`, `hints` and `constraints`.
+    1. Fuzzing: Generates standard NumPy inputs based on ``params``, ``hints`` and ``constraints``.
     2. Renaming: Maps standard argument names to framework-specific names
-       defined in the Semantics (e.g., `axis` -> `dim`).
+       defined in the Semantics (e.g., ``axis`` -> ``dim``).
     3. Adaptation: Converts NumPy arrays to framework Tensors.
     4. Execution: Runs the functions via dynamic import.
     5. Normalization: Converts results back to NumPy.
-    6. **Shape Check**: Verifies result shape using `shape_calc` lambda if provided.
-    7. Comparison: Asserts numeric closeness between frameworks.
+    6. **Shape Check**: Verifies result shape using ``shape_calc`` lambda if provided.
+    7. Comparison: Asserts numeric closeness between frameworks using ``rtol``/``atol``.
 
     Args:
         variants: Dictionary of framework implementations from the Semantic
                   Knowledge Base.
-        params: List of standard argument names (e.g. `['x', 'axis']`).
-        hints: Dictionary of type hints (e.g. `{'axis': 'int'}`) to guide
+        params: List of standard argument names (e.g. ``['x', 'axis']``).
+        hints: Dictionary of type hints (e.g. ``{'axis': 'int'}``) to guide
                the fuzzer. Uses explicit types over heuristics.
         constraints: Dictionary of constraint maps (min, max, options) to bound fuzzer.
-        shape_calc: Optional python lambda string (e.g. `lambda x: x.shape`) to verify output shape.
+        shape_calc: Optional python lambda string (e.g. ``lambda x: x.shape``) to verify output shape.
+        rtol: Relative tolerance for numeric comparison (default 1e-3).
+        atol: Absolute tolerance for numeric comparison (default 1e-4).
 
     Returns:
         Tuple[bool, str]: A pair containing:
@@ -94,6 +98,7 @@ class EquivalenceRunner:
         res = self._execute_api(api_path, fw_inputs)
 
         # 2d. Normalize Result (Tensor -> Numpy) via central Adapter Registry
+        # This ensures we comparison logic works on clean NumPy arrays
         numpy_adapter = get_adapter("numpy")
         if numpy_adapter:
           results[fw] = numpy_adapter.convert(res)
@@ -102,7 +107,7 @@ class EquivalenceRunner:
           results[fw] = res
 
       except Exception:
-        # Capture traceback for detailed error reporting
+        # Capture traceback for detailed error reporting in CLI
         err_msg = traceback.format_exc()
         # We return False immediately on crash to highlight the error
         return False, f"Crash in {fw} ({api_path}):\n{err_msg}"
@@ -113,7 +118,7 @@ class EquivalenceRunner:
     # 3. Shape Verification (Feature 20)
     if shape_calc:
       try:
-        # order args for positional lambda arguments if names match input list ordering
+        # Order args for positional lambda arguments if names match input list ordering
         # Assuming lambda signature accepts args in same order as 'params' keys
         # We pass arguments as *args to the lambda
         input_args_ordered = [base_inputs[p] for p in params]
@@ -123,8 +128,13 @@ class EquivalenceRunner:
 
         for fw, val in results.items():
           if hasattr(val, "shape"):
-            if val.shape != expected_shape:
-              return False, f"Shape Mismatch in {fw}: {val.shape} != {expected_shape}"
+            # If a tuple is expected but list returned (or vice versa), cast to robustly compare
+            # e.g. list shape [3] vs tuple shape (3,)
+            val_shape = tuple(val.shape) if hasattr(val.shape, "__iter__") else (val.shape,)
+            tgt_shape = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)
+
+            if val_shape != tgt_shape:
+              return False, f"Shape Mismatch in {fw}: {val_shape} != {tgt_shape}"
       except Exception as e:
         return False, f"Shape Calculation Error: {e}"
 
@@ -137,10 +147,10 @@ class EquivalenceRunner:
     ref_fw = keys[0]
     ref_val = results[ref_fw]
 
+    # Propagate tolerance settings to deep comparison
     for other_fw in keys[1:]:
       val = results[other_fw]
-      # Use loose tolerance for float32 differences across backends
-      if not self._deep_compare(ref_val, val):
+      if not self._deep_compare(ref_val, val, rtol=rtol, atol=atol):
         # Try to provide helpful debug info
         msg = f"Mismatch between {ref_fw} and {other_fw}.\nRef ({ref_fw}): {ref_val}\nCand ({other_fw}): {val}"
         return False, msg
@@ -190,25 +200,26 @@ class EquivalenceRunner:
     # Import module dynamically (e.g. import torch.nn.functional)
     mod = importlib.import_module(module_name)
 
-    # Support nested attributes if needed (though usually flat)
-    # but standard split is robust for most cases.
+    # Support nested attributes via getattr if needed (flat is standard)
     func = getattr(mod, func_name)
 
     return func(**kwargs)
 
-  def _deep_compare(self, a: Any, b: Any) -> bool:
+  def _deep_compare(self, a: Any, b: Any, rtol: float = 1e-3, atol: float = 1e-4) -> bool:
     """
     Recursively compares two objects (Arrays, Lists, Scalars).
 
     Handles:
     - Nested Sequences (List/Tuple)
     - Dictionaries
-    - NumPy Arrays (with tolerance)
+    - NumPy Arrays (with configurable tolerance)
     - Scalars (int/float/bool)
 
     Args:
         a: Reference object.
         b: Candidate object.
+        rtol: Relative tolerance (default: 1e-3).
+        atol: Absolute tolerance (default: 1e-4).
 
     Returns:
         bool: True if they are effectively equal.
@@ -218,13 +229,14 @@ class EquivalenceRunner:
     if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
       if len(a) != len(b):
         return False
-      return all(self._deep_compare(x, y) for x, y in zip(a, b))
+      # Recursively pass tolerances
+      return all(self._deep_compare(x, y, rtol=rtol, atol=atol) for x, y in zip(a, b))
 
     # 2. Dictionary Check
     if isinstance(a, dict) and isinstance(b, dict):
       if set(a.keys()) != set(b.keys()):
         return False
-      return all(self._deep_compare(a[k], b[k]) for k in a)
+      return all(self._deep_compare(a[k], b[k], rtol=rtol, atol=atol) for k in a)
 
     # 3. Handle scalars and arrays uniformly via numpy
     # Using loose instance check to catch numpy scalars vs python scalars
@@ -249,9 +261,8 @@ class EquivalenceRunner:
         if np.any(nan_mask_a != nan_mask_b):
           return False
 
-        # Compare finite values
-        # rtol=1e-3, atol=1e-4 is standard for ML cross-framework testing (float32 precision)
-        return np.allclose(arr_a, arr_b, rtol=1e-3, atol=1e-4, equal_nan=True)
+        # Compare finite values using dynamic tolerances
+        return np.allclose(arr_a, arr_b, rtol=rtol, atol=atol, equal_nan=True)
       except Exception:
         # Fallback for shape mismatch or uncomparable types caught late
         return False

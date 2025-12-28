@@ -195,6 +195,9 @@
     "Linear": {
       "api": "nnx.Linear"
     },
+    "Load": {
+      "api": "jax.numpy.load"
+    },
     "Log": {
       "api": "jax.numpy.log"
     },
@@ -297,6 +300,9 @@
     },
     "Round": {
       "api": "jax.numpy.round"
+    },
+    "Save": {
+      "api": "jax.numpy.save"
     },
     "Sequential": {
       "api": "nnx.helpers.Sequential",

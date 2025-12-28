@@ -236,6 +236,13 @@
     "Less": {
       "api": "tensorflow.less"
     },
+    "Load": {
+      "api": "load",
+      "required_imports": [
+        "import tensorflow as tf"
+      ],
+      "requires_plugin": "io_handler"
+    },
     "Log": {
       "api": "tensorflow.math.log"
     },
@@ -316,6 +323,13 @@
     },
     "STFT": {
       "api": "tensorflow.signal.stft"
+    },
+    "Save": {
+      "api": "save",
+      "required_imports": [
+        "import tensorflow as tf"
+      ],
+      "requires_plugin": "io_handler"
     },
     "Scan": {
       "api": "tensorflow.scan"

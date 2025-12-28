@@ -15,12 +15,14 @@ from pathlib import Path
 from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule
 from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
+
 @pytest.fixture
 def plugin_dir(tmp_path):
   """Creates a temporary plugins directory."""
   d = tmp_path / "plugins"
   d.mkdir()
   return d
+
 
 def test_filename_normalization(plugin_dir):
   """
@@ -49,6 +51,7 @@ def test_filename_normalization(plugin_dir):
   assert '@register_hook("MyCustomHook")' in content
   assert "def MyCustomHook(" in content
 
+
 def test_generate_call_plugin(plugin_dir):
   """Verify generating a standard call plugin."""
   gen = PluginGenerator(plugin_dir)
@@ -67,6 +70,7 @@ def test_generate_call_plugin(plugin_dir):
   assert '"""\nTest Hook\n"""' in content
   assert "# TODO: Implement custom logic" in content
 
+
 def test_generate_block_plugin(plugin_dir):
   """Verify generating a block plugin uses the correct template."""
   gen = PluginGenerator(plugin_dir)
@@ -80,6 +84,7 @@ def test_generate_block_plugin(plugin_dir):
   # Should not contain specific helpers unless rules are present
   assert "def _get_kwarg_value" not in content
 
+
 def test_generate_creates_directory(tmp_path):
   """Verify it creates the plugin directory if missing."""
   missing_dir = tmp_path / "ghost_plugins"
@@ -91,6 +96,7 @@ def test_generate_creates_directory(tmp_path):
   assert created is True
   assert missing_dir.exists()
   assert (missing_dir / "test.py").exists()
+
 
 def test_generate_plugin_with_rules(plugin_dir):
   """
@@ -135,6 +141,7 @@ def test_generate_plugin_with_rules(plugin_dir):
   assert "return node.with_changes(func=new_func)" in content
   # Final fallback return
   assert content.strip().endswith("return node")
+
 
 def test_preserves_user_logic(plugin_dir):
   """
@@ -187,6 +194,7 @@ def custom_logic(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   # 2 for Function Docstring
   assert content.count('"""') == 4
 
+
 def test_preserves_logic_with_complex_indentation(plugin_dir):
   """
   Verify indentation is handled correctly when extracting and reinjecting body.
@@ -216,6 +224,7 @@ def indent_test(node, ctx):
   # The generated file uses 4 spaces.
   assert "\n    if True:" in content
 
+
 def test_user_logic_trumps_rules(plugin_dir):
   """
   Scenario: User has written custom logic. Updates specify generated rules.
@@ -242,6 +251,7 @@ def priority_test(node, ctx):
   assert 'return "UserLogic"' in content
   assert "val_0 =" not in content  # Rule logic skipped
 
+
 def test_overwrite_on_syntax_error(plugin_dir, capsys):
   """
   Scenario: Existing file has syntax error (unparseable).
@@ -263,6 +273,7 @@ def test_overwrite_on_syntax_error(plugin_dir, capsys):
   assert "syntax error" not in content
   assert "# TODO: Implement custom logic" in content
 
+
 def test_auto_wire_generation(plugin_dir):
   """
   Scenario: scaffold_plugins entry contains 'auto_wire' dict.
@@ -270,21 +281,9 @@ def test_auto_wire_generation(plugin_dir):
   """
   gen = PluginGenerator(plugin_dir)
 
-  auto_data = {
-    "ops": {
-      "TestOp": {
-        "std_args": ["x"],
-        "variants": {"jax": {"api": "foo", "requires_plugin": "rewired"}}
-      }
-    }
-  }
+  auto_data = {"ops": {"TestOp": {"std_args": ["x"], "variants": {"jax": {"api": "foo", "requires_plugin": "rewired"}}}}}
 
-  scaffold = PluginScaffoldDef(
-    name="rewired",
-    type=PluginType.CALL,
-    doc="Auto Wired",
-    auto_wire=auto_data
-  )
+  scaffold = PluginScaffoldDef(name="rewired", type=PluginType.CALL, doc="Auto Wired", auto_wire=auto_data)
 
   gen.generate(scaffold)
 

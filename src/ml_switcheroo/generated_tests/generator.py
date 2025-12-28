@@ -15,6 +15,7 @@ It operations in two stages:
     - Execute the operation across all available backends (Torch, JAX, etc.).
     - Compare outputs using `np.allclose`.
     - **Verify Output Shape** if `output_shape_calc` is defined in the ODL.
+    - **Verify Output Type** if `return_type` is defined in the ODL.
 
 JIT Logic (Decoupled):
     If a template specifies a `jit_template`, the generator wraps the execution call.
@@ -167,7 +168,7 @@ class TestGenerator:
   ) -> str:
     """
     Constructs a single test function string.
-    Includes logic for JIT wrapping and Output Shape Verification.
+    Includes logic for JIT wrapping, Output Shape Verification, and Output Type Verification.
 
     Args:
         op_name: Name of the operation (e.g. 'sum').
@@ -293,8 +294,19 @@ class TestGenerator:
         "            assert val.shape == expected_shape, f'{fw} shape mismatch: {val.shape} != {expected_shape}'"
       )
 
-    # 4. Comparison Logic
-    lines.append("\n    # 4. Comparison")
+    # 4. Type Verification (Feature: Output Type Verification)
+    return_type = details.get("return_type")
+    if return_type and return_type != "Any":
+      lines.append("\n    # 4. Type Verification")
+      type_check_logic = self._generate_type_check_code(return_type, "val")
+      if type_check_logic:
+        lines.append("    for fw, val in results.items():")
+        # Indent logic
+        for l in type_check_logic.split("\n"):
+          lines.append(f"        {l}")
+
+    # 5. Comparison Logic
+    lines.append("\n    # 5. Comparison")
     lines.append("    if len(results) < 2:")
     lines.append("        pytest.skip('Not enough successful backends to compare')")
     lines.append("")
@@ -310,6 +322,39 @@ class TestGenerator:
     lines.append("            assert ref == val")
 
     return "\n".join(lines)
+
+  def _generate_type_check_code(self, type_hint: str, var_name: str) -> str:
+    """
+    Generates Python assertion logic to verify output types at runtime.
+
+    Args:
+        type_hint: ODL return_type string (e.g. 'int', 'bool', 'Tensor').
+        var_name: Name of the variable holding the result value.
+
+    Returns:
+        Python code block with assertions.
+    """
+    t = type_hint.lower()
+
+    if t in ["int", "integer"]:
+      return f"assert np.issubdtype(np.array({var_name}).dtype, np.integer) or isinstance({var_name}, int), f'{{fw}} type mismatch: Expected int, got {{type({var_name})}}'"
+
+    if t in ["float", "float32", "double"]:
+      # Arrays of floats or scalars
+      return f"assert np.issubdtype(np.array({var_name}).dtype, np.floating) or isinstance({var_name}, float), f'{{fw}} type mismatch: Expected float, got {{type({var_name})}}'"
+
+    if t == "bool":
+      return f"assert np.issubdtype(np.array({var_name}).dtype, bool) or isinstance({var_name}, bool), f'{{fw}} type mismatch: Expected bool, got {{type({var_name})}}'"
+
+    if t == "str" or t == "string":
+      return f"assert isinstance({var_name}, str), f'{{fw}} type mismatch: Expected string, got {{type({var_name})}}'"
+
+    if "tensor" in t or "array" in t:
+      # Since we converted to numpy in `results`, we check for ndarray
+      # OR if scalar numpy type
+      return f"assert isinstance({var_name}, (np.ndarray, np.generic)), f'{{fw}} type mismatch: Expected Array/Tensor, got {{type({var_name})}}'"
+
+    return ""
 
   def _generate_value_code(self, name: str, type_hint: str) -> str:
     """

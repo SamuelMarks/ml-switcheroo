@@ -1,6 +1,8 @@
 import os
 import sys
+import inspect
 from datetime import datetime
+from pathlib import Path
 
 # -- Project information -----------------------------------------------------
 project = "ml-switcheroo"
@@ -18,7 +20,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../s
 extensions = [
   "sphinx.ext.autodoc",
   "sphinx.ext.napoleon",
-  # "sphinx.ext.viewcode",  <-- REMOVED: Causing IndexError due to AST line number mismatch
+  "sphinx.ext.linkcode",  # Using linkcode for GitHub source linking
   "sphinx.ext.intersphinx",
   "autoapi.extension",
   "myst_parser",
@@ -95,3 +97,64 @@ html_sidebars = {"**": ["logo-text.html", "globaltoc.html", "localtoc.html", "se
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+
+# -- Linkcode Resolution Logic -----------------------------------------------
+def linkcode_resolve(domain, info):
+  """
+  Resolve a GitHub URL for the given Python object.
+  Required by sphinx.ext.linkcode to generate [source] links.
+  """
+  if domain != "py":
+    return None
+
+  if not info["module"]:
+    return None
+
+  # Try to import the module to inspect it
+  mod = sys.modules.get(info["module"])
+  if not mod:
+    # If not already imported, try importlib (though autoapi usually handles this via static analysis,
+    # linkcode requires runtime inspection for line numbers)
+    return None
+
+  # Traverse attributes to find the object
+  obj = mod
+  for part in info["fullname"].split("."):
+    try:
+      obj = getattr(obj, part)
+    except AttributeError:
+      return None
+
+  # Unwrap decorators if needed
+  while hasattr(obj, "__wrapped__"):
+    obj = obj.__wrapped__
+
+  # Introspect source file and lines
+  try:
+    fn = inspect.getsourcefile(obj)
+    source, lineno = inspect.getsourcelines(obj)
+  except (TypeError, OSError):
+    return None
+
+  if not fn:
+    return None
+
+  # Get relative path to repo root
+  # assuming conf.py is in docs/ and project root is parent "../"
+  root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+  try:
+    rel_path = os.path.relpath(fn, start=root_path)
+  except ValueError:
+    return None
+
+  # Ignore if file is outside repo (e.g. system installs or site-packages)
+  if rel_path.startswith(".."):
+    return None
+
+  end_lineno = lineno + len(source) - 1
+
+  # Construct GitHub URL (assuming master branch)
+  blob_url = f"https://github.com/SamuelMarks/ml-switcheroo/blob/master/{rel_path}#L{lineno}-L{end_lineno}"
+  return blob_url

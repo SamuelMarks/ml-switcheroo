@@ -8,6 +8,7 @@ It provides:
     This moves the "Golden Set" logic out of the central hub and into this file.
 3.  **Discovery**: Heuristics and logic for scanning the installed `torch` library
     to discover new operations dynamically.
+4.  **IO & Device Support**: Wires up serialization (`save`/`load`) and device allocation logic.
 """
 
 import inspect
@@ -337,6 +338,11 @@ class TorchAdapter:
       "load_state_dict": StandardMap(api="torch.nn.Module.load_state_dict"),
       "parameters": StandardMap(api="torch.nn.Module.parameters"),
       "DataLoader": StandardMap(api="torch.utils.data.DataLoader"),
+      # --- Wired Orphans: IO & Devices ---
+      "Save": StandardMap(api="torch.save", args={"obj": "obj", "f": "f"}),
+      "Load": StandardMap(api="torch.load", args={"f": "f"}),
+      "Device": StandardMap(api="torch.device", requires_plugin="device_allocator"),
+      "CudaAvailable": StandardMap(api="torch.cuda.is_available"),  # <--- NEW: Wired Orphan
       # --- 10. Container Logic (Reverse Mapping from Flax NNX) ---
       "Param": StandardMap(api="torch.nn.Parameter"),
       "Variable": StandardMap(api="torch.nn.Parameter", requires_plugin="nnx_param_to_torch"),
@@ -382,6 +388,7 @@ class TorchAdapter:
     return "pass"
 
   def get_serialization_imports(self) -> List[str]:
+    """Returns imports required for IO operations."""
     return ["import torch"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:

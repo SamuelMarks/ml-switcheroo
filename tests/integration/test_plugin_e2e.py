@@ -4,150 +4,133 @@ End-to-End Integration Test for Plugins.
 Verifies that the entire plugin pipeline works:
 CLI -> Engine -> Semantics -> Hooks -> Plugin Logic -> Output.
 
-Target Scenarios:
-1. Decompose: torch.add(x, y, alpha=2) -> jax.numpy.add(x, y * 2)
-2. Recompose: jax.numpy.add(x, y * 2)  -> torch.add(x, y, alpha=2)
+This test uses a locally defined hook to verify infrastructure without relying
+on specific built-in plugins that may change or be removed.
 """
 
 import pytest
+import libcst as cst
 from typing import Set
 
 from ml_switcheroo.cli.__main__ import main
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.hooks import _HOOKS
-from ml_switcheroo.plugins.decompositions import transform_alpha_add, transform_alpha_add_reverse
+from ml_switcheroo.core.hooks import _HOOKS, register_hook, HookContext, clear_hooks
 
 # --- Mock Knowledge Base for E2E ---
-# Since we removed hardcoded defaults, we must provide the knowledge
-# that tells the E2E CLI to use the plugins. This simulates having valid JSONs.
 
 
 class E2EMockSemantics(SemanticsManager):
+  """
+  Mock Semantics Manager for End-to-End plugin testing.
+
+  Defines a test operation 'MagicOp' that requires a plugin to translate
+  from 'torch' to 'jax'.
+  """
+
   def __init__(self):
+    """Initialize with an empty state and inject 'MagicOp' definition."""
     # Skip super init to avoid file loading
     self.data = {}
     self.import_data = {}
-    self.framework_configs = {}  # Required by ASTEngine alias checker
+    self.framework_configs = {}
     self._known_rng_methods = set()
-    # Simple reverse index
-    self.data["add"] = {
-      "std_args": ["x", "y"],
+
+    # Define operation with plugin requirement
+    self.data["MagicOp"] = {
+      "std_args": ["x"],
       "variants": {
-        "torch": {"api": "torch.add", "requires_plugin": "recompose_alpha"},
-        "jax": {"api": "jax.numpy.add", "requires_plugin": "decompose_alpha"},
+        "torch": {"api": "torch.magic"},
+        "jax": {"api": "jax.magic", "requires_plugin": "e2e_test_hook"},
       },
     }
+
+    # Setup reverse index for lookup
     self._reverse_index = {
-      "torch.add": ("add", self.data["add"]),
-      "jax.numpy.add": ("add", self.data["add"]),
+      "torch.magic": ("MagicOp", self.data["MagicOp"]),
     }
 
+    # Initialize required attributes for discovery/fixer
+    self._providers = {}
+    self._source_registry = {}
+    self._key_origins = {}
+    self._validation_status = {}
+
   def get_all_rng_methods(self) -> Set[str]:
+    """Return empty set for RNG methods."""
     return self._known_rng_methods
 
   def get_definition(self, name):
+    """Mock reverse lookup."""
     return self._reverse_index.get(name)
 
   def get_import_map(self, _target):
-    return {}  # Basic for E2E
+    """Return empty import map."""
+    return {}
 
   def get_known_apis(self):
+    """Return data dictionary."""
     return self.data
 
 
 @pytest.fixture
 def mock_cli_semantics(monkeypatch):
   """Patches the SemanticsManager used in the CLI handler."""
-  # Updated path to point to 'commands' module
+  # Updated path to point to 'commands' module where it is instantiated
   monkeypatch.setattr("ml_switcheroo.cli.handlers.convert.SemanticsManager", E2EMockSemantics)
 
 
 @pytest.fixture(autouse=True)
 def register_test_hooks():
-  """Ensure required hooks are registered in the global registry."""
-  _HOOKS["decompose_alpha"] = transform_alpha_add
-  _HOOKS["recompose_alpha"] = transform_alpha_add_reverse
+  """
+  Registers a local test hook for the duration of the test.
+  Ensures a clean state before and after.
+  """
+  clear_hooks()
+
+  @register_hook("e2e_test_hook")
+  def transform_magic_op(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
+    """
+    Test Hook: Transforms `torch.magic(x)` to `jax.magic_resolved(x)`.
+    Also injects a comment to prove control flow.
+    """
+    # 1. Verify context
+    assert ctx.source_fw == "torch"
+    assert ctx.target_fw == "jax"
+
+    # 2. Modify Node
+    return node.with_changes(func=cst.Name("magic_resolved"))
+
   yield
-  # No strict cleanup needed for registry in e2e context usually
+
+  clear_hooks()
 
 
-def test_alpha_composition_decomposition_e2e(tmp_path, mock_cli_semantics, register_test_hooks):
+def test_plugin_pipeline_e2e(tmp_path, mock_cli_semantics, register_test_hooks):
   """
-  Verify complete bidirectional flow using 'decompose_alpha' and 'recompose_alpha'.
+  Verify complete flow: CLI execution triggers the registered 'e2e_test_hook'.
+
+  Steps:
+  1. Write source file with `torch.magic(x)`.
+  2. Run `ml_switcheroo convert`.
+  3. Verify output contains `magic_resolved(x)`.
   """
+  # 1. Source Input
+  infile = tmp_path / "torch_source.py"
+  infile.write_text("z = torch.magic(x)\n", encoding="utf-8")
+  outfile = tmp_path / "jax_output.py"
 
-  # --- STEP 1: Torch -> JAX (Decomposition) ---
-  infile_t2j = tmp_path / "torch_source.py"
-  infile_t2j.write_text("z = torch.add(x, y, alpha=2.5)\n")
-  outfile_t2j = tmp_path / "jax_output.py"
-
-  args_t2j = ["convert", str(infile_t2j), "--out", str(outfile_t2j), "--source", "torch", "--target", "jax"]
-
-  try:
-    main(args_t2j)
-  except SystemExit as e:
-    assert e.code == 0
-
-  assert outfile_t2j.exists()
-  content_t2j = outfile_t2j.read_text()
-
-  # Checks behavior of 'decompose_alpha'
-  assert "import jax" in content_t2j
-  assert "jax.numpy.add" in content_t2j
-  assert "alpha=" not in content_t2j.replace(" ", "")  # Check ignoring space
-  assert "*" in content_t2j  # Multiplication injected
-  assert "2.5" in content_t2j
-
-  # --- STEP 2: JAX -> Torch (Recomposition) ---
-  # We use the valid JAX output from Step 1 as input here
-  # Input: jax.numpy.add(x, y * 2.5) or x, 2.5 * y
-  infile_j2t = outfile_t2j
-  outfile_j2t = tmp_path / "torch_recovered.py"
-
-  args_j2t = ["convert", str(infile_j2t), "--out", str(outfile_j2t), "--source", "jax", "--target", "torch"]
-
-  try:
-    main(args_j2t)
-  except SystemExit as e:
-    assert e.code == 0
-
-  assert outfile_j2t.exists()
-  content_j2t = outfile_j2t.read_text()
-
-  # Checks behavior of 'recompose_alpha'
-  assert "import torch" in content_j2t
-  # Expect function swap back
-  assert "torch.add" in content_j2t
-
-  # Expect alpha to be reconstructed from the multiplication
-  # Normalize whitespace to avoid failure on 'alpha = 2.5' vs 'alpha=2.5'
-  normalized_j2t = content_j2t.replace(" ", "")
-  assert "alpha=" in normalized_j2t
-  assert "2.5" in normalized_j2t
-
-  # Cleanup check: The plugin strip inner arithmetic?
-  # Logic: argument structure should be clean
-  assert "*" not in content_j2t.split("torch.add")[1]
-
-
-def test_recompose_fallback(tmp_path, mock_cli_semantics):
-  """
-  Verify that JAX -> Torch conversion falls back to simple rename
-  if the pattern (multiplication) is not present.
-  """
-  infile = tmp_path / "simple_jax.py"
-  infile.write_text("z = jax.numpy.add(x, y)")
-  outfile = tmp_path / "simple_torch.py"
-
-  args = ["convert", str(infile), "--out", str(outfile), "--source", "jax", "--target", "torch"]
+  # 2. Execute CLI
+  args = ["convert", str(infile), "--out", str(outfile), "--source", "torch", "--target", "jax"]
 
   try:
     main(args)
-  except SystemExit:
-    pass
+  except SystemExit as e:
+    assert e.code == 0
 
-  content = outfile.read_text()
+  # 3. Validation
+  assert outfile.exists()
+  content = outfile.read_text("utf-8")
 
-  # Should simply be renamed based on the map provided by E2EMockSemantics
-  assert "torch.add(x, y)" in content
-  assert "alpha" not in content
+  # The plugin should have renamed the function
+  assert "magic_resolved(x)" in content
+  assert "torch.magic" not in content

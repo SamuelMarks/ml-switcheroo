@@ -47,27 +47,40 @@ def handle_pre_checks(
       log_diff("Functional Unwrap", original, result_node)
       return True, result_node
 
-  # 2. Plugin Check (Explicit Requirement)
+  # 2. Plugin Check (Explicit Requirement or ODL In-Place Metadata)
   # If the known function name maps to a plugin-required stub, we flag it.
-  # Note: This is an early check, but the actual hook execution happens in `logic_core.py` usually.
-  # However, if it's a heuristic hook (like in-place unroll), we run it here.
   plugin_claim = False
+  is_inplace = False
+
   if func_name:
-    mapping = rewriter._get_mapping(func_name)
+    mapping = rewriter._get_mapping(func_name, silent=True)
     if mapping and "requires_plugin" in mapping:
       plugin_claim = True
 
+    # Check ODL metadata for inplace flag
+    defn = rewriter.semantics.get_definition(func_name)
+    if defn:
+      _, details = defn
+      if details.get("is_inplace"):
+        is_inplace = True
+
   # 2b. Heuristic Plugin: In-Place Unrolling
-  # Automatically triggers for methods ending in '_' if not claimed by explicit map
-  if not plugin_claim and func_name and func_name.endswith("_") and not func_name.startswith("__"):
+  # Triggers if:
+  # A) 'is_inplace' is set in ODL metadata
+  # B) Method ends with '_' (heuristic) AND isn't claimed by another plugin
+  should_unroll = False
+  if is_inplace:
+    should_unroll = True
+  elif not plugin_claim and func_name and func_name.endswith("_") and not func_name.startswith("__"):
+    should_unroll = True
+
+  if should_unroll:
     hook = get_hook("unroll_inplace_ops")
     if hook:
       new_node = hook(updated, rewriter.ctx)
       if new_node != updated:
-        log_diff("In-place Unroll (Heuristic)", updated, new_node)
+        log_diff("In-place Unroll", updated, new_node)
         # If transformed, we return it as final result for this phase
-        # Usually we might want to continue processing (e.g. arg rewrite),
-        # but unroll changes the structure significantly (to BinOp).
         return True, new_node
 
   # 3. Lifecycle Method Handling (Strip/Warn)
@@ -92,8 +105,7 @@ def handle_pre_checks(
         log_diff("Lifecycle Warn", original, result_node)
         return True, result_node
 
-  # 4. Stateful Object Usage
-  # Rewrites `self.layer(x)` to `self.layer.apply(params, x)` if target requires it
+  # 4. Stateful Call (e.g. self.layer(x) -> self.layer.apply(params, x))
   if func_name and rewriter._is_stateful(func_name):
     fw_config = rewriter.semantics.get_framework_config(rewriter.target_fw)
     stateful_spec = fw_config.get("stateful_call")

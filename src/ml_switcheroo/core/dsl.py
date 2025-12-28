@@ -18,6 +18,7 @@ from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
 from ml_switcheroo.enums import LogicOp
 
+
 class OpType(str, Enum):
   """
   Classification of the operation's syntactic usage.
@@ -27,6 +28,7 @@ class OpType(str, Enum):
   CONTEXT = "context"
   DECORATOR = "decorator"
 
+
 class ContainerType(str, Enum):
   """
   Supported container types for argument packing.
@@ -34,6 +36,7 @@ class ContainerType(str, Enum):
 
   TUPLE = "Tuple"
   LIST = "List"
+
 
 class ParameterDef(BaseModel):
   """
@@ -82,6 +85,7 @@ class ParameterDef(BaseModel):
     description="Parameter kind: 'positional_only', 'keyword_only', 'var_positional', etc.",
   )
 
+
 class Rule(BaseModel):
   """
   Declarative rule for conditional logic within a variant or plugin.
@@ -99,6 +103,7 @@ class Rule(BaseModel):
   )
   use_api: str = Field(..., description="The target API path to use if the condition matches.")
 
+
 class ImportReq(BaseModel):
   """
   Structured definition for a required import, supporting aliasing.
@@ -106,6 +111,7 @@ class ImportReq(BaseModel):
 
   module: str = Field(..., description="The name of the module to import (e.g. 'numpy').")
   alias: Optional[str] = Field(None, description="Optional alias (e.g. 'np').")
+
 
 class FrameworkVariant(BaseModel):
   """
@@ -154,7 +160,7 @@ class FrameworkVariant(BaseModel):
   # --- Feature: Tensor Layout Permutation ---
   layout_map: Optional[Dict[str, str]] = Field(
     None,
-    description="Map of arguments (or 'return') to layout transformation strings (e.g., {'x': 'NCHW->NHWC'}). " 
+    description="Map of arguments (or 'return') to layout transformation strings (e.g., {'x': 'NCHW->NHWC'}). "
     "Engine automatically injects permutation calls to match target layout expected by this API variant.",
   )
 
@@ -167,7 +173,7 @@ class FrameworkVariant(BaseModel):
   # --- Feature: Composite Operations (Macros) ---
   macro_template: Optional[str] = Field(
     None,
-    description="Python expression template string for composite operations. " 
+    description="Python expression template string for composite operations. "
     "Use standard argument names as placeholders (e.g. '{x} * jax.nn.sigmoid({x})').",
   )
 
@@ -201,6 +207,7 @@ class FrameworkVariant(BaseModel):
     None, description="Custom error message to display if this mapping fails or is missing."
   )
 
+
 class PluginType(str, Enum):
   """
   Enumeration of supported plugin structures to generate.
@@ -208,6 +215,7 @@ class PluginType(str, Enum):
 
   CALL = "call_transform"
   BLOCK = "block_transform"
+
 
 class PluginScaffoldDef(BaseModel):
   """
@@ -225,9 +233,10 @@ class PluginScaffoldDef(BaseModel):
   # --- Feature: Auto-Wire ---
   auto_wire: Optional[Dict[str, Any]] = Field(
     None,
-    description="Dictionary defining Semantic Operations to be automatically injected via the plugin itself." 
-    "Matches the structure of an ODL OperationDef JSON."
+    description="Dictionary defining Semantic Operations to be automatically injected via the plugin itself."
+    "Matches the structure of an ODL OperationDef JSON.",
   )
+
 
 class OperationDef(BaseModel):
   """

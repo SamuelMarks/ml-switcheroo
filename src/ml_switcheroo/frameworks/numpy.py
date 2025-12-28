@@ -115,6 +115,8 @@ class NumpyAdapter:
     Includes Math, Extras, Types, and Casting logic.
     """
     return {
+      "Save": StandardMap(api="save", requires_plugin="io_handler", required_imports=["import numpy as np"]),
+      "Load": StandardMap(api="load", requires_plugin="io_handler", required_imports=["import numpy as np"]),
       # --- Math / Array ---
       "Abs": StandardMap(api="np.abs"),
       "Mean": StandardMap(api="np.mean"),
