@@ -35,3 +35,4 @@ class LogicOp(str, Enum):
   LTE = "lte"  # <=
   IN = "in"  # value in [list]
   NOT_IN = "not_in"  # value not in [list]
+  IS_TYPE = "is_type"  # Checks if AST node matches type (int, list, etc)

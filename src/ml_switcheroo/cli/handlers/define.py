@@ -7,18 +7,14 @@ inject the corresponding Python code into the `ml-switcheroo` source tree.
 
 Workflow:
 1.  **Parse YAML**: Validates input against the `OperationDef` schema.
-2.  **Auto-Inference**: Resolves `api: "infer"` placeholders using `SimulatedReflection`.
-3.  **Inject Hub**: Updates `standards_internal.py` with the abstract definition.
-4.  **Inject Spokes**: Updates framework adapter files with mapping variants.
-5.  **Scaffold Plugins**: Generates boilerplate Python files for complex logic hooks.
-
-Dependencies:
-    - `PyYAML` (optional, fails gracefully if missing).
-    - `LibCST` for robust AST transformation.
+2.  **Auto-Inference**: Resolves `api: "infer"` placeholders.
+3.  **Inject Hub**: Updates `standards_internal.py` (Abstract Standard).
+4.  **Inject Spokes**: Updates framework adapter files (Mappings).
+5.  **Scaffold Plugins**: Generates boilerplate Python files for hooks.
+6.  **Generate Tests**: Creates physical test file for verification.
 """
 
 import fileinput
-import sys
 import inspect
 from pathlib import Path
 from typing import Optional, Any
@@ -37,16 +33,18 @@ from ml_switcheroo.tools.injector_fw import FrameworkInjector
 from ml_switcheroo.tools.injector_plugin import PluginGenerator
 from ml_switcheroo.utils.console import log_success, log_error, log_info, log_warning
 from ml_switcheroo.frameworks import get_adapter
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.generated_tests.generator import TestGenerator
 import ml_switcheroo.semantics.standards_internal as internal_standards_module
 import ml_switcheroo.plugins
 
 
-def handle_define(yaml_path: Path) -> int:
+def handle_define(yaml_file: Path) -> int:
   """
   Main entry point for the `define` CLI command.
 
   Args:
-      yaml_path: Path to the ODL YAML file.
+      yaml_file: Path to the ODL definition YAML file.
 
   Returns:
       int: Exit code (0 for success, 1 for failure).
@@ -55,12 +53,12 @@ def handle_define(yaml_path: Path) -> int:
     log_error("PyYAML is not installed. Please run `pip install PyYAML`.")
     return 1
 
-  if not yaml_path.exists() and not yaml_path.name == "-":
-    log_error(f"File not found: {yaml_path}")
+  if not yaml_file.exists() and not yaml_file.name == "-":
+    log_error(f"File not found: {yaml_file}")
     return 1
 
   try:
-    with fileinput.FileInput(str(yaml_path), mode="r", encoding="utf-8") as content:
+    with fileinput.FileInput(str(yaml_file), mode="r", encoding="utf-8") as content:
       data = yaml.safe_load("".join(content))
 
     # Handle both Single Object and List of Objects
@@ -72,6 +70,11 @@ def handle_define(yaml_path: Path) -> int:
   except Exception as e:
     log_error(f"Failed to valid ODL YAML: {e}")
     return 1
+
+  # Load Semantics Manager once (for test generation templates)
+  # Note: We rely on the manager to load templates, but we manually
+  # construct the op definition dict for the generator to ensure it sees the NEW op.
+  semantics_mgr = SemanticsManager()
 
   for op_def in ops:
     log_info(f"Defining Operation: {op_def.operation}...")
@@ -89,7 +92,10 @@ def handle_define(yaml_path: Path) -> int:
     # 4. Plugin Scaffolding (New Hooks)
     _scaffold_plugins(op_def)
 
-    log_success(f"Operation '{op_def.operation}' defined successfully.")
+    # 5. Test Generation (New Feature)
+    _generate_test_file(op_def, semantics_mgr)
+
+    log_success(f"Operation '{op_def.operation}' defined & tested.")
 
   return 0
 
@@ -97,7 +103,6 @@ def handle_define(yaml_path: Path) -> int:
 def _resolve_inferred_apis(op_def: OperationDef) -> None:
   """
   Iterates through variants and attempts to infer APIs marked with 'infer'.
-  Updates the OperationDef object in-place.
   """
   for fw_key, variant in op_def.variants.items():
     if variant and variant.api and variant.api.lower() == "infer":
@@ -143,7 +148,6 @@ def _inject_spokes(op_def: OperationDef) -> None:
   Iterates variants and injects mappings into framework adapter files.
   """
   for fw_key, variant in op_def.variants.items():
-    # Helper: Check if variant is null or api is None (supported by new base.py)
     if not variant:
       continue
 
@@ -152,7 +156,6 @@ def _inject_spokes(op_def: OperationDef) -> None:
       continue
     adapter = get_adapter(fw_key)
     if not adapter:
-      # log_warning(f"Skipping '{fw_key}': Adapter not registered or installed.")
       continue
     try:
       adapter_cls = type(adapter)
@@ -186,7 +189,9 @@ def _scaffold_plugins(op_def: OperationDef) -> None:
     if ml_switcheroo.plugins.__file__:
       plugins_pkg_dir = Path(ml_switcheroo.plugins.__file__).parent
     else:
+      # Fallback path logic
       plugins_pkg_dir = Path(__file__).resolve().parents[2] / "plugins"
+
     generator = PluginGenerator(plugins_pkg_dir)
     for plug_def in op_def.scaffold_plugins:
       try:
@@ -199,3 +204,44 @@ def _scaffold_plugins(op_def: OperationDef) -> None:
         log_error(f"Failed to generate plugin {plug_def.name}: {e}")
   except Exception as e:
     log_error(f"Plugin scaffolding process error: {e}")
+
+
+def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager) -> None:
+  """
+  Generates a physical test file for the operation.
+  Location: tests/generated/test_odl_{opname}.py
+  """
+  # 1. Construct Dictionary representation of the Op for the Generator
+  # TestGenerator expects { "OpName": { "std_args": ..., "variants": ... } }
+  # We must convert the pydantic model to dict
+  op_data_dict = op_def.model_dump(exclude_unset=True)
+
+  # Wrap in single-key dictionary
+  semantics_input = {op_def.operation: op_data_dict}
+
+  # 2. Determine Output Path
+  # Resolve 'tests' directory relative to package
+  try:
+    # Assuming typical structure: src/ml_switcheroo/cli/handlers/define.py -> root/
+    root_dir = Path(__file__).parents[4]
+    if not (root_dir / "pyproject.toml").exists():
+      # Fallback if structure confusing (e.g. installed pkg vs source)
+      root_dir = Path.cwd()
+  except Exception:
+    root_dir = Path.cwd()
+
+  test_dir = root_dir / "tests" / "generated"
+  test_file = test_dir / f"test_odl_{op_def.operation.lower()}.py"
+
+  # 3. Run Generator
+  try:
+    gen = TestGenerator(semantics_mgr=mgr)
+    gen.generate(semantics_input, test_file)
+    # Log path usually relative to cwd for readability
+    try:
+      rel_path = test_file.relative_to(Path.cwd())
+      log_success(f"Generated Verification Test: {rel_path}")
+    except ValueError:
+      log_success(f"Generated Verification Test: {test_file}")
+  except Exception as e:
+    log_warning(f"Failed to generate tests for {op_def.operation}: {e}")

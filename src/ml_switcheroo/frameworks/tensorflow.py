@@ -11,7 +11,6 @@ It supports:
 3.  **Semantic Definitions**: Static mappings for standard Math, NN, and Optimization ops.
 """
 
-import sys
 import logging
 from typing import List, Tuple, Optional, Dict, Any, Set
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector

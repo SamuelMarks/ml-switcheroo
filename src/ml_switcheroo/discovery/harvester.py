@@ -15,8 +15,8 @@ Logic:
 
     - **Naming Convention**: `np_x` matches standard arg `x`.
     - **Explicit Keywords**: `kwargs` match standard arg names directly.
-    - **Value-Based Inference**: Matches literals (e.g. `1`, `True`) to
-      type hints defined in the Semantics (e.g., `axis: int`).
+    - **Value-Based Inference**: Matches literals (e.g. `1`, `(1, 2)`) to
+      type hints defined in the Semantics (e.g., `axis: Tuple[int]`).
 6.  Construct and return valid mapping dictionaries.
 """
 
@@ -218,10 +218,11 @@ class TargetCallVisitor(ast.NodeVisitor):
   """
   Helper AST walker to find specific API calls and extract arguments.
 
-  Implements **Value-Based Inference**:
+  Implements **Value-Based Inference** for Primitives and Containers:
 
   - Matches naming conventions (``np_x``).
-  - Matches literal types (e.g. ``1`` is ``int``) to Semantic Types (``axis: int``).
+  - Matches literal types (e.g. `1` is `int`, `(1, 2)` is `Tuple[int]`)
+    to Semantic Types (``axis: int``, ``shape: Tuple[int]``).
   """
 
   def __init__(
@@ -250,6 +251,12 @@ class TargetCallVisitor(ast.NodeVisitor):
     for item in raw:
       if isinstance(item, (list, tuple)) and len(item) >= 2:
         out.append((item[0], item[1]))
+      elif isinstance(item, dict):
+        # Handle dictionary definition (ODL)
+        name = item.get("name")
+        typ = item.get("type", "Any")
+        if name:
+          out.append((name, typ))
       elif isinstance(item, str):
         out.append((item, "Any"))
     return out
@@ -265,6 +272,9 @@ class TargetCallVisitor(ast.NodeVisitor):
     if not call_name:
       return
 
+    # Relaxed matching to handle method calls on objects
+    # e.g. target_api="torch.nn.functional.relu", call="F.relu" -> Match (handled by alias resolver)
+    # e.g. target_api="Obj.method", call="obj.method" -> Handled elsewhere
     if call_name != self.target_api:
       return
 
@@ -286,6 +296,7 @@ class TargetCallVisitor(ast.NodeVisitor):
 
       # Heuristic B: Value-Based Inference via Literal Matching
       # e.g. call(axis=1) matches std_arg 'axis' type 'int'
+      # e.g. call(axes=(0, 1)) matches std_arg 'axes' type 'Tuple[int]'
       val_type = self._infer_literal_type(kw.value)
       if val_type != "Any":
         match = self._find_std_arg_by_type(val_type)
@@ -332,14 +343,15 @@ class TargetCallVisitor(ast.NodeVisitor):
 
   def _infer_literal_type(self, node: ast.AST) -> str:
     """
-    Determines logical type of a literal node.
+    Determines logical type of a literal node, including Containers.
 
     Args:
         node: AST node.
 
     Returns:
-        String: 'int', 'float', 'bool', 'str', or 'Any'.
+        String hint: 'int', 'float', 'bool', 'str', 'List[...]`, 'Tuple[...]', or 'Any'.
     """
+    # Primitives
     if isinstance(node, ast.Constant):
       val = node.value
       if isinstance(val, bool):
@@ -350,26 +362,80 @@ class TargetCallVisitor(ast.NodeVisitor):
         return "float"
       if isinstance(val, str):
         return "str"
+
+    # Containers (New Feature)
+    if isinstance(node, ast.List):
+      return self._infer_container_type(node.elts, "List")
+
+    # Explicit handling for Tuple nodes
+    if isinstance(node, ast.Tuple):
+      return self._infer_container_type(node.elts, "Tuple")
+
     return "Any"
+
+  def _infer_container_type(self, elements: List[ast.AST], container_name: str) -> str:
+    """Helper to infer type of homogenous container elements."""
+    if not elements:
+      # Empty container matches generic List/Tuple
+      return container_name
+
+    # Infer type of first element
+    inner_type = self._infer_literal_type(elements[0])
+
+    # Verify homogeneity (heuristic for simple matching)
+    # If types are mixed, it returns generic 'List'/'Tuple' which matches loosely.
+    for e in elements[1:]:
+      t = self._infer_literal_type(e)
+      if t != inner_type:
+        return container_name
+
+    if inner_type == "Any":
+      return container_name
+
+    return f"{container_name}[{inner_type}]"
 
   def _find_std_arg_by_type(self, val_type: str) -> Optional[str]:
     """
     Constraints Solver: Find unique std_arg that matches this type.
 
     If multiple args match (e.g. two ints), returns None (Ambiguous).
+    Logic parses containment (e.g. 'Tuple[int]' matches 'Tuple[int, int]').
     """
     candidates = []
+    # Robustly clean whitespace for matching
+    clean_val_type = val_type.replace(" ", "")
+
     for name, type_hint in self.std_args_info:
-      # Check simple match (hint usually 'int' or 'Optional[int]')
-      if val_type in type_hint or type_hint == "Any":
+      clean_hint = type_hint.replace(" ", "")
+      # Check match using relaxed string containment
+      # "Tuple[int]" in "Tuple[int,...]" -> True
+      # "int" in "Tuple[int]" -> True (False Positive risk handled by refined check below?)
+
+      # Simple substring check covers most generics:
+      # val="Tuple[int]" -> hint="Tuple[int,int]" (Pass)
+      # val="int" -> hint="int" (Pass)
+
+      if clean_val_type in clean_hint or clean_hint == "Any":
         candidates.append(name)
+        continue
+
+      # --- Update for Container Partial Matching ---
+      # Handles Tuple[int] matching Tuple[int, ...]
+      if clean_val_type.endswith("]") and "[" in clean_val_type:
+        # e.g. clean_val_type="Tuple[int]"
+        # check if hint starts with "Tuple[int"
+        # This works for Tuple[int], Tuple[int,int], Tuple[int,...]
+        prefix = clean_val_type[:-1]  # "Tuple[int"
+        if clean_hint.startswith(prefix):
+          candidates.append(name)
+          continue
 
     if len(candidates) == 1:
       return candidates[0]
 
     # Refined check for specific common names if ambiguous
-    # e.g. if we have axis(int) and other(int), prioritize axis
-    priority = ["axis", "dim", "keepdims"]
+    # Important: Order matters. More specific terms first.
+    priority = ["axis", "axes", "dim", "dims", "keepdims", "shape", "size"]
     for p in priority:
       if p in candidates:
         return p

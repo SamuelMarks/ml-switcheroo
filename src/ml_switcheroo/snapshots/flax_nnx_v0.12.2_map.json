@@ -220,6 +220,9 @@
       "api": "nnx.module.Module",
       "args": {}
     },
+    "ModuleList": {
+      "api": "nnx.List"
+    },
     "MultiheadAttention": {
       "api": "nnx.MultiHeadAttention"
     },
@@ -306,6 +309,9 @@
       "api": "nnx.pytreelib.ArrayRepr.shape",
       "args": {}
     },
+    "SiLU": {
+      "api": "nnx.silu"
+    },
     "Sigmoid": {
       "api": "nnx.sigmoid"
     },
@@ -359,6 +365,9 @@
     },
     "Tanh": {
       "api": "jax.numpy.tanh"
+    },
+    "TensorType": {
+      "api": "jax.Array"
     },
     "Threshold": {
       "api": "nnx.training.metrics.Accuracy.threshold",

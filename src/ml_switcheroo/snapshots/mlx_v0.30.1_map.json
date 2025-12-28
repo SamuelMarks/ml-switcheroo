@@ -588,6 +588,9 @@
       "api": "mlx.core.array.shape",
       "args": {}
     },
+    "SiLU": {
+      "api": "mlx.nn.silu"
+    },
     "Sigmoid": {
       "api": "mlx.core.sigmoid",
       "args": {
@@ -709,6 +712,9 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "TensorType": {
+      "api": "mlx.core.array"
     },
     "Threshold": {
       "api": "mlx.nn.layers.activations.Step.threshold",

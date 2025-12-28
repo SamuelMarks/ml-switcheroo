@@ -223,6 +223,7 @@
     "Min": {
       "api": "jax.numpy.min"
     },
+    "ModuleList": {},
     "Mul": {
       "api": "jnp.multiply"
     },
@@ -274,6 +275,9 @@
         "a": "a"
       }
     },
+    "SiLU": {
+      "api": "jax.nn.silu"
+    },
     "Sign": {
       "api": "jax.numpy.sign"
     },
@@ -308,6 +312,9 @@
     },
     "Tanh": {
       "api": "jax.numpy.tanh"
+    },
+    "TensorType": {
+      "api": "jax.Array"
     },
     "Tile": {
       "api": "jax.numpy.tile"

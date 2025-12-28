@@ -1,8 +1,8 @@
 """
 Primitive Generation Logic for the Fuzzer.
 
-This module contains functions to generate random scalars and NumPy arrays
-respecting specified constraints (min, max, dtype).
+This module contains functions to generate random scalars, NumPy arrays,
+and dummy callables respecting specified constraints (min, max, dtype).
 """
 
 import random
@@ -137,3 +137,22 @@ def get_random_shape(seed_shape: Optional[Tuple[int, ...]] = None) -> Tuple[int,
 
   rank = random.randint(1, 4)
   return tuple(random.randint(2, 5) for _ in range(rank))
+
+
+def generate_fake_callable(constraints: Dict[str, Any] = None) -> Any:
+  """
+  Generates a dummy function (identity) for functional ops.
+
+  This is critical for fuzzer verification of HOFs (Higher Order Functions)
+  like `vmap`, `grad`, or `jit` which expect a callable input.
+
+  The return value is a lambda that accepts any arguments and returns the first one.
+  This ensures compatibility with unary ops (`f(x)`) and binary ops (`f(x, y)`).
+
+  Args:
+      constraints (Dict[str, Any]): Unused, kept for API consistency.
+
+  Returns:
+      Callable: A lambda function `lambda x, *args, **kwargs: x`.
+  """
+  return lambda x, *args, **kwargs: x

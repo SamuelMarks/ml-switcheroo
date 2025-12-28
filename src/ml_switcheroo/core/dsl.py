@@ -18,7 +18,6 @@ from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
 from ml_switcheroo.enums import LogicOp
 
-
 class OpType(str, Enum):
   """
   Classification of the operation's syntactic usage.
@@ -28,6 +27,13 @@ class OpType(str, Enum):
   CONTEXT = "context"
   DECORATOR = "decorator"
 
+class ContainerType(str, Enum):
+  """
+  Supported container types for argument packing.
+  """
+
+  TUPLE = "Tuple"
+  LIST = "List"
 
 class ParameterDef(BaseModel):
   """
@@ -76,7 +82,6 @@ class ParameterDef(BaseModel):
     description="Parameter kind: 'positional_only', 'keyword_only', 'var_positional', etc.",
   )
 
-
 class Rule(BaseModel):
   """
   Declarative rule for conditional logic within a variant or plugin.
@@ -88,10 +93,11 @@ class Rule(BaseModel):
   if_arg: str = Field(..., description="Name of the standard argument to check.")
   op: LogicOp = Field(LogicOp.EQ, description="Logical operator for comparison.")
   is_val: Union[str, int, float, bool, List[Union[str, int, float]]] = Field(
-    ..., alias="val", description="Value or list of values to compare against."
+    ...,
+    alias="val",
+    description="Value to compare against. If op='is_type', this should be 'int', 'float', 'list', 'dict', 'str', or 'bool'.",
   )
   use_api: str = Field(..., description="The target API path to use if the condition matches.")
-
 
 class ImportReq(BaseModel):
   """
@@ -100,7 +106,6 @@ class ImportReq(BaseModel):
 
   module: str = Field(..., description="The name of the module to import (e.g. 'numpy').")
   alias: Optional[str] = Field(None, description="Optional alias (e.g. 'np').")
-
 
 class FrameworkVariant(BaseModel):
   """
@@ -128,7 +133,7 @@ class FrameworkVariant(BaseModel):
   casts: Optional[Dict[str, str]] = Field(
     None, description="Mapping of argument names to target types (e.g. {'x': 'int32'})."
   )
-  requires_plugin: Optional[str] = Field(None, description="Name of a plugin hook required to handle this operation.")
+  requires_plugin: Optional[str] = Field(None, description="Name of a registered plugin hook to handle translation.")
 
   # --- Feature: Conditional Dispatch ---
   dispatch_rules: List[Rule] = Field(
@@ -139,13 +144,17 @@ class FrameworkVariant(BaseModel):
   # --- Feature: Argument Packing (Star-Args) ---
   pack_to_tuple: Optional[str] = Field(
     None,
-    description="If set (e.g. 'axes'), collects trailing positional arguments defined as variadic in spec into a tuple and assigns it to this keyword argument. Standardizes varargs-to-tuple mapping natively.",
+    description="If set (e.g. 'axes'), collects variadic positional args into a container argument.",
+  )
+  pack_as: ContainerType = Field(
+    ContainerType.TUPLE,
+    description="Container type to use for packing ('Tuple' or 'List'). Defaults to Tuple.",
   )
 
   # --- Feature: Tensor Layout Permutation ---
   layout_map: Optional[Dict[str, str]] = Field(
     None,
-    description="Map of arguments (or 'return') to layout transformation strings (e.g., {'x': 'NCHW->NHWC'}). "
+    description="Map of arguments (or 'return') to layout transformation strings (e.g., {'x': 'NCHW->NHWC'}). " 
     "Engine automatically injects permutation calls to match target layout expected by this API variant.",
   )
 
@@ -158,7 +167,7 @@ class FrameworkVariant(BaseModel):
   # --- Feature: Composite Operations (Macros) ---
   macro_template: Optional[str] = Field(
     None,
-    description="Python expression template string for composite operations. "
+    description="Python expression template string for composite operations. " 
     "Use standard argument names as placeholders (e.g. '{x} * jax.nn.sigmoid({x})').",
   )
 
@@ -192,7 +201,6 @@ class FrameworkVariant(BaseModel):
     None, description="Custom error message to display if this mapping fails or is missing."
   )
 
-
 class PluginType(str, Enum):
   """
   Enumeration of supported plugin structures to generate.
@@ -200,7 +208,6 @@ class PluginType(str, Enum):
 
   CALL = "call_transform"
   BLOCK = "block_transform"
-
 
 class PluginScaffoldDef(BaseModel):
   """
@@ -215,6 +222,12 @@ class PluginScaffoldDef(BaseModel):
     description="List of conditional dispatch rules to compile into the plugin.",
   )
 
+  # --- Feature: Auto-Wire ---
+  auto_wire: Optional[Dict[str, Any]] = Field(
+    None,
+    description="Dictionary defining Semantic Operations to be automatically injected via the plugin itself." 
+    "Matches the structure of an ODL OperationDef JSON."
+  )
 
 class OperationDef(BaseModel):
   """

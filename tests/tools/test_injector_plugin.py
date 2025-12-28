@@ -6,13 +6,14 @@ Verifies:
 2. Compilation of declarative rules into Python logic.
 3. **Preservation of User Logic**: Ensuring manual edits are kept when regenerating.
 4. Robustness against syntax errors or existing file corruption.
+5. **Filename Normalization**: Validates Snake Case conversion.
+6. **Auto-Wire Generation**: Validates that auto_wire dicts are injected into source code.
 """
 
 import pytest
 from pathlib import Path
 from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule
 from ml_switcheroo.tools.injector_plugin import PluginGenerator
-
 
 @pytest.fixture
 def plugin_dir(tmp_path):
@@ -21,6 +22,32 @@ def plugin_dir(tmp_path):
   d.mkdir()
   return d
 
+def test_filename_normalization(plugin_dir):
+  """
+  Verify that PascalCase names are converted to snake_case filenames.
+  """
+  gen = PluginGenerator(plugin_dir)
+
+  # Case 1: PascalCase
+  scaffold = PluginScaffoldDef(name="MyCustomHook", type=PluginType.CALL, doc="Test")
+  gen.generate(scaffold)
+  assert (plugin_dir / "my_custom_hook.py").exists()
+  assert not (plugin_dir / "MyCustomHook.py").exists()
+
+  # Case 2: camelCase
+  scaffold2 = PluginScaffoldDef(name="tensorOps", type=PluginType.CALL, doc="Test")
+  gen.generate(scaffold2)
+  assert (plugin_dir / "tensor_ops.py").exists()
+
+  # Case 3: Already snake
+  scaffold3 = PluginScaffoldDef(name="already_valid", type=PluginType.CALL, doc="Test")
+  gen.generate(scaffold3)
+  assert (plugin_dir / "already_valid.py").exists()
+
+  # Verify internal hook name matches spec (NOT filename)
+  content = (plugin_dir / "my_custom_hook.py").read_text("utf-8")
+  assert '@register_hook("MyCustomHook")' in content
+  assert "def MyCustomHook(" in content
 
 def test_generate_call_plugin(plugin_dir):
   """Verify generating a standard call plugin."""
@@ -40,7 +67,6 @@ def test_generate_call_plugin(plugin_dir):
   assert '"""\nTest Hook\n"""' in content
   assert "# TODO: Implement custom logic" in content
 
-
 def test_generate_block_plugin(plugin_dir):
   """Verify generating a block plugin uses the correct template."""
   gen = PluginGenerator(plugin_dir)
@@ -54,7 +80,6 @@ def test_generate_block_plugin(plugin_dir):
   # Should not contain specific helpers unless rules are present
   assert "def _get_kwarg_value" not in content
 
-
 def test_generate_creates_directory(tmp_path):
   """Verify it creates the plugin directory if missing."""
   missing_dir = tmp_path / "ghost_plugins"
@@ -66,7 +91,6 @@ def test_generate_creates_directory(tmp_path):
   assert created is True
   assert missing_dir.exists()
   assert (missing_dir / "test.py").exists()
-
 
 def test_generate_plugin_with_rules(plugin_dir):
   """
@@ -112,7 +136,6 @@ def test_generate_plugin_with_rules(plugin_dir):
   # Final fallback return
   assert content.strip().endswith("return node")
 
-
 def test_preserves_user_logic(plugin_dir):
   """
   Verify that if a user modifies the logic body, regenerating the plugin
@@ -128,15 +151,15 @@ def test_preserves_user_logic(plugin_dir):
   # 2. Simulate User Edit
   # User adds print statements and custom return
   # Using clean formatting for input simulation
-  user_code = '''
+  user_code = ''' 
 import libcst as cst
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
-@register_hook("custom_logic")
-def custom_logic(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-    """Old Docstring."""
-    print("User Custom Logic")
-    return node.with_changes(func=cst.Name("hacked"))
+@register_hook("custom_logic") 
+def custom_logic(node: cst.Call, ctx: HookContext) -> cst.CSTNode: 
+    """Old Docstring.""" 
+    print("User Custom Logic") 
+    return node.with_changes(func=cst.Name("hacked")) 
 '''
   file_path.write_text(user_code.strip(), encoding="utf-8")
 
@@ -164,7 +187,6 @@ def custom_logic(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   # 2 for Function Docstring
   assert content.count('"""') == 4
 
-
 def test_preserves_logic_with_complex_indentation(plugin_dir):
   """
   Verify indentation is handled correctly when extracting and reinjecting body.
@@ -174,11 +196,11 @@ def test_preserves_logic_with_complex_indentation(plugin_dir):
   gen.generate(scaffold)
 
   file_path = plugin_dir / "indent_test.py"
-  user_code = """
-@register_hook("indent_test")
-def indent_test(node, ctx):
-    if True:
-        print("Indented")
+  user_code = """ 
+@register_hook("indent_test") 
+def indent_test(node, ctx): 
+    if True: 
+        print("Indented") 
     return node
 """
   file_path.write_text(user_code.strip(), encoding="utf-8")
@@ -194,7 +216,6 @@ def indent_test(node, ctx):
   # The generated file uses 4 spaces.
   assert "\n    if True:" in content
 
-
 def test_user_logic_trumps_rules(plugin_dir):
   """
   Scenario: User has written custom logic. Updates specify generated rules.
@@ -205,10 +226,10 @@ def test_user_logic_trumps_rules(plugin_dir):
   gen.generate(scaffold)
 
   file_path = plugin_dir / "priority_test.py"
-  file_path.write_text("""
-@register_hook("priority_test")
-def priority_test(node, ctx):
-    return "UserLogic"
+  file_path.write_text(""" 
+@register_hook("priority_test") 
+def priority_test(node, ctx): 
+    return "UserLogic" 
 """)
 
   # Regenerate with rules
@@ -220,7 +241,6 @@ def priority_test(node, ctx):
 
   assert 'return "UserLogic"' in content
   assert "val_0 =" not in content  # Rule logic skipped
-
 
 def test_overwrite_on_syntax_error(plugin_dir, capsys):
   """
@@ -242,3 +262,36 @@ def test_overwrite_on_syntax_error(plugin_dir, capsys):
   content = file_path.read_text("utf-8")
   assert "syntax error" not in content
   assert "# TODO: Implement custom logic" in content
+
+def test_auto_wire_generation(plugin_dir):
+  """
+  Scenario: scaffold_plugins entry contains 'auto_wire' dict.
+  Expectation: Generated file includes `auto_wire={...}` in decorator.
+  """
+  gen = PluginGenerator(plugin_dir)
+
+  auto_data = {
+    "ops": {
+      "TestOp": {
+        "std_args": ["x"],
+        "variants": {"jax": {"api": "foo", "requires_plugin": "rewired"}}
+      }
+    }
+  }
+
+  scaffold = PluginScaffoldDef(
+    name="rewired",
+    type=PluginType.CALL,
+    doc="Auto Wired",
+    auto_wire=auto_data
+  )
+
+  gen.generate(scaffold)
+
+  file_path = plugin_dir / "rewired.py"
+  content = file_path.read_text("utf-8")
+
+  # Check Decorator Injection
+  assert '@register_hook(trigger="rewired", auto_wire={' in content
+  assert '"TestOp":' in content
+  assert '"api": "foo"' in content

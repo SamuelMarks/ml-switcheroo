@@ -226,7 +226,7 @@ class ASTEngine:
     reset_tracer()
     tracer = get_tracer()
 
-    print(f"[Engine] Starting run: {self.source} -> {self.target}")
+    print(f"[Engine] Starting run: {self.source} -> {self.target} (Strict: {self.strict_mode})")
 
     _root_phase = tracer.start_phase("Transpilation Pipeline", f"{self.source} -> {self.target}")
 

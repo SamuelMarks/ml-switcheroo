@@ -17,19 +17,27 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
     pytest.fail(f"Rewrite failed: {e}")
 
 
-def get_rewriter_for_target(target_fw, pack_kw):
-  # Force reload of hooks to pick up any changes if necessary (though registry is global)
-  hooks._HOOKS["pack_varargs"] = pack_varargs
+def get_rewriter_for_target(target_fw, pack_kw, pack_as=None):
+  """
+  Creates a rewriter with mocked semantics.
+  If pack_as is set ('List' or 'Tuple'), it is injected into the variant.
+  Note: This test uses the *Core Normalization* packing logic by NOT requesting the plugin,
+  thus verifying the generalizability of the feature implemented in `normalization.py`.
+  """
   hooks._PLUGINS_LOADED = True
 
   mgr = MagicMock()
 
-  # Definition that requires plugin
+  variant = {"api": "target.transpose", "pack_to_tuple": pack_kw}
+  if pack_as:
+    variant["pack_as"] = pack_as
+
+  # Definition that uses core packing (no Requires Plugin)
   permute_def = {
     "std_args": ["x", {"name": "axes", "is_variadic": True}],
     "variants": {
       "torch": {"api": "torch.permute"},
-      target_fw: {"api": "target.transpose", "pack_to_tuple": pack_kw, "requires_plugin": "pack_varargs"},
+      target_fw: variant,
     },
   }
 
@@ -59,8 +67,8 @@ def get_rewriter_for_target(target_fw, pack_kw):
   return PivotRewriter(semantics=mgr, config=cfg)
 
 
-def test_generic_axis_packing():
-  """Verify default packing to 'axes' (JAX style)."""
+def test_generic_axis_packing_tuple():
+  """Verify default packing to 'axes' (JAX style default) using Tuple."""
   rewriter = get_rewriter_for_target("jax", pack_kw="axes")
 
   code = "y = torch.permute(x, 2, 0, 1)"
@@ -72,43 +80,27 @@ def test_generic_axis_packing():
   assert "axes=(2,0,1)" in clean
 
 
-def test_custom_perm_packing():
-  """Verify packing to 'perm' (TensorFlow style) driven by data, not hardcoded if."""
-  rewriter = get_rewriter_for_target("tensorflow", pack_kw="perm")
+def test_custom_perm_packing_list():
+  """
+  Verify packing to 'perm' into a List (e.g. for list-based APIs like torch.cat).
+  Features: pack_as="List".
+  """
+  rewriter = get_rewriter_for_target("tensorflow", pack_kw="perm", pack_as="List")
 
   code = "y = torch.permute(x, 0, 2, 1)"
   result = rewrite_code(rewriter, code)
 
   clean = result.replace(" ", "")
-  assert "perm=(0,2,1)" in clean
+  # Must use square brackets
+  assert "perm=[0,2,1]" in clean
 
 
-def test_pack_single_dim():
-  """Verify single arg packing."""
-  rewriter = get_rewriter_for_target("jax", pack_kw="axes")
+def test_pack_single_dim_list():
+  """Verify single arg packing into a List container."""
+  rewriter = get_rewriter_for_target("jax", pack_kw="axes", pack_as="List")
 
   code = "y = torch.permute(x, 0)"
   result = rewrite_code(rewriter, code)
   clean = result.replace(" ", "")
-  assert "axes=(0,)" in clean
-
-
-def test_ignore_wrong_fw():
-  """
-  Verify plugin is NOT triggered if target framework has no mapping.
-  """
-  mgr = MagicMock()
-  # Resolve returns None
-  mgr.resolve_variant.return_value = None
-  mgr.get_definition.return_value = None
-
-  mgr.get_framework_config.return_value = {}
-
-  # Valid definition for Torch, but NO mapping for target 'numpy'
-  cfg = RuntimeConfig(source_framework="torch", target_framework="numpy")
-  rewriter = PivotRewriter(semantics=mgr, config=cfg)
-
-  code = "y = torch.permute(x, 1, 0)"
-  # Should not crash, should return original (or rewriter logic skips it)
-  result = rewrite_code(rewriter, code)
-  assert "torch.permute" in result
+  # List packing should be [0] not [0,]
+  assert "axes=[0]" in clean

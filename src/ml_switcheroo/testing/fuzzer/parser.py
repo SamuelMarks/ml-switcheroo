@@ -14,6 +14,7 @@ from ml_switcheroo.testing.fuzzer.generators import (
   generate_array,
   generate_scalar_int,
   generate_scalar_float,
+  generate_fake_callable,
 )
 from ml_switcheroo.testing.fuzzer.utils import (
   is_pipe_top_level,
@@ -43,6 +44,11 @@ def get_fallback_base_value(type_str: str, base_shape: Tuple[int, ...]) -> Any:
     return ()
   if type_str.startswith(("Dict", "Mapping")):
     return {}
+
+  # Feature: Callable Support
+  if type_str.startswith("Callable") or type_str in ["func", "function"]:
+    return generate_fake_callable()
+
   return None
 
 
@@ -58,7 +64,7 @@ def generate_from_hint(
   Recursively parses a type string and generates conforming data.
 
   Handles structural types (List, Tuple, Dict, Union, Optional) and
-  content types (Array, int, float, dtype).
+  content types (Array, int, float, dtype, Callable).
 
   Args:
       type_str (str): The type hint string to parse.
@@ -160,7 +166,11 @@ def generate_from_hint(
       shape = adjust_shape_rank(shape, constrs["rank"])
     return generate_array("float", shape, constrs)
 
-  # 9. Primitives
+  # 9. Callables (New Feature)
+  if type_str.startswith("Callable") or type_str in ["func", "function"]:
+    return generate_fake_callable(constrs)
+
+  # 10. Primitives
   if type_str in ["int", "integer"]:
     return generate_scalar_int(constrs)
   if type_str in ["float", "number"]:
@@ -170,7 +180,7 @@ def generate_from_hint(
   if type_str in ["str", "string"]:
     return "val_" + str(random.randint(0, 100))
 
-  # 10. Dtype objects
+  # 11. Dtype objects
   if "dtype" in type_str.lower():
     # Dtype constraints on a dtype object is meta (e.g. valid types)
     return random.choice([np.float32, np.int32, np.float64, np.bool_])

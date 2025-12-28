@@ -6,11 +6,11 @@ Verifies that:
 2.  Argument values are extracted from literals correctly.
 3.  Positional vs Keyword mapping is respected (Std Name resolution).
 4.  Condition logic (EQ, GT, IN) works.
+5.  **NEW**: Type Matching (IS_TYPE) works for lists vs scalars.
 """
 
 import pytest
 import libcst as cst
-from unittest.mock import MagicMock
 from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -58,6 +58,26 @@ class MockDispatchSemantics(SemanticsManager):
     self.data["clamp"] = clamp_def
     self._reverse_index["torch.clamp"] = ("clamp", clamp_def)
 
+    # Define op with Type-Based Dispatch
+    # process(data) -> single_process (default)
+    # if data is List -> batch_process
+    # if data is Int -> int_process
+    process_def = {
+      "std_args": ["data"],
+      "variants": {
+        "torch": {"api": "torch.process"},
+        "jax": {
+          "api": "jax.single_process",
+          "dispatch_rules": [
+            Rule(if_arg="data", op=LogicOp.IS_TYPE, val="list", use_api="jax.batch_process"),
+            Rule(if_arg="data", op=LogicOp.IS_TYPE, val="int", use_api="jax.int_process"),
+          ],
+        },
+      },
+    }
+    self.data["process"] = process_def
+    self._reverse_index["torch.process"] = ("process", process_def)
+
   def get_definition(self, name):
     # Heuristic lookup to handle method calls like "x.clamp"
     # In real scenarios, this is handled by fuller indexing or upstream discovery
@@ -65,6 +85,8 @@ class MockDispatchSemantics(SemanticsManager):
       return ("resize", self.data["resize"])
     if name.endswith("clamp"):
       return ("clamp", self.data["clamp"])
+    if name.endswith("process"):
+      return ("process", self.data["process"])
     return self._reverse_index.get(name)
 
   def get_framework_config(self, framework: str):
@@ -155,3 +177,31 @@ def test_dispatch_numeric_method_call(rewriter):
   code2 = "y = x.clamp(150)"  # > 100
   res2 = rewrite(rewriter, code2)
   assert "jnp.heavy_clip" in res2
+
+
+def test_dispatch_is_type_list(rewriter):
+  """
+  Scenario: input is List Literal [1, 2] -> Is List -> Batch API.
+  """
+  code = "y = torch.process([1, 2])"
+  res = rewrite(rewriter, code)
+  assert "jax.batch_process" in res
+
+
+def test_dispatch_is_type_int(rewriter):
+  """
+  Scenario: input is Integer Literal 5 -> Is Int -> Int API.
+  """
+  code = "y = torch.process(5)"
+  res = rewrite(rewriter, code)
+  assert "jax.int_process" in res
+
+
+def test_dispatch_is_type_fallback(rewriter):
+  """
+  Scenario: input is variable 'x' (unknown type/Name).
+  Logic fails integer/list checks -> Default API.
+  """
+  code = "y = torch.process(x)"
+  res = rewrite(rewriter, code)
+  assert "jax.single_process" in res

@@ -2,6 +2,7 @@
 Logic for Conditional API Dispatch.
 
 Handles evaluation of ODL Rules at runtime to switch APIs based on argument values.
+Updated to support Type Checking of AST Literals.
 """
 
 from typing import Any, List, Optional, Dict
@@ -33,6 +34,11 @@ def evaluate_dispatch_rules(rewriter, node: cst.Call, rules: List[Any], details:
   for item in std_args_raw:
     if isinstance(item, (list, tuple)):
       std_args_order.append(item[0])
+    elif isinstance(item, dict):
+      # Dict or ParameterDef model
+      name = item.get("name")
+      if name:
+        std_args_order.append(name)
     else:
       std_args_order.append(item)
 
@@ -40,33 +46,35 @@ def evaluate_dispatch_rules(rewriter, node: cst.Call, rules: List[Any], details:
     # Determine Source Name for the rule's IF arg (which is standard name)
     src_arg_name = source_arg_map.get(rule.if_arg, rule.if_arg)
 
-    # Extract Value
-    val = _extract_value_from_call(rewriter, node, src_arg_name, rule.if_arg, std_args_order)
+    # Extract Argument Node (Raw CST)
+    arg_node = _extract_argument_node(rewriter, node, src_arg_name, rule.if_arg, std_args_order)
 
-    if val is None:
+    if arg_node is None:
       continue
 
     # Compare
-    if _check_rule_condition(val, rule):
+    if _check_rule_condition(arg_node, rule):
       return rule.use_api
 
   return None
 
 
-def _extract_value_from_call(
+def _extract_argument_node(
   rewriter,
   node: cst.Call,
   src_name: str,
   std_name: str,
   std_order: List[str],
-) -> Optional[Any]:
+) -> Optional[cst.CSTNode]:
   """
-  Extracts a literal value from a call node's arguments.
+  Extracts the raw CST node for an argument value.
+
+  Checks keyword arguments first, then positional mapping logic.
   """
   # 1. Keyword Check
   for arg in node.args:
     if arg.keyword and arg.keyword.value == src_name:
-      return _node_to_literal(arg.value)
+      return arg.value
 
   # 2. Positional Check
   try:
@@ -79,7 +87,7 @@ def _extract_value_from_call(
     if call_idx >= 0 and call_idx < len(node.args):
       arg = node.args[call_idx]
       if not arg.keyword:
-        return _node_to_literal(arg.value)
+        return arg.value
   except ValueError:
     pass
 
@@ -89,9 +97,16 @@ def _extract_value_from_call(
 def _node_to_literal(node: cst.CSTNode) -> Any:
   """Converts CST node to Python primitive if possible."""
   if isinstance(node, cst.Integer):
-    return int(node.value)
+    # Handle simple integers
+    try:
+      return int(node.value)
+    except ValueError:
+      return None
   if isinstance(node, cst.Float):
-    return float(node.value)
+    try:
+      return float(node.value)
+    except ValueError:
+      return None
   if isinstance(node, cst.SimpleString):
     return node.value.strip("'").strip('"')
   if isinstance(node, cst.Name):
@@ -104,9 +119,40 @@ def _node_to_literal(node: cst.CSTNode) -> Any:
   return None
 
 
-def _check_rule_condition(val: Any, rule: Any) -> bool:
-  """Evaluates the logic operator."""
+def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
+  """
+  Evaluates the logic operator against the AST node.
+
+  Supports value checking (EQ, GT, etc.) and type checking (IS_TYPE).
+  """
   op = rule.op
+
+  # Type Inspection Logic matches CST types to abstract Strings
+  if op == LogicOp.IS_TYPE:
+    expected_type = str(rule.is_val).lower()
+
+    if isinstance(node, cst.Integer):
+      return expected_type == "int"
+    if isinstance(node, cst.Float):
+      return expected_type == "float"
+    if isinstance(node, cst.SimpleString):
+      return expected_type == "str"
+    if isinstance(node, (cst.List, cst.Tuple)):
+      return expected_type in ["list", "tuple", "sequence"]
+    if isinstance(node, cst.Dict):
+      return expected_type == "dict"
+
+    # Heuristic for boolean literals
+    if isinstance(node, cst.Name) and node.value in ["True", "False"]:
+      return expected_type == "bool"
+
+    return False
+
+  # Value Inspection Logic (Requires converting node to literal)
+  val = _node_to_literal(node)
+  if val is None:
+    return False
+
   target = rule.is_val
 
   if op == LogicOp.EQ:
@@ -125,5 +171,5 @@ def _check_rule_condition(val: Any, rule: Any) -> bool:
     return val in target
   elif op == LogicOp.NOT_IN:
     return val not in target
-  else:
-    return False
+
+  return False

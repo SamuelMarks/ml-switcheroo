@@ -328,18 +328,19 @@ class TestGenerator:
 
     if "bool" in t:
       return "bool(random.getrandbits(1))"
-    if "int" in t:
+    # Support generic and specific widths
+    if any(v in t for v in ("int", "int8", "int16", "int32", "int64", "int128")):
       return "random.randint(1, 3)"
-    if "float" in t:
+    if any(v in t for v in ("float", "float8", "float16", "float32", "float64", "float128")):
       return "random.uniform(0.1, 1.0)"
-    if "str" in t or "string" in t:
+    if any(v in t for v in ("str", "string")):
       return "'test_string'"
 
     # --- Strategy 2: Heuristics ---
     name_lower = name.lower()
-    if name_lower in ["axis", "dim"]:
+    if name_lower in ("axis", "dim"):
       return "1"
-    if name_lower in ["keepdims", "keepdim"]:
+    if name_lower in ("keepdims", "keepdim"):
       return "True"
     if "shape" in name_lower or "size" in name_lower:
       return "(2, 2)"

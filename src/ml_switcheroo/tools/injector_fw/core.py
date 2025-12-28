@@ -29,8 +29,7 @@ class FrameworkInjector(cst.CSTTransformer):
   3. A `return` statement returning a `Dict`.
 
   Additionally, it scans the module for existing imports and injects missing
-  dependencies required by the new mapping (e.g. injecting `import scipy` if
-  the API is `scipy.special.erf`).
+  dependencies explicitly required by the definition (e.g. `required_imports`).
   """
 
   def __init__(self, target_fw: str, op_name: str, variant: FrameworkVariant):
@@ -55,15 +54,34 @@ class FrameworkInjector(cst.CSTTransformer):
     self._required_roots: Set[str] = set()
     self._existing_roots: Set[str] = set()
 
-    # Analyze variant for potential import requirements
-    # Logic: If API is 'scipy.special.erf', we likely need 'import scipy'.
-    if self.variant.api:
-      parts = self.variant.api.split(".")
-      if len(parts) > 1:
-        root = parts[0]
-        # Heuristic: We only auto-inject if it looks like an external package.
-        # We assume the user wants the root package imported.
-        self._required_roots.add(root)
+    # Collect explicit import requirements from ODL
+    # We do NOT infer from 'api' anymore to prevent corruption (e.g. tf.abs -> import tf)
+    if self.variant.required_imports:
+      for item in self.variant.required_imports:
+        # Handle Model object (ImportReq) or simple string
+        # If it's a string "import numpy", we parse "numpy"
+        # If it's "import numpy as np", we parse "numpy"
+        # If ImportReq(module='numpy'), we parse "numpy"
+        root = ""
+        if hasattr(item, "module"):
+          root = item.module.split(".")[0]
+        elif isinstance(item, str):
+          # Rough parsing for "import X"
+          clean = item.strip()
+          if clean.startswith("import "):
+            # import numpy as np
+            remainder = clean[7:].strip()
+            if " as " in remainder:
+              root = remainder.split(" as ")[0].split(".")[0]
+            else:
+              root = remainder.split(".")[0]
+          elif clean.startswith("from "):
+            # from X import Y
+            remainder = clean[5:].strip()
+            root = remainder.split(" ")[0].split(".")[0]
+
+        if root:
+          self._required_roots.add(root)
 
   def visit_Import(self, node: cst.Import) -> None:
     """Tracks existing top-level imports."""
@@ -210,10 +228,12 @@ class FrameworkInjector(cst.CSTTransformer):
 
     # 1. api="string"
     if self.variant.api:
+      # Handle quotes in API name just in case
+      safe_api = self.variant.api.replace('"', '\\"')
       args_list.append(
         cst.Arg(
           keyword=cst.Name("api"),
-          value=cst.SimpleString(f'"{self.variant.api}"'),
+          value=cst.SimpleString(f'"{safe_api}"'),
           equal=tight_eq,
           comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
         )
@@ -306,13 +326,17 @@ class FrameworkInjector(cst.CSTTransformer):
       "operator",
       "macro_template",
       "output_cast",
+      "pack_to_tuple",
+      "missing_message",
     ]:
       val = getattr(self.variant, field, None)
       if val:
+        # Basic string encoding
+        safe_val = str(val).replace('"', '\\"')
         args_list.append(
           cst.Arg(
             keyword=cst.Name(field),
-            value=cst.SimpleString(f'"{val}"'),
+            value=cst.SimpleString(f'"{safe_val}"'),
             equal=tight_eq,
             comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
           )

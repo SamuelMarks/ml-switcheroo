@@ -1,0 +1,145 @@
+"""
+Pre-processing Phase for Call Rewriting.
+
+Handles logic that must occur before the core semantic lookup:
+1.  **Functional Unwrapping**: Converting `apply` patterns if converting from functional frameworks.
+2.  **Plugin Claims**: Heuristic execution of plugins (like in-place unrolling).
+3.  **Lifecycle Management**: Stripping methods like `.cuda()` or `.eval()`.
+4.  **Stateful Calls**: Rewriting calls that require state injection.
+5.  **Implicit Resolution**: Guessing API paths for method calls on objects.
+"""
+
+from typing import Tuple, Any, Optional
+
+import libcst as cst
+
+from ml_switcheroo.core.rewriter.calls.utils import (
+  is_functional_apply,
+  log_diff,
+  rewrite_stateful_call,
+)
+from ml_switcheroo.core.hooks import get_hook
+
+
+def handle_pre_checks(
+  rewriter: Any, original: cst.Call, updated: cst.Call, func_name: Optional[str]
+) -> Tuple[bool, cst.CSTNode]:
+  """
+  Executes pre-lookup checks and transformations.
+
+  Returns:
+      Tuple[bool, cst.CSTNode]:
+          - `handled (bool)`: If True, the transformation is complete and should return early.
+          - `node (cst.CSTNode)`: The result node (or updated node if not handled).
+  """
+
+  # 1. Functional 'apply' unwrapping (Dynamic Trait)
+  # Checks if source uses functional patterns (e.g. Flax 'apply') that need unwrapping
+  source_traits = rewriter._get_source_traits()
+  unwrap_method = source_traits.functional_execution_method
+
+  if is_functional_apply(original, unwrap_method):
+    if isinstance(updated.func, cst.Attribute):
+      receiver = updated.func.value
+      # Strip the first argument (variables/params) and use receiver as callable
+      new_args = updated.args[1:] if len(updated.args) > 0 else []
+      result_node = updated.with_changes(func=receiver, args=new_args)
+      log_diff("Functional Unwrap", original, result_node)
+      return True, result_node
+
+  # 2. Plugin Check (Explicit Requirement)
+  # If the known function name maps to a plugin-required stub, we flag it.
+  # Note: This is an early check, but the actual hook execution happens in `logic_core.py` usually.
+  # However, if it's a heuristic hook (like in-place unroll), we run it here.
+  plugin_claim = False
+  if func_name:
+    mapping = rewriter._get_mapping(func_name)
+    if mapping and "requires_plugin" in mapping:
+      plugin_claim = True
+
+  # 2b. Heuristic Plugin: In-Place Unrolling
+  # Automatically triggers for methods ending in '_' if not claimed by explicit map
+  if not plugin_claim and func_name and func_name.endswith("_") and not func_name.startswith("__"):
+    hook = get_hook("unroll_inplace_ops")
+    if hook:
+      new_node = hook(updated, rewriter.ctx)
+      if new_node != updated:
+        log_diff("In-place Unroll (Heuristic)", updated, new_node)
+        # If transformed, we return it as final result for this phase
+        # Usually we might want to continue processing (e.g. arg rewrite),
+        # but unroll changes the structure significantly (to BinOp).
+        return True, new_node
+
+  # 3. Lifecycle Method Handling (Strip/Warn)
+  strip_set, warn_set = rewriter._get_source_lifecycle_lists()
+
+  if not plugin_claim and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
+    method_name = original.func.attr.value
+
+    if method_name in strip_set:
+      if isinstance(updated.func, cst.Attribute):
+        # Identity transform: x.cuda() -> x
+        rewriter._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
+        result_node = updated.func.value
+        log_diff("Lifecycle Strip", original, result_node)
+        return True, result_node
+
+    if method_name in warn_set:
+      if isinstance(updated.func, cst.Attribute):
+        # Identity transform with warning
+        rewriter._report_warning(f"Ignored model state method '.{method_name}()'.")
+        result_node = updated.func.value
+        log_diff("Lifecycle Warn", original, result_node)
+        return True, result_node
+
+  # 4. Stateful Object Usage
+  # Rewrites `self.layer(x)` to `self.layer.apply(params, x)` if target requires it
+  if func_name and rewriter._is_stateful(func_name):
+    fw_config = rewriter.semantics.get_framework_config(rewriter.target_fw)
+    stateful_spec = fw_config.get("stateful_call")
+    if stateful_spec:
+      result_node = rewrite_stateful_call(rewriter, updated, func_name, stateful_spec)
+      log_diff("State Mechanism", original, result_node)
+      return True, result_node
+
+  return False, updated
+
+
+def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Optional[str]) -> Optional[str]:
+  """
+  Attempts to resolve method calls on objects to full API paths.
+  E.g. `x.float()` -> `torch.Tensor.float`.
+
+  This function attempts to find a match in the Semantic Knowledge Base
+  by checking implicit root classes (e.g. `torch.Tensor`) defined in source traits.
+
+  Args:
+      rewriter: The calling rewriter.
+      original: The original CST node.
+      func_name: The currently resolved name (usually None or the failed name).
+
+  Returns:
+      str: Resolved fully qualified name, or None if no match found.
+  """
+  # Check if it looks like a method call
+  if isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
+    receiver = original.func.value
+    # Ensure we aren't misinterpreting module alias `torch.abs` as `obj.abs`
+    is_module = rewriter._is_module_alias(receiver)
+    # Check for 'self'
+    is_self = isinstance(receiver, cst.Name) and receiver.value == "self"
+
+    if not is_self and not is_module:
+      leaf_method = original.func.attr.value
+      source_traits = rewriter._get_source_traits()
+      implicit_roots = source_traits.implicit_method_roots
+
+      for root in implicit_roots:
+        candidate_api = f"{root}.{leaf_method}"
+        # Silent lookup
+        candidate_mapping = rewriter._get_mapping(candidate_api, silent=True)
+        if candidate_mapping:
+          # Found a match via implicit root
+          return candidate_api
+
+  return None
