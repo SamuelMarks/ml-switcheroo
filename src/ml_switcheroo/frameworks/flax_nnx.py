@@ -9,16 +9,9 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 - Wires important plugins and structural traits.
 """
 
-import jax
-
 import logging
 import textwrap
 from typing import List, Tuple, Dict, Any, Optional
-
-try:
-  import flax.nnx
-except ImportError:
-  flax_nnx = None
 
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -35,6 +28,20 @@ from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.ghost import GhostInspector
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
+
+# Safe Import Handling for Ghost Mode (WASM/Docs)
+try:
+  import jax
+except ImportError:
+  jax = None
+
+try:
+  import flax.nnx
+
+  # Explicitly bind the variable name so it is defined in success case
+  flax_nnx = flax.nnx
+except ImportError:
+  flax_nnx = None
 
 
 @register_framework("flax_nnx")
@@ -62,11 +69,9 @@ class FlaxNNXAdapter(JAXStackMixin):
     self._mode = InitMode.LIVE
     self._snapshot_data: Dict[str, Any] = {}
 
-    try:
-      import flax.nnx  # noqa: F401
-
+    if flax_nnx is not None:
       self._flax_available = True
-    except ImportError:
+    else:
       self._flax_available = False
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("flax_nnx")
@@ -90,7 +95,11 @@ class FlaxNNXAdapter(JAXStackMixin):
     core = JaxCoreAdapter()
 
     # Use core JAX scanning for losses, optimizers, activations
-    if category in [StandardCategory.LOSS, StandardCategory.OPTIMIZER, StandardCategory.ACTIVATION]:
+    if category in [
+      StandardCategory.LOSS,
+      StandardCategory.OPTIMIZER,
+      StandardCategory.ACTIVATION,
+    ]:
       results.extend(core.collect_api(category))
 
     # Add Flax-specific neural layers
@@ -209,14 +218,16 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   def get_harness_init_code(self) -> str:
     """Logic to create Flax NNX Rngs."""
-    return textwrap.dedent(""" 
-        def _make_flax_rngs(seed): 
-            "Attempts to create a Flax NNX Rngs object." 
-            try: 
-                return nnx.Rngs(seed) 
-            except (ImportError, AttributeError): 
-                return "mock_flax_rngs" 
-    """).strip()
+    return textwrap.dedent(
+      """
+        def _make_flax_rngs(seed):
+            "Attempts to create a Flax NNX Rngs object."
+            try:
+                return nnx.Rngs(seed)
+            except (ImportError, AttributeError):
+                return "mock_flax_rngs"
+    """
+    ).strip()
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
@@ -376,13 +387,13 @@ class FlaxNNXAdapter(JAXStackMixin):
     return """from flax import nnx
 import jax.numpy as jnp
 
-class Net(nnx.Module): 
-    def __init__(self, rngs: nnx.Rngs): 
-        self.linear = nnx.Linear(10, 10, rngs=rngs) 
+class Net(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        self.linear = nnx.Linear(10, 10, rngs=rngs)
 
-    def __call__(self, x): 
-        x = self.linear(x) 
-        return nnx.relu(x) 
+    def __call__(self, x):
+        x = self.linear(x)
+        return nnx.relu(x)
 """
 
   def get_tiered_examples(self) -> Dict[str, str]:
