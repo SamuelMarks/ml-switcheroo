@@ -1,309 +1,244 @@
-Extending with ODL
+Extending with DSL
 ==================
 
-The **Operation Definition Language (ODL)** is a declarative YAML schema used to teach `ml-switcheroo` new mathematical
-operations without writing Python AST transformation code or manually updating:
+The **Operation Definition Language (ODL)** is a declarative YAML schema used to teach `ml-switcheroo` new mathematical operations. It serves as the "DNA" of the transpiler, defining:
 
-- `src/ml_switcheroo/semantics/standards_internal.py` and
-- `src/ml_switcheroo/frameworks/*.py` (for torch, mlx, tensorflow, jax, etc.)
+1.  **Semantic Interface**: Arguments, Types, Shapes, and Constraints.
+2.  **Implementation logic**: How to map the operation to specific backends (Torch, JAX, TF, etc.).
+3.  **Verification Data**: Hints for the automated fuzzer to prove correctness.
 
-ODL serves as the "DNA" of the transpiler, defining **Inputs** (Arguments, Types, Shapes), **Behavior** (Math logic,
-Side effects), and **Implementation** (How to map it to PyTorch, JAX, TensorFlow, etc.).
+ODL allows you to inject logic into the **Knowledge Base** without writing Python AST transformation code.
 
 ---
 
-## 🔄 The Workflow: Audit & Define
+## 📚 The Schema at a Glance
 
-The standard loop for adding missing operations is **Audit $\to$ Define $\to$ Inject**.
-
-### 1. Audit your codebase
-
-Run the `audit` command on your source project to find APIs that are not yet in the Knowledge Base.
-
-```bash
-# Check 'my_model.py' for unmapped PyTorch calls
-ml_switcheroo audit my_model.py --roots torch
-```
-
-**Output:**
-
-```text
-❌ Missing Operations
-Framework    API Name          Suggestion
-torch        torch.erf         Run 'scaffold' or 'wizard'
-torch        torch.reciprocal  Run 'scaffold' or 'wizard'
-```
-
-### 2. Describe the Operation (YAML)
-
-Create a file named `math_ops.yaml` and describe the missing operations using ODL.
+A complete ODL definition looks like this:
 
 ```yaml
-# math_ops.yaml
-operation: "Erf"
-description: "Computes the error function of each element."
+operation: "LogSoftmax"
+description: "Applies the LogSoftmax function to an n-dimensional input Tensor."
+op_type: "function" # function | context | decorator
+
+# 1. Standard Arguments (The Abstract Signature)
 std_args:
   - name: "input"
     type: "Tensor"
+    rank: 4                 # Constraint: Must be 4D (e.g. NCHW)
+    dtype: "float32"        # Constraint: Input must be float check
+    shape_spec: "[B, C, ...]" # Symbolic shape hint for Fuzzer
+
+  - name: "dim"
+    type: "int"
+    default: "-1"           # Default value if missing in source
+    min: -2
+    max: 3
+
+# 2. Return Verification
+return_type: "Tensor"
+output_shape_calc: "lambda input, dim: input.shape" # Verifies output shape matches input
+
+# 3. Framework Implementations
 variants:
   torch:
-    api: "torch.erf"
+    api: "torch.nn.functional.log_softmax"
+  
   jax:
-    api: "jax.lax.erf"
-    required_imports: [ "import jax" ]
+    api: "jax.nn.log_softmax"
+    args:
+      dim: "axis"           # Rename 'dim' -> 'axis'
+    min_version: "0.4.0"    # Version constraints
+    required_imports:
+      - "import jax"
 ```
 
-### 3. Inject into Knowledge Base
-
-Run the `define` command. This parses the YAML, validates it against the schema, and injects the Python code directly
-into the `ml-switcheroo` source tree.
-
+To apply this file:
 ```bash
-ml_switcheroo define math_ops.yaml
-```
-
-**Output:**
-
-```text
-✅ Updated Hub: src/ml_switcheroo/semantics/standards_internal.py
-✅ Updated Spoke (torch): src/ml_switcheroo/frameworks/torch.py
-✅ Updated Spoke (jax): src/ml_switcheroo/frameworks/jax.py
+ml_switcheroo define my_op.yaml
 ```
 
 ---
 
-## 🧬 ODL Feature Gallery
+## 🧬 Feature Reference
 
-The DSL supports complex transpilation logic including layout permutation, argument packing, macros, and conditional
-dispatch.
-
-### 1. Basic Argument Renaming
-
-Map argument names between frameworks (e.g., PyTorch `dim` vs JAX `axis`).
+### 1. Argument Normalization
+The core job of ODL is pivoting arguments from **Source Names** to **Standard Names**, and then to **Target Names**.
 
 ```yaml
-operation: "Sum"
-description: "Sum of array elements over a given axis."
-std_args:
-  - name: "x"
-    type: "Tensor"
-  - name: "axis"
-    type: "int"
-    default: "None"
+std_args: ["x", "axis", "keepdims"]
 variants:
   torch:
     api: "torch.sum"
     args:
-      axis: "dim"  # Map Spec 'axis' -> Torch 'dim'
+      axis: "dim"          # Map Spec 'axis' -> Torch 'dim'
+      keepdims: "keepdim"
   jax:
     api: "jnp.sum"
-    # JAX uses 'axis' natively, no mapping needed
+    # JAX matches standard names, no mapping needed
 ```
 
-### 2. Argument Injection & Casting
+### 2. Rich Parameter Constraints (Fuzzer Control)
+You can attach metadata to `std_args` to constrain the inputs generated during verification (CI) or strict mode checking.
 
-Inject fixed parameters required by the target framework but missing in the source.
+| Field | Description | Example |
+| :--- | :--- | :--- | 
+| `type` | Python Type Hint string. | `"int"`, `"Tensor"`, `"List[int]"` |
+| `default` | Default value (transpiled if arg missing). | `"1e-5"`, `"True"` |
+| `rank` | Required tensor rank (number of dims). | `4` |
+| `dtype` | Required data type. | `"float32"`, `"int64"`, `"bool"` |
+| `shape_spec` | Symbolic shape string. | `"[B, T, D]"`, `"[N, N]"` |
+| `min` / `max` | Numeric bounds for scalar generation. | `min: 0`, `max: 1` |
+| `options` | Allowed values (Enumeration). | `["sum", "mean", "none"]` |
 
+**Example: Convolution Weights**
 ```yaml
-operation: "LayerNorm"
-description: "Applies Layer Normalization."
-std_args: [ "input", "normalized_shape", "eps" ]
-variants:
-  torch:
-    api: "torch.nn.LayerNorm"
-  jax:
-    api: "flax.nnx.LayerNorm"
-    args:
-      normalized_shape: "num_features"
-      eps: "epsilon"
-    # Inject arguments not present in the Abstract Standard
-    inject_args:
-      use_fast_variance: true
-    # Cast specific inputs to avoid type errors
-    casts:
-      epsilon: "float32"
-```
-
-### 3. Variadic Packing (Star-Args)
-
-Convert variable positional arguments into a tuple (common in `permute` vs `transpose`).
-
-```yaml
-operation: "Permute"
-description: "Permutes tensor dimensions."
 std_args:
-  - name: "input"
+  - name: "weight"
     type: "Tensor"
-  # Mark 'dims' as variadic (*dims)
-  - name: "dims"
-    type: "int"
-    is_variadic: true
-variants:
-  torch:
-    api: "torch.permute"
-    # Torch layout: permute(input, *dims)
-  jax:
-    api: "jax.numpy.transpose"
-    # JAX layout: transpose(a, axes=(...))
-    # This instructs the engine to pack *dims into a tuple and pass it to 'axes='
-    pack_to_tuple: "axes"
+    rank: 4
+    shape_spec: "[Out, In, K, K]" # Enforce square kernel in fuzzer
 ```
 
-### 4. Tensor Layout Permutation
+### 3. Conditional Dispatch (Rules)
+Sometimes a single API mapping isn't enough. You can use **Dispatch Rules** to switch the target API based on the *value* or *type* of an argument at runtime.
 
-Automatically inject `transpose` calls to align memory layouts (e.g., NCHW $\leftrightarrow$ NHWC).
+**Supported Operators:** `eq`, `neq`, `gt`, `lt`, `in`, `not_in`, `is_type`.
+
+```yaml
+operation: "Resize"
+std_args: ["image", "mode"]
+variants:
+  jax:
+    api: "jax.image.resize" # Default
+    dispatch_rules:
+      # If mode == 'nearest', use specific function
+      - if_arg: "mode"
+        op: "eq"
+        val: "nearest"
+        use_api: "jax.image.resize_nearest"
+      
+      # If input is a List, use batch processor
+      - if_arg: "image"
+        op: "is_type"
+        val: "list"
+        use_api: "jax.image.resize_batch"
+```
+
+### 4. Argument Value Mapping (Enum Translation)
+Map string literals or integers between frameworks.
+
+```yaml
+operation: "Reduce"
+std_args: ["x", "reduction"]
+variants:
+  torch:
+    api: "torch.reduce"
+    # Logic: Source 'mean' -> Target 'avg'
+    arg_values:
+      reduction:
+        mean: "'avg'"
+        sum: "'add'"
+```
+
+### 5. Output Adaptation
+Handle differences in return signatures.
+
+*   **Selection:** If source returns a Tuple `(val, idx)` but target returns only `val`.
+*   **Casting:** If target usually returns `float32` but spec requires `int64`.
+
+```yaml
+variants:
+  jax:
+    api: "jnp.max_indices"
+    # Select index 0 from result tuple
+    output_select_index: 0
+    # Cast result to int64
+    output_cast: "jnp.int64"
+```
+
+### 6. Tensor Layout Permutation
+Automatically inject `transpose` / `permute` calls to align memory layouts (e.g. NCHW vs NHWC).
 
 ```yaml
 operation: "Conv2d"
-description: "2D Convolution."
-std_args: [ "input", "weight" ]
 variants:
-  torch:
-    api: "torch.nn.functional.conv2d"
-    # Torch assumes NCHW
   jax:
     api: "jax.lax.conv"
-    args:
-      input: "lhs"
-      weight: "rhs"
-    # JAX LAX expects NHWC. The Engine will wrap inputs/outputs automatically.
-    # Notation matches Einstein summation or explicit dimension chars.
+    # Syntax: SOURCE_LAYOUT -> TARGET_LAYOUT
     layout_map:
       input: "NCHW->NHWC"
       weight: "OIHW->HWIO"
       return: "NHWC->NCHW"
 ```
 
-### 5. Macros (Composite Operations)
-
-Define operations as inline Python expressions rather than function calls. Useful for activation functions or simple
-math combos.
+### 7. Argument Packing & Variadics
+Convert `func(*args)` to `func(list=[...])`.
 
 ```yaml
-operation: "Swish"
-std_args: [ "x" ]
-variants:
-  torch:
-    api: "torch.nn.functional.silu"
-  jax:
-    # Defines an inline template. {x} is replaced by the argument variable.
-    macro_template: "{x} * jax.nn.sigmoid({x})"
-    required_imports: [ "import jax" ]
-```
-
-### 6. Infix Operators
-
-Convert function calls to Python operators (e.g., `add(a, b)` $\to$ `a + b`).
-
-```yaml
-operation: "Add"
-std_args: [ "a", "b" ]
-variants:
-  torch:
-    api: "torch.add"
-  numpy:
-    # Transformation: np.add(a, b) -> a + b
-    transformation_type: "infix"
-    operator: "+"
-```
-
-### 7. Output Adaptation
-
-Handle API mismatches in return values (e.g., Tuple vs Scalar).
-
-```yaml
-operation: "Max"
-std_args: [ "x" ]
-variants:
-  torch:
-    api: "torch.max"
-    # Torch returns (values, indices). We only want values.
-    # Wraps result: (torch.max(x))[0]
-    output_select_index: 0
-  jax:
-    api: "jnp.max"
-    # Wraps result: (lambda x: x.astype(jnp.float32))(...)
-    output_cast: "jnp.float32"
-```
-
-### 8. Conditional Dispatch (Rules)
-
-Dynamically switch the target API based on the *value* of an argument.
-
-```yaml
-operation: "Resize"
-std_args: [ "image", "size", "mode" ]
-variants:
-  jax:
-    api: "jax.image.resize" # Default
-    dispatch_rules:
-      # If mode == 'nearest', switch API
-      - if_arg: "mode"
-        op: "eq"
-        val: "nearest"
-        use_api: "jax.image.resize_nearest"
-      # If mode in ['bilinear', 'bicubic'], switch API
-      - if_arg: "mode"
-        op: "in"
-        val: [ "bilinear", "bicubic" ]
-        use_api: "jax.image.resize_bilinear"
-```
-
----
-
-## 🧪 Verification Constraints (Fuzzer)
-
-You can guide the automated Fuzzer (CI) by adding constraints to `std_args`. This ensures generated tests use valid
-inputs.
-
-```yaml
-operation: "LogSoftmax"
 std_args:
-  - name: "input"
-    type: "Tensor"
-    # Generate 4D tensors
-    rank: 4
-    # Enforce float32
-    dtype: "float32"
-    # Symbolic Shape: Start with Batch, End with Channels
-    shape_spec: "[B, ..., C]"
+  - name: "tensors"
+    is_variadic: true # Accepts *tensors
+variants:
+  keras:
+    api: "keras.layers.Add"
+    # Packs *tensors into a list and passes to 'inputs' argument (implicit pos 0)
+    pack_as: "List" 
+```
 
-  - name: "dim"
-    type: "int"
-    # Constrain random integer generation
-    min: -1
-    max: 3
+### 8. Constraint Injection via Metadata
+Mark operations with specific flags to trigger built-in engine plugins without writing custom code.
 
-  - name: "reduction"
-    type: "str"
-    # Restrict to enum values
-    options: [ "mean", "sum", "none" ]
-
-# Verify output shape matches input shape
-output_shape_calc: "lambda input, dim, reduction: input.shape"
+```yaml
+operation: "Add_"
+is_inplace: true   # Triggers 'unroll_inplace_ops' plugin automatically
+variants:
+  torch: { api: "torch.add_" }
 ```
 
 ---
 
-## 🔌 Plugin Scaffolding
+## 🔌 Advanced Configuration
 
-If ODL is not expressive enough (e.g., requires complex AST restructing), you can ask the `define` command to generate a
-Python plugin file for you.
+### Version Constraints
+Prevent invalid code generation if the target environment is too old or too new.
 
 ```yaml
-operation: "StrangeOp"
-std_args: [ "x" ]
 variants:
   jax:
-    # Link to a plugin hook
-    requires_plugin: "my_strange_logic"
+    api: "jax.scipy.special.logits"
+    min_version: "0.4.0"
+    max_version: "0.5.0"
+```
 
-# Define the plugin stubs to generate
+### Dependency Management
+Inject imports required by your mapping. The `ImportFixer` will place these at the top of the file and deduplicate them.
+
+```yaml
+variants:
+  numpy:
+    api: "np.sigmoid"
+    # Can be simple strings or structured objects
+    required_imports:
+      - "import numpy as np"
+      - module: "scipy.special"
+        alias: "sp"
+```
+
+### Plugin Scaffolding
+If ODL is not expressive enough, define a stub for a Python plugin loop. The CLI will generate the file `src/ml_switcheroo/plugins/{name}.py` for you to fill in.
+
+```yaml
+operation: "ComplexOp"
+variants:
+  jax:
+    requires_plugin: "my_complex_logic"
+
+# Define the stub to generate
 scaffold_plugins:
-  - name: "my_strange_logic"
+  - name: "my_complex_logic"
     type: "call_transform"
-    doc: "Handles strange logic for JAX."
-    # Optional: Pre-compile some rules into the python code
+    doc: "Handles complex logic for JAX."
+    # Optional: Pre-compile rules into the python code
     rules:
       - if_arg: "x"
         op: "eq"
@@ -311,5 +246,16 @@ scaffold_plugins:
         use_api: "jax.zeros_like"
 ```
 
-Running `ml_switcheroo define strange.yaml` will create `src/ml_switcheroo/plugins/my_strange_logic.py` with the
-boilerplate code ready for editing.
+---
+
+## 🧪 Verification Logic
+
+The `gen-tests` command uses the metadata in your ODL to create physical test files.
+
+*   `test_rtol` / `test_atol`: Set numerical tolerance for equivalence checks.
+*   `nondeterministic`: Set to `true` to relax checks for RNG ops.
+*   `output_shape_calc`: A Python lambda string to verify output shape rigorously.
+    ```yaml
+    # Checks that output shape is input shape with last dim removed
+    output_shape_calc: "lambda input, dim: input.shape[:-1]"
+    ```
