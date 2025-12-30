@@ -72,12 +72,10 @@ def test_ops_assignment_and_call():
   """
   Input:
       %0 = sw.op {type="torch.add"} (%a, %b)
+      sw.return %0
   Expect:
-      v0 = torch.add(a, b)
+      return torch.add(_a, _b) (Fused)
   """
-  # Requires context seeding for %a, %b or we assume generator handles lookup safely
-  # If they aren't registered, lookup returns modified string.
-
   op = OperationNode(
     name="sw.op",
     results=[ValueNode("%0")],
@@ -85,12 +83,14 @@ def test_ops_assignment_and_call():
     attributes=[AttributeNode("type", '"torch.add"')],
   )
 
-  mod = ModuleNode(body=BlockNode("", operations=[op]))
+  # Force usage to trigger assignment (Void suppression feature)
+  use_op = OperationNode(name="sw.return", operands=[ValueNode("%0")])
+
+  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
   code = gen_code(mod)
 
-  # Generator defaults unregistered names: %a -> _a (if reserved) or just a
-  # NamingContext.lookup("%a") -> "_a" (fallback replaces % with _)
-  assert "_0 = torch.add(_a, _b)" in code
+  # Generator applies Statement Fusion logic (inline single usage into return)
+  assert "return torch.add(_a, _b)" in code
 
 
 def test_trivia_restoration():
@@ -109,13 +109,17 @@ def test_trivia_restoration():
 def test_constant_generation():
   """
   Input: %c = sw.constant {value = 1}
-  Expect: v0 = 1
+  Expect: return 1 (Fused)
   """
   op = OperationNode(name="sw.constant", results=[ValueNode("%c")], attributes=[AttributeNode("value", "1")])
-  mod = ModuleNode(body=BlockNode("", operations=[op]))
+
+  # Force usage
+  use_op = OperationNode(name="sw.return", operands=[ValueNode("%c")])
+
+  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
   code = gen_code(mod)
 
-  assert "c = 1" in code or "_c = 1" in code
+  assert "return 1" in code
 
 
 def test_getattr_generation():
@@ -123,7 +127,7 @@ def test_getattr_generation():
   Input:
       %attr = sw.getattr %self {name = "layer"}
   Expect:
-      layer = self.layer
+      return self.layer (Smart Heuristic inlines single usage)
   """
   op = OperationNode(
     name="sw.getattr",
@@ -132,20 +136,28 @@ def test_getattr_generation():
     attributes=[AttributeNode("name", '"layer"')],
   )
 
-  mod = ModuleNode(body=BlockNode("", operations=[op]))
+  # Usage
+  use_op = OperationNode(name="sw.return", operands=[ValueNode("%attr")])
+
+  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
   code = gen_code(mod)
 
   # Heuristic uses hint="layer" for result name
-  assert "layer = _self.layer" in code
+  # But smart heuristic inlines getattr if used once
+  assert "return _self.layer" in code
 
 
 def test_sw_call_generation():
   """
   Input: %res = sw.call %func (%arg)
-  Expect: res = _func(_arg)
+  Expect: return _func(_arg) (Fused)
   """
   op = OperationNode(name="sw.call", results=[ValueNode("%res")], operands=[ValueNode("%func"), ValueNode("%arg")])
-  mod = ModuleNode(body=BlockNode("", operations=[op]))
+
+  # Force usage
+  use_op = OperationNode(name="sw.return", operands=[ValueNode("%res")])
+
+  mod = ModuleNode(body=BlockNode("", operations=[op, use_op]))
   code = gen_code(mod)
 
-  assert "res = _func(_arg)" in code
+  assert "return _func(_arg)" in code

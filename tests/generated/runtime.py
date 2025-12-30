@@ -18,31 +18,6 @@ try:
 except ImportError:
   JAX_AVAILABLE = False
 
-# --- mlx ---
-try:
-  import mlx.core as mx
-  import numpy as np
-
-  MLX_AVAILABLE = True
-except ImportError:
-  MLX_AVAILABLE = False
-
-# --- numpy ---
-try:
-  import numpy as np
-
-  NUMPY_AVAILABLE = True
-except ImportError:
-  NUMPY_AVAILABLE = False
-
-# --- tensorflow ---
-try:
-  import tensorflow as tf
-
-  TENSORFLOW_AVAILABLE = True
-except ImportError:
-  TENSORFLOW_AVAILABLE = False
-
 # --- torch ---
 try:
   import torch
@@ -163,4 +138,4 @@ def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
       return False
 
 
-# __all__ = ['JAX_AVAILABLE', 'jax', 'MLX_AVAILABLE', 'mlx', 'NUMPY_AVAILABLE', 'numpy', 'TENSORFLOW_AVAILABLE', 'tensorflow', 'TORCH_AVAILABLE', 'torch']
+# __all__ = ['verify_results', 'jnp', 'JAX_AVAILABLE', 'jax', 'TORCH_AVAILABLE', 'torch']

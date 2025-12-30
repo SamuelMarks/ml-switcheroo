@@ -9,7 +9,7 @@ It performs the inverse operation of the Emitter:
 2.  **SSA Resolution**: Converts `%id` references into readable Python variable names.
 3.  **Trivia Restoration**: Transforms `// comment` back to `# comment`.
 4.  **Expression Folding**: Inlines single-use intermediates (SSA values) to
-    produce Pythonic code (e.g. `f(x)` instead of `_1=x; _2=f(_1);`).
+    produce Pythonic code (e.g. `f(x)` instead of `_1=x; _2=f(_1);`) *if enabled*.
 
 Feature Hardening:
 - Robustly handles `sw.op` "type" attributes for deep class hierarchies (e.g. `torch.nn.Conv2d`).
@@ -17,6 +17,11 @@ Feature Hardening:
 - Ensures valid assignment generation for results.
 - **Naming Heuristics**: Preserves variable names based on SSA IDs or Type Hints, prioritizing stability.
 - **Type Reconstruction**: Restores Python type hints from MLIR `!sw.type` annotations.
+- **Void Assignment Suppression**: Strips assignments like `_0 = super().__init__()` if unused or void-like.
+- **Explicit Re-rolling**: Defaults to sequential statements (SSA form) for clarity unless inlining is requested.
+- **Smart Heuristics**: Forces inlining of `super()` and `getattr` to prevent verbose `_0 = super()` assignments.
+- **Statement Fusion**: fuses operations into `setattr` and `return` to restore idiomatic syntax (`self.x = y`).
+- **Semantic Naming**: Extracts readable variable names from operation types (e.g., `_flatten` from `torch.flatten`).
 """
 
 from typing import Dict, List, Optional, Set
@@ -31,6 +36,8 @@ from ml_switcheroo.core.mlir.nodes import (
   OperationNode,
   TriviaNode,
   ValueNode,
+  TypeNode,
+  AttributeNode,
 )
 
 
@@ -72,7 +79,7 @@ class NamingContext:
 
     Args:
         ssa_name: The MLIR variable name (e.g. "%0", "%arg0").
-        hint: Optional string to guide naming (e.g. "x" from original source).
+        hint: Optional string to guide naming (e.g. "flatten" from torch.flatten).
 
     Returns:
         The resolved Python identifier string.
@@ -96,6 +103,17 @@ class NamingContext:
       else:
         base = clean
 
+      # Semantic Hint Prefixing
+      # If explicit hint is provided (e.g. "flatten"), prepend "_" if it doesn't already have one,
+      # to denote internal/generated variable usage typically.
+      # If it was an SSA reference (e.g. %self), base will be 'self'.
+
+      # We distinguish explicit semantic hints from SSA hints by checking structure
+      if not ssa_name.endswith(hint) and not hint.startswith("_") and not ssa_name.startswith(f"%{hint}"):
+        # This implies 'hint' came from op type, not ssa ID
+        if not base.startswith("_"):
+          base = f"_{base}"
+
     elif ssa_name.startswith("%"):
       base = "_" + ssa_name[1:]
 
@@ -118,13 +136,17 @@ class NamingContext:
           prefix = "v"
           if hint:
             prefix = hint.lstrip("%").replace(".", "_")
+            if not prefix.startswith("_"):
+              prefix = f"_{prefix}"
 
           attempt = f"{prefix}_{count}"
           if attempt not in self._used_names:
             break
           count += 1
 
-      py_name = attempt
+        py_name = attempt
+      else:
+        py_name = attempt
 
     self._map[ssa_name] = py_name
     self._used_names[py_name] = True
@@ -156,10 +178,24 @@ class MlirToPythonGenerator:
   Transpiler back-end: MLIR CST -> Python LibCST.
   """
 
-  def __init__(self) -> None:
+  def __init__(self, inline_expressions: bool = False) -> None:
+    """
+    Initialize the generator.
+
+    Args:
+        inline_expressions (bool): If True, single-use MLIR values will be inlined into
+                                   nested Python expressions (e.g. `f(g(x))`).
+                                   If False (default), generates sequential SSA statements
+                                   (e.g. `_0 = g(x); f(_0)`).
+    """
     self.ctx = NamingContext()
+    self.inline_expressions = inline_expressions
+
     # Store usage counts for inlining logic: {ssa_name: count}
     self.usage_counts: Dict[str, int] = defaultdict(int)
+    # Map of ssa_name -> consumer_op (single consumer context)
+    self.usage_consumers: Dict[str, OperationNode] = {}
+
     # Map of ssa_name -> CST Node (Expression) for deferred inlining
     self.deferred_exprs: Dict[str, cst.BaseExpression] = {}
 
@@ -187,7 +223,6 @@ class MlirToPythonGenerator:
     Traverses the MLIR tree to count SSAs usage.
     Populates self.usage_counts.
     """
-    # We recursively check all blocks
     self._scan_block_usage(mod.body)
 
   def _scan_block_usage(self, block: BlockNode) -> None:
@@ -195,6 +230,9 @@ class MlirToPythonGenerator:
       # Count operand usage
       for operand in op.operands:
         self.usage_counts[operand.name] += 1
+        # Track last (or only) consumer for fusion analysis
+        self.usage_consumers[operand.name] = op
+
       # Recurse regions
       for region in op.regions:
         for b in region.blocks:
@@ -253,15 +291,54 @@ class MlirToPythonGenerator:
   def _should_inline_expression(self, op: OperationNode, expr: cst.BaseExpression) -> bool:
     """
     Determines if the result of an operation should be folded/inlined.
+
+    Revised Logic:
+    1.  **Atoms**: Always inline `sw.constant` and `sw.getattr` IF USED.
+         If unused, do NOT inline so they can be emitted as bare expressions
+         (required for some tests expecting '1' output, and for side-effect ops).
+    2.  **Explicit Global**: Check `self.inline_expressions` flag (e.g. True).
+    3.  **Statement Fusion**: Even if global inline is False, inline if the consumer is
+        a "Terminal Statement" like `sw.setattr` or `sw.return`.
     """
     if not op.results:
       return False  # No result to inline
 
+    op_name = op.name.strip('"')
     res_ssa = op.results[0].name
-    count = self.usage_counts[res_ssa]
+    usage = self.usage_counts[res_ssa]
 
-    # Optimize: Single-use expressions are inlined to avoid temp variables
-    return count == 1
+    # 1. ATOMS: Always inline simple values (Constants, Attributes) if they are used.
+    # If unused (usage=0), returning False forces '_wrap_as_statement' to emit them
+    # as standalone expression statements (e.g. just "1" on a line), avoiding "assignment to nothing".
+    if op_name == "sw.constant":
+      return usage > 0
+
+    if op_name == "sw.getattr":
+      return usage > 0
+
+    # 2. VOID/SUPER: Always inline proxies
+    # sw.op type="super"
+    type_attr = self._get_attr(op, "type")
+    if op_name == "sw.op" and type_attr and "super" in type_attr:
+      return True
+
+    # 3. STATEMENT FUSION:
+    # If the value is used EXACTLY ONCE by a statement-like op (setattr, return),
+    # we force inlining to create a clean statement.
+    if usage == 1 and res_ssa in self.usage_consumers:
+      consumer = self.usage_consumers[res_ssa]
+      cons_name = consumer.name.strip('"')
+
+      # Target consumers that are definitely statements
+      statement_ops = {"sw.setattr", "sw.return"}
+      if cons_name in statement_ops:
+        return True
+
+    # 4. Standard Re-roll Check
+    if not self.inline_expressions:
+      return False
+
+    return usage == 1
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
     """
@@ -323,27 +400,61 @@ class MlirToPythonGenerator:
   def _wrap_as_statement(self, op: OperationNode, expr: cst.BaseExpression) -> cst.BaseStatement:
     """
     Wraps an expression into a statement (Assign or Expr).
+    Extracts semantic hints from 'type' attribute to produce readable variable names.
     """
     if op.results:
       res_ssa = op.results[0].name
+
+      # Rule 1: Usage Count 0 -> Suppress assignment
+      if self.usage_counts[res_ssa] == 0:
+        return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
+
+      # Rule 2: Void Pattern Detection
+      if self._is_void_call(expr):
+        return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
+
+      # Semantic Hint Extraction
       hint: Optional[str] = None
       is_numeric_ssa = res_ssa.startswith("%") and res_ssa[1:].isdigit()
 
-      if op.name.strip('"') == "sw.op" and not is_numeric_ssa:
-        raw_t = self._get_attr(op, "type")
-        if raw_t:
-          hint = raw_t.strip('"').split(".")[-1].lower()
+      # 1. Check for 'type' attribute (e.g. torch.flatten)
+      raw_t = self._get_attr(op, "type")
+      if raw_t:
+        # Clean quotes
+        val = raw_t.strip('"').strip("'")
+        # Get last segment: flattened structure -> flatten
+        hint = val.split(".")[-1].lower()
+
+      # 2. Check for 'name' attribute (e.g. getattr self "conv")
       elif op.name.strip('"') == "sw.getattr":
-        # Hint for attrs
         raw_n = self._get_attr(op, "name")
         if raw_n:
           hint = raw_n.strip('"')
+
+      # 3. Fallback for constants: cst
+      elif op.name.strip('"') == "sw.constant":
+        hint = "cst"
 
       py_target = self.ctx.register(res_ssa, hint=hint)
       target_node = cst.AssignTarget(target=cst.Name(py_target))
       return cst.SimpleStatementLine(body=[cst.Assign(targets=[target_node], value=expr)])
     else:
       return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
+
+  def _is_void_call(self, expr: cst.BaseExpression) -> bool:
+    """
+    Heuristic detection of calls that return None/Void (like super().__init__).
+    """
+    if isinstance(expr, cst.Call):
+      # Detect super().__init__()
+      # Structure: Call(func=Attribute(value=Call(func=Name("super")), attr=Name("__init__")))
+      if isinstance(expr.func, cst.Attribute):
+        if expr.func.attr.value == "__init__":
+          receiver = expr.func.value
+          if isinstance(receiver, cst.Call) and isinstance(receiver.func, cst.Name):
+            if receiver.func.value == "super":
+              return True
+    return False
 
   # --- Ops Conversion Utils ---
 
@@ -464,12 +575,22 @@ class MlirToPythonGenerator:
     prev_ctx = self.ctx
     self.ctx = NamingContext()
 
+    # Reset Usage Counts for new scope to prevent external block counts affecting internal logic
+    prev_usage_counts = self.usage_counts
+    self.usage_counts = defaultdict(int)
+    # Also reset consumers map
+    prev_usage_consumers = self.usage_consumers
+    self.usage_consumers = {}
+
     params = []
     body_stmts = []
 
     try:
       if op.regions and op.regions[0].blocks:
         block0 = op.regions[0].blocks[0]
+        # Pre-analyze usage for this scope
+        self._scan_block_usage(block0)
+
         # Register arguments in local context to establish 'self', 'x', etc.
         for val, typ in block0.arguments:
           py_name = self.ctx.register(val.name, hint=val.name)
@@ -487,12 +608,9 @@ class MlirToPythonGenerator:
         body_stmts = [cst.SimpleStatementLine(body=[cst.Pass()])]
 
     finally:
-      # Restore if we were nested (though func defs usually aren't nested in this IR structure yet)
-      # But cleaning up is good practice in case we reuse generator.
-      # Actually, since NamingContext also tracks deferred_exprs counts globally in the current implementation,
-      # this scoping might affect inlining counts if not handled carefully, but usage_counts is separate.
-      # Usage counts are global to module, so that's fine. Naming is the only thing we reset.
       self.ctx = prev_ctx
+      self.usage_counts = prev_usage_counts
+      self.usage_consumers = prev_usage_consumers
 
     return cst.FunctionDef(
       name=cst.Name(func_name), params=cst.Parameters(params=params), body=cst.IndentedBlock(body=body_stmts)

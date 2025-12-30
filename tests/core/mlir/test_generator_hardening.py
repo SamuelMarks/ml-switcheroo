@@ -24,6 +24,7 @@ def test_sw_op_attribute_hardening():
   """
   Verify `sw.op` uses `type` attribute for complex dotted names.
   Scenario: x = torch.nn.Conv2d(...)
+  Impact of Void Suppression: Unused result -> Expression Statement.
   """
   op = OperationNode(
     name="sw.op",
@@ -33,7 +34,9 @@ def test_sw_op_attribute_hardening():
   )
 
   code = gen_code(op)
-  assert "conv2d = torch.nn.Conv2d(_arg)" in code
+  # Checks updated for Void Supression: No assignment
+  assert "torch.nn.Conv2d(_arg)" in code
+  assert "=" not in code
 
 
 def test_sw_call_method_chain_hardening():
@@ -42,6 +45,7 @@ def test_sw_call_method_chain_hardening():
   Scenario:
       self.conv = ...
       x = self.conv(x)
+  Impact of Void Suppression: Unused result -> Expression Statement.
   """
   # 1. Simulate naming context having 'self.conv' registered
   gen = MlirToPythonGenerator()
@@ -58,7 +62,8 @@ def test_sw_call_method_chain_hardening():
   code = gen.generate(mod).code
 
   # Expect it to resolve 'self.conv' into proper CST attributes
-  assert "_res = self.conv(_x)" in code
+  assert "self.conv(_x)" in code
+  assert "=" not in code
 
 
 def test_sw_op_void_return():

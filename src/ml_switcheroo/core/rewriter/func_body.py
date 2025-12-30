@@ -9,7 +9,7 @@ It handles structural manipulations of the function body, including:
 4.  Converting one-line bodies to indented blocks.
 """
 
-from typing import List
+from typing import List, Optional
 import libcst as cst
 from libcst import BaseSuite, SimpleStatementSuite, IndentedBlock, SimpleStatementLine
 
@@ -154,12 +154,22 @@ class FuncBodyMixin:
 
   def _is_super_init_stmt(self, stmt: cst.CSTNode) -> bool:
     """
-    Detects if statement is ``super().__init__()`` or ``super(Type, self).__init__()``.
+    Detects if statement is ``super().__init__()``, ``super(Type, self).__init__()``,
+    or an assignment like ``x = super().__init__()``.
     """
     if isinstance(stmt, cst.SimpleStatementLine) and len(stmt.body) == 1:
       small = stmt.body[0]
-      if isinstance(small, cst.Expr) and isinstance(small.value, cst.Call):
-        call = small.value
+      call_node = None
+
+      # Case 1: Expression Statement (e.g. super().__init__())
+      if isinstance(small, cst.Expr):
+        call_node = small.value
+      # Case 2: Assignment (e.g. _1 = super().__init__())
+      elif isinstance(small, cst.Assign):
+        call_node = small.value
+
+      if isinstance(call_node, cst.Call):
+        call = call_node
         # Check for .__init__()
         if isinstance(call.func, cst.Attribute) and call.func.attr.value == "__init__":
           receiver = call.func.value

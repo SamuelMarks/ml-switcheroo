@@ -50,7 +50,7 @@ def test_mlir_to_python(base_engine):
   """
   Scenario: User converts MLIR code to Python (Default jax target).
   Input: %0 = sw.constant {value=1}
-  Output: _0 = 1 (Generated Python) -> Processed (Analysis/Rewriter)
+  Output: 1 (Expression Statement via Void Suppression)
   """
   # Note: rewriter needs config, so target='jax' means standard rewriter runs.
   # The generated python code is generic ("_0 = 1"), which might not trigger rewriter changes.
@@ -61,8 +61,9 @@ def test_mlir_to_python(base_engine):
   result = engine.run(mlir_code)
 
   assert result.success
-  # Generator creates "_0 = 1" (or v0 = 1)
-  assert "= 1" in result.code
+  # Generator creates just "1\n" as it is unused and suppressing assignments
+  assert "1" in result.code
+  assert "=" not in result.code
 
 
 def test_mlir_to_mlir_roundtrip(base_engine):
