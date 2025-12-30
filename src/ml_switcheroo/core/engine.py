@@ -7,20 +7,29 @@ from a source framework to a target framework.
 
 The Engine pipeline consists of:
 
-1.  **Preprocessing**: Parsing source code into a LibCST tree.
-2.  **Safety Analysis**:
+1.  **Ingestion Phase**:
+    - If `source="mlir"`, parses MLIR text and hydrates a Python AST.
+    - Otherwise, parses Python source code into a LibCST tree.
 
-    *   **Purity**: Checking for side effects if targeting functional frameworks (JAX).
-    *   **Lifecycle**: Verifying variable initialization.
-    *   **Dependencies**: Scanning for unmapped 3rd-party imports.
+2.  **MLIR Emission (Target="mlir")**:
+    - If the target is "mlir", the pipeline short-circuits here.
+    - The AST is converted to MLIR IR text and returned immediately.
 
-3.  **Semantic Pivoting**: Executing the `PivotRewriter` to map API calls and structure.
+3.  **Safety Analysis (Standard)**:
+    - **Purity**: Checking for side effects if targeting functional frameworks (JAX).
+    - **Lifecycle**: Verifying variable initialization.
+    - **Dependencies**: Scanning for unmapped 3rd-party imports.
+
+4.  **Semantic Pivoting**: Executing the `PivotRewriter` to map API calls and structure.
     *Creates AST Snapshots for visualization before and after this phase using Mermaid.*
 
-4.  **Post-processing**:
+5.  **Intermediate Representation (MLIR) Roundtrip** (Optional):
+    - If `intermediate="mlir"`, the pivot result is converted to MLIR text,
+      parsed back, and regenerated into Python to verify fidelity.
 
-    *   **Import Fixer**: Injecting necessary imports and removing unused source imports.
-    *   **Structural Linting**: Verifying no artifacts from the source framework remain.
+6.  **Post-processing**:
+    - **Import Fixer**: Injecting necessary imports and removing unused source imports.
+    - **Structural Linting**: Verifying no artifacts from the source framework remain.
 
 The engine relies on `RuntimeConfig` to resolve 'Flavours' (e.g., distinguishing
 `flax_nnx` from generic `jax`) to load the correct structural traits.
@@ -46,6 +55,11 @@ import ml_switcheroo.frameworks as fw_registry
 
 # Import Visualizer for snapshots
 from ml_switcheroo.utils.visualizer import MermaidGenerator
+
+# MLIR Bridge
+from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
+from ml_switcheroo.core.mlir.parser import MlirParser
+from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 class ConversionResult(BaseModel):
@@ -82,13 +96,14 @@ class ASTEngine:
 
   def __init__(
     self,
-    semantics: SemanticsManager = None,
+    semantics: Optional[SemanticsManager] = None,
     config: Optional[RuntimeConfig] = None,
     # Legacy parameters for backward compat
     source: Optional[str] = None,
     target: Optional[str] = None,
     strict_mode: bool = False,
     plugin_config: Optional[Dict[str, Any]] = None,
+    intermediate: Optional[str] = None,
   ):
     """
     Initializes the Engine.
@@ -104,6 +119,7 @@ class ASTEngine:
         target (str, optional): Legacy override for target framework key.
         strict_mode (bool): Legacy override for strict mode.
         plugin_config (Dict, optional): Legacy override for plugin settings.
+        intermediate (str, optional): "mlir" to enable IR verification roundtrip.
     """
     self.semantics = semantics or SemanticsManager()
 
@@ -125,6 +141,7 @@ class ASTEngine:
     self.source = self.config.effective_source
     self.target = self.config.effective_target
     self.strict_mode = self.config.strict_mode
+    self.intermediate = intermediate
 
   def parse(self, code: str) -> cst.Module:
     """
@@ -201,21 +218,44 @@ class ASTEngine:
 
     return False
 
+  def _run_mlir_roundtrip(self, tree: cst.Module, tracer: Any) -> cst.Module:
+    """
+    Executes CST -> MLIR Text -> CST pipeline for verification.
+    """
+    try:
+      tracer.start_phase("MLIR Bridge", "CST -> MLIR Text -> CST")
+
+      # 1. Emit
+      emitter = PythonToMlirEmitter()
+      mlir_cst = emitter.convert(tree)
+      mlir_text = mlir_cst.to_text()
+
+      tracer.log_mutation("MLIR Generation", "(Python CST)", mlir_text)
+
+      # 2. Parse Back
+      parser = MlirParser(mlir_text)
+      mlir_cst_restored = parser.parse()
+      mlir_text_roundtrip = mlir_cst_restored.to_text()
+
+      if mlir_text != mlir_text_roundtrip:
+        tracer.log_warning("MLIR Text Roundtrip Mismatch")
+
+      # 3. Generate Python
+      generator = MlirToPythonGenerator()
+      restored_tree = generator.generate(mlir_cst_restored)
+
+      tracer.end_phase()
+      return restored_tree
+
+    except Exception as e:
+      tracer.log_warning(f"MLIR Bridge Failed: {e}")
+      tracer.end_phase()
+      # Return original if bridge fails to ensure pipeline robustness
+      return tree
+
   def run(self, code: str) -> ConversionResult:
     """
     Executes the full transpilation pipeline.
-
-    Passes performed:
-
-    1.  Parse.
-    2.  Purity Scan (if targeting traits.enforce_purity_analysis).
-    3.  Lifecycle Analysis (Init/Forward mismatch).
-    4.  Dependency Scan (Checking 3rd party libs).
-    5.  Pivot Rewrite (The main transformation).
-        *Includes visual snapshots before and after.*
-    6.  Import Fixer (Injecting new imports, pruning old ones).
-        *Checks for lingering usage before pruning.*
-    7.  Structural Linting (Verifying output cleanliness).
 
     Args:
         code (str): The input source string.
@@ -230,46 +270,85 @@ class ASTEngine:
 
     _root_phase = tracer.start_phase("Transpilation Pipeline", f"{self.source} -> {self.target}")
 
-    try:
+    tree: cst.Module
+
+    # --- PHASE 1: INGESTION (Parsing/Hydration) ---
+    if self.source == "mlir":
+      tracer.start_phase("MLIR Ingest", "MLIR Text -> Python CST")
+      try:
+        parser = MlirParser(code)
+        mlir_mod = parser.parse()
+        gen = MlirToPythonGenerator()
+        tree = gen.generate(mlir_mod)
+        tracer.log_mutation("Ingestion", "(MLIR Text)", "(Python CST)")
+      except Exception as e:
+        return ConversionResult(
+          code=code,
+          errors=[f"MLIR Parse Error: {e}"],
+          success=False,
+          trace_events=tracer.export(),
+        )
+      tracer.end_phase()
+    else:
       tracer.start_phase("Preprocessing", "Parsing & Analysis")
-      tree = self.parse(code)
-      tracer.log_mutation("Module", "(Raw Source)", "(AST Parsed)")
-    except Exception as e:
-      return ConversionResult(
-        code=code,
-        errors=[f"Parse Error: {e}"],
-        success=False,
-        trace_events=tracer.export(),
-      )
+      try:
+        tree = self.parse(code)
+        tracer.log_mutation("Module", "(Raw Source)", "(AST Parsed)")
+      except Exception as e:
+        return ConversionResult(
+          code=code,
+          errors=[f"Parse Error: {e}"],
+          success=False,
+          trace_events=tracer.export(),
+        )
+      tracer.end_phase()
+
+    # --- PHASE 2: SHORT CURCUIT (Target = MLIR) ---
+    if self.target == "mlir":
+      tracer.start_phase("MLIR Emission", "CST -> MLIR Text")
+      try:
+        emitter = PythonToMlirEmitter()
+        mlir_cst = emitter.convert(tree)
+        mlir_text = mlir_cst.to_text()
+        tracer.log_mutation("Emission", "(Python CST)", mlir_text)
+        tracer.end_phase()
+        tracer.end_phase()  # End root phase
+        return ConversionResult(code=mlir_text, success=True, trace_events=tracer.export())
+      except Exception as e:
+        return ConversionResult(
+          code="",
+          errors=[f"MLIR Emit Error: {e}"],
+          success=False,
+          trace_events=tracer.export(),
+        )
+
+    # --- PHASE 3: STANDARD REWRITING ---
 
     errors_log = []
 
-    # Pass 0a: Purity Analysis
-    # Controlled dynamically by Framework Traits (e.g. JAX/Flax opt-in)
+    # Pass 3a: Purity Analysis (if targeting safe framework)
     if self._should_enforce_purity():
       tracer.start_phase("Purity Check", "Scanning for side-effects")
       purity_scanner = PurityScanner(semantics=self.semantics, source_fw=self.source)
       tree = tree.visit(purity_scanner)
       tracer.end_phase()
 
-    # Pass 0b: Lifecycle Analysis
+    # Pass 3b: Lifecycle Analysis
     lifecycle_tracker = InitializationTracker()
     tree.visit(lifecycle_tracker)
     if lifecycle_tracker.warnings:
       errors_log.extend([f"Lifecycle: {w}" for w in lifecycle_tracker.warnings])
 
-    # Pass 0c: Dependency Analysis
+    # Pass 3c: Dependency Analysis
     dep_scanner = DependencyScanner(self.semantics, self.source)
     tree.visit(dep_scanner)
     if dep_scanner.unknown_imports:
       errors_log.append(f"Deps: {dep_scanner.unknown_imports}")
 
-    tracer.end_phase()
-
     # --- VISUALIZER HOOK 1 ---
     self._generate_snapshot(tree, "AST Before Pivot")
 
-    # Pass 1: Semantic Pivot (Rewriter)
+    # Pass 4: Semantic Pivot (Rewriter)
     tracer.start_phase("Rewrite Engine", "Visitor Traversal")
     rewriter = PivotRewriter(self.semantics, self.config)
     tree = tree.visit(rewriter)
@@ -278,7 +357,11 @@ class ASTEngine:
     # --- VISUALIZER HOOK 2 ---
     self._generate_snapshot(tree, "AST After Pivot")
 
-    # Pass 2: Import Scaffolding
+    # Pass 5: MLIR Bridge (Optional Verification Roundtrip)
+    if self.intermediate == "mlir":
+      tree = self._run_mlir_roundtrip(tree, tracer)
+
+    # Pass 6: Import Scaffolding
     roots_to_prune = {self.source}
     if self.source != self.target:
       tracer.start_phase("Import Fixer", "Resolving Dependencies")
@@ -297,13 +380,19 @@ class ASTEngine:
       tree.visit(usage_scanner)
       should_preserve = usage_scanner.get_result()
 
-      fixer = ImportFixer(sorted(list(roots_to_prune)), self.target, submodule_map, alias_map, should_preserve)
+      fixer = ImportFixer(
+        sorted(list(roots_to_prune)),
+        self.target,
+        submodule_map,
+        alias_map,
+        should_preserve,
+      )
       tree = tree.visit(fixer)
       tracer.end_phase()
 
     final_code = self.to_source(tree)
 
-    # Pass 3: Linter
+    # Pass 7: Linter
     if self.source != self.target:
       tracer.start_phase("Structural Linter", "Verifying Cleanup")
       linter = StructuralLinter(forbidden_roots=roots_to_prune)
@@ -316,4 +405,9 @@ class ASTEngine:
       errors_log.append("Escape Hatches Detected")
 
     tracer.end_phase()
-    return ConversionResult(code=final_code, errors=errors_log, success=True, trace_events=tracer.export())
+    return ConversionResult(
+      code=final_code,
+      errors=errors_log,
+      success=True,
+      trace_events=tracer.export(),
+    )

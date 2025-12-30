@@ -30,6 +30,11 @@ each ML framework, in order to confidently—and with evidence—make haughty cl
 
 To/fro Lean or Coq. Maybe u
 
+### WASM
+
+Also for WASM doc frontend compile ML model to WASM then execute WASM in browser with some way of giving input and
+showing output… very much TBD
+
 ## Mobile friendly doc
 
 Show always-on-top selection of target, source framework
