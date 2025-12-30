@@ -12,12 +12,13 @@ Workflow:
 4.  **Inject Spokes**: Updates framework adapter files (Mappings).
 5.  **Scaffold Plugins**: Generates boilerplate Python files for hooks.
 6.  **Generate Tests**: Creates physical test file for verification.
+    *Update*: Generates ONE test file per operation defined in the YAML.
 """
 
 import fileinput
 import inspect
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional, Any, List
 
 import libcst as cst
 
@@ -72,8 +73,6 @@ def handle_define(yaml_file: Path) -> int:
     return 1
 
   # Load Semantics Manager once (for test generation templates)
-  # Note: We rely on the manager to load templates, but we manually
-  # construct the op definition dict for the generator to ensure it sees the NEW op.
   semantics_mgr = SemanticsManager()
 
   for op_def in ops:
@@ -92,7 +91,9 @@ def handle_define(yaml_file: Path) -> int:
     # 4. Plugin Scaffolding (New Hooks)
     _scaffold_plugins(op_def)
 
-    # 5. Test Generation (New Feature)
+    # 5. Test Generation (One per Op)
+    # We ensure a unique test file for every operation to prevent overwriting
+    # when processing batches.
     _generate_test_file(op_def, semantics_mgr)
 
     log_success(f"Operation '{op_def.operation}' defined & tested.")
@@ -231,12 +232,16 @@ def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager) -> None:
     root_dir = Path.cwd()
 
   test_dir = root_dir / "tests" / "generated"
-  test_file = test_dir / f"test_odl_{op_def.operation.lower()}.py"
+
+  # Sanitize filename
+  safe_name = op_def.operation.lower().replace(" ", "_").replace("-", "_")
+  test_file = test_dir / f"test_odl_{safe_name}.py"
 
   # 3. Run Generator
   try:
     gen = TestGenerator(semantics_mgr=mgr)
     gen.generate(semantics_input, test_file)
+
     # Log path usually relative to cwd for readability
     try:
       rel_path = test_file.relative_to(Path.cwd())

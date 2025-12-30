@@ -458,4 +458,187 @@ INTERNAL_OPS = {
     "std_args": [],
     "variants": {},
   },
+  "Arange": {
+    "description": "Returns evenly spaced values within a given interval.",
+    "std_args": [
+      {
+        "name": "start",
+        "type": "int",
+      },
+      {
+        "name": "stop",
+        "type": "int",
+      },
+      {
+        "name": "step",
+        "type": "int",
+        "default": "1",
+      },
+      {
+        "name": "dtype",
+        "type": "dtype",
+      },
+    ],
+    "variants": {},
+  },
+  "Ones": {
+    "description": "Returns a new tensor of given shape filled with ones.",
+    "std_args": [
+      {
+        "name": "shape",
+        "type": "Tuple[int, ...]",
+      },
+      {
+        "name": "dtype",
+        "type": "dtype",
+      },
+    ],
+    "variants": {},
+  },
+  "Concatenate": {
+    "description": "Joins a sequence of arrays along an existing axis.",
+    "std_args": [
+      {
+        "name": "tensors",
+        "type": "List[Tensor]",
+      },
+      {
+        "name": "axis",
+        "type": "int",
+        "default": "0",
+      },
+    ],
+    "variants": {},
+  },
+  "Zeros": {
+    "description": "Returns a tensor filled with the scalar value 0, with the shape defined by the argument.",
+    "std_args": [
+      {
+        "name": "shape",
+        "type": "Tuple[int, ...]",
+      },
+      {
+        "name": "dtype",
+        "type": "dtype",
+        "default": "None",
+      },
+    ],
+    "variants": {},
+  },
+  "Concatenate": {
+    "description": "Joins a sequence of arrays along an existing axis.",
+    "std_args": [
+      {
+        "name": "tensors",
+        "type": "List[Tensor]",
+      },
+      {
+        "name": "axis",
+        "type": "int",
+        "default": "0",
+      },
+    ],
+    "variants": {},
+  },
+  "Zeros": {
+    "description": "Returns a tensor filled with the scalar value 0, with the shape defined by the argument.",
+    "std_args": [
+      {
+        "name": "shape",
+        "type": "Tuple[int, ...]",
+      },
+      {
+        "name": "dtype",
+        "type": "dtype",
+        "default": "None",
+      },
+    ],
+    "variants": {},
+  },
+  "RandInt": {
+    "description": "Generates integers uniformly distributed in the range [low, high).",
+    "std_args": [
+      {
+        "name": "low",
+        "type": "int",
+      },
+      {
+        "name": "high",
+        "type": "int",
+      },
+      {
+        "name": "shape",
+        "type": "Tuple[int, ...]",
+      },
+      {
+        "name": "dtype",
+        "type": "dtype",
+        "default": "None",
+      },
+    ],
+    "variants": {},
+  },
+  "Array": {
+    "description": "Creates a tensor/array from a list or numeric data.",
+    "std_args": [
+      {
+        "name": "data",
+        "type": "List[Any]",
+      },
+      {
+        "name": "dtype",
+        "type": "dtype",
+        "default": "None",
+      },
+    ],
+    "variants": {},
+  },
+  "Pad": {
+    "description": "Pads a tensor. Plugin handles conversion between flat padding (Torch) and tuple-padding (NumPy).",
+    "std_args": [
+      {
+        "name": "input",
+        "type": "Tensor",
+      },
+      {
+        "name": "pad",
+        "type": "Union[Tuple[int, ...], List[int]]",
+      },
+      {
+        "name": "mode",
+        "type": "str",
+        "default": '"constant"',
+      },
+      {
+        "name": "value",
+        "type": "float",
+        "default": "0.0",
+      },
+    ],
+    "variants": {},
+  },
+  "AssertClose": {
+    "description": "Asserts that two tensors are numerically close.",
+    "std_args": [
+      {
+        "name": "actual",
+        "type": "Tensor",
+      },
+      {
+        "name": "expected",
+        "type": "Tensor",
+      },
+      {
+        "name": "rtol",
+        "type": "float",
+        "default": "1e-5",
+      },
+      {
+        "name": "atol",
+        "type": "float",
+        "default": "1e-8",
+      },
+    ],
+    "variants": {},
+  },
 }

@@ -300,6 +300,22 @@ class TensorFlowAdapter:
       "SiLU": StandardMap(api="tensorflow.nn.silu"),
       "TensorType": StandardMap(api="tensorflow.Tensor"),
       "CudaAvailable": StandardMap(api="tf.config.list_physical_devices", requires_plugin="cuda_is_available"),
+      "Arange": StandardMap(api="tf.range", args={"stop": "limit", "step": "delta"}),
+      "Ones": StandardMap(api="tf.ones"),
+      "Concatenate": StandardMap(api="tf.concat", args={"tensors": "values"}),
+      "Zeros": StandardMap(api="tf.zeros"),
+      "Concatenate": StandardMap(api="tf.concat", args={"tensors": "values"}),
+      "Zeros": StandardMap(api="tf.zeros"),
+      "RandInt": StandardMap(
+        api="tf.random.uniform", args={"low": "minval", "high": "maxval"}, inject_args={"dtype": "tf.int32"}
+      ),
+      "Array": StandardMap(api="tf.constant", args={"data": "value"}),
+      "Pad": StandardMap(
+        api="tf.pad",
+        args={"input": "tensor", "pad": "paddings", "value": "constant_values"},
+        requires_plugin="padding_converter",
+      ),
+      "AssertClose": StandardMap(api="tf.debugging.assert_near", args={"actual": "x", "expected": "y"}),
       # <--- NEW: Wired Orphan
     }
 

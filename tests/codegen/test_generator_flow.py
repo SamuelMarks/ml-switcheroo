@@ -6,6 +6,7 @@ Verifies:
 2.  Generator handles 'tensorflow' or 'mlx' if present in Semantics (dynamic case).
 3.  Generator skips operations with only 1 variant.
 4.  Generator respects manually existing tests.
+5.  **NEW**: Runtime import usage.
 """
 
 import pytest
@@ -48,7 +49,23 @@ def mock_mgr():
   mgr.get_test_template.side_effect = lambda fw: templates.get(fw)
   # Safe fallback for other calls
   mgr.get_framework_config.return_value = {}
+  # Ensure test_templates attribute exists for runtime generator
+  mgr.test_templates = templates
   return mgr
+
+
+def test_generation_runtime_import(tmp_path, mock_mgr):
+  """
+  Verify `from .runtime import *` is generated.
+  """
+  semantics = {"add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}}
+
+  out_file = tmp_path / "test_structure.py"
+  gen = TestGenerator(semantics_mgr=mock_mgr)
+  gen.generate(semantics, out_file)
+
+  content = out_file.read_text()
+  assert "from .runtime import *" in content
 
 
 def test_generation_safety(tmp_path, mock_mgr):
@@ -78,7 +95,7 @@ def test_gen_abs():
 def test_generation_multi_backend(tmp_path, mock_mgr):
   """
   Scenario: Semantics includes Torch, JAX, and TensorFlow.
-  Expect: Generated code contains try/except blocks for all three.
+  Expect: Generated code contains execution blocks for all three.
   """
   # 1. Mock Semantics
   semantics = {
@@ -94,15 +111,12 @@ def test_generation_multi_backend(tmp_path, mock_mgr):
   gen = TestGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
-  # 3. Verify Imports
+  # 3. Verify Imports via Runtime
   content = out_file.read_text()
-  assert "import torch" in content
-  assert "import tensorflow as tf" in content
-  assert "import jax" in content
 
   # 4. Verify Execution Blocks
-  assert "Framework: torch" in content
-  assert "Framework: tensorflow" in content
+  assert "if TORCH_AVAILABLE:" in content
+  assert "if TENSORFLOW_AVAILABLE:" in content
   assert "tf.convert_to_tensor(np_x)" in content
   assert "res.numpy()" in content  # TF specific normalization
 

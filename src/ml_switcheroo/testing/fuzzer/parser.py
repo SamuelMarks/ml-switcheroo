@@ -3,6 +3,9 @@ Type Hint Parser and Recursive Generation Logic.
 
 This module processes string type hints (e.g. `List[Array['N']]`) and
 generates conforming data structures.
+
+Updates:
+- Enforces shape consistency for ``List[Tensor]`` generation to support ``stack``/``concat``.
 """
 
 import re
@@ -15,6 +18,7 @@ from ml_switcheroo.testing.fuzzer.generators import (
   generate_scalar_int,
   generate_scalar_float,
   generate_fake_callable,
+  get_random_shape,
 )
 from ml_switcheroo.testing.fuzzer.utils import (
   is_pipe_top_level,
@@ -119,11 +123,45 @@ def generate_from_hint(
       return tuple(generate_from_hint(t, base_shape, depth + 1, max_depth, symbol_map, constraints) for t in sub_types)
 
   # 4. List/Sequence (List[T])
+  # Update: Enforce consistency for List[Array]
   match_list = re.match(r"^(List|Sequence)\[(.*)\]$", type_str)
   if match_list:
     inner = match_list.group(2)
-    length = random.randint(1, 3)
-    return [generate_from_hint(inner, base_shape, depth + 1, max_depth, symbol_map, constraints) for _ in range(length)]
+    length = random.randint(2, 3)  # ensure at least 2 for concat cases
+
+    # Check if inner type is Tensor-like to enforce uniform shape
+    is_tensor = inner.startswith(("Array", "Tensor", "np.ndarray"))
+
+    # Generate the first element to establish shape context
+    first_elem = generate_from_hint(inner, base_shape, depth + 1, max_depth, symbol_map, constraints)
+
+    if is_tensor and isinstance(first_elem, np.ndarray):
+      # Use the shape of the first element as the base_shape for subsequent elements
+      # This ensures all tensors in List[Tensor] share compatible dimensions.
+      uniform_shape = first_elem.shape
+      list_data = [first_elem]
+      for _ in range(length - 1):
+        # Pass explicit uniform_shape as base_shape context
+        # Note: If 'inner' has symbolic dims like Array['N'], symbol_map already enforces consistency.
+        # But for generic 'Array', this override forces equality.
+        elem = generate_from_hint(inner, uniform_shape, depth + 1, max_depth, symbol_map, constraints)
+
+        # Double check generation respected it (or forced new random if generic)
+        # If generic heuristic was used, we overwrite it to match
+        if isinstance(elem, np.ndarray) and elem.shape != uniform_shape:
+          # Resize/Regenerate to match strictly
+          # We reuse the logic from generate_array but force shape
+          elem = generate_array("float", uniform_shape, constrs)
+
+        list_data.append(elem)
+      return list_data
+
+    else:
+      # Standard generation
+      list_data = [first_elem]
+      for _ in range(length - 1):
+        list_data.append(generate_from_hint(inner, base_shape, depth + 1, max_depth, symbol_map, constraints))
+      return list_data
 
   # 5. Dict/Mapping (Dict[K, V])
   match_dict = re.match(r"^(Dict|Mapping)\[(.*)\]$", type_str)

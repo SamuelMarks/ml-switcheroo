@@ -359,6 +359,16 @@ class TorchAdapter:
       "SiLU": StandardMap(api="torch.nn.functional.silu"),
       "ModuleList": StandardMap(api="torch.nn.ModuleList"),
       "TensorType": StandardMap(api="torch.Tensor"),
+      "Arange": StandardMap(api="torch.arange", args={"stop": "end"}),
+      "Ones": StandardMap(api="torch.ones", args={"shape": "size"}),
+      "Concatenate": StandardMap(api="torch.cat", args={"axis": "dim"}),
+      "Zeros": StandardMap(api="torch.zeros", args={"shape": "size"}),
+      "Concatenate": StandardMap(api="torch.cat", args={"axis": "dim"}),
+      "Zeros": StandardMap(api="torch.zeros", args={"shape": "size"}),
+      "RandInt": StandardMap(api="torch.randint", args={"shape": "size"}),
+      "Array": StandardMap(api="torch.tensor"),
+      "Pad": StandardMap(api="torch.nn.functional.pad"),
+      "AssertClose": StandardMap(api="torch.testing.assert_close"),
     }
 
   # --- Syntax Generators ---

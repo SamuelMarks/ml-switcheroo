@@ -222,6 +222,20 @@ class MLXAdapter:
       "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
       "SiLU": StandardMap(api="mlx.nn.silu"),
       "TensorType": StandardMap(api="mlx.core.array"),
+      "Arange": StandardMap(api="mlx.core.arange"),
+      "Ones": StandardMap(api="mlx.core.ones"),
+      "Concatenate": StandardMap(api="mlx.core.concatenate", args={"tensors": "arrays"}),
+      "Zeros": StandardMap(api="mlx.core.zeros"),
+      "Concatenate": StandardMap(api="mlx.core.concatenate", args={"tensors": "arrays"}),
+      "Zeros": StandardMap(api="mlx.core.zeros"),
+      "RandInt": StandardMap(api="mlx.random.randint"),
+      "Array": StandardMap(api="mlx.core.array"),
+      "Pad": StandardMap(
+        api="mlx.core.pad",
+        args={"input": "x", "pad": "pad_width", "value": "constant_values"},
+        requires_plugin="padding_converter",
+      ),
+      "AssertClose": StandardMap(macro_template="assert {actual}.allclose({expected}, rtol={rtol}, atol={atol}).item()"),
     }
 
   @property

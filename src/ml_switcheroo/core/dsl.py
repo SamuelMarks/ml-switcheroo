@@ -13,7 +13,7 @@ It defines the structure for:
 - Operations (abstract definitions).
 """
 
-from typing import Dict, List, Optional, Any, Union, Tuple
+from typing import Dict, List, Optional, Any, Union, Tuple, Literal
 from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
 from ml_switcheroo.enums import LogicOp
@@ -271,6 +271,12 @@ class OperationDef(BaseModel):
   # --- Feature: Verification Configuration ---
   test_rtol: float = Field(1e-3, description="Relative tolerance for numerical equivalence tests.")
   test_atol: float = Field(1e-4, description="Absolute tolerance for numerical equivalence tests.")
+
+  # New Feature: Mode
+  verification_mode: Literal["approx", "exact"] = Field(
+    "approx", description="Verification mode. 'approx' uses np.allclose (fuzzy). 'exact' uses np.array_equal (equality)."
+  )
+
   skip_fuzzing: bool = Field(False, description="If True, excludes this operation from automated fuzzing.")
   nondeterministic: bool = Field(
     False,

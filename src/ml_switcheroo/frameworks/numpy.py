@@ -156,6 +156,20 @@ class NumpyAdapter:
       "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
       "SiLU": StandardMap(macro_template="{x} * (1 / (1 + np.exp(-{x})))", required_imports=["import numpy as np"]),
       "TensorType": StandardMap(api="numpy.ndarray"),
+      "Arange": StandardMap(api="numpy.arange"),
+      "Ones": StandardMap(api="numpy.ones"),
+      "Concatenate": StandardMap(api="numpy.concatenate", args={"tensors": "arrays"}),
+      "Zeros": StandardMap(api="numpy.zeros"),
+      "Concatenate": StandardMap(api="numpy.concatenate"),
+      "Zeros": StandardMap(api="numpy.zeros"),
+      "RandInt": StandardMap(api="numpy.random.randint", args={"shape": "size"}),
+      "Array": StandardMap(api="numpy.array", args={"data": "object"}),
+      "Pad": StandardMap(
+        api="numpy.pad",
+        args={"input": "array", "pad": "pad_width", "value": "constant_values"},
+        requires_plugin="padding_converter",
+      ),
+      "AssertClose": StandardMap(api="numpy.testing.assert_allclose", args={"expected": "desired"}),
     }
 
   @property

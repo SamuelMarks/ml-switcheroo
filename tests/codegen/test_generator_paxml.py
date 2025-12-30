@@ -4,7 +4,7 @@ test_generator_paxml.py
 Verifies that the TestGenerator correctly handles the 'paxml' framework configuration.
 Ensures that templates derived from `k_test_templates.json` (or Registry Sync)
 are correctly applied to generate valid executable test code including:
-1. Specific imports (praxis, jax).
+1. Specific imports (praxis, jax) in runtime.
 2. Input conversion syntax (jnp.array).
 3. Output normalization syntax (np.array).
 """
@@ -20,8 +20,8 @@ def test_paxml_code_generation(tmp_path):
   Scenario:
       Semantics definition contains a 'paxml' variant.
   Expected Output:
-      - A test file containing `import praxis`.
-      - A try/except block for `Framework: paxml`.
+      - A runtime.py containing `import praxis`.
+      - A test file with a try/except block for `Framework: paxml`.
       - Conversion of numpy inputs using `jnp.array(...)`.
   """
   # 1. Setup Mock Semantics Data
@@ -42,6 +42,8 @@ def test_paxml_code_generation(tmp_path):
   }
   mgr.get_test_template.side_effect = lambda fw: templates.get(fw)
   mgr.get_framework_config.return_value = {}
+  # Ensure attributes exist for runtime generation iteration
+  mgr.test_templates = templates
 
   # Sanity check: Ensure template is actually loaded before generating
   # If this fails, the issue is in Manager loading, not Generator logic.
@@ -57,11 +59,15 @@ def test_paxml_code_generation(tmp_path):
   assert out_file.exists()
   content = out_file.read_text(encoding="utf-8")
 
-  # Check Header Imports
-  assert "import praxis" in content
-  assert "import jax.numpy as jnp" in content
+  # Check Runtime Imports (New Location)
+  runtime_file = out_file.parent / "runtime.py"
+  assert runtime_file.exists()
+  runtime_content = runtime_file.read_text(encoding="utf-8")
 
-  # Check specific test function body
+  assert "import praxis" in runtime_content
+  assert "import jax.numpy as jnp" in runtime_content
+
+  # Check specific test function body in generated test file
   pax_block_start = content.find("Framework: paxml")
   assert pax_block_start != -1
 

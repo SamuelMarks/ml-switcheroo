@@ -41,15 +41,15 @@ class JAXStackMixin:
     Returns standard JAX test generation templates using JIT wrapping.
 
     Defines:
-    - `import`: Libraries to import.
+    - `import`: Libraries to import (including opt-in Chex support).
     - `convert_input`: Syntax to convert Numpy array to JAX array.
-    - `to_numpy`: Syntax to convert JAX array back to Numpy.
+    - `to_numpy`: Identity transform (preserves PyTrees for Chex comparison).
     - `jit_template`: Detailed JAX JIT syntax with static argument support.
     """
     return {
-      "import": "import jax\nimport jax.numpy as jnp",
+      "import": "import jax\nimport jax.numpy as jnp\ntry:\n    import chex\nexcept ImportError:\n    pass",
       "convert_input": "jnp.array({np_var})",
-      "to_numpy": "np.array({res_var})",
+      "to_numpy": "{res_var}",
       "jit_template": "jax.jit({fn}, static_argnums={static_argnums})",
     }
 

@@ -9,6 +9,8 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 - Wires important plugins and structural traits.
 """
 
+import numpy
+
 import logging
 import textwrap
 from typing import List, Tuple, Dict, Any, Optional
@@ -332,6 +334,16 @@ class FlaxNNXAdapter(JAXStackMixin):
       "SiLU": StandardMap(api="flax.nnx.silu"),
       "ModuleList": StandardMap(api="flax.nnx.List"),
       "TensorType": StandardMap(api="jax.Array"),
+      "Arange": StandardMap(api="jax.numpy.arange"),
+      "Ones": StandardMap(api="jax.numpy.ones"),
+      "Pad": StandardMap(
+        api="jax.numpy.pad",
+        args={"input": "array", "pad": "pad_width", "value": "constant_values"},
+        requires_plugin="padding_converter",
+      ),
+      "AssertClose": StandardMap(
+        api="numpy.testing.assert_allclose", args={"expected": "desired"}, required_imports=["import numpy"]
+      ),
     }
 
   def convert(self, data: Any) -> Any:

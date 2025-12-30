@@ -52,6 +52,11 @@ def test_wiring_injection():
   adapter._apply_stack_wiring(snapshot)
 
   mappings = snapshot.get("mappings", {})
+  templates = snapshot.get("templates", {})
+
+  # Check Template Logic (Chex Support)
+  assert "import chex" in templates["import"]
+  assert templates["to_numpy"] == "{res_var}"  # Identity check for PyTree support
 
   # Check Math (L0)
   assert mappings["Abs"]["api"] == "jnp.abs"

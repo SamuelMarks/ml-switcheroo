@@ -3,6 +3,8 @@ Primitive Generation Logic for the Fuzzer.
 
 This module contains functions to generate random scalars, NumPy arrays,
 and dummy callables respecting specified constraints (min, max, dtype).
+
+Feature Update: Added broadcasting logic generator.
 """
 
 import random
@@ -139,20 +141,44 @@ def get_random_shape(seed_shape: Optional[Tuple[int, ...]] = None) -> Tuple[int,
   return tuple(random.randint(2, 5) for _ in range(rank))
 
 
+def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tuple[int, ...]:
+  """
+  Derives a shape that is broadcast-compatible with the base_shape.
+
+  For each dimension, there is a probability it becomes 1 (broadcasting dimension).
+  The 'salt' ensures arguments don't all degenerate to 1s in the same way, creating
+  varied valid broadcasting patterns (e.g. (A, 1, C) vs (1, B, C)).
+
+  Args:
+      base_shape: The target accumulated shape.
+      salt: Integer to vary the random choice (arg index).
+
+  Returns:
+      A new shape tuple.
+  """
+  # Use local random instance to not affect global state
+  # Seed with salt to be deterministic for this specific run context
+  rng = random.Random(sum(base_shape) + salt)
+
+  new_shape = []
+
+  # Heuristic: First argument (salt 0) usually keeps full shape or minimal broadcast.
+  # Later arguments broadcast more aggressively.
+
+  for dim in base_shape:
+    # 20% chance to broadcast this dim to 1.
+    # If salt is high (later argument), increase chance?
+    # Let's keep it simple: 30% chance to be 1.
+    if rng.random() < 0.3:
+      new_shape.append(1)
+    else:
+      new_shape.append(dim)
+
+  return tuple(new_shape)
+
+
 def generate_fake_callable(constraints: Dict[str, Any] = None) -> Any:
   """
   Generates a dummy function (identity) for functional ops.
-
-  This is critical for fuzzer verification of HOFs (Higher Order Functions)
-  like `vmap`, `grad`, or `jit` which expect a callable input.
-
-  The return value is a lambda that accepts any arguments and returns the first one.
-  This ensures compatibility with unary ops (`f(x)`) and binary ops (`f(x, y)`).
-
-  Args:
-      constraints (Dict[str, Any]): Unused, kept for API consistency.
-
-  Returns:
-      Callable: A lambda function `lambda x, *args, **kwargs: x`.
   """
   return lambda x, *args, **kwargs: x

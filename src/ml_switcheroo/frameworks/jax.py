@@ -10,6 +10,8 @@ to a high-level neural network library like Flax or Haiku. It maps:
 It specifically enables `requires_explicit_rng` in plugin traits.
 """
 
+import numpy
+
 import logging
 import textwrap
 from typing import List, Tuple, Dict, Any, Optional
@@ -282,6 +284,24 @@ class JaxCoreAdapter(JAXStackMixin):
       "SiLU": StandardMap(api="jax.nn.silu"),
       "ModuleList": StandardMap(),
       "TensorType": StandardMap(api="jax.Array"),
+      "Arange": StandardMap(api="jax.numpy.arange"),
+      "Ones": StandardMap(api="jax.numpy.ones"),
+      "Concatenate": StandardMap(api="jax.numpy.concatenate", args={"tensors": "arrays"}),
+      "Zeros": StandardMap(api="jax.numpy.zeros"),
+      "Concatenate": StandardMap(api="jax.numpy.concatenate"),
+      "Zeros": StandardMap(api="jax.numpy.zeros"),
+      "RandInt": StandardMap(
+        api="jax.random.randint", args={"low": "minval", "high": "maxval"}, requires_plugin="inject_prng"
+      ),
+      "Array": StandardMap(api="jax.numpy.array"),
+      "Pad": StandardMap(
+        api="jax.numpy.pad",
+        args={"input": "array", "pad": "pad_width", "value": "constant_values"},
+        requires_plugin="padding_converter",
+      ),
+      "AssertClose": StandardMap(
+        api="numpy.testing.assert_allclose", args={"expected": "desired"}, required_imports=["import numpy"]
+      ),
     }
 
   # --- Discovery ---

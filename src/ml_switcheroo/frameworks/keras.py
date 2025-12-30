@@ -11,6 +11,8 @@ It handles:
 4.  **Ghost Mode**: Silent fallback when Keras is not installed.
 """
 
+import numpy
+
 import inspect
 import logging
 import textwrap
@@ -230,6 +232,22 @@ class KerasAdapter:
       "CastChar": StandardMap(api="keras.ops.cast", inject_args={"dtype": "int8"}),
       "SiLU": StandardMap(api="keras.activations.silu"),
       "ModuleList": StandardMap(),
+      "Arange": StandardMap(api="keras.ops.arange"),
+      "Ones": StandardMap(api="keras.ops.ones"),
+      "Concatenate": StandardMap(api="keras.ops.concatenate", args={"tensors": "inputs"}),
+      "Zeros": StandardMap(api="keras.ops.zeros"),
+      "Concatenate": StandardMap(api="keras.ops.concatenate", args={"tensors": "inputs"}),
+      "Zeros": StandardMap(api="keras.ops.zeros"),
+      "RandInt": StandardMap(api="keras.random.randint", args={"low": "minval", "high": "maxval"}),
+      "Array": StandardMap(api="keras.ops.convert_to_tensor", args={"data": "x"}),
+      "Pad": StandardMap(
+        api="keras.ops.pad",
+        args={"input": "x", "pad": "pad_width", "value": "constant_values"},
+        requires_plugin="padding_converter",
+      ),
+      "AssertClose": StandardMap(
+        api="numpy.testing.assert_allclose", args={"expected": "desired"}, required_imports=["import numpy"]
+      ),
     }
 
   @property

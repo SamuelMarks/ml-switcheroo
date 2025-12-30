@@ -26,6 +26,9 @@ class MockTemplateSemantics(SemanticsManager):
   def get_test_template(self, framework):
     return self.test_templates.get(framework)
 
+  def get_framework_config(self, framework):
+    return {}
+
 
 @pytest.fixture
 def semantics_data():
@@ -62,8 +65,12 @@ def test_default_template_fallback(tmp_path, semantics_data):
   gen.generate(semantics_data, out_file)
 
   content = out_file.read_text()
-  assert "import torch" in content
-  assert "import jax" in content
+  runtime_content = (out_file.parent / "runtime.py").read_text()
+
+  # Check imports in runtime module
+  assert "import torch" in runtime_content
+  assert "import jax" in runtime_content
+
   # Should skip tinygrad because no template exists for it in defaults
   assert "Framework: tinygrad" not in content
 
@@ -71,7 +78,7 @@ def test_default_template_fallback(tmp_path, semantics_data):
 def test_custom_backend_template(tmp_path, semantics_data):
   """
   Scenario: Add templates for 'tinygrad'.
-  Expect: Generated code includes TinyGrad block.
+  Expect: Generated code includes TinyGrad block, imports are in runtime.
   """
   custom_templates = {
     "torch": {
@@ -93,10 +100,15 @@ def test_custom_backend_template(tmp_path, semantics_data):
   gen.generate(semantics_data, out_file)
 
   content = out_file.read_text()
+  runtime_content = (out_file.parent / "runtime.py").read_text()
 
-  # check structure
+  # check logic structure
   assert "Framework: tinygrad" in content
-  assert "from tinygrad.tensor import Tensor" in content
+
+  # check imports in runtime
+  assert "from tinygrad.tensor import Tensor" in runtime_content
+
+  # check usage
   assert "Tensor(np_x)" in content
 
 

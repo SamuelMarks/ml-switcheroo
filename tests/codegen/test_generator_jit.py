@@ -19,6 +19,8 @@ class MockTraitSemantics(SemanticsManager):
 
   def __init__(self, templates=None):
     self.custom_templates = templates or {}
+    # Ensure test_templates exists for runtime generator iteration
+    self.test_templates = self.custom_templates
 
   def get_framework_config(self, framework: str):
     if framework == "jax":
@@ -60,6 +62,7 @@ def test_missing_template_skips_jit(tmp_path):
   }
 
   mgr = MockTraitSemantics(templates=no_jit_tmpl)
+  mgr.test_templates = no_jit_tmpl  # explicit populate
 
   out_file = tmp_path / "test_jit_skipped.py"
   gen = TestGenerator(semantics_mgr=mgr)
@@ -83,6 +86,12 @@ def test_standard_jit_template(tmp_path):
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
 
   mgr = MockTraitSemantics()  # Uses default mock which has jit_template
+  # Ensure default templates are populated in attribute for runtime gen
+  mgr.test_templates = {
+    "jax": {"import": "import jax"},
+    "torch": {"import": "import torch"},
+  }
+
   out_file = tmp_path / "test_jit_std.py"
   gen = TestGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
@@ -112,6 +121,7 @@ def test_custom_jit_template(tmp_path):
   }
 
   mgr = MockTraitSemantics(templates=custom_tmpl)
+  mgr.test_templates = custom_tmpl
 
   out_file = tmp_path / "test_jit_custom.py"
   gen = TestGenerator(semantics_mgr=mgr)
@@ -137,6 +147,9 @@ def test_jit_static_argnums_detection(tmp_path):
   }
 
   mgr = MockTraitSemantics()
+  # Populate for runtime
+  mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
+
   out_file = tmp_path / "test_jit_static.py"
   gen = TestGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
@@ -170,6 +183,8 @@ def test_custom_template_static_args_interpolation(tmp_path):
   }
 
   mgr = MockTraitSemantics(templates=custom_tmpl)
+  mgr.test_templates = custom_tmpl
+
   out_file = tmp_path / "test_jit_custom_static.py"
 
   gen = TestGenerator(semantics_mgr=mgr)
@@ -203,6 +218,8 @@ def test_custom_template_static_args_missing(tmp_path):
   }
 
   mgr = MockTraitSemantics(templates=custom_tmpl)
+  mgr.test_templates = custom_tmpl
+
   out_file = tmp_path / "test_jit_custom_none.py"
 
   gen = TestGenerator(semantics_mgr=mgr)
@@ -222,6 +239,8 @@ def test_torch_block_no_jit(tmp_path):
   semantics = {"abs": {"std_args": ["x"], "variants": {"jax": {"api": "jnp.abs"}, "torch": {"api": "torch.abs"}}}}
 
   mgr = MockTraitSemantics()
+  mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
+
   out_file = tmp_path / "test_jit_torch.py"
   gen = TestGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
@@ -234,23 +253,26 @@ def test_torch_block_no_jit(tmp_path):
   assert "torch.abs(" in torch_section
 
 
-def test_jit_import_generation(tmp_path):
+def test_runtime_generation_includes_jit_modules(tmp_path):
   """
-  Scenario: 'jax' template is used.
-  Expectation: File header should contain `import jax` defined in the template config.
+  Scenario: Generating code creates runtime.py which should include framework imports.
   """
-  # Mock manager behavior implicitly uses default JAX template
-  mgr = MockTraitSemantics()
-  gen = TestGenerator(semantics_mgr=mgr)
-
   semantics = {
     "sum": {
       "variants": {"jax": {"api": "jnp.sum"}, "torch": {"api": "torch.sum"}},
       "std_args": ["x"],
     }
   }
-  out_file = tmp_path / "test_imports.py"
+
+  mgr = MockTraitSemantics()
+  # Explicitly set templates for runtime gen
+  mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
+
+  gen = TestGenerator(semantics_mgr=mgr)
+  out_file = tmp_path / "subdir" / "test.py"
+
   gen.generate(semantics, out_file)
 
-  content = out_file.read_text()
-  assert "import jax" in content
+  runtime = out_file.parent / "runtime.py"
+  assert runtime.exists()
+  assert "import jax" in runtime.read_text()
