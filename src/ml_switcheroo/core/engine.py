@@ -9,25 +9,30 @@ The Engine pipeline consists of:
 
 1.  **Ingestion Phase**:
     - If `source="mlir"`, parses MLIR text and hydrates a Python AST.
+    - If `source="tikz"`, parses TikZ code -> Logical Graph -> Python AST (via Synthesizer).
     - Otherwise, parses Python source code into a LibCST tree.
 
 2.  **MLIR Emission (Target="mlir")**:
     - If the target is "mlir", the pipeline short-circuits here.
     - The AST is converted to MLIR IR text and returned immediately.
 
-3.  **Safety Analysis (Standard)**:
+3.  **TikZ Emission (Target="tikz")**:
+    - If the target is "tikz", the pipeline short-circuits logic extracting the AST
+      to a Logical Graph and emitting TikZ code string.
+
+4.  **Safety Analysis (Standard)**:
     - **Purity**: Checking for side effects if targeting functional frameworks (JAX).
     - **Lifecycle**: Verifying variable initialization.
     - **Dependencies**: Scanning for unmapped 3rd-party imports.
 
-4.  **Semantic Pivoting**: Executing the `PivotRewriter` to map API calls and structure.
+5.  **Semantic Pivoting**: Executing the `PivotRewriter` to map API calls and structure.
     *Creates AST Snapshots for visualization before and after this phase using Mermaid.*
 
-5.  **Intermediate Representation (MLIR) Roundtrip** (Optional):
+6.  **Intermediate Representation (MLIR) Roundtrip** (Optional):
     - If `intermediate="mlir"`, the pivot result is converted to MLIR text,
       parsed back, and regenerated into Python to verify fidelity.
 
-6.  **Post-processing**:
+7.  **Post-processing**:
     - **Import Fixer**: Injecting necessary imports and removing unused source imports.
     - **Structural Linting**: Verifying no artifacts from the source framework remain.
 
@@ -60,6 +65,12 @@ from ml_switcheroo.utils.visualizer import MermaidGenerator
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 from ml_switcheroo.core.mlir.parser import MlirParser
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
+
+# TikZ Bridge
+from ml_switcheroo.core.tikz.parser import TikzParser
+from ml_switcheroo.core.tikz.synthesizer import GraphSynthesizer
+from ml_switcheroo.core.tikz.analyser import GraphExtractor
+from ml_switcheroo.core.tikz.emitter import TikzEmitter
 
 
 class ConversionResult(BaseModel):
@@ -272,6 +283,11 @@ class ASTEngine:
 
     tree: cst.Module
 
+    # Track the "logical" source framework for later stages (Pruning/Linting).
+    # This defaults to self.source, but if we synthesize intermediate code (e.g. from TikZ),
+    # we update this to match the synthesized language so tooling works correctly.
+    effective_source_pruning_root = self.source
+
     # --- PHASE 1: INGESTION (Parsing/Hydration) ---
     if self.source == "mlir":
       tracer.start_phase("MLIR Ingest", "MLIR Text -> Python CST")
@@ -285,6 +301,39 @@ class ASTEngine:
         return ConversionResult(
           code=code,
           errors=[f"MLIR Parse Error: {e}"],
+          success=False,
+          trace_events=tracer.export(),
+        )
+      tracer.end_phase()
+    elif self.source == "tikz":
+      tracer.start_phase("TikZ Ingest", "TikZ Text -> Logical Graph -> Python CST")
+      try:
+        # 1. Parse TikZ
+        parser = TikzParser(code)
+        graph = parser.parse()
+
+        # 2. Synthesize Python
+        # We attempt to produce code in the target dialect to minimize rewriting work,
+        # but default to 'torch' if target is not directly supported by synthesizer.
+        # Currently GraphSynthesizer supports 'torch' and 'jax'.
+        synth_target = "torch"
+        if self.target in ["jax", "flax", "flax_nnx"]:
+          synth_target = "jax"
+
+        # Update the effective source for pruning logic
+        effective_source_pruning_root = synth_target
+
+        synthesizer = GraphSynthesizer(framework=synth_target)
+        py_code = synthesizer.generate(graph, class_name="SwitcherooNet")
+
+        # 3. Hydrate CST
+        tree = self.parse(py_code)
+
+        tracer.log_mutation("Ingestion", "(TikZ Source)", f"(Python CST)\n{py_code}")
+      except Exception as e:
+        return ConversionResult(
+          code=code,
+          errors=[f"TikZ Parse/Synthesis Error: {e}"],
           success=False,
           trace_events=tracer.export(),
         )
@@ -303,7 +352,8 @@ class ASTEngine:
         )
       tracer.end_phase()
 
-    # --- PHASE 2: SHORT CURCUIT (Target = MLIR) ---
+    # --- PHASE 2: SHORT CIRCUIT (Target = MLIR/TikZ) ---
+
     if self.target == "mlir":
       tracer.start_phase("MLIR Emission", "CST -> MLIR Text")
       try:
@@ -361,11 +411,41 @@ class ASTEngine:
     if self.intermediate == "mlir":
       tree = self._run_mlir_roundtrip(tree, tracer)
 
-    # Pass 6: Import Scaffolding
-    roots_to_prune = {self.source}
-    if self.source != self.target:
+    # --- PHASE 6: OUTPUT GENERATION ---
+
+    if self.target == "tikz":
+      tracer.start_phase("TikZ Emission", "CST -> Logical Graph -> TikZ Text")
+      try:
+        # 1. Extract Logic
+        extractor = GraphExtractor()
+        tree.visit(extractor)
+
+        # 2. Emit TikZ
+        emitter = TikzEmitter()
+        tikz_code = emitter.emit(extractor.graph)
+
+        tracer.log_mutation("Emission", "(Python CST)", "(TikZ Source)")
+        tracer.end_phase()
+        tracer.end_phase()
+        return ConversionResult(code=tikz_code, success=True, trace_events=tracer.export())
+      except Exception as e:
+        return ConversionResult(
+          code="",
+          errors=[f"TikZ Emit Error: {e}"],
+          success=False,
+          trace_events=tracer.export(),
+        )
+
+    # Pass 7: Import Scaffolding (Python Targets)
+    # Use the effective_source determined during ingestion to prune synthethic imports
+    # e.g. If TikZ -> Torch (synthetic), we want to prune 'torch' imports if targeting 'jax'
+    roots_to_prune = {effective_source_pruning_root}
+
+    if effective_source_pruning_root != self.target:
       tracer.start_phase("Import Fixer", "Resolving Dependencies")
-      adapter = fw_registry.get_adapter(self.source)
+
+      # Load adapter metadata for pruning aliases
+      adapter = fw_registry.get_adapter(effective_source_pruning_root)
       if adapter:
         if hasattr(adapter, "import_alias") and adapter.import_alias:
           roots_to_prune.add(adapter.import_alias[0].split(".")[0])
@@ -376,7 +456,7 @@ class ASTEngine:
       alias_map = self.semantics.get_framework_aliases()
 
       # Check for lingering usage of source framework logic before instructing fixer to prune
-      usage_scanner = UsageScanner(self.source)
+      usage_scanner = UsageScanner(effective_source_pruning_root)
       tree.visit(usage_scanner)
       should_preserve = usage_scanner.get_result()
 
@@ -392,8 +472,8 @@ class ASTEngine:
 
     final_code = self.to_source(tree)
 
-    # Pass 7: Linter
-    if self.source != self.target:
+    # Pass 8: Linter
+    if effective_source_pruning_root != self.target:
       tracer.start_phase("Structural Linter", "Verifying Cleanup")
       linter = StructuralLinter(forbidden_roots=roots_to_prune)
       lint_errors = linter.check(final_code)
