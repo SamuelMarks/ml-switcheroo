@@ -12,7 +12,8 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 
 # Segments that should be collapsed if they appear in framework paths.
 # e.g., 'flax.nnx.module.Module' -> 'module' is redundant if 'Module' is exported by 'nnx'.
-REDUNDANT_SEGMENTS = {"module", "_src", "src"}
+# 'modules' added to handle 'torch.nn.modules.Module' -> 'torch.nn.Module'
+REDUNDANT_SEGMENTS = {"module", "modules", "_src", "src"}
 
 
 def get_root_name(node: Union[cst.Name, cst.Attribute]) -> str:
