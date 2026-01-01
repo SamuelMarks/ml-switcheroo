@@ -11,13 +11,11 @@ import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.scanners import UsageScanner
 from unittest.mock import MagicMock, patch
 import libcst as cst
 
 
 # Define a concrete mock class to satisfy LibCST's visitor requirements
-# Must explicitly inherit CSTVisitor to pass isinstance check in LibCST runner
 class MockUsageScanner(cst.CSTVisitor):
   def __init__(self, *args, **kwargs):
     pass
@@ -36,7 +34,6 @@ class MockSemantics(SemanticsManager):
   """Minimal semantics to handle basic ops."""
 
   def __init__(self):
-    # Use super's structure but empty data
     self.data = {}
     self.framework_configs = {}
     self.import_data = {}
@@ -48,7 +45,6 @@ class MockSemantics(SemanticsManager):
     self._providers = {}
     self._source_registry = {}
 
-  # Valid stub for engine usage
   def get_import_map(self, target_fw):
     return {}
 
@@ -71,8 +67,16 @@ def engine():
   mock_torch = MagicMock()
   mock_torch.configure_mock(import_alias=("torch", "torch"), inherits_from=None)
 
+  # CRITICAL FIX: Ensure no parser/emitter is found to prevent engine from running custom hooks
+  # MagicMock has all attributes by default, so hasattr(mock, 'create_parser') is True.
+  # We must delete them to force the engine to use standard Python parsing.
+  del mock_torch.create_emitter
+  del mock_torch.create_parser
+
   mock_jax = MagicMock()
   mock_jax.configure_mock(import_alias=("jax.numpy", "jnp"), inherits_from=None)
+  del mock_jax.create_emitter
+  del mock_jax.create_parser
 
   def get_adapter_side_effect(name):
     if name == "torch":
@@ -81,7 +85,6 @@ def engine():
       return mock_jax
     return None
 
-  # Patch the location where Engine imports it
   with patch("ml_switcheroo.frameworks.get_adapter", side_effect=get_adapter_side_effect):
     yield ASTEngine(semantics=mgr, config=config)
 
@@ -95,7 +98,6 @@ def test_engine_catches_leaked_import(engine):
 import torch
 x = 1
 """
-  # Use MockUsageScanner class instead of instance patching to satisfy LibCST checks
   with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
     result = engine.run(code)
 
@@ -114,15 +116,10 @@ def test_engine_catches_leaked_usage(engine):
 import torch
 y = torch.abs(x) 
 """
-  # Here we don't force UsageScanner, we let it detect 'torch.abs' usage naturally.
-  # The engine should preserve 'import torch' because 'torch' is used in 'torch.abs'.
-  # The linter should then flag 'Forbidden Import' and 'Forbidden Usage'.
-
   result = engine.run(code)
 
   assert "torch.abs(x)" in result.code
   assert result.has_errors
-
   errors_str = str(result.errors)
   assert "Forbidden" in errors_str
 
@@ -136,6 +133,5 @@ def test_linter_trace_event(engine):
   with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
     result = engine.run(code)
 
-  # Check for Structural Linter phase
   phases = [e["description"] for e in result.trace_events if e["type"] == "phase_start"]
   assert "Structural Linter" in phases

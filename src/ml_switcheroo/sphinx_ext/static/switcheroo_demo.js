@@ -1,6 +1,16 @@
+/* src/ml_switcheroo/sphinx_ext/static/switcheroo_demo.js */
+
 /*
  * switcheroo_demo.js
  * Client-side controller with Debugging Enabled.
+ *
+ * Capabilities:
+ * - Pyodide Engine Management (WASM).
+ * - CodeMirror Editor sync.
+ * - Trace Graph Rendering.
+ * - Semantic Knowledge Base Interaction (Validation/Hints).
+ * - TikZ/LaTeX Rendering Integration (TikZJax).
+ * - Mermaid for AST visualisation
  */
 
 // Global State
@@ -9,13 +19,17 @@ let srcEditor = null;
 let tgtEditor = null;
 let EXAMPLES = {};
 let FW_TIERS = {};
+let tikzLoaded = false;
+
+// Default CDN fallback in case local assets are missing
+const DEFAULT_TIKZJAX_URL = "https://tikzjax.com/v1/tikzjax.js";
 
 // Trace Data State
 let currentAstGraphs = { pre: "", post: "" };
 
 // Debug Configuration
 const DEBUG_MODE = true;
-function debugLog(msg, data=null) {
+function debugLog(msg, data = null) {
     if (DEBUG_MODE) {
         if (data) console.log(`[Switcheroo] ${msg}`, data);
         else console.log(`[Switcheroo] ${msg}`);
@@ -23,7 +37,6 @@ function debugLog(msg, data=null) {
 }
 
 // Python Bridge Script
-// Updates: Now prints diagnostic info to the output logs
 const PYTHON_BRIDGE = `
 import json
 import traceback
@@ -34,7 +47,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.utils.console import set_console, log_info
 
 # Setup Output Capture
-process_log = Console(record=True, force_terminal=False, width=80) 
+process_log = Console(record=True, force_terminal=False, width=120) 
 set_console(process_log) 
 
 response = {} 
@@ -47,15 +60,20 @@ try:
         print(">>> Initializing SemanticsManager...") 
         GLOBAL_SEMANTICS = SemanticsManager() 
     
-    # Resolve frameworks
-    real_source = js_src_flavour if js_src_flavour else js_src_fw
-    real_target = js_tgt_flavour if js_tgt_flavour else js_tgt_fw
+    # Resolve flavors
+    src_flavour = js_src_flavour if 'js_src_flavour' in globals() and js_src_flavour else None
+    tgt_flavour = js_tgt_flavour if 'js_tgt_flavour' in globals() and js_tgt_flavour else None
+
+    real_source = src_flavour if src_flavour else js_src_fw
+    real_target = tgt_flavour if tgt_flavour else js_tgt_fw
     
     print(f">>> Config: {real_source} -> {real_target} (Strict: {js_strict_mode})") 
     
     config = RuntimeConfig( 
-        source_framework=real_source, 
-        target_framework=real_target, 
+        source_framework=js_src_fw, 
+        target_framework=js_tgt_fw, 
+        source_flavour=src_flavour, 
+        target_flavour=tgt_flavour, 
         strict_mode=js_strict_mode
     ) 
     
@@ -63,11 +81,10 @@ try:
     engine = ASTEngine(semantics=GLOBAL_SEMANTICS, config=config) 
     result = engine.run(js_source_code) 
     print(f">>> Conversion Finished. Success: {result.success}") 
-    print(f">>> Trace Events Captured: {len(result.trace_events)}") 
     
-    # Check specifically for snapshots
+    # Check trace statistics
     snap_count = sum(1 for e in result.trace_events if e['type'] == 'ast_snapshot') 
-    print(f">>> Visualizer Snapshots Found: {snap_count}") 
+    print(f">>> Trace: {len(result.trace_events)} events, {snap_count} snapshots.") 
 
     response = { 
         "code": result.code, 
@@ -98,16 +115,52 @@ async function initEngine() {
     const btnLoad = document.getElementById("btn-load-engine");
     const splashEl = document.getElementById("demo-splash");
     const interfaceEl = document.getElementById("demo-interface");
-    const wheelName = rootEl.dataset.wheel;
+    const wheelName = (rootEl && rootEl.dataset.wheel) ? rootEl.dataset.wheel : "ml_switcheroo-0.0.1-py3-none-any.whl";
 
     statusEl.innerText = "Downloading...";
     statusEl.className = "status-badge status-loading";
     btnLoad.disabled = true;
 
     try {
+        // 1. Load Pyodide
         if (!window.loadPyodide) await loadScript("https://cdn.jsdelivr.net/pyodide/v0.29.0/full/pyodide.js");
         if (!pyodide) pyodide = await loadPyodide();
 
+        // 2. Load TikZJax (Lazy with Smart Path Resolution)
+        if (!tikzLoaded) {
+            let urlToLoad = DEFAULT_TIKZJAX_URL;
+
+            // Try to construct local path using Sphinx DOCUMENTATION_OPTIONS
+            if (window.DOCUMENTATION_OPTIONS && window.DOCUMENTATION_OPTIONS.URL_ROOT) {
+                const root = window.DOCUMENTATION_OPTIONS.URL_ROOT;
+                // Normalize root (ensure it ends with /)
+                const safeRoot = root.endsWith('/') ? root : root + '/';
+                const localPath = `${safeRoot}_static/tikzjax/tikzjax.js`;
+                debugLog(`Attempting local TikZJax load: ${localPath}`);
+                urlToLoad = localPath;
+            } else if (window.TIKZJAX_URL) {
+                // Fallback to what was injected in __init__.py (might be incorrect for subpages)
+                urlToLoad = window.TIKZJAX_URL;
+            }
+
+            try {
+                await loadScript(urlToLoad);
+                tikzLoaded = true;
+                debugLog("TikZJax loaded.");
+            } catch (tiErr) {
+                console.warn(`Local TikZ load failed (${urlToLoad}). Fallback to CDN.`);
+                try {
+                    await loadScript(DEFAULT_TIKZJAX_URL);
+                    tikzLoaded = true;
+                    debugLog("TikZJax loaded from CDN.");
+                } catch (cdnErr) {
+                    console.error("TikZJax CDN failed:", cdnErr);
+                    tikzLoaded = false;
+                }
+            }
+        }
+
+        // 3. Check for Engine Install
         const isInstalled = pyodide.runPython(`
 import importlib.util
 importlib.util.find_spec("ml_switcheroo") is not None
@@ -117,15 +170,27 @@ importlib.util.find_spec("ml_switcheroo") is not None
             statusEl.innerText = "Fetching Requirements...";
             await pyodide.loadPackage("micropip");
             const micropip = pyodide.pyimport("micropip");
-            const reqRes = await fetch("_static/requirements.txt");
-            const reqText = await reqRes.text();
-            const reqs = reqText.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
-            await micropip.install("numpy");
-            await micropip.install(reqs);
+
+            try {
+                const reqRes = await fetch("_static/requirements.txt");
+                if (reqRes.ok) {
+                    const reqText = await reqRes.text();
+                    const reqs = reqText.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+                    await micropip.install("numpy");
+                    if (reqs.length > 0) await micropip.install(reqs);
+                } else {
+                    await micropip.install(["numpy", "pydantic", "rich", "libcst"]);
+                }
+            } catch (e) {
+                console.warn("Reqs fetch failed, using fallback deps.");
+                await micropip.install(["numpy", "pydantic", "rich", "libcst"]);
+            }
+
             statusEl.innerText = "Installing Engine...";
             await micropip.install(`_static/${wheelName}`);
         }
 
+        // 4. UI Transition
         splashEl.style.display = "none";
         interfaceEl.style.display = "block";
         initEditors();
@@ -134,7 +199,8 @@ importlib.util.find_spec("ml_switcheroo") is not None
         if (window.SWITCHEROO_FRAMEWORK_TIERS) FW_TIERS = window.SWITCHEROO_FRAMEWORK_TIERS;
 
         initExampleSelector();
-        initFlavourListeners();
+        initFrameworkListeners();
+        updateRenderTabVisibility();
 
         statusEl.innerText = "Ready";
         statusEl.className = "status-badge status-ready";
@@ -144,6 +210,7 @@ importlib.util.find_spec("ml_switcheroo") is not None
         console.error(err);
         statusEl.innerText = "Load Failed";
         statusEl.className = "status-badge status-error";
+        btnLoad.disabled = false;
     }
 }
 
@@ -172,26 +239,51 @@ function initExampleSelector() {
     }
     sel.onchange = (e) => loadExample(e.target.value);
 
-    // FIX: Set default example to Torch CNN ("PyTorch: Cnn") per user preference
-    const preferred = "torch_tier2_neural_cnn";
-    if (Object.prototype.hasOwnProperty.call(EXAMPLES, preferred)) {
-        sel.value = preferred;
-        loadExample(preferred);
-    } else if (sortedKeys.length > 0) {
-        sel.value = sortedKeys[0];
-        loadExample(sel.value);
+    if (sortedKeys.length > 0) {
+       const preferred = sortedKeys.find(k => k.includes("torch") && k.includes("neural"));
+       const defKey = preferred || sortedKeys[0];
+       sel.value = defKey;
+       loadExample(defKey);
     }
 }
 
-function initFlavourListeners() {
+function initFrameworkListeners() {
     const handler = (type) => {
         const sel = document.getElementById(`select-${type}`);
         const region = document.getElementById(`${type}-flavour-region`);
-        region.style.display = sel.value === 'jax' ? 'inline-block' : 'none';
+
+        if (region) {
+             const hasFlavours = ['jax', 'flax'].includes(sel.value);
+             region.style.display = hasFlavours ? 'inline-block' : 'none';
+        }
+        updateRenderTabVisibility();
     };
+
     document.getElementById("select-src").addEventListener("change", () => handler('src'));
     document.getElementById("select-tgt").addEventListener("change", () => handler('tgt'));
-    handler('src'); handler('tgt');
+    updateRenderTabVisibility();
+}
+
+function updateRenderTabVisibility() {
+    const srcFw = document.getElementById("select-src").value;
+    const tgtFw = document.getElementById("select-tgt").value;
+
+    // Enable render tab if either side is TikZ
+    const isTikzInvolved = (srcFw === 'tikz' || tgtFw === 'tikz');
+
+    const tabLabel = document.getElementById("label-tab-render");
+    const tabInput = document.getElementById("tab-render");
+
+    if (tabLabel) {
+        if (isTikzInvolved) {
+            tabLabel.style.display = "inline-flex";
+        } else {
+            tabLabel.style.display = "none";
+            if (tabInput && tabInput.checked) {
+                document.getElementById("tab-trace").checked = true;
+            }
+        }
+    }
 }
 
 function loadExample(key) {
@@ -200,30 +292,16 @@ function loadExample(key) {
     srcEditor.setValue(ex.code);
     tgtEditor.setValue("");
 
-    // Set Source
     setSelectValue(document.getElementById("select-src"), ex.srcFw);
+    const tgtSelect = document.getElementById("select-tgt");
+    for (let opt of tgtSelect.options) opt.disabled = false;
+    setSelectValue(tgtSelect, ex.tgtFw);
 
-    // Set Target
-    filterTargetOptions(ex.requiredTier);
-    setSelectValue(document.getElementById("select-tgt"), ex.tgtFw);
-
-    // Trigger display logic for flavor dropdowns (hidden/visible)
     document.getElementById("select-src").dispatchEvent(new Event('change'));
     document.getElementById("select-tgt").dispatchEvent(new Event('change'));
 
-    // FIX: Set Flavours explicitly if defined in example metadata
-    if (ex.srcFlavour) {
-        setSelectValue(document.getElementById("src-flavour"), ex.srcFlavour);
-    }
-    if (ex.tgtFlavour) {
-        setSelectValue(document.getElementById("tgt-flavour"), ex.tgtFlavour);
-    }
-}
-
-function filterTargetOptions(tier) {
-    // Simplified logic for brevity in debug file
-    const tgt = document.getElementById("select-tgt");
-    for (let opt of tgt.options) opt.disabled = false;
+    if (ex.srcFlavour) setSelectValue(document.getElementById("src-flavour"), ex.srcFlavour);
+    if (ex.tgtFlavour) setSelectValue(document.getElementById("tgt-flavour"), ex.tgtFlavour);
 }
 
 function setSelectValue(el, val) {
@@ -239,20 +317,10 @@ function setSelectValue(el, val) {
 function swapContext() {
     const s = document.getElementById("select-src");
     const t = document.getElementById("select-tgt");
+    [s.value, t.value] = [t.value, s.value];
 
-    const sVal = s.value;
-    const tVal = t.value;
-
-    // Swap Roots
-    [s.value, t.value] = [tVal, sVal];
-
-    // Re-trigger GUI update
     s.dispatchEvent(new Event("change"));
     t.dispatchEvent(new Event("change"));
-
-    // Swap Flavours if applicable (JAX side)
-    // If Source became JAX, check if Target was using a JAX flavour and move it?
-    // Simple logic: Just swap text
 
     const tmp = srcEditor.getValue();
     srcEditor.setValue(tgtEditor.getValue());
@@ -274,15 +342,12 @@ function loadScript(src) {
     return new Promise((res, rej) => {
         const s = document.createElement('script');
         s.src = src;
+        s.async = true;
         s.onload = res;
         s.onerror = rej;
         document.head.appendChild(s);
     });
 }
-
-// -----------------------------------------------------------------------------
-// Debugged Transpilation Logic
-// -----------------------------------------------------------------------------
 
 async function runTranspilation() {
     if (!pyodide || !srcEditor) return;
@@ -302,8 +367,6 @@ async function runTranspilation() {
     // Gather Inputs
     const srcFw = document.getElementById("select-src").value;
     const tgtFw = document.getElementById("select-tgt").value;
-
-    // Flavours
     let srcFlav = "", tgtFlav = "";
     const srcReg = document.getElementById("src-flavour-region");
     const tgtReg = document.getElementById("tgt-flavour-region");
@@ -321,28 +384,27 @@ async function runTranspilation() {
         await pyodide.runPythonAsync(PYTHON_BRIDGE);
 
         const jsonRaw = pyodide.globals.get("json_output");
-
         const result = JSON.parse(jsonRaw);
 
         tgtEditor.setValue(result.code);
 
         if (result.is_success) {
              consoleEl.innerText = `✅ Success!\n\n--- Engine Logs ---\n${result.logs}`;
+
+             if (tgtFw === 'tikz' || srcFw === 'tikz') {
+                 document.getElementById("tab-render").checked = true;
+                 // Give DOM render beat + TikZJax async search time
+                 setTimeout(() => renderTikZ(result.code), 150);
+             }
         } else {
              consoleEl.innerText = `❌ Error\n\n${result.logs}`;
         }
 
-        // --- Visualizer Logic ---
         if (result.trace_events) {
-             // 1. Render List
              if (window.TraceGraph) {
                  new TraceGraph('trace-visualizer', updateLineHighlight).render(result.trace_events);
              }
-
-             // 2. Extract AST Graphs
-             // Look for 'ast_snapshot' type strings (case sensitive match to Python Enum)
              const snapshots = result.trace_events.filter(e => e.type === "ast_snapshot");
-
              currentAstGraphs.pre = "";
              currentAstGraphs.post = "";
 
@@ -351,10 +413,7 @@ async function runTranspilation() {
                  if (s.description.includes("After")) currentAstGraphs.post = s.metadata.mermaid;
              });
 
-             // Refresh View
              renderMermaid(currentAstGraphs.pre || currentAstGraphs.post);
-        } else {
-            debugLog("No trace events array in result.");
         }
     } catch (err) {
         console.error("Transpilation JS Error", err);
@@ -362,6 +421,97 @@ async function runTranspilation() {
     } finally {
         btn.disabled = false;
         btn.innerText = "Run Translation";
+    }
+}
+
+/**
+ * Helper: Polls for window.tikzjax namespace presence.
+ */
+function waitForTikZ(timeout = 10000) {
+    return new Promise(resolve => {
+        const start = Date.now();
+        const check = () => {
+            // Check existence, not specific method, to be robust
+            if (window.tikzjax) {
+                resolve(true);
+            } else if (Date.now() - start > timeout) {
+                resolve(false);
+            } else {
+                requestAnimationFrame(check);
+            }
+        };
+        check();
+    });
+}
+
+/**
+ * Injects TikZ Code into the DOM to trigger TikZJax processing.
+ * @param {string} tikzCode - The LaTeX string generated by the engine.
+ */
+async function renderTikZ(tikzCode) {
+    const container = document.getElementById("tikz-output-container");
+    if (!container) return;
+
+    // Clear previous results/loaders
+    container.innerHTML = "";
+
+    // Show loading state while waiting for WASM
+    const loaderId = "tikz-loading-indicator";
+    container.innerHTML = `<div id="${loaderId}" style='color:#666; padding:20px;'>Rendering TikZ Diagram... (WASM via <span id="tikz-method">...</span>)</div>`;
+    container.style.display = "block";
+
+    if (!tikzLoaded) {
+        container.innerHTML = "<div style='color:orange;'>⚠️ TikZJax library not loaded. Check network or console.</div>";
+        return;
+    }
+
+    debugLog("Waiting for TikZJax readiness...");
+
+    // FIX: Increased timeout to 5000ms. WASM compilation can be slow on first load.
+    const ready = await waitForTikZ(5000);
+
+    if (!ready) {
+         const methInfo = document.getElementById("tikz-method");
+         if (methInfo) methInfo.innerText = "Event Trigger";
+         debugLog("TikZJax global not ready. Fallback to DOMContentLoaded event.");
+    } else {
+         debugLog("TikZJax global detected.");
+    }
+
+    debugLog("Injecting TikZ Script...");
+
+    // Clear loader
+    container.innerHTML = "";
+
+    // Create script tag expected by tikzjax
+    const scriptEl = document.createElement("script");
+    scriptEl.type = "text/tikz";
+    scriptEl.dataset.showConsole = "true";
+    scriptEl.textContent = tikzCode;
+
+    container.appendChild(scriptEl);
+
+    // Trigger processing logic
+    if (window.tikzjax && typeof window.tikzjax.process === 'function') {
+        try {
+            debugLog("Calling tikzjax.process(container)...");
+            await window.tikzjax.process(container);
+            // Check visibility
+            setTimeout(() => {
+                const svg = container.querySelector("svg");
+                if (svg) {
+                    svg.style.display = "block";
+                    svg.style.margin = "0 auto";
+                }
+            }, 100);
+        } catch (e) {
+            console.error("TikZJax API error:", e);
+            container.innerHTML += `<div style="color:red; margin-top:10px;">Render Error: ${e.message}</div>`;
+        }
+    } else {
+        debugLog("API not found. Triggering DOMContentLoaded event to force scan.");
+        // Fallback for libraries relying on load events
+        document.dispatchEvent(new Event("DOMContentLoaded"));
     }
 }
 
@@ -379,14 +529,8 @@ async function renderMermaid(graphDefinition) {
     }
 
     try {
-        // Unique ID for SVG
         const id = 'ast-svg-' + Date.now();
-
-        // mermaid.render returns {svg} in v10+
         const result = await mermaid.render(id, graphDefinition);
-
-        // Handle API difference between v9 and v10
-        // v10 returns object. v9 returns string callback or string.
         const svgContent = (typeof result === 'string') ? result : result.svg;
         targetEl.innerHTML = svgContent;
     } catch (e) {
@@ -397,13 +541,11 @@ async function renderMermaid(graphDefinition) {
 
 // Init Listeners
 document.addEventListener("DOMContentLoaded", () => {
-    // ... Buttons ...
     document.getElementById("btn-load-engine").addEventListener("click", initEngine);
     document.getElementById("btn-convert").addEventListener("click", runTranspilation);
     document.getElementById("btn-swap").addEventListener("click", swapContext);
     document.getElementById("btn-retro").addEventListener("click", toggleRetroMode);
 
-    // AST Sub-Buttons (Before/After)
     document.getElementById("btn-ast-prev")?.addEventListener("click", (e) => {
         renderMermaid(currentAstGraphs.pre);
     });
@@ -412,7 +554,6 @@ document.addEventListener("DOMContentLoaded", () => {
         renderMermaid(currentAstGraphs.post);
     });
 
-    // Config Mermaid
     if (typeof mermaid !== "undefined") {
         mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
     }

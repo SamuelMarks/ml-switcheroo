@@ -4,6 +4,12 @@ HTML Rendering logic for the WASM demo.
 This module constructs the interactive HTML template embedded in the Sphinx
 documentation. It dynamically populates dropdowns and configuration based
 on the scanned registry data.
+
+Features:
+- Dynamic Dropdowns via Registry scanning.
+- Framework Flavours support.
+- Render Tab (TikZ) structure.
+- Wheel auto-discovery for Pyodide injection.
 """
 
 import os
@@ -22,6 +28,12 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   Locates the most recent wheel file in the dist/ directory to serve to the
   browser-based Pyodide environment.
 
+  Structure includes:
+  1. Header & Status.
+  2. Splash Screen.
+  3. Main Interface (Toolbar, Editors, Controls).
+  4. Output Tabs (Console, AST Viz, Timeline, Render).
+
   Args:
       hierarchy: The framework parent-child relationship map.
       examples_json: Serialized examples data.
@@ -32,6 +44,7 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   """
   # 1. Locate Wheel
   # We resolve relative to this file inside 'src/ml_switcheroo/sphinx_ext'
+  # Project root is 3 levels up
   root_dir = Path(__file__).parents[3]
   dist_dir = root_dir / "dist"
   wheel_name = "ml_switcheroo-latest-py3-none-any.whl"
@@ -72,11 +85,11 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   src_flavours_html = _render_flavour_dropdown("src", hierarchy, def_source)
   tgt_flavours_html = _render_flavour_dropdown("tgt", hierarchy, def_target)
 
-  return f""" 
+  return f"""
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
             <script>
-                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
-                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json}; 
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json};
+                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json};
             </script>
 
             <div class="demo-header">
@@ -101,14 +114,14 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
                     <div class="select-wrapper">
                         <select id="select-src" class="material-select">{opts_src}</select>
                         <div id="src-flavour-region" style="background:transparent; margin-left:5px;">
-                            {src_flavours_html} 
+                            {src_flavours_html}
                         </div>
                     </div>
                     <button id="btn-swap" class="swap-icon-btn" title="Swap Languages">⇄</button>
                     <div class="select-wrapper">
                         <select id="select-tgt" class="material-select">{opts_tgt}</select>
                          <div id="tgt-flavour-region" style="background:transparent; margin-left:5px;">
-                            {tgt_flavours_html} 
+                            {tgt_flavours_html}
                         </div>
                     </div>
                 </div>
@@ -127,8 +140,8 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
                         <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Source code...">import torch
 import torch.nn as nn
 
-class Model(nn.Module): 
-    def forward(self, x): 
+class Model(nn.Module):
+    def forward(self, x):
         return torch.abs(x)</textarea>
                     </div>
                     <div class="editor-group target-group">
@@ -149,21 +162,30 @@ class Model(nn.Module):
                     <button id="btn-convert" class="md-btn md-btn-accent" disabled>Run Translation</button>
                 </div>
 
-                <!-- Three Tabs: Console, Mermaid, Timeline -->
+                <!-- Output Tabs -->
                 <div class="output-tabs">
+                    <!-- Tab 1: Console -->
                     <input type="radio" name="wm-tabs" id="tab-console">
                     <label for="tab-console" class="tab-label"><span class="tab-icon">💻</span> Console</label>
 
+                    <!-- Tab 2: Mermaid AST -->
                     <input type="radio" name="wm-tabs" id="tab-mermaid">
-                    <label for="tab-mermaid" class="tab-label"><span class="tab-icon">🌳</span> AST visualisation</label>
+                    <label for="tab-mermaid" class="tab-label"><span class="tab-icon">🌳</span> AST Graph</label>
 
+                    <!-- Tab 3: Timeline Trace (Default) -->
                     <input type="radio" name="wm-tabs" id="tab-trace" checked>
                     <label for="tab-trace" class="tab-label"><span class="tab-icon">⏱️</span> Timeline</label>
 
+                    <!-- Tab 4: Render (TikZ) - Hidden by default -->
+                    <input type="radio" name="wm-tabs" id="tab-render">
+                    <label for="tab-render" id="label-tab-render" class="tab-label" style="display:none;"><span class="tab-icon">📐</span> Render</label>
+
+                    <!-- Content: Console -->
                     <div class="tab-panel" id="panel-console">
                         <pre id="console-output">Waiting for engine...</pre>
                     </div>
 
+                    <!-- Content: Mermaid -->
                     <div class="tab-panel" id="panel-mermaid">
                         <div class="ast-toolbar">
                             <button id="btn-ast-prev" class="md-btn md-btn-primary" style="padding:4px 10px; font-size:12px;">Before Pivot</button>
@@ -174,8 +196,16 @@ class Model(nn.Module):
                         </div>
                     </div>
 
+                    <!-- Content: Trace -->
                     <div class="tab-panel" id="panel-trace">
                         <div id="trace-visualizer" class="trace-container"></div>
+                    </div>
+
+                    <!-- Content: Render (TikZ) -->
+                    <div class="tab-panel" id="panel-render">
+                        <div id="tikz-output-container" class="tikz-container">
+                            <em style="color:#999">Select 'TikZ' framework and run translation to render diagram.</em>
+                        </div>
                     </div>
                 </div>
 
@@ -206,12 +236,6 @@ def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: st
   """
   Renders the secondary dropdown for Framework Flavours.
 
-  The JS logic in 'switcheroo_demo.js' toggles visibility based on whether the
-  actively selected framework matches a hardcoded list (currently 'jax').
-
-  To support the requested default state (JAX + Flax NNX), we pre-populate this
-  dropdown with children of the currently active default root.
-
   Args:
       side: "src" or "tgt" (Source vs Target ID prefix).
       hierarchy: The framework hierarchy map.
@@ -230,22 +254,15 @@ def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: st
   opts = []
   if children:
     # Pick first child as default selected
-    # (e.g., flax_nnx comes before paxml alphabetically usually, or use priority sort in registry.py)
     for i, child in enumerate(children):
       sel = "selected" if i == 0 else ""
       opts.append(f'<option value="{child["key"]}" {sel}>{child["label"]}</option>')
   else:
-    # If no children, populate JAX defaults as fallback to ensure the element exists
-    # for JS to populate later if user switches to JAX.
-    jax_kids = hierarchy.get("jax", [])
-    if jax_kids:
-      for i, child in enumerate(jax_kids):
-        opts.append(f'<option value="{child["key"]}">{child["label"]}</option>')
-    else:
-      opts.append('<option value="" disabled selected>No Flavours</option>')
+    # Fallback filler
+    opts.append('<option value="" disabled selected>No Flavours</option>')
 
-  return f""" 
+  return f"""
         <select id="{side}-flavour" class="material-select-sm" style="{style}">
-            {"".join(opts)} 
+            {"".join(opts)}
         </select>
         """

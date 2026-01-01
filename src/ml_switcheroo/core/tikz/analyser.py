@@ -11,11 +11,12 @@ emitter to generate visual diagrams.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, Optional
 import libcst as cst
 from libcst import matchers as m
 
 from ml_switcheroo.core.scanners import get_full_name
+from ml_switcheroo.utils.node_diff import capture_node_source
 
 
 @dataclass
@@ -65,16 +66,22 @@ class GraphExtractor(cst.CSTVisitor):
       Builds edges between registered nodes based on data flow.
   """
 
-  def __init__(self):
+  def __init__(self) -> None:
+    """Initialize the extractor state."""
     self.graph = LogicalGraph()
 
     # State Tracking
     self.layer_registry: Dict[str, LogicalNode] = {}  # attr_name -> Node
     self.provenance: Dict[str, str] = {}  # var_name -> node_id_that_produced_it
+    self.model_name: str = "GeneratedNet"
 
     self._in_init = False
     self._in_forward = False
-    self._forward_args: List[str] = []
+
+  def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
+    """Capture the model class name."""
+    self.model_name = node.name.value
+    return True
 
   def leave_Module(self, original_node: cst.Module) -> None:
     """
@@ -130,9 +137,6 @@ class GraphExtractor(cst.CSTVisitor):
         self._analyze_call_expression(node.value, output_vars=[])
         # The _analyze_call_expression logic creates edges to the *layer*.
         # We need to link that layer to Output.
-        # Since we don't have a variable, we infer from layer logic?
-        # Actually, capturing the var provenance is tricky here.
-        # Let's see if we can resolve the layer name.
         layer_name = self._resolve_layer_or_func_name(node.value.func)
         if layer_name:
           # Link layer -> Output
@@ -157,7 +161,8 @@ class GraphExtractor(cst.CSTVisitor):
     """
     Registers function arguments as input sources.
     """
-    # Create explicit Input node
+    # Always register the primary input node with ID "input"
+    # This matches the expectation of visualizers and tests.
     input_id = "input"
     self.layer_registry[input_id] = LogicalNode(input_id, "Input", {})
 
@@ -165,7 +170,7 @@ class GraphExtractor(cst.CSTVisitor):
       if param.name.value == "self":
         continue
       arg_name = param.name.value
-      # Mark this variable as coming from "Input"
+      # Map the actual variable name (e.g. 'x', 'img') to the Input Node ID
       self.provenance[arg_name] = input_id
 
   def _analyze_layer_def(self, node: cst.Assign) -> None:
@@ -264,19 +269,13 @@ class GraphExtractor(cst.CSTVisitor):
     return None
 
   def _node_to_string(self, node: cst.CSTNode) -> str:
-    """Extracts simple source string representation."""
-    if isinstance(node, (cst.Integer, cst.Float)):
-      return node.value
-    if isinstance(node, cst.Name):
-      return node.value
-    if isinstance(node, cst.SimpleString):
-      return node.value.strip("'\"")
-    return "..."
+    """
+    Extracts source string representation of an AST Node.
+    Handles complex expressions by capturing exact source via utility.
+    """
+    return capture_node_source(node)
 
   def _finalize_graph(self) -> None:
     """Populates the graph nodes list from the registry."""
-    # Convert registry dict to list
-    # Filter: only include nodes that are part of edges?
-    # Better: Include all registered layers, as disjoint nodes might exist.
     if self.layer_registry:
       self.graph.nodes = list(self.layer_registry.values())

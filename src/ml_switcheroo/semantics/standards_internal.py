@@ -525,36 +525,6 @@ INTERNAL_OPS = {
     ],
     "variants": {},
   },
-  "Concatenate": {
-    "description": "Joins a sequence of arrays along an existing axis.",
-    "std_args": [
-      {
-        "name": "tensors",
-        "type": "List[Tensor]",
-      },
-      {
-        "name": "axis",
-        "type": "int",
-        "default": "0",
-      },
-    ],
-    "variants": {},
-  },
-  "Zeros": {
-    "description": "Returns a tensor filled with the scalar value 0, with the shape defined by the argument.",
-    "std_args": [
-      {
-        "name": "shape",
-        "type": "Tuple[int, ...]",
-      },
-      {
-        "name": "dtype",
-        "type": "dtype",
-        "default": "None",
-      },
-    ],
-    "variants": {},
-  },
   "RandInt": {
     "description": "Generates integers uniformly distributed in the range [low, high).",
     "std_args": [

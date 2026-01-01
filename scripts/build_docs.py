@@ -4,14 +4,17 @@ Documentation Build Script for ml-switcheroo.
 
 This script orchestrates the Sphinx documentation build process, including:
 1.  Cleaning previous build artifacts.
-2.  Copying root-level Markdown files (README, ARCHITECTURE, etc.) into the docs directory.
-3.  Building a pure-Python Wheel (.whl) of the package to support the interactive WASM demo.
-4.  Invoking `sphinx-build` to generate the HTML site.
+2.  Importing root markdown files.
+3.  Building a pure-Python Wheel for the WASM demo.
+4.  Downloading static assets for TikZJax from a public CDN (jsDelivr) to avoid 403 errors.
 """
 
+import gzip
 import shutil
 import subprocess
 import sys
+import urllib.request
+import urllib.error
 from pathlib import Path
 
 # Configuration
@@ -24,32 +27,37 @@ ROOT_FILES = [
   "README.md",
   "ARCHITECTURE.md",
   "EXTENDING.md",
-  "EXTENDING_WITH_DSL.md",  # Added to fix cross-reference warning
+  "EXTENDING_WITH_DSL.md",
   "IDEAS.md",
   "MAINTENANCE.md",
   "LICENSE",
+]
+
+# TikZJax Assets configuration
+# Switch to jsDelivr CDN to avoid HTTP 403 Forbidden on the main site
+TIKZ_BASE_URL = "https://cdn.jsdelivr.net/npm/tikzjax@1.0.3/dist"
+TIKZ_ASSETS = [
+  # Core Javascript
+  {"name": "tikzjax.js", "remote": "tikzjax.js"},
+  # WASM Runtime (Fetch raw, browser handles loading)
+  {"name": "tex.wasm", "remote": "tex.wasm"},
+  # TeX Memory Dump
+  {"name": "core.dump", "remote": "core.dump"},
 ]
 
 
 def clean() -> None:
   """
   Cleans the build directory and temporary artifacts.
-
-  Removes:
-  - The `_build` directory.
-  - Copied root Markdown files in `docs/`.
-  - Auto-generated API documentation helpers.
   """
   if BUILD_DIR.exists():
     shutil.rmtree(BUILD_DIR)
 
-  # Remove copied root files
   for fname in ROOT_FILES:
     dest = DOCS_DIR / fname
     if dest.exists():
       dest.unlink()
 
-  # Remove autoapi helper dir
   api_dir = DOCS_DIR / "api"
   if api_dir.exists():
     shutil.rmtree(api_dir)
@@ -58,9 +66,6 @@ def clean() -> None:
 def copy_root_files() -> None:
   """
   Copies essential Markdown files from the project root to the docs directory.
-
-  This allows files like `README.md` and `ARCHITECTURE.md` to be included
-  in the Sphinx toctree without duplication.
   """
   print("📋 Copying root Markdown files to docs/...")
   for fname in ROOT_FILES:
@@ -72,48 +77,63 @@ def copy_root_files() -> None:
       print(f"⚠️  Warning: {fname} not found in root.")
 
 
+def download_vendor_assets() -> None:
+  """
+  Downloads TikZJax assets to docs/_static/tikzjax using a robust CDN.
+  """
+  target_dir = DOCS_DIR / "_static" / "tikzjax"
+  target_dir.mkdir(parents=True, exist_ok=True)
+
+  print(f"⬇️  Downloading TikZJax assets to {target_dir}...")
+
+  for asset in TIKZ_ASSETS:
+    local_name = asset["name"]
+    remote_name = asset["remote"]
+
+    url = f"{TIKZ_BASE_URL}/{remote_name}"
+    dest = target_dir / local_name
+
+    print(f"   Fetching {remote_name} -> {local_name}...")
+
+    try:
+      # Set a standard User-Agent to avoid generic blocks
+      req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+      with urllib.request.urlopen(req) as response:
+        with open(dest, "wb") as out_file:
+          shutil.copyfileobj(response, out_file)
+
+    except urllib.error.URLError as e:
+      print(f"❌ Failed to download {remote_name}: {e}")
+      print("   > The WASM demo might not render TikZ diagrams correctly locally.")
+    except Exception as e:
+      print(f"❌ Error processing {local_name}: {e}")
+
+
 def build_wheel() -> None:
   """
   Builds the pure Python wheel for the WASM demo.
-
-  Delegates to the standard `python -m build` command. The resulting `.whl` file
-  is placed in `dist/` and later picked up by the Sphinx extension to be embedded
-  in the static site.
-
-  Exits:
-      sys.exit(1): If the build process fails.
   """
   print("📦 Building Python Wheel for WASM...")
-
-  # Ensure 'dist' is clean to avoid grabbing old versions
   dist_dir = PROJECT_ROOT / "dist"
   if dist_dir.exists():
     shutil.rmtree(dist_dir)
 
   try:
-    # Standard PEP 517 build
     cmd = [sys.executable, "-m", "build", ".", "--wheel"]
     subprocess.run(cmd, cwd=PROJECT_ROOT, check=True, capture_output=True)
     print("✅ Wheel built successfully in dist/")
   except subprocess.CalledProcessError as e:
     print("❌ Failed to build wheel.")
     print("STDERR:", e.stderr.decode())
-    print("\n💡 Tip: Ensure 'build' is installed: pip install build")
     sys.exit(1)
 
 
 def build() -> int:
   """
   Executes the Sphinx build process.
-
-  1. Builds the package wheel.
-  2. Runs `sphinx-build -b html`.
-
-  Returns:
-      int: The exit code from sphinx-build (0 for success).
   """
-  # 1. Build the wheel first so the sphinx extension can find it
   build_wheel()
+  download_vendor_assets()
 
   print("🏗️  Building Sphinx documentation...")
   cmd = [
@@ -131,9 +151,6 @@ def build() -> int:
 
 
 def main() -> None:
-  """
-  Main entry point. Orchestrates clean, copy, and build steps.
-  """
   try:
     clean()
     copy_root_files()
@@ -143,8 +160,8 @@ def main() -> None:
       index_path = BUILD_DIR / "html" / "index.html"
       print("\n✨ Documentation built successfully!")
       print(f"🌍 Open index at: {index_path.resolve()}")
+      print("   (Serve with: python3 -m http.server --directory docs/_build/html)")
   finally:
-    # Optional: cleanup copied files after build
     for fname in ROOT_FILES:
       dest = DOCS_DIR / fname
       if dest.exists():

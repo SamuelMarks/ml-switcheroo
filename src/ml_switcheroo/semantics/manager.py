@@ -200,8 +200,19 @@ class SemanticsManager:
     return self.data.get(abstract_id)
 
   def get_definition(self, api_name: str) -> Optional[Tuple[str, Dict]]:
-    """Reverse lookup from concrete API string."""
-    return self._reverse_index.get(api_name)
+    """Reverse lookup from concrete API string or Abstract ID fallback."""
+    # 1. Try Reverse Index (Framework API path -> Abstract ID)
+    res = self._reverse_index.get(api_name)
+    if res:
+      return res
+
+    # 2. Try Direct Abstract ID match (e.g. "Conv2d" -> "Conv2d")
+    # This falls back to checking the primary data store if the input string
+    # looks like an Abstract ID (common in DSL/Parser outputs).
+    if api_name in self.data:
+      return (api_name, self.data[api_name])
+
+    return None
 
   def get_known_apis(self) -> Dict[str, Dict]:
     """Returns full knowledge graph."""

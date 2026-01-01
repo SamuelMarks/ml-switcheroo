@@ -1,0 +1,14 @@
+\documentclass[tikz, border=10pt, landscape]{standalone}
+\usepackage{midl}
+\begin{document}
+\begin{DefModel}{ConvNet}
+ \Attribute{conv}{Conv2d}{arg_0=1, arg_1=32, kernel_size=3}
+ \Attribute{fc}{Linear}{arg_0=..., arg_1=10}
+ \Attribute{func_relu}{F.relu}{}
+ \Input{x}{[_]}
+ \StateOp{op_conv}{conv}{x}{[_]}
+ \StateOp{op_func_relu}{func_relu}{conv}{[_]}
+ \StateOp{op_fc}{fc}{func_relu}{[_]}
+ \Return{op_fc}
+\end{DefModel}
+\end{document}

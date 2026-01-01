@@ -78,6 +78,32 @@ class BaseRewriter(
     self._in_module_class = False
     self._module_preamble: List[str] = []
 
+    # --- FIX: Pre-populate Alias Map with Source Framework Aliases ---
+    # This ensures strict mode and rewriters recognize implicit roots (like 'midl' for 'latex_dsl')
+    # even if no explicit import statement is found in the AST.
+    self._hydrate_source_aliases()
+
+  def _hydrate_source_aliases(self) -> None:
+    """Loads default aliases for the source framework from semantics config."""
+    fw_conf = self.semantics.get_framework_config(self.source_fw)
+    if fw_conf:
+      alias_info = fw_conf.get("alias")
+      # Handle Pydantic model or dict
+      if hasattr(alias_info, "model_dump"):
+        alias_info = alias_info.model_dump()
+
+      if isinstance(alias_info, dict):
+        name = alias_info.get("name")
+        if name:
+          # Map the alias (e.g. 'midl') to the full framework key ('latex_dsl')
+          # or the module path?
+          # The Resolver logic expects _alias_map values to be fully qualified prefixes.
+          # Usually "torch" -> "torch". "midl" -> "latex_dsl"?
+          # No, the semantics defines API paths.
+          # if latex_dsl defines api="midl.Conv2d", then `midl` is the root.
+          # We map alias -> alias to treat it as a known root.
+          self._alias_map[name] = name
+
   def _callback_inject_arg(self, name: str, annotation: Optional[str] = None) -> None:
     """
     Callback for plugins to inject arguments into the current function signature.
@@ -151,7 +177,20 @@ class BaseRewriter(
     """
     lookup = self.semantics.get_definition(name)
     if not lookup:
-      if self.strict_mode and name.startswith(f"{self.source_fw}.") and not silent:
+      # Strict Mode Logic:
+      # If the API starts with a known source prefix, we flag it as an error.
+      # We check both the explicit framework name (e.g. 'torch.')
+      # AND any known aliases in the map (e.g. 't.' or 'midl.').
+
+      is_known_source_prefix = False
+      root = name.split(".")[0]
+
+      if root == self.source_fw:
+        is_known_source_prefix = True
+      elif root in self._alias_map:
+        is_known_source_prefix = True
+
+      if self.strict_mode and is_known_source_prefix and not silent:
         self._report_failure(f"API '{name}' not found in semantics.")
       return None
 
