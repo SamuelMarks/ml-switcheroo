@@ -9,6 +9,7 @@ Addresses the architectural difference between:
 **Transformation**
 
 1.  **Instantiation**:
+
     -   Detects specific Scheduler constructors via `scheduler_rewire`.
     -   Removes the `optimizer` argument (Arg 0).
     -   Maps hyperparameters to target equivalents using keys defined in the semantic map
@@ -17,6 +18,7 @@ Addresses the architectural difference between:
     -   Injects `init_value=1.0` (as partial schedule) or tries to preserve semantics.
 
 2.  **Stepping**:
+
     -   Detects `scheduler.step()` via `scheduler_step_noop`.
     -   Replaces `scheduler.step()` with a no-op placeholder `None`.
 """
@@ -54,6 +56,13 @@ def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Logic routes based on detected Operation ID in context (StepLR vs Cosine).
   Now fully decoupled: reads target API and argument names from `ctx`.
+
+  Args:
+      node: Original CST call.
+      ctx: Hook context containing operation ID.
+
+  Returns:
+      Transformed CST call.
   """
   op_id = ctx.current_op_id or ""
   target_api = ctx.lookup_api(op_id)

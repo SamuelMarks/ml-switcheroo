@@ -21,11 +21,13 @@ class CoverageScanner(cst.CSTVisitor):
 
   It tracks import aliases to correctly resolve calls like `jnp.sum` back to
   `jax.numpy.sum` before querying the knowledge base.
-
-  Attributes:
-      results (Dict[str, Tuple[bool, str]]): A dictionary mapping Fully Qualified Names (FQN)
-          to a tuple of `(is_supported, framework_key)`.
   """
+
+  results: Dict[str, Tuple[bool, str]]
+  """ 
+    A dictionary mapping Fully Qualified Names (FQN) 
+    to a tuple of `(is_supported, framework_key)`. 
+    """
 
   def __init__(self, semantics: SemanticsManager, allowed_roots: Set[str]):
     """
@@ -43,7 +45,7 @@ class CoverageScanner(cst.CSTVisitor):
     self._alias_map: Dict[str, str] = {}
 
     # Results: Map FQN -> (IsSupported, FrameworkKey)
-    self.results: Dict[str, Tuple[bool, str]] = {}
+    self.results = {}
 
   def visit_Import(self, node: cst.Import) -> None:
     """

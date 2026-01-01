@@ -61,6 +61,12 @@ class StructuralLinter(cst.CSTVisitor):
   def visit_Import(self, node: cst.Import) -> None:
     """
     Checks `import x`, `import x as y`.
+
+    Logs violations if the root package is forbidden.
+    Tracks aliases to detect usage later in the file.
+
+    Args:
+        node: The Import node.
     """
     self._context_stack.append("import")
     for alias in node.names:
@@ -75,11 +81,22 @@ class StructuralLinter(cst.CSTVisitor):
         self._local_aliases[local_name] = root
 
   def leave_Import(self, node: cst.Import) -> None:
+    """
+    Exits the import scope context.
+
+    Args:
+        node: The Import node being exited.
+    """
     self._context_stack.pop()
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
     """
     Checks `from x import y`.
+
+    Logs violations if the module root matches forbidden set.
+
+    Args:
+        node: The ImportFrom node.
     """
     self._context_stack.append("import")
 
@@ -102,11 +119,22 @@ class StructuralLinter(cst.CSTVisitor):
               self._local_aliases[local_name] = root
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
+    """
+    Exits the import-from scope context.
+
+    Args:
+        node: The ImportFrom node being exited.
+    """
     self._context_stack.pop()
 
   def visit_Name(self, node: cst.Name) -> None:
     """
     Checks usage of aliased forbidden variables (e.g. `t.abs()` where `t` is torch).
+
+    Ignores names inside import definition statements.
+
+    Args:
+        node: The Name node.
     """
     # Iterate check only if we are not defining the import itself
     if "import" in self._context_stack:
@@ -122,6 +150,11 @@ class StructuralLinter(cst.CSTVisitor):
   def visit_Attribute(self, node: cst.Attribute) -> None:
     """
     Checks attributes to provide more specific error messages (e.g. `torch.abs`).
+
+    If the left side of the attribute matches a forbidden alias, logs an error.
+
+    Args:
+        node: The Attribute node.
     """
     # If the value (left side) of attribute is a forbidden alias
     if isinstance(node.value, cst.Name):
@@ -134,7 +167,15 @@ class StructuralLinter(cst.CSTVisitor):
           self.violations.append(msg)
 
   def _get_root_name(self, node: cst.BaseExpression) -> str:
-    """Extracts root package from dotted path node (e.g. 'torch' from 'torch.nn')."""
+    """
+    Extracts root package from dotted path node (e.g. 'torch' from 'torch.nn').
+
+    Args:
+        node: CST expression node (Name or Attribute).
+
+    Returns:
+        str: The root identifier.
+    """
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute):
@@ -142,7 +183,15 @@ class StructuralLinter(cst.CSTVisitor):
     return ""
 
   def _get_full_name_from_node(self, node: cst.BaseExpression) -> str:
-    """Recursively resolves CST node to dot-string."""
+    """
+    Recursively resolves CST node to dot-separated string.
+
+    Args:
+        node: CST expression node.
+
+    Returns:
+        str: The full path (e.g. "torch.nn.functional").
+    """
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute):

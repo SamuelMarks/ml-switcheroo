@@ -2,6 +2,7 @@
 Post-processing Phase for Call Rewriting.
 
 Handles transformations that occur *after* the main API rewrite call has been constructed.
+
 1.  **Output Adaptation**: Applying `output_adapter` lambdas or `output_select_index` subscripting.
 2.  **Output Casting**: Injecting `.astype(...)` based on `output_cast`.
 3.  **State Threading (Init)**: Stripping or injecting magic arguments (like `rngs`)

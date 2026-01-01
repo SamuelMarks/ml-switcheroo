@@ -139,8 +139,7 @@ class ClassStructureMixin(BaseRewriter):
       # Actually _current_stmt_errors is reset on visit_SimpleStatementLine.
       # ClassDef contains statements.
       # If we reported failure in visit_ClassDef, it sits in _current_stmt_errors.
-      # But visit_SimpleStatementLine inside body clears it?
-      # No, visit_SimpleStatement line runs on children.
+      # But visit_SimpleStatement line runs on children.
       # We need to act on errors found *at this level*.
 
       # Simpler: If we flagged this class, escape hatch it.

@@ -2,7 +2,8 @@
 Versioning Check Mixin.
 
 Handles parsing and verification of framework version strings against constraints
-defined in the Semantic Knowledge Base.
+defined in the Semantic Knowledge Base. This ensures that generated code does
+not rely on APIs present only in future or past versions of the target framework.
 """
 
 from typing import Optional, Tuple
@@ -14,33 +15,41 @@ class VersioningMixin:
   """
   Mixin for checking target framework version compatibility.
 
-  Assumed attributes on self:
+  Provides methods to load the current version (from config or environment)
+  and compare it against min/max constraints defined in ODL.
+
+  Assumed attributes on self (from BaseRewriter):
       target_fw (str): The target framework key.
       semantics (SemanticsManager): The knowledge base.
   """
 
   def __init__(self):
+    """Initialize cache state."""
     self._cached_target_version: Optional[str] = None
     self._version_checked = False
 
   def _get_target_version(self) -> Optional[str]:
     """
     Resolves the version of the target framework.
-    Prioritizes configuration overrides, then installed package metadata.
+    Prioritizes configuration overrides (e.g. Ghost snapshot metadata),
+    then falls back to installed package metadata.
+
+    Returns:
+        str: The version string (e.g. "1.12.0") or None if unknown.
     """
     if self._version_checked:
       return self._cached_target_version
 
     self._version_checked = True
 
-    # 1. Check if Semantic Config has a 'version' set (e.g. from Ghost Snapshot)
+    # 1. Check if Semantic Config has a 'version' set (e.g. from Ghost Snapshot header)
     fw_conf = self.semantics.get_framework_config(self.target_fw)
     if fw_conf and "version" in fw_conf:
       self._cached_target_version = fw_conf["version"]
       return self._cached_target_version
 
-    # 2. Try importing live
-    # Use mapping for weird package names (e.g. flax_nnx -> flax)
+    # 2. Try importing live metadata
+    # Map special package names (e.g. flax_nnx -> flax)
     pkg = self.target_fw
     if pkg == "flax_nnx":
       pkg = "flax"
@@ -55,10 +64,16 @@ class VersioningMixin:
   def _parse_version(self, v_str: str) -> Tuple[int, ...]:
     """
     Parses version string into tuple of ints for comparison.
-    Handles basic semver like '1.2.3' or '2.0.0+cuda'.
+    Handles basic semver like '1.2.3' or versions with build metadata '2.0.0+cuda'.
+
+    Args:
+        v_str: Version string.
+
+    Returns:
+        Tuple of integers (e.g. (1, 2, 3)).
     """
     parts = []
-    # Split by non-digits
+    # Split by non-digits to handle '.', '+', '-', etc.
     tokens = re.split(r"[^\d]+", v_str)
     for t in tokens:
       if t:
@@ -67,11 +82,11 @@ class VersioningMixin:
 
   def check_version_constraints(self, min_v: Optional[str], max_v: Optional[str]) -> Optional[str]:
     """
-    Verifies loaded target version against constraints.
+    Verifies loaded target version against provided constraints.
 
     Args:
         min_v: Minimum required version string (inclusive).
-        max_v: Maximum supported version string.
+        max_v: Maximum supported version string (exclusive/warning threshold).
 
     Returns:
         None if compatible.

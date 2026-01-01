@@ -135,6 +135,12 @@ class FrameworkAdapter(Protocol):
     """
     Converts input data (List, NumPy) to the framework's Tensor format.
     Used by the Fuzzer for validation.
+
+    Args:
+       data (Any): Input data in standard format (numpy, list).
+
+    Returns:
+       Any: The data converted to the framework's tensor type.
     """
     ...
 
@@ -239,7 +245,16 @@ class FrameworkAdapter(Protocol):
     ...
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """Generates code for device object creation."""
+    """
+    Generates code for device object creation.
+
+    Args:
+        device_type (str): Type of device (e.g. 'cuda', 'cpu').
+        device_index (Optional[str]): Index of device.
+
+    Returns:
+        str: Code string.
+    """
     ...
 
   def get_device_check_syntax(self) -> str:
@@ -253,11 +268,22 @@ class FrameworkAdapter(Protocol):
     """
     Returns syntax for splitting RNG state (Preamble Injection).
     Example: ``rng, key = jax.random.split(rng)``.
+
+    Args:
+        rng_var (str): Variable name of current RNG state.
+        key_var (str): Variable name for new key.
     """
     ...
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Generates code for save/load operations."""
+    """
+    Generates code for save/load operations.
+
+    Args:
+        op (str): 'save' or 'load'.
+        file_arg (str): File path variable/string.
+        object_arg (Optional[str]): Object to save.
+    """
     ...
 
   def get_serialization_imports(self) -> List[str]:
@@ -300,11 +326,24 @@ class FrameworkAdapter(Protocol):
     ...
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Collects APIs for consensus discovery."""
+    """
+    Collects APIs for consensus discovery.
+
+    Args:
+        category (StandardCategory): The category to scan (e.g. LOSS, LAYER).
+
+    Returns:
+        List[GhostRef]: Found API metadata.
+    """
     ...
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """Applies manual patches to the snapshot dictionary."""
+    """
+    Applies manual patches to the snapshot dictionary.
+
+    Args:
+        snapshot (Dict[str, Any]): The snapshot structure to modify in place.
+    """
     ...
 
 

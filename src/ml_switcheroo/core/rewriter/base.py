@@ -2,18 +2,20 @@
 Base Rewriter Implementation.
 
 The foundation for the ``PivotRewriter``, aggregating mixins for:
+
 - Resolution (Aliases)
 - Scoping (State Tracking)
 - Version Checking
 - Error Handling
 
 Also provides core infrastructure for:
+
 - HookContext initialization.
 - Global Preamble Injection.
-- Knowledge Base Lookups (`_get_mapping`).
+- Knowledge Base Lookups (``_get_mapping``).
 """
 
-from typing import Optional, List, Dict, Any, Union, Set, Tuple
+from typing import Optional, List, Dict, Any, Union, Set
 import libcst as cst
 
 from ml_switcheroo.core.tracer import get_tracer
@@ -84,7 +86,9 @@ class BaseRewriter(
     self._hydrate_source_aliases()
 
   def _hydrate_source_aliases(self) -> None:
-    """Loads default aliases for the source framework from semantics config."""
+    """
+    Loads default aliases for the source framework from semantics config.
+    """
     fw_conf = self.semantics.get_framework_config(self.source_fw)
     if fw_conf:
       alias_info = fw_conf.get("alias")
@@ -134,7 +138,7 @@ class BaseRewriter(
 
   def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
     """
-    Processes `required_imports` from a variant specification.
+    Processes ``required_imports`` from a variant specification.
     """
     reqs = variant.get("required_imports", [])
     for r in reqs:

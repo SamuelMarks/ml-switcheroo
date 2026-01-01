@@ -12,10 +12,11 @@ It implements the **Hub-and-Spoke** write strategy:
     to `snapshots/{framework}_v{version}_map.json`.
 
 Policy:
-- **Do Not Harm**: Existing keys in Specs or Snapshots (implying manual curation)
-  are skipped to prevent overwriting high-quality manual edits.
-- **Additive**: New discoveries are added.
-- **Atomic**: Writes are performed per-file using standard JSON serialization.
+
+-   **Do Not Harm**: Existing keys in Specs or Snapshots (implying manual curation)
+    are skipped to prevent overwriting high-quality manual edits.
+-   **Additive**: New discoveries are added.
+-   **Atomic**: Writes are performed per-file using standard JSON serialization.
 """
 
 import json

@@ -1,5 +1,3 @@
-# src/ml_switcheroo/core/latex/nodes.py
-
 """
 MIDL Semantic Nodes.
 
@@ -8,17 +6,17 @@ LaTeX DSL. These nodes act as an intermediate representation between
 raw LaTeX macros and the compiler's logical graph.
 
 Classes match the DSL macros:
-    - ModelContainer -> \\begin{DefModel}
-    - MemoryNode     -> \\Attribute
-    - InputNode      -> \\Input
-    - ComputeNode    -> \\Op
-    - StateOpNode    -> \\StateOp
-    - ReturnNode     -> \\Return
+    - ``ModelContainer`` -> ``\\begin{DefModel}``
+    - ``MemoryNode``     -> ``\\Attribute``
+    - ``InputNode``      -> ``\\Input``
+    - ``ComputeNode``    -> ``\\Op``
+    - ``StateOpNode``    -> ``\\StateOp``
+    - ``ReturnNode``     -> ``\\Return``
 """
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Dict, Union, Optional
+from typing import List, Dict
 
 
 @dataclass
@@ -26,7 +24,7 @@ class LatexNode(ABC):
   """
   Abstract base class for all MIDL nodes.
 
-  Enforces a `to_latex()` method for serialization support.
+  Enforces a ``to_latex()`` method for serialization support.
   """
 
   @abstractmethod
@@ -44,18 +42,24 @@ class LatexNode(ABC):
 class MemoryNode(LatexNode):
   """
   Represents stateful memory allocation (e.g., Weights/Layers).
-  Maps to the `\\Attribute` macro.
+  Maps to the ``\\Attribute`` macro.
 
-  Example:
+  Example::
+
       \\Attribute{conv}{Conv2d}{in=1, out=32, k=3}
   """
 
   node_id: str
+  """The unique identifier for the attribute."""
+
   op_type: str
+  """The operation type (e.g., 'Conv2d')."""
+
   config: Dict[str, str] = field(default_factory=dict)
+  """Configuration parameters for the layer."""
 
   def to_latex(self) -> str:
-    """Render to \\Attribute macro."""
+    """Render to ``\\Attribute`` macro."""
     # Convert config dict to string "k=v, k2=v2"
     config_str = ", ".join(f"{k}={v}" for k, v in self.config.items())
     return f"\\Attribute{{{self.node_id}}}{{{self.op_type}}}{{{config_str}}}"
@@ -65,17 +69,21 @@ class MemoryNode(LatexNode):
 class InputNode(LatexNode):
   """
   Represents the model input definition.
-  Maps to the `\\Input` macro.
+  Maps to the ``\\Input`` macro.
 
-  Example:
+  Example::
+
       \\Input{x}{[B, 1, 28, 28]}
   """
 
   name: str
+  """Name of the input variable."""
+
   shape: str
+  """Shape descriptor string."""
 
   def to_latex(self) -> str:
-    """Render to \\Input macro."""
+    """Render to ``\\Input`` macro."""
     return f"\\Input{{{self.name}}}{{{self.shape}}}"
 
 
@@ -83,19 +91,27 @@ class InputNode(LatexNode):
 class ComputeNode(LatexNode):
   """
   Represents a stateless operation call.
-  Maps to the `\\Op` macro.
+  Maps to the ``\\Op`` macro.
 
-  Example:
+  Example::
+
       \\Op{s2}{Flatten}{s1, start=1}{[B, 21632]}
   """
 
   node_id: str
+  """The unique identifier to assign the result to."""
+
   op_type: str
+  """The operation type (e.g., 'Flatten')."""
+
   args: List[str]
+  """List of arguments passed to the operation."""
+
   shape: str
+  """Resulting shape descriptor."""
 
   def to_latex(self) -> str:
-    """Render to \\Op macro."""
+    """Render to ``\\Op`` macro."""
     args_str = ", ".join(self.args)
     return f"\\Op{{{self.node_id}}}{{{self.op_type}}}{{{args_str}}}{{{self.shape}}}"
 
@@ -104,19 +120,27 @@ class ComputeNode(LatexNode):
 class StateOpNode(LatexNode):
   """
   Represents a call to a stateful layer defined in Memory.
-  Maps to the `\\StateOp` macro.
+  Maps to the ``\\StateOp`` macro.
 
-  Example:
+  Example::
+
       \\StateOp{s1}{conv}{x}{[B, 32, 26, 26]}
   """
 
   node_id: str
+  """The unique identifier to assign the result to."""
+
   attribute_id: str
+  """The ID of the attribute being called."""
+
   args: List[str]
+  """List of arguments passed to the call."""
+
   shape: str
+  """Resulting shape descriptor."""
 
   def to_latex(self) -> str:
-    """Render to \\StateOp macro."""
+    """Render to ``\\StateOp`` macro."""
     args_str = ", ".join(self.args)
     return f"\\StateOp{{{self.node_id}}}{{{self.attribute_id}}}{{{args_str}}}{{{self.shape}}}"
 
@@ -125,16 +149,18 @@ class StateOpNode(LatexNode):
 class ReturnNode(LatexNode):
   """
   Represents the output return statement.
-  Maps to the `\\Return` macro.
+  Maps to the ``\\Return`` macro.
 
-  Example:
+  Example::
+
       \\Return{s3}
   """
 
   target_id: str
+  """The variable ID to return."""
 
   def to_latex(self) -> str:
-    """Render to \\Return macro."""
+    """Render to ``\\Return`` macro."""
     return f"\\Return{{{self.target_id}}}"
 
 
@@ -142,18 +168,17 @@ class ReturnNode(LatexNode):
 class ModelContainer(LatexNode):
   """
   Root container representing the Model definition block.
-  Maps to the `DefModel` environment.
-
-  Attributes:
-      name: The model class name.
-      children: List of body statements (Memory, Input, Ops, Return).
+  Maps to the ``DefModel`` environment.
   """
 
-  name: str
+  name: str = field()
+  """The model class name."""
+
   children: List[LatexNode] = field(default_factory=list)
+  """List of body statements (Memory, Input, Ops, Return)."""
 
   def to_latex(self) -> str:
-    """Render the full \\begin{DefModel}...\\end{DefModel} block."""
+    """Render the full ``\\begin{DefModel}...\\end{DefModel}`` block."""
     lines = [f"\\begin{{DefModel}}{{{self.name}}}"]
 
     # Indent children

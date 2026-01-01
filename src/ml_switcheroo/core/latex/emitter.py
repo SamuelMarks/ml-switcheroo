@@ -19,7 +19,12 @@ from ml_switcheroo.core.latex.nodes import (
 
 
 class LatexEmitter:
+  """
+  Orchestrates the conversion of Python code into the MIDL LaTeX format.
+  """
+
   def __init__(self) -> None:
+    """Initialize the emitter with a fresh graph extractor."""
     self.extractor = GraphExtractor()
 
   def emit(self, code: str, model_name: str = "GeneratedNet") -> str:
@@ -58,7 +63,11 @@ class LatexEmitter:
     return self._wrap_document(container.to_latex())
 
   def _wrap_document(self, content: str) -> str:
-    # Inject instructional header for users lacking the custom package
+    """
+    Wraps the generated LaTeX content in a standalone document boilerplate.
+
+    Checks requirements and adds instructional comments for the user.
+    """
     comment_block = (
       r"% ------------------------------------------------------------------"
       "\n"
@@ -84,6 +93,16 @@ class LatexEmitter:
     return comment_block + header + content + footer
 
   def _transcode_graph(self, graph: LogicalGraph, name: str) -> ModelContainer:
+    """
+    Transforms the Logical Graph representation into MIDL Semantic Nodes.
+
+    Args:
+        graph: The intermediate logical graph.
+        name: The model name for the container.
+
+    Returns:
+        A populated ModelContainer holding the sequence of LaTeX nodes.
+    """
     children: List[LatexNode] = []
     state_registry = self.extractor.layer_registry
 

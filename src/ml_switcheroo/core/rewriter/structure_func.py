@@ -2,6 +2,7 @@
 Function Structure Rewriting Logic.
 
 Handles transformations relative to function definitions, specifically:
+
 1.  **Logic 5: Method Renaming**: Mapping ``forward`` <-> ``__call__`` <-> ``call`` using Configuration Traits.
     *Decoupling Update*: Uses ``known_inference_methods`` from traits to detect candidate methods.
 2.  Signature Modification: Injecting hooks or state arguments (Logic 2).
@@ -9,9 +10,10 @@ Handles transformations relative to function definitions, specifically:
 4.  Docstring Updating.
 
 This class acts as an aggregator mixin, pulling specialized logic from:
-- :class:`FuncSignatureMixin`
-- :class:`FuncBodyMixin`
-- :class:`FuncDocstringMixin`
+
+-   :class:`FuncSignatureMixin`
+-   :class:`FuncBodyMixin`
+-   :class:`FuncDocstringMixin`
 """
 
 from typing import Optional, Set
@@ -113,6 +115,7 @@ class FuncStructureMixin(FuncSignatureMixin, FuncBodyMixin, FuncDocstringMixin, 
     Exits a function definition scope and applies structural transformations.
 
     Applies logic based on Target Traits:
+
     1.  **Method Renaming**: Renames inference methods (e.g. ``forward`` -> ``__call__``).
     2.  **Constructor Ops**: Renames ``__init__`` if required (e.g. ``setup`` for Pax).
     3.  **State Injection**: Injects magic arguments (e.g. ``rngs``) if targeting Flax/JAX.

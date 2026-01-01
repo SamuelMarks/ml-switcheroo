@@ -8,6 +8,7 @@ Defines the structure for the visual elements used in the HTML/SVG DSL:
 """
 
 from dataclasses import dataclass, field
+from operator import methodcaller
 from typing import List, Optional
 
 
@@ -34,25 +35,31 @@ class HtmlNode:
 class SvgArrow(HtmlNode):
   """
   Represents an SVG connection line between grid cells.
-
-  Attributes:
-      x1 (int): Start X coordinate.
-      y1 (int): Start Y coordinate.
-      x2 (int): End X coordinate.
-      y2 (int): End Y coordinate.
-      style_class (str): CSS class for stroke color/style (e.g. 's-red', 's-blue').
-      marker_end (str): Marker ID for arrowhead (e.g. 'url(#mr)').
-      parent_style (str): CSS string for absolute positioning of the container SVG.
-                          Example: 'left:100%; bottom:20px;'
   """
 
   x1: int
+  """Start X coordinate."""
+
   y1: int
+  """Start Y coordinate."""
+
   x2: int
+  """End X coordinate."""
+
   y2: int
+  """End Y coordinate."""
+
   style_class: str
+  """CSS class for stroke color/style (e.g. 's-red', 's-blue')."""
+
   marker_end: str
+  """Marker ID for arrowhead (e.g. 'url(#mr)')."""
+
   parent_style: str
+  """ 
+    CSS string for absolute positioning of the container SVG. 
+    Example: 'left:100%; bottom:20px;' 
+    """
 
   def to_html(self) -> str:
     """
@@ -69,26 +76,31 @@ class SvgArrow(HtmlNode):
 class GridBox(HtmlNode):
   """
   Represents a content box positioned within the CSS Grid.
-
-  Attributes:
-      row (int): CSS Grid row index.
-      col (int): CSS Grid column index.
-      css_class (str): Visual styling classes (e.g. 'box r', 'circ').
-      header_text (str): Main label (e.g. 'Conv2d', 'Return').
-      code_text (Optional[str]): Parameter details formatted as code.
-      body_text (Optional[str]): Additional text (e.g. Shape info like '[B, 32]').
-      arrows (List[SvgArrow]): List of outgoing or decorative arrows attached to this box.
-      z_index (Optional[int]): Explicit stack order.
   """
 
   row: int
+  """CSS Grid row index."""
+
   col: int
+  """CSS Grid column index."""
+
   css_class: str
+  """Visual styling classes (e.g. 'box r', 'circ')."""
+
   header_text: str
+  """Main label (e.g. 'Conv2d', 'Return')."""
+
   code_text: Optional[str] = None
+  """Parameter details formatted as code."""
+
   body_text: Optional[str] = None
+  """Additional text (e.g. Shape info like '[B, 32]')."""
+
   arrows: List[SvgArrow] = field(default_factory=list)
+  """List of outgoing or decorative arrows attached to this box."""
+
   z_index: Optional[int] = None
+  """Explicit stack order."""
 
   def to_html(self) -> str:
     """
@@ -127,14 +139,13 @@ class GridBox(HtmlNode):
 class HtmlDocument(HtmlNode):
   """
   Root container for the generated HTML.
-
-  Attributes:
-      model_name (str): Title displayed in H1.
-      children (List[GridBox]): List of grid elements.
   """
 
   model_name: str
+  """Title displayed in H1."""
+
   children: List[GridBox]
+  """List of grid elements."""
 
   # CSS Definition
   # Updates:
@@ -220,7 +231,9 @@ class HtmlDocument(HtmlNode):
   def to_html(self) -> str:
     """
     Renders the complete HTML document.
+
     Notes:
+
     - Removed 'visibility:hidden' from markers block to enable correct rendering in some browsers
       when injected via innerHTML. Use 0 sizes and pointer-events logic instead.
     """
@@ -262,7 +275,7 @@ class HtmlDocument(HtmlNode):
   <div style="grid-row:1; grid-column:2; text-align:center;"><h3>Computer (forward)</h3></div>
   <div style="grid-row:1; grid-column:3;"><h3>Data (shape)</h3></div>
 
-  {"".join(c.to_html() for c in self.children)} 
+  {"".join(map(methodcaller("to_html"), self.children))} 
 </div>
 
 </body>

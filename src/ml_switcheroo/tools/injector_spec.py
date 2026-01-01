@@ -11,7 +11,7 @@ the dictionary structure.
 
 import libcst as cst
 from typing import Any
-from ml_switcheroo.core.dsl import OperationDef, ParameterDef
+from ml_switcheroo.core.dsl import OperationDef, ParameterDef, FrameworkVariant
 
 
 class StandardsInjector(cst.CSTTransformer):
@@ -115,6 +115,15 @@ class StandardsInjector(cst.CSTTransformer):
     return cst.Dict(elements)
 
   def _convert_literal(self, val: Any) -> cst.BaseExpression:
+    """
+    Converts a python literal (bool, int, float, str) to a CST node.
+
+    Args:
+        val (Any): The literal value.
+
+    Returns:
+        cst.BaseExpression: The corresponding CST node.
+    """
     if isinstance(val, bool):
       return cst.Name("True") if val else cst.Name("False")
     if isinstance(val, int):

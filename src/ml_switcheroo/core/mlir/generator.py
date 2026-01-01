@@ -5,6 +5,7 @@ This module provides the `MlirToPythonGenerator` class, which consumes the
 MLIR CST object model and reconstructs valid Python code via LibCST.
 
 It performs the inverse operation of the Emitter:
+
 1.  **Dialect Interpretation**: Maps `sw.*` ops back to Python constructs.
 2.  **SSA Resolution**: Converts `%id` references into readable Python variable names.
 3.  **Trivia Restoration**: Transforms `// comment` back to `# comment`.
@@ -12,22 +13,18 @@ It performs the inverse operation of the Emitter:
     produce Pythonic code (e.g. `f(x)` instead of `_1=x; _2=f(_1);`) *if enabled*.
 
 Feature Hardening:
-- Robustly handles `sw.op` "type" attributes for deep class hierarchies (e.g. `torch.nn.Conv2d`).
-- Distinguishes between static operation calls (`sw.op`) and dynamic calls (`sw.call`).
+- Robustly handles `sw.op` "type" attributes for deep class hierarchies.
+- Distinguishes between static operation calls and dynamic calls.
 - Ensures valid assignment generation for results.
-- **Naming Heuristics**: Preserves variable names based on SSA IDs or Type Hints, prioritizing stability.
-- **Type Reconstruction**: Restores Python type hints from MLIR `!sw.type` annotations.
-- **Void Assignment Suppression**: Strips assignments like `_0 = super().__init__()` if unused or void-like.
-- **Explicit Re-rolling**: Defaults to sequential statements (SSA form) for clarity unless inlining is requested.
-- **Smart Heuristics**: Forces inlining of `super()` and `getattr` to prevent verbose `_0 = super()` assignments.
-- **Statement Fusion**: fuses operations into `setattr` and `return` to restore idiomatic syntax (`self.x = y`).
-- **Semantic Naming**: Extracts readable variable names from operation types (e.g., `_flatten` from `torch.flatten`).
+- **Naming Heuristics**: Preserves variable names based on SSA IDs or Type Hints.
+- **Type Reconstruction**: Restores Python type hints from MLIR.
+- **Void Assignment Suppression**: Strips unused assignments.
+- **Explicit Re-rolling**: Defaults to sequential statements.
+- **Statement Fusion**: fuses operations into `setattr` and `return`.
 """
 
-from typing import Dict, List, Optional, Set
-import re
+from typing import Dict, List, Optional
 from collections import defaultdict
-
 import libcst as cst
 
 from ml_switcheroo.core.mlir.nodes import (
@@ -35,147 +32,19 @@ from ml_switcheroo.core.mlir.nodes import (
   ModuleNode,
   OperationNode,
   TriviaNode,
-  ValueNode,
-  TypeNode,
-  AttributeNode,
 )
 
-
-class NamingContext:
-  """
-  Tracks mapping between MLIR SSA IDs and Python variable names.
-  Ensures generated names are valid identifiers.
-  """
-
-  def __init__(self) -> None:
-    # Map SSA Identifier (e.g. "%0") -> Python Identifier (e.g. "v0")
-    self._map: Dict[str, str] = {}
-    # Track used python names to prevent collision
-    self._used_names: Dict[str, bool] = {}
-    # Reserved python keywords + return to avoid collision logic
-    # Removed 'self' to allow clean reconstruction of methods
-    self._reserved = {
-      "return",
-      "def",
-      "class",
-      "if",
-      "else",
-      "for",
-      "import",
-      "from",
-      "as",
-      "with",
-    }
-
-  def register(self, ssa_name: str, hint: Optional[str] = None) -> str:
-    """
-    Assigns a valid Python name to an SSA value.
-
-    Naming Strategy:
-    1. If hint provided: Use hint (cleaned).
-    2. If SSA ID (e.g. %res): Use prefix + ID body (e.g. _res).
-    3. Heuristic: Strip trailing numeric counters from SSA hints if base is unique.
-       (e.g., %self0 -> self, %x5 -> x).
-
-    Args:
-        ssa_name: The MLIR variable name (e.g. "%0", "%arg0").
-        hint: Optional string to guide naming (e.g. "flatten" from torch.flatten).
-
-    Returns:
-        The resolved Python identifier string.
-    """
-    base = "v"
-
-    if hint:
-      # Clean start/chars
-      clean = hint.lstrip("%").replace(".", "_")
-
-      # Heuristic: If hint ends in digits (e.g. self0), try stripping them
-      # to recover original name 'self', unless it collides.
-      match = re.match(r"([a-zA-Z_]+)\d+$", clean)
-      if match:
-        candidate = match.group(1)
-        # Only use stripped name if it's safe (not reserved/used)
-        if candidate not in self._used_names and candidate not in self._reserved:
-          base = candidate
-        else:
-          base = clean
-      else:
-        base = clean
-
-      # Semantic Hint Prefixing
-      # If explicit hint is provided (e.g. "flatten"), prepend "_" if it doesn't already have one,
-      # to denote internal/generated variable usage typically.
-      # If it was an SSA reference (e.g. %self), base will be 'self'.
-
-      # We distinguish explicit semantic hints from SSA hints by checking structure
-      if not ssa_name.endswith(hint) and not hint.startswith("_") and not ssa_name.startswith(f"%{hint}"):
-        # This implies 'hint' came from op type, not ssa ID
-        if not base.startswith("_"):
-          base = f"_{base}"
-
-    elif ssa_name.startswith("%"):
-      base = "_" + ssa_name[1:]
-
-    py_name = base
-
-    # Fallback/Collision Resolution
-    if not py_name.isidentifier() or py_name in self._reserved or py_name in self._used_names:
-      # Collision or invalid: Try prepending underscore
-      if not py_name.startswith("_"):
-        attempt = f"_{py_name}"
-      else:
-        attempt = py_name
-
-      # If still used or invalid, fallback to indexed v
-      if attempt in self._used_names or not attempt.isidentifier():
-        # Simple collision resolution logic
-        count = 0
-        while True:
-          # Clean might be undefined if hint was None
-          prefix = "v"
-          if hint:
-            prefix = hint.lstrip("%").replace(".", "_")
-            if not prefix.startswith("_"):
-              prefix = f"_{prefix}"
-
-          attempt = f"{prefix}_{count}"
-          if attempt not in self._used_names:
-            break
-          count += 1
-
-        py_name = attempt
-      else:
-        py_name = attempt
-
-    self._map[ssa_name] = py_name
-    self._used_names[py_name] = True
-    return py_name
-
-  def lookup(self, ssa_name: str) -> str:
-    """
-    Retrieves Python name for SSA ID.
-
-    Args:
-        ssa_name: The MLIR variable name.
-
-    Returns:
-        The mapped Python name, or safe fallback if not registered.
-    """
-    if ssa_name in self._map:
-      return self._map[ssa_name]
-
-    # Global references (functions, classes) often stored with @ prefix in Emitter
-    if ssa_name.startswith("@"):
-      return ssa_name[1:]
-
-    # Fallback replacing % with _ if somehow not registered
-    return ssa_name.replace("%", "_")
+# Import modular components
+from ml_switcheroo.core.mlir.naming import NamingContext
+from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
+from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
+from ml_switcheroo.core.mlir.gen_statements import StatementGeneratorMixin
 
 
-class MlirToPythonGenerator:
+class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, BaseGeneratorMixin):
   """
   Transpiler back-end: MLIR CST -> Python LibCST.
+  Integrates expression and statement generation logic.
   """
 
   def __init__(self, inline_expressions: bool = False) -> None:
@@ -226,6 +95,7 @@ class MlirToPythonGenerator:
     self._scan_block_usage(mod.body)
 
   def _scan_block_usage(self, block: BlockNode) -> None:
+    """Recursively scans op operands to update usage counts."""
     for op in block.operations:
       # Count operand usage
       for operand in op.operands:
@@ -245,9 +115,9 @@ class MlirToPythonGenerator:
     """
     lines = []
     for t in trivia:
-      if t.kind == "comment":
-        # Convert // to #
-        content = t.content.strip()
+      content = t.content.strip()
+      # Only process comments, not just newlines
+      if t.kind == "comment" or content.startswith("//"):
         if content.startswith("//"):
           content = "#" + content[2:]
         lines.append(cst.EmptyLine(comment=cst.Comment(content), newline=cst.Newline()))
@@ -275,14 +145,15 @@ class MlirToPythonGenerator:
         else:
           # Wrap as statement (Assignment or Expression Stmt)
           stmt_node = self._wrap_as_statement(op, expr_node)
-          if hasattr(stmt_node, "with_changes"):
+          if hasattr(stmt_node, "with_changes") and leading:
             stmt_node = stmt_node.with_changes(leading_lines=leading)
           stmts.append(stmt_node)
       else:
         # Handle statements that are never expressions (Control Flow, Class Defs, Defs)
+        # These are handled by StatementGeneratorMixin
         stmt_node = self._convert_statement_op(op)
         if stmt_node:
-          if hasattr(stmt_node, "with_changes"):
+          if hasattr(stmt_node, "with_changes") and leading:
             stmt_node = stmt_node.with_changes(leading_lines=leading)
           stmts.append(stmt_node)
 
@@ -294,8 +165,6 @@ class MlirToPythonGenerator:
 
     Revised Logic:
     1.  **Atoms**: Always inline `sw.constant` and `sw.getattr` IF USED.
-         If unused, do NOT inline so they can be emitted as bare expressions
-         (required for some tests expecting '1' output, and for side-effect ops).
     2.  **Explicit Global**: Check `self.inline_expressions` flag (e.g. True).
     3.  **Statement Fusion**: Even if global inline is False, inline if the consumer is
         a "Terminal Statement" like `sw.setattr` or `sw.return`.
@@ -308,8 +177,6 @@ class MlirToPythonGenerator:
     usage = self.usage_counts[res_ssa]
 
     # 1. ATOMS: Always inline simple values (Constants, Attributes) if they are used.
-    # If unused (usage=0), returning False forces '_wrap_as_statement' to emit them
-    # as standalone expression statements (e.g. just "1" on a line), avoiding "assignment to nothing".
     if op_name == "sw.constant":
       return usage > 0
 
@@ -317,14 +184,11 @@ class MlirToPythonGenerator:
       return usage > 0
 
     # 2. VOID/SUPER: Always inline proxies
-    # sw.op type="super"
     type_attr = self._get_attr(op, "type")
     if op_name == "sw.op" and type_attr and "super" in type_attr:
       return True
 
     # 3. STATEMENT FUSION:
-    # If the value is used EXACTLY ONCE by a statement-like op (setattr, return),
-    # we force inlining to create a clean statement.
     if usage == 1 and res_ssa in self.usage_consumers:
       consumer = self.usage_consumers[res_ssa]
       cons_name = consumer.name.strip('"')
@@ -355,7 +219,6 @@ class MlirToPythonGenerator:
     py_name = self.ctx.lookup(ssa_name)
 
     # HARDENING FIX: If name is dotted (e.g. self.layer), return Attribute chain
-    # using the internal helper to avoid bare Name validation errors.
     if "." in py_name:
       return self._create_dotted_name(py_name)
 
@@ -364,7 +227,7 @@ class MlirToPythonGenerator:
   def _create_expression_from_op(self, op: OperationNode) -> Optional[cst.BaseExpression]:
     """
     Attempts to map an Op to a Python Expression (e.g. Call, BinaryOp, Attribute).
-    Returns None if the op maps to a Statement structure (ClassDef, FuncDef).
+    Delegates to ExpressionGeneratorMixin.
     """
     op_name = op.name.strip('"')
 
@@ -377,12 +240,11 @@ class MlirToPythonGenerator:
     elif op_name == "sw.constant":
       return self._expr_sw_constant(op)
 
-    # Not an expression-native op
     return None
 
   def _convert_statement_op(self, op: OperationNode) -> Optional[cst.BaseStatement]:
     """
-    Maps structural ops to Statements.
+    Maps structural ops to Statements. Delegates to StatementGeneratorMixin.
     """
     op_name = op.name.strip('"')
 
@@ -415,17 +277,14 @@ class MlirToPythonGenerator:
 
       # Semantic Hint Extraction
       hint: Optional[str] = None
-      is_numeric_ssa = res_ssa.startswith("%") and res_ssa[1:].isdigit()
 
       # 1. Check for 'type' attribute (e.g. torch.flatten)
       raw_t = self._get_attr(op, "type")
       if raw_t:
-        # Clean quotes
         val = raw_t.strip('"').strip("'")
-        # Get last segment: flattened structure -> flatten
         hint = val.split(".")[-1].lower()
 
-      # 2. Check for 'name' attribute (e.g. getattr self "conv")
+      # 2. Check for 'name' attribute
       elif op.name.strip('"') == "sw.getattr":
         raw_n = self._get_attr(op, "name")
         if raw_n:
@@ -447,7 +306,6 @@ class MlirToPythonGenerator:
     """
     if isinstance(expr, cst.Call):
       # Detect super().__init__()
-      # Structure: Call(func=Attribute(value=Call(func=Name("super")), attr=Name("__init__")))
       if isinstance(expr.func, cst.Attribute):
         if expr.func.attr.value == "__init__":
           receiver = expr.func.value
@@ -455,180 +313,3 @@ class MlirToPythonGenerator:
             if receiver.func.value == "super":
               return True
     return False
-
-  # --- Ops Conversion Utils ---
-
-  def _expr_sw_constant(self, op: OperationNode) -> cst.BaseExpression:
-    val_str = self._get_attr(op, "value") or "0"
-    try:
-      return cst.parse_expression(val_str)
-    except Exception:
-      return cst.Name(val_str)
-
-  def _expr_sw_getattr(self, op: OperationNode) -> cst.BaseExpression:
-    if not op.operands:
-      return cst.Name("error")
-    obj_expr = self._resolve_operand(op.operands[0].name)
-    attr_name = (self._get_attr(op, "name") or "unknown").strip('"')
-    return cst.Attribute(value=obj_expr, attr=cst.Name(attr_name))
-
-  def _expr_sw_call(self, op: OperationNode) -> cst.BaseExpression:
-    # Operands: [func, arg0, arg1...]
-    if not op.operands:
-      return cst.Call(func=cst.Name("unknown"))
-
-    func_expr = self._resolve_operand(op.operands[0].name)
-    args = []
-    for op_val in op.operands[1:]:
-      arg_expr = self._resolve_operand(op_val.name)
-      args.append(cst.Arg(value=arg_expr))
-
-    return cst.Call(func=func_expr, args=args)
-
-  def _expr_sw_op(self, op: OperationNode) -> cst.BaseExpression:
-    type_name = self._get_attr(op, "type") or '"unknown"'
-    if "binop." in type_name:
-      return self._expr_binop(op, type_name)
-
-    dotted_path = type_name.strip('"')
-    func_node = self._create_dotted_name(dotted_path)
-    args = []
-    for op_val in op.operands:
-      arg_expr = self._resolve_operand(op_val.name)
-      args.append(cst.Arg(value=arg_expr))
-
-    return cst.Call(func=func_node, args=args)
-
-  def _expr_binop(self, op: OperationNode, type_attr: str) -> cst.BaseExpression:
-    op_code = type_attr.strip('"').replace("binop.", "")
-    if len(op.operands) < 2:
-      return cst.Name("error_binop")
-
-    lhs_expr = self._resolve_operand(op.operands[0].name)
-    rhs_expr = self._resolve_operand(op.operands[1].name)
-
-    op_map = {
-      "add": cst.Add(),
-      "sub": cst.Subtract(),
-      "mul": cst.Multiply(),
-      "div": cst.Divide(),
-      "floordiv": cst.FloorDivide(),
-      "mod": cst.Modulo(),
-      "pow": cst.Power(),
-      "matmul": cst.MatrixMultiply(),
-      "lshift": cst.LeftShift(),
-      "rshift": cst.RightShift(),
-      "and": cst.BitAnd(),
-      "or": cst.BitOr(),
-      "xor": cst.BitXor(),
-    }
-    return cst.BinaryOperation(left=lhs_expr, operator=op_map.get(op_code, cst.Add()), right=rhs_expr)
-
-  def _convert_setattr(self, op: OperationNode) -> cst.SimpleStatementLine:
-    if len(op.operands) < 2:
-      return cst.SimpleStatementLine(body=[cst.Pass()])
-
-    obj_expr = self._resolve_operand(op.operands[0].name)
-    val_expr = self._resolve_operand(op.operands[1].name)
-    attr_name = (self._get_attr(op, "name") or "unknown").strip('"')
-
-    target = cst.Attribute(value=obj_expr, attr=cst.Name(attr_name))
-    assign = cst.Assign(targets=[cst.AssignTarget(target=target)], value=val_expr)
-    return cst.SimpleStatementLine(body=[assign])
-
-  def _convert_return(self, op: OperationNode) -> cst.SimpleStatementLine:
-    val_node = None
-    if op.operands:
-      val_node = self._resolve_operand(op.operands[0].name)
-    return cst.SimpleStatementLine(body=[cst.Return(value=val_node)])
-
-  def _convert_class_def(self, op: OperationNode) -> cst.ClassDef:
-    name_attr = self._get_attr(op, "sym_name")
-    class_name = name_attr.strip('"') if name_attr else "UnknownClass"
-
-    base_nodes = []
-    bases_attr = self._get_attr(op, "bases")
-    if bases_attr:
-      clean = bases_attr.strip("[]")
-      if clean:
-        parts = clean.split(",")
-        for p in parts:
-          b = p.strip().strip('"').strip("'")
-          if b:
-            base_nodes.append(cst.Arg(value=self._create_dotted_name(b)))
-
-    body_stmts = []
-    if op.regions and op.regions[0].blocks:
-      body_stmts = self._convert_block(op.regions[0].blocks[0])
-
-    if not body_stmts:
-      body_stmts = [cst.SimpleStatementLine(body=[cst.Pass()])]
-
-    return cst.ClassDef(name=cst.Name(class_name), bases=base_nodes, body=cst.IndentedBlock(body=body_stmts))
-
-  def _convert_func_def(self, op: OperationNode) -> cst.FunctionDef:
-    name_attr = self._get_attr(op, "sym_name")
-    func_name = name_attr.strip('"') if name_attr else "unknown_func"
-
-    # Scope Reset: Logic for functions should be isolated from parent naming context (mostly)
-    # This prevents 'self' from becoming 'self13' due to collisions with constructor context.
-    prev_ctx = self.ctx
-    self.ctx = NamingContext()
-
-    # Reset Usage Counts for new scope to prevent external block counts affecting internal logic
-    prev_usage_counts = self.usage_counts
-    self.usage_counts = defaultdict(int)
-    # Also reset consumers map
-    prev_usage_consumers = self.usage_consumers
-    self.usage_consumers = {}
-
-    params = []
-    body_stmts = []
-
-    try:
-      if op.regions and op.regions[0].blocks:
-        block0 = op.regions[0].blocks[0]
-        # Pre-analyze usage for this scope
-        self._scan_block_usage(block0)
-
-        # Register arguments in local context to establish 'self', 'x', etc.
-        for val, typ in block0.arguments:
-          py_name = self.ctx.register(val.name, hint=val.name)
-          annotation = None
-          type_str = typ.body
-          if type_str and type_str.startswith("!sw.type<"):
-            inner = type_str[9:-1].strip('"').strip("'")
-            if inner != "Any":
-              annotation = cst.Annotation(annotation=self._create_dotted_name(inner))
-          params.append(cst.Param(name=cst.Name(py_name), annotation=annotation))
-
-        body_stmts = self._convert_block(block0)
-
-      if not body_stmts:
-        body_stmts = [cst.SimpleStatementLine(body=[cst.Pass()])]
-
-    finally:
-      self.ctx = prev_ctx
-      self.usage_counts = prev_usage_counts
-      self.usage_consumers = prev_usage_consumers
-
-    return cst.FunctionDef(
-      name=cst.Name(func_name), params=cst.Parameters(params=params), body=cst.IndentedBlock(body=body_stmts)
-    )
-
-  def _get_attr(self, op: OperationNode, key: str) -> Optional[str]:
-    for attr in op.attributes:
-      if attr.name == key:
-        if isinstance(attr.value, list):
-          return f"[{', '.join(attr.value)}]"
-        return attr.value
-    return None
-
-  def _create_dotted_name(self, path: str) -> cst.BaseExpression:
-    parts = path.split(".")
-    if not parts:
-      return cst.Name("unknown")
-    node: cst.BaseExpression = cst.Name(parts[0])
-    for p in parts[1:]:
-      node = cst.Attribute(value=node, attr=cst.Name(p))
-    return node

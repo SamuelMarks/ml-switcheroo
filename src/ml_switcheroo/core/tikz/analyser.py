@@ -10,49 +10,13 @@ The output `LogicalGraph` is an intermediate representation used by the TikZ
 emitter to generate visual diagrams.
 """
 
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 import libcst as cst
 from libcst import matchers as m
 
 from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.utils.node_diff import capture_node_source
-
-
-@dataclass
-class LogicalNode:
-  """
-  Represents a computation unit (Layer) in the graph.
-
-  Attributes:
-      id: Unique identifier (e.g. 'conv1').
-      kind: Operation type (e.g. 'Conv2d', 'Input', 'Output').
-      metadata: Dictionary of configuration parameters (e.g. kernel_size=3).
-  """
-
-  id: str
-  kind: str
-  metadata: Dict[str, str] = field(default_factory=dict)
-
-
-@dataclass
-class LogicalEdge:
-  """
-  Represents data flow between two nodes.
-  """
-
-  source: str
-  target: str
-
-
-@dataclass
-class LogicalGraph:
-  """
-  Language-agnostic representation of the neural network structure.
-  """
-
-  nodes: List[LogicalNode] = field(default_factory=list)
-  edges: List[LogicalEdge] = field(default_factory=list)
+from ml_switcheroo.core.graph import LogicalNode, LogicalEdge, LogicalGraph
 
 
 class GraphExtractor(cst.CSTVisitor):
@@ -60,6 +24,7 @@ class GraphExtractor(cst.CSTVisitor):
   LibCST Visitor that extracts a LogicalGraph from Python source code.
 
   Two-Pass Logic:
+
   1.  **Init Pass**: Scans `__init__` or `setup` to register named layers
       assigned to `self`. Populates the node registry.
   2.  **Forward Pass**: Scans `forward` or `__call__` to trace variable usage.

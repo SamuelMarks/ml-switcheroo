@@ -34,11 +34,23 @@ class ImportScanner(ast.NodeVisitor):
   """
 
   def __init__(self, root_fw: str):
+    """
+    Initialize the scanner.
+
+    Args:
+        root_fw (str): The root package to track (e.g. 'jax').
+    """
     self.root_fw = root_fw
     # Map of alias -> full_path (e.g. 'jnp' -> 'jax.numpy').
     self.aliases = {}
 
   def visit_Import(self, node: ast.Import) -> Any:
+    """
+    Visits ``import ...`` statements.
+
+    Args:
+        node: The Import node.
+    """
     for alias in node.names:
       if alias.name.startswith(self.root_fw):
         store_as = alias.asname if alias.asname else alias.name
@@ -46,6 +58,12 @@ class ImportScanner(ast.NodeVisitor):
     self.generic_visit(node)
 
   def visit_ImportFrom(self, node: ast.ImportFrom) -> Any:
+    """
+    Visits ``from ... import ...`` statements.
+
+    Args:
+        node: The ImportFrom node.
+    """
     if node.module and node.module.startswith(self.root_fw):
       for alias in node.names:
         full_name = f"{node.module}.{alias.name}"
@@ -246,7 +264,15 @@ class TargetCallVisitor(ast.NodeVisitor):
     self.mappings: Optional[Dict[str, str]] = None
 
   def _normalize_info(self, raw: List[Any]) -> List[Tuple[str, str]]:
-    """Ensures consistent list of tuples structure."""
+    """
+    Ensures consistent list of tuples structure for argument definitions.
+
+    Args:
+        raw: List of arguments in varying formats (str, tuple, dict).
+
+    Returns:
+        List of (name, type) tuples.
+    """
     out = []
     for item in raw:
       if isinstance(item, (list, tuple)) and len(item) >= 2:
@@ -264,6 +290,9 @@ class TargetCallVisitor(ast.NodeVisitor):
   def visit_Call(self, node: ast.Call) -> Any:
     """
     Inspects calls. Check if they match target_api and extract args.
+
+    Args:
+        node: The Call AST node.
     """
     if self.mappings is not None:
       return
@@ -314,7 +343,15 @@ class TargetCallVisitor(ast.NodeVisitor):
     self.generic_visit(node)
 
   def _resolve_call_name(self, node: ast.AST) -> str:
-    """Resolves AST Attribute/Name to full dotted string using aliases."""
+    """
+    Resolves AST Attribute/Name to full dotted string using aliases.
+
+    Args:
+        node: The AST node representing the function being called.
+
+    Returns:
+        Dotted name string or empty string.
+    """
     parts = []
     curr = node
     while isinstance(curr, ast.Attribute):
@@ -330,13 +367,29 @@ class TargetCallVisitor(ast.NodeVisitor):
     return ""
 
   def _get_arg_val_name(self, node: ast.AST) -> Optional[str]:
-    """Extracts variable name from AST node if it is a Name."""
+    """
+    Extracts variable name from AST node if it is a Name.
+
+    Args:
+        node: The value node.
+
+    Returns:
+        Variable name string or None.
+    """
     if isinstance(node, ast.Name):
       return node.id
     return None
 
   def _clean_std_name(self, var_name: str) -> str:
-    """Converts variable name to abstract standard name."""
+    """
+    Converts variable name to abstract standard name by stripping prefixes.
+
+    Args:
+        var_name: The local variable name (e.g. 'np_x').
+
+    Returns:
+        The abstract argument name (e.g. 'x').
+    """
     if var_name.startswith("np_"):
       return var_name[3:]
     return var_name
@@ -374,7 +427,16 @@ class TargetCallVisitor(ast.NodeVisitor):
     return "Any"
 
   def _infer_container_type(self, elements: List[ast.AST], container_name: str) -> str:
-    """Helper to infer type of homogenous container elements."""
+    """
+    Helper to infer type of homogenous container elements.
+
+    Args:
+        elements: List of AST nodes inside container.
+        container_name: "List" or "Tuple".
+
+    Returns:
+        String type hint (e.g. "List[int]").
+    """
     if not elements:
       # Empty container matches generic List/Tuple
       return container_name
@@ -400,6 +462,12 @@ class TargetCallVisitor(ast.NodeVisitor):
 
     If multiple args match (e.g. two ints), returns None (Ambiguous).
     Logic parses containment (e.g. 'Tuple[int]' matches 'Tuple[int, int]').
+
+    Args:
+        val_type: The string type hint inferred from the literal.
+
+    Returns:
+        The name of the matching standard argument, or None.
     """
     candidates = []
     # Robustly clean whitespace for matching

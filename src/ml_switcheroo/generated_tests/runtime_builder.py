@@ -1,28 +1,17 @@
-"""Shared runtime flags for generated tests (Auto-Generated)."""
-import sys
-import pytest
-import random
-import numpy as np
+"""
+Runtime Module Logic Generator.
 
-# --- jax ---
-try:
-    import jax
-    import jax.numpy as jnp
-    try:
-        import chex
-    except ImportError:
-        pass
-    JAX_AVAILABLE = True
-except ImportError:
-    JAX_AVAILABLE = False
+This module contains the logic to creating the `runtime.py` file required by
+generated tests. It injects shared helpers, cross-framework comparison logic,
+and determinism fixtures.
+"""
 
-# --- torch ---
-try:
-    import torch
-    TORCH_AVAILABLE = True
-except ImportError:
-    TORCH_AVAILABLE = False
+import pathlib
+from typing import List, Optional, Dict, Any
+from ml_switcheroo.generated_tests.templates import get_template
 
+# The static part of the runtime helper that does not depend on available frameworks.
+_SHARED_RUNTIME_LOGIC = r'''
 # --- Determinism ---
 @pytest.fixture(autouse=True)
 def ensure_determinism():
@@ -131,3 +120,72 @@ def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
       return ref == val
     except Exception:
       return False
+'''
+
+
+def ensure_runtime_module(
+  out_dir: pathlib.Path,
+  frameworks: Optional[List[str]] = None,
+  mgr: Any = None,
+) -> None:
+  """
+  Creates or updates the `runtime.py` module in the output directory.
+
+  Injects:
+  1. Safe import blocks for all used frameworks (try/except ImportError).
+  2. Determinism fixtures.
+  3. Recursive result comparison logic (`verify_results`).
+
+  Args:
+      out_dir: Directory where the generated tests and runtime.py reside.
+      frameworks: List of frameworks to include imports for.
+      mgr: SemanticsManager for retrieving custom import templates.
+  """
+  out_dir.mkdir(parents=True, exist_ok=True)
+  runtime_path = out_dir / "runtime.py"
+
+  imports_block = []
+  alls = ["verify_results"]
+
+  # Always include torch/jax logic if they appear in defaults or requested
+  fw_set = set(frameworks) if frameworks else set()
+  chk_fws = fw_set | {"torch", "jax"}
+
+  # Sort for determinism in file output
+  for fw in sorted(chk_fws):
+    # We need the template dict to know what to import
+    tmpl = get_template(mgr, fw)
+    if not tmpl:
+      continue
+
+    # Get imports string from template, defaulting to simple import
+    imp = tmpl.get("import", f"import {fw}")
+
+    # Sanitization for checking availability
+    # e.g., TORCH_AVAILABLE = True
+    var_name = f"{fw.upper()}_AVAILABLE"
+    imports_block.append(f"# --- {fw} ---")
+    imports_block.append("try:")
+    for line in imp.split("\n"):
+      imports_block.append(f"    {line}")
+    imports_block.append(f"    {var_name} = True")
+    imports_block.append("except ImportError:")
+    imports_block.append(f"    {var_name} = False")
+    imports_block.append("")
+
+    if fw == "tensorflow":
+      alls.extend((var_name, "tf"))
+    else:
+      if fw == "jax":
+        alls.append("jnp")
+      alls.extend((var_name, fw))
+
+  imports_str = "\n".join(imports_block)
+
+  # Combine parts
+  code = f'"""Shared runtime flags for generated tests (Auto-Generated)."""\n'
+  code += "import sys\nimport pytest\nimport random\nimport numpy as np\n\n"
+  code += imports_str
+  code += _SHARED_RUNTIME_LOGIC
+
+  runtime_path.write_text(code, encoding="utf-8")

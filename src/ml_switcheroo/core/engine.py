@@ -1,11 +1,12 @@
 """
 Orchestration Engine for AST Transformations.
 
-This module provides the `ASTEngine`, the primary driver for the transpilation process.
+This module provides the ``ASTEngine``, the primary driver for the transpilation process.
 It coordinates the various analysis and transformation passes required to convert code
 from a source framework to a target framework.
 
 Pipeline:
+
 1.  **Ingestion**: Adapter Hooks (LaTeX) or Standard Parsing (Python/MLIR/TikZ).
 2.  **Emission**: Adapter Hooks (LaTeX) or Standard Emission (Python/MLIR/TikZ).
 3.  **Transformation**: Purity, Lifecycle, Dependency checks, Rewriting, Import Fixing.
@@ -13,7 +14,7 @@ Pipeline:
 
 import traceback
 import libcst as cst
-from typing import Optional, Dict, Any, List, Union
+from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 
 from ml_switcheroo.core.tracer import reset_tracer, get_tracer
@@ -45,18 +46,27 @@ from ml_switcheroo.core.tikz.emitter import TikzEmitter
 
 
 class ConversionResult(BaseModel):
-  code: str = Field(default="")
-  errors: List[str] = Field(default_factory=list)
-  success: bool = Field(default=True)
-  trace_events: List[Dict[str, Any]] = Field(default_factory=list)
+  """
+  Container for the results of a transpilation job.
+  """
+
+  code: str = Field(default="", description="The generated source code.")
+  errors: List[str] = Field(default_factory=list, description="List of error messages encountered.")
+  success: bool = Field(default=True, description="True if the pipeline completed without fatal crashes.")
+  trace_events: List[Dict[str, Any]] = Field(default_factory=list, description="Execution trace log data.")
 
   @property
   def has_errors(self) -> bool:
+    """Check if the result contains any error messages."""
     return len(self.errors) > 0
 
 
 class ASTEngine:
-  """The main compilation unit."""
+  """
+  The main compilation unit.
+
+  Orchestrates parsing, analysis, transformation, and code generation.
+  """
 
   def __init__(
     self,
@@ -68,6 +78,18 @@ class ASTEngine:
     plugin_config: Optional[Dict[str, Any]] = None,
     intermediate: Optional[str] = None,
   ):
+    """
+    Initializes the Engine.
+
+    Args:
+        semantics: The Knowledge Base manager. If None, a new default manager is loaded.
+        config: A specific RuntimeConfig object. If provided, overrides single attributes.
+        source: Source framework key (e.g. 'torch').
+        target: Target framework key (e.g. 'jax').
+        strict_mode: If True, fail on unmapped APIs instead of preserving them.
+        plugin_config: Dictionary of settings passed to plugins.
+        intermediate: Optional intermediate representation ('mlir', 'tikz') or None.
+    """
     self.semantics = semantics or SemanticsManager()
 
     if config:
@@ -92,12 +114,37 @@ class ASTEngine:
     self.target_adapter = fw_registry.get_adapter(self.target)
 
   def parse(self, code: str) -> cst.Module:
+    """
+    Parses Python source code into a LibCST module.
+
+    Args:
+        code: Source code string.
+
+    Returns:
+        A parsed CST object.
+    """
     return cst.parse_module(code)
 
   def to_source(self, tree: cst.Module) -> str:
+    """
+    Converts a LibCST module back to source code string.
+
+    Args:
+        tree: The modified CST module.
+
+    Returns:
+        The generated Python code.
+    """
     return tree.code
 
   def _generate_snapshot(self, tree: cst.CSTNode, phase_label: str) -> None:
+    """
+    Generates a Mermaid graph snapshot of the current AST state for the tracer.
+
+    Args:
+        tree: The AST to visualize.
+        phase_label: Description of the current phase (e.g. "Before Pivot").
+    """
     tracer = get_tracer()
     try:
       viz = MermaidGenerator()
@@ -107,6 +154,12 @@ class ASTEngine:
       tracer.log_warning(f"Visualizer Error {phase_label}: {str(e)}")
 
   def _should_enforce_purity(self) -> bool:
+    """
+    Determines if Purity Analysis should run based on target traits.
+
+    Returns:
+        True if the target framework requires functional purity (e.g. JAX).
+    """
     conf = self.semantics.get_framework_config(self.target)
     if conf:
       traits = conf.get("plugin_traits")
@@ -123,7 +176,19 @@ class ASTEngine:
     return False
 
   def _run_mlir_roundtrip(self, tree: cst.Module, tracer: Any) -> cst.Module:
-    """Executes CST -> MLIR Text -> CST pipeline for verification."""
+    """
+    Executes CST -> MLIR Text -> CST pipeline for verification.
+
+    Used when intermediate="mlir" is selected to verify the structural integrity
+    of the MLIR bridge.
+
+    Args:
+        tree: The Python CST.
+        tracer: The active trace logger.
+
+    Returns:
+        A reconstructed Python CST (via MLIR).
+    """
     try:
       tracer.start_phase("MLIR Bridge", "CST -> MLIR Text -> CST")
       emitter = PythonToMlirEmitter()
@@ -144,6 +209,22 @@ class ASTEngine:
       return tree
 
   def _run_ingestion(self, code: str, tracer) -> Optional[cst.Module]:
+    """
+    Parses input code handles non-python sources via adapters.
+
+    Supports:
+    1. Adapter-specific parsers (e.g. LaTeX).
+    2. MLIR text parsing.
+    3. TikZ text parsing.
+    4. Standard Python parsing.
+
+    Args:
+        code: Raw source code string.
+        tracer: The trace logger instance.
+
+    Returns:
+        A validated Python LibCST Module.
+    """
     # 1. Adapter Hook (e.g. LatexParser)
     if self.source_adapter and hasattr(self.source_adapter, "create_parser"):
       tracer.start_phase("Custom Ingest", f"{self.source} Parser")
@@ -201,6 +282,23 @@ class ASTEngine:
       raise e
 
   def run(self, code: str) -> ConversionResult:
+    """
+    Executes the full transpilation pipeline.
+
+    Steps:
+
+    1.  **Ingestion**: Parse source (Python/MLIR/LaTeX) to AST.
+    2.  **Short-Circuit**: If target is non-Python (MLIR/TikZ/Latex), emit immediately.
+    3.  **Analysis**: Run Purity, Lifecycle, and Dependency checks.
+    4.  **Rewriting**: Execute `PivotRewriter` to transform the AST.
+    5.  **Refinement**: Run `ImportFixer` and `StructuralLinter` to clean results.
+
+    Args:
+        code: The source code string to transpile.
+
+    Returns:
+        A `ConversionResult` containing the output code, errors, and execution trace.
+    """
     reset_tracer()
     tracer = get_tracer()
     tracer.start_phase("Transpilation Pipeline", f"{self.source} -> {self.target}")

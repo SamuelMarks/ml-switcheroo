@@ -5,6 +5,7 @@ This module registers `html` as a valid framework in the `ml-switcheroo` ecosyst
 It enables the conversion of Python code to the Visual HTML Grid DSL and vice versa.
 
 Features:
+
 -   **Target (Output)**: Uses `HtmlEmitter` to generate the HTML grid from Python AST.
 -   **Source (Input)**: Uses `HtmlParser` to scrape HTML grids back into Python AST.
 -   **Semantic Mappings**: Defines the virtual `html_dsl` namespace to map grid components

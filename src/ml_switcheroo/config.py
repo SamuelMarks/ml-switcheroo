@@ -70,7 +70,10 @@ def get_framework_priority_order() -> List[str]:
 def _resolve_default_source() -> str:
   """
   Resolves the default source framework.
-  Returns the highest priority framework (Index 0 in sorted list).
+
+  Returns:
+      str: The highest priority framework key (Index 0 in sorted list),
+      or "source_placeholder" if none are registered.
   """
   fws = get_framework_priority_order()
   return fws[0] if fws else "source_placeholder"
@@ -79,8 +82,10 @@ def _resolve_default_source() -> str:
 def _resolve_default_target() -> str:
   """
   Resolves the default target framework.
-  Returns the second highest priority framework (Index 1),
-  or the first if only one exists.
+
+  Returns:
+      str: The second highest priority framework key (Index 1),
+      or the first (Index 0) if only one exists, or "target_placeholder".
   """
   fws = get_framework_priority_order()
   if len(fws) >= 2:
@@ -116,6 +121,15 @@ class RuntimeConfig(BaseModel):
   def validate_framework(cls, v: str) -> str:
     """
     Ensures the framework is registered in the system.
+
+    Args:
+        v (str): The framework key to validate.
+
+    Returns:
+        str: The normalized framework key.
+
+    Raises:
+        ValueError: If the framework is not registered and not a placeholder.
     """
     v_clean = v.lower().strip()
     known = available_frameworks()
@@ -127,17 +141,40 @@ class RuntimeConfig(BaseModel):
 
   @property
   def effective_source(self) -> str:
-    """Returns source flavour if present, else source framework."""
+    """
+    Returns the resolved source framework key.
+
+    Prioritizes `source_flavour` if present, otherwise returns `source_framework`.
+
+    Returns:
+        str: The active source framework key.
+    """
     return self.source_flavour if self.source_flavour else self.source_framework
 
   @property
   def effective_target(self) -> str:
-    """Returns target flavour if present, else target framework."""
+    """
+    Returns the resolved target framework key.
+
+    Prioritizes `target_flavour` if present, otherwise returns `target_framework`.
+
+    Returns:
+        str: The active target framework key.
+    """
     return self.target_flavour if self.target_flavour else self.target_framework
 
   def parse_plugin_settings(self, schema: Type[T]) -> T:
     """
     Validates plugin settings against a Pydantic model.
+
+    Args:
+        schema (Type[T]): The Pydantic model class defining the settings schema.
+
+    Returns:
+        T: An instance of the schema populated with validated settings.
+
+    Raises:
+        ValueError: If validation against the schema fails.
     """
     try:
       return schema.model_validate(self.plugin_settings)
@@ -159,6 +196,19 @@ class RuntimeConfig(BaseModel):
     """
     Loads configuration from pyproject.toml, overriding with CLI arguments.
     Defaults are calculated dynamically via factory methods if not found.
+
+    Args:
+        source (Optional[str]): Override source framework.
+        target (Optional[str]): Override target framework.
+        source_flavour (Optional[str]): Override source flavour.
+        target_flavour (Optional[str]): Override target flavour.
+        strict_mode (Optional[bool]): Override strict mode setting.
+        plugin_settings (Optional[Dict]): Additional plugin settings.
+        validation_report (Optional[Path]): Override validation report path.
+        search_path (Optional[Path]): Directory path to search for config file.
+
+    Returns:
+        RuntimeConfig: The fully resolved configuration object.
     """
     start_dir = search_path or Path.cwd()
     toml_config, toml_dir = _load_toml_settings(start_dir)
@@ -212,7 +262,14 @@ class RuntimeConfig(BaseModel):
 def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path]]:
   """
   Recursively searches parents for 'pyproject.toml' and extracts config.
-  Returns (ConfigDict, ConfigFileDirectory).
+
+  Args:
+      start_path (Path): Directory to begin the search from.
+
+  Returns:
+      Tuple[Dict[str, Any], Optional[Path]]:
+          - A dictionary of configuration settings found in the TOML file.
+          - The directory containing the TOML file, or None if not found.
   """
   if not tomllib:
     return {}, None
@@ -239,6 +296,12 @@ def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path
 def parse_cli_key_values(items: Optional[List[str]]) -> Dict[str, Any]:
   """
   Parses a list of 'key=value' strings into a dictionary with type inference.
+
+  Args:
+      items (Optional[List[str]]): List of strings in "key=value" format.
+
+  Returns:
+      Dict[str, Any]: Dictionary with parsed values (bool, int, float, or str).
   """
   if not items:
     return {}

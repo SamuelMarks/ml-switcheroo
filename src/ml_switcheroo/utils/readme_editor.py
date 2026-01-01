@@ -1,3 +1,10 @@
+"""
+Utilities for updating the project README.
+
+This module provides logic to inject automated verification reports (the Compatibility Matrix)
+directly into the `README.md` file, ensuring documentation stays valid with the code.
+"""
+
 import re
 from pathlib import Path
 from typing import Dict, Optional
@@ -20,7 +27,7 @@ class ReadmeEditor:
     Initializes the editor.
 
     Args:
-        semantics: The loaded semantics manager.
+        semantics: The loaded semantics manager used to fetch API details.
         readme_path: File system path to the target markdown file.
     """
     self.semantics = semantics
@@ -52,8 +59,8 @@ class ReadmeEditor:
     # 1. Generate New Table
     new_table = self._generate_markdown_table(validation_results)
 
-    # 2. Inject via Regex
-    # Pattern: Matches the Header, newlines, then captures content until next ## header
+    # 2. Inject via Regex search
+    # Pattern: Matches the Header line.
     header_marker = "## ✅ Compatibility Matrix"
 
     if header_marker not in content:
@@ -73,13 +80,13 @@ class ReadmeEditor:
     next_section_match = re.search(r"\n## ", remainder)
 
     if next_section_match:
-      # Found next section
+      # Found next section, preserve everything after it
       post_table = remainder[next_section_match.start() :]
     else:
       # No next section, table goes to EOF
       post_table = ""
 
-    # Add buffering newlines
+    # Add buffering newlines for cleaner markdown format
     new_content = f"{pre_table}{header_marker}\n\n{new_table}\n{post_table}"
 
     try:
@@ -94,17 +101,19 @@ class ReadmeEditor:
     """
     Constructs the ASCII Markdown table from semantics data.
 
+    Generates a table row for every operation known in the SemanticsManager.
+
     Columns:
         - Category: Derived from Semantic Tier heuristics.
-        - PyTorch: Source API path.
-        - JAX: Target API path.
+        - PyTorch: Source API path (from variants).
+        - JAX: Target API path (from variants).
         - Verification: Status icon based on results dict.
 
     Args:
-        results: Validation outcomes.
+        results: Validation outcomes (True/False).
 
     Returns:
-        str: The formatted markdown table.
+        str: The fully formatted markdown table string.
     """
     known_apis = self.semantics.get_known_apis()
     # Sort for deterministic output
@@ -142,12 +151,12 @@ class ReadmeEditor:
       if is_valid:
         status = "✅ Passing"
       elif plugin_info:
-        # If verification failed but it uses a plugin, mark separately
+        # If verification failed but it uses a plugin, mark separately implies complexity
         status = "🧩 Plugin (Complex)"
       else:
         status = "⚠️ Untested/Fail"
 
-      # Simple Category Heuristic (Ideally this data is stored in SemanticsManager)
+      # Determine Category
       category = _guess_category(torch_api, jax_variant)
 
       row = f"| **{category}** | {t_cell} | {j_cell} | {status} |"
@@ -157,7 +166,16 @@ class ReadmeEditor:
 
 
 def _guess_category(api_name: str, target_var: Optional[Dict]) -> str:
-  """Helper to categorize op based on API string."""
+  """
+  Heuristic helper to categorize op based on API string contents.
+
+  Args:
+      api_name: The Torch/Source API path.
+      target_var: The target dictionary (to check for plugins).
+
+  Returns:
+      str: "Neural", "Special", or "Math".
+  """
   if "nn" in api_name or "Linear" in api_name or "Conv" in api_name:
     return "Neural"
   if target_var and "requires_plugin" in target_var:

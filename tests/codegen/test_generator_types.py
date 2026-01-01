@@ -6,6 +6,7 @@ Includes validation for Return Types (Output Verification).
 import pytest
 from unittest.mock import MagicMock
 from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -35,65 +36,65 @@ def gen(tmp_path):
   return TestGenerator(semantics_mgr=mgr)
 
 
-def test_code_gen_str_int(gen):
+def test_code_gen_str_int():
   """
   Scenario: Type hint "int".
   Expectation: `random.randint(...)`
   """
-  code = gen._generate_value_code("dim", "int")
+  code = generate_input_value_code("dim", "int")
   assert "random.randint" in code
 
 
-def test_code_gen_str_bool(gen):
+def test_code_gen_str_bool():
   """
   Scenario: Type hint "bool".
   Expectation: `bool(random.getrandbits(1))`
   """
-  code = gen._generate_value_code("keepdims", "bool")
+  code = generate_input_value_code("keepdims", "bool")
   assert "bool(random.getrandbits(1))" in code
 
 
-def test_code_gen_str_float(gen):
+def test_code_gen_str_float():
   """
   Scenario: Type hint "float".
   Expectation: `random.uniform`
   """
-  code = gen._generate_value_code("alpha", "float")
+  code = generate_input_value_code("alpha", "float")
   assert "random.uniform" in code
 
 
-def test_code_gen_str_array(gen):
+def test_code_gen_str_array():
   """
   Scenario: Type hint "Array" or "Tensor".
   Expectation: `np.random.randn`
   """
-  code1 = gen._generate_value_code("x", "Array")
+  code1 = generate_input_value_code("x", "Array")
   assert "np.random.randn" in code1
 
-  code2 = gen._generate_value_code("x", "Tensor")
+  code2 = generate_input_value_code("x", "Tensor")
   assert "np.random.randn" in code2
 
 
-def test_code_gen_complex_list(gen):
+def test_code_gen_complex_list():
   """
   Scenario: Type hint "List[int]".
   Expectation: `[1, 2]` stub.
   """
-  code = gen._generate_value_code("pads", "List[int]")
+  code = generate_input_value_code("pads", "List[int]")
   assert "[1, 2]" in code
 
 
-def test_code_gen_heuristic_fallback(gen):
+def test_code_gen_heuristic_fallback():
   """
   Scenario: Type hint "Any" or None.
   Expectation: Name-based heuristic (e.g. 'axis' -> '1').
   """
   # Name 'axis' -> heuristic returns 1
-  code_axis = gen._generate_value_code("axis", "Any")
+  code_axis = generate_input_value_code("axis", "Any")
   assert code_axis == "1"
 
   # Name 'x' -> defaults to array
-  code_x = gen._generate_value_code("x", "Any")
+  code_x = generate_input_value_code("x", "Any")
   assert "np.random.randn" in code_x
 
 

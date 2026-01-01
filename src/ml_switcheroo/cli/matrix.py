@@ -57,16 +57,17 @@ class CompatibilityMatrix:
 
     Returns:
         List[Dict]: Rows of the matrix. Structure:
-        [
-            {
-                "operation": "Conv2d",
-                "tier": "Neural",
-                "torch": "✅",
-                "jax": "🧩",
-                ...
-            },
-            ...
-        ]
+
+        .. code-block:: json
+
+            [
+                {
+                    "operation": "Conv2d",
+                    "tier": "Neural",
+                    "torch": "✅",
+                    "jax": "🧩"
+                }
+            ]
     """
     rows = []
     engines = self._get_sorted_engines()

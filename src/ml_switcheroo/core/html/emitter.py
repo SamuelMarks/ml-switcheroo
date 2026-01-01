@@ -22,6 +22,7 @@ class HtmlEmitter:
   Orchestrates the conversion of Python code to the HTML visual DSL.
 
   Layout Strategy:
+
   - Input Node: Row 1-2 implicit styling or explicit green box.
   - Stateful Nodes (Layers): Occupy a Red Box (Definition) in Column 1,
     followed by a Blue Box (Execution) in Column 2.

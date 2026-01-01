@@ -5,6 +5,7 @@ This module addresses the impedance mismatch between PyTorch's global state cont
 (like `torch.no_grad()`) and JAX's functional, explicit gradient handling.
 
 It provides a transformation hook that:
+
 1.  Detects usage of context managers flagged with `context_to_function_wrap`.
 2.  Injects a `nullcontext` shim into the function preamble.
 3.  Rewrites the specific API call to use this shim, ensuring the `with ...:` block
@@ -34,7 +35,8 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("context_to_function_wrap")
 def transform_context_manager(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """Plugin Hook: Transforms valid Source context managers into JAX-compatible shims.
+  """
+  Plugin Hook: Transforms valid Source context managers into JAX-compatible shims.
 
   **Triggers**
 

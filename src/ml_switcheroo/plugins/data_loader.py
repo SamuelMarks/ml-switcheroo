@@ -9,11 +9,12 @@ operation to `requires_plugin: "convert_dataloader"`. It does not check the
 target framework name.
 
 Implementation Details:
-- Filters arguments to ensure compatibility with the Generic Shim.
-- Explicitly handles `num_workers`, `pin_memory`, and `drop_last` by mapping
-  names and passing them (since the Shim accepts them as optional kwargs).
-- Injects the Shim class definition at the top of the file on first use
-  via `ctx.inject_preamble`.
+
+-   Filters arguments to ensure compatibility with the Generic Shim.
+-   Explicitly handles `num_workers`, `pin_memory`, and `drop_last` by mapping
+    names and passing them (since the Shim accepts them as optional kwargs).
+-   Injects the Shim class definition at the top of the file on first use
+    via `ctx.inject_preamble`.
 """
 
 import libcst as cst
@@ -113,9 +114,11 @@ def transform_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """Middleware to rewrite DataLoader instantiation.
 
   **Triggers**
+
   - Operations marked with ``requires_plugin: "convert_dataloader"`` in JSON.
 
   **Actions**
+
   - Injects `GenericDataLoader` class definition into preamble (idempotent).
   - Rewrites function call to `GenericDataLoader(...)`
   - Filters arguments (Dataset as pos 0, preserves supported kwargs).

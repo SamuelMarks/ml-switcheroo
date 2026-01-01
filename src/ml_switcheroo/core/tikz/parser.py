@@ -7,7 +7,7 @@ the operation of the `TikzEmitter`.
 
 Capabilities:
 1.  **Tokenization**: Regex-based lexer for LaTeX commands, groups, and options.
-2.  **Structural Parsing**: Identifies nodes, edges, and environments.
+2.  **Structural Parsing**: Identifies nodes, edges, and environments via recursive descent.
 3.  **Metadata Extraction**: Parses HTML-like tabular environments embedded in
     node labels to recover layer hyperparameters (e.g., kernel size, stride).
 4.  **Graph Reconstruction**: Builds a `LogicalGraph` object compatible with
@@ -43,7 +43,7 @@ class TokenKind(Enum):
 
 @dataclass
 class Token:
-  """A lexical unit."""
+  """A lexical unit with position info."""
 
   kind: TokenKind
   text: str
@@ -54,6 +54,9 @@ class Token:
 class TikzLexer:
   """
   Regex-based tokenizer for TikZ source code.
+
+  Splits raw LaTeX strings into a stream of typed Tokens, handling
+  symbols, commands, strings, and whitespace.
   """
 
   # Order matters: Specific patterns before general ones
@@ -76,6 +79,7 @@ class TikzLexer:
   ]
 
   def __init__(self, text: str):
+    """Initialize the lexer with input text."""
     self.text = text
     self.pos = 0
     self.line = 1
@@ -84,7 +88,11 @@ class TikzLexer:
 
   def tokenize(self) -> List[Token]:
     """
-    Converts the full string into a list of Tokens, filtering whitespace/comments.
+    Converts the full string into a list of Tokens.
+
+    Returns:
+        List[Token]: Sequence of tokens, excluding comments and whitespace.
+                     Ends with an EOF token.
     """
     while self.pos < len(self.text):
       match = None
@@ -93,7 +101,7 @@ class TikzLexer:
         match = regex.match(self.text, self.pos)
         if match:
           text = match.group(0)
-          # Create token
+          # Create token (skip whitespace/comments)
           if kind not in (TokenKind.WHITESPACE, TokenKind.COMMENT):
             self._tokens.append(Token(kind, text, self.line, self.col))
 
@@ -109,7 +117,7 @@ class TikzLexer:
           break
 
       if not match:
-        # Skip unknown char
+        # Skip unknown char (robustness)
         # In a real parser we might raise SyntaxError, but here we skip to be robust
         self.pos += 1
         self.col += 1
@@ -128,6 +136,7 @@ class TikzParser:
   """
 
   def __init__(self, text: str):
+    """Initialize parser and tokenize input."""
     self.lexer = TikzLexer(text)
     self.tokens = self.lexer.tokenize()
     self.pos = 0
@@ -135,7 +144,7 @@ class TikzParser:
 
   def parse(self) -> LogicalGraph:
     """
-    Main entry point.
+    Main entry point. Iterates top-level commands.
 
     Returns:
         LogicalGraph: The reconstructed graph extracted from the visual definition.
@@ -168,32 +177,41 @@ class TikzParser:
   # --- Parser Primitives ---
 
   def _peek(self, offset: int = 0) -> Token:
+    """Look ahead at a token without consumption."""
     idx = self.pos + offset
     if idx >= len(self.tokens):
       return self.tokens[-1]
     return self.tokens[idx]
 
   def _consume(self) -> Token:
+    """Consume and return the current token."""
     token = self._peek()
     self.pos += 1
     return token
 
   def _match(self, kind: TokenKind) -> bool:
+    """Check if the current token matches a specific kind."""
     return self._peek().kind == kind
 
   def _expect(self, kind: TokenKind) -> Token:
+    """
+    Consume the current token if it matches kind, else raise error.
+    """
     if not self._match(kind):
       cur = self._peek()
       raise SyntaxError(f"Expected {kind}, got {cur.kind} ('{cur.text}') at line {cur.line}")
     return self._consume()
 
   def _is_eof(self) -> bool:
+    """Check if End of File reached."""
     return self._peek().kind == TokenKind.EOF
 
   def _parse_braced_group(self) -> List[Token]:
     """
-    Consumes tokens inside `{ ... }`. Returns the inner tokens.
-    Handles nesting logic.
+    Consumes tokens inside `{ ... }`, handling nesting.
+
+    Returns:
+        List[Token]: The tokens inside the braces.
     """
     self._expect(TokenKind.LBRACE)
     content = []
@@ -210,7 +228,12 @@ class TikzParser:
     return content
 
   def _optional_bracket_group(self) -> List[Token]:
-    """Consumes `[...]` if present."""
+    """
+    Consumes `[...]` group if present.
+
+    Returns:
+        List[Token]: The tokens inside brackets, or empty list if brackets specific not found.
+    """
     if self._match(TokenKind.LBRACKET):
       self._consume()
       content = []
@@ -224,7 +247,8 @@ class TikzParser:
 
   def _parse_node(self) -> None:
     """
-    Parses `\node [options] (id) at (x,y) {content};`.
+    Parses a `\\node` command and adds a LogicalNode to the graph.
+    Expects format: `\\node [options] (id) at (x,y) {content};`.
     """
     self._expect(TokenKind.COMMAND)  # \node
 
@@ -239,13 +263,11 @@ class TikzParser:
       node_id = node_id_tk.text
     else:
       # Nodes without IDs are usually aux/labels. We skip them to avoid noise.
-      # But in our emitter, all logic nodes have IDs.
       self._scan_until_semicolon()
       return
 
     # Position "at (x, y)"
     # We parse but discard position for LogicalGraph purposes
-    # The token stream might have "at" as a WORD
     if self._peek().text == "at":
       self._consume()
       self._consume()  # (
@@ -257,7 +279,7 @@ class TikzParser:
     # Content { ... }
     content_tokens = self._parse_braced_group()
 
-    # Parse content for metadata
+    # Parse content for metadata using tabular extraction heuristics
     kind, metadata = self._extract_metadata(content_tokens)
 
     # Build Logical Node
@@ -270,7 +292,8 @@ class TikzParser:
 
   def _parse_edge(self) -> None:
     """
-    Parses `\draw [opts] (src) -- (tgt);`.
+    Parses a `\\draw` command and adds a LogicalEdge to the graph.
+    Expects format: `\\draw [opts] (src) -- (tgt);`.
     """
     self._expect(TokenKind.COMMAND)  # \draw
     self._optional_bracket_group()
@@ -301,7 +324,7 @@ class TikzParser:
       self._consume()
 
   def _scan_until_semicolon(self) -> None:
-    """Helper to recover from unknown syntax."""
+    """Helper to consume tokens until a semicolon is found (Error Recovery)."""
     while not self._match(TokenKind.SEMICOLON) and not self._is_eof():
       self._consume()
     if self._match(TokenKind.SEMICOLON):
@@ -309,18 +332,18 @@ class TikzParser:
 
   def _extract_metadata(self, tokens: List[Token]) -> Tuple[str, Dict[str, str]]:
     """
-    Parses the node label content.
+    Parses the node label content to extract Op Kind and Config.
 
-    Expected Emitter Format:
-        \begin{tabular}{c}
-            \textbf{Kind} \\
-            \textit{ID} \\
-            key: val \\
-            ...
-        \end{tabular}
+    Expected structure is a LaTeX tabular:
+        Kind (Row 1)
+        ID   (Row 2, ignored)
+        key: value (Row 3+)
 
-    Output:
-        (Kind, {key: val})
+    Args:
+        tokens: The list of raw tokens inside the node body.
+
+    Returns:
+        Tuple of (Kind String, Metadata Dict).
     """
     # Linear scan for text tokens.
     # We ignore LaTeX formatting macros like \textbf, \textit, \begin, \end, &, \\
@@ -344,12 +367,6 @@ class TikzParser:
     metadata = {}
 
     # The rest should be key-value pairs?
-    # The emitter emits "key: value".
-    # The lexer splits "key:" and "value" into separate WORD tokens if space between.
-    # "key:" will be one token, "value" another. Or "key" ":" "value".
-
-    # Let's reconstruct strings passed via "key: value" logic.
-    # We skip the 2nd element (ID) if it matches the known structural pattern
     # The emitter puts ID in italics as row 2.
     # Row 1: Kind. Row 2: ID. Row 3+: Metadata.
 
@@ -358,13 +375,7 @@ class TikzParser:
       # Just return what we have
       return (kind, metadata)
 
-    # Remaining stream: "k1", ":", "v1", "k2", "v2"... or "k1:", "v1"...
-    # We assume pairs logic roughly
-
-    # Simpler approach: Rejoin tokens and split by line based on original source?
-    # We can re-scan the raw text of the tokens.
-
-    # Fallback to key/value extraction from list
+    # Fallback to key/value extraction from token text list
     # Look for tokens ending in ":" to identify keys
     current_key = None
 

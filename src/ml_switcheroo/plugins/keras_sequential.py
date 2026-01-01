@@ -5,6 +5,7 @@ This plugin bridges the difference between PyTorch's `nn.Sequential(*layers)` (v
 and Keras's `keras.Sequential([layers])` (list input).
 
 It performs two key transformations:
+
 1.  **API Renaming**: Swaps the function name to `keras.Sequential` (or configured API).
 2.  **Argument Packing**: Collects all positional arguments (individual layers) into a
     single list argument to match the Keras constructor signature.

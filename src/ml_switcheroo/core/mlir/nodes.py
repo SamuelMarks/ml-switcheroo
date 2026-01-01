@@ -17,6 +17,7 @@ class MlirNode(ABC):
 
   @abstractmethod
   def to_text(self) -> str:
+    """Return the textual MLIR representation of this node."""
     pass
 
 
@@ -28,6 +29,7 @@ class TriviaNode(MlirNode):
   kind: str = "whitespace"
 
   def to_text(self) -> str:
+    """Return the trivia content verbatim."""
     return self.content
 
 
@@ -38,6 +40,7 @@ class ValueNode(MlirNode):
   name: str
 
   def to_text(self) -> str:
+    """Return the SSA identifier."""
     return self.name
 
 
@@ -48,6 +51,7 @@ class TypeNode(MlirNode):
   body: str
 
   def to_text(self) -> str:
+    """Return the type string."""
     return self.body
 
 
@@ -63,6 +67,7 @@ class AttributeNode(MlirNode):
   type_annotation: Optional[str] = None
 
   def to_text(self) -> str:
+    """Return 'key = value' string format."""
     suffix = f" : {self.type_annotation}" if self.type_annotation else ""
 
     if isinstance(self.value, list):
@@ -84,6 +89,7 @@ class BlockNode(MlirNode):
   leading_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
+    """Formats the block including label, arguments, and operations."""
     out = []
     for t in self.leading_trivia:
       out.append(t.to_text())
@@ -117,6 +123,7 @@ class RegionNode(MlirNode):
   blocks: List[BlockNode] = field(default_factory=list)
 
   def to_text(self) -> str:
+    """Formats the region enclosed in braces."""
     blocks_text = [b.to_text() for b in self.blocks]
     content = "".join(blocks_text)
     return "{" + content + "}"
@@ -137,6 +144,7 @@ class OperationNode(MlirNode):
   trailing_trivia: List[TriviaNode] = field(default_factory=list)
 
   def to_text(self) -> str:
+    """Formats the operation string following MLIR syntax rules."""
     parts = []
 
     # 1. Leading Trivia
@@ -226,4 +234,5 @@ class ModuleNode(MlirNode):
   body: BlockNode
 
   def to_text(self) -> str:
+    """Return module body text."""
     return self.body.to_text()

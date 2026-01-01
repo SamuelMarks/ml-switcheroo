@@ -5,6 +5,7 @@ This module converts a language-agnostic ``LogicalGraph`` into renderable TikZ c
 It acts as the backend of the visualization subsystem.
 
 Responsibilities:
+
 1.  **Layout**: Assigns (x, y) coordinates to nodes using a rank-based topological sort.
     Vertical layout is standard for neural networks (Input at top, Output at bottom).
 2.  **Conversion**: transforms abstract Logical components into Concrete Syntax Tree (CST)
@@ -31,13 +32,16 @@ from ml_switcheroo.core.tikz.nodes import (
 class TikzEmitter:
   """
   Orchestrates the conversion of a LogicalGraph to TikZ source code.
-
-  Attributes:
-      y_spacing (float): Vertical distance between ranks.
-      x_spacing (float): Horizontal distance between sibling nodes.
   """
 
   def __init__(self, y_spacing: float = 2.5, x_spacing: float = 3.0):
+    """
+    Initialize the emitter.
+
+    Args:
+        y_spacing: Vertical distance between ranks.
+        x_spacing: Horizontal distance between sibling nodes.
+    """
     self.y_spacing = y_spacing
     self.x_spacing = x_spacing
 
@@ -97,7 +101,7 @@ class TikzEmitter:
 
   def _calculate_layout(self, graph: LogicalGraph) -> Dict[str, Tuple[float, float]]:
     """
-    Computes (x, y) coordinates for each node.
+    Computes (x, y) coordinates for each node using a rank-based layout.
 
     Algorithm:
     1.  Build adjacency list.
@@ -107,8 +111,11 @@ class TikzEmitter:
     5.  Assign X coordinates: Center nodes at each rank around x=0.
     6.  Assign Y coordinates: ``-rank * y_spacing``.
 
+    Args:
+        graph: The logical graph.
+
     Returns:
-        Dict[node_id, (x, y)]
+        Dict[node_id, (x, y)] mapping.
     """
     if not graph.nodes:
       return {}
@@ -193,6 +200,14 @@ class TikzEmitter:
     """
     Converts a LogicalNode to a TikzNode with HTML-like label table.
     Applies sanitization to strings to safely render LaTeX.
+
+    Args:
+        node: The logical graph node.
+        x: X-coordinate.
+        y: Y-coordinate.
+
+    Returns:
+        A populated value object for the tikz node.
     """
     # Node style specs
     options = [
@@ -240,6 +255,12 @@ class TikzEmitter:
   def _create_tikz_edge(self, edge: LogicalEdge) -> TikzEdge:
     """
     Converts a LogicalEdge to a TikzEdge using standardized arrows.
+
+    Args:
+        edge: The logical edge (source, target).
+
+    Returns:
+        A CST value object for the draw command.
     """
     return TikzEdge(
       source_id=edge.source,

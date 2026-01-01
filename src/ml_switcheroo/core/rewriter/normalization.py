@@ -5,11 +5,12 @@ This module provides the `NormalizationMixin`, a component of the `PivotRewriter
 responsible for reshaping function arguments and call structures during translation.
 
 Updates:
-- Supports argument value mapping (Enums) via `arg_values`.
-- Supports variadic argument packing via `pack_to_tuple`.
-- **Feature Update (Configurable Packing)**: Supports `pack_as="List"` for list-based APIs.
-- **Feature Update**: Injects ODL `default` values if argument missing in source.
-- **Feature Update**: Handles dynamic module aliasing checks.
+
+-   Supports argument value mapping (Enums) via `arg_values`.
+-   Supports variadic argument packing via `pack_to_tuple`.
+-   **Feature Update (Configurable Packing)**: Supports `pack_as="List"` for list-based APIs.
+-   **Feature Update**: Injects ODL `default` values if argument missing in source.
+-   **Feature Update**: Handles dynamic module aliasing checks.
 """
 
 from typing import List, Dict, Any, Union, Optional

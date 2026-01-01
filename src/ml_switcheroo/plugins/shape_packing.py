@@ -15,10 +15,19 @@ Decoupling Logic:
 """
 
 import libcst as cst
-from typing import List, Union
+from typing import List, Union, Optional
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_node
+
+
+def _create_dotted_name(name_str: str) -> cst.BaseExpression:
+  """Helper to create a CST Attribute chain from string."""
+  parts = name_str.split(".")
+  node = cst.Name(parts[0])
+  for part in parts[1:]:
+    node = cst.Attribute(value=node, attr=cst.Name(part))
+  return node
 
 
 @register_hook("pack_shape_args")
@@ -50,7 +59,7 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
     return node
 
   # 1. Determine Input Tensor & Shape Args
-  input_tensor: cst.BaseExpression = None
+  input_tensor: Optional[cst.BaseExpression] = None
   shape_args: List[cst.Arg] = []
 
   is_method = False

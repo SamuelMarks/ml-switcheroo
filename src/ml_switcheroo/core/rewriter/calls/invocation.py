@@ -6,6 +6,7 @@ This module provides the :class:`InvocationMixin`, a component of the
 the Abstract Syntax Tree (AST).
 
 It orchestrates three phases of processing:
+
 1.  **Pre-Processing**: Checks for functional unwrapping, plugin claims, and lifecycle methods.
 2.  **Strategy Execution**: Switches API calls based on Semantic Definitions, handling
     infix operators, macros, and standard function renaming. This phase includes compatibility checks

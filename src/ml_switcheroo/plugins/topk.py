@@ -41,6 +41,7 @@ def transform_topk(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   Hook: Wraps target top_k call in a NamedTuple constructor.
 
   Orchestrates the following:
+
   1. Looks up the target API for "TopK" (e.g., `jax.lax.top_k`).
   2. Strips arguments not supported by the target (e.g., `largest`, `sorted`).
   3. Injects `import collections` into the file preamble.

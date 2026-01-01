@@ -5,6 +5,7 @@ Parses the HTML DSL structure using standard library `html.parser`.
 Reconstructs a Python LibCST Module representing the logic described by the visual grid.
 
 Logic:
+
 1.  Scrapes `<div>` elements with specific classes (`box r`, `box b`) to identify
     memory allocations (Attributes) and computation steps (Operations).
 2.  Extracts textual metadata from headers (`<span>`) and code blocks (`<code>`).

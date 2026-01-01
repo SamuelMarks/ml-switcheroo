@@ -10,11 +10,15 @@ JAX libraries typically return the loss *per sample* to support vmap/pmap flexib
 PyTorch defaults to averaging (`mean`) immediately.
 
 Transformation:
+
 1. Detects `reduction` keyword argument.
+
 2. Strips the argument (as Optax/JAX funcs don't usually accept it).
-3. Wraps the function call in `Mean(x)` or `Sum(x)`.
-   - Dynamically looks up "Mean" or "Sum" API from the Semantic Knowledge Base.
-   - Supports any target framework definition (e.g. `tf.reduce_mean`, `jnp.mean`, `mx.mean`).
+
+3. Wraps the function call in `Mean(x)` or `Sum(x)`. This step dynamically looks up
+   the "Mean" or "Sum" API from the Semantic Knowledge Base, supporting any target
+   framework definition (e.g. `tf.reduce_mean`, `jnp.mean`, `mx.mean`).
+
 4. If `reduction='none'`, leaves the vector output alone.
 """
 

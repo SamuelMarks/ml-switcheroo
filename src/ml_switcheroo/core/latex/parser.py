@@ -1,17 +1,7 @@
-# src/ml_switcheroo/core/latex/parser.py
-
 """
 LaTeX DSL Parser.
 
 Parses MIDL LaTeX macros into a LibCST Module representing a Python AST.
-
-The parser transforms the declarative LaTeX structure into an object-oriented
-Python representation wrapped in a specific namespace (`midl`). This allows
-downstream attributes and operations to be explicitly targeted by the rewriter.
-
-Example Transformation:
-    LaTeX: \Attribute{conv}{Conv2d}{k=3}
-    Python: self.conv = midl.Conv2d(k=3)
 """
 
 import re
@@ -39,6 +29,7 @@ class LatexParser:
   _RETURN_RE = re.compile(r"\\Return\{(?P<id>[\w\d_]+)\}")
 
   def __init__(self, latex_source: str):
+    """Initialize the parser with LaTeX source code."""
     self.source = latex_source
 
   def parse(self) -> cst.Module:
@@ -99,6 +90,7 @@ class LatexParser:
     return cst.Module(body=[imports, class_def])
 
   def _parse_config_string(self, s: str) -> Dict[str, str]:
+    """Parses 'key=value, key2=value2' strings."""
     if not s.strip():
       return {}
     res = {}
@@ -111,6 +103,7 @@ class LatexParser:
     return res
 
   def _parse_arg_list(self, s: str) -> List[str]:
+    """Parses comma-separated arguments logic."""
     if not s.strip():
       return []
     return [a.strip() for a in s.split(",")]
@@ -137,11 +130,10 @@ class LatexParser:
       pass
 
     # 3. Fallback to Identifier (Name)
-    # Note: This might create invalid ASTs if 'val' is not a valid identifier,
-    # but provides a last-ditch effort for raw strings passed as args in macros.
     return cst.Name(clean_val)
 
   def _create_call(self, func_name: str, config: Dict = None, args_list: List = None) -> cst.Call:
+    """Constructs a CST Call node from config and arguments."""
     if "." in func_name:
       p = func_name.split(".")
       fn = cst.Name(p[0])
@@ -190,6 +182,7 @@ class LatexParser:
     return cst.Call(func=fn, args=args)
 
   def _synthesize_class(self, name, mem, inp, ops, ret) -> cst.ClassDef:
+    """Combines logical components into a Python Class AST."""
     init_body = [cst.SimpleStatementLine([cst.Expr(cst.parse_expression("super().__init__()"))])]
     for m in mem:
       tgt = cst.Attribute(value=cst.Name("self"), attr=cst.Name(m.node_id))

@@ -6,15 +6,11 @@ This script orchestrates the Sphinx documentation build process, including:
 1.  Cleaning previous build artifacts.
 2.  Importing root markdown files.
 3.  Building a pure-Python Wheel for the WASM demo.
-4.  Downloading static assets for TikZJax from a public CDN (jsDelivr) to avoid 403 errors.
 """
 
-import gzip
 import shutil
 import subprocess
 import sys
-import urllib.request
-import urllib.error
 from pathlib import Path
 
 # Configuration
@@ -31,18 +27,6 @@ ROOT_FILES = [
   "IDEAS.md",
   "MAINTENANCE.md",
   "LICENSE",
-]
-
-# TikZJax Assets configuration
-# Switch to jsDelivr CDN to avoid HTTP 403 Forbidden on the main site
-TIKZ_BASE_URL = "https://cdn.jsdelivr.net/npm/tikzjax@1.0.3/dist"
-TIKZ_ASSETS = [
-  # Core Javascript
-  {"name": "tikzjax.js", "remote": "tikzjax.js"},
-  # WASM Runtime (Fetch raw, browser handles loading)
-  {"name": "tex.wasm", "remote": "tex.wasm"},
-  # TeX Memory Dump
-  {"name": "core.dump", "remote": "core.dump"},
 ]
 
 
@@ -77,38 +61,6 @@ def copy_root_files() -> None:
       print(f"⚠️  Warning: {fname} not found in root.")
 
 
-def download_vendor_assets() -> None:
-  """
-  Downloads TikZJax assets to docs/_static/tikzjax using a robust CDN.
-  """
-  target_dir = DOCS_DIR / "_static" / "tikzjax"
-  target_dir.mkdir(parents=True, exist_ok=True)
-
-  print(f"⬇️  Downloading TikZJax assets to {target_dir}...")
-
-  for asset in TIKZ_ASSETS:
-    local_name = asset["name"]
-    remote_name = asset["remote"]
-
-    url = f"{TIKZ_BASE_URL}/{remote_name}"
-    dest = target_dir / local_name
-
-    print(f"   Fetching {remote_name} -> {local_name}...")
-
-    try:
-      # Set a standard User-Agent to avoid generic blocks
-      req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-      with urllib.request.urlopen(req) as response:
-        with open(dest, "wb") as out_file:
-          shutil.copyfileobj(response, out_file)
-
-    except urllib.error.URLError as e:
-      print(f"❌ Failed to download {remote_name}: {e}")
-      print("   > The WASM demo might not render TikZ diagrams correctly locally.")
-    except Exception as e:
-      print(f"❌ Error processing {local_name}: {e}")
-
-
 def build_wheel() -> None:
   """
   Builds the pure Python wheel for the WASM demo.
@@ -133,7 +85,6 @@ def build() -> int:
   Executes the Sphinx build process.
   """
   build_wheel()
-  download_vendor_assets()
 
   print("🏗️  Building Sphinx documentation...")
   cmd = [

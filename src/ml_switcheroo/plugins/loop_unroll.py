@@ -7,6 +7,7 @@ which support imperative Python loops, frameworks targeting XLA (like JAX) requi
 loops to be expressed as functional operators (`scan` or `fori_loop`) to be compiled.
 
 The strategy is **Safety-First**:
+
 1.  **Analysis**: Inspects `for` loops.
 2.  **Trait Check**: Determines if the target framework requires functional control flow.
 3.  **Handling**: Wraps imperative loops in an `EscapeHatch` warning rather than
@@ -44,13 +45,14 @@ def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.Flatt
   Triggered by the `ControlFlowMixin` when visiting `For` nodes.
 
   Strategy:
-      - Check `ctx.plugin_traits.requires_functional_control_flow`.
-      - If False: Pass through (Imperative loops are valid).
-      - If True:
-          - Analyze the iterator.
-          - If `range()`: Warn that `jax.lax.fori_loop` (or equivalent) is required.
-          - Else: Warn that `scan` is required.
-          - Wrap in `EscapeHatch` to prevent compilation errors in the target.
+
+  - Check `ctx.plugin_traits.requires_functional_control_flow`.
+  - If False: Pass through (Imperative loops are valid).
+  - If True:
+      - Analyze the iterator.
+      - If `range()`: Warn that `jax.lax.fori_loop` (or equivalent) is required.
+      - Else: Warn that `scan` is required.
+      - Wrap in `EscapeHatch` to prevent compilation errors in the target.
 
   Args:
       node: The original CST For loop node.

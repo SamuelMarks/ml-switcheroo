@@ -5,6 +5,7 @@ This module provides the :class:`ApiInspector`, a hybrid static-dynamic analysis
 designed to extract API signatures (functions, classes, and attributes) from Python packages.
 
 It employs a two-stage strategy:
+
 1.  **Static Analysis (Griffe)**: Attempts to parse the source code first. This is
     safer and provides richer information (like docstrings and parameter names) without
     executing code.
@@ -13,6 +14,7 @@ It employs a two-stage strategy:
     analysis misses.
 
 **Memory Safety**:
+
 Includes recursion safeguards (visited set tracking) and an optional blacklist
 to prevent infinite loops or memory explosion when traversing circular references
 in large libraries like PyTorch or TensorFlow.
@@ -34,8 +36,7 @@ class ApiInspector:
   A robust inspector for discovering API surfaces of installed libraries.
 
   Attributes:
-      _package_cache (Dict[str, griffe.Object]): Cache of statically parsed Griffe trees
-                                                 to avoid re-parsing large packages.
+      _package_cache: Cache of statically parsed Griffe trees to avoid re-parsing large packages.
   """
 
   def __init__(self):

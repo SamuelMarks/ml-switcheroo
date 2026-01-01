@@ -3,7 +3,7 @@ TikZ Concrete Syntax Tree (CST) Nodes.
 
 This module defines the data structures for representing TikZ source code.
 It follows a similar philosophy to LibCST, where nodes own their
-string representation via a `to_text()` method, allowing for precise control
+string representation via a ``to_text()`` method, allowing for precise control
 over formatting (whitespace, indentation) during code generation.
 """
 
@@ -34,6 +34,7 @@ class TriviaNode(TikzBaseNode):
   """
 
   content: str
+  """The raw whitespace content."""
 
   def to_text(self) -> str:
     """Returns the raw whitespace content."""
@@ -43,12 +44,15 @@ class TriviaNode(TikzBaseNode):
 @dataclass
 class TikzComment(TikzBaseNode):
   """
-  Represents a LaTeX comment (e.g. `% My Comment`).
+  Represents a LaTeX comment (e.g. ``% My Comment``).
   Includes the percent sign in the content or adds it during export.
   """
 
   text: str
+  """The comment text."""
+
   trailing_newline: bool = True
+  """Whether to append a newline after the comment."""
 
   def to_text(self) -> str:
     """Formats the comment with a leading percent sign."""
@@ -60,14 +64,17 @@ class TikzComment(TikzBaseNode):
 @dataclass
 class TikzOption(TikzBaseNode):
   """
-  Represents a TikZ option like `[draw=black]` or `[circle]`.
+  Represents a TikZ option like ``[draw=black]`` or ``[circle]``.
   """
 
   key: str
+  """Option key."""
+
   value: Optional[str] = None
+  """Optional value for key-value pairs."""
 
   def to_text(self) -> str:
-    """Returns `key=value` or just `key`."""
+    """Returns ``key=value`` or just ``key``."""
     if self.value:
       return f"{self.key}={self.value}"
     return self.key
@@ -75,19 +82,23 @@ class TikzOption(TikzBaseNode):
 
 @dataclass
 class TikzTable(TikzBaseNode):
-  """
-    Represents an HTML-like table structure used inside TikZ Node labels.
-    Uses LaTeX tabular environment syntax.
+  """ 
+    Represents an HTML-like table structure used inside TikZ Node labels. 
+    Uses LaTeX tabular environment syntax. 
 
-    Example:
-        \\begin{tabular}{c}
-            \\textbf{LayerName} \\\\
+    Example:: 
+
+        \\begin{tabular}{c} 
+            \\textbf{LayerName} \\\\ 
             param: val
-        \\end{tabular}
+        \\end{tabular} 
     """
 
   rows: List[List[str]] = field(default_factory=list)
-  align: str = "c"  # c=center, l=left, r=right
+  """List of rows, where each row is a list of cell strings."""
+
+  align: str = "c"
+  """Column alignment (c=center, l=left, r=right)."""
 
   def to_text(self) -> str:
     """Renders the tabular environment string."""
@@ -104,18 +115,30 @@ class TikzTable(TikzBaseNode):
 @dataclass
 class TikzNode(TikzBaseNode):
   """
-  Represents a `\\node` command.
+  Represents a ``\\node`` command.
 
-  Structure:
+  Structure::
+
       \\node [options] (id) at (x, y) {label_content};
   """
 
   node_id: str
+  """Unique identifier for the node (used for edges)."""
+
   x: float
+  """X Coordinate."""
+
   y: float
+  """Y Coordinate."""
+
   content: Union[str, TikzTable]
+  """Inner content (Text or Table)."""
+
   options: List[TikzOption] = field(default_factory=list)
+  """List of TikZ options."""
+
   leading_trivia: List[TriviaNode] = field(default_factory=list)
+  """Whitespace/Comments before the node command."""
 
   def to_text(self) -> str:
     """Constructs the full node command string."""
@@ -143,17 +166,27 @@ class TikzNode(TikzBaseNode):
 @dataclass
 class TikzEdge(TikzBaseNode):
   """
-  Represents a `\\draw` command connecting two nodes.
+  Represents a ``\\draw`` command connecting two nodes.
 
-  Structure:
+  Structure::
+
       \\draw [options] (src) -- (tgt);
   """
 
   source_id: str
+  """Source node ID."""
+
   target_id: str
+  """Target node ID."""
+
   options: List[TikzOption] = field(default_factory=list)
-  connector: str = "--"  # -- or -> usually
+  """List of styling options."""
+
+  connector: str = "--"
+  """Connector style (e.g. ``--`` or ``->``)."""
+
   leading_trivia: List[TriviaNode] = field(default_factory=list)
+  """Whitespace before the draw command."""
 
   def to_text(self) -> str:
     """Constructs the draw command string."""
@@ -177,16 +210,20 @@ class TikzEdge(TikzBaseNode):
 @dataclass
 class TikzGraph(TikzBaseNode):
   """
-  The root container representing the `tikzpicture` environment.
+  The root container representing the ``tikzpicture`` environment.
 
-  Structure:
+  Structure::
+
       \\begin{tikzpicture}
           ... children ...
       \\end{tikzpicture}
   """
 
   children: List[TikzBaseNode] = field(default_factory=list)
+  """List of nodes, edges, comments, and trivia."""
+
   options: List[TikzOption] = field(default_factory=list)
+  """Global environment options."""
 
   def to_text(self) -> str:
     """Constructs the complete environment string."""

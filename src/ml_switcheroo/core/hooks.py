@@ -89,6 +89,9 @@ class HookContext:
     Returns the capabilities of the current Target Framework.
     This allows plugins to check functionality (e.g. has_numpy_compatible_arrays)
     rather than checking the framework name string.
+
+    Returns:
+        PluginTraits: The capability flags for the target framework.
     """
     if not self.semantics:
       return PluginTraits()
@@ -114,6 +117,9 @@ class HookContext:
     """
     Returns the Variant definition for the current operation/target.
     Allows plugins to read extra metadata defined in the JSON (e.g. pack_to_tuple).
+
+    Returns:
+        Optional[Variant]: The variant definition if resolved, else None.
     """
     if not self.semantics or not self.current_op_id:
       return None
@@ -127,31 +133,76 @@ class HookContext:
     return Variant.model_validate(data)
 
   def inject_signature_arg(self, name: str, annotation: Optional[str] = None) -> None:
-    """Requests injection of argument into the current function signature."""
+    """
+    Requests injection of argument into the current function signature.
+
+    Args:
+        name (str): The name of the argument to inject.
+        annotation (Optional[str]): Type hint string for the argument.
+    """
     if self._arg_injector:
       self._arg_injector(name, annotation)
 
   def inject_preamble(self, code_str: str) -> None:
-    """Requests injection of a statement at the beginning of the function body."""
+    """
+    Requests injection of a statement at the beginning of the function body.
+
+    Args:
+        code_str (str): Python source code string to inject.
+    """
     if self._preamble_injector:
       self._preamble_injector(code_str)
 
   def raw_config(self, key: str, default: Any = None) -> Any:
-    """Retrieve a raw value from the unstructured plugin settings dict."""
+    """
+    Retrieve a raw value from the unstructured plugin settings dict.
+
+    Args:
+        key (str): Configuration key.
+        default (Any): Default value if key is not found.
+
+    Returns:
+        Any: The configuration value.
+    """
     return self._runtime_config.plugin_settings.get(key, default)
 
   def config(self, key: str, default: Any = None) -> Any:
-    """Legacy alias for raw_config."""
+    """
+    Legacy alias for raw_config.
+
+    Args:
+        key (str): Configuration key.
+        default (Any): Default value.
+
+    Returns:
+        Any: The configuration value.
+    """
     return self.raw_config(key, default)
 
   def validate_settings(self, model: Type[T]) -> T:
-    """Validates global config against a Plugin-specific Pydantic schema."""
+    """
+    Validates global config against a Plugin-specific Pydantic schema.
+
+    Args:
+        model (Type[T]): Pydantic model definition.
+
+    Returns:
+        T: Validated configuration object.
+    """
     relevant = model.model_fields.keys()
     subset = {k: v for k, v in self._runtime_config.plugin_settings.items() if k in relevant}
     return model.model_validate(subset)
 
   def lookup_api(self, op_name: str) -> Optional[str]:
-    """Resolves target framework's API string for a given standard operation."""
+    """
+    Resolves target framework's API string for a given standard operation.
+
+    Args:
+        op_name (str): Standard operation ID.
+
+    Returns:
+        Optional[str]: The target API string, or None if not found.
+    """
     if not self.semantics:
       return None
 
@@ -165,7 +216,15 @@ class HookContext:
     return target_variant.get("api")
 
   def lookup_signature(self, op_name: str) -> List[str]:
-    """Retrieves standard argument list for a given operation."""
+    """
+    Retrieves standard argument list for a given operation.
+
+    Args:
+        op_name (str): Standard operation ID.
+
+    Returns:
+        List[str]: List of argument names.
+    """
     if not self.semantics:
       return []
     # get_definition_by_id checks main data store
@@ -206,6 +265,9 @@ def register_hook(trigger: str, auto_wire: Optional[Dict[str, Any]] = None) -> C
                  If provided, the SemanticsManager will automatically load
                  these definitions, eliminating the need for JSON usage.
                  Format matches `semantics/*.json` schema (e.g. `{"ops": {"MyOp": ...}}`).
+
+  Returns:
+      Callable: The decorator wrapper.
   """
 
   def decorator(func: HookFunction) -> HookFunction:
@@ -225,6 +287,12 @@ def get_hook(trigger: str) -> Optional[HookFunction]:
   """
   Retrieves a registered hook function by its trigger name.
   Lazily loads plugins from the default directory if registry is empty.
+
+  Args:
+      trigger (str): Hook identifier key.
+
+  Returns:
+      Optional[HookFunction]: The registered function or None.
   """
   if not _PLUGINS_LOADED:
     load_plugins()
@@ -235,6 +303,9 @@ def get_all_hook_metadata() -> Dict[str, AutoWireSpec]:
   """
   Returns the metadata for all registered hooks.
   Used by SemanticsManager to hydrate the Knowledge Base.
+
+  Returns:
+      Dict[str, AutoWireSpec]: Metadata for autowired plugins.
   """
   if not _PLUGINS_LOADED:
     load_plugins()
@@ -291,7 +362,16 @@ def load_plugins(plugins_dir: Optional[Path] = None, extra_dirs: Optional[List[P
 
 
 def _import_from_dir(directory: Path, base_package: Optional[str] = None) -> int:
-  """Helper to iterate and import python files from a directory."""
+  """
+  Helper to iterate and import python files from a directory.
+
+  Args:
+      directory (Path): The directory to scan.
+      base_package (Optional[str]): Base python package name if loading via importlib.
+
+  Returns:
+      int: Count of successfully imported modules.
+  """
   count = 0
   for item in directory.glob("*.py"):
     if item.name == "__init__.py":

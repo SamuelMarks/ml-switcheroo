@@ -6,12 +6,14 @@ developer to define a new operation via a YAML specification and automatically
 inject the corresponding Python code into the `ml-switcheroo` source tree.
 
 Workflow:
+
 1.  **Parse YAML**: Validates input against the `OperationDef` schema.
 2.  **Auto-Inference**: Resolves `api: "infer"` placeholders.
 3.  **Inject Hub**: Updates `standards_internal.py` (Abstract Standard).
 4.  **Inject Spokes**: Updates framework adapter files (Mappings).
 5.  **Scaffold Plugins**: Generates boilerplate Python files for hooks.
 6.  **Generate Tests**: Creates physical test file for verification.
+
     *Update*: Generates ONE test file per operation defined in the YAML.
 """
 

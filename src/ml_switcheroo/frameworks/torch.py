@@ -3,6 +3,7 @@ PyTorch Framework Adapter.
 
 This module implements the `FrameworkAdapter` protocol for PyTorch.
 It provides:
+
 1.  **Import Abstraction**: Self-declared namespace mappings (e.g. `torch.nn` is `NEURAL`).
 2.  **Semantic Definitions**: A comprehensive mapping of Abstract Operations to `torch.*` APIs.
     This moves the "Golden Set" logic out of the central hub and into this file.

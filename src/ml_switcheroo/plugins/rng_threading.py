@@ -5,6 +5,7 @@ PyTorch handles randomness via global state (`torch.manual_seed` and `generator`
 whereas JAX requires explicit passing and splitting of PRNG keys.
 
 This plugin automates the transition by:
+
 1.  **Signature Injection**: Adds an `rng` argument to the function definition.
 2.  **Preamble Injection**: Asks the target Adapter for the correct split syntax
     (e.g. `rng, key = jax.random.split(rng)`) and injects it.

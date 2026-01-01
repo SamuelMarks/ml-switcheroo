@@ -20,28 +20,28 @@ from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule, LogicOp
 from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 
 # Helper logic injected into plugins generated with rules
-HELPER_LOGIC = """ 
-def _get_kwarg_value(node: cst.Call, arg_name: str): 
-    for arg in node.args: 
-        if arg.keyword and arg.keyword.value == arg_name: 
-             return _node_to_literal(arg.value) 
+HELPER_LOGIC = """
+def _get_kwarg_value(node: cst.Call, arg_name: str):
+    for arg in node.args:
+        if arg.keyword and arg.keyword.value == arg_name:
+             return _node_to_literal(arg.value)
     return None
 
-def _node_to_literal(node): 
-    if isinstance(node, cst.Integer): return int(node.value) 
-    if isinstance(node, cst.Float): return float(node.value) 
-    if isinstance(node, cst.SimpleString): return node.value.strip("'").strip('"') 
-    if isinstance(node, cst.Name): 
+def _node_to_literal(node):
+    if isinstance(node, cst.Integer): return int(node.value)
+    if isinstance(node, cst.Float): return float(node.value)
+    if isinstance(node, cst.SimpleString): return node.value.strip("'").strip('"')
+    if isinstance(node, cst.Name):
          if node.value == "True": return True
          if node.value == "False": return False
          if node.value == "None": return None
     return None
 
-def _create_dotted_name(name_str: str) -> cst.BaseExpression: 
-    parts = name_str.split(".") 
-    node = cst.Name(parts[0]) 
-    for part in parts[1:]: 
-        node = cst.Attribute(value=node, attr=cst.Name(part)) 
+def _create_dotted_name(name_str: str) -> cst.BaseExpression:
+    parts = name_str.split(".")
+    node = cst.Name(parts[0])
+    for part in parts[1:]:
+        node = cst.Attribute(value=node, attr=cst.Name(part))
     return node
 """
 
@@ -62,6 +62,12 @@ class BodyExtractor(cst.CSTVisitor):
   """
 
   def __init__(self, func_name: str):
+    """
+    Initializes the extractor to look for a function by name.
+
+    Args:
+        func_name (str): The name of the function to extract.
+    """
     self.func_name = func_name
     self.body_node: Optional[cst.BaseSuite] = None
     self.found = False
@@ -70,6 +76,12 @@ class BodyExtractor(cst.CSTVisitor):
     """
     Visits function definitions to find the target hook.
     If found, captures the body and stops recursion.
+
+    Args:
+        node (cst.FunctionDef): The function definition node.
+
+    Returns:
+        Optional[bool]: False if found to stop recursion, True otherwise.
     """
     if node.name.value == self.func_name:
       self.body_node = node.body
@@ -96,12 +108,18 @@ class PluginGenerator:
     """
     Converts PascalCase or camelCase to snake_case for filenames.
     e.g. MyPlugin -> my_plugin, HTTPResponse -> http_response
+
+    Args:
+        name (str): The input name.
+
+    Returns:
+        str: The snake_case version of the name.
     """
     # Handle simple lowercase existing
     if "_" in name and name.islower():
       return name
 
-      # 1. Add underscore before capitals preceded by lowercase
+    # 1. Add underscore before capitals preceded by lowercase
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     # 2. Add underscore before capitals preceded by uppercase/numbers
     s2 = re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
@@ -162,7 +180,7 @@ class PluginGenerator:
     elif isinstance(body_node, cst.SimpleStatementSuite):
       stmts = list(body_node.body)
 
-      # Strip Docstring (First stmt is expression string)
+    # Strip Docstring (First stmt is expression string)
     if stmts:
       first = stmts[0]
       idx = 0
@@ -180,7 +198,7 @@ class PluginGenerator:
       # Empty body or just docstring -> return 'return node' default or pass
       return "    return node"
 
-      # Render back to string using a temporary module container
+    # Render back to string using a temporary module container
     # We construct a module from the statements to leverage LibCST's code generation
     temp_mod = cst.Module(body=stmts)
     code = temp_mod.code
@@ -193,7 +211,16 @@ class PluginGenerator:
     return indented.rstrip()
 
   def _build_content(self, scaffold: PluginScaffoldDef, preserved_body: Optional[str] = None) -> str:
-    """Constructs the full python source for the file."""
+    """
+    Constructs the full python source for the file.
+
+    Args:
+        scaffold: The plugin definition.
+        preserved_body: Optional preserved source code for the body.
+
+    Returns:
+        str: The complete file source string.
+    """
     parts = []
 
     # 1. Header
@@ -204,7 +231,7 @@ class PluginGenerator:
     if scaffold.rules:
       parts.append(HELPER_LOGIC)
 
-      # 3. Function Definition
+    # 3. Function Definition
     node_type = "cst.Call" if scaffold.type == PluginType.CALL else "cst.CSTNode"
 
     if scaffold.auto_wire:
@@ -222,7 +249,7 @@ class PluginGenerator:
     else:
       parts.append(TEMPLATE_FUNC_DEF.format(name=scaffold.name, doc=scaffold.doc, node_type=node_type))
 
-      # 4. Body (Preserved or Generated)
+    # 4. Body (Preserved or Generated)
     if preserved_body and preserved_body.strip():
       # Ensure newline before body
       if not preserved_body.startswith("\n"):
@@ -238,7 +265,15 @@ class PluginGenerator:
     return "".join(parts)
 
   def _generate_body_logic(self, rules: List[Rule]) -> str:
-    """Compiles declarative rules into Python if statements."""
+    """
+    Compiles declarative rules into Python if statements.
+
+    Args:
+        rules: List of dispatch rules.
+
+    Returns:
+        str: Generated python code string for the logic body.
+    """
     if not rules:
       return "    # TODO: Implement custom logic\n    return node\n"
 

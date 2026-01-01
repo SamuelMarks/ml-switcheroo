@@ -9,6 +9,7 @@ This logic enables a prioritization chain for loop handling:
 
 1.  **Static Unrolling**: Optimization strategy. If a loop is determined to be
     static (e.g., ``range(5)``), it is unrolled into flat code.
+
 2.  **Safety Transformation**: Compliance strategy. If the loop remains dynamic
     and the target framework (like JAX) enforces functional purity, this ensures
     the loop is flagged or converted to a scan/while construct.
@@ -34,6 +35,7 @@ class ControlFlowMixin(BaseRewriter):
 
     1.  **Static Unroll**: Checks ``transform_for_loop_static``. If the loop index
         is constant, unrolls it (Optimization).
+
     2.  **General Transform**: Checks ``transform_for_loop``. Handles general
         case logic or applies safety warnings (e.g., Escape Hatch for JAX).
 

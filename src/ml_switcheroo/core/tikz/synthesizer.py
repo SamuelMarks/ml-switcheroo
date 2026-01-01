@@ -6,6 +6,7 @@ of a neural network extracted from TikZ) and generates valid, executable
 Python source code using LibCST.
 
 It performs the inverse of the ``analyser.py``:
+
 1.  **Topological Sort**: Determines the execution order of the graph.
 2.  **Init Generation**: Constructs layer definitions (e.g., ``self.conv = ...``)
     based on the target framework's API conventions.

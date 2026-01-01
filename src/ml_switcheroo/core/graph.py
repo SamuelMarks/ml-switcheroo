@@ -6,6 +6,7 @@ used to convert Python ASTs into a logical graph of operations (Layers) and
 data flow (Edges).
 
 Shared by:
+
 - TikZ Backend (Visualizer)
 - HTML Backend (Grid Layout)
 """
@@ -24,16 +25,16 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 class LogicalNode:
   """
   Represents a computation unit (Layer) in the graph.
-
-  Attributes:
-      id: Unique identifier (e.g. 'conv1').
-      kind: Operation type (e.g. 'Conv2d', 'Input', 'Output').
-      metadata: Dictionary of configuration parameters (e.g. kernel_size=3).
   """
 
   id: str
+  """Unique identifier (e.g. 'conv1')."""
+
   kind: str
+  """Operation type (e.g. 'Conv2d', 'Input', 'Output')."""
+
   metadata: Dict[str, str] = field(default_factory=dict)
+  """Dictionary of configuration parameters (e.g. ``kernel_size=3``)."""
 
 
 @dataclass
@@ -43,7 +44,10 @@ class LogicalEdge:
   """
 
   source: str
+  """Source node ID."""
+
   target: str
+  """Target node ID."""
 
 
 @dataclass
@@ -53,7 +57,10 @@ class LogicalGraph:
   """
 
   nodes: List[LogicalNode] = field(default_factory=list)
+  """Ordered list of nodes in the graph."""
+
   edges: List[LogicalEdge] = field(default_factory=list)
+  """List of directed edges between nodes."""
 
 
 def topological_sort(graph: LogicalGraph) -> List[LogicalNode]:
@@ -110,9 +117,10 @@ class GraphExtractor(cst.CSTVisitor):
   LibCST Visitor that extracts a LogicalGraph from Python source code.
 
   Two-Pass Logic:
-  1.  **Init Pass**: Scans `__init__` or `setup` to register named layers
-      assigned to `self`. Populates the node registry.
-  2.  **Forward Pass**: Scans `forward` or `__call__` to trace variable usage.
+
+  1.  **Init Pass**: Scans ``__init__`` or ``setup`` to register named layers
+      assigned to ``self``. Populates the node registry.
+  2.  **Forward Pass**: Scans ``forward`` or ``__call__`` to trace variable usage.
       Builds edges between registered nodes based on data flow.
   """
 
@@ -219,7 +227,7 @@ class GraphExtractor(cst.CSTVisitor):
 
   def _analyze_layer_def(self, node: cst.Assign) -> None:
     """
-    Parses `self.conv = nn.Conv2d(...)` lines in __init__.
+    Parses ``self.conv = nn.Conv2d(...)`` lines in ``__init__``.
     """
     # 1. Identify Target (must be self.something)
     target = node.targets[0].target
@@ -252,7 +260,7 @@ class GraphExtractor(cst.CSTVisitor):
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
     """
-    Parses `x = self.layer(x)` assignments in forward.
+    Parses ``x = self.layer(x)`` assignments in forward.
     """
     if not isinstance(node.value, cst.Call):
       return
@@ -266,7 +274,7 @@ class GraphExtractor(cst.CSTVisitor):
     self._analyze_call_expression(node.value, targets)
 
   def _resolve_layer_or_func_name(self, func_node: cst.BaseExpression) -> Optional[str]:
-    """Resolves `self.layer` -> `layer` or `F.relu` -> `func_relu`."""
+    """Resolves ``self.layer`` -> ``layer`` or ``F.relu`` -> ``func_relu``."""
     # 1. Method call on self (Registered Layer)
     if m.matches(func_node, m.Attribute()) and m.matches(func_node.value, m.Name("self")):
       return func_node.attr.value
