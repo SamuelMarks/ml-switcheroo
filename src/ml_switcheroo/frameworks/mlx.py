@@ -112,6 +112,12 @@ class MLXAdapter:
   def get_harness_init_code(self) -> str:
     return ""
 
+  def get_to_numpy_code(self) -> str:
+    """
+    Returns code to convert MLX arrays (which have .tolist()) to NumPy.
+    """
+    return "if hasattr(obj, 'tolist'): return np.array(obj.tolist())"
+
   @property
   def supported_tiers(self) -> List[SemanticTier]:
     """

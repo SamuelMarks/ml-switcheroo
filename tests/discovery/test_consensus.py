@@ -5,6 +5,7 @@ Verifies:
 1. Normalization Logic (Stripping suffixes, handling cases).
 2. Clustering Logic (Grouping disparate frameworks correctly).
 3. Signature Alignment (Identifying standard arguments).
+4. Type Discovery (Extraction and voting on type hints).
 """
 
 import pytest
@@ -143,3 +144,38 @@ def test_signature_alignment_threshold(engine):
 
   # Support 1/3 (0.33) < 0.5
   assert "amsgrad" not in cand.std_args
+
+
+def test_signature_alignment_with_types(engine):
+  """
+  Scenario: Variants provide type hints.
+
+  Variant A: x: int
+  Variant B: input: int (=x)
+  Variant C: tensor: float (=x)
+
+  Expectation:
+  1. 'x' is discovered as standard arg.
+  2. 'int' is discovered as type (2/3 majority).
+  3. std_args contains rich definition: `{'name': 'x', 'type': 'int'}`.
+  """
+  p_a = GhostParam(name="x", kind="p", annotation="int")
+  p_b = GhostParam(name="input", kind="p", annotation="int")
+  # Note: 3rd variant disagrees on type
+  p_c = GhostParam(name="tensor", kind="p", annotation="float")
+
+  ref_a = GhostRef(name="Op", api_path="A", kind="f", params=[p_a])
+  ref_b = GhostRef(name="Op", api_path="B", kind="f", params=[p_b])
+  ref_c = GhostRef(name="Op", api_path="C", kind="f", params=[p_c])
+
+  cand = CandidateStandard(name="Op", variants={"a": ref_a, "b": ref_b, "c": ref_c})
+
+  engine.align_signatures([cand])
+
+  assert len(cand.std_args) == 1
+  arg_def = cand.std_args[0]
+
+  # Ensure it's a dict and not a string
+  assert isinstance(arg_def, dict)
+  assert arg_def["name"] == "x"
+  assert arg_def["type"] == "int"

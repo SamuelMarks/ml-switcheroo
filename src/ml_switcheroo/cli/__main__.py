@@ -15,6 +15,8 @@ from ml_switcheroo.cli import commands
 
 # Import direct handler for new 'define' command
 from ml_switcheroo.cli.handlers.define import handle_define
+from ml_switcheroo.cli.handlers.meta import handle_schema
+from ml_switcheroo.cli.handlers.suggest import handle_suggest
 from ml_switcheroo import __version__
 from ml_switcheroo.frameworks import available_frameworks
 
@@ -45,6 +47,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     default=None,
     help="Framework roots to scan for (default: all installed/registered frameworks)",
   )
+  cmd_audit.add_argument(
+    "--json",
+    action="store_true",
+    help="Output results as JSON for programmatic parsing.",
+  )
 
   # --- Command: CONVERT ---
   cmd_conv = subparsers.add_parser("convert", help="Transpile a Python file or directory")
@@ -64,6 +71,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     help="Fail on unknown APIs instead of passing them through (Overrides config)",
   )
   cmd_conv.add_argument(
+    "--intermediate",
+    default=None,
+    choices=["mlir", "tikz"],
+    help="Force round-trip through intermediate representation for verification",
+  )
+  cmd_conv.add_argument(
     "--json-trace", type=Path, default=None, help="Dump full execution trace (events, diffs) to a JSON file."
   )
   cmd_conv.add_argument(
@@ -75,9 +88,21 @@ def main(argv: Optional[List[str]] = None) -> int:
   # --- Command: DEFINE (New) ---
   cmd_def = subparsers.add_parser("define", help="Inject new operation definitions from YAML.")
   cmd_def.add_argument("yaml_file", type=Path, help="Path to the ODL definition YAML file.")
+  cmd_def.add_argument(
+    "--dry-run",
+    action="store_true",
+    help="Print diffs to console instead of modifying files.",
+  )
 
   # --- Command: MATRIX ---
   subparsers.add_parser("matrix", help="Show compatibility table")
+
+  # --- Command: SCHEMA ---
+  subparsers.add_parser("schema", help="Export ODL JSON Schema for LLM prompts/validation.")
+
+  # --- Command: SUGGEST ---
+  cmd_sug = subparsers.add_parser("suggest", help="Generate an LLM prompt for defining a new operation.")
+  cmd_sug.add_argument("api", help="The source API to inspect (e.g. 'torch.nn.Linear').")
 
   # --- Command: WIZARD (Interactive Discovery) ---
   cmd_wiz = subparsers.add_parser("wizard", help="Interactively categorize missing mappings")
@@ -172,7 +197,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     if roots is None:
       # Dynamic Default logic: Scan all registered frameworks if none specified
       roots = available_frameworks()
-    return commands.handle_audit(args.path, roots)
+    return commands.handle_audit(args.path, roots, json_mode=args.json)
 
   elif args.command == "convert":
     settings = parse_cli_key_values(args.config)
@@ -183,15 +208,22 @@ def main(argv: Optional[List[str]] = None) -> int:
       args.target,
       args.verify,
       args.strict,
+      args.intermediate,
       settings,
       args.json_trace,
     )
 
   elif args.command == "define":
-    return handle_define(args.yaml_file)
+    return handle_define(args.yaml_file, dry_run=args.dry_run)
 
   elif args.command == "matrix":
     return commands.handle_matrix()
+
+  elif args.command == "schema":
+    return handle_schema()
+
+  elif args.command == "suggest":
+    return handle_suggest(args.api)
 
   elif args.command == "wizard":
     return commands.handle_wizard(args.package)

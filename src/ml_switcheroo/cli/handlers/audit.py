@@ -2,10 +2,10 @@
 Audit Command Handler.
 """
 
+import json
 from pathlib import Path
 from typing import List, Set, Dict, Tuple
 from rich.table import Table
-from rich.console import Console
 
 import libcst as cst
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -41,15 +41,17 @@ def resolve_roots(framework_keys: List[str]) -> Set[str]:
   return roots
 
 
-def handle_audit(path: Path, source_frameworks: List[str]) -> int:
+def handle_audit(path: Path, source_frameworks: List[str], json_mode: bool = False) -> int:
   """
   Scans a directory/file to determine coverage against the Knowledge Base.
 
   Args:
       path: Input source.
       source_frameworks: List of framework keys to scan for.
+      json_mode: If True, output JSON to stdout and suppress Rich logs.
   """
   if not path.exists():
+    # Errors go to logs (stderr usually) but we want to fail cleanly.
     log_error(f"Path not found: {path}")
     return 1
 
@@ -60,7 +62,8 @@ def handle_audit(path: Path, source_frameworks: List[str]) -> int:
   # Resolve roots implies expanding 'flax_nnx' to 'flax', 'torch' to 'torch', etc.
   allowed_roots = resolve_roots(source_frameworks)
 
-  log_info(f"Auditing {len(files)} files against roots: {list(allowed_roots)}...")
+  if not json_mode:
+    log_info(f"Auditing {len(files)} files against roots: {list(allowed_roots)}...")
 
   # Aggregators: FQN -> (IsSupported, Framework)
   global_results: Dict[str, Tuple[bool, str]] = {}
@@ -76,11 +79,31 @@ def handle_audit(path: Path, source_frameworks: List[str]) -> int:
       global_results.update(scanner.results)
 
     except Exception as e:
+      # We log parse errors even in JSON mode to stderr as they are critical warnings
       log_error(f"Failed to parse {f.name}: {e}")
 
   # Partition results
   missing_ops = {k: v for k, v in global_results.items() if not v[0]}
   supported_ops = {k: v for k, v in global_results.items() if v[0]}
+
+  if json_mode:
+    output_list = []
+    # Sort for deterministic output
+    sorted_keys = sorted(global_results.keys())
+    for op in sorted_keys:
+      is_supported, fw = global_results[op]
+      item = {
+        "api": op,
+        "supported": is_supported,
+        "framework": fw,
+      }
+      if not is_supported:
+        item["suggestion"] = "Run 'scaffold' or 'wizard'"
+      output_list.append(item)
+
+    # Print pure JSON to stdout
+    print(json.dumps(output_list, indent=2))
+    return 1 if missing_ops else 0
 
   # Render Table
   if missing_ops:

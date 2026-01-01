@@ -112,6 +112,12 @@ class RuntimeConfig(BaseModel):
   target_flavour: Optional[str] = Field(None, description="Detailed target sub-framework.")
 
   strict_mode: bool = Field(False, description="If True, fail on unknown APIs.")
+
+  # Structural Verification
+  intermediate: Optional[str] = Field(
+    None, description="Intermediate representation layer (e.g. 'mlir', 'tikz') for round-trip verification."
+  )
+
   plugin_settings: Dict[str, Any] = Field(default_factory=dict, description="Configuration passed to plugins.")
   plugin_paths: List[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
   validation_report: Optional[Path] = Field(None, description="Path to a verification lockfile.")
@@ -189,6 +195,7 @@ class RuntimeConfig(BaseModel):
     source_flavour: Optional[str] = None,
     target_flavour: Optional[str] = None,
     strict_mode: Optional[bool] = None,
+    intermediate: Optional[str] = None,
     plugin_settings: Optional[Dict[str, Any]] = None,
     validation_report: Optional[Path] = None,
     search_path: Optional[Path] = None,
@@ -203,6 +210,7 @@ class RuntimeConfig(BaseModel):
         source_flavour (Optional[str]): Override source flavour.
         target_flavour (Optional[str]): Override target flavour.
         strict_mode (Optional[bool]): Override strict mode setting.
+        intermediate (Optional[str]): Override intermediate representation mode.
         plugin_settings (Optional[Dict]): Additional plugin settings.
         validation_report (Optional[Path]): Override validation report path.
         search_path (Optional[Path]): Directory path to search for config file.
@@ -226,6 +234,9 @@ class RuntimeConfig(BaseModel):
       final_strict = strict_mode
     else:
       final_strict = toml_config.get("strict_mode", False)
+
+    # 2b. Intermediate Mode
+    final_intermediate = intermediate or toml_config.get("intermediate")
 
     # 3. Plugin Settings (Merge TOML + CLI, CLI wins)
     toml_plugins = toml_config.get("plugin_settings", {})
@@ -253,6 +264,7 @@ class RuntimeConfig(BaseModel):
       source_flavour=final_src_flavour,
       target_flavour=final_tgt_flavour,
       strict_mode=final_strict,
+      intermediate=final_intermediate,
       plugin_settings=final_plugins,
       plugin_paths=final_plugin_paths,
       validation_report=final_report,

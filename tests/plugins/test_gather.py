@@ -31,6 +31,10 @@ class CustomAdapter:
   def get_harness_init_code(self):
     return ""
 
+  def get_to_numpy_code(self) -> str:
+    """Implement required protocol method."""
+    return "return str(obj)"
+
   @property
   def declared_magic_args(self):
     return []

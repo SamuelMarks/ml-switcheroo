@@ -121,6 +121,10 @@ class LatexDSLAdapter(FrameworkAdapter):
     """No init code."""
     return ""
 
+  def get_to_numpy_code(self) -> str:
+    """No runtime conversion logic for LaTeX."""
+    return "return str(obj)"
+
   @property
   def declared_magic_args(self) -> List[str]:
     """No magic args."""
@@ -220,13 +224,13 @@ class LatexDSLAdapter(FrameworkAdapter):
   @classmethod
   def get_example_code(cls) -> str:
     """Returns valid MIDL sample."""
-    return r"""
-\begin{DefModel}{ConvNet}
-    \Attribute{conv}{Conv2d}{k=3}
-    \Input{x}{_}
-    \StateOp{y}{conv}{x}{_}
-    \Return{y}
-\end{DefModel}
+    return r""" 
+\begin{DefModel}{ConvNet} 
+    \Attribute{conv}{Conv2d}{k=3} 
+    \Input{x}{_} 
+    \StateOp{y}{conv}{x}{_} 
+    \Return{y} 
+\end{DefModel} 
 """
 
   def get_tiered_examples(self) -> Dict[str, str]:

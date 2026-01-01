@@ -20,7 +20,7 @@ from ml_switcheroo.core.mlir.nodes import (
 def gen_code(ops: list[OperationNode]) -> str:
   """Generates Python code from a list of ops."""
   mod = ModuleNode(body=BlockNode(label="", operations=ops))
-  gen = MlirToPythonGenerator(inline_expressions=False)
+  gen = MlirToPythonGenerator()
   return gen.generate(mod).code
 
 
@@ -31,9 +31,16 @@ def test_naming_from_type_attribute():
   """
   # Must use result in another op to force assignment
   op1 = OperationNode(
-    name="sw.op", results=[ValueNode("%0")], attributes=[AttributeNode("type", '"torch.flatten"')], operands=[]
+    name="sw.op",
+    results=[ValueNode("%0")],
+    attributes=[AttributeNode("type", '"torch.flatten"')],
+    operands=[],
   )
-  op2 = OperationNode(name="sw.op", operands=[ValueNode("%0")], attributes=[AttributeNode("type", '"nop"')])
+  op2 = OperationNode(
+    name="sw.op",
+    operands=[ValueNode("%0")],
+    attributes=[AttributeNode("type", '"nop"')],
+  )
 
   code = gen_code([op1, op2])
 
@@ -48,9 +55,16 @@ def test_naming_from_nested_type():
   Expectation: _linear = flax.nnx.Linear(...)
   """
   op1 = OperationNode(
-    name="sw.op", results=[ValueNode("%0")], attributes=[AttributeNode("type", '"flax.nnx.Linear"')], operands=[]
+    name="sw.op",
+    results=[ValueNode("%0")],
+    attributes=[AttributeNode("type", '"flax.nnx.Linear"')],
+    operands=[],
   )
-  op2 = OperationNode(name="sw.op", operands=[ValueNode("%0")], attributes=[AttributeNode("type", '"nop"')])
+  op2 = OperationNode(
+    name="sw.op",
+    operands=[ValueNode("%0")],
+    attributes=[AttributeNode("type", '"nop"')],
+  )
 
   code = gen_code([op1, op2])
 
@@ -63,13 +77,21 @@ def test_naming_collision_handling():
   Expectation: _flatten and _flatten_0.
   """
   op1 = OperationNode(
-    name="sw.op", results=[ValueNode("%a")], attributes=[AttributeNode("type", '"torch.flatten"')], operands=[]
+    name="sw.op",
+    results=[ValueNode("%a")],
+    attributes=[AttributeNode("type", '"torch.flatten"')],
+    operands=[],
   )
   op2 = OperationNode(
-    name="sw.op", results=[ValueNode("%b")], attributes=[AttributeNode("type", '"torch.flatten"')], operands=[]
+    name="sw.op",
+    results=[ValueNode("%b")],
+    attributes=[AttributeNode("type", '"torch.flatten"')],
+    operands=[],
   )
   op3 = OperationNode(
-    name="sw.op", operands=[ValueNode("%a"), ValueNode("%b")], attributes=[AttributeNode("type", '"nop"')]
+    name="sw.op",
+    operands=[ValueNode("%a"), ValueNode("%b")],
+    attributes=[AttributeNode("type", '"nop"')],
   )
 
   code = gen_code([op1, op2, op3])
@@ -91,12 +113,12 @@ def test_naming_fallback():
     operands=[],
   )
   # Use 'sw.op' as consumer to prevent Statement Fusion (which happens on sw.return)
-  # Usage count needs to be > 1 to prevent inlining in inline_expressions=False mode?
-  # No, default is re-rolled.
-  # However, Statement Fusion logic in generator aggressively fuses single-use if consumer is
-  # 'setattr' or 'return'.
   # We use 'sw.op' ("nop") as consumer to ensure assignment generation.
-  op2 = OperationNode(name="sw.op", operands=[ValueNode("%a")], attributes=[AttributeNode("type", '"nop"')])
+  op2 = OperationNode(
+    name="sw.op",
+    operands=[ValueNode("%a")],
+    attributes=[AttributeNode("type", '"nop"')],
+  )
 
   code = gen_code([op1, op2])
 

@@ -17,6 +17,7 @@ Workflow:
     *Update*: Generates ONE test file per operation defined in the YAML.
 """
 
+import difflib
 import fileinput
 import inspect
 from pathlib import Path
@@ -42,12 +43,13 @@ import ml_switcheroo.semantics.standards_internal as internal_standards_module
 import ml_switcheroo.plugins
 
 
-def handle_define(yaml_file: Path) -> int:
+def handle_define(yaml_file: Path, dry_run: bool = False) -> int:
   """
   Main entry point for the `define` CLI command.
 
   Args:
       yaml_file: Path to the ODL definition YAML file.
+      dry_run: If True, prints diffs to stdout instead of modifying files.
 
   Returns:
       int: Exit code (0 for success, 1 for failure).
@@ -84,21 +86,24 @@ def handle_define(yaml_file: Path) -> int:
     _resolve_inferred_apis(op_def)
 
     # 2. Hub Injection (Abstract Standard)
-    if not _inject_hub(op_def):
+    if not _inject_hub(op_def, dry_run=dry_run):
       return 1
 
     # 3. Spoke Injection (Framework Adapters)
-    _inject_spokes(op_def)
+    _inject_spokes(op_def, dry_run=dry_run)
 
     # 4. Plugin Scaffolding (New Hooks)
-    _scaffold_plugins(op_def)
+    _scaffold_plugins(op_def, dry_run=dry_run)
 
     # 5. Test Generation (One per Op)
     # We ensure a unique test file for every operation to prevent overwriting
     # when processing batches.
-    _generate_test_file(op_def, semantics_mgr)
+    _generate_test_file(op_def, semantics_mgr, dry_run=dry_run)
 
-    log_success(f"Operation '{op_def.operation}' defined & tested.")
+    if not dry_run:
+      log_success(f"Operation '{op_def.operation}' defined & tested.")
+    else:
+      log_info(f"[Dry Run] Reviewed changes for '{op_def.operation}'.")
 
   return 0
 
@@ -119,7 +124,7 @@ def _resolve_inferred_apis(op_def: OperationDef) -> None:
         log_warning(f"  Failed: Could not infer API for {op_def.operation} in {fw_key}. Keeping 'infer'.")
 
 
-def _inject_hub(op_def: OperationDef) -> bool:
+def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
   """
   Injects the abstract definition into `standards_internal.py`.
   """
@@ -136,8 +141,11 @@ def _inject_hub(op_def: OperationDef) -> bool:
       log_warning("Could not find `INTERNAL_OPS` dictionary in source. Skipping Hub injection.")
       return False
     if new_tree.code != source_code:
-      spec_file.write_text(new_tree.code, "utf-8")
-      log_success(f"Updated Hub: {spec_file.name}")
+      if dry_run:
+        _print_diff(source_code, new_tree.code, str(spec_file))
+      else:
+        spec_file.write_text(new_tree.code, "utf-8")
+        log_success(f"Updated Hub: {spec_file.name}")
     else:
       log_info(f"Hub unchanged: {spec_file.name}")
     return True
@@ -146,7 +154,7 @@ def _inject_hub(op_def: OperationDef) -> bool:
     return False
 
 
-def _inject_spokes(op_def: OperationDef) -> None:
+def _inject_spokes(op_def: OperationDef, dry_run: bool = False) -> None:
   """
   Iterates variants and injects mappings into framework adapter files.
   """
@@ -174,15 +182,18 @@ def _inject_spokes(op_def: OperationDef) -> None:
         log_warning(f"Skipping '{fw_key}': Could not locate `definitions` property in {adapter_cls.__name__}.")
         continue
       if new_tree.code != source_code:
-        adapter_file.write_text(new_tree.code, "utf-8")
-        log_success(f"Updated Spoke ({fw_key}): {adapter_file.name}")
+        if dry_run:
+          _print_diff(source_code, new_tree.code, str(adapter_file))
+        else:
+          adapter_file.write_text(new_tree.code, "utf-8")
+          log_success(f"Updated Spoke ({fw_key}): {adapter_file.name}")
       else:
         log_info(f"Spoke unchanged ({fw_key}): {adapter_file.name}")
     except Exception as e:
       log_warning(f"Failed to update {fw_key}: {e}")
 
 
-def _scaffold_plugins(op_def: OperationDef) -> None:
+def _scaffold_plugins(op_def: OperationDef, dry_run: bool = False) -> None:
   """
   Generates new Python files for required plugins.
   """
@@ -197,23 +208,31 @@ def _scaffold_plugins(op_def: OperationDef) -> None:
 
     generator = PluginGenerator(plugins_pkg_dir)
     for plug_def in op_def.scaffold_plugins:
-      try:
-        created = generator.generate(plug_def)
-        if created:
-          log_success(f"Generated Plugin: plugins/{plug_def.name}.py")
-        else:
-          log_info(f"Plugin already exists (skipped): plugins/{plug_def.name}.py")
-      except Exception as e:
-        log_error(f"Failed to generate plugin {plug_def.name}: {e}")
+      if dry_run:
+        log_info(f"[Dry Run] Would generate plugin file: plugins/{plug_def.name}.py")
+      else:
+        try:
+          created = generator.generate(plug_def)
+          if created:
+            log_success(f"Generated Plugin: plugins/{plug_def.name}.py")
+          else:
+            log_info(f"Plugin already exists (skipped): plugins/{plug_def.name}.py")
+        except Exception as e:
+          log_error(f"Failed to generate plugin {plug_def.name}: {e}")
   except Exception as e:
     log_error(f"Plugin scaffolding process error: {e}")
 
 
-def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager) -> None:
+def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager, dry_run: bool = False) -> None:
   """
   Generates a physical test file for the operation.
   Location: tests/generated/test_odl_{opname}.py
   """
+  if dry_run:
+    safe_name = op_def.operation.lower().replace(" ", "_").replace("-", "_")
+    log_info(f"[Dry Run] Would generate test file: tests/generated/test_odl_{safe_name}.py")
+    return
+
   # 1. Construct Dictionary representation of the Op for the Generator
   # TestGenerator expects { "OpName": { "std_args": ..., "variants": ... } }
   # We must convert the pydantic model to dict
@@ -252,3 +271,19 @@ def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager) -> None:
       log_success(f"Generated Verification Test: {test_file}")
   except Exception as e:
     log_warning(f"Failed to generate tests for {op_def.operation}: {e}")
+
+
+def _print_diff(old_code: str, new_code: str, filename: str) -> None:
+  """
+  Prints a unified diff of the changes.
+  """
+  diff = difflib.unified_diff(
+    old_code.splitlines(keepends=True),
+    new_code.splitlines(keepends=True),
+    fromfile=filename,
+    tofile=f"{filename} (modified)",
+  )
+  print(f"\n--- Changes for {filename} ---")
+  for line in diff:
+    print(line, end="")
+  print("\n")

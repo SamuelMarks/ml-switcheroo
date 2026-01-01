@@ -99,6 +99,7 @@ class ASTEngine:
         source=source,
         target=target,
         strict_mode=strict_mode,
+        intermediate=intermediate,
         plugin_settings=plugin_config or {},
       )
 
@@ -108,7 +109,8 @@ class ASTEngine:
     self.source = self.config.effective_source
     self.target = self.config.effective_target
     self.strict_mode = self.config.strict_mode
-    self.intermediate = intermediate
+    # Prioritize explicit argument if provided, else check config
+    self.intermediate = intermediate or self.config.intermediate
 
     self.source_adapter = fw_registry.get_adapter(self.source)
     self.target_adapter = fw_registry.get_adapter(self.target)
@@ -393,6 +395,7 @@ class ASTEngine:
 
     self._generate_snapshot(tree, "AST After Pivot")
 
+    # Only run MLIR bridge if specifically requested via config
     if self.intermediate == "mlir":
       tree = self._run_mlir_roundtrip(tree, tracer)
 

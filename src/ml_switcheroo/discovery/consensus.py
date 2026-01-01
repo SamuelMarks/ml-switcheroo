@@ -7,7 +7,8 @@ It aligns variable naming conventions (e.g., 'dim' vs 'axis') and clusters API e
 the Semantic Knowledge Base.
 """
 
-from typing import Dict, List, Optional, Set, Counter, Any
+from typing import Dict, List, Optional, Set, Any, Union
+from collections import Counter as CollectionCounter
 from pydantic import BaseModel, Field
 
 from ml_switcheroo.core.ghost import GhostRef
@@ -23,8 +24,8 @@ class CandidateStandard(BaseModel):
     default_factory=dict, description="A map of framework names to their specific implementations."
   )
   score: float = Field(0.0, description="A confidence score derived from the number of concurring frameworks.")
-  std_args: List[str] = Field(
-    default_factory=list, description="The list of argument names deemed 'standard' via voting."
+  std_args: List[Union[str, Dict[str, Any]]] = Field(
+    default_factory=list, description="The list of argument names or definitions deemed 'standard' via voting."
   )
   arg_mappings: Dict[str, Dict[str, str]] = Field(
     default_factory=dict, description="Nested dictionary mapping {framework: {std_arg: fw_specific_arg}}."
@@ -52,6 +53,7 @@ class ConsensusEngine:
   1.  **Clustering**: Groups APIs like `HuberLoss`, `huber_loss`, and `Huber` together.
   2.  **Normalization**: Strips common noise (prefixes/suffixes) to find the semantic root.
   3.  **Signature Alignment**: Builds a translation map for arguments (e.g., `keepdims` <-> `keep_dims`).
+  4.  **Type Consensus**: Aggregates type hints found in source candidates to enrich the standard signature.
   """
 
   # Suffixes that carry framework-specific implementation details rather than semantic meaning.
@@ -202,10 +204,12 @@ class ConsensusEngine:
 
   def align_signatures(self, candidates: List[CandidateStandard], consensus_threshold: float = 0.5) -> None:
     """
-    Analyses the arguments of all variants in a candidate to determine Standard Arguments.
+    Analyses the arguments of all variants in a candidate to determine Standard Arguments and Types.
 
-    It populates `std_args` on the candidate by voting: if an argument (normalized)
-    appears in >50% of the implementations, it becomes part of the standard signature.
+    It populates `std_args` on the candidate by voting:
+    1.  If an argument (normalized) appears in >50% of the implementations, it becomes part of the standard.
+    2.  If type hints are available across the variants, it determines the consensus type and
+        populates a rich argument definition (e.g. `{'name': 'x', 'type': 'int'}`) instead of a simple string.
 
     It also populates `arg_mappings` to translate between the Standard name and
     the specific framework name (e.g. Standard 'dim' -> Torch 'dim', Jax 'axis').
@@ -217,6 +221,9 @@ class ConsensusEngine:
     for cand in candidates:
       # Map: {canonical_arg: {fw_name: original_arg_name}}
       arg_matrix: Dict[str, Dict[str, str]] = {}
+      # Map: {canonical_arg: List[str_type]} - collects observed types for voting
+      type_matrix: Dict[str, List[str]] = {}
+
       total_variants = len(cand.variants)
 
       if total_variants == 0:
@@ -225,8 +232,8 @@ class ConsensusEngine:
       # 1. Harvest all args from all variants
       for fw_name, ref in cand.variants.items():
         for param in ref.params:
-          # Access param.name safely depending on object structure
-          # GhostInspector usually returns objects with .name attribute
+          # Access param attributes
+          # GhostRef params are GhostParam objects
           p_name = getattr(param, "name", param) if hasattr(param, "name") else param
           p_str = str(p_name)
 
@@ -234,12 +241,19 @@ class ConsensusEngine:
           if p_str in ["self", "cls"]:
             continue
 
+          # Use normalized name for consensus tracking
           canonical = self.normalize_arg(p_str)
 
           if canonical not in arg_matrix:
             arg_matrix[canonical] = {}
+            type_matrix[canonical] = []
 
           arg_matrix[canonical][fw_name] = p_str
+
+          # Collect Type Hint
+          anno = getattr(param, "annotation", None)
+          if anno and anno not in ("None", "Any", "<unrepresentable>", ""):
+            type_matrix[canonical].append(anno)
 
       std_args = []
       mappings = {fw: {} for fw in cand.variants}
@@ -250,7 +264,22 @@ class ConsensusEngine:
 
         # If support is sufficient, this arg becomes part of the standard
         if support > consensus_threshold:
-          std_args.append(canonical)
+          # Determine Type Consensus
+          observed_types = type_matrix.get(canonical, [])
+          final_type = None
+
+          if observed_types:
+            # Simple majority vote logic for types
+            ctr = CollectionCounter(observed_types)
+            most_common = ctr.most_common(1)
+            if most_common:
+              best_type, _count = most_common[0]
+              final_type = best_type
+
+          if final_type:
+            std_args.append({"name": canonical, "type": final_type})
+          else:
+            std_args.append(canonical)
 
           # Create mappings for frameworks that possess this arg
           # e.g., if canonical is 'dim', store mapping 'dim' -> 'axis' for JAX

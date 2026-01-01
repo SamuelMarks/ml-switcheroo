@@ -31,6 +31,7 @@ class JAXStackMixin:
   - Serialization (Torch Save/Load -> Orbax Checkpointing).
   - Device Management (Torch Device -> JAX Devices).
   - **Test Configuration** (Gen-Tests templates).
+  - **Verification Normalization** (JAX Array -> NumPy).
   """
 
   # --- Test Configuration (Shared) ---
@@ -52,6 +53,13 @@ class JAXStackMixin:
       "to_numpy": "{res_var}",
       "jit_template": "jax.jit({fn}, static_argnums={static_argnums})",
     }
+
+  def get_to_numpy_code(self) -> str:
+    """
+    Returns logic to convert JAX arrays to NumPy.
+    Checks for `__array__` protocol which JAX arrays implement.
+    """
+    return "if hasattr(obj, '__array__'): return np.array(obj)"
 
   # --- Hardware Abstraction (Level 0) ---
 

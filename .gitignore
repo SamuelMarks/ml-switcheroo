@@ -1,3 +1,5 @@
+*.log
+
 # If you clone ONNX and array-api to inside this repo
 array-api
 onnx

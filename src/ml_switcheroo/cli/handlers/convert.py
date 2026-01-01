@@ -38,6 +38,7 @@ def handle_convert(
   target: Optional[str],
   verify: bool,
   strict: Optional[bool],
+  intermediate: Optional[str],
   plugin_settings: Dict[str, Any],
   json_trace_path: Optional[Path] = None,
 ) -> int:
@@ -54,6 +55,7 @@ def handle_convert(
       target: Override for target framework (e.g. 'jax').
       verify: If True, generates and runs a verification harness test immediately.
       strict: If True, enforces strict strict_mode on the Engine.
+      intermediate: If provided, forces a roundtrip via this IR (e.g. 'mlir').
       plugin_settings: Dictionary of specific plugin configuration flags.
       json_trace_path: Optional path to dump execution trace JSON.
 
@@ -69,6 +71,7 @@ def handle_convert(
     source=source,
     target=target,
     strict_mode=strict,
+    intermediate=intermediate,
     plugin_settings=plugin_settings,
     search_path=input_path if input_path.is_dir() else input_path.parent,
   )

@@ -130,6 +130,12 @@ class KerasAdapter:
     """Init code for verification harness."""
     return ""
 
+  def get_to_numpy_code(self) -> str:
+    """
+    Returns code to convert Keras tensors to NumPy.
+    """
+    return "if hasattr(obj, 'numpy'): return obj.numpy()"
+
   @property
   def supported_tiers(self) -> List[SemanticTier]:
     """Supported semantic tiers."""

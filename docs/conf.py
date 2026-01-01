@@ -29,6 +29,7 @@ extensions = [
   "sphinx.ext.linkcode",  # Using linkcode for GitHub source linking
   "sphinx.ext.intersphinx",
   "autoapi.extension",
+  "sphinxcontrib.autodoc_pydantic",
   "myst_parser",
   "sphinxcontrib.mermaid",
   "sphinx_copybutton",

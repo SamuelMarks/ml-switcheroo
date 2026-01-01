@@ -113,6 +113,10 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """No init code."""
     return ""
 
+  def get_to_numpy_code(self) -> str:
+    """No runtime conversion logic for HTML."""
+    return "return str(obj)"
+
   @property
   def declared_magic_args(self) -> List[str]:
     """No magic args."""

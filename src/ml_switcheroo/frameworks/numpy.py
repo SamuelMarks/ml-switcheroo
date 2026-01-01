@@ -77,6 +77,12 @@ class NumpyAdapter:
   def get_harness_init_code(self) -> str:
     return ""
 
+  def get_to_numpy_code(self) -> str:
+    """
+    Returns identity code for NumPy arrays.
+    """
+    return "if isinstance(obj, np.ndarray): return obj"
+
   @property
   def supported_tiers(self) -> List[SemanticTier]:
     """

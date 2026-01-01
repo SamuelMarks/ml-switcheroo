@@ -9,8 +9,8 @@ It performs the inverse operation of the Emitter:
 1.  **Dialect Interpretation**: Maps `sw.*` ops back to Python constructs.
 2.  **SSA Resolution**: Converts `%id` references into readable Python variable names.
 3.  **Trivia Restoration**: Transforms `// comment` back to `# comment`.
-4.  **Expression Folding**: Inlines single-use intermediates (SSA values) to
-    produce Pythonic code (e.g. `f(x)` instead of `_1=x; _2=f(_1);`) *if enabled*.
+4.  **Expression Folding**: Inlines specific single-use intermediates (Atoms, Fused Statements)
+    to produce Pythonic code.
 
 Feature Hardening:
 - Robustly handles `sw.op` "type" attributes for deep class hierarchies.
@@ -19,8 +19,8 @@ Feature Hardening:
 - **Naming Heuristics**: Preserves variable names based on SSA IDs or Type Hints.
 - **Type Reconstruction**: Restores Python type hints from MLIR.
 - **Void Assignment Suppression**: Strips unused assignments.
-- **Explicit Re-rolling**: Defaults to sequential statements.
-- **Statement Fusion**: fuses operations into `setattr` and `return`.
+- **Explicit Re-rolling**: Enforces sequential statements for clarity unless fusion triggers.
+- **Statement Fusion**: Fuses operations into `setattr` and `return`.
 """
 
 from typing import Dict, List, Optional
@@ -47,18 +47,13 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
   Integrates expression and statement generation logic.
   """
 
-  def __init__(self, inline_expressions: bool = False) -> None:
+  def __init__(self) -> None:
     """
     Initialize the generator.
 
-    Args:
-        inline_expressions (bool): If True, single-use MLIR values will be inlined into
-                                   nested Python expressions (e.g. `f(g(x))`).
-                                   If False (default), generates sequential SSA statements
-                                   (e.g. `_0 = g(x); f(_0)`).
+    Sets up naming context and usage tracking containers.
     """
     self.ctx = NamingContext()
-    self.inline_expressions = inline_expressions
 
     # Store usage counts for inlining logic: {ssa_name: count}
     self.usage_counts: Dict[str, int] = defaultdict(int)
@@ -165,9 +160,9 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
     Revised Logic:
     1.  **Atoms**: Always inline `sw.constant` and `sw.getattr` IF USED.
-    2.  **Explicit Global**: Check `self.inline_expressions` flag (e.g. True).
-    3.  **Statement Fusion**: Even if global inline is False, inline if the consumer is
-        a "Terminal Statement" like `sw.setattr` or `sw.return`.
+    2.  **Statement Fusion**: Inline if the consumer is a "Terminal Statement"
+        like `sw.setattr` or `sw.return`.
+    3.  **Default**: Do not inline (sequential generation).
     """
     if not op.results:
       return False  # No result to inline
@@ -198,11 +193,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
       if cons_name in statement_ops:
         return True
 
-    # 4. Standard Re-roll Check
-    if not self.inline_expressions:
-      return False
-
-    return usage == 1
+    return False
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
     """

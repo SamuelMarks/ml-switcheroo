@@ -5,6 +5,7 @@ sphinx-copybutton>=0.5
 sphinx-material>=0.0.36
 sphinx>=8,<9
 sphinxcontrib-mermaid>=1.2
+autodoc_pydantic
 
 build
 

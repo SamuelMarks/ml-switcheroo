@@ -215,7 +215,7 @@ class HarnessGenerator:
     Constructs the `to_numpy` logic by aggregating snippets from adapters.
 
     This ensures that the result verification can convert tensors from any registered
-    framework back to NumPy for numeric comparison.
+    framework back to NumPy for numeric comparison, relying solely on the Protocol.
 
     Args:
         source_fw: The source framework key.
@@ -226,23 +226,11 @@ class HarnessGenerator:
     """
     blocks = []
 
-    # Legacy Fallbacks (ensure we don't break existing FWs before they implement new protocol)
-    legacy_defaults = {
-      "torch": "if hasattr(obj, 'detach'): return obj.detach().cpu().numpy()",
-      "jax": "if hasattr(obj, '__array__'): return np.array(obj)",
-      "flax": "if hasattr(obj, '__array__'): return np.array(obj)",
-      "flax_nnx": "if hasattr(obj, '__array__'): return np.array(obj)",
-      "tensorflow": "if hasattr(obj, 'numpy'): return obj.numpy()",
-      "keras": "if hasattr(obj, 'numpy'): return obj.numpy()",
-      "mlx": "if hasattr(obj, 'tolist'): return np.array(obj.tolist())",
-      # MLX arrays have tolist() but not always __array__ depending on version
-    }
-
     # We collect configs for both Source and Target to ensure full coverage
     # (e.g. if we verify Torch -> JAX, we need to convert both Torch Output and JAX output)
     unique_fws = set([source_fw, target_fw])
 
-    # Expand flavours
+    # Expand flavours implicit logic
     if "flax_nnx" in unique_fws:
       unique_fws.add("jax")
 
@@ -250,16 +238,12 @@ class HarnessGenerator:
       adapter = get_adapter(fw)
       code = None
 
-      # 1. Try new protocol method
+      # Try new protocol method
       if adapter and hasattr(adapter, "get_to_numpy_code"):
         try:
           code = adapter.get_to_numpy_code()
         except Exception:
           pass
-
-      # 2. Fallback to legacy map
-      if not code and fw in legacy_defaults:
-        code = legacy_defaults[fw]
 
       if code:
         # Indent consistency for injection

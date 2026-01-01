@@ -101,6 +101,10 @@ class TikzAdapter:
     """No harness init code."""
     return ""
 
+  def get_to_numpy_code(self) -> str:
+    """No runtime conversion logic."""
+    return "return str(obj)"
+
   @property
   def declared_magic_args(self) -> List[str]:
     """No magic args."""
@@ -158,13 +162,13 @@ class TikzAdapter:
     """
     Returns a sample TikZ graph.
     """
-    return r"""
+    return r""" 
 % TikZ Example
-\begin{tikzpicture}
-    \node [draw] (input) at (0, 0) {Input};
-    \node [draw] (output) at (0, -2) {Output};
-    \draw [->] (input) -- (output);
-\end{tikzpicture}
+\begin{tikzpicture} 
+    \node [draw] (input) at (0, 0) {Input}; 
+    \node [draw] (output) at (0, -2) {Output}; 
+    \draw [->] (input) -- (output); 
+\end{tikzpicture} 
 """
 
   def get_tiered_examples(self) -> Dict[str, str]:

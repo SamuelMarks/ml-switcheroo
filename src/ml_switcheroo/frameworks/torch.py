@@ -174,6 +174,12 @@ class TorchAdapter:
     """No special initialization helpers needed."""
     return ""
 
+  def get_to_numpy_code(self) -> str:
+    """
+    Returns code to convert Torch tensors to NumPy (detach/cpu check).
+    """
+    return "if hasattr(obj, 'detach'): return obj.detach().cpu().numpy()"
+
   @property
   def structural_traits(self) -> StructuralTraits:
     """

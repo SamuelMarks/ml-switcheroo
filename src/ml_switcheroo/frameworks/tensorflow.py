@@ -192,6 +192,12 @@ class TensorFlowAdapter:
     """
     return ""
 
+  def get_to_numpy_code(self) -> str:
+    """
+    Returns code to convert TF tensors to NumPy.
+    """
+    return "if hasattr(obj, 'numpy'): return obj.numpy()"
+
   @property
   def declared_magic_args(self) -> List[str]:
     """
