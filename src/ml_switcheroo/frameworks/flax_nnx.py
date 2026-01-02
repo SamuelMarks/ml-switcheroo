@@ -221,13 +221,13 @@ class FlaxNNXAdapter(JAXStackMixin):
   def get_harness_init_code(self) -> str:
     """Logic to create Flax NNX Rngs."""
     return textwrap.dedent(
-      """
-        def _make_flax_rngs(seed):
-            "Attempts to create a Flax NNX Rngs object."
-            try:
-                return nnx.Rngs(seed)
-            except (ImportError, AttributeError):
-                return "mock_flax_rngs"
+      """ 
+        def _make_flax_rngs(seed): 
+            "Attempts to create a Flax NNX Rngs object." 
+            try: 
+                return nnx.Rngs(seed) 
+            except (ImportError, AttributeError): 
+                return "mock_flax_rngs" 
     """
     ).strip()
 
@@ -399,13 +399,13 @@ class FlaxNNXAdapter(JAXStackMixin):
     return """from flax import nnx
 import jax.numpy as jnp
 
-class Net(nnx.Module):
-    def __init__(self, rngs: nnx.Rngs):
-        self.linear = nnx.Linear(10, 10, rngs=rngs)
+class Net(nnx.Module): 
+    def __init__(self, rngs: nnx.Rngs): 
+        self.linear = nnx.Linear(10, 10, rngs=rngs) 
 
-    def __call__(self, x):
-        x = self.linear(x)
-        return nnx.relu(x)
+    def __call__(self, x): 
+        x = self.linear(x) 
+        return nnx.relu(x) 
 """
 
   def get_tiered_examples(self) -> Dict[str, str]:
@@ -419,3 +419,17 @@ class Net(nnx.Module):
       "tier2_neural": self.get_example_code(),
       "tier3_extras": "# Flax NNX State Management\n# See repo for details on nnx.Variable interactions.",
     }
+
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """
+    Returns the official Flax documentation URL for a given API string.
+    Defaults to ReadTheDocs search query for robustness with new NNX APIs.
+
+    Args:
+        api_name (str): The fully qualified API name.
+
+    Returns:
+        Optional[str]: The URL to the documentation page.
+    """
+    # Flax NNX APIs change frequently, search is safest
+    return f"https://flax.readthedocs.io/en/latest/search.html?q={api_name}"

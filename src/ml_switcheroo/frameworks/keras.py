@@ -366,6 +366,12 @@ class KerasAdapter:
     """Applies configuration wiring."""
     pass
 
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """
+    Provides a search URL for Keras documentation as direct API mapping is non-trivial.
+    """
+    return f"https://keras.io/search.html?q={api_name}"
+
   @classmethod
   def get_example_code(cls) -> str:
     """Returns example code."""

@@ -398,6 +398,12 @@ class JaxCoreAdapter(JAXStackMixin):
       "tier3_extras": "# Use Optax for optimization:\nimport optax\noptimizer = optax.adam(learning_rate=0.01)",
     }
 
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """
+    Generates JAX core documentation URL.
+    """
+    return super().get_doc_url(api_name)
+
 
 # Backwards compatibility alias
 JaxAdapter = JaxCoreAdapter

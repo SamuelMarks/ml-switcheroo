@@ -415,3 +415,9 @@ def compute_on_gpu(x):
     Overrides/Patches snapshot items that cannot be statically defined.
     """
     pass
+
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """
+    Generates documentation URL for MLX APIs using autosummary pattern.
+    """
+    return f"https://ml-explore.github.io/mlx/build/html/python/_autosummary/{api_name}.html"

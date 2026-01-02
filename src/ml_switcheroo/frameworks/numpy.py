@@ -219,6 +219,13 @@ class NumpyAdapter:
     """No dynamic wiring needed for NumPy."""
     pass
 
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """
+    Generates NumPy documentation URL.
+    Example: https://numpy.org/doc/stable/reference/generated/numpy.mean.html
+    """
+    return f"https://numpy.org/doc/stable/reference/generated/{api_name}.html"
+
   # --- Verification ---
 
   def convert(self, data: Any) -> Any:

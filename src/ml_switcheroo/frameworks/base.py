@@ -290,6 +290,19 @@ class FrameworkAdapter(Protocol):
     """Returns list of imports required for serialization."""
     ...
 
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """
+    Returns the official documentation URL for a given API string.
+    Can be a direct deep link or a search query if direct linking is ambiguous.
+
+    Args:
+        api_name (str): The fully qualified API name (e.g., 'torch.nn.Linear').
+
+    Returns:
+        Optional[str]: The URL to the documentation page, or None if not available.
+    """
+    ...
+
   @classmethod
   def get_example_code(cls) -> str:
     """Returns the primary code example for documentation."""

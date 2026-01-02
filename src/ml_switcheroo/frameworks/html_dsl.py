@@ -202,6 +202,10 @@ class HtmlDSLAdapter(FrameworkAdapter):
     """No manual wiring."""
     pass
 
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """No official documentation URL."""
+    return None
+
   @classmethod
   def get_example_code(cls) -> str:
     """Returns a valid HTML Snippet."""

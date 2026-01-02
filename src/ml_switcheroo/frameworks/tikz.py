@@ -157,6 +157,10 @@ class TikzAdapter:
     """No wiring to apply."""
     pass
 
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """No documentation URL for internal DSL."""
+    return None
+
   @classmethod
   def get_example_code(cls) -> str:
     """

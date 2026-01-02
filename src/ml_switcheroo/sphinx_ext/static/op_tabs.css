@@ -1,0 +1,124 @@
+/* Vertical Tabs Layout for Operation Docs */ 
+
+.op-tabs-container { 
+    display: flex; 
+    border: 1px solid #e0e0e0; 
+    border-radius: 8px; 
+    overflow: hidden; 
+    margin: 20px 0; 
+    background-color: #fcfcfc; 
+    min-height: 200px; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+    font-family: inherit; 
+} 
+
+/* Navigation Column (Left) */ 
+.op-tabs-nav { 
+    width: 180px; 
+    background-color: #f5f5f5; 
+    border-right: 1px solid #e0e0e0; 
+    display: flex; 
+    flex-direction: column; 
+    flex-shrink: 0; 
+} 
+
+.op-tab-btn { 
+    background: transparent; 
+    border: none; 
+    outline: none; 
+    padding: 12px 16px; 
+    text-align: left; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    font-size: 13px; 
+    font-weight: 500; 
+    color: #555; 
+    border-left: 4px solid transparent; 
+} 
+
+.op-tab-btn:hover { 
+    background-color: #e0e0e0; 
+    color: #333; 
+} 
+
+.op-tab-btn.active { 
+    background-color: #fff; 
+    color: #1976d2; 
+    border-left: 4px solid #1976d2; 
+    box-shadow: -2px 0 5px rgba(0,0,0,0.05); 
+    /* Extend over the border to look seamless */ 
+    margin-right: -1px; 
+    border-right: 1px solid transparent; 
+    position: relative; 
+    z-index: 2; 
+} 
+
+/* Content Area (Right) */ 
+.op-tabs-content { 
+    flex: 1; 
+    padding: 20px 30px; 
+    background-color: #fff; 
+    position: relative; 
+    z-index: 1; 
+} 
+
+.op-tab-pane { 
+    display: none; 
+    animation: fadeEffect 0.3s; 
+} 
+
+.op-tab-pane.active { 
+    display: block; 
+} 
+
+@keyframes fadeEffect { 
+    from {opacity: 0;} 
+    to {opacity: 1;} 
+} 
+
+/* Detail Typography */ 
+.op-tab-pane h4 { 
+    border-bottom: 2px solid #eee; 
+    padding-bottom: 10px; 
+    margin-top: 0; 
+    color: #333; 
+} 
+
+.op-detail-row { 
+    margin-bottom: 12px; 
+    line-height: 1.6; 
+} 
+
+.op-detail-row .label { 
+    font-weight: bold; 
+    color: #666; 
+    min-width: 80px; 
+    display: inline-block; 
+} 
+
+.op-detail-row code { 
+    background: #f1f8e9; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-family: 'Roboto Mono', monospace; 
+    color: #2e7d32; 
+    border: 1px solid #c8e6c9; 
+} 
+
+.op-doc-link { 
+    display: inline-block; 
+    margin-top: 10px; 
+    text-decoration: none; 
+    color: #1976d2; 
+    font-weight: 500; 
+    border: 1px solid #1976d2; 
+    padding: 6px 12px; 
+    border-radius: 4px; 
+    transition: 0.2s; 
+    font-size: 13px; 
+} 
+
+.op-doc-link:hover { 
+    background-color: #e3f2fd; 
+    text-decoration: none; 
+}

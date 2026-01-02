@@ -103,15 +103,18 @@ Type: {info["kind"]}
 Signature: {op_name}{info["signature"]} 
 
 Docstring: 
-{info["docstring"]} 
+
+{"\n>".join(info["docstring"].split("\n"))} 
 
 --- OUTPUT FORMAT (JSON SCHEMA) --- 
 The YAML must conform rigidly to this Pydantic schema: 
+```json
 {schema_json} 
+```
 
 --- ONE-SHOT EXAMPLE ---
 Here is a valid example mapping `torch.abs` to all supported frameworks:
-
+```yml
 operation: "Abs"
 description: "Calculates the absolute value element-wise."
 std_args:
@@ -134,7 +137,7 @@ variants:
     api: "numpy.abs"
   mlx:
     api: "mlx.core.abs"
-
+```
 --- INSTRUCTIONS --- 
 1. Analyze the Target Operation above. 
 2. Define standard arguments (`std_args`) that abstract the core inputs. 

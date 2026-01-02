@@ -126,6 +126,22 @@ class JAXStackMixin:
       return f"orbax.checkpoint.PyTreeCheckpointer().restore({file_arg})"
     return ""
 
+  # --- Documentation Linking ---
+
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """
+    Generates a default documentation URL for standard JAX APIs.
+    Maps to ReadTheDocs autosummary path.
+    NOTE: Subclasses (Flax/Pax) should override this for their specific namespaces.
+
+    Args:
+        api_name: The fully qualified API path (e.g. 'jax.numpy.abs').
+
+    Returns:
+        String URL or None.
+    """
+    return f"https://jax.readthedocs.io/en/latest/_autosummary/{api_name}.html"
+
   # --- Manual Wiring (Semantics Injection / Legacy Support) ---
 
   def _apply_stack_wiring(self, snapshot: Dict[str, Any]) -> None:

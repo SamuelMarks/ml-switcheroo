@@ -1,5 +1,12 @@
 """
-Sphinx Extension for ML-Switcheroo WASM Demo.
+Sphinx Extension for ML-Switcheroo.
+
+This package provides custom Sphinx directives and hooks to generate
+interactive documentation, including:
+1.  **WASM Demo**: Embeds a client-side transpiler demo (Pyodide).
+2.  **Auto-Docs**: Automatically generates API reference pages for the
+    Abstract Operations defined in the Semantic Knowledge Base.
+3.  **Visualization**: Injects assets for TikZ and AST rendering.
 """
 
 from typing import Any, Dict
@@ -7,12 +14,16 @@ from typing import Any, Dict
 from ml_switcheroo import __version__
 from ml_switcheroo.sphinx_ext.directive import SwitcherooDemo
 from ml_switcheroo.sphinx_ext.hooks import add_static_path, copy_wheel_and_reqs
+from ml_switcheroo.sphinx_ext.autogen_ops import generate_op_docs
 
 
 def setup(app: Any) -> Dict[str, Any]:
   """
   Sphinx Extension Setup Hook.
+
+  Registers directives, connects build events, and adds static assets.
   """
+  # --- Directives ---
   app.add_directive("switcheroo_demo", SwitcherooDemo)
 
   # --- CodeMirror Assets (Editor) ---
@@ -31,10 +42,8 @@ def setup(app: Any) -> Dict[str, Any]:
   app.add_js_file("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js")
 
   # --- TikZJax (Graph Renderer) ---
-  # FIX: Use CDN for fonts. Local copy breaks relative paths to ../bakoma/ttf
+  # Use CDN for fonts to fix relative path issues
   app.add_css_file("https://tikzjax.com/v1/fonts.css")
-
-  # Inject URL for main script. We serve the JS locally to ensure we can host the WASM side-by-side.
   app.add_js_file(None, body="window.TIKZJAX_URL = '_static/tikzjax/tikzjax.js';")
 
   # --- Local Extension Assets ---
@@ -43,9 +52,17 @@ def setup(app: Any) -> Dict[str, Any]:
   app.add_js_file("trace_render.js")
   app.add_js_file("switcheroo_demo.js")
 
+  # --- Docs UI Assets (Feature 3) ---
+  app.add_css_file("op_tabs.css")
+  app.add_js_file("op_tabs.js")
+
   # --- Build Hooks ---
+  # 1. Register static path
   app.connect("builder-inited", add_static_path)
+  # 2. Copy WASM Wheel
   app.connect("build-finished", copy_wheel_and_reqs)
+  # 3. Generate Operation Docs (Feature 4)
+  app.connect("builder-inited", generate_op_docs)
 
   return {
     "version": __version__,

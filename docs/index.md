@@ -30,6 +30,7 @@ IDEAS
 :caption: Reference
 
 api/index
+ops/index
 ```
 
 ## Indices and tables

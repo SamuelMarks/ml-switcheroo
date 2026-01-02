@@ -16,6 +16,7 @@ _bootstrap_temp
 __pycache__/
 *.py[cod]
 *$py.class
+docs/ops/*.rst
 
 # Distribution / packaging
 .Python

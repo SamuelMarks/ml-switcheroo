@@ -3,14 +3,14 @@ MLIR Framework Adapter.
 
 This module provides the pseudo-adapter for Multi-Level Intermediate Representation (MLIR).
 It registers "mlir" as a valid source/target key in the system, enabling the Engine
-to route conversion logic through the MLIR Emitter/Parser path instead of the
+to route conversion logic through the MLIR Emitter/Generator path instead of the
 standard Python AST Rewriter path.
 
 It does not provide semantic mappings (Definitions) because MLIR transformation
 is structural, not API-based.
 """
 
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple, Optional
 
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import (
@@ -147,6 +147,10 @@ class MlirAdapter:
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """No manual wiring."""
     pass
+
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """No documentation URL for internal IR."""
+    return None
 
   @property
   def rng_seed_methods(self) -> List[str]:
