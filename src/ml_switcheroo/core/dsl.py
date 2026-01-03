@@ -50,7 +50,11 @@ class ParameterDef(BaseModel):
   name: str = Field(..., description="Argument name (e.g. 'dim').")
   type: Optional[str] = Field("Any", description="Type hint string (e.g. 'int', 'Tensor').")
   doc: Optional[str] = Field(None, description="Argument docstring explanation.")
-  default: Optional[str] = Field(None, description="Default value as a string code representation.")
+
+  # --- Feature: Rich Defaults ---
+  default: Optional[Any] = Field(
+    None, description="Default value. Supports primitives (int, float, bool, str) and containers (list, dict, None)."
+  )
 
   # --- Feature: Semantic Constraints (Bounds Checking) ---
   min: Optional[float] = Field(None, description="Minimum numeric value (inclusive).")
@@ -96,7 +100,7 @@ class Rule(BaseModel):
 
   if_arg: str = Field(..., description="Name of the standard argument to check.")
   op: LogicOp = Field(LogicOp.EQ, description="Logical operator for comparison.")
-  is_val: Union[str, int, float, bool, List[Union[str, int, float]]] = Field(
+  is_val: Any = Field(
     ...,
     alias="val",
     description="Value to compare against. If op='is_type', this should be 'int', 'float', 'list', 'dict', 'str', or 'bool'.",
@@ -132,10 +136,12 @@ class FrameworkVariant(BaseModel):
     description="Map of {StandardArg: {SourceValueString: TargetValueCode}} for enum value mapping. Keys should match stringified source values (e.g. 'mean' or '0'). Values are target code strings.",
   )
   kwargs_map: Optional[Dict[str, str]] = Field(None, description="Mapping for specific keys within a **kwargs expansion.")
-  inject_args: Optional[Dict[str, Union[str, int, float, bool]]] = Field(
+
+  inject_args: Optional[Dict[str, Any]] = Field(
     None,
-    description="Dictionary of new arguments to inject with fixed default values (e.g. {'epsilon': 1e-5}).",
+    description="Dictionary of new arguments to inject with fixed default values (supports primitives and complex types).",
   )
+
   casts: Optional[Dict[str, str]] = Field(
     None, description="Mapping of argument names to target types (e.g. {'x': 'int32'})."
   )

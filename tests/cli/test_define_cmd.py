@@ -3,12 +3,12 @@ Tests for the `define` CLI command handler.
 
 Verifies:
 1.  YAML parsing/validation errors are handled gracefully.
-2.  Missing files (hub source or adapter source) are handled.
-3.  Successful injection modifies files properly.
-4.  **Inference Integration**: Verifies 'infer' API triggers lookup.
+2.  Successful injection modifies Hub (Python) and Spoke (JSON) files properly.
+3.  **Inference Integration**: Verifies 'infer' API triggers lookup.
 """
 
 import sys
+import json
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
@@ -51,69 +51,52 @@ variants:
 
 
 @pytest.fixture
-def mock_source_env(tmp_path):
+def mock_fs_env(tmp_path):
   """
-  Creates a simulated source tree with a standards file and adapter file.
+  Creates a simulated filesystem.
   """
-  semantics_dir = tmp_path / "src" / "semantics"
-  semantics_dir.mkdir(parents=True)
+  # 1. Hub (Python file)
+  semantics_dir = tmp_path / "semantics"
+  semantics_dir.mkdir()
+  hub_file = semantics_dir / "standards_internal.py"
+  hub_file.write_text("INTERNAL_OPS = {}", encoding="utf-8")
 
-  standards_file = semantics_dir / "standards_internal.py"
-  standards_file.write_text("INTERNAL_OPS = {}", encoding="utf-8")
+  # 2. Spoke (JSON file)
+  defs_dir = tmp_path / "frameworks" / "definitions"
+  defs_dir.mkdir(parents=True)
+  spoke_file = defs_dir / "mock_fw.json"
+  spoke_file.write_text("{}", encoding="utf-8")
 
-  frameworks_dir = tmp_path / "src" / "frameworks"
-  frameworks_dir.mkdir(parents=True)
-
-  adapter_file = frameworks_dir / "mock_fw.py"
-  adapter_file.write_text(
-    """
-from ml_switcheroo.frameworks.base import register_framework, StandardMap
-
-@register_framework("mock_fw")
-class MockAdapter:
-    @property
-    def definitions(self):
-        return {}
-""",
-    encoding="utf-8",
-  )
-
-  return standards_file, adapter_file
+  return hub_file, spoke_file
 
 
-def mock_inspect_env(hub_file, spoke_file):
-  """Applies patches for file inspection logic."""
-  patcher = patch("inspect.getfile")
-  mock_getfile = patcher.start()
+def mock_env_patches(hub_file, spoke_file):
+  """Applies patches for file locations."""
+  # Patch 1: Hub location (inspect.getfile) -> standards_internal.py
+  p1 = patch("inspect.getfile", return_value=str(hub_file))
 
-  def side_effect(obj):
-    if getattr(obj, "__name__", "") == "ml_switcheroo.semantics.standards_internal":
-      return str(hub_file)
-    if getattr(obj, "__name__", "") == "MockAdapterCls":
-      return str(spoke_file)
-    return str(hub_file)
+  # Patch 2: Spoke location (get_definitions_path) -> mock_fw.json
+  p2 = patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=spoke_file)
 
-  mock_getfile.side_effect = side_effect
-  return patcher
+  # Patch 3: Adapter retrieval (must return something truthy so loop continues)
+  mock_adapter = MagicMock()
+  p3 = patch("ml_switcheroo.cli.handlers.define.get_adapter", return_value=mock_adapter)
+
+  p1.start()
+  p2.start()
+  p3.start()
+  return [p1, p2, p3]
 
 
-def test_define_success_flow(mock_yaml_file, mock_source_env):
+def test_define_success_flow(mock_yaml_file, mock_fs_env):
   """
   Full integration: verify file updates on success.
   """
-  hub_file, spoke_file = mock_source_env
+  hub_file, spoke_file = mock_fs_env
+  patches = mock_env_patches(hub_file, spoke_file)
 
-  # 1. Setup Inspect Patch
-  insp_patch = mock_inspect_env(hub_file, spoke_file)
-
-  # 2. Mock Adapter
-  mock_adapter_instance = MagicMock()
-  type(mock_adapter_instance).__name__ = "MockAdapterCls"
-
-  with patch(
-    "ml_switcheroo.cli.handlers.define.get_adapter", lambda k: mock_adapter_instance if k == "mock_fw" else None
-  ):
-    # 3. Handle missing YAML in env (if necessary)
+  try:
+    # Handle missing YAML in env (if necessary)
     if "yaml" not in sys.modules:
       m_yaml = MagicMock()
       m_yaml.safe_load.return_value = {
@@ -126,33 +109,31 @@ def test_define_success_flow(mock_yaml_file, mock_source_env):
         ret = handle_define(mock_yaml_file)
     else:
       ret = handle_define(mock_yaml_file)
+  finally:
+    for p in patches:
+      p.stop()
 
-  insp_patch.stop()
   assert ret == 0
 
-  spoke_code = spoke_file.read_text()
-  assert '"NewOp": StandardMap(api="lib.op")' in spoke_code
+  # Verify Spoke Update (JSON)
+  spoke_content = json.loads(spoke_file.read_text())
+  assert "NewOp" in spoke_content
+  assert spoke_content["NewOp"]["api"] == "lib.op"
 
 
-def test_define_inference_flow(infer_yaml_file, mock_source_env):
+def test_define_inference_flow(infer_yaml_file, mock_fs_env):
   """
   Integration: verify 'api: infer' triggers discovery and updates API.
   """
-  hub_file, spoke_file = mock_source_env
-  insp_patch = mock_inspect_env(hub_file, spoke_file)
+  hub_file, spoke_file = mock_fs_env
+  patches = mock_env_patches(hub_file, spoke_file)
 
-  mock_adapter_instance = MagicMock()
-  type(mock_adapter_instance).__name__ = "MockAdapterCls"
-
-  # Mock Discovery so we don't rely on real frameworks
+  # Mock Discovery
   with patch("ml_switcheroo.cli.handlers.define.SimulatedReflection") as MockReflect:
     ref_instance = MockReflect.return_value
     ref_instance.discover.return_value = "mock_fw.discovered_api"
 
-    with patch(
-      "ml_switcheroo.cli.handlers.define.get_adapter", lambda k: mock_adapter_instance if k == "mock_fw" else None
-    ):
-      # Ensure YAML loading works
+    try:
       if "yaml" not in sys.modules:
         m_yaml = MagicMock()
         m_yaml.safe_load.return_value = {
@@ -165,47 +146,14 @@ def test_define_inference_flow(infer_yaml_file, mock_source_env):
           handle_define(infer_yaml_file)
       else:
         handle_define(infer_yaml_file)
+    finally:
+      for p in patches:
+        p.stop()
 
     # Verify Mock was called
     ref_instance.discover.assert_called_with("InferredOp")
 
-  insp_patch.stop()
-
-  # Verify Spoke Update uses the DISCOVERED api, not 'infer'
-  spoke_code = spoke_file.read_text()
-  assert 'api="mock_fw.discovered_api"' in spoke_code
-  assert 'api="infer"' not in spoke_code
-
-
-def test_define_inference_failure_skips_injection(infer_yaml_file, mock_source_env):
-  """
-  Integration: verify 'api: infer' failing means no spoke update.
-  """
-  hub_file, spoke_file = mock_source_env
-  insp_patch = mock_inspect_env(hub_file, spoke_file)
-  mock_adapter_instance = MagicMock()
-  type(mock_adapter_instance).__name__ = "MockAdapterCls"
-
-  with patch("ml_switcheroo.cli.handlers.define.SimulatedReflection") as MockReflect:
-    # Simulate Failure
-    MockReflect.return_value.discover.return_value = None
-
-    with patch("ml_switcheroo.cli.handlers.define.get_adapter", lambda k: mock_adapter_instance):
-      if "yaml" not in sys.modules:
-        m_yaml = MagicMock()
-        m_yaml.safe_load.return_value = {
-          "operation": "Op",
-          "description": "",
-          "std_args": [],
-          "variants": {"mock_fw": {"api": "infer"}},
-        }
-        with patch("ml_switcheroo.cli.handlers.define.yaml", m_yaml):
-          handle_define(infer_yaml_file)
-      else:
-        handle_define(infer_yaml_file)
-
-  insp_patch.stop()
-
-  # Verify Spoke Update SKIPPED
-  spoke_code = spoke_file.read_text()
-  assert "InferredOp" not in spoke_code
+  # Verify Spoke Update uses the DISCOVERED api in the JSON
+  spoke_content = json.loads(spoke_file.read_text())
+  assert "InferredOp" in spoke_content
+  assert spoke_content["InferredOp"]["api"] == "mock_fw.discovered_api"

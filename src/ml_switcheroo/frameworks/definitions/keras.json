@@ -1,0 +1,354 @@
+{
+  "Abs": {
+    "api": "keras.ops.abs",
+    "required_imports": []
+  },
+  "Add": {
+    "api": "keras.ops.add",
+    "args": {
+      "x": "x1",
+      "y": "x2"
+    },
+    "required_imports": []
+  },
+  "Arange": {
+    "api": "keras.ops.arange",
+    "required_imports": []
+  },
+  "ArgMax": {
+    "api": "keras.ops.argmax",
+    "args": {
+      "dim": "axis"
+    },
+    "required_imports": []
+  },
+  "ArgMin": {
+    "api": "keras.ops.argmin",
+    "args": {
+      "dim": "axis"
+    },
+    "required_imports": []
+  },
+  "Array": {
+    "api": "keras.ops.convert_to_tensor",
+    "args": {
+      "data": "x"
+    },
+    "required_imports": []
+  },
+  "AssertClose": {
+    "api": "numpy.testing.assert_allclose",
+    "args": {
+      "expected": "desired"
+    },
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "Bool": {
+    "api": "bool",
+    "required_imports": []
+  },
+  "CastBool": {
+    "api": "keras.ops.cast",
+    "inject_args": {
+      "dtype": "bool"
+    },
+    "required_imports": []
+  },
+  "CastByte": {
+    "api": "keras.ops.cast",
+    "inject_args": {
+      "dtype": "uint8"
+    },
+    "required_imports": []
+  },
+  "CastChar": {
+    "api": "keras.ops.cast",
+    "inject_args": {
+      "dtype": "int8"
+    },
+    "required_imports": []
+  },
+  "CastDouble": {
+    "api": "keras.ops.cast",
+    "inject_args": {
+      "dtype": "float64"
+    },
+    "required_imports": []
+  },
+  "CastFloat": {
+    "api": "keras.ops.cast",
+    "inject_args": {
+      "dtype": "float32"
+    },
+    "required_imports": []
+  },
+  "CastHalf": {
+    "api": "keras.ops.cast",
+    "inject_args": {
+      "dtype": "float16"
+    },
+    "required_imports": []
+  },
+  "CastInt": {
+    "api": "keras.ops.cast",
+    "inject_args": {
+      "dtype": "int32"
+    },
+    "required_imports": []
+  },
+  "CastLong": {
+    "api": "keras.ops.cast",
+    "inject_args": {
+      "dtype": "int64"
+    },
+    "required_imports": []
+  },
+  "CastShort": {
+    "api": "keras.ops.cast",
+    "inject_args": {
+      "dtype": "int16"
+    },
+    "required_imports": []
+  },
+  "CenterCrop": {
+    "api": "keras.layers.CenterCrop",
+    "args": {
+      "size": "height"
+    },
+    "required_imports": []
+  },
+  "Concatenate": {
+    "api": "keras.ops.concatenate",
+    "args": {
+      "tensors": "inputs"
+    },
+    "required_imports": []
+  },
+  "Div": {
+    "api": "keras.ops.divide",
+    "args": {
+      "x": "x1",
+      "y": "x2"
+    },
+    "required_imports": []
+  },
+  "Embedding": {
+    "api": "keras.layers.Embedding",
+    "args": {
+      "embedding_dim": "output_dim",
+      "num_embeddings": "input_dim"
+    },
+    "required_imports": []
+  },
+  "Flatten": {
+    "api": "keras.layers.Flatten",
+    "required_imports": []
+  },
+  "Float16": {
+    "api": "numpy.float16",
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "Float32": {
+    "api": "numpy.float32",
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "Float64": {
+    "api": "numpy.float64",
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "GELU": {
+    "api": "keras.layers.Activation",
+    "args": {
+      "input": "gelu"
+    },
+    "operator": "keras.activations.gelu",
+    "required_imports": [],
+    "transformation_type": "inline_lambda"
+  },
+  "Grayscale": {
+    "api": "lambda x: x",
+    "required_imports": [],
+    "transformation_type": "inline_lambda"
+  },
+  "Int16": {
+    "api": "numpy.int16",
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "Int32": {
+    "api": "numpy.int32",
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "Int64": {
+    "api": "numpy.int64",
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "LayerNorm": {
+    "api": "keras.layers.LayerNormalization",
+    "args": {
+      "eps": "epsilon",
+      "normalized_shape": "axis"
+    },
+    "required_imports": []
+  },
+  "Linear": {
+    "api": "keras.layers.Dense",
+    "args": {
+      "out_features": "units"
+    },
+    "required_imports": []
+  },
+  "Mean": {
+    "api": "keras.ops.mean",
+    "required_imports": []
+  },
+  "ModuleList": {
+    "required_imports": []
+  },
+  "Mul": {
+    "api": "keras.ops.multiply",
+    "args": {
+      "x": "x1",
+      "y": "x2"
+    },
+    "required_imports": []
+  },
+  "MultiheadAttention": {
+    "api": "keras.layers.MultiHeadAttention",
+    "args": {
+      "embed_dim": "key_dim"
+    },
+    "required_imports": [],
+    "requires_plugin": "repack_attn_keras"
+  },
+  "Normalize": {
+    "api": "keras.layers.Normalization",
+    "args": {
+      "mean": "mean",
+      "std": "variance"
+    },
+    "required_imports": []
+  },
+  "Ones": {
+    "api": "keras.ops.ones",
+    "required_imports": []
+  },
+  "Pad": {
+    "api": "keras.ops.pad",
+    "args": {
+      "input": "x",
+      "pad": "pad_width",
+      "value": "constant_values"
+    },
+    "required_imports": [],
+    "requires_plugin": "padding_converter"
+  },
+  "RandInt": {
+    "api": "keras.random.randint",
+    "args": {
+      "high": "maxval",
+      "low": "minval"
+    },
+    "required_imports": []
+  },
+  "RandomCrop": {
+    "api": "keras.layers.RandomCrop",
+    "required_imports": []
+  },
+  "RandomHorizontalFlip": {
+    "api": "keras.layers.RandomFlip",
+    "args": {
+      "p": "mode"
+    },
+    "required_imports": []
+  },
+  "RandomVerticalFlip": {
+    "api": "keras.layers.RandomFlip",
+    "required_imports": []
+  },
+  "Reshape": {
+    "api": "keras.ops.reshape",
+    "args": {
+      "shape": "newshape"
+    },
+    "required_imports": []
+  },
+  "Resize": {
+    "api": "keras.layers.Resizing",
+    "args": {
+      "size": "height"
+    },
+    "required_imports": []
+  },
+  "Sequential": {
+    "api": "keras.Sequential",
+    "required_imports": [],
+    "requires_plugin": "keras_sequential_pack"
+  },
+  "SiLU": {
+    "api": "keras.activations.silu",
+    "required_imports": []
+  },
+  "Sub": {
+    "api": "keras.ops.subtract",
+    "args": {
+      "x": "x1",
+      "y": "x2"
+    },
+    "required_imports": []
+  },
+  "ToTensor": {
+    "api": "keras.ops.convert_to_tensor",
+    "required_imports": []
+  },
+  "UInt8": {
+    "api": "numpy.uint8",
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "Variable": {
+    "api": "keras.Variable",
+    "args": {
+      "value": "initializer"
+    },
+    "required_imports": []
+  },
+  "Zeros": {
+    "api": "keras.ops.zeros",
+    "required_imports": []
+  },
+  "exp": {
+    "api": "keras.ops.exp",
+    "required_imports": []
+  },
+  "log": {
+    "api": "keras.ops.log",
+    "required_imports": []
+  },
+  "log_softmax": {
+    "api": "keras.activations.log_softmax",
+    "required_imports": []
+  },
+  "sqrt": {
+    "api": "keras.ops.sqrt",
+    "required_imports": []
+  },
+  "square": {
+    "api": "keras.ops.square",
+    "required_imports": []
+  }
+}

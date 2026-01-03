@@ -25,6 +25,7 @@ from ml_switcheroo.frameworks.base import (
   InitMode,
   load_snapshot_for_adapter,
 )
+from ml_switcheroo.frameworks.loader import load_definitions
 
 try:
   import tensorflow as tf
@@ -65,7 +66,7 @@ class TensorFlowAdapter:
       if not self._snapshot_data:
         logging.debug("TensorFlow not installed and no snapshot found.")
 
-        # --- Metadata ---
+  # --- Metadata ---
 
   @property
   def unsafe_submodules(self) -> Set[str]:
@@ -169,7 +170,7 @@ class TensorFlowAdapter:
       "to_numpy": "{res_var}.numpy()",
     }
 
-    # --- Harness Protocol ---
+  # --- Harness Protocol ---
 
   @property
   def harness_imports(self) -> List[str]:
@@ -195,6 +196,9 @@ class TensorFlowAdapter:
   def get_to_numpy_code(self) -> str:
     """
     Returns code to convert TF tensors to NumPy.
+
+    Returns:
+        str: Code string.
     """
     return "if hasattr(obj, 'numpy'): return obj.numpy()"
 
@@ -259,70 +263,12 @@ class TensorFlowAdapter:
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Returns the static dictionary of Operation Mappings.
-
-    This mapping defines how Abstract Operations (e.g. 'Abs', 'Conv2d') are
-    implemented in TensorFlow.
+    Loaded dynamically from `frameworks/definitions/tensorflow.json`.
 
     Returns:
         Dict[str, StandardMap]: The mapping dictionary.
     """
-    return {
-      "Save": StandardMap(api="save", requires_plugin="io_handler", required_imports=["import tensorflow as tf"]),
-      "Load": StandardMap(api="load", requires_plugin="io_handler", required_imports=["import tensorflow as tf"]),
-      "Abs": StandardMap(api="tf.abs"),
-      "Mean": StandardMap(api="tf.math.reduce_mean"),
-      "Sum": StandardMap(api="tf.math.reduce_sum"),
-      "exp": StandardMap(api="tf.math.exp"),
-      "log": StandardMap(api="tf.math.log"),
-      "square": StandardMap(api="tf.math.square"),
-      "Add": StandardMap(api="tf.math.add"),
-      "Sub": StandardMap(api="tf.math.subtract"),
-      "Mul": StandardMap(api="tf.math.multiply"),
-      "Div": StandardMap(api="tf.math.divide"),
-      # Explicitly define pack_to_tuple as 'perm' for TF logic
-      "permute_dims": StandardMap(api="tf.transpose", pack_to_tuple="perm"),
-      "randn": StandardMap(api="tf.random.normal"),
-      "ArgMax": StandardMap(api="tf.math.argmax"),
-      "ArgMin": StandardMap(api="tf.math.argmin"),
-      "DataLoader": StandardMap(api="tf.data.Dataset", requires_plugin="tf_data_loader"),
-      # Types
-      "Float32": StandardMap(api="tf.float32"),
-      "Float64": StandardMap(api="tf.float64"),
-      "Float16": StandardMap(api="tf.float16"),
-      "Int64": StandardMap(api="tf.int64"),
-      "Int32": StandardMap(api="tf.int32"),
-      "Int16": StandardMap(api="tf.int16"),
-      "UInt8": StandardMap(api="tf.uint8"),
-      "Bool": StandardMap(api="tf.bool"),
-      # Casting
-      "CastFloat": StandardMap(api="tf.cast", inject_args={"dtype": "tf.float32"}),
-      "CastDouble": StandardMap(api="tf.cast", inject_args={"dtype": "tf.float64"}),
-      "CastHalf": StandardMap(api="tf.cast", inject_args={"dtype": "tf.float16"}),
-      "CastLong": StandardMap(api="tf.cast", inject_args={"dtype": "tf.int64"}),
-      "CastInt": StandardMap(api="tf.cast", inject_args={"dtype": "tf.int32"}),
-      "CastShort": StandardMap(api="tf.cast", inject_args={"dtype": "tf.int16"}),
-      "CastByte": StandardMap(api="tf.cast", inject_args={"dtype": "tf.uint8"}),
-      "CastBool": StandardMap(api="tf.cast", inject_args={"dtype": "tf.bool"}),
-      "SiLU": StandardMap(api="tensorflow.nn.silu"),
-      "TensorType": StandardMap(api="tensorflow.Tensor"),
-      "CudaAvailable": StandardMap(api="tf.config.list_physical_devices", requires_plugin="cuda_is_available"),
-      "Arange": StandardMap(api="tf.range", args={"stop": "limit", "step": "delta"}),
-      "Ones": StandardMap(api="tf.ones"),
-      "Concatenate": StandardMap(api="tf.concat", args={"tensors": "values"}),
-      "Zeros": StandardMap(api="tf.zeros"),
-      "Concatenate": StandardMap(api="tf.concat", args={"tensors": "values"}),
-      "Zeros": StandardMap(api="tf.zeros"),
-      "RandInt": StandardMap(
-        api="tf.random.uniform", args={"low": "minval", "high": "maxval"}, inject_args={"dtype": "tf.int32"}
-      ),
-      "Array": StandardMap(api="tf.constant", args={"data": "value"}),
-      "Pad": StandardMap(
-        api="tf.pad",
-        args={"input": "tensor", "pad": "paddings", "value": "constant_values"},
-        requires_plugin="padding_converter",
-      ),
-      "AssertClose": StandardMap(api="tf.debugging.assert_near", args={"actual": "x", "expected": "y"}),
-    }
+    return load_definitions("tensorflow")
 
   @property
   def rng_seed_methods(self) -> List[str]:
@@ -443,35 +389,35 @@ class TensorFlowAdapter:
     return {
       "tier1_math": """import tensorflow as tf
 
-def math_ops(x, y): 
+def math_ops(x, y):
   # Tier 1: Core TensorFlow Math
-  a = tf.abs(x) 
-  b = tf.math.add(a, y) 
-  return tf.math.reduce_mean(b) 
+  a = tf.abs(x)
+  b = tf.math.add(a, y)
+  return tf.math.reduce_mean(b)
 """,
       "tier2_neural": """import tensorflow as tf
 
-class Model(tf.Module): 
-  # Tier 2: Low-level TF Module (Not Keras) 
-  def __init__(self, in_features, out_features): 
-    super().__init__() 
-    self.w = tf.Variable(tf.random.normal([in_features, out_features])) 
-    self.b = tf.Variable(tf.zeros([out_features])) 
+class Model(tf.Module):
+  # Tier 2: Low-level TF Module (Not Keras)
+  def __init__(self, in_features, out_features):
+    super().__init__()
+    self.w = tf.Variable(tf.random.normal([in_features, out_features]))
+    self.b = tf.Variable(tf.zeros([out_features]))
 
-  def __call__(self, x): 
+  def __call__(self, x):
     return tf.matmul(x, self.w) + self.b
   """,
       "tier3_extras": """import tensorflow as tf
 
-def data_pipeline(tensors, batch_size=32): 
+def data_pipeline(tensors, batch_size=32):
   # Tier 3: tf.data Input Pipeline
-  dataset = tf.data.Dataset.from_tensor_slices(tensors) 
-  loader = dataset.shuffle(1024).batch(batch_size) 
+  dataset = tf.data.Dataset.from_tensor_slices(tensors)
+  loader = dataset.shuffle(1024).batch(batch_size)
   return loader
 """,
     }
 
-    # --- Syntax Generators ---
+  # --- Syntax Generators ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """
@@ -572,6 +518,12 @@ def data_pipeline(tensors, batch_size=32):
     """
     Generates TensorFlow API documentation URL.
     Corrects internal `tensorflow` path to `tf` for doc references.
+
+    Args:
+        api_name: API Path.
+
+    Returns:
+        Optional[str]: URL.
     """
     path = api_name.replace("tensorflow.", "tf.").replace(".", "/")
     return f"https://www.tensorflow.org/api_docs/python/{path}"

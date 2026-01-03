@@ -1,185 +1,324 @@
 """
 TikZ Framework Adapter.
 
-This module provides the adapter for the TikZ (PGF/TikZ) graphical language.
-It registers "tikz" as a valid framework key, allowing the ASTEngine to routing logic
-to treat it as a source or target.
-
-Since TikZ is not a Python library, this adapter operates exclusively in GHOST mode,
-serving primarily as a metadata container and entry point for the `core.tikz` subsystem.
+This module provides the adapter for the TikZ (LaTeX) visualization target.
+It primarily serves as a target for the Graph Extraction -> Latex Emitter pipeline.
+Unlike computational frameworks, it has few semantic definitions, but it
+adheres to the adapter protocol for consistency.
 """
 
-from typing import List, Tuple, Dict, Any, Set, Optional
+from typing import List, Tuple, Dict, Any, Optional, Set
 
 from ml_switcheroo.frameworks.base import (
   register_framework,
-  InitMode,
+  FrameworkAdapter,
+  StructuralTraits,
+  PluginTraits,
   StandardCategory,
   StandardMap,
   ImportConfig,
+  InitMode,
   GhostRef,
 )
-from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits, OpDefinition
 from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.frameworks.loader import load_definitions
 
 
 @register_framework("tikz")
-class TikzAdapter:
+class TikzAdapter(FrameworkAdapter):
   """
-  Adapter for TikZ Visualization Language.
-
-  This framework entry enables `ml-switcheroo` to treat visualization code as
-  just another "backend". It doesn't provide semantic mappings for math operations
-  but serves as the routing endpoint for Graph Extraction/Synthesis.
+  Adapter for TikZ (LaTeX Visualization).
   """
 
   display_name: str = "TikZ (LaTeX)"
+  ui_priority: int = 1000  # Bottom of list
   inherits_from: Optional[str] = None
-  # Place at the very end of visual lists
-  ui_priority: int = 1000
 
   def __init__(self) -> None:
-    """
-    Initializes the adapter in Ghost Mode.
-    """
+    """Initialize in Ghost Mode as it has no python library backing."""
     self._mode = InitMode.GHOST
-    self._snapshot_data: Dict[str, Any] = {}
+
+  @property
+  def definitions(self) -> Dict[str, StandardMap]:
+    """
+    Returns static definitions for TikZ.
+    Loaded dynamically from `frameworks/definitions/tikz.json`.
+
+    Returns:
+        Dict[str, StandardMap]: Definitions map.
+    """
+    return load_definitions("tikz")
+
+  @property
+  def specifications(self) -> Dict:
+    """
+    Returns abstract specifications.
+
+    Returns:
+        Dict: Empty dict.
+    """
+    return {}
 
   @property
   def search_modules(self) -> List[str]:
-    """TikZ has no python modules to scan."""
+    """
+    Returns list of modules to scan.
+
+    Returns:
+        List[str]: Empty list.
+    """
     return []
 
   @property
   def unsafe_submodules(self) -> Set[str]:
-    """No submodules to avoid."""
+    """
+    Returns unsafe submodules.
+
+    Returns:
+        Set[str]: Empty set.
+    """
     return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """No imports for TikZ."""
+    """
+    Returns import alias.
+
+    Returns:
+        Tuple[str, str]: ("tikz", "tikz").
+    """
     return ("tikz", "tikz")
 
   @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """TikZ does not have python namespaces."""
+  def import_namespaces(self) -> Dict:
+    """
+    Returns namespaces.
+
+    Returns:
+        Dict: Empty dict.
+    """
     return {}
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """TikZ does not support discovery heuristics."""
+  def discovery_heuristics(self) -> Dict:
+    """
+    Returns regex heuristics.
+
+    Returns:
+        Dict: Empty dict.
+    """
     return {}
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
+  def test_config(self) -> Dict:
     """
-    TikZ structurally represents Neural networks, though it doesn't execute them.
+    Returns test templates.
+
+    Returns:
+        Dict: Empty dict.
     """
-    return [SemanticTier.NEURAL]
-
-  @property
-  def structural_traits(self) -> StructuralTraits:
-    """No python structural traits apply to LaTeX."""
-    return StructuralTraits()
-
-  @property
-  def plugin_traits(self) -> PluginTraits:
-    """No plugin traits apply."""
-    return PluginTraits()
-
-  @property
-  def test_config(self) -> Dict[str, str]:
-    """No python tests can be generated for LaTeX."""
     return {}
 
   @property
   def harness_imports(self) -> List[str]:
-    """No harness imports."""
+    """
+    Returns harness imports.
+
+    Returns:
+        List[str]: Empty list.
+    """
     return []
 
   def get_harness_init_code(self) -> str:
-    """No harness init code."""
+    """
+    Returns harness init code.
+
+    Returns:
+        str: Empty string.
+    """
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """No runtime conversion logic."""
-    return "return str(obj)"
+    """
+    Returns numpy conversion logic.
+
+    Returns:
+        str: Identity logic.
+    """
+    return "return data"
+
+  def convert(self, data: Any) -> Any:
+    """
+    Converts input data for validation.
+
+    Args:
+        data (Any): Input.
+
+    Returns:
+        Any: String representation.
+    """
+    return str(data)
+
+  @property
+  def supported_tiers(self) -> List[SemanticTier]:
+    """
+    Returns supported tiers.
+
+    Returns:
+        List[SemanticTier]: [NEURAL].
+    """
+    return [SemanticTier.NEURAL]
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """No magic args."""
+    """
+    Returns magic args.
+
+    Returns:
+        List[str]: Empty list.
+    """
     return []
+
+  @property
+  def structural_traits(self) -> StructuralTraits:
+    """
+    Returns structural traits.
+
+    Returns:
+        StructuralTraits: Default object.
+    """
+    return StructuralTraits()
+
+  @property
+  def plugin_traits(self) -> PluginTraits:
+    """
+    Returns plugin capabilities.
+
+    Returns:
+        PluginTraits: Default object.
+    """
+    return PluginTraits()
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """No RNG methods."""
+    """
+    Returns seed methods.
+
+    Returns:
+        List[str]: Empty list.
+    """
     return []
-
-  @property
-  def definitions(self) -> Dict[str, StandardMap]:
-    """No semantic mappings; translation is structural via Engine pipeline."""
-    return {}
-
-  @property
-  def specifications(self) -> Dict[str, OpDefinition]:
-    """No specifications defined by this adapter."""
-    return {}
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """No API to collect."""
-    return []
-
-  def convert(self, data: Any) -> Any:
-    """Identity conversion for data."""
-    return str(data)
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """No device syntax."""
+    """
+    Returns device syntax.
+
+    Args:
+        device_type: Device.
+        device_index: Index.
+
+    Returns:
+        str: Empty string.
+    """
     return ""
 
   def get_device_check_syntax(self) -> str:
-    """Always False."""
+    """
+    Returns check syntax.
+
+    Returns:
+        str: "False".
+    """
     return "False"
 
-  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """No RNG syntax."""
+  def get_rng_split_syntax(self, r, k) -> str:
+    """
+    Returns split syntax.
+
+    Args:
+        r: RNG var.
+        k: Key var.
+
+    Returns:
+        str: Empty string.
+    """
     return ""
 
   def get_serialization_imports(self) -> List[str]:
-    """No serialization imports."""
+    """
+    Returns IO imports.
+
+    Returns:
+        List[str]: Empty list.
+    """
     return []
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """No serialization syntax."""
+  def get_serialization_syntax(self, op: str, f: str, o: Optional[str] = None) -> str:
+    """
+    Returns IO syntax.
+
+    Args:
+        op: Operation.
+        f: File.
+        o: Object.
+
+    Returns:
+        str: Empty string.
+    """
     return ""
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """No wiring to apply."""
-    pass
-
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """No documentation URL for internal DSL."""
+    """
+    Returns doc URL.
+
+    Args:
+        api_name: API.
+
+    Returns:
+        Optional[str]: None.
+    """
     return None
 
   @classmethod
   def get_example_code(cls) -> str:
     """
-    Returns a sample TikZ graph.
+    Returns example code.
+
+    Returns:
+        str: LaTeX snippet.
     """
-    return r""" 
-% TikZ Example
-\begin{tikzpicture} 
-    \node [draw] (input) at (0, 0) {Input}; 
-    \node [draw] (output) at (0, -2) {Output}; 
-    \draw [->] (input) -- (output); 
-\end{tikzpicture} 
-"""
+    return r"\begin{tikzpicture} ... \end{tikzpicture}"
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns examples for supported tiers."""
-    code = self.get_example_code()
+    """
+    Returns tiered examples.
+
+    Returns:
+        Dict[str, str]: Examples map.
+    """
     return {
-      "tier1_math": code,
-      "tier2_neural": code,
-      "tier3_extras": code,
+      "tier1_math": self.get_example_code(),
+      "tier2_neural": self.get_example_code(),
+      "tier3_extras": self.get_example_code(),
     }
+
+  def collect_api(self, c) -> List:
+    """
+    Collects API signatures.
+
+    Args:
+        c: Category.
+
+    Returns:
+        List: Empty list.
+    """
+    return []
+
+  def apply_wiring(self, s) -> None:
+    """
+    Applies wiring.
+
+    Args:
+        s: Snapshot.
+    """
+    pass

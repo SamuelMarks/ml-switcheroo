@@ -4,17 +4,14 @@ PyTorch Framework Adapter.
 This module implements the `FrameworkAdapter` protocol for PyTorch.
 It provides:
 
-1.  **Import Abstraction**: Self-declared namespace mappings (e.g. `torch.nn` is `NEURAL`).
-2.  **Semantic Definitions**: A comprehensive mapping of Abstract Operations to `torch.*` APIs.
-    This moves the "Golden Set" logic out of the central hub and into this file.
-3.  **Discovery**: Heuristics and logic for scanning the installed `torch` library
-    to discover new operations dynamically.
-4.  **IO & Device Support**: Wires up serialization (`save`/`load`) and device allocation logic.
+1.  **Import Abstraction**: Self-declared namespace mappings (e.g., `torch.nn` is `NEURAL`).
+2.  **Semantic Definitions**: Mappings loaded from `definitions/torch.json` via helper.
+3.  **Discovery**: Heuristics and logic for scanning the installed `torch` library.
+4.  **IO & Device Support**: Wires up serialization and device allocation.
 """
 
 import inspect
 import logging
-import sys
 from typing import List, Tuple, Dict, Any, Optional, Set
 
 try:
@@ -39,6 +36,7 @@ from ml_switcheroo.frameworks.base import (
   load_snapshot_for_adapter,
 )
 from ml_switcheroo.core.ghost import GhostInspector
+from ml_switcheroo.frameworks.loader import load_definitions
 
 
 @register_framework("torch")
@@ -58,6 +56,7 @@ class TorchAdapter:
   def __init__(self) -> None:
     """
     Initializes the adapter.
+
     Detects if PyTorch is installed to switch between LIVE inspection
     and GHOST snapshot loading.
     """
@@ -73,14 +72,21 @@ class TorchAdapter:
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Returns the primary root import alias ('torch', 'torch')."""
+    """
+    Returns the primary root import alias ('torch', 'torch').
+
+    Returns:
+        The module name and default alias.
+    """
     return ("torch", "torch")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
     """
     Defines the semantic roles of PyTorch namespaces.
-    Used by the SemanticsManager to link Source imports to Target imports.
+
+    Returns:
+        Mapping of dot-path strings to configuration objects.
     """
     return {
       "torch": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="torch"),
@@ -95,7 +101,12 @@ class TorchAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    """Modules to scan during `scaffold` or `sync` operations."""
+    """
+    Modules to scan during `scaffold` or `sync` operations.
+
+    Returns:
+        List of module names.
+    """
     if self._mode == InitMode.GHOST:
       return []
     return [
@@ -110,8 +121,10 @@ class TorchAdapter:
   @property
   def unsafe_submodules(self) -> Set[str]:
     """
-    Submodules that cause recursion depth errors or C-Extension crashes
-    during dynamic introspection.
+    Submodules that cause recursion depth errors or C-Extension crashes.
+
+    Returns:
+        Set of module names to exclude from recursive scanning.
     """
     return {
       "_C",
@@ -135,7 +148,12 @@ class TorchAdapter:
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Regex patterns (strings) to categorize discovered APIs."""
+    """
+    Regex patterns to categorize discovered APIs.
+
+    Returns:
+        Dictionary mapping category names to list of regex patterns.
+    """
     return {
       "neural": [r"\\.nn\\.", r"\\.modules\\.", r"\\.layers\\.", r"Module$"],
       "extras": [
@@ -153,12 +171,22 @@ class TorchAdapter:
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """Returns the semantic tiers fully supported by this adapter."""
+    """
+    Returns the semantic tiers fully supported by this adapter.
+
+    Returns:
+        List of supported tiers.
+    """
     return [SemanticTier.NEURAL, SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Templates used by `gen-tests` to create physical verification files."""
+    """
+    Templates used by `gen-tests` to create physical verification files.
+
+    Returns:
+        Dictionary of code templates.
+    """
     return {
       "import": "import torch",
       "convert_input": "torch.tensor({np_var})",
@@ -167,16 +195,29 @@ class TorchAdapter:
 
   @property
   def harness_imports(self) -> List[str]:
-    """No special imports needed for harness initialization."""
+    """
+    Imports required for harness initialization.
+
+    Returns:
+        List of import statements.
+    """
     return []
 
   def get_harness_init_code(self) -> str:
-    """No special initialization helpers needed."""
+    """
+    Returns helper code for initializing the harness.
+
+    Returns:
+        Python source code string.
+    """
     return ""
 
   def get_to_numpy_code(self) -> str:
     """
     Returns code to convert Torch tensors to NumPy (detach/cpu check).
+
+    Returns:
+        Python statement string.
     """
     return "if hasattr(obj, 'detach'): return obj.detach().cpu().numpy()"
 
@@ -184,12 +225,15 @@ class TorchAdapter:
   def structural_traits(self) -> StructuralTraits:
     """
     Defines how classes and functions are rewritten when targeting PyTorch.
+
+    Returns:
+        Configuration object for structural rewriting.
     """
     return StructuralTraits(
       module_base="torch.nn.Module",
       forward_method="forward",
       requires_super_init=True,
-      auto_strip_magic_args=True,  # Decoupled
+      auto_strip_magic_args=True,
       lifecycle_strip_methods=[
         "to",
         "cpu",
@@ -211,13 +255,16 @@ class TorchAdapter:
         "fill_",
       ],
       jit_static_args=[],  # Torch imperative doesn't require static args annotations
-      implicit_method_roots=["torch.Tensor"],  # Explicitly declare implicit method roots
+      implicit_method_roots=["torch.Tensor"],
     )
 
   @property
   def plugin_traits(self) -> PluginTraits:
     """
     Capabilities flags. PyTorch uses imperative state and eager execution.
+
+    Returns:
+        Configuration object for plugin logic.
     """
     return PluginTraits(
       has_numpy_compatible_arrays=False,  # Uses .to() not .astype()
@@ -228,12 +275,23 @@ class TorchAdapter:
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Global seed setting methods detected as impure side-effects."""
+    """
+    Global seed setting methods detected as impure side-effects.
+
+    Returns:
+        List of method names.
+    """
     return ["manual_seed", "seed"]
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Torch emits no magic args, all state is implicit."""
+    """
+    Returns list of framework-specific magic arguments.
+    Torch emits no magic args; all state is implicit.
+
+    Returns:
+        Empty list.
+    """
     return []
 
   # --- Semantic Definitions (The Spoke) ---
@@ -242,148 +300,25 @@ class TorchAdapter:
   def definitions(self) -> Dict[str, StandardMap]:
     """
     The definitive mapping of Abstract Operations to PyTorch APIs.
-    Moved from `standards_internal.py` to decouple the Core from Frameworks.
+    Loaded dynamically from `frameworks/definitions/torch.json`.
+
+    Returns:
+        Dictionary mapping operation abstract IDs to implementation details.
     """
-    return {
-      # --- 1. Math / Array Operations ---
-      "TorchFunctional": StandardMap(api="torch.nn.functional"),
-      "Abs": StandardMap(api="torch.abs"),
-      "Mean": StandardMap(api="torch.mean"),
-      "Sum": StandardMap(api="torch.sum"),
-      "Add": StandardMap(api="torch.add"),
-      "Sub": StandardMap(api="torch.sub"),
-      "Mul": StandardMap(api="torch.mul"),
-      "Div": StandardMap(api="torch.div"),
-      "Pow": StandardMap(api="torch.pow"),
-      "exp": StandardMap(api="torch.exp"),
-      "log": StandardMap(api="torch.log"),
-      "sqrt": StandardMap(api="torch.sqrt"),
-      "square": StandardMap(api="torch.square"),
-      # --- 2. Tensor Manipulation ---
-      "randn": StandardMap(api="torch.randn"),
-      "Clamp": StandardMap(api="torch.clamp"),
-      "Gather": StandardMap(api="torch.gather"),
-      "Scatter": StandardMap(api="torch.Tensor.scatter_"),
-      "Flatten": StandardMap(api="torch.flatten"),
-      "Reshape": StandardMap(api="torch.reshape"),
-      "View": StandardMap(api="torch.Tensor.view"),
-      "Squeeze": StandardMap(api="torch.squeeze"),
-      "Unsqueeze": StandardMap(api="torch.unsqueeze"),
-      "TopK": StandardMap(api="torch.topk"),
-      "ArgMax": StandardMap(api="torch.argmax"),
-      "ArgMin": StandardMap(api="torch.argmin"),
-      "Pad": StandardMap(api="torch.nn.functional.pad"),
-      "Einsum": StandardMap(api="torch.einsum"),
-      "permute_dims": StandardMap(api="torch.permute"),
-      "size": StandardMap(api="torch.Tensor.size"),
-      "OneHot": StandardMap(api="torch.nn.functional.one_hot"),
-      "max": StandardMap(api="torch.max"),
-      "min": StandardMap(api="torch.min"),
-      # --- 3. Types (Target Mapping) ---
-      "Float32": StandardMap(api="torch.float32"),
-      "Float64": StandardMap(api="torch.float64"),
-      "Float16": StandardMap(api="torch.float16"),
-      "Int64": StandardMap(api="torch.int64"),
-      "Int32": StandardMap(api="torch.int32"),
-      "Int16": StandardMap(api="torch.int16"),
-      "UInt8": StandardMap(api="torch.uint8"),
-      "Bool": StandardMap(api="torch.bool"),
-      # --- 4. Casting Logic ---
-      # Note: Torch casting is usually a method call `.float()`
-      # These mappings allow `CastFloat(x)` -> `x.float()` via transformation types if plugins support it,
-      # otherwise they map to `torch.Tensor.float` which rewriter handles as methods.
-      "CastFloat": StandardMap(api="torch.Tensor.float"),
-      "CastDouble": StandardMap(api="torch.Tensor.double"),
-      "CastHalf": StandardMap(api="torch.Tensor.half"),
-      "CastLong": StandardMap(api="torch.Tensor.long"),
-      "CastInt": StandardMap(api="torch.Tensor.int"),
-      "CastShort": StandardMap(api="torch.Tensor.short"),
-      "CastByte": StandardMap(api="torch.Tensor.byte"),
-      "CastBool": StandardMap(api="torch.Tensor.bool"),
-      "CastChar": StandardMap(api="torch.Tensor.char"),
-      # --- 5. Optimization ---
-      "Adam": StandardMap(api="torch.optim.Adam"),
-      "SGD": StandardMap(api="torch.optim.SGD"),
-      "RMSprop": StandardMap(api="torch.optim.RMSprop"),
-      "StepLR": StandardMap(api="torch.optim.lr_scheduler.StepLR"),
-      "CosineAnnealingLR": StandardMap(api="torch.optim.lr_scheduler.CosineAnnealingLR"),
-      "ClipGradNorm": StandardMap(api="torch.nn.utils.clip_grad_norm_"),
-      "step": StandardMap(api="optimizer.step"),
-      "zero_grad": StandardMap(api="optimizer.zero_grad"),
-      # --- 6. Neural Layers ---
-      "Linear": StandardMap(api="torch.nn.Linear"),
-      "Conv2d": StandardMap(api="torch.nn.Conv2d"),
-      "MaxPool2d": StandardMap(api="torch.nn.MaxPool2d"),
-      "MultiheadAttention": StandardMap(api="torch.nn.MultiheadAttention"),
-      "Embedding": StandardMap(api="torch.nn.Embedding"),
-      "Sequential": StandardMap(api="torch.nn.Sequential"),
-      "BatchNorm": StandardMap(api="torch.nn.BatchNorm2d"),
-      "LayerNorm": StandardMap(api="torch.nn.LayerNorm"),
-      "Dropout": StandardMap(api="torch.nn.Dropout"),
-      # --- 7. Activations & Loss ---
-      "GELU": StandardMap(api="torch.nn.GELU"),
-      "relu": StandardMap(api="torch.nn.functional.relu"),
-      "softmax": StandardMap(api="torch.nn.functional.softmax"),
-      "log_softmax": StandardMap(api="torch.nn.functional.log_softmax"),
-      "CrossEntropyLoss": StandardMap(api="torch.nn.functional.cross_entropy"),
-      "MSELoss": StandardMap(api="torch.nn.functional.mse_loss"),
-      # --- 8. Vision Transforms ---
-      "Resize": StandardMap(api="torchvision.transforms.Resize"),
-      "Normalize": StandardMap(api="torchvision.transforms.Normalize"),
-      "ToTensor": StandardMap(api="torchvision.transforms.ToTensor"),
-      "CenterCrop": StandardMap(api="torchvision.transforms.CenterCrop"),
-      "RandomCrop": StandardMap(api="torchvision.transforms.RandomCrop"),
-      "RandomHorizontalFlip": StandardMap(api="torchvision.transforms.RandomHorizontalFlip"),
-      "RandomVerticalFlip": StandardMap(api="torchvision.transforms.RandomVerticalFlip"),
-      "Grayscale": StandardMap(api="torchvision.transforms.Grayscale"),
-      # --- 9. State Management & Extras ---
-      "no_grad": StandardMap(api="torch.no_grad"),
-      "enable_grad": StandardMap(api="torch.enable_grad"),
-      "register_buffer": StandardMap(api="torch.nn.Module.register_buffer"),
-      "register_parameter": StandardMap(api="torch.nn.Module.register_parameter"),
-      "state_dict": StandardMap(api="torch.nn.Module.state_dict"),
-      "load_state_dict": StandardMap(api="torch.nn.Module.load_state_dict"),
-      "parameters": StandardMap(api="torch.nn.Module.parameters"),
-      "DataLoader": StandardMap(api="torch.utils.data.DataLoader"),
-      # --- Wired Orphans: IO & Devices ---
-      "Save": StandardMap(api="torch.save", args={"obj": "obj", "f": "f"}),
-      "Load": StandardMap(api="torch.load", args={"f": "f"}),
-      "Device": StandardMap(api="torch.device", requires_plugin="device_allocator"),
-      "CudaAvailable": StandardMap(api="torch.cuda.is_available"),  # <--- NEW: Wired Orphan
-      # --- 10. Container Logic (Reverse Mapping from Flax NNX) ---
-      "Param": StandardMap(api="torch.nn.Parameter"),
-      "Variable": StandardMap(api="torch.nn.Parameter", requires_plugin="nnx_param_to_torch"),
-      "Cache": StandardMap(api="torch.nn.Parameter", requires_plugin="nnx_param_to_torch"),
-      # --- 11. Functional Transforms ---
-      "vmap": StandardMap(
-        api="torch.vmap",
-        args={"func": "func", "in_axes": "in_dims", "out_axes": "out_dims"},
-      ),
-      "grad": StandardMap(api="torch.func.grad"),
-      "jit": StandardMap(api="torch.compile"),
-      "Compile": StandardMap(api="torch.compile"),
-      "Synchronize": StandardMap(api="torch.cuda.synchronize"),
-      "SiLU": StandardMap(api="torch.nn.functional.silu"),
-      "ModuleList": StandardMap(api="torch.nn.ModuleList"),
-      "TensorType": StandardMap(api="torch.Tensor"),
-      "Arange": StandardMap(api="torch.arange", args={"stop": "end"}),
-      "Ones": StandardMap(api="torch.ones", args={"shape": "size"}),
-      "Concatenate": StandardMap(api="torch.cat", args={"axis": "dim"}),
-      "Zeros": StandardMap(api="torch.zeros", args={"shape": "size"}),
-      "Concatenate": StandardMap(api="torch.cat", args={"axis": "dim"}),
-      "Zeros": StandardMap(api="torch.zeros", args={"shape": "size"}),
-      "RandInt": StandardMap(api="torch.randint", args={"shape": "size"}),
-      "Array": StandardMap(api="torch.tensor"),
-      "Pad": StandardMap(api="torch.nn.functional.pad"),
-      "AssertClose": StandardMap(api="torch.testing.assert_close"),
-    }
+    return load_definitions("torch")
 
   # --- Syntax Generators ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """
     Generates code for device creation.
-    Example: "torch.device('cuda', 0)"
+
+    Args:
+        device_type: The device type string (e.g. 'cuda', 'cpu').
+        device_index: The optional device index.
+
+    Returns:
+        Code string for device creation.
     """
     args = [str(device_type)]
     if device_index:
@@ -394,23 +329,46 @@ class TorchAdapter:
   def get_device_check_syntax(self) -> str:
     """
     Returns PyTorch syntax for checking CUDA availability.
+
+    Returns:
+        Python expression string.
     """
     return "torch.cuda.is_available()"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """
+    Returns syntax for splitting RNG state.
     PyTorch uses global state-based randomness, so explicit splitting is a no-op.
-    Returns 'pass' to maintain valid block syntax if injected blindly.
+
+    Args:
+        rng_var: Variable name holding random state.
+        key_var: Variable name for the new key.
+
+    Returns:
+        'pass' string (No-op).
     """
     return "pass"
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns imports required for IO operations."""
+    """
+    Returns imports required for IO operations.
+
+    Returns:
+        List of import statements.
+    """
     return ["import torch"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """
     Generates save/load syntax.
+
+    Args:
+        op: Operation name ('save' or 'load').
+        file_arg: Code string representing the file path.
+        object_arg: Code string representing the object to save (optional).
+
+    Returns:
+        Python code string for the operation.
     """
     if op == "save" and object_arg:
       return f"torch.save({object_arg}, {file_arg})"
@@ -422,10 +380,11 @@ class TorchAdapter:
     """
     Returns the official PyTorch documentation URL.
 
-    Handles namespaces:
-    - `torch.nn.init.*` -> `https://pytorch.org/docs/stable/nn.init.html#{name}`
-    - `torch.optim.*` -> `https://pytorch.org/docs/stable/optim.html#{name}` (Often grouped)
-    - Default -> `https://pytorch.org/docs/stable/generated/{name}.html`
+    Args:
+        api_name: The fully qualified API name.
+
+    Returns:
+        URL string or None.
     """
     if "nn.init" in api_name:
       return f"https://pytorch.org/docs/stable/nn.init.html#{api_name}"
@@ -434,12 +393,20 @@ class TorchAdapter:
 
   @classmethod
   def get_example_code(cls) -> str:
-    """Default example for documentation."""
+    """
+    Default example for documentation.
+
+    Returns:
+        Source code string.
+    """
     return cls().get_tiered_examples()["tier1_math"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """
     Provides code snippets for "Wizard" or "Demo" usage.
+
+    Returns:
+        Dictionary mapping tier IDs to code snippets.
     """
     return {
       "tier1_math": """import torch\n\ndef math_ops(x, y):\n    # Tier 1: Core Tensor Operations\n    a = torch.abs(x)\n    b = torch.add(a, y)\n    \n    # Reduction\n    return torch.mean(b)\n""",
@@ -451,6 +418,12 @@ class TorchAdapter:
   def convert(self, data: Any) -> Any:
     """
     Converts input data (numpy, lists) into PyTorch Tensors for verification runners.
+
+    Args:
+        data: Input data structure.
+
+    Returns:
+        Converted PyTorch Tensor or original data if conversion fails.
     """
     try:
       import torch
@@ -476,20 +449,42 @@ class TorchAdapter:
     Implementation of the Ghost Protocol.
     Scans the locally installed PyTorch library for API definitions corresponding
     to the requested category (Loss, Layer, etc.).
+
+    Args:
+        category: The standard category to search for.
+
+    Returns:
+        List of discovered API references.
     """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
     return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
-    """Loads definitions from JSON snapshot."""
+    """
+    Loads definitions from JSON snapshot.
+
+    Args:
+        category: The standard category to filter by.
+
+    Returns:
+        List of hydrated GhostRef objects.
+    """
     if not self._snapshot_data:
       return []
     raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
     return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
-    """Introspects live torch modules."""
+    """
+    Introspects live torch modules.
+
+    Args:
+        category: The standard category to filter by.
+
+    Returns:
+        List of discovered GhostRef objects.
+    """
     results = []
     if category == StandardCategory.LOSS:
       results.extend(self._scan_losses())
@@ -502,6 +497,12 @@ class TorchAdapter:
     return results
 
   def _scan_losses(self) -> List[GhostRef]:
+    """
+    Scans `torch.nn` for Loss classes.
+
+    Returns:
+        List of discovered loss classes.
+    """
     if not nn:
       return []
     found = []
@@ -512,6 +513,12 @@ class TorchAdapter:
     return found
 
   def _scan_optimizers(self) -> List[GhostRef]:
+    """
+    Scans `torch.optim` for Optimizer classes.
+
+    Returns:
+        List of discovered optimizer classes.
+    """
     if not optim:
       return []
     found = []
@@ -525,6 +532,12 @@ class TorchAdapter:
     return found
 
   def _scan_activations(self) -> List[GhostRef]:
+    """
+    Scans `torch.nn.modules.activation` and `torch.nn.functional` for activation functions.
+
+    Returns:
+        List of discovered activation functions.
+    """
     found = []
     known_names = {
       "ReLU",
@@ -576,6 +589,12 @@ class TorchAdapter:
     return found
 
   def _scan_layers(self) -> List[GhostRef]:
+    """
+    Scans `torch.nn` for Layer classes.
+
+    Returns:
+        List of discovered layer classes, excluding Losses.
+    """
     if not nn:
       return []
     found = []
@@ -589,7 +608,12 @@ class TorchAdapter:
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """
     Apply manual patches to the standard mappings if necessary.
+    Used to inject complex behaviors not captured by simple API scanning.
+
+    Args:
+        snapshot: The snapshot dictionary to update in-place.
     """
     mappings = snapshot.setdefault("mappings", {})
+    # Example of manual wiring for sort output adaptation
     if "sort" in mappings:
       mappings["sort"]["output_adapter"] = "lambda x: x.values"

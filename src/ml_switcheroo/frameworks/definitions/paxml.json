@@ -1,0 +1,26 @@
+{
+  "Dropout": {
+    "api": "praxis.layers.Dropout",
+    "args": {
+      "p": "keep_prob"
+    },
+    "required_imports": []
+  },
+  "Embedding": {
+    "api": "praxis.layers.Embedding",
+    "required_imports": []
+  },
+  "Linear": {
+    "api": "praxis.layers.Linear",
+    "args": {
+      "bias": "use_bias",
+      "in_features": "input_dims",
+      "out_features": "output_dims"
+    },
+    "required_imports": []
+  },
+  "Sequential": {
+    "api": "praxis.layers.Sequential",
+    "required_imports": []
+  }
+}

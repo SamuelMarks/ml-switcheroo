@@ -1,0 +1,38 @@
+{
+  "Conv2d": {
+    "api": "html_dsl.Conv2d",
+    "args": {
+      "in_channels": "i",
+      "kernel_size": "k",
+      "out_channels": "o"
+    },
+    "required_imports": []
+  },
+  "Flatten": {
+    "api": "html_dsl.Flatten",
+    "args": {
+      "start_dim": "start"
+    },
+    "required_imports": []
+  },
+  "Linear": {
+    "api": "html_dsl.Linear",
+    "args": {
+      "in_features": "i",
+      "out_features": "o"
+    },
+    "required_imports": []
+  },
+  "Module": {
+    "api": "html_dsl.Module",
+    "required_imports": []
+  },
+  "ReLU": {
+    "api": "html_dsl.ReLU",
+    "required_imports": []
+  },
+  "relu": {
+    "api": "html_dsl.relu",
+    "required_imports": []
+  }
+}

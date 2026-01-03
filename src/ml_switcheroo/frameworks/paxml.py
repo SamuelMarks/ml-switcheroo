@@ -11,7 +11,7 @@ such as the ``setup()`` lifecycle method for layer definition.
 
 import logging
 import textwrap
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Any, Optional, Set
 
 try:
   import praxis
@@ -37,6 +37,7 @@ from ml_switcheroo.core.ghost import GhostInspector
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.frameworks.loader import load_definitions
 
 
 @register_framework("paxml")
@@ -177,6 +178,16 @@ class PaxmlAdapter(JAXStackMixin):
     ]
 
   @property
+  def unsafe_submodules(self) -> Set[str]:
+    """
+    Safe defaults.
+
+    Returns:
+        Set[str]: Empty set.
+    """
+    return set()
+
+  @property
   def import_alias(self) -> Tuple[str, str]:
     """
     Returns the primary import alias for the framework.
@@ -241,14 +252,14 @@ class PaxmlAdapter(JAXStackMixin):
     Returns:
         str: Source code for ``_make_jax_key``.
     """
-    return textwrap.dedent(""" 
-        def _make_jax_key(seed): 
-            try: 
-                import jax
-                return jax.random.PRNGKey(seed) 
-            except ImportError: 
-                return "mock_jax_key" 
-      """).strip()
+    return textwrap.dedent("""
+            def _make_jax_key(seed):
+                try:
+                    import jax
+                    return jax.random.PRNGKey(seed)
+                except ImportError:
+                    return "mock_jax_key"
+        """).strip()
 
   @property
   def supported_tiers(self) -> List[Any]:
@@ -314,26 +325,12 @@ class PaxmlAdapter(JAXStackMixin):
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Returns static definitions for Praxis Layers.
-
-    Maps standard Neural ops (Linear, Dropout, Embedding) to ``praxis.layers.*``
-    and handles specific argument renaming (e.g. in_features -> input_dims).
+    Loaded dynamically from `frameworks/definitions/paxml.json`.
 
     Returns:
         Dict[str, StandardMap]: The mapping dictionary.
     """
-    return {
-      "Linear": StandardMap(
-        api="praxis.layers.Linear",
-        args={
-          "in_features": "input_dims",
-          "out_features": "output_dims",
-          "bias": "use_bias",
-        },
-      ),
-      "Dropout": StandardMap(api="praxis.layers.Dropout", args={"p": "keep_prob"}),
-      "Embedding": StandardMap(api="praxis.layers.Embedding"),
-      "Sequential": StandardMap(api="praxis.layers.Sequential"),
-    }
+    return load_definitions("paxml")
 
   @property
   def rng_seed_methods(self) -> List[str]:
@@ -371,6 +368,12 @@ class PaxmlAdapter(JAXStackMixin):
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """
     Generates GitHub search URL for PaxML APIs since documentation is sparse.
+
+    Args:
+        api_name: API Path.
+
+    Returns:
+        str: URL.
     """
     return f"https://github.com/search?q=repo%3Agoogle%2Fpaxml+{api_name}&type=code"
 
@@ -396,30 +399,30 @@ class PaxmlAdapter(JAXStackMixin):
       "tier2_neural": """import praxis.layers as pl
 from praxis import base_layer
 
-class SimpleMLP(base_layer.BaseLayer): 
+class SimpleMLP(base_layer.BaseLayer):
     # Tier 2: Praxis Layer Definition
-    # Note the use of 'setup()' instead of '__init__' 
+    # Note the use of 'setup()' instead of '__init__'
 
-    def setup(self): 
-        # Layers are instantiated in setup() 
-        self.fc1 = pl.Linear(output_dims=128) 
-        self.fc2 = pl.Linear(output_dims=10) 
-        self.dropout = pl.Dropout(keep_prob=0.5) 
+    def setup(self):
+        # Layers are instantiated in setup()
+        self.fc1 = pl.Linear(output_dims=128)
+        self.fc2 = pl.Linear(output_dims=10)
+        self.dropout = pl.Dropout(keep_prob=0.5)
 
-    def __call__(self, x): 
-        x = self.fc1(x) 
-        x = pl.relu(x) 
-        x = self.dropout(x) 
-        return self.fc2(x) 
+    def __call__(self, x):
+        x = self.fc1(x)
+        x = pl.relu(x)
+        x = self.dropout(x)
+        return self.fc2(x)
 """,
       "tier3_extras": """import praxis.layers as pl
 from praxis import pax_fiddle
 
-def get_model_config(): 
+def get_model_config():
     # Tier 3: HParams Configuration
     # Praxis often relies on fiddle/HParams for configuration
 
-    p = pax_fiddle.Config(pl.Linear, name="my_linear") 
+    p = pax_fiddle.Config(pl.Linear, name="my_linear")
     p.input_dims = 64
     p.output_dims = 10
 

@@ -1,0 +1,14 @@
+{
+  "InferredOp": {
+    "api": "mock_fw.discovered_api",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NewOp": {
+    "api": "lib.op",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  }
+}

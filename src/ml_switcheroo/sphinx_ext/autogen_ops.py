@@ -133,6 +133,9 @@ def generate_op_docs(app: Sphinx) -> None:
   # app.srcdir usually points to 'docs/'
   out_dir = Path(app.srcdir) / "ops"
 
+  # Ensure directory exists
+  out_dir.mkdir(parents=True, exist_ok=True)
+
   logger.info(f"[ml-switcheroo] Generating Operation Docs in {out_dir}")
 
   semantics = SemanticsManager()
@@ -163,13 +166,16 @@ def generate_op_docs(app: Sphinx) -> None:
     safe_name = "".join(c for c in op_name if c.isalnum() or c in ("_", "-"))
 
     try:
-      with open(ops_dir / f"{safe_name}.rst", "w", encoding="utf-8") as f:
+      with open(out_dir / f"{safe_name}.rst", "w", encoding="utf-8") as f:
         f.write(rst_content)
       generated_files.append(safe_name)
     except IOError:
       pass
 
-  _write_index_file(ops_dir, generated_files)
+  _write_index_file(out_dir, generated_files)
+
+  # docs root is usually app.srcdir (the folder containing conf.py and index.rst)
+  docs_root = Path(app.srcdir)
   _write_yaml_update(docs_root / "operations.yaml", yaml_entries)
 
 

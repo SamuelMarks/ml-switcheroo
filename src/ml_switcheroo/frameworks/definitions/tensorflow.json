@@ -1,0 +1,238 @@
+{
+  "Abs": {
+    "api": "tf.abs",
+    "required_imports": []
+  },
+  "Add": {
+    "api": "tf.math.add",
+    "required_imports": []
+  },
+  "Arange": {
+    "api": "tf.range",
+    "args": {
+      "step": "delta",
+      "stop": "limit"
+    },
+    "required_imports": []
+  },
+  "ArgMax": {
+    "api": "tf.math.argmax",
+    "required_imports": []
+  },
+  "ArgMin": {
+    "api": "tf.math.argmin",
+    "required_imports": []
+  },
+  "Array": {
+    "api": "tf.constant",
+    "args": {
+      "data": "value"
+    },
+    "required_imports": []
+  },
+  "AssertClose": {
+    "api": "tf.debugging.assert_near",
+    "args": {
+      "actual": "x",
+      "expected": "y"
+    },
+    "required_imports": []
+  },
+  "Bool": {
+    "api": "tf.bool",
+    "required_imports": []
+  },
+  "CastBool": {
+    "api": "tf.cast",
+    "inject_args": {
+      "dtype": "tf.bool"
+    },
+    "required_imports": []
+  },
+  "CastByte": {
+    "api": "tf.cast",
+    "inject_args": {
+      "dtype": "tf.uint8"
+    },
+    "required_imports": []
+  },
+  "CastDouble": {
+    "api": "tf.cast",
+    "inject_args": {
+      "dtype": "tf.float64"
+    },
+    "required_imports": []
+  },
+  "CastFloat": {
+    "api": "tf.cast",
+    "inject_args": {
+      "dtype": "tf.float32"
+    },
+    "required_imports": []
+  },
+  "CastHalf": {
+    "api": "tf.cast",
+    "inject_args": {
+      "dtype": "tf.float16"
+    },
+    "required_imports": []
+  },
+  "CastInt": {
+    "api": "tf.cast",
+    "inject_args": {
+      "dtype": "tf.int32"
+    },
+    "required_imports": []
+  },
+  "CastLong": {
+    "api": "tf.cast",
+    "inject_args": {
+      "dtype": "tf.int64"
+    },
+    "required_imports": []
+  },
+  "CastShort": {
+    "api": "tf.cast",
+    "inject_args": {
+      "dtype": "tf.int16"
+    },
+    "required_imports": []
+  },
+  "Concatenate": {
+    "api": "tf.concat",
+    "args": {
+      "tensors": "values"
+    },
+    "required_imports": []
+  },
+  "CudaAvailable": {
+    "api": "tf.config.list_physical_devices",
+    "required_imports": [],
+    "requires_plugin": "cuda_is_available"
+  },
+  "DataLoader": {
+    "api": "tf.data.Dataset",
+    "required_imports": [],
+    "requires_plugin": "tf_data_loader"
+  },
+  "Div": {
+    "api": "tf.math.divide",
+    "required_imports": []
+  },
+  "Float16": {
+    "api": "tf.float16",
+    "required_imports": []
+  },
+  "Float32": {
+    "api": "tf.float32",
+    "required_imports": []
+  },
+  "Float64": {
+    "api": "tf.float64",
+    "required_imports": []
+  },
+  "Int16": {
+    "api": "tf.int16",
+    "required_imports": []
+  },
+  "Int32": {
+    "api": "tf.int32",
+    "required_imports": []
+  },
+  "Int64": {
+    "api": "tf.int64",
+    "required_imports": []
+  },
+  "Load": {
+    "api": "load",
+    "required_imports": [
+      "import tensorflow as tf"
+    ],
+    "requires_plugin": "io_handler"
+  },
+  "Mean": {
+    "api": "tf.math.reduce_mean",
+    "required_imports": []
+  },
+  "Mul": {
+    "api": "tf.math.multiply",
+    "required_imports": []
+  },
+  "Ones": {
+    "api": "tf.ones",
+    "required_imports": []
+  },
+  "Pad": {
+    "api": "tf.pad",
+    "args": {
+      "input": "tensor",
+      "pad": "paddings",
+      "value": "constant_values"
+    },
+    "required_imports": [],
+    "requires_plugin": "padding_converter"
+  },
+  "RandInt": {
+    "api": "tf.random.uniform",
+    "args": {
+      "high": "maxval",
+      "low": "minval"
+    },
+    "inject_args": {
+      "dtype": "tf.int32"
+    },
+    "required_imports": []
+  },
+  "Save": {
+    "api": "save",
+    "required_imports": [
+      "import tensorflow as tf"
+    ],
+    "requires_plugin": "io_handler"
+  },
+  "SiLU": {
+    "api": "tensorflow.nn.silu",
+    "required_imports": []
+  },
+  "Sub": {
+    "api": "tf.math.subtract",
+    "required_imports": []
+  },
+  "Sum": {
+    "api": "tf.math.reduce_sum",
+    "required_imports": []
+  },
+  "TensorType": {
+    "api": "tensorflow.Tensor",
+    "required_imports": []
+  },
+  "UInt8": {
+    "api": "tf.uint8",
+    "required_imports": []
+  },
+  "Zeros": {
+    "api": "tf.zeros",
+    "required_imports": []
+  },
+  "exp": {
+    "api": "tf.math.exp",
+    "required_imports": []
+  },
+  "log": {
+    "api": "tf.math.log",
+    "required_imports": []
+  },
+  "permute_dims": {
+    "api": "tf.transpose",
+    "pack_to_tuple": "perm",
+    "required_imports": []
+  },
+  "randn": {
+    "api": "tf.random.normal",
+    "required_imports": []
+  },
+  "square": {
+    "api": "tf.math.square",
+    "required_imports": []
+  }
+}

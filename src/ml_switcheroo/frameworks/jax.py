@@ -10,11 +10,9 @@ to a high-level neural network library like Flax or Haiku. It maps:
 It specifically enables `requires_explicit_rng` in plugin traits.
 """
 
-import numpy
-
 import logging
 import textwrap
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Any, Optional, Set
 
 try:
   import jax
@@ -27,10 +25,10 @@ from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
   PluginTraits,
-  InitMode,
-  StandardCategory,
   StandardMap,
   ImportConfig,
+  StandardCategory,
+  InitMode,
   GhostRef,
   load_snapshot_for_adapter,
 )
@@ -38,6 +36,7 @@ from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.ghost import GhostInspector
 from ml_switcheroo.frameworks.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
+from ml_switcheroo.frameworks.loader import load_definitions
 
 
 @register_framework("jax")
@@ -75,10 +74,25 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def search_modules(self) -> List[str]:
-    """Scans only core math and optimization libraries (no neural layers)."""
+    """
+    Scans only core math and optimization libraries (no neural layers).
+
+    Returns:
+        List[str]: List of module names.
+    """
     if self._mode == InitMode.GHOST:
       return []
     return ["jax.numpy", "jax.numpy.linalg", "jax.numpy.fft", "optax"]
+
+  @property
+  def unsafe_submodules(self) -> Set[str]:
+    """
+    Returns a set of submodule names to exclude from recursive introspection.
+
+    Returns:
+        Set[str]: Explicitly empty set (safe to scan default paths).
+    """
+    return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -89,6 +103,9 @@ class JaxCoreAdapter(JAXStackMixin):
   def import_namespaces(self) -> Dict[str, ImportConfig]:
     """
     Self-declared namespace roles.
+
+    Returns:
+        Dict[str, ImportConfig]: Map of paths to configuration.
     """
     return {
       "jax": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="jax"),
@@ -100,7 +117,12 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Regex patterns for identifying API categories."""
+    """
+    Regex patterns for identifying API categories.
+
+    Returns:
+        Dict[str, List[str]]: Tier to regex patterns mapping.
+    """
     return {
       "array": [r"jax\\.numpy\\.", r"jnp\\."],
       "extras": [r"jax\\.random\\.", r"jax\\.lax\\.", r"optax\\."],
@@ -122,13 +144,13 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     Returns logic to create JAX PRNG Keys.
     """
-    return textwrap.dedent(""" 
-            def _make_jax_key(seed): 
-                "Attempts to create a JAX PRNGKey." 
-                try: 
-                    return jax.random.PRNGKey(seed) 
-                except (ImportError, AttributeError): 
-                    return "mock_jax_key" 
+    return textwrap.dedent("""
+            def _make_jax_key(seed):
+                "Attempts to create a JAX PRNGKey."
+                try:
+                    return jax.random.PRNGKey(seed)
+                except (ImportError, AttributeError):
+                    return "mock_jax_key"
         """).strip()
 
   @property
@@ -141,6 +163,9 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     Defines JAX structural behavior (Transformation rules).
     Specifies JIT static arguments for compilation safety.
+
+    Returns:
+        StructuralTraits: Configuration object.
     """
     return StructuralTraits(
       module_base=None,
@@ -169,6 +194,9 @@ class JaxCoreAdapter(JAXStackMixin):
     Enables NumPy compatibility and explicit RNG threading.
 
     IMPORTANT: Enforces Purity Analysis to catch side-effects unsafe for functional trace.
+
+    Returns:
+        PluginTraits: Configuration flags.
     """
     return PluginTraits(
       has_numpy_compatible_arrays=True,
@@ -189,120 +217,12 @@ class JaxCoreAdapter(JAXStackMixin):
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Static Definitions for JAX Core, Optax, Orbax, and Types.
-    Moved from `standards_internal.py` for decoupling.
+    Loaded dynamically from `frameworks/definitions/jax.json`.
+
+    Returns:
+        Dict[str, StandardMap]: Mapping of definitions.
     """
-    return {
-      # --- Math / Array ---
-      "TorchFunctional": StandardMap(api="jax.nn"),
-      "Abs": StandardMap(api="jnp.abs"),
-      "Mean": StandardMap(api="jnp.mean"),
-      "Sum": StandardMap(api="jnp.sum"),
-      "Add": StandardMap(api="jnp.add"),
-      "Sub": StandardMap(api="jnp.subtract"),
-      "Mul": StandardMap(api="jnp.multiply"),
-      "Div": StandardMap(api="jnp.divide"),
-      "Pow": StandardMap(api="jnp.power"),
-      "exp": StandardMap(api="jnp.exp"),
-      "log": StandardMap(api="jnp.log"),
-      "sqrt": StandardMap(api="jnp.sqrt"),
-      "square": StandardMap(api="jnp.square"),
-      "randn": StandardMap(api="jax.random.normal", requires_plugin="inject_prng"),
-      "Clamp": StandardMap(api="jax.numpy.clip", args={"min": "a_min", "max": "a_max", "input": "a"}),
-      "Gather": StandardMap(api="jax.numpy.take_along_axis", requires_plugin="gather_adapter"),
-      "Scatter": StandardMap(api="jax.ops.index_update", requires_plugin="scatter_indexer"),
-      "Flatten": StandardMap(api="jax.numpy.reshape", requires_plugin="flatten_range"),
-      "Reshape": StandardMap(api="jax.numpy.reshape", requires_plugin="pack_shape_args"),
-      "View": StandardMap(api="jax.numpy.reshape", requires_plugin="view_semantics"),
-      "Squeeze": StandardMap(api="jax.numpy.squeeze", args={"dim": "axis"}),
-      "Unsqueeze": StandardMap(api="jax.numpy.expand_dims", args={"dim": "axis"}),
-      "TopK": StandardMap(api="jax.lax.top_k", requires_plugin="topk_adapter"),
-      "ArgMax": StandardMap(api="jax.numpy.argmax", args={"dim": "axis"}),
-      "ArgMin": StandardMap(api="jax.numpy.argmin", args={"dim": "axis"}),
-      "Pad": StandardMap(api="jax.numpy.pad", requires_plugin="padding_converter"),
-      "Einsum": StandardMap(api="jnp.einsum", requires_plugin="einsum_normalizer"),
-      "permute_dims": StandardMap(api="jnp.transpose", pack_to_tuple="axes"),
-      "size": StandardMap(api="shape", requires_plugin="method_to_property"),
-      "OneHot": StandardMap(api="jax.nn.one_hot", args={"tensor": "x", "input": "x"}),
-      "max": StandardMap(api="jnp.max"),
-      "min": StandardMap(api="jnp.min"),
-      # --- Activation (Math Tier) ---
-      "relu": StandardMap(api="jax.nn.relu"),
-      "softmax": StandardMap(api="jax.nn.softmax"),
-      "log_softmax": StandardMap(api="jax.nn.log_softmax"),
-      "GELU": StandardMap(api="jax.nn.gelu"),
-      # --- Optimization (Optax) ---
-      "Adam": StandardMap(api="optax.adam", requires_plugin="optimizer_constructor"),
-      "SGD": StandardMap(api="optax.sgd", requires_plugin="optimizer_constructor"),
-      "RMSprop": StandardMap(api="optax.rmsprop", requires_plugin="optimizer_constructor"),
-      "StepLR": StandardMap(api="optax.exponential_decay", requires_plugin="scheduler_rewire"),
-      "CosineAnnealingLR": StandardMap(api="optax.cosine_decay_schedule", requires_plugin="scheduler_rewire"),
-      "ClipGradNorm": StandardMap(api="optax.clip_by_global_norm", requires_plugin="grad_clipper"),
-      "step": StandardMap(api="optimizer_step", requires_plugin="optimizer_step"),
-      "zero_grad": StandardMap(api="optimizer_zero_grad", requires_plugin="optimizer_zero_grad"),
-      "CrossEntropyLoss": StandardMap(
-        api="optax.softmax_cross_entropy_with_integer_labels",
-        args={"input": "logits", "target": "labels"},
-        requires_plugin="loss_reduction",
-      ),
-      "MSELoss": StandardMap(
-        api="optax.l2_loss", args={"input": "predictions", "target": "targets"}, requires_plugin="loss_reduction"
-      ),
-      # --- Types (Core Dtypes) ---
-      "Float32": StandardMap(api="jnp.float32"),
-      "Float64": StandardMap(api="jnp.float64"),
-      "Float16": StandardMap(api="jnp.float16"),
-      "Int64": StandardMap(api="jnp.int64"),
-      "Int32": StandardMap(api="jnp.int32"),
-      "Int16": StandardMap(api="jnp.int16"),
-      "UInt8": StandardMap(api="jnp.uint8"),
-      "Bool": StandardMap(api="jnp.bool_"),
-      # --- Casting (via Plugin) ---
-      "CastFloat": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastDouble": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastHalf": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastLong": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastInt": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastShort": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastByte": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastChar": StandardMap(api="astype", requires_plugin="type_methods"),
-      # --- Extras & Contexts ---
-      "no_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
-      "enable_grad": StandardMap(api="contextlib.nullcontext", requires_plugin="context_to_function_wrap"),
-      "DataLoader": StandardMap(api="GenericDataLoader", requires_plugin="convert_dataloader"),
-      "LoadStateDict": StandardMap(api="KeyMapper.from_torch", requires_plugin="checkpoint_mapper"),
-      # --- Wired Orphans ---
-      "Save": StandardMap(api="save", requires_plugin="io_handler", required_imports=["import orbax.checkpoint"]),
-      "Load": StandardMap(api="load", requires_plugin="io_handler", required_imports=["import orbax.checkpoint"]),
-      "Device": StandardMap(api="jax.devices", requires_plugin="device_allocator"),
-      "CudaAvailable": StandardMap(api="jax.devices", requires_plugin="cuda_is_available"),  # <--- NEW: Wired Orphan
-      # -------------------------------
-      # --- Functional Transforms ---
-      "vmap": StandardMap(api="jax.vmap", args={"func": "fun"}),
-      "grad": StandardMap(api="jax.grad", args={"func": "fun"}),
-      "jit": StandardMap(api="jax.jit", args={"func": "fun"}),
-      "SiLU": StandardMap(api="jax.nn.silu"),
-      "ModuleList": StandardMap(),
-      "TensorType": StandardMap(api="jax.Array"),
-      "Arange": StandardMap(api="jax.numpy.arange"),
-      "Ones": StandardMap(api="jax.numpy.ones"),
-      "Concatenate": StandardMap(api="jax.numpy.concatenate", args={"tensors": "arrays"}),
-      "Zeros": StandardMap(api="jax.numpy.zeros"),
-      "Concatenate": StandardMap(api="jax.numpy.concatenate"),
-      "Zeros": StandardMap(api="jax.numpy.zeros"),
-      "RandInt": StandardMap(
-        api="jax.random.randint", args={"low": "minval", "high": "maxval"}, requires_plugin="inject_prng"
-      ),
-      "Array": StandardMap(api="jax.numpy.array"),
-      "Pad": StandardMap(
-        api="jax.numpy.pad",
-        args={"input": "array", "pad": "pad_width", "value": "constant_values"},
-        requires_plugin="padding_converter",
-      ),
-      "AssertClose": StandardMap(
-        api="numpy.testing.assert_allclose", args={"expected": "desired"}, required_imports=["import numpy"]
-      ),
-    }
+    return load_definitions("jax")
 
   # --- Discovery ---
 
@@ -310,18 +230,26 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     Collects API signatures for discovering new Standards.
     Supports both Live introspection and Ghost Mode snapshots.
+
+    Args:
+        category (StandardCategory): Category to scan.
+
+    Returns:
+        List[GhostRef]: Found API references.
     """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
     return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
+    """Loads from snapshot."""
     if not self._snapshot_data:
       return []
     raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
     return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
+    """Scans installed JAX/Optax modules."""
     results = []
 
     # Level 1: Optax is core to the JAX ecosystem for optimization/loss
@@ -339,6 +267,9 @@ class JaxCoreAdapter(JAXStackMixin):
   def _scan_jax_activations(self) -> List[GhostRef]:
     """
     Dynamically scans jax.nn for activation-like functions.
+
+    Returns:
+        List[GhostRef]: Found activation functions.
     """
     if jax is None:
       return []
@@ -366,6 +297,12 @@ class JaxCoreAdapter(JAXStackMixin):
   def convert(self, data: Any) -> Any:
     """
     Converts input data to a JAX array for verification.
+
+    Args:
+        data (Any): Input data.
+
+    Returns:
+        Any: JAX Array.
     """
     try:
       import jax.numpy as jnp
@@ -380,6 +317,9 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     Applies Level 0/1 Stack wiring.
     Populates the JSON snapshot with manually wired logic.
+
+    Args:
+        snapshot (Dict[str, Any]): The snapshot to modify.
     """
     self._apply_stack_wiring(snapshot)
 
@@ -387,11 +327,21 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @classmethod
   def get_example_code(cls) -> str:
-    """Returns a generic JAX example."""
+    """
+    Returns a generic JAX example.
+
+    Returns:
+        str: Source code.
+    """
     return """import jax.numpy as jnp\nfrom jax import grad, jit\n\ndef predict(params, x):\n  return jnp.dot(x, params['w']) + params['b']"""
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Provides default tiered examples for the base adapter."""
+    """
+    Provides default tiered examples for the base adapter.
+
+    Returns:
+        Dict[str, str]: Mapping of tier name to source code.
+    """
     return {
       "tier1_math": self.get_example_code(),
       "tier2_neural": "# JAX (Core) does not include a neural network layer library.\n# Use Flax or Haiku for layer abstractions.",
@@ -401,6 +351,12 @@ class JaxCoreAdapter(JAXStackMixin):
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """
     Generates JAX core documentation URL.
+
+    Args:
+        api_name (str): API path.
+
+    Returns:
+        Optional[str]: URL string.
     """
     return super().get_doc_url(api_name)
 

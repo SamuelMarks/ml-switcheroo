@@ -1,172 +1,171 @@
 """
-MLIR Framework Adapter.
+MLIR Intermediate Representation Adapter.
 
-This module provides the pseudo-adapter for Multi-Level Intermediate Representation (MLIR).
-It registers "mlir" as a valid source/target key in the system, enabling the Engine
-to route conversion logic through the MLIR Emitter/Generator path instead of the
-standard Python AST Rewriter path.
+This adapter provides support for pivoting through the Multi-Level Intermediate Representation
+(MLIR) format. It serves primarily as a validation target for the `Python -> MLIR -> Python`
+roundtrip pipeline.
 
-It does not provide semantic mappings (Definitions) because MLIR transformation
-is structural, not API-based.
+It exposes NO definitions (empty dict) as MLIR translation is handled structurally
+by the Emitter/Parser, not by semantic mapping.
 """
 
-from typing import Any, Dict, List, Set, Tuple, Optional
+from typing import Dict, List, Optional, Any, Tuple, Set
 
-from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import (
-  ImportConfig,
-  PluginTraits,
-  StandardMap,
-  StructuralTraits,
   register_framework,
+  FrameworkAdapter,
+  StructuralTraits,
+  PluginTraits,
+  StandardCategory,
+  StandardMap,
+  ImportConfig,
+  InitMode,
+  GhostRef,
 )
-from ml_switcheroo.semantics.schema import OpDefinition
+from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.frameworks.loader import load_definitions
 
 
 @register_framework("mlir")
-class MlirAdapter:
+class MlirAdapter(FrameworkAdapter):
   """
-  Adapter for the Multi-Level Intermediate Representation key.
-
-  Acts as a bridge for the ASTEngine to trigger Emitter/Generator logic.
-  Unlike standard frameworks, this adapter does not scan modules or provide
-  semantic mappings, as MLIR is an internal structural representation.
+  Adapter for MLIR (Intermediate).
   """
 
   display_name: str = "MLIR (Intermediate)"
-  # Place at the end of the list visually
-  ui_priority: int = 900
-  inherits_from = None
+  ui_priority: int = 2000
+  inherits_from: Optional[str] = None
 
   def __init__(self) -> None:
-    """Initialize the adapter."""
-    pass
-
-  @property
-  def search_modules(self) -> List[str]:
-    """MLIR is not a Python package, so no modules to scan."""
-    return []
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """No unsafe submodules."""
-    return set()
-
-  @property
-  def import_alias(self) -> Tuple[str, str]:
-    """Virtual alias for import logic."""
-    return ("mlir", "sw")
-
-  @property
-  def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """No namespaces to map."""
-    return {}
-
-  @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """No heuristics needed."""
-    return {}
-
-  @property
-  def supported_tiers(self) -> List[SemanticTier]:
-    """MLIR supports representing all tiers structurally."""
-    return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
-
-  @property
-  def structural_traits(self) -> StructuralTraits:
-    """Default traits (no special class rewriting rules)."""
-    return StructuralTraits()
-
-  @property
-  def plugin_traits(self) -> PluginTraits:
-    """Default traits."""
-    return PluginTraits()
+    """Init."""
+    self._mode = InitMode.GHOST
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """
-    No semantic definitions.
+    Returns empty definitions as MLIR logic is structural, not mapped.
+    Still uses loader for consistency if a file is ever added.
 
-    Logic is handled by the Emitter/Generator, not the semantic rewriter.
+    Returns:
+        Dict[str, StandardMap]: Definitions.
     """
+    return load_definitions("mlir")
+
+  @property
+  def specifications(self) -> Dict:
+    """Empty specs."""
     return {}
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]:
-    """No semantic specifications."""
-    return {}
-
-  # Required methods for Protocol compliance
-  @property
-  def harness_imports(self) -> List[str]:
-    """No harness imports."""
+  def search_modules(self) -> List[str]:
+    """Empty."""
     return []
 
   @property
-  def test_config(self) -> Dict[str, str]:
-    """No test config."""
+  def unsafe_submodules(self) -> Set[str]:
+    """Empty."""
+    return set()
+
+  @property
+  def import_alias(self) -> Tuple[str, str]:
+    """("mlir", "sw")."""
+    return ("mlir", "sw")
+
+  @property
+  def import_namespaces(self) -> Dict:
+    """Empty."""
     return {}
 
+  @property
+  def discovery_heuristics(self) -> Dict:
+    """Empty."""
+    return {}
+
+  @property
+  def test_config(self) -> Dict:
+    """Empty."""
+    return {}
+
+  @property
+  def harness_imports(self) -> List[str]:
+    """Empty."""
+    return []
+
   def get_harness_init_code(self) -> str:
-    """No initialization code."""
+    """Empty."""
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """No runtime conversion logic."""
-    return "return str(obj)"
+    """Identity."""
+    return "return data"
+
+  def convert(self, data: Any) -> Any:
+    """Identity string conversion."""
+    return str(data)
+
+  @property
+  def supported_tiers(self) -> List[SemanticTier]:
+    """All tiers implicitly."""
+    return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """No magic args."""
+    """Empty."""
     return []
 
-  def convert(self, data: Any) -> Any:
-    """Identity conversion for testing."""
-    return str(data)
+  @property
+  def structural_traits(self) -> StructuralTraits:
+    """Default."""
+    return StructuralTraits()
 
-  def get_device_syntax(self, device_type: str, device_index: str = None) -> str:
-    """No device syntax."""
-    return ""
-
-  def get_device_check_syntax(self) -> str:
-    """No device checks."""
-    return "False"
-
-  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """No RNG splitting."""
-    return "pass"
-
-  def get_serialization_imports(self) -> List[str]:
-    """No serialization imports."""
-    return []
-
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: str = None) -> str:
-    """No serialization syntax."""
-    return ""
-
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """No manual wiring."""
-    pass
-
-  def get_doc_url(self, api_name: str) -> Optional[str]:
-    """No documentation URL for internal IR."""
-    return None
+  @property
+  def plugin_traits(self) -> PluginTraits:
+    """Default."""
+    return PluginTraits()
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """No seed methods."""
+    """Empty."""
     return []
+
+  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+    """Empty."""
+    return ""
+
+  def get_device_check_syntax(self) -> str:
+    """False."""
+    return "False"
+
+  def get_rng_split_syntax(self, r, k) -> str:
+    """Empty."""
+    return ""
+
+  def get_serialization_imports(self) -> List[str]:
+    """Empty."""
+    return []
+
+  def get_serialization_syntax(self, op: str, f: str, o: Optional[str] = None) -> str:
+    """Empty."""
+    return ""
+
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """None."""
+    return None
 
   @classmethod
   def get_example_code(cls) -> str:
-    """Return a placeholder description."""
-    return "# MLIR Intermediate Representation\n# Used for verifying structural integrity."
+    """MLIR text."""
+    return '%0 = "sw.op"() { name = "AbstractOp" } : () -> i32'
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """Return placeholders."""
-    code = self.get_example_code()
-    return {
-      "tier1_math": code,
-      "tier2_neural": code,
-      "tier3_extras": code,
-    }
+    """Tiered examples."""
+    ex = self.get_example_code()
+    return {"tier1_math": ex, "tier2_neural": '%model = "sw.module"() ( { ... } ) : () -> !sw.module', "tier3_extras": ex}
+
+  def collect_api(self, c) -> List:
+    """Empty."""
+    return []
+
+  def apply_wiring(self, s) -> None:
+    """None."""
+    pass

@@ -18,6 +18,7 @@ from ml_switcheroo.frameworks.base import (
   StandardMap,
   ImportConfig,
 )
+from ml_switcheroo.frameworks.loader import load_definitions
 
 
 @register_framework("numpy")
@@ -37,31 +38,62 @@ class NumpyAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    """Returns list of numpy submodules to scan."""
+    """
+    Returns list of numpy submodules to scan.
+
+    Returns:
+        List[str]: Modules.
+    """
     return ["numpy", "numpy.linalg", "numpy.fft"]
 
   @property
   def unsafe_submodules(self) -> Set[str]:
+    """
+    Returns unsafe modules.
+
+    Returns:
+        Set[str]: Empty.
+    """
     return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """Returns ('numpy', 'np')."""
+    """
+    Returns import tuple.
+
+    Returns:
+        Tuple[str, str]: ("numpy", "np").
+    """
     return ("numpy", "np")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """Remaps imports to 'np' alias."""
+    """
+    Remaps imports to 'np' alias.
+
+    Returns:
+        Dict[str, ImportConfig]: Mappings.
+    """
     return {"numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="np")}
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Regex patterns for IO and Randomness."""
+    """
+    Regex patterns for IO and Randomness.
+
+    Returns:
+        Dict[str, List[str]]: Patterns.
+    """
     return {"extras": [r"\\.random\\\\.", r"save", r"load"]}
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """Test templates for NumPy."""
+    """
+    Test templates for NumPy.
+
+    Returns:
+        Dict[str, str]: Templates.
+    """
     return {
       "import": "import numpy as np",
       "convert_input": "{np_var}",  # Identity (NumPy is default)
@@ -72,14 +104,29 @@ class NumpyAdapter:
 
   @property
   def harness_imports(self) -> List[str]:
+    """
+    Imports for harness.
+
+    Returns:
+        List[str]: Empty.
+    """
     return []
 
   def get_harness_init_code(self) -> str:
+    """
+    Init code.
+
+    Returns:
+        str: Empty.
+    """
     return ""
 
   def get_to_numpy_code(self) -> str:
     """
     Returns identity code for NumPy arrays.
+
+    Returns:
+        str: Code string.
     """
     return "if isinstance(obj, np.ndarray): return obj"
 
@@ -88,16 +135,30 @@ class NumpyAdapter:
     """
     NumPy supports Arrays (Math) and Extras (IO).
     It does NOT support Neural layers structurally.
+
+    Returns:
+        List[SemanticTier]: Supported tiers.
     """
     return [SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
 
   @property
   def declared_magic_args(self) -> List[str]:
+    """
+    Returns list of magic args.
+
+    Returns:
+        List[str]: Empty.
+    """
     return []
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """Returns default structural traits (no class rewriting)."""
+    """
+    Returns default structural traits (no class rewriting).
+
+    Returns:
+        StructuralTraits: Traits.
+    """
     return StructuralTraits(
       auto_strip_magic_args=True  # NumPy doesn't support random keys or context args
     )
@@ -106,6 +167,9 @@ class NumpyAdapter:
   def plugin_traits(self) -> PluginTraits:
     """
     Plugin capabilities.
+
+    Returns:
+        PluginTraits: Capabilities.
     """
     return PluginTraits(
       has_numpy_compatible_arrays=True,
@@ -118,97 +182,93 @@ class NumpyAdapter:
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Static definitions for NumPy mappings.
-    Includes Math, Extras, Types, and Casting logic.
+    Loaded dynamically from `frameworks/definitions/numpy.json`.
+
+    Returns:
+        Dict[str, StandardMap]: Definitions.
     """
-    return {
-      "Save": StandardMap(api="save", requires_plugin="io_handler", required_imports=["import numpy as np"]),
-      "Load": StandardMap(api="load", requires_plugin="io_handler", required_imports=["import numpy as np"]),
-      # --- Math / Array ---
-      "Abs": StandardMap(api="np.abs"),
-      "Mean": StandardMap(api="np.mean"),
-      "Sum": StandardMap(api="np.sum"),
-      "Add": StandardMap(api="np.add", transformation_type="infix", operator="+"),
-      "Sub": StandardMap(api="np.subtract", transformation_type="infix", operator="-"),
-      "Mul": StandardMap(api="np.multiply", transformation_type="infix", operator="*"),
-      "Div": StandardMap(api="np.divide", transformation_type="infix", operator="/"),
-      "max": StandardMap(api="np.max"),
-      "min": StandardMap(api="np.min"),
-      "exp": StandardMap(api="np.exp"),
-      "log": StandardMap(api="np.log"),
-      "square": StandardMap(api="np.square"),
-      "sqrt": StandardMap(api="np.sqrt"),
-      # --- Extras ---
-      "randn": StandardMap(api="numpy.random.randn"),
-      "permute_dims": StandardMap(api="numpy.transpose", pack_to_tuple="axes"),
-      # --- Types ---
-      "Float32": StandardMap(api="numpy.float32"),
-      "Float64": StandardMap(api="numpy.float64"),
-      "Float16": StandardMap(api="numpy.float16"),
-      "Int64": StandardMap(api="numpy.int64"),
-      "Int32": StandardMap(api="numpy.int32"),
-      "Int16": StandardMap(api="numpy.int16"),
-      "UInt8": StandardMap(api="numpy.uint8"),
-      "Bool": StandardMap(api="numpy.bool_"),
-      # --- Casting ---
-      # Maps generic casting hooks to .astype(), relying on the plugin to
-      # inject the correct type object looked up from the types above.
-      "CastFloat": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastDouble": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastHalf": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastLong": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastInt": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastShort": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastByte": StandardMap(api="astype", requires_plugin="type_methods"),
-      "CastBool": StandardMap(api="astype", requires_plugin="type_methods"),
-      "SiLU": StandardMap(macro_template="{x} * (1 / (1 + np.exp(-{x})))", required_imports=["import numpy as np"]),
-      "TensorType": StandardMap(api="numpy.ndarray"),
-      "Arange": StandardMap(api="numpy.arange"),
-      "Ones": StandardMap(api="numpy.ones"),
-      "Concatenate": StandardMap(api="numpy.concatenate", args={"tensors": "arrays"}),
-      "Zeros": StandardMap(api="numpy.zeros"),
-      "Concatenate": StandardMap(api="numpy.concatenate"),
-      "Zeros": StandardMap(api="numpy.zeros"),
-      "RandInt": StandardMap(api="numpy.random.randint", args={"shape": "size"}),
-      "Array": StandardMap(api="numpy.array", args={"data": "object"}),
-      "Pad": StandardMap(
-        api="numpy.pad",
-        args={"input": "array", "pad": "pad_width", "value": "constant_values"},
-        requires_plugin="padding_converter",
-      ),
-      "AssertClose": StandardMap(api="numpy.testing.assert_allclose", args={"expected": "desired"}),
-    }
+    return load_definitions("numpy")
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Returns seed methods."""
+    """
+    Returns seed methods.
+
+    Returns:
+        List[str]: Methods list.
+    """
     return ["seed"]
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """NumPy doesn't implement Layers/Losses structurally."""
+    """
+    NumPy doesn't implement Layers/Losses structurally.
+
+    Args:
+        category: Category.
+
+    Returns:
+        List[GhostRef]: Empty list.
+    """
     return []
 
   # --- Syntax Generation ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """Returns CPU syntax ignoring device requests (NumPy is CPU-only)."""
+    """
+    Returns CPU syntax ignoring device requests (NumPy is CPU-only).
+
+    Args:
+        device_type: Device.
+        device_index: Index.
+
+    Returns:
+        str: "'cpu'".
+    """
     return "'cpu'"
 
   def get_device_check_syntax(self) -> str:
     """
     NumPy does not support GPUs.
+
+    Returns:
+        str: "False".
     """
     return "False"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """No-op for NumPy."""
+    """
+    No-op for NumPy.
+
+    Args:
+        rng_var: RNG variable.
+        key_var: Key variable.
+
+    Returns:
+        str: "pass".
+    """
     return "pass"
 
   def get_serialization_imports(self) -> List[str]:
-    """Returns imports for IO."""
+    """
+    Returns imports for IO.
+
+    Returns:
+        List[str]: Imports.
+    """
     return ["import numpy as np"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """Returns np.save/load syntax."""
+    """
+    Returns np.save/load syntax.
+
+    Args:
+        op: 'save' or 'load'.
+        file_arg: Path.
+        object_arg: Obj.
+
+    Returns:
+        str: Code.
+    """
     if op == "save" and object_arg:
       return f"np.save(file={file_arg}, arr={object_arg})"
     elif op == "load":
@@ -222,14 +282,27 @@ class NumpyAdapter:
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """
     Generates NumPy documentation URL.
-    Example: https://numpy.org/doc/stable/reference/generated/numpy.mean.html
+
+    Args:
+        api_name: API Path.
+
+    Returns:
+        Optional[str]: URL.
     """
     return f"https://numpy.org/doc/stable/reference/generated/{api_name}.html"
 
   # --- Verification ---
 
   def convert(self, data: Any) -> Any:
-    """Attempts to convert input data to a NumPy array."""
+    """
+    Attempts to convert input data to a NumPy array.
+
+    Args:
+        data (Any): Input.
+
+    Returns:
+        Any: Numpy array or original.
+    """
     if isinstance(data, (list, tuple)):
       return type(data)(self.convert(x) for x in data)
     if isinstance(data, dict):
@@ -254,44 +327,52 @@ class NumpyAdapter:
 
   @classmethod
   def get_example_code(cls) -> str:
-    """Returns the primary example code used for instant demos."""
+    """
+    Returns the primary example code used for instant demos.
+
+    Returns:
+        str: Math example.
+    """
     return cls().get_tiered_examples()["tier1_math"]
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """
     Returns NumPy idiomatic examples.
+
+    Returns:
+        Dict[str, str]: Examples.
     """
     return {
       "tier1_math": """import numpy as np
 
-def linear_algebra_ops(a, b): 
+def linear_algebra_ops(a, b):
     # Tier 1: Standard Numeric Computing
     # Matrix Multiplication
-    dot = np.matmul(a, b) 
+    dot = np.matmul(a, b)
 
     # Element-wise operations
-    diff = np.abs(a - b) 
+    diff = np.abs(a - b)
 
     # Aggregation
-    norm = np.linalg.norm(diff) 
+    norm = np.linalg.norm(diff)
     return dot, norm
 """,
       "tier2_neural": """import numpy as np
 
-# Tier 2: Neural Networks (Out of Scope for NumPy) 
-# NumPy does not offer a built-in neural layer API. 
+# Tier 2: Neural Networks (Out of Scope for NumPy)
+# NumPy does not offer a built-in neural layer API.
 # While possible to write one from scratch, it is not
-# supported by the ml-switcheroo transpiler out-of-the-box. 
+# supported by the ml-switcheroo transpiler out-of-the-box.
 """,
       "tier3_extras": """import numpy as np
 
-def serialize_data(arr, filename): 
+def serialize_data(arr, filename):
     # Tier 3: IO Persistence
-    # Use standard binary format (.npy) 
-    np.save(file=filename, arr=arr) 
+    # Use standard binary format (.npy)
+    np.save(file=filename, arr=arr)
 
     # Reload
-    loaded = np.load(file=filename) 
+    loaded = np.load(file=filename)
     return loaded
 """,
     }

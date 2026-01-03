@@ -1,16 +1,38 @@
 """
-Tests for the Framework Auto-Injector.
+Tests for the Framework Definition Injector (JSON Mode).
+
+Verifies that:
+1. It loads existing JSON definitions.
+2. It inserts or updates operation mappings.
+3. It handles missing files gracefully (creates them).
+4. Dry run mode does not write to disk.
 """
 
+import json
 import pytest
-import libcst as cst
+from pathlib import Path
+from unittest.mock import patch, MagicMock
+
 from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.tools.injector_fw import FrameworkInjector
 
 
 @pytest.fixture
+def target_json(tmp_path):
+  """Creates a temporary definition directory and file."""
+  defs_dir = tmp_path / "definitions"
+  defs_dir.mkdir()
+
+  # Pre-populate with one op
+  initial_data = {"OldOp": {"api": "torch.old"}}
+  json_path = defs_dir / "torch.json"
+  json_path.write_text(json.dumps(initial_data), encoding="utf-8")
+
+  return json_path
+
+
+@pytest.fixture
 def sample_variant():
-  """Returns a fully populated variant configuration."""
   return FrameworkVariant(
     api="torch.nn.functional.log_softmax",
     args={"dim": "dim"},
@@ -18,93 +40,59 @@ def sample_variant():
   )
 
 
-@pytest.fixture
-def target_source():
+def test_injector_updates_existing_json(target_json, sample_variant):
   """
-  Returns python source code representing a framework adapter file.
-  Includes a matching adapter ('torch') and a non-matching one ('jax').
+  Scenario: File exists. Inject a new Op.
   """
-  return """
-from typing import Dict
-from ml_switcheroo.frameworks.base import register_framework, StandardMap
+  # Patch the path discovery to point to our temp file
+  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
+    injector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
+    success = injector.inject(dry_run=False)
 
-@register_framework("jax")
-class JaxAdapter:
-    @property
-    def definitions(self):
-        return {"Existing": StandardMap(api="foo")}
+  assert success is True
 
-@register_framework("torch")
-class TorchAdapter:
-    # Some other methods
-    def convert(self, x):
-        return x
+  # Verify Content
+  content = json.loads(target_json.read_text())
+  assert "OldOp" in content
+  assert "LogSoftmax" in content
 
-    @property
-    def definitions(self) -> Dict[str, StandardMap]:
-        return {
-            "Abs": StandardMap(api="torch.abs"),
-            "Relu": StandardMap(api="torch.relu")
-        }
-"""
+  entry = content["LogSoftmax"]
+  assert entry["api"] == "torch.nn.functional.log_softmax"
+  assert entry["args"] == {"dim": "dim"}
+  assert entry["requires_plugin"] == "custom_plugin"
 
 
-def test_injector_targets_correct_class(target_source, sample_variant):
+def test_injector_creates_new_file(tmp_path, sample_variant):
   """
-  Verify the injector modifies 'TorchAdapter' based on the 'torch' key.
+  Scenario: Definitions file does not exist.
   """
-  wrapper = cst.parse_module(target_source)
-  transformer = FrameworkInjector("torch", "LogSoftmax", sample_variant)
-  new_module = wrapper.visit(transformer)
+  missing_path = tmp_path / "definitions" / "new_fw.json"
 
-  assert transformer.found is True
+  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=missing_path):
+    injector = FrameworkInjector("new_fw", "NewOp", sample_variant)
+    injector.inject(dry_run=False)
 
-  code = new_module.code
-
-  # Check that LogSoftmax is inserted
-  assert '"LogSoftmax": StandardMap(api="torch.nn.functional.log_softmax"' in code
-
-  # Check that keywords are used correctly
-  assert 'args={"dim": "dim"}' in code
-  assert 'requires_plugin="custom_plugin"' in code
-
-  # Ensure we didn't touch JAX
-  assert code.count('"LogSoftmax"') == 1
+  assert missing_path.exists()
+  content = json.loads(missing_path.read_text())
+  assert "NewOp" in content
+  assert content["NewOp"]["api"] == "torch.nn.functional.log_softmax"
 
 
-def test_import_injection_heuristic_disabled(target_source):
+def test_injector_dry_run(target_json, sample_variant, capsys):
   """
-  Scenario: Variant has API 'scipy.special.erf'.
-  Expectation: Injector should NOT inject 'import scipy' based on heuristic.
-  This validates the fix for the 'import tf' bug.
+  Scenario: Dry Run enabled. File should NOT change.
   """
-  scipy_var = FrameworkVariant(api="scipy.special.erf")
-  wrapper = cst.parse_module(target_source)
-  transformer = FrameworkInjector("torch", "Erf", scipy_var)
-  new_module = wrapper.visit(transformer)
+  original_mtime = target_json.stat().st_mtime
 
-  code = new_module.code
+  with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
+    injector = FrameworkInjector("torch", "LogSoftmax", sample_variant)
+    injector.inject(dry_run=True)
 
-  # 1. Check mapping was injected
-  assert '"Erf": StandardMap(api="scipy.special.erf")' in code
+  # check stdout
+  captured = capsys.readouterr()
+  assert "[Dry Run] Writing to torch.json" in captured.out
+  assert "LogSoftmax" in captured.out
 
-  # 2. Check import was NOT injected
-  assert "import scipy" not in code
-
-
-def test_explicit_import_injection(target_source):
-  """
-  Scenario: Variant has 'required_imports=["import scipy"]'.
-  Expectation: 'import scipy' IS injected at top of file.
-  """
-  scipy_var = FrameworkVariant(api="scipy.special.erf", required_imports=["import scipy"])
-  wrapper = cst.parse_module(target_source)
-  transformer = FrameworkInjector("torch", "Erf", scipy_var)
-  new_module = wrapper.visit(transformer)
-
-  code = new_module.code
-
-  # Check import injection
-  assert "import scipy" in code
-  # Ensure it is at the top (before class def)
-  assert code.find("import scipy") < code.find("@register_framework")
+  # check file untouched
+  content = json.loads(target_json.read_text())
+  assert "LogSoftmax" not in content

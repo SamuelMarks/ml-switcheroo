@@ -4,16 +4,17 @@ Normalization Helpers for AST Rewriting (The Argument Pivot).
 This module provides the `NormalizationMixin`, a component of the `PivotRewriter`
 responsible for reshaping function arguments and call structures during translation.
 
-Updates:
-
--   Supports argument value mapping (Enums) via `arg_values`.
--   Supports variadic argument packing via `pack_to_tuple`.
--   **Feature Update (Configurable Packing)**: Supports `pack_as="List"` for list-based APIs.
--   **Feature Update**: Injects ODL `default` values if argument missing in source.
--   **Feature Update**: Handles dynamic module aliasing checks.
+Handles:
+-   **Argument Renaming**: Maps source keywords to target keywords (e.g. `dim` -> `axis`).
+-   **Method-to-Function Pivot**: Injects the receiver object `x.add()` -> `add(x)` if needed.
+-   **Default Value Injection**: Injects values defined in ODL `default` field if arguments are missing.
+-   **Value Normalization**: Transforms primitives and nested containers defined in ODL defaults into CST nodes.
+-   **Argument Values Enum Mapping**: Maps string/int literals (e.g. `reduction='mean'` -> `mode='avg'`).
+-   **Packing**: Handles variadic argument packing into containers (List/Tuple).
 """
 
-from typing import List, Dict, Any, Union, Optional
+import json
+from typing import List, Dict, Any, Optional
 import libcst as cst
 from ml_switcheroo.core.rewriter.base import BaseRewriter
 
@@ -30,12 +31,14 @@ class NormalizationMixin(BaseRewriter):
   def _is_module_alias(self, node: cst.CSTNode) -> bool:
     """
     Determines if a node represents a known framework module alias (e.g. 'torch', 'jnp').
-    Used to prevent injecting the module itself as 'self' argument during method-to-function conversion.
 
-    Logic:
-        1. Checks local file aliases.
-        2. Checks configured source/target frameworks.
-        3. Checks semantics registry for known roots.
+    Checks purely syntactic presence in local imports or semantic registry.
+
+    Args:
+        node: The CST node to inspect (Name or Attribute).
+
+    Returns:
+        bool: True if it corresponds to a known framework root alias.
     """
     name = self._cst_to_string(node)
     if not name:
@@ -59,47 +62,110 @@ class NormalizationMixin(BaseRewriter):
 
     # B. From Semantics Manager (Registered Adapters)
     if hasattr(self, "semantics") and self.semantics:
-      # framework_configs keys are framework IDs (e.g. 'torch', 'flax_nnx')
       configs = getattr(self.semantics, "framework_configs", {})
       for fw_key, conf in configs.items():
         known_roots.add(fw_key)
-
-        # Check alias config (e.g. module='jax.numpy', name='jnp')
+        # Handle Pydantic model dump or dict access
         alias_conf = conf.get("alias")
         if alias_conf and isinstance(alias_conf, dict):
           mod = alias_conf.get("module")
           if mod:
             known_roots.add(mod.split(".")[0])
 
-      # Check import_data keys (keys are module paths like 'torch.nn')
       import_data = getattr(self.semantics, "import_data", {})
       for mod_path in import_data.keys():
         known_roots.add(mod_path.split(".")[0])
 
-    # Validation
     root = name.split(".")[0]
     return root in known_roots
 
   def _extract_primitive_key(self, node: cst.BaseExpression) -> Optional[str]:
     """
-    Extracts a string representation of a primitive AST node for key lookup.
-    Used for Enum value mapping.
+    Extracts a string representation of a primitive AST node for Enum key lookup.
 
     Args:
-        node: The CST node to extract value from.
+        node: The CST expression node.
 
     Returns:
-        String representation (e.g., "0", "mean", "True") or None if complex.
+        Optional[str]: The string value (if literal) or variable name.
     """
     if isinstance(node, cst.SimpleString):
-      # "mean" -> mean
       return node.value.strip("'").strip('"')
     elif isinstance(node, cst.Integer):
       return node.value
     elif isinstance(node, cst.Name):
-      # True, False, None
       return node.value
     return None
+
+  def _convert_value_to_cst(self, val: Any) -> cst.BaseExpression:
+    """
+    Recursively converts a python value (primitive/container) to a CST literal expression node.
+
+    Supported types:
+    - Primitives: bool, int, float, str, None
+    - Containers: list, tuple, dict
+
+    Args:
+        val: The python value.
+
+    Returns:
+        cst.BaseExpression: The corresponding LibCST node.
+    """
+    # 1. Container Recursion (List/Tuple)
+    if isinstance(val, (list, tuple)):
+      elements = []
+      for item in val:
+        node = self._convert_value_to_cst(item)
+        # Add comma with spacing
+        elements.append(cst.Element(value=node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
+
+      # Fix trailing comma for the last element based on Python style preferences
+      # Usually strict JSON-like structures don't strictly need one, but LibCST allows exact control.
+      if elements:
+        last = elements[-1]
+        elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+
+      if isinstance(val, list):
+        return cst.List(elements=elements)
+      else:
+        return cst.Tuple(elements=elements)
+
+    # 2. Key-Value Recursion (Dict)
+    if isinstance(val, dict):
+      elements = []
+      for k, v in val.items():
+        k_node = self._convert_value_to_cst(k)
+        v_node = self._convert_value_to_cst(v)
+        elements.append(
+          cst.DictElement(
+            key=k_node,
+            value=v_node,
+            comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+          )
+        )
+
+      if elements:
+        last = elements[-1]
+        elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
+
+      return cst.Dict(elements=elements)
+
+    # 3. Primitives
+    # Important: bool MUST be checked before int because bool is subclass of int in Python
+    if isinstance(val, bool):
+      return cst.Name("True") if val else cst.Name("False")
+    elif isinstance(val, int):
+      return cst.Integer(str(val))
+    elif isinstance(val, float):
+      return cst.Float(repr(val))
+    elif isinstance(val, str):
+      # Use json.dumps to ensure proper quoting and escaping (produces double quotes)
+      return cst.SimpleString(json.dumps(val))
+    elif val is None:
+      return cst.Name("None")
+    else:
+      # Fallback for unknown objects using string representation
+      return cst.SimpleString(repr(str(val)))
 
   def _normalize_arguments(
     self,
@@ -124,7 +190,7 @@ class NormalizationMixin(BaseRewriter):
     # 1. Extract Standard Argument Order with metadata
     std_args_raw = op_details.get("std_args", [])
     std_args_order = []
-    defaults_map: Dict[str, str] = {}
+    defaults_map: Dict[str, Any] = {}
     variadic_arg_name = None
 
     for item in std_args_raw:
@@ -134,9 +200,9 @@ class NormalizationMixin(BaseRewriter):
           std_args_order.append(name)
           if item.get("is_variadic"):
             variadic_arg_name = name
-          # Capture default value if present
-          if item.get("default") is not None:
-            defaults_map[name] = str(item.get("default"))
+          # Capture default value if present key exists (even if value is None)
+          if "default" in item:
+            defaults_map[name] = item["default"]
 
       elif isinstance(item, (list, tuple)):
         std_args_order.append(item[0])
@@ -144,19 +210,17 @@ class NormalizationMixin(BaseRewriter):
         std_args_order.append(item)
 
     # 2. Prepare Mapping Dictionaries
-    source_variant = op_details["variants"].get(self.source_fw, {})
-    source_arg_map = source_variant.get("args", {})
-    target_arg_map = target_impl.get("args", {})
+    # Access safety: if variants dict doesn't have key, return empty
+    source_variant = op_details.get("variants", {}).get(self.source_fw, {})
+    if not source_variant:
+      source_variant = {}
 
-    # Feature: Argument Value Mapping
-    target_val_map = target_impl.get("arg_values", {})
-
-    # Feature: Argument Packing (Tuple/List)
+    source_arg_map = source_variant.get("args", {}) or {}
+    target_arg_map = target_impl.get("args", {}) or {}
+    target_val_map = target_impl.get("arg_values", {}) or {}
     pack_target_kw = target_impl.get("pack_to_tuple")
-    pack_as_type = target_impl.get("pack_as", "Tuple")  # Default to Tuple
-
-    # Feature: Argument Injection
-    target_inject_map = target_impl.get("inject_args", {})
+    pack_as_type = target_impl.get("pack_as", "Tuple")
+    target_inject_map = target_impl.get("inject_args", {}) or {}
 
     # Invert source map: {fw_name: std_name}
     lib_to_std = {v: k for k, v in source_arg_map.items()}
@@ -169,15 +233,14 @@ class NormalizationMixin(BaseRewriter):
     is_method_call = isinstance(original_node.func, cst.Attribute)
     receiver_injected = False
 
-    # Distinguish `x.add()` from `torch.add()`
-    if is_method_call:
-      if self._is_module_alias(original_node.func.value):
-        is_method_call = False
+    # If the receiver IS the module (e.g. torch.add), it's not a method call on data.
+    if is_method_call and self._is_module_alias(original_node.func.value):
+      is_method_call = False
 
     if is_method_call:
-      # Case A: We have a standard mapping (e.g. method X corresponds to arg 'x')
       if std_args_order:
         first_std_arg = std_args_order[0]
+        # Check if arg already provided by keyword (e.g. F.linear(input=x))
         arg_provided = False
         for arg in original_node.args:
           if arg.keyword:
@@ -187,26 +250,33 @@ class NormalizationMixin(BaseRewriter):
               arg_provided = True
               break
 
+        # If not provided explicitly, inject the receiver (Attribute.value) as the first argument
         if not arg_provided:
           if isinstance(original_node.func, cst.Attribute):
             rec = original_node.func.value
-            # Create arg without comma initially
             found_args[first_std_arg] = cst.Arg(value=rec)
             receiver_injected = True
-
-      # Case B: Safety Fallback for Methods with missing/empty spec
       else:
+        # Fallback: if no metadata, just preserve receiver as first extra arg?
+        # Usually implies malformed semantics, but safe behavior is append.
         if isinstance(original_node.func, cst.Attribute):
-          rec = original_node.func.value
-          extra_args.append(cst.Arg(value=rec))
+          extra_args.append(cst.Arg(value=original_node.func.value))
 
     # 4. Process Arguments from Call
     pos_idx = 1 if receiver_injected else 0
     packing_mode = False
 
-    for orig_arg, upd_arg in zip(original_node.args, updated_node.args):
+    # We use updated_node args because children might have been rewritten recursively
+    for i, upd_arg in enumerate(updated_node.args):
+      # Access corresponding original arg to check structure (positional/keyword)
+      # Safe index check in case updated_node length mismatch (should be same)
+      if i < len(original_node.args):
+        orig_arg = original_node.args[i]
+      else:
+        orig_arg = upd_arg
+
       if not orig_arg.keyword:
-        # Positional Argument handling
+        # Positional
         if packing_mode:
           variadic_buffer.append(upd_arg)
         elif pos_idx < len(std_args_order):
@@ -221,7 +291,7 @@ class NormalizationMixin(BaseRewriter):
         else:
           extra_args.append(upd_arg)
       else:
-        # Keyword Argument handling
+        # Keyword
         k_name = orig_arg.keyword.value
         std_name = lib_to_std.get(k_name, k_name)
         if std_name in std_args_order:
@@ -229,72 +299,68 @@ class NormalizationMixin(BaseRewriter):
         else:
           extra_args.append(upd_arg)
 
-    # 5. Handle Packing Buffer (for variadic args like *dims)
+    # 5. Handle Packing Buffer (variadic arguments)
     if packing_mode and variadic_arg_name and pack_target_kw:
       elements = []
       for arg in variadic_buffer:
         elements.append(cst.Element(value=arg.value, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
 
-      # Use Tuple or List based on config and fix trailing comma logic
       is_list = pack_as_type == "List"
-
       if elements:
-        # Determine trailing comma requirement for single element
-        # List: [x] (No comma usually required/preferred for lists)
-        # Tuple: (x,) (Comma required)
+        # Formatting: Lists no trailing comma, Tuples with 1 element need comma
         trailing_comma = cst.MaybeSentinel.DEFAULT
         if not is_list and len(elements) == 1:
           trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
 
         elements[-1] = elements[-1].with_changes(comma=trailing_comma)
 
-      if is_list:
-        container_node = cst.List(elements=elements)
-      else:
-        container_node = cst.Tuple(elements=elements)
+      container_node = cst.List(elements=elements) if is_list else cst.Tuple(elements=elements)
 
-      packed_arg = cst.Arg(
+      found_args[variadic_arg_name] = cst.Arg(
         keyword=cst.Name(pack_target_kw),
         value=container_node,
         equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
       )
-      found_args[variadic_arg_name] = packed_arg
 
-    # 6. Construct New List (Applying Defaults, Renaming, Value Mapping)
+    # 6. Construct New List (Reordering, Renaming, Injection)
     new_args_list: List[cst.Arg] = []
 
     for std_name in std_args_order:
-      # --- Logic Injection: Default Value Handling ---
+      # --- Logical Injection: Default Value Handling ---
       if std_name not in found_args and std_name in defaults_map:
-        # Argument unused in source, but Spec defines a default.
-        # Must inject to ensure semantic equivalence in target framework.
         try:
-          default_code = defaults_map[std_name]
-          lit_val_node = cst.parse_expression(default_code)
+          default_val = defaults_map[std_name]
+          # Convert python object to CST node
+          lit_val_node = self._convert_value_to_cst(default_val)
 
           found_args[std_name] = cst.Arg(
-            keyword=cst.Name(std_name),  # Assign standard name temporarily
+            keyword=cst.Name(std_name),  # Will be renamed below
             value=lit_val_node,
             equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
           )
         except Exception:
-          # If default string is invalid python (unlikely from ODL), skip injection
+          # Ignore if conversion fails, rely on target default
           pass
       # -----------------------------------------------
 
       if std_name in found_args:
         current_arg = found_args[std_name]
 
+        # If the arg was packed, we already handled it in found_args dict?
+        # Actually variadics don't usually map 1:1 in order list unless
+        # they are singular. The `variadic_arg_name` check earlier handles packing construction.
+        # If pack_target_kw is active, we put the packed arg here.
         if std_name == variadic_arg_name and pack_target_kw:
           new_args_list.append(current_arg)
           continue
 
         tg_alias = target_arg_map.get(std_name, std_name)
 
-        # Apply Value Mapping (Enums)
+        # Apply Value Mapping (Enum Translation)
         final_val_node = current_arg.value
         if target_val_map and std_name in target_val_map:
           val_options = target_val_map[std_name]
+          # Try to get string representation of key
           raw_key = self._extract_primitive_key(current_arg.value)
           if raw_key is not None and str(raw_key) in val_options:
             target_code = val_options[str(raw_key)]
@@ -302,6 +368,17 @@ class NormalizationMixin(BaseRewriter):
               final_val_node = cst.parse_expression(target_code)
             except cst.ParserSyntaxError:
               pass
+
+        # Determine if keyword is required
+        # Logic: If arg has keyword, keep/rename keyword.
+        # If arg is positional, but we reordered it or injected it, we force keyword?
+        # Current Logic: If it HAD keyword, use TG alias keyword.
+        # If it didn't have keyword, and value changed, update value.
+        # Note: Default injection args created above have keywords.
+
+        # Robustness Update: If this std_name matches an injected default or
+        # a remapped positional arg in a different slot, should we force keyword?
+        # Generally JAX prefers positionals for main tensors and keywords for config.
 
         should_use_keyword = current_arg.keyword is not None
 
@@ -313,29 +390,27 @@ class NormalizationMixin(BaseRewriter):
           )
           new_args_list.append(new_arg)
         else:
-          # Preserve positional style unless value changed significantly,
-          # but logic allows updating value node regardless.
           if final_val_node is not current_arg.value:
             new_arg = current_arg.with_changes(value=final_val_node)
             new_args_list.append(new_arg)
           else:
             new_args_list.append(current_arg)
 
+    # Append extra arguments
     new_args_list.extend(extra_args)
 
-    # 7. Inject Additional Arguments (from Target Variant config)
+    # 7. Inject Additional Arguments (Target Specific)
     if target_inject_map:
       for arg_name, arg_val in target_inject_map.items():
-        val_node = self._convert_value_to_cst(arg_val)
-        # Don't overwrite if present
+        # Don't inject if already present
         if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):
           continue
 
-        # Format previous comma
-        if len(new_args_list) > 0:
-          last = new_args_list[-1]
-          if last.comma == cst.MaybeSentinel.DEFAULT:
-            new_args_list[-1] = last.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+        val_node = self._convert_value_to_cst(arg_val)
+
+        # Ensure previous arg has comma
+        if len(new_args_list) > 0 and new_args_list[-1].comma == cst.MaybeSentinel.DEFAULT:
+          new_args_list[-1] = new_args_list[-1].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
         injected_arg = cst.Arg(
           keyword=cst.Name(arg_name),
@@ -344,24 +419,11 @@ class NormalizationMixin(BaseRewriter):
         )
         new_args_list.append(injected_arg)
 
-    # Final cleanup: Ensure all internal items have commas
+    # Formatting Fixes: Ensure commas everywhere except last
     for i in range(len(new_args_list) - 1):
       new_args_list[i] = new_args_list[i].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
-    # Ensure last item has no comma
     if new_args_list:
       new_args_list[-1] = new_args_list[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
     return new_args_list
-
-  def _convert_value_to_cst(self, val: Any) -> cst.BaseExpression:
-    """Converts a python primitive to a CST node."""
-    if isinstance(val, bool):
-      return cst.Name("True") if val else cst.Name("False")
-    elif isinstance(val, int):
-      return cst.Integer(str(val))
-    elif isinstance(val, float):
-      return cst.Float(str(val))
-    elif isinstance(val, str):
-      return cst.SimpleString(f"'{val}'")
-    return cst.SimpleString(f"'{str(val)}'")

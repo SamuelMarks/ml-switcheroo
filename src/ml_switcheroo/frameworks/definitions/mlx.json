@@ -1,0 +1,282 @@
+{
+  "Abs": {
+    "api": "mx.abs",
+    "required_imports": []
+  },
+  "Adam": {
+    "api": "mlx.optimizers.Adam",
+    "args": {
+      "lr": "learning_rate"
+    },
+    "required_imports": [],
+    "requires_plugin": "mlx_optimizer_init"
+  },
+  "Add": {
+    "api": "mx.add",
+    "required_imports": []
+  },
+  "Arange": {
+    "api": "mlx.core.arange",
+    "required_imports": []
+  },
+  "ArgMax": {
+    "api": "mlx.core.argmax",
+    "args": {
+      "dim": "axis",
+      "keepdim": "keepdims"
+    },
+    "required_imports": []
+  },
+  "ArgMin": {
+    "api": "mlx.core.argmin",
+    "args": {
+      "dim": "axis",
+      "keepdim": "keepdims"
+    },
+    "required_imports": []
+  },
+  "Array": {
+    "api": "mlx.core.array",
+    "required_imports": []
+  },
+  "AssertClose": {
+    "macro_template": "assert {actual}.allclose({expected}, rtol={rtol}, atol={atol}).item()",
+    "required_imports": []
+  },
+  "BatchNorm": {
+    "api": "mlx.nn.BatchNorm",
+    "required_imports": []
+  },
+  "Bool": {
+    "api": "mx.bool_",
+    "required_imports": []
+  },
+  "CastBool": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastByte": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastDouble": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastFloat": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastHalf": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastInt": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastLong": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastShort": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "Compile": {
+    "api": "mlx.core.compile",
+    "required_imports": [],
+    "requires_plugin": "mlx_compiler"
+  },
+  "Concatenate": {
+    "api": "mlx.core.concatenate",
+    "args": {
+      "tensors": "arrays"
+    },
+    "required_imports": []
+  },
+  "Div": {
+    "api": "mx.divide",
+    "required_imports": []
+  },
+  "Embedding": {
+    "api": "mlx.nn.Embedding",
+    "args": {
+      "embedding_dim": "dims"
+    },
+    "required_imports": []
+  },
+  "Float16": {
+    "api": "mx.float16",
+    "required_imports": []
+  },
+  "Float32": {
+    "api": "mx.float32",
+    "required_imports": []
+  },
+  "Float64": {
+    "api": "mx.float32",
+    "required_imports": []
+  },
+  "GELU": {
+    "api": "mlx.nn.GELU",
+    "required_imports": []
+  },
+  "Int16": {
+    "api": "mx.int16",
+    "required_imports": []
+  },
+  "Int32": {
+    "api": "mx.int32",
+    "required_imports": []
+  },
+  "Int64": {
+    "api": "mx.int64",
+    "required_imports": []
+  },
+  "LayerNorm": {
+    "api": "mlx.nn.LayerNorm",
+    "args": {
+      "normalized_shape": "dims"
+    },
+    "required_imports": []
+  },
+  "Linear": {
+    "api": "mlx.nn.Linear",
+    "args": {
+      "in_features": "input_dims",
+      "out_features": "output_dims"
+    },
+    "required_imports": []
+  },
+  "Load": {
+    "api": "load",
+    "required_imports": [
+      "import mlx.core as mx"
+    ],
+    "requires_plugin": "io_handler"
+  },
+  "Mean": {
+    "api": "mx.mean",
+    "required_imports": []
+  },
+  "Mul": {
+    "api": "mx.multiply",
+    "required_imports": []
+  },
+  "OneHot": {
+    "api": "mlx.nn.OneHot",
+    "required_imports": []
+  },
+  "Ones": {
+    "api": "mlx.core.ones",
+    "required_imports": []
+  },
+  "Pad": {
+    "api": "mlx.core.pad",
+    "args": {
+      "input": "x",
+      "pad": "pad_width",
+      "value": "constant_values"
+    },
+    "required_imports": [],
+    "requires_plugin": "padding_converter"
+  },
+  "RandInt": {
+    "api": "mlx.random.randint",
+    "required_imports": []
+  },
+  "SGD": {
+    "api": "mlx.optimizers.SGD",
+    "args": {
+      "lr": "learning_rate"
+    },
+    "required_imports": [],
+    "requires_plugin": "mlx_optimizer_init"
+  },
+  "Save": {
+    "api": "save",
+    "required_imports": [
+      "import mlx.core as mx"
+    ],
+    "requires_plugin": "io_handler"
+  },
+  "SiLU": {
+    "api": "mlx.nn.silu",
+    "required_imports": []
+  },
+  "Sub": {
+    "api": "mx.subtract",
+    "required_imports": []
+  },
+  "Synchronize": {
+    "api": "mx.eval",
+    "required_imports": [],
+    "requires_plugin": "mlx_synchronize"
+  },
+  "TensorType": {
+    "api": "mlx.core.array",
+    "required_imports": []
+  },
+  "UInt8": {
+    "api": "mx.uint8",
+    "required_imports": []
+  },
+  "Variable": {
+    "api": "mlx.core.array",
+    "required_imports": []
+  },
+  "Zeros": {
+    "api": "mlx.core.zeros",
+    "required_imports": []
+  },
+  "enable_grad": {
+    "api": "contextlib.nullcontext",
+    "required_imports": [],
+    "requires_plugin": "context_to_function_wrap"
+  },
+  "log_softmax": {
+    "api": "mlx.nn.log_softmax",
+    "required_imports": []
+  },
+  "no_grad": {
+    "api": "contextlib.nullcontext",
+    "required_imports": [],
+    "requires_plugin": "context_to_function_wrap"
+  },
+  "permute_dims": {
+    "api": "mx.transpose",
+    "pack_to_tuple": "axes",
+    "required_imports": []
+  },
+  "randn": {
+    "api": "mlx.random.normal",
+    "required_imports": []
+  },
+  "relu": {
+    "api": "mlx.nn.relu",
+    "required_imports": []
+  },
+  "softmax": {
+    "api": "mlx.core.softmax",
+    "required_imports": []
+  },
+  "step": {
+    "api": "optimizer_step",
+    "required_imports": [],
+    "requires_plugin": "mlx_optimizer_step"
+  },
+  "zero_grad": {
+    "api": "optimizer_zero_grad",
+    "required_imports": [],
+    "requires_plugin": "mlx_zero_grad"
+  }
+}

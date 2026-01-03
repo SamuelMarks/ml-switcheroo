@@ -1,0 +1,432 @@
+{
+  "Abs": {
+    "api": "jnp.abs",
+    "required_imports": []
+  },
+  "Adam": {
+    "api": "optax.adam",
+    "required_imports": [],
+    "requires_plugin": "optimizer_constructor"
+  },
+  "Add": {
+    "api": "jnp.add",
+    "required_imports": []
+  },
+  "Arange": {
+    "api": "jax.numpy.arange",
+    "required_imports": []
+  },
+  "ArgMax": {
+    "api": "jax.numpy.argmax",
+    "args": {
+      "dim": "axis"
+    },
+    "required_imports": []
+  },
+  "ArgMin": {
+    "api": "jax.numpy.argmin",
+    "args": {
+      "dim": "axis"
+    },
+    "required_imports": []
+  },
+  "Array": {
+    "api": "jax.numpy.array",
+    "required_imports": []
+  },
+  "AssertClose": {
+    "api": "numpy.testing.assert_allclose",
+    "args": {
+      "expected": "desired"
+    },
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "Bool": {
+    "api": "jnp.bool_",
+    "required_imports": []
+  },
+  "CastBool": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastByte": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastChar": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastDouble": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastFloat": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastHalf": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastInt": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastLong": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastShort": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "Clamp": {
+    "api": "jax.numpy.clip",
+    "args": {
+      "input": "a",
+      "max": "a_max",
+      "min": "a_min"
+    },
+    "required_imports": []
+  },
+  "ClipGradNorm": {
+    "api": "optax.clip_by_global_norm",
+    "required_imports": [],
+    "requires_plugin": "grad_clipper"
+  },
+  "Concatenate": {
+    "api": "jax.numpy.concatenate",
+    "required_imports": []
+  },
+  "CosineAnnealingLR": {
+    "api": "optax.cosine_decay_schedule",
+    "required_imports": [],
+    "requires_plugin": "scheduler_rewire"
+  },
+  "CrossEntropyLoss": {
+    "api": "optax.softmax_cross_entropy_with_integer_labels",
+    "args": {
+      "input": "logits",
+      "target": "labels"
+    },
+    "required_imports": [],
+    "requires_plugin": "loss_reduction"
+  },
+  "CudaAvailable": {
+    "api": "jax.devices",
+    "required_imports": [],
+    "requires_plugin": "cuda_is_available"
+  },
+  "DataLoader": {
+    "api": "GenericDataLoader",
+    "required_imports": [],
+    "requires_plugin": "convert_dataloader"
+  },
+  "Device": {
+    "api": "jax.devices",
+    "required_imports": [],
+    "requires_plugin": "device_allocator"
+  },
+  "Div": {
+    "api": "jnp.divide",
+    "required_imports": []
+  },
+  "Einsum": {
+    "api": "jnp.einsum",
+    "required_imports": [],
+    "requires_plugin": "einsum_normalizer"
+  },
+  "Flatten": {
+    "api": "jax.numpy.reshape",
+    "required_imports": [],
+    "requires_plugin": "flatten_range"
+  },
+  "Float16": {
+    "api": "jnp.float16",
+    "required_imports": []
+  },
+  "Float32": {
+    "api": "jnp.float32",
+    "required_imports": []
+  },
+  "Float64": {
+    "api": "jnp.float64",
+    "required_imports": []
+  },
+  "GELU": {
+    "api": "jax.nn.gelu",
+    "required_imports": []
+  },
+  "Gather": {
+    "api": "jax.numpy.take_along_axis",
+    "required_imports": [],
+    "requires_plugin": "gather_adapter"
+  },
+  "Int16": {
+    "api": "jnp.int16",
+    "required_imports": []
+  },
+  "Int32": {
+    "api": "jnp.int32",
+    "required_imports": []
+  },
+  "Int64": {
+    "api": "jnp.int64",
+    "required_imports": []
+  },
+  "Load": {
+    "api": "load",
+    "required_imports": [
+      "import orbax.checkpoint"
+    ],
+    "requires_plugin": "io_handler"
+  },
+  "LoadStateDict": {
+    "api": "KeyMapper.from_torch",
+    "required_imports": [],
+    "requires_plugin": "checkpoint_mapper"
+  },
+  "MSELoss": {
+    "api": "optax.l2_loss",
+    "args": {
+      "input": "predictions",
+      "target": "targets"
+    },
+    "required_imports": [],
+    "requires_plugin": "loss_reduction"
+  },
+  "Mean": {
+    "api": "jnp.mean",
+    "required_imports": []
+  },
+  "ModuleList": {
+    "required_imports": []
+  },
+  "Mul": {
+    "api": "jnp.multiply",
+    "required_imports": []
+  },
+  "OneHot": {
+    "api": "jax.nn.one_hot",
+    "args": {
+      "input": "x",
+      "tensor": "x"
+    },
+    "required_imports": []
+  },
+  "Ones": {
+    "api": "jax.numpy.ones",
+    "required_imports": []
+  },
+  "Pad": {
+    "api": "jax.numpy.pad",
+    "args": {
+      "input": "array",
+      "pad": "pad_width",
+      "value": "constant_values"
+    },
+    "required_imports": [],
+    "requires_plugin": "padding_converter"
+  },
+  "Pow": {
+    "api": "jnp.power",
+    "required_imports": []
+  },
+  "RMSprop": {
+    "api": "optax.rmsprop",
+    "required_imports": [],
+    "requires_plugin": "optimizer_constructor"
+  },
+  "RandInt": {
+    "api": "jax.random.randint",
+    "args": {
+      "high": "maxval",
+      "low": "minval"
+    },
+    "required_imports": [],
+    "requires_plugin": "inject_prng"
+  },
+  "Reshape": {
+    "api": "jax.numpy.reshape",
+    "required_imports": [],
+    "requires_plugin": "pack_shape_args"
+  },
+  "SGD": {
+    "api": "optax.sgd",
+    "required_imports": [],
+    "requires_plugin": "optimizer_constructor"
+  },
+  "Save": {
+    "api": "save",
+    "required_imports": [
+      "import orbax.checkpoint"
+    ],
+    "requires_plugin": "io_handler"
+  },
+  "Scatter": {
+    "api": "jax.ops.index_update",
+    "required_imports": [],
+    "requires_plugin": "scatter_indexer"
+  },
+  "SiLU": {
+    "api": "jax.nn.silu",
+    "required_imports": []
+  },
+  "Squeeze": {
+    "api": "jax.numpy.squeeze",
+    "args": {
+      "dim": "axis"
+    },
+    "required_imports": []
+  },
+  "StepLR": {
+    "api": "optax.exponential_decay",
+    "required_imports": [],
+    "requires_plugin": "scheduler_rewire"
+  },
+  "Sub": {
+    "api": "jnp.subtract",
+    "required_imports": []
+  },
+  "Sum": {
+    "api": "jnp.sum",
+    "required_imports": []
+  },
+  "TensorType": {
+    "api": "jax.Array",
+    "required_imports": []
+  },
+  "TopK": {
+    "api": "jax.lax.top_k",
+    "required_imports": [],
+    "requires_plugin": "topk_adapter"
+  },
+  "TorchFunctional": {
+    "api": "jax.nn",
+    "required_imports": []
+  },
+  "UInt8": {
+    "api": "jnp.uint8",
+    "required_imports": []
+  },
+  "Unsqueeze": {
+    "api": "jax.numpy.expand_dims",
+    "args": {
+      "dim": "axis"
+    },
+    "required_imports": []
+  },
+  "View": {
+    "api": "jax.numpy.reshape",
+    "required_imports": [],
+    "requires_plugin": "view_semantics"
+  },
+  "Zeros": {
+    "api": "jax.numpy.zeros",
+    "required_imports": []
+  },
+  "enable_grad": {
+    "api": "contextlib.nullcontext",
+    "required_imports": [],
+    "requires_plugin": "context_to_function_wrap"
+  },
+  "exp": {
+    "api": "jnp.exp",
+    "required_imports": []
+  },
+  "grad": {
+    "api": "jax.grad",
+    "args": {
+      "func": "fun"
+    },
+    "required_imports": []
+  },
+  "jit": {
+    "api": "jax.jit",
+    "args": {
+      "func": "fun"
+    },
+    "required_imports": []
+  },
+  "log": {
+    "api": "jnp.log",
+    "required_imports": []
+  },
+  "log_softmax": {
+    "api": "jax.nn.log_softmax",
+    "required_imports": []
+  },
+  "max": {
+    "api": "jnp.max",
+    "required_imports": []
+  },
+  "min": {
+    "api": "jnp.min",
+    "required_imports": []
+  },
+  "no_grad": {
+    "api": "contextlib.nullcontext",
+    "required_imports": [],
+    "requires_plugin": "context_to_function_wrap"
+  },
+  "permute_dims": {
+    "api": "jnp.transpose",
+    "pack_to_tuple": "axes",
+    "required_imports": []
+  },
+  "randn": {
+    "api": "jax.random.normal",
+    "required_imports": [],
+    "requires_plugin": "inject_prng"
+  },
+  "relu": {
+    "api": "jax.nn.relu",
+    "required_imports": []
+  },
+  "size": {
+    "api": "shape",
+    "required_imports": [],
+    "requires_plugin": "method_to_property"
+  },
+  "softmax": {
+    "api": "jax.nn.softmax",
+    "required_imports": []
+  },
+  "sqrt": {
+    "api": "jnp.sqrt",
+    "required_imports": []
+  },
+  "square": {
+    "api": "jnp.square",
+    "required_imports": []
+  },
+  "step": {
+    "api": "optimizer_step",
+    "required_imports": [],
+    "requires_plugin": "optimizer_step"
+  },
+  "vmap": {
+    "api": "jax.vmap",
+    "args": {
+      "func": "fun"
+    },
+    "required_imports": []
+  },
+  "zero_grad": {
+    "api": "optimizer_zero_grad",
+    "required_imports": [],
+    "requires_plugin": "optimizer_zero_grad"
+  }
+}

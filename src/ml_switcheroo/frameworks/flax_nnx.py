@@ -9,8 +9,6 @@ Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 - Wires important plugins and structural traits.
 """
 
-import numpy
-
 import logging
 import textwrap
 from typing import List, Tuple, Dict, Any, Optional
@@ -30,6 +28,7 @@ from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.ghost import GhostInspector
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
+from ml_switcheroo.frameworks.loader import load_definitions
 
 # Safe Import Handling for Ghost Mode (WASM/Docs)
 try:
@@ -221,14 +220,14 @@ class FlaxNNXAdapter(JAXStackMixin):
   def get_harness_init_code(self) -> str:
     """Logic to create Flax NNX Rngs."""
     return textwrap.dedent(
-      """ 
-        def _make_flax_rngs(seed): 
-            "Attempts to create a Flax NNX Rngs object." 
-            try: 
-                return nnx.Rngs(seed) 
-            except (ImportError, AttributeError): 
-                return "mock_flax_rngs" 
-    """
+      """
+            def _make_flax_rngs(seed):
+                "Attempts to create a Flax NNX Rngs object."
+                try:
+                    return nnx.Rngs(seed)
+                except (ImportError, AttributeError):
+                    return "mock_flax_rngs"
+        """
     ).strip()
 
   @property
@@ -243,6 +242,7 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def declared_magic_args(self) -> List[str]:
+    """Returns list of argument names that represent injected state ('rngs')."""
     return ["rngs"]
 
   @property
@@ -292,63 +292,19 @@ class FlaxNNXAdapter(JAXStackMixin):
   def definitions(self) -> Dict[str, StandardMap]:
     """
     Static standard operation definitions specific to Flax NNX.
+    Loaded dynamically from `frameworks/definitions/flax_nnx.json`.
 
     Returns:
         Dict[str, StandardMap]: Mapping of standard op names to framework implementations.
     """
-    return {
-      "Linear": StandardMap(
-        api="flax.nnx.Linear",
-        args={"in_features": "in_features", "out_features": "out_features", "bias": "use_bias"},
-        # Removed inject_args for rngs: Relying on structural_traits.inject_magic_args for dynamic variable injection
-      ),
-      "Flatten": StandardMap(api="flax.nnx.Flatten"),
-      "MultiheadAttention": StandardMap(api="flax.nnx.MultiHeadAttention", requires_plugin="repack_attn_flax"),
-      "Embedding": StandardMap(api="flax.nnx.Embed", args={"embedding_dim": "features"}),
-      "Sequential": StandardMap(api="flax.nnx.Sequential"),
-      "BatchNorm": StandardMap(api="flax.nnx.BatchNorm", args={"eps": "epsilon"}, requires_plugin="batch_norm_unwrap"),
-      "LayerNorm": StandardMap(api="flax.nnx.LayerNorm", args={"normalized_shape": "num_features", "eps": "epsilon"}),
-      "GELU": StandardMap(api="flax.nnx.gelu"),
-      "relu": StandardMap(api="flax.nnx.relu"),
-      "softmax": StandardMap(api="flax.nnx.softmax"),
-      "log_softmax": StandardMap(api="flax.nnx.log_softmax"),
-      "Conv2d": StandardMap(api="flax.nnx.Conv"),
-      "Dropout": StandardMap(api="flax.nnx.Dropout"),
-      "MaxPool2d": StandardMap(api="flax.nnx.max_pool"),
-      "Param": StandardMap(api="flax.nnx.Param"),
-      "Variable": StandardMap(api="flax.nnx.Variable"),
-      "Cache": StandardMap(api="flax.nnx.Cache"),
-      # --- State Management (Targeting Flax -> Torch) ---
-      # This enables converting nnx code back to torch.
-      # nnx.BatchStat maps to "Variable" abstract op or dedicated key if defined
-      "BatchStat": StandardMap(api="flax.nnx.BatchStat"),
-      # --- State Management (Targeting Torch -> Flax) ---
-      # Plugins formerly in JaxCore are now correctly placed here in the Neural adapter
-      "register_buffer": StandardMap(api="torch_register_buffer_to_nnx", requires_plugin="torch_register_buffer_to_nnx"),
-      "register_parameter": StandardMap(
-        api="torch_register_parameter_to_nnx", requires_plugin="torch_register_parameter_to_nnx"
-      ),
-      "state_dict": StandardMap(api="torch_state_dict_to_nnx", requires_plugin="torch_state_dict_to_nnx"),
-      "load_state_dict": StandardMap(api="torch_load_state_dict_to_nnx", requires_plugin="torch_load_state_dict_to_nnx"),
-      "parameters": StandardMap(api="torch_parameters_to_nnx", requires_plugin="torch_parameters_to_nnx"),
-      "SiLU": StandardMap(api="flax.nnx.silu"),
-      "ModuleList": StandardMap(api="flax.nnx.List"),
-      "TensorType": StandardMap(api="jax.Array"),
-      "Arange": StandardMap(api="jax.numpy.arange"),
-      "Ones": StandardMap(api="jax.numpy.ones"),
-      "Pad": StandardMap(
-        api="jax.numpy.pad",
-        args={"input": "array", "pad": "pad_width", "value": "constant_values"},
-        requires_plugin="padding_converter",
-      ),
-      "AssertClose": StandardMap(
-        api="numpy.testing.assert_allclose", args={"expected": "desired"}, required_imports=["import numpy"]
-      ),
-    }
+    return load_definitions("flax_nnx")
 
   def convert(self, data: Any) -> Any:
     """
     Converts generic data to framework-specific Pytree/arrays.
+
+    Args:
+        data (Any): Input data (numpy/list).
 
     Returns:
         Converted data tailored to JAX/Flax ecosystem.
@@ -359,10 +315,11 @@ class FlaxNNXAdapter(JAXStackMixin):
     """
     Applies manual wiring and modifies the snapshot to alias 'flax.nnx.' to 'nnx.'.
 
-    Adds plugin wiring for key interface methods.
+    Adds plugin wiring for key interface methods ensuring correctness during
+    Ghost Mode synchronization.
 
     Args:
-        snapshot (Dict[str, Any]): The mapping snapshot dictionary.
+        snapshot (Dict[str, Any]): The mapping snapshot dictionary to mutate.
     """
     self._apply_stack_wiring(snapshot)
     mappings = snapshot.setdefault("mappings", {})
@@ -379,9 +336,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       if op not in mappings or "api" not in mappings[op]:
         mappings[op] = {"requires_plugin": "inject_training_flag"}
 
-    # Note: Plugins for container state (register_buffer, etc.) are now statically defined in definitions
-    # so we don't need to manually wire them here if definitions are merged.
-    # We keep the fallback wiring just in case Ghost Mode lacks static defs.
+    # Fallback wiring if definitions are not fully loaded in Ghost Mode
     mappings.setdefault("register_buffer", {"requires_plugin": "torch_register_buffer_to_nnx"})
     mappings.setdefault("register_parameter", {"requires_plugin": "torch_register_parameter_to_nnx"})
     mappings.setdefault("state_dict", {"requires_plugin": "torch_state_dict_to_nnx"})
@@ -399,13 +354,13 @@ class FlaxNNXAdapter(JAXStackMixin):
     return """from flax import nnx
 import jax.numpy as jnp
 
-class Net(nnx.Module): 
-    def __init__(self, rngs: nnx.Rngs): 
-        self.linear = nnx.Linear(10, 10, rngs=rngs) 
+class Net(nnx.Module):
+    def __init__(self, rngs: nnx.Rngs):
+        self.linear = nnx.Linear(10, 10, rngs=rngs)
 
-    def __call__(self, x): 
-        x = self.linear(x) 
-        return nnx.relu(x) 
+    def __call__(self, x):
+        x = self.linear(x)
+        return nnx.relu(x)
 """
 
   def get_tiered_examples(self) -> Dict[str, str]:

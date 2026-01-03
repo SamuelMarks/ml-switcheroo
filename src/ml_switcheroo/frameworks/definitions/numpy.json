@@ -1,0 +1,214 @@
+{
+  "Abs": {
+    "api": "np.abs",
+    "required_imports": []
+  },
+  "Add": {
+    "api": "np.add",
+    "operator": "+",
+    "required_imports": [],
+    "transformation_type": "infix"
+  },
+  "Arange": {
+    "api": "numpy.arange",
+    "required_imports": []
+  },
+  "Array": {
+    "api": "numpy.array",
+    "args": {
+      "data": "object"
+    },
+    "required_imports": []
+  },
+  "AssertClose": {
+    "api": "numpy.testing.assert_allclose",
+    "args": {
+      "expected": "desired"
+    },
+    "required_imports": []
+  },
+  "Bool": {
+    "api": "numpy.bool_",
+    "required_imports": []
+  },
+  "CastBool": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastByte": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastDouble": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastFloat": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastHalf": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastInt": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastLong": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "CastShort": {
+    "api": "astype",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "Concatenate": {
+    "api": "numpy.concatenate",
+    "required_imports": []
+  },
+  "Div": {
+    "api": "np.divide",
+    "operator": "/",
+    "required_imports": [],
+    "transformation_type": "infix"
+  },
+  "Float16": {
+    "api": "numpy.float16",
+    "required_imports": []
+  },
+  "Float32": {
+    "api": "numpy.float32",
+    "required_imports": []
+  },
+  "Float64": {
+    "api": "numpy.float64",
+    "required_imports": []
+  },
+  "Int16": {
+    "api": "numpy.int16",
+    "required_imports": []
+  },
+  "Int32": {
+    "api": "numpy.int32",
+    "required_imports": []
+  },
+  "Int64": {
+    "api": "numpy.int64",
+    "required_imports": []
+  },
+  "Load": {
+    "api": "load",
+    "required_imports": [
+      "import numpy as np"
+    ],
+    "requires_plugin": "io_handler"
+  },
+  "Mean": {
+    "api": "np.mean",
+    "required_imports": []
+  },
+  "Mul": {
+    "api": "np.multiply",
+    "operator": "*",
+    "required_imports": [],
+    "transformation_type": "infix"
+  },
+  "Ones": {
+    "api": "numpy.ones",
+    "required_imports": []
+  },
+  "Pad": {
+    "api": "numpy.pad",
+    "args": {
+      "input": "array",
+      "pad": "pad_width",
+      "value": "constant_values"
+    },
+    "required_imports": [],
+    "requires_plugin": "padding_converter"
+  },
+  "RandInt": {
+    "api": "numpy.random.randint",
+    "args": {
+      "shape": "size"
+    },
+    "required_imports": []
+  },
+  "Save": {
+    "api": "save",
+    "required_imports": [
+      "import numpy as np"
+    ],
+    "requires_plugin": "io_handler"
+  },
+  "SiLU": {
+    "macro_template": "{x} * (1 / (1 + np.exp(-{x})))",
+    "required_imports": [
+      "import numpy as np"
+    ]
+  },
+  "Sub": {
+    "api": "np.subtract",
+    "operator": "-",
+    "required_imports": [],
+    "transformation_type": "infix"
+  },
+  "Sum": {
+    "api": "np.sum",
+    "required_imports": []
+  },
+  "TensorType": {
+    "api": "numpy.ndarray",
+    "required_imports": []
+  },
+  "UInt8": {
+    "api": "numpy.uint8",
+    "required_imports": []
+  },
+  "Zeros": {
+    "api": "numpy.zeros",
+    "required_imports": []
+  },
+  "exp": {
+    "api": "np.exp",
+    "required_imports": []
+  },
+  "log": {
+    "api": "np.log",
+    "required_imports": []
+  },
+  "max": {
+    "api": "np.max",
+    "required_imports": []
+  },
+  "min": {
+    "api": "np.min",
+    "required_imports": []
+  },
+  "permute_dims": {
+    "api": "numpy.transpose",
+    "pack_to_tuple": "axes",
+    "required_imports": []
+  },
+  "randn": {
+    "api": "numpy.random.randn",
+    "required_imports": []
+  },
+  "sqrt": {
+    "api": "np.sqrt",
+    "required_imports": []
+  },
+  "square": {
+    "api": "np.square",
+    "required_imports": []
+  }
+}

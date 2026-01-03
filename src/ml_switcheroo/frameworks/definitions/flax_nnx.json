@@ -1,0 +1,155 @@
+{
+  "Arange": {
+    "api": "jax.numpy.arange",
+    "required_imports": []
+  },
+  "AssertClose": {
+    "api": "numpy.testing.assert_allclose",
+    "args": {
+      "expected": "desired"
+    },
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "BatchNorm": {
+    "api": "flax.nnx.BatchNorm",
+    "args": {
+      "eps": "epsilon"
+    },
+    "required_imports": [],
+    "requires_plugin": "batch_norm_unwrap"
+  },
+  "BatchStat": {
+    "api": "flax.nnx.BatchStat",
+    "required_imports": []
+  },
+  "Cache": {
+    "api": "flax.nnx.Cache",
+    "required_imports": []
+  },
+  "Conv2d": {
+    "api": "flax.nnx.Conv",
+    "required_imports": []
+  },
+  "Dropout": {
+    "api": "flax.nnx.Dropout",
+    "required_imports": []
+  },
+  "Embedding": {
+    "api": "flax.nnx.Embed",
+    "args": {
+      "embedding_dim": "features"
+    },
+    "required_imports": []
+  },
+  "Flatten": {
+    "api": "flax.nnx.Flatten",
+    "required_imports": []
+  },
+  "GELU": {
+    "api": "flax.nnx.gelu",
+    "required_imports": []
+  },
+  "LayerNorm": {
+    "api": "flax.nnx.LayerNorm",
+    "args": {
+      "eps": "epsilon",
+      "normalized_shape": "num_features"
+    },
+    "required_imports": []
+  },
+  "Linear": {
+    "api": "flax.nnx.Linear",
+    "args": {
+      "bias": "use_bias",
+      "in_features": "in_features",
+      "out_features": "out_features"
+    },
+    "required_imports": []
+  },
+  "MaxPool2d": {
+    "api": "flax.nnx.max_pool",
+    "required_imports": []
+  },
+  "ModuleList": {
+    "api": "flax.nnx.List",
+    "required_imports": []
+  },
+  "MultiheadAttention": {
+    "api": "flax.nnx.MultiHeadAttention",
+    "required_imports": [],
+    "requires_plugin": "repack_attn_flax"
+  },
+  "Ones": {
+    "api": "jax.numpy.ones",
+    "required_imports": []
+  },
+  "Pad": {
+    "api": "jax.numpy.pad",
+    "args": {
+      "input": "array",
+      "pad": "pad_width",
+      "value": "constant_values"
+    },
+    "required_imports": [],
+    "requires_plugin": "padding_converter"
+  },
+  "Param": {
+    "api": "flax.nnx.Param",
+    "required_imports": []
+  },
+  "Sequential": {
+    "api": "flax.nnx.Sequential",
+    "required_imports": []
+  },
+  "SiLU": {
+    "api": "flax.nnx.silu",
+    "required_imports": []
+  },
+  "TensorType": {
+    "api": "jax.Array",
+    "required_imports": []
+  },
+  "Variable": {
+    "api": "flax.nnx.Variable",
+    "required_imports": []
+  },
+  "load_state_dict": {
+    "api": "torch_load_state_dict_to_nnx",
+    "required_imports": [],
+    "requires_plugin": "torch_load_state_dict_to_nnx"
+  },
+  "log_softmax": {
+    "api": "flax.nnx.log_softmax",
+    "required_imports": []
+  },
+  "parameters": {
+    "api": "torch_parameters_to_nnx",
+    "required_imports": [],
+    "requires_plugin": "torch_parameters_to_nnx"
+  },
+  "register_buffer": {
+    "api": "torch_register_buffer_to_nnx",
+    "required_imports": [],
+    "requires_plugin": "torch_register_buffer_to_nnx"
+  },
+  "register_parameter": {
+    "api": "torch_register_parameter_to_nnx",
+    "required_imports": [],
+    "requires_plugin": "torch_register_parameter_to_nnx"
+  },
+  "relu": {
+    "api": "flax.nnx.relu",
+    "required_imports": []
+  },
+  "softmax": {
+    "api": "flax.nnx.softmax",
+    "required_imports": []
+  },
+  "state_dict": {
+    "api": "torch_state_dict_to_nnx",
+    "required_imports": [],
+    "requires_plugin": "torch_state_dict_to_nnx"
+  }
+}

@@ -6,7 +6,7 @@ lists, primitives) into LibCST nodes, as well as utilities for inspecting import
 """
 
 from typing import Any, Union
-
+import json
 import libcst as cst
 
 
@@ -68,7 +68,8 @@ def is_future_import(node: cst.CSTNode) -> bool:
 def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
   """
   Recursively converts a python primitive or container to a CST node.
-  Robustly handles strings using repr() to prevent syntax errors.
+  Robustly handles strings using standard JSON encoding to prevent syntax errors
+  and ensure double-quotes are used (matching test expectations).
 
   Args:
       val: The python value to convert.
@@ -122,8 +123,9 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
     # repr ensures high precision float string
     return cst.Float(repr(val))
   elif isinstance(val, str):
-    # Use repr to handle escaping of quotes/newlines automatically and robustly
-    return cst.SimpleString(repr(val))
+    # Use json.dumps to force double quotes for string literals,
+    # matching expectation in tests and standard style.
+    return cst.SimpleString(json.dumps(val))
   elif val is None:
     return cst.Name("None")
   else:

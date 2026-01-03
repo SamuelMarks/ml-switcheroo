@@ -1,0 +1,49 @@
+{
+  "Conv2d": {
+    "api": "midl.Conv2d",
+    "args": {
+      "in_channels": "arg_0",
+      "kernel_size": "arg_2",
+      "out_channels": "arg_1",
+      "padding": "arg_4",
+      "stride": "arg_3"
+    },
+    "required_imports": []
+  },
+  "Dropout": {
+    "api": "midl.Dropout",
+    "args": {
+      "p": "p"
+    },
+    "required_imports": []
+  },
+  "Flatten": {
+    "api": "midl.Flatten",
+    "args": {
+      "end_dim": "arg_1",
+      "start_dim": "arg_0"
+    },
+    "required_imports": []
+  },
+  "Linear": {
+    "api": "midl.Linear",
+    "args": {
+      "bias": "arg_2",
+      "in_features": "arg_0",
+      "out_features": "arg_1"
+    },
+    "required_imports": []
+  },
+  "Module": {
+    "api": "midl.Module",
+    "required_imports": []
+  },
+  "ReLU": {
+    "api": "midl.ReLU",
+    "required_imports": []
+  },
+  "relu": {
+    "api": "midl.relu",
+    "required_imports": []
+  }
+}

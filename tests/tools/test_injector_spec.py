@@ -30,13 +30,13 @@ def test_injector_finds_internal_ops(sample_op):
   assert transformer.found is True
 
   code = new_module.code
-  assert "'LogSoftmax':" in code
-  assert "'description': 'Log Softmax implementation.'" in code
-  assert "'std_args':" in code
-  # Verify rich param structure
-  assert "'name': 'input'" in code
-  assert "'type': 'Tensor'" in code
-  assert "'default': '-1'" in code
+  assert '"LogSoftmax":' in code
+  assert '"description": "Log Softmax implementation."' in code
+  assert '"std_args":' in code
+  # Verify rich param structure with strict double quotes from json.dumps
+  assert '"name": "input"' in code
+  assert '"type": "Tensor"' in code
+  assert '"default": "-1"' in code
 
 
 def test_injector_ignores_other_assigns(sample_op):
@@ -52,10 +52,10 @@ def test_injector_ignores_other_assigns(sample_op):
 
 def test_injector_appends_to_existing(sample_op):
   """Verify it appends to a non-empty dictionary correctly."""
-  source_code = """
-INTERNAL_OPS = {
-    'Existing': {'description': 'old'}
-}
+  source_code = """ 
+INTERNAL_OPS = { 
+    'Existing': {'description': 'old'} 
+} 
 """
   wrapper = cst.parse_module(source_code)
   transformer = StandardsInjector(sample_op)
@@ -63,7 +63,7 @@ INTERNAL_OPS = {
 
   code = new_module.code
   assert "'Existing':" in code
-  assert "'LogSoftmax':" in code
+  assert '"LogSoftmax":' in code
 
   # Check syntax validity by compiling
   try:
