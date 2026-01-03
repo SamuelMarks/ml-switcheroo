@@ -519,6 +519,11 @@
     ],
     "type": "class"
   },
+  "CudaAvailable": {
+    "description": "Checks if a CUDA device is available.",
+    "return_type": "bool",
+    "std_args": []
+  },
   "CustomFromMask": {
     "description": "The class representing a Python class.",
     "std_args": [
@@ -558,6 +563,13 @@
       "dim"
     ],
     "type": "class"
+  },
+  "Device": {
+    "description": "Abstract Device placement context.",
+    "std_args": [
+      "type",
+      "index"
+    ]
   },
   "DistributedDataParallel": {
     "description": "Implement distributed data parallelism based on ``torch.distributed`` at module level.",

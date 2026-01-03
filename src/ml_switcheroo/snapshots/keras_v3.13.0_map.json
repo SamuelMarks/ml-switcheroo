@@ -14,6 +14,10 @@
     "Alphadropout": {
       "api": "keras.layers.AlphaDropout"
     },
+    "Arange": {
+      "api": "keras.ops.arange",
+      "required_imports": []
+    },
     "ArgMax": {
       "api": "keras.ops.argmax",
       "args": {
@@ -25,6 +29,22 @@
       "args": {
         "dim": "axis"
       }
+    },
+    "Array": {
+      "api": "keras.ops.convert_to_tensor",
+      "args": {
+        "data": "x"
+      },
+      "required_imports": []
+    },
+    "AssertClose": {
+      "api": "numpy.testing.assert_allclose",
+      "args": {
+        "expected": "desired"
+      },
+      "required_imports": [
+        "import numpy"
+      ]
     },
     "Attention": {
       "api": "keras.layers.Attention"
@@ -128,6 +148,13 @@
     },
     "Clip": {
       "api": "keras.ops.clip"
+    },
+    "Concatenate": {
+      "api": "keras.ops.concatenate",
+      "args": {
+        "tensors": "inputs"
+      },
+      "required_imports": []
     },
     "Conv1d": {
       "api": "keras.layers.Conv1D"
@@ -450,6 +477,10 @@
         "self": "self"
       }
     },
+    "Ones": {
+      "api": "keras.ops.ones",
+      "required_imports": []
+    },
     "PRelu": {
       "api": "keras.src.layers.activations.prelu.PReLU",
       "args": {
@@ -475,6 +506,14 @@
     },
     "RNN": {
       "api": "keras.layers.RNN"
+    },
+    "RandInt": {
+      "api": "keras.random.randint",
+      "args": {
+        "high": "maxval",
+        "low": "minval"
+      },
+      "required_imports": []
     },
     "RandomCrop": {
       "api": "keras.layers.RandomCrop"
@@ -677,6 +716,10 @@
     },
     "Where": {
       "api": "keras.ops.where"
+    },
+    "Zeros": {
+      "api": "keras.ops.zeros",
+      "required_imports": []
     },
     "abs": {
       "api": "keras.ops.abs"

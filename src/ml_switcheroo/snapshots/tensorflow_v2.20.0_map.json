@@ -16,17 +16,40 @@
     "Alphadropout": {
       "api": "keras.layers.AlphaDropout"
     },
+    "Arange": {
+      "api": "tf.range",
+      "args": {
+        "step": "delta",
+        "stop": "limit"
+      },
+      "required_imports": []
+    },
     "ArgMax": {
       "api": "tf.math.argmax"
     },
     "ArgMin": {
       "api": "tf.math.argmin"
     },
+    "Array": {
+      "api": "tf.constant",
+      "args": {
+        "data": "value"
+      },
+      "required_imports": []
+    },
     "Asin": {
       "api": "tensorflow.asin"
     },
     "Asinh": {
       "api": "tensorflow.asinh"
+    },
+    "AssertClose": {
+      "api": "tf.debugging.assert_near",
+      "args": {
+        "actual": "x",
+        "expected": "y"
+      },
+      "required_imports": []
     },
     "Atan": {
       "api": "tensorflow.atan"
@@ -118,6 +141,13 @@
     "Concat": {
       "api": "tensorflow.concat"
     },
+    "Concatenate": {
+      "api": "tf.concat",
+      "args": {
+        "tensors": "values"
+      },
+      "required_imports": []
+    },
     "Conv": {
       "api": "tensorflow.conv"
     },
@@ -135,6 +165,11 @@
     },
     "Cosh": {
       "api": "tensorflow.cosh"
+    },
+    "CudaAvailable": {
+      "api": "tf.config.list_physical_devices",
+      "required_imports": [],
+      "requires_plugin": "cuda_is_available"
     },
     "CumSum": {
       "api": "tensorflow.cumsum"
@@ -288,6 +323,10 @@
     "Normalize": {
       "api": "tensorflow.linalg.normalize"
     },
+    "Ones": {
+      "api": "tf.ones",
+      "required_imports": []
+    },
     "PRelu": {
       "api": "keras.layers.PReLU"
     },
@@ -302,6 +341,17 @@
     },
     "RNN": {
       "api": "keras.layers.RNN"
+    },
+    "RandInt": {
+      "api": "tf.random.uniform",
+      "args": {
+        "high": "maxval",
+        "low": "minval"
+      },
+      "inject_args": {
+        "dtype": "tf.int32"
+      },
+      "required_imports": []
     },
     "RandomCrop": {
       "api": "keras.layers.RandomCrop"
@@ -417,6 +467,10 @@
     },
     "Where": {
       "api": "tensorflow.where"
+    },
+    "Zeros": {
+      "api": "tf.zeros",
+      "required_imports": []
     },
     "abs": {
       "api": "tensorflow.abs"

@@ -10,11 +10,23 @@
     "Add": {
       "api": "mlx.core.add"
     },
+    "Arange": {
+      "api": "mlx.core.arange",
+      "required_imports": []
+    },
     "ArgMax": {
       "api": "mlx.core.argmax"
     },
     "ArgMin": {
       "api": "mlx.core.argmin"
+    },
+    "Array": {
+      "api": "mlx.core.array",
+      "required_imports": []
+    },
+    "AssertClose": {
+      "macro_template": "assert {actual}.allclose({expected}, rtol={rtol}, atol={atol}).item()",
+      "required_imports": []
     },
     "AvgPool1d": {
       "api": "mlx.nn.AvgPool1d"
@@ -109,6 +121,13 @@
     },
     "Concat": {
       "api": "mlx.core.concat"
+    },
+    "Concatenate": {
+      "api": "mlx.core.concatenate",
+      "args": {
+        "tensors": "arrays"
+      },
+      "required_imports": []
     },
     "Conv1d": {
       "api": "mlx.core.conv1d",
@@ -523,6 +542,10 @@
     "OneHot": {
       "api": "mlx.nn.OneHot"
     },
+    "Ones": {
+      "api": "mlx.core.ones",
+      "required_imports": []
+    },
     "Optional": {
       "api": "mlx.optimizers.Optional"
     },
@@ -545,6 +568,10 @@
     "RPC_AVAILABLE": {
       "api": "mlx.core.cuda.is_available",
       "args": {}
+    },
+    "RandInt": {
+      "api": "mlx.random.randint",
+      "required_imports": []
     },
     "Reciprocal": {
       "api": "mlx.core.reciprocal"
@@ -796,6 +823,10 @@
     },
     "Where": {
       "api": "mlx.core.where"
+    },
+    "Zeros": {
+      "api": "mlx.core.zeros",
+      "required_imports": []
     },
     "abs": {
       "api": "mlx.core.abs"

@@ -17,17 +17,34 @@
     "Add": {
       "api": "jax.numpy.add"
     },
+    "Arange": {
+      "api": "jax.numpy.arange",
+      "required_imports": []
+    },
     "ArgMax": {
       "api": "jax.numpy.argmax"
     },
     "ArgMin": {
       "api": "jax.numpy.argmin"
     },
+    "Array": {
+      "api": "jax.numpy.array",
+      "required_imports": []
+    },
     "Asin": {
       "api": "jax.numpy.asin"
     },
     "Asinh": {
       "api": "jax.numpy.asinh"
+    },
+    "AssertClose": {
+      "api": "numpy.testing.assert_allclose",
+      "args": {
+        "expected": "desired"
+      },
+      "required_imports": [
+        "import numpy"
+      ]
     },
     "Atan": {
       "api": "jax.numpy.atan"
@@ -95,6 +112,10 @@
     "Compress": {
       "api": "jax.numpy.compress"
     },
+    "Concatenate": {
+      "api": "jax.numpy.concatenate",
+      "required_imports": []
+    },
     "Constant": {
       "api": "optax.constant_schedule",
       "args": {}
@@ -117,6 +138,11 @@
       },
       "requires_plugin": "loss_reduction"
     },
+    "CudaAvailable": {
+      "api": "jax.devices",
+      "required_imports": [],
+      "requires_plugin": "cuda_is_available"
+    },
     "CumSum": {
       "api": "jax.numpy.cumsum"
     },
@@ -126,6 +152,11 @@
     },
     "Det": {
       "api": "jax.numpy.linalg.det"
+    },
+    "Device": {
+      "api": "jax.devices",
+      "required_imports": [],
+      "requires_plugin": "device_allocator"
     },
     "Div": {
       "api": "jnp.divide"
@@ -240,6 +271,10 @@
         "tensor": "x"
       }
     },
+    "Ones": {
+      "api": "jax.numpy.ones",
+      "required_imports": []
+    },
     "Pad": {
       "api": "jax.numpy.pad",
       "args": {
@@ -254,6 +289,15 @@
     },
     "RMSprop": {
       "api": "optax.rmsprop"
+    },
+    "RandInt": {
+      "api": "jax.random.randint",
+      "args": {
+        "high": "maxval",
+        "low": "minval"
+      },
+      "required_imports": [],
+      "requires_plugin": "inject_prng"
     },
     "Reciprocal": {
       "api": "jax.numpy.reciprocal"
@@ -361,6 +405,10 @@
     },
     "Where": {
       "api": "jax.numpy.where"
+    },
+    "Zeros": {
+      "api": "jax.numpy.zeros",
+      "required_imports": []
     },
     "__array_namespace_info__": {
       "api": "jax.numpy.__array_namespace_info__"
@@ -1014,9 +1062,9 @@
   "templates": {
     "convert_input": "jnp.array({np_var})",
     "fori_loop": "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})",
-    "import": "import jax\nimport jax.numpy as jnp",
+    "import": "import jax\nimport jax.numpy as jnp\ntry:\n    import chex\nexcept ImportError:\n    pass",
     "jit_template": "jax.jit({fn}, static_argnums={static_argnums})",
     "scan": "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})",
-    "to_numpy": "np.array({res_var})"
+    "to_numpy": "{res_var}"
   }
 }

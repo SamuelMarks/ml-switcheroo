@@ -17,6 +17,10 @@
     "Add": {
       "api": "jax.numpy.add"
     },
+    "Arange": {
+      "api": "jax.numpy.arange",
+      "required_imports": []
+    },
     "ArgMax": {
       "api": "jax.numpy.argmax"
     },
@@ -28,6 +32,15 @@
     },
     "Asinh": {
       "api": "jax.numpy.asinh"
+    },
+    "AssertClose": {
+      "api": "numpy.testing.assert_allclose",
+      "args": {
+        "expected": "desired"
+      },
+      "required_imports": [
+        "import numpy"
+      ]
     },
     "Atan": {
       "api": "jax.numpy.atan"
@@ -231,6 +244,10 @@
     },
     "NonZero": {
       "api": "jax.numpy.nonzero"
+    },
+    "Ones": {
+      "api": "jax.numpy.ones",
+      "required_imports": []
     },
     "PRelu": {
       "api": "nnx.nn.activations.PReLU",
@@ -1328,9 +1345,9 @@
   "templates": {
     "convert_input": "jnp.array({np_var})",
     "fori_loop": "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})",
-    "import": "import jax\nimport jax.numpy as jnp\nimport flax.nnx as nnx",
+    "import": "import jax\nimport jax.numpy as jnp\ntry:\n    import chex\nexcept ImportError:\n    pass\nimport flax.nnx as nnx",
     "jit_template": "jax.jit({fn}, static_argnums={static_argnums})",
     "scan": "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})",
-    "to_numpy": "np.array({res_var})"
+    "to_numpy": "{res_var}"
   }
 }

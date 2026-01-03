@@ -13,17 +13,35 @@
     "Add": {
       "api": "numpy.add"
     },
+    "Arange": {
+      "api": "numpy.arange",
+      "required_imports": []
+    },
     "ArgMax": {
       "api": "numpy.argmax"
     },
     "ArgMin": {
       "api": "numpy.argmin"
     },
+    "Array": {
+      "api": "numpy.array",
+      "args": {
+        "data": "object"
+      },
+      "required_imports": []
+    },
     "Asin": {
       "api": "numpy.asin"
     },
     "Asinh": {
       "api": "numpy.asinh"
+    },
+    "AssertClose": {
+      "api": "numpy.testing.assert_allclose",
+      "args": {
+        "expected": "desired"
+      },
+      "required_imports": []
     },
     "Atan": {
       "api": "numpy.atan"
@@ -77,6 +95,10 @@
     },
     "Concat": {
       "api": "numpy.concat"
+    },
+    "Concatenate": {
+      "api": "numpy.concatenate",
+      "required_imports": []
     },
     "Cos": {
       "api": "numpy.cos"
@@ -166,8 +188,29 @@
     "NonZero": {
       "api": "numpy.nonzero"
     },
+    "Ones": {
+      "api": "numpy.ones",
+      "required_imports": []
+    },
+    "Pad": {
+      "api": "numpy.pad",
+      "args": {
+        "input": "array",
+        "pad": "pad_width",
+        "value": "constant_values"
+      },
+      "required_imports": [],
+      "requires_plugin": "padding_converter"
+    },
     "Pow": {
       "api": "numpy.pow"
+    },
+    "RandInt": {
+      "api": "numpy.random.randint",
+      "args": {
+        "shape": "size"
+      },
+      "required_imports": []
     },
     "Reciprocal": {
       "api": "numpy.reciprocal"
@@ -236,6 +279,10 @@
     },
     "Where": {
       "api": "numpy.where"
+    },
+    "Zeros": {
+      "api": "numpy.zeros",
+      "required_imports": []
     },
     "__array_namespace_info__": {
       "api": "numpy.__array_namespace_info__"
