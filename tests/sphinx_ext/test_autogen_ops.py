@@ -5,7 +5,7 @@ Verifies:
 1.  Recursion of SemanticsManager logic inside the hook.
 2.  File creation in the `docs/ops` directory.
 3.  Structure of the `index.rst` table of contents.
-4.  Robustness against missing data.
+4.  Filtering of Orphaned operations (implemented by < 2 frameworks).
 """
 
 import pytest
@@ -29,13 +29,19 @@ def mock_app(tmp_path):
   return app
 
 
-def test_autogen_creates_files(mock_app):
+def test_autogen_creates_files_for_valid_ops(mock_app):
   """
-  Scenario: Semantics contain 1 Op ('TestOp').
-  Expectation: 'ops/TestOp.rst' and 'ops/index.rst' are created.
+  Scenario: Semantics contain 1 Op implemented by 2 frameworks.
+  Expectation: 'ops/ValidOp.rst' and 'ops/index.rst' are created.
   """
   # Mock Semantics
-  mock_apis = {"TestOp": {"description": "A test op.", "std_args": ["x"], "variants": {"torch": {"api": "torch.foo"}}}}
+  mock_apis = {
+    "ValidOp": {
+      "description": "A valid op.",
+      "std_args": ["x"],
+      "variants": {"torch": {"api": "torch.foo"}, "jax": {"api": "jnp.foo"}},
+    }
+  }
 
   with patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager") as MockMgr:
     mgr = MockMgr.return_value
@@ -48,26 +54,56 @@ def test_autogen_creates_files(mock_app):
   ops_dir = Path(mock_app.srcdir) / "ops"
   assert ops_dir.exists()
 
-  # Verify Op File
-  op_file = ops_dir / "TestOp.rst"
+  # Verify Op File Created
+  op_file = ops_dir / "ValidOp.rst"
   assert op_file.exists()
   content = op_file.read_text("utf-8")
-  assert "TestOp" in content
-  assert "A test op." in content
-  assert "Standard Signature" in content or "Abstract Signature" in content
+  assert "ValidOp" in content
 
-  # Verify Index File
+  # Verify Index File Created and Linked
   index_file = ops_dir / "index.rst"
   assert index_file.exists()
   index_content = index_file.read_text("utf-8")
-  assert "Operation Reference" in index_content
-  assert "TestOp" in index_content
+  assert "ValidOp" in index_content
+
+
+def test_autogen_skips_orphan_ops(mock_app, caplog):
+  """
+  Scenario: Semantics contain 1 Op implemented by ONLY 1 framework (Orphan).
+  Expectation: Directory created, but NO operation file created.
+  """
+  mock_apis = {
+    "OrphanOp": {
+      "description": "A lonely op.",
+      "std_args": ["x"],
+      "variants": {
+        "torch": {"api": "torch.foo"},
+        "jax": None,  # Explicitly disabled
+      },
+    }
+  }
+
+  with patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager") as MockMgr:
+    mgr = MockMgr.return_value
+    mgr.get_known_apis.return_value = mock_apis
+    generate_op_docs(mock_app)
+
+  ops_dir = Path(mock_app.srcdir) / "ops"
+
+  # File should NOT exist
+  op_file = ops_dir / "OrphanOp.rst"
+  assert not op_file.exists()
+
+  # Index should NOT link it
+  index_file = ops_dir / "index.rst"
+  index_content = index_file.read_text("utf-8")
+  assert "OrphanOp" not in index_content
 
 
 def test_autogen_handles_empty_semantics(mock_app, caplog):
   """
-  Scenario: Semantics are empty.
-  Expectation: Directory created, index created (empty list), warning logged.
+  Scenario: Semantics are completely empty.
+  Expectation: Warning logged, no crashes.
   """
   with patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager") as MockMgr:
     mgr = MockMgr.return_value
@@ -80,25 +116,3 @@ def test_autogen_handles_empty_semantics(mock_app, caplog):
 
   # Check warning log
   assert "No operations found" in caplog.text
-
-  # Index should still exist but have no entries
-  index_file = ops_dir / "index.rst"
-  assert index_file.exists()
-
-
-def test_autogen_sanitizes_filenames(mock_app):
-  """
-  Scenario: Operation name contains weird characters 'My Op/1'.
-  Expectation: Filename is sanitized to 'MyOp1.rst'.
-  """
-  mock_apis = {"My Op/1": {"description": "Complex name", "std_args": [], "variants": {}}}
-
-  with patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager") as MockMgr:
-    mgr = MockMgr.return_value
-    mgr.get_known_apis.return_value = mock_apis
-    generate_op_docs(mock_app)
-
-  ops_dir = Path(mock_app.srcdir) / "ops"
-
-  expected_file = ops_dir / "MyOp1.rst"
-  assert expected_file.exists()

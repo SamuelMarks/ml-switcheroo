@@ -68,14 +68,13 @@ def is_future_import(node: cst.CSTNode) -> bool:
 def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
   """
   Recursively converts a python primitive or container to a CST node.
-
-  Supports: int, float, bool, str, list, tuple, dict, None.
+  Robustly handles strings using repr() to prevent syntax errors.
 
   Args:
       val: The python value to convert.
 
   Returns:
-      cst.BaseExpression: The resulting AST node.
+      cst.BaseExpression: The literal node.
   """
   # 1. Container Recursion (List/Tuple)
   if isinstance(val, (list, tuple)):
@@ -84,8 +83,8 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
       node = convert_to_cst_literal(item)
       elements.append(cst.Element(value=node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
 
-    # Strip trailing comma from last element for cleanliness
     if elements:
+      # Strip trailing comma from last element for cleaner syntax
       last = elements[-1]
       elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
 
@@ -100,7 +99,6 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
     for k, v in val.items():
       k_node = convert_to_cst_literal(k)
       v_node = convert_to_cst_literal(v)
-
       elements.append(
         cst.DictElement(
           key=k_node,
@@ -121,14 +119,13 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
   elif isinstance(val, int):
     return cst.Integer(str(val))
   elif isinstance(val, float):
-    return cst.Float(str(val))
+    # repr ensures high precision float string
+    return cst.Float(repr(val))
   elif isinstance(val, str):
-    # Basic quote escaping
-    s = val.replace('"', '\\"')
-    return cst.SimpleString(f'"{s}"')
+    # Use repr to handle escaping of quotes/newlines automatically and robustly
+    return cst.SimpleString(repr(val))
   elif val is None:
     return cst.Name("None")
   else:
-    # Fallback
-    s = str(val).replace('"', '\\"')
-    return cst.SimpleString(f'"{s}"')
+    # Final Fallback
+    return cst.SimpleString(repr(str(val)))

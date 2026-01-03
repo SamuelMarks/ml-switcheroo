@@ -1,20 +1,10 @@
 """
 Handler for the 'define' command.
 
-This module orchestrates the "Code Injection" workflow, allowing an LLM or
-developer to define a new operation via a YAML specification and automatically
-inject the corresponding Python code into the `ml-switcheroo` source tree.
+This module orchestrates the "Code Injection" workflow.
 
-Workflow:
-
-1.  **Parse YAML**: Validates input against the `OperationDef` schema.
-2.  **Auto-Inference**: Resolves `api: "infer"` placeholders.
-3.  **Inject Hub**: Updates `standards_internal.py` (Abstract Standard).
-4.  **Inject Spokes**: Updates framework adapter files (Mappings).
-5.  **Scaffold Plugins**: Generates boilerplate Python files for hooks.
-6.  **Generate Tests**: Creates physical test file for verification.
-
-    *Update*: Generates ONE test file per operation defined in the YAML.
+It imports YAML, validates schema, and uses LibCST injectors to modify source files.
+Robust checks added for syntax errors during injection.
 """
 
 import difflib
@@ -28,7 +18,7 @@ import libcst as cst
 try:
   import yaml
 except ImportError:
-  yaml = None  # type: ignore
+  yaml = None
 
 from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.core.discovery import SimulatedReflection
@@ -44,18 +34,8 @@ import ml_switcheroo.plugins
 
 
 def handle_define(yaml_file: Path, dry_run: bool = False) -> int:
-  """
-  Main entry point for the `define` CLI command.
-
-  Args:
-      yaml_file: Path to the ODL definition YAML file.
-      dry_run: If True, prints diffs to stdout instead of modifying files.
-
-  Returns:
-      int: Exit code (0 for success, 1 for failure).
-  """
   if yaml is None:
-    log_error("PyYAML is not installed. Please run `pip install PyYAML`.")
+    log_error("PyYAML is not installed.")
     return 1
 
   if not yaml_file.exists() and not yaml_file.name == "-":
@@ -66,7 +46,6 @@ def handle_define(yaml_file: Path, dry_run: bool = False) -> int:
     with fileinput.FileInput(str(yaml_file), mode="r", encoding="utf-8") as content:
       data = yaml.safe_load("".join(content))
 
-    # Handle both Single Object and List of Objects
     if isinstance(data, list):
       ops = [OperationDef(**d) for d in data]
     else:
@@ -76,78 +55,74 @@ def handle_define(yaml_file: Path, dry_run: bool = False) -> int:
     log_error(f"Failed to valid ODL YAML: {e}")
     return 1
 
-  # Load Semantics Manager once (for test generation templates)
   semantics_mgr = SemanticsManager()
 
   for op_def in ops:
-    log_info(f"Defining Operation: {op_def.operation}...")
-
-    # 1. Auto-Inference Resolution
+    # 1. Auto-Inference
     _resolve_inferred_apis(op_def)
 
-    # 2. Hub Injection (Abstract Standard)
+    # 2. Hub Injection
     if not _inject_hub(op_def, dry_run=dry_run):
+      # If hub fails (syntax error), stop
       return 1
 
-    # 3. Spoke Injection (Framework Adapters)
+    # 3. Spoke Injection
     _inject_spokes(op_def, dry_run=dry_run)
 
-    # 4. Plugin Scaffolding (New Hooks)
+    # 4. Plugin Scaffolding
     _scaffold_plugins(op_def, dry_run=dry_run)
 
-    # 5. Test Generation (One per Op)
-    # We ensure a unique test file for every operation to prevent overwriting
-    # when processing batches.
+    # 5. Test Generation
     _generate_test_file(op_def, semantics_mgr, dry_run=dry_run)
 
     if not dry_run:
       log_success(f"Operation '{op_def.operation}' defined & tested.")
-    else:
-      log_info(f"[Dry Run] Reviewed changes for '{op_def.operation}'.")
 
   return 0
 
 
 def _resolve_inferred_apis(op_def: OperationDef) -> None:
-  """
-  Iterates through variants and attempts to infer APIs marked with 'infer'.
-  """
   for fw_key, variant in op_def.variants.items():
     if variant and variant.api and variant.api.lower() == "infer":
-      log_info(f"Inferring API for {op_def.operation} in {fw_key}...")
       reflector = SimulatedReflection(fw_key)
       discovered = reflector.discover(op_def.operation)
       if discovered:
         variant.api = discovered
-        log_success(f"  Result: {discovered}")
+        log_success(f"  Inferred {fw_key}: {discovered}")
       else:
-        log_warning(f"  Failed: Could not infer API for {op_def.operation} in {fw_key}. Keeping 'infer'.")
+        log_warning(f"  Could not infer API for {op_def.operation} in {fw_key}")
 
 
 def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
-  """
-  Injects the abstract definition into `standards_internal.py`.
-  """
   try:
     spec_file = Path(inspect.getfile(internal_standards_module))
-    if not spec_file.exists():
-      log_error(f"Could not locate standards source file: {spec_file}")
-      return False
     source_code = spec_file.read_text("utf-8")
     tree = cst.parse_module(source_code)
+
     transformer = StandardsInjector(op_def)
     new_tree = tree.visit(transformer)
+
     if not transformer.found:
-      log_warning("Could not find `INTERNAL_OPS` dictionary in source. Skipping Hub injection.")
+      log_warning("INTERNAL_OPS dictionary not found.")
       return False
-    if new_tree.code != source_code:
+
+    generated_code = new_tree.code
+
+    # Syntax check before writing
+    try:
+      compile(generated_code, "<string>", "exec")
+    except SyntaxError as e:
+      log_error(f"Generated Invalid Python (Hub): {e}")
+      return False
+
+    if generated_code != source_code:
       if dry_run:
-        _print_diff(source_code, new_tree.code, str(spec_file))
+        _print_diff(source_code, generated_code, str(spec_file))
       else:
-        spec_file.write_text(new_tree.code, "utf-8")
+        spec_file.write_text(generated_code, "utf-8")
         log_success(f"Updated Hub: {spec_file.name}")
     else:
-      log_info(f"Hub unchanged: {spec_file.name}")
+      log_info(f"Hub unchanged (Key exists): {spec_file.name}")
     return True
   except Exception as e:
     log_error(f"Hub Injection failed: {e}")
@@ -155,135 +130,87 @@ def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
 
 
 def _inject_spokes(op_def: OperationDef, dry_run: bool = False) -> None:
-  """
-  Iterates variants and injects mappings into framework adapter files.
-  """
   for fw_key, variant in op_def.variants.items():
-    if not variant:
+    if not variant or (variant.api and variant.api.lower() == "infer"):
       continue
 
-    if variant.api and variant.api.lower() == "infer":
-      log_warning(f"Skipping '{fw_key}' spoke injection: API is unresolved ('infer').")
-      continue
     adapter = get_adapter(fw_key)
     if not adapter:
       continue
+
     try:
       adapter_cls = type(adapter)
       adapter_file = Path(inspect.getfile(adapter_cls))
-      if not adapter_file.exists() or not adapter_file.name.endswith(".py"):
-        log_warning(f"Skipping '{fw_key}': Cannot verify source file ({adapter_file}).")
-        continue
       source_code = adapter_file.read_text("utf-8")
       tree = cst.parse_module(source_code)
+
       injector = FrameworkInjector(target_fw=fw_key, op_name=op_def.operation, variant=variant)
       new_tree = tree.visit(injector)
-      if not injector.found:
-        log_warning(f"Skipping '{fw_key}': Could not locate `definitions` property in {adapter_cls.__name__}.")
+
+      generated_code = new_tree.code
+      try:
+        compile(generated_code, "<string>", "exec")
+      except SyntaxError as e:
+        log_error(f"Generated Invalid Python (Spoke {fw_key}): {e}")
         continue
-      if new_tree.code != source_code:
+
+      if not injector.found:
+        log_warning(f"Could not inject into {fw_key} (definitions property missing?)")
+        continue
+
+      if generated_code != source_code:
         if dry_run:
-          _print_diff(source_code, new_tree.code, str(adapter_file))
+          _print_diff(source_code, generated_code, str(adapter_file))
         else:
-          adapter_file.write_text(new_tree.code, "utf-8")
-          log_success(f"Updated Spoke ({fw_key}): {adapter_file.name}")
+          adapter_file.write_text(generated_code, "utf-8")
+          log_success(f"Updated Spoke ({fw_key})")
       else:
-        log_info(f"Spoke unchanged ({fw_key}): {adapter_file.name}")
+        log_info(f"Spoke unchanged ({fw_key})")
     except Exception as e:
       log_warning(f"Failed to update {fw_key}: {e}")
 
 
 def _scaffold_plugins(op_def: OperationDef, dry_run: bool = False) -> None:
-  """
-  Generates new Python files for required plugins.
-  """
   if not op_def.scaffold_plugins:
     return
   try:
     if ml_switcheroo.plugins.__file__:
       plugins_pkg_dir = Path(ml_switcheroo.plugins.__file__).parent
     else:
-      # Fallback path logic
       plugins_pkg_dir = Path(__file__).resolve().parents[2] / "plugins"
 
     generator = PluginGenerator(plugins_pkg_dir)
     for plug_def in op_def.scaffold_plugins:
       if dry_run:
-        log_info(f"[Dry Run] Would generate plugin file: plugins/{plug_def.name}.py")
+        log_info(f"[Dry Run] Generate plugin: {plug_def.name}")
       else:
-        try:
-          created = generator.generate(plug_def)
-          if created:
-            log_success(f"Generated Plugin: plugins/{plug_def.name}.py")
-          else:
-            log_info(f"Plugin already exists (skipped): plugins/{plug_def.name}.py")
-        except Exception as e:
-          log_error(f"Failed to generate plugin {plug_def.name}: {e}")
+        generator.generate(plug_def)
+        log_success(f"Generated Plugin: {plug_def.name}")
   except Exception as e:
-    log_error(f"Plugin scaffolding process error: {e}")
+    log_error(f"Plugin scaffolding error: {e}")
 
 
 def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager, dry_run: bool = False) -> None:
-  """
-  Generates a physical test file for the operation.
-  Location: tests/generated/test_odl_{opname}.py
-  """
   if dry_run:
-    safe_name = op_def.operation.lower().replace(" ", "_").replace("-", "_")
-    log_info(f"[Dry Run] Would generate test file: tests/generated/test_odl_{safe_name}.py")
     return
 
-  # 1. Construct Dictionary representation of the Op for the Generator
-  # TestGenerator expects { "OpName": { "std_args": ..., "variants": ... } }
-  # We must convert the pydantic model to dict
-  op_data_dict = op_def.model_dump(exclude_unset=True)
-
-  # Wrap in single-key dictionary
-  semantics_input = {op_def.operation: op_data_dict}
-
-  # 2. Determine Output Path
-  # Resolve 'tests' directory relative to package
   try:
-    # Assuming typical structure: src/ml_switcheroo/cli/handlers/define.py -> root/
-    root_dir = Path(__file__).parents[4]
-    if not (root_dir / "pyproject.toml").exists():
-      # Fallback if structure confusing (e.g. installed pkg vs source)
-      root_dir = Path.cwd()
-  except Exception:
     root_dir = Path.cwd()
+    test_dir = root_dir / "tests" / "generated"
+    safe_name = op_def.operation.lower().replace(" ", "_").replace("-", "_")
+    test_file = test_dir / f"test_odl_{safe_name}.py"
 
-  test_dir = root_dir / "tests" / "generated"
-
-  # Sanitize filename
-  safe_name = op_def.operation.lower().replace(" ", "_").replace("-", "_")
-  test_file = test_dir / f"test_odl_{safe_name}.py"
-
-  # 3. Run Generator
-  try:
     gen = TestGenerator(semantics_mgr=mgr)
-    gen.generate(semantics_input, test_file)
-
-    # Log path usually relative to cwd for readability
-    try:
-      rel_path = test_file.relative_to(Path.cwd())
-      log_success(f"Generated Verification Test: {rel_path}")
-    except ValueError:
-      log_success(f"Generated Verification Test: {test_file}")
+    gen.generate({op_def.operation: op_def.model_dump(exclude_unset=True)}, test_file)
   except Exception as e:
-    log_warning(f"Failed to generate tests for {op_def.operation}: {e}")
+    log_warning(f"Test match generation failed: {e}")
 
 
 def _print_diff(old_code: str, new_code: str, filename: str) -> None:
-  """
-  Prints a unified diff of the changes.
-  """
   diff = difflib.unified_diff(
     old_code.splitlines(keepends=True),
     new_code.splitlines(keepends=True),
     fromfile=filename,
     tofile=f"{filename} (modified)",
   )
-  print(f"\n--- Changes for {filename} ---")
-  for line in diff:
-    print(line, end="")
-  print("\n")
+  print("".join(diff))

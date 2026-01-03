@@ -5,13 +5,16 @@ This tool modifies Python source files (specifically `standards_internal.py`)
 by locating the `INTERNAL_OPS` dictionary and appending a new operation definition
 derived from an ODL (Operation Definition Language) model.
 
-Update: Now supports persisting semantic constraints (min, max, options) into
-the dictionary structure.
+Updates:
+- Supports persistent semantic constraints (min, max, options).
+- Checks for duplicate keys to prevent overwriting existing definitions.
+- Uses robust string literal generation.
 """
 
 import libcst as cst
 from typing import Any
-from ml_switcheroo.core.dsl import OperationDef, ParameterDef, FrameworkVariant
+from ml_switcheroo.core.dsl import OperationDef, ParameterDef
+from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 
 
 class StandardsInjector(cst.CSTTransformer):
@@ -38,111 +41,37 @@ class StandardsInjector(cst.CSTTransformer):
     Constructs a CST Dictionary node representing a parameter definition.
 
     Result format: `{'name': 'x', 'type': 'int', 'min': 0, 'options': [1, 2]}`
-
-    Args:
-        param: Validated parameter data.
-
-    Returns:
-        cst.Dict: A CST node structure representing the python dict.
     """
-    elements = [
-      cst.DictElement(
-        cst.SimpleString("'name'"),
-        cst.SimpleString(f"'{param.name}'"),
-        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-      )
-    ]
+    # We assume clean dictionary of properties
+    data = {
+      "name": param.name,
+      "type": param.type,
+      "default": param.default,
+      "min": param.min,
+      "max": param.max,
+      "options": param.options,
+      "rank": param.rank,
+      "dtype": param.dtype,
+      "kind": param.kind if param.kind != "positional_or_keyword" else None,
+      "is_variadic": param.is_variadic if param.is_variadic else None,
+    }
 
-    if param.type and param.type != "Any":
-      elements.append(
-        cst.DictElement(
-          cst.SimpleString("'type'"),
-          cst.SimpleString(f"'{param.type}'"),
-          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-        )
-      )
+    # Remove None values
+    data = {k: v for k, v in data.items() if v is not None}
 
-    if param.default is not None:
-      # We store the default value as a string code representation in the dict.
-      # e.g. default="-1" becomes 'default': '-1' in the python dict.
-      elements.append(
-        cst.DictElement(
-          cst.SimpleString("'default'"),
-          cst.SimpleString(f"'{param.default}'"),
-          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-        )
-      )
-
-    # --- Constraints Injection ---
-
-    if param.min is not None:
-      elements.append(
-        cst.DictElement(
-          cst.SimpleString("'min'"),
-          cst.Float(str(param.min)),
-          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-        )
-      )
-
-    if param.max is not None:
-      elements.append(
-        cst.DictElement(
-          cst.SimpleString("'max'"),
-          cst.Float(str(param.max)),
-          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-        )
-      )
-
-    if param.options is not None:
-      # Convert list of options to CST list node
-      list_elements = []
-      for opt in param.options:
-        val_node = self._convert_literal(opt)
-        list_elements.append(cst.Element(value=val_node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
-
-      # Clean last comma is optional in lists but clean style
-      if list_elements:
-        list_elements[-1] = list_elements[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
-
-      elements.append(
-        cst.DictElement(
-          cst.SimpleString("'options'"),
-          cst.List(list_elements),
-          comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-        )
-      )
-
-    return cst.Dict(elements)
-
-  def _convert_literal(self, val: Any) -> cst.BaseExpression:
-    """
-    Converts a python literal (bool, int, float, str) to a CST node.
-
-    Args:
-        val (Any): The literal value.
-
-    Returns:
-        cst.BaseExpression: The corresponding CST node.
-    """
-    if isinstance(val, bool):
-      return cst.Name("True") if val else cst.Name("False")
-    if isinstance(val, int):
-      return cst.Integer(str(val))
-    if isinstance(val, float):
-      return cst.Float(str(val))
-    if isinstance(val, str):
-      return cst.SimpleString(f"'{val}'")
-    return cst.SimpleString(f"'{str(val)}'")
+    # Use utility converter for the dict
+    return convert_to_cst_literal(data)
 
   def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
     """
     Visits assignment statements to find `INTERNAL_OPS`.
 
-    If found, modifies the dictionary value to include the new key-value pair.
+    If found, modifies the dictionary value to include the new key-value pair,
+    UNLESS the key already exists.
 
     Args:
         original_node: The node before transformation.
-        updated_node: The node after transformation (containing any recursive changes).
+        updated_node: The node after transformation.
 
     Returns:
         cst.Assign: The modified assignment node.
@@ -160,40 +89,83 @@ class StandardsInjector(cst.CSTTransformer):
 
     self.found = True
 
-    # 1. Build std_args list of Dict elements
+    # 1. Existence Check
+    # Iterate existing elements to check keys
+    for element in updated_node.value.elements:
+      if isinstance(element, cst.DictElement):
+        # Evaluate key literal if simple string
+        if isinstance(element.key, cst.SimpleString):
+          # Strip quotes roughly to check value
+          key_val = element.key.value.strip("'\"")
+          if key_val == self.op_def.operation:
+            # Operation Exists: Skip injection to preserve manual edits/ordering
+            return updated_node
+
+    # 2. Build std_args list of Dict elements
     args_elements = []
     for arg in self.op_def.std_args:
-      param_node = self._build_param_dict(arg)
+      # If arg is simple string (legacy/user yaml), handle it
+      if isinstance(arg, str):
+        p_def = ParameterDef(name=arg)
+        param_node = self._build_param_dict(p_def)
+      elif isinstance(arg, (list, tuple)):
+        p_def = ParameterDef(name=arg[0], type=arg[1] if len(arg) > 1 else "Any")
+        param_node = self._build_param_dict(p_def)
+      elif isinstance(arg, dict):
+        # Assuming validated by Pydantic loading before
+        p_model = ParameterDef(**arg)
+        param_node = self._build_param_dict(p_model)
+      else:
+        # Fallback for ParameterDef objects directly
+        param_node = self._build_param_dict(arg)
+
       args_elements.append(cst.Element(value=param_node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
 
-    # 2. Build the main operation Dictionary values
+    # 3. Build the main operation Dictionary values
     # Structure: { 'description': ..., 'std_args': [...], 'variants': {} }
-    # Note: Variants are empty in the Hub spec; they reside in frameworks (Spokes).
-    dict_body = [
-      cst.DictElement(
-        cst.SimpleString("'description'"),
-        cst.SimpleString(f"'{self.op_def.description}'"),
-        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-      ),
-      cst.DictElement(
-        cst.SimpleString("'std_args'"),
-        cst.List(args_elements),
-        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-      ),
-      cst.DictElement(
-        cst.SimpleString("'variants'"),
-        cst.Dict([]),  # Variants are handled by the FW injector
-        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-      ),
-    ]
+    dict_body = {
+      "description": self.op_def.description,
+      "std_args": cst.List(args_elements),  # Use pre-built list node for complex args
+      "variants": {},
+    }
 
-    new_entry_val = cst.Dict(dict_body)
-    new_entry_key = cst.SimpleString(f"'{self.op_def.operation}'")
+    # We manually construct this dict to inject the special cst.List node
+    dict_elements = []
 
-    # 3. Append to existing dictionary elements
+    # Description
+    dict_elements.append(
+      cst.DictElement(
+        key=convert_to_cst_literal("description"),
+        value=convert_to_cst_literal(self.op_def.description),
+        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+      )
+    )
+
+    # Std Args
+    dict_elements.append(
+      cst.DictElement(
+        key=convert_to_cst_literal("std_args"),
+        value=cst.List(args_elements),
+        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+      )
+    )
+
+    # Variants
+    dict_elements.append(
+      cst.DictElement(
+        key=convert_to_cst_literal("variants"),
+        value=cst.Dict([]),
+        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+      )
+    )
+
+    new_entry_val = cst.Dict(dict_elements)
+    new_entry_key = convert_to_cst_literal(self.op_def.operation)
+
+    # 4. Append to existing dictionary elements
     new_elements = list(updated_node.value.elements)
 
-    # Use formatting to ensure readable indentation on the new line
+    # Formatting
     new_dict_item = cst.DictElement(
       key=new_entry_key,
       value=new_entry_val,
@@ -206,6 +178,5 @@ class StandardsInjector(cst.CSTTransformer):
 
     new_elements.append(new_dict_item)
 
-    # Reconstruct the dictionary
     new_dict = updated_node.value.with_changes(elements=new_elements)
     return updated_node.with_changes(value=new_dict)
