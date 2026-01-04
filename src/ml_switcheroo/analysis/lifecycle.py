@@ -20,6 +20,13 @@ import libcst as cst
 class _ClassContext:
   """
   Tracks state for the current class scope.
+
+  Attributes:
+      name: Name of the class being analyzed.
+      initialized_members: Set of attributes assigned in ``__init__``.
+      used_in_forward: Set of attributes accessed in ``forward`` methods.
+      in_init: Flag indicating if traversal is inside ``__init__``.
+      in_forward: Flag indicating if traversal is inside a forward method.
   """
 
   name: str
@@ -45,6 +52,9 @@ class InitializationTracker(cst.CSTVisitor):
     """
     Enters a class definition.
     Pushes a new Context onto the stack.
+
+    Args:
+        node: The class definition node.
     """
     self._scope_stack.append(_ClassContext(name=node.name.value))
 
@@ -52,6 +62,9 @@ class InitializationTracker(cst.CSTVisitor):
     """
     Exits a class definition and computes the difference between usages and inits.
     If discrepancies are found, they are recorded in `self.warnings`.
+
+    Args:
+        node: The class definition node.
     """
     if not self._scope_stack:
       return
@@ -74,6 +87,9 @@ class InitializationTracker(cst.CSTVisitor):
     """
     Tracks entry into __init__ or forward/call methods.
     Sets context flags `in_init` or `in_forward`.
+
+    Args:
+        node: The function definition node.
     """
     if not self._scope_stack:
       return
@@ -90,6 +106,9 @@ class InitializationTracker(cst.CSTVisitor):
     """
     Exits function scope.
     Resets context flags.
+
+    Args:
+        node: The function definition node.
     """
     if not self._scope_stack:
       return
@@ -105,6 +124,9 @@ class InitializationTracker(cst.CSTVisitor):
   def visit_Assign(self, node: cst.Assign) -> None:
     """
     Tracks assignments to `self.x` inside `__init__`.
+
+    Args:
+        node: The assignment node.
     """
     if not self._scope_stack:
       return
@@ -118,6 +140,9 @@ class InitializationTracker(cst.CSTVisitor):
   def visit_AnnAssign(self, node: cst.AnnAssign) -> None:
     """
     Tracks annotated assignments (`self.x: int = ...`) inside `__init__`.
+
+    Args:
+        node: The annotated assignment node.
     """
     if not self._scope_stack:
       return
@@ -129,6 +154,9 @@ class InitializationTracker(cst.CSTVisitor):
   def visit_Attribute(self, node: cst.Attribute) -> None:
     """
     Tracks attribute access (`self.x`) inside `forward`.
+
+    Args:
+        node: The attribute access node.
     """
     if not self._scope_stack:
       return
@@ -169,5 +197,11 @@ class InitializationTracker(cst.CSTVisitor):
   def _is_self(self, node: cst.BaseExpression) -> bool:
     """
     Checks if a node is the Name 'self'.
+
+    Args:
+        node: The node to check.
+
+    Returns:
+        True if it is a Name node with value 'self'.
     """
     return isinstance(node, cst.Name) and node.value == "self"

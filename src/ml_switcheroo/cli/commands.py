@@ -2,7 +2,8 @@
 CLI Command Handlers Facade.
 
 This module primarily re-exports handlers from `ml_switcheroo.cli.handlers`
-to maintain backward compatibility with existing tests and imports.
+to maintain backward compatibility with existing tests and imports. Must remain
+synced with handler modules.
 """
 
 from ml_switcheroo.cli.handlers.audit import handle_audit
@@ -57,6 +58,17 @@ def handle_gen_weight_script(
 ) -> int:
   """
   Handler for generating weight migration script.
+
+  Delegates to the `WeightScriptGenerator` class.
+
+  Args:
+      source_file: Path to the model source code.
+      out_script: Path to write the output script.
+      source_fw: Source framework key (optional).
+      target_fw: Target framework key (optional).
+
+  Returns:
+      int: Exit Code (0 for success, 1 for failure).
   """
   config = RuntimeConfig.load(source=source_fw, target=target_fw)
   semantics = SemanticsManager()

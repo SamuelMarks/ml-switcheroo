@@ -64,6 +64,12 @@ class GraphOptimizer:
   def _apply_fusion_pass(self, graph: LogicalGraph) -> LogicalGraph:
     """
     Executes a single pass of greedy pattern matching.
+
+    Args:
+        graph: The input graph.
+
+    Returns:
+        The optimized graph.
     """
     # 1. Build Adjacency and Lookup Maps
     # node_id -> Node

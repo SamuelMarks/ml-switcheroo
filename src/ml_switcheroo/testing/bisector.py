@@ -6,6 +6,7 @@ verification tests by incrementally relaxing the constraints in the ODL specific
 It closes the loop between Testing and Definition.
 
 Capabilities:
+
 1.  **Tolerance Relaxation**: If a test fails on numeric comparison, the bisector
     retries with looser `rtol`/`atol` values.
 2.  **Suggestion Generation**: Returns a mutated OperationDef dict that passes tests,
@@ -14,7 +15,7 @@ Capabilities:
 
 import copy
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 from ml_switcheroo.testing.runner import EquivalenceRunner
 

@@ -24,10 +24,7 @@ class CoverageScanner(cst.CSTVisitor):
   """
 
   results: Dict[str, Tuple[bool, str]]
-  """ 
-    A dictionary mapping Fully Qualified Names (FQN) 
-    to a tuple of `(is_supported, framework_key)`. 
-    """
+  """Dictionary mapping Fully Qualified Names (FQN) to a tuple of (is_supported, framework_key)."""
 
   def __init__(self, semantics: SemanticsManager, allowed_roots: Set[str]):
     """
@@ -36,7 +33,7 @@ class CoverageScanner(cst.CSTVisitor):
     Args:
         semantics: The knowledge base manager used to verify support.
         allowed_roots: A set of framework root strings to consider (e.g. `{'torch', 'jax'}`).
-                       APIs not starting with these roots are ignored.
+            APIs not starting with these roots are ignored.
     """
     self.semantics = semantics
     self.allowed_roots = allowed_roots
@@ -145,7 +142,7 @@ class CoverageScanner(cst.CSTVisitor):
         node: The node to resolve.
 
     Returns:
-        str: The resolved fully qualified name, or empty string if unresolvable.
+        The resolved fully qualified name, or empty string if unresolvable.
     """
     # 1. Flatten CST to string
     raw_name = get_full_name(node)

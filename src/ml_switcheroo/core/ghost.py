@@ -21,10 +21,10 @@ class GhostParam(BaseModel):
   Serializable representation of a function parameter.
   """
 
-  name: str
-  kind: str
-  default: Optional[str] = None
-  annotation: Optional[str] = None
+  name: str = Field(description="Parameter name.")
+  kind: str = Field(description="Kind of parameter (e.g. POSITIONAL_OR_KEYWORD).")
+  default: Optional[str] = Field(None, description="Default value as string.")
+  annotation: Optional[str] = Field(None, description="Type annotation as string.")
 
 
 class GhostRef(BaseModel):
@@ -35,15 +35,23 @@ class GhostRef(BaseModel):
   without needing the framework installed at runtime.
   """
 
-  name: str
-  api_path: str
+  name: str = Field(description="Short name of the object.")
+  api_path: str = Field(description="Fully qualified import path.")
   kind: str = Field(description="One of: 'class', 'function'")
-  params: List[GhostParam] = Field(default_factory=list)
-  docstring: Optional[str] = None
-  has_varargs: bool = False
+  params: List[GhostParam] = Field(default_factory=list, description="List of parameters.")
+  docstring: Optional[str] = Field(None, description="Extracted docstring.")
+  has_varargs: bool = Field(False, description="True if signature accepts *args.")
 
   def has_arg(self, arg_name: str) -> bool:
-    """Checks if a specific argument exists in the signature."""
+    """
+    Checks if a specific argument exists in the signature.
+
+    Args:
+        arg_name: The argument name to find.
+
+    Returns:
+        True if found.
+    """
     return any(p.name == arg_name for p in self.params)
 
 
@@ -138,5 +146,11 @@ class GhostInspector:
   def hydrate(data: dict) -> "GhostRef":
     """
     Creates a GhostRef from a dictionary (JSON snapshot).
+
+    Args:
+        data: The dictionary data.
+
+    Returns:
+        The hydrated GhostRef object.
     """
     return GhostRef.model_validate(data)

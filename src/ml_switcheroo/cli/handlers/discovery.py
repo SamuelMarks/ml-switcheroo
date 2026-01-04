@@ -49,7 +49,7 @@ def handle_scaffold(frameworks: list[str], out_dir: Path) -> int:
   Args:
       frameworks (list[str]): List of framework package names to scaffold (e.g., ['torch', 'jax']).
       out_dir (Path): The root directory for generating the knowledge base.
-                      Defaults to the package source if None.
+          Defaults to the package source if None.
 
   Returns:
       int: Exit code.
@@ -114,7 +114,14 @@ def handle_import_spec(target: Path) -> int:
 
 
 def _save_spec(out_dir: Path, filename: str, data: Dict[str, Any]) -> None:
-  """Helper to persist JSON spec data."""
+  """
+  Helper to persist JSON spec data.
+
+  Args:
+      out_dir: Target directory path.
+      filename: JSON filename.
+      data: Dictionary content to save.
+  """
   out_p = out_dir / filename
   final_data = data
 
@@ -144,7 +151,7 @@ def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]]
   Args:
       categories (List[str]): List of category strings (layer, loss, etc.) to scan.
       frameworks (Optional[List[str]]): List of framework keys to scan.
-                                        Defaults to installed/registered frameworks.
+          Defaults to installed/registered frameworks.
       dry_run (bool): If True, prints results without saving.
 
   Returns:

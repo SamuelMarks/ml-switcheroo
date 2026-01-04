@@ -54,6 +54,9 @@ class DependencyScanner(cst.CSTVisitor):
     """
     Visits ``import x``, ``import x.y``.
     Checks the root package name.
+
+    Args:
+        node: The import statement node.
     """
     for alias in node.names:
       root_pkg = self._get_root_package(alias.name)
@@ -63,6 +66,9 @@ class DependencyScanner(cst.CSTVisitor):
     """
     Visits ``from x import y``.
     Checks the module root package name.
+
+    Args:
+        node: The import-from statement node.
     """
     # Ignore relative imports (starting with dots like `from . import utils`)
     if node.relative:
@@ -76,6 +82,12 @@ class DependencyScanner(cst.CSTVisitor):
     """
     Extracts the root package string from a CST node.
     e.g., ``Attribute(Name(os), Name(path))`` -> "os".
+
+    Args:
+        node: The node representing the module name.
+
+    Returns:
+        The root identifier string (e.g. 'os') or empty string if not found.
     """
     # Unwrap Attribute chains to find the leftmost Name
     curr = node
@@ -91,6 +103,9 @@ class DependencyScanner(cst.CSTVisitor):
     """
     Filters and checks the package name.
     If it's external and unmapped, adds to unknown_imports.
+
+    Args:
+        pkg_name: The root package identifier.
     """
     if not pkg_name:
       return
@@ -114,6 +129,12 @@ class DependencyScanner(cst.CSTVisitor):
     """
     Determines if a package is part of the Python Standard Library.
     Uses ``sys.stdlib_module_names`` on Python 3.10+, falls back to known list.
+
+    Args:
+        name: The package name to check.
+
+    Returns:
+        True if the package is in the standard library.
     """
     # Python 3.10+
     if sys.version_info >= (3, 10):

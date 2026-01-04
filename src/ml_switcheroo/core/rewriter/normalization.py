@@ -13,10 +13,14 @@ Handles:
 -   **Packing**: Handles variadic argument packing into containers (List/Tuple).
 """
 
-import json
-from typing import List, Dict, Any, Optional
 import libcst as cst
+from typing import List, Dict, Any, Union
+
 from ml_switcheroo.core.rewriter.base import BaseRewriter
+from ml_switcheroo.core.rewriter.normalization_utils import (
+  convert_value_to_cst,
+  extract_primitive_key,
+)
 
 
 class NormalizationMixin(BaseRewriter):
@@ -38,7 +42,7 @@ class NormalizationMixin(BaseRewriter):
         node: The CST node to inspect (Name or Attribute).
 
     Returns:
-        bool: True if it corresponds to a known framework root alias.
+        True if it corresponds to a known framework root alias.
     """
     name = self._cst_to_string(node)
     if not name:
@@ -78,94 +82,6 @@ class NormalizationMixin(BaseRewriter):
 
     root = name.split(".")[0]
     return root in known_roots
-
-  def _extract_primitive_key(self, node: cst.BaseExpression) -> Optional[str]:
-    """
-    Extracts a string representation of a primitive AST node for Enum key lookup.
-
-    Args:
-        node: The CST expression node.
-
-    Returns:
-        Optional[str]: The string value (if literal) or variable name.
-    """
-    if isinstance(node, cst.SimpleString):
-      return node.value.strip("'").strip('"')
-    elif isinstance(node, cst.Integer):
-      return node.value
-    elif isinstance(node, cst.Name):
-      return node.value
-    return None
-
-  def _convert_value_to_cst(self, val: Any) -> cst.BaseExpression:
-    """
-    Recursively converts a python value (primitive/container) to a CST literal expression node.
-
-    Supported types:
-    - Primitives: bool, int, float, str, None
-    - Containers: list, tuple, dict
-
-    Args:
-        val: The python value.
-
-    Returns:
-        cst.BaseExpression: The corresponding LibCST node.
-    """
-    # 1. Container Recursion (List/Tuple)
-    if isinstance(val, (list, tuple)):
-      elements = []
-      for item in val:
-        node = self._convert_value_to_cst(item)
-        # Add comma with spacing
-        elements.append(cst.Element(value=node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
-
-      # Fix trailing comma for the last element based on Python style preferences
-      # Usually strict JSON-like structures don't strictly need one, but LibCST allows exact control.
-      if elements:
-        last = elements[-1]
-        elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
-
-      if isinstance(val, list):
-        return cst.List(elements=elements)
-      else:
-        return cst.Tuple(elements=elements)
-
-    # 2. Key-Value Recursion (Dict)
-    if isinstance(val, dict):
-      elements = []
-      for k, v in val.items():
-        k_node = self._convert_value_to_cst(k)
-        v_node = self._convert_value_to_cst(v)
-        elements.append(
-          cst.DictElement(
-            key=k_node,
-            value=v_node,
-            comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-          )
-        )
-
-      if elements:
-        last = elements[-1]
-        elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)
-
-      return cst.Dict(elements=elements)
-
-    # 3. Primitives
-    # Important: bool MUST be checked before int because bool is subclass of int in Python
-    if isinstance(val, bool):
-      return cst.Name("True") if val else cst.Name("False")
-    elif isinstance(val, int):
-      return cst.Integer(str(val))
-    elif isinstance(val, float):
-      return cst.Float(repr(val))
-    elif isinstance(val, str):
-      # Use json.dumps to ensure proper quoting and escaping (produces double quotes)
-      return cst.SimpleString(json.dumps(val))
-    elif val is None:
-      return cst.Name("None")
-    else:
-      # Fallback for unknown objects using string representation
-      return cst.SimpleString(repr(str(val)))
 
   def _normalize_arguments(
     self,
@@ -303,7 +219,12 @@ class NormalizationMixin(BaseRewriter):
     if packing_mode and variadic_arg_name and pack_target_kw:
       elements = []
       for arg in variadic_buffer:
-        elements.append(cst.Element(value=arg.value, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
+        elements.append(
+          cst.Element(
+            value=arg.value,
+            comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
+          )
+        )
 
       is_list = pack_as_type == "List"
       if elements:
@@ -319,7 +240,10 @@ class NormalizationMixin(BaseRewriter):
       found_args[variadic_arg_name] = cst.Arg(
         keyword=cst.Name(pack_target_kw),
         value=container_node,
-        equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
+        equal=cst.AssignEqual(
+          whitespace_before=cst.SimpleWhitespace(""),
+          whitespace_after=cst.SimpleWhitespace(""),
+        ),
       )
 
     # 6. Construct New List (Reordering, Renaming, Injection)
@@ -331,12 +255,15 @@ class NormalizationMixin(BaseRewriter):
         try:
           default_val = defaults_map[std_name]
           # Convert python object to CST node
-          lit_val_node = self._convert_value_to_cst(default_val)
+          lit_val_node = convert_value_to_cst(default_val)
 
           found_args[std_name] = cst.Arg(
             keyword=cst.Name(std_name),  # Will be renamed below
             value=lit_val_node,
-            equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
+            equal=cst.AssignEqual(
+              whitespace_before=cst.SimpleWhitespace(""),
+              whitespace_after=cst.SimpleWhitespace(""),
+            ),
           )
         except Exception:
           # Ignore if conversion fails, rely on target default
@@ -361,7 +288,7 @@ class NormalizationMixin(BaseRewriter):
         if target_val_map and std_name in target_val_map:
           val_options = target_val_map[std_name]
           # Try to get string representation of key
-          raw_key = self._extract_primitive_key(current_arg.value)
+          raw_key = extract_primitive_key(current_arg.value)
           if raw_key is not None and str(raw_key) in val_options:
             target_code = val_options[str(raw_key)]
             try:
@@ -376,17 +303,16 @@ class NormalizationMixin(BaseRewriter):
         # If it didn't have keyword, and value changed, update value.
         # Note: Default injection args created above have keywords.
 
-        # Robustness Update: If this std_name matches an injected default or
-        # a remapped positional arg in a different slot, should we force keyword?
-        # Generally JAX prefers positionals for main tensors and keywords for config.
-
         should_use_keyword = current_arg.keyword is not None
 
         if should_use_keyword:
           new_arg = current_arg.with_changes(
             keyword=cst.Name(tg_alias),
             value=final_val_node,
-            equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
+            equal=cst.AssignEqual(
+              whitespace_before=cst.SimpleWhitespace(""),
+              whitespace_after=cst.SimpleWhitespace(""),
+            ),
           )
           new_args_list.append(new_arg)
         else:
@@ -406,7 +332,7 @@ class NormalizationMixin(BaseRewriter):
         if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):
           continue
 
-        val_node = self._convert_value_to_cst(arg_val)
+        val_node = convert_value_to_cst(arg_val)
 
         # Ensure previous arg has comma
         if len(new_args_list) > 0 and new_args_list[-1].comma == cst.MaybeSentinel.DEFAULT:
@@ -415,7 +341,10 @@ class NormalizationMixin(BaseRewriter):
         injected_arg = cst.Arg(
           keyword=cst.Name(arg_name),
           value=val_node,
-          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
+          equal=cst.AssignEqual(
+            whitespace_before=cst.SimpleWhitespace(""),
+            whitespace_after=cst.SimpleWhitespace(""),
+          ),
         )
         new_args_list.append(injected_arg)
 

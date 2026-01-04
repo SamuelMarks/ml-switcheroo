@@ -7,6 +7,7 @@ new operation definitions in the codebase, enforcing schema validity before
 AST injection occurs.
 
 It defines the structure for:
+
 - Parameters (types, constraints, shapes, dtypes).
 - Variants (framework implementations).
 - Plugins (scaffolding logic).
@@ -54,7 +55,8 @@ class ParameterDef(BaseModel):
 
   # --- Feature: Rich Defaults ---
   default: Optional[Any] = Field(
-    None, description="Default value. Supports primitives (int, float, bool, str) and containers (list, dict, None)."
+    None,
+    description="Default value. Supports primitives (int, float, bool, str) and containers (list, dict, None).",
   )
 
   # --- Feature: Semantic Constraints (Bounds Checking) ---
@@ -167,8 +169,7 @@ class FrameworkVariant(BaseModel):
   # --- Feature: Tensor Layout Permutation ---
   layout_map: Optional[Dict[str, str]] = Field(
     None,
-    description="Map of arguments (or 'return') to layout transformation strings (e.g., {'x': 'NCHW->NHWC'}). "
-    "Engine automatically injects permutation calls to match target layout expected by this API variant.",
+    description="Map of arguments (or 'return') to layout transformation strings (e.g., {'x': 'NCHW->NHWC'}). Engine automatically injects permutation calls to match target layout expected by this API variant.",
   )
 
   # --- Transformation Logic ---
@@ -180,8 +181,7 @@ class FrameworkVariant(BaseModel):
   # --- Feature: Composite Operations (Macros) ---
   macro_template: Optional[str] = Field(
     None,
-    description="Python expression template string for composite operations. "
-    "Use standard argument names as placeholders (e.g. '{x} * jax.nn.sigmoid({x})').",
+    description="Python expression template string for composite operations. Use standard argument names as placeholders (e.g. '{x} * jax.nn.sigmoid({x})').",
   )
 
   # --- Output Destructuring and Adaptation ---
@@ -240,8 +240,7 @@ class PluginScaffoldDef(BaseModel):
   # --- Feature: Auto-Wire ---
   auto_wire: Optional[Dict[str, Any]] = Field(
     None,
-    description="Dictionary defining Semantic Operations to be automatically injected via the plugin itself."
-    "Matches the structure of an ODL OperationDef JSON.",
+    description="Dictionary defining Semantic Operations to be automatically injected via the plugin itself. Matches the structure of an ODL OperationDef JSON.",
   )
 
 

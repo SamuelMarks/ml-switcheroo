@@ -72,6 +72,12 @@ class HtmlEmitter:
     """
     Formats metadata dictionary into a shorthand string.
     e.g., {'k': 3, 'in': 1} -> "k=3, in=1"
+
+    Args:
+        metadata: Dictionary of configuration values.
+
+    Returns:
+        Pretty-printed string.
     """
     parts = []
     for k, v in metadata.items():
@@ -91,6 +97,12 @@ class HtmlEmitter:
     2. Nodes with ID starting with 'func_' are purely functional ops extracted by
        GraphExtractor from standard library calls.
     3. Nodes with kind starting with 'func_' catch manual functional nodes.
+
+    Args:
+        node: The logical node to inspect.
+
+    Returns:
+        bool: True if it's a stateful layer.
     """
     if node.kind in ["Input", "Output"]:
       return False
@@ -108,6 +120,12 @@ class HtmlEmitter:
     """
     Normalizes function/class names for display.
     e.g. 'func_relu' -> 'Relu', 'torch.flatten' -> 'Flatten'.
+
+    Args:
+        kind: The operation kind string.
+
+    Returns:
+        Clean string capitalized.
     """
     if kind.startswith("func_"):
       kind = kind[5:]
@@ -125,6 +143,9 @@ class HtmlEmitter:
         start_row: Grid row of source box.
         end_row: Grid row of destination box.
         arrow_type: 'seq' (Blue->Blue down), 'def' (Red->Blue right), 'data' (Blue->Green right).
+
+    Returns:
+        A configured SvgArrow instance.
     """
     # Visual Constants matching the DSL CSS logic
     # row-gap is 40px, row-height is 80px.
@@ -197,6 +218,12 @@ class HtmlEmitter:
   def _layout_graph(self, graph: LogicalGraph) -> List[GridBox]:
     """
     Generates list of GridBoxes with layout coordinates.
+
+    Args:
+        graph: The logical graph to layout.
+
+    Returns:
+        List of GridBox elements.
     """
     boxes = []
     ordered = topological_sort(graph)

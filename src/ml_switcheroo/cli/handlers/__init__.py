@@ -1,4 +1,8 @@
-"""CLI handlers module."""
+"""
+CLI handlers module.
+
+Exposes individual command handler functions aggregated by domain.
+"""
 
 from .convert import handle_convert, _convert_single_file, _print_batch_summary
 from .discovery import (

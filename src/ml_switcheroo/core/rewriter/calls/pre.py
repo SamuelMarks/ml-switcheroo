@@ -2,6 +2,7 @@
 Pre-processing Phase for Call Rewriting.
 
 Handles logic that must occur before the core semantic lookup:
+
 1.  **Functional Unwrapping**: Converting ``apply`` patterns if converting from functional frameworks.
 2.  **Plugin Claims**: Heuristic execution of plugins (like in-place unrolling).
 3.  **Lifecycle Management**: Stripping methods like ``.cuda()`` or ``.eval()``.
@@ -39,9 +40,10 @@ def handle_pre_checks(
       func_name: The resolved fully qualified name of the function, or None if unresolved.
 
   Returns:
-      Tuple[bool, cst.CSTNode]:
-          - ``handled (bool)``: If True, the transformation is complete and should return early.
-          - ``node (cst.CSTNode)``: The result node (or updated node if not handled).
+      Tuple[bool, cst.CSTNode]: A tuple containing:
+
+      -   ``handled (bool)``: If True, the transformation is complete and should return early.
+      -   ``node (cst.CSTNode)``: The result node (or updated node if not handled).
   """
 
   # 1. Functional 'apply' unwrapping (Dynamic Trait)
@@ -136,6 +138,7 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
       ``x.view()`` -> ``torch.Tensor.view``
 
   Logic:
+
   1.  **Type Inference**: Consults the Symbol Table (if available) to determine
       the type of the receiver object (e.g., it is a Tensor).
   2.  **Heuristic Fallback**: Checks implicit root classes (e.g. ``torch.Tensor``)

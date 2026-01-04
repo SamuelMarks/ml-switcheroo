@@ -36,6 +36,13 @@ import ml_switcheroo.plugins
 def handle_define(yaml_file: Path, dry_run: bool = False) -> int:
   """
   Main entry point for defining new operations.
+
+  Args:
+      yaml_file: Path to the input YAML definition.
+      dry_run: If True, simulate changes without writing to disk.
+
+  Returns:
+      int: Exit Code (0 for success, 1 for failure).
   """
   if yaml is None:
     log_error("PyYAML is not installed.")
@@ -89,6 +96,12 @@ def handle_define(yaml_file: Path, dry_run: bool = False) -> int:
 
 
 def _resolve_inferred_apis(op_def: OperationDef) -> None:
+  """
+  Updates variant APIs in `op_def` if they are set to "infer".
+
+  Args:
+      op_def: The definition object to mutate.
+  """
   for fw_key, variant in op_def.variants.items():
     if variant and variant.api and variant.api.lower() == "infer":
       reflector = SimulatedReflection(fw_key)
@@ -101,6 +114,16 @@ def _resolve_inferred_apis(op_def: OperationDef) -> None:
 
 
 def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
+  """
+  Injects the definition into `standards_internal.py`.
+
+  Args:
+      op_def: The operation definition.
+      dry_run: Simulation mode flag.
+
+  Returns:
+      bool: True on success.
+  """
   try:
     spec_file = Path(inspect.getfile(internal_standards_module))
     source_code = spec_file.read_text("utf-8")
@@ -140,6 +163,10 @@ def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
 def _inject_spokes(op_def: OperationDef, dry_run: bool = False) -> None:
   """
   Injects definitions into framework JSON files.
+
+  Args:
+      op_def: The operation definition.
+      dry_run: Simulation mode flag.
   """
   for fw_key, variant in op_def.variants.items():
     if not variant or (variant.api and variant.api.lower() == "infer"):
@@ -160,6 +187,13 @@ def _inject_spokes(op_def: OperationDef, dry_run: bool = False) -> None:
 
 
 def _scaffold_plugins(op_def: OperationDef, dry_run: bool = False) -> None:
+  """
+  Scaffolds new plugin files defined in the ODL.
+
+  Args:
+      op_def: The operation definition.
+      dry_run: Simulation mode flag.
+  """
   if not op_def.scaffold_plugins:
     return
   try:
@@ -182,6 +216,14 @@ def _scaffold_plugins(op_def: OperationDef, dry_run: bool = False) -> None:
 
 
 def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager, dry_run: bool = False) -> None:
+  """
+  Generates a physical test file for verification.
+
+  Args:
+      op_def: The operation definition.
+      mgr: The Semantics Manager.
+      dry_run: Simulation mode flag.
+  """
   if dry_run:
     log_info(f"  [Dry Run] Would generate test file for {op_def.operation}")
     return

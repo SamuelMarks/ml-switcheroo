@@ -3,7 +3,7 @@ Runtime Configuration Store.
 Supports Dynamic Defaults, TOML loading, and Framework Flavours.
 
 This module resolves default Source and Target frameworks by querying the
-`ui_priority` of registered adapters, ensuring the logic is completely agnotistic
+``ui_priority`` of registered adapters, ensuring the logic is completely agnostic
 to the specific libraries installed.
 """
 
@@ -30,7 +30,7 @@ def get_framework_priority_order() -> List[str]:
   """
   Returns a list of framework keys sorted by UI Priority.
 
-  The sort order is determined by the `ui_priority` attribute of the
+  The sort order is determined by the ``ui_priority`` attribute of the
   registered FrameworkAdapter. Lower numbers appear first (Source default).
 
   If no priority is defined, defaults to 999.
@@ -152,7 +152,7 @@ class RuntimeConfig(BaseModel):
     """
     Returns the resolved source framework key.
 
-    Prioritizes `source_flavour` if present, otherwise returns `source_framework`.
+    Prioritizes ``source_flavour`` if present, otherwise returns ``source_framework``.
 
     Returns:
         str: The active source framework key.
@@ -164,7 +164,7 @@ class RuntimeConfig(BaseModel):
     """
     Returns the resolved target framework key.
 
-    Prioritizes `target_flavour` if present, otherwise returns `target_framework`.
+    Prioritizes ``target_flavour`` if present, otherwise returns ``target_framework``.
 
     Returns:
         str: The active target framework key.
@@ -204,7 +204,7 @@ class RuntimeConfig(BaseModel):
     search_path: Optional[Path] = None,
   ) -> "RuntimeConfig":
     """
-    Loads configuration from pyproject.toml, overriding with CLI arguments.
+    Loads configuration from ``pyproject.toml``, overriding with CLI arguments.
     Defaults are calculated dynamically via factory methods if not found.
 
     Args:

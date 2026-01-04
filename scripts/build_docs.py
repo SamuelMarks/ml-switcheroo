@@ -46,6 +46,12 @@ def clean() -> None:
   if api_dir.exists():
     shutil.rmtree(api_dir)
 
+  # Clean generated Operations documentation to prevent stale files
+  # triggering 'document isn't included in any toctree' warnings.
+  ops_dir = DOCS_DIR / "ops"
+  if ops_dir.exists():
+    shutil.rmtree(ops_dir)
+
 
 def copy_root_files() -> None:
   """

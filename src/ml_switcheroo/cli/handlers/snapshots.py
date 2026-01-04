@@ -6,8 +6,8 @@ It handles:
 1.  **Syncing**: Linking Abstract Standards (Hub) to installed framework implementations.
 2.  **Snapshotting**: Capturing API surfaces for Ghost Mode support.
 
-Update: Automatically extracts `test_config` from adapters and persists it into the snapshot
-templates. This ensures `gen-tests` has the necessary metadata.
+Update: Automatically extracts ``test_config`` from adapters and persists it into the snapshot
+templates. This ensures ``gen-tests`` has the necessary metadata.
 """
 
 import json
@@ -46,7 +46,7 @@ def handle_snapshot(out_dir: Optional[Path]) -> int:
       out_dir: Optional custom output directory. Defaults to package/snapshots.
 
   Returns:
-      int: Exit code.
+      Exit code (0 for success, 1 for failure).
   """
   target_dir = out_dir or DEFAULT_SNAP_DIR
 
@@ -79,18 +79,18 @@ def handle_sync(framework: str) -> int:
 
   Links the Abstract Standards (Hub) to the concrete implementation in a
   specific framework. This process involves:
-  1.  Reading the Specs from `semantics/`.
+  1.  Reading the Specs from ``semantics/``.
   2.  Introspecting the installed framework to find matching APIs.
   3.  **Merging Static Definitions** from the Adapter (for Ghost support).
   4.  Applying Adapter-specific manual wiring (plugins, templates).
   5.  **Persisting Test Configuration templates**.
-  6.  Writing the results to the Snapshot Overlay (`snapshots/{fw}_mappings.json`).
+  6.  Writing the results to the Snapshot Overlay (``snapshots/{fw}_mappings.json``).
 
   Args:
       framework: The framework key to sync (e.g. 'torch', 'jax').
 
   Returns:
-      int: Exit code.
+      Exit code (0 for success, 1 for failure).
   """
   # Resolve paths relative to package
   sem_dir = resolve_semantics_dir()
@@ -236,7 +236,7 @@ def _capture_framework(fw_name: str) -> Dict[str, Any]:
   Runs API collection for a single framework.
 
   Delegates to the framework's Adapter to scan all standardized categories.
-  Used by `handle_snapshot`.
+  Used by ``handle_snapshot``.
 
   Args:
       fw_name: The framework identifier.
@@ -278,12 +278,12 @@ def _capture_framework(fw_name: str) -> Dict[str, Any]:
   return snapshot_data
 
 
-def _save_snapshot(fw_name: str, data: Dict[str, Any], target_dir: Path):
+def _save_snapshot(fw_name: str, data: Dict[str, Any], target_dir: Path) -> None:
   """
   Writes snapshot data to a JSON file.
 
-  File naming convention: `{fw_name}_v{version}.json`
-  (e.g., `torch_v2.0.1.json`).
+  File naming convention: ``{fw_name}_v{version}.json``
+  (e.g., ``torch_v2.0.1.json``).
 
   Args:
       fw_name: Framework name.

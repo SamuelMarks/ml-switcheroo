@@ -84,6 +84,12 @@ class PurityScanner(cst.CSTTransformer):
   def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
     """
     Enters a statement line. Resets violation tracking.
+
+    Args:
+        node: The statement line node.
+
+    Returns:
+        Always True to visit children.
     """
     self._current_violations = []
     return True
@@ -117,6 +123,12 @@ class PurityScanner(cst.CSTTransformer):
   def visit_Global(self, node: cst.Global) -> Optional[bool]:
     """
     Detects usage of the 'global' keyword.
+
+    Args:
+        node: The global statement node.
+
+    Returns:
+        False to stop recursion (impure).
     """
     names = [n.name.value for n in node.names]
     self._current_violations.append(f"Global mutation ({', '.join(names)})")
@@ -125,6 +137,12 @@ class PurityScanner(cst.CSTTransformer):
   def visit_Nonlocal(self, node: cst.Nonlocal) -> Optional[bool]:
     """
     Detects usage of the 'nonlocal' keyword.
+
+    Args:
+        node: The nonlocal statement node.
+
+    Returns:
+        False to stop recursion (impure).
     """
     names = [n.name.value for n in node.names]
     self._current_violations.append(f"Nonlocal mutation ({', '.join(names)})")
@@ -133,6 +151,12 @@ class PurityScanner(cst.CSTTransformer):
   def visit_Call(self, node: cst.Call) -> Optional[bool]:
     """
     Inspects calls for I/O functions, list mutations, or global RNG seeding.
+
+    Args:
+        node: The call expression node.
+
+    Returns:
+        True to continue traversal.
     """
     # 1. Check Function Name (e.g., print())
     if isinstance(node.func, cst.Name):

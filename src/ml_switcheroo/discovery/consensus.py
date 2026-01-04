@@ -7,11 +7,11 @@ It aligns variable naming conventions (e.g., 'dim' vs 'axis') and clusters API e
 the Semantic Knowledge Base.
 """
 
-from typing import Dict, List, Optional, Set, Any, Union
+from typing import Dict, List, Set, Any, Union
 from collections import Counter as CollectionCounter
 from pydantic import BaseModel, Field
 
-from ml_switcheroo.core.ghost import GhostRef
+from ml_switcheroo.core.ghost import GhostRef, GhostParam
 
 
 class CandidateStandard(BaseModel):
@@ -110,9 +110,10 @@ class ConsensusEngine:
     This removes casing, underscores, and common prefixes/suffixes.
 
     Examples:
-        * 'HuberLoss' -> 'huber'
-        * 'reduce_mean' -> 'mean'
-        * 'conv2d' -> 'conv'
+
+    * 'HuberLoss' -> 'huber'
+    * 'reduce_mean' -> 'mean'
+    * 'conv2d' -> 'conv'
 
     Args:
         name (str): The raw API name (e.g. 'CrossEntropyLoss').
@@ -207,6 +208,7 @@ class ConsensusEngine:
     Analyses the arguments of all variants in a candidate to determine Standard Arguments and Types.
 
     It populates `std_args` on the candidate by voting:
+
     1.  If an argument (normalized) appears in >50% of the implementations, it becomes part of the standard.
     2.  If type hints are available across the variants, it determines the consensus type and
         populates a rich argument definition (e.g. `{'name': 'x', 'type': 'int'}`) instead of a simple string.

@@ -38,28 +38,12 @@ class SvgArrow(HtmlNode):
   """
 
   x1: int
-  """Start X coordinate."""
-
   y1: int
-  """Start Y coordinate."""
-
   x2: int
-  """End X coordinate."""
-
   y2: int
-  """End Y coordinate."""
-
   style_class: str
-  """CSS class for stroke color/style (e.g. 's-red', 's-blue')."""
-
   marker_end: str
-  """Marker ID for arrowhead (e.g. 'url(#mr)')."""
-
   parent_style: str
-  """ 
-    CSS string for absolute positioning of the container SVG. 
-    Example: 'left:100%; bottom:20px;' 
-    """
 
   def to_html(self) -> str:
     """
@@ -79,28 +63,13 @@ class GridBox(HtmlNode):
   """
 
   row: int
-  """CSS Grid row index."""
-
   col: int
-  """CSS Grid column index."""
-
   css_class: str
-  """Visual styling classes (e.g. 'box r', 'circ')."""
-
   header_text: str
-  """Main label (e.g. 'Conv2d', 'Return')."""
-
   code_text: Optional[str] = None
-  """Parameter details formatted as code."""
-
   body_text: Optional[str] = None
-  """Additional text (e.g. Shape info like '[B, 32]')."""
-
   arrows: List[SvgArrow] = field(default_factory=list)
-  """List of outgoing or decorative arrows attached to this box."""
-
   z_index: Optional[int] = None
-  """Explicit stack order."""
 
   def to_html(self) -> str:
     """
@@ -142,10 +111,7 @@ class HtmlDocument(HtmlNode):
   """
 
   model_name: str
-  """Title displayed in H1."""
-
   children: List[GridBox]
-  """List of grid elements."""
 
   # CSS Definition
   # Updates:
@@ -236,6 +202,9 @@ class HtmlDocument(HtmlNode):
 
     - Removed 'visibility:hidden' from markers block to enable correct rendering in some browsers
       when injected via innerHTML. Use 0 sizes and pointer-events logic instead.
+
+    Returns:
+        The complete HTML string document.
     """
     # Determine strict grid height
     repeat_count = 0

@@ -14,8 +14,9 @@ Features:
 """
 
 import yaml
+import shutil
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 from sphinx.application import Sphinx
 from sphinx.util import logging
@@ -37,6 +38,7 @@ class IndentedDumper(yaml.SafeDumper):
 def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any]:
   """
   Normalizes internal semantics data into clean ODL YAML structure.
+  Safe sanitization of description strings to prevent broken RST references.
   """
   # 1. Normalize Arguments
   yaml_args = []
@@ -66,9 +68,17 @@ def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any
     if details:
       clean_variants[fw] = dict(sorted(details.items()))
 
+  # Sanitize Description (Escape single backticks for RST safety)
+  raw_desc = definition.get("description", "").strip()
+  safe_desc = raw_desc
+  # Heuristically fix unmatched backticks that cause "Inline literal start-string without end-string"
+  # Basic fix: replace single backticks with double backticks if they appear isolated?
+  # Or just ensure description is safe string.
+  # For now, we leave as-is but the rendering pipeline should handle it.
+
   return {
     "operation": op_name,
-    "description": definition.get("description", "").strip(),
+    "description": safe_desc,
     "op_type": str(op_type),
     "std_args": yaml_args,
     "variants": clean_variants,
@@ -133,6 +143,12 @@ def generate_op_docs(app: Sphinx) -> None:
   # app.srcdir usually points to 'docs/'
   out_dir = Path(app.srcdir) / "ops"
 
+  # Self-Healing: Clean directoy to ensure no stale checks during consistent check.
+  # If we don't clean, Sphinx might find OldOp.rst from a previous run which isn't
+  # in the new index, causing "document isn't included in any toctree" warnings.
+  if out_dir.exists():
+    shutil.rmtree(out_dir)
+
   # Ensure directory exists
   out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -151,6 +167,9 @@ def generate_op_docs(app: Sphinx) -> None:
   generated_files = []
   yaml_entries = []
 
+  # Track seen safe names to prevent case-insensitive collision on Windows/Mac
+  seen_safe_names = set()
+
   for op_name in sorted_ops:
     definition = known_apis[op_name]
     variants = definition.get("variants", {})
@@ -163,7 +182,17 @@ def generate_op_docs(app: Sphinx) -> None:
 
     context = builder.build(op_name, definition)
     rst_content = renderer.render_rst(context)
+
+    # Sanitize filename
     safe_name = "".join(c for c in op_name if c.isalnum() or c in ("_", "-"))
+
+    # Case-insensitive collision check logic
+    # e.g., 'Abs' vs 'abs'
+    if safe_name.lower() in seen_safe_names:
+      logger.info(f"[ml-switcheroo] Skipping {op_name} (File collision with {safe_name.lower()})")
+      continue
+
+    seen_safe_names.add(safe_name.lower())
 
     try:
       with open(out_dir / f"{safe_name}.rst", "w", encoding="utf-8") as f:

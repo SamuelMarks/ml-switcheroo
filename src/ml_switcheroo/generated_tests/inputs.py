@@ -7,6 +7,7 @@ It parses argument definitions and emits code like `random.randint(1, 5)`
 or `np.random.randn(...)`.
 
 Features:
+
 - Infers generation logic from explicit types.
 - **Default Value Inference**: Uses default values to guess types when explicit
   hints are missing (e.g. `default=True` implies boolean generation).
@@ -14,7 +15,7 @@ Features:
 """
 
 import random
-from typing import Union, Dict, Any, Optional
+from typing import Union, Dict, Any
 
 
 def parse_arg_def(arg: Union[str, tuple, dict]) -> Dict[str, Any]:
@@ -90,6 +91,7 @@ def generate_input_value_code(name: str, arg_def: Union[str, Dict[str, Any]]) ->
   Generates Python code string to instantiate inputs based on type/constraints.
 
   Prioritizes:
+
   1. Explicit `options` list.
   2. Explicit `type` hint.
   3. Inference from `default` value if type is Any.

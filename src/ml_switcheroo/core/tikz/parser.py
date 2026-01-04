@@ -6,6 +6,7 @@ and reconstructs the `LogicalGraph` representation. It effectively reverses
 the operation of the `TikzEmitter`.
 
 Capabilities:
+
 1.  **Tokenization**: Regex-based lexer for LaTeX commands, groups, and options.
 2.  **Structural Parsing**: Identifies nodes, edges, and environments via recursive descent.
 3.  **Metadata Extraction**: Parses HTML-like tabular environments embedded in

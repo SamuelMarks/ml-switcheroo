@@ -6,11 +6,12 @@ It is responsible for identifying operations in machine learning libraries,
 aligning them with abstract standards, and populating the Semantic Knowledge Base.
 
 Modules:
-    - ``inspector``: Low-level introspection of Python modules/objects (Live & Ghost).
-    - ``scaffolder``: Heuristic-based scanning to generate initial mappings.
-    - ``consensus``: Algorithms to align divergent API names across frameworks.
-    - ``harvester``: Extraction of semantic rules from manual test files.
-    - ``syncer``: Linking abstract operation definitions to concrete framework APIs.
+
+- ``inspector``: Low-level introspection of Python modules/objects (Live & Ghost).
+- ``scaffolder``: Heuristic-based scanning to generate initial mappings.
+- ``consensus``: Algorithms to align divergent API names across frameworks.
+- ``harvester``: Extraction of semantic rules from manual test files.
+- ``syncer``: Linking abstract operation definitions to concrete framework APIs.
 """
 
 from ml_switcheroo.discovery.consensus import ConsensusEngine

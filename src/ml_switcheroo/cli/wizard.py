@@ -230,11 +230,12 @@ class MappingWizard:
 
     Returns:
         Optional[Dict[str, Any]]: A dictionary defining the target mapping logic if confirmed,
-        otherwise None. Structure:
-        {
-           "framework": str,
-           "data": { "api": str, "args": dict, "requires_plugin": str|None }
-        }
+        otherwise None. Structure::
+
+            {
+               "framework": str,
+               "data": { "api": str, "args": dict, "requires_plugin": str|None }
+            }
     """
     # Decoupled default: uses self.default_target (e.g. from config)
     if not Confirm.ask("Map to a Target Framework?", default=False):

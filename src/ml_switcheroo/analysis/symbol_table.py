@@ -22,11 +22,15 @@ from ml_switcheroo.core.scanners import get_full_name
 
 @dataclass
 class SymbolType:
-  """Base class for inferred types."""
+  """
+  Base class for inferred types.
+  """
 
   name: str
+  """A string representation of the type (e.g., 'Tensor')."""
 
   def __str__(self) -> str:
+    """Returns the type name."""
     return self.name
 
 
@@ -34,26 +38,20 @@ class SymbolType:
 class TensorType(SymbolType):
   """
   Represents a Tensor object from a specific framework.
-
-  Parameters:
-      name: inherited from SymbolType (e.g. "Tensor")
-      framework: the framework key (e.g. "torch" or "jax")
   """
 
   framework: str
+  """The framework key (e.g. "torch" or "jax") responsible for this tensor."""
 
 
 @dataclass
 class ModuleType(SymbolType):
   """
   Represents an imported module or sub-module.
-
-  Parameters:
-      name: inherited from SymbolType (e.g. "Module")
-      path: fully qualified path string (e.g. "torch.nn")
   """
 
   path: str
+  """Fully qualified path string (e.g. "torch.nn")."""
 
 
 class Scope:
@@ -74,11 +72,25 @@ class Scope:
     self.symbols: Dict[str, SymbolType] = {}
 
   def set(self, name: str, sym_type: SymbolType) -> None:
-    """Register a symbol in the current scope."""
+    """
+    Register a symbol in the current scope.
+
+    Args:
+        name: Variable identifier.
+        sym_type: Inferred Type object.
+    """
     self.symbols[name] = sym_type
 
   def get(self, name: str) -> Optional[SymbolType]:
-    """Resolve a symbol, traversing parent scopes."""
+    """
+    Resolve a symbol, traversing parent scopes.
+
+    Args:
+        name: Variable identifier to lookup.
+
+    Returns:
+        The SymbolType if found, else None.
+    """
     if name in self.symbols:
       return self.symbols[name]
     if self.parent:
@@ -92,14 +104,29 @@ class SymbolTable:
   """
 
   def __init__(self):
+    """Initializes an empty node map."""
     self._node_types: Dict[cst.CSTNode, SymbolType] = {}
 
   def record_type(self, node: cst.CSTNode, sym_type: SymbolType) -> None:
-    """Associates a CST node with a type."""
+    """
+    Associates a CST node with a type.
+
+    Args:
+        node: The CST node.
+        sym_type: The determined type.
+    """
     self._node_types[node] = sym_type
 
   def get_type(self, node: cst.CSTNode) -> Optional[SymbolType]:
-    """Retrieves the inferred type for a CST node."""
+    """
+    Retrieves the inferred type for a CST node.
+
+    Args:
+        node: The CST node to inspect.
+
+    Returns:
+        The stored SymbolType or None.
+    """
     return self._node_types.get(node)
 
 
@@ -110,6 +137,12 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   """
 
   def __init__(self, semantics: SemanticsManager):
+    """
+    Initializes the analyzer.
+
+    Args:
+        semantics: Reference to semantic knowledge base for type inference rules.
+    """
     self.semantics = semantics
     self.table = SymbolTable()
     self.root_scope = Scope(name="global")
@@ -118,20 +151,40 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   # --- Scoping ---
 
   def visit_ClassDef(self, node: cst.ClassDef) -> None:
-    """Enter class scope."""
+    """
+    Enter class scope.
+
+    Args:
+        node: Class definition node.
+    """
     self.current_scope = Scope(parent=self.current_scope, name=f"class_{node.name.value}")
 
   def leave_ClassDef(self, node: cst.ClassDef) -> None:
-    """Exit class scope."""
+    """
+    Exit class scope.
+
+    Args:
+        node: Class definition node.
+    """
     if self.current_scope.parent:
       self.current_scope = self.current_scope.parent
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Enter function scope."""
+    """
+    Enter function scope.
+
+    Args:
+        node: Function definition node.
+    """
     self.current_scope = Scope(parent=self.current_scope, name=f"func_{node.name.value}")
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """Exit function scope."""
+    """
+    Exit function scope.
+
+    Args:
+        node: Function definition node.
+    """
     if self.current_scope.parent:
       self.current_scope = self.current_scope.parent
 
@@ -141,6 +194,9 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     """
     Track imports.
     e.g. `import torch` -> symbols['torch'] = ModuleType(name='Module', path='torch')
+
+    Args:
+        node: Import statement node.
     """
     for alias in node.names:
       full_path = get_full_name(alias.name)
@@ -151,6 +207,9 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     """
     Track from-imports.
     e.g. `from torch import nn` -> symbols['nn'] = ModuleType(name='Module', path='torch.nn')
+
+    Args:
+        node: ImportFrom statement.
     """
     if not node.module:
       return
@@ -167,6 +226,9 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     """
     Propagate type from RHS to LHS.
     x = torch.randn() -> x is Tensor.
+
+    Args:
+        node: Assignment node.
     """
     rhs_type = self.table.get_type(node.value)
     if not rhs_type:
@@ -188,7 +250,12 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   # --- Usage Resolution ---
 
   def leave_Name(self, node: cst.Name) -> None:
-    """Look up variable in scope."""
+    """
+    Look up variable in scope.
+
+    Args:
+        node: Name node usage.
+    """
     sym_type = self.current_scope.get(node.value)
     if sym_type:
       self.table.record_type(node, sym_type)
@@ -197,6 +264,9 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     """
     Resolve attributes.
     If `x` is Module('torch'), `x.nn` is Module('torch.nn').
+
+    Args:
+        node: Attribute access node.
     """
     base_type = self.table.get_type(node.value)
     if isinstance(base_type, ModuleType):
@@ -208,6 +278,9 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     Infer return type of a call.
     1. Resolve function fully qualified name.
     2. Check SemanticsManager for return type.
+
+    Args:
+        node: Function call node.
     """
     api_path = None
 

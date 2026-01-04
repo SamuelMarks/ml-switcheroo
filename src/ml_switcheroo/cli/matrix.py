@@ -10,7 +10,7 @@ Sorting Order:
     Typically: PyTorch (0) -> JAX (10) -> NumPy (20) -> TensorFlow (30) -> ...
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from rich.console import Console
 from rich.table import Table
@@ -41,8 +41,8 @@ class CompatibilityMatrix:
     """
     Returns list of frameworks sorted for UI consistency.
 
-    Delegates to `ml_switcheroo.config.get_framework_priority_order` which
-    inspects `ui_priority` on registered adapters.
+    Delegates to ``ml_switcheroo.config.get_framework_priority_order`` which
+    inspects ``ui_priority`` on registered adapters.
 
     Returns:
         List[str]: Identifiers like ['torch', 'jax', 'numpy'].
@@ -104,7 +104,7 @@ class CompatibilityMatrix:
   def render(self) -> None:
     """
     Generates and prints the compatibility table to the standard output.
-    Uses `rich.Table` for formatting.
+    Uses ``rich.Table`` for formatting.
     """
     table = Table(title="ml-switcheroo Compatibility Matrix")
 

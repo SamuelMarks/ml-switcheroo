@@ -43,7 +43,13 @@ class GridParser(HTMLParser):
     self._buf_code = ""
 
   def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
-    """Handles opening tags to set context flags."""
+    """
+    Handles opening tags to set context flags.
+
+    Args:
+        tag: The tag name.
+        attrs: List of attribute tuples.
+    """
     attrs_dict = dict((k, v) for k, v in attrs if v is not None)
     cls = attrs_dict.get("class", "")
 
@@ -61,7 +67,12 @@ class GridParser(HTMLParser):
       self.in_code = True
 
   def handle_endtag(self, tag: str) -> None:
-    """Handles closing tags to process buffered content."""
+    """
+    Handles closing tags to process buffered content.
+
+    Args:
+        tag: The tag name.
+    """
     if tag == "div" and self.in_box:
       self.in_box = False
       self._process_box()
@@ -74,7 +85,12 @@ class GridParser(HTMLParser):
       self.in_code = False
 
   def handle_data(self, data: str) -> None:
-    """Accumulates text content based on active flags."""
+    """
+    Accumulates text content based on active flags.
+
+    Args:
+        data: Text content within a tag.
+    """
     if self.in_header_txt:
       self._buf_header += data
     if self.in_code:
@@ -124,6 +140,8 @@ class HtmlParser:
 
   def __init__(self, source: str) -> None:
     """
+    Initializes the parser.
+
     Args:
         source (str): The raw HTML string containing the grid DSL.
     """

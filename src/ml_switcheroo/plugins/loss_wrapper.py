@@ -2,6 +2,7 @@
 Plugin for Loss Reduction Semantics.
 
 Addresses the mismatch between:
+
 1. PyTorch: `loss = F.cross_entropy(..., reduction='mean')` (Scalar output by default).
 2. Functional Frameworks (JAX/Optax): `loss = optax.softmax_cross_entropy(x, y)`
    (Vector output per batch element).
@@ -12,18 +13,14 @@ PyTorch defaults to averaging (`mean`) immediately.
 Transformation:
 
 1. Detects `reduction` keyword argument.
-
 2. Strips the argument (as Optax/JAX funcs don't usually accept it).
-
 3. Wraps the function call in `Mean(x)` or `Sum(x)`. This step dynamically looks up
    the "Mean" or "Sum" API from the Semantic Knowledge Base, supporting any target
    framework definition (e.g. `tf.reduce_mean`, `jnp.mean`, `mx.mean`).
-
 4. If `reduction='none'`, leaves the vector output alone.
 """
 
 import libcst as cst
-from typing import Optional
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -76,7 +73,7 @@ def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   if reduction_arg_index != -1:
     del args[reduction_arg_index]
 
-    # 3. Resolve Inner Function Name from Context
+  # 3. Resolve Inner Function Name from Context
   # We reconstruct the inner call using the mapped API for the current operation.
   # If op_id is unknown (generic hook usage), fallback to 'cross_entropy' heuristic logic?
   loss_op_id = ctx.current_op_id

@@ -33,11 +33,6 @@ from ml_switcheroo.frameworks import get_adapter
 class WeightScriptGenerator:
   """
   Generates a Python script to migrate weights between frameworks.
-
-  Attributes:
-      semantics (SemanticsManager): The knowledge base manager.
-      source_fw (str): The source framework key (e.g. 'torch').
-      target_fw (str): The target framework key (e.g. 'jax').
   """
 
   def __init__(self, semantics: SemanticsManager, config: RuntimeConfig):
@@ -186,6 +181,12 @@ class WeightScriptGenerator:
   def _generate_script(self, rules: List[Dict[str, Any]]) -> str:
     """
     Generates the migration script using Adapter primitives.
+
+    Args:
+        rules: The list of mapping rules to embed in the script.
+
+    Returns:
+        The generated Python script as a string.
     """
     src_imports = "\n".join(self.source_adapter.get_weight_conversion_imports())
     tgt_imports = "\n".join(self.target_adapter.get_weight_conversion_imports())
@@ -196,54 +197,54 @@ class WeightScriptGenerator:
 
     rules_repr = pprint.pformat(rules, indent=4, width=100)
 
-    return textwrap.dedent(f"""
+    return textwrap.dedent(f""" 
 import sys
 import numpy as np
-{src_imports}
-{tgt_imports}
+{src_imports} 
+{tgt_imports} 
 
-MAPPING_RULES = {rules_repr}
+MAPPING_RULES = {rules_repr} 
 
-def permute(arr, p):
-    if p: return np.transpose(arr, p)
+def permute(arr, p): 
+    if p: return np.transpose(arr, p) 
     return arr
 
-def migrate(input_path, output_path):
-    print(f"Loading {{input_path}}...")
-{load_code}
+def migrate(input_path, output_path): 
+    print(f"Loading {{input_path}}...") 
+{load_code} 
 
-    converted_state = {{}}
-    print("Transforming weights...")
+    converted_state = {{}} 
+    print("Transforming weights...") 
 
-    for rule in MAPPING_RULES:
-        src_key = rule["src_key"]
+    for rule in MAPPING_RULES: 
+        src_key = rule["src_key"] 
         
         # Checking flat keys
-        if src_key not in raw_state:
-            print(f"⚠️  Missing source key: {{src_key}}")
+        if src_key not in raw_state: 
+            print(f"⚠️  Missing source key: {{src_key}}") 
             continue
             
-        raw_val = raw_state[src_key]
+        raw_val = raw_state[src_key] 
         
         # Convert to Numpy
-        np_val = {to_numpy_expr}
+        np_val = {to_numpy_expr} 
         
         # Permute if needed
-        data = permute(np_val, rule["perm"])
+        data = permute(np_val, rule["perm"]) 
         
         # Store for saving using target key string
         converted_state[rule["tgt_key"]] = data
-        print(f"✔ {{src_key}} -> {{rule['tgt_key']}} (Shape: {{data.shape}})")
+        print(f"✔ {{src_key}} -> {{rule['tgt_key']}} (Shape: {{data.shape}})") 
 
-    print(f"Saving to {{output_path}}...")
-{save_code}
-    print("Done!")
+    print(f"Saving to {{output_path}}...") 
+{save_code} 
+    print("Done!") 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     import argparse
-    parser = argparse.ArgumentParser(description="Weight Migration Script")
-    parser.add_argument("input", help="Input checkpoint path")
-    parser.add_argument("output", help="Output checkpoint path")
-    args = parser.parse_args()
-    migrate(args.input, args.output)
+    parser = argparse.ArgumentParser(description="Weight Migration Script") 
+    parser.add_argument("input", help="Input checkpoint path") 
+    parser.add_argument("output", help="Output checkpoint path") 
+    args = parser.parse_args() 
+    migrate(args.input, args.output) 
 """).strip()

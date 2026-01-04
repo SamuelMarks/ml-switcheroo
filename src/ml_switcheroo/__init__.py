@@ -7,38 +7,30 @@ frameworks (e.g., PyTorch -> JAX/Flax).
 This package exposes the core compilation engine and configuration utilities
 for programmatic usage.
 
-Usage
------
+Usage:
+    Simple String Conversion::
 
-Simple String Conversion
-^^^^^^^^^^^^^^^^^^^^^^^^
+        import ml_switcheroo as mls
+        # Auto-detects defaults based on installed libraries (e.g. Torch -> JAX)
+        code = "y = torch.abs(x)"
+        result = mls.convert(code)
+        print(result)
 
-.. code-block:: python
+        # Explicit conversion
+        result = mls.convert(code, source="torch", target="jax")
 
-    import ml_switcheroo as mls
-    # Auto-detects defaults based on installed libraries (e.g. Torch -> JAX)
-    code = "y = torch.abs(x)"
-    result = mls.convert(code)
-    print(result)
+    Advanced Usage (AST Engine)::
 
-    # Explicit conversion
-    result = mls.convert(code, source="torch", target="jax")
+        from ml_switcheroo import ASTEngine, RuntimeConfig
 
-Advanced Usage (AST Engine)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
+        engine = ASTEngine(config=config)
+        res = engine.run("y = torch.abs(x)")
 
-.. code-block:: python
-
-    from ml_switcheroo import ASTEngine, RuntimeConfig
-
-    config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
-    engine = ASTEngine(config=config)
-    res = engine.run("y = torch.abs(x)")
-
-    if res.success:
-        print(res.code)
-    else:
-        print(f"Errors: {res.errors}")
+        if res.success:
+            print(res.code)
+        else:
+            print(f"Errors: {res.errors}")
 """
 
 from typing import Any, Dict, Optional
@@ -67,21 +59,21 @@ def convert(
   `ASTEngine` directly.
 
   Args:
-      code (str): The source code to convert.
-      source (str, optional): The source framework key (e.g., "torch").
+      code: The source code to convert.
+      source: The source framework key (e.g., "torch").
           If None, determined dynamically by priority via `RuntimeConfig`.
-      target (str, optional): The target framework key (e.g., "jax").
+      target: The target framework key (e.g., "jax").
           If None, determined dynamically by priority via `RuntimeConfig`.
-      strict (bool): If True, the engine will return an error if an API
-                     cannot be mapped. If False (default), the original code
-                     is preserved wrapped in escape hatch comments.
-      plugin_settings (dict, optional): Specific configuration flags passed to
+      strict: If True, the engine will return an error if an API
+          cannot be mapped. If False (default), the original code
+          is preserved wrapped in escape hatch comments.
+      plugin_settings: Specific configuration flags passed to
           plugin hooks (e.g., `{"rng_arg_name": "seed"}`).
-      semantics (SemanticsManager, optional): An existing Knowledge Base instance.
+      semantics: An existing Knowledge Base instance.
           If None, a new one is initialized from disk.
 
   Returns:
-      str: The transpiled source code.
+      The transpiled source code string.
 
   Raises:
       ValueError: If the conversion fails (e.g. syntax errors or strict mode violations).

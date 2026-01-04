@@ -14,56 +14,33 @@ Pipeline:
 5.  **Refinement**: Import Fixing and Linting.
 """
 
-import traceback
-import libcst as cst
-from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field
+from typing import Any, Dict, Optional
 
-from ml_switcheroo.core.tracer import reset_tracer, get_tracer
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.rewriter import PivotRewriter
-from ml_switcheroo.core.import_fixer import ImportFixer
-from ml_switcheroo.testing.linter import StructuralLinter
-from ml_switcheroo.core.scanners import UsageScanner
-from ml_switcheroo.analysis.purity import PurityScanner
+import libcst as cst
+
+import ml_switcheroo.frameworks as fw_registry
 from ml_switcheroo.analysis.dependencies import DependencyScanner
 from ml_switcheroo.analysis.lifecycle import InitializationTracker
+from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.schema import PluginTraits
+from ml_switcheroo.core.conversion_result import ConversionResult
+from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 from ml_switcheroo.core.hooks import load_plugins
-import ml_switcheroo.frameworks as fw_registry
-
-# Visualizer
-from ml_switcheroo.utils.visualizer import MermaidGenerator
-
-# MLIR Bridge
+from ml_switcheroo.core.import_fixer import ImportFixer
+from ml_switcheroo.core.ingestion import ingest_code
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
-from ml_switcheroo.core.mlir.parser import MlirParser
-from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
-
-# TikZ Bridge / Graph Fusion
-from ml_switcheroo.core.tikz.parser import TikzParser
-from ml_switcheroo.core.tikz.synthesizer import GraphSynthesizer
+from ml_switcheroo.core.mlir_bridge import run_mlir_roundtrip
+from ml_switcheroo.core.rewriter import PivotRewriter
+from ml_switcheroo.core.scanners import UsageScanner
 from ml_switcheroo.core.tikz.analyser import GraphExtractor
 from ml_switcheroo.core.tikz.emitter import TikzEmitter
-from ml_switcheroo.core.graph_optimizer import GraphOptimizer
-
-
-class ConversionResult(BaseModel):
-  """
-  Container for the results of a transpilation job.
-  """
-
-  code: str = Field(default="", description="The generated source code.")
-  errors: List[str] = Field(default_factory=list, description="List of error messages encountered.")
-  success: bool = Field(default=True, description="True if the pipeline completed without fatal crashes.")
-  trace_events: List[Dict[str, Any]] = Field(default_factory=list, description="Execution trace log data.")
-
-  @property
-  def has_errors(self) -> bool:
-    """Check if the result contains any error messages."""
-    return len(self.errors) > 0
+from ml_switcheroo.core.tikz.synthesizer import GraphSynthesizer
+from ml_switcheroo.core.tracer import get_tracer, reset_tracer
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.schema import PluginTraits
+from ml_switcheroo.testing.linter import StructuralLinter
+from ml_switcheroo.utils.visualizer import MermaidGenerator
 
 
 class ASTEngine:
@@ -191,10 +168,11 @@ class ASTEngine:
 
   def _run_mlir_roundtrip(self, tree: cst.Module, tracer: Any) -> cst.Module:
     """
-    Executes CST -> MLIR Text -> CST pipeline for verification.
+    Wrapper to execute CST -> MLIR Text -> CST pipeline.
 
-    Used when intermediate="mlir" is selected to verify the structural integrity
-    of the MLIR bridge.
+    This method is maintained for backward compatibility with tests which expect
+    it to exist as a private method of the Engine class. It delegates to the
+    module-level `run_mlir_roundtrip` function.
 
     Args:
         tree: The Python CST.
@@ -203,97 +181,7 @@ class ASTEngine:
     Returns:
         A reconstructed Python CST (via MLIR).
     """
-    try:
-      tracer.start_phase("MLIR Bridge", "CST -> MLIR Text -> CST")
-      emitter = PythonToMlirEmitter()
-      mlir_cst = emitter.convert(tree)
-      mlir_text = mlir_cst.to_text()
-      tracer.log_mutation("MLIR Generation", "(Python CST)", mlir_text)
-
-      parser = MlirParser(mlir_text)
-      mlir_cst_restored = parser.parse()
-
-      generator = MlirToPythonGenerator()
-      restored_tree = generator.generate(mlir_cst_restored)
-      tracer.end_phase()
-      return restored_tree
-    except Exception as e:
-      tracer.log_warning(f"MLIR Bridge Failed: {e}")
-      tracer.end_phase()
-      return tree
-
-  def _run_ingestion(self, code: str, tracer) -> Optional[cst.Module]:
-    """
-    Parses input code handles non-python sources via adapters.
-
-    Supports:
-    1. Adapter-specific parsers (e.g. LaTeX).
-    2. MLIR text parsing.
-    3. TikZ text parsing.
-    4. Standard Python parsing.
-
-    Args:
-        code: Raw source code string.
-        tracer: The trace logger instance.
-
-    Returns:
-        A validated Python LibCST Module.
-    """
-    # 1. Adapter Hook (e.g. LatexParser)
-    if self.source_adapter and hasattr(self.source_adapter, "create_parser"):
-      tracer.start_phase("Custom Ingest", f"{self.source} Parser")
-      try:
-        parser = self.source_adapter.create_parser(code)
-        tree = parser.parse()
-        tracer.log_mutation("Transformed Ingestion", "(Raw Source)", "(AST Parsed)")
-        tracer.end_phase()
-        return tree
-      except Exception as e:
-        tracer.end_phase()
-        raise e
-
-    # 2. MLIR source
-    if self.source == "mlir":
-      tracer.start_phase("MLIR Ingest", "MLIR Text -> Python CST")
-      try:
-        parser = MlirParser(code)
-        mlir_mod = parser.parse()
-        gen = MlirToPythonGenerator()
-        tree = gen.generate(mlir_mod)
-        tracer.log_mutation("Ingestion", "(MLIR Text)", "(Python CST)")
-        tracer.end_phase()
-        return tree
-      except Exception as e:
-        tracer.end_phase()
-        raise e
-
-    # 3. TikZ source
-    if self.source == "tikz":
-      tracer.start_phase("TikZ Ingest", "TikZ Text -> Logical Graph -> Python CST")
-      try:
-        parser = TikzParser(code)
-        graph = parser.parse()
-        synth_target = "jax" if self.target in ["jax", "flax", "flax_nnx"] else "torch"
-        synthesizer = GraphSynthesizer(framework=synth_target)
-        py_code = synthesizer.generate(graph, class_name="SwitcherooNet")
-        tree = self.parse(py_code)
-        tracer.log_mutation("Ingestion", "(TikZ Source)", f"(Python CST)\n{py_code}")
-        tracer.end_phase()
-        return tree
-      except Exception as e:
-        tracer.end_phase()
-        raise e
-
-    # 4. Standard Python
-    tracer.start_phase("Preprocessing", "Parsing & Analysis")
-    try:
-      tree = self.parse(code)
-      tracer.log_mutation("Transformed Module", "(Raw Source)", "(AST Parsed)")
-      tracer.end_phase()
-      return tree
-    except Exception as e:
-      tracer.end_phase()
-      raise e
+    return run_mlir_roundtrip(tree, tracer)
 
   def run(self, code: str) -> ConversionResult:
     """
@@ -320,10 +208,15 @@ class ASTEngine:
     tracer.start_phase("Transpilation Pipeline", f"{self.source} -> {self.target}")
 
     try:
-      tree = self._run_ingestion(code, tracer)
+      tree = ingest_code(code, self.source, self.target, self.source_adapter, tracer)
     except Exception as e:
       tracer.end_phase()  # Root
-      return ConversionResult(code=code, errors=[f"Parse Error: {e}"], success=False, trace_events=tracer.export())
+      return ConversionResult(
+        code=code,
+        errors=[f"Parse Error: {e}"],
+        success=False,
+        trace_events=tracer.export(),
+      )
 
     # Effective root for pruning (used for synthetic sources)
     effective_source_pruning_root = self.source
@@ -336,17 +229,26 @@ class ASTEngine:
     if self.target_adapter and hasattr(self.target_adapter, "create_emitter"):
       tracer.start_phase("Custom Emission", f"{self.target} Emitter")
       try:
-        emitter = self.target_adapter.create_emitter()
+        emitter = self.target_adapter.create_emitter()  # type: ignore
         current_source = self.to_source(tree)
         output_code = emitter.emit(current_source)
-        tracer.log_mutation("Transformed Emission", "(Python CST)", f"({self.target} Source)")
+        tracer.log_mutation(
+          "Transformed Emission",
+          "(Python CST)",
+          f"({self.target} Source)",
+        )
         tracer.end_phase()
         tracer.end_phase()  # Root
         return ConversionResult(code=output_code, success=True, trace_events=tracer.export())
       except Exception as e:
         tracer.end_phase()
         tracer.end_phase()  # Root
-        return ConversionResult(code="", errors=[f"Emission Error: {e}"], success=False, trace_events=tracer.export())
+        return ConversionResult(
+          code="",
+          errors=[f"Emission Error: {e}"],
+          success=False,
+          trace_events=tracer.export(),
+        )
 
     # 2. MLIR Emission
     if self.target == "mlir":
@@ -362,7 +264,12 @@ class ASTEngine:
       except Exception as e:
         tracer.end_phase()
         tracer.end_phase()
-        return ConversionResult(code="", errors=[f"MLIR Emit Error: {e}"], success=False, trace_events=tracer.export())
+        return ConversionResult(
+          code="",
+          errors=[f"MLIR Emit Error: {e}"],
+          success=False,
+          trace_events=tracer.export(),
+        )
 
     # 3. TikZ Emission
     if self.target == "tikz":
@@ -379,7 +286,12 @@ class ASTEngine:
       except Exception as e:
         tracer.end_phase()
         tracer.end_phase()
-        return ConversionResult(code="", errors=[f"TikZ Emit Error: {e}"], success=False, trace_events=tracer.export())
+        return ConversionResult(
+          code="",
+          errors=[f"TikZ Emit Error: {e}"],
+          success=False,
+          trace_events=tracer.export(),
+        )
 
     # --- PHASE 3: ANALYSIS & REWRITING ---
     errors_log = []
@@ -474,7 +386,13 @@ class ASTEngine:
       tree.visit(usage_scanner)
       should_preserve = usage_scanner.get_result()
 
-      fixer = ImportFixer(sorted(list(roots_to_prune)), self.target, submodule_map, alias_map, should_preserve)
+      fixer = ImportFixer(
+        sorted(list(roots_to_prune)),
+        self.target,
+        submodule_map,
+        alias_map,
+        should_preserve,
+      )
       tree = tree.visit(fixer)
       tracer.end_phase()
 
@@ -497,4 +415,9 @@ class ASTEngine:
       errors_log.append("Escape Hatches Detected")
 
     tracer.end_phase()
-    return ConversionResult(code=final_code, errors=errors_log, success=True, trace_events=tracer.export())
+    return ConversionResult(
+      code=final_code,
+      errors=errors_log,
+      success=True,
+      trace_events=tracer.export(),
+    )
