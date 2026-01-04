@@ -2,11 +2,12 @@
 Pre-processing Phase for Call Rewriting.
 
 Handles logic that must occur before the core semantic lookup:
-1.  **Functional Unwrapping**: Converting `apply` patterns if converting from functional frameworks.
+1.  **Functional Unwrapping**: Converting ``apply`` patterns if converting from functional frameworks.
 2.  **Plugin Claims**: Heuristic execution of plugins (like in-place unrolling).
-3.  **Lifecycle Management**: Stripping methods like `.cuda()` or `.eval()`.
+3.  **Lifecycle Management**: Stripping methods like ``.cuda()`` or ``.eval()``.
 4.  **Stateful Calls**: Rewriting calls that require state injection.
-5.  **Implicit Resolution**: Guessing API paths for method calls on objects.
+5.  **Implicit Resolution**: Guessing API paths for method calls on objects, using
+    Symbol Table inference or heuristic fallbacks.
 """
 
 from typing import Tuple, Any, Optional
@@ -27,10 +28,20 @@ def handle_pre_checks(
   """
   Executes pre-lookup checks and transformations.
 
+  These checks handle framework-specific idioms that don't map cleanly via
+  simple API renaming (e.g., in-place operations, lifecycle management,
+  functional state patterns).
+
+  Args:
+      rewriter: The parent Rewriter instance containing context and config.
+      original: The original CST node (before traversal).
+      updated: The updated CST node (after children handling).
+      func_name: The resolved fully qualified name of the function, or None if unresolved.
+
   Returns:
       Tuple[bool, cst.CSTNode]:
-          - `handled (bool)`: If True, the transformation is complete and should return early.
-          - `node (cst.CSTNode)`: The result node (or updated node if not handled).
+          - ``handled (bool)``: If True, the transformation is complete and should return early.
+          - ``node (cst.CSTNode)``: The result node (or updated node if not handled).
   """
 
   # 1. Functional 'apply' unwrapping (Dynamic Trait)
@@ -120,29 +131,53 @@ def handle_pre_checks(
 def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Optional[str]) -> Optional[str]:
   """
   Attempts to resolve method calls on objects to full API paths.
-  E.g. `x.float()` -> `torch.Tensor.float`.
 
-  This function attempts to find a match in the Semantic Knowledge Base
-  by checking implicit root classes (e.g. `torch.Tensor`) defined in source traits.
+  Example:
+      ``x.view()`` -> ``torch.Tensor.view``
+
+  Logic:
+  1.  **Type Inference**: Consults the Symbol Table (if available) to determine
+      the type of the receiver object (e.g., it is a Tensor).
+  2.  **Heuristic Fallback**: Checks implicit root classes (e.g. ``torch.Tensor``)
+      defined in the source traits to guess if the method belongs to them.
 
   Args:
-      rewriter: The calling rewriter.
-      original: The original CST node.
+      rewriter: The calling rewriter instance.
+      original: The original CST node structure.
       func_name: The currently resolved name (usually None or the failed name).
 
   Returns:
-      str: Resolved fully qualified name, or None if no match found.
+      Optional[str]: Resolved fully qualified name, or None if no match found.
   """
-  # Check if it looks like a method call
+  # Check if it looks like a method call: object.method(...)
   if isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
     receiver = original.func.value
+    leaf_method = original.func.attr.value
+
     # Ensure we aren't misinterpreting module alias `torch.abs` as `obj.abs`
     is_module = rewriter._is_module_alias(receiver)
     # Check for 'self'
     is_self = isinstance(receiver, cst.Name) and receiver.value == "self"
 
     if not is_self and not is_module:
-      leaf_method = original.func.attr.value
+      # --- 1. Symbol Table Inference ---
+      if hasattr(rewriter, "symbol_table") and rewriter.symbol_table:
+        sym_type = rewriter.symbol_table.get_type(receiver)
+        if sym_type:
+          # Construct API path based on inferred type
+          # e.g., if type is TensorType(framework='torch'), try 'torch.Tensor.view'
+          candidate_api = f"{sym_type.name}.{leaf_method}"
+
+          # Handle Tensor special casing map if frameworks define 'Tensor' roots differently
+          if "Tensor" in sym_type.name and hasattr(sym_type, "framework"):
+            # 'torch.Tensor.view'
+            candidate_api = f"{sym_type.framework}.Tensor.{leaf_method}"
+
+          mapping = rewriter._get_mapping(candidate_api, silent=True)
+          if mapping:
+            return candidate_api
+
+      # --- 2. Legacy Heuristic Fallback ---
       source_traits = rewriter._get_source_traits()
       implicit_roots = source_traits.implicit_method_roots
 

@@ -4,9 +4,15 @@ Numpy Framework Adapter.
 This module provides the implementation definitions for the NumPy API.
 It maps abstract operations for Math and Extras to ``numpy.*`` functions
 and defines type mappings for data-driven casting logic.
+
+Capabilities:
+1.  **Math**: `np.abs`, `np.mean`.
+2.  **IO**: `np.save`, `np.load` for persistence.
+3.  **Weight Migration**: Handling dict-based `.npz` archives via `get_weight_*` hooks.
 """
 
 import numpy as np
+import textwrap
 from typing import List, Tuple, Optional, Dict, Any, Set
 from ml_switcheroo.core.ghost import GhostRef
 from ml_switcheroo.enums import SemanticTier
@@ -274,6 +280,34 @@ class NumpyAdapter:
     elif op == "load":
       return f"np.load(file={file_arg})"
     return ""
+
+  # --- Weight Handling ---
+
+  def get_weight_conversion_imports(self) -> List[str]:
+    return ["import numpy as np"]
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """Loads .npz files into a dictionary."""
+    return textwrap.dedent(
+      f"""
+            loaded = np.load({path_var}, allow_pickle=True)
+            # If NpzFile wrapper, convert to dict
+            if hasattr(loaded, 'files'):
+                raw_state = {{k: loaded[k] for k in loaded.files}}
+            elif isinstance(loaded.item(), dict):
+                # Handle 0-d array wrapping a dict (common in np.save)
+                raw_state = loaded.item()
+            else:
+                raw_state = {{'data': loaded}}
+            """
+    )
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    return f"{tensor_var}"
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """Saves dictionary to compressed .npz."""
+    return f"np.savez_compressed({path_var}, **{state_var})"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """No dynamic wiring needed for NumPy."""

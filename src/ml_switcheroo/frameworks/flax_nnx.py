@@ -302,6 +302,8 @@ class FlaxNNXAdapter(JAXStackMixin):
   def convert(self, data: Any) -> Any:
     """
     Converts generic data to framework-specific Pytree/arrays.
+    Contains self-contained logic to ensure safe extraction by the Harness Generator which
+    does not preserve external dependencies like 'JaxCoreAdapter' class references.
 
     Args:
         data (Any): Input data (numpy/list).
@@ -309,7 +311,18 @@ class FlaxNNXAdapter(JAXStackMixin):
     Returns:
         Converted data tailored to JAX/Flax ecosystem.
     """
-    return JaxCoreAdapter().convert(data)
+    try:
+      import jax.numpy as jnp
+      # Use NumPy check if jnp fails, but jnp is preferred
+    except ImportError:
+      return data
+
+    if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
+      try:
+        return jnp.array(data)
+      except Exception:
+        pass
+    return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """

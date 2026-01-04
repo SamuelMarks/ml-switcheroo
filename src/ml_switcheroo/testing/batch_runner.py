@@ -6,7 +6,7 @@ Prioritizes "Manual/Human" tests found on disk over "Auto/Robotic" fuzzing.
 This closes the loop for Workflow B, allowing manual fixes to count as success.
 
 Updated to handle Rich Parameter Constraints (dict items in std_args),
-including Dtype and Rank constraints, and **Input-Dependent Output Shape** verification.
+including Dtype, Rank, and Symbolic Shape constraints.
 """
 
 import ast
@@ -101,7 +101,7 @@ class BatchValidator:
         A tuple containing:
             - List of argument names [str].
             - Dictionary of type hints {name: type_str}.
-            - Dictionary of constraints {name: {min: val, dtype: 'int64', ...}}.
+            - Dictionary of constraints {name: {min: val, dtype: 'int64', shape_spec: '...', ...}}.
     """
     params = []
     hints = {}
@@ -118,9 +118,10 @@ class BatchValidator:
         if "type" in item:
           hints[name] = item["type"]
 
-        # Extract constraints if present (Updated for dtype/rank)
+        # Extract constraints if present (Updated for dtype/rank/shape_spec)
         constrs = {}
-        for k in ["min", "max", "options", "rank", "dtype"]:
+        # Include 'default' to allow inference fallback
+        for k in ["min", "max", "options", "rank", "dtype", "shape_spec", "default"]:
           if k in item and item[k] is not None:
             constrs[k] = item[k]
 

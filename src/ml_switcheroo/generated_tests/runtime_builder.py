@@ -111,6 +111,7 @@ def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
 
     kind = np_ref.dtype.kind
     if kind in {"f", "c"}:
+      # Use equal_nan=True to handle NaNs consistently
       return np.allclose(np_ref, np_val, rtol=rtol, atol=atol, equal_nan=True)
 
     return np.array_equal(np_ref, np_val)

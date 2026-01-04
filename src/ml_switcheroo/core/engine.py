@@ -9,7 +9,9 @@ Pipeline:
 
 1.  **Ingestion**: Adapter Hooks (LaTeX) or Standard Parsing (Python/MLIR/TikZ).
 2.  **Emission**: Adapter Hooks (LaTeX) or Standard Emission (Python/MLIR/TikZ).
-3.  **Transformation**: Purity, Lifecycle, Dependency checks, Rewriting, Import Fixing.
+3.  **Analysis**: Symbol Table Inference, Purity, Lifecycle, Dependency checks.
+4.  **Transformation**: Rewriting via PivotRewriter.
+5.  **Refinement**: Import Fixing and Linting.
 """
 
 import traceback
@@ -26,8 +28,10 @@ from ml_switcheroo.core.scanners import UsageScanner
 from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.analysis.dependencies import DependencyScanner
 from ml_switcheroo.analysis.lifecycle import InitializationTracker
+from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.schema import PluginTraits
+from ml_switcheroo.core.hooks import load_plugins
 import ml_switcheroo.frameworks as fw_registry
 
 # Visualizer
@@ -38,11 +42,12 @@ from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 from ml_switcheroo.core.mlir.parser import MlirParser
 from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
-# TikZ Bridge
+# TikZ Bridge / Graph Fusion
 from ml_switcheroo.core.tikz.parser import TikzParser
 from ml_switcheroo.core.tikz.synthesizer import GraphSynthesizer
 from ml_switcheroo.core.tikz.analyser import GraphExtractor
 from ml_switcheroo.core.tikz.emitter import TikzEmitter
+from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 
 
 class ConversionResult(BaseModel):
@@ -75,6 +80,7 @@ class ASTEngine:
     source: Optional[str] = None,
     target: Optional[str] = None,
     strict_mode: bool = False,
+    enable_fusion: bool = False,
     plugin_config: Optional[Dict[str, Any]] = None,
     intermediate: Optional[str] = None,
   ):
@@ -87,6 +93,7 @@ class ASTEngine:
         source: Source framework key (e.g. 'torch').
         target: Target framework key (e.g. 'jax').
         strict_mode: If True, fail on unmapped APIs instead of preserving them.
+        enable_fusion: If True, performs graph-level fusion pass.
         plugin_config: Dictionary of settings passed to plugins.
         intermediate: Optional intermediate representation ('mlir', 'tikz') or None.
     """
@@ -100,6 +107,7 @@ class ASTEngine:
         target=target,
         strict_mode=strict_mode,
         intermediate=intermediate,
+        enable_fusion=enable_fusion,
         plugin_settings=plugin_config or {},
       )
 
@@ -114,6 +122,10 @@ class ASTEngine:
 
     self.source_adapter = fw_registry.get_adapter(self.source)
     self.target_adapter = fw_registry.get_adapter(self.target)
+
+    # Ensure built-in plugins are loaded now, so that hooks are available during rewrite
+    # This prevents "Missing required plugin" errors in programmatic usage.
+    load_plugins()
 
   def parse(self, code: str) -> cst.Module:
     """
@@ -291,8 +303,10 @@ class ASTEngine:
 
     1.  **Ingestion**: Parse source (Python/MLIR/LaTeX) to AST.
     2.  **Short-Circuit**: If target is non-Python (MLIR/TikZ/Latex), emit immediately.
-    3.  **Analysis**: Run Purity, Lifecycle, and Dependency checks.
-    4.  **Rewriting**: Execute `PivotRewriter` to transform the AST.
+    3.  **Analysis**:
+        - Run Symbol Table Analyzer for type inference.
+        - Run Purity, Lifecycle, and Dependency checks.
+    4.  **Transformation**: Rewriting via PivotRewriter.
     5.  **Refinement**: Run `ImportFixer` and `StructuralLinter` to clean results.
 
     Args:
@@ -367,8 +381,19 @@ class ASTEngine:
         tracer.end_phase()
         return ConversionResult(code="", errors=[f"TikZ Emit Error: {e}"], success=False, trace_events=tracer.export())
 
-    # --- PHASE 3: STANDARD REWRITING ---
+    # --- PHASE 3: ANALYSIS & REWRITING ---
     errors_log = []
+
+    # 1. Symbol Table Analysis (New Step)
+    tracer.start_phase("Symbol Table Analysis", "Inferring types and scopes")
+    try:
+      symbol_analyzer = SymbolTableAnalyzer(self.semantics)
+      tree.visit(symbol_analyzer)
+      symbol_table = symbol_analyzer.table
+    except Exception as e:
+      tracer.log_warning(f"Symbol Table analysis failed: {e}")
+      symbol_table = None
+    tracer.end_phase()
 
     if self._should_enforce_purity():
       tracer.start_phase("Purity Check", "Scanning for side-effects")
@@ -388,8 +413,43 @@ class ASTEngine:
 
     self._generate_snapshot(tree, "AST Before Pivot")
 
+    # --- Graph Fusion Optimization Pass ---
+    if self.config.enable_fusion:
+      tracer.start_phase("Graph Optimization", "Pattern-Based Fusion")
+      try:
+        # 1. Extract Logic Graph
+        extractor = GraphExtractor()
+        tree.visit(extractor)
+        logical_graph = extractor.graph
+
+        if logical_graph.nodes:
+          # 2. Run Fusion
+          optimizer = GraphOptimizer(patterns=self.semantics.get_patterns())
+          optimized_graph = optimizer.optimize(logical_graph)
+
+          # 3. Synthesize Code (Replaces Rewriter Logic)
+          # Note: Synthesizer needs framework target 'jax' or 'torch'
+          synth_target = "jax" if self.target in ["jax", "flax", "flax_nnx"] else "torch"
+          synthesizer = GraphSynthesizer(framework=self.target)  # Pass actual target for better alias handling
+          generated_code = synthesizer.generate(optimized_graph)
+
+          tracer.log_mutation("Fusion Synthesis", "(Original AST)", generated_code)
+
+          # Re-parse generated code back to CST for ImportFixer/Linting
+          tree = self.parse(generated_code)
+
+      except Exception as e:
+        tracer.log_warning(f"Optimization pass failed: {e}")
+        # Fallback to standard flow (continue with original tree)
+
+      tracer.end_phase()
+
+    # Standard AST Rewriter (Only run if fusion didn't entirely replace pipeline or if fallback needed)
+    # If fusion ran, 'tree' is now the optimized tree.
+    # We run rewriter anyway to handle nuanced expression rewrites not captured by graph extraction.
     tracer.start_phase("Rewrite Engine", "Visitor Traversal")
-    rewriter = PivotRewriter(self.semantics, self.config)
+    # Inject symbol_table for intelligent rewriting
+    rewriter = PivotRewriter(self.semantics, self.config, symbol_table=symbol_table)
     tree = tree.visit(rewriter)
     tracer.end_phase()
 

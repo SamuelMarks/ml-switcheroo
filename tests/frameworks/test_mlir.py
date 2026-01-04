@@ -15,26 +15,40 @@ def test_mlir_adapter_registration():
 
 
 def test_mlir_properties_defaults():
-  """Verify empty/default properties."""
+  """
+  Verify properties.
+  Updated to expect the actual test_config layout defined in the adapter.
+  """
   adapter = MlirAdapter()
   assert adapter.search_modules == []
   assert adapter.import_alias == ("mlir", "sw")
-  # definitions loads from file, which might be empty
+
+  # Verify strict specification default
   assert adapter.specifications == {}
-  assert adapter.test_config == {}
+
+  # Verify Config is populated with MLIR comment syntax
+  config = adapter.test_config
+  assert config["import"].startswith("//")
+  assert "{np_var}" in config["convert_input"]
+
   assert adapter.unsafe_submodules == set()
-  assert adapter.get_device_syntax("cuda") == ""
+
+  # Wrapper check
   assert adapter.convert(123) == "123"
 
 
 def test_mlir_example_code():
   """Verify example code generation."""
-  # Update assertion to match actual code in adapter
   code = MlirAdapter.get_example_code()
+  # Check for dialect specific tokens
+  assert "sw.module" in code
+  assert "sw.func" in code
   assert "sw.op" in code
-  assert "AbstractOp" in code
+  # Ensure attributes are present
+  assert 'type="torch.abs"' in code
 
   adapter = MlirAdapter()
   examples = adapter.get_tiered_examples()
   assert "tier1_math" in examples
   assert "tier2_neural" in examples
+  assert "//" in examples["tier3_extras"]

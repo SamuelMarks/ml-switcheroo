@@ -8,12 +8,25 @@ Updated to support:
 - `PluginTraits`: Capability flags for decoupling plugins from framework identifiers.
 - Rich Argument Definitions in `std_args` with Typed Defaults (Any).
 - Conditional Dispatch Rules.
+- **PatternDef**: Graph fusion patterns.
 """
 
 from typing import Dict, List, Optional, Union, Tuple, Any, Set, Literal
 from pydantic import BaseModel, Field, ConfigDict
 
 from ml_switcheroo.enums import SemanticTier, LogicOp
+from ml_switcheroo.core.dsl import (
+  ImportReq,
+  OpType,
+  ContainerType,
+  ParameterDef,
+  Rule,
+  FrameworkVariant,
+  PluginType,
+  PluginScaffoldDef,
+  PatternDef,  # Added re-export
+  OperationDef,  # Added re-export
+)
 
 
 class PluginTraits(BaseModel):
@@ -120,132 +133,16 @@ class FrameworkTraits(BaseModel):
   )
 
 
-class Rule(BaseModel):
+# Re-expose Variant to maintain compatibility with manager.py usage
+Variant = FrameworkVariant
+
+
+class OpDefinition(OperationDef):
   """
-  Declarative rule for conditional logic within a variant.
-  """
-
-  model_config = ConfigDict(populate_by_name=True)
-
-  if_arg: str = Field(..., description="Name of the standard argument to check.")
-  op: LogicOp = Field(LogicOp.EQ, description="Logical operator for comparison.")
-  is_val: Any = Field(..., alias="val", description="Value or list of values to compare against.")
-  use_api: str = Field(..., description="The target API path to use if the condition matches.")
-
-
-class Variant(BaseModel):
-  """
-  Defines how a specific framework implements an abstract operation.
+  Compat alias for OperationDef to match existing codebase usage.
   """
 
-  model_config = ConfigDict(extra="allow")
-
-  api: Optional[str] = Field(None, description="Fully qualified API path.")
-  args: Optional[Dict[str, str]] = Field(None, description="Map of 'Standard Name' -> 'Framework Name' for arguments.")
-  arg_values: Optional[Dict[str, Dict[str, str]]] = Field(
-    None,
-    description="Map of {StandardArg: {SourceValueString: TargetValueCode}} for enum value mapping.",
-  )
-  kwargs_map: Optional[Dict[str, str]] = Field(None, description="Mapping for specific keys within a **kwargs expansion.")
-  inject_args: Optional[Dict[str, Any]] = Field(
-    None,
-    description="Dictionary of new arguments to inject with fixed values (supports primitives/collections).",
-  )
-  casts: Optional[Dict[str, str]] = Field(
-    None, description="Mapping of argument names to target types (e.g. {'x': 'int32'})."
-  )
-  requires_plugin: Optional[str] = Field(None, description="Name of a registered plugin hook to handle translation.")
-  dispatch_rules: List[Rule] = Field(
-    default_factory=list,
-    description="List of conditional rules to switch APIs based on argument values at runtime.",
-  )
-  pack_to_tuple: Optional[str] = Field(
-    None,
-    description="If set (e.g. 'axes'), collects variadic positional args into a tuple kwargs.",
-  )
-  layout_map: Optional[Dict[str, str]] = Field(
-    None,
-    description="Map of arguments to layout transformation strings (e.g., {'x': 'NCHW->NHWC'}).",
-  )
-  transformation_type: Optional[str] = Field(None, description="Special rewrite mode (e.g. 'infix', 'inline_lambda').")
-  operator: Optional[str] = Field(None, description="If transformation_type='infix', the symbol to use (e.g. '+').")
-  macro_template: Optional[str] = Field(
-    None,
-    description="Expression template for composite ops.",
-  )
-  output_select_index: Optional[int] = Field(
-    None,
-    description="Integer index to extract from a tuple return value.",
-  )
-  output_adapter: Optional[str] = Field(
-    None,
-    description="Python lambda string to normalize the return value.",
-  )
-  output_cast: Optional[str] = Field(
-    None,
-    description="Target Dtype string (e.g. 'jnp.int64') to cast the output to via .astype().",
-  )
-  min_version: Optional[str] = Field(None, description="Minimum supported version.")
-  max_version: Optional[str] = Field(None, description="Maximum supported version.")
-  required_imports: List[Union[str, Any]] = Field(
-    default_factory=list,
-    description="List of imports required by this variant.",
-  )
-  missing_message: Optional[str] = Field(
-    None, description="Custom error message to display if this mapping fails or is missing."
-  )
-
-
-class ParameterDef(BaseModel):
-  """
-  Definition of a single argument in an abstract operation signature.
-  """
-
-  name: str = Field(..., description="Argument name (e.g. 'dim').")
-  type: Optional[str] = Field("Any", description="Type hint string (e.g. 'int', 'Tensor').")
-  doc: Optional[str] = Field(None, description="Argument docstring explanation.")
-  default: Optional[Any] = Field(None, description="Default value (primitive or container).")
-  min: Optional[float] = Field(None, description="Minimum numeric value.")
-  max: Optional[float] = Field(None, description="Maximum numeric value.")
-  options: Optional[List[Union[str, int, float, bool]]] = Field(None, description="List of allowed discrete values.")
-  rank: Optional[int] = Field(None, description="Required tensor rank.")
-  dtype: Optional[str] = Field(None, description="Required numpy-style dtype.")
-  shape_spec: Optional[str] = Field(None, description="Symbolic shape string.")
-  is_variadic: bool = Field(False, description="If True, accepts variable args (*args).")
-  kind: str = Field("positional_or_keyword", description="Parameter kind.")
-
-
-class OpDefinition(BaseModel):
-  """
-  Definition of an Abstract Operation standard.
-  """
-
-  model_config = ConfigDict(extra="allow")
-
-  operation: Optional[str] = None
-  description: Optional[str] = None
-
-  # std_args can be simple ["x"], typed [("x", "int")], or rich Dicts
-  std_args: List[Union[str, Tuple[str, str], ParameterDef, Dict[str, Any]]] = Field(
-    default_factory=list, description="List of standard argument names, types, or rich definitions."
-  )
-
-  variants: Dict[str, Optional[Variant]] = Field(
-    default_factory=dict, description="Map of framework keys to implementation details."
-  )
-
-  scaffold_plugins: List[Any] = Field(default_factory=list)
-  op_type: Any = "function"
-  return_type: Optional[str] = "Any"
-  is_inplace: bool = False
-  test_rtol: float = 1e-3
-  test_atol: float = 1e-4
-  skip_fuzzing: bool = False
-  nondeterministic: bool = False
-  differentiable: bool = True
-  deprecated: bool = False
-  output_shape_calc: Optional[str] = None
-  complexity: Optional[str] = None
+  pass
 
 
 class SemanticsFile(BaseModel):
@@ -254,4 +151,4 @@ class SemanticsFile(BaseModel):
   model_config = ConfigDict(extra="allow")
   frameworks: Optional[Dict[str, FrameworkTraits]] = Field(None, alias="__frameworks__")
   imports: Optional[Dict[str, Any]] = Field(None, alias="__imports__")
-  pass
+  patterns: Optional[List[PatternDef]] = Field(default_factory=list, alias="__patterns__")

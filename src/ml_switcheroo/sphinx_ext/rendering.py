@@ -9,12 +9,12 @@ Features:
 - Dynamic Dropdowns via Registry scanning.
 - Framework Flavours support.
 - Render Tab (TikZ) structure.
+- **Weight Script Tab**: Integration of checkpoint migration generator.
 - Wheel auto-discovery for Pyodide injection.
 """
 
 import os
 from pathlib import Path
-from typing import List
 
 from ml_switcheroo.config import get_framework_priority_order
 from ml_switcheroo.frameworks import get_adapter
@@ -32,7 +32,7 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   1. Header & Status.
   2. Splash Screen.
   3. Main Interface (Toolbar, Editors, Controls).
-  4. Output Tabs (Console, AST Viz, Timeline, Render).
+  4. Output Tabs (Console, AST Viz, Timeline, Render, Weights).
 
   Args:
       hierarchy: The framework parent-child relationship map.
@@ -40,7 +40,7 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
       tier_metadata_json: Serialized tier capabilities data.
 
   Returns:
-      str: The complete HTML/JS block.
+      The complete HTML/JS block.
   """
   # 1. Locate Wheel
   # We resolve relative to this file inside 'src/ml_switcheroo/sphinx_ext'
@@ -85,6 +85,8 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   src_flavours_html = _render_flavour_dropdown("src", hierarchy, def_source)
   tgt_flavours_html = _render_flavour_dropdown("tgt", hierarchy, def_target)
 
+  # Note: Logic to show/hide weight tab is handled in JS (switcheroo_demo.js) based on
+  # return data from the engine.
   return f"""
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
             <script>
@@ -176,9 +178,14 @@ class Model(nn.Module):
                     <input type="radio" name="wm-tabs" id="tab-trace" checked>
                     <label for="tab-trace" class="tab-label"><span class="tab-icon">⏱️</span> Timeline</label>
 
-                    <!-- Tab 4: Render (TikZ) - Hidden by default -->
+                    <!-- Tab 4: Render (TikZ / HTML) - Hidden by default -->
                     <input type="radio" name="wm-tabs" id="tab-render">
                     <label for="tab-render" id="label-tab-render" class="tab-label" style="display:none;"><span class="tab-icon">📐</span> Render</label>
+
+                    <!-- Tab 5: Weight Script (New) -->
+                    <input type="radio" name="wm-tabs" id="tab-weights">
+                    <!-- Added data-supported attribute hook for JS control --> 
+                    <label for="tab-weights" id="label-tab-weights" class="tab-label" style="display:none;"><span class="tab-icon">🏋️</span> Weight Script</label>
 
                     <!-- Content: Console -->
                     <div class="tab-panel" id="panel-console">
@@ -204,7 +211,14 @@ class Model(nn.Module):
                     <!-- Content: Render (TikZ) -->
                     <div class="tab-panel" id="panel-render">
                         <div id="tikz-output-container" class="tikz-container">
-                            <em style="color:#999">Select 'TikZ' framework and run translation to render diagram.</em>
+                            <em style="color:#999">Select 'TikZ' or 'HTML' as target framework and run translation.</em>
+                        </div>
+                    </div>
+
+                    <!-- Content: Weight Script -->
+                    <div class="tab-panel" id="panel-weights">
+                        <div class="weight-script-container">
+                            <textarea id="code-weights" readonly class="material-input output-bg" placeholder="Migration script will appear here..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -222,7 +236,7 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
       hierarchy: Map of parent keys to children, identifying roots.
 
   Returns:
-      str: HTML string of option elements.
+      HTML string of option elements.
   """
   html = []
   for root in hierarchy.keys():
@@ -242,7 +256,7 @@ def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: st
       active_root: The framework key currently selected as default for this side.
 
   Returns:
-      str: HTML string for the select element container.
+      HTML string for the select element container.
   """
   children = hierarchy.get(active_root, [])
 

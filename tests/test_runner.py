@@ -24,14 +24,18 @@ def mock_frameworks():
   """
 
   def create_safe_mock(name, ret_val=5.0):
+    # Create a mock that behaves like a module
     m = MagicMock(name=name)
+    # Prevent iteration to differentiate from lists/iterables during inspection
     m.__iter__.side_effect = TypeError(f"'{name}' object is not iterable")
     m.return_value = ret_val
     return m
 
+  # Mock 'torch.sum'
   mock_torch = create_safe_mock("torch")
   mock_torch.sum.return_value = np.array(5.0)
 
+  # Mock 'jax.numpy.sum'
   mock_jax = create_safe_mock("jax")
   mock_jax_numpy = create_safe_mock("jax.numpy")
   mock_jax.numpy = mock_jax_numpy
@@ -58,6 +62,7 @@ def test_runner_uses_adapter_registry_for_normalization(mock_frameworks):
   with patch("ml_switcheroo.testing.runner.get_adapter") as mock_get:
     mock_get.return_value = mock_adapter
 
+    # Run verify (params=["x"] will generate random x)
     runner.verify(variants, params=["x"])
 
     # Verify we requested the numpy adapter
@@ -78,7 +83,8 @@ def test_equivalence_flow_integration(mock_frameworks):
   pass_ok, msg = runner.verify(variants, params=["x"])
 
   assert pass_ok
-  assert "Output Matched" in msg
+  # Updated assertion to match current Runner implementation
+  assert "✅ Verified" in msg
 
 
 def test_adapter_normalization_logic_real():

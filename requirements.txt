@@ -9,3 +9,4 @@ pydantic_core;platform_system!='Emscripten'
 pydantic_core==2.27.2;platform_system=='Emscripten'
 pygments==2.19.1;platform_system=='Emscripten'
 rich>=13.0
+hypothesis;platform_system=='Emscripten'

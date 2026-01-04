@@ -1,112 +1,123 @@
 """
-Core Engine of the Input Fuzzer.
+Core Engine of the Input Fuzzer (Hypothesis Integration).
 
-Defines the `InputFuzzer` class which acts as the high-level API
-for generating test inputs and adapting them to target frameworks.
+This module provides the `InputFuzzer` facade which now delegates generation logic
+to Hypothesis Strategies. It maintains backward compatibility for casual usage via `generate_inputs`.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
-
+from typing import Any, Dict, List, Optional
+import hypothesis.strategies as st
 from ml_switcheroo.frameworks import get_adapter
-from ml_switcheroo.testing.fuzzer.generators import get_random_shape
-from ml_switcheroo.testing.fuzzer.heuristics import generate_by_heuristic
-from ml_switcheroo.testing.fuzzer.parser import generate_from_hint
+from ml_switcheroo.testing.fuzzer.strategies import strategies_from_spec
+from ml_switcheroo.testing.fuzzer.heuristics import guess_dtype_by_name
 
 
 class InputFuzzer:
   """
-  Generates dummy inputs (Arrays, Scalars, Containers) for equivalence testing.
-
-  Orchestrates:
-  1.  Resolution of Explicit Type Hints via Parser.
-  2.  Resolution of Implicit Heuristics via Heuristics engine.
-  3.  Framework adaptation via Adapters.
+  Facade for creating Hypothesis strategies based on Semantic Spec.
   """
 
+  # Legacy constant for compatibility with extraction tests
   MAX_RECURSION_DEPTH = 3
 
-  def __init__(self, seed_shape: Optional[Tuple[int, ...]] = None):
-    """
-    Initializes the Fuzzer.
-
-    Args:
-        seed_shape: If provided, heuristic array generation defaults to this shape.
-    """
-    self._seed_shape = seed_shape
-    self.max_depth = self.MAX_RECURSION_DEPTH
-
-  def generate_inputs(
+  def build_strategies(
     self,
     params: List[str],
     hints: Optional[Dict[str, str]] = None,
     constraints: Optional[Dict[str, Dict]] = None,
-  ) -> Dict[str, Any]:
+  ) -> Dict[str, st.SearchStrategy]:
     """
-    Creates a dictionary of `{arg_name: value}`.
-
-    Resolves symbolic dimensions across the entire parameter set. For example,
-    if hints are `{'x': "Array['N']", 'y': "Array['N']"}`, both arrays will
-    have matching lengths.
+    Constructs a dictionary of Hypothesis strategies for the given parameters.
+    Automatically handles shared symbolic dimensions (e.g. Array['N']).
 
     Args:
-        params: List of argument names to generate (e.g. `['x', 'axis']`).
-        hints: Dictionary of `{arg_name: type_string}` derived from Spec.
-        constraints: Dictionary of `{arg_name: {min, max, options, dtype}}`.
+        params: List of argument names.
+        hints: Mapping of name -> type string.
+        constraints: Mapping of name -> dict constraints (min, max, etc).
 
     Returns:
-        Dict[str, Any]: Randomized inputs ready for Framework adaptation.
+        Dict[str, Strategy]: Strategies ready to be fed into @given.
     """
-    kwargs: Dict[str, Any] = {}
-    # Context to resolve symbolic dimensions like 'B', 'N' across arguments
-    symbol_map: Dict[str, int] = {}
-
-    # Decide on a consistent base shape for heuristics fallback
-    base_shape = get_random_shape(self._seed_shape)
     hints = hints or {}
-    constraints_map = constraints or {}
+    constraints = constraints or {}
+    strategies = {}
+
+    # Shared Context for dimension symbols
+    shared_dims = {}
 
     for p in params:
       hint = hints.get(p)
-      cons = constraints_map.get(p, {})
+      cons = constraints.get(p, {})
 
-      # Strategy 1: Explicit Type Hint
-      if hint and hint != "Any":
-        try:
-          val = generate_from_hint(
-            type_str=hint,
-            base_shape=base_shape,
-            depth=0,
-            max_depth=self.max_depth,
-            symbol_map=symbol_map,
-            constraints=cons,
-          )
-          kwargs[p] = val
-          continue
-        except Exception:
-          # If parsing fails, fall back to heuristics...
-          pass
+      # If hint maps to "Any" or is missing, try to infer from heuristic name
+      if not hint or hint == "Any":
+        # Heuristic Logic Ported to Strategy
+        inferred_type = guess_dtype_by_name(p)
 
-      # Strategy 2: Heuristic Matching based on Name
-      kwargs[p] = generate_by_heuristic(p, base_shape, constraints=cons)
+        # Handling name-based heuristics via explicit types to reuse strategies logic
+        if p in ["axis", "dim"]:
+          # Dimension usually integer within small range
+          hint = "int"
+          cons.setdefault("min", 0)
+          cons.setdefault("max", 3)
+        elif p in ["shape", "size"]:
+          # Shape is Tuple[int, ...], but we can use list strategy here
+          hint = "Tuple[int, ...]"
+        elif inferred_type == "bool":
+          # Default to boolean Array if name implies mask, or scalar logic?
+          # Legacy behavior was Array('bool').
+          hint = "Array"
+          cons.setdefault("dtype", "bool")
+        elif inferred_type == "int":
+          # Indices are usually arrays
+          hint = "Array"
+          cons.setdefault("dtype", "int")
+        elif inferred_type == "float":
+          # Alpha/eps scalars
+          if any(prefix in p.lower() for prefix in ["alpha", "eps", "scalar", "val"]):
+            hint = "float"
+          else:
+            hint = "Array"
+            cons.setdefault("dtype", "float")
 
-    return kwargs
+      strategies[p] = strategies_from_spec(hint, cons, shared_dims)
+
+    return strategies
+
+  def generate_inputs(
+    self, params: List[str], hints: Optional[Dict[str, str]] = None, constraints: Optional[Dict[str, Dict]] = None
+  ) -> Dict[str, Any]:
+    """
+    Generates a SINGLE set of inputs. Valid for simple legacy tests and harnesses.
+
+    Under the hood, this builds a Hypothesis strategy and draws one example.
+    This replaces the old ad-hoc random generation logic.
+
+    Args:
+        params: List of argument names.
+        hints: Type hints.
+        constraints: Constraints.
+
+    Returns:
+        Dict[str, Any]: A dictionary of generated input values.
+    """
+    strat_dict = self.build_strategies(params, hints, constraints)
+    # Create a fixed dictionary strategy
+    composite = st.fixed_dictionaries(strat_dict)
+    return composite.example()
 
   def adapt_to_framework(self, kwargs: Dict[str, Any], framework: str) -> Dict[str, Any]:
     """
-    Converts Numpy inputs to framework-specific tensor types.
-
-    Delegates to registered adapters (e.g., `TorchAdapter`, `JaxAdapter`).
+    Delegates to Framework Adapter to convert Numpy/Native inputs to Tensors.
 
     Args:
-        kwargs: Input dictionary with Numpy values.
-        framework: Key of the framework (e.g., "torch", "jax").
+        kwargs: Dictionary of input values.
+        framework: Target framework key (e.g. 'torch').
 
     Returns:
-        Dict with framework-specific tensors.
+        Dict with converted values.
     """
     adapter = get_adapter(framework)
-
-    # If no adapter found, return pure numpy/python objects (Pass-through)
     if not adapter:
       return kwargs
 
@@ -115,7 +126,5 @@ class InputFuzzer:
       try:
         converted[k] = adapter.convert(v)
       except Exception:
-        # If conversion logic fails, keep original
         converted[k] = v
-
     return converted

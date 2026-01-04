@@ -12,6 +12,8 @@ It performs the inverse of the ``analyser.py``:
     based on the target framework's API conventions.
 3.  **Forward Generation**: Reconstructs the data flow of the ``forward`` method,
     handling variable assignment and return values.
+
+Update: Supports generic dot-notated node kinds (e.g. `optax.Adam`, `FusedBlock`).
 """
 
 import libcst as cst
@@ -50,6 +52,8 @@ class GraphSynthesizer:
 
     # 1. Create Class Header
     base_class = "nn.Module" if self.framework == "torch" else "nnx.Module"
+    if self.framework == "flax_nnx":
+      base_class = "nnx.Module"
 
     # 2. Generate __init__
     init_func = self._generate_init(graph.nodes)
@@ -80,7 +84,7 @@ class GraphSynthesizer:
         cst.parse_statement("import torch"),
         cst.parse_statement("import torch.nn as nn"),
       ]
-    elif self.framework == "jax":
+    elif self.framework in ["jax", "flax", "flax_nnx"]:
       return [
         cst.parse_statement("from flax import nnx"),
         cst.parse_statement("import jax.numpy as jnp"),
@@ -106,8 +110,12 @@ class GraphSynthesizer:
       lhs = cst.parse_expression(f"self.{node.id}")
 
       # Resolve API prefix
-      prefix = "nn" if self.framework == "torch" else "nnx"
-      api_call = f"{prefix}.{node.kind}"
+      # Update: if kind contains dots (e.g. 'fused.Block'), use it directly
+      if "." in node.kind:
+        api_call = node.kind
+      else:
+        prefix = "nn" if self.framework == "torch" else "nnx"
+        api_call = f"{prefix}.{node.kind}"
 
       # Build args string
       args_parts = []
@@ -119,9 +127,12 @@ class GraphSynthesizer:
           args_parts.append(f"{k}={v}")
 
       # In JAX (Flax NNX), inject rngs if it looks like a layer
-      if self.framework == "jax" and "arg_0" in node.metadata:  # Heuristic for layer
+      if self.framework in ["jax", "flax", "flax_nnx"] and not node.kind.startswith("func_"):
+        # Check if user manually added rngs first
         if not any("rngs" in a for a in args_parts):
-          args_parts.append("rngs=rngs")
+          # Simple heuristic: stateful layers usually have args
+          if args_parts or node.metadata:
+            args_parts.append("rngs=rngs")
 
       args_str = ", ".join(args_parts)
       rhs = cst.parse_expression(f"{api_call}({args_str})")
@@ -131,7 +142,7 @@ class GraphSynthesizer:
 
     # Params
     params = [cst.Param(name=cst.Name("self"))]
-    if self.framework == "jax":
+    if self.framework in ["jax", "flax", "flax_nnx"]:
       # Inject rngs argument for NNX
       params.append(cst.Param(name=cst.Name("rngs"), annotation=cst.Annotation(cst.parse_expression("nnx.Rngs"))))
 
@@ -197,11 +208,6 @@ class GraphSynthesizer:
       # Or if multi-input: x = self.layer(a, b)
       call_args = ", ".join(inputs)
 
-      # Result variable is usually 'x' if chain, or unique if branching
-      # Simple heuristic: Always overwrite x for linear, use unique for branching
-      # For robustness: Always use node_id as var name unless it's a simple chain?
-      # Let's reuse 'x' if only 1 input and this is the only consumer?
-      # Safe strategy: Assign to node_id.
       out_var = node.id
       var_map[node.id] = out_var
       last_var = out_var

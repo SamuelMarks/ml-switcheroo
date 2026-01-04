@@ -85,7 +85,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     help="Plugin configuration flags in key=value format (e.g. epsilon=1e-5 use_custom=True)",
   )
 
-  # --- Command: DEFINE (New) ---
+  # --- Command: DEFINE ---
   cmd_def = subparsers.add_parser("define", help="Inject new operation definitions from YAML.")
   cmd_def.add_argument("yaml_file", type=Path, help="Path to the ODL definition YAML file.")
   cmd_def.add_argument(
@@ -93,6 +93,13 @@ def main(argv: Optional[List[str]] = None) -> int:
     action="store_true",
     help="Print diffs to console instead of modifying files.",
   )
+
+  # --- Command: GEN WEIGHT SCRIPT (NEW) ---
+  cmd_wgt = subparsers.add_parser("gen-weight-script", help="Generate a checkpoint migration script.")
+  cmd_wgt.add_argument("source_file", type=Path, help="Path to the model source code file.")
+  cmd_wgt.add_argument("--out", type=Path, required=True, help="Output path for the generated script.")
+  cmd_wgt.add_argument("--source", default=None, help="Source framework (e.g. torch).")
+  cmd_wgt.add_argument("--target", default=None, help="Target framework (e.g. jax).")
 
   # --- Command: MATRIX ---
   subparsers.add_parser("matrix", help="Show compatibility table")
@@ -195,7 +202,6 @@ def main(argv: Optional[List[str]] = None) -> int:
   if args.command == "audit":
     roots = args.roots
     if roots is None:
-      # Dynamic Default logic: Scan all registered frameworks if none specified
       roots = available_frameworks()
     return commands.handle_audit(args.path, roots, json_mode=args.json)
 
@@ -212,6 +218,9 @@ def main(argv: Optional[List[str]] = None) -> int:
       settings,
       args.json_trace,
     )
+
+  elif args.command == "gen-weight-script":
+    return commands.handle_gen_weight_script(args.source_file, args.out, args.source, args.target)
 
   elif args.command == "define":
     return handle_define(args.yaml_file, dry_run=args.dry_run)

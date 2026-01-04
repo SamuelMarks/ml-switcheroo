@@ -9,6 +9,7 @@ Refactor:
     - Added `auto_wire` support to the `register_hook` decorator.
     - Plugins can now declare their own Semantic definitions.
     - HookContext now exposes `plugin_traits` and `current_variant` for data-driven logic.
+    - **New**: `resolve_type` method to query Symbol Table.
 """
 
 import importlib
@@ -22,7 +23,9 @@ from pydantic import BaseModel, Field, ConfigDict
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.schema import PluginTraits, Variant
 
-# Validation that SemanticsManager is importable for type hinting
+# Lazy import to avoid circular dependency
+# TYPE_CHECKING block logic or Any is sufficient for runtime
+SymbolTableType = Any
 SemanticsManagerType = Any
 T = TypeVar("T", bound=BaseModel)
 
@@ -61,6 +64,7 @@ class HookContext:
     config: RuntimeConfig,
     arg_injector: Optional[ArgInjectorType] = None,
     preamble_injector: Optional[PreambleInjectorType] = None,
+    symbol_table: Optional[SymbolTableType] = None,
   ):
     """
     Initializes the hook context.
@@ -70,11 +74,13 @@ class HookContext:
         config: Runtime configuration (strict mode, selected frameworks).
         arg_injector: Callback to inject arguments into function signature.
         preamble_injector: Callback to inject code at top of function.
+        symbol_table: Pre-calculated Symbol Table for type resolution.
     """
     self.semantics = semantics
     self._runtime_config = config
     self._arg_injector = arg_injector
     self._preamble_injector = preamble_injector
+    self._symbol_table = symbol_table
 
     self.source_fw = config.source_framework
     self.target_fw = config.target_framework
@@ -82,6 +88,30 @@ class HookContext:
     # Plugin State
     self.metadata: Dict[str, Any] = {}
     self.current_op_id: Optional[str] = None
+
+  def resolve_type(self, node: Any) -> Optional[str]:
+    """
+    Queries the Symbol Table for the inferred type of a node.
+
+    Args:
+        node: The LibCST node to inspect.
+
+    Returns:
+        str: "Tensor" if it's a tensor, "Module" if module, or None.
+    """
+    if not self._symbol_table:
+      return None
+
+    sym = self._symbol_table.get_type(node)
+    if not sym:
+      return None
+
+    # Return simple string type indicator
+    if "Tensor" in sym.name:
+      return "Tensor"
+    if "Module" in sym.name:
+      return "Module"
+    return sym.name
 
   @property
   def plugin_traits(self) -> PluginTraits:

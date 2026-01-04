@@ -8,11 +8,13 @@ It supports:
 3.  **Discovery**: Runtime introspection of the MLX API surface.
 4.  **Types**: Mapping Abstract Types to ``mlx.core`` dtypes (e.g. ``mx.float32``).
 5.  **Casting**: Generic casting plugin integration via ``.astype()``.
+6.  **Weight Migration**: Loading/saving .npz or .safetensors files (via stubs/core).
 
 Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
 import logging
+import textwrap
 from typing import List, Tuple, Optional, Dict, Any, Set
 
 import numpy as np
@@ -442,6 +444,45 @@ def compute_on_gpu(x):
     elif op == "load":
       return f"mx.load({file_arg})"
     return ""
+
+  # --- Weight Migrations ---
+
+  def get_weight_conversion_imports(self) -> List[str]:
+    """Returns imports needed for weight scripts."""
+    return ["import mlx.core as mx"]
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """Loads weights using mx.load (npz/safetensors) into a raw dictionary."""
+    return textwrap.dedent(
+      f"""
+            if str({path_var}).endswith(".npz"):
+                loaded = mx.load({path_var})
+            else:
+                loaded = mx.load({path_var}) # supports safetensors implicitly usually
+                
+            # If load returns array, wrap in dict
+            if isinstance(loaded, dict):
+                 raw_state = loaded
+            else:
+                 # Flatten if nested or assume single array?
+                 # MLX usually loads dict of arrays
+                 raw_state = loaded
+            """
+    )
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    """Converts MLX array to numpy."""
+    return f"np.array({tensor_var})"
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """Saves dictionary of arrays to .npz or .safetensors."""
+    return textwrap.dedent(
+      f"""
+            # Convert to MLX arrays if numpy
+            mlx_state = {{k: mx.array(v) for k, v in {state_var}.items()}}
+            mx.save_safetensors({path_var}, mlx_state)
+            """
+    )
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """

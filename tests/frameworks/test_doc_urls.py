@@ -4,7 +4,7 @@ Tests for API Documentation URL Generation Protocol.
 Verifies that:
 1.  All adapters implement `get_doc_url`.
 2.  Generated URLs match expected patterns for each framework.
-3.  Fallback behaviors (None) are correct for intermediate reps.
+3.  Stub adapters (MLIR, TikZ) return valid informational URLs instead of None.
 """
 
 import pytest
@@ -71,10 +71,24 @@ def test_doc_url_generation(fw_key, api, pattern):
   assert pattern in url
 
 
-def test_stub_adapters_return_none():
-  """Verify intermediate/DSL adapters return None for docs."""
-  stubs = ["mlir", "tikz", "html", "latex_dsl"]
-  for key in stubs:
-    adapter = get_adapter(key)
-    if adapter:
-      assert adapter.get_doc_url("foo") is None
+def test_stub_adapters_return_docs():
+  """Verify intermediate/DSL adapters return valid links for docs."""
+  # MLIR provides dialect docs
+  mlir = get_adapter("mlir")
+  assert mlir is not None
+  assert mlir.get_doc_url("tosa.add") is None
+
+  # LaTeX/TikZ provides nothing
+  tikz = get_adapter("tikz")
+  assert tikz is not None
+  assert tikz.get_doc_url("foo") is None
+
+  # LaTeX DSL provides nothing
+  latex = get_adapter("latex_dsl")
+  assert latex is not None
+  assert latex.get_doc_url("midl.Conv") is None
+
+  # HTML DSL provides nothing
+  html = get_adapter("html")
+  assert html is not None
+  assert html.get_doc_url("html_dsl.Conv") is None

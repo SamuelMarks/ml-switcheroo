@@ -13,11 +13,11 @@ Core Responsibilities:
 
 import json
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Any, Set
+from typing import Dict, Optional, Tuple, Any, Set, List
 from pydantic import ValidationError
 
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.schema import OpDefinition
+from ml_switcheroo.semantics.schema import OpDefinition, PatternDef  # Imported PatternDef
 from ml_switcheroo.semantics.standards_internal import MATH_OPS, NEURAL_OPS, EXTRAS_OPS
 from ml_switcheroo.semantics.merging import merge_tier_data
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
@@ -46,6 +46,7 @@ class SemanticsManager:
     self.test_templates: Dict[str, Dict] = {}
     self._known_rng_methods: Set[str] = set()
     self.known_magic_args: Set[str] = set()
+    self.patterns: List[PatternDef] = []  # NEW: Store patterns
 
     # Indexes
     self._reverse_index: Dict[str, Tuple[str, Dict]] = {}
@@ -65,6 +66,7 @@ class SemanticsManager:
       key_origins=self._key_origins,
       import_data={},
       framework_configs=self.framework_configs,
+      patterns=self.patterns,  # Pass patterns list
       new_content=MATH_OPS,
       tier=SemanticTier.ARRAY_API,
     )
@@ -75,6 +77,7 @@ class SemanticsManager:
       key_origins=self._key_origins,
       import_data={},
       framework_configs=self.framework_configs,
+      patterns=self.patterns,
       new_content=NEURAL_OPS,
       tier=SemanticTier.NEURAL,
     )
@@ -85,6 +88,7 @@ class SemanticsManager:
       key_origins=self._key_origins,
       import_data={},
       framework_configs=self.framework_configs,
+      patterns=self.patterns,
       new_content=EXTRAS_OPS,
       tier=SemanticTier.EXTRAS,
     )
@@ -241,6 +245,10 @@ class SemanticsManager:
   def get_all_rng_methods(self) -> Set[str]:
     """Returns aggregate list of random seeding methods."""
     return self._known_rng_methods
+
+  def get_patterns(self) -> List[PatternDef]:
+    """Returns the list of loaded fusion patterns."""
+    return self.patterns
 
   def load_validation_report(self, report_path: Path) -> None:
     """

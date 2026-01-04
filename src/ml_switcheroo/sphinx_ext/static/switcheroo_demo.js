@@ -1,23 +1,21 @@
-/* src/ml_switcheroo/sphinx_ext/static/switcheroo_demo.js */
-
 /*
  * switcheroo_demo.js
- * Client-side controller with Debugging Enabled.
+ * Client-side controller for the WASM interactive demo.
  *
  * Capabilities:
  * - Pyodide Engine Management (WASM).
  * - CodeMirror Editor sync.
- * - Trace Graph Rendering.
- * - Semantic Knowledge Base Interaction (Validation/Hints).
+ * - Trace Graph Visualization.
+ * - Weight Script Generation.
  * - TikZ/LaTeX Rendering Integration (TikZJax).
- * - HTML DSL Rendering Integration (Dynamic CSS/DOM).
- * - Mermaid for AST visualisation
+ * - Mermaid AST Visualization.
  */
 
 // Global State
 let pyodide = null;
 let srcEditor = null;
 let tgtEditor = null;
+let weightEditor = null;
 let EXAMPLES = {};
 let FW_TIERS = {};
 let tikzLoaded = false;
@@ -28,88 +26,109 @@ const DEFAULT_TIKZJAX_URL = "https://tikzjax.com/v1/tikzjax.js";
 // Trace Data State
 let currentAstGraphs = { pre: "", post: "" };
 
-// Debug Configuration
-const DEBUG_MODE = true;
-function debugLog(msg, data = null) {
-    if (DEBUG_MODE) {
-        if (data) console.log(`[Switcheroo] ${msg}`, data);
-        else console.log(`[Switcheroo] ${msg}`);
-    }
-}
-
-// Python Bridge Script
+/**
+ * Python Script to be executed inside the Pyodide environment.
+ * It imports the ml_switcheroo package, configures the ASTEngine,
+ * runs the conversion, and generates weight scripts if applicable.
+ */
 const PYTHON_BRIDGE = `
 import json
 import traceback
+import pathlib
+import sys
 from rich.console import Console
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.utils.console import set_console, log_info
+from ml_switcheroo.utils.console import set_console
 
 # Setup Output Capture
-process_log = Console(record=True, force_terminal=False, width=120) 
-set_console(process_log) 
+process_log = Console(record=True, force_terminal=False, width=120)
+set_console(process_log)
 
-response = {} 
+response = {}
 
-try: 
-    print(">>> Python Bridge Started") 
+try:
+    # Initialize Semantics Singleton if needed to avoid re-parsing JSONs
+    if 'GLOBAL_SEMANTICS' not in globals():
+        GLOBAL_SEMANTICS = SemanticsManager()
     
-    # Initialize Semantics Singleton if needed
-    if 'GLOBAL_SEMANTICS' not in globals(): 
-        print(">>> Initializing SemanticsManager...") 
-        GLOBAL_SEMANTICS = SemanticsManager() 
-    
-    # Resolve flavors
+    # Resolve flavors from JS globals
     src_flavour = js_src_flavour if 'js_src_flavour' in globals() and js_src_flavour else None
     tgt_flavour = js_tgt_flavour if 'js_tgt_flavour' in globals() and js_tgt_flavour else None
 
+    # Determine execution config
     real_source = src_flavour if src_flavour else js_src_fw
     real_target = tgt_flavour if tgt_flavour else js_tgt_fw
     
-    print(f">>> Config: {real_source} -> {real_target} (Strict: {js_strict_mode})") 
-    
-    config = RuntimeConfig( 
-        source_framework=js_src_fw, 
-        target_framework=js_tgt_fw, 
-        source_flavour=src_flavour, 
-        target_flavour=tgt_flavour, 
+    config = RuntimeConfig(
+        source_framework=js_src_fw,
+        target_framework=js_tgt_fw,
+        source_flavour=src_flavour,
+        target_flavour=tgt_flavour,
         strict_mode=js_strict_mode
-    ) 
+    )
     
-    print(">>> Launching ASTEngine...") 
-    engine = ASTEngine(semantics=GLOBAL_SEMANTICS, config=config) 
-    result = engine.run(js_source_code) 
-    print(f">>> Conversion Finished. Success: {result.success}") 
+    # 1. Run Transpilation
+    print(f"Running AST Engine ({real_source} -> {real_target})...")
+    engine = ASTEngine(semantics=GLOBAL_SEMANTICS, config=config)
+    result = engine.run(js_source_code)
     
-    # Check trace statistics
-    snap_count = sum(1 for e in result.trace_events if e['type'] == 'ast_snapshot') 
-    print(f">>> Trace: {len(result.trace_events)} events, {snap_count} snapshots.") 
+    if result.success:
+        print("Transpilation successful.")
+    else:
+        print("Transpilation failed with errors.")
 
-    response = { 
-        "code": result.code, 
-        "logs": process_log.export_text(), 
-        "is_success": result.success, 
-        "errors": result.errors, 
-        "trace_events": result.trace_events
-    } 
-except Exception as e: 
-    err_str = traceback.format_exc() 
-    print(f"!!! CRITICAL BRIDGE ERROR: {e}") 
-    print(err_str) 
-    
-    response = { 
-        "code": "", 
-        "logs": f"{process_log.export_text()}\\nCRITICAL PYTHON ERROR: {str(e)}\\n{err_str}", 
-        "is_success": False, 
-        "errors": [str(e)], 
-        "trace_events": [] 
-    } 
+    # 2. Run Weight Script Generator (If architecture detected)
+    weight_script_code = ""
+    # We always attempt weight gen if successful, but fallback to empty string if no layers found
+    if result.success:
+        try:
+            # Virtual FS in Pyodide
+            f_src = pathlib.Path("/tmp/src_model.py")
+            f_src.write_text(js_source_code, encoding="utf-8")
+            f_out = pathlib.Path("/tmp/migration_script.py")
+            
+            from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
+            
+            wgen = WeightScriptGenerator(GLOBAL_SEMANTICS, config)
+            success = wgen.generate(f_src, f_out)
+            
+            if success and f_out.exists():
+                weight_script_code = f_out.read_text(encoding="utf-8")
+            else:
+                pass 
+                # Silent fail typical for non-architecture code
+        except Exception as e:
+            print(f"Weight Gen Error: {e}")
 
-json_output = json.dumps(response) 
+    # Build Response using Pydantic dumps where available or manual dict
+    response = {
+        "code": result.code,
+        "logs": process_log.export_text(),
+        "is_success": result.success,
+        "errors": result.errors,
+        "trace_events": result.trace_events,
+        "weight_script": weight_script_code
+    }
+except Exception as e:
+    err_str = traceback.format_exc()
+    response = {
+        "code": "",
+        "logs": f"{process_log.export_text()}\\nCRITICAL PYTHON ERROR: {str(e)}\\n{err_str}",
+        "is_success": False,
+        "errors": [str(e)],
+        "trace_events": [],
+        "weight_script": ""
+    }
+
+json_output = json.dumps(response)
 `;
 
+/**
+ * Initializes the Python environment (Pyodide) and installs dependencies.
+ * Triggered by the "Initialize Engine" button.
+ */
 async function initEngine() {
     const rootEl = document.getElementById("switcheroo-wasm-root");
     const statusEl = document.getElementById("engine-status");
@@ -130,32 +149,22 @@ async function initEngine() {
         // 2. Load TikZJax (Lazy with Smart Path Resolution)
         if (!tikzLoaded) {
             let urlToLoad = DEFAULT_TIKZJAX_URL;
-
-            // Try to construct local path using Sphinx DOCUMENTATION_OPTIONS
             if (window.DOCUMENTATION_OPTIONS && window.DOCUMENTATION_OPTIONS.URL_ROOT) {
                 const root = window.DOCUMENTATION_OPTIONS.URL_ROOT;
-                // Normalize root (ensure it ends with /)
                 const safeRoot = root.endsWith('/') ? root : root + '/';
-                const localPath = `${safeRoot}_static/tikzjax/tikzjax.js`;
-                debugLog(`Attempting local TikZJax load: ${localPath}`);
-                urlToLoad = localPath;
+                urlToLoad = `${safeRoot}_static/tikzjax/tikzjax.js`;
             } else if (window.TIKZJAX_URL) {
-                // Fallback to what was injected in __init__.py (might be incorrect for subpages)
                 urlToLoad = window.TIKZJAX_URL;
             }
 
             try {
                 await loadScript(urlToLoad);
                 tikzLoaded = true;
-                debugLog("TikZJax loaded.");
             } catch (tiErr) {
-                console.warn(`Local TikZ load failed (${urlToLoad}). Fallback to CDN.`);
                 try {
                     await loadScript(DEFAULT_TIKZJAX_URL);
                     tikzLoaded = true;
-                    debugLog("TikZJax loaded from CDN.");
                 } catch (cdnErr) {
-                    console.error("TikZJax CDN failed:", cdnErr);
                     tikzLoaded = false;
                 }
             }
@@ -172,6 +181,7 @@ importlib.util.find_spec("ml_switcheroo") is not None
             await pyodide.loadPackage("micropip");
             const micropip = pyodide.pyimport("micropip");
 
+            // Attempt to load local requirements or fallback to minimal set
             try {
                 const reqRes = await fetch("_static/requirements.txt");
                 if (reqRes.ok) {
@@ -183,7 +193,6 @@ importlib.util.find_spec("ml_switcheroo") is not None
                     await micropip.install(["numpy", "pydantic", "rich", "libcst"]);
                 }
             } catch (e) {
-                console.warn("Reqs fetch failed, using fallback deps.");
                 await micropip.install(["numpy", "pydantic", "rich", "libcst"]);
             }
 
@@ -207,6 +216,11 @@ importlib.util.find_spec("ml_switcheroo") is not None
         statusEl.className = "status-badge status-ready";
         document.getElementById("btn-convert").disabled = false;
 
+        // Initialize Mermaid config if not already done
+        if (typeof mermaid !== "undefined") {
+            mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+        }
+
     } catch (err) {
         console.error(err);
         statusEl.innerText = "Load Failed";
@@ -215,17 +229,30 @@ importlib.util.find_spec("ml_switcheroo") is not None
     }
 }
 
+/**
+ * Initializes CodeMirror instances for Source, Target, and Weights.
+ */
 function initEditors() {
     if (srcEditor) {
         srcEditor.refresh();
         if (tgtEditor) tgtEditor.refresh();
+        if (weightEditor) weightEditor.refresh();
         return;
     }
     const opts = { mode: "python", lineNumbers: true, viewportMargin: Infinity, theme: "default" };
     srcEditor = CodeMirror.fromTextArea(document.getElementById("code-source"), { ...opts, readOnly: false });
     tgtEditor = CodeMirror.fromTextArea(document.getElementById("code-target"), { ...opts, readOnly: true });
+
+    // Initialize Weight Script Editor
+    const weightEl = document.getElementById("code-weights");
+    if (weightEl) {
+        weightEditor = CodeMirror.fromTextArea(weightEl, { ...opts, readOnly: true });
+    }
 }
 
+/**
+ * Populates the Example dropdown from the loaded registry.
+ */
 function initExampleSelector() {
     const sel = document.getElementById("select-example");
     if (!sel) return;
@@ -240,6 +267,7 @@ function initExampleSelector() {
     }
     sel.onchange = (e) => loadExample(e.target.value);
 
+    // Auto-select a neural example if possible for better first impression
     if (sortedKeys.length > 0) {
        const preferred = sortedKeys.find(k => k.includes("torch") && k.includes("neural"));
        const defKey = preferred || sortedKeys[0];
@@ -248,6 +276,9 @@ function initExampleSelector() {
     }
 }
 
+/**
+ * Attaches event listeners for framework dropdowns logic handling.
+ */
 function initFrameworkListeners() {
     const handler = (type) => {
         const sel = document.getElementById(`select-${type}`);
@@ -263,15 +294,23 @@ function initFrameworkListeners() {
     document.getElementById("select-src").addEventListener("change", () => handler('src'));
     document.getElementById("select-tgt").addEventListener("change", () => handler('tgt'));
     updateRenderTabVisibility();
+
+    // -- Tab Switching Listener for Refreshing Editors --
+    document.querySelectorAll('input[name="wm-tabs"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.id === 'tab-weights' && weightEditor) {
+                // Short timeout to allow CSS display transition so CodeMirror calculates size correctly
+                setTimeout(() => weightEditor.refresh(), 20);
+            }
+        });
+    });
 }
 
 function updateRenderTabVisibility() {
     const srcFw = document.getElementById("select-src").value;
     const tgtFw = document.getElementById("select-tgt").value;
 
-    // Enable render tab if either side is TikZ or HTML
     const isVisual = (srcFw === 'tikz' || tgtFw === 'tikz' || srcFw === 'html' || tgtFw === 'html');
-
     const tabLabel = document.getElementById("label-tab-render");
     const tabInput = document.getElementById("tab-render");
 
@@ -292,6 +331,8 @@ function loadExample(key) {
     if (!ex) return;
     srcEditor.setValue(ex.code);
     tgtEditor.setValue("");
+
+    if (weightEditor) weightEditor.setValue("");
 
     setSelectValue(document.getElementById("select-src"), ex.srcFw);
     const tgtSelect = document.getElementById("select-tgt");
@@ -328,6 +369,9 @@ function swapContext() {
     tgtEditor.setValue(tmp);
 }
 
+/**
+ * Highlights a line in the source editor when hovering over trace components.
+ */
 function updateLineHighlight(event, hover) {
     if (!srcEditor || !event.lineno) return;
     const ln = event.lineno - 1;
@@ -350,6 +394,50 @@ function loadScript(src) {
     });
 }
 
+/**
+ * Renders a Mermaid graph into the AST visualization tab.
+ * Handles Mermaid v10+ async rendering properly.
+ *
+ * @param {string} graphDef - The Mermaid graph definition string (e.g. "graph TD...").
+ */
+async function renderMermaid(graphDef) {
+    const element = document.getElementById('ast-mermaid-target');
+    if (!element) return;
+
+    if (!graphDef || graphDef.trim() === '') {
+        element.innerHTML = '<em style="color:#999">No graph data available.</em>';
+        return;
+    }
+
+    // Set loading state
+    element.innerHTML = '<div style="padding:20px; color:#666">Generating Graph...</div>';
+
+    try {
+        if (typeof mermaid === "undefined") {
+            element.innerText = "Mermaid library not loaded.";
+            return;
+        }
+
+        // Generate unique ID for SVG isolation to prevent conflicts
+        const uniqueId = `mermaid-graph-${Date.now()}`;
+
+        // Attempt Render
+        // API: mermaid.render(id, text) -> { svg: string } in v10
+        const result = await mermaid.render(uniqueId, graphDef);
+        element.innerHTML = result.svg;
+
+    } catch (e) {
+        console.error("Mermaid Render Fail", e);
+        element.innerHTML = `<div style="color:red; padding:10px; border:1px solid red;">
+            <strong>Graph Render Error:</strong><br/>
+            ${e.message || String(e)}
+        </div>`;
+    }
+}
+
+/**
+ * Executes the main translation logic in Pyodide.
+ */
 async function runTranspilation() {
     if (!pyodide || !srcEditor) return;
     const consoleEl = document.getElementById("console-output");
@@ -382,6 +470,7 @@ async function runTranspilation() {
         pyodide.globals.set("js_tgt_flavour", tgtFlav);
         pyodide.globals.set("js_strict_mode", !!document.getElementById("chk-strict-mode").checked);
 
+        // Execute Python
         await pyodide.runPythonAsync(PYTHON_BRIDGE);
 
         const jsonRaw = pyodide.globals.get("json_output");
@@ -389,30 +478,60 @@ async function runTranspilation() {
 
         tgtEditor.setValue(result.code);
 
+        // Update Weight Script editor
+        if (weightEditor) {
+            if (result.weight_script) {
+                weightEditor.setValue(result.weight_script);
+            } else {
+                weightEditor.setValue("# No weight script generated.");
+            }
+        }
+
         // Update syntax highlighting based on target framework
         if (tgtFw === 'html') {
              tgtEditor.setOption("mode", "htmlmixed");
         } else {
              tgtEditor.setOption("mode", "python");
         }
+
         // Force refresh to ensure highlighting applies
-        setTimeout(() => tgtEditor.refresh(), 10);
+        setTimeout(() => {
+            tgtEditor.refresh();
+            if (weightEditor) weightEditor.refresh();
+        }, 50);
+
+        // Manage Weight Tab Visibility
+        const weightLabel = document.getElementById("label-tab-weights");
+        if (weightLabel) {
+            // Reduced threshold to 20 chars to catch short valid scripts or errors
+            if (result.weight_script && result.weight_script.length > 20) {
+                weightLabel.style.color = "#2196f3"; // Visual cue
+                weightLabel.style.display = "inline-flex"; // Show tab
+            } else {
+                weightLabel.style.display = "none"; // Hide tab
+                // If user was on the tab, switch them back to trace
+                if (document.getElementById("tab-weights") && document.getElementById("tab-weights").checked) {
+                    document.getElementById("tab-trace").checked = true;
+                }
+            }
+        }
 
         if (result.is_success) {
              consoleEl.innerText = `✅ Success!\n\n--- Engine Logs ---\n${result.logs}`;
 
              if (tgtFw === 'tikz' || srcFw === 'tikz') {
                  document.getElementById("tab-render").checked = true;
-                 // Give DOM render beat + TikZJax async search time
                  setTimeout(() => renderTikZ(result.code), 150);
              } else if (tgtFw === 'html' || srcFw === 'html') {
                  document.getElementById("tab-render").checked = true;
                  renderHtmlDSL(result.code);
              }
+
         } else {
              consoleEl.innerText = `❌ Error\n\n${result.logs}`;
         }
 
+        // Trace Handling (Viz)
         if (result.trace_events) {
              if (window.TraceGraph) {
                  new TraceGraph('trace-visualizer', updateLineHighlight).render(result.trace_events);
@@ -426,7 +545,8 @@ async function runTranspilation() {
                  if (s.description.includes("After")) currentAstGraphs.post = s.metadata.mermaid;
              });
 
-             renderMermaid(currentAstGraphs.pre || currentAstGraphs.post);
+             // Use the fixed renderMermaid logic
+             await renderMermaid(currentAstGraphs.pre || currentAstGraphs.post);
         }
     } catch (err) {
         console.error("Transpilation JS Error", err);
@@ -437,205 +557,6 @@ async function runTranspilation() {
     }
 }
 
-/**
- * Helper: Polls for window.tikzjax namespace presence.
- */
-function waitForTikZ(timeout = 10000) {
-    return new Promise(resolve => {
-        const start = Date.now();
-        const check = () => {
-            // Check existence, not specific method, to be robust
-            if (window.tikzjax) {
-                resolve(true);
-            } else if (Date.now() - start > timeout) {
-                resolve(false);
-            } else {
-                requestAnimationFrame(check);
-            }
-        };
-        check();
-    });
-}
-
-/**
- * Injects TikZ Code into the DOM to trigger TikZJax processing.
- * @param {string} tikzCode - The LaTeX string generated by the engine.
- */
-async function renderTikZ(tikzCode) {
-    const container = document.getElementById("tikz-output-container");
-    if (!container) return;
-
-    // Clear previous results/loaders
-    container.innerHTML = "";
-
-    // Show loading state while waiting for WASM
-    const loaderId = "tikz-loading-indicator";
-    container.innerHTML = `<div id="${loaderId}" style='color:#666; padding:20px;'>Rendering TikZ Diagram... (WASM via <span id="tikz-method">...</span>)</div>`;
-    container.style.display = "block";
-
-    if (!tikzLoaded) {
-        container.innerHTML = "<div style='color:orange;'>⚠️ TikZJax library not loaded. Check network or console.</div>";
-        return;
-    }
-
-    debugLog("Waiting for TikZJax readiness...");
-
-    // FIX: Increased timeout to 5000ms. WASM compilation can be slow on first load.
-    const ready = await waitForTikZ(5000);
-
-    if (!ready) {
-         const methInfo = document.getElementById("tikz-method");
-         if (methInfo) methInfo.innerText = "Event Trigger";
-         debugLog("TikZJax global not ready. Fallback to DOMContentLoaded event.");
-    } else {
-         debugLog("TikZJax global detected.");
-    }
-
-    debugLog("Injecting TikZ Script...");
-
-    // Clear loader
-    container.innerHTML = "";
-
-    // Create script tag expected by tikzjax
-    const scriptEl = document.createElement("script");
-    scriptEl.type = "text/tikz";
-    scriptEl.dataset.showConsole = "true";
-    scriptEl.textContent = tikzCode;
-
-    container.appendChild(scriptEl);
-
-    // Trigger processing logic
-    if (window.tikzjax && typeof window.tikzjax.process === 'function') {
-        try {
-            debugLog("Calling tikzjax.process(container)...");
-            await window.tikzjax.process(container);
-            // Check visibility
-            setTimeout(() => {
-                const svg = container.querySelector("svg");
-                if (svg) {
-                    svg.style.display = "block";
-                    svg.style.margin = "0 auto";
-                }
-            }, 100);
-        } catch (e) {
-            console.error("TikZJax API error:", e);
-            container.innerHTML += `<div style="color:red; margin-top:10px;">Render Error: ${e.message}</div>`;
-        }
-    } else {
-        debugLog("API not found. Triggering DOMContentLoaded event to force scan.");
-        // Fallback for libraries relying on load events
-        document.dispatchEvent(new Event("DOMContentLoaded"));
-    }
-}
-
-/**
- * Renders HTML DSL output by stripping head/body tags and injecting CSS dynamically.
- * Applies decrementing z-index to rows to fix arrow overlap stacking context issues.
- * Ensures the background column remains at the bottom of the stack.
- * @param {string} fullHtml - The complete HTML document string generated by the engine.
- */
-function renderHtmlDSL(fullHtml) {
-    const container = document.getElementById("tikz-output-container");
-    if (!container) return;
-
-    // Clear previous results
-    container.innerHTML = "";
-    container.style.display = "block";
-
-    if (!fullHtml || !fullHtml.includes("<html")) {
-        container.innerHTML = `<div style='padding:20px; color:#666;'>No valid HTML output generated.</div>`;
-        return;
-    }
-
-    try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(fullHtml, "text/html");
-
-        // 1. Extract and Inject CSS
-        const styles = doc.querySelectorAll("head style");
-
-        // Use a dedicated style tag to apply these styles dynamically
-        // This ensures the styles from the HTML DSL don't leak or are reset correctly
-        let dynamicStyle = document.getElementById("switcheroo-custom-style");
-        if (!dynamicStyle) {
-            dynamicStyle = document.createElement("style");
-            dynamicStyle.id = "switcheroo-custom-style";
-            document.head.appendChild(dynamicStyle);
-        }
-
-        let newCss = "";
-        // Simple sanitization: remove global body selector to prevent affecting main docs
-        styles.forEach(s => {
-            let cssText = s.textContent;
-            // Replace 'body {' with a generic container rule or strip it
-            cssText = cssText.replace(/body\s*{[^}]*}/g, "");
-            newCss += cssText + "\n";
-        });
-
-        dynamicStyle.textContent = newCss;
-
-        // 2. Extract Body Content (Markers + Grid)
-        const bodyContent = doc.body.innerHTML;
-        container.innerHTML = bodyContent;
-
-        // 3. Fix Stacking Context for Descending Arrows
-        // The arrows are absolute children of their grid boxes. In CSS Grid, later elements (higher rows)
-        // paint on top of earlier elements. This causes the destination row (N+1) to obscure the arrow
-        // coming from the source row (N).
-        // We iterate grid children and assign decrementing Z-indices so top rows paint LAST.
-        // Important: We exclude `.col-mid-bg` to keep it in the background.
-
-        // Fallback robustness check: if the Python emitter didn't set inline z-index (e.g. old wheel),
-        // we can apply it here as well. The redundancy is safe.
-        const gridItems = container.querySelectorAll(".sw-grid > div");
-        gridItems.forEach((item, idx) => {
-            // Identify if this is the background column tracker
-            if (item.classList.contains("col-mid-bg")) {
-                // Force background to stay behind everything
-                item.style.zIndex = "0";
-            } else {
-                // Only overwrite if not set inline by backend?
-                // Actually safer to enforce our stacking logic to be sure
-                if (!item.style.zIndex) {
-                    item.style.zIndex = (1000 - idx).toString();
-                }
-                if (window.getComputedStyle(item).position === 'static') {
-                    item.style.position = "relative";
-                }
-            }
-        });
-
-    } catch (e) {
-        console.error("HTML Render Error:", e);
-        container.innerHTML = `<div style="color:red;">HTML Render Failed: ${e.message}</div>`;
-    }
-}
-
-async function renderMermaid(graphDefinition) {
-    const targetEl = document.getElementById("ast-mermaid-target");
-
-    if (!graphDefinition) {
-        targetEl.innerHTML = "<em style='color:#999'>No AST graph data found in trace results.</em>";
-        return;
-    }
-
-    if (typeof mermaid === "undefined") {
-        targetEl.innerHTML = "<b style='color:red'>Mermaid Library Not Loaded</b>";
-        return;
-    }
-
-    try {
-        const id = 'ast-svg-' + Date.now();
-        const result = await mermaid.render(id, graphDefinition);
-        const svgContent = (typeof result === 'string') ? result : result.svg;
-        targetEl.innerHTML = svgContent;
-    } catch (e) {
-        console.error("Mermaid Render Exception:", e);
-        targetEl.innerHTML = `<div style='color:red; text-align:left; font-family:monospace;'>Mermaid Syntax Error:<br/>${e.message}</div>`;
-    }
-}
-
-// Init Listeners
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-load-engine").addEventListener("click", initEngine);
     document.getElementById("btn-convert").addEventListener("click", runTranspilation);
@@ -649,8 +570,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-ast-next")?.addEventListener("click", (e) => {
         renderMermaid(currentAstGraphs.post);
     });
-
-    if (typeof mermaid !== "undefined") {
-        mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
-    }
 });

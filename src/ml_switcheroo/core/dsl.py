@@ -11,6 +11,7 @@ It defines the structure for:
 - Variants (framework implementations).
 - Plugins (scaffolding logic).
 - Operations (abstract definitions).
+- **Patterns**: Graph fusion rules.
 """
 
 from typing import Dict, List, Optional, Any, Union, Tuple, Literal
@@ -242,6 +243,17 @@ class PluginScaffoldDef(BaseModel):
     description="Dictionary defining Semantic Operations to be automatically injected via the plugin itself."
     "Matches the structure of an ODL OperationDef JSON.",
   )
+
+
+class PatternDef(BaseModel):
+  """
+  Definition of a subgraph pattern for Graph Fusion.
+  """
+
+  name: str = Field(..., description="Name of the pattern (e.g., 'ConvBNReLU').")
+  sequence: List[str] = Field(..., description="Ordered list of Operation Kinds (e.g. ['Conv2d', 'BatchNorm', 'ReLU']).")
+  replace_with: str = Field(..., description="The target Operation Kind to substitute (e.g. 'FusedConvBlock').")
+  allow_partial: bool = Field(False, description="If True, matches prefixes of sequence (not implemented yet).")
 
 
 class OperationDef(BaseModel):

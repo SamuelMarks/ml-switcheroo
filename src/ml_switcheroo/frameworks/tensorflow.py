@@ -9,9 +9,11 @@ It supports:
 1.  **Live Inspection**: Scanning installed TensorFlow modules for new operations.
 2.  **Ghost Mode**: Loading API signatures from JSON snapshots when TF is not installed.
 3.  **Semantic Definitions**: Static mappings for standard Math, NN, and Optimization ops.
+4.  **Weight Migration**: Loading checkpoints via ``tf.train.load_checkpoint``.
 """
 
 import logging
+import textwrap
 from typing import List, Tuple, Optional, Dict, Any, Set
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
 from ml_switcheroo.enums import SemanticTier
@@ -198,7 +200,7 @@ class TensorFlowAdapter:
     Returns code to convert TF tensors to NumPy.
 
     Returns:
-        str: Code string.
+        str: Code string using safe attribute check.
     """
     return "if hasattr(obj, 'numpy'): return obj.numpy()"
 
@@ -496,6 +498,73 @@ def data_pipeline(tensors, batch_size=32):
       return f"tf.io.read_file({file_arg})"
     return ""
 
+  # --- Weight Handling Logic ---
+
+  def get_weight_conversion_imports(self) -> List[str]:
+    """
+    Returns imports required for the generated weight migration script.
+
+    Returns:
+        List[str]: List of import statements.
+    """
+    return ["import tensorflow as tf", "import numpy as np"]
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """
+    Returns Python code to load a TF checkpoint into a raw dict found in `raw_state`.
+    Attempt to load variable map if available.
+
+    Args:
+        path_var: Variable name containing file path.
+
+    Returns:
+        Code block string.
+    """
+    return textwrap.dedent(
+      f"""
+            try:
+                reader = tf.train.load_checkpoint({path_var})
+                dtypes = reader.get_variable_to_dtype_map()
+                raw_state = {{key: reader.get_tensor(key) for key in dtypes}}
+            except Exception as e:
+                print(f"Failed to load TF checkpoint: {{e}}")
+                raw_state = {{}}
+            """
+    )
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    """
+    Returns expression to convert a TF tensor to a NumPy array.
+
+    Args:
+        tensor_var: Variable name of the tensor.
+
+    Returns:
+        Conversion expression string.
+    """
+    return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """
+    Returns logic (stubbed with warning) for saving weights.
+    TensorFlow checkpoint saving generally requires a model instance structure,
+    so raw dictionary saving is not supported in the standalone migration script.
+
+    Args:
+        state_var: Unused state variable name.
+        path_var: Unused path variable name.
+
+    Returns:
+        Warning print code.
+    """
+    return textwrap.dedent(
+      """
+            print("WARNING: Saving raw dictionary to TensorFlow checkpoint is not directly supported without model structure.")
+            print("To save weights for TensorFlow, instantiate the Keras/TF model and use `model.set_weights()` or `root.save_weights()`.")
+            print(f"Weights available in converted_state variable for manual assignment.")
+            """
+    )
+
   def convert(self, data: Any) -> Any:
     """
     Converts input data (NumPy/List) into TensorFlow Tensors.
@@ -520,7 +589,7 @@ def data_pipeline(tensors, batch_size=32):
     Corrects internal `tensorflow` path to `tf` for doc references.
 
     Args:
-        api_name: API Path.
+        api_name (str): API Path.
 
     Returns:
         Optional[str]: URL.

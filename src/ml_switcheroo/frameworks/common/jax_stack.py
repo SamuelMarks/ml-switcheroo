@@ -18,6 +18,7 @@ Usage:
         # ... logic ...
 """
 
+import textwrap
 from typing import Dict, Any, List, Optional
 
 
@@ -32,6 +33,7 @@ class JAXStackMixin:
   - Device Management (Torch Device -> JAX Devices).
   - **Test Configuration** (Gen-Tests templates).
   - **Verification Normalization** (JAX Array -> NumPy).
+  - **Weight Migration** (Loading/Saving checkpoints via Orbax).
   """
 
   # --- Test Configuration (Shared) ---
@@ -125,6 +127,62 @@ class JAXStackMixin:
     elif op == "load":
       return f"orbax.checkpoint.PyTreeCheckpointer().restore({file_arg})"
     return ""
+
+  # --- Weight Migration (Adapter) ---
+
+  def get_weight_conversion_imports(self) -> List[str]:
+    """Returns imports required for the generated weight migration script."""
+    return [
+      "import jax.numpy as jnp",
+      "import orbax.checkpoint",
+      "from flax.traverse_util import unflatten_dict, flatten_dict",
+    ]
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """
+    Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
+    The `raw_state` is a flat dictionary where keys are dot-separated strings (e.g. 'layer.weight').
+    """
+    return textwrap.dedent(
+      f"""
+            # Load with Orbax and Flatten
+            checkpointer = orbax.checkpoint.PyTreeCheckpointer()
+            raw_tree = checkpointer.restore({path_var})
+            if 'params' in raw_tree:
+                raw_tree = raw_tree['params']
+            
+            # Helper to flatten with tuple keys
+            # Key format: (layer_name, param_name) tuple
+            # We convert tuple keys to dot-separated strings for the interop mapping
+            raw_state = {{
+                ".".join(k) : v for k, v in flatten_dict(raw_tree).items()
+            }}
+            """
+    )
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    """
+    Returns a python expression string that converts `tensor_var` from JAX array to numpy array.
+    """
+    return f"np.array({tensor_var})"
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """
+    Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays)
+    to `path_var`. It unstricts flat keys back to PyTree structure using `unflatten_dict` and saves via Orbax.
+    """
+    return textwrap.dedent(
+      f"""
+            # Restructure PyTree
+            # Convert dot keys back to tuple keys
+            tuple_params = {{tuple(k.split('.')): v for k, v in {state_var}.items()}}
+            params_tree = unflatten_dict(tuple_params)
+            final_tree = {{'params': params_tree}}
+
+            checkpointer = orbax.checkpoint.PyTreeCheckpointer()
+            checkpointer.save({path_var}, final_tree)
+            """
+    )
 
   # --- Documentation Linking ---
 

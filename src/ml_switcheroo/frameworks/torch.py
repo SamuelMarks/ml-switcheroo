@@ -8,10 +8,13 @@ It provides:
 2.  **Semantic Definitions**: Mappings loaded from `definitions/torch.json` via helper.
 3.  **Discovery**: Heuristics and logic for scanning the installed `torch` library.
 4.  **IO & Device Support**: Wires up serialization and device allocation.
+5.  **Weight Migration**: Implements logic to generate scripts for converting .pth checkpoints
+    to/from NumPy format for interoperability.
 """
 
 import inspect
 import logging
+import textwrap
 from typing import List, Tuple, Dict, Any, Optional, Set
 
 try:
@@ -375,6 +378,77 @@ class TorchAdapter:
     elif op == "load":
       return f"torch.load({file_arg})"
     return ""
+
+  # --- Weight Handling Logic ---
+
+  def get_weight_conversion_imports(self) -> List[str]:
+    """
+    Returns imports required for the generated weight migration script logic.
+
+    Returns:
+        List of import strings.
+    """
+    return ["import torch"]
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """
+    Returns Python code to load a .pth file into a raw state dictionary.
+    Handles both bare state dicts and Lightning-style checkpoints.
+
+    Args:
+        path_var: Variable name containing the file path string.
+
+    Returns:
+        Block of python code setting 'raw_state'.
+    """
+    return textwrap.dedent(
+      f"""
+            # Load PyTorch checkpoint to CPU to avoid CUDA dependency
+            loaded = torch.load({path_var}, map_location='cpu')
+            
+            # Unwrap common checkpoint formats
+            if isinstance(loaded, dict) and 'state_dict' in loaded:
+                raw_state = loaded['state_dict']
+            else:
+                raw_state = loaded
+            
+            if not isinstance(raw_state, dict):
+                raise ValueError(f"Expected dict-like checkpoint, got {{type(loaded)}}")
+            """
+    )
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    """
+    Returns expression to convert a Torch tensor variable to a NumPy array.
+    Includes detach and cpu calls for safety.
+
+    Args:
+        tensor_var: Name of variable holding the torch tensor.
+
+    Returns:
+        Expression string.
+    """
+    return f"{tensor_var}.detach().cpu().numpy()"
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """
+    Returns Python code to save the converted state dictionary back to .pth format.
+    Converts NumPy arrays back to Torch tensors before saving.
+
+    Args:
+        state_var: Variable name of the flat dictionary {key: numpy_array}.
+        path_var: Variable name of the output path.
+
+    Returns:
+        Block of python code.
+    """
+    return textwrap.dedent(
+      f"""
+            # Convert NumPy arrays back to Torch Tensors
+            torch_state = {{k: torch.from_numpy(v) for k, v in {state_var}.items()}}
+            torch.save(torch_state, {path_var})
+            """
+    )
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """

@@ -18,6 +18,7 @@ Also provides core infrastructure for:
 from typing import Optional, List, Dict, Any, Union, Set
 import libcst as cst
 
+from ml_switcheroo.analysis.symbol_table import SymbolTable
 from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.hooks import HookContext
@@ -38,27 +39,25 @@ class BaseRewriter(
   VersioningMixin,
   cst.CSTTransformer,
 ):
-  """
-  The base class for AST transformation traversal.
-  """
-
-  def __init__(self, semantics: SemanticsManager, config: RuntimeConfig):
+  def __init__(self, semantics: SemanticsManager, config: RuntimeConfig, symbol_table: Optional[SymbolTable] = None):
     """
     Initializes the rewriter and its mixins.
     """
     self.semantics = semantics
     self.config = config
+    self.symbol_table = symbol_table
 
     self.source_fw = str(config.effective_source)
     self.target_fw = str(config.effective_target)
     self.strict_mode = config.strict_mode
 
-    # Initialize Hook Context
+    # Initialize Hook Context with Symbol Table
     self.ctx = HookContext(
       semantics,
       config,
       arg_injector=self._callback_inject_arg,
       preamble_injector=self._callback_inject_preamble,
+      symbol_table=symbol_table,
     )
 
     # Initialize Mixin State

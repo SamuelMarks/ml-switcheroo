@@ -1,68 +1,54 @@
 """
-TikZ Framework Adapter.
+TikZ / LaTeX Visualization Adapter.
 
-This module provides the adapter for the TikZ (LaTeX) visualization target.
-It primarily serves as a target for the Graph Extraction -> Latex Emitter pipeline.
-Unlike computational frameworks, it has few semantic definitions, but it
-adheres to the adapter protocol for consistency.
+This framework adapter treats LaTeX/TikZ as a target "language" for
+visualization purposes. It allows the system to transpile a model architecture
+into a TikZ node graph representation.
+
+As a non-computational framework, most runtime hooks (device management,
+weight loading, execution) are implemented as no-ops or return comments.
+
+Capabilities:
+1.  **Format**: Generates LaTeX code strings.
+2.  **Tiers**: Visual representation only.
+3.  **No-Ops**: Weights, tensors, and runtime checks are explicitly disabled.
 """
 
-from typing import List, Tuple, Dict, Any, Optional, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
+from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.core.ghost import GhostRef
 from ml_switcheroo.frameworks.base import (
   register_framework,
-  FrameworkAdapter,
   StructuralTraits,
   PluginTraits,
   StandardCategory,
   StandardMap,
   ImportConfig,
   InitMode,
-  GhostRef,
+  OpDefinition,
 )
-from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.loader import load_definitions
 
 
 @register_framework("tikz")
-class TikzAdapter(FrameworkAdapter):
+class TikzAdapter:
   """
-  Adapter for TikZ (LaTeX Visualization).
+  Adapter for generating TikZ (LaTeX) visualizations.
+
+  Targeting this framework results in the generation of a .tex file
+  content describing the model's computation graph.
   """
 
   display_name: str = "TikZ (LaTeX)"
-  ui_priority: int = 1000  # Bottom of list
   inherits_from: Optional[str] = None
-
-  def __init__(self) -> None:
-    """Initialize in Ghost Mode as it has no python library backing."""
-    self._mode = InitMode.GHOST
-
-  @property
-  def definitions(self) -> Dict[str, StandardMap]:
-    """
-    Returns static definitions for TikZ.
-    Loaded dynamically from `frameworks/definitions/tikz.json`.
-
-    Returns:
-        Dict[str, StandardMap]: Definitions map.
-    """
-    return load_definitions("tikz")
-
-  @property
-  def specifications(self) -> Dict:
-    """
-    Returns abstract specifications.
-
-    Returns:
-        Dict: Empty dict.
-    """
-    return {}
+  ui_priority: int = 1000  # Bottom of list
+  _mode: InitMode = InitMode.GHOST
 
   @property
   def search_modules(self) -> List[str]:
     """
-    Returns list of modules to scan.
+    No modules to search; TikZ is not a python library.
 
     Returns:
         List[str]: Empty list.
@@ -72,7 +58,7 @@ class TikzAdapter(FrameworkAdapter):
   @property
   def unsafe_submodules(self) -> Set[str]:
     """
-    Returns unsafe submodules.
+    No unsafe modules.
 
     Returns:
         Set[str]: Empty set.
@@ -82,7 +68,7 @@ class TikzAdapter(FrameworkAdapter):
   @property
   def import_alias(self) -> Tuple[str, str]:
     """
-    Returns import alias.
+    Import alias definition.
 
     Returns:
         Tuple[str, str]: ("tikz", "tikz").
@@ -90,39 +76,45 @@ class TikzAdapter(FrameworkAdapter):
     return ("tikz", "tikz")
 
   @property
-  def import_namespaces(self) -> Dict:
+  def import_namespaces(self) -> Dict[str, ImportConfig]:
     """
-    Returns namespaces.
+    No namespace mappings.
 
     Returns:
-        Dict: Empty dict.
+        Dict[str, ImportConfig]: Empty dict.
     """
     return {}
 
   @property
-  def discovery_heuristics(self) -> Dict:
+  def discovery_heuristics(self) -> Dict[str, List[str]]:
     """
-    Returns regex heuristics.
+    No discovery possible.
 
     Returns:
-        Dict: Empty dict.
+        Dict[str, List[str]]: Empty dict.
     """
     return {}
 
   @property
-  def test_config(self) -> Dict:
+  def test_config(self) -> Dict[str, str]:
     """
-    Returns test templates.
+    Returns placeholder configuration for testing.
 
     Returns:
-        Dict: Empty dict.
+        Dict[str, str]: Comment templates.
     """
-    return {}
+    return {
+      "import": "% latex package imports here",
+      "convert_input": "% input {np_var}",
+      "to_numpy": "% output {res_var}",
+    }
+
+  # --- Harness Protocol ---
 
   @property
   def harness_imports(self) -> List[str]:
     """
-    Returns harness imports.
+    Returns empty imports.
 
     Returns:
         List[str]: Empty list.
@@ -131,7 +123,7 @@ class TikzAdapter(FrameworkAdapter):
 
   def get_harness_init_code(self) -> str:
     """
-    Returns harness init code.
+    Returns empty init code.
 
     Returns:
         str: Empty string.
@@ -140,29 +132,17 @@ class TikzAdapter(FrameworkAdapter):
 
   def get_to_numpy_code(self) -> str:
     """
-    Returns numpy conversion logic.
+    Returns generic stringifier.
 
     Returns:
-        str: Identity logic.
+        str: Code returning string representation.
     """
-    return "return data"
-
-  def convert(self, data: Any) -> Any:
-    """
-    Converts input data for validation.
-
-    Args:
-        data (Any): Input.
-
-    Returns:
-        Any: String representation.
-    """
-    return str(data)
+    return "return str(obj)"
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
     """
-    Returns supported tiers.
+    Supports Neural tier for architecture visualization.
 
     Returns:
         List[SemanticTier]: [NEURAL].
@@ -172,7 +152,7 @@ class TikzAdapter(FrameworkAdapter):
   @property
   def declared_magic_args(self) -> List[str]:
     """
-    Returns magic args.
+    No magic args.
 
     Returns:
         List[str]: Empty list.
@@ -182,40 +162,75 @@ class TikzAdapter(FrameworkAdapter):
   @property
   def structural_traits(self) -> StructuralTraits:
     """
-    Returns structural traits.
+    Defines default structural traits (pass-through).
 
     Returns:
-        StructuralTraits: Default object.
+        StructuralTraits: Default traits.
     """
     return StructuralTraits()
 
   @property
   def plugin_traits(self) -> PluginTraits:
     """
-    Returns plugin capabilities.
+    Defines default capabilities.
 
     Returns:
-        PluginTraits: Default object.
+        PluginTraits: Default traits.
     """
     return PluginTraits()
 
   @property
+  def definitions(self) -> Dict[str, StandardMap]:
+    """
+    Returns static definitions for visual mappings.
+    Loaded dynamically from `frameworks/definitions/tikz.json`.
+
+    Returns:
+        Dict[str, StandardMap]: Mappings for drawing logic.
+    """
+    return load_definitions("tikz")
+
+  @property
+  def specifications(self) -> Dict[str, OpDefinition]:
+    """
+    Returns empty specifications.
+
+    Returns:
+        Dict[str, OpDefinition]: Empty dict.
+    """
+    return {}
+
+  @property
   def rng_seed_methods(self) -> List[str]:
     """
-    Returns seed methods.
+    No RNG logic.
 
     Returns:
         List[str]: Empty list.
     """
     return []
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """
-    Returns device syntax.
+    No API to collect.
 
     Args:
-        device_type: Device.
-        device_index: Index.
+        category (StandardCategory): Ignored.
+
+    Returns:
+        List[GhostRef]: Empty list.
+    """
+    return []
+
+  # --- Syntax Generation (No-Ops) ---
+
+  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+    """
+    Returns empty string.
+
+    Args:
+        device_type (str): Device.
+        device_index (Optional[str]): Index.
 
     Returns:
         str: Empty string.
@@ -224,20 +239,20 @@ class TikzAdapter(FrameworkAdapter):
 
   def get_device_check_syntax(self) -> str:
     """
-    Returns check syntax.
+    Returns generic boolean.
 
     Returns:
-        str: "False".
+        str: "True".
     """
-    return "False"
+    return "True"
 
-  def get_rng_split_syntax(self, r, k) -> str:
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """
-    Returns split syntax.
+    Returns empty string.
 
     Args:
-        r: RNG var.
-        k: Key var.
+        rng_var (str): RNG.
+        key_var (str): New Key.
 
     Returns:
         str: Empty string.
@@ -246,79 +261,130 @@ class TikzAdapter(FrameworkAdapter):
 
   def get_serialization_imports(self) -> List[str]:
     """
-    Returns IO imports.
+    Empty imports.
 
     Returns:
         List[str]: Empty list.
     """
     return []
 
-  def get_serialization_syntax(self, op: str, f: str, o: Optional[str] = None) -> str:
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """
-    Returns IO syntax.
+    Returns empty string for IO.
 
     Args:
-        op: Operation.
-        f: File.
-        o: Object.
+        op (str): Operation.
+        file_arg (str): Filename.
+        object_arg (Optional[str]): Object.
 
     Returns:
         str: Empty string.
     """
     return ""
 
-  def get_doc_url(self, api_name: str) -> Optional[str]:
-    """
-    Returns doc URL.
+  # --- Weight Handling (No-Ops) ---
 
-    Args:
-        api_name: API.
+  def get_weight_conversion_imports(self) -> List[str]:
+    """
+    Empty list.
 
     Returns:
-        Optional[str]: None.
+        List[str]: Empty.
     """
+    return []
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """
+    Returns comment code.
+
+    Args:
+        path_var (str): Path.
+
+    Returns:
+        str: Comment.
+    """
+    return f"# Weights not supported in TikZ mode"
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    """
+    Identity.
+
+    Args:
+        tensor_var (str): Var name.
+
+    Returns:
+        str: Var name.
+    """
+    return tensor_var
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """
+    Returns comment code.
+
+    Args:
+        state_var (str): State.
+        path_var (str): Path.
+
+    Returns:
+        str: Comment.
+    """
+    return f"# Weights not supported in TikZ mode"
+
+  # --- Documentation ---
+
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """
+    No wiring needed.
+
+    Args:
+        snapshot (Dict[str, Any]): Snapshot dict.
+    """
+    pass
+
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """
+    Returns None as this TikZ DSL is undocumented.
+
+    Args:
+        api_name (str): API name.
+
+    Returns:
+        None
+    """
+    del api_name
     return None
+
+  def convert(self, data: Any) -> Any:
+    """
+    Returns string representation of data.
+
+    Args:
+        data (Any): Input.
+
+    Returns:
+        str: Stringified input.
+    """
+    return str(data)
 
   @classmethod
   def get_example_code(cls) -> str:
     """
-    Returns example code.
+    Returns TikZ example wrapped in environment.
 
     Returns:
-        str: LaTeX snippet.
+        str: TeX code.
     """
-    return r"\begin{tikzpicture} ... \end{tikzpicture}"
+    return r"\begin{tikzpicture}\node (input) {Input}; \node (layer) [right of=input] {Layer}; \draw[->] (input) -- (layer);\end{tikzpicture}"
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """
-    Returns tiered examples.
+    Returns example TeX strings.
 
     Returns:
-        Dict[str, str]: Examples map.
+        Dict[str, str]: Examples.
     """
     return {
-      "tier1_math": self.get_example_code(),
+      "tier1_math": "% Math ops not visualized directly",
       "tier2_neural": self.get_example_code(),
-      "tier3_extras": self.get_example_code(),
+      "tier3_extras": "% Extras ignored",
     }
-
-  def collect_api(self, c) -> List:
-    """
-    Collects API signatures.
-
-    Args:
-        c: Category.
-
-    Returns:
-        List: Empty list.
-    """
-    return []
-
-  def apply_wiring(self, s) -> None:
-    """
-    Applies wiring.
-
-    Args:
-        s: Snapshot.
-    """
-    pass

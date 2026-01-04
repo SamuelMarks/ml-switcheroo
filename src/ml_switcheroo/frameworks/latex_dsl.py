@@ -1,56 +1,58 @@
 """
-LaTeX DSL Framework Adapter.
+LaTeX Math DSL Adapter.
 
-This adapter provides the bridge for the "Machine Intelligence Definition Language" (MIDL).
-It enables the engine to consume and produce LaTeX code for neural network architectures.
+This framework adapter treats standard mathematical notation (LaTeX) as a target "language"
+for documentation purposes. It allows the system to transpile a model architecture
+or set of operations into readable mathematical equations.
 
-It exposes:
-1.  **Parsing**: Converts MIDL macros into Python AST via `LatexParser`.
-2.  **Emission**: Converts Python AST into MIDL macros via `LatexEmitter`.
-3.  **Specs**: Defines operations within the `midl` namespace.
+As a non-computational framework, most runtime hooks (device management,
+weight loading, execution) are implemented as no-ops or return LaTeX comments.
+
+Capabilities:
+1.  **Format**: Generates LaTeX equation code strings.
+2.  **Tiers**: Visual/Mathematical representation only.
+3.  **No-Ops**: Weights, tensors, and runtime checks are explicitly disabled.
 """
 
-from typing import Dict, List, Tuple, Optional, Any, Set
+from typing import Any, Dict, List, Optional, Set, Tuple
 
+from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.core.ghost import GhostRef
 from ml_switcheroo.frameworks.base import (
   register_framework,
-  FrameworkAdapter,
   StructuralTraits,
   PluginTraits,
   StandardCategory,
   StandardMap,
   ImportConfig,
   InitMode,
-  GhostRef,
 )
+from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.core.latex.parser import LatexParser
 from ml_switcheroo.core.latex.emitter import LatexEmitter
-from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.schema import OpDefinition, ParameterDef
-from ml_switcheroo.frameworks.loader import load_definitions
 
 
 @register_framework("latex_dsl")
-class LatexDSLAdapter(FrameworkAdapter):
+class LatexDSLAdapter:
   """
-  Adapter for the LaTeX DSL (MIDL).
+  Adapter for generating LaTeX Mathematical Expressions.
+
+  Targeting this framework results in the generation of .tex file content
+  describing the model's mathematical formulation (e.g., $y = Wx + b$).
   """
 
   display_name: str = "LaTeX DSL (MIDL)"
-  ui_priority: int = 1000  # Bottom of list
   inherits_from: Optional[str] = None
-
-  def __init__(self) -> None:
-    """Initialize in Ghost Mode as it has no python library backing."""
-    self._mode = InitMode.GHOST
+  ui_priority: int = 98
+  _mode: InitMode = InitMode.GHOST
 
   @property
   def search_modules(self) -> List[str]:
     """
-    No python modules to scan.
+    No modules to search; LaTeX is not a Python library.
 
     Returns:
-        List[str]: Empty list.
+        Empty list.
     """
     return []
 
@@ -60,193 +62,355 @@ class LatexDSLAdapter(FrameworkAdapter):
     No unsafe modules.
 
     Returns:
-        Set[str]: Empty.
+        Empty set.
     """
     return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
     """
-    Virtual namespace for the DSL logic.
+    Import alias for the virtual `midl` package used in intermediate AST.
 
     Returns:
-        Tuple[str, str]: ("midl", "midl").
+        ("midl", "midl").
     """
     return ("midl", "midl")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
     """
-    Declare `midl` namespace as Neural Logic tier.
+    Namespace mappings. Defines 'midl' as a valid Neural Tier source.
 
     Returns:
-        Dict[str, ImportConfig]: Config map.
+        Mapping.
     """
     return {
       "midl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="midl"),
     }
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
+  def discovery_heuristics(self) -> Dict[str, List[str]]:
     """
-    Defines how Abstract Standards map to `midl.*` macros.
-    Loaded dynamically from `frameworks/definitions/latex_dsl.json`.
+    No discovery possible.
 
     Returns:
-        Dict[str, StandardMap]: Definitions.
-    """
-    return load_definitions("latex_dsl")
-
-  @property
-  def specifications(self) -> Dict[str, OpDefinition]:
-    """
-    Defines the Abstract Standards themselves if unique to this DSL.
-    Currently empty as it reuses standard Neural Ops.
-
-    Returns:
-        Dict[str, OpDefinition]: Specs.
+        Empty dict.
     """
     return {}
 
   @property
-  def structural_traits(self) -> StructuralTraits:
+  def test_config(self) -> Dict[str, str]:
     """
-    Defines how to parse/emit the Module structure.
-    The LatexParser synthesizes classes inheriting from `midl.Module`.
+    Returns placeholder configuration for testing.
 
     Returns:
-        StructuralTraits: Traits.
+        Comment templates.
+    """
+    return {
+      "import": "% latex package imports (e.g. amsmath)",
+      "convert_input": "% input {np_var}",
+      "to_numpy": "% output {res_var}",
+    }
+
+  # --- Harness Protocol ---
+
+  @property
+  def harness_imports(self) -> List[str]:
+    """
+    Returns empty imports.
+
+    Returns:
+        Empty list.
+    """
+    return []
+
+  def get_harness_init_code(self) -> str:
+    """
+    Returns empty init code.
+
+    Returns:
+        Empty string.
+    """
+    return ""
+
+  def get_to_numpy_code(self) -> str:
+    """
+    Returns generic stringifier.
+
+    Returns:
+        Code returning string representation.
+    """
+    return "return str(obj)"
+
+  @property
+  def supported_tiers(self) -> List[SemanticTier]:
+    """
+    Supports Neural and Math tiers for formula generation.
+
+    Returns:
+        [NEURAL, ARRAY_API].
+    """
+    return [SemanticTier.NEURAL, SemanticTier.ARRAY_API]
+
+  @property
+  def declared_magic_args(self) -> List[str]:
+    """
+    No magic args.
+
+    Returns:
+        Empty list.
+    """
+    return []
+
+  @property
+  def structural_traits(self) -> StructuralTraits:
+    """
+    Defines traits for the virtual 'midl' framework used in round-trip tests.
+    When parsing LaTeX, we generate class `M(midl.Module)`.
+
+    Returns:
+        Config for parsing LaTeX-generated ASTs.
     """
     return StructuralTraits(
       module_base="midl.Module",
       forward_method="forward",
-      requires_super_init=True,
+      init_method_name="__init__",
+      requires_super_init=False,
+      # No state injection required for math formulas
     )
 
-  # --- Factory Hooks for ASTEngine ---
+  @property
+  def plugin_traits(self) -> PluginTraits:
+    """
+    Defines default capabilities.
+
+    Returns:
+        Default traits.
+    """
+    return PluginTraits()
+
+  @property
+  def definitions(self) -> Dict[str, StandardMap]:
+    """
+    Returns static definitions for math mappings.
+    Loaded dynamically from `frameworks/definitions/latex_dsl.json`.
+
+    Returns:
+        Mappings for equation logic.
+    """
+    return load_definitions("latex_dsl")
+
+  @property
+  def rng_seed_methods(self) -> List[str]:
+    """
+    No RNG logic.
+
+    Returns:
+        Empty list.
+    """
+    return []
+
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    """
+    No API to collect.
+
+    Args:
+        category: Ignored.
+
+    Returns:
+        Empty list.
+    """
+    return []
+
+  # --- Syntax Generation (No-Ops) ---
+
+  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+    """
+    Returns empty string to avoid polluting latex output with comments about devices.
+
+    Args:
+        device_type: Target device.
+        device_index: Optional device index.
+
+    Returns:
+        Empty string.
+    """
+    return ""
+
+  def get_device_check_syntax(self) -> str:
+    """
+    Returns generic boolean.
+
+    Returns:
+        "True".
+    """
+    return "True"
+
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """
+    Returns empty string.
+
+    Args:
+        rng_var: RNG variable name.
+        key_var: Key variable name.
+
+    Returns:
+        Empty string.
+    """
+    return ""
+
+  def get_serialization_imports(self) -> List[str]:
+    """
+    Empty imports.
+
+    Returns:
+        Empty list.
+    """
+    return []
+
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+    """
+    Returns empty string for IO.
+
+    Args:
+        op: Operation name.
+        file_arg: Filename argument.
+        object_arg: Optional object argument.
+
+    Returns:
+        Empty string.
+    """
+    return ""
+
+  # --- Weight Handling (No-Ops) ---
+
+  def get_weight_conversion_imports(self) -> List[str]:
+    """
+    Empty list.
+
+    Returns:
+        Empty list.
+    """
+    return []
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """
+    Returns comment code.
+
+    Args:
+        path_var: Variable name for path.
+
+    Returns:
+        Comment code literal.
+    """
+    return "# Weights not supported in LaTeX mode"
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    """
+    Identity.
+
+    Args:
+        tensor_var: Variable name.
+
+    Returns:
+        Argument as is.
+    """
+    return tensor_var
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """
+    Returns comment code.
+
+    Args:
+        state_var: Variable name for state.
+        path_var: Variable name for path.
+
+    Returns:
+        Comment code literal.
+    """
+    return "# Weights not supported in LaTeX mode"
+
+  # --- Documentation ---
+
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """
+    No wiring needed.
+
+    Args:
+        snapshot: Snapshot dict.
+    """
+    pass
+
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """
+    Returns None as I haven't documented this yet.
+
+    Args:
+        api_name (str): API name.
+
+    Returns:
+        None
+    """
+    del api_name
+    return None
+
+  def convert(self, data: Any) -> Any:
+    """
+    Returns string representation of data.
+
+    Args:
+        data: Input.
+
+    Returns:
+        Stringified input.
+    """
+    return str(data)
+
+  @classmethod
+  def get_example_code(cls) -> str:
+    """
+    Returns LaTeX equation example.
+
+    Returns:
+        TeX code.
+    """
+    return r"""\begin{DefModel}{ConvNet}
+    \Attribute{conv}{Conv2d}{in=1, out=32, k=3}
+    \Return{conv}
+\end{DefModel}"""
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """
+    Returns example TeX strings.
+
+    Returns:
+        Examples.
+    """
+    return {
+      "tier1_math": "y = |x| + z",
+      "tier2_neural": self.get_example_code(),
+      "tier3_extras": "% Extras ignored",
+    }
+
+  # --- Engine Factories ---
 
   def create_parser(self, code: str) -> LatexParser:
     """
-    Factory method to instantiate the LaTeX Parser.
-    Used by ASTEngine when `source="latex_dsl"`.
+    Factory for the ingest parser.
 
     Args:
-        code: The input latex source string.
+        code: Source code string.
 
     Returns:
-        LatexParser: Configured parser instance.
+        Instance of LatexParser.
     """
     return LatexParser(code)
 
   def create_emitter(self) -> LatexEmitter:
     """
-    Factory method to instantiate the LaTeX Emitter.
-    Used by ASTEngine when `target="latex_dsl"`.
+    Factory for the output generator.
 
     Returns:
-        LatexEmitter: Configured emitter instance.
+        Instance of LatexEmitter.
     """
     return LatexEmitter()
-
-  # --- Required Protocol Stubs ---
-
-  @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """No runtime discovery."""
-    return {}
-
-  @property
-  def test_config(self) -> Dict[str, str]:
-    """No physical tests generated for DSL."""
-    return {}
-
-  @property
-  def harness_imports(self) -> List[str]:
-    """No harness support."""
-    return []
-
-  def get_harness_init_code(self) -> str:
-    """No harness support."""
-    return ""
-
-  def get_to_numpy_code(self) -> str:
-    """Identity conversion."""
-    return "return data"
-
-  @property
-  def supported_tiers(self) -> List[SemanticTier]:
-    """Supports Neural ops."""
-    return [SemanticTier.NEURAL]
-
-  @property
-  def declared_magic_args(self) -> List[str]:
-    """None."""
-    return []
-
-  @property
-  def plugin_traits(self) -> PluginTraits:
-    """Defaults."""
-    return PluginTraits()
-
-  @property
-  def rng_seed_methods(self) -> List[str]:
-    """None."""
-    return []
-
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """No device support."""
-    return ""
-
-  def get_device_check_syntax(self) -> str:
-    """False."""
-    return "False"
-
-  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """None."""
-    return ""
-
-  def get_serialization_imports(self) -> List[str]:
-    """None."""
-    return []
-
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """None."""
-    return ""
-
-  def get_doc_url(self, api_name: str) -> Optional[str]:
-    """None."""
-    return None
-
-  def convert(self, data: Any) -> Any:
-    """Identity."""
-    return data
-
-  @classmethod
-  def get_example_code(cls) -> str:
-    """
-    Returns example LaTeX source.
-
-    Returns:
-        str: Source snippet.
-    """
-    return r"""\begin{DefModel}{ConvNet}
-    \Attribute{conv}{Conv2d}{in=1, out=32, k=3}
-    \Attribute{fc}{Linear}{in=..., out=10}
-    \Input{x}{[_]}
-    \StateOp{h}{conv}{x}{[_]}
-    \Op{a}{ReLU}{h}{[_]}
-    \StateOp{y}{fc}{a}{[_]}
-    \Return{y}
-\end{DefModel}"""
-
-  def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns map of examples."""
-    return {"tier2_neural": self.get_example_code()}
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """No API collection."""
-    return []
-
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """No wiring."""
-    pass

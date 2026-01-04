@@ -1,10 +1,8 @@
 """
 Integration Test Harness Generator.
 
-This module creates self-contained Python scripts for verifying transpilation accuracy.
-It dynamically extracts source code from the live system to ensure that generated
-harnesses support ALL registered frameworks (Torch, JAX, Keras, etc.) without
-hardcoding switch statements.
+Generates standalone verification scripts.
+Bundles fuzzer logic (including Hypothesis strategies).
 """
 
 import json
@@ -15,7 +13,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List
 
 from ml_switcheroo.testing.harness_generator_template import HARNESS_TEMPLATE
-from ml_switcheroo.testing.fuzzer import InputFuzzer
+from ml_switcheroo.testing.fuzzer.core import InputFuzzer
 from ml_switcheroo.utils.code_extractor import CodeExtractor
 from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, get_adapter
 
@@ -24,6 +22,7 @@ import ml_switcheroo.testing.fuzzer.generators
 import ml_switcheroo.testing.fuzzer.parser
 import ml_switcheroo.testing.fuzzer.heuristics
 import ml_switcheroo.testing.fuzzer.utils
+import ml_switcheroo.testing.fuzzer.strategies
 
 
 class HarnessGenerator:
@@ -46,21 +45,9 @@ class HarnessGenerator:
     target_fw: str = "jax",
     semantics: Optional[Dict[str, Any]] = None,
   ) -> None:
-    """
-    Writes the standalone verification script to disk.
-
-    Args:
-        source_file: Path to original source.
-        target_file: Path to transpiled result.
-        output_harness: Destination path for the generated script.
-        source_fw: Key of source framework (e.g. 'torch').
-        target_fw: Key of target framework (e.g. 'jax').
-        semantics: Optional dictionary of semantic definitions (for type hints).
-    """
-    # 1. Extract Fuzzer Logic & Dependencies
+    """Creates the verification harness file."""
     fuzzer_code = self._bundle_fuzzer_dependencies()
 
-    # 2. Serialize Hints
     hints_map = {}
     if semantics:
       for op_name, details in semantics.items():
@@ -73,27 +60,13 @@ class HarnessGenerator:
           hints_map[op_name] = func_hints
 
     hints_json = json.dumps(hints_map).replace("'", '"')
-
-    # 3. Generate Dynamic Adapter Shim
     adapter_shim = self._generate_adapter_shim()
 
-    # 4. Assemble Fuzzer Block
-    fuzzer_block = (
-      f"{adapter_shim}\n\n"
-      f"{fuzzer_code}\n\n"
-      "# Alias matching template expectation\n"
-      "class StandaloneFuzzer(InputFuzzer):\n"
-      "    pass\n"
-    )
+    fuzzer_block = f"{adapter_shim}\n\n{fuzzer_code}\n\nclass StandaloneFuzzer(InputFuzzer):\n    pass\n"
 
-    # 5. Build Dynamic Init Logic (Decoupling Step)
     imports_block, init_helpers_block, injection_logic_block = self._build_dynamic_init(target_fw)
-
-    # 6. Build Dynamic to_numpy() Logic (Result Normalization)
-    # We only need normalization logic for the source and target frameworks involved.
     to_numpy_block = self._build_result_normalization(source_fw, target_fw)
 
-    # 7. Populate Template
     script_content = HARNESS_TEMPLATE.format(
       source_path=source_file.resolve().as_posix(),
       target_path=target_file.resolve().as_posix(),
@@ -107,30 +80,28 @@ class HarnessGenerator:
       to_numpy_logic=to_numpy_block,
     )
 
-    # 8. Write to Disk
     output_harness.parent.mkdir(parents=True, exist_ok=True)
     with open(output_harness, "wt", encoding="utf-8") as f:
       f.write(script_content)
 
   def _bundle_fuzzer_dependencies(self) -> str:
     """
-    Extracts all helper functions required by InputFuzzer to allow it to run
-    standalone without importing ml_switcheroo modules.
-
-    It iterates through various fuzzer submodules (generators, parser, heuristics),
-    extracts their source code via inspection, and bundles them into a single string
-    to be injected into the harness template.
-
-    Returns:
-        str: A large block of Python source code containing all dependencies.
+    Extracts all helper functions required by InputFuzzer.
+    Injects Hypothesis and typing imports globally for the bundle.
     """
     deps = []
 
-    # Helper to extract all functions from a module
+    # Global imports required by the extracted code
+    # We must ensure all imports used by strategies.py and core.py types/logic are present
+    deps.append("import hypothesis.strategies as st")
+    deps.append("import hypothesis.extra.numpy as npst")
+    deps.append("import re")
+    deps.append("import numpy as np")
+    deps.append("from typing import Any, Dict, List, Optional, Tuple, Callable")
+
     def extract_module_functions(module):
       funcs = inspect.getmembers(module, inspect.isfunction)
       for name, func in funcs:
-        # Only extract functions actually defined in this module
         if func.__module__ == module.__name__:
           try:
             source = inspect.getsource(func)
@@ -138,64 +109,33 @@ class HarnessGenerator:
           except OSError:
             pass
 
-    # Extract Utils first (deps)
+    # Order matters slightly for resolution order of helpers
     extract_module_functions(ml_switcheroo.testing.fuzzer.utils)
-    # Extract Generators
+    extract_module_functions(ml_switcheroo.testing.fuzzer.strategies)
     extract_module_functions(ml_switcheroo.testing.fuzzer.generators)
-    # Extract Heuristics
     extract_module_functions(ml_switcheroo.testing.fuzzer.heuristics)
-    # Extract Parser
     extract_module_functions(ml_switcheroo.testing.fuzzer.parser)
 
-    # Extract Class
     fuzzer_class = self.extractor.extract_class(InputFuzzer)
 
     return "\n\n".join(deps + [fuzzer_class])
 
   def _build_dynamic_init(self, target_fw: str) -> tuple[str, str, str]:
-    """
-    Queries the target adapter to construct framework-specific initialization logic.
-
-    This includes imports (e.g. `import jax`), init helpers (e.g. PRNG key creation),
-    and parameter injection logic (e.g. checking for 'rngs' argument).
-
-    Args:
-        target_fw: The framework key to generate initialization code for.
-
-    Returns:
-        tuple[str, str, str]: A tuple containing:
-            - imports_str: Framework imports.
-            - init_code: Helper function definitions.
-            - final_logic: The injection logic block for the loop body.
-    """
     adapter = get_adapter(target_fw)
-
-    # Defaults (Empty)
     if not adapter:
       return "", "", "pass"
 
-    # A. Imports
     imports = getattr(adapter, "harness_imports", [])
     imports_str = "\n".join(imports)
-
-    # B. Helper Code
     init_code = getattr(adapter, "get_harness_init_code", lambda: "")()
-
-    # Extract function name from the code string (e.g. def _make_jax_key)
     match = re.search(r"def\s+([a-zA-Z0-9_]+)\s*\(", init_code)
     helper_name = match.group(1) if match else None
-
-    # C. Injection Logic (The loop body)
     magic_args = getattr(adapter, "declared_magic_args", [])
 
     injection_lines = []
-
     if magic_args and helper_name:
-      # Construct dispatch: if parameter matches any magic arg, call helper
       quoted_args = [f'"{a}"' for a in magic_args]
       list_str = "[" + ", ".join(quoted_args) + "]"
-
-      # Indentation matches context in template logic
       injection_lines.append(f"val = None")
       injection_lines.append(f"if tp in {list_str}:")
       injection_lines.append(f"    val = {helper_name}(seed=42)")
@@ -211,60 +151,28 @@ class HarnessGenerator:
     return imports_str, init_code, final_logic
 
   def _build_result_normalization(self, source_fw: str, target_fw: str) -> str:
-    """
-    Constructs the `to_numpy` logic by aggregating snippets from adapters.
-
-    This ensures that the result verification can convert tensors from any registered
-    framework back to NumPy for numeric comparison, relying solely on the Protocol.
-
-    Args:
-        source_fw: The source framework key.
-        target_fw: The target framework key.
-
-    Returns:
-        str: A string body of code to be injected into `to_numpy`.
-    """
     blocks = []
-
-    # We collect configs for both Source and Target to ensure full coverage
-    # (e.g. if we verify Torch -> JAX, we need to convert both Torch Output and JAX output)
     unique_fws = set([source_fw, target_fw])
-
-    # Expand flavours implicit logic
     if "flax_nnx" in unique_fws:
       unique_fws.add("jax")
 
     for fw in unique_fws:
       adapter = get_adapter(fw)
       code = None
-
-      # Try new protocol method
       if adapter and hasattr(adapter, "get_to_numpy_code"):
         try:
           code = adapter.get_to_numpy_code()
         except Exception:
           pass
-
       if code:
-        # Indent consistency for injection
         indented = textwrap.indent(code, "    ")
         blocks.append(f"# Framework: {fw}\n{indented}")
 
     return "\n    ".join(blocks)
 
   def _generate_adapter_shim(self) -> str:
-    """
-    Introspects registered frameworks to build the `get_adapter` function shim.
-
-    This shim allows the generated script to perform basic type conversion (e.g.
-    Torch Tensor -> Numpy) without importing the actual `ml_switcheroo` package
-    or the heavy framework libraries unless they are actually present.
-
-    Returns:
-        str: Source code for the `get_adapter` function to be embedded in the harness.
-    """
     shim_lines = [
-      "# Shim for missing ml_switcheroo.frameworks.get_adapter",
+      "# Shim for missing get_adapter",
       "def get_adapter(framework):",
       "    class GenericAdapter:",
       "        def convert(self, data):",
@@ -276,13 +184,10 @@ class HarnessGenerator:
       "                pass",
       "",
     ]
-
     frameworks = sorted(_ADAPTER_REGISTRY.keys())
     first = True
     for fw_name in frameworks:
       adapter_cls = _ADAPTER_REGISTRY[fw_name]
-
-      # Skip if abstract/incomplete
       if not hasattr(adapter_cls, "convert"):
         continue
 
@@ -300,17 +205,12 @@ class HarnessGenerator:
           break
 
       body_lines = lines[body_start:]
-      if not body_lines:
-        continue
-
       condition_kw = "if" if first else "elif"
       shim_lines.append(f"            {condition_kw} framework == '{fw_name}':")
-
       base_indent = " " * 16
       body_str = textwrap.dedent("\n".join(body_lines))
       indented_body = textwrap.indent(body_str, base_indent)
       shim_lines.append(indented_body)
-
       first = False
 
     shim_lines.append("")

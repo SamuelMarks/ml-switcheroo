@@ -114,6 +114,10 @@ class StandardMap(BaseModel):
     default=None,
     description="Custom error message to display if this mapping fails or is explicitly unsupported.",
   )
+  layout_map: Optional[Dict[str, str]] = Field(
+    default=None,
+    description="Layout permutation map for tensors (e.g. 'NCHW->NHWC').",
+  )
 
 
 class FrameworkAdapter(Protocol):
@@ -277,7 +281,7 @@ class FrameworkAdapter(Protocol):
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """
-    Generates code for save/load operations.
+    Generates code for save/load operations (Model Persistence).
 
     Args:
         op (str): 'save' or 'load'.
@@ -288,6 +292,45 @@ class FrameworkAdapter(Protocol):
 
   def get_serialization_imports(self) -> List[str]:
     """Returns list of imports required for serialization."""
+    ...
+
+  # --- Weight Handling Logic (New) ---
+
+  def get_weight_conversion_imports(self) -> List[str]:
+    """
+    Returns list of imports required for the generated weight migration script.
+    """
+    ...
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """
+    Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
+    The `raw_state` should be a dict-like object where keys are strings (e.g. 'layer.weight').
+
+    Args:
+        path_var: The name of the variable holding the file path.
+    """
+    ...
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    """
+    Returns a python expression string that converts `tensor_var` from framework tensor to numpy array.
+    Used within the migration loop to normalize data before permutation.
+
+    Args:
+        tensor_var: The variable name of the framework tensor.
+    """
+    ...
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """
+    Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays)
+    to `path_var`. The adapter is responsible for any restructuring (unflattening) required.
+
+    Args:
+        state_var: The variable containing the flat state dictionary.
+        path_var: The variable containign the output path.
+    """
     ...
 
   def get_doc_url(self, api_name: str) -> Optional[str]:

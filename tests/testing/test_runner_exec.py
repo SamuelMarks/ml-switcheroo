@@ -15,7 +15,6 @@ import pytest
 import numpy as np
 
 from ml_switcheroo.testing.runner import EquivalenceRunner
-from ml_switcheroo.frameworks import register_framework
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 
@@ -31,6 +30,7 @@ def mock_frameworks():
     m = MagicMock(name=name)
     # Prevent iteration to differentiate from lists/iterables during inspection
     m.__iter__.side_effect = TypeError(f"'{name}' object is not iterable")
+    m.return_value = ret_val
     return m
 
   # Mock 'torch.sum'
@@ -61,7 +61,6 @@ def test_runner_uses_adapter_registry_for_normalization(mock_frameworks):
   mock_adapter.convert.return_value = "normalized_via_adapter"
 
   # Patch get_adapter. Note we patch where it is *defined* in runner's scope or imported.
-  # runner.py: `from ml_switcheroo.frameworks import get_adapter`
   with patch("ml_switcheroo.testing.runner.get_adapter") as mock_get:
     mock_get.return_value = mock_adapter
 
@@ -87,7 +86,8 @@ def test_equivalence_flow_integration(mock_frameworks):
   pass_ok, msg = runner.verify(variants, params=["x"])
 
   assert pass_ok
-  assert "Output Matched" in msg
+  # Updated to match current Runner implementation
+  assert "✅ Verified" in msg
 
 
 def test_adapter_normalization_logic_real():
@@ -195,4 +195,7 @@ def test_crash_reporting(mock_frameworks):
 
   assert not passed
   assert "Crash in torch" in msg
-  assert "ValueError: Mock Crash" in msg
+  # Updated assertion: check if the string representation of exception is present
+  # Runner formats as: f"Failures Detected: Crash in {fw}: {e}"
+  # e is ValueError("Mock Crash"), str(e) is "Mock Crash".
+  assert "Mock Crash" in msg

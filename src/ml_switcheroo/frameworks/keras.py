@@ -9,10 +9,12 @@ It handles:
 2.  **Layers**: Mapping `keras.layers.*`.
 3.  **Discovery**: Runtime introspection of the Keras API surface.
 4.  **Ghost Mode**: Silent fallback when Keras is not installed.
+5.  **Weight Migration**: Loading/saving .h5 or .keras files (stubs provided).
 """
 
 import inspect
 import logging
+import textwrap
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 try:
@@ -396,6 +398,61 @@ class KerasAdapter:
       return f"keras.saving.load_model({file_arg})"
     return ""
 
+  # --- Weight Handling Logic ---
+
+  def get_weight_conversion_imports(self) -> List[str]:
+    """
+    Returns imports required for the generated weight migration script.
+    """
+    return ["import keras", "import numpy as np"]
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """
+    Returns python code to load a checkpoint.
+    Stub implemented as Keras models contain structure + weights, making raw dict handling tricky.
+    """
+    return textwrap.dedent(
+      f"""
+            try:
+                # Keras weights are usually saved with .weights.h5 or as full model
+                # This stub attempts to load if it's a full model file, extracting weights
+                model = keras.models.load_model({path_var}, compile=False)
+                raw_state = {{w.name: w.numpy() for w in model.weights}}
+            except Exception as e:
+                print(f"Warning: Failed to load Keras model ({{e}}). Assuming raw h5 weights file.")
+                # Fallback to h5py if available for raw weights
+                try:
+                    import h5py
+                    f = h5py.File({path_var}, 'r')
+                    raw_state = {{}}
+                    def visit_func(name, node):
+                        if isinstance(node, h5py.Dataset):
+                            raw_state[name] = node[()]
+                    f.visititems(visit_func)
+                except ImportError:
+                    print("h5py not installed, cannot load raw weights.")
+                    raw_state = {{}}
+            """
+    )
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    """
+    Returns python expression string that converts `tensor_var` from Keras tensor to numpy array.
+    """
+    return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """
+    Returns warning that saving raw dictionary to Keras checkpoint is complex without model definition.
+    """
+    return textwrap.dedent(
+      """
+            print("WARNING: Saving raw dictionary to Keras checkpoint is not directly supported without model structure.")
+            print("To save weights for Keras, instantiate the model and use `model.set_weights()`.")
+            print(f"Weights available in converted_state variable for manual assignment.")
+            """
+    )
+
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """
     Syntax for device scoping.
@@ -467,7 +524,7 @@ class KerasAdapter:
         Dict[str, str]: Map of tiers to examples.
     """
     return {
-      "tier1_math": "import keras\nfrom keras import ops\n\ndef math_ops(x, y):\n  # Tier 1\n  a = ops.abs(x)\n  b = ops.add(a, y)\n  return ops.mean(b)\n",
+      "tier1_math": "import keras\nfrom keras import ops\n\ndef math_ops(x, y):\n  # Tier 1: Using keras.ops for backend-agnostic math\n  a = ops.abs(x)\n  b = ops.add(a, y)\n  return ops.mean(b)\n",
       "tier2_neural": 'import keras\nfrom keras import layers\n\ndef build_model(input_shape):\n  inputs = keras.Input(shape=input_shape)\n  x = layers.Conv2D(32, 3, activation="relu")(inputs)\n  x = layers.Flatten()(x)\n  outputs = layers.Dense(10)(x)\n  return keras.Model(inputs, outputs)\n',
       "tier3_extras": "import keras\nfrom keras import random\n\ndef generate_noise(shape):\n  seed_gen = random.SeedGenerator(42)\n  return random.normal(shape, seed=seed_gen)\n",
     }
