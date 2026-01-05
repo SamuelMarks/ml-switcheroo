@@ -6,15 +6,15 @@ ml-switcheroo 🔄🦘
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](https://opensource.org/license/apache-2-0)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+[![Interactive docs](https://img.shields.io/badge/interactive-docs-orange)](https://samuelmarks.github.io/ml-switcheroo/)
 
-**ml-switcheroo** is a rigorous AST-based transpiler designed to convert Deep Learning code between frameworks (e.g., *
-*PyTorch** $\leftrightarrow$ **JAX**, **Keras** $\to$ **TensorFlow**) without hallucination.
+**ml-switcheroo** is a rigorous AST-based transpiler designed to convert Deep Learning code between frameworks (e.g., **PyTorch** $\leftrightarrow$ **JAX**, **Keras** $\to$ **TensorFlow**) without hallucination.
 
 It uses a **Hub-and-Spoke** architecture to solve the $O(N^2)$ translation problem. Instead of writing translators for
 every pair of frameworks, `ml-switcheroo` maps all frameworks to a central **Abstract Standard** (Hub). This allows
 for "Zero-Edit" support for new frameworks via isolated JSON snapshots (Spokes).
 
---- 
+---
 
 ## 🚀 Key Features
 
@@ -31,60 +31,153 @@ for "Zero-Edit" support for new frameworks via isolated JSON snapshots (Spokes).
 * **🧬 Structural Rewriting**: Handles complex transformations for class hierarchies (e.g., `nn.Module` $\leftrightarrow$
   `flax.nnx.Module`), random number threading, and state management.
 
---- 
+---
 
 ## 🏗️ Architecture
 
 Code is parsed into an Abstract Syntax Tree (AST), analyzed for safety, pivoted through the Abstract Standard, and
 reconstructed for the target framework.
 
-<!-- prettier-ignore -->
-
 ```mermaid
 graph TD
-%% Theme
-    classDef default font-family: 'Google Sans Normal', color: #20344b, stroke: #20344b, stroke-width: 1px;
-    classDef source fill: #ea4335, stroke: #20344b, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Medium', rx: 5px;
-    classDef engine fill: #4285f4, stroke: #20344b, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Medium', rx: 5px;
-    classDef hub fill: #f9ab00, stroke: #20344b, stroke-width: 2px, color: #20344b, font-family: 'Google Sans Medium', rx: 5px;
-    classDef spoke fill: #fff4c7, stroke: #f9ab00, stroke-width: 2px, stroke-dasharray: 5 5, color: #20344b, font-family: 'Google Sans Medium', rx: 5px;
-    classDef target fill: #34a853, stroke: #20344b, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Medium', rx: 5px;
-    classDef codeBlock fill: #ffffff, stroke: #20344b, stroke-width: 1px, font-family: 'Roboto Mono Normal', text-align: left, font-size: 12px;
-    SRC_HEADER("<b>0. Source Code</b><br/>(e.g., PyTorch)"):::source
-    PARSER("<b>1. Analysis Phase</b><br/>Parsing, Purity Check,<br/>Lifecycle Scans"):::engine
-    SRC_HEADER --> PARSER
-%% The Knowledge Base
-    subgraph KB [Distributed Knowledge Base]
+    %% =========================================================================
+    %%  DESIGN SYSTEM & PALETTE
+    %% =========================================================================
+    
+    %% Colors
+    %% Blue 500: #4285f4 | Green 500: #34a853 | Yellow 600: #f9ab00 | Red 500: #ea4335
+    %% Navy: #20344b | White: #ffffff 
+    %% Halftone Blue: #57caff | Halftone Green: #5cdb6d 
+    %% Halftone Yellow: #ffd427 | Halftone Red: #ff7daf
+
+    %% Fonts
+    classDef default font-family:'Google Sans Normal',color:#20344b,stroke:#20344b,stroke-width:1px;
+    classDef title font-family:'Google Sans Medium',font-size:12px,color:#ffffff,stroke-width:0px,rx:4px;
+    classDef code font-family:'Roboto Mono Normal',font-size:11px,text-align:left,fill:#ffffff,color:#20344b,stroke:#20344b,stroke-dasharray: 2 2,rx:0;
+    classDef db font-family:'Google Sans Normal',font-size:11px,fill:#fff4c7,stroke:#f9ab00,stroke-width:1px,rx:2px;
+
+    %% Node Types
+    classDef src fill:#ea4335,color:#ffffff;
+    classDef eng fill:#4285f4,color:#ffffff;
+    classDef hub fill:#f9ab00,color:#20344b;
+    classDef plug fill:#57caff,color:#20344b;
+    classDef tgt fill:#34a853,color:#ffffff;
+    classDef ghost fill:#20344b,color:#ffffff,stroke-dasharray: 2 2;
+
+    %% =========================================================================
+    %%  1. SOURCE INPUT
+    %% =========================================================================
+    
+    S_HEAD("<b>1. Source Code (PyTorch)</b>"):::src
+    S_HEAD:::title
+
+    %% Syntax Highlighted HTML Label
+    S_CODE("
+    <span style='color:#4285f4'>import</span> torch.nn <span style='color:#4285f4'>as</span> nn<br/>
+    <span style='color:#4285f4'>class</span> <span style='color:#ea4335'>Net</span>(nn.Module):<br/>
+    &nbsp;&nbsp;<span style='color:#4285f4'>def</span> <span style='color:#f9ab00'>__init__</span>(<span style='color:#57caff'>self</span>):<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#57caff'>self</span>.fc = nn.Linear(<span style='color:#34a853'>20</span>, <span style='color:#34a853'>30</span>)<br/>
+    "):::code
+
+    S_HEAD --- S_CODE
+
+    %% =========================================================================
+    %%  2. INGESTION & ANALYSIS
+    %% =========================================================================
+
+    P_LIBCST("<b>LibCST Parser</b><br/><i>Generates AST</i>"):::eng
+    P_LIBCST:::title
+    
+    S_CODE --> P_LIBCST
+
+    %% Ghost / Live Context
+    subgraph CONTEXT ["Reflection Context"]
         direction TB
-        SPECS[("<b>The Hub (Specs)</b><br/>semantics/*.json<br/><i>Abstract Operations</i>")]:::hub
-        MAPS[("<b>The Spokes (Overlays)</b><br/>snapshots/*_mappings.json<br/><i>Framework Variants</i>")]:::spoke
-        MAPS -.->|" Hydrates "| SPECS
+        GHOST("<b>Ghost Snapshot</b><br/><i>torch_v2.1.json</i>"):::ghost
+        LIVE("<b>Live Library</b><br/><i>import torch</i>"):::ghost
     end
 
-    REWRITER("<b>2. Pivot Rewriter</b><br/><i>Semantic Translation</i>"):::engine
-    KB -.->|" Lookup API "| REWRITER
-    PARSER --> REWRITER
-    PIVOT_LOGIC("<b>1. Ingest:</b> torch.abs(x)<br/><b>2. Pivot:</b> Abs(x) [Standard]<br/><b>3. Project:</b> jnp.abs(x)"):::codeBlock
-    REWRITER --- PIVOT_LOGIC
-    FIXER("<b>3. Refinement</b><br/>Import Injection & Pruning"):::engine
-    PIVOT_LOGIC --> FIXER
-    TGT_HEADER("<b>4. Target Code</b><br/>(e.g., JAX/Flax)"):::target
-    FIXER --> TGT_HEADER
+    GHOST -.->|" API Signatures "| P_LIBCST
+    LIVE -.-> |" Introspection "| P_LIBCST
+
+    %% =========================================================================
+    %%  3. SEMANTIC PIVOT (The Hub)
+    %% =========================================================================
+
+    HUB_HEAD("<b>Semantics Manager</b>"):::hub
+    HUB_HEAD:::title
+    P_LIBCST --> HUB_HEAD
+
+    %% The Knowledge Base (JSONs)
+    JSON_DB[("<b>Knowledge Base</b><br/><i>semantics/k_neural.json</i><br/><i>snapshots/jax_map.json</i>")]:::db
+    JSON_DB -.->|" 1. Lookup 'Linear'<br/>2. Read Constraints "| HUB_HEAD
+
+    %% Intermediate Representation
+    ABS_NODE("
+    <b>Abstract Operation found:</b><br/>
+    Op: <span style='color:#f9ab00'>Linear</span><br/>
+    Tier: <span style='color:#ea4335'>Neural</span> (Stateful)<br/>
+    Args: {in: 20, out: 30}<br/>
+    "):::code
+    HUB_HEAD --- ABS_NODE
+
+    %% =========================================================================
+    %%  4. REWRITING & PLUGINS
+    %% =========================================================================
+
+    REWRITE("<b>Pivot Rewriter</b>"):::eng
+    REWRITE:::title
+    ABS_NODE --> REWRITE
+
+    %% Plugin Logic
+    subgraph PLUGINS ["Extension System"]
+        target_trait("<b>Target Traits (JAX)</b><br/>requires_explicit_rng: <span style='color:#34a853'>True</span>"):::db
+        
+        HOOK_DEF("<b>Plugin: rng_threading</b><br/><i>Injects 'rngs' arg into<br/>stateful layer calls</i>"):::plug
+        HOOK_DEF:::title
+        
+        target_trait -.-> HOOK_DEF
+    end
+
+    REWRITE <-->|" AST Transformation "| HOOK_DEF
+
+    %% =========================================================================
+    %%  5. OUTPUT GENERATION
+    %% =========================================================================
+
+    FIXER("<b>Import Fixer</b><br/><i>Resolves 'nnx' alias</i>"):::plug
+    FIXER:::title
+    REWRITE --> FIXER
+
+    T_HEAD("<b>Target Code (Flax NNX)</b>"):::tgt
+    T_HEAD:::title
+    FIXER --> T_HEAD
+
+    %% Final Code
+    T_CODE("
+    <span style='color:#4285f4'>from</span> flax <span style='color:#4285f4'>import</span> nnx<br/>
+    <span style='color:#4285f4'>class</span> <span style='color:#34a853'>Net</span>(nnx.Module):<br/>
+    &nbsp;&nbsp;<span style='color:#4285f4'>def</span> <span style='color:#f9ab00'>__init__</span>(<span style='color:#57caff'>self</span>, <span style='color:#ea4335'>rngs</span>: nnx.Rngs):<br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#90a4ae'># Hook injected 'rngs'</span><br/>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#57caff'>self</span>.fc = nnx.Linear(<span style='color:#34a853'>20</span>, <span style='color:#34a853'>30</span>, <span style='color:#ea4335'>rngs=rngs</span>)<br/>
+    "):::code
+
+    T_HEAD --- T_CODE
 ```
 
---- 
+---
 
 ## 📦 Installation
 
 ```bash
 # Install form source
-pip install . 
+pip install .
 
-# Install with testing dependencies (for running the fuzzer/verification) 
-pip install ".[test]" 
+# Install with testing dependencies (for running the fuzzer/verification)
+pip install ".[test]"
 ```
 
---- 
+---
 
 ## 🛠️ CLI Usage
 
@@ -95,14 +188,14 @@ The `ml_switcheroo` tool provides a suite of commands for conversion, auditing, 
 Convert a file or directory from one framework to another.
 
 ```bash
-# Convert a PyTorch model to JAX (Flax NNX) 
-ml_switcheroo convert ./models/resnet.py \ 
-    --source torch \ 
-    --target jax \ 
+# Convert a PyTorch model to JAX (Flax NNX)
+ml_switcheroo convert ./models/resnet.py \
+    --source torch \
+    --target jax \
     --out ./resnet_jax.py
 
 # Convert an entire directory, enabling strict mode
-# Strict mode fails if an API mapping is missing, rather than passing it through. 
+# Strict mode fails if an API mapping is missing, rather than passing it through.
 ml_switcheroo convert ./src/ --out ./dst/ --strict
 ```
 
@@ -148,21 +241,21 @@ Inject new operations into the Knowledge Base using declarative YAML files.
 ml_switcheroo define my_ops.yaml
 ```
 
---- 
+---
 
 ## ✅ API Support Matrix
 
 Supported Frameworks via **Zero-Edit Adapters**:
 
-| Framework      |   Status   | Specialized Features Supported                                         | 
-|:---------------|:----------:|:-----------------------------------------------------------------------| 
-| **PyTorch**    | 🟢 Primary | Source/Target, `nn.Module`, `functional`, Optimizers, DataLoaders      | 
-| **JAX / Flax** | 🟢 Primary | Source/Target (`flax.nnx`), `vmap`, `grad`, `jit`, Orbax Checkpointing | 
-| **TensorFlow** |  🔵 Beta   | Keras Layer conversion, `tf.data`, IO operations                       | 
-| **NumPy**      | 🟡 Stable  | Array operations, fallback target for pure math                        | 
-| **Keras 3**    |  🔵 Beta   | Multi-backend layers, `keras.ops` math                                 | 
-| **Apple MLX**  |  🔵 Beta   | `mlx.nn` layers, `mlx.core` array ops, Optimizers                      | 
-| **PaxML**      |  ⚪ Alpha   | `praxis` layer structure translation                                   | 
+| Framework      |   Status   | Specialized Features Supported                                         |
+|:---------------|:----------:|:-----------------------------------------------------------------------|
+| **PyTorch**    | 🟢 Primary | Source/Target, `nn.Module`, `functional`, Optimizers, DataLoaders      |
+| **JAX / Flax** | 🟢 Primary | Source/Target (`flax.nnx`), `vmap`, `grad`, `jit`, Orbax Checkpointing |
+| **TensorFlow** |  🔵 Beta   | Keras Layer conversion, `tf.data`, IO operations                       |
+| **NumPy**      | 🟡 Stable  | Array operations, fallback target for pure math                        |
+| **Keras 3**    |  🔵 Beta   | Multi-backend layers, `keras.ops` math                                 |
+| **Apple MLX**  |  🔵 Beta   | `mlx.nn` layers, `mlx.core` array ops, Optimizers                      |
+| **PaxML**      |  ⚪ Alpha   | `praxis` layer structure translation                                   |
 
 To view the live compatibility table for your installed version:
 
@@ -170,7 +263,7 @@ To view the live compatibility table for your installed version:
 ml_switcheroo matrix
 ```
 
---- 
+---
 
 ## 🧠 Advanced Capabilities
 
@@ -198,7 +291,7 @@ The **Import Fixer** does not just swap strings; it analyzes usage logic:
 * Injects required target imports (`import jax.numpy as jnp`) only if referenced.
 * Handles alias conflicts (`import torch as t`).
 
---- 
+---
 
 ## 🔌 Extensibility
 
@@ -208,15 +301,16 @@ ml-switcheroo is designed to be extended without modifying the core engine.
    recommended way to add missing functionality.
 
    ```yaml
-   operation: "Erf" 
-   std_args: [ "input" ] 
-   variants: 
-     torch: { api: "torch.erf" } 
-     jax: { api: "jax.lax.erf" } 
+   operation: "Erf"
+   std_args: [ "input" ]
+   variants:
+     torch: { api: "torch.erf" }
+     jax: { api: "jax.lax.erf" }
    ```
-   See [EXTENDING_WITH_DSL.md](EXTENDING_WITH_DSL.md) for the full guide. Alternative to the YAML DSL you can manually update:
+   See [EXTENDING_WITH_DSL.md](EXTENDING_WITH_DSL.md) for the full guide. Alternative to the YAML DSL you can manually
+   update:
     - `src/ml_switcheroo/semantics/standards_internal.py` and
-    - `src/ml_switcheroo/frameworks/*.py` (for torch, mlx, tensorflow, jax, etc.)
+    - `src/ml_switcheroo/frameworks/definitions/*.json` (for torch, mlx, tensorflow, jax, etc.)
 
 2. **Add a Framework**: Create a class inheriting `FrameworkAdapter` in `src/ml_switcheroo/frameworks/`.
 3. **Add Logic**: Write a localized hook in `src/ml_switcheroo/plugins/` (e.g., for custom layer rewrites like
@@ -224,8 +318,8 @@ ml-switcheroo is designed to be extended without modifying the core engine.
 
 See [EXTENDING.md](EXTENDING.md) for architectural details on Adapters and Plugins.
 
---- 
+---
 
 ## License
 
-[Apache-2.0](LICENSE) 
+[Apache-2.0](LICENSE)
