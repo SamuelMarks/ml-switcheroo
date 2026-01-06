@@ -29,28 +29,28 @@ import ml_switcheroo.frameworks.latex_dsl
 
 # A complete ConvNet definition in MIDL LaTeX
 # Uses positional argument mapping (arg_0, arg_1) defined in frameworks/latex_dsl.py
-LATEX_SOURCE_CONVNET = r"""
-\documentclass[tikz]{standalone}
-\begin{DefModel}{ConvNet}
-    % arg_0=in_channels, arg_1=out_channels, arg_2=kernel_size
-    \Attribute{conv}{Conv2d}{arg_0=1, arg_1=32, arg_2=3}
-    
-    % arg_0=in_features, arg_1=out_features
-    \Attribute{fc}{Linear}{arg_0=128, arg_1=10}
-    
-    % Input tensor
-    \Input{x}{[B, 1, 28, 28]}
-
-    % Forward Pass
-    \StateOp{h1}{conv}{x}{[_]}
-    \Op{h2}{relu}{h1}{[_]}
-    
-    % Flatten: arg_0=start_dim
-    \Op{flat}{Flatten}{h2, arg_0=1}{[_]}
-    
-    \StateOp{out}{fc}{flat}{[_]}
-    \Return{out}
-\end{DefModel}
+LATEX_SOURCE_CONVNET = r"""  
+\documentclass[tikz]{standalone}  
+\begin{DefModel}{ConvNet}  
+    % arg_0=in_channels, arg_1=out_channels, arg_2=kernel_size  
+    \Attribute{conv}{Conv2d}{arg_0=1, arg_1=32, arg_2=3}  
+      
+    % arg_0=in_features, arg_1=out_features  
+    \Attribute{fc}{Linear}{arg_0=128, arg_1=10}  
+      
+    % Input tensor  
+    \Input{x}{[B, 1, 28, 28]}  
+  
+    % Forward Pass  
+    \StateOp{h1}{conv}{x}{[_]}  
+    \Op{h2}{relu}{h1}{[_]}  
+      
+    % Flatten: arg_0=start_dim  
+    \Op{flat}{Flatten}{h2, arg_0=1}{[_]}  
+      
+    \StateOp{out}{fc}{flat}{[_]}  
+    \Return{out}  
+\end{DefModel}  
 """
 
 # --- Fixtures ---
@@ -147,15 +147,15 @@ def test_latex_to_torch_architecture_conversion(hydrated_semantics):
 
 
 def test_missing_mapping_fails_strict_mode(hydrated_semantics):
-  """
+  r"""
   Verifies that if LaTeX uses an unknown operation (e.g. \Attribute{x}{UnknownOp}),
   strict mode catches it.
   """
-  bad_source = r"""
-    \documentclass{standalone}
-    \begin{DefModel}{BadNet}
-        \Attribute{x}{UnknownLayer}{arg_0=1}
-    \end{DefModel}
+  bad_source = r"""  
+    \documentclass{standalone}  
+    \begin{DefModel}{BadNet}  
+        \Attribute{x}{UnknownLayer}{arg_0=1}  
+    \end{DefModel}  
     """
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="torch", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)
@@ -171,15 +171,15 @@ def test_argument_value_mapping(hydrated_semantics):
   """
   Verify that string values in LaTeX config are preserved.
   """
-  source = r"""
-    \documentclass{standalone}
-    \begin{DefModel}{KeywordNet}
-        % Using direct key-value pairs supported by parser
-        \Attribute{drop}{Dropout}{p=0.5}
-        \Input{x}{_}
-        \StateOp{y}{drop}{x}{_}
-        \Return{y}
-    \end{DefModel}
+  source = r"""  
+    \documentclass{standalone}  
+    \begin{DefModel}{KeywordNet}  
+        % Using direct key-value pairs supported by parser  
+        \Attribute{drop}{Dropout}{p=0.5}  
+        \Input{x}{_}  
+        \StateOp{y}{drop}{x}{_}  
+        \Return{y}  
+    \end{DefModel}  
     """
 
   config = RuntimeConfig(source_framework="latex_dsl", target_framework="torch", strict_mode=False)

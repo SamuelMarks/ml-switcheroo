@@ -108,7 +108,7 @@ def test_edge_rendering_with_trivia():
     leading_trivia=[TriviaNode("\n    ")],
   )
   text = edge.to_text()
-  assert "\n    \draw" in text
+  assert r"\n    \draw" in text
 
 
 def test_graph_composition():

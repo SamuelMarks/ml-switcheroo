@@ -1,4 +1,4 @@
-"""
+r"""
 Importer for StableHLO Specification (OpenXLA).
 
 This module parses the official StableHLO Markdown specifications (spec.md),
