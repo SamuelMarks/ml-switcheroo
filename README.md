@@ -56,7 +56,7 @@ flowchart TD
         LaTeX
     end
 
-    subgraph L1 [Level 1: High-Level Frameworks]
+    subgraph L1 [Level 1: High-Level]
         direction LR
         PyTorch
         MLX
@@ -66,13 +66,13 @@ flowchart TD
         Pax
     end
 
-    subgraph L2 [Level 2: Numerical Foundation]
+    subgraph L2 [Level 2: Numeric only]
         direction LR
         JAX
         NumPy
     end
 
-    subgraph L3 [Level 3: Intermediate Representation]
+    subgraph L3 [Level 3: Standard IR]
         direction LR
         StableHLO[Stable HLO]
         MLIR

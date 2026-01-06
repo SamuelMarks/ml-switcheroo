@@ -3,6 +3,9 @@ Internal Standards Definition (Hub of the Knowledge Base).
 
 This module defines the "Golden Set" of abstract operations (The Hub).
 It defines the **Abstract Schema**: Standard argument names (`std_args`) and docstrings.
+
+It does **NOT** contain implementation details (variants).
+Implementations must be defined in Framework Adapters or Snapshot Overlay files.
 """
 
 from ml_switcheroo.core.dsl import OpType
@@ -123,9 +126,18 @@ MATH_OPS = {
     "description": "Takes LongTensor with index values of shape (*) and returns a tensor of shape (*, num_classes).",
     "std_args": ["tensor", "num_classes"],
   },
-  "max": {"description": "Element-wise maximum or reduction.", "std_args": ["x"]},
-  "min": {"description": "Element-wise minimum or reduction.", "std_args": ["x"]},
-  "relu": {"description": "Rectified Linear Unit.", "std_args": ["x"]},
+  "max": {
+    "description": "Element-wise maximum or reduction.",
+    "std_args": ["x"],
+  },
+  "min": {
+    "description": "Element-wise minimum or reduction.",
+    "std_args": ["x"],
+  },
+  "relu": {
+    "description": "Rectified Linear Unit.",
+    "std_args": ["x"],
+  },
   "TorchFunctional": {
     "description": "Abstract Functional Namespace (e.g. F in torch.nn.functional)",
     "std_args": [],
@@ -139,16 +151,55 @@ MATH_OPS = {
   "UInt8": {"description": "8-bit unsigned integer type (Byte).", "std_args": []},
   "Bool": {"description": "Boolean type.", "std_args": []},
   "size": {"description": "Get tensor shape", "std_args": []},
-  "data_ptr": {"description": "Get valid data pointer or buffer access.", "std_args": []},
-  "CastFloat": {"description": "Cast tensor to float32", "std_args": ["x"], "metadata": {"target_type": "Float32"}},
-  "CastDouble": {"description": "Cast tensor to float64", "std_args": ["x"], "metadata": {"target_type": "Float64"}},
-  "CastHalf": {"description": "Cast tensor to float16", "std_args": ["x"], "metadata": {"target_type": "Float16"}},
-  "CastLong": {"description": "Cast tensor to int64", "std_args": ["x"], "metadata": {"target_type": "Int64"}},
-  "CastInt": {"description": "Cast tensor to int32", "std_args": ["x"], "metadata": {"target_type": "Int32"}},
-  "CastShort": {"description": "Cast tensor to int16", "std_args": ["x"], "metadata": {"target_type": "Int16"}},
-  "CastByte": {"description": "Cast tensor to uint8", "std_args": ["x"], "metadata": {"target_type": "UInt8"}},
-  "CastBool": {"description": "Cast tensor to bool", "std_args": ["x"], "metadata": {"target_type": "Bool"}},
-  "CastChar": {"description": "Cast tensor to int8/char", "std_args": ["x"], "metadata": {"target_type": "Int8"}},
+  "data_ptr": {
+    "description": "Get valid data pointer or buffer access.",
+    "std_args": [],
+  },
+  "CastFloat": {
+    "description": "Cast tensor to float32",
+    "std_args": ["x"],
+    "metadata": {"target_type": "Float32"},
+  },
+  "CastDouble": {
+    "description": "Cast tensor to float64",
+    "std_args": ["x"],
+    "metadata": {"target_type": "Float64"},
+  },
+  "CastHalf": {
+    "description": "Cast tensor to float16",
+    "std_args": ["x"],
+    "metadata": {"target_type": "Float16"},
+  },
+  "CastLong": {
+    "description": "Cast tensor to int64",
+    "std_args": ["x"],
+    "metadata": {"target_type": "Int64"},
+  },
+  "CastInt": {
+    "description": "Cast tensor to int32",
+    "std_args": ["x"],
+    "metadata": {"target_type": "Int32"},
+  },
+  "CastShort": {
+    "description": "Cast tensor to int16",
+    "std_args": ["x"],
+    "metadata": {"target_type": "Int16"},
+  },
+  "CastByte": {
+    "description": "Cast tensor to uint8",
+    "std_args": ["x"],
+    "metadata": {"target_type": "UInt8"},
+  },
+  "CastBool": {
+    "description": "Cast tensor to bool",
+    "std_args": ["x"],
+    "metadata": {"target_type": "Bool"},
+  },
+  "CastChar": {
+    "description": "Cast tensor to int8/char",
+    "std_args": ["x"],
+    "metadata": {"target_type": "Int8"},
+  },
 }
 
 # ============================================================================
@@ -201,7 +252,14 @@ NEURAL_OPS = {
   },
   "MaxPool2d": {
     "description": "Applies a 2D max pooling over an input signal composed of several input planes.",
-    "std_args": ["kernel_size", "stride", "padding", "dilation", "return_indices", "ceil_mode"],
+    "std_args": [
+      "kernel_size",
+      "stride",
+      "padding",
+      "dilation",
+      "return_indices",
+      "ceil_mode",
+    ],
   },
   "Dropout": {
     "description": "During training, randomly zeroes some of the elements of the input tensor with probability p.",
@@ -288,7 +346,15 @@ EXTRAS_OPS = {
   "__imports__": {},
   "Adam": {
     "description": "Adaptive Moment Estimation optimizer.",
-    "std_args": ["params", "lr", "beta1", "beta2", "eps", "weight_decay", "amsgrad"],
+    "std_args": [
+      "params",
+      "lr",
+      "beta1",
+      "beta2",
+      "eps",
+      "weight_decay",
+      "amsgrad",
+    ],
   },
   "SGD": {
     "description": "Stochastic Gradient Descent optimizer.",
@@ -328,7 +394,10 @@ EXTRAS_OPS = {
     "op_type": OpType.CONTEXT,
     "std_args": [],
   },
-  "Resize": {"description": "Resize the input image to the given size.", "std_args": ["size"]},
+  "Resize": {
+    "description": "Resize the input image to the given size.",
+    "std_args": ["size"],
+  },
   "Normalize": {
     "description": "Normalize a tensor image with mean and standard deviation.",
     "std_args": ["mean", "std", "inplace"],
@@ -371,7 +440,7 @@ EXTRAS_OPS = {
     "description": "Abstract Device placement context.",
     "std_args": ["type", "index"],
   },
-  "CudaAvailable": {  # <--- NEW: Wired Orphan
+  "CudaAvailable": {
     "description": "Checks if a CUDA device is available.",
     "std_args": [],
     "return_type": "bool",

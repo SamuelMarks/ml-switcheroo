@@ -108,7 +108,10 @@ def test_edge_rendering_with_trivia():
     leading_trivia=[TriviaNode("\n    ")],
   )
   text = edge.to_text()
-  assert r"\n    \draw" in text
+
+  # Check for real newline followed by indented \draw command.
+  # We escape the backslash explicitly to avoid invalid escape sequence warnings.
+  assert "\n    \\draw" in text
 
 
 def test_graph_composition():

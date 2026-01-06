@@ -9,6 +9,7 @@ Capabilities:
 - Handles complex Operands (Memory, Predicates, Negated Registers).
 - Supports parsing of basic blocks markers.
 - Ignores potential stray semicolons.
+- **Update**: Handles Branch targets with trailing colons (e.g. `BRA Label:;`).
 """
 
 from typing import List, Optional, Union, Any
@@ -245,6 +246,12 @@ class SassParser:
     if token.kind == TokenType.IDENTIFIER:
       self._consume()
       return LabelRef(name=token.value)
+
+    # Fix: Accept LABEL_DEF as an operand for branches like 'BRA Label:;'
+    if token.kind == TokenType.LABEL_DEF:
+      self._consume()
+      # Strip trailing colon
+      return LabelRef(name=token.value[:-1])
 
     raise SyntaxError(f"Unknown operand type: {token.kind} ({token.value})")
 

@@ -105,7 +105,7 @@ Signature: {op_name}{info["signature"]}
 
 Docstring: 
 
-{newline + ">".join(info["docstring"].split(newline))}
+{(newline + ">").join(info["docstring"].split(newline))}
 
 --- OUTPUT FORMAT (JSON SCHEMA) --- 
 The YAML must conform rigidly to this Pydantic schema: 

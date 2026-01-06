@@ -3,8 +3,9 @@ Tests for SASS Synthesizer and Register Allocator.
 
 Verifies:
 1.  **Register Allocation**: Sequential assignment, overflow handling, reuse.
-2.  **Graph -> SASS**: Mapping Logic, Opcode Resolution, Instruction construction.
-3.  **SASS -> Python**: AST transformation, format handling.
+2.  **Graph -> SASS (1:1)**: Mapping Logic, Opcode Resolution.
+3.  **Graph -> SASS (Macro)**: Macro registration and expansion (Conv2d, Linear).
+4.  **SASS -> Python**: AST transformation, format handling.
 """
 
 import pytest
@@ -13,8 +14,9 @@ from unittest.mock import MagicMock
 
 from ml_switcheroo.core.sass.synthesizer import RegisterAllocator, SassSynthesizer, MAX_REGISTERS
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.sass.nodes import Instruction, Register, Immediate, Comment
+from ml_switcheroo.core.sass.nodes import Instruction, Register, Immediate, Comment, Label
 from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.core.sass.macros import expand_conv2d, expand_linear
 
 # --- 1. Register Allocator Tests ---
 
@@ -91,15 +93,23 @@ def mock_semantics():
 
   mgr.resolve_variant.side_effect = resolve
 
-  # Fix: Ensure get_definition returns None so Logic falls back to using node.kind as ID
-  mgr.get_definition.return_value = None
+  # Define get_definition logic for "Conv2d" to ensure it matches Abstract ID "Conv2d"
+  # This allows synthesizer to fetch ID even if node.kind is "torch.nn.Conv2d"
+  def get_def(kind):
+    if "Conv2d" in kind:
+      return ("Conv2d", {})
+    if "Linear" in kind:
+      return ("Linear", {})
+    return None
+
+  mgr.get_definition.side_effect = get_def
 
   return mgr
 
 
 def test_graph_to_sass_linear_flow(mock_semantics):
   """
-  Scenario: x -> Add(y) -> z
+  Scenario: x -> Add(y) -> z (1:1 Op Mapping)
   Graph:
     Nodes: Input(x), Input(y), Add(z)
     Edges: x->z, y->z
@@ -146,7 +156,7 @@ def test_graph_to_sass_linear_flow(mock_semantics):
 
 
 def test_graph_to_sass_unmapped_op(mock_semantics):
-  """Verify handling of ops missing from semantics."""
+  """Verify handling of ops missing from semantics and no macro."""
   synth = SassSynthesizer(mock_semantics)
 
   g = LogicalGraph()
@@ -157,6 +167,38 @@ def test_graph_to_sass_unmapped_op(mock_semantics):
   assert len(nodes) == 1
   assert isinstance(nodes[0], Comment)
   assert "Unmapped Op: UnknownOp" in str(nodes[0])
+
+
+def test_graph_to_sass_macro_expansion(mock_semantics):
+  """
+  Scenario: Conv2d node triggers Macro Expansion logic.
+  Expectation: Output contains loop labels and IMAD instructions instead of single op.
+  """
+  synth = SassSynthesizer(mock_semantics)
+
+  # 1. Create Graph with Conv2d
+  g = LogicalGraph()
+  g.nodes = [LogicalNode("conv1", "Conv2d", {"k": 3})]
+
+  # 2. Run Synthesizer
+  nodes = synth.from_graph(g)
+
+  # 3. Validation
+  # Should not be 1 instruction
+  assert len(nodes) > 10
+
+  # Check for markers from macro
+  comments = [n.text for n in nodes if isinstance(n, Comment)]
+  assert "BEGIN Conv2d (conv1)" in comments
+
+  # Check for labels (Loop Lables)
+  labels = [n.name for n in nodes if isinstance(n, Label)]
+  assert any("L_KY" in l for l in labels)
+
+  # Check for instructions specific to macro (IMAD, LDG)
+  opcodes = [n.opcode for n in nodes if isinstance(n, Instruction)]
+  assert "IMAD" in opcodes
+  assert "FFMA" in opcodes
 
 
 def test_graph_to_sass_output_node(mock_semantics):

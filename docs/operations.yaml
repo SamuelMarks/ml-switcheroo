@@ -1985,6 +1985,8 @@
     torch:
       api: torch.clamp
       required_imports: []
+    sass:
+      api: MNMX
 - operation: Clip
   description: Clip operator limits the given input within an interval. The interval is specified by the inputs 'min' and 'max'. They default to numeric_limits::lowest() and numeric_limits::max(), respectively.
     When 'min' is greater than 'max', the clip operator sets all the 'input' values to the value of 'max'. T...
@@ -2668,6 +2670,8 @@
         padding: arg_4
         stride: arg_3
       required_imports: []
+    sass:
+      api: Macro.Conv2d
 - operation: Conv3DTranspose
   description: "3D transposed convolution layer.\n\nThe need for transposed convolutions generally arise from the desire to use\na transformation going in the opposite direction of a normal convolution,\n\
     i.e., from something that has the shape of the output of some convolution\nto something that has the shape of its input while maintaining a\nconnectivity pattern that is compatible with said convolution.\n\
@@ -7362,6 +7366,8 @@
         in_features: input_dims
         out_features: output_dims
       required_imports: []
+    sass:
+      api: Macro.Linear
 - operation: LinearT
   description: The class representing a Python module/class/instance attribute.
   op_type: function
@@ -12608,6 +12614,8 @@
     torch:
       api: torch.sub
       required_imports: []
+    sass:
+      api: FADD
 - operation: Sum
   description: Element-wise sum of each of the input tensors (with Numpy-style broadcasting support). All inputs and outputs must have the same data type. This operator supports **multidirectional (i.e.,
     Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).

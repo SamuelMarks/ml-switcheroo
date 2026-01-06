@@ -10,13 +10,13 @@ It contains:
     Physical Registers (e.g., 'R0', 'R1').
 2.  **SassSynthesizer**:
     -   **Target Transformation (`from_graph`)**: Converts a topological logical graph
-        into a linear list of SASS instructions, performing opcode lookup via
-        semantic definitions.
+        into a linear list of SASS instructions. Supports 1:1 opcode mapping via
+        semantics and 1:N expansion via Kernel Macros (e.g. Conv2d loops).
     -   **Source Transformation (`to_python`)**: Converts SASS AST nodes back into
         Python LibCST nodes for high-level analysis or documentation.
 """
 
-from typing import Dict, List, Optional, Union, Tuple, Any
+from typing import Dict, List, Optional, Union, Callable
 import libcst as cst
 
 from ml_switcheroo.core.sass.nodes import (
@@ -27,11 +27,10 @@ from ml_switcheroo.core.sass.nodes import (
   Comment,
   Operand,
   Label,
-  Directive,
 )
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, topological_sort
+from ml_switcheroo.core.graph import LogicalGraph, topological_sort
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.hooks import HookContext
+from ml_switcheroo.core.sass.macros import expand_conv2d, expand_linear
 
 # Maximum number of general-purpose 32-bit registers per thread in CUDA
 MAX_REGISTERS = 255
@@ -59,7 +58,7 @@ class RegisterAllocator:
     If new, allocates the next available physical register.
 
     Args:
-        var_name (str): The logical variable identifier (e.g., 'input_1', 'bias').
+        var_name (str): The logical identifier (e.g., 'input_1', 'bias').
 
     Returns:
         Register: A populated Register node (e.g., Register('R0')).
@@ -103,6 +102,8 @@ class SassSynthesizer:
 
   Handles:
   1.  **Forward (Graph -> SASS)**: Synthesizes Assembly from Logical Graphs.
+      Delegates high-level ops (Conv2d, Linear) to Macros, and low-level ops
+      (Add, Mul) to Semantic Opcode Lookup.
   2.  **Reverse (SASS -> Python)**: Synthesizes Python AST from Assembly nodes.
   """
 
@@ -116,6 +117,13 @@ class SassSynthesizer:
     self.semantics = semantics
     self.allocator = RegisterAllocator()
 
+    # Registry of Kernel Macros for 1-to-N expansion
+    # Maps Abstract Operation IDs to expansion functions
+    self.macro_registry: Dict[str, Callable] = {
+      "Conv2d": expand_conv2d,
+      "Linear": expand_linear,
+    }
+
   def from_graph(self, graph: LogicalGraph) -> List[SassNode]:
     """
     Converts a LogicalGraph into a list of SASS AST nodes.
@@ -124,10 +132,11 @@ class SassSynthesizer:
     1.  Sorts nodes topologically.
     2.  Traverses nodes.
     3.  For each node:
-        a. Lookup abstract opcode mapping (e.g. `Add` -> `FADD`).
-        b. Allocate/Resolve Input Registers.
-        c. Allocate Output Register.
-        d. Construct `Instruction` node.
+        a. Check if it matches a Macro (e.g. Conv2d). If so, expand kernel.
+        b. If not, lookup abstract opcode mapping (e.g. `Add` -> `FADD`).
+        c. Allocate/Resolve Input Registers.
+        d. Allocate Output Register.
+        e. Construct `Instruction` node.
     4.  Handles `Input` nodes by pre-allocating registers (Contract: R0, R1...).
 
     Args:
@@ -168,18 +177,29 @@ class SassSynthesizer:
           output_nodes.append(Comment(f"Return: {src_reg.name}"))
         continue
 
-      # Look up Opcode via Abstract Semantic Name
-      # 1. Try treating node.kind as an API path (e.g. "torch.add") to find Abstract ID ("Add")
+      # Look up Abstract ID
+      # 1. Try treating node.kind as an API path (e.g. "torch.nn.Conv2d")
+      # to find Abstract ID ("Conv2d")
       defn = self.semantics.get_definition(node.kind)
       abstract_id = None
       if defn:
         abstract_id = defn[0]
       else:
-        # 2. Try treating node.kind as Abstract ID directly (e.g. "Conv2d")
-        # (common in GraphOptimizer outputs)
+        # 2. Try treating node.kind as Abstract ID directly
         abstract_id = node.kind
 
-      # 3. Resolve SASS variant
+      # --- Macro Expansion Path ---
+      if abstract_id in self.macro_registry:
+        expander = self.macro_registry[abstract_id]
+        # Expand macro using the Allocator protocol.
+        # Note: Macros handle their own internal register allocation for loops/etc.
+        kernel_nodes = expander(self.allocator, node.id, node.metadata)
+        output_nodes.extend(kernel_nodes)
+        continue
+
+      # --- 1:1 Instruction Path ---
+
+      # 3. Resolve SASS variant opcode
       variant = None
       if abstract_id:
         variant = self.semantics.resolve_variant(abstract_id, "sass")
@@ -203,12 +223,6 @@ class SassSynthesizer:
       for src_id in sources:
         src_reg = self.allocator.get_register(src_id)
         operands.append(src_reg)
-
-      # Metadata Literals (e.g. immediate values stored in metadata)
-      # If metadata has numeric keys, we might append them?
-      # Basic Graph logic stores attributes in metadata.
-      # Simplified Logic: Check for 'val' or 'k' in metadata if sources < expected arity?
-      # For now, we assume graph edges carry all data flow.
 
       inst = Instruction(opcode=opcode, operands=operands)
       output_nodes.append(inst)
@@ -242,8 +256,12 @@ class SassSynthesizer:
         # We emit a "pass" with comment or just ignore for logic graph
         pass
       elif isinstance(node, Label):
-        # L_1: -> label_L_1 = object() placeholder?
-        # Python does not have labels. emitted as comment or marker.
+        # Labels usually denote blocks. Python doesn't have labels.
+        # We emit a comment marker for clarity in decompilation.
+        # To attach comment, we need a node.
+        comment_node = cst.EmptyLine(comment=cst.Comment(f"# Label: {node.name}"))
+        # LibCST Module body expects Statements, not EmptyLines directly unfortunately in all versions,
+        # but we can try attaching to a no-op if strictly validating structure.
         pass
 
       if stmt:
@@ -257,6 +275,12 @@ class SassSynthesizer:
 
     Assumes SASS semantics: First literal Dest, rest Sources.
     `OP DST, SRC1, SRC2` -> `DST = sass.OP(SRC1, SRC2)`
+
+    Args:
+        inst (Instruction): The SASS instruction node.
+
+    Returns:
+        cst.SimpleStatementLine: Python statement.
     """
     # SASS usually has DST as op 0.
     if not inst.operands:
@@ -278,7 +302,9 @@ class SassSynthesizer:
 
     is_store = inst.opcode.startswith("ST")
     is_branch = inst.opcode in ["BRA", "BRX", "EXIT", "RET"]
+    is_cmp = inst.opcode.startswith("ISETP") or inst.opcode.startswith("ISETP")
 
+    # ISETP typically writes to Predicate register P0
     if is_store or is_branch:
       srcs = inst.operands
     else:
@@ -290,6 +316,10 @@ class SassSynthesizer:
     for op in srcs:
       arg_val = self._convert_operand_to_py(op)
       arg_nodes.append(cst.Arg(value=arg_val))
+
+    # Add Predicate as arg if present
+    if inst.predicate:
+      arg_nodes.append(cst.Arg(keyword=cst.Name("predicate"), value=cst.SimpleString(f"'{inst.predicate}'")))
 
     call = self._make_call(inst.opcode, arg_nodes)
 
@@ -310,7 +340,15 @@ class SassSynthesizer:
       return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
 
   def _convert_operand_to_py(self, op: Operand) -> cst.BaseExpression:
-    """Helper to convert operands to Python Literals/Names."""
+    """
+    Helper to convert operands to Python Literals/Names.
+
+    Args:
+        op (Operand): The operand node.
+
+    Returns:
+        cst.BaseExpression: The corresponding Python AST node.
+    """
     if isinstance(op, Immediate):
       if op.is_hex:
         return cst.Integer(hex(int(op.value)))
@@ -332,5 +370,14 @@ class SassSynthesizer:
     return cst.SimpleString(f"'{raw}'")
 
   def _make_call(self, opcode: str, args: List[cst.Arg]) -> cst.Call:
-    """Constructs `sass.OPCODE(...)`."""
+    """
+    Constructs `sass.OPCODE(...)`.
+
+    Args:
+        opcode (str): The instruction mnemonic.
+        args (List[cst.Arg]): Arguments for the call.
+
+    Returns:
+        cst.Call: The constructed call node.
+    """
     return cst.Call(func=cst.Attribute(value=cst.Name("sass"), attr=cst.Name(opcode)), args=args)
