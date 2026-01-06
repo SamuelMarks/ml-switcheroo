@@ -90,6 +90,8 @@ class TensorFlowAdapter:
       "contrib",
       "examples",
       "tools",
+      "xla",
+      "lite",
     }
 
   @property
@@ -362,12 +364,25 @@ class TensorFlowAdapter:
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """
     Applies manual wiring patches to the generated snapshot.
-    TensorFlow currently requires no manual wiring corrections.
+    Updates `tensorflow.` API prefixes to `tf.` to match standard aliases.
 
     Args:
         snapshot (Dict[str, Any]): The snapshot dictionary to modify in-place.
     """
-    pass
+    if "mappings" not in snapshot:
+      return
+
+    # Normalize 'tensorflow.' -> 'tf.' in API paths
+    for _, entry in snapshot["mappings"].items():
+      if not entry or "api" not in entry:
+        continue
+
+      api = entry["api"]
+      if api.startswith("tensorflow."):
+        # Reconstruct path using 'tf' alias
+        # e.g. tensorflow.math.add -> tf.math.add
+        new_api = "tf." + api[11:]
+        entry["api"] = new_api
 
   @classmethod
   def get_example_code(cls) -> str:
@@ -391,30 +406,30 @@ class TensorFlowAdapter:
     return {
       "tier1_math": """import tensorflow as tf
 
-def math_ops(x, y):
+def math_ops(x, y): 
   # Tier 1: Core TensorFlow Math
-  a = tf.abs(x)
-  b = tf.math.add(a, y)
-  return tf.math.reduce_mean(b)
+  a = tf.abs(x) 
+  b = tf.math.add(a, y) 
+  return tf.math.reduce_mean(b) 
 """,
       "tier2_neural": """import tensorflow as tf
 
-class Model(tf.Module):
-  # Tier 2: Low-level TF Module (Not Keras)
-  def __init__(self, in_features, out_features):
-    super().__init__()
-    self.w = tf.Variable(tf.random.normal([in_features, out_features]))
-    self.b = tf.Variable(tf.zeros([out_features]))
+class Model(tf.Module): 
+  # Tier 2: Low-level TF Module (Not Keras) 
+  def __init__(self, in_features, out_features): 
+    super().__init__() 
+    self.w = tf.Variable(tf.random.normal([in_features, out_features])) 
+    self.b = tf.Variable(tf.zeros([out_features])) 
 
-  def __call__(self, x):
+  def __call__(self, x): 
     return tf.matmul(x, self.w) + self.b
   """,
       "tier3_extras": """import tensorflow as tf
 
-def data_pipeline(tensors, batch_size=32):
+def data_pipeline(tensors, batch_size=32): 
   # Tier 3: tf.data Input Pipeline
-  dataset = tf.data.Dataset.from_tensor_slices(tensors)
-  loader = dataset.shuffle(1024).batch(batch_size)
+  dataset = tf.data.Dataset.from_tensor_slices(tensors) 
+  loader = dataset.shuffle(1024).batch(batch_size) 
   return loader
 """,
     }
@@ -511,24 +526,24 @@ def data_pipeline(tensors, batch_size=32):
 
   def get_weight_load_code(self, path_var: str) -> str:
     """
-    Returns Python code to load a TF checkpoint into a raw dict found in `raw_state`.
+    Returns Python code to load a TF checkpoint into a raw state dictionary.
     Attempt to load variable map if available.
 
     Args:
-        path_var: Variable name containing file path.
+        path_var: Variable name containing the file path string.
 
     Returns:
-        Code block string.
+        Block of python code setting 'raw_state'.
     """
     return textwrap.dedent(
-      f"""
-            try:
-                reader = tf.train.load_checkpoint({path_var})
-                dtypes = reader.get_variable_to_dtype_map()
-                raw_state = {{key: reader.get_tensor(key) for key in dtypes}}
-            except Exception as e:
-                print(f"Failed to load TF checkpoint: {{e}}")
-                raw_state = {{}}
+      f""" 
+            try: 
+                reader = tf.train.load_checkpoint({path_var}) 
+                dtypes = reader.get_variable_to_dtype_map() 
+                raw_state = {{key: reader.get_tensor(key) for key in dtypes}} 
+            except Exception as e: 
+                print(f"Failed to load TF checkpoint: {{e}}") 
+                raw_state = {{}} 
             """
     )
 
@@ -558,10 +573,10 @@ def data_pipeline(tensors, batch_size=32):
         Warning print code.
     """
     return textwrap.dedent(
-      """
-            print("WARNING: Saving raw dictionary to TensorFlow checkpoint is not directly supported without model structure.")
-            print("To save weights for TensorFlow, instantiate the Keras/TF model and use `model.set_weights()` or `root.save_weights()`.")
-            print(f"Weights available in converted_state variable for manual assignment.")
+      """ 
+            print("WARNING: Saving raw dictionary to TensorFlow checkpoint is not directly supported without model structure.") 
+            print("To save weights for TensorFlow, instantiate the Keras/TF model and use `model.set_weights()` or `root.save_weights()`.") 
+            print(f"Weights available in converted_state variable for manual assignment.") 
             """
     )
 

@@ -9,6 +9,7 @@ It handles:
 2.  **Scaffolding**: Generating skeleton mappings.
 3.  **Discovery**: Identifying Neural Layers via Consensus and linking them to the Semantic Hub.
 4.  **StableHLO**: Importing StableHLO specificiation from markdown.
+5.  **SASS**: Importing NVIDIA Instruction Sets from HTML documentation.
 """
 
 import json
@@ -27,9 +28,11 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
+from ml_switcheroo.importers.sass_reader import SassSpecImporter  # NEW
 from ml_switcheroo.semantics.autogen import SemanticPersister
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
+from ml_switcheroo.frameworks.loader import get_definitions_path  # NEW
 from ml_switcheroo.semantics.standards_internal import EXTRAS_OPS, MATH_OPS, NEURAL_OPS
 from ml_switcheroo.utils.console import (
   console,
@@ -71,7 +74,7 @@ def handle_import_spec(target: Path) -> int:
   into the local semantics Hub.
 
   Args:
-      target (Path): Code resource to import ('internal', .md file, or directory).
+      target (Path): Code resource to import ('internal', .md file, .html file, or directory).
 
   Returns:
       int: Exit code.
@@ -117,7 +120,20 @@ def handle_import_spec(target: Path) -> int:
       _save_spec(out_dir, "k_neural_net.json", data)
       return 0
 
-  # 3. Array API Stubs (Tier A)
+  # 3. Parsing Logic for HTML Files (NVIDIA SASS) - NEW
+  elif target.is_file() and target.suffix == ".html":
+    log_info(f"Detected SASS HTML Spec: {target.name}")
+    importer = SassSpecImporter()
+    data = importer.parse_file(target)
+
+    # Special Case: SASS mappings go to frameworks/definitions/sass.json, NOT semantics/
+    sass_def_path = get_definitions_path("sass")
+
+    # We reuse _save_spec logic but point it to the definitions directory
+    _save_spec(sass_def_path.parent, sass_def_path.name, data)
+    return 0
+
+  # 4. Array API Stubs (Tier A)
   elif target.is_dir():
     log_info("Detected Array API Stubs Directory")
     importer = ArrayApiSpecImporter()
@@ -126,7 +142,7 @@ def handle_import_spec(target: Path) -> int:
     return 0
 
   else:
-    log_error("Invalid input. Must be 'internal', .md (ONNX/StableHLO), or dir of stubs (Array API).")
+    log_error("Invalid input. Must be 'internal', .md (ONNX/StableHLO), .html (SASS), or dir of stubs (Array API).")
     return 1
 
 
@@ -152,9 +168,12 @@ def _save_spec(out_dir: Path, filename: str, data: Dict[str, Any]) -> None:
     except Exception as e:
       log_warning(f"Could not load existing {filename}: {e}. Overwriting.")
 
+  if not out_dir.exists():
+    out_dir.mkdir(parents=True, exist_ok=True)
+
   with open(out_p, "wt", encoding="utf-8") as f:
     json.dump(final_data, f, indent=2, sort_keys=True)
-  log_success(f"Saved {len(final_data)} operations to [path]{out_p}[/path]")
+  log_success(f"Saved {len(final_data)} entries to [path]{out_p}[/path]")
 
 
 def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]], dry_run: bool) -> int:

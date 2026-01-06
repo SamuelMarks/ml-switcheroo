@@ -1,0 +1,691 @@
+{
+  "__framework__": "sass",
+  "mappings": {
+    "Abs": {
+      "api": "IABS"
+    },
+    "Acqbulk": {
+      "api": "ACQBULK"
+    },
+    "Acqshminit": {
+      "api": "ACQSHMINIT"
+    },
+    "Add": {
+      "api": "FADD"
+    },
+    "Add3": {
+      "api": "IADD3"
+    },
+    "Atom": {
+      "api": "ATOM"
+    },
+    "Atomg": {
+      "api": "ATOMG"
+    },
+    "Atoms": {
+      "api": "ATOMS"
+    },
+    "B2R": {
+      "api": "B2R"
+    },
+    "Bar": {
+      "api": "BAR"
+    },
+    "Bgmma": {
+      "api": "BGMMA"
+    },
+    "BitwiseOp": {
+      "api": "LOP"
+    },
+    "Bmma": {
+      "api": "BMMA"
+    },
+    "Bmov": {
+      "api": "BMOV"
+    },
+    "Bmsk": {
+      "api": "BMSK"
+    },
+    "Bpt": {
+      "api": "BPT"
+    },
+    "Bra": {
+      "api": "BRA"
+    },
+    "Break": {
+      "api": "BREAK"
+    },
+    "Brev": {
+      "api": "BREV"
+    },
+    "Brx": {
+      "api": "BRX"
+    },
+    "Brxu": {
+      "api": "BRXU"
+    },
+    "Bssy": {
+      "api": "BSSY"
+    },
+    "Bsync": {
+      "api": "BSYNC"
+    },
+    "Call": {
+      "api": "CALL"
+    },
+    "CastFloat": {
+      "api": "I2F"
+    },
+    "CastInt": {
+      "api": "F2I"
+    },
+    "Cctl": {
+      "api": "CCTL"
+    },
+    "Cctll": {
+      "api": "CCTLL"
+    },
+    "Cctlt": {
+      "api": "CCTLT"
+    },
+    "Cgaerrbar": {
+      "api": "CGAERRBAR"
+    },
+    "Credux": {
+      "api": "CREDUX"
+    },
+    "Cs2R": {
+      "api": "CS2R"
+    },
+    "Cs2Ur": {
+      "api": "CS2UR"
+    },
+    "Dadd": {
+      "api": "DADD"
+    },
+    "Depbar": {
+      "api": "DEPBAR"
+    },
+    "Dfma": {
+      "api": "DFMA"
+    },
+    "Dmma": {
+      "api": "DMMA"
+    },
+    "Dmul": {
+      "api": "DMUL"
+    },
+    "Dsetp": {
+      "api": "DSETP"
+    },
+    "Elect": {
+      "api": "ELECT"
+    },
+    "Endcollective": {
+      "api": "ENDCOLLECTIVE"
+    },
+    "Errbar": {
+      "api": "ERRBAR"
+    },
+    "Exit": {
+      "api": "EXIT"
+    },
+    "F2F": {
+      "api": "F2F"
+    },
+    "F2I": {
+      "api": "F2I"
+    },
+    "F2Ip": {
+      "api": "F2IP"
+    },
+    "Fchk": {
+      "api": "FCHK"
+    },
+    "Fence": {
+      "api": "FENCE"
+    },
+    "Flo": {
+      "api": "FLO"
+    },
+    "Fmnmx3": {
+      "api": "FMNMX3"
+    },
+    "Frnd": {
+      "api": "FRND"
+    },
+    "Fsel": {
+      "api": "FSEL"
+    },
+    "Fset": {
+      "api": "FSET"
+    },
+    "Fsetp": {
+      "api": "FSETP"
+    },
+    "Fswzadd": {
+      "api": "FSWZADD"
+    },
+    "FusedMultiplyAdd": {
+      "api": "FFMA32I"
+    },
+    "Getlmembase": {
+      "api": "GETLMEMBASE"
+    },
+    "Hadd2": {
+      "api": "HADD2"
+    },
+    "Hadd2_32I": {
+      "api": "HADD2_32I"
+    },
+    "Hfma2": {
+      "api": "HFMA2"
+    },
+    "Hfma2_32I": {
+      "api": "HFMA2_32I"
+    },
+    "Hgmma": {
+      "api": "HGMMA"
+    },
+    "Hmma": {
+      "api": "HMMA"
+    },
+    "Hmnmx2": {
+      "api": "HMNMX2"
+    },
+    "Hmul2": {
+      "api": "HMUL2"
+    },
+    "Hmul2_32I": {
+      "api": "HMUL2_32I"
+    },
+    "Hset2": {
+      "api": "HSET2"
+    },
+    "Hsetp2": {
+      "api": "HSETP2"
+    },
+    "I2F": {
+      "api": "I2F"
+    },
+    "I2Fp": {
+      "api": "I2FP"
+    },
+    "I2I": {
+      "api": "I2I"
+    },
+    "I2Ip": {
+      "api": "I2IP"
+    },
+    "Idp": {
+      "api": "IDP"
+    },
+    "Idp4A": {
+      "api": "IDP4A"
+    },
+    "Igmma": {
+      "api": "IGMMA"
+    },
+    "Imad": {
+      "api": "IMAD"
+    },
+    "Imma": {
+      "api": "IMMA"
+    },
+    "Imnmx": {
+      "api": "IMNMX"
+    },
+    "Isetp": {
+      "api": "ISETP"
+    },
+    "Jmp": {
+      "api": "JMP"
+    },
+    "Jmx": {
+      "api": "JMX"
+    },
+    "Jmxu": {
+      "api": "JMXU"
+    },
+    "Kill": {
+      "api": "KILL"
+    },
+    "Ld": {
+      "api": "LD"
+    },
+    "Ldc": {
+      "api": "LDC"
+    },
+    "Ldcu": {
+      "api": "LDCU"
+    },
+    "Ldg": {
+      "api": "LDG"
+    },
+    "Ldgdepbar": {
+      "api": "LDGDEPBAR"
+    },
+    "Ldgmc": {
+      "api": "LDGMC"
+    },
+    "Ldgsts": {
+      "api": "LDGSTS"
+    },
+    "Ldl": {
+      "api": "LDL"
+    },
+    "Lds": {
+      "api": "LDS"
+    },
+    "Ldsm": {
+      "api": "LDSM"
+    },
+    "Ldt": {
+      "api": "LDT"
+    },
+    "Ldtm": {
+      "api": "LDTM"
+    },
+    "Lea": {
+      "api": "LEA"
+    },
+    "Lepc": {
+      "api": "LEPC"
+    },
+    "Match": {
+      "api": "MATCH"
+    },
+    "Membar": {
+      "api": "MEMBAR"
+    },
+    "MinMax": {
+      "api": "FMNMX"
+    },
+    "Mov": {
+      "api": "MOV"
+    },
+    "Mov32I": {
+      "api": "MOV32I"
+    },
+    "Movm": {
+      "api": "MOVM"
+    },
+    "Mufu": {
+      "api": "MUFU"
+    },
+    "Mul": {
+      "api": "FMUL"
+    },
+    "Nanosleep": {
+      "api": "NANOSLEEP"
+    },
+    "Nop": {
+      "api": "NOP"
+    },
+    "Omma": {
+      "api": "OMMA"
+    },
+    "P2R": {
+      "api": "P2R"
+    },
+    "Pmtrig": {
+      "api": "PMTRIG"
+    },
+    "Popc": {
+      "api": "POPC"
+    },
+    "Preexit": {
+      "api": "PREEXIT"
+    },
+    "Prmt": {
+      "api": "PRMT"
+    },
+    "Psetp": {
+      "api": "PSETP"
+    },
+    "Qgmma": {
+      "api": "QGMMA"
+    },
+    "Qmma": {
+      "api": "QMMA"
+    },
+    "Qspc": {
+      "api": "QSPC"
+    },
+    "R2B": {
+      "api": "R2B"
+    },
+    "R2P": {
+      "api": "R2P"
+    },
+    "R2Ur": {
+      "api": "R2UR"
+    },
+    "Red": {
+      "api": "RED"
+    },
+    "Redas": {
+      "api": "REDAS"
+    },
+    "Redg": {
+      "api": "REDG"
+    },
+    "Redux": {
+      "api": "REDUX"
+    },
+    "Ret": {
+      "api": "RET"
+    },
+    "Rpcmov": {
+      "api": "RPCMOV"
+    },
+    "Rtt": {
+      "api": "RTT"
+    },
+    "S2R": {
+      "api": "S2R"
+    },
+    "S2Ur": {
+      "api": "S2UR"
+    },
+    "Sel": {
+      "api": "SEL"
+    },
+    "Setctaid": {
+      "api": "SETCTAID"
+    },
+    "Setlmembase": {
+      "api": "SETLMEMBASE"
+    },
+    "Sgxt": {
+      "api": "SGXT"
+    },
+    "Shf": {
+      "api": "SHF"
+    },
+    "Shfl": {
+      "api": "SHFL"
+    },
+    "Shl": {
+      "api": "SHL"
+    },
+    "Shr": {
+      "api": "SHR"
+    },
+    "St": {
+      "api": "ST"
+    },
+    "Stas": {
+      "api": "STAS"
+    },
+    "Stg": {
+      "api": "STG"
+    },
+    "Stl": {
+      "api": "STL"
+    },
+    "Sts": {
+      "api": "STS"
+    },
+    "Stsm": {
+      "api": "STSM"
+    },
+    "Stt": {
+      "api": "STT"
+    },
+    "Sttm": {
+      "api": "STTM"
+    },
+    "Suatom": {
+      "api": "SUATOM"
+    },
+    "Suld": {
+      "api": "SULD"
+    },
+    "Sured": {
+      "api": "SURED"
+    },
+    "Sust": {
+      "api": "SUST"
+    },
+    "Syncs": {
+      "api": "SYNCS"
+    },
+    "Tex": {
+      "api": "TEX"
+    },
+    "Tld": {
+      "api": "TLD"
+    },
+    "Tld4": {
+      "api": "TLD4"
+    },
+    "Tmml": {
+      "api": "TMML"
+    },
+    "Txd": {
+      "api": "TXD"
+    },
+    "Txq": {
+      "api": "TXQ"
+    },
+    "Ublkcp": {
+      "api": "UBLKCP"
+    },
+    "Ublkpf": {
+      "api": "UBLKPF"
+    },
+    "Ublkred": {
+      "api": "UBLKRED"
+    },
+    "Ubmsk": {
+      "api": "UBMSK"
+    },
+    "Ubrev": {
+      "api": "UBREV"
+    },
+    "Ucgabar_Arv": {
+      "api": "UCGABAR_ARV"
+    },
+    "Ucgabar_Wait": {
+      "api": "UCGABAR_WAIT"
+    },
+    "Uclea": {
+      "api": "UCLEA"
+    },
+    "Uf2F": {
+      "api": "UF2F"
+    },
+    "Uf2Fp": {
+      "api": "UF2FP"
+    },
+    "Uf2I": {
+      "api": "UF2I"
+    },
+    "Uf2Ip": {
+      "api": "UF2IP"
+    },
+    "Uffma": {
+      "api": "UFFMA"
+    },
+    "Uflo": {
+      "api": "UFLO"
+    },
+    "Ufmnmx": {
+      "api": "UFMNMX"
+    },
+    "Ufrnd": {
+      "api": "UFRND"
+    },
+    "Ufsel": {
+      "api": "UFSEL"
+    },
+    "Ufset": {
+      "api": "UFSET"
+    },
+    "Ufsetp": {
+      "api": "UFSETP"
+    },
+    "Ugetnextworkid": {
+      "api": "UGETNEXTWORKID"
+    },
+    "Ui2F": {
+      "api": "UI2F"
+    },
+    "Ui2Fp": {
+      "api": "UI2FP"
+    },
+    "Ui2I": {
+      "api": "UI2I"
+    },
+    "Ui2Ip": {
+      "api": "UI2IP"
+    },
+    "Uimad": {
+      "api": "UIMAD"
+    },
+    "Uimnmx": {
+      "api": "UIMNMX"
+    },
+    "Uisetp": {
+      "api": "UISETP"
+    },
+    "Uldc": {
+      "api": "ULDC"
+    },
+    "Ulea": {
+      "api": "ULEA"
+    },
+    "Ulepc": {
+      "api": "ULEPC"
+    },
+    "Umemsets": {
+      "api": "UMEMSETS"
+    },
+    "Umov": {
+      "api": "UMOV"
+    },
+    "Up2Ur": {
+      "api": "UP2UR"
+    },
+    "Upopc": {
+      "api": "UPOPC"
+    },
+    "Uprmt": {
+      "api": "UPRMT"
+    },
+    "Ur2Up": {
+      "api": "UR2UP"
+    },
+    "Uredgr": {
+      "api": "UREDGR"
+    },
+    "Usel": {
+      "api": "USEL"
+    },
+    "Usetmaxreg": {
+      "api": "USETMAXREG"
+    },
+    "Usgxt": {
+      "api": "USGXT"
+    },
+    "Ushf": {
+      "api": "USHF"
+    },
+    "Ushl": {
+      "api": "USHL"
+    },
+    "Ushr": {
+      "api": "USHR"
+    },
+    "Ustgr": {
+      "api": "USTGR"
+    },
+    "Utcatomsws": {
+      "api": "UTCATOMSWS"
+    },
+    "Utcbar": {
+      "api": "UTCBAR"
+    },
+    "Utccp": {
+      "api": "UTCCP"
+    },
+    "Utchmma": {
+      "api": "UTCHMMA"
+    },
+    "Utcimma": {
+      "api": "UTCIMMA"
+    },
+    "Utcomma": {
+      "api": "UTCOMMA"
+    },
+    "Utcqmma": {
+      "api": "UTCQMMA"
+    },
+    "Utcshift": {
+      "api": "UTCSHIFT"
+    },
+    "Utmacctl": {
+      "api": "UTMACCTL"
+    },
+    "Utmacmdflush": {
+      "api": "UTMACMDFLUSH"
+    },
+    "Utmaldg": {
+      "api": "UTMALDG"
+    },
+    "Utmapf": {
+      "api": "UTMAPF"
+    },
+    "Utmaredg": {
+      "api": "UTMAREDG"
+    },
+    "Utmastg": {
+      "api": "UTMASTG"
+    },
+    "Uvimnmx": {
+      "api": "UVIMNMX"
+    },
+    "Uvirtcount": {
+      "api": "UVIRTCOUNT"
+    },
+    "Vabsdiff": {
+      "api": "VABSDIFF"
+    },
+    "Vabsdiff4": {
+      "api": "VABSDIFF4"
+    },
+    "Vhmnmx": {
+      "api": "VHMNMX"
+    },
+    "Vimnmx": {
+      "api": "VIMNMX"
+    },
+    "Vimnmx3": {
+      "api": "VIMNMX3"
+    },
+    "Vote": {
+      "api": "VOTE"
+    },
+    "Voteu": {
+      "api": "VOTEU"
+    },
+    "Warpgroup": {
+      "api": "WARPGROUP"
+    },
+    "Warpgroupset": {
+      "api": "WARPGROUPSET"
+    },
+    "Warpsync": {
+      "api": "WARPSYNC"
+    },
+    "Yield": {
+      "api": "YIELD"
+    }
+  },
+  "templates": {
+    "convert_input": "// Input {np_var}",
+    "import": "// SASS Header",
+    "to_numpy": "// Output {res_var}"
+  }
+}

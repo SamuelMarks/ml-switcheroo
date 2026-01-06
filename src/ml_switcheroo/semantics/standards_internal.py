@@ -125,6 +125,7 @@ MATH_OPS = {
   },
   "max": {"description": "Element-wise maximum or reduction.", "std_args": ["x"]},
   "min": {"description": "Element-wise minimum or reduction.", "std_args": ["x"]},
+  "relu": {"description": "Rectified Linear Unit.", "std_args": ["x"]},
   "TorchFunctional": {
     "description": "Abstract Functional Namespace (e.g. F in torch.nn.functional)",
     "std_args": [],
@@ -222,7 +223,10 @@ NEURAL_OPS = {
     "description": "Gaussian Error Linear Unit.",
     "std_args": ["input"],
   },
-  "relu": {"description": "Rectified Linear Unit.", "std_args": ["input"]},
+  "ReLU": {
+    "description": "Rectified Linear Unit.",
+    "std_args": [],
+  },
   "softmax": {
     "description": "Applies the Softmax function to an n-dimensional input Tensor.",
     "std_args": ["input", "dim"],
@@ -441,7 +445,6 @@ INTERNAL_OPS = {
         "type": "Tensor",
       },
     ],
-    "variants": {},
   },
   "ModuleList": {
     "description": "Holds submodules in a list.",
@@ -451,12 +454,10 @@ INTERNAL_OPS = {
         "type": "List[Module]",
       },
     ],
-    "variants": {},
   },
   "TensorType": {
     "description": "Abstract Type Annotation for Tensors/Arrays.",
     "std_args": [],
-    "variants": {},
   },
   "Arange": {
     "description": "Returns evenly spaced values within a given interval.",
@@ -479,7 +480,6 @@ INTERNAL_OPS = {
         "type": "dtype",
       },
     ],
-    "variants": {},
   },
   "Ones": {
     "description": "Returns a new tensor of given shape filled with ones.",
@@ -493,7 +493,6 @@ INTERNAL_OPS = {
         "type": "dtype",
       },
     ],
-    "variants": {},
   },
   "Concatenate": {
     "description": "Joins a sequence of arrays along an existing axis.",
@@ -508,7 +507,6 @@ INTERNAL_OPS = {
         "default": "0",
       },
     ],
-    "variants": {},
   },
   "Zeros": {
     "description": "Returns a tensor filled with the scalar value 0, with the shape defined by the argument.",
@@ -523,7 +521,6 @@ INTERNAL_OPS = {
         "default": "None",
       },
     ],
-    "variants": {},
   },
   "RandInt": {
     "description": "Generates integers uniformly distributed in the range [low, high).",
@@ -546,7 +543,6 @@ INTERNAL_OPS = {
         "default": "None",
       },
     ],
-    "variants": {},
   },
   "Array": {
     "description": "Creates a tensor/array from a list or numeric data.",
@@ -561,7 +557,6 @@ INTERNAL_OPS = {
         "default": "None",
       },
     ],
-    "variants": {},
   },
   "Pad": {
     "description": "Pads a tensor. Plugin handles conversion between flat padding (Torch) and tuple-padding (NumPy).",
@@ -585,7 +580,6 @@ INTERNAL_OPS = {
         "default": "0.0",
       },
     ],
-    "variants": {},
   },
   "AssertClose": {
     "description": "Asserts that two tensors are numerically close.",
@@ -609,6 +603,5 @@ INTERNAL_OPS = {
         "default": "1e-8",
       },
     ],
-    "variants": {},
   },
 }

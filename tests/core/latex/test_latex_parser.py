@@ -1,5 +1,3 @@
-# tests/core/latex/test_parser.py
-
 """
 Tests for the LaTeX DSL Parser.
 

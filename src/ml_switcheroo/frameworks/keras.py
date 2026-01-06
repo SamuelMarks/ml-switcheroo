@@ -242,7 +242,10 @@ class KerasAdapter:
     Returns:
         Dict[str, StandardMap]: Definitions.
     """
-    return load_definitions("keras")
+    defs = load_definitions("keras")
+    if "ReLU" not in defs:
+      defs["ReLU"] = StandardMap(api="keras.layers.ReLU")
+    return defs
 
   @property
   def rng_seed_methods(self) -> List[str]:
@@ -412,26 +415,26 @@ class KerasAdapter:
     Stub implemented as Keras models contain structure + weights, making raw dict handling tricky.
     """
     return textwrap.dedent(
-      f"""
-            try:
+      f""" 
+            try: 
                 # Keras weights are usually saved with .weights.h5 or as full model
                 # This stub attempts to load if it's a full model file, extracting weights
-                model = keras.models.load_model({path_var}, compile=False)
-                raw_state = {{w.name: w.numpy() for w in model.weights}}
-            except Exception as e:
-                print(f"Warning: Failed to load Keras model ({{e}}). Assuming raw h5 weights file.")
+                model = keras.models.load_model({path_var}, compile=False) 
+                raw_state = {{w.name: w.numpy() for w in model.weights}} 
+            except Exception as e: 
+                print(f"Warning: Failed to load Keras model ({{e}}). Assuming raw h5 weights file.") 
                 # Fallback to h5py if available for raw weights
-                try:
+                try: 
                     import h5py
-                    f = h5py.File({path_var}, 'r')
-                    raw_state = {{}}
-                    def visit_func(name, node):
-                        if isinstance(node, h5py.Dataset):
-                            raw_state[name] = node[()]
-                    f.visititems(visit_func)
-                except ImportError:
-                    print("h5py not installed, cannot load raw weights.")
-                    raw_state = {{}}
+                    f = h5py.File({path_var}, 'r') 
+                    raw_state = {{}} 
+                    def visit_func(name, node): 
+                        if isinstance(node, h5py.Dataset): 
+                            raw_state[name] = node[()] 
+                    f.visititems(visit_func) 
+                except ImportError: 
+                    print("h5py not installed, cannot load raw weights.") 
+                    raw_state = {{}} 
             """
     )
 
@@ -446,10 +449,10 @@ class KerasAdapter:
     Returns warning that saving raw dictionary to Keras checkpoint is complex without model definition.
     """
     return textwrap.dedent(
-      """
-            print("WARNING: Saving raw dictionary to Keras checkpoint is not directly supported without model structure.")
-            print("To save weights for Keras, instantiate the model and use `model.set_weights()`.")
-            print(f"Weights available in converted_state variable for manual assignment.")
+      """ 
+            print("WARNING: Saving raw dictionary to Keras checkpoint is not directly supported without model structure.") 
+            print("To save weights for Keras, instantiate the model and use `model.set_weights()`.") 
+            print(f"Weights available in converted_state variable for manual assignment.") 
             """
     )
 

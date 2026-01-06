@@ -2,15 +2,27 @@
   "Avgpool": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "kernel_size",
-      "padding",
-      "stride"
+      {
+        "name": "kernel_size",
+        "type": "Union"
+      },
+      {
+        "name": "padding",
+        "type": "Union"
+      },
+      {
+        "name": "stride",
+        "type": "Union"
+      }
     ]
   },
   "Bilinear": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "bias"
+      {
+        "name": "bias",
+        "type": "bool"
+      }
     ]
   },
   "Cosinesimilarity": {
@@ -29,9 +41,18 @@
   "Gaussiannll": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "eps",
-      "full",
-      "reduction"
+      {
+        "name": "eps",
+        "type": "float"
+      },
+      {
+        "name": "full",
+        "type": "bool"
+      },
+      {
+        "name": "reduction",
+        "type": "str"
+      }
     ]
   },
   "Hardshrink": {
@@ -45,13 +66,19 @@
   "Kldiv": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "reduction"
+      {
+        "name": "reduction",
+        "type": "str"
+      }
     ]
   },
   "L1": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "reduction"
+      {
+        "name": "reduction",
+        "type": "str"
+      }
     ]
   },
   "Logcosh": {
@@ -70,39 +97,62 @@
   "Marginranking": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "margin",
-      "reduction"
+      {
+        "name": "margin",
+        "type": "float"
+      },
+      {
+        "name": "reduction",
+        "type": "str"
+      }
     ]
   },
   "Maxpool": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "kernel_size",
-      "padding",
-      "stride"
+      {
+        "name": "kernel_size",
+        "type": "Union"
+      },
+      {
+        "name": "padding",
+        "type": "Union"
+      },
+      {
+        "name": "stride",
+        "type": "Union"
+      }
     ]
-  },
-  "Module": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": []
   },
   "Mse": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "reduction"
+      {
+        "name": "reduction",
+        "type": "str"
+      }
     ]
   },
   "Nll": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "reduction"
+      {
+        "name": "reduction",
+        "type": "str"
+      }
     ]
   },
   "Smoothl1": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "beta",
-      "reduction"
+      {
+        "name": "beta",
+        "type": "float"
+      },
+      {
+        "name": "reduction",
+        "type": "str"
+      }
     ]
   },
   "Softmin": {
@@ -112,29 +162,68 @@
   "Transformer": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "activation",
-      "custom_decoder",
-      "custom_encoder",
-      "dropout",
-      "norm_first",
-      "num_decoder_layers",
-      "num_encoder_layers"
+      {
+        "name": "activation",
+        "type": "Union"
+      },
+      {
+        "name": "custom_decoder",
+        "type": "Optional"
+      },
+      {
+        "name": "custom_encoder",
+        "type": "Optional"
+      },
+      {
+        "name": "dropout",
+        "type": "float"
+      },
+      {
+        "name": "norm_first",
+        "type": "bool"
+      },
+      {
+        "name": "num_decoder_layers",
+        "type": "int"
+      },
+      {
+        "name": "num_encoder_layers",
+        "type": "int"
+      }
     ]
   },
   "Transformerdecoder": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "activation",
-      "dropout",
-      "norm_first"
+      {
+        "name": "activation",
+        "type": "Union"
+      },
+      {
+        "name": "dropout",
+        "type": "float"
+      },
+      {
+        "name": "norm_first",
+        "type": "bool"
+      }
     ]
   },
   "Transformerencoder": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      "activation",
-      "dropout",
-      "norm_first"
+      {
+        "name": "activation",
+        "type": "Union"
+      },
+      {
+        "name": "dropout",
+        "type": "float"
+      },
+      {
+        "name": "norm_first",
+        "type": "bool"
+      }
     ]
   }
 }

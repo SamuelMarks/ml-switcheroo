@@ -74,10 +74,9 @@ def test_status_icon_resolution(matrix):
   assert matrix._get_status_icon({}) == "❌"
 
 
-# Fix: Patch get_adapter WHERE IT IS USED (in config.py)
-# Also patch available_frameworks in config.py
-@patch("ml_switcheroo.config.available_frameworks")
-@patch("ml_switcheroo.config.get_adapter")
+# Fix: Patch where it is defined since it is dynamically imported in config.py
+@patch("ml_switcheroo.frameworks.base.available_frameworks")
+@patch("ml_switcheroo.frameworks.base.get_adapter")
 def test_dynamic_column_sorting(mock_get_adapter, mock_avail, matrix):
   """
   Verify that columns are ordered by Adapter UI priority.
@@ -120,9 +119,9 @@ def test_dynamic_column_sorting(mock_get_adapter, mock_avail, matrix):
   assert "beta" in row0
 
 
-# Fix: Patch where used
-@patch("ml_switcheroo.config.available_frameworks")
-@patch("ml_switcheroo.config.get_adapter")
+# Fix: Patch where defined
+@patch("ml_switcheroo.frameworks.base.available_frameworks")
+@patch("ml_switcheroo.frameworks.base.get_adapter")
 def test_render_output_contains_headers(mock_get_adapter, mock_avail, matrix):
   """
   Verify Rich Table rendering includes dynamic headers.
@@ -146,9 +145,9 @@ def test_render_output_contains_headers(mock_get_adapter, mock_avail, matrix):
   assert "❌" in output  # MissingOp Jax
 
 
-# Fix: Patch where used
-@patch("ml_switcheroo.config.available_frameworks")
-@patch("ml_switcheroo.config.get_adapter")
+# Fix: Patch where defined
+@patch("ml_switcheroo.frameworks.base.available_frameworks")
+@patch("ml_switcheroo.frameworks.base.get_adapter")
 def test_inheritance_hiding_logic(mock_get_adapter, mock_avail, matrix):
   """
   Verify that frameworks inheriting from others (Children/Flavours) are

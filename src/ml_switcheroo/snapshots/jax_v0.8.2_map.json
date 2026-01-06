@@ -10,26 +10,85 @@
     "Acosh": {
       "api": "jax.numpy.acosh"
     },
+    "Adadelta": {
+      "api": "optax.adadelta"
+    },
+    "Adafactor": {
+      "api": "optax.adafactor"
+    },
+    "Adagrad": {
+      "api": "optax.adagrad"
+    },
     "Adam": {
       "api": "optax.adam",
       "requires_plugin": "optimizer_constructor"
     },
+    "Adamax": {
+      "api": "optax.adamax"
+    },
+    "Adamw": {
+      "api": "optax.adamw"
+    },
+    "AdaptiveGradClipState": {
+      "api": "optax.AdaptiveGradClipState",
+      "args": {}
+    },
     "Add": {
-      "api": "jax.numpy.add"
+      "api": "optax.tree.add",
+      "args": {}
+    },
+    "AddDecayedWeightsState": {
+      "api": "optax.AddDecayedWeightsState",
+      "args": {}
+    },
+    "AddNoiseState": {
+      "api": "optax.AddNoiseState",
+      "args": {}
+    },
+    "ApplyIfFiniteState": {
+      "api": "optax.ApplyIfFiniteState",
+      "args": {}
     },
     "Arange": {
       "api": "jax.numpy.arange",
-      "required_imports": []
+      "args": {
+        "device": "device",
+        "dtype": "dtype",
+        "out_sharding": "out_sharding",
+        "start": "start",
+        "step": "step",
+        "stop": "stop"
+      }
     },
     "ArgMax": {
-      "api": "jax.numpy.argmax"
+      "api": "jax.numpy.ndarray.argmax",
+      "args": {
+        "axis": "axis",
+        "keepdims": "keepdims",
+        "out": "out",
+        "self": "self"
+      }
     },
     "ArgMin": {
-      "api": "jax.numpy.argmin"
+      "api": "jax.numpy.ndarray.argmin",
+      "args": {
+        "axis": "axis",
+        "keepdims": "keepdims",
+        "out": "out",
+        "self": "self"
+      }
     },
     "Array": {
       "api": "jax.numpy.array",
-      "required_imports": []
+      "args": {
+        "copy": "copy",
+        "device": "device",
+        "dtype": "dtype",
+        "ndmin": "ndmin",
+        "object": "object",
+        "order": "order",
+        "out_sharding": "out_sharding"
+      }
     },
     "Asin": {
       "api": "jax.numpy.asin"
@@ -53,42 +112,58 @@
       "api": "jax.numpy.atanh"
     },
     "Bool": {
-      "api": "jnp.bool_"
+      "api": "jax.numpy.bool",
+      "args": {
+        "x": "x"
+      }
+    },
+    "Cast": {
+      "api": "optax.tree.cast",
+      "args": {}
     },
     "CastBool": {
       "api": "astype",
+      "required_imports": [],
       "requires_plugin": "type_methods"
     },
     "CastByte": {
       "api": "astype",
+      "required_imports": [],
       "requires_plugin": "type_methods"
     },
     "CastChar": {
       "api": "astype",
+      "required_imports": [],
       "requires_plugin": "type_methods"
     },
     "CastDouble": {
       "api": "astype",
+      "required_imports": [],
       "requires_plugin": "type_methods"
     },
     "CastFloat": {
       "api": "astype",
+      "required_imports": [],
       "requires_plugin": "type_methods"
     },
     "CastHalf": {
       "api": "astype",
+      "required_imports": [],
       "requires_plugin": "type_methods"
     },
     "CastInt": {
       "api": "astype",
+      "required_imports": [],
       "requires_plugin": "type_methods"
     },
     "CastLong": {
       "api": "astype",
+      "required_imports": [],
       "requires_plugin": "type_methods"
     },
     "CastShort": {
       "api": "astype",
+      "required_imports": [],
       "requires_plugin": "type_methods"
     },
     "Ceil": {
@@ -100,24 +175,69 @@
         "input": "a",
         "max": "a_max",
         "min": "a_min"
-      }
+      },
+      "required_imports": []
     },
     "Clip": {
-      "api": "jax.numpy.clip"
+      "api": "optax.tree.clip",
+      "args": {}
+    },
+    "ClipByGlobalNormState": {
+      "api": "optax.ClipByGlobalNormState",
+      "args": {}
     },
     "ClipGradNorm": {
       "api": "optax.clip_by_global_norm",
+      "required_imports": [],
       "requires_plugin": "grad_clipper"
     },
+    "ClipState": {
+      "api": "optax.ClipState",
+      "args": {}
+    },
+    "ComplexWarning": {
+      "api": "jax.numpy.ComplexWarning"
+    },
     "Compress": {
-      "api": "jax.numpy.compress"
+      "api": "jax.numpy.ndarray.compress",
+      "args": {
+        "axis": "axis",
+        "condition": "condition",
+        "fill_value": "fill_value",
+        "out": "out",
+        "self": "self",
+        "size": "size"
+      }
+    },
+    "ComputeCv": {
+      "api": "optax.monte_carlo.control_variates.ComputeCv",
+      "args": {}
+    },
+    "Concat": {
+      "api": "jax.numpy.concat",
+      "args": {
+        "arrays": "arrays",
+        "axis": "axis"
+      }
     },
     "Concatenate": {
       "api": "jax.numpy.concatenate",
-      "required_imports": []
+      "args": {
+        "arrays": "arrays",
+        "axis": "axis",
+        "dtype": "dtype"
+      }
     },
-    "Constant": {
-      "api": "optax.constant_schedule",
+    "ConditionallyMaskState": {
+      "api": "optax.ConditionallyMaskState",
+      "args": {}
+    },
+    "ConditionallyTransformState": {
+      "api": "optax.ConditionallyTransformState",
+      "args": {}
+    },
+    "ControlVariate": {
+      "api": "optax.monte_carlo.control_variates.ControlVariate",
       "args": {}
     },
     "Cos": {
@@ -128,6 +248,7 @@
     },
     "CosineAnnealingLR": {
       "api": "optax.cosine_decay_schedule",
+      "required_imports": [],
       "requires_plugin": "scheduler_rewire"
     },
     "CrossEntropyLoss": {
@@ -136,6 +257,7 @@
         "input": "logits",
         "target": "labels"
       },
+      "required_imports": [],
       "requires_plugin": "loss_reduction"
     },
     "CudaAvailable": {
@@ -144,10 +266,25 @@
       "requires_plugin": "cuda_is_available"
     },
     "CumSum": {
-      "api": "jax.numpy.cumsum"
+      "api": "jax.numpy.ndarray.cumsum",
+      "args": {
+        "axis": "axis",
+        "dtype": "dtype",
+        "out": "out",
+        "self": "self"
+      }
+    },
+    "CvExpectedValue": {
+      "api": "optax.monte_carlo.control_variates.CvExpectedValue",
+      "args": {}
+    },
+    "CvState": {
+      "api": "optax.monte_carlo.control_variates.CvState",
+      "args": {}
     },
     "DataLoader": {
       "api": "GenericDataLoader",
+      "required_imports": [],
       "requires_plugin": "convert_dataloader"
     },
     "Det": {
@@ -159,11 +296,16 @@
       "requires_plugin": "device_allocator"
     },
     "Div": {
-      "api": "jnp.divide"
+      "api": "optax.tree.div",
+      "args": {}
     },
     "Einsum": {
       "api": "jnp.einsum",
       "requires_plugin": "einsum_normalizer"
+    },
+    "EmaState": {
+      "api": "optax.EmaState",
+      "args": {}
     },
     "Equal": {
       "api": "jax.numpy.equal"
@@ -172,34 +314,44 @@
       "api": "jax.numpy.exp"
     },
     "Flatten": {
-      "api": "jax.numpy.ndarray.flatten",
-      "args": {
-        "order": "order",
-        "out_sharding": "out_sharding",
-        "self": "self"
-      }
+      "api": "optax.flatten",
+      "args": {}
     },
     "Float16": {
-      "api": "jnp.float16"
+      "api": "jax.numpy.float16",
+      "args": {
+        "x": "x"
+      }
     },
     "Float32": {
-      "api": "jnp.float32"
+      "api": "jax.numpy.float32",
+      "args": {
+        "x": "x"
+      }
     },
     "Float64": {
-      "api": "jnp.float64"
+      "api": "jax.numpy.float64",
+      "args": {
+        "x": "x"
+      }
     },
     "Floor": {
       "api": "jax.numpy.floor"
     },
     "GELU": {
-      "api": "jax.nn.gelu"
+      "api": "jax.nn.gelu",
+      "required_imports": []
     },
     "Gather": {
       "api": "jax.numpy.take_along_axis",
+      "required_imports": [],
       "requires_plugin": "gather_adapter"
     },
     "Greater": {
       "api": "jax.numpy.greater"
+    },
+    "INTEGER": {
+      "api": "jax.numpy.integer"
     },
     "Identity": {
       "api": "jax.numpy.identity",
@@ -208,14 +360,31 @@
         "n": "n"
       }
     },
+    "InjectHyperparamsState": {
+      "api": "optax.schedules.inject.InjectHyperparamsState",
+      "args": {}
+    },
+    "InjectStatefulHyperparamsState": {
+      "api": "optax.InjectStatefulHyperparamsState",
+      "args": {}
+    },
     "Int16": {
-      "api": "jnp.int16"
+      "api": "jax.numpy.int16",
+      "args": {
+        "x": "x"
+      }
     },
     "Int32": {
-      "api": "jnp.int32"
+      "api": "jax.numpy.int32",
+      "args": {
+        "x": "x"
+      }
     },
     "Int64": {
-      "api": "jnp.int64"
+      "api": "jax.numpy.int64",
+      "args": {
+        "x": "x"
+      }
     },
     "IsNaN": {
       "api": "jax.numpy.isnan"
@@ -223,15 +392,20 @@
     "Less": {
       "api": "jax.numpy.less"
     },
-    "Linear": {
-      "api": "optax.linear_schedule",
-      "args": {}
+    "Lion": {
+      "api": "optax.lion"
     },
     "Load": {
-      "api": "jax.numpy.load"
+      "api": "jax.numpy.load",
+      "args": {
+        "args": "args",
+        "file": "file",
+        "kwargs": "kwargs"
+      }
     },
     "LoadStateDict": {
       "api": "KeyMapper.from_torch",
+      "required_imports": [],
       "requires_plugin": "checkpoint_mapper"
     },
     "Log": {
@@ -243,37 +417,106 @@
         "input": "predictions",
         "target": "targets"
       },
+      "required_imports": [],
       "requires_plugin": "loss_reduction"
     },
+    "MaskedNode": {
+      "api": "optax.MaskedNode",
+      "args": {}
+    },
+    "MaskedState": {
+      "api": "optax.MaskedState",
+      "args": {}
+    },
     "MatMul": {
-      "api": "jax.numpy.matmul"
+      "api": "jax.numpy.linalg.matmul",
+      "args": {
+        "precision": "precision",
+        "preferred_element_type": "preferred_element_type",
+        "x1": "x1",
+        "x2": "x2"
+      }
     },
     "Max": {
-      "api": "jax.numpy.max"
+      "api": "optax.tree.max",
+      "args": {}
     },
     "Mean": {
-      "api": "jax.numpy.mean"
+      "api": "jax.numpy.ndarray.mean",
+      "args": {
+        "axis": "axis",
+        "dtype": "dtype",
+        "keepdims": "keepdims",
+        "out": "out",
+        "self": "self",
+        "where": "where"
+      }
     },
     "Min": {
-      "api": "jax.numpy.min"
+      "api": "optax.tree.min",
+      "args": {}
     },
-    "ModuleList": {},
+    "Mod": {
+      "api": "jax.numpy.mod",
+      "args": {
+        "x1": "x1",
+        "x2": "x2"
+      }
+    },
+    "ModuleList": {
+      "required_imports": []
+    },
     "Mul": {
-      "api": "jnp.multiply"
+      "api": "optax.tree.mul",
+      "args": {}
+    },
+    "MultiSteps": {
+      "api": "optax.MultiSteps",
+      "args": {}
+    },
+    "MultiStepsState": {
+      "api": "optax.MultiStepsState",
+      "args": {}
+    },
+    "MultiTransformState": {
+      "api": "optax.MultiTransformState",
+      "args": {}
+    },
+    "NonNegativeParamsState": {
+      "api": "optax.NonNegativeParamsState",
+      "args": {}
     },
     "NonZero": {
-      "api": "jax.numpy.nonzero"
+      "api": "jax.numpy.nonzero",
+      "args": {
+        "a": "a",
+        "fill_value": "fill_value",
+        "size": "size"
+      }
     },
     "OneHot": {
       "api": "jax.nn.one_hot",
       "args": {
         "input": "x",
         "tensor": "x"
-      }
+      },
+      "required_imports": []
     },
     "Ones": {
       "api": "jax.numpy.ones",
-      "required_imports": []
+      "args": {
+        "device": "device",
+        "dtype": "dtype",
+        "out_sharding": "out_sharding",
+        "shape": "shape"
+      }
+    },
+    "OptState": {
+      "api": "optax.OptState"
+    },
+    "OptaxTest": {
+      "api": "optax.optax_test.OptaxTest",
+      "args": {}
     },
     "Pad": {
       "api": "jax.numpy.pad",
@@ -284,8 +527,19 @@
         "pad_width": "pad_width"
       }
     },
+    "PartitionState": {
+      "api": "optax.PartitionState",
+      "args": {}
+    },
+    "Poly": {
+      "api": "jax.numpy.poly"
+    },
     "Pow": {
-      "api": "jax.numpy.pow"
+      "api": "jax.numpy.pow",
+      "args": {
+        "x1": "x1",
+        "x2": "x2"
+      }
     },
     "RMSprop": {
       "api": "optax.rmsprop"
@@ -303,20 +557,42 @@
       "api": "jax.numpy.reciprocal"
     },
     "Reshape": {
-      "api": "jax.numpy.reshape"
+      "api": "jax.numpy.reshape",
+      "args": {
+        "a": "a",
+        "copy": "copy",
+        "order": "order",
+        "out_sharding": "out_sharding",
+        "shape": "shape"
+      }
     },
     "Round": {
-      "api": "jax.numpy.round"
+      "api": "jax.numpy.ndarray.round",
+      "args": {
+        "decimals": "decimals",
+        "out": "out",
+        "self": "self"
+      }
     },
     "SGD": {
       "api": "optax.sgd",
+      "required_imports": [],
       "requires_plugin": "optimizer_constructor"
     },
     "Save": {
       "api": "jax.numpy.save"
     },
+    "ScaleByTrustRatioState": {
+      "api": "optax.ScaleByTrustRatioState",
+      "args": {}
+    },
+    "ScaleState": {
+      "api": "optax.ScaleState",
+      "args": {}
+    },
     "Scatter": {
       "api": "jax.ops.index_update",
+      "required_imports": [],
       "requires_plugin": "scatter_indexer"
     },
     "Shape": {
@@ -325,8 +601,13 @@
         "a": "a"
       }
     },
+    "ShouldSkipUpdateFunction": {
+      "api": "optax.ShouldSkipUpdateFunction",
+      "args": {}
+    },
     "SiLU": {
-      "api": "jax.nn.silu"
+      "api": "jax.nn.silu",
+      "required_imports": []
     },
     "Sign": {
       "api": "jax.numpy.sign"
@@ -341,21 +622,40 @@
       "api": "optax.tree.size",
       "args": {}
     },
+    "SnapshotState": {
+      "api": "optax.SnapshotState",
+      "args": {}
+    },
+    "Split": {
+      "api": "jax.numpy.split",
+      "args": {
+        "ary": "ary",
+        "axis": "axis",
+        "indices_or_sections": "indices_or_sections"
+      }
+    },
     "Sqrt": {
       "api": "jax.numpy.sqrt"
     },
     "Squeeze": {
-      "api": "jax.numpy.squeeze"
+      "api": "jax.numpy.squeeze",
+      "args": {
+        "a": "a",
+        "axis": "axis"
+      }
     },
     "StepLR": {
       "api": "optax.exponential_decay",
+      "required_imports": [],
       "requires_plugin": "scheduler_rewire"
     },
     "Sub": {
-      "api": "jnp.subtract"
+      "api": "optax.tree.sub",
+      "args": {}
     },
     "Sum": {
-      "api": "jax.numpy.sum"
+      "api": "optax.tree.sum",
+      "args": {}
     },
     "Tan": {
       "api": "jax.numpy.tan"
@@ -364,51 +664,95 @@
       "api": "jax.numpy.tanh"
     },
     "TensorType": {
-      "api": "jax.Array"
+      "api": "jax.Array",
+      "required_imports": []
     },
     "Tile": {
-      "api": "jax.numpy.tile"
+      "api": "jax.numpy.tile",
+      "args": {
+        "A": "A",
+        "reps": "reps"
+      }
     },
     "TopK": {
       "api": "jax.lax.top_k",
+      "required_imports": [],
       "requires_plugin": "topk_adapter"
     },
     "TorchFunctional": {
-      "api": "jax.nn"
+      "api": "jax.nn",
+      "required_imports": []
+    },
+    "TraceState": {
+      "api": "optax.TraceState",
+      "args": {}
     },
     "Transpose": {
-      "api": "jax.numpy.transpose"
+      "api": "jax.numpy.transpose",
+      "args": {
+        "a": "a",
+        "axes": "axes"
+      }
     },
     "UInt8": {
-      "api": "jnp.uint8"
-    },
-    "Unflatten": {
-      "api": "jax.numpy.ndarray.flatten",
+      "api": "jax.numpy.uint8",
       "args": {
-        "order": "order",
-        "out_sharding": "out_sharding",
-        "self": "self"
+        "x": "x"
       }
     },
     "Unique": {
-      "api": "jax.numpy.unique"
+      "api": "jax.numpy.unique",
+      "args": {
+        "ar": "ar",
+        "axis": "axis",
+        "equal_nan": "equal_nan",
+        "fill_value": "fill_value",
+        "return_counts": "return_counts",
+        "return_index": "return_index",
+        "return_inverse": "return_inverse",
+        "size": "size",
+        "sorted": "sorted"
+      }
     },
     "Unsqueeze": {
       "api": "jax.numpy.expand_dims",
       "args": {
         "dim": "axis"
-      }
+      },
+      "required_imports": []
+    },
+    "UpdateCvState": {
+      "api": "optax.monte_carlo.control_variates.UpdateCvState",
+      "args": {}
     },
     "View": {
-      "api": "jax.numpy.reshape",
-      "requires_plugin": "view_semantics"
+      "api": "jax.numpy.ndarray.view",
+      "args": {
+        "dtype": "dtype",
+        "self": "self",
+        "type": "type"
+      }
     },
     "Where": {
-      "api": "jax.numpy.where"
+      "api": "optax.tree.where",
+      "args": {}
+    },
+    "WrappedSchedule": {
+      "api": "optax.WrappedSchedule",
+      "args": {}
+    },
+    "ZeroNansState": {
+      "api": "optax.ZeroNansState",
+      "args": {}
     },
     "Zeros": {
       "api": "jax.numpy.zeros",
-      "required_imports": []
+      "args": {
+        "device": "device",
+        "dtype": "dtype",
+        "out_sharding": "out_sharding",
+        "shape": "shape"
+      }
     },
     "__array_namespace_info__": {
       "api": "jax.numpy.__array_namespace_info__"
@@ -422,19 +766,96 @@
     "acosh": {
       "api": "jax.numpy.acosh"
     },
+    "adaptive_grad_clip": {
+      "api": "optax.adaptive_grad_clip",
+      "args": {}
+    },
     "add": {
       "api": "jax.numpy.add"
     },
+    "add_decayed_weights": {
+      "api": "optax.add_decayed_weights",
+      "args": {}
+    },
+    "add_noise": {
+      "api": "optax.add_noise",
+      "args": {}
+    },
+    "add_scale": {
+      "api": "optax.tree.add_scale",
+      "args": {}
+    },
+    "addressable_data": {
+      "api": "jax.numpy.ndarray.addressable_data",
+      "args": {
+        "index": "index",
+        "self": "self"
+      }
+    },
     "all": {
-      "api": "jax.numpy.all"
+      "api": "jax.numpy.ndarray.all",
+      "args": {
+        "axis": "axis",
+        "keepdims": "keepdims",
+        "out": "out",
+        "self": "self",
+        "where": "where"
+      }
+    },
+    "allclose": {
+      "api": "optax.tree.allclose",
+      "args": {}
+    },
+    "amax": {
+      "api": "jax.numpy.amax",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "initial": "initial",
+        "keepdims": "keepdims",
+        "out": "out",
+        "where": "where"
+      }
+    },
+    "amin": {
+      "api": "jax.numpy.amin",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "initial": "initial",
+        "keepdims": "keepdims",
+        "out": "out",
+        "where": "where"
+      }
     },
     "any": {
-      "api": "jax.numpy.any"
+      "api": "jax.numpy.ndarray.any",
+      "args": {
+        "axis": "axis",
+        "keepdims": "keepdims",
+        "out": "out",
+        "self": "self",
+        "where": "where"
+      }
     },
     "append": {
       "api": "jax.numpy.append"
     },
-    "apply": {
+    "apply_along_axis": {
+      "api": "jax.numpy.apply_along_axis",
+      "args": {
+        "args": "args",
+        "arr": "arr",
+        "axis": "axis",
+        "func1d": "func1d",
+        "kwargs": "kwargs"
+      }
+    },
+    "apply_if_finite": {
+      "api": "optax.apply_if_finite",
+      "args": {}
+    },
+    "apply_over_axes": {
       "api": "jax.numpy.apply_over_axes",
       "args": {
         "a": "a",
@@ -448,11 +869,81 @@
     "argmin": {
       "api": "jax.numpy.argmin"
     },
+    "argpartition": {
+      "api": "jax.numpy.ndarray.argpartition",
+      "args": {
+        "axis": "axis",
+        "kth": "kth",
+        "self": "self"
+      }
+    },
+    "argsort": {
+      "api": "jax.numpy.ndarray.argsort",
+      "args": {
+        "axis": "axis",
+        "descending": "descending",
+        "kind": "kind",
+        "order": "order",
+        "self": "self",
+        "stable": "stable"
+      }
+    },
+    "argwhere": {
+      "api": "jax.numpy.argwhere",
+      "args": {
+        "a": "a",
+        "fill_value": "fill_value",
+        "size": "size"
+      }
+    },
+    "array_equal": {
+      "api": "jax.numpy.array_equal",
+      "args": {
+        "a1": "a1",
+        "a2": "a2",
+        "equal_nan": "equal_nan"
+      }
+    },
+    "array_equiv": {
+      "api": "jax.numpy.array_equiv",
+      "args": {
+        "a1": "a1",
+        "a2": "a2"
+      }
+    },
+    "array_split": {
+      "api": "jax.numpy.array_split",
+      "args": {
+        "ary": "ary",
+        "axis": "axis",
+        "indices_or_sections": "indices_or_sections"
+      }
+    },
+    "asarray": {
+      "api": "jax.numpy.asarray",
+      "args": {
+        "a": "a",
+        "copy": "copy",
+        "device": "device",
+        "dtype": "dtype",
+        "order": "order",
+        "out_sharding": "out_sharding"
+      }
+    },
     "asin": {
       "api": "jax.numpy.asin"
     },
     "asinh": {
       "api": "jax.numpy.asinh"
+    },
+    "astype": {
+      "api": "jax.numpy.ndarray.astype",
+      "args": {
+        "copy": "copy",
+        "device": "device",
+        "dtype": "dtype",
+        "self": "self"
+      }
     },
     "atan": {
       "api": "jax.numpy.atan"
@@ -463,15 +954,53 @@
     "atanh": {
       "api": "jax.numpy.atanh"
     },
+    "atleast_1d": {
+      "api": "jax.numpy.atleast_1d"
+    },
+    "atleast_2d": {
+      "api": "jax.numpy.atleast_2d"
+    },
+    "atleast_3d": {
+      "api": "jax.numpy.atleast_3d"
+    },
+    "average": {
+      "api": "jax.numpy.average",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "keepdims": "keepdims",
+        "returned": "returned",
+        "weights": "weights"
+      }
+    },
+    "bartlett": {
+      "api": "jax.numpy.bartlett",
+      "args": {
+        "M": "M"
+      }
+    },
+    "batch_shape": {
+      "api": "optax.tree.batch_shape",
+      "args": {}
+    },
     "bfloat16": {
       "api": "jax.numpy.bfloat16",
       "args": {
         "x": "x"
       }
     },
-    "bias": {
-      "api": "optax.bias_correction",
+    "bias_correction": {
+      "api": "optax.tree.bias_correction",
       "args": {}
+    },
+    "bincount": {
+      "api": "jax.numpy.bincount",
+      "args": {
+        "length": "length",
+        "minlength": "minlength",
+        "weights": "weights",
+        "x": "x"
+      }
     },
     "bitwise_and": {
       "api": "jax.numpy.bitwise_and"
@@ -482,6 +1011,9 @@
     "bitwise_left_shift": {
       "api": "jax.numpy.bitwise_left_shift"
     },
+    "bitwise_not": {
+      "api": "jax.numpy.bitwise_not"
+    },
     "bitwise_or": {
       "api": "jax.numpy.bitwise_or"
     },
@@ -491,7 +1023,31 @@
     "bitwise_xor": {
       "api": "jax.numpy.bitwise_xor"
     },
-    "broadcast": {
+    "blackman": {
+      "api": "jax.numpy.blackman",
+      "args": {
+        "M": "M"
+      }
+    },
+    "bool_": {
+      "api": "jax.numpy.bool_",
+      "args": {
+        "x": "x"
+      }
+    },
+    "broadcast_arrays": {
+      "api": "jax.numpy.broadcast_arrays",
+      "args": {
+        "args": "args"
+      }
+    },
+    "broadcast_shapes": {
+      "api": "jax.numpy.broadcast_shapes",
+      "args": {
+        "shapes": "shapes"
+      }
+    },
+    "broadcast_to": {
       "api": "jax.numpy.broadcast_to",
       "args": {
         "array": "array",
@@ -499,23 +1055,122 @@
         "shape": "shape"
       }
     },
-    "broadcast_arrays": {
-      "api": "jax.numpy.broadcast_arrays"
-    },
-    "broadcast_to": {
-      "api": "jax.numpy.broadcast_to"
-    },
     "can_cast": {
       "api": "jax.numpy.can_cast"
+    },
+    "cast_like": {
+      "api": "optax.tree.cast_like",
+      "args": {}
+    },
+    "cdouble": {
+      "api": "jax.numpy.cdouble",
+      "args": {
+        "x": "x"
+      }
     },
     "ceil": {
       "api": "jax.numpy.ceil"
     },
+    "chain": {
+      "api": "optax.chain",
+      "args": {}
+    },
+    "character": {
+      "api": "jax.numpy.character"
+    },
+    "choose": {
+      "api": "jax.numpy.ndarray.choose",
+      "args": {
+        "choices": "choices",
+        "mode": "mode",
+        "out": "out",
+        "self": "self"
+      }
+    },
     "clip": {
       "api": "jax.numpy.clip"
     },
+    "clip_by_block_rms": {
+      "api": "optax.clip_by_block_rms",
+      "args": {}
+    },
+    "clip_by_global_norm": {
+      "api": "optax.clip_by_global_norm",
+      "args": {}
+    },
+    "column_stack": {
+      "api": "jax.numpy.column_stack",
+      "args": {
+        "tup": "tup"
+      }
+    },
+    "complex128": {
+      "api": "jax.numpy.complex128",
+      "args": {
+        "x": "x"
+      }
+    },
+    "complex64": {
+      "api": "jax.numpy.complex64",
+      "args": {
+        "x": "x"
+      }
+    },
+    "complex_": {
+      "api": "jax.numpy.complex_",
+      "args": {
+        "x": "x"
+      }
+    },
+    "complexfloating": {
+      "api": "jax.numpy.complexfloating"
+    },
+    "conditionally_mask": {
+      "api": "optax.conditionally_mask",
+      "args": {}
+    },
+    "conditionally_transform": {
+      "api": "optax.conditionally_transform",
+      "args": {}
+    },
     "conj": {
-      "api": "jax.numpy.conj"
+      "api": "optax.tree.conj",
+      "args": {}
+    },
+    "conjugate": {
+      "api": "jax.numpy.ndarray.conjugate",
+      "args": {
+        "self": "self"
+      }
+    },
+    "constant_schedule": {
+      "api": "optax.constant_schedule",
+      "args": {}
+    },
+    "control_delta_method": {
+      "api": "optax.monte_carlo.control_variates.control_delta_method",
+      "args": {
+        "function": "function"
+      }
+    },
+    "control_variates_jacobians": {
+      "api": "optax.monte_carlo.control_variates.control_variates_jacobians",
+      "args": {
+        "control_variate_from_function": "control_variate_from_function",
+        "control_variate_state": "control_variate_state",
+        "dist_builder": "dist_builder",
+        "estimate_cv_coeffs": "estimate_cv_coeffs",
+        "estimate_cv_coeffs_num_samples": "estimate_cv_coeffs_num_samples",
+        "function": "function",
+        "grad_estimator": "grad_estimator",
+        "num_samples": "num_samples",
+        "params": "params",
+        "rng": "rng"
+      }
+    },
+    "convex_kl_divergence": {
+      "api": "optax.convex_kl_divergence",
+      "args": {}
     },
     "copy": {
       "api": "jax.numpy.ndarray.copy",
@@ -523,14 +1178,35 @@
         "self": "self"
       }
     },
+    "copy_to_host_async": {
+      "api": "jax.numpy.ndarray.copy_to_host_async",
+      "args": {
+        "self": "self"
+      }
+    },
     "copysign": {
       "api": "jax.numpy.copysign"
+    },
+    "corrcoef": {
+      "api": "jax.numpy.corrcoef"
     },
     "cos": {
       "api": "jax.numpy.cos"
     },
     "cosh": {
       "api": "jax.numpy.cosh"
+    },
+    "cosine_decay_schedule": {
+      "api": "optax.cosine_decay_schedule",
+      "args": {}
+    },
+    "cosine_distance": {
+      "api": "optax.cosine_distance",
+      "args": {}
+    },
+    "cosine_onecycle_schedule": {
+      "api": "optax.cosine_onecycle_schedule",
+      "args": {}
     },
     "cosine_similarity": {
       "api": "optax.cosine_similarity",
@@ -539,34 +1215,168 @@
     "count_nonzero": {
       "api": "jax.numpy.count_nonzero"
     },
+    "cov": {
+      "api": "jax.numpy.cov"
+    },
     "cross": {
-      "api": "jax.numpy.cross"
+      "api": "jax.numpy.linalg.cross",
+      "args": {
+        "axis": "axis",
+        "x1": "x1",
+        "x2": "x2"
+      }
+    },
+    "csingle": {
+      "api": "jax.numpy.csingle",
+      "args": {
+        "x": "x"
+      }
+    },
+    "ctc_loss": {
+      "api": "optax.ctc_loss",
+      "args": {}
+    },
+    "ctc_loss_with_forward_probs": {
+      "api": "optax.ctc_loss_with_forward_probs",
+      "args": {}
+    },
+    "cumprod": {
+      "api": "jax.numpy.ndarray.cumprod",
+      "args": {
+        "axis": "axis",
+        "dtype": "dtype",
+        "out": "out",
+        "self": "self"
+      }
+    },
+    "cumulative_prod": {
+      "api": "jax.numpy.cumulative_prod",
+      "args": {
+        "axis": "axis",
+        "dtype": "dtype",
+        "include_initial": "include_initial",
+        "x": "x"
+      }
+    },
+    "cumulative_sum": {
+      "api": "jax.numpy.cumulative_sum",
+      "args": {
+        "axis": "axis",
+        "dtype": "dtype",
+        "include_initial": "include_initial",
+        "x": "x"
+      }
     },
     "data_ptr": {
       "api": "data",
       "requires_plugin": "method_to_property"
     },
+    "degrees": {
+      "api": "jax.numpy.degrees",
+      "args": {
+        "x": "x"
+      }
+    },
+    "delete": {
+      "api": "jax.numpy.delete",
+      "args": {
+        "arr": "arr",
+        "assume_unique_indices": "assume_unique_indices",
+        "axis": "axis",
+        "obj": "obj"
+      }
+    },
     "det": {
       "api": "jax.numpy.linalg.det"
     },
+    "diag": {
+      "api": "jax.numpy.diag",
+      "args": {
+        "k": "k",
+        "v": "v"
+      }
+    },
+    "diag_indices": {
+      "api": "jax.numpy.diag_indices",
+      "args": {
+        "n": "n",
+        "ndim": "ndim"
+      }
+    },
+    "diag_indices_from": {
+      "api": "jax.numpy.diag_indices_from",
+      "args": {
+        "arr": "arr"
+      }
+    },
+    "diagflat": {
+      "api": "jax.numpy.diagflat",
+      "args": {
+        "k": "k",
+        "v": "v"
+      }
+    },
     "diagonal": {
-      "api": "jax.numpy.diagonal"
+      "api": "jax.numpy.ndarray.diagonal",
+      "args": {
+        "axis1": "axis1",
+        "axis2": "axis2",
+        "offset": "offset",
+        "self": "self"
+      }
     },
     "diff": {
       "api": "jax.numpy.diff"
     },
-    "div_value": {
-      "api": "optax.tree.div",
-      "args": {}
+    "digitize": {
+      "api": "jax.numpy.digitize"
     },
     "divide": {
-      "api": "jax.numpy.divide"
+      "api": "jax.numpy.divide",
+      "args": {
+        "x1": "x1",
+        "x2": "x2"
+      }
+    },
+    "dot": {
+      "api": "jax.numpy.ndarray.dot",
+      "args": {
+        "b": "b",
+        "precision": "precision",
+        "preferred_element_type": "preferred_element_type",
+        "self": "self"
+      }
     },
     "double": {
       "api": "jax.numpy.double",
       "args": {
         "x": "x"
       }
+    },
+    "dsplit": {
+      "api": "jax.numpy.dsplit",
+      "args": {
+        "ary": "ary",
+        "indices_or_sections": "indices_or_sections"
+      }
+    },
+    "dstack": {
+      "api": "jax.numpy.dstack",
+      "args": {
+        "dtype": "dtype",
+        "tup": "tup"
+      }
+    },
+    "dtype": {
+      "api": "optax.tree.dtype",
+      "args": {}
+    },
+    "e": {
+      "api": "jax.numpy.e",
+      "args": {}
+    },
+    "ediff1d": {
+      "api": "jax.numpy.ediff1d"
     },
     "eig": {
       "api": "jax.numpy.linalg.eig",
@@ -580,45 +1390,245 @@
     "eigvalsh": {
       "api": "jax.numpy.linalg.eigvalsh"
     },
+    "einsum_path": {
+      "api": "jax.numpy.einsum_path",
+      "args": {
+        "operands": "operands",
+        "optimize": "optimize",
+        "subscripts": "subscripts"
+      }
+    },
+    "ema": {
+      "api": "optax.ema",
+      "args": {}
+    },
+    "empty": {
+      "api": "jax.numpy.empty",
+      "args": {
+        "device": "device",
+        "dtype": "dtype",
+        "out_sharding": "out_sharding",
+        "shape": "shape"
+      }
+    },
     "empty_like": {
-      "api": "jax.numpy.empty_like"
+      "api": "jax.numpy.empty_like",
+      "args": {
+        "device": "device",
+        "dtype": "dtype",
+        "prototype": "prototype",
+        "shape": "shape"
+      }
     },
     "enable_grad": {
       "api": "contextlib.nullcontext",
+      "required_imports": [],
       "requires_plugin": "context_to_function_wrap"
     },
     "equal": {
       "api": "jax.numpy.equal"
     },
+    "estimate_control_variate_coefficients": {
+      "api": "optax.monte_carlo.control_variates.estimate_control_variate_coefficients",
+      "args": {
+        "control_variate_from_function": "control_variate_from_function",
+        "control_variate_state": "control_variate_state",
+        "dist_builder": "dist_builder",
+        "eps": "eps",
+        "function": "function",
+        "grad_estimator": "grad_estimator",
+        "num_samples": "num_samples",
+        "params": "params",
+        "rng": "rng"
+      }
+    },
+    "euler_gamma": {
+      "api": "jax.numpy.euler_gamma",
+      "args": {}
+    },
     "exp": {
       "api": "jax.numpy.exp"
     },
     "expand_dims": {
-      "api": "jax.numpy.expand_dims"
+      "api": "jax.numpy.expand_dims",
+      "args": {
+        "a": "a",
+        "axis": "axis"
+      }
     },
     "expm1": {
       "api": "jax.numpy.expm1"
     },
+    "exponential_decay": {
+      "api": "optax.exponential_decay",
+      "args": {}
+    },
+    "extract": {
+      "api": "jax.numpy.extract",
+      "args": {
+        "arr": "arr",
+        "condition": "condition",
+        "fill_value": "fill_value",
+        "size": "size"
+      }
+    },
+    "eye": {
+      "api": "jax.numpy.eye",
+      "args": {
+        "M": "M",
+        "N": "N",
+        "device": "device",
+        "dtype": "dtype",
+        "k": "k"
+      }
+    },
     "fft": {
-      "api": "jax.numpy.fft.fft"
+      "api": "jax.numpy.fft.fft",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "n": "n",
+        "norm": "norm"
+      }
+    },
+    "fft2": {
+      "api": "jax.numpy.fft.fft2",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "norm": "norm",
+        "s": "s"
+      }
+    },
+    "fftfreq": {
+      "api": "jax.numpy.fft.fftfreq",
+      "args": {
+        "d": "d",
+        "device": "device",
+        "dtype": "dtype",
+        "n": "n"
+      }
     },
     "fftn": {
-      "api": "jax.numpy.fft.fftn"
+      "api": "jax.numpy.fft.fftn",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "norm": "norm",
+        "s": "s"
+      }
     },
     "fftshift": {
-      "api": "jax.numpy.fft.fftshift"
+      "api": "jax.numpy.fft.fftshift",
+      "args": {
+        "axes": "axes",
+        "x": "x"
+      }
+    },
+    "fill_diagonal": {
+      "api": "jax.numpy.fill_diagonal",
+      "args": {
+        "a": "a",
+        "inplace": "inplace",
+        "val": "val",
+        "wrap": "wrap"
+      }
     },
     "finfo": {
       "api": "jax.numpy.finfo"
     },
-    "flip": {
-      "api": "jax.numpy.flip"
+    "flatnonzero": {
+      "api": "jax.numpy.flatnonzero",
+      "args": {
+        "a": "a",
+        "fill_value": "fill_value",
+        "size": "size"
+      }
     },
-    "float": {
+    "flexible": {
+      "api": "jax.numpy.flexible"
+    },
+    "flip": {
+      "api": "jax.numpy.flip",
+      "args": {
+        "axis": "axis",
+        "m": "m"
+      }
+    },
+    "fliplr": {
+      "api": "jax.numpy.fliplr",
+      "args": {
+        "m": "m"
+      }
+    },
+    "flipud": {
+      "api": "jax.numpy.flipud",
+      "args": {
+        "m": "m"
+      }
+    },
+    "float4_e2m1fn": {
+      "api": "jax.numpy.float4_e2m1fn",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float8_e3m4": {
+      "api": "jax.numpy.float8_e3m4",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float8_e4m3": {
+      "api": "jax.numpy.float8_e4m3",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float8_e4m3b11fnuz": {
+      "api": "jax.numpy.float8_e4m3b11fnuz",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float8_e4m3fn": {
+      "api": "jax.numpy.float8_e4m3fn",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float8_e4m3fnuz": {
+      "api": "jax.numpy.float8_e4m3fnuz",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float8_e5m2": {
+      "api": "jax.numpy.float8_e5m2",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float8_e5m2fnuz": {
+      "api": "jax.numpy.float8_e5m2fnuz",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float8_e8m0fnu": {
+      "api": "jax.numpy.float8_e8m0fnu",
+      "args": {
+        "x": "x"
+      }
+    },
+    "float_": {
       "api": "jax.numpy.float_",
       "args": {
         "x": "x"
       }
+    },
+    "floating": {
+      "api": "jax.numpy.floating"
     },
     "floor": {
       "api": "jax.numpy.floor"
@@ -630,14 +1640,109 @@
       "api": "optax.freeze",
       "args": {}
     },
+    "from_dlpack": {
+      "api": "jax.numpy.from_dlpack",
+      "args": {
+        "copy": "copy",
+        "device": "device",
+        "x": "x"
+      }
+    },
+    "frombuffer": {
+      "api": "jax.numpy.frombuffer",
+      "args": {
+        "buffer": "buffer",
+        "count": "count",
+        "dtype": "dtype",
+        "offset": "offset"
+      }
+    },
+    "fromfile": {
+      "api": "jax.numpy.fromfile",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "fromfunction": {
+      "api": "jax.numpy.fromfunction",
+      "args": {
+        "dtype": "dtype",
+        "function": "function",
+        "kwargs": "kwargs",
+        "shape": "shape"
+      }
+    },
+    "fromiter": {
+      "api": "jax.numpy.fromiter",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "frompyfunc": {
+      "api": "jax.numpy.frompyfunc",
+      "args": {
+        "func": "func",
+        "identity": "identity",
+        "nin": "nin",
+        "nout": "nout"
+      }
+    },
+    "fromstring": {
+      "api": "jax.numpy.fromstring",
+      "args": {
+        "count": "count",
+        "dtype": "dtype",
+        "sep": "sep",
+        "string": "string"
+      }
+    },
+    "full": {
+      "api": "jax.numpy.full",
+      "args": {
+        "device": "device",
+        "dtype": "dtype",
+        "fill_value": "fill_value",
+        "shape": "shape"
+      }
+    },
     "full_like": {
-      "api": "jax.numpy.full_like"
+      "api": "optax.tree.full_like",
+      "args": {}
+    },
+    "generic": {
+      "api": "jax.numpy.generic"
+    },
+    "geomspace": {
+      "api": "jax.numpy.geomspace",
+      "args": {
+        "axis": "axis",
+        "dtype": "dtype",
+        "endpoint": "endpoint",
+        "num": "num",
+        "start": "start",
+        "stop": "stop"
+      }
+    },
+    "get": {
+      "api": "optax.tree.get",
+      "args": {}
+    },
+    "get_all_with_path": {
+      "api": "optax.tree.get_all_with_path",
+      "args": {}
+    },
+    "get_printoptions": {
+      "api": "jax.numpy.get_printoptions",
+      "args": {}
     },
     "grad": {
       "api": "jax.grad",
       "args": {
         "func": "fun"
-      }
+      },
+      "required_imports": []
     },
     "greater": {
       "api": "jax.numpy.greater"
@@ -645,29 +1750,166 @@
     "greater_equal": {
       "api": "jax.numpy.greater_equal"
     },
+    "hamming": {
+      "api": "jax.numpy.hamming",
+      "args": {
+        "M": "M"
+      }
+    },
+    "hanning": {
+      "api": "jax.numpy.hanning",
+      "args": {
+        "M": "M"
+      }
+    },
     "hfft": {
-      "api": "jax.numpy.fft.hfft"
+      "api": "jax.numpy.fft.hfft",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "n": "n",
+        "norm": "norm"
+      }
+    },
+    "hinge_loss": {
+      "api": "optax.hinge_loss",
+      "args": {}
+    },
+    "histogram": {
+      "api": "jax.numpy.histogram",
+      "args": {
+        "a": "a",
+        "bins": "bins",
+        "density": "density",
+        "range": "range",
+        "weights": "weights"
+      }
+    },
+    "histogram2d": {
+      "api": "jax.numpy.histogram2d",
+      "args": {
+        "bins": "bins",
+        "density": "density",
+        "range": "range",
+        "weights": "weights",
+        "x": "x",
+        "y": "y"
+      }
+    },
+    "histogram_bin_edges": {
+      "api": "jax.numpy.histogram_bin_edges",
+      "args": {
+        "a": "a",
+        "bins": "bins",
+        "range": "range",
+        "weights": "weights"
+      }
+    },
+    "histogramdd": {
+      "api": "jax.numpy.histogramdd",
+      "args": {
+        "bins": "bins",
+        "density": "density",
+        "range": "range",
+        "sample": "sample",
+        "weights": "weights"
+      }
+    },
+    "hsplit": {
+      "api": "jax.numpy.hsplit",
+      "args": {
+        "ary": "ary",
+        "indices_or_sections": "indices_or_sections"
+      }
+    },
+    "hstack": {
+      "api": "jax.numpy.hstack",
+      "args": {
+        "dtype": "dtype",
+        "tup": "tup"
+      }
+    },
+    "huber_loss": {
+      "api": "optax.huber_loss",
+      "args": {}
     },
     "hypot": {
       "api": "jax.numpy.hypot"
     },
     "ifft": {
-      "api": "jax.numpy.fft.ifft"
+      "api": "jax.numpy.fft.ifft",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "n": "n",
+        "norm": "norm"
+      }
+    },
+    "ifft2": {
+      "api": "jax.numpy.fft.ifft2",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "norm": "norm",
+        "s": "s"
+      }
     },
     "ifftn": {
-      "api": "jax.numpy.fft.ifftn"
+      "api": "jax.numpy.fft.ifftn",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "norm": "norm",
+        "s": "s"
+      }
     },
     "ifftshift": {
-      "api": "jax.numpy.fft.ifftshift"
+      "api": "jax.numpy.fft.ifftshift",
+      "args": {
+        "axes": "axes",
+        "x": "x"
+      }
     },
     "ihfft": {
-      "api": "jax.numpy.fft.ihfft"
+      "api": "jax.numpy.fft.ihfft",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "n": "n",
+        "norm": "norm"
+      }
     },
     "iinfo": {
       "api": "jax.numpy.iinfo"
     },
     "imag": {
       "api": "jax.numpy.imag"
+    },
+    "indices": {
+      "api": "jax.numpy.indices",
+      "args": {
+        "dimensions": "dimensions",
+        "dtype": "dtype",
+        "sparse": "sparse"
+      }
+    },
+    "inexact": {
+      "api": "jax.numpy.inexact"
+    },
+    "inf": {
+      "api": "jax.numpy.inf",
+      "args": {}
+    },
+    "inject_hyperparams": {
+      "api": "optax.schedules.inject.inject_hyperparams",
+      "args": {}
+    },
+    "inject_stateful_hyperparams": {
+      "api": "optax.inject_stateful_hyperparams",
+      "args": {}
+    },
+    "inner": {
+      "api": "jax.numpy.inner"
     },
     "insert": {
       "api": "jax.numpy.insert",
@@ -678,26 +1920,116 @@
         "values": "values"
       }
     },
-    "int": {
-      "api": "jax.numpy.uint",
+    "int2": {
+      "api": "jax.numpy.int2",
       "args": {
         "x": "x"
+      }
+    },
+    "int4": {
+      "api": "jax.numpy.int4",
+      "args": {
+        "x": "x"
+      }
+    },
+    "int8": {
+      "api": "jax.numpy.int8",
+      "args": {
+        "x": "x"
+      }
+    },
+    "int_": {
+      "api": "jax.numpy.int_",
+      "args": {
+        "x": "x"
+      }
+    },
+    "integer": {
+      "api": "jax.numpy.integer"
+    },
+    "interp": {
+      "api": "jax.numpy.interp",
+      "args": {
+        "fp": "fp",
+        "left": "left",
+        "period": "period",
+        "right": "right",
+        "x": "x",
+        "xp": "xp"
+      }
+    },
+    "intersect1d": {
+      "api": "jax.numpy.intersect1d",
+      "args": {
+        "ar1": "ar1",
+        "ar2": "ar2",
+        "assume_unique": "assume_unique",
+        "fill_value": "fill_value",
+        "return_indices": "return_indices",
+        "size": "size"
       }
     },
     "inv": {
       "api": "jax.numpy.linalg.inv"
     },
     "irfft": {
-      "api": "jax.numpy.fft.irfft"
+      "api": "jax.numpy.fft.irfft",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "n": "n",
+        "norm": "norm"
+      }
+    },
+    "irfft2": {
+      "api": "jax.numpy.fft.irfft2",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "norm": "norm",
+        "s": "s"
+      }
     },
     "irfftn": {
-      "api": "jax.numpy.fft.irfftn"
+      "api": "jax.numpy.fft.irfftn",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "norm": "norm",
+        "s": "s"
+      }
+    },
+    "isclose": {
+      "api": "jax.numpy.isclose"
+    },
+    "iscomplex": {
+      "api": "jax.numpy.iscomplex"
+    },
+    "iscomplexobj": {
+      "api": "jax.numpy.iscomplexobj",
+      "args": {
+        "x": "x"
+      }
     },
     "isdtype": {
-      "api": "jax.numpy.isdtype"
+      "api": "jax.numpy.isdtype",
+      "args": {
+        "dtype": "dtype",
+        "kind": "kind"
+      }
     },
     "isfinite": {
       "api": "jax.numpy.isfinite"
+    },
+    "isin": {
+      "api": "jax.numpy.isin",
+      "args": {
+        "assume_unique": "assume_unique",
+        "element": "element",
+        "invert": "invert",
+        "method": "method",
+        "test_elements": "test_elements"
+      }
     },
     "isinf": {
       "api": "jax.numpy.isinf"
@@ -705,18 +2037,90 @@
     "isnan": {
       "api": "jax.numpy.isnan"
     },
-    "items": {
+    "isneginf": {
+      "api": "jax.numpy.isneginf",
+      "args": {
+        "out": "out",
+        "x": "x"
+      }
+    },
+    "isposinf": {
+      "api": "jax.numpy.isposinf",
+      "args": {
+        "out": "out",
+        "x": "x"
+      }
+    },
+    "isreal": {
+      "api": "jax.numpy.isreal"
+    },
+    "isrealobj": {
+      "api": "jax.numpy.isrealobj",
+      "args": {
+        "x": "x"
+      }
+    },
+    "isscalar": {
+      "api": "jax.numpy.isscalar",
+      "args": {
+        "element": "element"
+      }
+    },
+    "issubdtype": {
+      "api": "jax.numpy.issubdtype",
+      "args": {
+        "arg1": "arg1",
+        "arg2": "arg2"
+      }
+    },
+    "item": {
       "api": "jax.numpy.ndarray.item",
       "args": {
         "args": "args",
         "self": "self"
       }
     },
+    "ix_": {
+      "api": "jax.numpy.ix_",
+      "args": {
+        "args": "args"
+      }
+    },
     "jit": {
       "api": "jax.jit",
       "args": {
         "func": "fun"
+      },
+      "required_imports": []
+    },
+    "join_schedules": {
+      "api": "optax.join_schedules",
+      "args": {}
+    },
+    "kaiser": {
+      "api": "jax.numpy.kaiser",
+      "args": {
+        "M": "M",
+        "beta": "beta"
       }
+    },
+    "keep_params_nonnegative": {
+      "api": "optax.keep_params_nonnegative",
+      "args": {}
+    },
+    "kl_divergence": {
+      "api": "optax.kl_divergence",
+      "args": {}
+    },
+    "kron": {
+      "api": "jax.numpy.kron"
+    },
+    "l2_loss": {
+      "api": "optax.l2_loss",
+      "args": {}
+    },
+    "left_shift": {
+      "api": "jax.numpy.left_shift"
     },
     "less": {
       "api": "jax.numpy.less"
@@ -724,8 +2128,26 @@
     "less_equal": {
       "api": "jax.numpy.less_equal"
     },
+    "linear_onecycle_schedule": {
+      "api": "optax.linear_onecycle_schedule",
+      "args": {}
+    },
+    "linear_schedule": {
+      "api": "optax.linear_schedule",
+      "args": {}
+    },
     "linspace": {
-      "api": "jax.numpy.linspace"
+      "api": "jax.numpy.linspace",
+      "args": {
+        "axis": "axis",
+        "device": "device",
+        "dtype": "dtype",
+        "endpoint": "endpoint",
+        "num": "num",
+        "retstep": "retstep",
+        "start": "start",
+        "stop": "stop"
+      }
     },
     "log": {
       "api": "jax.numpy.log"
@@ -739,11 +2161,19 @@
     "log2": {
       "api": "jax.numpy.log2"
     },
+    "log_cosh": {
+      "api": "optax.log_cosh",
+      "args": {}
+    },
     "log_softmax": {
-      "api": "jax.nn.log_softmax"
+      "api": "jax.nn.log_softmax",
+      "required_imports": []
     },
     "logaddexp": {
       "api": "jax.numpy.logaddexp"
+    },
+    "logaddexp2": {
+      "api": "jax.numpy.logaddexp2"
     },
     "logical_and": {
       "api": "jax.numpy.logical_and"
@@ -757,12 +2187,54 @@
     "logical_xor": {
       "api": "jax.numpy.logical_xor"
     },
-    "mask": {
+    "logspace": {
+      "api": "jax.numpy.logspace",
+      "args": {
+        "axis": "axis",
+        "base": "base",
+        "dtype": "dtype",
+        "endpoint": "endpoint",
+        "num": "num",
+        "start": "start",
+        "stop": "stop"
+      }
+    },
+    "lstsq": {
+      "api": "jax.numpy.linalg.lstsq",
+      "args": {
+        "a": "a",
+        "b": "b",
+        "numpy_resid": "numpy_resid",
+        "rcond": "rcond"
+      }
+    },
+    "map_params": {
+      "api": "optax.tree.map_params",
+      "args": {}
+    },
+    "mask_indices": {
+      "api": "jax.numpy.mask_indices",
+      "args": {
+        "k": "k",
+        "mask_func": "mask_func",
+        "n": "n",
+        "size": "size"
+      }
+    },
+    "masked": {
       "api": "optax.masked",
       "args": {}
     },
     "matmul": {
       "api": "jax.numpy.matmul"
+    },
+    "matrix_norm": {
+      "api": "jax.numpy.linalg.matrix_norm",
+      "args": {
+        "keepdims": "keepdims",
+        "ord": "ord",
+        "x": "x"
+      }
     },
     "matrix_power": {
       "api": "jax.numpy.linalg.matrix_power"
@@ -771,18 +2243,13 @@
       "api": "jax.numpy.linalg.matrix_rank"
     },
     "matrix_transpose": {
-      "api": "jax.numpy.matrix_transpose"
+      "api": "jax.numpy.matrix_transpose",
+      "args": {
+        "x": "x"
+      }
     },
     "max": {
       "api": "jax.numpy.max"
-    },
-    "max_norm": {
-      "api": "optax.tree.max",
-      "args": {}
-    },
-    "max_val": {
-      "api": "optax.tree.max",
-      "args": {}
     },
     "maximum": {
       "api": "jax.numpy.maximum"
@@ -790,28 +2257,124 @@
     "mean": {
       "api": "jax.numpy.mean"
     },
+    "measure_valued_estimation_mean": {
+      "api": "optax.monte_carlo.stochastic_gradient_estimators.measure_valued_estimation_mean",
+      "args": {
+        "coupling": "coupling",
+        "dist": "dist",
+        "function": "function",
+        "num_samples": "num_samples",
+        "rng": "rng"
+      }
+    },
+    "measure_valued_estimation_std": {
+      "api": "optax.monte_carlo.stochastic_gradient_estimators.measure_valued_estimation_std",
+      "args": {
+        "coupling": "coupling",
+        "dist": "dist",
+        "function": "function",
+        "num_samples": "num_samples",
+        "rng": "rng"
+      }
+    },
+    "measure_valued_jacobians": {
+      "api": "optax.monte_carlo.stochastic_gradient_estimators.measure_valued_jacobians",
+      "args": {
+        "coupling": "coupling",
+        "dist_builder": "dist_builder",
+        "function": "function",
+        "num_samples": "num_samples",
+        "params": "params",
+        "rng": "rng"
+      }
+    },
+    "median": {
+      "api": "jax.numpy.median"
+    },
     "meshgrid": {
-      "api": "jax.numpy.meshgrid"
+      "api": "jax.numpy.meshgrid",
+      "args": {
+        "copy": "copy",
+        "indexing": "indexing",
+        "sparse": "sparse",
+        "xi": "xi"
+      }
     },
     "min": {
       "api": "jax.numpy.min"
-    },
-    "min_val": {
-      "api": "optax.tree.min",
-      "args": {}
     },
     "minimum": {
       "api": "jax.numpy.minimum"
     },
     "moveaxis": {
-      "api": "jax.numpy.moveaxis"
+      "api": "jax.numpy.moveaxis",
+      "args": {
+        "a": "a",
+        "destination": "destination",
+        "source": "source"
+      }
+    },
+    "moving_avg_baseline": {
+      "api": "optax.monte_carlo.control_variates.moving_avg_baseline",
+      "args": {
+        "decay": "decay",
+        "function": "function",
+        "use_decay_early_training_heuristic": "use_decay_early_training_heuristic",
+        "zero_debias": "zero_debias"
+      }
+    },
+    "multi_dot": {
+      "api": "jax.numpy.linalg.multi_dot",
+      "args": {
+        "arrays": "arrays",
+        "precision": "precision"
+      }
+    },
+    "multi_transform": {
+      "api": "optax.multi_transform",
+      "args": {}
     },
     "multiply": {
       "api": "jax.numpy.multiply"
     },
-    "name": {
+    "named_chain": {
       "api": "optax.named_chain",
       "args": {}
+    },
+    "nan": {
+      "api": "jax.numpy.nan",
+      "args": {}
+    },
+    "nan_to_num": {
+      "api": "jax.numpy.nan_to_num"
+    },
+    "nanargmax": {
+      "api": "jax.numpy.nanargmax",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "keepdims": "keepdims",
+        "out": "out"
+      }
+    },
+    "nanargmin": {
+      "api": "jax.numpy.nanargmin",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "keepdims": "keepdims",
+        "out": "out"
+      }
+    },
+    "ndarray": {
+      "api": "jax.numpy.ndarray",
+      "args": {}
+    },
+    "ndim": {
+      "api": "jax.numpy.ndim",
+      "args": {
+        "a": "a"
+      }
     },
     "negative": {
       "api": "jax.numpy.negative"
@@ -821,6 +2384,7 @@
     },
     "no_grad": {
       "api": "contextlib.nullcontext",
+      "required_imports": [],
       "requires_plugin": "context_to_function_wrap"
     },
     "nonzero": {
@@ -830,45 +2394,118 @@
       "api": "optax.tree.norm",
       "args": {}
     },
-    "norm1": {
-      "api": "optax.tree.norm",
-      "args": {}
-    },
-    "norm2": {
-      "api": "optax.tree.norm",
-      "args": {}
-    },
-    "norm3": {
-      "api": "optax.tree.norm",
-      "args": {}
-    },
-    "norm_first": {
-      "api": "optax.tree.norm",
-      "args": {}
-    },
-    "norm_type": {
-      "api": "optax.tree.norm",
-      "args": {}
-    },
-    "normal": {
-      "api": "optax.tree.norm",
-      "args": {}
-    },
     "not_equal": {
       "api": "jax.numpy.not_equal"
     },
+    "ntxent": {
+      "api": "optax.ntxent",
+      "args": {}
+    },
+    "number": {
+      "api": "jax.numpy.number"
+    },
+    "object_": {
+      "api": "jax.numpy.object_"
+    },
     "ones_like": {
-      "api": "jax.numpy.ones_like"
+      "api": "optax.tree.ones_like",
+      "args": {}
     },
     "outer": {
-      "api": "jax.numpy.outer"
+      "api": "jax.numpy.linalg.outer",
+      "args": {
+        "x1": "x1",
+        "x2": "x2"
+      }
+    },
+    "params": {
+      "api": "optax.Params"
+    },
+    "partition": {
+      "api": "optax.partition",
+      "args": {}
+    },
+    "pathwise_jacobians": {
+      "api": "optax.monte_carlo.stochastic_gradient_estimators.pathwise_jacobians",
+      "args": {
+        "dist_builder": "dist_builder",
+        "function": "function",
+        "num_samples": "num_samples",
+        "params": "params",
+        "rng": "rng"
+      }
+    },
+    "per_example_global_norm_clip": {
+      "api": "optax.per_example_global_norm_clip",
+      "args": {}
+    },
+    "per_example_layer_norm_clip": {
+      "api": "optax.per_example_layer_norm_clip",
+      "args": {}
     },
     "permute_dims": {
       "api": "jnp.transpose",
       "pack_to_tuple": "axes"
     },
+    "pi": {
+      "api": "jax.numpy.pi",
+      "args": {}
+    },
+    "piecewise": {
+      "api": "jax.numpy.piecewise",
+      "args": {
+        "args": "args",
+        "condlist": "condlist",
+        "funclist": "funclist",
+        "kw": "kw",
+        "x": "x"
+      }
+    },
+    "piecewise_constant_schedule": {
+      "api": "optax.piecewise_constant_schedule",
+      "args": {}
+    },
+    "piecewise_interpolate_schedule": {
+      "api": "optax.piecewise_interpolate_schedule",
+      "args": {}
+    },
     "pinv": {
-      "api": "jax.numpy.linalg.pinv"
+      "api": "jax.numpy.linalg.pinv",
+      "args": {
+        "a": "a",
+        "hermitian": "hermitian",
+        "rcond": "rcond",
+        "rtol": "rtol"
+      }
+    },
+    "place": {
+      "api": "jax.numpy.place",
+      "args": {
+        "arr": "arr",
+        "inplace": "inplace",
+        "mask": "mask",
+        "vals": "vals"
+      }
+    },
+    "polydiv": {
+      "api": "jax.numpy.polydiv",
+      "args": {
+        "trim_leading_zeros": "trim_leading_zeros",
+        "u": "u",
+        "v": "v"
+      }
+    },
+    "polymul": {
+      "api": "jax.numpy.polymul",
+      "args": {
+        "a1": "a1",
+        "a2": "a2",
+        "trim_leading_zeros": "trim_leading_zeros"
+      }
+    },
+    "polynomial_schedule": {
+      "api": "optax.polynomial_schedule",
+      "args": {}
     },
     "positive": {
       "api": "jax.numpy.positive"
@@ -876,68 +2513,275 @@
     "pow": {
       "api": "jax.numpy.pow"
     },
-    "prod": {
-      "api": "jax.numpy.prod"
+    "power": {
+      "api": "jax.numpy.power",
+      "args": {
+        "x1": "x1",
+        "x2": "x2"
+      }
     },
-    "psi": {
-      "api": "jax.numpy.pi",
-      "args": {}
+    "printoptions": {
+      "api": "jax.numpy.printoptions",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "prod": {
+      "api": "jax.numpy.prod",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "dtype": "dtype",
+        "initial": "initial",
+        "keepdims": "keepdims",
+        "out": "out",
+        "promote_integers": "promote_integers",
+        "where": "where"
+      }
+    },
+    "promote_types": {
+      "api": "jax.numpy.promote_types",
+      "args": {
+        "a": "a",
+        "b": "b"
+      }
+    },
+    "ptp": {
+      "api": "jax.numpy.ptp",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "keepdims": "keepdims",
+        "out": "out"
+      }
+    },
+    "put": {
+      "api": "jax.numpy.put",
+      "args": {
+        "a": "a",
+        "ind": "ind",
+        "inplace": "inplace",
+        "mode": "mode",
+        "v": "v"
+      }
     },
     "qr": {
       "api": "jax.numpy.linalg.qr"
     },
+    "quantile": {
+      "api": "jax.numpy.quantile"
+    },
+    "radians": {
+      "api": "jax.numpy.radians",
+      "args": {
+        "x": "x"
+      }
+    },
     "randn": {
       "api": "jax.random.normal",
+      "required_imports": [],
       "requires_plugin": "inject_prng"
     },
-    "real": {
-      "api": "jax.numpy.real"
+    "random_like": {
+      "api": "optax.tree.random_like",
+      "args": {}
     },
-    "reciprocal": {
-      "api": "jax.numpy.reciprocal"
-    },
-    "relu": {
-      "api": "jax.nn.relu"
-    },
-    "remainder": {
-      "api": "jax.numpy.remainder"
-    },
-    "repeat": {
-      "api": "jax.numpy.repeat"
-    },
-    "reshape": {
-      "api": "jax.numpy.reshape"
-    },
-    "reshape_weight_to_matrix": {
-      "api": "jax.numpy.ndarray.reshape",
+    "ravel": {
+      "api": "jax.numpy.ndarray.ravel",
       "args": {
-        "args": "args",
         "order": "order",
         "out_sharding": "out_sharding",
         "self": "self"
       }
     },
+    "ravel_multi_index": {
+      "api": "jax.numpy.ravel_multi_index",
+      "args": {
+        "dims": "dims",
+        "mode": "mode",
+        "multi_index": "multi_index",
+        "order": "order"
+      }
+    },
+    "real": {
+      "api": "optax.tree.real",
+      "args": {}
+    },
+    "reciprocal": {
+      "api": "jax.numpy.reciprocal"
+    },
+    "relu": {
+      "api": "jax.nn.relu",
+      "required_imports": []
+    },
+    "remainder": {
+      "api": "jax.numpy.remainder"
+    },
+    "repeat": {
+      "api": "jax.numpy.repeat",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "out_sharding": "out_sharding",
+        "repeats": "repeats",
+        "total_repeat_length": "total_repeat_length"
+      }
+    },
+    "reshape": {
+      "api": "jax.numpy.reshape"
+    },
     "result_type": {
-      "api": "jax.numpy.result_type"
+      "api": "jax.numpy.result_type",
+      "args": {
+        "args": "args"
+      }
     },
     "rfft": {
-      "api": "jax.numpy.fft.rfft"
+      "api": "jax.numpy.fft.rfft",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "n": "n",
+        "norm": "norm"
+      }
+    },
+    "rfft2": {
+      "api": "jax.numpy.fft.rfft2",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "norm": "norm",
+        "s": "s"
+      }
+    },
+    "rfftfreq": {
+      "api": "jax.numpy.fft.rfftfreq",
+      "args": {
+        "d": "d",
+        "device": "device",
+        "dtype": "dtype",
+        "n": "n"
+      }
     },
     "rfftn": {
-      "api": "jax.numpy.fft.rfftn"
+      "api": "jax.numpy.fft.rfftn",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "norm": "norm",
+        "s": "s"
+      }
+    },
+    "right_shift": {
+      "api": "jax.numpy.right_shift"
     },
     "roll": {
-      "api": "jax.numpy.roll"
+      "api": "jax.numpy.roll",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "shift": "shift"
+      }
+    },
+    "roots": {
+      "api": "jax.numpy.roots",
+      "args": {
+        "p": "p",
+        "strip_zeros": "strip_zeros"
+      }
+    },
+    "rot90": {
+      "api": "jax.numpy.rot90"
     },
     "round": {
       "api": "jax.numpy.round"
     },
-    "scale_factor": {
+    "safe_softmax_cross_entropy": {
+      "api": "optax.safe_softmax_cross_entropy",
+      "args": {}
+    },
+    "savez": {
+      "api": "jax.numpy.savez"
+    },
+    "scale": {
       "api": "optax.tree.scale",
       "args": {}
     },
+    "score_function_jacobians": {
+      "api": "optax.monte_carlo.stochastic_gradient_estimators.score_function_jacobians",
+      "args": {
+        "dist_builder": "dist_builder",
+        "function": "function",
+        "num_samples": "num_samples",
+        "params": "params",
+        "rng": "rng"
+      }
+    },
     "searchsorted": {
-      "api": "jax.numpy.searchsorted"
+      "api": "jax.numpy.ndarray.searchsorted",
+      "args": {
+        "method": "method",
+        "self": "self",
+        "side": "side",
+        "sorter": "sorter",
+        "v": "v"
+      }
+    },
+    "select": {
+      "api": "jax.numpy.select",
+      "args": {
+        "choicelist": "choicelist",
+        "condlist": "condlist",
+        "default": "default"
+      }
+    },
+    "selective_transform": {
+      "api": "optax.selective_transform",
+      "args": {}
+    },
+    "set": {
+      "api": "optax.tree.set",
+      "args": {}
+    },
+    "set_printoptions": {
+      "api": "jax.numpy.set_printoptions",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "setdiff1d": {
+      "api": "jax.numpy.setdiff1d",
+      "args": {
+        "ar1": "ar1",
+        "ar2": "ar2",
+        "assume_unique": "assume_unique",
+        "fill_value": "fill_value",
+        "size": "size"
+      }
+    },
+    "setxor1d": {
+      "api": "jax.numpy.setxor1d",
+      "args": {
+        "ar1": "ar1",
+        "ar2": "ar2",
+        "assume_unique": "assume_unique",
+        "fill_value": "fill_value",
+        "size": "size"
+      }
+    },
+    "sgdr_schedule": {
+      "api": "optax.sgdr_schedule",
+      "args": {}
+    },
+    "sigmoid_binary_cross_entropy": {
+      "api": "optax.sigmoid_binary_cross_entropy",
+      "args": {}
+    },
+    "sigmoid_focal_loss": {
+      "api": "optax.sigmoid_focal_loss",
+      "args": {}
     },
     "sign": {
       "api": "jax.numpy.sign"
@@ -945,8 +2789,17 @@
     "signbit": {
       "api": "jax.numpy.signbit"
     },
+    "signedinteger": {
+      "api": "jax.numpy.signedinteger"
+    },
     "sin": {
       "api": "jax.numpy.sin"
+    },
+    "single": {
+      "api": "jax.numpy.single",
+      "args": {
+        "x": "x"
+      }
     },
     "sinh": {
       "api": "jax.numpy.sinh"
@@ -955,15 +2808,54 @@
       "api": "shape",
       "requires_plugin": "method_to_property"
     },
+    "skip_large_updates": {
+      "api": "optax.skip_large_updates",
+      "args": {}
+    },
+    "skip_not_finite": {
+      "api": "optax.skip_not_finite",
+      "args": {}
+    },
     "slogdet": {
       "api": "jax.numpy.linalg.slogdet"
     },
+    "smooth_labels": {
+      "api": "optax.smooth_labels",
+      "args": {}
+    },
+    "snapshot": {
+      "api": "optax.snapshot",
+      "args": {}
+    },
     "softmax": {
+      "api": "jax.nn.softmax",
+      "required_imports": []
+    },
+    "softmax_cross_entropy": {
       "api": "optax.softmax_cross_entropy",
+      "args": {}
+    },
+    "softmax_cross_entropy_with_integer_labels": {
+      "api": "optax.softmax_cross_entropy_with_integer_labels",
       "args": {}
     },
     "solve": {
       "api": "jax.numpy.linalg.solve"
+    },
+    "sort": {
+      "api": "jax.numpy.ndarray.sort",
+      "args": {
+        "axis": "axis",
+        "descending": "descending",
+        "kind": "kind",
+        "order": "order",
+        "self": "self",
+        "stable": "stable"
+      }
+    },
+    "split_key_like": {
+      "api": "optax.tree.split_key_like",
+      "args": {}
     },
     "sqrt": {
       "api": "jax.numpy.sqrt"
@@ -971,14 +2863,35 @@
     "square": {
       "api": "jax.numpy.square"
     },
+    "squared_error": {
+      "api": "optax.squared_error",
+      "args": {}
+    },
     "squeeze": {
       "api": "jax.numpy.squeeze"
     },
     "stack": {
-      "api": "jax.numpy.stack"
+      "api": "jax.numpy.stack",
+      "args": {
+        "arrays": "arrays",
+        "axis": "axis",
+        "dtype": "dtype",
+        "out": "out"
+      }
     },
     "std": {
-      "api": "jax.numpy.std"
+      "api": "jax.numpy.std",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "correction": "correction",
+        "ddof": "ddof",
+        "dtype": "dtype",
+        "keepdims": "keepdims",
+        "mean": "mean",
+        "out": "out",
+        "where": "where"
+      }
     },
     "step": {
       "requires_plugin": "optimizer_step"
@@ -998,8 +2911,26 @@
         "x": "x"
       }
     },
+    "swapaxes": {
+      "api": "jax.numpy.ndarray.swapaxes",
+      "args": {
+        "axis1": "axis1",
+        "axis2": "axis2",
+        "self": "self"
+      }
+    },
     "take": {
-      "api": "jax.numpy.take"
+      "api": "jax.numpy.take",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "fill_value": "fill_value",
+        "indices": "indices",
+        "indices_are_sorted": "indices_are_sorted",
+        "mode": "mode",
+        "out": "out",
+        "unique_indices": "unique_indices"
+      }
     },
     "take_along_axis": {
       "api": "jax.numpy.take_along_axis"
@@ -1011,43 +2942,331 @@
       "api": "jax.numpy.tanh"
     },
     "tensordot": {
-      "api": "jax.numpy.tensordot"
+      "api": "jax.numpy.tensordot",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "b": "b",
+        "out_sharding": "out_sharding",
+        "precision": "precision",
+        "preferred_element_type": "preferred_element_type"
+      }
+    },
+    "tensorinv": {
+      "api": "jax.numpy.linalg.tensorinv",
+      "args": {
+        "a": "a",
+        "ind": "ind"
+      }
+    },
+    "tensorsolve": {
+      "api": "jax.numpy.linalg.tensorsolve",
+      "args": {
+        "a": "a",
+        "axes": "axes",
+        "b": "b"
+      }
+    },
+    "test_import": {
+      "api": "optax.optax_test.OptaxTest.test_import",
+      "args": {
+        "self": "self"
+      }
     },
     "tile": {
       "api": "jax.numpy.tile"
     },
+    "to_device": {
+      "api": "jax.numpy.ndarray.to_device",
+      "args": {
+        "device": "device",
+        "self": "self",
+        "stream": "stream"
+      }
+    },
     "trace": {
-      "api": "jax.numpy.trace"
+      "api": "optax.trace",
+      "args": {}
+    },
+    "trapezoid": {
+      "api": "jax.numpy.trapezoid"
+    },
+    "tree_add_scalar_mul": {
+      "api": "optax.tree_utils.tree_add_scalar_mul",
+      "args": {}
+    },
+    "tree_l1_norm": {
+      "api": "optax.tree_utils.tree_l1_norm",
+      "args": {}
+    },
+    "tree_l2_norm": {
+      "api": "optax.tree_utils.tree_l2_norm",
+      "args": {}
+    },
+    "tree_linf_norm": {
+      "api": "optax.tree_utils.tree_linf_norm",
+      "args": {}
+    },
+    "tree_map_params": {
+      "api": "optax.tree_map_params",
+      "args": {}
+    },
+    "tree_scalar_mul": {
+      "api": "optax.tree_utils.tree_scalar_mul",
+      "args": {}
+    },
+    "tri": {
+      "api": "jax.numpy.tri",
+      "args": {
+        "M": "M",
+        "N": "N",
+        "dtype": "dtype",
+        "k": "k"
+      }
     },
     "tril": {
       "api": "jax.numpy.tril"
     },
+    "tril_indices": {
+      "api": "jax.numpy.tril_indices",
+      "args": {
+        "k": "k",
+        "m": "m",
+        "n": "n"
+      }
+    },
+    "tril_indices_from": {
+      "api": "jax.numpy.tril_indices_from",
+      "args": {
+        "arr": "arr",
+        "k": "k"
+      }
+    },
+    "trim_zeros": {
+      "api": "jax.numpy.trim_zeros",
+      "args": {
+        "axis": "axis",
+        "filt": "filt",
+        "trim": "trim"
+      }
+    },
     "triu": {
       "api": "jax.numpy.triu"
+    },
+    "triu_indices": {
+      "api": "jax.numpy.triu_indices",
+      "args": {
+        "k": "k",
+        "m": "m",
+        "n": "n"
+      }
+    },
+    "triu_indices_from": {
+      "api": "jax.numpy.triu_indices_from",
+      "args": {
+        "arr": "arr",
+        "k": "k"
+      }
     },
     "trunc": {
       "api": "jax.numpy.trunc"
     },
+    "ufunc": {
+      "api": "jax.numpy.ufunc",
+      "args": {
+        "accumulate": "accumulate",
+        "at": "at",
+        "call": "call",
+        "func": "func",
+        "identity": "identity",
+        "name": "name",
+        "nargs": "nargs",
+        "nin": "nin",
+        "nout": "nout",
+        "reduce": "reduce",
+        "reduceat": "reduceat"
+      }
+    },
+    "uint": {
+      "api": "jax.numpy.uint",
+      "args": {
+        "x": "x"
+      }
+    },
+    "uint16": {
+      "api": "jax.numpy.uint16",
+      "args": {
+        "x": "x"
+      }
+    },
+    "uint2": {
+      "api": "jax.numpy.uint2",
+      "args": {
+        "x": "x"
+      }
+    },
+    "uint32": {
+      "api": "jax.numpy.uint32",
+      "args": {
+        "x": "x"
+      }
+    },
+    "uint4": {
+      "api": "jax.numpy.uint4",
+      "args": {
+        "x": "x"
+      }
+    },
+    "uint64": {
+      "api": "jax.numpy.uint64",
+      "args": {
+        "x": "x"
+      }
+    },
+    "union1d": {
+      "api": "jax.numpy.union1d",
+      "args": {
+        "ar1": "ar1",
+        "ar2": "ar2",
+        "fill_value": "fill_value",
+        "size": "size"
+      }
+    },
     "unique_all": {
-      "api": "jax.numpy.unique_all"
+      "api": "jax.numpy.unique_all",
+      "args": {
+        "fill_value": "fill_value",
+        "size": "size",
+        "x": "x"
+      }
     },
     "unique_counts": {
-      "api": "jax.numpy.unique_counts"
+      "api": "jax.numpy.unique_counts",
+      "args": {
+        "fill_value": "fill_value",
+        "size": "size",
+        "x": "x"
+      }
     },
     "unique_inverse": {
-      "api": "jax.numpy.unique_inverse"
+      "api": "jax.numpy.unique_inverse",
+      "args": {
+        "fill_value": "fill_value",
+        "size": "size",
+        "x": "x"
+      }
     },
     "unique_values": {
-      "api": "jax.numpy.unique_values"
+      "api": "jax.numpy.unique_values",
+      "args": {
+        "fill_value": "fill_value",
+        "size": "size",
+        "x": "x"
+      }
+    },
+    "unravel_index": {
+      "api": "jax.numpy.unravel_index",
+      "args": {
+        "indices": "indices",
+        "shape": "shape"
+      }
+    },
+    "unsignedinteger": {
+      "api": "jax.numpy.unsignedinteger"
+    },
+    "unwrap_random_key_data": {
+      "api": "optax.tree.unwrap_random_key_data",
+      "args": {}
+    },
+    "update_infinity_moment": {
+      "api": "optax.tree.update_infinity_moment",
+      "args": {}
+    },
+    "update_moment": {
+      "api": "optax.tree.update_moment",
+      "args": {}
+    },
+    "update_moment_per_elem_norm": {
+      "api": "optax.tree.update_moment_per_elem_norm",
+      "args": {}
     },
     "var": {
-      "api": "jax.numpy.var"
+      "api": "jax.numpy.var",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "correction": "correction",
+        "ddof": "ddof",
+        "dtype": "dtype",
+        "keepdims": "keepdims",
+        "mean": "mean",
+        "out": "out",
+        "where": "where"
+      }
+    },
+    "vdot": {
+      "api": "optax.tree.vdot",
+      "args": {}
+    },
+    "vecdot": {
+      "api": "jax.numpy.vecdot",
+      "args": {
+        "axis": "axis",
+        "precision": "precision",
+        "preferred_element_type": "preferred_element_type",
+        "x1": "x1",
+        "x2": "x2"
+      }
+    },
+    "vector_norm": {
+      "api": "jax.numpy.linalg.vector_norm",
+      "args": {
+        "axis": "axis",
+        "keepdims": "keepdims",
+        "ord": "ord",
+        "x": "x"
+      }
+    },
+    "vectorize": {
+      "api": "jax.numpy.vectorize",
+      "args": {
+        "excluded": "excluded",
+        "pyfunc": "pyfunc",
+        "signature": "signature"
+      }
     },
     "vmap": {
       "api": "jax.vmap",
       "args": {
         "func": "fun"
+      },
+      "required_imports": []
+    },
+    "vsplit": {
+      "api": "jax.numpy.vsplit",
+      "args": {
+        "ary": "ary",
+        "indices_or_sections": "indices_or_sections"
       }
+    },
+    "vstack": {
+      "api": "jax.numpy.vstack",
+      "args": {
+        "dtype": "dtype",
+        "tup": "tup"
+      }
+    },
+    "warmup_constant_schedule": {
+      "api": "optax.warmup_constant_schedule",
+      "args": {}
+    },
+    "warmup_cosine_decay_schedule": {
+      "api": "optax.warmup_cosine_decay_schedule",
+      "args": {}
+    },
+    "warmup_exponential_decay_schedule": {
+      "api": "optax.warmup_exponential_decay_schedule",
+      "args": {}
     },
     "where": {
       "api": "jax.numpy.where"
@@ -1055,8 +3274,13 @@
     "zero_grad": {
       "requires_plugin": "optimizer_zero_grad"
     },
+    "zero_nans": {
+      "api": "optax.zero_nans",
+      "args": {}
+    },
     "zeros_like": {
-      "api": "jax.numpy.zeros_like"
+      "api": "optax.tree.zeros_like",
+      "args": {}
     }
   },
   "templates": {

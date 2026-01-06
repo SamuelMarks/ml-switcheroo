@@ -308,7 +308,19 @@ class TorchAdapter:
     Returns:
         Dictionary mapping operation abstract IDs to implementation details.
     """
-    return load_definitions("torch")
+    defs = load_definitions("torch")
+
+    # Ensure class-based ReLU is present for architecture translation
+    if "ReLU" not in defs:
+      defs["ReLU"] = StandardMap(api="torch.nn.ReLU")
+
+    # Ensure functional relu is present for expression translation
+    # This fixes the issue where nnx.relu (functional) incorrectly mapped to nn.ReLU (class)
+    # or was missing entirely.
+    if "relu" not in defs:
+      defs["relu"] = StandardMap(api="torch.nn.functional.relu")
+
+    return defs
 
   # --- Syntax Generators ---
 
@@ -402,18 +414,18 @@ class TorchAdapter:
         Block of python code setting 'raw_state'.
     """
     return textwrap.dedent(
-      f"""
+      f""" 
             # Load PyTorch checkpoint to CPU to avoid CUDA dependency
-            loaded = torch.load({path_var}, map_location='cpu')
+            loaded = torch.load({path_var}, map_location='cpu') 
             
             # Unwrap common checkpoint formats
-            if isinstance(loaded, dict) and 'state_dict' in loaded:
-                raw_state = loaded['state_dict']
-            else:
+            if isinstance(loaded, dict) and 'state_dict' in loaded: 
+                raw_state = loaded['state_dict'] 
+            else: 
                 raw_state = loaded
             
-            if not isinstance(raw_state, dict):
-                raise ValueError(f"Expected dict-like checkpoint, got {{type(loaded)}}")
+            if not isinstance(raw_state, dict): 
+                raise ValueError(f"Expected dict-like checkpoint, got {{type(loaded)}}") 
             """
     )
 
@@ -443,10 +455,10 @@ class TorchAdapter:
         Block of python code.
     """
     return textwrap.dedent(
-      f"""
+      f""" 
             # Convert NumPy arrays back to Torch Tensors
-            torch_state = {{k: torch.from_numpy(v) for k, v in {state_var}.items()}}
-            torch.save(torch_state, {path_var})
+            torch_state = {{k: torch.from_numpy(v) for k, v in {state_var}.items()}} 
+            torch.save(torch_state, {path_var}) 
             """
     )
 

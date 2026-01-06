@@ -103,7 +103,7 @@ def test_no_toml_fallback(tmp_path):
   # We patch available_frameworks to ensure deterministic defaults for the test.
   # Logic: sorted(['jax', 'torch']) -> ['jax', 'torch'].
   # _resolve_default_source swaps them -> ['torch', 'jax'].
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["torch", "jax"]):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["torch", "jax"]):
     # Ensure no file exists
     config = RuntimeConfig.load(search_path=tmp_path)
 
@@ -122,7 +122,7 @@ def test_malformed_toml_is_ignored(tmp_path):
   fpath.write_text("[tool.ml_switcheroo\nbad_syntax_here", encoding="utf-8")
 
   # Force defaults
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["torch", "jax"]):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["torch", "jax"]):
     config = RuntimeConfig.load(search_path=tmp_path)
 
     # Should fall back to defaults rather than crashing

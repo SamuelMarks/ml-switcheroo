@@ -1,11 +1,5 @@
 """
 Tests for Configuration, Path Resolution, and Defaults Logic.
-
-Verifies:
-1. Dynamic Defaults: Prioritizes frameworks based on `ui_priority`.
-2. TOML Loading: Recursive search, parsing, and merging.
-3. CLI Overrides: Args take precedence over TOML.
-4. Validation: Ensures unknown frameworks trigger errors.
 """
 
 import sys
@@ -46,8 +40,9 @@ def test_defaults_priority_sort():
       return adapter_beta
     return None
 
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["alpha", "beta"]):
-    with patch("ml_switcheroo.config.get_adapter", side_effect=get_mock_adapter):
+  # FIX: Patch directly in frameworks.base where logic comes from
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["alpha", "beta"]):
+    with patch("ml_switcheroo.frameworks.base.get_adapter", side_effect=get_mock_adapter):
       src = _resolve_default_source()
       tgt = _resolve_default_target()
 
@@ -74,8 +69,8 @@ def test_defaults_no_priority_defined():
       return adapter_b
     return None
 
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["b", "a"]):
-    with patch("ml_switcheroo.config.get_adapter", side_effect=get_mock_adapter):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["b", "a"]):
+    with patch("ml_switcheroo.frameworks.base.get_adapter", side_effect=get_mock_adapter):
       src = _resolve_default_source()
       # Alphabetical fallback: A comes before B
       assert src == "a"
@@ -87,8 +82,8 @@ def test_defaults_single_framework():
   Scenario: Registry has ['jax'].
   Expectation: Source='jax', Target='jax'.
   """
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["jax"]):
-    with patch("ml_switcheroo.config.get_adapter", return_value=MagicMock(ui_priority=10)):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["jax"]):
+    with patch("ml_switcheroo.frameworks.base.get_adapter", return_value=MagicMock(ui_priority=10)):
       src = _resolve_default_source()
       tgt = _resolve_default_target()
       assert src == "jax"
@@ -100,7 +95,7 @@ def test_defaults_empty_registry():
   Scenario: Registry empty.
   Expectation: Placeholders.
   """
-  with patch("ml_switcheroo.config.available_frameworks", return_value=[]):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=[]):
     src = _resolve_default_source()
     tgt = _resolve_default_target()
     assert src == "source_placeholder"
@@ -131,7 +126,7 @@ use_gpu = false
 def test_load_defaults_from_toml(toml_env):
   """Run without CLI args inside a configured root."""
   # We must patch available_frameworks because validation runs during init
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["tensorflow", "mlx"]):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["tensorflow", "mlx"]):
     config = RuntimeConfig.load(search_path=toml_env)
 
   assert config.source_framework == "tensorflow"
@@ -142,7 +137,7 @@ def test_load_defaults_from_toml(toml_env):
 
 def test_cli_overrides_toml(toml_env):
   """Run with CLI args overriding TOML."""
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["torch", "mlx"]):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["torch", "mlx"]):
     config = RuntimeConfig.load(
       source="torch",  # Override 'tensorflow'
       strict_mode=False,  # Override 'true'
@@ -159,7 +154,7 @@ def test_recursive_toml_search(toml_env):
   subdir = toml_env / "src" / "subdir"
   subdir.mkdir(parents=True)
 
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["tensorflow", "mlx"]):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["tensorflow", "mlx"]):
     config = RuntimeConfig.load(search_path=subdir)
 
   assert config.source_framework == "tensorflow"
@@ -172,8 +167,8 @@ def test_no_toml_library_fallback(toml_env):
   with patch("ml_switcheroo.config.tomllib", None):
     # Explicit mock to force default resolution usage
     mock_adapter = MagicMock(ui_priority=1)
-    with patch("ml_switcheroo.config.available_frameworks", return_value=["torch", "jax"]):
-      with patch("ml_switcheroo.config.get_adapter", return_value=mock_adapter):
+    with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["torch", "jax"]):
+      with patch("ml_switcheroo.frameworks.base.get_adapter", return_value=mock_adapter):
         config = RuntimeConfig.load(search_path=toml_env)
 
   # Should ignore the file and use defaults
@@ -187,7 +182,7 @@ def test_no_toml_library_fallback(toml_env):
 
 def test_invalid_framework_raises_validation_error():
   """Verify validation against registry."""
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["torch"]):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["torch"]):
     with pytest.raises(ValidationError) as excinfo:
       RuntimeConfig(source_framework="ghost_fw")
     assert "Unknown framework" in str(excinfo.value)
@@ -207,7 +202,7 @@ def test_cli_key_value_parsing():
 
 def test_effective_flavours():
   """Verify flavour resolution logic."""
-  with patch("ml_switcheroo.config.available_frameworks", return_value=["torch", "jax"]):
+  with patch("ml_switcheroo.frameworks.base.available_frameworks", return_value=["torch", "jax"]):
     cfg = RuntimeConfig(source_framework="torch", target_framework="jax", target_flavour="flax_nnx")
     assert cfg.effective_source == "torch"
     assert cfg.effective_target == "flax_nnx"

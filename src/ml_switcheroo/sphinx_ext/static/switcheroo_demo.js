@@ -81,8 +81,12 @@ try:
 
     # 2. Run Weight Script Generator (If architecture detected)
     weight_script_code = ""
+    
+    # Fix: Block IR targets from generating weight scripts (Visual/Intermediate only)
+    ir_targets = {'mlir', 'stablehlo', 'tikz', 'latex_dsl', 'html'}
+
     # We always attempt weight gen if successful, but fallback to empty string if no layers found
-    if result.success:
+    if result.success and real_target not in ir_targets:
         try:
             # Virtual FS in Pyodide
             f_src = pathlib.Path("/tmp/src_model.py")
@@ -432,6 +436,31 @@ async function renderMermaid(graphDef) {
             <strong>Graph Render Error:</strong><br/>
             ${e.message || String(e)}
         </div>`;
+    }
+}
+
+function renderHtmlDSL(htmlCode) {
+    const container = document.getElementById("tikz-output-container");
+    if (!container) return;
+
+    // Use iframe for style isolation
+    container.innerHTML = '<iframe style="width:100%; height:100%; min-height:400px; border:none;"></iframe>';
+    const iframe = container.querySelector("iframe");
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(htmlCode);
+    doc.close();
+}
+
+function renderTikZ(tikzCode) {
+    const container = document.getElementById("tikz-output-container");
+    if (!container) return;
+    // Basic injection for TikZJax to find
+    container.innerHTML = `<script type="text/tikz">${tikzCode}</script>`;
+    // Force re-scan if library is loaded
+    if (window.tikzjax) {
+         // Some versions of tikzjax need explicit trigger or just handle DOM mutations.
+         // Pass for now, assuming DOM mutation observer in lib or simple refresh.
     }
 }
 

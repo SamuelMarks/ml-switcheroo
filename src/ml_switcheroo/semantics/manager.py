@@ -17,7 +17,7 @@ from typing import Dict, Optional, Tuple, Any, Set, List
 from pydantic import ValidationError
 
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.schema import OpDefinition, PatternDef  # Imported PatternDef
+from ml_switcheroo.semantics.schema import OpDefinition, PatternDef
 from ml_switcheroo.semantics.standards_internal import MATH_OPS, NEURAL_OPS, EXTRAS_OPS
 from ml_switcheroo.semantics.merging import merge_tier_data
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
@@ -49,6 +49,7 @@ class SemanticsManager:
     self._known_rng_methods: Set[str] = set()
     self.known_magic_args: Set[str] = set()
     self.patterns: List[PatternDef] = []  # NEW: Store patterns
+    self.import_data: Dict[str, Dict] = {}  # Initialize import_data
 
     # Indexes
     self._reverse_index: Dict[str, Tuple[str, Dict]] = {}
@@ -66,7 +67,7 @@ class SemanticsManager:
     merge_tier_data(
       data=self.data,
       key_origins=self._key_origins,
-      import_data={},
+      import_data=self.import_data,
       framework_configs=self.framework_configs,
       patterns=self.patterns,  # Pass patterns list
       new_content=MATH_OPS,
@@ -78,7 +79,7 @@ class SemanticsManager:
     merge_tier_data(
       data=self.data,
       key_origins=self._key_origins,
-      import_data={},
+      import_data=self.import_data,
       framework_configs=self.framework_configs,
       patterns=self.patterns,
       new_content=NEURAL_OPS,
@@ -90,7 +91,7 @@ class SemanticsManager:
     merge_tier_data(
       data=self.data,
       key_origins=self._key_origins,
-      import_data={},
+      import_data=self.import_data,
       framework_configs=self.framework_configs,
       patterns=self.patterns,
       new_content=EXTRAS_OPS,
@@ -110,7 +111,13 @@ class SemanticsManager:
     self._build_index()
 
   def _build_index(self) -> None:
-    """Rebuilds the reverse lookup index (API string -> Abstract ID)."""
+    """
+    Rebuilds the reverse lookup index (API string -> Abstract ID).
+
+    Handles collision resolution for ambiguous APIs (e.g. if 'flax.nnx.relu'
+    is mapped to both 'relu' (Array) and 'ReLU' (Neural)).
+    Prioritizes Array API (Math) over Neural for call resolution.
+    """
     self._reverse_index.clear()
     for abstract_id, details in self.data.items():
       variants = details.get("variants", {})
@@ -119,7 +126,34 @@ class SemanticsManager:
           continue
         api_name = impl.get("api")
         if api_name:
-          self._reverse_index[api_name] = (abstract_id, details)
+          # Conflict Resolution Strategy
+          if api_name in self._reverse_index:
+            existing_id, _ = self._reverse_index[api_name]
+
+            new_tier = self._key_origins.get(abstract_id)
+            old_tier = self._key_origins.get(existing_id)
+
+            # Special case for ReLU/relu ambiguity
+            if abstract_id.lower() == "relu" and existing_id.lower() == "relu":
+              if abstract_id == "relu":
+                self._reverse_index[api_name] = (abstract_id, details)
+              # If existing was relu, keep it.
+              continue
+
+            # Priority 1: ARRAY_API (Math) vs NEURAL
+            # If the new one is Math and old was Neural, take Math (implies function call usage)
+            if new_tier == SemanticTier.ARRAY_API.value and old_tier == SemanticTier.NEURAL.value:
+              self._reverse_index[api_name] = (abstract_id, details)
+
+            # If old was Math and new is Neural, KEEP old (pass)
+            elif old_tier == SemanticTier.ARRAY_API.value and new_tier == SemanticTier.NEURAL.value:
+              pass
+
+            # Else: Standard Overwrite (Last wins, usually Extras vs Math/Neural)
+            else:
+              self._reverse_index[api_name] = (abstract_id, details)
+          else:
+            self._reverse_index[api_name] = (abstract_id, details)
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
     """

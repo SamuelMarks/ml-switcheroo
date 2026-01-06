@@ -12,9 +12,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, TypeVar, Tuple
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
-# Breaking circular import by using base
-from ml_switcheroo.frameworks.base import available_frameworks, get_adapter
-
 # Optional TOML support
 if sys.version_info >= (3, 11):
   import tomllib
@@ -39,6 +36,10 @@ def get_framework_priority_order() -> List[str]:
   Returns:
       List[str]: Sorted list of framework identifiers (e.g. ['torch', 'jax']).
   """
+  # Defer import to prevent circular dependency during initialization
+  # config -> frameworks/__init__ -> sass -> hooks -> config
+  from ml_switcheroo.frameworks.base import available_frameworks, get_adapter
+
   frameworks = available_frameworks()
 
   def sort_key(name: str) -> Tuple[int, str]:
@@ -141,6 +142,9 @@ class RuntimeConfig(BaseModel):
     Raises:
         ValueError: If the framework is not registered and not a placeholder.
     """
+    # Defer import to prevent circular dependency
+    from ml_switcheroo.frameworks.base import available_frameworks
+
     v_clean = v.lower().strip()
     known = available_frameworks()
     # Allow unregistered checks if registry is empty (bootstrap/test mode)

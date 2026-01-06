@@ -220,13 +220,13 @@ class FlaxNNXAdapter(JAXStackMixin):
   def get_harness_init_code(self) -> str:
     """Logic to create Flax NNX Rngs."""
     return textwrap.dedent(
-      """
-            def _make_flax_rngs(seed):
-                "Attempts to create a Flax NNX Rngs object."
-                try:
-                    return nnx.Rngs(seed)
-                except (ImportError, AttributeError):
-                    return "mock_flax_rngs"
+      """ 
+            def _make_flax_rngs(seed): 
+                "Attempts to create a Flax NNX Rngs object." 
+                try: 
+                    return nnx.Rngs(seed) 
+                except (ImportError, AttributeError): 
+                    return "mock_flax_rngs" 
         """
     ).strip()
 
@@ -297,7 +297,23 @@ class FlaxNNXAdapter(JAXStackMixin):
     Returns:
         Dict[str, StandardMap]: Mapping of standard op names to framework implementations.
     """
-    return load_definitions("flax_nnx")
+    defs = load_definitions("flax_nnx")
+
+    # Override Module base mapping specifically to avoid 'bridge' namespace artifacts
+    # coming from outdated snapshots.
+    defs["Module"] = StandardMap(api="flax.nnx.Module")
+
+    # Ensure ReLU (Class Layer) is present for architectural transforms (Torch -> Flax)
+    if "ReLU" not in defs:
+      defs["ReLU"] = StandardMap(api="flax.nnx.relu")
+
+    # Ensure relu (Functional) is present for source mapping (Flax -> Torch)
+    # This prevents 'nnx.relu' from mapping back to the 'ReLU' class ID if 'ReLU' comes later in dict iteration.
+    # We force overwrite or ensure it's set last to take precedence in reverse index logic
+    # inside SemanticsManager.
+    defs["relu"] = StandardMap(api="flax.nnx.relu")
+
+    return defs
 
   def convert(self, data: Any) -> Any:
     """
@@ -367,13 +383,13 @@ class FlaxNNXAdapter(JAXStackMixin):
     return """from flax import nnx
 import jax.numpy as jnp
 
-class Net(nnx.Module):
-    def __init__(self, rngs: nnx.Rngs):
-        self.linear = nnx.Linear(10, 10, rngs=rngs)
+class Net(nnx.Module): 
+    def __init__(self, rngs: nnx.Rngs): 
+        self.linear = nnx.Linear(10, 10, rngs=rngs) 
 
-    def __call__(self, x):
-        x = self.linear(x)
-        return nnx.relu(x)
+    def __call__(self, x): 
+        x = self.linear(x) 
+        return nnx.relu(x) 
 """
 
   def get_tiered_examples(self) -> Dict[str, str]:

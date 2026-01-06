@@ -135,6 +135,7 @@ class GraphExtractor(cst.CSTVisitor):
 
     self._in_init = False
     self._in_forward = False
+    self._scope_depth = 0
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
     """
@@ -147,7 +148,11 @@ class GraphExtractor(cst.CSTVisitor):
         True to visit children.
     """
     self.model_name = node.name.value
+    self._scope_depth += 1
     return True
+
+  def leave_ClassDef(self, node: cst.ClassDef) -> None:
+    self._scope_depth -= 1
 
   def leave_Module(self, original_node: cst.Module) -> None:
     """
@@ -170,9 +175,10 @@ class GraphExtractor(cst.CSTVisitor):
         True to visit children.
     """
     name = node.name.value
+    self._scope_depth += 1
     if name in ["__init__", "setup"]:
       self._in_init = True
-    elif name in ["forward", "__call__", "call"]:
+    elif name in ["forward", "__call__", "call", "kernel", "f"]:
       self._in_init = False  # Safety reset
       self._in_forward = True
       # Reset provenance for new forward pass analysis
@@ -188,6 +194,7 @@ class GraphExtractor(cst.CSTVisitor):
     Args:
         node: The function definition node.
     """
+    self._scope_depth -= 1
     if self._in_init:
       self._in_init = False
     elif self._in_forward:
@@ -207,6 +214,9 @@ class GraphExtractor(cst.CSTVisitor):
       self._analyze_layer_def(node)
     elif self._in_forward:
       self._analyze_data_flow(node)
+    elif self._scope_depth == 0:
+      # Top-level script mode
+      self._analyze_data_flow(node)
     return True
 
   def visit_Return(self, node: cst.Return) -> Optional[bool]:
@@ -220,6 +230,7 @@ class GraphExtractor(cst.CSTVisitor):
     Returns:
         False to stop recursion into the return statement (logic handled here).
     """
+    # Handle both explicit function context or implicit script context if result printed/last
     if self._in_forward and node.value:
       # 1. Check if returning a direct call (e.g. return self.layer(x))
       if isinstance(node.value, cst.Call):
@@ -246,18 +257,23 @@ class GraphExtractor(cst.CSTVisitor):
   def _extract_input_args(self, node: cst.FunctionDef) -> None:
     """
     Registers function arguments as input sources.
+    Creates distinct Input nodes for each argument to allow SASS register mapping.
 
     Args:
         node: The function definition.
     """
-    input_id = "input"
-    self.layer_registry[input_id] = LogicalNode(input_id, "Input", {})
-
     for param in node.params.params:
       if param.name.value == "self":
         continue
       arg_name = param.name.value
-      # Map the actual variable name (e.g. 'x', 'img') to the Input Node ID
+      # Unique node ID for this input
+      input_id = f"Input_{arg_name}"  # e.g. "Input_x"
+
+      # Register node if not exists
+      if input_id not in self.layer_registry:
+        self.layer_registry[input_id] = LogicalNode(input_id, "Input", {"name": arg_name})
+
+      # Map valid variable name to this input node
       self.provenance[arg_name] = input_id
 
   def _analyze_layer_def(self, node: cst.Assign) -> None:
@@ -357,6 +373,15 @@ class GraphExtractor(cst.CSTVisitor):
     # Trace Inputs -> This Layer
     for arg in call.args:
       var_name = self._get_var_name(arg.value)
+
+      # Handle implicit external input (script mode)
+      if var_name and var_name not in self.provenance:
+        if self._scope_depth == 0:
+          ext_id = f"Input_{var_name}"
+          if ext_id not in self.layer_registry:
+            self.layer_registry[ext_id] = LogicalNode(ext_id, "Input", {"name": var_name})
+          self.provenance[var_name] = ext_id
+
       if var_name and var_name in self.provenance:
         source_id = self.provenance[var_name]
         self.graph.edges.append(LogicalEdge(source_id, layer_name))
