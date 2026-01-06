@@ -41,6 +41,7 @@ jobs:
         # Activates venv, installs the package in editable mode with [test] extras
         run: |
           source .venv/bin/activate
+          uv pip install -r requirements.txt -r docs/requirements.txt -r test-requirements.txt
           uv pip install -e ".[test]"
 
       - name: Run Pytest

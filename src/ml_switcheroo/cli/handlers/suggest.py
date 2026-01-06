@@ -93,6 +93,7 @@ def _build_prompt(api_path: str, info: Dict[str, Any], schema_json: str) -> str:
   Formats the final prompt template.
   """
   op_name = api_path.split(".")[-1]
+  newline = "\n"
 
   template = f"""You are an expert AI assistant for the 'ml-switcheroo' transpiler project. 
 Your task is to generate a valid YAML definition using the Operation Definition Language (ODL). 
@@ -104,7 +105,7 @@ Signature: {op_name}{info["signature"]}
 
 Docstring: 
 
-{"\n>".join(info["docstring"].split("\n"))} 
+{newline + ">".join(info["docstring"].split(newline))}
 
 --- OUTPUT FORMAT (JSON SCHEMA) --- 
 The YAML must conform rigidly to this Pydantic schema: 
