@@ -97,6 +97,7 @@ try:
     print(' '.join(sorted(set(
       {'flax_nnx': 'flax'}.get(fw, fw)
       for fw in available_frameworks()
+      if fw not in {'html', 'latex_dsl', 'tikz', 'mlir', 'stablehlo'}
     ))))
 except ImportError:
     print('torch jax flax tensorflow keras mlx numpy')
@@ -161,7 +162,7 @@ if [ ! -d "$TEMP_DIR/array-api" ]; then
     printf '   ⬇️  Cloning Array API Standard...\n'
     git clone --depth 1 --branch 2024.12 https://github.com/data-apis/array-api "$TEMP_DIR/array-api" > /dev/null 2>&1
 fi
-printf '   Parsing Array API Stubs...\n'
+printf '   Parsings Array API Stubs...\n'
 python3 -m ml_switcheroo import-spec "$TEMP_DIR/array-api/src/array_api_stubs/_2024_12"
 
 # Tier B: ONNX Neural
@@ -169,10 +170,18 @@ if [ ! -d "$TEMP_DIR/onnx" ]; then
     printf '   ⬇️  Cloning ONNX Operators...\n'
     git clone --depth 1 --branch v1.20.0 https://github.com/onnx/onnx "$TEMP_DIR/onnx" > /dev/null 2>&1
 fi
-printf '   Parsing ONNX Operators...\n'
+printf '   Parsings ONNX Operators...\n'
 python3 -m ml_switcheroo import-spec "$TEMP_DIR/onnx/docs/Operators.md"
 
-# Tier C: Internals
+# Tier C: StableHLO
+if [ ! -d "$TEMP_DIR/stablehlo" ]; then
+    printf '   ⬇️  Cloning StableHLO Spec...\n'
+    git clone --depth 1 https://github.com/openxla/stablehlo "$TEMP_DIR/stablehlo" > /dev/null 2>&1
+fi
+printf '   Parsing StableHLO Spec...\n'
+python3 -m ml_switcheroo import-spec "$TEMP_DIR/stablehlo/docs/spec.md"
+
+# Tier D: Internals
 printf '   Importing Internal Golden Sets...\n'
 python3 -m ml_switcheroo import-spec internal
 
@@ -181,11 +190,14 @@ python3 -m ml_switcheroo import-spec internal
 # ------------------------------------------------------------------------------
 printf '\n%b[4/6] Discovering & Scaffolding Standards...%b\n' "${BLUE}" "${NC}"
 
+# Filter out virtual frameworks from consensus to avoid errors
+REAL_FWS=$(echo "$REGISTERED_FWS" | sed 's/\bhtml\b//g' | sed 's/\blatex_dsl\b//g' | sed 's/\btikz\b//g' | sed 's/\bmlir\b//g' | sed 's/\bstablehlo\b//g')
+
 # Consensus
-printf '   🤝 Running Consensus Engine (on %s)...\n' "$REGISTERED_FWS"
+printf '   🤝 Running Consensus Engine (on %s)...\n' "$REAL_FWS"
 # We deliberately rely on word splitting here to pass frameworks as separate args
 # shellcheck disable=SC2086
-python3 -m ml_switcheroo sync-standards --categories layer activation loss optimizer --frameworks "$REGISTERED_FWS"
+python3 -m ml_switcheroo sync-standards --categories layer activation loss optimizer --frameworks $REAL_FWS
 
 # Scaffolding
 printf '   🏗️  Applying Heuristics...\n'
@@ -201,6 +213,14 @@ python3 -m ml_switcheroo snapshot --out-dir "$SNAPSHOTS_DIR"
 # Loop through registered frameworks using POSIX read loop
 printf '%s' "$REGISTERED_FWS" | tr ' ' '\n' | while read -r fw; do
     [ -z "$fw" ] && continue
+
+    # Skip virtual frameworks that have no runtime implementation to sync
+    case "$fw" in
+        html|latex_dsl|tikz|mlir|stablehlo)
+            # printf '   ⏭️  Skipping virtual framework %s\n' "$fw"
+            continue
+            ;;
+    esac
 
     printf '   👉 Syncing %s... ' "$fw"
     if python3 -m ml_switcheroo sync "$fw" > /dev/null 2>&1; then

@@ -6,6 +6,7 @@ Checks that the harness is generated correctly, compiles, and runs standalone.
 import sys
 import subprocess
 import os
+from pathlib import Path
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 
@@ -78,6 +79,7 @@ def my_op(x):
 def test_harness_execution_mismatch(tmp_path):
   """
   Verify that logic failures are still caught in the standalone script.
+  Forces float input type so generated test does not use empty arrays, ensuring numeric mismatch logic triggers.
   """
   src_file = tmp_path / "mod_src.py"
   src_file.write_text("def my_op(x): return x + 1")
@@ -88,7 +90,10 @@ def test_harness_execution_mismatch(tmp_path):
   harness_path = tmp_path / "verify_fail.py"
 
   gen = HarnessGenerator()
-  gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="numpy")
+  # Semantics definition forces x to be float scalar, preventing empty array edge case
+  semantics = {"my_op": {"std_args": [{"name": "x", "type": "float"}]}}
+
+  gen.generate(src_file, tgt_file, harness_path, source_fw="numpy", target_fw="numpy", semantics=semantics)
 
   env = os.environ.copy()
   if "PYTHONPATH" in env:

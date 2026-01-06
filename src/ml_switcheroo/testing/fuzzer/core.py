@@ -90,8 +90,10 @@ class InputFuzzer:
     """
     Generates a SINGLE set of inputs. Valid for simple legacy tests and harnesses.
 
-    Under the hood, this builds a Hypothesis strategy and draws one example.
+    Under the hood, this builds a Hypothesis strategy and draws a random example.
     This replaces the old ad-hoc random generation logic.
+    It uses `@given` to properly invoke the engine, but requests multiple examples
+    to ensure the returned value is not just the trivial first case (e.g. 0 or None).
 
     Args:
         params: List of argument names.
@@ -104,7 +106,28 @@ class InputFuzzer:
     strat_dict = self.build_strategies(params, hints, constraints)
     # Create a fixed dictionary strategy
     composite = st.fixed_dictionaries(strat_dict)
-    return composite.example()
+
+    # Use @given to run the engine properly instead of .example()
+    # Imports inside function to be portable for Harness Generator extraction
+    from hypothesis import given, settings, Phase
+    import random
+
+    results = []
+
+    # Request multiple examples to overcome simple-case bias of Phase.generate
+    @settings(max_examples=10, phases=[Phase.generate], database=None)
+    @given(composite)
+    def single_shot_runner(data):
+      results.append(data)
+
+    single_shot_runner()
+
+    # Return a random choice from the generated pool to ensure diversity
+    if results:
+      return random.choice(results)
+
+    # Fallback if strategy generation failed to produce any (unlikely without error)
+    return {}
 
   def adapt_to_framework(self, kwargs: Dict[str, Any], framework: str) -> Dict[str, Any]:
     """

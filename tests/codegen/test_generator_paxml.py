@@ -1,7 +1,7 @@
 """
 test_generator_paxml.py
 
-Verifies that the TestGenerator correctly handles the 'paxml' framework configuration.
+Verifies that the TestCaseGenerator correctly handles the 'paxml' framework configuration.
 Ensures that templates derived from `k_test_templates.json` (or Registry Sync)
 are correctly applied to generate valid executable test code including:
 1. Specific imports (praxis, jax) in runtime.
@@ -11,7 +11,7 @@ are correctly applied to generate valid executable test code including:
 
 import pytest
 from unittest.mock import MagicMock
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -49,7 +49,7 @@ def test_paxml_code_generation(tmp_path):
   # If this fails, the issue is in Manager loading, not Generator logic.
   assert mgr.get_test_template("paxml") is not None, "PaxML template not loaded in Manager"
 
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "test_pax_generated.py"
 
   # 3. Generate Code

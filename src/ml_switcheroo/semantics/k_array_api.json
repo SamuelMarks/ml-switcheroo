@@ -1717,8 +1717,8 @@
     ]
   },
   "matmul": {
-    "description": "Alias for :func:`~array_api.matmul`.",
-    "from": "_2024_12/linalg.py",
+    "description": "Computes the matrix product.",
+    "from": "_2024_12/linear_algebra_functions.py",
     "std_args": [
       [
         "x1",
@@ -1777,8 +1777,8 @@
     ]
   },
   "matrix_transpose": {
-    "description": "Alias for :func:`~array_api.matrix_transpose`.",
-    "from": "_2024_12/linalg.py",
+    "description": "Transposes a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linear_algebra_functions.py",
     "std_args": [
       [
         "x",
@@ -1998,6 +1998,7 @@
   },
   "permute_dims": {
     "description": "Permutes tensor dimensions.",
+    "operation": "permute_dims",
     "std_args": [
       "input",
       {
@@ -2005,7 +2006,8 @@
         "name": "dims",
         "type": "int"
       }
-    ]
+    ],
+    "variants": {}
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
@@ -2553,8 +2555,8 @@
     ]
   },
   "tensordot": {
-    "description": "Alias for :func:`~array_api.tensordot`.",
-    "from": "_2024_12/linalg.py",
+    "description": "Returns a tensor contraction of ``x1`` and ``x2`` over specific axes.",
+    "from": "_2024_12/linear_algebra_functions.py",
     "std_args": [
       [
         "x1",
@@ -2717,8 +2719,8 @@
     ]
   },
   "vecdot": {
-    "description": "Alias for :func:`~array_api.vecdot`.",
-    "from": "_2024_12/linalg.py",
+    "description": "Computes the (vector) dot product of two arrays.",
+    "from": "_2024_12/linear_algebra_functions.py",
     "std_args": [
       [
         "x1",

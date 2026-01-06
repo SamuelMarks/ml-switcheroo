@@ -12,7 +12,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.enums import SemanticTier
 
 
-class TestSemantics(SemanticsManager):
+class MockSequentialSemantics(SemanticsManager):
   """
   Overrides framework configs for testing to ensure traits are available
   without relying on external files or registry defaults that might be missing
@@ -89,7 +89,7 @@ def semantics_manager():
   """
   Loads the semantics manager.
   """
-  return TestSemantics()
+  return MockSequentialSemantics()
 
 
 def test_sequential_container_transpilation(semantics_manager):
@@ -105,22 +105,22 @@ def test_sequential_container_transpilation(semantics_manager):
   5. Structural injection of `rngs=rngs` happens inside the container items
      because they are calls inside a Neural Module's `__init__`.
   """
-  source_code = """
+  source_code = """ 
 import torch
 import torch.nn as nn
 
-class MLP(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(28 * 28, 512),
-            nn.ReLU(),
-            nn.Linear(512, 10)
-        )
+class MLP(nn.Module): 
+    def __init__(self): 
+        super().__init__() 
+        self.net = nn.Sequential( 
+            nn.Flatten(), 
+            nn.Linear(28 * 28, 512), 
+            nn.ReLU(), 
+            nn.Linear(512, 10) 
+        ) 
 
-    def forward(self, x):
-        return self.net(x)
+    def forward(self, x): 
+        return self.net(x) 
 """
 
   config = RuntimeConfig(
@@ -179,11 +179,11 @@ def test_sequential_variable_assignment(semantics_manager):
     layers = [nnx.Linear(10, 10, rngs=rngs), nnx.relu(rngs=rngs)]
     seq = nnx.Sequential(*layers, rngs=rngs)
   """
-  source_code = """
-class Model(torch.nn.Module):
-    def __init__(self):
-        layers = [torch.nn.Linear(10, 10), torch.nn.ReLU()]
-        self.seq = torch.nn.Sequential(*layers)
+  source_code = """ 
+class Model(torch.nn.Module): 
+    def __init__(self): 
+        layers = [torch.nn.Linear(10, 10), torch.nn.ReLU()] 
+        self.seq = torch.nn.Sequential(*layers) 
 """
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=semantics_manager, config=config)

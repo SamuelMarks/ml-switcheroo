@@ -21,7 +21,9 @@ from ml_switcheroo.semantics.schema import OpDefinition, PatternDef  # Imported 
 from ml_switcheroo.semantics.standards_internal import MATH_OPS, NEURAL_OPS, EXTRAS_OPS
 from ml_switcheroo.semantics.merging import merge_tier_data
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
-from ml_switcheroo.frameworks import get_adapter
+
+# Use base directly to avoid cycle
+from ml_switcheroo.frameworks.base import get_adapter
 
 # New modular loaders
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
@@ -69,6 +71,7 @@ class SemanticsManager:
       patterns=self.patterns,  # Pass patterns list
       new_content=MATH_OPS,
       tier=SemanticTier.ARRAY_API,
+      is_internal=True,
     )
 
     # Load Neural Ops (Trigger for state injection)
@@ -80,6 +83,7 @@ class SemanticsManager:
       patterns=self.patterns,
       new_content=NEURAL_OPS,
       tier=SemanticTier.NEURAL,
+      is_internal=True,
     )
 
     # Load Extras
@@ -91,6 +95,7 @@ class SemanticsManager:
       patterns=self.patterns,
       new_content=EXTRAS_OPS,
       tier=SemanticTier.EXTRAS,
+      is_internal=True,
     )
 
     # --- Phase 2: File System Loading ---

@@ -180,6 +180,13 @@
         "self": "self"
       }
     },
+    "Cosinesimilarity": {
+      "api": "keras.losses.CosineSimilarity",
+      "args": {
+        "dim": "axis",
+        "reduction": "reduction"
+      }
+    },
     "DataParallel": {
       "api": "keras.src.distribution.distribution_lib.DataParallel",
       "args": {
@@ -405,6 +412,12 @@
         "axis": "axis",
         "name": "name",
         "self": "self"
+      }
+    },
+    "Logcosh": {
+      "api": "keras.losses.LogCosh",
+      "args": {
+        "reduction": "reduction"
       }
     },
     "Logsigmoid": {

@@ -58,7 +58,7 @@ def semantics():
   # This prevents stale JSON snapshots on disk from overriding the new ODL standard
   # during test execution (split-brain problem).
   if "permute_dims" in INTERNAL_OPS:
-    # Fix: Construct valid OpDefinition dict for update to pass Strict Pydantic Validation
+    # Fix: Construct strict OpDefinition dict to pass Pydantic validation
     op_data = INTERNAL_OPS["permute_dims"].copy()
     if "operation" not in op_data:
       op_data["operation"] = "permute_dims"

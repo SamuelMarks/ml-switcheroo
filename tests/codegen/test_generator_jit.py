@@ -9,7 +9,7 @@ Verifies:
 5. Lambda wrapping structure is syntactically valid for multi-argument calls.
 """
 
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 from unittest.mock import MagicMock
 
@@ -65,7 +65,7 @@ def test_missing_template_skips_jit(tmp_path):
   mgr.test_templates = no_jit_tmpl  # explicit populate
 
   out_file = tmp_path / "test_jit_skipped.py"
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -93,7 +93,7 @@ def test_standard_jit_template(tmp_path):
   }
 
   out_file = tmp_path / "test_jit_std.py"
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -124,7 +124,7 @@ def test_custom_jit_template(tmp_path):
   mgr.test_templates = custom_tmpl
 
   out_file = tmp_path / "test_jit_custom.py"
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -151,7 +151,7 @@ def test_jit_static_argnums_detection(tmp_path):
   mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
 
   out_file = tmp_path / "test_jit_static.py"
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -187,7 +187,7 @@ def test_custom_template_static_args_interpolation(tmp_path):
 
   out_file = tmp_path / "test_jit_custom_static.py"
 
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -222,7 +222,7 @@ def test_custom_template_static_args_missing(tmp_path):
 
   out_file = tmp_path / "test_jit_custom_none.py"
 
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -242,7 +242,7 @@ def test_torch_block_no_jit(tmp_path):
   mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
 
   out_file = tmp_path / "test_jit_torch.py"
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -268,7 +268,7 @@ def test_runtime_generation_includes_jit_modules(tmp_path):
   # Explicitly set templates for runtime gen
   mgr.test_templates = {"jax": {"import": "import jax"}, "torch": {"import": "import torch"}}
 
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "subdir" / "test.py"
 
   gen.generate(semantics, out_file)

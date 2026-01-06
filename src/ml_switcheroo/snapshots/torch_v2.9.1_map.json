@@ -574,6 +574,9 @@
         "self": "self"
       }
     },
+    "Cosinesimilarity": {
+      "api": "torch.nn.CosineSimilarity"
+    },
     "CrossEntropyLoss": {
       "api": "torch.nn.modules.loss.CrossEntropyLoss",
       "args": {

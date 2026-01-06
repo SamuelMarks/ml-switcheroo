@@ -22,12 +22,19 @@ Policy:
 import json
 import importlib.metadata
 from pathlib import Path
-from typing import Dict, List, Any, DefaultDict
+from typing import Dict, List, Any, DefaultDict, Union
 from collections import defaultdict
 
 from ml_switcheroo.discovery.consensus import CandidateStandard
 from ml_switcheroo.utils.console import log_info, log_warning, log_success
 from ml_switcheroo.semantics.paths import resolve_snapshots_dir
+
+
+def _arg_sort_key(arg: Union[str, Dict[str, Any]]) -> str:
+  """Helper key for sorting arguments that might be strings or dicts."""
+  if isinstance(arg, dict):
+    return arg.get("name", "")
+  return str(arg)
 
 
 class SemanticPersister:
@@ -67,7 +74,7 @@ class SemanticPersister:
       else:
         # Transform to Abstract Schema
         spec_entry = {
-          "std_args": sorted(cand.std_args),
+          "std_args": sorted(cand.std_args, key=_arg_sort_key),
           "description": f"Auto-discovered via Consensus (Score: {cand.score})",
           # Variants keys removed from Hub in new architecture
         }

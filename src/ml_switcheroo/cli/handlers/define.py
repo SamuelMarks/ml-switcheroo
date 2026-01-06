@@ -28,7 +28,7 @@ from ml_switcheroo.tools.injector_plugin import PluginGenerator
 from ml_switcheroo.utils.console import log_success, log_error, log_info, log_warning
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 import ml_switcheroo.semantics.standards_internal as internal_standards_module
 import ml_switcheroo.plugins
 
@@ -234,9 +234,9 @@ def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager, dry_run: bo
     safe_name = op_def.operation.lower().replace(" ", "_").replace("-", "_")
     test_file = test_dir / f"test_odl_{safe_name}.py"
 
-    gen = TestGenerator(semantics_mgr=mgr)
+    gen = TestCaseGenerator(semantics_mgr=mgr)
     gen.generate({op_def.operation: op_def.model_dump(exclude_unset=True)}, test_file)
-    # We don't log success here as TestGenerator manages file IO quietly usually,
+    # We don't log success here as TestCaseGenerator manages file IO quietly usually,
     # but it's good feedback
   except Exception as e:
     log_warning(f"Test generation failed: {e}")

@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Type, TypeVar, Tuple
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
-from ml_switcheroo.frameworks import available_frameworks, get_adapter
+# Breaking circular import by using base
+from ml_switcheroo.frameworks.base import available_frameworks, get_adapter
 
 # Optional TOML support
 if sys.version_info >= (3, 11):
@@ -115,7 +116,8 @@ class RuntimeConfig(BaseModel):
 
   # Structural Verification
   intermediate: Optional[str] = Field(
-    None, description="Intermediate representation layer (e.g. 'mlir', 'tikz') for round-trip verification."
+    None,
+    description="Intermediate representation layer (e.g. 'mlir', 'tikz') for round-trip verification.",
   )
 
   enable_fusion: bool = Field(False, description="If True, performs graph-level optimization and fusion.")

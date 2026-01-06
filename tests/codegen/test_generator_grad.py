@@ -9,7 +9,7 @@ Verifies:
 
 import pytest
 from unittest.mock import MagicMock
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -24,7 +24,7 @@ def generator(tmp_path):
   mgr.get_test_template.side_effect = lambda fw: templates.get(fw)
   mgr.test_templates = templates
   mgr.get_framework_config.return_value = {}
-  return TestGenerator(semantics_mgr=mgr)
+  return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_grad_injection_enabled(generator, tmp_path):

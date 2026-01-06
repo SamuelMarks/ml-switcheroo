@@ -14,7 +14,7 @@ Handles:
 """
 
 import warnings
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 
 from pydantic import ValidationError
 
@@ -111,6 +111,33 @@ def merge_patterns(master_patterns: List[PatternDef], new_patterns: List[Any]) -
       print(f"⚠️ Invalid pattern definition: {e}")
 
 
+def _normalize_args(args_list: List[Any]) -> List[str]:
+  """
+  Simplifies argument definitions to a list of names for relaxed comparison.
+
+  Converts:
+  - ["x", "y"] -> ["x", "y"]
+  - [{"name": "x", "type": "int"}, "y"] -> ["x", "y"]
+
+  Args:
+      args_list: List of argument definitions (strings, dicts, or tuples).
+
+  Returns:
+      List of argument names.
+  """
+  names = []
+  for arg in args_list:
+    if isinstance(arg, str):
+      names.append(arg)
+    elif isinstance(arg, dict):
+      name = arg.get("name")
+      if name:
+        names.append(name)
+    elif isinstance(arg, (list, tuple)) and len(arg) > 0:
+      names.append(arg[0])
+  return names
+
+
 def merge_tier_data(
   data: Dict[str, Dict],
   key_origins: Dict[str, str],
@@ -119,6 +146,7 @@ def merge_tier_data(
   new_content: Dict[str, Any],
   tier: SemanticTier,
   patterns: Optional[List[PatternDef]] = None,
+  is_internal: bool = False,
 ) -> None:
   """
   Merges content from a Specification file (hub) into the manager state.
@@ -135,6 +163,7 @@ def merge_tier_data(
       new_content: The JSON content being loaded.
       tier: The Semantic Tier of the file being loaded.
       patterns: Master list of fusion patterns (optional).
+      is_internal: If True, marks entries as internal defaults which can be silently overwritten.
   """
   data_copy = new_content.copy()
 
@@ -182,12 +211,17 @@ def merge_tier_data(
       stored_dict = details_to_validate.copy()
       stored_dict.update(validated_dict)
 
+      if is_internal:
+        stored_dict["_is_internal"] = True
+
       if op_name in data:
         # Idempotency Check: If the new definition is identical to existing, skip
         if data[op_name] == stored_dict:
           continue
 
         existing_entry = data[op_name]
+        was_internal = existing_entry.get("_is_internal", False)
+
         prev_tier_val = key_origins.get(op_name, "unknown")
 
         # Determine precedence
@@ -195,6 +229,7 @@ def merge_tier_data(
         curr_prec = TIER_PRECEDENCE.get(tier.value, 0)
 
         # Downgrade Protection: Don't let low-priority spec overwrite high-priority origin tag
+        # Unless origin was internal default and we are loading file (any precedence)
         if curr_prec < prev_prec:
           should_update_origin = False
 
@@ -212,16 +247,23 @@ def merge_tier_data(
           # Warning Logic:
           # Warn only if a meaningful conflict (signature mismatch) exists at the same tier.
           # Upgrades (e.g. Array->Neural) are silent.
-          # Same-Tier with identical args (e.g. doc-only update) are silent.
-          if tier != SemanticTier.EXTRAS and should_update_origin:
-            if curr_prec == prev_prec:
-              old_args = existing_entry.get("std_args", [])
-              new_args = stored_dict.get("std_args", [])
-              if old_args != new_args:
-                warnings.warn(
-                  f"Conflict detected for '{op_name}': Signature mismatch within '{tier.value}'. Overwriting.",
-                  UserWarning,
-                )
+          # Overwriting an Internal Default with explicit File content is also silent.
+          suppress_internal_conflict = was_internal and not is_internal
+
+          if tier != SemanticTier.EXTRAS and should_update_origin and curr_prec == prev_prec:
+            old_args_raw = existing_entry.get("std_args", [])
+            new_args_raw = stored_dict.get("std_args", [])
+
+            # Normalize args to names only to check for True mismatch
+            # (Ignoring metadata upgrades like type/min/max)
+            old_names = _normalize_args(old_args_raw)
+            new_names = _normalize_args(new_args_raw)
+
+            if old_names != new_names and not suppress_internal_conflict:
+              warnings.warn(
+                f"Conflict detected for '{op_name}': Signature mismatch within '{tier.value}'. Overwriting.",
+                UserWarning,
+              )
 
       # Merge dictionaries (Overwrite properties with new spec, but variants are merged above)
       data[op_name] = stored_dict

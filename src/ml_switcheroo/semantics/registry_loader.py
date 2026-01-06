@@ -7,8 +7,11 @@ definitions alongside "Config-First" JSONs.
 """
 
 from typing import Any
-from ml_switcheroo.frameworks import available_frameworks, get_adapter
-from ml_switcheroo.frameworks.base import ImportConfig
+from ml_switcheroo.frameworks.base import (
+  available_frameworks,
+  get_adapter,
+  ImportConfig,
+)
 from ml_switcheroo.core import hooks
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.semantics.merging import merge_tier_data, merge_overlay_data

@@ -9,7 +9,7 @@ Verifies that:
 
 import pytest
 from unittest.mock import MagicMock
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -30,7 +30,7 @@ def generator(tmp_path):
   # Populate attributes for runtime gen
   mgr.test_templates = mock_templates
   mgr.get_framework_config.return_value = {}
-  return TestGenerator(semantics_mgr=mgr)
+  return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_void_return_logic(generator, tmp_path):

@@ -11,7 +11,7 @@ Verifies:
 
 import pytest
 from unittest.mock import MagicMock
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -61,7 +61,7 @@ def test_generation_runtime_import(tmp_path, mock_mgr):
   semantics = {"add": {"std_args": ["x"], "variants": {"torch": {"api": "torch.add"}, "jax": {"api": "jnp.add"}}}}
 
   out_file = tmp_path / "test_structure.py"
-  gen = TestGenerator(semantics_mgr=mock_mgr)
+  gen = TestCaseGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()
@@ -82,7 +82,7 @@ def test_gen_abs():
 """)
 
   # 3. Run Generator
-  gen = TestGenerator(semantics_mgr=mock_mgr)
+  gen = TestCaseGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
   # 4. Verify Content
@@ -108,7 +108,7 @@ def test_generation_multi_backend(tmp_path, mock_mgr):
   out_file = tmp_path / "test_multi.py"
 
   # 2. Run
-  gen = TestGenerator(semantics_mgr=mock_mgr)
+  gen = TestCaseGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
   # 3. Verify Imports via Runtime
@@ -130,7 +130,7 @@ def test_excludes_single_variant(tmp_path, mock_mgr):
 
   out_file = tmp_path / "test_empty.py"
 
-  gen = TestGenerator(semantics_mgr=mock_mgr)
+  gen = TestCaseGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text() if out_file.exists() else ""
@@ -150,7 +150,7 @@ def test_generation_unary_vs_binary(tmp_path, mock_mgr):
   }
 
   out_file = tmp_path / "test_unary.py"
-  gen = TestGenerator(semantics_mgr=mock_mgr)
+  gen = TestCaseGenerator(semantics_mgr=mock_mgr)
   gen.generate(semantics, out_file)
 
   content = out_file.read_text()

@@ -22,6 +22,7 @@ from ml_switcheroo.frameworks.base import (
   _ADAPTER_REGISTRY,
   register_framework,
   get_adapter,
+  available_frameworks,
 )
 
 # Modules to exclude from the automatic adapter registration scan.
@@ -54,22 +55,6 @@ def _auto_register_adapters() -> None:
 
 # Execute discovery on import
 _auto_register_adapters()
-
-
-def available_frameworks() -> List[str]:
-  """
-  Returns a list of all registered framework keys.
-
-  The keys are populated dynamically. Usage example:
-  >>> if "tinygrad" in available_frameworks():
-  ...     print("TinyGrad is supported!")
-
-  Returns:
-      List[str]: A list of identifier strings (e.g. ['torch', 'jax']).
-  """
-  # Keys correspond to the string passed to @register_framework("key")
-  return list(_ADAPTER_REGISTRY.keys())
-
 
 __all__ = [
   "FrameworkAdapter",

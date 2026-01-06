@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -51,7 +51,7 @@ class MockSemantics(SemanticsManager):
 @pytest.fixture
 def generator():
   mgr = MockSemantics()
-  return TestGenerator(semantics_mgr=mgr)
+  return TestCaseGenerator(semantics_mgr=mgr)
 
 
 @pytest.fixture
@@ -71,7 +71,7 @@ def test_generator_writes_file_and_runtime(generator, sample_spec, tmp_path):
   out_file = tmp_path / "test_generated.py"
 
   # We must ensure runtime can be generated next to output
-  # TestGenerator._ensure_runtime_module does this
+  # TestCaseGenerator._ensure_runtime_module does this
   generator.generate(sample_spec, out_file)
 
   assert out_file.exists()

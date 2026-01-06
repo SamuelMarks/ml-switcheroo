@@ -165,8 +165,18 @@
     "Cosh": {
       "api": "mlx.core.cosh"
     },
+    "Cosinesimilarity": {
+      "api": "mlx.nn.losses.cosine_similarity_loss",
+      "args": {
+        "dim": "axis",
+        "reduction": "reduction"
+      }
+    },
     "CumSum": {
       "api": "mlx.core.cumsum"
+    },
+    "Device": {
+      "api": "mlx.core.Device"
     },
     "Div": {
       "api": "mx.divide"
@@ -410,6 +420,12 @@
       "api": "mlx.nn.layers.activations.LogSoftmax",
       "args": {
         "self": "self"
+      }
+    },
+    "Logcosh": {
+      "api": "mlx.nn.losses.log_cosh_loss",
+      "args": {
+        "reduction": "reduction"
       }
     },
     "Logsigmoid": {

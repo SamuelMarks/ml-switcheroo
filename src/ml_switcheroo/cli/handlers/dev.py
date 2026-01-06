@@ -10,7 +10,7 @@ from pathlib import Path
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.utils.console import log_info, log_success
 
 
@@ -65,6 +65,6 @@ def handle_gen_tests(out: Path) -> int:
   mgr = SemanticsManager()
   semantics = mgr.get_known_apis()
   out.parent.mkdir(parents=True, exist_ok=True)
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   gen.generate(semantics, out)
   return 0

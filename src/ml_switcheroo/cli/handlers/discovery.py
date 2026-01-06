@@ -8,31 +8,34 @@ It handles:
 1.  **Ingestion**: Importing external standards (ONNX, Array API) and Internal Golden Sets (Hub).
 2.  **Scaffolding**: Generating skeleton mappings.
 3.  **Discovery**: Identifying Neural Layers via Consensus and linking them to the Semantic Hub.
+4.  **StableHLO**: Importing StableHLO specificiation from markdown.
 """
 
 import json
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.semantics.paths import resolve_semantics_dir
-from ml_switcheroo.semantics.standards_internal import MATH_OPS, NEURAL_OPS, EXTRAS_OPS
-from ml_switcheroo.discovery.scaffolder import Scaffolder
-from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
-from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
+from ml_switcheroo.core.ghost import GhostRef
 from ml_switcheroo.discovery.consensus import ConsensusEngine
-from ml_switcheroo.semantics.autogen import SemanticPersister
+from ml_switcheroo.discovery.scaffolder import Scaffolder
+from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.frameworks import available_frameworks
 from ml_switcheroo.frameworks.base import (
   StandardCategory,
   get_adapter,
-  GhostRef,
 )
-from ml_switcheroo.frameworks import available_frameworks
+from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
+from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
+from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
+from ml_switcheroo.semantics.autogen import SemanticPersister
+from ml_switcheroo.semantics.manager import SemanticsManager
+from ml_switcheroo.semantics.paths import resolve_semantics_dir
+from ml_switcheroo.semantics.standards_internal import EXTRAS_OPS, MATH_OPS, NEURAL_OPS
 from ml_switcheroo.utils.console import (
   console,
+  log_error,
   log_info,
   log_success,
-  log_error,
   log_warning,
 )
 
@@ -92,13 +95,27 @@ def handle_import_spec(target: Path) -> int:
     log_success("Hydrated internal specs to semantics folder.")
     return 0
 
-  # 2. ONNX Spec (Tier B)
+  # 2. Parsing Logic for Markdown Files
   elif target.is_file() and target.suffix == ".md":
-    log_info(f"Detected ONNX Markdown Spec: {target.name}")
-    importer = OnnxSpecImporter()
-    data = importer.parse_file(target)
-    _save_spec(out_dir, "k_neural_net.json", data)
-    return 0
+    # Distinguish between ONNX and StableHLO based on content header
+    try:
+      content_header = target.read_text(encoding="utf-8", errors="ignore")[:300]
+    except Exception as e:
+      log_error(f"Failed to read file header: {e}")
+      return 1
+
+    if "StableHLO" in content_header or "stablehlo" in content_header.lower():
+      log_info(f"Detected StableHLO Spec: {target.name}")
+      importer = StableHloSpecImporter()
+      data = importer.parse_file(target)
+      _save_spec(out_dir, "k_stablehlo.json", data)
+      return 0
+    else:
+      log_info(f"Detected ONNX Markdown Spec: {target.name}")
+      importer = OnnxSpecImporter()
+      data = importer.parse_file(target)
+      _save_spec(out_dir, "k_neural_net.json", data)
+      return 0
 
   # 3. Array API Stubs (Tier A)
   elif target.is_dir():
@@ -109,7 +126,7 @@ def handle_import_spec(target: Path) -> int:
     return 0
 
   else:
-    log_error("Invalid input. Must be 'internal', .md (ONNX), or dir of stubs (Array API).")
+    log_error("Invalid input. Must be 'internal', .md (ONNX/StableHLO), or dir of stubs (Array API).")
     return 1
 
 

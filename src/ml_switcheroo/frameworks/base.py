@@ -445,6 +445,21 @@ def register_framework(name: str):
   return wrapper
 
 
+def available_frameworks() -> List[str]:
+  """
+  Returns a list of all registered framework keys.
+
+  The keys are populated dynamically. Usage example:
+  >>> if "tinygrad" in available_frameworks():
+  ...     print("TinyGrad is supported!")
+
+  Returns:
+      List[str]: A list of identifier strings (e.g. ['torch', 'jax']).
+  """
+  # Keys correspond to the string passed to @register_framework("key")
+  return list(_ADAPTER_REGISTRY.keys())
+
+
 def get_adapter(name: str) -> Optional[FrameworkAdapter]:
   """
   Factory to retrieve an instantiated adapter.

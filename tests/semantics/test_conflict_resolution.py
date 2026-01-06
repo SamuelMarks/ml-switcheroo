@@ -15,7 +15,7 @@ from ml_switcheroo.semantics.merging import merge_tier_data
 from ml_switcheroo.enums import SemanticTier
 
 
-class TestSemanticsManager(SemanticsManager):
+class MockConflictSemantics(SemanticsManager):
   """Subclass to intercept loading logic for testing."""
 
   def __init__(self):
@@ -30,7 +30,7 @@ class TestSemanticsManager(SemanticsManager):
 
 def test_merge_clean_insert():
   """Verify standard insertion works."""
-  mgr = TestSemanticsManager()
+  mgr = MockConflictSemantics()
 
   data = {"abs": {"doc": "Math"}}
 
@@ -52,7 +52,7 @@ def test_array_vs_neural_silent_upgrade():
   Scenario: 'sigmoid' defined in Array API, then upgraded in Neural.
   Expectation: Content updated, Tier Origin updated to Neural, NO warning emitted (Refinement upgrade).
   """
-  mgr = TestSemanticsManager()
+  mgr = MockConflictSemantics()
 
   # 1. Load Array
   merge_tier_data(
@@ -94,7 +94,7 @@ def test_extras_override_silence():
   2. Tier remains Neural (Downgrade protection).
   3. No Warning issued (Extras are silent patchers).
   """
-  mgr = TestSemanticsManager()
+  mgr = MockConflictSemantics()
 
   # 1. Load Base (Precedence 3)
   merge_tier_data(
@@ -136,7 +136,7 @@ def test_duplicate_same_tier_signature_mismatch_warning():
   Scenario: Same key appears twice in same Tier with CONFLICTING signatures.
   Expectation: Warning issued.
   """
-  mgr = TestSemanticsManager()
+  mgr = MockConflictSemantics()
 
   content_a = {"add": {"std_args": ["a"]}}
   content_b = {"add": {"std_args": ["x", "y"]}}
@@ -168,7 +168,7 @@ def test_duplicate_same_tier_identical_is_silent():
   Scenario: Content is reloaded (identical or minor metadata change only).
   Expectation: No warning.
   """
-  mgr = TestSemanticsManager()
+  mgr = MockConflictSemantics()
 
   # Same signature, different descriptions (minor update)
   content_a = {"add": {"std_args": ["x"], "description": "v1"}}
@@ -201,7 +201,7 @@ def test_build_index_refresh():
   """
   Verify _build_index is capable of updating mappings after a merge.
   """
-  mgr = TestSemanticsManager()
+  mgr = MockConflictSemantics()
 
   # Init Data: abs -> torch.abs
   data_a = {"abs": {"variants": {"torch": {"api": "torch.abs"}}}}

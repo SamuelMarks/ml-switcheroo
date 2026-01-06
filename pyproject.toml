@@ -23,6 +23,9 @@ ml_switcheroo = "ml_switcheroo.cli.__main__:main"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+filterwarnings = [
+    "ignore:.*np.object will be defined.*:FutureWarning"
+]
 
 [tool.ruff]
 exclude = [

@@ -14,7 +14,7 @@ from ml_switcheroo.generated_tests.inputs import parse_arg_def, generate_input_v
 from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module
 
 
-class TestGenerator:
+class TestCaseGenerator:
   """
   Generates PyTest files for ML operators across frameworks (Torch, JAX, etc.).
 
@@ -22,9 +22,12 @@ class TestGenerator:
   runtime environment setup via helper modules.
   """
 
+  # Prevent pytest from trying to collect this class as a test suite
+  __test__ = False
+
   def __init__(self, semantics_mgr: Any = None) -> None:
     """
-    Initialize the TestGenerator.
+    Initialize the TestCaseGenerator.
 
     Args:
         semantics_mgr: Manager for semantics and templates.

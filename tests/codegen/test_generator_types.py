@@ -5,7 +5,7 @@ Includes validation for Return Types (Output Verification).
 
 import pytest
 from unittest.mock import MagicMock
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.generated_tests.inputs import generate_input_value_code
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -33,7 +33,7 @@ def gen(tmp_path):
 
   mgr.get_test_template.side_effect = mock_get_template
 
-  return TestGenerator(semantics_mgr=mgr)
+  return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_code_gen_str_int():

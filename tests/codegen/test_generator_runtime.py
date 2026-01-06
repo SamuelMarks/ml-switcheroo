@@ -11,7 +11,7 @@ Verifies that:
 import sys
 import pytest
 from unittest.mock import MagicMock
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -36,7 +36,7 @@ class MockRuntimeSemantics(SemanticsManager):
 @pytest.fixture
 def generator(tmp_path):
   mgr = MockRuntimeSemantics()
-  return TestGenerator(semantics_mgr=mgr)
+  return TestCaseGenerator(semantics_mgr=mgr)
 
 
 def test_runtime_file_creation(generator, tmp_path):

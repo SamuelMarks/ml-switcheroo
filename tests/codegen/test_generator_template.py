@@ -8,7 +8,7 @@ Verifies:
 """
 
 import pytest
-from ml_switcheroo.generated_tests.generator import TestGenerator
+from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -56,7 +56,7 @@ def test_default_template_fallback(tmp_path, semantics_data):
   }
 
   mgr = MockTemplateSemantics(templates=defaults)
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "test_defaults.py"
 
   # Must add a valid second one (JAX) to force generation logic (needs >=2 variants)
@@ -94,7 +94,7 @@ def test_custom_backend_template(tmp_path, semantics_data):
   }
 
   mgr = MockTemplateSemantics(templates=custom_templates)
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "test_tinygrad.py"
 
   gen.generate(semantics_data, out_file)
@@ -142,7 +142,7 @@ def test_jit_config_via_template(tmp_path):
   }
 
   mgr = MockTemplateSemantics(templates=templates)
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "test_jit_flag.py"
 
   gen.generate(data, out_file)
@@ -165,7 +165,7 @@ def test_invalid_framework_skipped(tmp_path, semantics_data):
   templates = {"torch": {"import": "import torch"}, "jax": {"import": "import jax"}}
   mgr = MockTemplateSemantics(templates=templates)
 
-  gen = TestGenerator(semantics_mgr=mgr)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
   out_file = tmp_path / "test_skip.py"
 
   gen.generate(semantics_data, out_file)
