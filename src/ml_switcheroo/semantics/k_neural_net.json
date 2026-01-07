@@ -1282,18 +1282,12 @@
     ]
   },
   "Gelu": {
-    "description": "Gelu takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the gaussian error linear units function, $y = 0.5 * x * (1 + erf(x/sqrt(2)))$ is applied to the tensor elementwise. If the attribute \"approximate\" is set to \"tanh\", the function estimation, $y = 0.5 * x * (1 + Tanh...",
-    "from": "Operators.md",
+    "description": "Auto-discovered via Consensus (Score: 4.0)",
     "std_args": [
-      [
-        "X",
-        "Tensor"
-      ],
-      [
-        "approximate",
-        "str"
-      ]
-    ]
+      "approximate",
+      "x"
+    ],
+    "type": "function"
   },
   "Gemm": {
     "description": "General Matrix multiplication: https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms#Level_3 * A' = transpose(A) if transA else A * B' = transpose(B) if transB else B Compute Y = alpha * A' * B' + beta * C, where input tensor A has shape (M, K) or (K, M), input tensor B has shape (K, N) or ...",

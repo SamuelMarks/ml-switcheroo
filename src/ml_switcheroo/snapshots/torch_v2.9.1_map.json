@@ -897,7 +897,8 @@
       }
     },
     "Gelu": {
-      "api": "torch.nn.GELU"
+      "api": "torch.nn.functional.gelu",
+      "args": {}
     },
     "Glu": {
       "api": "torch.nn.modules.activation.GLU",
@@ -941,11 +942,7 @@
       }
     },
     "HardSwish": {
-      "api": "torch.nn.functional.hardswish",
-      "args": {
-        "inplace": "inplace",
-        "input": "input"
-      }
+      "api": "torch.nn.Hardswish"
     },
     "Hardshrink": {
       "api": "torch.nn.modules.activation.Hardshrink",
@@ -1920,7 +1917,11 @@
       }
     },
     "Relu": {
-      "api": "torch.nn.ReLU"
+      "api": "torch.nn.functional.relu",
+      "args": {
+        "inplace": "inplace",
+        "input": "input"
+      }
     },
     "Relu6": {
       "api": "torch.nn.modules.activation.ReLU6",

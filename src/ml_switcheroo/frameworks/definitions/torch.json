@@ -1,14 +1,31 @@
 {
   "Abs": {
     "api": "torch.abs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Adam": {
     "api": "torch.optim.Adam",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Add": {
     "api": "torch.add",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Alphadropout": {
+    "api": "torch.nn.modules.dropout.AlphaDropout",
+    "args": {
+      "inplace": "inplace",
+      "p": "p",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Arange": {
@@ -16,87 +33,248 @@
     "args": {
       "stop": "end"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ArgMax": {
     "api": "torch.argmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ArgMin": {
     "api": "torch.argmin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Array": {
     "api": "torch.tensor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "AssertClose": {
     "api": "torch.testing.assert_close",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AuxOutput": {
+    "api": "torch.nn.attention.flex_attention.AuxOutput",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool1d": {
+    "api": "torch.nn.modules.pooling.AvgPool1d",
+    "args": {
+      "ceil_mode": "ceil_mode",
+      "count_include_pad": "count_include_pad",
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool2d": {
+    "api": "torch.nn.modules.pooling.AvgPool2d",
+    "args": {
+      "ceil_mode": "ceil_mode",
+      "count_include_pad": "count_include_pad",
+      "divisor_override": "divisor_override",
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool3d": {
+    "api": "torch.nn.modules.pooling.AvgPool3d",
+    "args": {
+      "ceil_mode": "ceil_mode",
+      "count_include_pad": "count_include_pad",
+      "divisor_override": "divisor_override",
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Avgpool": {
+    "api": "torch.nn.AvgPool3d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BLOCK_M": {
+    "api": "torch.nn.attention.flex_attention.FlexKernelOptions.BLOCK_M",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "BatchNorm": {
     "api": "torch.nn.BatchNorm2d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bidirectional": {
+    "api": "torch.nn.modules.rnn.RNNBase.bidirectional",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bilinear": {
+    "api": "torch.nn.modules.linear.Bilinear",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dtype": "dtype",
+      "in1_features": "in1_features",
+      "in2_features": "in2_features",
+      "out_features": "out_features",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Bool": {
     "api": "torch.bool",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CTCLoss": {
+    "api": "torch.nn.modules.loss.CTCLoss",
+    "args": {
+      "blank": "blank",
+      "reduction": "reduction",
+      "self": "self",
+      "zero_infinity": "zero_infinity"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Cache": {
     "api": "torch.nn.Parameter",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "nnx_param_to_torch"
   },
   "CastBool": {
     "api": "torch.Tensor.bool",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CastByte": {
     "api": "torch.Tensor.byte",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CastChar": {
     "api": "torch.Tensor.char",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CastDouble": {
     "api": "torch.Tensor.double",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CastFloat": {
     "api": "torch.Tensor.float",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CastHalf": {
     "api": "torch.Tensor.half",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CastInt": {
     "api": "torch.Tensor.int",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CastLong": {
     "api": "torch.Tensor.long",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CastShort": {
     "api": "torch.Tensor.short",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Celu": {
+    "api": "torch.nn.modules.activation.CELU",
+    "args": {
+      "alpha": "alpha",
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CenterCrop": {
     "api": "torchvision.transforms.CenterCrop",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Clamp": {
     "api": "torch.clamp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ClipGradNorm": {
     "api": "torch.nn.utils.clip_grad_norm_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Compile": {
     "api": "torch.compile",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ComplexOp": {
@@ -110,95 +288,656 @@
     "args": {
       "axis": "dim"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Constant": {
+    "api": "torch.nn.init.constant",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv1d": {
+    "api": "torch.nn.modules.conv.Conv1d",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dilation": "dilation",
+      "dtype": "dtype",
+      "groups": "groups",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "padding": "padding",
+      "padding_mode": "padding_mode",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Conv2d": {
     "api": "torch.nn.Conv2d",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dilation": "dilation",
+      "dtype": "dtype",
+      "groups": "groups",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "padding": "padding",
+      "padding_mode": "padding_mode",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv3d": {
+    "api": "torch.nn.modules.conv.Conv3d",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dilation": "dilation",
+      "dtype": "dtype",
+      "groups": "groups",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "padding": "padding",
+      "padding_mode": "padding_mode",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvT": {
+    "api": "torch.nn.utils.fusion.ConvT",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose1d": {
+    "api": "torch.nn.modules.conv.ConvTranspose1d",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dilation": "dilation",
+      "dtype": "dtype",
+      "groups": "groups",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "output_padding": "output_padding",
+      "padding": "padding",
+      "padding_mode": "padding_mode",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose2d": {
+    "api": "torch.nn.modules.conv.ConvTranspose2d",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dilation": "dilation",
+      "dtype": "dtype",
+      "groups": "groups",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "output_padding": "output_padding",
+      "padding": "padding",
+      "padding_mode": "padding_mode",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose3d": {
+    "api": "torch.nn.modules.conv.ConvTranspose3d",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dilation": "dilation",
+      "dtype": "dtype",
+      "groups": "groups",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "output_padding": "output_padding",
+      "padding": "padding",
+      "padding_mode": "padding_mode",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CosineAnnealingLR": {
     "api": "torch.optim.lr_scheduler.CosineAnnealingLR",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CosineSimilarity": {
+    "api": "torch.nn.modules.distance.CosineSimilarity",
+    "args": {
+      "dim": "dim",
+      "eps": "eps",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cosinesimilarity": {
+    "api": "torch.nn.modules.distance.CosineSimilarity",
+    "args": {
+      "dim": "dim",
+      "eps": "eps",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CrossEntropyLoss": {
     "api": "torch.nn.functional.cross_entropy",
+    "args": {
+      "ignore_index": "ignore_index",
+      "label_smoothing": "label_smoothing",
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "self": "self",
+      "size_average": "size_average",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CudaAvailable": {
     "api": "torch.cuda.is_available",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "DataLoader": {
     "api": "torch.utils.data.DataLoader",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DataParallel": {
+    "api": "torch.nn.parallel.data_parallel.DataParallel",
+    "args": {
+      "device_ids": "device_ids",
+      "dim": "dim",
+      "module": "module",
+      "output_device": "output_device",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Det": {
+    "api": "torch.linalg.det",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Device": {
     "api": "torch.device",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "device_allocator"
   },
   "Div": {
     "api": "torch.div",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Dropout": {
     "api": "torch.nn.Dropout",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dropout2d": {
+    "api": "torch.nn.modules.dropout.Dropout2d",
+    "args": {
+      "inplace": "inplace",
+      "p": "p",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dropout3d": {
+    "api": "torch.nn.modules.dropout.Dropout3d",
+    "args": {
+      "inplace": "inplace",
+      "p": "p",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Einsum": {
     "api": "torch.einsum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Elu": {
+    "api": "torch.nn.modules.activation.ELU",
+    "args": {
+      "alpha": "alpha",
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Embedding": {
     "api": "torch.nn.Embedding",
+    "args": {
+      "_freeze": "_freeze",
+      "_weight": "_weight",
+      "device": "device",
+      "dtype": "dtype",
+      "embedding_dim": "embedding_dim",
+      "max_norm": "max_norm",
+      "norm_type": "norm_type",
+      "num_embeddings": "num_embeddings",
+      "padding_idx": "padding_idx",
+      "scale_grad_by_freq": "scale_grad_by_freq",
+      "self": "self",
+      "sparse": "sparse"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Erf": {
+    "api": "torch.special.erf",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Flatten": {
     "api": "torch.flatten",
+    "args": {
+      "end_dim": "end_dim",
+      "self": "self",
+      "start_dim": "start_dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Float16": {
     "api": "torch.float16",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Float32": {
     "api": "torch.float32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Float64": {
     "api": "torch.float64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "GELU": {
     "api": "torch.nn.GELU",
+    "args": {
+      "approximate": "approximate",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GRU": {
+    "api": "torch.nn.modules.rnn.GRU",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Gather": {
     "api": "torch.gather",
+    "args": {
+      "output_device": "output_device",
+      "outputs": "outputs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Gaussiannll": {
+    "api": "torch.nn.GaussianNLLLoss",
+    "args": {
+      "eps": "eps",
+      "full": "full",
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Gelu": {
+    "api": "torch.nn.GELU",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Glu": {
+    "api": "torch.nn.modules.activation.GLU",
+    "args": {
+      "dim": "dim",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Grayscale": {
     "api": "torchvision.transforms.Grayscale",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Groupnorm": {
+    "api": "torch.nn.modules.normalization.GroupNorm",
+    "args": {
+      "affine": "affine",
+      "device": "device",
+      "dtype": "dtype",
+      "eps": "eps",
+      "num_channels": "num_channels",
+      "num_groups": "num_groups",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Grucell": {
+    "api": "torch.nn.modules.rnn.GRUCell",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dtype": "dtype",
+      "hidden_size": "hidden_size",
+      "input_size": "input_size",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HardSigmoid": {
+    "api": "torch.nn.modules.activation.Hardsigmoid",
+    "args": {
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HardSwish": {
+    "api": "torch.nn.functional.hardswish",
+    "args": {
+      "inplace": "inplace",
+      "input": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hardshrink": {
+    "api": "torch.nn.modules.activation.Hardshrink",
+    "args": {
+      "lambd": "lambd",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hardswish": {
+    "api": "torch.nn.modules.activation.Hardswish",
+    "args": {
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hardtanh": {
+    "api": "torch.nn.modules.activation.Hardtanh",
+    "args": {
+      "inplace": "inplace",
+      "max_val": "max_val",
+      "max_value": "max_value",
+      "min_val": "min_val",
+      "min_value": "min_value",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Identity": {
+    "api": "torch.nn.modules.linear.Identity",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Int16": {
     "api": "torch.int16",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Int32": {
     "api": "torch.int32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Int64": {
     "api": "torch.int64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Kldiv": {
+    "api": "torch.nn.KLDivLoss",
+    "args": {
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "L1": {
+    "api": "torch.nn.L1Loss",
+    "args": {
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LOWER_RIGHT": {
+    "api": "torch.nn.attention.bias.CausalVariant.LOWER_RIGHT",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LSTM": {
+    "api": "torch.nn.modules.rnn.LSTM",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "LayerNorm": {
     "api": "torch.nn.LayerNorm",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dtype": "dtype",
+      "elementwise_affine": "elementwise_affine",
+      "eps": "eps",
+      "normalized_shape": "normalized_shape",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LazyConvTranspose1d": {
+    "api": "torch.nn.modules.conv.LazyConvTranspose1d",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dilation": "dilation",
+      "dtype": "dtype",
+      "groups": "groups",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "output_padding": "output_padding",
+      "padding": "padding",
+      "padding_mode": "padding_mode",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LazyConvTranspose2d": {
+    "api": "torch.nn.modules.conv.LazyConvTranspose2d",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dilation": "dilation",
+      "dtype": "dtype",
+      "groups": "groups",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "output_padding": "output_padding",
+      "padding": "padding",
+      "padding_mode": "padding_mode",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LazyConvTranspose3d": {
+    "api": "torch.nn.modules.conv.LazyConvTranspose3d",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dilation": "dilation",
+      "dtype": "dtype",
+      "groups": "groups",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "output_padding": "output_padding",
+      "padding": "padding",
+      "padding_mode": "padding_mode",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LeakyRelu": {
+    "api": "torch.nn.modules.activation.LeakyReLU",
+    "args": {
+      "inplace": "inplace",
+      "negative_slope": "negative_slope",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Linear": {
     "api": "torch.nn.Linear",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dtype": "dtype",
+      "in_features": "in_features",
+      "out_features": "out_features",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LinearT": {
+    "api": "torch.nn.utils.fusion.LinearT",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Load": {
@@ -206,38 +945,284 @@
     "args": {
       "f": "f"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSoftmax": {
+    "api": "torch.nn.modules.activation.LogSoftmax",
+    "args": {
+      "dim": "dim",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Logsigmoid": {
+    "api": "torch.nn.modules.activation.LogSigmoid",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Logsumexp": {
+    "api": "torch.special.logsumexp",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Lstmcell": {
+    "api": "torch.nn.modules.rnn.LSTMCell",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dtype": "dtype",
+      "hidden_size": "hidden_size",
+      "input_size": "input_size",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "MSELoss": {
     "api": "torch.nn.functional.mse_loss",
+    "args": {
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "self": "self",
+      "size_average": "size_average"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MarginRankingLoss": {
+    "api": "torch.nn.modules.loss.MarginRankingLoss",
+    "args": {
+      "margin": "margin",
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "self": "self",
+      "size_average": "size_average"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Marginranking": {
+    "api": "torch.nn.MarginRankingLoss",
+    "args": {
+      "margin": "margin",
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MatMul": {
+    "api": "torch.linalg.matmul",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool1d": {
+    "api": "torch.nn.modules.pooling.MaxPool1d",
+    "args": {
+      "ceil_mode": "ceil_mode",
+      "dilation": "dilation",
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "return_indices": "return_indices",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "MaxPool2d": {
     "api": "torch.nn.MaxPool2d",
+    "args": {
+      "ceil_mode": "ceil_mode",
+      "dilation": "dilation",
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "return_indices": "return_indices",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool3d": {
+    "api": "torch.nn.modules.pooling.MaxPool3d",
+    "args": {
+      "ceil_mode": "ceil_mode",
+      "dilation": "dilation",
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "return_indices": "return_indices",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxUnpool1d": {
+    "api": "torch.nn.modules.pooling.MaxUnpool1d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxUnpool2d": {
+    "api": "torch.nn.modules.pooling.MaxUnpool2d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxUnpool3d": {
+    "api": "torch.nn.modules.pooling.MaxUnpool3d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Maxpool": {
+    "api": "torch.nn.MaxPool3d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Mean": {
     "api": "torch.mean",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Mish": {
+    "api": "torch.nn.modules.activation.Mish",
+    "args": {
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Module": {
+    "api": "torch.nn.modules.module.Module",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ModuleList": {
     "api": "torch.nn.ModuleList",
+    "args": {
+      "modules": "modules",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Mse": {
+    "api": "torch.nn.MSELoss",
+    "args": {
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Mul": {
     "api": "torch.mul",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "MultiheadAttention": {
     "api": "torch.nn.MultiheadAttention",
+    "args": {
+      "add_bias_kv": "add_bias_kv",
+      "add_zero_attn": "add_zero_attn",
+      "batch_first": "batch_first",
+      "bias": "bias",
+      "device": "device",
+      "dropout": "dropout",
+      "dtype": "dtype",
+      "embed_dim": "embed_dim",
+      "kdim": "kdim",
+      "num_heads": "num_heads",
+      "self": "self",
+      "vdim": "vdim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Nll": {
+    "api": "torch.nn.NLLLoss",
+    "args": {
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Normalize": {
     "api": "torchvision.transforms.Normalize",
+    "args": {
+      "dim": "dim",
+      "eps": "eps",
+      "input": "input",
+      "out": "out",
+      "p": "p"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "OneHot": {
     "api": "torch.nn.functional.one_hot",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Ones": {
@@ -245,22 +1230,116 @@
     "args": {
       "shape": "size"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Optional": {
+    "api": "torch.nn.functional.Optional",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PRelu": {
+    "api": "torch.nn.modules.activation.PReLU",
+    "args": {
+      "device": "device",
+      "dtype": "dtype",
+      "init": "init",
+      "num_parameters": "num_parameters",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Pad": {
     "api": "torch.nn.functional.pad",
+    "args": {
+      "input": "input",
+      "mode": "mode",
+      "pad": "pad",
+      "value": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Param": {
     "api": "torch.nn.Parameter",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Parameter": {
+    "api": "torch.nn.parameter.Parameter",
+    "args": {
+      "data": "data",
+      "requires_grad": "requires_grad",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ParameterList": {
+    "api": "torch.nn.modules.container.ParameterList",
+    "args": {
+      "self": "self",
+      "values": "values"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Pow": {
     "api": "torch.pow",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "RMSprop": {
     "api": "torch.optim.RMSprop",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RNN": {
+    "api": "torch.nn.modules.rnn.RNN",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RNNBase": {
+    "api": "torch.nn.modules.rnn.RNNBase",
+    "args": {
+      "batch_first": "batch_first",
+      "bias": "bias",
+      "bidirectional": "bidirectional",
+      "device": "device",
+      "dropout": "dropout",
+      "dtype": "dtype",
+      "hidden_size": "hidden_size",
+      "input_size": "input_size",
+      "mode": "mode",
+      "num_layers": "num_layers",
+      "proj_size": "proj_size",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RPC_AVAILABLE": {
+    "api": "torch.nn.parallel.distributed.RPC_AVAILABLE",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "RandInt": {
@@ -268,30 +1347,106 @@
     "args": {
       "shape": "size"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomCrop": {
     "api": "torchvision.transforms.RandomCrop",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomHorizontalFlip": {
     "api": "torchvision.transforms.RandomHorizontalFlip",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomVerticalFlip": {
     "api": "torchvision.transforms.RandomVerticalFlip",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReLU": {
+    "api": "torch.nn.ReLU",
+    "args": {
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Relu": {
+    "api": "torch.nn.ReLU",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Relu6": {
+    "api": "torch.nn.modules.activation.ReLU6",
+    "args": {
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Reshape": {
     "api": "torch.reshape",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Resize": {
     "api": "torchvision.transforms.Resize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rmsnorm": {
+    "api": "torch.nn.modules.normalization.RMSNorm",
+    "args": {
+      "device": "device",
+      "dtype": "dtype",
+      "elementwise_affine": "elementwise_affine",
+      "eps": "eps",
+      "normalized_shape": "normalized_shape",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rnncellbase": {
+    "api": "torch.nn.modules.rnn.RNNCellBase",
+    "args": {
+      "bias": "bias",
+      "device": "device",
+      "dtype": "dtype",
+      "hidden_size": "hidden_size",
+      "input_size": "input_size",
+      "num_chunks": "num_chunks",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Round": {
+    "api": "torch.special.round",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "SGD": {
     "api": "torch.optim.SGD",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Save": {
@@ -300,71 +1455,439 @@
       "f": "f",
       "obj": "obj"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Scatter": {
     "api": "torch.Tensor.scatter_",
+    "args": {
+      "device_ids": "device_ids",
+      "inputs": "inputs",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Selu": {
+    "api": "torch.nn.modules.activation.SELU",
+    "args": {
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Sequential": {
     "api": "torch.nn.Sequential",
+    "args": {
+      "args": "args",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Shape": {
+    "api": "torch.nn.attention.flex_attention.BlockMask.shape",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "SiLU": {
     "api": "torch.nn.functional.silu",
+    "args": {
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sigmoid": {
+    "api": "torch.nn.modules.activation.Sigmoid",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Silu": {
+    "api": "torch.nn.modules.activation.SiLU",
+    "args": {
+      "inplace": "inplace",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Size": {
+    "api": "torch.nn.modules.normalization.CrossMapLRN2d.size",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Smoothl1": {
+    "api": "torch.nn.SmoothL1Loss",
+    "args": {
+      "beta": "beta",
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softmax": {
+    "api": "torch.nn.modules.activation.Softmax",
+    "args": {
+      "dim": "dim",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softmax2d": {
+    "api": "torch.nn.modules.activation.Softmax2d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softmin": {
+    "api": "torch.nn.modules.activation.Softmin",
+    "args": {
+      "dim": "dim",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softplus": {
+    "api": "torch.nn.modules.activation.Softplus",
+    "args": {
+      "beta": "beta",
+      "self": "self",
+      "threshold": "threshold"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softshrink": {
+    "api": "torch.nn.modules.activation.Softshrink",
+    "args": {
+      "lambd": "lambd",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softsign": {
+    "api": "torch.nn.modules.activation.Softsign",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SpectralNorm": {
+    "api": "torch.nn.utils.spectral_norm.SpectralNorm",
+    "args": {
+      "dim": "dim",
+      "eps": "eps",
+      "n_power_iterations": "n_power_iterations",
+      "name": "name",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Squeeze": {
     "api": "torch.squeeze",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "StepLR": {
     "api": "torch.optim.lr_scheduler.StepLR",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Sub": {
     "api": "torch.sub",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Sum": {
     "api": "torch.sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Synchronize": {
     "api": "torch.cuda.synchronize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "T": {
+    "api": "torch.nn.modules.module.T",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "T_module": {
+    "api": "torch.nn.utils.weight_norm.T_module",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tanh": {
+    "api": "torch.nn.modules.activation.Tanh",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tanhshrink": {
+    "api": "torch.nn.modules.activation.Tanhshrink",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tensor": {
+    "api": "torch.fft.Tensor",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "TensorType": {
     "api": "torch.Tensor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Threshold": {
+    "api": "torch.nn.modules.activation.Softplus.threshold",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ToTensor": {
     "api": "torchvision.transforms.ToTensor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "TopK": {
     "api": "torch.topk",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "TorchFunctional": {
     "api": "torch.nn.functional",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Transformer": {
+    "api": "torch.nn.modules.transformer.Transformer",
+    "args": {
+      "activation": "activation",
+      "batch_first": "batch_first",
+      "bias": "bias",
+      "custom_decoder": "custom_decoder",
+      "custom_encoder": "custom_encoder",
+      "d_model": "d_model",
+      "device": "device",
+      "dim_feedforward": "dim_feedforward",
+      "dropout": "dropout",
+      "dtype": "dtype",
+      "layer_norm_eps": "layer_norm_eps",
+      "nhead": "nhead",
+      "norm_first": "norm_first",
+      "num_decoder_layers": "num_decoder_layers",
+      "num_encoder_layers": "num_encoder_layers",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TransformerDecoderLayer": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer",
+    "args": {
+      "activation": "activation",
+      "batch_first": "batch_first",
+      "bias": "bias",
+      "d_model": "d_model",
+      "device": "device",
+      "dim_feedforward": "dim_feedforward",
+      "dropout": "dropout",
+      "dtype": "dtype",
+      "layer_norm_eps": "layer_norm_eps",
+      "nhead": "nhead",
+      "norm_first": "norm_first",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TransformerEncoderLayer": {
+    "api": "torch.nn.modules.transformer.TransformerEncoderLayer",
+    "args": {
+      "activation": "activation",
+      "batch_first": "batch_first",
+      "bias": "bias",
+      "d_model": "d_model",
+      "device": "device",
+      "dim_feedforward": "dim_feedforward",
+      "dropout": "dropout",
+      "dtype": "dtype",
+      "layer_norm_eps": "layer_norm_eps",
+      "nhead": "nhead",
+      "norm_first": "norm_first",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Transformerdecoder": {
+    "api": "torch.nn.modules.transformer.TransformerDecoder",
+    "args": {
+      "decoder_layer": "decoder_layer",
+      "norm": "norm",
+      "num_layers": "num_layers",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Transformerencoder": {
+    "api": "torch.nn.modules.transformer.TransformerEncoder",
+    "args": {
+      "enable_nested_tensor": "enable_nested_tensor",
+      "encoder_layer": "encoder_layer",
+      "mask_check": "mask_check",
+      "norm": "norm",
+      "num_layers": "num_layers",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "UInt8": {
     "api": "torch.uint8",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Unflatten": {
+    "api": "torch.nn.modules.flatten.Unflatten",
+    "args": {
+      "dim": "dim",
+      "self": "self",
+      "unflattened_size": "unflattened_size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Unfold": {
+    "api": "torch.nn.modules.fold.Unfold",
+    "args": {
+      "dilation": "dilation",
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Unsqueeze": {
     "api": "torch.unsqueeze",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Upsample": {
+    "api": "torch.nn.modules.upsampling.Upsample",
+    "args": {
+      "align_corners": "align_corners",
+      "mode": "mode",
+      "recompute_scale_factor": "recompute_scale_factor",
+      "scale_factor": "scale_factor",
+      "self": "self",
+      "size": "size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Variable": {
     "api": "torch.nn.Parameter",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "nnx_param_to_torch"
   },
   "View": {
     "api": "torch.Tensor.view",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "WeightNorm": {
+    "api": "torch.nn.utils.weight_norm.WeightNorm",
+    "args": {
+      "dim": "dim",
+      "name": "name",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Zeros": {
@@ -372,94 +1895,2312 @@
     "args": {
       "shape": "size"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "activation": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.activation",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "activation_relu_or_gelu": {
+    "api": "torch.nn.modules.transformer.TransformerEncoderLayer.activation_relu_or_gelu",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "align_corners": {
+    "api": "torch.nn.modules.upsampling.Upsample.align_corners",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "alpha": {
+    "api": "torch.nn.modules.normalization.CrossMapLRN2d.alpha",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "append": {
+    "api": "torch.nn.modules.container.ParameterList.append",
+    "args": {
+      "self": "self",
+      "value": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "apply": {
+    "api": "torch.nn.modules.module.Module.apply",
+    "args": {
+      "fn": "fn",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "apply_mask": {
+    "api": "torch.nn.utils.prune.BasePruningMethod.apply_mask",
+    "args": {
+      "module": "module",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "approximate": {
+    "api": "torch.nn.modules.activation.GELU.approximate",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "attr": {
+    "api": "torch.nn.cpp.OrderedDictWrapper.attr",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "beta": {
+    "api": "torch.nn.modules.normalization.CrossMapLRN2d.beta",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bfloat16": {
+    "api": "torch.nn.modules.module.Module.bfloat16",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias": {
+    "api": "torch.nn.modules.rnn.RNNCellBase.bias",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias_hh": {
+    "api": "torch.nn.modules.rnn.RNNCellBase.bias_hh",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias_ih": {
+    "api": "torch.nn.modules.rnn.RNNCellBase.bias_ih",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias_k": {
+    "api": "torch.nn.modules.activation.MultiheadAttention.bias_k",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias_v": {
+    "api": "torch.nn.modules.activation.MultiheadAttention.bias_v",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "binary_cross_entropy": {
+    "api": "torch.nn.functional.binary_cross_entropy",
+    "args": {
+      "input": "input",
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "size_average": "size_average",
+      "target": "target",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "broadcast": {
+    "api": "torch.nn.parallel.comm.broadcast",
+    "args": {
+      "devices": "devices",
+      "out": "out",
+      "tensor": "tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "byte": {
+    "api": "torch.nn.utils.rnn.PackedSequence.byte",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cached": {
+    "api": "torch.nn.utils.parametrize.cached",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ceil_mode": {
+    "api": "torch.nn.modules.pooling.AvgPool3d.ceil_mode",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "char": {
+    "api": "torch.nn.utils.rnn.PackedSequence.char",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "children": {
+    "api": "torch.nn.modules.module.Module.children",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cholesky": {
+    "api": "torch.linalg.cholesky",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "clear": {
+    "api": "torch.nn.modules.container.ParameterDict.clear",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "clip_grad_norm": {
+    "api": "torch.nn.utils.clip_grad.clip_grad_norm",
+    "args": {
+      "error_if_nonfinite": "error_if_nonfinite",
+      "foreach": "foreach",
+      "max_norm": "max_norm",
+      "norm_type": "norm_type",
+      "parameters": "parameters"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "compute_mask": {
+    "api": "torch.nn.utils.prune.CustomFromMask.compute_mask",
+    "args": {
+      "default_mask": "default_mask",
+      "self": "self",
+      "t": "t"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cond": {
+    "api": "torch.linalg.cond",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "constant_": {
+    "api": "torch.nn.init.constant_",
+    "args": {
+      "tensor": "tensor",
+      "val": "val"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv1d": {
+    "api": "torch.nn.functional.conv1d",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv1d_input": {
+    "api": "torch.nn.grad.conv1d_input",
+    "args": {
+      "dilation": "dilation",
+      "grad_output": "grad_output",
+      "groups": "groups",
+      "input_size": "input_size",
+      "padding": "padding",
+      "stride": "stride",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv1d_weight": {
+    "api": "torch.nn.grad.conv1d_weight",
+    "args": {
+      "dilation": "dilation",
+      "grad_output": "grad_output",
+      "groups": "groups",
+      "input": "input",
+      "padding": "padding",
+      "stride": "stride",
+      "weight_size": "weight_size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv2d_input": {
+    "api": "torch.nn.grad.conv2d_input",
+    "args": {
+      "dilation": "dilation",
+      "grad_output": "grad_output",
+      "groups": "groups",
+      "input_size": "input_size",
+      "padding": "padding",
+      "stride": "stride",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv2d_weight": {
+    "api": "torch.nn.grad.conv2d_weight",
+    "args": {
+      "dilation": "dilation",
+      "grad_output": "grad_output",
+      "groups": "groups",
+      "input": "input",
+      "padding": "padding",
+      "stride": "stride",
+      "weight_size": "weight_size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv3d": {
+    "api": "torch.nn.functional.conv3d",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv3d_input": {
+    "api": "torch.nn.grad.conv3d_input",
+    "args": {
+      "dilation": "dilation",
+      "grad_output": "grad_output",
+      "groups": "groups",
+      "input_size": "input_size",
+      "padding": "padding",
+      "stride": "stride",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv3d_weight": {
+    "api": "torch.nn.grad.conv3d_weight",
+    "args": {
+      "dilation": "dilation",
+      "grad_output": "grad_output",
+      "groups": "groups",
+      "input": "input",
+      "padding": "padding",
+      "stride": "stride",
+      "weight_size": "weight_size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv_transpose1d": {
+    "api": "torch.nn.functional.conv_transpose1d",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv_transpose2d": {
+    "api": "torch.nn.functional.conv_transpose2d",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv_transpose3d": {
+    "api": "torch.nn.functional.conv_transpose3d",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "copy": {
+    "api": "torch.nn.modules.container.ParameterDict.copy",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cosine_similarity": {
+    "api": "torch.nn.functional.cosine_similarity",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cpu": {
+    "api": "torch.nn.modules.module.Module.cpu",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "create_mask": {
+    "api": "torch.nn.attention.flex_attention.create_mask",
+    "args": {
+      "B": "B",
+      "H": "H",
+      "KV_LEN": "KV_LEN",
+      "Q_LEN": "Q_LEN",
+      "device": "device",
+      "mod_fn": "mod_fn"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cross": {
+    "api": "torch.linalg.cross",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cross_entropy": {
+    "api": "torch.nn.functional.cross_entropy",
+    "args": {
+      "ignore_index": "ignore_index",
+      "input": "input",
+      "label_smoothing": "label_smoothing",
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "size_average": "size_average",
+      "target": "target",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ctc_loss": {
+    "api": "torch.nn.functional.ctc_loss",
+    "args": {
+      "blank": "blank",
+      "input_lengths": "input_lengths",
+      "log_probs": "log_probs",
+      "reduction": "reduction",
+      "target_lengths": "target_lengths",
+      "targets": "targets",
+      "zero_infinity": "zero_infinity"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "d_model": {
+    "api": "torch.nn.modules.transformer.Transformer.d_model",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "data": {
+    "api": "torch.nn.utils.rnn.PackedSequence_.data",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "decoder": {
+    "api": "torch.nn.modules.transformer.Transformer.decoder",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "det": {
+    "api": "torch.linalg.det",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "device": {
+    "api": "torch.nn.parallel.distributed.DistributedDataParallel.device",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "device_ids": {
+    "api": "torch.nn.parallel.distributed.DistributedDataParallel.device_ids",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "device_mesh": {
+    "api": "torch.nn.parallel.distributed.DistributedDataParallel.device_mesh",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "device_type": {
+    "api": "torch.nn.parallel.distributed.DistributedDataParallel.device_type",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "diagonal": {
+    "api": "torch.linalg.diagonal",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "digamma": {
+    "api": "torch.special.digamma",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dilation": {
+    "api": "torch.nn.modules.fold.Unfold.dilation",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dim": {
+    "api": "torch.nn.modules.activation.LogSoftmax.dim",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "div_value": {
+    "api": "torch.nn.modules.adaptive.AdaptiveLogSoftmaxWithLoss.div_value",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "double": {
+    "api": "torch.nn.modules.module.Module.double",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "downscale_factor": {
+    "api": "torch.nn.modules.pixelshuffle.PixelUnshuffle.downscale_factor",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout1": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.dropout1",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout2": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.dropout2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout2d": {
+    "api": "torch.nn.functional.dropout2d",
+    "args": {
+      "inplace": "inplace",
+      "input": "input",
+      "p": "p",
+      "training": "training"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout3": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.dropout3",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout3d": {
+    "api": "torch.nn.functional.dropout3d",
+    "args": {
+      "inplace": "inplace",
+      "input": "input",
+      "p": "p",
+      "training": "training"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dtype": {
+    "api": "torch.nn.functional.DType",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eig": {
+    "api": "torch.linalg.eig",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eigh": {
+    "api": "torch.linalg.eigh",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eigvals": {
+    "api": "torch.linalg.eigvals",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eigvalsh": {
+    "api": "torch.linalg.eigvalsh",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "embedding_dim": {
+    "api": "torch.nn.modules.sparse.EmbeddingBag.embedding_dim",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "enable_grad": {
     "api": "torch.enable_grad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "encoder": {
+    "api": "torch.nn.modules.transformer.Transformer.encoder",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "end_dim": {
+    "api": "torch.nn.modules.flatten.Flatten.end_dim",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eps": {
+    "api": "torch.nn.modules.normalization.RMSNorm.eps",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "erfc": {
+    "api": "torch.special.erfc",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "erfcx": {
+    "api": "torch.special.erfcx",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "erfinv": {
+    "api": "torch.special.erfinv",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eval": {
+    "api": "torch.nn.modules.module.Module.eval",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "exp": {
     "api": "torch.exp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "exp2": {
+    "api": "torch.special.exp2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "expit": {
+    "api": "torch.special.expit",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "expm1": {
+    "api": "torch.special.expm1",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "extend": {
+    "api": "torch.nn.modules.container.ParameterList.extend",
+    "args": {
+      "self": "self",
+      "values": "values"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eye": {
+    "api": "torch.nn.init.eye",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eye_": {
+    "api": "torch.nn.init.eye_",
+    "args": {
+      "tensor": "tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fft": {
+    "api": "torch.fft.fft",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fft2": {
+    "api": "torch.fft.fft2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fftfreq": {
+    "api": "torch.fft.fftfreq",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fftn": {
+    "api": "torch.fft.fftn",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fftshift": {
+    "api": "torch.fft.fftshift",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "flatten_parameters": {
+    "api": "torch.nn.modules.rnn.RNNBase.flatten_parameters",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "float": {
+    "api": "torch.nn.modules.module.Module.float",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fn": {
+    "api": "torch.nn.utils.spectral_norm.SpectralNormStateDictHook.fn",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "forward": {
+    "api": "torch.nn.modules.fold.Unfold.forward",
+    "args": {
+      "input": "input",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "freeze": {
+    "api": "torch.nn.modules.sparse.Embedding.freeze",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "full": {
+    "api": "torch.nn.modules.loss.GaussianNLLLoss.full",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "gammainc": {
+    "api": "torch.special.gammainc",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "gammaincc": {
+    "api": "torch.special.gammaincc",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "gammaln": {
+    "api": "torch.special.gammaln",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "gaussian_nll_loss": {
+    "api": "torch.nn.functional.gaussian_nll_loss",
+    "args": {
+      "eps": "eps",
+      "full": "full",
+      "input": "input",
+      "reduction": "reduction",
+      "target": "target",
+      "var": "var"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "get": {
+    "api": "torch.nn.modules.container.ParameterDict.get",
+    "args": {
+      "default": "default",
+      "key": "key",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "get_parameter": {
+    "api": "torch.nn.modules.module.Module.get_parameter",
+    "args": {
+      "self": "self",
+      "target": "target"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "grad": {
     "api": "torch.func.grad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "groups": {
+    "api": "torch.nn.modules.channelshuffle.ChannelShuffle.groups",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "half": {
+    "api": "torch.nn.modules.module.Module.half",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "head": {
+    "api": "torch.nn.modules.adaptive.AdaptiveLogSoftmaxWithLoss.head",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "head_dim": {
+    "api": "torch.nn.modules.activation.MultiheadAttention.head_dim",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "hfft": {
+    "api": "torch.fft.hfft",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "hidden_size": {
+    "api": "torch.nn.modules.rnn.RNNCellBase.hidden_size",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "huber_loss": {
+    "api": "torch.nn.functional.huber_loss",
+    "args": {
+      "delta": "delta",
+      "input": "input",
+      "reduction": "reduction",
+      "target": "target",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ifft": {
+    "api": "torch.fft.ifft",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ifft2": {
+    "api": "torch.fft.ifft2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ifftn": {
+    "api": "torch.fft.ifftn",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ifftshift": {
+    "api": "torch.fft.ifftshift",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ihfft": {
+    "api": "torch.fft.ihfft",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "in1_features": {
+    "api": "torch.nn.modules.linear.Bilinear.in1_features",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "in2_features": {
+    "api": "torch.nn.modules.linear.Bilinear.in2_features",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "in_features": {
+    "api": "torch.nn.modules.adaptive.AdaptiveLogSoftmaxWithLoss.in_features",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "init": {
+    "api": "torch.nn.modules.activation.PReLU.init",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "inplace": {
+    "api": "torch.nn.modules.activation.LeakyReLU.inplace",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "insert": {
+    "api": "torch.nn.modules.container.ModuleList.insert",
+    "args": {
+      "index": "index",
+      "module": "module",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "int": {
+    "api": "torch.nn.utils.rnn.PackedSequence.int",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "interpolate": {
+    "api": "torch.nn.functional.interpolate",
+    "args": {
+      "align_corners": "align_corners",
+      "antialias": "antialias",
+      "input": "input",
+      "mode": "mode",
+      "recompute_scale_factor": "recompute_scale_factor",
+      "scale_factor": "scale_factor",
+      "size": "size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "inv": {
+    "api": "torch.linalg.inv",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "invert_permutation": {
+    "api": "torch.nn.utils.rnn.invert_permutation",
+    "args": {
+      "permutation": "permutation"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "irfft": {
+    "api": "torch.fft.irfft",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "irfft2": {
+    "api": "torch.fft.irfft2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "irfftn": {
+    "api": "torch.fft.irfftn",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "is_tensor": {
+    "api": "torch.nn.utils.parametrize.ParametrizationList.is_tensor",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "items": {
+    "api": "torch.nn.modules.container.ParameterDict.items",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "jit": {
     "api": "torch.compile",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "join": {
+    "api": "torch.nn.parallel.distributed.DistributedDataParallel.join",
+    "args": {
+      "divide_by_initial_world_size": "divide_by_initial_world_size",
+      "enable": "enable",
+      "self": "self",
+      "throw_on_early_termination": "throw_on_early_termination"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "k": {
+    "api": "torch.nn.modules.normalization.CrossMapLRN2d.k",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "kaiming_normal": {
+    "api": "torch.nn.init.kaiming_normal",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "kaiming_uniform": {
+    "api": "torch.nn.init.kaiming_uniform",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "kernel_size": {
+    "api": "torch.nn.modules.fold.Unfold.kernel_size",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "keys": {
+    "api": "torch.nn.modules.container.ParameterDict.keys",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "l1_loss": {
+    "api": "torch.nn.functional.l1_loss",
+    "args": {
+      "input": "input",
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "size_average": "size_average",
+      "target": "target",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "label_smoothing": {
+    "api": "torch.nn.modules.loss.CrossEntropyLoss.label_smoothing",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "lambd": {
+    "api": "torch.nn.modules.activation.Softshrink.lambd",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "layer_norm": {
+    "api": "torch.nn.functional.layer_norm",
+    "args": {
+      "bias": "bias",
+      "eps": "eps",
+      "input": "input",
+      "normalized_shape": "normalized_shape",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "layers": {
+    "api": "torch.nn.modules.transformer.TransformerDecoder.layers",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "leaky_relu": {
+    "api": "torch.nn.functional.leaky_relu",
+    "args": {
+      "inplace": "inplace",
+      "input": "input",
+      "negative_slope": "negative_slope"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "linear1": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.linear1",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "linear2": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.linear2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "load_state_dict": {
     "api": "torch.nn.Module.load_state_dict",
+    "args": {
+      "assign": "assign",
+      "self": "self",
+      "state_dict": "state_dict",
+      "strict": "strict"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "log": {
     "api": "torch.log",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log1p": {
+    "api": "torch.special.log1p",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log_ndtr": {
+    "api": "torch.special.log_ndtr",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log_prob": {
+    "api": "torch.nn.modules.adaptive.AdaptiveLogSoftmaxWithLoss.log_prob",
+    "args": {
+      "input": "input",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "log_softmax": {
     "api": "torch.nn.functional.log_softmax",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logger": {
+    "api": "torch.nn.parallel.distributed.DistributedDataParallel.logger",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logit": {
+    "api": "torch.special.logit",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "long": {
+    "api": "torch.nn.utils.rnn.PackedSequence.long",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "lower": {
+    "api": "torch.nn.modules.activation.RReLU.lower",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "lstsq": {
+    "api": "torch.linalg.lstsq",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "lu": {
+    "api": "torch.linalg.lu",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "lu_factor": {
+    "api": "torch.linalg.lu_factor",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "margin": {
+    "api": "torch.nn.modules.loss.TripletMarginWithDistanceLoss.margin",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "margin_ranking_loss": {
+    "api": "torch.nn.functional.margin_ranking_loss",
+    "args": {
+      "input1": "input1",
+      "input2": "input2",
+      "margin": "margin",
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "size_average": "size_average",
+      "target": "target"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "mask": {
+    "api": "torch.nn.utils.prune.CustomFromMask.mask",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "mask_check": {
+    "api": "torch.nn.modules.transformer.TransformerEncoder.mask_check",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "mask_mod": {
+    "api": "torch.nn.attention.flex_attention.BlockMask.mask_mod",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "matmul": {
+    "api": "torch.linalg.matmul",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "matrix_norm": {
+    "api": "torch.linalg.matrix_norm",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "matrix_power": {
+    "api": "torch.linalg.matrix_power",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "matrix_rank": {
+    "api": "torch.linalg.matrix_rank",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "max": {
     "api": "torch.max",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_norm": {
+    "api": "torch.nn.modules.sparse.EmbeddingBag.max_norm",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_pool1d": {
+    "api": "torch.nn.functional.max_pool1d",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_pool2d": {
+    "api": "torch.nn.functional.max_pool2d",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_pool3d": {
+    "api": "torch.nn.functional.max_pool3d",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_val": {
+    "api": "torch.nn.modules.activation.Hardtanh.max_val",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "merge_masks": {
+    "api": "torch.nn.modules.activation.MultiheadAttention.merge_masks",
+    "args": {
+      "attn_mask": "attn_mask",
+      "key_padding_mask": "key_padding_mask",
+      "query": "query",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "min": {
     "api": "torch.min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "min_val": {
+    "api": "torch.nn.modules.activation.Hardtanh.min_val",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "mode": {
+    "api": "torch.nn.modules.rnn.RNNBase.mode",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "modules": {
+    "api": "torch.nn.modules.module.Module.modules",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "mse_loss": {
+    "api": "torch.nn.functional.mse_loss",
+    "args": {
+      "input": "input",
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "size_average": "size_average",
+      "target": "target",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "multi_dot": {
+    "api": "torch.linalg.multi_dot",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "n": {
+    "api": "torch.nn.utils.prune.LnStructured.n",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "name": {
+    "api": "torch.nn.modules.upsampling.Upsample.name",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "named_modules": {
+    "api": "torch.nn.modules.module.Module.named_modules",
+    "args": {
+      "memo": "memo",
+      "prefix": "prefix",
+      "remove_duplicate": "remove_duplicate",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "named_parameters": {
+    "api": "torch.nn.modules.module.Module.named_parameters",
+    "args": {
+      "prefix": "prefix",
+      "recurse": "recurse",
+      "remove_duplicate": "remove_duplicate",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "negative_slope": {
+    "api": "torch.nn.modules.activation.LeakyReLU.negative_slope",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "nll_loss": {
+    "api": "torch.nn.functional.nll_loss",
+    "args": {
+      "ignore_index": "ignore_index",
+      "input": "input",
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "size_average": "size_average",
+      "target": "target",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "no_grad": {
     "api": "torch.no_grad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "nonlinearity": {
+    "api": "torch.nn.modules.rnn.RNNCell.nonlinearity",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm": {
+    "api": "torch.linalg.norm",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm1": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.norm1",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm2": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.norm2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm3": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.norm3",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm_first": {
+    "api": "torch.nn.modules.transformer.TransformerDecoderLayer.norm_first",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm_type": {
+    "api": "torch.nn.modules.sparse.EmbeddingBag.norm_type",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "normal": {
+    "api": "torch.nn.init.normal",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "num_embeddings": {
+    "api": "torch.nn.modules.sparse.EmbeddingBag.num_embeddings",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "num_groups": {
+    "api": "torch.nn.modules.normalization.GroupNorm.num_groups",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "num_heads": {
+    "api": "torch.nn.modules.activation.MultiheadAttention.num_heads",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "num_layers": {
+    "api": "torch.nn.modules.rnn.RNNBase.num_layers",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "one_hot": {
+    "api": "torch.nn.functional.one_hot",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ones_": {
+    "api": "torch.nn.init.ones_",
+    "args": {
+      "tensor": "tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "orthogonal": {
+    "api": "torch.nn.utils.parametrizations.orthogonal",
+    "args": {
+      "module": "module",
+      "name": "name",
+      "orthogonal_map": "orthogonal_map",
+      "use_trivialization": "use_trivialization"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "orthogonal_": {
+    "api": "torch.nn.init.orthogonal_",
+    "args": {
+      "gain": "gain",
+      "generator": "generator",
+      "tensor": "tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "out_features": {
+    "api": "torch.nn.modules.linear.LazyLinear.out_features",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "out_proj": {
+    "api": "torch.nn.modules.activation.MultiheadAttention.out_proj",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "output_device": {
+    "api": "torch.nn.parallel.distributed.DistributedDataParallel.output_device",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "output_ratio": {
+    "api": "torch.nn.modules.pooling.FractionalMaxPool3d.output_ratio",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "output_size": {
+    "api": "torch.nn.modules.fold.Fold.output_size",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "p": {
+    "api": "torch.nn.modules.loss.TripletMarginLoss.p",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "padding": {
+    "api": "torch.nn.modules.fold.Unfold.padding",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "padding_idx": {
+    "api": "torch.nn.modules.sparse.EmbeddingBag.padding_idx",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "parameters": {
     "api": "torch.nn.Module.parameters",
+    "args": {
+      "recurse": "recurse",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "parameters_to_vector": {
+    "api": "torch.nn.utils.convert_parameters.parameters_to_vector",
+    "args": {
+      "parameters": "parameters"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "permute_dims": {
     "api": "torch.permute",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "pinv": {
+    "api": "torch.linalg.pinv",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "pop": {
+    "api": "torch.nn.modules.container.ParameterDict.pop",
+    "args": {
+      "key": "key",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "popitem": {
+    "api": "torch.nn.modules.container.ParameterDict.popitem",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "predict": {
+    "api": "torch.nn.modules.adaptive.AdaptiveLogSoftmaxWithLoss.predict",
+    "args": {
+      "input": "input",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "psi": {
+    "api": "torch.special.psi",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "qr": {
+    "api": "torch.linalg.qr",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "randn": {
     "api": "torch.randn",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "register_buffer": {
     "api": "torch.nn.Module.register_buffer",
+    "args": {
+      "name": "name",
+      "persistent": "persistent",
+      "self": "self",
+      "tensor": "tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "register_parameter": {
     "api": "torch.nn.Module.register_parameter",
+    "args": {
+      "name": "name",
+      "param": "param",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "relu": {
     "api": "torch.nn.functional.relu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "remove": {
+    "api": "torch.nn.utils.prune.remove",
+    "args": {
+      "module": "module",
+      "name": "name"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "reshape_weight_to_matrix": {
+    "api": "torch.nn.utils.spectral_norm.SpectralNorm.reshape_weight_to_matrix",
+    "args": {
+      "self": "self",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rfft": {
+    "api": "torch.fft.rfft",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rfft2": {
+    "api": "torch.fft.rfft2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rfftfreq": {
+    "api": "torch.fft.rfftfreq",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rfftn": {
+    "api": "torch.fft.rfftn",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rms_norm": {
+    "api": "torch.nn.functional.rms_norm",
+    "args": {
+      "eps": "eps",
+      "input": "input",
+      "normalized_shape": "normalized_shape",
+      "weight": "weight"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "round": {
+    "api": "torch.special.round",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "scale_factor": {
+    "api": "torch.nn.modules.upsampling.Upsample.scale_factor",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "scale_grad_by_freq": {
+    "api": "torch.nn.modules.sparse.EmbeddingBag.scale_grad_by_freq",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "scaled_dot_product_attention": {
+    "api": "torch.nn.functional.scaled_dot_product_attention",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "short": {
+    "api": "torch.nn.utils.rnn.PackedSequence.short",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sinc": {
+    "api": "torch.special.sinc",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "size": {
     "api": "torch.Tensor.size",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "slogdet": {
+    "api": "torch.linalg.slogdet",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "smooth_l1_loss": {
+    "api": "torch.nn.functional.smooth_l1_loss",
+    "args": {
+      "beta": "beta",
+      "input": "input",
+      "reduce": "reduce",
+      "reduction": "reduction",
+      "size_average": "size_average",
+      "target": "target"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "softmax": {
     "api": "torch.nn.functional.softmax",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "solve": {
+    "api": "torch.linalg.solve",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "solve_triangular": {
+    "api": "torch.linalg.solve_triangular",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sparse": {
+    "api": "torch.nn.modules.sparse.EmbeddingBag.sparse",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sparse_": {
+    "api": "torch.nn.init.sparse_",
+    "args": {
+      "generator": "generator",
+      "sparsity": "sparsity",
+      "std": "std",
+      "tensor": "tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "sqrt": {
     "api": "torch.sqrt",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "square": {
     "api": "torch.square",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "start_dim": {
+    "api": "torch.nn.modules.flatten.Flatten.start_dim",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "state_dict": {
     "api": "torch.nn.Module.state_dict",
+    "args": {
+      "args": "args",
+      "destination": "destination",
+      "keep_vars": "keep_vars",
+      "prefix": "prefix",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "static_graph": {
+    "api": "torch.nn.parallel.distributed.DistributedDataParallel.static_graph",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "step": {
     "api": "optimizer.step",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "stride": {
+    "api": "torch.nn.modules.fold.Unfold.stride",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "svd": {
+    "api": "torch.linalg.svd",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "svdvals": {
+    "api": "torch.linalg.svdvals",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "swap": {
+    "api": "torch.nn.modules.loss.TripletMarginWithDistanceLoss.swap",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tanh": {
+    "api": "torch.nn.Tanh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tensorinv": {
+    "api": "torch.linalg.tensorinv",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tensorsolve": {
+    "api": "torch.linalg.tensorsolve",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "threshold_": {
+    "api": "torch.nn.functional.threshold_",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "to_dense": {
+    "api": "torch.nn.attention.flex_attention.BlockMask.to_dense",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "train": {
+    "api": "torch.nn.modules.module.Module.train",
+    "args": {
+      "mode": "mode",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "training": {
+    "api": "torch.nn.modules.module.Module.training",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "trunc_normal_": {
+    "api": "torch.nn.init.trunc_normal_",
+    "args": {
+      "a": "a",
+      "b": "b",
+      "generator": "generator",
+      "mean": "mean",
+      "std": "std",
+      "tensor": "tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "type": {
+    "api": "torch.nn.modules.module.Module.type",
+    "args": {
+      "dst_type": "dst_type",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "unflattened_size": {
+    "api": "torch.nn.modules.flatten.Unflatten.unflattened_size",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "unfold": {
+    "api": "torch.nn.functional.unfold",
+    "args": {
+      "dilation": "dilation",
+      "input": "input",
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "uniform": {
+    "api": "torch.nn.init.uniform",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "update": {
+    "api": "torch.nn.modules.container.ParameterDict.update",
+    "args": {
+      "parameters": "parameters",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "upper": {
+    "api": "torch.nn.modules.activation.RReLU.upper",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "upsample_bilinear": {
+    "api": "torch.nn.functional.upsample_bilinear",
+    "args": {
+      "input": "input",
+      "scale_factor": "scale_factor",
+      "size": "size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "upsample_nearest": {
+    "api": "torch.nn.functional.upsample_nearest",
+    "args": {
+      "input": "input",
+      "scale_factor": "scale_factor",
+      "size": "size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "upscale_factor": {
+    "api": "torch.nn.modules.pixelshuffle.PixelShuffle.upscale_factor",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "value": {
+    "api": "torch.nn.modules.activation.Threshold.value",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "values": {
+    "api": "torch.nn.modules.container.ParameterDict.values",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "vander": {
+    "api": "torch.linalg.vander",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "variant": {
+    "api": "torch.nn.attention.bias.CausalBias.variant",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "vecdot": {
+    "api": "torch.linalg.vecdot",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "vector_norm": {
+    "api": "torch.linalg.vector_norm",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "vmap": {
@@ -469,10 +4210,69 @@
       "in_axes": "in_dims",
       "out_axes": "out_dims"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "weight": {
+    "api": "torch.nn.modules.normalization.RMSNorm.weight",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "weight_hh": {
+    "api": "torch.nn.modules.rnn.RNNCellBase.weight_hh",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "weight_ih": {
+    "api": "torch.nn.modules.rnn.RNNCellBase.weight_ih",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "xavier_normal": {
+    "api": "torch.nn.init.xavier_normal",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "xavier_uniform": {
+    "api": "torch.nn.init.xavier_uniform",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "xlog1py": {
+    "api": "torch.special.xlog1py",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "zero_grad": {
     "api": "optimizer.zero_grad",
+    "args": {
+      "self": "self",
+      "set_to_none": "set_to_none"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "zeros_": {
+    "api": "torch.nn.init.zeros_",
+    "args": {
+      "tensor": "tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   }
 }

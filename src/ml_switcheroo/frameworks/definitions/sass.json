@@ -1,6 +1,9 @@
 {
   "Abs": {
-    "api": "IABS"
+    "api": "IABS",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Acqbulk": {
     "api": "ACQBULK"
@@ -9,13 +12,19 @@
     "api": "ACQSHMINIT"
   },
   "Add": {
-    "api": "FADD"
+    "api": "FADD",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Add3": {
     "api": "IADD3"
   },
   "Atom": {
-    "api": "ATOM"
+    "api": "ATOM",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Atomg": {
     "api": "ATOMG"
@@ -69,13 +78,22 @@
     "api": "BSYNC"
   },
   "Call": {
-    "api": "CALL"
+    "api": "CALL",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "CastFloat": {
-    "api": "I2F"
+    "api": "I2F",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "CastInt": {
-    "api": "F2I"
+    "api": "F2I",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Cctl": {
     "api": "CCTL"
@@ -88,6 +106,18 @@
   },
   "Cgaerrbar": {
     "api": "CGAERRBAR"
+  },
+  "Clamp": {
+    "api": "MNMX",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv2d": {
+    "api": "Macro.Conv2d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Credux": {
     "api": "CREDUX"
@@ -165,7 +195,10 @@
     "api": "FSWZADD"
   },
   "FusedMultiplyAdd": {
-    "api": "FFMA32I"
+    "api": "FFMA32I",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Getlmembase": {
     "api": "GETLMEMBASE"
@@ -290,6 +323,12 @@
   "Lepc": {
     "api": "LEPC"
   },
+  "Linear": {
+    "api": "Macro.Linear",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Match": {
     "api": "MATCH"
   },
@@ -312,13 +351,19 @@
     "api": "MUFU"
   },
   "Mul": {
-    "api": "FMUL"
+    "api": "FMUL",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Nanosleep": {
     "api": "NANOSLEEP"
   },
   "Nop": {
-    "api": "NOP"
+    "api": "NOP",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Omma": {
     "api": "OMMA"
@@ -436,6 +481,12 @@
   },
   "Suatom": {
     "api": "SUATOM"
+  },
+  "Sub": {
+    "api": "FADD",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Suld": {
     "api": "SULD"

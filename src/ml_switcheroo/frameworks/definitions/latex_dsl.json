@@ -8,6 +8,8 @@
       "padding": "arg_4",
       "stride": "arg_3"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Dropout": {
@@ -15,6 +17,8 @@
     "args": {
       "p": "p"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Flatten": {
@@ -23,6 +27,8 @@
       "end_dim": "arg_1",
       "start_dim": "arg_0"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Linear": {
@@ -32,18 +38,26 @@
       "in_features": "arg_0",
       "out_features": "arg_1"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Module": {
     "api": "midl.Module",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ReLU": {
     "api": "midl.ReLU",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "relu": {
     "api": "midl.relu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   }
 }

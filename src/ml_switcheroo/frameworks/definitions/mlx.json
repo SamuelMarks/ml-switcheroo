@@ -1,6 +1,50 @@
 {
   "Abs": {
     "api": "mx.abs",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adadelta": {
+    "api": "mlx.optimizers.optimizers.AdaDelta",
+    "args": {
+      "eps": "eps",
+      "learning_rate": "learning_rate",
+      "rho": "rho",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adafactor": {
+    "api": "mlx.optimizers.optimizers.Adafactor",
+    "args": {
+      "beta_1": "beta_1",
+      "clip_threshold": "clip_threshold",
+      "decay_rate": "decay_rate",
+      "eps": "eps",
+      "learning_rate": "learning_rate",
+      "relative_step": "relative_step",
+      "scale_parameter": "scale_parameter",
+      "self": "self",
+      "warmup_init": "warmup_init",
+      "weight_decay": "weight_decay"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adagrad": {
+    "api": "mlx.optimizers.optimizers.Adagrad",
+    "args": {
+      "eps": "eps",
+      "learning_rate": "learning_rate",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Adam": {
@@ -8,15 +52,55 @@
     "args": {
       "lr": "learning_rate"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "mlx_optimizer_init"
   },
+  "Adamax": {
+    "api": "mlx.optimizers.optimizers.Adamax",
+    "args": {
+      "betas": "betas",
+      "eps": "eps",
+      "learning_rate": "learning_rate",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adamw": {
+    "api": "mlx.optimizers.optimizers.AdamW",
+    "args": {
+      "betas": "betas",
+      "bias_correction": "bias_correction",
+      "eps": "eps",
+      "learning_rate": "learning_rate",
+      "self": "self",
+      "weight_decay": "weight_decay"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Add": {
     "api": "mx.add",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Arange": {
     "api": "mlx.core.arange",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ArgMax": {
@@ -25,6 +109,8 @@
       "dim": "axis",
       "keepdim": "keepdims"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ArgMin": {
@@ -33,78 +119,474 @@
       "dim": "axis",
       "keepdim": "keepdims"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Array": {
     "api": "mlx.core.array",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ArrayLike": {
+    "api": "mlx.core.ArrayLike",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "AssertClose": {
+    "dispatch_rules": [],
     "macro_template": "assert {actual}.allclose({expected}, rtol={rtol}, atol={atol}).item()",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Attention": {
+    "api": "mlx.nn.layers.transformer.TransformerEncoderLayer.attention",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool1d": {
+    "api": "mlx.nn.layers.pooling.AvgPool1d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool2d": {
+    "api": "mlx.nn.layers.pooling.AvgPool2d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool3d": {
+    "api": "mlx.nn.layers.pooling.AvgPool3d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Avgpool": {
+    "api": "mlx.nn.AvgPool3d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "B": {
+    "api": "mlx.nn.layers.recurrent.GRU.b",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BLOCK_M": {
+    "api": "mlx.core.block_masked_mm",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "BatchNorm": {
     "api": "mlx.nn.BatchNorm",
+    "args": {
+      "affine": "affine",
+      "eps": "eps",
+      "momentum": "momentum",
+      "num_features": "num_features",
+      "self": "self",
+      "track_running_stats": "track_running_stats"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bernoulli": {
+    "api": "mlx.core.random.bernoulli",
+    "args": {
+      "key": "key",
+      "p": "p",
+      "shape": "shape",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bilinear": {
+    "api": "mlx.nn.layers.linear.Bilinear",
+    "args": {
+      "bias": "bias",
+      "input1_dims": "input1_dims",
+      "input2_dims": "input2_dims",
+      "output_dims": "output_dims",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Bool": {
     "api": "mx.bool_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "CastBool": {
     "api": "astype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "type_methods"
   },
   "CastByte": {
     "api": "astype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "type_methods"
   },
   "CastDouble": {
     "api": "astype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "type_methods"
   },
   "CastFloat": {
     "api": "astype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "type_methods"
   },
   "CastHalf": {
     "api": "astype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "type_methods"
   },
   "CastInt": {
     "api": "astype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "type_methods"
   },
   "CastLong": {
     "api": "astype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "type_methods"
   },
   "CastShort": {
     "api": "astype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "type_methods"
   },
+  "Ceil": {
+    "api": "mlx.core.ceil",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Celu": {
+    "api": "mlx.nn.layers.activations.CELU",
+    "args": {
+      "alpha": "alpha",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Clip": {
+    "api": "mlx.core.clip",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Compile": {
     "api": "mlx.core.compile",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "mlx_compiler"
+  },
+  "Concat": {
+    "api": "mlx.core.concat",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Concatenate": {
     "api": "mlx.core.concatenate",
     "args": {
       "tensors": "arrays"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Constant": {
+    "api": "mlx.nn.init.constant",
+    "args": {
+      "dtype": "dtype",
+      "value": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv1d": {
+    "api": "mlx.nn.layers.convolution.Conv1d",
+    "args": {
+      "bias": "bias",
+      "dilation": "dilation",
+      "groups": "groups",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv2d": {
+    "api": "mlx.nn.layers.convolution.Conv2d",
+    "args": {
+      "bias": "bias",
+      "dilation": "dilation",
+      "groups": "groups",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv3d": {
+    "api": "mlx.nn.layers.convolution.Conv3d",
+    "args": {
+      "bias": "bias",
+      "dilation": "dilation",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose1d": {
+    "api": "mlx.nn.layers.convolution_transpose.ConvTranspose1d",
+    "args": {
+      "bias": "bias",
+      "dilation": "dilation",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "output_padding": "output_padding",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose2d": {
+    "api": "mlx.nn.layers.convolution_transpose.ConvTranspose2d",
+    "args": {
+      "bias": "bias",
+      "dilation": "dilation",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "output_padding": "output_padding",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose3d": {
+    "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d",
+    "args": {
+      "bias": "bias",
+      "dilation": "dilation",
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "output_padding": "output_padding",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cos": {
+    "api": "mlx.core.cos",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cosh": {
+    "api": "mlx.core.cosh",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cosinesimilarity": {
+    "api": "mlx.nn.losses.cosine_similarity_loss",
+    "args": {
+      "dim": "axis",
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CumSum": {
+    "api": "mlx.core.cumsum",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Device": {
+    "api": "mlx.core.Stream.device",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Div": {
     "api": "mx.divide",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dropout": {
+    "api": "mlx.nn.layers.dropout.Dropout",
+    "args": {
+      "p": "p",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dropout2d": {
+    "api": "mlx.nn.layers.dropout.Dropout2d",
+    "args": {
+      "p": "p",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dropout3d": {
+    "api": "mlx.nn.layers.dropout.Dropout3d",
+    "args": {
+      "p": "p",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Einsum": {
+    "api": "mlx.core.einsum",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Elu": {
+    "api": "mlx.nn.layers.activations.ELU",
+    "args": {
+      "alpha": "alpha",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Embedding": {
@@ -112,34 +594,289 @@
     "args": {
       "embedding_dim": "dims"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Equal": {
+    "api": "mlx.core.equal",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Erf": {
+    "api": "mlx.core.erf",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Exp": {
+    "api": "mlx.core.exp",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Flatten": {
+    "api": "mlx.core.flatten",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Float16": {
     "api": "mx.float16",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Float32": {
     "api": "mx.float32",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Float64": {
     "api": "mx.float32",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Floor": {
+    "api": "mlx.core.floor",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "GELU": {
     "api": "mlx.nn.GELU",
+    "args": {
+      "approx": "approx",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GRU": {
+    "api": "mlx.nn.layers.recurrent.GRU",
+    "args": {
+      "bias": "bias",
+      "hidden_size": "hidden_size",
+      "input_size": "input_size",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Gaussiannll": {
+    "api": "mlx.nn.losses.gaussian_nll_loss",
+    "args": {
+      "eps": "eps",
+      "full": "full",
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Gelu": {
+    "api": "mlx.nn.GELU",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Glu": {
+    "api": "mlx.nn.layers.activations.GLU",
+    "args": {
+      "axis": "axis",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Greater": {
+    "api": "mlx.core.greater",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Group": {
+    "api": "mlx.core.distributed.Group",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Groupnorm": {
+    "api": "mlx.nn.layers.normalization.GroupNorm",
+    "args": {
+      "affine": "affine",
+      "dims": "dims",
+      "eps": "eps",
+      "num_groups": "num_groups",
+      "pytorch_compatible": "pytorch_compatible",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HardSwish": {
+    "api": "mlx.nn.layers.activations.hardswish",
+    "args": {
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hardshrink": {
+    "api": "mlx.nn.layers.activations.HardShrink",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hardswish": {
+    "api": "mlx.nn.layers.activations.Hardswish",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hardtanh": {
+    "api": "mlx.nn.layers.activations.HardTanh",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Identity": {
+    "api": "mlx.nn.layers.linear.Identity",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Instancenorm": {
+    "api": "mlx.nn.layers.normalization.InstanceNorm",
+    "args": {
+      "affine": "affine",
+      "dims": "dims",
+      "eps": "eps",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Int16": {
     "api": "mx.int16",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Int32": {
     "api": "mx.int32",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Int64": {
     "api": "mx.int64",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsInf": {
+    "api": "mlx.core.isinf",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsNaN": {
+    "api": "mlx.core.isnan",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Kldiv": {
+    "api": "mlx.nn.losses.kl_div_loss",
+    "args": {
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "L1": {
+    "api": "mlx.nn.losses.l1_loss",
+    "args": {
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LSTM": {
+    "api": "mlx.nn.layers.recurrent.LSTM",
+    "args": {
+      "bias": "bias",
+      "hidden_size": "hidden_size",
+      "input_size": "input_size",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "LayerNorm": {
@@ -147,6 +884,58 @@
     "args": {
       "normalized_shape": "dims"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LazyConvTranspose1d": {
+    "api": "mlx.core.conv_transpose1d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LazyConvTranspose2d": {
+    "api": "mlx.core.conv_transpose2d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LazyConvTranspose3d": {
+    "api": "mlx.core.conv_transpose3d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LeakyRelu": {
+    "api": "mlx.nn.layers.activations.LeakyReLU",
+    "args": {
+      "negative_slope": "negative_slope",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Less": {
+    "api": "mlx.core.less",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Linear": {
@@ -155,29 +944,341 @@
       "in_features": "input_dims",
       "out_features": "output_dims"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LinearT": {
+    "api": "mlx.nn.layers.transformer.TransformerEncoderLayer.linear2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Lion": {
+    "api": "mlx.optimizers.optimizers.Lion",
+    "args": {
+      "betas": "betas",
+      "learning_rate": "learning_rate",
+      "self": "self",
+      "weight_decay": "weight_decay"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "List": {
+    "api": "mlx.optimizers.List",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Load": {
     "api": "load",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [
       "import mlx.core as mx"
     ],
     "requires_plugin": "io_handler"
   },
+  "Log": {
+    "api": "mlx.core.log",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSoftmax": {
+    "api": "mlx.nn.layers.activations.LogSoftmax",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Logcosh": {
+    "api": "mlx.nn.losses.log_cosh_loss",
+    "args": {
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Logsigmoid": {
+    "api": "mlx.nn.layers.activations.LogSigmoid",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Logsumexp": {
+    "api": "mlx.core.logsumexp",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MarginRankingLoss": {
+    "api": "mlx.nn.losses.margin_ranking_loss",
+    "args": {
+      "inputs1": "inputs1",
+      "inputs2": "inputs2",
+      "margin": "margin",
+      "reduction": "reduction",
+      "targets": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Marginranking": {
+    "api": "mlx.nn.losses.margin_ranking_loss",
+    "args": {
+      "margin": "margin",
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MatMul": {
+    "api": "mlx.core.matmul",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Max": {
+    "api": "mlx.core.max",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool1d": {
+    "api": "mlx.nn.layers.pooling.MaxPool1d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool2d": {
+    "api": "mlx.nn.layers.pooling.MaxPool2d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool3d": {
+    "api": "mlx.nn.layers.pooling.MaxPool3d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxUnpool1d": {
+    "api": "mlx.nn.layers.pooling.MaxPool1d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxUnpool2d": {
+    "api": "mlx.nn.layers.pooling.MaxPool2d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxUnpool3d": {
+    "api": "mlx.nn.layers.pooling.MaxPool3d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "self": "self",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Maxpool": {
+    "api": "mlx.nn.MaxPool3d",
+    "args": {
+      "kernel_size": "kernel_size",
+      "padding": "padding",
+      "stride": "stride"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Mean": {
     "api": "mx.mean",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Min": {
+    "api": "mlx.core.min",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Mish": {
+    "api": "mlx.nn.layers.activations.Mish",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Module": {
+    "api": "mlx.nn.layers.base.Module",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Mse": {
+    "api": "mlx.nn.losses.mse_loss",
+    "args": {
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Mul": {
     "api": "mx.multiply",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MultiheadAttention": {
+    "api": "mlx.nn.layers.transformer.MultiHeadAttention",
+    "args": {
+      "bias": "bias",
+      "dims": "dims",
+      "key_input_dims": "key_input_dims",
+      "num_heads": "num_heads",
+      "query_input_dims": "query_input_dims",
+      "self": "self",
+      "value_dims": "value_dims",
+      "value_input_dims": "value_input_dims",
+      "value_output_dims": "value_output_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Nll": {
+    "api": "mlx.nn.losses.nll_loss",
+    "args": {
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "OneHot": {
     "api": "mlx.nn.OneHot",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Ones": {
     "api": "mlx.core.ones",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Optimizer": {
+    "api": "mlx.optimizers.optimizers.Optimizer",
+    "args": {
+      "schedulers": "schedulers",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Optional": {
+    "api": "mlx.optimizers.Optional",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PRelu": {
+    "api": "mlx.nn.layers.activations.PReLU",
+    "args": {
+      "init": "init",
+      "num_parameters": "num_parameters",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Pad": {
@@ -187,11 +1288,123 @@
       "pad": "pad_width",
       "value": "constant_values"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "padding_converter"
   },
+  "RMSprop": {
+    "api": "mlx.optimizers.optimizers.RMSprop",
+    "args": {
+      "alpha": "alpha",
+      "eps": "eps",
+      "learning_rate": "learning_rate",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RNN": {
+    "api": "mlx.nn.layers.recurrent.RNN",
+    "args": {
+      "bias": "bias",
+      "hidden_size": "hidden_size",
+      "input_size": "input_size",
+      "nonlinearity": "nonlinearity",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RPC_AVAILABLE": {
+    "api": "mlx.core.cuda.is_available",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "RandInt": {
     "api": "mlx.random.randint",
+    "args": {
+      "dtype": "dtype",
+      "high": "high",
+      "key": "key",
+      "low": "low",
+      "shape": "shape",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReLU": {
+    "api": "mlx.nn.layers.activations.ReLU",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Reciprocal": {
+    "api": "mlx.core.reciprocal",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Relu": {
+    "api": "mlx.nn.layers.activations.relu",
+    "args": {
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Relu6": {
+    "api": "mlx.nn.layers.activations.ReLU6",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Reshape": {
+    "api": "mlx.core.reshape",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rmsnorm": {
+    "api": "mlx.nn.layers.normalization.RMSNorm",
+    "args": {
+      "dims": "dims",
+      "eps": "eps",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Round": {
+    "api": "mlx.core.round",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "SGD": {
@@ -199,84 +1412,3725 @@
     "args": {
       "lr": "learning_rate"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "mlx_optimizer_init"
   },
   "Save": {
     "api": "save",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [
       "import mlx.core as mx"
     ],
     "requires_plugin": "io_handler"
   },
+  "Selu": {
+    "api": "mlx.nn.layers.activations.SELU",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sequential": {
+    "api": "mlx.nn.layers.containers.Sequential",
+    "args": {
+      "modules": "modules",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Shape": {
+    "api": "mlx.core.array.shape",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "SiLU": {
     "api": "mlx.nn.silu",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sigmoid": {
+    "api": "mlx.nn.layers.activations.Sigmoid",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sign": {
+    "api": "mlx.core.sign",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Silu": {
+    "api": "mlx.nn.layers.activations.silu",
+    "args": {
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sin": {
+    "api": "mlx.core.sin",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sinh": {
+    "api": "mlx.core.sinh",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Size": {
+    "api": "mlx.core.distributed.Group.size",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Slice": {
+    "api": "mlx.core.slice",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Smoothl1": {
+    "api": "mlx.nn.losses.smooth_l1_loss",
+    "args": {
+      "beta": "beta",
+      "reduction": "reduction"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softmax": {
+    "api": "mlx.nn.layers.activations.Softmax",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softmax2d": {
+    "api": "mlx.core.softmax",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softmin": {
+    "api": "mlx.nn.layers.activations.Softmin",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softplus": {
+    "api": "mlx.nn.layers.activations.Softplus",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softshrink": {
+    "api": "mlx.nn.layers.activations.Softshrink",
+    "args": {
+      "lambd": "lambd",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softsign": {
+    "api": "mlx.nn.layers.activations.Softsign",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Split": {
+    "api": "mlx.core.split",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sqrt": {
+    "api": "mlx.core.sqrt",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Squeeze": {
+    "api": "mlx.core.squeeze",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Sub": {
     "api": "mx.subtract",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sum": {
+    "api": "mlx.core.sum",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Synchronize": {
     "api": "mx.eval",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "mlx_synchronize"
   },
+  "T": {
+    "api": "mlx.core.array.T",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TUPLE": {
+    "api": "mlx.optimizers.Tuple",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tan": {
+    "api": "mlx.core.tan",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tanh": {
+    "api": "mlx.nn.layers.activations.Tanh",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tanhshrink": {
+    "api": "mlx.core.tanh",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "TensorType": {
     "api": "mlx.core.array",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Threshold": {
+    "api": "mlx.nn.layers.activations.Step.threshold",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tile": {
+    "api": "mlx.core.tile",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TopK": {
+    "api": "mlx.core.topk",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Transformer": {
+    "api": "mlx.nn.layers.transformer.Transformer",
+    "args": {
+      "activation": "activation",
+      "checkpoint": "checkpoint",
+      "custom_decoder": "custom_decoder",
+      "custom_encoder": "custom_encoder",
+      "dims": "dims",
+      "dropout": "dropout",
+      "mlp_dims": "mlp_dims",
+      "norm_first": "norm_first",
+      "num_decoder_layers": "num_decoder_layers",
+      "num_encoder_layers": "num_encoder_layers",
+      "num_heads": "num_heads",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TransformerDecoderLayer": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoderLayer",
+    "args": {
+      "activation": "activation",
+      "dims": "dims",
+      "dropout": "dropout",
+      "mlp_dims": "mlp_dims",
+      "norm_first": "norm_first",
+      "num_heads": "num_heads",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TransformerEncoderLayer": {
+    "api": "mlx.nn.layers.transformer.TransformerEncoderLayer",
+    "args": {
+      "activation": "activation",
+      "dims": "dims",
+      "dropout": "dropout",
+      "mlp_dims": "mlp_dims",
+      "norm_first": "norm_first",
+      "num_heads": "num_heads",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Transformerdecoder": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoder",
+    "args": {
+      "activation": "activation",
+      "checkpoint": "checkpoint",
+      "dims": "dims",
+      "dropout": "dropout",
+      "mlp_dims": "mlp_dims",
+      "norm_first": "norm_first",
+      "num_heads": "num_heads",
+      "num_layers": "num_layers",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Transformerencoder": {
+    "api": "mlx.nn.layers.transformer.TransformerEncoder",
+    "args": {
+      "activation": "activation",
+      "checkpoint": "checkpoint",
+      "dims": "dims",
+      "dropout": "dropout",
+      "mlp_dims": "mlp_dims",
+      "norm_first": "norm_first",
+      "num_heads": "num_heads",
+      "num_layers": "num_layers",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Transpose": {
+    "api": "mlx.core.transpose",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "UInt8": {
     "api": "mx.uint8",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Unflatten": {
+    "api": "mlx.core.unflatten",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Upsample": {
+    "api": "mlx.nn.layers.upsample.Upsample",
+    "args": {
+      "align_corners": "align_corners",
+      "mode": "mode",
+      "scale_factor": "scale_factor",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Variable": {
     "api": "mlx.core.array",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "View": {
+    "api": "mlx.core.view",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Where": {
+    "api": "mlx.core.where",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Zeros": {
     "api": "mlx.core.zeros",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "abs": {
+    "api": "mlx.core.abs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "activation": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.activation",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "activation_relu_or_gelu": {
+    "api": "mlx.nn.layers.transformer.TransformerEncoderLayer.activation",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "add": {
+    "api": "mlx.core.add",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "align_corners": {
+    "api": "mlx.nn.layers.upsample.Upsample.align_corners",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "all": {
+    "api": "mlx.core.array.all",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "allclose": {
+    "api": "mlx.core.allclose",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "alpha": {
+    "api": "mlx.optimizers.optimizers.RMSprop.alpha",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "any": {
+    "api": "mlx.core.array.any",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "apply": {
+    "api": "mlx.nn.layers.base.Module.apply",
+    "args": {
+      "filter_fn": "filter_fn",
+      "map_fn": "map_fn",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "apply_gradients": {
+    "api": "mlx.optimizers.optimizers.MultiOptimizer.apply_gradients",
+    "args": {
+      "gradients": "gradients",
+      "parameters": "parameters",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "arange": {
+    "api": "mlx.core.arange",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "arccos": {
+    "api": "mlx.core.arccos",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "arccosh": {
+    "api": "mlx.core.arccosh",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "arcsin": {
+    "api": "mlx.core.arcsin",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "arcsinh": {
+    "api": "mlx.core.arcsinh",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "arctan": {
+    "api": "mlx.core.arctan",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "arctan2": {
+    "api": "mlx.core.arctan2",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "arctanh": {
+    "api": "mlx.core.arctanh",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "argmax": {
+    "api": "mlx.core.argmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "argmin": {
+    "api": "mlx.core.argmin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "argpartition": {
+    "api": "mlx.core.argpartition",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "argsort": {
+    "api": "mlx.core.argsort",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "array": {
+    "api": "mlx.core.array",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "array_equal": {
+    "api": "mlx.core.array_equal",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "astype": {
+    "api": "mlx.core.array.astype",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "at": {
+    "api": "mlx.core.array.at",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "atleast_1d": {
+    "api": "mlx.core.atleast_1d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "atleast_2d": {
+    "api": "mlx.core.atleast_2d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "atleast_3d": {
+    "api": "mlx.core.atleast_3d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "axis": {
+    "api": "mlx.nn.layers.activations.GLU.axis",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "base": {
+    "api": "mlx.nn.layers.positional_encoding.RoPE.base",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bfloat16": {
+    "api": "mlx.core.bfloat16",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias": {
+    "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.bias",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias_correction": {
+    "api": "mlx.optimizers.optimizers.Adam.bias_correction",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias_hh": {
+    "api": "mlx.nn.layers.convolution.Conv1d.bias",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias_ih": {
+    "api": "mlx.nn.layers.convolution.Conv1d.bias",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias_k": {
+    "api": "mlx.nn.layers.convolution.Conv1d.bias",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bias_v": {
+    "api": "mlx.nn.layers.convolution.Conv1d.bias",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "binary_cross_entropy": {
+    "api": "mlx.nn.losses.binary_cross_entropy",
+    "args": {
+      "inputs": "inputs",
+      "reduction": "reduction",
+      "targets": "targets",
+      "weights": "weights",
+      "with_logits": "with_logits"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bits": {
+    "api": "mlx.nn.layers.distributed.QuantizedShardedToAllLinear.bits",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bitwise_and": {
+    "api": "mlx.core.bitwise_and",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bitwise_invert": {
+    "api": "mlx.core.bitwise_invert",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bitwise_or": {
+    "api": "mlx.core.bitwise_or",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bitwise_xor": {
+    "api": "mlx.core.bitwise_xor",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "bool_": {
+    "api": "mlx.core.bool_",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "broadcast_arrays": {
+    "api": "mlx.core.broadcast_arrays",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "broadcast_shapes": {
+    "api": "mlx.core.broadcast_shapes",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "broadcast_to": {
+    "api": "mlx.core.broadcast_to",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "categorical": {
+    "api": "mlx.core.random.categorical",
+    "args": {
+      "axis": "axis",
+      "key": "key",
+      "logits": "logits",
+      "num_samples": "num_samples",
+      "shape": "shape",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ceil": {
+    "api": "mlx.core.ceil",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ceil_mode": {
+    "api": "mlx.core.ceil",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "children": {
+    "api": "mlx.nn.layers.base.Module.children",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cholesky": {
+    "api": "mlx.core.linalg.cholesky",
+    "args": {
+      "a": "a",
+      "stream": "stream",
+      "upper": "upper"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "clip": {
+    "api": "mlx.core.clip",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "clip_grad_norm": {
+    "api": "mlx.optimizers.optimizers.clip_grad_norm",
+    "args": {
+      "grads": "grads",
+      "max_norm": "max_norm"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "close": {
+    "api": "mlx.core.FunctionExporter.close",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "complex64": {
+    "api": "mlx.core.complex64",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "complexfloating": {
+    "api": "mlx.core.complexfloating",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "concat": {
+    "api": "mlx.core.concat",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conj": {
+    "api": "mlx.core.conj",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conjugate": {
+    "api": "mlx.core.conjugate",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "constant_": {
+    "api": "mlx.nn.init.constant",
+    "args": {
+      "dtype": "dtype",
+      "value": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv1d": {
+    "api": "mlx.core.conv1d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv1d_input": {
+    "api": "mlx.core.conv1d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv1d_weight": {
+    "api": "mlx.core.conv1d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv2d_input": {
+    "api": "mlx.core.conv2d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv2d_weight": {
+    "api": "mlx.core.conv2d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv3d": {
+    "api": "mlx.core.conv3d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv3d_input": {
+    "api": "mlx.core.conv3d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv3d_weight": {
+    "api": "mlx.core.conv3d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv_transpose1d": {
+    "api": "mlx.core.conv_transpose1d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv_transpose2d": {
+    "api": "mlx.core.conv_transpose2d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv_transpose3d": {
+    "api": "mlx.core.conv_transpose3d",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "convolve": {
+    "api": "mlx.core.convolve",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cos": {
+    "api": "mlx.core.cos",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cosh": {
+    "api": "mlx.core.cosh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cpu": {
+    "api": "mlx.core.cpu",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cross": {
+    "api": "mlx.core.linalg.cross",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "b": "b",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cross_entropy": {
+    "api": "mlx.nn.losses.cross_entropy",
+    "args": {
+      "axis": "axis",
+      "label_smoothing": "label_smoothing",
+      "logits": "logits",
+      "reduction": "reduction",
+      "targets": "targets",
+      "weights": "weights"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cumprod": {
+    "api": "mlx.core.cumprod",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "decoder": {
+    "api": "mlx.nn.layers.transformer.Transformer.decoder",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "degrees": {
+    "api": "mlx.core.degrees",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "device": {
+    "api": "mlx.core.Device",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "device_ids": {
+    "api": "mlx.core.Device",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "device_mesh": {
+    "api": "mlx.core.Device",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "device_type": {
+    "api": "mlx.core.DeviceType",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "diag": {
+    "api": "mlx.core.diag",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "diagonal": {
+    "api": "mlx.core.diagonal",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dilation": {
+    "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.dilation",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dim": {
+    "api": "mlx.core.array.ndim",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dims": {
+    "api": "mlx.nn.layers.normalization.GroupNorm.dims",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "divide": {
+    "api": "mlx.core.divide",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "divmod": {
+    "api": "mlx.core.divmod",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "downscale_factor": {
+    "api": "mlx.nn.layers.upsample.Upsample.scale_factor",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout1": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.dropout1",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout2": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.dropout2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout2d": {
+    "api": "mlx.nn.Dropout2d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout3": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.dropout3",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout3d": {
+    "api": "mlx.nn.Dropout3d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dtype": {
+    "api": "mlx.core.iinfo.dtype",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "e": {
+    "api": "mlx.core.e",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eig": {
+    "api": "mlx.core.linalg.eig",
+    "args": {
+      "a": "a",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eigh": {
+    "api": "mlx.core.linalg.eigh",
+    "args": {
+      "UPLO": "UPLO",
+      "a": "a",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eigvals": {
+    "api": "mlx.core.linalg.eigvals",
+    "args": {
+      "a": "a",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eigvalsh": {
+    "api": "mlx.core.linalg.eigvalsh",
+    "args": {
+      "UPLO": "UPLO",
+      "a": "a",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "einsum_path": {
+    "api": "mlx.core.einsum_path",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "enable_grad": {
     "api": "contextlib.nullcontext",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "context_to_function_wrap"
   },
+  "encoder": {
+    "api": "mlx.nn.layers.transformer.Transformer.encoder",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eps": {
+    "api": "mlx.optimizers.optimizers.Adafactor.eps",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "equal": {
+    "api": "mlx.core.equal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "erfc": {
+    "api": "mlx.core.erf",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "erfcx": {
+    "api": "mlx.core.erf",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "erfinv": {
+    "api": "mlx.core.erfinv",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "euler_gamma": {
+    "api": "mlx.core.euler_gamma",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eval": {
+    "api": "mlx.nn.layers.base.Module.eval",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "exp": {
+    "api": "mlx.core.exp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "expand_dims": {
+    "api": "mlx.core.expand_dims",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "expit": {
+    "api": "mlx.core.array.exp",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "expm1": {
+    "api": "mlx.core.expm1",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "exponential_decay": {
+    "api": "mlx.optimizers.schedulers.exponential_decay",
+    "args": {
+      "decay_rate": "decay_rate",
+      "init": "init"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eye": {
+    "api": "mlx.core.eye",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "eye_": {
+    "api": "mlx.core.eye",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fft": {
+    "api": "mlx.core.fft.fft",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "n": "n",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fft2": {
+    "api": "mlx.core.fft.fft2",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "s": "s",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fftn": {
+    "api": "mlx.core.fft.fftn",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "s": "s",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fftshift": {
+    "api": "mlx.core.fft.fftshift",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "filters": {
+    "api": "mlx.optimizers.optimizers.MultiOptimizer.filters",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "finfo": {
+    "api": "mlx.core.finfo",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "flatten_parameters": {
+    "api": "mlx.core.flatten",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "floating": {
+    "api": "mlx.core.floating",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "floor": {
+    "api": "mlx.core.floor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "floor_divide": {
+    "api": "mlx.core.floor_divide",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "freeze": {
+    "api": "mlx.nn.layers.base.Module.freeze",
+    "args": {
+      "keys": "keys",
+      "recurse": "recurse",
+      "self": "self",
+      "strict": "strict"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "full": {
+    "api": "mlx.core.full",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "gaussian_nll_loss": {
+    "api": "mlx.nn.losses.gaussian_nll_loss",
+    "args": {
+      "eps": "eps",
+      "full": "full",
+      "inputs": "inputs",
+      "reduction": "reduction",
+      "targets": "targets",
+      "vars": "vars"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "generic": {
+    "api": "mlx.core.generic",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "glorot_normal": {
+    "api": "mlx.nn.init.glorot_normal",
+    "args": {
+      "dtype": "dtype"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "glorot_uniform": {
+    "api": "mlx.nn.init.glorot_uniform",
+    "args": {
+      "dtype": "dtype"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "grad": {
+    "api": "mlx.core.grad",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "greater": {
+    "api": "mlx.core.greater",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "greater_equal": {
+    "api": "mlx.core.greater_equal",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "group": {
+    "api": "mlx.nn.layers.distributed.QuantizedShardedToAllLinear.group",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "group_size": {
+    "api": "mlx.nn.layers.distributed.QuantizedShardedToAllLinear.group_size",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "groups": {
+    "api": "mlx.nn.layers.convolution.Conv2d.groups",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "gumbel": {
+    "api": "mlx.core.random.gumbel",
+    "args": {
+      "dtype": "dtype",
+      "key": "key",
+      "shape": "shape",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "hard_shrink": {
+    "api": "mlx.nn.layers.activations.hard_shrink",
+    "args": {
+      "lambd": "lambd",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "hard_tanh": {
+    "api": "mlx.nn.layers.activations.hard_tanh",
+    "args": {
+      "max_val": "max_val",
+      "min_val": "min_val",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "he_normal": {
+    "api": "mlx.nn.init.he_normal",
+    "args": {
+      "dtype": "dtype"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "he_uniform": {
+    "api": "mlx.nn.init.he_uniform",
+    "args": {
+      "dtype": "dtype"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "hidden_size": {
+    "api": "mlx.nn.layers.recurrent.LSTM.hidden_size",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "hinge_loss": {
+    "api": "mlx.nn.losses.hinge_loss",
+    "args": {
+      "inputs": "inputs",
+      "reduction": "reduction",
+      "targets": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "huber_loss": {
+    "api": "mlx.nn.losses.huber_loss",
+    "args": {
+      "delta": "delta",
+      "inputs": "inputs",
+      "reduction": "reduction",
+      "targets": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ifft": {
+    "api": "mlx.core.fft.ifft",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "n": "n",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ifft2": {
+    "api": "mlx.core.fft.ifft2",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "s": "s",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ifftn": {
+    "api": "mlx.core.fft.ifftn",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "s": "s",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ifftshift": {
+    "api": "mlx.core.fft.ifftshift",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "iinfo": {
+    "api": "mlx.core.iinfo",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "imag": {
+    "api": "mlx.core.imag",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "in1_features": {
+    "api": "mlx.nn.layers.normalization.BatchNorm.num_features",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "in2_features": {
+    "api": "mlx.nn.layers.normalization.BatchNorm.num_features",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "inexact": {
+    "api": "mlx.core.inexact",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "inf": {
+    "api": "mlx.core.inf",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "init": {
+    "api": "mlx.optimizers.optimizers.MultiOptimizer.init",
+    "args": {
+      "parameters": "parameters",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "inner": {
+    "api": "mlx.core.inner",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "inplace": {
+    "api": "mlx.core.linspace",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "int8": {
+    "api": "mlx.core.int8",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "integer": {
+    "api": "mlx.core.integer",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "inv": {
+    "api": "mlx.core.linalg.inv",
+    "args": {
+      "a": "a",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "irfft": {
+    "api": "mlx.core.fft.irfft",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "n": "n",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "irfft2": {
+    "api": "mlx.core.fft.irfft2",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "s": "s",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "irfftn": {
+    "api": "mlx.core.fft.irfftn",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "s": "s",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "isclose": {
+    "api": "mlx.core.isclose",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "isfinite": {
+    "api": "mlx.core.isfinite",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "isinf": {
+    "api": "mlx.core.isinf",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "isnan": {
+    "api": "mlx.core.isnan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "isneginf": {
+    "api": "mlx.core.isneginf",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "isposinf": {
+    "api": "mlx.core.isposinf",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "issubdtype": {
+    "api": "mlx.core.issubdtype",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "item": {
+    "api": "mlx.core.array.item",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "itemsize": {
+    "api": "mlx.core.array.itemsize",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "join_schedules": {
+    "api": "mlx.optimizers.schedulers.join_schedules",
+    "args": {
+      "boundaries": "boundaries",
+      "schedules": "schedules"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "jvp": {
+    "api": "mlx.core.jvp",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "key": {
+    "api": "mlx.core.random.key",
+    "args": {
+      "seed": "seed"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "keys": {
+    "api": "mlx.core.random.key",
+    "args": {
+      "seed": "seed"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "kron": {
+    "api": "mlx.core.kron",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "l1_loss": {
+    "api": "mlx.nn.losses.l1_loss",
+    "args": {
+      "predictions": "predictions",
+      "reduction": "reduction",
+      "targets": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "lambd": {
+    "api": "mlx.nn.layers.activations.Softshrink.lambd",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "laplace": {
+    "api": "mlx.core.random.laplace",
+    "args": {
+      "dtype": "dtype",
+      "key": "key",
+      "loc": "loc",
+      "scale": "scale",
+      "shape": "shape",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "layer_norm": {
+    "api": "mlx.core.fast.layer_norm",
+    "args": {
+      "bias": "bias",
+      "eps": "eps",
+      "stream": "stream",
+      "weight": "weight",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "layers": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoder.layers",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "leaky_relu": {
+    "api": "mlx.nn.layers.activations.leaky_relu",
+    "args": {
+      "negative_slope": "negative_slope",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "left_shift": {
+    "api": "mlx.core.left_shift",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "less": {
+    "api": "mlx.core.less",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "less_equal": {
+    "api": "mlx.core.less_equal",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "linear1": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.linear1",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "linear2": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.linear2",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "linear_schedule": {
+    "api": "mlx.optimizers.schedulers.linear_schedule",
+    "args": {
+      "end": "end",
+      "init": "init",
+      "steps": "steps"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "linspace": {
+    "api": "mlx.core.linspace",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log": {
+    "api": "mlx.core.log",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log10": {
+    "api": "mlx.core.log10",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log1p": {
+    "api": "mlx.core.log1p",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log2": {
+    "api": "mlx.core.log2",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log_ndtr": {
+    "api": "mlx.core.array.log",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log_prob": {
+    "api": "mlx.core.log",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "log_sigmoid": {
+    "api": "mlx.nn.layers.activations.log_sigmoid",
+    "args": {
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "log_softmax": {
     "api": "mlx.nn.log_softmax",
+    "args": {
+      "axis": "axis",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logaddexp": {
+    "api": "mlx.core.logaddexp",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logger": {
+    "api": "mlx.core.array.log",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logical_and": {
+    "api": "mlx.core.logical_and",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logical_not": {
+    "api": "mlx.core.logical_not",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logical_or": {
+    "api": "mlx.core.logical_or",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logit": {
+    "api": "mlx.core.array.log",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "lu": {
+    "api": "mlx.core.linalg.lu",
+    "args": {
+      "a": "a",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "lu_factor": {
+    "api": "mlx.core.linalg.lu_factor",
+    "args": {
+      "a": "a",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "margin": {
+    "api": "mlx.core.argmin",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "margin_ranking_loss": {
+    "api": "mlx.nn.losses.margin_ranking_loss",
+    "args": {
+      "inputs1": "inputs1",
+      "inputs2": "inputs2",
+      "margin": "margin",
+      "reduction": "reduction",
+      "targets": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "matmul": {
+    "api": "mlx.core.matmul",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max": {
+    "api": "mlx.core.max",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_val": {
+    "api": "mlx.core.array.max",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "maximum": {
+    "api": "mlx.core.maximum",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "mean": {
+    "api": "mlx.core.mean",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "median": {
+    "api": "mlx.core.median",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meshgrid": {
+    "api": "mlx.core.meshgrid",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "min": {
+    "api": "mlx.core.min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "min_val": {
+    "api": "mlx.core.array.min",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "minimum": {
+    "api": "mlx.core.minimum",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "mode": {
+    "api": "mlx.nn.layers.upsample.Upsample.mode",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "modules": {
+    "api": "mlx.nn.layers.base.Module.modules",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "momentum": {
+    "api": "mlx.optimizers.optimizers.Muon.momentum",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "moveaxis": {
+    "api": "mlx.core.moveaxis",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "mse_loss": {
+    "api": "mlx.nn.losses.mse_loss",
+    "args": {
+      "predictions": "predictions",
+      "reduction": "reduction",
+      "targets": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "multiply": {
+    "api": "mlx.core.multiply",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "multivariate_normal": {
+    "api": "mlx.core.random.multivariate_normal",
+    "args": {
+      "cov": "cov",
+      "dtype": "dtype",
+      "key": "key",
+      "mean": "mean",
+      "shape": "shape",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "named_modules": {
+    "api": "mlx.nn.layers.base.Module.named_modules",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "nan": {
+    "api": "mlx.core.nan",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "nan_to_num": {
+    "api": "mlx.core.nan_to_num",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "nbytes": {
+    "api": "mlx.core.array.nbytes",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ndim": {
+    "api": "mlx.core.array.ndim",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "negative": {
+    "api": "mlx.core.negative",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "nll_loss": {
+    "api": "mlx.nn.losses.nll_loss",
+    "args": {
+      "axis": "axis",
+      "inputs": "inputs",
+      "reduction": "reduction",
+      "targets": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "no_grad": {
     "api": "contextlib.nullcontext",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "context_to_function_wrap"
   },
+  "nonlinearity": {
+    "api": "mlx.nn.layers.recurrent.RNN.nonlinearity",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm": {
+    "api": "mlx.core.linalg.norm",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "keepdims": "keepdims",
+      "ord": "ord",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm_first": {
+    "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.norm_first",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "normal": {
+    "api": "mlx.nn.init.normal",
+    "args": {
+      "dtype": "dtype",
+      "mean": "mean",
+      "std": "std"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "not_equal": {
+    "api": "mlx.core.not_equal",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "num_embeddings": {
+    "api": "mlx.nn.layers.quantized.QuantizedEmbedding.num_embeddings",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "num_features": {
+    "api": "mlx.nn.layers.normalization.BatchNorm.num_features",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "num_groups": {
+    "api": "mlx.nn.layers.normalization.GroupNorm.num_groups",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "num_heads": {
+    "api": "mlx.nn.layers.transformer.MultiHeadAttention.num_heads",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "number": {
+    "api": "mlx.core.number",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ones": {
+    "api": "mlx.core.ones",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ones_": {
+    "api": "mlx.core.ones",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ones_like": {
+    "api": "mlx.core.ones_like",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "orthogonal": {
+    "api": "mlx.nn.init.orthogonal",
+    "args": {
+      "dtype": "dtype",
+      "gain": "gain"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "orthogonal_": {
+    "api": "mlx.nn.init.orthogonal",
+    "args": {
+      "dtype": "dtype",
+      "gain": "gain"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "out_proj": {
+    "api": "mlx.nn.layers.transformer.MultiHeadAttention.out_proj",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "outer": {
+    "api": "mlx.core.outer",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "padding": {
+    "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.padding",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "padding_idx": {
+    "api": "mlx.nn.layers.convolution.Conv1d.padding",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "parameters": {
+    "api": "mlx.nn.layers.base.Module.parameters",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "parameters_to_vector": {
+    "api": "mlx.nn.layers.base.Module.parameters",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "partition": {
+    "api": "mlx.core.partition",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "permutation": {
+    "api": "mlx.core.random.permutation",
+    "args": {
+      "axis": "axis",
+      "key": "key",
+      "stream": "stream",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "permute_dims": {
     "api": "mx.transpose",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "pack_to_tuple": "axes",
+    "required_imports": []
+  },
+  "pi": {
+    "api": "mlx.core.pi",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "pinv": {
+    "api": "mlx.core.linalg.pinv",
+    "args": {
+      "a": "a",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "power": {
+    "api": "mlx.core.power",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "prod": {
+    "api": "mlx.core.prod",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "psi": {
+    "api": "mlx.core.pi",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "qr": {
+    "api": "mlx.core.linalg.qr",
+    "args": {
+      "a": "a",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "quantize": {
+    "api": "mlx.nn.layers.quantized.quantize",
+    "args": {
+      "bits": "bits",
+      "class_predicate": "class_predicate",
+      "group_size": "group_size",
+      "mode": "mode",
+      "model": "model"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "radians": {
+    "api": "mlx.core.radians",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "randn": {
     "api": "mlx.random.normal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rank": {
+    "api": "mlx.core.distributed.Group.rank",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "real": {
+    "api": "mlx.core.real",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "reciprocal": {
+    "api": "mlx.core.reciprocal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "relu": {
     "api": "mlx.nn.relu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "remainder": {
+    "api": "mlx.core.remainder",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "repeat": {
+    "api": "mlx.core.repeat",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "reshape": {
+    "api": "mlx.core.reshape",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "reshape_weight_to_matrix": {
+    "api": "mlx.core.reshape",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rfft": {
+    "api": "mlx.core.fft.rfft",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "n": "n",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rfft2": {
+    "api": "mlx.core.fft.rfft2",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "s": "s",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rfftn": {
+    "api": "mlx.core.fft.rfftn",
+    "args": {
+      "a": "a",
+      "axes": "axes",
+      "s": "s",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "right_shift": {
+    "api": "mlx.core.right_shift",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rms_norm": {
+    "api": "mlx.core.fast.rms_norm",
+    "args": {
+      "eps": "eps",
+      "stream": "stream",
+      "weight": "weight",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "roll": {
+    "api": "mlx.core.roll",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "round": {
+    "api": "mlx.core.round",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rsqrt": {
+    "api": "mlx.core.rsqrt",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "savez": {
+    "api": "mlx.core.savez",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "savez_compressed": {
+    "api": "mlx.core.savez_compressed",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "scale": {
+    "api": "mlx.nn.layers.positional_encoding.SinusoidalPositionalEncoding.scale",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "scale_factor": {
+    "api": "mlx.nn.layers.upsample.Upsample.scale_factor",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "scaled_dot_product_attention": {
+    "api": "mlx.core.fast.scaled_dot_product_attention",
+    "args": {
+      "k": "k",
+      "mask": "mask",
+      "q": "q",
+      "scale": "scale",
+      "sinks": "sinks",
+      "stream": "stream",
+      "v": "v"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "seed": {
+    "api": "mlx.core.random.seed",
+    "args": {
+      "seed": "seed"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sign": {
+    "api": "mlx.core.sign",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "signedinteger": {
+    "api": "mlx.core.signedinteger",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sin": {
+    "api": "mlx.core.sin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sinc": {
+    "api": "mlx.core.array.sin",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sinh": {
+    "api": "mlx.core.sinh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "slice_update": {
+    "api": "mlx.core.slice_update",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "smooth_l1_loss": {
+    "api": "mlx.nn.losses.smooth_l1_loss",
+    "args": {
+      "beta": "beta",
+      "predictions": "predictions",
+      "reduction": "reduction",
+      "targets": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "softmax": {
     "api": "mlx.core.softmax",
+    "args": {
+      "axis": "axis",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "solve": {
+    "api": "mlx.core.linalg.solve",
+    "args": {
+      "a": "a",
+      "b": "b",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "solve_triangular": {
+    "api": "mlx.core.linalg.solve_triangular",
+    "args": {
+      "a": "a",
+      "b": "b",
+      "stream": "stream",
+      "upper": "upper"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sort": {
+    "api": "mlx.core.sort",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sparse": {
+    "api": "mlx.nn.init.sparse",
+    "args": {
+      "dtype": "dtype",
+      "mean": "mean",
+      "sparsity": "sparsity",
+      "std": "std"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sparse_": {
+    "api": "mlx.nn.init.sparse",
+    "args": {
+      "dtype": "dtype",
+      "mean": "mean",
+      "sparsity": "sparsity",
+      "std": "std"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sqrt": {
+    "api": "mlx.core.sqrt",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "square": {
+    "api": "mlx.core.square",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "squeeze": {
+    "api": "mlx.core.squeeze",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "stack": {
+    "api": "mlx.core.stack",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "state": {
+    "api": "mlx.optimizers.optimizers.MultiOptimizer.state",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "std": {
+    "api": "mlx.core.std",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "step": {
     "api": "optimizer_step",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "mlx_optimizer_step"
   },
+  "stop_gradient": {
+    "api": "mlx.core.stop_gradient",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "stride": {
+    "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.stride",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "subtract": {
+    "api": "mlx.core.subtract",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sum": {
+    "api": "mlx.core.sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "svd": {
+    "api": "mlx.core.linalg.svd",
+    "args": {
+      "a": "a",
+      "compute_uv": "compute_uv",
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "swap": {
+    "api": "mlx.core.array.swapaxes",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "swapaxes": {
+    "api": "mlx.core.swapaxes",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "take": {
+    "api": "mlx.core.take",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "take_along_axis": {
+    "api": "mlx.core.take_along_axis",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tan": {
+    "api": "mlx.core.tan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tanh": {
+    "api": "mlx.core.tanh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tensordot": {
+    "api": "mlx.core.tensordot",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "threshold_": {
+    "api": "mlx.nn.layers.activations.Step.threshold",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tile": {
+    "api": "mlx.core.tile",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tolist": {
+    "api": "mlx.core.array.tolist",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "trace": {
+    "api": "mlx.core.trace",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "train": {
+    "api": "mlx.nn.layers.base.Module.train",
+    "args": {
+      "mode": "mode",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "training": {
+    "api": "mlx.nn.layers.base.Module.training",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tri": {
+    "api": "mlx.core.tri",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tril": {
+    "api": "mlx.core.tril",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "triu": {
+    "api": "mlx.core.triu",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "trunc_normal_": {
+    "api": "mlx.core.random.truncated_normal",
+    "args": {
+      "dtype": "dtype",
+      "key": "key",
+      "lower": "lower",
+      "shape": "shape",
+      "stream": "stream",
+      "upper": "upper"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "truncated_normal": {
+    "api": "mlx.core.random.truncated_normal",
+    "args": {
+      "dtype": "dtype",
+      "key": "key",
+      "lower": "lower",
+      "shape": "shape",
+      "stream": "stream",
+      "upper": "upper"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "type": {
+    "api": "mlx.core.Device.type",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "uint16": {
+    "api": "mlx.core.uint16",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "uint32": {
+    "api": "mlx.core.uint32",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "uint64": {
+    "api": "mlx.core.uint64",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "unflattened_size": {
+    "api": "mlx.core.unflatten",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "uniform": {
+    "api": "mlx.nn.init.uniform",
+    "args": {
+      "dtype": "dtype",
+      "high": "high",
+      "low": "low"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "unsignedinteger": {
+    "api": "mlx.core.unsignedinteger",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "update": {
+    "api": "mlx.optimizers.optimizers.Optimizer.update",
+    "args": {
+      "gradients": "gradients",
+      "model": "model",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "upsample_bilinear": {
+    "api": "mlx.nn.layers.upsample.upsample_linear",
+    "args": {
+      "align_corners": "align_corners",
+      "scale_factor": "scale_factor",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "upsample_nearest": {
+    "api": "mlx.nn.layers.upsample.upsample_nearest",
+    "args": {
+      "scale_factor": "scale_factor",
+      "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "upscale_factor": {
+    "api": "mlx.nn.layers.upsample.Upsample.scale_factor",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "value_and_grad": {
+    "api": "mlx.nn.utils.value_and_grad",
+    "args": {
+      "fn": "fn",
+      "model": "model"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "var": {
+    "api": "mlx.core.var",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "variant": {
+    "api": "mlx.core.array.var",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "vmap": {
+    "api": "mlx.core.vmap",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "weight": {
+    "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.weight",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "weight_hh": {
+    "api": "mlx.nn.layers.convolution.Conv1d.weight",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "weight_ih": {
+    "api": "mlx.nn.layers.convolution.Conv1d.weight",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "where": {
+    "api": "mlx.core.where",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "xlog1py": {
+    "api": "mlx.core.array.log1p",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "zero_grad": {
     "api": "optimizer_zero_grad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "mlx_zero_grad"
+  },
+  "zeros": {
+    "api": "mlx.core.zeros",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "zeros_": {
+    "api": "mlx.core.zeros",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "zeros_like": {
+    "api": "mlx.core.zeros_like",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   }
 }

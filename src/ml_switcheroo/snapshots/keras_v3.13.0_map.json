@@ -506,26 +506,7 @@
       }
     },
     "Conv3d": {
-      "api": "keras.layers.Conv3D",
-      "args": {
-        "activation": "activation",
-        "activity_regularizer": "activity_regularizer",
-        "bias_constraint": "bias_constraint",
-        "bias_initializer": "bias_initializer",
-        "bias_regularizer": "bias_regularizer",
-        "data_format": "data_format",
-        "dilation_rate": "dilation_rate",
-        "filters": "filters",
-        "groups": "groups",
-        "kernel_constraint": "kernel_constraint",
-        "kernel_initializer": "kernel_initializer",
-        "kernel_regularizer": "kernel_regularizer",
-        "kernel_size": "kernel_size",
-        "kwargs": "kwargs",
-        "padding": "padding",
-        "strides": "strides",
-        "use_bias": "use_bias"
-      }
+      "api": "keras.layers.Conv3D"
     },
     "ConvLSTM1D": {
       "api": "keras.layers.ConvLSTM1D",
@@ -3210,7 +3191,26 @@
       "api": "keras.layers.Conv1D"
     },
     "conv3d": {
-      "api": "keras.layers.Conv3D"
+      "api": "keras.layers.Conv3D",
+      "args": {
+        "activation": "activation",
+        "activity_regularizer": "activity_regularizer",
+        "bias_constraint": "bias_constraint",
+        "bias_initializer": "bias_initializer",
+        "bias_regularizer": "bias_regularizer",
+        "data_format": "data_format",
+        "dilation_rate": "dilation_rate",
+        "filters": "filters",
+        "groups": "groups",
+        "kernel_constraint": "kernel_constraint",
+        "kernel_initializer": "kernel_initializer",
+        "kernel_regularizer": "kernel_regularizer",
+        "kernel_size": "kernel_size",
+        "kwargs": "kwargs",
+        "padding": "padding",
+        "strides": "strides",
+        "use_bias": "use_bias"
+      }
     },
     "conv_transpose": {
       "api": "keras.ops.nn.conv_transpose",

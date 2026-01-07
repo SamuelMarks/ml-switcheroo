@@ -2003,7 +2003,6 @@
   },
   "permute_dims": {
     "description": "Permutes tensor dimensions.",
-    "operation": "permute_dims",
     "std_args": [
       "input",
       {
@@ -2012,7 +2011,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",

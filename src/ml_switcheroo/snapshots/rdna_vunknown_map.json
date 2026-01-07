@@ -1,0 +1,49 @@
+{
+  "__framework__": "rdna",
+  "mappings": {
+    "Abs": {
+      "api": "v_and_b32"
+    },
+    "Add": {
+      "api": "v_add_f32"
+    },
+    "Branch": {
+      "api": "s_cbranch_scc1"
+    },
+    "Clamp": {
+      "api": "v_med3_f32"
+    },
+    "Compare": {
+      "api": "v_cmp_lt_f32"
+    },
+    "Div": {
+      "api": "v_div_f32_e32"
+    },
+    "FusedMultiplyAdd": {
+      "api": "v_fmac_f32"
+    },
+    "Max": {
+      "api": "v_max_f32"
+    },
+    "Min": {
+      "api": "v_min_f32"
+    },
+    "Move": {
+      "api": "v_mov_b32"
+    },
+    "Mul": {
+      "api": "v_mul_f32"
+    },
+    "ScalarMove": {
+      "api": "s_mov_b32"
+    },
+    "Sub": {
+      "api": "v_sub_f32"
+    }
+  },
+  "templates": {
+    "convert_input": "; Input {np_var}",
+    "import": "; RDNA Header",
+    "to_numpy": "; Output {res_var}"
+  }
+}

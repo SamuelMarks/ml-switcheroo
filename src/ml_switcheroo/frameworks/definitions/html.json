@@ -6,6 +6,8 @@
       "kernel_size": "k",
       "out_channels": "o"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Flatten": {
@@ -13,6 +15,8 @@
     "args": {
       "start_dim": "start"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Linear": {
@@ -21,18 +25,26 @@
       "in_features": "i",
       "out_features": "o"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Module": {
     "api": "html_dsl.Module",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "ReLU": {
     "api": "html_dsl.ReLU",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "relu": {
     "api": "html_dsl.relu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   }
 }

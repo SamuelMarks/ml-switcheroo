@@ -549,7 +549,10 @@
       }
     },
     "Gelu": {
-      "api": "mlx.nn.GELU"
+      "api": "mlx.nn.layers.activations.gelu",
+      "args": {
+        "x": "x"
+      }
     },
     "Glu": {
       "api": "mlx.nn.layers.activations.GLU",
@@ -578,6 +581,12 @@
         "num_groups": "num_groups",
         "pytorch_compatible": "pytorch_compatible",
         "self": "self"
+      }
+    },
+    "HardSwish": {
+      "api": "mlx.nn.layers.activations.hardswish",
+      "args": {
+        "x": "x"
       }
     },
     "Hardshrink": {

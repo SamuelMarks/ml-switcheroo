@@ -93,6 +93,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     action="store_true",
     help="Print diffs to console instead of modifying files.",
   )
+  cmd_def.add_argument(
+    "--no-test-gen",
+    action="store_true",
+    help="Skip automatic generation of verification tests.",
+  )
 
   # --- Command: GEN WEIGHT SCRIPT (NEW) ---
   cmd_wgt = subparsers.add_parser("gen-weight-script", help="Generate a checkpoint migration script.")
@@ -223,7 +228,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     return commands.handle_gen_weight_script(args.source_file, args.out, args.source, args.target)
 
   elif args.command == "define":
-    return handle_define(args.yaml_file, dry_run=args.dry_run)
+    return handle_define(args.yaml_file, dry_run=args.dry_run, no_test_gen=args.no_test_gen)
 
   elif args.command == "matrix":
     return commands.handle_matrix()

@@ -91,6 +91,12 @@
     "Cgaerrbar": {
       "api": "CGAERRBAR"
     },
+    "Clamp": {
+      "api": "MNMX"
+    },
+    "Conv2d": {
+      "api": "Macro.Conv2d"
+    },
     "Credux": {
       "api": "CREDUX"
     },
@@ -292,6 +298,9 @@
     "Lepc": {
       "api": "LEPC"
     },
+    "Linear": {
+      "api": "Macro.Linear"
+    },
     "Match": {
       "api": "MATCH"
     },
@@ -438,6 +447,9 @@
     },
     "Suatom": {
       "api": "SUATOM"
+    },
+    "Sub": {
+      "api": "FADD"
     },
     "Suld": {
       "api": "SULD"

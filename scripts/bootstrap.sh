@@ -56,7 +56,7 @@ printf '%s\n' "----------------------------------------"
 # ------------------------------------------------------------------------------
 # 0. SETUP & CLEANUP
 # ------------------------------------------------------------------------------
-printf '%b[0/6] Preparing Workspace...%b\n' "${BLUE}" "${NC}"
+printf '%b[0/7] Preparing Workspace...%b\n' "${BLUE}" "${NC}"
 
 # Clean existing JSON artifacts to force a fresh regeneration.
 printf '   🧹 Cleaning old mappings and descriptors...\n'
@@ -82,7 +82,7 @@ fi
 # ------------------------------------------------------------------------------
 # 1. DEPENDENCY AUDIT & INSTALLATION
 # ------------------------------------------------------------------------------
-printf '\n%b[1/6] Auditing & Installing Dependencies...%b\n' "${BLUE}" "${NC}"
+printf '\n%b[1/7] Auditing & Installing Dependencies...%b\n' "${BLUE}" "${NC}"
 
 # Function: get_install_cmd
 # Determines whether to use `uv pip install` or `python3 -m pip install`
@@ -252,7 +252,7 @@ printf '   🔍 Active Adapters: %b%s%b\n' "${YELLOW}" "$REGISTERED_FWS" "${NC}"
 # ------------------------------------------------------------------------------
 # 3. IMPORT UPSTREAM SPECS (Hub Population)
 # ------------------------------------------------------------------------------
-printf '\n%b[3/6] Importing Upstream Specifications (The Hub)...%b\n' "${BLUE}" "${NC}"
+printf '\n%b[3/7] Importing Upstream Specifications (The Hub)...%b\n' "${BLUE}" "${NC}"
 
 # 3.1. Tier A: Array API Standard (Math)
 if [ ! -d "$TEMP_DIR/array-api" ]; then
@@ -303,7 +303,7 @@ fi
 # ------------------------------------------------------------------------------
 # 4. CONSENSUS & SCAFFOLDING (The Spokes)
 # ------------------------------------------------------------------------------
-printf '\n%b[4/6] Disovering & Scaffolding Implementations...%b\n' "${BLUE}" "${NC}"
+printf '\n%b[4/7] Disovering & Scaffolding Implementations...%b\n' "${BLUE}" "${NC}"
 
 # Filter out virtual frameworks from consensus to avoid noise.
 # We strip 'sass' here to ensure consensus doesn't try to introspect a non-existent python module.
@@ -337,7 +337,7 @@ done
 # ------------------------------------------------------------------------------
 # 5. GHOST SNAPSHOT & SYNC
 # ------------------------------------------------------------------------------
-printf '\n%b[5/6] Capturing Snapshots & Syncing...%b\n' "${BLUE}" "${NC}"
+printf '\n%b[5/7] Capturing Snapshots & Syncing...%b\n' "${BLUE}" "${NC}"
 
 # 5.1. Capture Snapshots (Raw API signatures)
 printf '   📸 Capturing API Snapshots...\n'
@@ -375,9 +375,24 @@ for fw in $REGISTERED_FWS; do
 done
 
 # ------------------------------------------------------------------------------
-# 6. CLEANUP
+# 7. Sync types from operations.yaml
 # ------------------------------------------------------------------------------
-printf '\n%b[6/6] Cleaning Up...%b\n' "${BLUE}" "${NC}"
+printf '\n%b[6/7] Syncing Semantic Types from Documentation...%b\n' "${BLUE}" "${NC}"
+
+OPS_YAML="$ROOT_DIR/docs/operations.yaml"
+
+if [ -f "$OPS_YAML" ]; then
+    printf '   📖 Found operations.yaml. Injecting semantic updates...\n'
+    python3 -m ml_switcheroo define "$OPS_YAML" --no-test-gen
+else
+    printf '   ⚠️  docs/operations.yaml not found.\n'
+    printf '   💡 Tip: Run "python3 scripts/build_docs.py" to regenerate it from the Knowledge Base.\n'
+fi
+
+# ------------------------------------------------------------------------------
+# 8. CLEANUP
+# ------------------------------------------------------------------------------
+printf '\n%b[7/7] Cleaning Up...%b\n' "${BLUE}" "${NC}"
 rm -rf -- "$TEMP_DIR"
 
 printf '%s\n' "----------------------------------------"

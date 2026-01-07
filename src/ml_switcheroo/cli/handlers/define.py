@@ -33,13 +33,14 @@ import ml_switcheroo.semantics.standards_internal as internal_standards_module
 import ml_switcheroo.plugins
 
 
-def handle_define(yaml_file: Path, dry_run: bool = False) -> int:
+def handle_define(yaml_file: Path, dry_run: bool = False, no_test_gen: bool = False) -> int:
   """
   Main entry point for defining new operations.
 
   Args:
       yaml_file: Path to the input YAML definition.
       dry_run: If True, simulate changes without writing to disk.
+      no_test_gen: If True, skip generation of test files.
 
   Returns:
       int: Exit Code (0 for success, 1 for failure).
@@ -90,7 +91,8 @@ def handle_define(yaml_file: Path, dry_run: bool = False) -> int:
     _scaffold_plugins(op_def, dry_run=dry_run)
 
     # 5. Test Generation
-    _generate_test_file(op_def, semantics_mgr, dry_run=dry_run)
+    if not no_test_gen:
+      _generate_test_file(op_def, semantics_mgr, dry_run=dry_run)
 
   return 0
 

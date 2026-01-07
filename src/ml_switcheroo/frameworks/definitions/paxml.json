@@ -1,13 +1,37 @@
 {
+  "Abs": {
+    "api": "jnp.abs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adam": {
+    "api": "optax.adam",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "optimizer_constructor"
+  },
   "Dropout": {
     "api": "praxis.layers.Dropout",
     "args": {
       "p": "keep_prob"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Einsum": {
+    "api": "jnp.einsum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "einsum_normalizer"
   },
   "Embedding": {
     "api": "praxis.layers.Embedding",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Linear": {
@@ -17,10 +41,137 @@
       "in_features": "input_dims",
       "out_features": "output_dims"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Sequential": {
     "api": "praxis.layers.Sequential",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
+  },
+  "abs": {
+    "api": "jnp.abs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "data_ptr": {
+    "api": "data",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "method_to_property"
+  },
+  "div_value": {
+    "api": "optax.tree.div",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_norm": {
+    "api": "optax.tree.max",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_pool1d": {
+    "api": "optax.tree.max",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_pool2d": {
+    "api": "optax.tree.max",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_pool3d": {
+    "api": "optax.tree.max",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "max_val": {
+    "api": "optax.tree.max",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "min_val": {
+    "api": "optax.tree.min",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm1": {
+    "api": "optax.tree.norm",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm2": {
+    "api": "optax.tree.norm",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm3": {
+    "api": "optax.tree.norm",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "norm_type": {
+    "api": "optax.tree.norm",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "permute_dims": {
+    "api": "jnp.transpose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "pack_to_tuple": "axes",
+    "required_imports": []
+  },
+  "scale_grad_by_freq": {
+    "api": "optax.tree.scale",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "size": {
+    "api": "shape",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "method_to_property"
+  },
+  "step": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "optimizer_step"
+  },
+  "zero_grad": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "optimizer_zero_grad"
   }
 }
