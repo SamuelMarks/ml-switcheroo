@@ -29,7 +29,7 @@ flowchart TD
     classDef l3Node fill: #f9ab00, stroke: #ffd427, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
 
 %% Hardware: Navy (SASS) - Roboto Mono
-    classDef sassNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: #ffffff, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
+    classDef asmNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: #ffffff, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
 
 %% --- 2. Subgraph Styling --- 
 %% White backgrounds to ensure text readability + visual grouping
@@ -73,6 +73,7 @@ flowchart TD
     subgraph LBottom [Level 4: ASM]
         direction LR
         SASS[NVIDIA SASS]
+        RDNA[AMD RDNA]
     end
 
 %% --- 4. Connections ---
@@ -85,7 +86,8 @@ flowchart TD
     class PyTorch,MLX,TensorFlow,Keras,FlaxNNX,Pax l1Node;
     class JAX,NumPy l2Node;
     class StableHLO,MLIR l3Node;
-    class SASS sassNode;
+    class SASS asmNode;
+    class RDNA asmNode;
     class L0 containerL0;
     class L1 containerL1;
     class L2 containerL2;

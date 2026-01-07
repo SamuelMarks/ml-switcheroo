@@ -1,0 +1,54 @@
+{
+  "Add": {
+    "api": "v_add_f32",
+    "description": "Floating-point addition (V_ADD_F32). Architecture dependent encodings (RDNA1/2/3)."
+  },
+  "Sub": {
+    "api": "v_sub_f32",
+    "description": "Floating-point subtraction."
+  },
+  "Mul": {
+    "api": "v_mul_f32",
+    "description": "Floating-point multiplication."
+  },
+  "Div": {
+    "api": "v_div_f32_e32",
+    "description": "Floating-point division (Note: reciprocal mul often used in optimization)."
+  },
+  "Abs": {
+    "api": "v_and_b32",
+    "description": "Absolute value usually implemented via bitwise AND with 0x7FFFFFFF."
+  },
+  "Max": {
+    "api": "v_max_f32",
+    "description": "Pointwise maximum."
+  },
+  "Min": {
+    "api": "v_min_f32",
+    "description": "Pointwise minimum."
+  },
+  "Clamp": {
+    "api": "v_med3_f32",
+    "description": "Clamp value between min and max (Median of 3)."
+  },
+  "FusedMultiplyAdd": {
+    "api": "v_fmac_f32",
+    "description": "Fused Multiply-Accumulate. Favored over v_fma_f32 in newer architectures (RDNA2+)."
+  },
+  "Move": {
+    "api": "v_mov_b32",
+    "description": "Vector register move."
+  },
+  "ScalarMove": {
+    "api": "s_mov_b32",
+    "description": "Scalar register move."
+  },
+  "Compare": {
+    "api": "v_cmp_lt_f32",
+    "description": "Vector float comparison."
+  },
+  "Branch": {
+    "api": "s_cbranch_scc1",
+    "description": "Conditional branch on SCC."
+  }
+}

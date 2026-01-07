@@ -14,11 +14,44 @@ Features:
 """
 
 import os
+from collections import defaultdict
 from pathlib import Path
 
 from ml_switcheroo.config import get_framework_priority_order
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.sphinx_ext.types import HierarchyMap
+
+# Categorization Map based on Architecture Diagram
+FRAMEWORK_GROUPS = {
+  # Level 1
+  "torch": "Level 1: High-Level",
+  "mlx": "Level 1: High-Level",
+  "tensorflow": "Level 1: High-Level",
+  "keras": "Level 1: High-Level",
+  # (Flax/Pax are usually children of JAX, so handled via JAX selection + Flavour)
+  # Level 2
+  "jax": "Level 2: Numerics",
+  "numpy": "Level 2: Numerics",
+  # Level 0
+  "html": "Level 0: Representations",
+  "tikz": "Level 0: Representations",
+  "latex_dsl": "Level 0: Representations",
+  # Level 3
+  "mlir": "Level 3: Standard IR",
+  "stablehlo": "Level 3: Standard IR",
+  # Level 4
+  "sass": "Level 4: ASM",
+  "rdna": "Level 4: ASM",
+}
+
+GROUP_ORDER = [
+  "Level 1: High-Level",
+  "Level 2: Numerics",
+  "Level 0: Representations",
+  "Level 3: Standard IR",
+  "Level 4: ASM",
+  "Other",
+]
 
 
 def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_json: str) -> str:
@@ -87,11 +120,11 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
 
   # Note: Logic to show/hide weight tab is handled in JS (switcheroo_demo.js) based on
   # return data from the engine.
-  return f"""
+  return f""" 
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
             <script>
-                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json};
-                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json};
+                window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
+                window.SWITCHEROO_FRAMEWORK_TIERS = {tier_metadata_json}; 
             </script>
 
             <div class="demo-header">
@@ -116,14 +149,14 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
                     <div class="select-wrapper">
                         <select id="select-src" class="material-select">{opts_src}</select>
                         <div id="src-flavour-region" style="background:transparent; margin-left:5px;">
-                            {src_flavours_html}
+                            {src_flavours_html} 
                         </div>
                     </div>
                     <button id="btn-swap" class="swap-icon-btn" title="Swap Languages">⇄</button>
                     <div class="select-wrapper">
                         <select id="select-tgt" class="material-select">{opts_tgt}</select>
                          <div id="tgt-flavour-region" style="background:transparent; margin-left:5px;">
-                            {tgt_flavours_html}
+                            {tgt_flavours_html} 
                         </div>
                     </div>
                 </div>
@@ -142,8 +175,8 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
                         <textarea id="code-source" spellcheck="false" class="material-input" placeholder="Source code...">import torch
 import torch.nn as nn
 
-class Model(nn.Module):
-    def forward(self, x):
+class Model(nn.Module): 
+    def forward(self, x): 
         return torch.abs(x)</textarea>
                     </div>
                     <div class="editor-group target-group">
@@ -231,19 +264,44 @@ class Model(nn.Module):
 def _render_primary_options(hierarchy: HierarchyMap) -> str:
   """
   Renders the top-level <option> elements for root frameworks.
+  Organizes frameworks into <optgroup> categories based on their semantic level.
 
   Args:
       hierarchy: Map of parent keys to children, identifying roots.
 
   Returns:
-      HTML string of option elements.
+      HTML string of option/optgroup elements.
   """
-  html = []
-  for root in hierarchy.keys():
-    adapter = get_adapter(root)
-    label = getattr(adapter, "display_name", root.capitalize())
-    html.append(f'<option value="{root}">{label}</option>')
-  return "\n".join(html)
+  # Organizes roots into buckets
+  grouped = defaultdict(list)
+
+  # Get framework priority list to sort within groups
+  priorities = get_framework_priority_order()
+  roots = list(hierarchy.keys())
+  sorted_roots = sorted(roots, key=lambda x: priorities.index(x) if x in priorities else 999)
+
+  for root in sorted_roots:
+    group_name = FRAMEWORK_GROUPS.get(root, "Other")
+    grouped[group_name].append(root)
+
+  html_parts = []
+
+  for group_name in GROUP_ORDER:
+    if group_name not in grouped:
+      continue
+
+    members = grouped[group_name]
+    if not members:
+      continue
+
+    html_parts.append(f'<optgroup label="{group_name}">')
+    for root in members:
+      adapter = get_adapter(root)
+      label = getattr(adapter, "display_name", root.capitalize())
+      html_parts.append(f'<option value="{root}">{label}</option>')
+    html_parts.append("</optgroup>")
+
+  return "\n".join(html_parts)
 
 
 def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: str) -> str:
@@ -275,8 +333,8 @@ def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: st
     # Fallback filler
     opts.append('<option value="" disabled selected>No Flavours</option>')
 
-  return f"""
+  return f""" 
         <select id="{side}-flavour" class="material-select-sm" style="{style}">
-            {"".join(opts)}
+            {"".join(opts)} 
         </select>
         """

@@ -1,4 +1,5 @@
 """Shared runtime flags for generated tests (Auto-Generated)."""
+
 import sys
 import pytest
 import random
@@ -6,22 +7,25 @@ import numpy as np
 
 # --- jax ---
 try:
-    import jax
-    import jax.numpy as jnp
-    try:
-        import chex
-    except ImportError:
-        pass
-    JAX_AVAILABLE = True
+  import jax
+  import jax.numpy as jnp
+
+  try:
+    import chex
+  except ImportError:
+    pass
+  JAX_AVAILABLE = True
 except ImportError:
-    JAX_AVAILABLE = False
+  JAX_AVAILABLE = False
 
 # --- torch ---
 try:
-    import torch
-    TORCH_AVAILABLE = True
+  import torch
+
+  TORCH_AVAILABLE = True
 except ImportError:
-    TORCH_AVAILABLE = False
+  TORCH_AVAILABLE = False
+
 
 # --- Determinism ---
 @pytest.fixture(autouse=True)
@@ -64,6 +68,7 @@ def ensure_determinism():
       sys.modules["mlx"].core.random.seed(42)
     except Exception:
       pass
+
 
 # --- Verification Logic ---
 def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
