@@ -1,0 +1,536 @@
+operation: "Bool"
+description: "A specialized scalar constructor for boolean types."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.bool_"
+  numpy:
+    api: "numpy.bool_"
+  torch:
+    api: "torch.tensor"
+    args:
+      x: "data"
+    inject_args:
+      dtype: "bool"
+
+---
+operation: "BroadcastArrays"
+description: "Broadcast arrays to a common shape."
+std_args:
+  - name: "args"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.broadcast_arrays"
+  numpy:
+    api: "numpy.broadcast_arrays"
+  torch:
+    api: "torch.broadcast_tensors"
+
+---
+operation: "BroadcastShapes"
+description: "Broadcast input shapes to a common output shape."
+std_args:
+  - name: "shapes"
+    type: "tuple"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.broadcast_shapes"
+  numpy:
+    api: "numpy.broadcast_shapes"
+  torch:
+    api: "torch.broadcast_shapes"
+
+---
+operation: "BroadcastTo"
+description: "Broadcast an array to a specified shape."
+std_args:
+  - name: "array"
+    type: "Tensor"
+  - name: "shape"
+    type: "tuple"
+variants:
+  jax:
+    api: "jax.numpy.broadcast_to"
+  numpy:
+    api: "numpy.broadcast_to"
+  torch:
+    api: "torch.broadcast_to"
+  tensorflow:
+    api: "tf.broadcast_to"
+    args:
+      array: "input"
+  keras:
+    api: "keras.ops.broadcast_to"
+    args:
+      array: "x"
+  mlx:
+    api: "mlx.core.broadcast_to"
+    args:
+        array: "a"
+
+---
+operation: "CanCast"
+description: "Returns True if cast between data types can occur according to the casting rule."
+std_args:
+  - name: "from_"
+    type: "DType | Tensor"
+  - name: "to"
+    type: "DType"
+  - name: "casting"
+    type: "str"
+    default: "safe"
+variants:
+  jax:
+    api: "jax.numpy.can_cast"
+  numpy:
+    api: "numpy.can_cast"
+  torch:
+    api: "torch.can_cast"
+
+---
+operation: "Cbrt"
+description: "Calculates element-wise cube root of the input array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.cbrt"
+  numpy:
+    api: "numpy.cbrt"
+  # Torch lacks a top-level cbrt; typically done via pow(x, 1/3) or special functions
+
+---
+operation: "Complex128"
+description: "Complex128 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.complex128"
+  numpy:
+    api: "numpy.complex128"
+  torch:
+    api: "torch.complex128"
+
+---
+operation: "Ceil"
+description: "Round input to the nearest integer upwards."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.ceil"
+  numpy:
+    api: "numpy.ceil"
+  torch:
+    api: "torch.ceil"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.ceil"
+  keras:
+    api: "keras.ops.ceil"
+  mlx:
+    api: "mlx.core.ceil"
+
+---
+operation: "Choose"
+description: "Construct an array by stacking slices of choice arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "choices"
+    type: "List[Tensor] | Tensor"
+  - name: "mode"
+    type: "str"
+    default: "raise"
+variants:
+  jax:
+    api: "jax.numpy.choose"
+  numpy:
+    api: "numpy.choose"
+
+---
+operation: "Clip"
+description: "Clip array values to a specified range."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "min"
+    type: "number | Tensor | None"
+    default: null
+  - name: "max"
+    type: "number | Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.clip"
+    args:
+      arr: "a"
+      min: "a_min"
+      max: "a_max"
+    # Note: JAX signature uses `a`, `a_min`, `a_max` but docstring also refs `arr`.
+    # Standardizing on `a` from signature.
+  numpy:
+    api: "numpy.clip"
+    args:
+        arr: "a"
+        min: "a_min"
+        max: "a_max"
+  torch:
+    api: "torch.clamp"
+    args:
+      arr: "input"
+  tensorflow:
+    api: "tf.clip_by_value"
+    args:
+      arr: "t"
+      min: "clip_value_min"
+      max: "clip_value_max"
+  keras:
+    api: "keras.ops.clip"
+    args:
+      arr: "x"
+      min: "min_value"
+      max: "max_value"
+  mlx:
+    api: "mlx.core.clip"
+    args:
+        arr: "a"
+        min: "a_min"
+        max: "a_max"
+
+---
+operation: "ColumnStack"
+description: "Stack arrays column-wise."
+std_args:
+  - name: "tup"
+    type: "List[Tensor]"
+variants:
+  jax:
+    api: "jax.numpy.column_stack"
+  numpy:
+    api: "numpy.column_stack"
+  torch:
+    api: "torch.column_stack"
+
+---
+operation: "Complex64"
+description: "Complex64 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.complex64"
+  numpy:
+    api: "numpy.complex64"
+  torch:
+    api: "torch.complex64"
+
+---
+operation: "Compress"
+description: "Compress an array along a given axis using a boolean condition."
+std_args:
+  - name: "condition"
+    type: "Tensor"
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.compress"
+  numpy:
+    api: "numpy.compress"
+
+---
+operation: "Concat"
+description: "Join arrays along an existing axis (Array API standard name)."
+std_args:
+  - name: "arrays"
+    type: "List[Tensor]"
+  - name: "axis"
+    type: "int | None"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.concat"
+  numpy:
+    api: "numpy.concat"
+  torch:
+    api: "torch.cat"
+    args:
+        arrays: "tensors"
+        axis: "dim"
+  keras:
+    api: "keras.ops.concatenate"
+    # Keras calls it create `concatenate`, not `concat`
+    args:
+        arrays: "inputs"
+
+---
+operation: "Concatenate"
+description: "Join arrays along an existing axis."
+std_args:
+  - name: "arrays"
+    type: "List[Tensor] | Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: 0
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.concatenate"
+  numpy:
+    api: "numpy.concatenate"
+  torch:
+    api: "torch.cat"
+    args:
+        arrays: "tensors"
+        axis: "dim"
+  tensorflow:
+    api: "tf.concat"
+    args:
+        arrays: "values"
+  keras:
+    api: "keras.ops.concatenate"
+    args:
+        arrays: "inputs"
+  mlx:
+    api: "mlx.core.concatenate"
+    args:
+        arrays: "arrays"
+
+---
+operation: "Conj"
+description: "Compute the complex conjugate."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.conj"
+  numpy:
+    api: "numpy.conj"
+  torch:
+    api: "torch.conj"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.conj"
+  keras:
+    api: "keras.ops.conj"
+
+---
+operation: "Conjugate"
+description: "Return element-wise complex-conjugate of the input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.conjugate"
+  numpy:
+    api: "numpy.conjugate"
+  torch:
+    api: "torch.conj"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.conj"
+  keras:
+    api: "keras.ops.conj"
+  mlx:
+    api: "mlx.core.conjugate"
+    # Note: MLX documentation generally points to conj, but often aliases exist.
+
+---
+operation: "Convolve"
+description: "Convolution of two one dimensional arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "v"
+    type: "Tensor"
+  - name: "mode"
+    type: "str"
+    default: "full"
+variants:
+  jax:
+    api: "jax.numpy.convolve"
+  numpy:
+    api: "numpy.convolve"
+  # Torch conv1d is N-D and expects (N,C,L) format, significantly different from 1D flat convolve.
+
+---
+operation: "Copy"
+description: "Return a copy of the array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.copy"
+  numpy:
+    api: "numpy.copy"
+  torch:
+    api: "torch.clone"
+    args:
+      a: "input"
+  tensorflow:
+    api: "tf.identity"
+    args:
+      a: "input"
+  keras:
+    api: "keras.ops.copy"
+    args:
+      a: "x"
+
+---
+operation: "Copysign"
+description: "Copies the sign of each element in x2 to the corresponding element in x1."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.copysign"
+  numpy:
+    api: "numpy.copysign"
+  torch:
+    api: "torch.copysign"
+    args:
+        x1: "input"
+        x2: "other"
+
+---
+operation: "Corrcoef"
+description: "Compute the Pearson correlation coefficients."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor | None"
+    default: null
+  - name: "rowvar"
+    type: "bool"
+    default: true
+variants:
+  jax:
+    api: "jax.numpy.corrcoef"
+  numpy:
+    api: "numpy.corrcoef"
+  torch:
+    api: "torch.corrcoef"
+    args:
+        x: "input"
+    # Note: Torch corrcoef does not support 'y' or 'rowvar' arguments exactly matching numpy signature in all versions.
+
+---
+operation: "Correlate"
+description: "Correlation of two one dimensional arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "v"
+    type: "Tensor"
+  - name: "mode"
+    type: "str"
+    default: "valid"
+variants:
+  jax:
+    api: "jax.numpy.correlate"
+  numpy:
+    api: "numpy.correlate"
+
+---
+operation: "Cos"
+description: "Compute trigonometric cosine element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.cos"
+  numpy:
+    api: "numpy.cos"
+  torch:
+    api: "torch.cos"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.cos"
+  keras:
+    api: "keras.ops.cos"
+  mlx:
+    api: "mlx.core.cos"
+
+---
+operation: "Cosh"
+description: "Calculate element-wise hyperbolic cosine of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.cosh"
+  numpy:
+    api: "numpy.cosh"
+  torch:
+    api: "torch.cosh"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.cosh"
+  keras:
+    api: "keras.ops.cosh"
+  mlx:
+    api: "mlx.core.cosh"
+
+---
+operation: "CountNonzero"
+description: "Return the number of nonzero elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | tuple | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.count_nonzero"
+  numpy:
+    api: "numpy.count_nonzero"
+  torch:
+    api: "torch.count_nonzero"
+    args:
+        a: "input"
+        axis: "dim"
+  tensorflow:
+    api: "tf.math.count_nonzero"
+    args:
+        a: "input_tensor"
+        keepdims: "keep_dims"
+  keras:
+    api: "keras.ops.count_nonzero"
+    args:
+        a: "x"

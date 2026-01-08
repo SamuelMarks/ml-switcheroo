@@ -114,7 +114,11 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   # --- Command: SUGGEST ---
   cmd_sug = subparsers.add_parser("suggest", help="Generate an LLM prompt for defining a new operation.")
-  cmd_sug.add_argument("api", help="The source API to inspect (e.g. 'torch.nn.Linear').")
+  cmd_sug.add_argument("api", help="The source API to inspect (e.g. 'torch.nn.Linear' or 'jax.numpy.*').")
+  cmd_sug.add_argument(
+    "--out-dir", type=Path, default=None, help="Directory to write batched prompt files to (avoids huge stdout)."
+  )
+  cmd_sug.add_argument("--batch-size", type=int, default=50, help="Number of operations per file (default: 50).")
 
   # --- Command: WIZARD (Interactive Discovery) ---
   cmd_wiz = subparsers.add_parser("wizard", help="Interactively categorize missing mappings")
@@ -237,7 +241,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     return handle_schema()
 
   elif args.command == "suggest":
-    return handle_suggest(args.api)
+    return handle_suggest(args.api, out_dir=args.out_dir, batch_size=args.batch_size)
 
   elif args.command == "wizard":
     return commands.handle_wizard(args.package)

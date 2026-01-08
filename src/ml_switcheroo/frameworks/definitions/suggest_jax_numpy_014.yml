@@ -1,0 +1,494 @@
+operation: "Unique"
+description: "Return the unique values from an array."
+std_args:
+  - name: "ar"
+    type: "Tensor"
+  - name: "return_index"
+    type: "bool"
+    default: false
+  - name: "return_inverse"
+    type: "bool"
+    default: false
+  - name: "return_counts"
+    type: "bool"
+    default: false
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "equal_nan"
+    type: "bool"
+    default: true
+  - name: "size"
+    type: "int"
+    default: null
+    doc: "JAX-specific argument for static output size."
+  - name: "fill_value"
+    type: "Tensor"
+    default: null
+    doc: "JAX-specific argument for padding."
+  - name: "sorted"
+    type: "bool"
+    default: true
+variants:
+  jax:
+    api: "jax.numpy.unique"
+  numpy:
+    api: "numpy.unique"
+  torch:
+    api: "torch.unique"
+    args:
+      ar: "input"
+      axis: "dim"
+  mlx:
+    api: "mlx.core.unique"
+    args:
+      ar: "a"
+---
+operation: "UniqueAll"
+description: "Return unique values from x, along with indices, inverse indices, and counts."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "size"
+    type: "int"
+    default: null
+  - name: "fill_value"
+    type: "Tensor"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.unique_all"
+  numpy:
+    api: "numpy.unique_all"
+---
+operation: "UniqueCounts"
+description: "Return unique values from x, along with counts."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "size"
+    type: "int"
+    default: null
+  - name: "fill_value"
+    type: "Tensor"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.unique_counts"
+  numpy:
+    api: "numpy.unique_counts"
+---
+operation: "UniqueInverse"
+description: "Return unique values from x, along with indices, inverse indices, and counts."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "size"
+    type: "int"
+    default: null
+  - name: "fill_value"
+    type: "Tensor"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.unique_inverse"
+  numpy:
+    api: "numpy.unique_inverse"
+---
+operation: "UniqueValues"
+description: "Return unique values from x, along with indices, inverse indices, and counts."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "size"
+    type: "int"
+    default: null
+  - name: "fill_value"
+    type: "Tensor"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.unique_values"
+  numpy:
+    api: "numpy.unique_values"
+---
+operation: "UnpackBits"
+description: "Unpack the bits in a uint8 array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "count"
+    type: "int"
+    default: null
+  - name: "bitorder"
+    type: "str"
+    default: "big"
+variants:
+  jax:
+    api: "jax.numpy.unpackbits"
+  numpy:
+    api: "numpy.unpackbits"
+---
+operation: "UnravelIndex"
+description: "Convert flat indices into multi-dimensional indices."
+std_args:
+  - name: "indices"
+    type: "Tensor"
+  - name: "shape"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.unravel_index"
+  numpy:
+    api: "numpy.unravel_index"
+  torch:
+    api: "torch.unravel_index"
+  mlx:
+    api: "mlx.core.unravel_index"
+---
+operation: "UnsignedInteger"
+description: "Abstract base class of all unsigned integer scalar types."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.unsignedinteger"
+  numpy:
+    api: "numpy.unsignedinteger"
+---
+operation: "Unstack"
+description: "Unstack an array along an axis."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.unstack"
+  tensorflow:
+    api: "tf.unstack"
+  torch:
+    api: "torch.unbind"
+    args:
+      x: "input"
+      axis: "dim"
+  keras:
+    api: "keras.ops.unstack"
+---
+operation: "Unwrap"
+description: "Unwrap a periodic signal."
+std_args:
+  - name: "p"
+    type: "Tensor"
+  - name: "discont"
+    type: "Tensor"
+    default: null
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "period"
+    type: "Tensor"
+    default: 6.283185307179586
+variants:
+  jax:
+    api: "jax.numpy.unwrap"
+  numpy:
+    api: "numpy.unwrap"
+---
+operation: "Vander"
+description: "Generate a Vandermonde matrix."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "N"
+    type: "int"
+    default: null
+  - name: "increasing"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.vander"
+  numpy:
+    api: "numpy.vander"
+  torch:
+    api: "torch.vander"
+---
+operation: "Var"
+description: "Compute the variance along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "Any"
+    default: null
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "out"
+    type: "Any"
+    default: null
+  - name: "ddof"
+    type: "int"
+    default: 0
+  - name: "keepdims"
+    type: "bool"
+    default: false
+  - name: "where"
+    type: "Tensor"
+    default: null
+  - name: "mean"
+    type: "Tensor"
+    default: null
+  - name: "correction"
+    type: "float"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.var"
+  numpy:
+    api: "numpy.var"
+  torch:
+    api: "torch.var"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+      ddof: "correction"
+  tensorflow:
+    api: "tf.math.reduce_variance"
+    args:
+      a: "input_tensor"
+  keras:
+    api: "keras.ops.var"
+    args:
+      a: "x"
+  mlx:
+    api: "mlx.core.var"
+    args:
+      a: "a"
+---
+operation: "Vdot"
+description: "Perform a conjugate multiplication of two 1D vectors."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "precision"
+    type: "Any"
+    default: null
+  - name: "preferred_element_type"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.vdot"
+  numpy:
+    api: "numpy.vdot"
+  torch:
+    api: "torch.vdot"
+    args:
+      a: "input"
+      b: "other"
+---
+operation: "Vecdot"
+description: "Perform a conjugate multiplication of two batched vectors."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "precision"
+    type: "Any"
+    default: null
+  - name: "preferred_element_type"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.vecdot"
+  numpy:
+    api: "numpy.vecdot"
+  torch:
+    api: "torch.linalg.vecdot"
+    args:
+      x1: "x"
+      x2: "y"
+      axis: "dim"
+---
+operation: "Vecmat"
+description: "Batched conjugate vector-matrix product."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.vecmat"
+---
+operation: "Vectorize"
+description: "Define a vectorized function with broadcasting."
+std_args:
+  - name: "pyfunc"
+    type: "Any"
+  - name: "excluded"
+    type: "Any"
+    default: null
+  - name: "signature"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.vectorize"
+  numpy:
+    api: "numpy.vectorize"
+---
+operation: "Vsplit"
+description: "Split an array into sub-arrays vertically."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.vsplit"
+  numpy:
+    api: "numpy.vsplit"
+  torch:
+    api: "torch.vsplit"
+    args:
+      ary: "input"
+---
+operation: "Vstack"
+description: "Vertically stack arrays."
+std_args:
+  - name: "tup"
+    type: "Any"
+  - name: "dtype"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.vstack"
+  numpy:
+    api: "numpy.vstack"
+  torch:
+    api: "torch.vstack"
+  keras:
+    api: "keras.ops.vstack"
+    args:
+      tup: "xs"
+---
+operation: "Where"
+description: "Select elements from two arrays based on a condition."
+std_args:
+  - name: "condition"
+    type: "Any"
+  - name: "x"
+    type: "Any"
+    default: null
+  - name: "y"
+    type: "Any"
+    default: null
+  - name: "size"
+    type: "int"
+    default: null
+  - name: "fill_value"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.where"
+  numpy:
+    api: "numpy.where"
+  torch:
+    api: "torch.where"
+    args:
+      x: "input"
+      y: "other"
+  tensorflow:
+    api: "tf.where"
+  keras:
+    api: "keras.ops.where"
+    args:
+      x: "x1"
+      y: "x2"
+  mlx:
+    api: "mlx.core.where"
+---
+operation: "Zeros"
+description: "Create an array full of zeros."
+std_args:
+  - name: "shape"
+    type: "Any"
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "device"
+    type: "Any"
+    default: null
+  - name: "out_sharding"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.zeros"
+  numpy:
+    api: "numpy.zeros"
+  torch:
+    api: "torch.zeros"
+    args:
+      shape: "size"
+  tensorflow:
+    api: "tf.zeros"
+  keras:
+    api: "keras.ops.zeros"
+  mlx:
+    api: "mlx.core.zeros"
+---
+operation: "ZerosLike"
+description: "Create an array full of zeros with the same shape and dtype as an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "shape"
+    type: "Any"
+    default: null
+  - name: "device"
+    type: "Any"
+    default: null
+  - name: "out_sharding"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.zeros_like"
+  numpy:
+    api: "numpy.zeros_like"
+  torch:
+    api: "torch.zeros_like"
+    args:
+      a: "input"
+  tensorflow:
+    api: "tf.zeros_like"
+    args:
+      a: "input"
+  keras:
+    api: "keras.ops.zeros_like"
+    args:
+      a: "x"
+  mlx:
+    api: "mlx.core.zeros_like"

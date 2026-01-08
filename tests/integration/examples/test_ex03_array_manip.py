@@ -54,45 +54,24 @@ def semantics():
   mgr = SemanticsManager()
 
   # CRITICAL: Force update permute_dims to ensure IS_VARIADIC and PACK_TO_TUPLE
-  # attributes are set in the in-memory knowledge base.
-  # This prevents stale JSON snapshots on disk from overriding the new ODL standard
-  # during test execution (split-brain problem).
-  if "permute_dims" in INTERNAL_OPS:
-    # Fix: Construct valid OpDefinition dict for update to pass Strict Pydantic Validation
-    op_data = INTERNAL_OPS["permute_dims"].copy()
-    if "operation" not in op_data:
-      op_data["operation"] = "permute_dims"
-    if "variants" not in op_data:
-      op_data["variants"] = {}
+  # attributes are set in the in-memory knowledge base using correct ODL Schema keys.
 
-    mgr.update_definition("permute_dims", op_data)
+  op_data = {
+    "operation": "permute_dims",
+    "description": "Permute tensor dimensions.",
+    # Use dictionary structure with 'is_variadic' key
+    "std_args": ["x", {"name": "axes", "is_variadic": True}],
+    "variants": {
+      "jax": {"api": "jnp.transpose", "pack_to_tuple": "axes"},
+      "tensorflow": {"api": "tf.transpose", "pack_to_tuple": "perm"},
+      "numpy": {"api": "numpy.transpose", "pack_to_tuple": "axes"},
+    },
+  }
 
-  # Also ensure the frameworks have the mapping set correctly if they rely on overlays
-  # We manually inject the target variants for this specific test to guarantee correctness
-  # regardless of bootstrap state.
+  mgr.update_definition("permute_dims", op_data)
 
-  permute_def = mgr.data.get("permute_dims", {})
-  variants = permute_def.get("variants", {})
-
-  # Ensure JAX has packing
-  if "jax" not in variants or not variants["jax"]:
-    variants["jax"] = {"api": "jnp.transpose", "pack_to_tuple": "axes"}
-  else:
-    variants["jax"]["pack_to_tuple"] = "axes"
-
-  # Ensure TensorFlow has packing
-  if "tensorflow" not in variants or not variants["tensorflow"]:
-    variants["tensorflow"] = {"api": "tf.transpose", "pack_to_tuple": "perm"}
-  else:
-    variants["tensorflow"]["pack_to_tuple"] = "perm"
-
-  # Ensure NumPy has packing
-  if "numpy" not in variants or not variants["numpy"]:
-    variants["numpy"] = {"api": "numpy.transpose", "pack_to_tuple": "axes"}
-  else:
-    variants["numpy"]["pack_to_tuple"] = "axes"
-
-  mgr.data["permute_dims"]["variants"] = variants
+  # Ensure reverse index matches source API to definition
+  mgr._reverse_index["torch.permute"] = ("permute_dims", mgr.data["permute_dims"])
 
   return mgr
 

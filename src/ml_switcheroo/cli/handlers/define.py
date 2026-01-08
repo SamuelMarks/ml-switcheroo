@@ -4,16 +4,13 @@ Handler for the 'define' command.
 This module orchestrates the "Code Injection" workflow.
 
 It imports YAML, validates schema, and uses:
-1. LibCST to inject specifications into `standards_internal.py` (The Hub).
-2. JSON Injector to update framework definition files (The Spokes).
+1. JSON Injector to inject specifications into `semantics/*.json` (The Hub).
+2. JSON Injector to update framework definition files in `snapshots/` (The Spokes).
 3. Code Generators to scaffold plugins and tests.
 """
 
-import inspect
 from pathlib import Path
-from typing import Optional, Any, List
-
-import libcst as cst
+from typing import Optional
 
 try:
   import yaml
@@ -29,7 +26,6 @@ from ml_switcheroo.utils.console import log_success, log_error, log_info, log_wa
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
-import ml_switcheroo.semantics.standards_internal as internal_standards_module
 import ml_switcheroo.plugins
 
 
@@ -61,12 +57,15 @@ def handle_define(yaml_file: Path, dry_run: bool = False, no_test_gen: bool = Fa
     else:
       content = yaml_file.read_text(encoding="utf-8")
 
-    data = yaml.safe_load(content)
+    ops = []
+    for doc in yaml.safe_load_all(content):
+      if not doc:
+        continue
 
-    if isinstance(data, list):
-      ops = [OperationDef(**d) for d in data]
-    else:
-      ops = [OperationDef(**data)]
+      if isinstance(doc, list):
+        ops.extend([OperationDef(**d) for d in doc])
+      else:
+        ops.append(OperationDef(**doc))
 
   except Exception as e:
     log_error(f"Failed to validate ODL YAML: {e}")
@@ -80,7 +79,7 @@ def handle_define(yaml_file: Path, dry_run: bool = False, no_test_gen: bool = Fa
     # 1. Auto-Inference
     _resolve_inferred_apis(op_def)
 
-    # 2. Hub Injection (Python CST)
+    # 2. Hub Injection (JSON)
     if not _inject_hub(op_def, dry_run=dry_run):
       return 1
 
@@ -117,7 +116,7 @@ def _resolve_inferred_apis(op_def: OperationDef) -> None:
 
 def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
   """
-  Injects the definition into `standards_internal.py`.
+  Injects the definition into the Semantic Knowledge Base (JSON).
 
   Args:
       op_def: The operation definition.
@@ -127,38 +126,10 @@ def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
       bool: True on success.
   """
   try:
-    spec_file = Path(inspect.getfile(internal_standards_module))
-    source_code = spec_file.read_text("utf-8")
-    tree = cst.parse_module(source_code)
-
-    transformer = StandardsInjector(op_def)
-    new_tree = tree.visit(transformer)
-
-    if not transformer.found:
-      log_warning("INTERNAL_OPS dictionary not found in standards file.")
-      return False
-
-    generated_code = new_tree.code
-
-    # Syntax check before writing
-    try:
-      compile(generated_code, "<string>", "exec")
-    except SyntaxError as e:
-      log_error(f"Generated Invalid Python (Hub): {e}")
-      return False
-
-    if generated_code != source_code:
-      if dry_run:
-        # Simple diff approximation for stdout
-        log_info("[Dry Run] Would update standards_internal.py")
-      else:
-        spec_file.write_text(generated_code, "utf-8")
-        log_success(f"  Updated Hub: {spec_file.name}")
-    else:
-      log_info(f"  Hub unchanged (Key exists): {spec_file.name}")
-    return True
+    injector = StandardsInjector(op_def)
+    return injector.inject(dry_run=dry_run)
   except Exception as e:
-    log_error(f"Hub Injection failed: {e}")
+    log_error(f"Hub Injection failed for operation '{op_def.operation}': {e}")
     return False
 
 

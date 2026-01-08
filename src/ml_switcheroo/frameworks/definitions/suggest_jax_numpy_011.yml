@@ -1,0 +1,744 @@
+operation: "Polyint"
+description: "Returns the coefficients of the integration of specified order of a polynomial."
+std_args:
+  - name: "p"
+    type: "Tensor"
+  - name: "m"
+    type: "int"
+    default: 1
+  - name: "k"
+    type: "int | Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.polyint"
+  numpy:
+    api: "numpy.polyint"
+---
+operation: "Polymul"
+description: "Returns the product of two polynomials."
+std_args:
+  - name: "a1"
+    type: "Tensor"
+  - name: "a2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.polymul"
+  numpy:
+    api: "numpy.polymul"
+---
+operation: "Polysub"
+description: "Returns the difference of two polynomials."
+std_args:
+  - name: "a1"
+    type: "Tensor"
+  - name: "a2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.polysub"
+  numpy:
+    api: "numpy.polysub"
+---
+operation: "Polyval"
+description: "Evaluates the polynomial at specific values."
+std_args:
+  - name: "p"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.polyval"
+  numpy:
+    api: "numpy.polyval"
+  tensorflow:
+    api: "tf.math.polyval"
+    args:
+        p: "coeffs"
+        x: "x"
+---
+operation: "Positive"
+description: "Return element-wise positive values of the input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.positive"
+  numpy:
+    api: "numpy.positive"
+  torch:
+    api: "torch.positive"
+  tensorflow:
+    api: "tf.debugging.check_numerics" # Closest proxy or identity
+    macro_template: "{x}" # Identity for positive
+  keras:
+    api: "keras.ops.identity"
+---
+operation: "Pow"
+description: "Calculate element-wise base x1 exponential of x2."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.pow"
+  numpy:
+    api: "numpy.power"
+  torch:
+    api: "torch.pow"
+    args:
+      x1: "input"
+      x2: "exponent"
+  tensorflow:
+    api: "tf.math.pow"
+    args:
+      x1: "x"
+      x2: "y"
+  keras:
+    api: "keras.ops.power"
+    args:
+        x1: "x1"
+        x2: "x2"
+  mlx:
+    api: "mlx.core.power"
+    args:
+        x1: "a"
+        x2: "b"
+---
+operation: "Power"
+description: "Calculate element-wise base x1 exponential of x2."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.power"
+  numpy:
+    api: "numpy.power"
+  torch:
+    api: "torch.pow"
+    args:
+      x1: "input"
+      x2: "exponent"
+  tensorflow:
+    api: "tf.math.pow"
+    args:
+      x1: "x"
+      x2: "y"
+  keras:
+    api: "keras.ops.power"
+    args:
+        x1: "x1"
+        x2: "x2"
+  mlx:
+    api: "mlx.core.power"
+    args:
+        x1: "a"
+        x2: "b"
+---
+operation: "Printoptions"
+description: "Context manager for setting print options."
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "kwargs"
+    kind: "var_keyword"
+variants:
+  jax:
+    api: "jax.numpy.printoptions"
+  numpy:
+    api: "numpy.printoptions"
+---
+operation: "Prod"
+description: "Return product of the array elements over a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | tuple[int, ...] | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+  - name: "initial"
+    type: "Any"
+    default: null
+  - name: "where"
+    type: "Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.prod"
+  numpy:
+    api: "numpy.prod"
+  torch:
+    api: "torch.prod"
+    args:
+        a: "input"
+        axis: "dim"
+        keepdims: "keepdim"
+    # Torch prod does not support tuple axis natively without flatten logic in some versions
+  tensorflow:
+    api: "tf.math.reduce_prod"
+    args:
+        a: "input_tensor"
+  keras:
+    api: "keras.ops.prod"
+    args:
+        a: "x"
+  mlx:
+    api: "mlx.core.prod"
+    args:
+        a: "a"
+---
+operation: "PromoteTypes"
+description: "Returns the type to which a binary operation should cast its arguments."
+std_args:
+  - name: "a"
+    type: "DType"
+  - name: "b"
+    type: "DType"
+variants:
+  jax:
+    api: "jax.numpy.promote_types"
+  numpy:
+    api: "numpy.promote_types"
+  torch:
+    api: "torch.promote_types"
+---
+operation: "Ptp"
+description: "Return the peak-to-peak range along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.ptp"
+  numpy:
+    api: "numpy.ptp"
+  torch:
+    # No direct top-level equivalent, implemented as max - min
+    macro_template: "{a}.max(dim={axis}, keepdim={keepdims}).values - {a}.min(dim={axis}, keepdim={keepdims}).values"
+---
+operation: "Put"
+description: "Put elements into an array at given indices."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "ind"
+    type: "Tensor"
+  - name: "v"
+    type: "Tensor"
+  - name: "mode"
+    type: "str | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.put"
+    inject_args:
+      inplace: false
+  numpy:
+    api: "numpy.put"
+  torch:
+    api: "torch.put"
+    args:
+      a: "input"
+      ind: "index"
+      v: "source"
+    # Torch put is basically flattened index placement
+  tensorflow:
+    api: "tf.compat.v1.scatter_update"
+    # TF put semantics are complex usually involve scatter_nd on reshaped tensor
+    missing_message: "Direct 'put' equivalent in TF requires scatter_nd logic."
+---
+operation: "PutAlongAxis"
+description: "Put values into the destination array by matching 1d index and data slices."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+  - name: "mode"
+    type: "str | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.put_along_axis"
+    inject_args:
+      inplace: false
+  numpy:
+    api: "numpy.put_along_axis"
+  torch:
+    api: "torch.scatter"
+    args:
+        arr: "input"
+        axis: "dim"
+        indices: "index"
+        values: "src"
+    # Note: Torch scatter is out-of-place by default, scatter_ is in-place
+  tensorflow:
+    api: "tf.tensor_scatter_nd_update"
+    missing_message: "TF put_along_axis requires sophisticated index grid generation."
+  keras:
+    api: "keras.ops.scatter"
+    # Keras scatter usually maps closer to tensor_update
+---
+operation: "Quantile"
+description: "Compute the quantile of the data along the specified axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "q"
+    type: "float | Tensor"
+  - name: "axis"
+    type: "int | tuple[int, ...] | None"
+    default: null
+  - name: "method"
+    type: "str"
+    default: "linear"
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.quantile"
+  numpy:
+    api: "numpy.quantile"
+  torch:
+    api: "torch.quantile"
+    args:
+        a: "input"
+        axis: "dim"
+        keepdims: "keepdim"
+    # Torch uses 'interpolation' arg instead of 'method'
+  tensorflow:
+    api: "tfp.stats.percentile"
+    # Requires tensorflow_probability
+    missing_message: "Quantile in TF requires tensorflow_probability."
+  keras:
+    api: "keras.ops.quantile"
+    args:
+        a: "x"
+  mlx:
+    api: "mlx.core.quantile"
+    args:
+        a: "a"
+---
+operation: "R_"
+description: "Concatenate slices, scalars and array-like objects along the first axis."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.r_"
+  numpy:
+    api: "numpy.r_"
+---
+operation: "Rad2deg"
+description: "Convert angles from radians to degrees."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.rad2deg"
+  numpy:
+    api: "numpy.rad2deg"
+  torch:
+    api: "torch.rad2deg"
+    args:
+        x: "input"
+  tensorflow:
+    macro_template: "{x} * (180.0 / 3.1415926535)"
+  keras:
+    api: "keras.ops.convert_to_degrees"
+    args:
+      x: "x"
+  mlx:
+    api: "mlx.core.degrees"
+    args:
+      x: "a"
+---
+operation: "Radians"
+description: "Convert angles from degrees to radians."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.radians"
+  numpy:
+    api: "numpy.radians"
+  torch:
+    api: "torch.deg2rad"
+    args:
+        x: "input"
+  tensorflow:
+    macro_template: "{x} * (3.1415926535 / 180.0)"
+  keras:
+    api: "keras.ops.convert_to_radians"
+  mlx:
+    api: "mlx.core.radians"
+    args:
+        x: "a"
+---
+operation: "Ravel"
+description: "Flatten array into a 1-dimensional shape."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "order"
+    type: "str"
+    default: "C"
+variants:
+  jax:
+    api: "jax.numpy.ravel"
+  numpy:
+    api: "numpy.ravel"
+  torch:
+    api: "torch.flatten"
+    args:
+        a: "input"
+  tensorflow:
+    api: "tf.reshape"
+    macro_template: "tf.reshape({a}, [-1])"
+  keras:
+    api: "keras.ops.ravel"
+    args:
+        a: "x"
+  mlx:
+    api: "mlx.core.flatten"
+    args:
+        a: "a"
+---
+operation: "RavelMultiIndex"
+description: "Convert multi-dimensional indices into flat indices."
+std_args:
+  - name: "multi_index"
+    type: "Sequence[Tensor]"
+  - name: "dims"
+    type: "Sequence[int]"
+  - name: "mode"
+    type: "str"
+    default: "raise"
+  - name: "order"
+    type: "str"
+    default: "C"
+variants:
+  jax:
+    api: "jax.numpy.ravel_multi_index"
+  numpy:
+    api: "numpy.ravel_multi_index"
+  torch:
+    api: "torch.ravel_multi_index"
+    # Not defined directly in Torch top-level
+    missing_message: "Precise equivalent not standard in PyTorch."
+---
+operation: "Real"
+description: "Return element-wise real part of the complex argument."
+std_args:
+  - name: "val"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.real"
+  numpy:
+    api: "numpy.real"
+  torch:
+    api: "torch.real"
+    args:
+        val: "input"
+  tensorflow:
+    api: "tf.math.real"
+    args:
+        val: "input"
+  keras:
+    api: "keras.ops.real"
+    args:
+        val: "x"
+  mlx:
+    api: "mlx.core.real"
+    args:
+        val: "a"
+---
+operation: "Reciprocal"
+description: "Calculate element-wise reciprocal of the input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.reciprocal"
+  numpy:
+    api: "numpy.reciprocal"
+  torch:
+    api: "torch.reciprocal"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.reciprocal"
+  keras:
+    api: "keras.ops.reciprocal"
+  mlx:
+    api: "mlx.core.reciprocal"
+    args:
+        x: "a"
+---
+operation: "Remainder"
+description: "Returns element-wise remainder of the division."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.remainder"
+  numpy:
+    api: "numpy.remainder"
+  torch:
+    api: "torch.remainder"
+    args:
+        x1: "input"
+        x2: "other"
+  tensorflow:
+    api: "tf.math.floormod"
+    args:
+        x1: "x"
+        x2: "y"
+  keras:
+    api: "keras.ops.mod"
+  mlx:
+    api: "mlx.core.remainder"
+    args:
+      x1: "a"
+      x2: "b"
+---
+operation: "Repeat"
+description: "Construct an array from repeated elements."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "repeats"
+    type: "int | Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.repeat"
+  numpy:
+    api: "numpy.repeat"
+  torch:
+    api: "torch.repeat_interleave"
+    args:
+        a: "input"
+        repeats: "repeats"
+        axis: "dim"
+  tensorflow:
+    api: "tf.repeat"
+    args:
+        a: "input"
+        repeats: "repeats"
+        axis: "axis"
+  keras:
+    api: "keras.ops.repeat"
+    args:
+        a: "x"
+  mlx:
+    api: "mlx.core.repeat"
+    args:
+        a: "arr"
+        repeats: "repeats"
+        axis: "axis"
+---
+operation: "Reshape"
+description: "Return a reshaped copy of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "shape"
+    type: "int | tuple[int, ...]"
+  - name: "order"
+    type: "str"
+    default: "C"
+variants:
+  jax:
+    api: "jax.numpy.reshape"
+  numpy:
+    api: "numpy.reshape"
+  torch:
+    api: "torch.reshape"
+    args:
+        a: "input"
+        shape: "shape"
+  tensorflow:
+    api: "tf.reshape"
+    args:
+        a: "tensor"
+        shape: "shape"
+  keras:
+    api: "keras.ops.reshape"
+    args:
+        a: "x"
+        shape: "new_shape"
+  mlx:
+    api: "mlx.core.reshape"
+    args:
+        a: "a"
+        shape: "shape"
+---
+operation: "Resize"
+description: "Return a new array with specified shape."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "new_shape"
+    type: "int | tuple[int, ...]"
+variants:
+  jax:
+    api: "jax.numpy.resize"
+  numpy:
+    api: "numpy.resize"
+  # Torch/MLX/TF semantics for resize usually imply image interpolation or in-place storage
+---
+operation: "ResultType"
+description: "Return the result of applying JAX promotion rules to the inputs."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.result_type"
+  numpy:
+    api: "numpy.result_type"
+  torch:
+    api: "torch.result_type"
+    args:
+       args: "tensors"
+       # Note: torch.result_type takes two args usually (tensor1, tensor2)
+---
+operation: "RightShift"
+description: "Right shift the bits of x1 to the amount specified in x2."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.right_shift"
+  numpy:
+    api: "numpy.right_shift"
+  torch:
+    api: "torch.bitwise_right_shift"
+    args:
+        x1: "input"
+        x2: "other"
+  tensorflow:
+    api: "tf.bitwise.right_shift"
+    args:
+        x1: "x"
+        x2: "y"
+  keras:
+    api: "keras.ops.bitwise_right_shift"
+  mlx:
+    api: "mlx.core.bitwise_right_shift"
+---
+operation: "Rint"
+description: "Rounds the elements of x to the nearest integer."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.rint"
+  numpy:
+    api: "numpy.rint"
+  torch:
+    api: "torch.round"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.rint"
+  keras:
+    api: "keras.ops.rint"
+  mlx:
+    api: "mlx.core.round"
+    args:
+        x: "a"
+---
+operation: "Roll"
+description: "Roll the elements of an array along a specified axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "shift"
+    type: "int | Sequence[int]"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.roll"
+  numpy:
+    api: "numpy.roll"
+  torch:
+    api: "torch.roll"
+    args:
+        a: "input"
+        shift: "shifts"
+        axis: "dims"
+  tensorflow:
+    api: "tf.roll"
+    args:
+        a: "input"
+        shift: "shift"
+        axis: "axis"
+  keras:
+    api: "keras.ops.roll"
+    args:
+        a: "x"
+  mlx:
+    # Requires newer version of mlx
+    api: "mlx.core.roll"
+---
+operation: "Rollaxis"
+description: "Roll the specified axis to a given position."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+  - name: "start"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.rollaxis"
+  numpy:
+    api: "numpy.rollaxis"
+  torch:
+    # Use moveaxis/permute instead
+    missing_message: "Use moveaxis semantics instead of rollaxis for torch."

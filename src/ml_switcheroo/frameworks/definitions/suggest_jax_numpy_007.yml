@@ -1,0 +1,1774 @@
+operation: "Equal"
+description: "Returns element-wise truth value of x == y."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.equal"
+    transformation_type: "infix"
+    operator: "=="
+  numpy:
+    api: "numpy.equal"
+    transformation_type: "infix"
+    operator: "=="
+  torch:
+    api: "torch.eq"
+    transformation_type: "infix"
+    operator: "=="
+  tensorflow:
+    api: "tf.math.equal"
+    transformation_type: "infix"
+    operator: "=="
+  keras:
+    api: "keras.ops.equal"
+    transformation_type: "infix"
+    operator: "=="
+  mlx:
+    api: "mlx.core.equal"
+    transformation_type: "infix"
+    operator: "=="
+
+---
+operation: "EulerGamma"
+description: "Euler's constant (gamma)."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.euler_gamma"
+  numpy:
+    api: "numpy.euler_gamma"
+
+---
+operation: "Exp"
+description: "Calculate element-wise exponential of the input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.exp"
+  numpy:
+    api: "numpy.exp"
+  torch:
+    api: "torch.exp"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.exp"
+  keras:
+    api: "keras.ops.exp"
+  mlx:
+    api: "mlx.core.exp"
+
+---
+operation: "Exp2"
+description: "Calculate element-wise base-2 exponential of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.exp2"
+  numpy:
+    api: "numpy.exp2"
+  torch:
+    api: "torch.exp2"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.pow"
+    macro_template: "tf.math.pow(2.0, {x})"
+    # TF lacks direct exp2 unless aliases exist, mapped to 2**x via macro
+
+---
+operation: "ExpandDims"
+description: "Insert dimensions of length 1 into array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int]"
+variants:
+  jax:
+    api: "jax.numpy.expand_dims"
+  numpy:
+    api: "numpy.expand_dims"
+  torch:
+    api: "torch.unsqueeze"
+    args:
+        a: "input"
+        axis: "dim"
+  tensorflow:
+    api: "tf.expand_dims"
+    args:
+        a: "input"
+        axis: "axis"
+  keras:
+    api: "keras.ops.expand_dims"
+    args:
+        a: "x"
+        axis: "axis"
+  mlx:
+    api: "mlx.core.expand_dims"
+    args:
+        a: "a"
+        axis: "axis"
+
+---
+operation: "Expm1"
+description: "Calculate exp(x) - 1 for all elements in the array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.expm1"
+  numpy:
+    api: "numpy.expm1"
+  torch:
+    api: "torch.expm1"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.expm1"
+  keras:
+    api: "keras.ops.expm1"
+  mlx:
+    api: "mlx.core.expm1"
+
+---
+operation: "Extract"
+description: "Return the elements of an array that satisfy a condition."
+std_args:
+  - name: "condition"
+    type: "Tensor"
+  - name: "arr"
+    type: "Tensor"
+  - name: "size"
+    type: "int | None"
+    default: null
+  - name: "fill_value"
+    type: "Any"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.extract"
+  numpy:
+    api: "numpy.extract"
+
+---
+operation: "Eye"
+description: "Create a square or rectangular identity matrix."
+std_args:
+  - name: "N"
+    type: "int"
+  - name: "M"
+    type: "int | None"
+    default: null
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.eye"
+  numpy:
+    api: "numpy.eye"
+  torch:
+    api: "torch.eye"
+    args:
+        N: "n"
+        M: "m"
+  tensorflow:
+    api: "tf.eye"
+    args:
+        N: "num_rows"
+        M: "num_columns"
+  keras:
+    api: "keras.ops.eye"
+  mlx:
+    api: "mlx.core.eye"
+    args:
+        N: "n"
+        M: "m"
+        k: "k"
+
+---
+operation: "Fabs"
+description: "Compute the element-wise absolute values of real input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.fabs"
+  numpy:
+    api: "numpy.fabs"
+  torch:
+    api: "torch.abs"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.abs"
+
+---
+operation: "FillDiagonal"
+description: "Fill the main diagonal of the given array of any dimensionality."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "val"
+    type: "Any"
+  - name: "wrap"
+    type: "bool"
+    default: false
+  - name: "inplace"
+    type: "bool"
+    default: true
+variants:
+  jax:
+    api: "jax.numpy.fill_diagonal"
+  numpy:
+    api: "numpy.fill_diagonal"
+  torch:
+    api: "torch.fill_diagonal_"
+    args:
+        a: "input"
+        val: "fill_value"
+        wrap: "wrap"
+
+---
+operation: "Finfo"
+description: "Machine limits for floating point types."
+std_args:
+  - name: "dtype"
+    type: "DType"
+variants:
+  jax:
+    api: "jax.numpy.finfo"
+  numpy:
+    api: "numpy.finfo"
+  torch:
+    api: "torch.finfo"
+
+---
+operation: "Fix"
+description: "Round to nearest integer towards zero."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.fix"
+  numpy:
+    api: "numpy.fix"
+  torch:
+    api: "torch.fix"
+    args:
+        x: "input"
+
+---
+operation: "Flatnonzero"
+description: "Return indices that are non-zero in the flattened version of a."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "size"
+    type: "int | None"
+    default: null
+  - name: "fill_value"
+    type: "Any"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.flatnonzero"
+  numpy:
+    api: "numpy.flatnonzero"
+
+---
+operation: "Flexible"
+description: "Flexible data type base class."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.flexible"
+  numpy:
+    api: "numpy.flexible"
+
+---
+operation: "Flip"
+description: "Reverse the order of elements in an array along the given axis."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.flip"
+  numpy:
+    api: "numpy.flip"
+  torch:
+    api: "torch.flip"
+    args:
+        m: "input"
+        axis: "dims"
+  tensorflow:
+    api: "tf.reverse"
+    args:
+        m: "tensor"
+        axis: "axis"
+  keras:
+    api: "keras.ops.flip"
+    args:
+        m: "x"
+        axis: "axis"
+
+---
+operation: "Fliplr"
+description: "Flip array in the left/right direction."
+std_args:
+  - name: "m"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.fliplr"
+  numpy:
+    api: "numpy.fliplr"
+  torch:
+    api: "torch.fliplr"
+    args:
+        m: "input"
+
+---
+operation: "Flipud"
+description: "Flip array in the up/down direction."
+std_args:
+  - name: "m"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.flipud"
+  numpy:
+    api: "numpy.flipud"
+  torch:
+    api: "torch.flipud"
+    args:
+        m: "input"
+
+---
+operation: "Float16"
+description: "Float16 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float16"
+  numpy:
+    api: "numpy.float16"
+  torch:
+    api: "torch.float16"
+
+---
+operation: "Float32"
+description: "Float32 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float32"
+  numpy:
+    api: "numpy.float32"
+  torch:
+    api: "torch.float32"
+
+---
+operation: "Float4_e2m1fn"
+description: "Float4_e2m1fn data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float4_e2m1fn"
+
+---
+operation: "Float64"
+description: "Float64 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float64"
+  numpy:
+    api: "numpy.float64"
+  torch:
+    api: "torch.float64"
+
+---
+operation: "Float8_e3m4"
+description: "Float8_e3m4 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e3m4"
+
+---
+operation: "Float8_e4m3"
+description: "Float8_e4m3 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e4m3"
+  torch:
+    api: "torch.float8_e4m3fn"
+
+---
+operation: "Float8_e4m3b11fnuz"
+description: "Float8_e4m3b11fnuz data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e4m3b11fnuz"
+
+---
+operation: "Float8_e4m3fn"
+description: "Float8_e4m3fn data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e4m3fn"
+  torch:
+    api: "torch.float8_e4m3fn"
+
+---
+operation: "Float8_e4m3fnuz"
+description: "Float8_e4m3fnuz data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e4m3fnuz"
+  torch:
+    api: "torch.float8_e4m3fnuz"
+
+---
+operation: "Float8_e5m2"
+description: "Float8_e5m2 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e5m2"
+  torch:
+    api: "torch.float8_e5m2"
+
+---
+operation: "Float8_e5m2fnuz"
+description: "Float8_e5m2fnuz data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e5m2fnuz"
+  torch:
+    api: "torch.float8_e5m2fnuz"
+
+---
+operation: "Float8_e8m0fnu"
+description: "Float8_e8m0fnu data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e8m0fnu"
+
+---
+operation: "Float_"
+description: "Float data type constructor (alias for float64)."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float_"
+  numpy:
+    api: "numpy.float_"
+
+---
+operation: "FloatPower"
+description: "Calculate element-wise base x exponential of y."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.float_power"
+  numpy:
+    api: "numpy.float_power"
+  torch:
+    api: "torch.pow"
+    args:
+        x: "input"
+        y: "exponent"
+  tensorflow:
+    api: "tf.math.pow"
+    args:
+        x: "x"
+        y: "y"
+
+---
+operation: "Floating"
+description: "Abstract base class of all floating-point scalar types."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.floating"
+  numpy:
+    api: "numpy.floating"
+
+---
+operation: "Floor"
+description: "Round input to the nearest integer downwards."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.floor"
+  numpy:
+    api: "numpy.floor"
+  torch:
+    api: "torch.floor"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.floor"
+  keras:
+    api: "keras.ops.floor"
+  mlx:
+    api: "mlx.core.floor"
+
+---
+operation: "FloorDivide"
+description: "Calculates the floor division of x1 by x2 element-wise"
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.floor_divide"
+    transformation_type: "infix"
+    operator: "//"
+  numpy:
+    api: "numpy.floor_divide"
+    transformation_type: "infix"
+    operator: "//"
+  torch:
+    api: "torch.floor_divide"
+    macro_template: "torch.div({x1}, {x2}, rounding_mode='floor')"
+  tensorflow:
+    api: "tf.math.floordiv"
+  keras:
+    api: "keras.ops.floor_divide"
+    transformation_type: "infix"
+    operator: "//"
+  mlx:
+    api: "mlx.core.floor_divide"
+    transformation_type: "infix"
+    operator: "//"
+
+---
+operation: "Fmax"
+description: "Return element-wise maximum of the input arrays."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.fmax"
+  numpy:
+    api: "numpy.fmax"
+  torch:
+    api: "torch.fmax"
+    args:
+        x1: "input"
+        x2: "other"
+
+---
+operation: "Fmin"
+description: "Return element-wise minimum of the input arrays."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.fmin"
+  numpy:
+    api: "numpy.fmin"
+  torch:
+    api: "torch.fmin"
+    args:
+        x1: "input"
+        x2: "other"
+
+---
+operation: "Fmod"
+description: "Calculate element-wise floating-point modulo operation."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.fmod"
+  numpy:
+    api: "numpy.fmod"
+  torch:
+    api: "torch.fmod"
+    args:
+        x1: "input"
+        x2: "other"
+
+---
+operation: "Frexp"
+description: "Split floating point values into mantissa and twos exponent."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.frexp"
+  numpy:
+    api: "numpy.frexp"
+  torch:
+    api: "torch.frexp"
+    args:
+        x: "input"
+
+---
+operation: "FromDlpack"
+description: "Construct a JAX/NumPy array via DLPack."
+std_args:
+  - name: "x"
+    type: "Any"
+  - name: "copy"
+    type: "bool | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.from_dlpack"
+  numpy:
+    api: "numpy.from_dlpack"
+  torch:
+    api: "torch.from_dlpack"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.experimental.dlpack.from_dlpack"
+    args:
+      x: "dlcapsule"
+
+---
+operation: "FromBuffer"
+description: "Convert a buffer into a 1-D JAX array."
+std_args:
+  - name: "buffer"
+    type: "Any"
+  - name: "dtype"
+    type: "DType"
+    default: "float64"
+  - name: "count"
+    type: "int"
+    default: -1
+  - name: "offset"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.frombuffer"
+  numpy:
+    api: "numpy.frombuffer"
+  torch:
+    api: "torch.frombuffer"
+    args:
+        buffer: "view"
+        dtype: "dtype"
+        count: "count"
+        offset: "offset"
+
+---
+operation: "FromFile"
+description: "Unimplemented JAX wrapper for jnp.fromfile."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.fromfile"
+  numpy:
+    api: "numpy.fromfile"
+
+---
+operation: "FromFunction"
+description: "Create an array from a function applied over indices."
+std_args:
+  - name: "function"
+    type: "Callable"
+  - name: "shape"
+    type: "tuple"
+  - name: "dtype"
+    type: "DType"
+    default: "float64"
+  - name: "kwargs"
+    kind: "var_keyword"
+variants:
+  jax:
+    api: "jax.numpy.fromfunction"
+  numpy:
+    api: "numpy.fromfunction"
+
+---
+operation: "FromIter"
+description: "Unimplemented JAX wrapper for jnp.fromiter."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.fromiter"
+  numpy:
+    api: "numpy.fromiter"
+
+---
+operation: "FromPyFunc"
+description: "Create a JAX ufunc from an arbitrary JAX-compatible scalar function."
+std_args:
+  - name: "func"
+    type: "Callable"
+  - name: "nin"
+    type: "int"
+  - name: "nout"
+    type: "int"
+  - name: "identity"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.frompyfunc"
+  numpy:
+    api: "numpy.frompyfunc"
+
+---
+operation: "FromString"
+description: "Convert a string of text into 1-D JAX array."
+std_args:
+  - name: "string"
+    type: "str"
+  - name: "dtype"
+    type: "DType"
+    default: "float64"
+  - name: "count"
+    type: "int"
+    default: -1
+  - name: "sep"
+    type: "str"
+variants:
+  jax:
+    api: "jax.numpy.fromstring"
+  numpy:
+    api: "numpy.fromstring"
+
+---
+operation: "Full"
+description: "Create an array full of a specified value."
+std_args:
+  - name: "shape"
+    type: "int | tuple"
+  - name: "fill_value"
+    type: "number | Tensor"
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.full"
+  numpy:
+    api: "numpy.full"
+  torch:
+    api: "torch.full"
+    args:
+        shape: "size"
+        fill_value: "fill_value"
+  tensorflow:
+    api: "tf.fill"
+    args:
+        shape: "dims"
+        fill_value: "value"
+  keras:
+    api: "keras.ops.full"
+  mlx:
+    api: "mlx.core.full"
+    args:
+        shape: "shape"
+        fill_value: "vals"
+
+---
+operation: "FullLike"
+description: "Create an array full of a specified value with the same shape and dtype as an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "fill_value"
+    type: "number | Tensor"
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "shape"
+    type: "tuple | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.full_like"
+  numpy:
+    api: "numpy.full_like"
+  torch:
+    api: "torch.full_like"
+    args:
+        a: "input"
+        fill_value: "fill_value"
+  tensorflow:
+    api: "tf.fill"
+    macro_template: "tf.fill(tf.shape({a}), {fill_value})"
+  keras:
+    api: "keras.ops.full_like"
+    args:
+        a: "x"
+
+---
+operation: "Gcd"
+description: "Compute the greatest common divisor of two arrays."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.gcd"
+  numpy:
+    api: "numpy.gcd"
+  torch:
+    api: "torch.gcd"
+    args:
+        x1: "input"
+        x2: "other"
+
+---
+operation: "Generic"
+description: "Base class for numpy scalar types."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.generic"
+  numpy:
+    api: "numpy.generic"
+
+---
+operation: "Geomspace"
+description: "Generate geometrically-spaced values."
+std_args:
+  - name: "start"
+    type: "number"
+  - name: "stop"
+    type: "number"
+  - name: "num"
+    type: "int"
+    default: 50
+  - name: "endpoint"
+    type: "bool"
+    default: true
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.geomspace"
+  numpy:
+    api: "numpy.geomspace"
+  torch:
+    api: "torch.logspace"
+    macro_template: "torch.logspace(torch.log10(torch.tensor({start})), torch.log10(torch.tensor({stop})), {num}, base=10.0)"
+
+---
+operation: "GetPrintoptions"
+description: "Return current print options."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.get_printoptions"
+  numpy:
+    api: "numpy.get_printoptions"
+
+---
+operation: "Gradient"
+description: "Compute the numerical gradient of a sampled function."
+std_args:
+  - name: "f"
+    type: "Tensor"
+  - name: "varargs"
+    type: "Tensor"
+    is_variadic: true
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.gradient"
+  numpy:
+    api: "numpy.gradient"
+  torch:
+    api: "torch.gradient"
+    args:
+        f: "input"
+        axis: "dim"
+
+---
+operation: "Greater"
+description: "Return element-wise truth value of x > y."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.greater"
+    transformation_type: "infix"
+    operator: ">"
+  numpy:
+    api: "numpy.greater"
+    transformation_type: "infix"
+    operator: ">"
+  torch:
+    api: "torch.gt"
+    transformation_type: "infix"
+    operator: ">"
+  tensorflow:
+    api: "tf.math.greater"
+    transformation_type: "infix"
+    operator: ">"
+  keras:
+    api: "keras.ops.greater"
+    transformation_type: "infix"
+    operator: ">"
+  mlx:
+    api: "mlx.core.greater"
+    transformation_type: "infix"
+    operator: ">"
+
+---
+operation: "GreaterEqual"
+description: "Return element-wise truth value of x >= y."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  numpy:
+    api: "numpy.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  torch:
+    api: "torch.ge"
+    transformation_type: "infix"
+    operator: ">="
+  tensorflow:
+    api: "tf.math.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  keras:
+    api: "keras.ops.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  mlx:
+    api: "mlx.core.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+
+---
+operation: "Hamming"
+description: "Return a Hamming window of size M."
+std_args:
+  - name: "M"
+    type: "int"
+variants:
+  jax:
+    api: "jax.numpy.hamming"
+  numpy:
+    api: "numpy.hamming"
+  torch:
+    api: "torch.hamming_window"
+    args:
+        M: "window_length"
+
+---
+operation: "Hanning"
+description: "Return a Hanning window of size M."
+std_args:
+  - name: "M"
+    type: "int"
+variants:
+  jax:
+    api: "jax.numpy.hanning"
+  numpy:
+    api: "numpy.hanning"
+  torch:
+    api: "torch.hann_window"
+    args:
+        M: "window_length"
+
+---
+operation: "Heaviside"
+description: "Compute the heaviside step function."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.heaviside"
+  numpy:
+    api: "numpy.heaviside"
+  torch:
+    api: "torch.heaviside"
+    args:
+        x1: "input"
+        x2: "values"
+
+---
+operation: "Histogram"
+description: "Compute a 1-dimensional histogram."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "bins"
+    type: "int | Tensor"
+    default: 10
+  - name: "range"
+    type: "tuple | None"
+    default: null
+  - name: "weights"
+    type: "Tensor | None"
+    default: null
+  - name: "density"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.histogram"
+  numpy:
+    api: "numpy.histogram"
+  torch:
+    api: "torch.histogram"
+    args:
+        a: "input"
+        bins: "bins"
+        range: "range"
+        weights: "weight"
+  tensorflow:
+    api: "tf.histogram_fixed_width"
+    # Note: TF lacks direct 1:1 mapping with dynamic bins.
+
+---
+operation: "Histogram2d"
+description: "Compute a 2-dimensional histogram."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+  - name: "bins"
+    type: "int | Tensor | List[Tensor]"
+    default: 10
+  - name: "range"
+    type: "Sequence | None"
+    default: null
+  - name: "weights"
+    type: "Tensor | None"
+    default: null
+  - name: "density"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.histogram2d"
+  numpy:
+    api: "numpy.histogram2d"
+
+---
+operation: "HistogramBinEdges"
+description: "Compute the bin edges for a histogram."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "bins"
+    type: "int | Tensor"
+    default: 10
+  - name: "range"
+    type: "tuple | None"
+    default: null
+  - name: "weights"
+    type: "Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.histogram_bin_edges"
+  numpy:
+    api: "numpy.histogram_bin_edges"
+
+---
+operation: "Histogramdd"
+description: "Compute an N-dimensional histogram."
+std_args:
+  - name: "sample"
+    type: "Tensor"
+  - name: "bins"
+    type: "int | Sequence"
+    default: 10
+  - name: "range"
+    type: "Sequence | None"
+    default: null
+  - name: "weights"
+    type: "Tensor | None"
+    default: null
+  - name: "density"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.histogramdd"
+  numpy:
+    api: "numpy.histogramdd"
+  torch:
+    api: "torch.histogramdd"
+    args:
+        sample: "input"
+        bins: "bins"
+        range: "range"
+        weights: "weight"
+
+---
+operation: "Hsplit"
+description: "Split an array into sub-arrays horizontally."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "int | Sequence[int]"
+variants:
+  jax:
+    api: "jax.numpy.hsplit"
+  numpy:
+    api: "numpy.hsplit"
+  torch:
+    api: "torch.hsplit"
+    args:
+        ary: "input"
+
+---
+operation: "Hstack"
+description: "Horizontally stack arrays."
+std_args:
+  - name: "tup"
+    type: "List[Tensor]"
+variants:
+  jax:
+    api: "jax.numpy.hstack"
+  numpy:
+    api: "numpy.hstack"
+  torch:
+    api: "torch.hstack"
+  keras:
+    api: "keras.ops.hstack"
+
+---
+operation: "Hypot"
+description: "Return element-wise hypotenuse for the given legs."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.hypot"
+  numpy:
+    api: "numpy.hypot"
+  torch:
+    api: "torch.hypot"
+    args:
+        x1: "input"
+        x2: "other"
+
+---
+operation: "I0"
+description: "Calculate modified Bessel function of first kind, zeroth order."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.i0"
+  numpy:
+    api: "numpy.i0"
+  torch:
+    api: "torch.special.i0"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.bessel_i0"
+  keras:
+    api: "keras.ops.i0"
+
+---
+operation: "Identity"
+description: "Create a square identity matrix."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.identity"
+  numpy:
+    api: "numpy.identity"
+  keras:
+    api: "keras.ops.identity"
+  mlx:
+    api: "mlx.core.identity"
+
+---
+operation: "Imag"
+description: "Return the imaginary component of a complex number."
+std_args:
+  - name: "val"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.imag"
+  numpy:
+    api: "numpy.imag"
+  torch:
+    api: "torch.imag"
+    args:
+        val: "input"
+  tensorflow:
+    api: "tf.math.imag"
+    args:
+        val: "input"
+  keras:
+    api: "keras.ops.imag"
+  mlx:
+    api: "mlx.core.imag"
+
+---
+operation: "Indices"
+description: "Generate arrays of grid indices."
+std_args:
+  - name: "dimensions"
+    type: "Sequence[int]"
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "sparse"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.indices"
+  numpy:
+    api: "numpy.indices"
+
+---
+operation: "Inner"
+description: "Compute the inner product of two arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.inner"
+  numpy:
+    api: "numpy.inner"
+  torch:
+    api: "torch.inner"
+    args:
+        a: "input"
+        b: "other"
+  tensorflow:
+    api: "tf.linalg.inner"
+    # Note: tf.inner is not top-level
+  mlx:
+    api: "mlx.core.inner"
+
+---
+operation: "Insert"
+description: "Insert entries into an array at specified indices."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "obj"
+    type: "int | slice | Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.insert"
+  numpy:
+    api: "numpy.insert"
+
+---
+operation: "Int16"
+description: "Int16 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.int16"
+  numpy:
+    api: "numpy.int16"
+  torch:
+    api: "torch.int16"
+
+---
+operation: "Int32"
+description: "Int32 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.int32"
+  numpy:
+    api: "numpy.int32"
+  torch:
+    api: "torch.int32"
+
+---
+operation: "Int64"
+description: "Int64 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.int64"
+  numpy:
+    api: "numpy.int64"
+  torch:
+    api: "torch.int64"
+
+---
+operation: "Int8"
+description: "Int8 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.int8"
+  numpy:
+    api: "numpy.int8"
+  torch:
+    api: "torch.int8"
+
+---
+operation: "Interp"
+description: "One-dimensional linear interpolation."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "xp"
+    type: "Tensor"
+  - name: "fp"
+    type: "Tensor"
+  - name: "left"
+    type: "number | None"
+    default: null
+  - name: "right"
+    type: "number | None"
+    default: null
+  - name: "period"
+    type: "number | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.interp"
+  numpy:
+    api: "numpy.interp"
+
+---
+operation: "Intersect1d"
+description: "Compute the set intersection of two 1D arrays."
+std_args:
+  - name: "ar1"
+    type: "Tensor"
+  - name: "ar2"
+    type: "Tensor"
+  - name: "assume_unique"
+    type: "bool"
+    default: false
+  - name: "return_indices"
+    type: "bool"
+    default: false
+  - name: "size"
+    type: "int | None"
+    default: null
+    doc: "JAX specific: Static output size."
+  - name: "fill_value"
+    type: "Any"
+    default: null
+    doc: "JAX specific: Padding value."
+variants:
+  jax:
+    api: "jax.numpy.intersect1d"
+  numpy:
+    api: "numpy.intersect1d"
+
+---
+operation: "Invert"
+description: "Compute the bitwise inversion of an input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.invert"
+  numpy:
+    api: "numpy.invert"
+  torch:
+    api: "torch.bitwise_not"
+  tensorflow:
+    api: "tf.bitwise.invert"
+  mlx:
+    api: "mlx.core.bitwise_invert"
+
+---
+operation: "Isclose"
+description: "Return a boolean array where two arrays are element-wise equal within a tolerance."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "rtol"
+    type: "float"
+    default: 1e-05
+  - name: "atol"
+    type: "float"
+    default: 1e-08
+  - name: "equal_nan"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.isclose"
+  numpy:
+    api: "numpy.isclose"
+  torch:
+    api: "torch.isclose"
+    args:
+        a: "input"
+        b: "other"
+  keras:
+    api: "keras.ops.isclose"
+    args:
+        a: "x1"
+        b: "x2"
+  mlx:
+    api: "mlx.core.isclose"
+    args:
+        a: "a"
+        b: "b"
+
+---
+operation: "IsComplex"
+description: "Return a boolean array where the input is complex."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.iscomplex"
+  numpy:
+    api: "numpy.iscomplex"
+  torch:
+    api: "torch.is_complex"
+    args:
+        x: "input"
+
+---
+operation: "IsComplexObj"
+description: "Check if a number or array contains complex numbers."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.iscomplexobj"
+  numpy:
+    api: "numpy.iscomplexobj"
+
+---
+operation: "IsDtype"
+description: "Returns True if the array data type is of the specified kind."
+std_args:
+  - name: "dtype"
+    type: "DType"
+  - name: "kind"
+    type: "str | DType"
+variants:
+  jax:
+    api: "jax.numpy.isdtype"
+  numpy:
+    api: "numpy.isdtype"
+
+---
+operation: "IsFinite"
+description: "Test element-wise for finiteness (not infinity and not Not a Number)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isfinite"
+  numpy:
+    api: "numpy.isfinite"
+  torch:
+    api: "torch.isfinite"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.is_finite"
+  keras:
+    api: "keras.ops.isfinite"
+
+---
+operation: "IsIn"
+description: "Calculates element in test_elements, broadcasting over element only."
+std_args:
+  - name: "element"
+    type: "Tensor"
+  - name: "test_elements"
+    type: "Tensor"
+  - name: "assume_unique"
+    type: "bool"
+    default: false
+  - name: "invert"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.isin"
+  numpy:
+    api: "numpy.isin"
+  torch:
+    api: "torch.isin"
+    args:
+      element: "elements"
+      test_elements: "test_elements"
+
+---
+operation: "IsInf"
+description: "Test element-wise for positive or negative infinity."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isinf"
+  numpy:
+    api: "numpy.isinf"
+  torch:
+    api: "torch.isinf"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.is_inf"
+  keras:
+    api: "keras.ops.isinf"
+
+---
+operation: "IsNan"
+description: "Test element-wise for NaN and return result as a boolean array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isnan"
+  numpy:
+    api: "numpy.isnan"
+  torch:
+    api: "torch.isnan"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.is_nan"
+  keras:
+    api: "keras.ops.isnan"
+  mlx:
+    api: "mlx.core.isnan"
+    args:
+        x: "a"
+
+---
+operation: "IsNegInf"
+description: "Test element-wise for negative infinity."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isneginf"
+  numpy:
+    api: "numpy.isneginf"
+  torch:
+    api: "torch.isneginf"
+    args:
+        x: "input"
+
+---
+operation: "IsPosInf"
+description: "Test element-wise for positive infinity."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isposinf"
+  numpy:
+    api: "numpy.isposinf"
+  torch:
+    api: "torch.isposinf"
+    args:
+        x: "input"
+
+---
+operation: "IsReal"
+description: "Returns a boolean array where true if input element is real."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isreal"
+  numpy:
+    api: "numpy.isreal"
+  torch:
+    api: "torch.is_real"
+    args:
+        x: "input"
+
+---
+operation: "IsRealObj"
+description: "Return True if x is a not complex type or an array of complex numbers."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.isrealobj"
+  numpy:
+    api: "numpy.isrealobj"
+
+---
+operation: "IsScalar"
+description: "Returns True if the type of num is a scalar type."
+std_args:
+  - name: "element"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.isscalar"
+  numpy:
+    api: "numpy.isscalar"
+
+---
+operation: "IsSubDtype"
+description: "Returns True if first argument is a typecode lower/equal in type hierarchy."
+std_args:
+  - name: "arg1"
+    type: "DType"
+  - name: "arg2"
+    type: "DType"
+variants:
+  jax:
+    api: "jax.numpy.issubdtype"
+  numpy:
+    api: "numpy.issubdtype"

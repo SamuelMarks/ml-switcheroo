@@ -1,182 +1,160 @@
 """
-LibCST Transformer for Injecting Specifications.
+JSON Injector for Semantic Specifications.
 
-This tool modifies Python source files (specifically `standards_internal.py`)
-by locating the `INTERNAL_OPS` dictionary and appending a new operation definition
-derived from an ODL (Operation Definition Language) model.
+This module provides the `StandardsInjector`, a utility to update the Semantic
+Knowledge Base JSON files (The Hub) with new operation definitions.
 
-Updates:
-- Supports persistent semantic constraints (min, max, options).
-- Checks for duplicate keys to prevent overwriting existing definitions.
-- Uses robust string literal generation.
+It replaces the legacy LibCST-based injector that modified `standards_internal.py`.
 """
 
-import libcst as cst
-from typing import Any
+import json
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Union, Tuple
+
 from ml_switcheroo.core.dsl import OperationDef, ParameterDef
-from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
+from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo.semantics.paths import resolve_semantics_dir
+from ml_switcheroo.utils.console import log_info, log_success, log_warning
 
 
-class StandardsInjector(cst.CSTTransformer):
+class StandardsInjector:
   """
-  Injects a new operation definition into the INTERNAL_OPS dict.
+  Injects a new operation definition into the Semantic Knowledge Base (JSON).
 
-  It transforms the abstract `OperationDef` into a concrete LibCST Dictionary
-  node structure, including rich parameter metadata (min, max, options) and appends
-  it to the existing dictionary in the source.
+  It determines the correct JSON file based on naming heuristics or provided tier,
+  serializes the `OperationDef` to JSON-compatible dict, and updates the file.
   """
 
-  def __init__(self, op_def: OperationDef):
+  def __init__(self, op_def: OperationDef, tier: SemanticTier = SemanticTier.EXTRAS):
     """
     Initializes the injector.
 
     Args:
         op_def: The definition model containing metadata and signatures.
+        tier: The target semantic tier (default: EXTRAS).
+              Heuristics in `inject()` may override this if the name suggests
+              a Neural operation.
     """
     self.op_def = op_def
+    self.tier = tier
     self.found = False
 
-  def _build_param_dict(self, param: ParameterDef) -> cst.Dict:
+  def inject(self, dry_run: bool = False) -> bool:
     """
-    Constructs a CST Dictionary node representing a parameter definition.
-
-    Result format: `{'name': 'x', 'type': 'int', 'min': 0, 'options': [1, 2]}`
-    """
-    # We assume clean dictionary of properties
-    data = {
-      "name": param.name,
-      "type": param.type,
-      "default": param.default,
-      "min": param.min,
-      "max": param.max,
-      "options": param.options,
-      "rank": param.rank,
-      "dtype": param.dtype,
-      "kind": param.kind if param.kind != "positional_or_keyword" else None,
-      "is_variadic": param.is_variadic if param.is_variadic else None,
-    }
-
-    # Remove None values
-    data = {k: v for k, v in data.items() if v is not None}
-
-    # Use utility converter for the dict
-    return convert_to_cst_literal(data)
-
-  def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
-    """
-    Visits assignment statements to find `INTERNAL_OPS`.
-
-    If found, modifies the dictionary value to include the new key-value pair,
-    UNLESS the key already exists.
+    Executes the injection.
 
     Args:
-        original_node: The node before transformation.
-        updated_node: The node after transformation.
+        dry_run: If True, prints intended changes without writing to disk.
 
     Returns:
-        cst.Assign: The modified assignment node.
+        bool: True on success.
     """
-    # Ensure we are modifying "INTERNAL_OPS = { ... }"
-    if len(original_node.targets) != 1:
-      return updated_node
+    # 1. Determine Tier / Filename
+    # Heuristic: Start with uppercase (PascalCase) usually implies Neural/Class
+    op_name = self.op_def.operation
 
-    target = original_node.targets[0].target
-    if not isinstance(target, cst.Name) or target.value != "INTERNAL_OPS":
-      return updated_node
+    if op_name[0].isupper() and self.tier == SemanticTier.EXTRAS:
+      # Simple heuristic: "Conv2d" -> Neural, "abs" -> Math
+      self.tier = SemanticTier.NEURAL
 
-    if not isinstance(updated_node.value, cst.Dict):
-      return updated_node
+    # NOTE: Removed islower() heuristic that forced EXTRAS->ARRAY_API.
+    # Explicit EXTRAS assignment should be respected for utilities like 'save' or 'load'.
 
+    if self.tier == SemanticTier.ARRAY_API:
+      filename = "k_array_api.json"
+    elif self.tier == SemanticTier.NEURAL:
+      filename = "k_neural_net.json"
+    else:
+      filename = "k_framework_extras.json"
+
+    target_path = resolve_semantics_dir() / filename
+
+    # 2. Serialize Definition
+    # We manually construct the dict to ensure clean output matching the schema
+    # `model_dump` often includes null fields we want to omit for brevity
+    data_entry = self._serialize_op(self.op_def)
+
+    # 3. Load Existing
+    current_data = {}
+    if target_path.exists():
+      try:
+        with open(target_path, "r", encoding="utf-8") as f:
+          current_data = json.load(f)
+      except json.JSONDecodeError:
+        log_warning(f"Corrupt JSON at {target_path}. Proceeding with empty dict.")
+
+    # 4. Update
+    if op_name in current_data:
+      log_info(f"  Updating existing Hub definition for '{op_name}' in {filename}")
+    else:
+      log_info(f"  Adding new Hub definition for '{op_name}' to {filename}")
+
+    current_data[op_name] = data_entry
     self.found = True
 
-    # 1. Existence Check
-    # Iterate existing elements to check keys
-    for element in updated_node.value.elements:
-      if isinstance(element, cst.DictElement):
-        # Evaluate key literal if simple string
-        if isinstance(element.key, cst.SimpleString):
-          # Strip quotes roughly to check value
-          key_val = element.key.value.strip("'\"")
-          if key_val == self.op_def.operation:
-            # Operation Exists: Skip injection to preserve manual edits/ordering
-            return updated_node
+    # 5. Write
+    if dry_run:
+      print(f"[Dry Run] Writing to {filename}:\n{json.dumps({op_name: data_entry}, indent=2)}")
+    else:
+      if not target_path.parent.exists():
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+      with open(target_path, "w", encoding="utf-8") as f:
+        json.dump(current_data, f, indent=2, sort_keys=True)
+      log_success(f"  Updated Hub: {filename}")
 
-    # 2. Build std_args list of Dict elements
-    args_elements = []
-    for arg in self.op_def.std_args:
-      # If arg is simple string (legacy/user yaml), handle it
-      if isinstance(arg, str):
-        p_def = ParameterDef(name=arg)
-        param_node = self._build_param_dict(p_def)
-      elif isinstance(arg, (list, tuple)):
-        p_def = ParameterDef(name=arg[0], type=arg[1] if len(arg) > 1 else "Any")
-        param_node = self._build_param_dict(p_def)
-      elif isinstance(arg, dict):
-        # Assuming validated by Pydantic loading before
-        p_model = ParameterDef(**arg)
-        param_node = self._build_param_dict(p_model)
-      else:
-        # Fallback for ParameterDef objects directly
-        param_node = self._build_param_dict(arg)
+    return True
 
-      args_elements.append(cst.Element(value=param_node, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))))
-
-    # 3. Build the main operation Dictionary values
-    # Structure: { 'description': ..., 'std_args': [...], 'variants': {} }
-    dict_body = {
-      "description": self.op_def.description,
-      "std_args": cst.List(args_elements),  # Use pre-built list node for complex args
-      "variants": {},
+  def _serialize_op(self, op: OperationDef) -> Dict[str, Any]:
+    """
+    Converts the OperationDef to a JSON-dict optimized for storage.
+    """
+    # Basic fields
+    out = {
+      "description": op.description,
+      "std_args": self._serialize_args(op.std_args),
+      "variants": {},  # Hub only stores abstract spec, mapping is in Spoke/Snapshot
     }
 
-    # We manually construct this dict to inject the special cst.List node
-    dict_elements = []
+    # Optional fields (only add if not default)
+    if op.op_type != "function":
+      out["op_type"] = op.op_type
+    if op.return_type != "Any":
+      out["return_type"] = op.return_type
+    if op.is_inplace:
+      out["is_inplace"] = True
+    if op.output_shape_calc:
+      out["output_shape_calc"] = op.output_shape_calc
 
-    # Description
-    dict_elements.append(
-      cst.DictElement(
-        key=convert_to_cst_literal("description"),
-        value=convert_to_cst_literal(self.op_def.description),
-        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-      )
-    )
+    return out
 
-    # Std Args
-    dict_elements.append(
-      cst.DictElement(
-        key=convert_to_cst_literal("std_args"),
-        value=cst.List(args_elements),
-        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-      )
-    )
+  def _serialize_args(self, args: List[Union[str, Tuple, Dict, Any]]) -> List[Any]:
+    """
+    Normalizes argument list to clean dictionaries or strings.
+    """
+    result = []
+    for arg in args:
+      if isinstance(arg, (ParameterDef, dict)):
+        # Convert object/dict to clean dict
+        if isinstance(arg, ParameterDef):
+          d = arg.model_dump(exclude_none=True)
+        else:
+          d = arg.copy()
+          # Filter None values manually if it was a raw dict
+          d = {k: v for k, v in d.items() if v is not None}
 
-    # Variants
-    dict_elements.append(
-      cst.DictElement(
-        key=convert_to_cst_literal("variants"),
-        value=cst.Dict([]),
-        comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")),
-      )
-    )
+        # Simplify: if it only has name and type='Any', store as string?
+        # No, stick to dicts for consistency if provided as such.
+        result.append(d)
 
-    new_entry_val = cst.Dict(dict_elements)
-    new_entry_key = convert_to_cst_literal(self.op_def.operation)
+      elif isinstance(arg, (list, tuple)):
+        # Legacy tuple ["x", "type"]
+        entry = {"name": arg[0]}
+        if len(arg) > 1:
+          entry["type"] = arg[1]
+        result.append(entry)
 
-    # 4. Append to existing dictionary elements
-    new_elements = list(updated_node.value.elements)
+      elif isinstance(arg, str):
+        result.append(arg)
 
-    # Formatting
-    new_dict_item = cst.DictElement(
-      key=new_entry_key,
-      value=new_entry_val,
-      comma=cst.Comma(
-        whitespace_after=cst.ParenthesizedWhitespace(
-          first_line=cst.TrailingWhitespace(newline=cst.Newline()), indent=True
-        )
-      ),
-    )
-
-    new_elements.append(new_dict_item)
-
-    new_dict = updated_node.value.with_changes(elements=new_elements)
-    return updated_node.with_changes(value=new_dict)
+    return result

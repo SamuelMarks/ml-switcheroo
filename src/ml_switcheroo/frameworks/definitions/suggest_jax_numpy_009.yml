@@ -1,0 +1,1390 @@
+operation: "Isin"
+description: "Calculates element in test_elements, broadcasting over element only."
+std_args:
+  - name: "element"
+    type: "Tensor"
+  - name: "test_elements"
+    type: "Tensor"
+  - name: "assume_unique"
+    type: "bool"
+    default: false
+  - name: "invert"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.isin"
+  numpy:
+    api: "numpy.isin"
+  torch:
+    api: "torch.isin"
+    args:
+        element: "elements"
+        test_elements: "test_elements"
+
+---
+operation: "IsInf"
+description: "Test element-wise for positive or negative infinity."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isinf"
+  numpy:
+    api: "numpy.isinf"
+  torch:
+    api: "torch.isinf"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.is_inf"
+  keras:
+    api: "keras.ops.isinf"
+
+---
+operation: "IsNan"
+description: "Test element-wise for NaN and return result as a boolean array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isnan"
+  numpy:
+    api: "numpy.isnan"
+  torch:
+    api: "torch.isnan"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.is_nan"
+  keras:
+    api: "keras.ops.isnan"
+  mlx:
+    api: "mlx.core.isnan"
+    args:
+        x: "a"
+
+---
+operation: "IsNegInf"
+description: "Test element-wise for negative infinity."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isneginf"
+  numpy:
+    api: "numpy.isneginf"
+  torch:
+    api: "torch.isneginf"
+    args:
+        x: "input"
+
+---
+operation: "IsPosInf"
+description: "Test element-wise for positive infinity."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isposinf"
+  numpy:
+    api: "numpy.isposinf"
+  torch:
+    api: "torch.isposinf"
+    args:
+        x: "input"
+
+---
+operation: "IsReal"
+description: "Returns a boolean array where true if input element is real."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.isreal"
+  numpy:
+    api: "numpy.isreal"
+  torch:
+    api: "torch.is_real"
+    args:
+        x: "input"
+
+---
+operation: "IsRealObj"
+description: "Return True if x is a not complex type or an array of complex numbers."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.isrealobj"
+  numpy:
+    api: "numpy.isrealobj"
+
+---
+operation: "IsScalar"
+description: "Returns True if the type of num is a scalar type."
+std_args:
+  - name: "element"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.isscalar"
+  numpy:
+    api: "numpy.isscalar"
+
+---
+operation: "IsSubDtype"
+description: "Returns True if first argument is a typecode lower/equal in type hierarchy."
+std_args:
+  - name: "arg1"
+    type: "DType"
+  - name: "arg2"
+    type: "DType"
+variants:
+  jax:
+    api: "jax.numpy.issubdtype"
+  numpy:
+    api: "numpy.issubdtype"
+
+---
+operation: "Iterable"
+description: "Check whether or not an object can be iterated over."
+std_args:
+  - name: "y"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.iterable"
+  numpy:
+    api: "numpy.iterable"
+  # Torch/TF generally use Python iteration checks, no direct util.
+
+---
+operation: "Ix_"
+description: "Construct an open mesh from multiple sequences."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.ix_"
+  numpy:
+    api: "numpy.ix_"
+  torch:
+    api: "torch.meshgrid"
+    # Note: Torch meshgrid signature (tensors..., indexing='ij') differs from ix_ which returns open mesh.
+    # ix_ specific logic might require reshaping meshgrid output or using `torch.cartesian_prod` with manual viewing.
+    # Sticking to close-enough semantic match only if needed.
+
+---
+operation: "Kaiser"
+description: "Return a Kaiser window."
+std_args:
+  - name: "M"
+    type: "int"
+  - name: "beta"
+    type: "float"
+variants:
+  jax:
+    api: "jax.numpy.kaiser"
+  numpy:
+    api: "numpy.kaiser"
+  torch:
+    api: "torch.kaiser_window"
+    args:
+        M: "window_length"
+
+---
+operation: "Kron"
+description: "Kronecker product of two arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.kron"
+  numpy:
+    api: "numpy.kron"
+  torch:
+    api: "torch.kron"
+    args:
+        a: "input"
+        b: "other"
+
+---
+operation: "Lcm"
+description: "Compute the least common multiple of two arrays."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.lcm"
+  numpy:
+    api: "numpy.lcm"
+  torch:
+    api: "torch.lcm"
+    args:
+        x1: "input"
+        x2: "other"
+
+---
+operation: "Ldexp"
+description: "Compute x1 * 2**x2."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.ldexp"
+  numpy:
+    api: "numpy.ldexp"
+  torch:
+    api: "torch.ldexp"
+    args:
+        x1: "input"
+        x2: "other"
+
+---
+operation: "LeftShift"
+description: "Shift the bits of an integer to the left."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.left_shift"
+  numpy:
+    api: "numpy.left_shift"
+  torch:
+    api: "torch.bitwise_left_shift"
+  tensorflow:
+    api: "tf.bitwise.left_shift"
+  keras:
+    api: "keras.ops.bitwise_left_shift"
+  mlx:
+    api: "mlx.core.bitwise_left_shift"
+
+---
+operation: "Less"
+description: "Return element-wise truth value of x < y."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.less"
+    transformation_type: "infix"
+    operator: "<"
+  numpy:
+    api: "numpy.less"
+    transformation_type: "infix"
+    operator: "<"
+  torch:
+    api: "torch.lt"
+    transformation_type: "infix"
+    operator: "<"
+  tensorflow:
+    api: "tf.math.less"
+    transformation_type: "infix"
+    operator: "<"
+  keras:
+    api: "keras.ops.less"
+    transformation_type: "infix"
+    operator: "<"
+  mlx:
+    api: "mlx.core.less"
+    transformation_type: "infix"
+    operator: "<"
+
+---
+operation: "LessEqual"
+description: "Return element-wise truth value of x <= y."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.less_equal"
+    transformation_type: "infix"
+    operator: "<="
+  numpy:
+    api: "numpy.less_equal"
+    transformation_type: "infix"
+    operator: "<="
+  torch:
+    api: "torch.le"
+    transformation_type: "infix"
+    operator: "<="
+  tensorflow:
+    api: "tf.math.less_equal"
+    transformation_type: "infix"
+    operator: "<="
+  keras:
+    api: "keras.ops.less_equal"
+    transformation_type: "infix"
+    operator: "<="
+  mlx:
+    api: "mlx.core.less_equal"
+    transformation_type: "infix"
+    operator: "<="
+
+---
+operation: "Lexsort"
+description: "Perform an indirect sort using a sequence of keys."
+std_args:
+  - name: "keys"
+    type: "Tensor | Sequence[Tensor]"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  jax:
+    api: "jax.numpy.lexsort"
+  numpy:
+    api: "numpy.lexsort"
+  # Torch traditionally lacks lexsort directly, often implemented via argsort on tuples.
+  # No direct mapping to avoid complexity.
+
+---
+operation: "Linspace"
+description: "Return evenly spaced numbers over a specified interval."
+std_args:
+  - name: "start"
+    type: "number"
+  - name: "stop"
+    type: "number"
+  - name: "num"
+    type: "int"
+    default: 50
+  - name: "endpoint"
+    type: "bool"
+    default: true
+  - name: "retstep"
+    type: "bool"
+    default: false
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.linspace"
+  numpy:
+    api: "numpy.linspace"
+  torch:
+    api: "torch.linspace"
+    args:
+        num: "steps"
+    # Torch linspace signature differs (start, end, steps), handled by rewriter for common args
+  tensorflow:
+    api: "tf.linspace"
+    args:
+        start: "start"
+        stop: "stop"
+        num: "num"
+  keras:
+    api: "keras.ops.linspace"
+  mlx:
+    api: "mlx.core.linspace"
+    args:
+       start: "start"
+       stop: "stop"
+       num: "num"
+
+---
+operation: "Load"
+description: "Load arrays from file."
+std_args:
+  - name: "file"
+    type: "str | Path"
+variants:
+  jax:
+    api: "jax.numpy.load"
+  numpy:
+    api: "numpy.load"
+  torch:
+    api: "torch.load"
+    args:
+        file: "f"
+  keras:
+    api: "keras.saving.load_model"
+    args:
+        file: "filepath"
+        # Note: Keras load is for models, numpy.load is for arrays.
+        # Semantics differ, but mapping for general 'Load' included.
+  mlx:
+    api: "mlx.core.load"
+    args:
+        file: "file"
+
+---
+operation: "Log"
+description: "Natural logarithm, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.log"
+  numpy:
+    api: "numpy.log"
+  torch:
+    api: "torch.log"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.log"
+  keras:
+    api: "keras.ops.log"
+  mlx:
+    api: "mlx.core.log"
+
+---
+operation: "Log10"
+description: "Base-10 logarithm, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.log10"
+  numpy:
+    api: "numpy.log10"
+  torch:
+    api: "torch.log10"
+    args:
+        x: "input"
+  keras:
+    api: "keras.ops.log10"
+  mlx:
+    api: "mlx.core.log10"
+
+---
+operation: "Log1p"
+description: "Return the natural logarithm of one plus the input array, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.log1p"
+  numpy:
+    api: "numpy.log1p"
+  torch:
+    api: "torch.log1p"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.log1p"
+  keras:
+    api: "keras.ops.log1p"
+  mlx:
+    api: "mlx.core.log1p"
+
+---
+operation: "Log2"
+description: "Base-2 logarithm, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.log2"
+  numpy:
+    api: "numpy.log2"
+  torch:
+    api: "torch.log2"
+    args:
+        x: "input"
+  keras:
+    api: "keras.ops.log2"
+  mlx:
+    api: "mlx.core.log2"
+  # TF doesn't have log2 direct op, usually log(x)/log(2)
+
+---
+operation: "Logaddexp"
+description: "Logarithm of the sum of exponentiations of the inputs."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.logaddexp"
+  numpy:
+    api: "numpy.logaddexp"
+  torch:
+    api: "torch.logaddexp"
+    args:
+      x1: "input"
+      x2: "other"
+  keras:
+    api: "keras.ops.logaddexp"
+  mlx:
+    api: "mlx.core.logaddexp"
+
+---
+operation: "Logaddexp2"
+description: "Logarithm of the sum of exponentiations of the inputs in base-2."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.logaddexp2"
+  numpy:
+    api: "numpy.logaddexp2"
+  torch:
+    api: "torch.logaddexp2"
+    args:
+      x1: "input"
+      x2: "other"
+
+---
+operation: "LogicalAnd"
+description: "Compute the truth value of x1 AND x2 element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.logical_and"
+    transformation_type: "infix"
+    operator: "&"
+  numpy:
+    api: "numpy.logical_and"
+    transformation_type: "infix"
+    operator: "&"
+  torch:
+    api: "torch.logical_and"
+    args:
+        x1: "input"
+        x2: "other"
+  tensorflow:
+    api: "tf.math.logical_and"
+    args:
+        x1: "x"
+        x2: "y"
+  keras:
+    api: "keras.ops.logical_and"
+  mlx:
+    api: "mlx.core.logical_and"
+
+---
+operation: "LogicalNot"
+description: "Compute the truth value of NOT x element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.logical_not"
+  numpy:
+    api: "numpy.logical_not"
+  torch:
+    api: "torch.logical_not"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.logical_not"
+  keras:
+    api: "keras.ops.logical_not"
+  mlx:
+    api: "mlx.core.logical_not"
+
+---
+operation: "LogicalOr"
+description: "Compute the truth value of x1 OR x2 element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.logical_or"
+    transformation_type: "infix"
+    operator: "|"
+  numpy:
+    api: "numpy.logical_or"
+    transformation_type: "infix"
+    operator: "|"
+  torch:
+    api: "torch.logical_or"
+    args:
+        x1: "input"
+        x2: "other"
+  tensorflow:
+    api: "tf.math.logical_or"
+    args:
+        x1: "x"
+        x2: "y"
+  keras:
+    api: "keras.ops.logical_or"
+  mlx:
+    api: "mlx.core.logical_or"
+
+---
+operation: "LogicalXor"
+description: "Compute the truth value of x1 XOR x2 element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.logical_xor"
+    transformation_type: "infix"
+    operator: "^"
+  numpy:
+    api: "numpy.logical_xor"
+    transformation_type: "infix"
+    operator: "^"
+  torch:
+    api: "torch.logical_xor"
+    args:
+        x1: "input"
+        x2: "other"
+  tensorflow:
+    api: "tf.math.logical_xor"
+    args:
+      x1: "x"
+      x2: "y"
+  keras:
+    api: "keras.ops.logical_xor"
+
+---
+operation: "Logspace"
+description: "Generate logarithmically-spaced values."
+std_args:
+  - name: "start"
+    type: "number"
+  - name: "stop"
+    type: "number"
+  - name: "num"
+    type: "int"
+    default: 50
+  - name: "endpoint"
+    type: "bool"
+    default: true
+  - name: "base"
+    type: "number"
+    default: 10.0
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.logspace"
+  numpy:
+    api: "numpy.logspace"
+  torch:
+    api: "torch.logspace"
+    args:
+        num: "steps"
+
+---
+operation: "MaskIndices"
+description: "Return indices of a mask of an (n, n) array."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "mask_func"
+    type: "Callable"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.mask_indices"
+  numpy:
+    api: "numpy.mask_indices"
+
+---
+operation: "Matmul"
+description: "Perform a matrix multiplication."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.matmul"
+    transformation_type: "infix"
+    operator: "@"
+  numpy:
+    api: "numpy.matmul"
+    transformation_type: "infix"
+    operator: "@"
+  torch:
+    api: "torch.matmul"
+    # Or torch.mm/bmm depending on rank, but matmul is generic
+    transformation_type: "infix"
+    operator: "@"
+  tensorflow:
+    api: "tf.linalg.matmul"
+    # Note: TF matmul is strict about ranks, unlike numpy.
+  keras:
+    api: "keras.ops.matmul"
+    transformation_type: "infix"
+    operator: "@"
+  mlx:
+    api: "mlx.core.matmul"
+    transformation_type: "infix"
+    operator: "@"
+
+---
+operation: "MatrixTranspose"
+description: "Transpose the last two dimensions of an array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.matrix_transpose"
+  numpy:
+    api: "numpy.matrix_transpose"
+  torch:
+    api: "torch.transpose"
+    macro_template: "torch.transpose({x}, -2, -1)"
+  tensorflow:
+    api: "tf.linalg.matrix_transpose"
+  keras:
+    api: "keras.ops.transpose"
+    # Keras transpose defaults to permuting all dims (HWC->CHW often), check specific usage.
+
+---
+operation: "Matvec"
+description: "Batched matrix-vector product."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.matvec"
+  numpy:
+    api: "numpy.matvec"
+  torch:
+    api: "torch.mv"
+    args:
+        x1: "input"
+        x2: "vec"
+  tensorflow:
+    api: "tf.linalg.matvec"
+
+---
+operation: "Maximum"
+description: "Return element-wise maximum of the input arrays."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.maximum"
+  numpy:
+    api: "numpy.maximum"
+  torch:
+    api: "torch.maximum"
+    args:
+        x1: "input"
+        x2: "other"
+  tensorflow:
+    api: "tf.math.maximum"
+    args:
+        x1: "x"
+        x2: "y"
+  keras:
+    api: "keras.ops.maximum"
+    args:
+        x1: "x1"
+        x2: "x2"
+  mlx:
+    api: "mlx.core.maximum"
+    args:
+        x1: "x1"
+        x2: "x2"
+
+---
+operation: "Mean"
+description: "Return the mean of array elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | tuple | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.mean"
+  numpy:
+    api: "numpy.mean"
+  torch:
+    api: "torch.mean"
+    args:
+        a: "input"
+        axis: "dim"
+        # Torch mean requires explicit logic for dim=None case vs specified dim.
+  tensorflow:
+    api: "tf.math.reduce_mean"
+    args:
+      a: "input_tensor"
+  keras:
+    api: "keras.ops.mean"
+    args:
+        a: "x"
+  mlx:
+    api: "mlx.core.mean"
+    args:
+        a: "a"
+
+---
+operation: "Median"
+description: "Return the median of array elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | tuple | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.median"
+  numpy:
+    api: "numpy.median"
+  torch:
+    api: "torch.median"
+    args:
+        a: "input"
+        axis: "dim"
+        keepdims: "keepdim"
+    # Note: Torch median returns (values, indices) tuple when dim specified.
+  keras:
+    api: "keras.ops.median"
+    args:
+        a: "x"
+  mlx:
+    api: "mlx.core.median"
+    args:
+        a: "a"
+
+---
+operation: "Meshgrid"
+description: "Construct N-dimensional grid arrays from N 1-dimensional vectors."
+std_args:
+  - name: "xi"
+    type: "Tensor"
+    is_variadic: true
+  - name: "copy"
+    type: "bool"
+    default: true
+  - name: "sparse"
+    type: "bool"
+    default: false
+  - name: "indexing"
+    type: "str"
+    default: "xy"
+variants:
+  jax:
+    api: "jax.numpy.meshgrid"
+  numpy:
+    api: "numpy.meshgrid"
+  torch:
+    api: "torch.meshgrid"
+    # Note: Torch meshgrid arg signature is *tensors, indexing='ij' (default varies by version)
+  tensorflow:
+    api: "tf.meshgrid"
+    # TF takes *args and indexing='xy'
+  keras:
+    api: "keras.ops.meshgrid"
+  mlx:
+    api: "mlx.core.meshgrid"
+
+---
+operation: "Mgrid"
+description: "Return dense multi-dimensional 'meshgrid'."
+std_args: []
+# Note: mgrid is an object instance in numpy/jax (used with slicing), not a callable function.
+variants:
+  jax:
+    api: "jax.numpy.mgrid"
+  numpy:
+    api: "numpy.mgrid"
+
+---
+operation: "Minimum"
+description: "Return element-wise minimum of the input arrays."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.minimum"
+  numpy:
+    api: "numpy.minimum"
+  torch:
+    api: "torch.minimum"
+    args:
+        x1: "input"
+        x2: "other"
+  tensorflow:
+    api: "tf.math.minimum"
+    args:
+        x1: "x"
+        x2: "y"
+  keras:
+    api: "keras.ops.minimum"
+    args:
+        x1: "x1"
+        x2: "x2"
+  mlx:
+    api: "mlx.core.minimum"
+    args:
+        x1: "x1"
+        x2: "x2"
+
+---
+operation: "Mod"
+description: "Return element-wise remainder of division."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.mod"
+    transformation_type: "infix"
+    operator: "%"
+  numpy:
+    api: "numpy.mod"
+    transformation_type: "infix"
+    operator: "%"
+  torch:
+    api: "torch.remainder"
+    transformation_type: "infix"
+    operator: "%"
+  tensorflow:
+    api: "tf.math.mod"
+    transformation_type: "infix"
+    operator: "%"
+  keras:
+    api: "keras.ops.mod"
+    transformation_type: "infix"
+    operator: "%"
+  mlx:
+    api: "mlx.core.remainder"
+    transformation_type: "infix"
+    operator: "%"
+
+---
+operation: "Modf"
+description: "Return element-wise fractional and integral parts of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.modf"
+  numpy:
+    api: "numpy.modf"
+  torch:
+    # No direct single op for modf
+    macro_template: "(torch.frac({x}), torch.trunc({x}))"
+
+---
+operation: "Moveaxis"
+description: "Move an array axis to a new position."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "source"
+    type: "int | Sequence[int]"
+  - name: "destination"
+    type: "int | Sequence[int]"
+variants:
+  jax:
+    api: "jax.numpy.moveaxis"
+  numpy:
+    api: "numpy.moveaxis"
+  torch:
+    api: "torch.movedim"
+    args:
+        a: "input"
+  tensorflow:
+    api: "tf.moveaxis"
+    args:
+        a: "input"
+  keras:
+    api: "keras.ops.moveaxis"
+    args:
+        a: "x"
+  mlx:
+    api: "mlx.core.moveaxis"
+    args:
+        a: "a"
+
+---
+operation: "Multiply"
+description: "Multiply two arrays element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.multiply"
+    transformation_type: "infix"
+    operator: "*"
+  numpy:
+    api: "numpy.multiply"
+    transformation_type: "infix"
+    operator: "*"
+  torch:
+    api: "torch.mul"
+    transformation_type: "infix"
+    operator: "*"
+  tensorflow:
+    api: "tf.math.multiply"
+    transformation_type: "infix"
+    operator: "*"
+  keras:
+    api: "keras.ops.multiply"
+    transformation_type: "infix"
+    operator: "*"
+  mlx:
+    api: "mlx.core.multiply"
+    transformation_type: "infix"
+    operator: "*"
+
+---
+operation: "Nan"
+description: "Floating point representation of Not a Number (NaN)."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.nan"
+  numpy:
+    api: "numpy.nan"
+  torch:
+    api: "torch.nan"
+
+---
+operation: "NanToNum"
+description: "Replace NaN with zero and infinity with finite numbers."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "copy"
+    type: "bool"
+    default: true
+  - name: "nan"
+    type: "number"
+    default: 0.0
+  - name: "posinf"
+    type: "number | None"
+    default: null
+  - name: "neginf"
+    type: "number | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.nan_to_num"
+  numpy:
+    api: "numpy.nan_to_num"
+  torch:
+    api: "torch.nan_to_num"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.where"
+    # TF requires manual composition for nan_to_num functionality
+  keras:
+    api: "keras.ops.nan_to_num"
+    args:
+        x: "x"
+
+---
+operation: "NanArgMax"
+description: "Return the index of the maximum value of an array, ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.nanargmax"
+  numpy:
+    api: "numpy.nanargmax"
+
+---
+operation: "NanArgMin"
+description: "Return the index of the minimum value of an array, ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.nanargmin"
+  numpy:
+    api: "numpy.nanargmin"
+
+---
+operation: "NanCumprod"
+description: "Cumulative product of elements along an axis, ignoring NaN values."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.nancumprod"
+  numpy:
+    api: "numpy.nancumprod"
+
+---
+operation: "NanCumsum"
+description: "Cumulative sum of elements along an axis, ignoring NaN values."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.nancumsum"
+  numpy:
+    api: "numpy.nancumsum"
+
+---
+operation: "NanMax"
+description: "Return the maximum of the array elements along a given axis, ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+  - name: "initial"
+    type: "Any"
+    default: null
+  - name: "where"
+    type: "Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.nanmax"
+  numpy:
+    api: "numpy.nanmax"
+  torch:
+    api: "torch.nanmax"
+    args:
+        a: "input"
+        axis: "dim"
+        # Torch only supports args a, dim, keepdim.
+        # Initial/Where not standard kwargs for top-level nanmax in simple case.
+
+---
+operation: "NanMean"
+description: "Return the mean of array elements along a given axis, ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+  - name: "where"
+    type: "Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.nanmean"
+  numpy:
+    api: "numpy.nanmean"
+  torch:
+    api: "torch.nanmean"
+    args:
+        a: "input"
+        axis: "dim"
+        # Torch nanmean signature differs from numpy.mean's general reducer style
+
+---
+operation: "NanMedian"
+description: "Return the median of array elements along a given axis, ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.nanmedian"
+  numpy:
+    api: "numpy.nanmedian"
+  torch:
+    api: "torch.nanmedian"
+    args:
+        a: "input"
+        axis: "dim"
+        keepdims: "keepdim"
+
+---
+operation: "NanMin"
+description: "Return the minimum of the array elements along a given axis, ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+  - name: "initial"
+    type: "Any"
+    default: null
+  - name: "where"
+    type: "Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.nanmin"
+  numpy:
+    api: "numpy.nanmin"
+  torch:
+    api: "torch.nanmin"
+    args:
+        a: "input"
+        axis: "dim"
+
+---
+operation: "NanPercentile"
+description: "Compute the percentile of the data along the specified axis, ignoring NaN values."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "q"
+    type: "number | Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+  - name: "method"
+    type: "str"
+    default: "linear"
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.nanpercentile"
+  numpy:
+    api: "numpy.nanpercentile"
+  torch:
+    api: "torch.nanquantile"
+    args:
+        a: "input"
+        q: "q"
+        axis: "dim"
+        # Torch uses quantile (0..1) instead of percentile (0..100) often.
+        # This requires scale adjustment if precise mapping needed.
+
+---
+operation: "NanProd"
+description: "Return the product of array elements along a given axis, ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.nanprod"
+  numpy:
+    api: "numpy.nanprod"

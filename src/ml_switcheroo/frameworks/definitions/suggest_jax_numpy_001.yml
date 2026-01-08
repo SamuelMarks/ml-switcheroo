@@ -1,0 +1,662 @@
+operation: "Abs"
+description: "Calculate the absolute value element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.abs"
+  numpy:
+    api: "numpy.abs"
+  torch:
+    api: "torch.abs"
+  tensorflow:
+    api: "tf.abs"
+  keras:
+    api: "keras.ops.abs"
+  mlx:
+    api: "mlx.core.abs"
+
+---
+operation: "Acos"
+description: "Compute element-wise inverse of trigonometric cosine of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.arccos"
+  numpy:
+    api: "numpy.arccos"
+  torch:
+    api: "torch.acos"
+  tensorflow:
+    api: "tf.math.acos"
+  keras:
+    api: "keras.ops.arccos"
+  mlx:
+    api: "mlx.core.arccos"
+
+---
+operation: "Acosh"
+description: "Calculate element-wise inverse of hyperbolic cosine of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.arccosh"
+  numpy:
+    api: "numpy.arccosh"
+  torch:
+    api: "torch.acosh"
+  tensorflow:
+    api: "tf.math.acosh"
+  keras:
+    api: "keras.ops.arccosh"
+  mlx:
+    api: "mlx.core.arccosh"
+
+---
+operation: "Add"
+description: "Add two arrays element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.add"
+    transformation_type: "infix"
+    operator: "+"
+  numpy:
+    api: "numpy.add"
+    transformation_type: "infix"
+    operator: "+"
+  torch:
+    api: "torch.add"
+    transformation_type: "infix"
+    operator: "+"
+  tensorflow:
+    api: "tf.math.add"
+    transformation_type: "infix"
+    operator: "+"
+  keras:
+    api: "keras.ops.add"
+    transformation_type: "infix"
+    operator: "+"
+  mlx:
+    api: "mlx.core.add"
+    transformation_type: "infix"
+    operator: "+"
+
+---
+operation: "All"
+description: "Test whether all array elements along a given axis evaluate to True."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | tuple | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.all"
+  numpy:
+    api: "numpy.all"
+  torch:
+    api: "torch.all"
+    args:
+      axis: "dim"
+      keepdims: "keepdim"
+  tensorflow:
+    api: "tf.math.reduce_all"
+    args:
+      a: "input_tensor"
+      keepdims: "keepdims"
+  keras:
+    api: "keras.ops.all"
+  mlx:
+    api: "mlx.core.all"
+    args:
+      keepdims: "keepdims"
+
+---
+operation: "AllClose"
+description: "Check if two arrays are element-wise approximately equal within a tolerance."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "rtol"
+    type: "float"
+    default: 1.0e-05
+  - name: "atol"
+    type: "float"
+    default: 1.0e-08
+  - name: "equal_nan"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.allclose"
+  numpy:
+    api: "numpy.allclose"
+  torch:
+    api: "torch.allclose"
+    args:
+      a: "input"
+      b: "other"
+  mlx:
+    api: "mlx.core.allclose"
+
+---
+operation: "Max"
+description: "Return the maximum of an array or maximum along an axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | tuple | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.max"
+  numpy:
+    api: "numpy.max"
+  torch:
+    api: "torch.max"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  tensorflow:
+    api: "tf.math.reduce_max"
+    args:
+      a: "input_tensor"
+  keras:
+    api: "keras.ops.max"
+  mlx:
+    api: "mlx.core.max"
+
+---
+operation: "Min"
+description: "Return the minimum of an array or minimum along an axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | tuple | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.min"
+  numpy:
+    api: "numpy.min"
+  torch:
+    api: "torch.min"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  tensorflow:
+    api: "tf.math.reduce_min"
+    args:
+      a: "input_tensor"
+  keras:
+    api: "keras.ops.min"
+  mlx:
+    api: "mlx.core.min"
+
+---
+operation: "Angle"
+description: "Return the angle of a complex valued number or array."
+std_args:
+  - name: "z"
+    type: "Tensor"
+  - name: "deg"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.angle"
+  numpy:
+    api: "numpy.angle"
+  torch:
+    api: "torch.angle"
+    # Note: Torch does not support 'deg' argument natively
+    args:
+      z: "input"
+  tensorflow:
+    api: "tf.math.angle"
+    args:
+      z: "input"
+
+---
+operation: "Any"
+description: "Test whether any of the array elements along a given axis evaluate to True."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | tuple | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.any"
+  numpy:
+    api: "numpy.any"
+  torch:
+    api: "torch.any"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  tensorflow:
+    api: "tf.math.reduce_any"
+    args:
+      a: "input_tensor"
+  keras:
+    api: "keras.ops.any"
+  mlx:
+    api: "mlx.core.any"
+
+---
+operation: "Append"
+description: "Return a new array with values appended to the end of the original array."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.append"
+  numpy:
+    api: "numpy.append"
+  keras:
+    api: "keras.ops.append"
+  # Torch/MLX/TF use concatenate/cat strategies, no direct 'append' equivalent
+
+---
+operation: "ApplyAlongAxis"
+description: "Apply a function to 1D array slices along an axis."
+std_args:
+  - name: "func1d"
+    type: "Callable"
+  - name: "axis"
+    type: "int"
+  - name: "arr"
+    type: "Tensor"
+  - name: "args"
+    is_variadic: true
+  - name: "kwargs"
+    kind: "var_keyword"
+variants:
+  jax:
+    api: "jax.numpy.apply_along_axis"
+  numpy:
+    api: "numpy.apply_along_axis"
+  # Other frameworks lack a direct equivalent (requires structured loop/map rewrite)
+
+---
+operation: "Arange"
+description: "Create an array of evenly-spaced values."
+std_args:
+  - name: "start"
+    type: "number"
+  - name: "stop"
+    type: "number | None"
+    default: null
+  - name: "step"
+    type: "number | None"
+    default: 1
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.arange"
+  numpy:
+    api: "numpy.arange"
+  torch:
+    api: "torch.arange"
+    # Torch arg position differs (start, end, step) vs (end).
+    # Handled by engine normalization if standard args matched to signature
+  tensorflow:
+    api: "tf.range"
+    args:
+      stop: "limit"
+      step: "delta"
+  keras:
+    api: "keras.ops.arange"
+  mlx:
+    api: "mlx.core.arange"
+
+---
+operation: "Asin"
+description: "Compute element-wise inverse of trigonometric sine of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.arcsin"
+  numpy:
+    api: "numpy.arcsin"
+  torch:
+    api: "torch.asin"
+  tensorflow:
+    api: "tf.math.asin"
+  keras:
+    api: "keras.ops.arcsin"
+  mlx:
+    api: "mlx.core.arcsin"
+
+---
+operation: "Asinh"
+description: "Calculate element-wise inverse of hyperbolic sine of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.arcsinh"
+  numpy:
+    api: "numpy.arcsinh"
+  torch:
+    api: "torch.asinh"
+  tensorflow:
+    api: "tf.math.asinh"
+  keras:
+    api: "keras.ops.arcsinh"
+  mlx:
+    api: "mlx.core.arcsinh"
+
+---
+operation: "Atan"
+description: "Compute element-wise inverse of trigonometric tangent of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.arctan"
+  numpy:
+    api: "numpy.arctan"
+  torch:
+    api: "torch.atan"
+  tensorflow:
+    api: "tf.math.atan"
+  keras:
+    api: "keras.ops.arctan"
+  mlx:
+    api: "mlx.core.arctan"
+
+---
+operation: "Atan2"
+description: "Compute the arctangent of x1/x2, choosing the correct quadrant."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.arctan2"
+  numpy:
+    api: "numpy.arctan2"
+  torch:
+    api: "torch.atan2"
+    args:
+      x1: "input"
+      x2: "other"
+  tensorflow:
+    api: "tf.math.atan2"
+    args:
+      x1: "y"
+      x2: "x"
+  keras:
+    api: "keras.ops.arctan2"
+  mlx:
+    api: "mlx.core.arctan2"
+
+---
+operation: "Atanh"
+description: "Calculate element-wise inverse of hyperbolic tangent of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.arctanh"
+  numpy:
+    api: "numpy.arctanh"
+  torch:
+    api: "torch.atanh"
+  tensorflow:
+    api: "tf.math.atanh"
+  keras:
+    api: "keras.ops.arctanh"
+  mlx:
+    api: "mlx.core.arctanh"
+
+---
+operation: "ArgMax"
+description: "Return the index of the maximum value of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.argmax"
+  numpy:
+    api: "numpy.argmax"
+  torch:
+    api: "torch.argmax"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  tensorflow:
+    api: "tf.math.argmax"
+    args:
+      a: "input"
+  keras:
+    api: "keras.ops.argmax"
+  mlx:
+    api: "mlx.core.argmax"
+
+---
+operation: "ArgMin"
+description: "Return the index of the minimum value of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.argmin"
+  numpy:
+    api: "numpy.argmin"
+  torch:
+    api: "torch.argmin"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  tensorflow:
+    api: "tf.math.argmin"
+    args:
+      a: "input"
+  keras:
+    api: "keras.ops.argmin"
+  mlx:
+    api: "mlx.core.argmin"
+
+---
+operation: "ArgPartition"
+description: "Returns indices that partially sort an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "kth"
+    type: "int"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  jax:
+    api: "jax.numpy.argpartition"
+  numpy:
+    api: "numpy.argpartition"
+  mlx:
+    api: "mlx.core.argpartition"
+
+---
+operation: "ArgSort"
+description: "Return indices that sort an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: -1
+  - name: "descending"
+    type: "bool"
+    default: false
+  - name: "stable"
+    type: "bool"
+    default: true
+variants:
+  jax:
+    api: "jax.numpy.argsort"
+  numpy:
+    api: "numpy.argsort"
+  torch:
+    api: "torch.argsort"
+    args:
+      a: "input"
+      axis: "dim"
+  tensorflow:
+    api: "tf.argsort"
+    args:
+      a: "values"
+      descending: "direction"
+      # Logic note: TF uses 'ASCENDING'/'DESCENDING' strings.
+  keras:
+    api: "keras.ops.argsort"
+  mlx:
+    api: "mlx.core.argsort"
+
+---
+operation: "ArgWhere"
+description: "Find the indices of nonzero array elements."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "size"
+    type: "int | None"
+    default: null
+    doc: "JAX-specific: Static size of the output for JIT compatibility."
+  - name: "fill_value"
+    type: "Any | None"
+    default: null
+    doc: "JAX-specific: Padding value when size is specified."
+variants:
+  jax:
+    api: "jax.numpy.argwhere"
+  numpy:
+    api: "numpy.argwhere"
+  torch:
+    api: "torch.argwhere"
+    args:
+      a: "input"
+  tensorflow:
+    api: "tf.where"
+    # tf.where(cond) is equivalent to argwhere, but requires cond=True handling.
+  keras:
+    api: "keras.ops.where"
+
+---
+operation: "Round"
+description: "Round an array to the given number of decimals."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "decimals"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.round"
+  numpy:
+    api: "numpy.round"
+  torch:
+    api: "torch.round"
+    args:
+      a: "input"
+  tensorflow:
+    api: "tf.math.round"
+    # TF round does not support 'decimals' argument natively
+  keras:
+    api: "keras.ops.round"
+  mlx:
+    api: "mlx.core.round"
+
+---
+operation: "Array"
+description: "Convert an object to an array."
+std_args:
+  - name: "object"
+    type: "Any"
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "copy"
+    type: "bool"
+    default: true
+  - name: "ndmin"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.array"
+  numpy:
+    api: "numpy.array"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+  mlx:
+    api: "mlx.core.array"
+  torch:
+    api: "torch.tensor"
+    args:
+        object: "data"

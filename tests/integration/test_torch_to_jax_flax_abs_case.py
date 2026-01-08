@@ -22,7 +22,21 @@ from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 # without relying on the file system state purely.
 class FixedSemantics(SemanticsManager):
   def __init__(self):
-    super().__init__()
+    # Do not call super init to avoid file I/O
+
+    self.data = {}
+    self.framework_configs = {}
+    self.test_templates = {}
+    self._known_rng_methods = set()
+    self.known_magic_args = set()
+    self.patterns = []
+    self.import_data = {}
+    self._reverse_index = {}
+    self._key_origins = {}
+    self._validation_status = {}
+    self._providers = {}
+    self._source_registry = {}
+
     # Use FlaxNNXAdapter traits for 'jax' key to enable structure rewrites
     adapter = FlaxNNXAdapter()
 
@@ -33,11 +47,6 @@ class FixedSemantics(SemanticsManager):
     adapter.apply_wiring(snapshot)
 
     # 2. Inject result into manager data structures
-    # Fix: Replacement for removed _merge_overlay method
-    # Ensure import_data exists if SemanticsManager doesn't create it anymore
-    if not hasattr(self, "import_data"):
-      self.import_data = {}
-
     merge_overlay_data(
       data=self.data,
       key_origins=self._key_origins,
@@ -60,6 +69,9 @@ class FixedSemantics(SemanticsManager):
     # Override configurations for 'jax' to use Flax NNX traits
     self.framework_configs["jax"] = {"traits": adapter.structural_traits.model_dump(exclude_unset=True)}
 
+    # CRITICAL FIX: Ensure 'torch' traits are present so source class recognition works
+    self.framework_configs["torch"] = {"traits": {"module_base": "torch.nn.Module", "forward_method": "forward"}}
+
     # Mock Aliases from Adapter
     self.framework_configs["jax"]["alias"] = {"module": "jax.numpy", "name": "jnp"}
 
@@ -67,10 +79,6 @@ class FixedSemantics(SemanticsManager):
     self._build_index()
 
     # Add explicit import map for torch.nn removal testing
-    # NOTE: We do NOT add torch.nn -> flax.nnx here, confirming the fix
-    # The default behavior logic comes from adapter.import_namespaces being loaded by manager
-    # but here we are mocking, so we manually inject the fixed alias
-
     self._source_registry["torch.nn"] = ("torch", SemanticTier.NEURAL)
 
     if "jax" not in self._providers:

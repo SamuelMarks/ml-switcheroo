@@ -42,8 +42,41 @@ def ensure_io_plugin():
 
 @pytest.fixture(scope="module")
 def hydrated_semantics():
-  # Initialize manager which loads standards_internal.py and adapter definitions
-  return SemanticsManager()
+  # Initialize manager
+  mgr = SemanticsManager()
+
+  # Force update the definitions to ensure IO ops are mapped to the plugin
+  # Use the definition that 'io_handler' expects (generic 'save', 'load' mapped from torch.save)
+
+  # For torch.save
+  mgr.update_definition(
+    "TorchSave",
+    {
+      "operation": "TorchSave",
+      "std_args": ["obj", "f"],
+      "variants": {
+        "torch": {"api": "torch.save"},
+        "jax": {"api": "save", "requires_plugin": "io_handler"},
+        "numpy": {"api": "save", "requires_plugin": "io_handler"},
+      },
+    },
+  )
+
+  # For torch.load
+  mgr.update_definition(
+    "TorchLoad",
+    {
+      "operation": "TorchLoad",
+      "std_args": ["f"],
+      "variants": {
+        "torch": {"api": "torch.load"},
+        "jax": {"api": "load", "requires_plugin": "io_handler"},
+        "numpy": {"api": "load", "requires_plugin": "io_handler"},
+      },
+    },
+  )
+
+  return mgr
 
 
 def test_io_to_jax(hydrated_semantics):

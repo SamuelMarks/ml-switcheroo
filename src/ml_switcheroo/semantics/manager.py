@@ -18,8 +18,6 @@ from pydantic import ValidationError
 
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.semantics.schema import OpDefinition, PatternDef
-from ml_switcheroo.semantics.standards_internal import MATH_OPS, NEURAL_OPS, EXTRAS_OPS
-from ml_switcheroo.semantics.merging import merge_tier_data
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 
 # Use base directly to avoid cycle
@@ -34,10 +32,9 @@ class SemanticsManager:
   """
   Central database for semantic mappings and configuration.
 
-  It aggregates data from three sources:
-  1.  **Internal Standards**: Hardcoded defaults (`standards_internal.py`).
-  2.  **File System**: JSON Specs (`semantics/`) and Overlays (`snapshots/`).
-  3.  **Code Registry**: Python classes (`FrameworkAdapter`, `Plugin`).
+  It aggregates data from sources:
+  1.  **File System**: JSON Specs (`semantics/`) and Overlays (`snapshots/`).
+  2.  **Code Registry**: Python classes (`FrameworkAdapter`, `Plugin`).
   """
 
   def __init__(self) -> None:
@@ -48,8 +45,8 @@ class SemanticsManager:
     self.test_templates: Dict[str, Dict] = {}
     self._known_rng_methods: Set[str] = set()
     self.known_magic_args: Set[str] = set()
-    self.patterns: List[PatternDef] = []  # NEW: Store patterns
-    self.import_data: Dict[str, Dict] = {}  # Initialize import_data
+    self.patterns: List[PatternDef] = []
+    self.import_data: Dict[str, Dict] = {}
 
     # Indexes
     self._reverse_index: Dict[str, Tuple[str, Dict]] = {}
@@ -62,52 +59,15 @@ class SemanticsManager:
     # Map[ImportPath, Tuple[Framework, Tier]]
     self._source_registry: Dict[str, Tuple[str, SemanticTier]] = {}
 
-    # --- Phase 1: Internal Defaults (Tiered Loading) ---
-    # Load Math Ops
-    merge_tier_data(
-      data=self.data,
-      key_origins=self._key_origins,
-      import_data=self.import_data,
-      framework_configs=self.framework_configs,
-      patterns=self.patterns,  # Pass patterns list
-      new_content=MATH_OPS,
-      tier=SemanticTier.ARRAY_API,
-      is_internal=True,
-    )
-
-    # Load Neural Ops (Trigger for state injection)
-    merge_tier_data(
-      data=self.data,
-      key_origins=self._key_origins,
-      import_data=self.import_data,
-      framework_configs=self.framework_configs,
-      patterns=self.patterns,
-      new_content=NEURAL_OPS,
-      tier=SemanticTier.NEURAL,
-      is_internal=True,
-    )
-
-    # Load Extras
-    merge_tier_data(
-      data=self.data,
-      key_origins=self._key_origins,
-      import_data=self.import_data,
-      framework_configs=self.framework_configs,
-      patterns=self.patterns,
-      new_content=EXTRAS_OPS,
-      tier=SemanticTier.EXTRAS,
-      is_internal=True,
-    )
-
-    # --- Phase 2: File System Loading ---
+    # --- Phase 1: File System Loading (Hub & Spokes) ---
     file_loader = KnowledgeBaseLoader(self)
     file_loader.load_knowledge_graph()
 
-    # --- Phase 3: Registry Hydration ---
+    # --- Phase 2: Registry Hydration ---
     registry_loader = RegistryLoader(self)
     registry_loader.hydrate()
 
-    # --- Phase 4: Indexing ---
+    # --- Phase 3: Indexing ---
     self._build_index()
 
   def _build_index(self) -> None:
@@ -168,15 +128,12 @@ class SemanticsManager:
     result = {}
     target_providers = self._providers.get(target_fw, {})
 
-    # Also get providers from parents if inheritance exists (e.g. Pax uses Jax)
     parent = self._resolve_inheritance(target_fw)
     parent_providers = self._providers.get(parent, {}) if parent else {}
 
     for src_path, (_, tier) in self._source_registry.items():
-      # Try specific target first
       target_config = target_providers.get(tier)
 
-      # Fallback to parent
       if not target_config:
         target_config = parent_providers.get(tier)
 
@@ -202,18 +159,7 @@ class SemanticsManager:
     return None
 
   def resolve_variant(self, abstract_id: str, target_fw: str) -> Optional[Dict[str, Any]]:
-    """
-    Resolves the implementation of an abstract operation for a specific framework.
-
-    Handles inheritance lookups (e.g. if 'flax_nnx' doesn't define 'abs', check 'jax').
-
-    Args:
-        abstract_id: The abstract operation name.
-        target_fw: The target framework key.
-
-    Returns:
-        The variant dictionary or None.
-    """
+    """Resolves the implementation of an abstract operation."""
     defn = self.data.get(abstract_id)
     if not defn:
       return None
@@ -244,14 +190,10 @@ class SemanticsManager:
 
   def get_definition(self, api_name: str) -> Optional[Tuple[str, Dict]]:
     """Reverse lookup from concrete API string or Abstract ID fallback."""
-    # 1. Try Reverse Index (Framework API path -> Abstract ID)
     res = self._reverse_index.get(api_name)
     if res:
       return res
 
-    # 2. Try Direct Abstract ID match (e.g. "Conv2d" -> "Conv2d")
-    # This falls back to checking the primary data store if the input string
-    # looks like an Abstract ID (common in DSL/Parser outputs).
     if api_name in self.data:
       return (api_name, self.data[api_name])
 
@@ -290,9 +232,7 @@ class SemanticsManager:
     return self.patterns
 
   def load_validation_report(self, report_path: Path) -> None:
-    """
-    Loads a CI verification report to gate unavailable operations.
-    """
+    """Loads a CI verification report to gate unavailable operations."""
     if not report_path.exists():
       print(f"⚠️ Validation report not found at {report_path}. Skipping gating.")
       return
@@ -306,12 +246,22 @@ class SemanticsManager:
       print(f"❌ Error loading validation report: {e}")
 
   def update_definition(self, abstract_id: str, new_data: Dict[str, Any]) -> None:
-    """
-    Updates an operation definition in memory and persists to disk.
-    Used by Harvester/Wizard tools.
-    """
+    """Updates an operation definition in memory and persists to disk."""
+    # Create a copy to inject defaults without mutating input
+    details_to_validate = new_data.copy()
+
+    # 1. Inject missing fields required by Schema if not present
+    if "operation" not in details_to_validate:
+      details_to_validate["operation"] = abstract_id
+    if "variants" not in details_to_validate:
+      details_to_validate["variants"] = {}
+    if "description" not in details_to_validate:
+      details_to_validate["description"] = f"Definition for {abstract_id}"
+    if "std_args" not in details_to_validate:
+      details_to_validate["std_args"] = []
+
     try:
-      validated = OpDefinition.model_validate(new_data)
+      validated = OpDefinition.model_validate(details_to_validate)
       final_data = validated.model_dump(by_alias=True, exclude_unset=True)
     except ValidationError as e:
       print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")

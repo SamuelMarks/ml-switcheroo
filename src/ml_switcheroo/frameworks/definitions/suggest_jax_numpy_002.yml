@@ -1,0 +1,550 @@
+operation: "ArrayEqual"
+description: "Check if two arrays are element-wise equal."
+std_args:
+  - name: "a1"
+    type: "Tensor"
+  - name: "a2"
+    type: "Tensor"
+  - name: "equal_nan"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.array_equal"
+  numpy:
+    api: "numpy.array_equal"
+  torch:
+    api: "torch.equal"
+    # Note: torch.equal does not strictly support equal_nan; behavior may differ
+  keras:
+    api: "keras.ops.equal"
+    # Logic note: Keras/TF equality is closer to element-wise 'equal', might need 'all' reduction.
+    # Leaving out strict direct mapping if semantics differ significantly on scalar return vs tensor return.
+
+---
+operation: "ArrayEquiv"
+description: "Check if two arrays are element-wise equal, allowing for broadcasting."
+std_args:
+  - name: "a1"
+    type: "Tensor"
+  - name: "a2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.array_equiv"
+  numpy:
+    api: "numpy.array_equiv"
+
+---
+operation: "ArraySplit"
+description: "Split an array into sub-arrays."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "int | Sequence[int]"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.array_split"
+  numpy:
+    api: "numpy.array_split"
+  torch:
+    api: "torch.tensor_split"
+    args:
+        ary: "input"
+        indices_or_sections: "indices"
+
+---
+operation: "AsArray"
+description: "Convert an object to an array."
+std_args:
+  - name: "a"
+    type: "Any"
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "copy"
+    type: "bool | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.asarray"
+  numpy:
+    api: "numpy.asarray"
+  torch:
+    api: "torch.as_tensor"
+    args:
+        a: "data"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+  mlx:
+    api: "mlx.core.array"
+
+---
+operation: "Asin"
+description: "Compute element-wise inverse of trigonometric sine of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.asin"
+  numpy:
+    api: "numpy.arcsin"
+  torch:
+    api: "torch.asin"
+  tensorflow:
+    api: "tf.math.asin"
+  keras:
+    api: "keras.ops.arcsin"
+  mlx:
+    api: "mlx.core.arcsin"
+
+---
+operation: "Asinh"
+description: "Calculate element-wise inverse of hyperbolic sine of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.asinh"
+  numpy:
+    api: "numpy.arcsinh"
+  torch:
+    api: "torch.asinh"
+  tensorflow:
+    api: "tf.math.asinh"
+  keras:
+    api: "keras.ops.arcsinh"
+  mlx:
+    api: "mlx.core.arcsinh"
+
+---
+operation: "Astype"
+description: "Convert an array to a specified dtype."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "dtype"
+    type: "DType"
+  - name: "copy"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.astype"
+  keras:
+    api: "keras.ops.cast"
+  tensorflow:
+    api: "tf.cast"
+  mlx:
+    api: "mlx.core.astype"
+  # Note: Numpy and Torch use methods (x.astype, x.to), no direct function mapping without adapter logic.
+
+---
+operation: "Atan"
+description: "Compute element-wise inverse of trigonometric tangent of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.atan"
+  numpy:
+    api: "numpy.arctan"
+  torch:
+    api: "torch.atan"
+  tensorflow:
+    api: "tf.math.atan"
+  keras:
+    api: "keras.ops.arctan"
+  mlx:
+    api: "mlx.core.arctan"
+
+---
+operation: "Atan2"
+description: "Compute the arctangent of x1/x2, choosing the correct quadrant."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.atan2"
+  numpy:
+    api: "numpy.arctan2"
+  torch:
+    api: "torch.atan2"
+    args:
+        x1: "input"
+        x2: "other"
+  tensorflow:
+    api: "tf.math.atan2"
+    args:
+        x1: "y"
+        x2: "x"
+  keras:
+    api: "keras.ops.arctan2"
+  mlx:
+    api: "mlx.core.arctan2"
+
+---
+operation: "Atanh"
+description: "Calculate element-wise inverse of hyperbolic tangent of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.atanh"
+  numpy:
+    api: "numpy.arctanh"
+  torch:
+    api: "torch.atanh"
+  tensorflow:
+    api: "tf.math.atanh"
+  keras:
+    api: "keras.ops.arctanh"
+  mlx:
+    api: "mlx.core.arctanh"
+
+---
+operation: "Atleast1d"
+description: "Convert inputs to arrays with at least 1 dimension."
+std_args:
+  - name: "arys"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.atleast_1d"
+  numpy:
+    api: "numpy.atleast_1d"
+  torch:
+    api: "torch.atleast_1d"
+
+---
+operation: "Atleast2d"
+description: "Convert inputs to arrays with at least 2 dimensions."
+std_args:
+  - name: "arys"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.atleast_2d"
+  numpy:
+    api: "numpy.atleast_2d"
+  torch:
+    api: "torch.atleast_2d"
+
+---
+operation: "Atleast3d"
+description: "Convert inputs to arrays with at least 3 dimensions."
+std_args:
+  - name: "arys"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.atleast_3d"
+  numpy:
+    api: "numpy.atleast_3d"
+  torch:
+    api: "torch.atleast_3d"
+
+---
+operation: "Average"
+description: "Compute the weighted average."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "weights"
+    type: "Tensor | None"
+    default: null
+  - name: "returned"
+    type: "bool"
+    default: false
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.average"
+  numpy:
+    api: "numpy.average"
+  keras:
+    api: "keras.ops.average"
+
+---
+operation: "Bartlett"
+description: "Return a Bartlett window of size M."
+std_args:
+  - name: "M"
+    type: "int"
+variants:
+  jax:
+    api: "jax.numpy.bartlett"
+  numpy:
+    api: "numpy.bartlett"
+  torch:
+    api: "torch.bartlett_window"
+    args:
+        M: "window_length"
+
+---
+operation: "Bfloat16"
+description: "Bfloat16 data type."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.bfloat16"
+  torch:
+    api: "torch.bfloat16"
+
+---
+operation: "Bincount"
+description: "Count the number of occurrences of each value in an integer array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "weights"
+    type: "Tensor | None"
+    default: null
+  - name: "minlength"
+    type: "int"
+    default: 0
+  - name: "length"
+    type: "int | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.bincount"
+  numpy:
+    api: "numpy.bincount"
+  torch:
+    api: "torch.bincount"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.bincount"
+    args:
+        x: "arr"
+
+---
+operation: "BitwiseAnd"
+description: "Compute the bitwise AND operation elementwise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.bitwise_and"
+  numpy:
+    api: "numpy.bitwise_and"
+  torch:
+    api: "torch.bitwise_and"
+  tensorflow:
+    api: "tf.bitwise.bitwise_and"
+  keras:
+    api: "keras.ops.bitwise_and"
+  mlx:
+    api: "mlx.core.bitwise_and"
+
+---
+operation: "BitwiseCount"
+description: "Counts the number of 1 bits in the binary representation."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.bitwise_count"
+  numpy:
+    api: "numpy.bitwise_count" # Note: New in Numpy 2.0? Usually available.
+  tensorflow:
+    api: "tf.math.count_nonzero" # Not strict equivalent, popcount not top-level in TF
+
+---
+operation: "BitwiseInvert"
+description: "Compute bit-wise inversion, or bit-wise NOT, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.bitwise_invert"
+  numpy:
+    api: "numpy.bitwise_invert"
+  torch:
+    api: "torch.bitwise_not"
+  tensorflow:
+    api: "tf.bitwise.invert"
+  keras:
+    api: "keras.ops.bitwise_invert"
+  mlx:
+    api: "mlx.core.bitwise_invert"
+
+---
+operation: "BitwiseLeftShift"
+description: "Shift the bits of an integer to the left."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.bitwise_left_shift"
+  numpy:
+    api: "numpy.bitwise_left_shift"
+  torch:
+    api: "torch.bitwise_left_shift"
+  tensorflow:
+    api: "tf.bitwise.left_shift"
+  keras:
+    api: "keras.ops.bitwise_left_shift"
+  mlx:
+    api: "mlx.core.bitwise_left_shift"
+
+---
+operation: "BitwiseNot"
+description: "Compute bit-wise inversion, or bit-wise NOT, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.bitwise_not"
+  numpy:
+    api: "numpy.bitwise_not"
+  torch:
+    api: "torch.bitwise_not"
+  tensorflow:
+    api: "tf.bitwise.invert"
+  keras:
+    api: "keras.ops.bitwise_not"
+  mlx:
+    api: "mlx.core.bitwise_not"
+
+---
+operation: "BitwiseOr"
+description: "Compute the bitwise OR operation elementwise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.bitwise_or"
+  numpy:
+    api: "numpy.bitwise_or"
+  torch:
+    api: "torch.bitwise_or"
+  tensorflow:
+    api: "tf.bitwise.bitwise_or"
+  keras:
+    api: "keras.ops.bitwise_or"
+  mlx:
+    api: "mlx.core.bitwise_or"
+
+---
+operation: "BitwiseRightShift"
+description: "Shift the bits of an integer to the right."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.bitwise_right_shift"
+  numpy:
+    api: "numpy.bitwise_right_shift"
+  torch:
+    api: "torch.bitwise_right_shift"
+  tensorflow:
+    api: "tf.bitwise.right_shift"
+  keras:
+    api: "keras.ops.bitwise_right_shift"
+  mlx:
+    api: "mlx.core.bitwise_right_shift"
+
+---
+operation: "BitwiseXor"
+description: "Compute the bitwise XOR operation elementwise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.bitwise_xor"
+  numpy:
+    api: "numpy.bitwise_xor"
+  torch:
+    api: "torch.bitwise_xor"
+  tensorflow:
+    api: "tf.bitwise.bitwise_xor"
+  keras:
+    api: "keras.ops.bitwise_xor"
+  mlx:
+    api: "mlx.core.bitwise_xor"
+
+---
+operation: "Blackman"
+description: "Return a Blackman window of size M."
+std_args:
+  - name: "M"
+    type: "int"
+variants:
+  jax:
+    api: "jax.numpy.blackman"
+  numpy:
+    api: "numpy.blackman"
+  torch:
+    api: "torch.blackman_window"
+    args:
+        M: "window_length"
+
+---
+operation: "Block"
+description: "Create an array from a list of blocks."
+std_args:
+  - name: "arrays"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.block"
+  numpy:
+    api: "numpy.block"
+
+---
+operation: "Bool"
+description: "Boolean type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.bool_"
+  numpy:
+    api: "numpy.bool_"
+  torch:
+    api: "torch.bool"

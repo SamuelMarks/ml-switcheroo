@@ -1,0 +1,486 @@
+operation: "Sum"
+description: "Sum of the elements of the array over a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | tuple[int, ...] | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+  - name: "initial"
+    type: "Any"
+    default: null
+  - name: "where"
+    type: "Tensor | None"
+    default: null
+  - name: "promote_integers"
+    type: "bool"
+    default: true
+variants:
+  jax:
+    api: "jax.numpy.sum"
+  numpy:
+    api: "numpy.sum"
+    args:
+      promote_integers: null # not in numpy
+---
+operation: "Swapaxes"
+description: "Swap two axes of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis1"
+    type: "int"
+  - name: "axis2"
+    type: "int"
+variants:
+  jax:
+    api: "jax.numpy.swapaxes"
+  numpy:
+    api: "numpy.swapaxes"
+---
+operation: "Take"
+description: "Take elements from an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "mode"
+    type: "str | None"
+    default: null
+  - name: "fill_value"
+    type: "Any"
+    default: null
+  - name: "unique_indices"
+    type: "bool"
+    default: false
+  - name: "indices_are_sorted"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.take"
+  numpy:
+    api: "numpy.take"
+    args:
+      unique_indices: null
+      indices_are_sorted: null
+      fill_value: null
+---
+operation: "TakeAlongAxis"
+description: "Take elements from an array."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: -1
+  - name: "mode"
+    type: "str | None"
+    default: null
+  - name: "fill_value"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.take_along_axis"
+  numpy:
+    api: "numpy.take_along_axis"
+    args:
+      fill_value: null
+      mode: null # JAX mode supersedes numpy mode options
+---
+operation: "Tan"
+description: "Compute a trigonometric tangent of each element of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.tan"
+  numpy:
+    api: "numpy.tan"
+---
+operation: "Tanh"
+description: "Calculate element-wise hyperbolic tangent of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.tanh"
+  numpy:
+    api: "numpy.tanh"
+---
+operation: "Tensordot"
+description: "Compute the tensor dot product of two N-dimensional arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "axes"
+    type: "int | Sequence[int] | Sequence[Sequence[int]]"
+    default: 2
+  - name: "precision"
+    type: "Any"
+    default: null
+  - name: "preferred_element_type"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.tensordot"
+  numpy:
+    api: "numpy.tensordot"
+    args:
+      precision: null
+      preferred_element_type: null
+---
+operation: "Tile"
+description: "Construct an array by repeating A along specified dimensions."
+std_args:
+  - name: "A"
+    type: "Tensor"
+  - name: "reps"
+    type: "int | Sequence[int]"
+variants:
+  jax:
+    api: "jax.numpy.tile"
+  numpy:
+    api: "numpy.tile"
+---
+operation: "Trace"
+description: "Calculate sum of the diagonal of input along the given axes."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "offset"
+    type: "int | Tensor"
+    default: 0
+  - name: "axis1"
+    type: "int"
+    default: 0
+  - name: "axis2"
+    type: "int"
+    default: 1
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.trace"
+  numpy:
+    api: "numpy.trace"
+---
+operation: "Transpose"
+description: "Return a transposed version of an N-dimensional array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axes"
+    type: "Sequence[int] | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.transpose"
+  numpy:
+    api: "numpy.transpose"
+---
+operation: "Trapezoid"
+description: "Integrate along the given axis using the composite trapezoidal rule."
+std_args:
+  - name: "y"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor | None"
+    default: null
+  - name: "dx"
+    type: "float | Tensor"
+    default: 1.0
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  jax:
+    api: "jax.numpy.trapezoid"
+  numpy:
+    api: "numpy.trapezoid"
+---
+operation: "Tri"
+description: "Return an array with ones on and below the diagonal and zeros elsewhere."
+std_args:
+  - name: "N"
+    type: "int"
+  - name: "M"
+    type: "int | None"
+    default: null
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.tri"
+  numpy:
+    api: "numpy.tri"
+---
+operation: "Tril"
+description: "Return lower triangle of an array."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.tril"
+  numpy:
+    api: "numpy.tril"
+---
+operation: "TrilIndices"
+description: "Return the indices of lower triangle of an array."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "m"
+    type: "int | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.tril_indices"
+  numpy:
+    api: "numpy.tril_indices"
+---
+operation: "TrilIndicesFrom"
+description: "Return the indices of lower triangle of a given array."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.tril_indices_from"
+  numpy:
+    api: "numpy.tril_indices_from"
+---
+operation: "TrimZeros"
+description: "Trim leading and/or trailing zeros of the input array."
+std_args:
+  - name: "filt"
+    type: "Tensor"
+  - name: "trim"
+    type: "str"
+    default: "fb"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.trim_zeros"
+  numpy:
+    api: "numpy.trim_zeros"
+    args:
+      axis: null # Numpy trim_zeros is 1D only/does not support axis arg
+---
+operation: "Triu"
+description: "Return upper triangle of an array."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.triu"
+  numpy:
+    api: "numpy.triu"
+---
+operation: "TriuIndices"
+description: "Return the indices of upper triangle of an array."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "m"
+    type: "int | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.triu_indices"
+  numpy:
+    api: "numpy.triu_indices"
+---
+operation: "TriuIndicesFrom"
+description: "Return the indices of upper triangle of a given array."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.triu_indices_from"
+  numpy:
+    api: "numpy.triu_indices_from"
+---
+operation: "TrueDivide"
+description: "Calculates the division of x1 by x2 element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.true_divide"
+  numpy:
+    api: "numpy.true_divide"
+---
+operation: "Trunc"
+description: "Round input to the nearest integer towards zero."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.trunc"
+  numpy:
+    api: "numpy.trunc"
+---
+operation: "Ufunc"
+description: "Universal functions which operation element-by-element on arrays."
+op_type: "class"
+std_args:
+  - name: "func"
+    type: "Callable"
+  - name: "nin"
+    type: "int"
+  - name: "nout"
+    type: "int"
+  - name: "identity"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.ufunc"
+  numpy:
+    api: "numpy.ufunc"
+---
+operation: "Uint"
+description: "A JAX scalar constructor of type uint64."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.uint"
+  numpy:
+    api: "numpy.uint64"
+---
+operation: "Uint16"
+description: "A JAX scalar constructor of type uint16."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.uint16"
+  numpy:
+    api: "numpy.uint16"
+---
+operation: "Uint2"
+description: "A JAX scalar constructor of type uint2."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.uint2"
+---
+operation: "Uint32"
+description: "A JAX scalar constructor of type uint32."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.uint32"
+  numpy:
+    api: "numpy.uint32"
+---
+operation: "Uint4"
+description: "A JAX scalar constructor of type uint4."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.uint4"
+---
+operation: "Uint64"
+description: "A JAX scalar constructor of type uint64."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.uint64"
+  numpy:
+    api: "numpy.uint64"
+---
+operation: "Uint8"
+description: "A JAX scalar constructor of type uint8."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.uint8"
+  numpy:
+    api: "numpy.uint8"
+---
+operation: "Union1d"
+description: "Compute the set union of two 1D arrays."
+std_args:
+  - name: "ar1"
+    type: "Tensor"
+  - name: "ar2"
+    type: "Tensor"
+  - name: "size"
+    type: "int | None"
+    default: null
+  - name: "fill_value"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.union1d"
+  numpy:
+    api: "numpy.union1d"
+    args:
+      size: null
+      fill_value: null

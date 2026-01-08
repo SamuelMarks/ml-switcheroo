@@ -165,6 +165,10 @@ def merge_tier_data(
       patterns: Master list of fusion patterns (optional).
       is_internal: If True, marks entries as internal defaults which can be silently overwritten.
   """
+  # Safety check: Guard against malformed content (e.g. strings or lists)
+  if not isinstance(new_content, dict):
+    return
+
   data_copy = new_content.copy()
 
   if "__imports__" in data_copy:

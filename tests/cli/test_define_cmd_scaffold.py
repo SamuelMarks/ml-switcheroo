@@ -15,17 +15,17 @@ from ml_switcheroo.cli.handlers.define import handle_define
 @pytest.fixture
 def scaffold_yaml(tmp_path):
   """Creates a YAML asking for a plugin."""
-  content = """
-operation: "ComplexOp"
-description: "Op needing plugin"
-std_args: []
-variants:
-  torch:
-    api: "torch.complex"
-scaffold_plugins:
-  - name: "complex_plugin"
-    type: "call_transform"
-    doc: "Handles complex logic"
+  content = """ 
+operation: "ComplexOp" 
+description: "Op needing plugin" 
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.complex" 
+scaffold_plugins: 
+  - name: "complex_plugin" 
+    type: "call_transform" 
+    doc: "Handles complex logic" 
 """
   f = tmp_path / "complex.yaml"
   f.write_text(content)
@@ -88,13 +88,15 @@ def test_define_scaffolds_plugin(scaffold_yaml, mock_env, tmp_path):
         # Mock yaml availability
         m_yaml = MagicMock()
         # Simple parser for the fixture above
-        m_yaml.safe_load.return_value = {
+        data = {
           "operation": "ComplexOp",
           "description": "Desc",
           "std_args": [],
           "variants": {"torch": {"api": "torch.complex"}},
           "scaffold_plugins": [{"name": "complex_plugin", "type": "call_transform", "doc": "Handles complex logic"}],
         }
+        m_yaml.safe_load_all.return_value = [data]
+        m_yaml.safe_load.return_value = data
 
         # Force YAML injection since we can't rely on real PyYAML in all test envs
         with patch("ml_switcheroo.cli.handlers.define.yaml", m_yaml):

@@ -1,8 +1,8 @@
 """
-Integration Tests for EX03: Array Manipulation (Plugins/DSL).
+Integration Tests for StableHLO Codegen and Array Manipulation.
 
 Validates:
-1. `torch.permute` (Varags) -> `jax.numpy.transpose` (Tuple) via `pack_to_tuple` DSL Feature.
+1. `torch.permute` (Varags) -> `jax.numpy.transpose` (Tuple) via packing DSL.
 2. `torch.permute` -> `tensorflow.transpose`.
 3. `torch.permute` -> `numpy.transpose`.
 """
@@ -12,9 +12,6 @@ import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-
-# Import INTERNAL_OPS to force refresh logic
-from ml_switcheroo.semantics.standards_internal import INTERNAL_OPS
 from tests.utils.ast_utils import cmp_ast
 
 SOURCE_TORCH = """ 
@@ -53,46 +50,24 @@ def transpose_matrices(batch):
 def semantics():
   mgr = SemanticsManager()
 
-  # CRITICAL: Force update permute_dims to ensure IS_VARIADIC and PACK_TO_TUPLE
-  # attributes are set in the in-memory knowledge base.
-  # This prevents stale JSON snapshots on disk from overriding the new ODL standard
-  # during test execution (split-brain problem).
-  if "permute_dims" in INTERNAL_OPS:
-    # Fix: Construct strict OpDefinition dict to pass Pydantic validation
-    op_data = INTERNAL_OPS["permute_dims"].copy()
-    if "operation" not in op_data:
-      op_data["operation"] = "permute_dims"
-    if "variants" not in op_data:
-      op_data["variants"] = {}
+  # Inject Robust Definition for PermuteDims logic
+  op_data = {
+    "operation": "permute_dims",
+    "description": "Permute tensor dimensions.",
+    # Use dictionary structure with 'is_variadic' key to enable packing
+    "std_args": ["x", {"name": "axes", "is_variadic": True}],
+    "variants": {
+      "torch": {"api": "torch.permute"},
+      "jax": {"api": "jax.numpy.transpose", "pack_to_tuple": "axes"},
+      "tensorflow": {"api": "tf.transpose", "pack_to_tuple": "perm"},
+      "numpy": {"api": "numpy.transpose", "pack_to_tuple": "axes"},
+    },
+  }
 
-    mgr.update_definition("permute_dims", op_data)
+  mgr.update_definition("permute_dims", op_data)
 
-  # Also ensure the frameworks have the mapping set correctly if they rely on overlays
-  # We manually inject the target variants for this specific test to guarantee correctness
-  # regardless of bootstrap state.
-
-  permute_def = mgr.data.get("permute_dims", {})
-  variants = permute_def.get("variants", {})
-
-  # Ensure JAX has packing
-  if "jax" not in variants or not variants["jax"]:
-    variants["jax"] = {"api": "jnp.transpose", "pack_to_tuple": "axes"}
-  else:
-    variants["jax"]["pack_to_tuple"] = "axes"
-
-  # Ensure TensorFlow has packing
-  if "tensorflow" not in variants or not variants["tensorflow"]:
-    variants["tensorflow"] = {"api": "tf.transpose", "pack_to_tuple": "perm"}
-  else:
-    variants["tensorflow"]["pack_to_tuple"] = "perm"
-
-  # Ensure NumPy has packing
-  if "numpy" not in variants or not variants["numpy"]:
-    variants["numpy"] = {"api": "numpy.transpose", "pack_to_tuple": "axes"}
-  else:
-    variants["numpy"]["pack_to_tuple"] = "axes"
-
-  mgr.data["permute_dims"]["variants"] = variants
+  # Also map direct API lookup aliases
+  mgr._reverse_index["torch.permute"] = ("permute_dims", op_data)
 
   return mgr
 

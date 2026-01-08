@@ -5,7 +5,7 @@ This module implements the logic for populating the Semantic Knowledge Base via
 Automated Discovery and Specification Imports.
 
 It handles:
-1.  **Ingestion**: Importing external standards (ONNX, Array API) and Internal Golden Sets (Hub).
+1.  **Ingestion**: Importing external standards (ONNX, Array API).
 2.  **Scaffolding**: Generating skeleton mappings.
 3.  **Discovery**: Identifying Neural Layers via Consensus and linking them to the Semantic Hub.
 4.  **StableHLO**: Importing StableHLO specificiation from markdown.
@@ -28,12 +28,11 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
-from ml_switcheroo.importers.sass_reader import SassSpecImporter  # NEW
+from ml_switcheroo.importers.sass_reader import SassSpecImporter
 from ml_switcheroo.semantics.autogen import SemanticPersister
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
-from ml_switcheroo.frameworks.loader import get_definitions_path  # NEW
-from ml_switcheroo.semantics.standards_internal import EXTRAS_OPS, MATH_OPS, NEURAL_OPS
+from ml_switcheroo.frameworks.loader import get_definitions_path
 from ml_switcheroo.utils.console import (
   console,
   log_error,
@@ -82,20 +81,10 @@ def handle_import_spec(target: Path) -> int:
   out_dir = resolve_semantics_dir()
   out_dir.mkdir(parents=True, exist_ok=True)
 
-  # 1. Internal Standards (Split by Tier)
+  # 1. Internal Standards (Deprecated Path)
   if str(target) == "internal":
-    log_info("Loading Internal Standards Spec (Math, Neural, Extras)...")
-
-    # Process MATH
-    _save_spec(out_dir, "k_array_api.json", MATH_OPS)
-
-    # Process NEURAL
-    _save_spec(out_dir, "k_neural_net.json", NEURAL_OPS)
-
-    # Process EXTRAS
-    _save_spec(out_dir, "k_framework_extras.json", EXTRAS_OPS)
-
-    log_success("Hydrated internal specs to semantics folder.")
+    log_warning("Importing 'internal' standard from python file is deprecated.")
+    log_info("The Knowledge Base is now JSON-native. This step is no longer required.")
     return 0
 
   # 2. Parsing Logic for Markdown Files
@@ -120,7 +109,7 @@ def handle_import_spec(target: Path) -> int:
       _save_spec(out_dir, "k_neural_net.json", data)
       return 0
 
-  # 3. Parsing Logic for HTML Files (NVIDIA SASS) - NEW
+  # 3. Parsing Logic for HTML Files (NVIDIA SASS)
   elif target.is_file() and target.suffix == ".html":
     log_info(f"Detected SASS HTML Spec: {target.name}")
     importer = SassSpecImporter()
@@ -142,7 +131,7 @@ def handle_import_spec(target: Path) -> int:
     return 0
 
   else:
-    log_error("Invalid input. Must be 'internal', .md (ONNX/StableHLO), .html (SASS), or dir of stubs (Array API).")
+    log_error("Invalid input. Must be .md (ONNX/StableHLO), .html (SASS), or dir of stubs (Array API).")
     return 1
 
 

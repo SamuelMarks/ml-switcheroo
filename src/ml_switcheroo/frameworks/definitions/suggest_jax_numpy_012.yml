@@ -1,0 +1,454 @@
+operation: "Roots"
+description: "Returns the roots of a polynomial given the coefficients."
+std_args:
+  - name: "p"
+    type: "Tensor"
+  - name: "strip_zeros"
+    type: "bool"
+    default: true
+variants:
+  jax:
+    api: "jax.numpy.roots"
+  numpy:
+    api: "numpy.roots"
+---
+operation: "Rot90"
+description: "Rotate an array by 90 degrees counterclockwise in the plane specified by axes."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 1
+  - name: "axes"
+    type: "tuple[int, int]"
+    default: [0, 1]
+variants:
+  jax:
+    api: "jax.numpy.rot90"
+  numpy:
+    api: "numpy.rot90"
+---
+operation: "Round"
+description: "Round input evenly to the given number of decimals."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "decimals"
+    type: "int"
+    default: 0
+  - name: "out"
+    type: "None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.round"
+  numpy:
+    api: "numpy.round"
+---
+operation: "Save"
+description: "Save an array to a binary file in NumPy .npy format."
+std_args:
+  - name: "file"
+    type: "str | Any"
+  - name: "arr"
+    type: "Tensor"
+  - name: "allow_pickle"
+    type: "bool"
+    default: true
+variants:
+  jax:
+    api: "jax.numpy.save"
+  numpy:
+    api: "numpy.save"
+---
+operation: "Savez"
+description: "Save several arrays into a single file in uncompressed .npz format."
+std_args:
+  - name: "file"
+    type: "str | Any"
+  - name: "args"
+    is_variadic: true
+  - name: "allow_pickle"
+    type: "bool"
+    default: true
+  - name: "kwds"
+    kind: "var_keyword"
+variants:
+  jax:
+    api: "jax.numpy.savez"
+  numpy:
+    api: "numpy.savez"
+---
+operation: "SearchSorted"
+description: "Perform a binary search within a sorted array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "v"
+    type: "Tensor"
+  - name: "side"
+    type: "str"
+    default: "left"
+  - name: "sorter"
+    type: "Tensor | None"
+    default: null
+  - name: "method"
+    type: "str"
+    default: "scan"
+variants:
+  jax:
+    api: "jax.numpy.searchsorted"
+  numpy:
+    api: "numpy.searchsorted"
+---
+operation: "Select"
+description: "Select values based on a series of conditions."
+std_args:
+  - name: "condlist"
+    type: "List[Tensor]"
+  - name: "choicelist"
+    type: "List[Tensor]"
+  - name: "default"
+    type: "Tensor | int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.select"
+  numpy:
+    api: "numpy.select"
+---
+operation: "SetPrintoptions"
+description: "Set printing options."
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "kwargs"
+    kind: "var_keyword"
+variants:
+  jax:
+    api: "jax.numpy.set_printoptions"
+  numpy:
+    api: "numpy.set_printoptions"
+---
+operation: "SetDiff1d"
+description: "Compute the set difference of two 1D arrays."
+std_args:
+  - name: "ar1"
+    type: "Tensor"
+  - name: "ar2"
+    type: "Tensor"
+  - name: "assume_unique"
+    type: "bool"
+    default: false
+  - name: "size"
+    type: "int | None"
+    default: null
+  - name: "fill_value"
+    type: "Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.setdiff1d"
+  numpy:
+    api: "numpy.setdiff1d"
+---
+operation: "SetXor1d"
+description: "Compute the set-wise xor of elements in two arrays."
+std_args:
+  - name: "ar1"
+    type: "Tensor"
+  - name: "ar2"
+    type: "Tensor"
+  - name: "assume_unique"
+    type: "bool"
+    default: false
+  - name: "size"
+    type: "int | None"
+    default: null
+  - name: "fill_value"
+    type: "Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.setxor1d"
+  numpy:
+    api: "numpy.setxor1d"
+---
+operation: "Shape"
+description: "Return the shape an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.shape"
+  numpy:
+    api: "numpy.shape"
+---
+operation: "Sign"
+description: "Return an element-wise indication of sign of the input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.sign"
+  numpy:
+    api: "numpy.sign"
+---
+operation: "Signbit"
+description: "Return the sign bit of array elements."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.signbit"
+  numpy:
+    api: "numpy.signbit"
+---
+operation: "SignedInteger"
+description: "Abstract base class of all signed integer scalar types."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.signedinteger"
+  numpy:
+    api: "numpy.signedinteger"
+---
+operation: "Sin"
+description: "Compute a trigonometric sine of each element of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.sin"
+  numpy:
+    api: "numpy.sin"
+---
+operation: "Sinc"
+description: "Calculate the normalized sinc function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.sinc"
+  numpy:
+    api: "numpy.sinc"
+---
+operation: "Single"
+description: "A JAX scalar constructor of type float32."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  jax:
+    api: "jax.numpy.single"
+  numpy:
+    api: "numpy.single"
+---
+operation: "Sinh"
+description: "Calculate element-wise hyperbolic sine of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.sinh"
+  numpy:
+    api: "numpy.sinh"
+---
+operation: "Size"
+description: "Return number of elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.size"
+  numpy:
+    api: "numpy.size"
+---
+operation: "Sort"
+description: "Return a sorted copy of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: -1
+  - name: "kind"
+    type: "None"
+    default: null
+  - name: "order"
+    type: "None"
+    default: null
+  - name: "stable"
+    type: "bool"
+    default: true
+  - name: "descending"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.sort"
+  numpy:
+    api: "numpy.sort"
+---
+operation: "SortComplex"
+description: "Return a sorted copy of complex array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.sort_complex"
+  numpy:
+    api: "numpy.sort_complex"
+---
+operation: "Spacing"
+description: "Return the spacing between x and the next adjacent number."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.spacing"
+  numpy:
+    api: "numpy.spacing"
+---
+operation: "Split"
+description: "Split an array into sub-arrays."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "int | Sequence[int] | Tensor"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.split"
+  numpy:
+    api: "numpy.split"
+---
+operation: "Sqrt"
+description: "Calculates element-wise non-negative square root of the input array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.sqrt"
+  numpy:
+    api: "numpy.sqrt"
+---
+operation: "Square"
+description: "Calculate element-wise square of the input array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.square"
+  numpy:
+    api: "numpy.square"
+---
+operation: "Squeeze"
+description: "Remove one or more length-1 axes from array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.squeeze"
+  numpy:
+    api: "numpy.squeeze"
+---
+operation: "Stack"
+description: "Join arrays along a new axis."
+std_args:
+  - name: "arrays"
+    type: "Sequence[Tensor]"
+  - name: "axis"
+    type: "int"
+    default: 0
+  - name: "out"
+    type: "None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.stack"
+  numpy:
+    api: "numpy.stack"
+---
+operation: "Std"
+description: "Compute the standard deviation along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "out"
+    type: "None"
+    default: null
+  - name: "ddof"
+    type: "int"
+    default: 0
+  - name: "keepdims"
+    type: "bool"
+    default: false
+  - name: "where"
+    type: "Tensor | None"
+    default: null
+  - name: "mean"
+    type: "Tensor | None"
+    default: null
+  - name: "correction"
+    type: "int | float | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.std"
+  numpy:
+    api: "numpy.std"
+---
+operation: "Subtract"
+description: "Subtract two arrays element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+  - name: "out"
+    type: "None"
+    default: null
+  - name: "where"
+    type: "None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.subtract"
+    transformation_type: "infix"
+    operator: "-"
+  numpy:
+    api: "numpy.subtract"
+    transformation_type: "infix"
+    operator: "-"

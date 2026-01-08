@@ -1,0 +1,691 @@
+operation: "Cov"
+description: "Estimate the weighted sample covariance."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor | None"
+    default: null
+  - name: "rowvar"
+    type: "bool"
+    default: true
+  - name: "bias"
+    type: "bool"
+    default: false
+  - name: "ddof"
+    type: "int | None"
+    default: null
+  - name: "fweights"
+    type: "Tensor | None"
+    default: null
+  - name: "aweights"
+    type: "Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.cov"
+  numpy:
+    api: "numpy.cov"
+  torch:
+    api: "torch.cov"
+    args:
+        m: "input"
+        # Note: Torch cov is limited (only fweights/aweights in recent versions, no bias arg)
+  tensorflow:
+    api: "tf.math.reduce_variance"
+    # TF lacks direct equivalent 'cov' function with full numpy signature
+    # Skipping direct mapping to avoid misleading partial support
+
+---
+operation: "Cross"
+description: "Compute the (batched) cross product of two arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "axisa"
+    type: "int"
+    default: -1
+  - name: "axisb"
+    type: "int"
+    default: -1
+  - name: "axisc"
+    type: "int"
+    default: -1
+  - name: "axis"
+    type: "int | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.cross"
+  numpy:
+    api: "numpy.cross"
+  torch:
+    api: "torch.cross"
+    args:
+        a: "input"
+        b: "other"
+        axis: "dim"
+  tensorflow:
+    api: "tf.linalg.cross"
+    args:
+      axis: "axis" # TF lacks axisa/axisb distinction
+
+---
+operation: "Csingle"
+description: "Complex64 data type constructor (CSingle)."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.csingle"
+  numpy:
+    api: "numpy.csingle"
+
+---
+operation: "Cumprod"
+description: "Cumulative product of elements along an axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.cumprod"
+  numpy:
+    api: "numpy.cumprod"
+  torch:
+    api: "torch.cumprod"
+    args:
+        a: "input"
+        axis: "dim"
+  tensorflow:
+    api: "tf.math.cumprod"
+    args:
+        a: "x"
+  keras:
+    api: "keras.ops.cumprod"
+    args:
+        a: "x"
+  mlx:
+    api: "mlx.core.cumprod"
+    args:
+        a: "a"
+        axis: "axis"
+
+---
+operation: "Cumsum"
+description: "Cumulative sum of elements along an axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.cumsum"
+  numpy:
+    api: "numpy.cumsum"
+  torch:
+    api: "torch.cumsum"
+    args:
+        a: "input"
+        axis: "dim"
+  tensorflow:
+    api: "tf.math.cumsum"
+    args:
+        a: "x"
+  keras:
+    api: "keras.ops.cumsum"
+    args:
+        a: "x"
+  mlx:
+    api: "mlx.core.cumsum"
+    args:
+        a: "a"
+        axis: "axis"
+
+---
+operation: "CumulativeProd"
+description: "Cumulative product along the axis of an array (Array API)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "include_initial"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.cumulative_prod"
+  numpy:
+    api: "numpy.cumulative_prod"
+
+---
+operation: "CumulativeSum"
+description: "Cumulative sum along the axis of an array (Array API)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+  - name: "include_initial"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.cumulative_sum"
+  numpy:
+    api: "numpy.cumulative_sum"
+
+---
+operation: "Deg2rad"
+description: "Convert angles from degrees to radians."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.deg2rad"
+  numpy:
+    api: "numpy.deg2rad"
+  torch:
+    api: "torch.deg2rad"
+    args:
+      x: "input"
+  tensorflow:
+    api: "tf.math.multiply"
+    macro_template: "{x} * (3.141592653589793 / 180.0)"
+    # TF lacks direct deg2rad, using macro or mapping to math.multiply with constant
+  keras:
+    api: "keras.ops.deg2rad" # Check availability or macro
+  mlx:
+    api: "mlx.core.radians"
+    # MLX uses radians() name
+
+---
+operation: "Degrees"
+description: "Convert angles from radians to degrees."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.degrees"
+  numpy:
+    api: "numpy.degrees"
+  torch:
+    api: "torch.rad2deg"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.degrees"
+
+---
+operation: "Delete"
+description: "Delete entry or entries from an array."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "obj"
+    type: "Tensor | int | slice"
+  - name: "axis"
+    type: "int | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.delete"
+  numpy:
+    api: "numpy.delete"
+  # Torch/TF require mask/indexing tricks, no direct 'delete' function.
+
+---
+operation: "Diag"
+description: "Extract diagonal or construct a diagonal array."
+std_args:
+  - name: "v"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.diag"
+  numpy:
+    api: "numpy.diag"
+  torch:
+    api: "torch.diag"
+    args:
+        v: "input"
+        k: "diagonal"
+  tensorflow:
+    api: "tf.linalg.diag"
+    args:
+        v: "diagonal"
+        k: "k"
+        # Note: TF behavior differs; diag creates matrix from vector.
+        # For extracting diagonal, TF uses tf.linalg.diag_part
+  keras:
+    api: "keras.ops.diag"
+  mlx:
+    api: "mlx.core.diag"
+    args:
+        v: "a"
+
+---
+operation: "DiagIndices"
+description: "Return indices for accessing the main diagonal."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "ndim"
+    type: "int"
+    default: 2
+variants:
+  jax:
+    api: "jax.numpy.diag_indices"
+  numpy:
+    api: "numpy.diag_indices"
+
+---
+operation: "DiagIndicesFrom"
+description: "Return indices for accessing the main diagonal of a given array."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.diag_indices_from"
+  numpy:
+    api: "numpy.diag_indices_from"
+
+---
+operation: "Diagflat"
+description: "Create a two-dimensional array with the flattened input as a diagonal."
+std_args:
+  - name: "v"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.diagflat"
+  numpy:
+    api: "numpy.diagflat"
+  torch:
+    api: "torch.diagflat"
+    args:
+      v: "input"
+      k: "offset"
+
+---
+operation: "Diagonal"
+description: "Return specified diagonals."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "offset"
+    type: "int"
+    default: 0
+  - name: "axis1"
+    type: "int"
+    default: 0
+  - name: "axis2"
+    type: "int"
+    default: 1
+variants:
+  jax:
+    api: "jax.numpy.diagonal"
+  numpy:
+    api: "numpy.diagonal"
+  torch:
+    api: "torch.diagonal"
+    args:
+        a: "input"
+        offset: "offset"
+        axis1: "dim1"
+        axis2: "dim2"
+  tensorflow:
+    api: "tf.linalg.diag_part"
+    # Complex mapping needed for offsets
+  keras:
+    api: "keras.ops.diagonal"
+  mlx:
+    api: "mlx.core.diagonal"
+    args:
+        a: "a"
+
+---
+operation: "Diff"
+description: "Calculate n-th order difference between array elements."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "n"
+    type: "int"
+    default: 1
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  jax:
+    api: "jax.numpy.diff"
+  numpy:
+    api: "numpy.diff"
+  torch:
+    api: "torch.diff"
+    args:
+        a: "input"
+        axis: "dim"
+  keras:
+    api: "keras.ops.diff"
+    args:
+        a: "x"
+
+---
+operation: "Digitize"
+description: "Return the indices of the bins to which each value in input belongs."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "bins"
+    type: "Tensor"
+  - name: "right"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.digitize"
+  numpy:
+    api: "numpy.digitize"
+  torch:
+    api: "torch.bucketize"
+    args:
+        x: "input"
+        bins: "boundaries"
+        right: "right"
+  keras:
+    api: "keras.ops.digitize"
+  mlx:
+    api: "mlx.core.digitize"
+    # Note: Check if available, MLX is relatively new.
+
+---
+operation: "Divide"
+description: "Element-wise true division."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.divide"
+    transformation_type: "infix"
+    operator: "/"
+  numpy:
+    api: "numpy.divide"
+    transformation_type: "infix"
+    operator: "/"
+  torch:
+    api: "torch.div"
+    transformation_type: "infix"
+    operator: "/"
+  tensorflow:
+    api: "tf.math.divide"
+    transformation_type: "infix"
+    operator: "/"
+  keras:
+    api: "keras.ops.divide"
+    transformation_type: "infix"
+    operator: "/"
+  mlx:
+    api: "mlx.core.divide"
+    transformation_type: "infix"
+    operator: "/"
+
+---
+operation: "Divmod"
+description: "Return element-wise quotient and remainder."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.divmod"
+  numpy:
+    api: "numpy.divmod"
+  torch:
+    # No direct single op for divmod in torch
+    macro_template: "(torch.div({x1}, {x2}, rounding_mode='floor'), torch.remainder({x1}, {x2}))"
+
+---
+operation: "Dot"
+description: "Dot product of two arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.dot"
+  numpy:
+    api: "numpy.dot"
+  torch:
+    api: "torch.dot"
+    # NOTE: Torch dot treats 1D only. Matmul/mm used for matrices.
+    # This difference might require plugin logic for >1D inputs.
+  tensorflow:
+    api: "tf.tensordot"
+    # requires axis arg usually
+  keras:
+    api: "keras.ops.dot"
+  mlx:
+    api: "mlx.core.dot"
+
+---
+operation: "Double"
+description: "Float64 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.double"
+  numpy:
+    api: "numpy.double"
+  torch:
+    api: "torch.double"
+
+---
+operation: "Dsplit"
+description: "Split array into multiple sub-arrays depth-wise."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "int | Sequence[int]"
+variants:
+  jax:
+    api: "jax.numpy.dsplit"
+  numpy:
+    api: "numpy.dsplit"
+  torch:
+    api: "torch.dsplit"
+    args:
+        ary: "input"
+
+---
+operation: "Dstack"
+description: "Stack arrays in sequence depth wise (along third axis)."
+std_args:
+  - name: "tup"
+    type: "List[Tensor]"
+variants:
+  jax:
+    api: "jax.numpy.dstack"
+  numpy:
+    api: "numpy.dstack"
+  torch:
+    api: "torch.dstack"
+
+---
+operation: "Dtype"
+description: "Create a data type object."
+std_args:
+  - name: "dtype"
+    type: "Any"
+  - name: "align"
+    type: "bool"
+    default: false
+  - name: "copy"
+    type: "bool"
+    default: false
+variants:
+  jax:
+    api: "jax.numpy.dtype"
+  numpy:
+    api: "numpy.dtype"
+  torch:
+    api: "torch.dtype"
+    # Torch dtype is a class/enum, usage differs from numpy factory
+
+---
+operation: "E"
+description: "Euler's constant."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.e"
+  numpy:
+    api: "numpy.e"
+  torch:
+    api: "torch.e"
+    # Note: Not standard attribute, usually math.e or torch.tensor(math.e)
+
+---
+operation: "Ediff1d"
+description: "Compute the differences between consecutive elements of an array."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "to_end"
+    type: "Tensor | None"
+    default: null
+  - name: "to_begin"
+    type: "Tensor | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.ediff1d"
+  numpy:
+    api: "numpy.ediff1d"
+  # Torch lacks direct ediff1d
+
+---
+operation: "Einsum"
+description: "Evaluates the Einstein summation convention on the operands."
+std_args:
+  - name: "subscripts"
+    type: "str"
+  - name: "operands"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  jax:
+    api: "jax.numpy.einsum"
+  numpy:
+    api: "numpy.einsum"
+  torch:
+    api: "torch.einsum"
+    args:
+        subscripts: "equation"
+  tensorflow:
+    api: "tf.einsum"
+    args:
+        subscripts: "equation"
+  keras:
+    api: "keras.ops.einsum"
+  mlx:
+    api: "mlx.core.einsum"
+
+---
+operation: "EinsumPath"
+description: "Evaluates the optimal contraction path without evaluating the einsum."
+std_args:
+  - name: "subscripts"
+    type: "str"
+  - name: "operands"
+    type: "Tensor"
+    is_variadic: true
+  - name: "optimize"
+    type: "str"
+    default: "auto"
+variants:
+  jax:
+    api: "jax.numpy.einsum_path"
+  numpy:
+    api: "numpy.einsum_path"
+
+---
+operation: "Empty"
+description: "Return a new array of given shape and type, without initializing entries."
+std_args:
+  - name: "shape"
+    type: "int | tuple"
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.empty"
+  numpy:
+    api: "numpy.empty"
+  torch:
+    api: "torch.empty"
+    args:
+      shape: "size"
+  keras:
+    api: "keras.ops.empty"
+
+---
+operation: "EmptyLike"
+description: "Return a new array with the same shape and type as a given array."
+std_args:
+  - name: "prototype"
+    type: "Tensor"
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+  - name: "shape"
+    type: "int | tuple | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.empty_like"
+  numpy:
+    api: "numpy.empty_like"
+  torch:
+    api: "torch.empty_like"
+    args:
+        prototype: "input"

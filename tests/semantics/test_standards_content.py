@@ -1,60 +1,82 @@
 """
-Tests for Standards Dictionary Content Integrity.
+Content Tests for Standards.
 
-Verifies that:
-1. INTERNAL_OPS contains expected functional primitives (vmap, grad).
-2. Standard arguments match expected signatures.
-3. No syntax errors in the static dictionary definition.
-4. **No Variants are present** (Decoupling Enforcement).
+Verifies that key operations are present in the loaded SemanticsManager.
+Replaces legacy checks against standards_internal.py.
 """
 
 import pytest
-from ml_switcheroo.semantics.standards_internal import INTERNAL_OPS
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-def test_functional_ops_merged():
-  """Verify that functional transforms from the orphan script are present."""
-  assert "vmap" in INTERNAL_OPS
-  assert "grad" in INTERNAL_OPS
-  assert "value_and_grad" in INTERNAL_OPS
-  assert "jit" in INTERNAL_OPS
+@pytest.fixture(scope="module")
+def mgr():
+  return SemanticsManager()
 
 
-def test_vmap_signature():
-  """Verify vmap standard arguments align with JAX/Torch abstraction."""
-  args = INTERNAL_OPS["vmap"]["std_args"]
-  assert "func" in args
-  assert "in_axes" in args
-  assert "out_axes" in args
+def test_functional_math_ops(mgr):
+  """Verify Array API defaults are loaded."""
+  data = mgr.get_known_apis()
+  # Use get to avoid KeyError if files missing during bootstrap
+  if not data:
+    pytest.skip("No semantics loaded (Bootstrap needed)")
+
+  assert "Abs" in data
+  assert "Add" in data
+  assert "Mean" in data
+
+  abs_op = data["Abs"]
+  # Handle list of dicts (new format) or strings
+  args = []
+  for arg in abs_op.get("std_args", []):
+    if isinstance(arg, dict):
+      args.append(arg.get("name"))
+    elif isinstance(arg, str):
+      args.append(arg)
+    elif isinstance(arg, (tuple, list)):
+      args.append(arg[0])
+
+  assert "x" in args
 
 
-def test_grad_signature():
-  """Verify grad arguments."""
-  args = INTERNAL_OPS["grad"]["std_args"]
-  assert "func" in args
-  assert "argnums" in args
+def test_neural_ops(mgr):
+  """Verify Neural Network layers are loaded."""
+  data = mgr.get_known_apis()
+  assert "Conv2d" in data
+  assert "Linear" in data
+  assert "MultiheadAttention" in data
+
+  conv = data["Conv2d"]
+  args = []
+  for arg in conv.get("std_args", []):
+    if isinstance(arg, dict):
+      args.append(arg.get("name"))
+    elif isinstance(arg, str):
+      args.append(arg)
+
+  assert "in_channels" in args
+  assert "kernel_size" in args
 
 
-def test_optimizer_standards():
-  """Verify existing optimizers are preserved."""
-  assert "Adam" in INTERNAL_OPS
-  assert "lr" in INTERNAL_OPS["Adam"]["std_args"]
+def test_optimizer_standards(mgr):
+  """Verify Optimizers are present."""
+  data = mgr.get_known_apis()
+  assert "Adam" in data
+  assert "SGD" in data
+
+  adam = data["Adam"]
+  args = []
+  for arg in adam.get("std_args", []):
+    if isinstance(arg, dict):
+      args.append(arg.get("name"))
+    elif isinstance(arg, str):
+      args.append(arg)
+
+  assert "lr" in args
 
 
-def test_vision_standards():
-  """Verify vision transforms are preserved."""
-  assert "CenterCrop" in INTERNAL_OPS
-  assert "size" in INTERNAL_OPS["CenterCrop"]["std_args"]
-
-
-def test_decoupling_enforcement():
-  """
-  Critical Check: Ensure NO variants/implementations are in the Hub.
-  This forces developers to put mappings in the Adapters (Spokes).
-  """
-  for op_name, details in INTERNAL_OPS.items():
-    if op_name == "__imports__":
-      continue
-    # variants should not exist, or be empty dicts if refactoring kept keys but empty
-    if "variants" in details:
-      assert not details["variants"], f"Found lingering variants in {op_name}. Move to Framework Adapter."
+def test_io_constants(mgr):
+  """Verify Extras/IO."""
+  data = mgr.get_known_apis()
+  assert "Save" in data
+  assert "Load" in data

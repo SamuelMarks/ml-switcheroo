@@ -118,9 +118,13 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
   if isinstance(val, bool):
     return cst.Name("True") if val else cst.Name("False")
   elif isinstance(val, int):
+    if val < 0:
+      return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer(str(abs(val))))
     return cst.Integer(str(val))
   elif isinstance(val, float):
     # repr ensures high precision float string
+    if val < 0:
+      return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Float(repr(abs(val))))
     return cst.Float(repr(val))
   elif isinstance(val, str):
     # Use json.dumps to force double quotes for string literals,

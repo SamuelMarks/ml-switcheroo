@@ -1,0 +1,535 @@
+operation: "Equal"
+description: "Returns element-wise truth value of x == y."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.equal"
+    transformation_type: "infix"
+    operator: "=="
+  numpy:
+    api: "numpy.equal"
+    transformation_type: "infix"
+    operator: "=="
+  torch:
+    api: "torch.eq"
+    transformation_type: "infix"
+    operator: "=="
+  tensorflow:
+    api: "tf.math.equal"
+    transformation_type: "infix"
+    operator: "=="
+  keras:
+    api: "keras.ops.equal"
+    transformation_type: "infix"
+    operator: "=="
+  mlx:
+    api: "mlx.core.equal"
+    transformation_type: "infix"
+    operator: "=="
+
+---
+operation: "EulerGamma"
+description: "Euler's constant (gamma)."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.euler_gamma"
+  numpy:
+    api: "numpy.euler_gamma"
+
+---
+operation: "Exp"
+description: "Calculate element-wise exponential of the input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.exp"
+  numpy:
+    api: "numpy.exp"
+  torch:
+    api: "torch.exp"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.exp"
+  keras:
+    api: "keras.ops.exp"
+  mlx:
+    api: "mlx.core.exp"
+
+---
+operation: "Exp2"
+description: "Calculate element-wise base-2 exponential of input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.exp2"
+  numpy:
+    api: "numpy.exp2"
+  torch:
+    api: "torch.exp2"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.pow"
+    # TF lacks direct exp2 unless aliases exist, mapped to 2**x via macro
+    macro_template: "tf.math.pow(2.0, {x})"
+  # Keras ops lacks exp2 top level
+
+---
+operation: "ExpandDims"
+description: "Insert dimensions of length 1 into array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int]"
+variants:
+  jax:
+    api: "jax.numpy.expand_dims"
+  numpy:
+    api: "numpy.expand_dims"
+  torch:
+    api: "torch.unsqueeze"
+    args:
+        a: "input"
+        axis: "dim"
+  tensorflow:
+    api: "tf.expand_dims"
+    args:
+        a: "input"
+        axis: "axis"
+  keras:
+    api: "keras.ops.expand_dims"
+    args:
+        a: "x"
+        axis: "axis"
+  mlx:
+    api: "mlx.core.expand_dims"
+    args:
+        a: "a"
+        axis: "axis"
+
+---
+operation: "Expm1"
+description: "Calculate exp(x) - 1 for all elements in the array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.expm1"
+  numpy:
+    api: "numpy.expm1"
+  torch:
+    api: "torch.expm1"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.expm1"
+  keras:
+    api: "keras.ops.expm1"
+  mlx:
+    api: "mlx.core.expm1"
+    # Not top-level in older MLX, check availability
+
+---
+operation: "Extract"
+description: "Return the elements of an array that satisfy a condition."
+std_args:
+  - name: "condition"
+    type: "Tensor"
+  - name: "arr"
+    type: "Tensor"
+  - name: "size"
+    type: "int | None"
+    default: null
+  - name: "fill_value"
+    type: "Any"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.extract"
+  numpy:
+    api: "numpy.extract"
+  # Torch/TF usually use boolean masking: arr[condition]
+
+---
+operation: "Eye"
+description: "Return a 2-D array with ones on the diagonal and zeros elsewhere."
+std_args:
+  - name: "N"
+    type: "int"
+  - name: "M"
+    type: "int | None"
+    default: null
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "dtype"
+    type: "DType | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.eye"
+  numpy:
+    api: "numpy.eye"
+  torch:
+    api: "torch.eye"
+    args:
+        N: "n"
+        M: "m"
+    # Note: Torch eye lacks 'k' argument directly.
+  tensorflow:
+    api: "tf.eye"
+    args:
+        N: "num_rows"
+        M: "num_columns"
+  keras:
+    api: "keras.ops.eye"
+  mlx:
+    api: "mlx.core.eye"
+    args:
+        N: "n"
+        M: "m"
+        k: "k"
+
+---
+operation: "Fabs"
+description: "Compute the absolute values element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.fabs"
+  numpy:
+    api: "numpy.fabs"
+  torch:
+    api: "torch.abs"
+    args:
+        x: "input"
+  tensorflow:
+    api: "tf.math.abs"
+    # fabs is strictly floating-point absolute in older numpy, but generally maps to abs
+
+---
+operation: "FillDiagonal"
+description: "Fill the main diagonal of the given array of any dimensionality."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "val"
+    type: "Any"
+  - name: "wrap"
+    type: "bool"
+    default: false
+  - name: "inplace"
+    type: "bool"
+    default: true
+variants:
+  jax:
+    api: "jax.numpy.fill_diagonal"
+  numpy:
+    api: "numpy.fill_diagonal"
+  torch:
+    api: "torch.fill_diagonal_"
+    args:
+        a: "input"
+        val: "fill_value"
+        wrap: "wrap"
+    # Note: Torch is in-place only
+
+---
+operation: "Finfo"
+description: "Machine limits for floating point types."
+std_args:
+  - name: "dtype"
+    type: "DType"
+variants:
+  jax:
+    api: "jax.numpy.finfo"
+  numpy:
+    api: "numpy.finfo"
+  torch:
+    api: "torch.finfo"
+
+---
+operation: "Fix"
+description: "Round to nearest integer towards zero."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.fix"
+  numpy:
+    api: "numpy.fix"
+  torch:
+    api: "torch.fix"
+    args:
+        x: "input"
+  # TF doesn't have direct 'fix', usually trunc
+
+---
+operation: "Flatnonzero"
+description: "Return indices that are non-zero in the flattened version of a."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "size"
+    type: "int | None"
+    default: null
+  - name: "fill_value"
+    type: "Any"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.flatnonzero"
+  numpy:
+    api: "numpy.flatnonzero"
+
+---
+operation: "Flexible"
+description: "Flexible data type base class."
+std_args: []
+variants:
+  jax:
+    api: "jax.numpy.flexible"
+  numpy:
+    api: "numpy.flexible"
+
+---
+operation: "Flip"
+description: "Reverse the order of elements in an array along the given axis."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.flip"
+  numpy:
+    api: "numpy.flip"
+  torch:
+    api: "torch.flip"
+    args:
+      m: "input"
+      axis: "dims"
+  tensorflow:
+    api: "tf.reverse"
+    args:
+      m: "tensor"
+      axis: "axis"
+  keras:
+    api: "keras.ops.flip"
+    args:
+      m: "x"
+      axis: "axis"
+
+---
+operation: "Fliplr"
+description: "Flip array in the left/right direction."
+std_args:
+  - name: "m"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.fliplr"
+  numpy:
+    api: "numpy.fliplr"
+  torch:
+    api: "torch.fliplr"
+    args:
+        m: "input"
+
+---
+operation: "Flipud"
+description: "Flip array in the up/down direction."
+std_args:
+  - name: "m"
+    type: "Tensor"
+variants:
+  jax:
+    api: "jax.numpy.flipud"
+  numpy:
+    api: "numpy.flipud"
+  torch:
+    api: "torch.flipud"
+    args:
+        m: "input"
+
+---
+operation: "Float16"
+description: "Float16 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float16"
+  numpy:
+    api: "numpy.float16"
+  torch:
+    api: "torch.float16"
+
+---
+operation: "Float32"
+description: "Float32 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float32"
+  numpy:
+    api: "numpy.float32"
+  torch:
+    api: "torch.float32"
+
+---
+operation: "Float4_e2m1fn"
+description: "Float4_e2m1fn data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float4_e2m1fn"
+  # numpy support pending
+
+---
+operation: "Float64"
+description: "Float64 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float64"
+  numpy:
+    api: "numpy.float64"
+  torch:
+    api: "torch.float64"
+
+---
+operation: "Float8_e3m4"
+description: "Float8_e3m4 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e3m4"
+
+---
+operation: "Float8_e4m3"
+description: "Float8_e4m3 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e4m3"
+  torch:
+    api: "torch.float8_e4m3fn"
+    # Approx match, torch has fn variant
+
+---
+operation: "Float8_e4m3b11fnuz"
+description: "Float8_e4m3b11fnuz data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e4m3b11fnuz"
+
+---
+operation: "Float8_e4m3fn"
+description: "Float8_e4m3fn data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e4m3fn"
+  torch:
+    api: "torch.float8_e4m3fn"
+
+---
+operation: "Float8_e4m3fnuz"
+description: "Float8_e4m3fnuz data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e4m3fnuz"
+
+---
+operation: "Float8_e5m2"
+description: "Float8_e5m2 data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e5m2"
+  torch:
+    api: "torch.float8_e5m2"
+
+---
+operation: "Float8_e5m2fnuz"
+description: "Float8_e5m2fnuz data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e5m2fnuz"
+
+---
+operation: "Float8_e8m0fnu"
+description: "Float8_e8m0fnu data type constructor."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float8_e8m0fnu"
+
+---
+operation: "Float_"
+description: "Float data type constructor (alias for float64)."
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.float_"
+  numpy:
+    api: "numpy.float_"
