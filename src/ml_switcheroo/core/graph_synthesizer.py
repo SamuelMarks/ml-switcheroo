@@ -2,24 +2,117 @@
 Graph Synthesizer Module.
 
 This module provides the `GraphSynthesizer` class, which converts a high-level
-`LogicalGraph` representation back into executable Python source code (specifically
-PyTorch `nn.Module` definitions).
+`LogicalGraph` representation back into executable Python source code.
 
-It is used in the "Lifting" pipeline (Decompilation) to reconstruct model code
-from intermediate graph representations extracted from SASS or other IRs.
+It supports two modes:
+1.  **Fresh Generation**: Creates a new Python module from scratch (for simple decompilation).
+2.  **Context Preservation**: Injects the synthesized graph logic into an existing
+    source tree (AST), replacing only the `__init__` and `forward` methods while
+    preserving class definitions, docstrings, decorators, and auxiliary methods.
 """
 
+from typing import Any, Dict, List, Optional, Union
+
 import libcst as cst
-from typing import List, Dict, Any, Optional
+from libcst import matchers as m
 
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, topological_sort
+
+
+class ClassBodyReplacer(cst.CSTTransformer):
+  """
+  Transformer to swap __init__ and forward methods in a target class.
+
+  Attributes:
+      target_class (str): The name of the class to update.
+      new_init (cst.FunctionDef): The new AST node for __init__.
+      new_forward (cst.FunctionDef): The new AST node for forward.
+      found (bool): Flag indicating if the class was found and updated.
+  """
+
+  def __init__(
+    self,
+    target_class: str,
+    new_init: cst.FunctionDef,
+    new_forward: cst.FunctionDef,
+  ) -> None:
+    """
+    Initialize the replacer.
+
+    Args:
+        target_class (str): Name of the class to modify.
+        new_init (cst.FunctionDef): Synthesized __init__ method.
+        new_forward (cst.FunctionDef): Synthesized forward method.
+    """
+    self.target_class = target_class
+    self.new_init = new_init
+    self.new_forward = new_forward
+    self.found = False
+
+  def leave_ClassDef(self, original_node: cst.ClassDef, updated_node: cst.ClassDef) -> cst.ClassDef:
+    """
+    Visits the ClassDefinition and replaces methods if name matches.
+
+    Args:
+        original_node (cst.ClassDef): The original node.
+        updated_node (cst.ClassDef): The node with processed children.
+
+    Returns:
+        cst.ClassDef: The modified class definition.
+    """
+    if original_node.name.value == self.target_class:
+      self.found = True
+      new_body_stmts = []
+
+      # Map of updated methods
+      replacements = {
+        "__init__": self.new_init,
+        "forward": self.new_forward,
+        "call": self.new_forward,
+        "__call__": self.new_forward,
+      }
+
+      # Track which methods we have injected to avoid duplication
+      injected = set()
+
+      # Preserve parts of the class that are NOT the methods we are replacing
+      for stmt in updated_node.body.body:
+        if isinstance(stmt, cst.FunctionDef):
+          fname = stmt.name.value
+          if fname in replacements:
+            # This is a target method. Replace it.
+            repl_node = replacements[fname]
+            # Preserve docstring if available in original but not in new
+            # (Though our synthesis doesn't generate docs yet, this is safe)
+            new_body_stmts.append(repl_node)
+            injected.add(fname)
+          else:
+            # Preserve other methods (e.g. training_step)
+            new_body_stmts.append(stmt)
+        else:
+          # Preserve class attributes, docstrings, etc.
+          new_body_stmts.append(stmt)
+
+      # If the class didn't have the methods (e.g. partial definition), append them
+      # We enforce standard PyTorch naming 'forward' for synthesis
+      if "__init__" not in injected:
+        new_body_stmts.append(self.new_init)
+
+      # Check inference method presence. If we didn't replace forward/call/__call__, append 'forward'
+      inference_hit = any(x in injected for x in ["forward", "call", "__call__"])
+      if not inference_hit:
+        new_body_stmts.append(self.new_forward)
+
+      return updated_node.with_changes(body=updated_node.body.with_changes(body=new_body_stmts))
+
+    return updated_node
 
 
 class GraphSynthesizer:
   """
   Synthesizes a Python CST Module from a LogicalGraph.
 
-  Primarily targets PyTorch `nn.Module` generation.
+  Primarily targets PyTorch `nn.Module` generation structure.
   """
 
   def __init__(self, framework: str = "torch") -> None:
@@ -28,38 +121,58 @@ class GraphSynthesizer:
 
     Args:
         framework (str): Target framework string (default: "torch").
-                         Currently primarily influences import generation.
+                         Influences import generation and syntax style.
     """
     self.framework = framework
 
-  def generate(self, graph: LogicalGraph, class_name: str = "DecompiledNet") -> str:
+  def generate(
+    self,
+    graph: LogicalGraph,
+    class_name: str = "SwitcherooNet",
+    original_tree: Optional[cst.Module] = None,
+  ) -> str:
     """
     Generates Python source code for the given graph.
 
-    Constructs a standard `nn.Module` class with:
-    1. An `__init__` method defining stateful layers.
-    2. A `forward` method sequencing operations.
+    If `original_tree` is provided, it attempts to verify and patch the
+    existing class definition within that tree, preserving comments and
+    auxiliary methods. Otherwise, it generates a fresh file.
 
     Args:
         graph (LogicalGraph): The input computation graph.
         class_name (str): The name of the generated class.
+        original_tree (Optional[cst.Module]): The original AST to patch.
 
     Returns:
         str: The formatted Python source code.
     """
-    # 1. Imports
+    # 1. Sort nodes for definition/execution order
+    ordered_nodes = topological_sort(graph)
+
+    # 2. Build Method Bodies (Fresh)
+    init_func = self._build_init(ordered_nodes)
+    forward_func = self._build_forward(ordered_nodes)
+
+    # 3. Strategy: Patch or Create
+    if original_tree:
+      # Context Preservation Mode
+      replacer = ClassBodyReplacer(class_name, init_func, forward_func)
+      new_tree = original_tree.visit(replacer)
+
+      if replacer.found:
+        return new_tree.code
+
+      # Fallback: If class not found in original tree, append it?
+      # Or assume the user wants clean gen.
+      # We fall through to clean gen but log warning in a real system.
+      pass
+
+    # Fresh Mode / Fallback
     body: List[cst.CSTNode] = [
       cst.parse_statement("import torch"),
       cst.parse_statement("import torch.nn as nn"),
       cst.EmptyLine(),
     ]
-
-    # 2. Sort nodes for definition/execution order
-    ordered_nodes = topological_sort(graph)
-
-    # 3. Build Class Body
-    init_func = self._build_init(ordered_nodes)
-    forward_func = self._build_forward(ordered_nodes)
 
     class_def = cst.ClassDef(
       name=cst.Name(class_name),
@@ -94,6 +207,10 @@ class GraphSynthesizer:
         # self.{id} = nn.{Kind}(...)
         assignment = self._generate_layer_init(node)
         stmts.append(assignment)
+
+    # Determine if we have inputs that are not 'x' to add to args?
+    # Typically models are initialized with hyperparameters, but LogicalGraph
+    # doesn't strictly track init-args yet. We assume strict default init.
 
     return cst.FunctionDef(
       name=cst.Name("__init__"),
@@ -137,10 +254,11 @@ class GraphSynthesizer:
         line = f"{current_var} = self.{node.id}({current_var})"
         stmts.append(cst.parse_statement(line))
       else:
-        # Functional op: x = torch.flatten(x)
-        # If kind contains dot (torch.flatten), use it. Else assume functional?
-        # The lifter produces dotted names for unmapped ops.
+        # Functional op: x = F.relu(x)
         func_api = node.kind
+        # Heuristic: If it looks like a class (Conv2d), assume it's meant to be functional?
+        # No, GraphOptimizer replaces fused nodes with Macros usually.
+
         # Generate args string (input + metadata args if any)
         args_str = current_var
         if node.metadata:
@@ -150,6 +268,10 @@ class GraphSynthesizer:
 
         line = f"{current_var} = {func_api}({args_str})"
         stmts.append(cst.parse_statement(line))
+
+    # If last stmt wasn't return, add one
+    if not stmts or not m.matches(stmts[-1], m.Return()):
+      stmts.append(cst.parse_statement(f"return {current_var}"))
 
     return cst.FunctionDef(
       name=cst.Name("forward"),
@@ -192,7 +314,7 @@ class GraphSynthesizer:
     """
     kind = node.kind
     # Normalize kind to nn.{Kind} if not present
-    if not kind.startswith("nn.") and not "." in kind:
+    if not kind.startswith("nn.") and "." not in kind:
       kind = f"nn.{kind}"
 
     args_str = self._format_args_from_metadata(node.metadata)

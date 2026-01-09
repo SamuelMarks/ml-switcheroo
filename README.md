@@ -26,27 +26,27 @@ flowchart TD
 %% --- 1. Font & Node Styling ---
 
 %% Level 0: Red (Representations)
-    classDef l0Node fill: #ea4335, stroke: #ff7daf, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
+    classDef l0Node fill: #ea4335, stroke: #ff7daf, stroke-width: 2px, color: white, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
 
 %% Level 1: Blue (Frameworks)
-    classDef l1Node fill: #4285f4, stroke: #57caff, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
+    classDef l1Node fill: #4285f4, stroke: #57caff, stroke-width: 2px, color: white, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
 
 %% Level 2: Green (Numerical)
-    classDef l2Node fill: #34a853, stroke: #5cdb6d, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
+    classDef l2Node fill: #34a853, stroke: #5cdb6d, stroke-width: 2px, color: white, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
 
 %% Level 3: Yellow (Intermediate)
-    classDef l3Node fill: #f9ab00, stroke: #ffd427, stroke-width: 2px, color: #ffffff, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
+    classDef l3Node fill: #f9ab00, stroke: #ffd427, stroke-width: 2px, color: white, font-family: 'Google Sans Normal', font-size: 16px, rx: 5px, ry: 5px;
 
 %% Hardware: Navy (SASS) - Roboto Mono
-    classDef asmNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: #ffffff, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
+    classDef asmNode fill: #20344b, stroke: #57caff, stroke-width: 2px, color: white, font-family: 'Roboto Mono Normal', font-size: 14px, rx: 2px, ry: 2px;
 
 %% --- 2. Subgraph Styling --- 
 %% White backgrounds to ensure text readability + visual grouping
-    classDef containerL0 fill: #ffffff, stroke: #ea4335, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
-    classDef containerL1 fill: #ffffff, stroke: #4285f4, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
-    classDef containerL2 fill: #ffffff, stroke: #34a853, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
-    classDef containerL3 fill: #ffffff, stroke: #f9ab00, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
-    classDef containerHW fill: #ffffff, stroke: #20344b, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
+    classDef containerL0 fill: white, stroke: #ea4335, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
+    classDef containerL1 fill: white, stroke: #4285f4, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
+    classDef containerL2 fill: white, stroke: #34a853, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
+    classDef containerL3 fill: white, stroke: #f9ab00, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
+    classDef containerHW fill: white, stroke: #20344b, stroke-width: 3px, color: #20344b, font-family: 'Google Sans Medium', font-size: 20px;
 
 %% --- 3. Diagram Structure ---
 
@@ -130,127 +130,68 @@ reconstructed for the target framework.
 
 ```mermaid
 graph TD
-%% =========================================================================
-%%  DESIGN SYSTEM & PALETTE
-%% =========================================================================
+    classDef default font-family:sans-serif,color:#20344b,stroke:#20344b,stroke-width:1px;
+    classDef title font-family:sans-serif,font-size:12px,color:white,stroke-width:0px,rx:4px;
+    classDef code font-family:monospace,font-size:11px,text-align:left,fill:white,color:#20344b,stroke:#20344b,stroke-dasharray:2 2,rx:0;
+    classDef db font-family:sans-serif,font-size:11px,fill:#fff4c7,stroke:#f9ab00,stroke-width:1px,rx:2px;
 
-%% Colors
-%% Blue 500: #4285f4 | Green 500: #34a853 | Yellow 600: #f9ab00 | Red 500: #ea4335
-%% Navy: #20344b | White: #ffffff 
-%% Halftone Blue: #57caff | Halftone Green: #5cdb6d 
-%% Halftone Yellow: #ffd427 | Halftone Red: #ff7daf
+    classDef src fill:#ea4335,color:white;
+    classDef eng fill:#4285f4,color:white;
+    classDef hub fill:#f9ab00,color:#20344b;
+    classDef plug fill:#57caff,color:#20344b;
+    classDef tgt fill:#34a853,color:white;
+    classDef ghost fill:#20344b,color:white,stroke-dasharray:2 2;
 
-%% Fonts
-    classDef default font-family: 'Google Sans Normal', color: #20344b, stroke: #20344b, stroke-width: 1px;
-    classDef title font-family: 'Google Sans Medium', font-size: 12px, color: #ffffff, stroke-width: 0px, rx: 4px;
-    classDef code font-family: 'Roboto Mono Normal', font-size: 11px, text-align: left, fill: #ffffff, color: #20344b, stroke: #20344b, stroke-dasharray: 2 2, rx: 0;
-    classDef db font-family: 'Google Sans Normal', font-size: 11px, fill: #fff4c7, stroke: #f9ab00, stroke-width: 1px, rx: 2px;
-
-%% Node Types
-    classDef src fill: #ea4335, color: #ffffff;
-    classDef eng fill: #4285f4, color: #ffffff;
-    classDef hub fill: #f9ab00, color: #20344b;
-    classDef plug fill: #57caff, color: #20344b;
-    classDef tgt fill: #34a853, color: #ffffff;
-    classDef ghost fill: #20344b, color: #ffffff, stroke-dasharray: 2 2;
-
-%% =========================================================================
-%%  1. SOURCE INPUT
-%% =========================================================================
     S_HEAD("<b>1. Source Code (PyTorch)</b>"):::src
     S_HEAD:::title
-%% Syntax Highlighted HTML Label
-    S_CODE("
-    <span style='color:#4285f4'>import</span> torch.nn <span style='color:#4285f4'>as</span> nn<br/>
-<span style='color:#4285f4'>class</span> <span style='color:#ea4335'>Net</span>(nn.Module):<br/>
-&nbsp;&nbsp;<span style='color:#4285f4'>def</span> <span style='color:#f9ab00'>__init__</span>(<span style='color:#57caff'>self</span>):<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#57caff'>self</span>.fc = nn.Linear(<span style='color:#34a853'>20</span>, <span style='color:#34a853'>30</span>)<br/>
-"):::code
 
-S_HEAD --- S_CODE
+    S_CODE("import torch.nn as nn<br/>class Net(nn.Module):<br/>def __init__(self):<br/>self.fc = nn.Linear(20, 30)"):::code
+    S_HEAD --- S_CODE
 
-%% =========================================================================
-%%  2. INGESTION & ANALYSIS
-%% =========================================================================
+    P_LIBCST("<b>LibCST Parser</b><br/><i>Generates AST</i>"):::eng
+    P_LIBCST:::title
+    S_CODE --> P_LIBCST
 
-P_LIBCST("<b>LibCST Parser</b><br/><i>Generates AST</i>"):::eng
-P_LIBCST:::title
+    subgraph CONTEXT ["Reflection Context"]
+      direction TB
+      GHOST("<b>Ghost Snapshot</b><br/><i>torch_v2.1.json</i>"):::ghost
+      LIVE("<b>Live Library</b><br/><i>import torch</i>"):::ghost
+    end
+    GHOST -.->|" API Signatures "|P_LIBCST
+    LIVE -.->|" Introspection "|P_LIBCST
 
-S_CODE --> P_LIBCST
+    HUB_HEAD("<b>Semantics Manager</b>"):::hub
+    HUB_HEAD:::title
+    P_LIBCST --> HUB_HEAD
 
-%% Ghost / Live Context
-subgraph CONTEXT ["Reflection Context"]
-direction TB
-GHOST("<b>Ghost Snapshot</b><br/><i>torch_v2.1.json</i>"):::ghost
-LIVE("<b>Live Library</b><br/><i>import torch</i>"):::ghost
-end
+    JSON_DB[("<b>Knowledge Base</b><br/><i>semantics/k_neural.json</i><br/><i>snapshots/jax_map.json</i>")]:::db
+    JSON_DB -.->|" 1. Lookup 'Linear'<br/>2. Read Constraints "|HUB_HEAD
 
-GHOST -.->|" API Signatures "|P_LIBCST
-LIVE -.->|" Introspection "|P_LIBCST
+    ABS_NODE("<b>Abstract Operation found:</b><br/>Op: Linear<br/>Tier: Neural (Stateful)<br/>Args: {in: 20, out: 30}"):::code
+    HUB_HEAD --- ABS_NODE
 
-%% =========================================================================
-%%  3. SEMANTIC PIVOT (The Hub)
-%% =========================================================================
+    REWRITE("<b>Pivot Rewriter</b>"):::eng
+    REWRITE:::title
+    ABS_NODE --> REWRITE
 
-HUB_HEAD("<b>Semantics Manager</b>"):::hub
-HUB_HEAD:::title
-P_LIBCST --> HUB_HEAD
+    subgraph PLUGINS ["Extension System"]
+      target_trait("<b>Target Traits (JAX)</b><br/>requires_explicit_rng: True"):::db
+      HOOK_DEF("<b>Plugin: rng_threading</b><br/><i>Injects 'rngs' arg into<br/>stateful layer calls</i>"):::plug
+      HOOK_DEF:::title
+      target_trait -.-> HOOK_DEF
+    end
+    REWRITE <-->|" AST Transformation "|HOOK_DEF
 
-%% The Knowledge Base (JSONs)
-JSON_DB[("<b>Knowledge Base</b><br/><i>semantics/k_neural.json</i><br/><i>snapshots/jax_map.json</i>")]:::db
-JSON_DB -.->|" 1. Lookup 'Linear'<br/>2. Read Constraints "|HUB_HEAD
+    FIXER("<b>Import Fixer</b><br/><i>Resolves 'nnx' alias</i>"):::plug
+    FIXER:::title
+    REWRITE --> FIXER
 
-%% Intermediate Representation
-ABS_NODE("
-<b>Abstract Operation found:</b><br/>
-Op: <span style='color:#f9ab00'>Linear</span><br/>
-Tier: <span style='color:#ea4335'>Neural</span> (Stateful)<br/>
-Args: {in: 20, out: 30}<br/>
-"):::code
-HUB_HEAD --- ABS_NODE
+    T_HEAD("<b>Target Code (Flax NNX)</b>"):::tgt
+    T_HEAD:::title
+    FIXER --> T_HEAD
 
-%% =========================================================================
-%%  4. REWRITING & PLUGINS
-%% =========================================================================
-
-REWRITE("<b>Pivot Rewriter</b>"):::eng
-REWRITE:::title
-ABS_NODE --> REWRITE
-
-%% Plugin Logic
-subgraph PLUGINS ["Extension System"]
-target_trait("<b>Target Traits (JAX)</b><br/>requires_explicit_rng: <span style='color:#34a853'>True</span>"):::db
-
-HOOK_DEF("<b>Plugin: rng_threading</b><br/><i>Injects 'rngs' arg into<br/>stateful layer calls</i>"):::plug
-HOOK_DEF:::title
-
-target_trait -.-> HOOK_DEF
-end
-
-REWRITE <-->|" AST Transformation "|HOOK_DEF
-
-%% =========================================================================
-%%  5. OUTPUT GENERATION
-%% =========================================================================
-
-FIXER("<b>Import Fixer</b><br/><i>Resolves 'nnx' alias</i>"):::plug
-FIXER:::title
-REWRITE --> FIXER
-
-T_HEAD("<b>Target Code (Flax NNX)</b>"):::tgt
-T_HEAD:::title
-FIXER --> T_HEAD
-
-%% Final Code
-T_CODE("
-<span style='color:#4285f4'>from</span> flax <span style='color:#4285f4'>import</span> nnx<br/>
-<span style='color:#4285f4'>class</span> <span style='color:#34a853'>Net</span>(nnx.Module):<br/>
-&nbsp;&nbsp;<span style='color:#4285f4'>def</span> <span style='color:#f9ab00'>__init__</span>(<span style='color:#57caff'>self</span>, <span style='color:#ea4335'>rngs</span>: nnx.Rngs):<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#90a4ae'># Hook injected 'rngs'</span><br/>
-&nbsp;&nbsp;&nbsp;&nbsp;<span style='color:#57caff'>self</span>.fc = nnx.Linear(<span style='color:#34a853'>20</span>, <span style='color:#34a853'>30</span>, <span style='color:#ea4335'>rngs=rngs</span>)<br/>
-"):::code
-
-T_HEAD --- T_CODE
+    T_CODE("from flax import nnx<br/>class Net(nnx.Module):<br/>def __init__(self, rngs: nnx.Rngs):<br/># Hook injected 'rngs'<br/>self.fc = nnx.Linear(20, 30, rngs=rngs)"):::code
+    T_HEAD --- T_CODE
 ```
 
 ---
