@@ -70,10 +70,13 @@ def test_flatten_batch_preserve(rewriter):
 
 
 def test_flatten_passthrough_missing_def(rewriter):
-  # Switch target to one without definitions
-  rewriter.ctx.target_fw = "numpy"
-  rewriter.target_fw = "numpy"
-  # Traits allow it, but lookup will fail
+  # Switch target to one without definitions (e.g. numpy)
+  # Update configuration on shared context
+  rewriter.context.config.target_framework = "numpy"
+  # Update hook context (since it persists copy)
+  rewriter.context.hook_context.target_fw = "numpy"
+
+  # Feature flag enabled, but lookups will fail because resolve_variant mock checks 'jax'
   rewriter.semantics.get_framework_config.side_effect = lambda f: {
     "plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)
   }

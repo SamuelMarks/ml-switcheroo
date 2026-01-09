@@ -1,35 +1,134 @@
 """
-Base Rewriter Implementation.
+Base Rewriter Implementation and Stage Abstraction.
 
-The foundation for the ``PivotRewriter``, aggregating mixins for:
+This module defines the `RewriterStage` base class for pipeline passes and
+maintains the `BaseRewriter` (shim) for backward compatibility with the
+legacy monolithic structure.
 
-- Resolution (Aliases)
-- Scoping (State Tracking)
-- Version Checking
-- Error Handling
-
-Also provides core infrastructure for:
-
-- HookContext initialization.
-- Global Preamble Injection.
-- Knowledge Base Lookups (``_get_mapping``).
+It defines `RewriterProxy` to map property accessors from Mixins to the
+shared `RewriterContext`.
 """
 
 from typing import Optional, List, Dict, Any, Union, Set
 import libcst as cst
 
 from ml_switcheroo.analysis.symbol_table import SymbolTable
-from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.hooks import HookContext
 from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
 
-# Import Mixins
+# Import Mixins (Legacy aggregation support)
 from ml_switcheroo.core.rewriter.resolver import ResolverMixin
 from ml_switcheroo.core.rewriter.scopes import ScopingMixin
 from ml_switcheroo.core.rewriter.ver_check import VersioningMixin
 from ml_switcheroo.core.rewriter.errors import ErrorHandlingMixin
+
+
+class RewriterProxy:
+  """
+  Mixin providing read/write accessors to the shared Context.
+  Ensures mixins can access state via `self._attr` without knowing about `self.context`.
+  """
+
+  @property
+  def context(self) -> RewriterContext:
+    """Abstract required property."""
+    raise NotImplementedError
+
+  # --- Property Proxies to Context ---
+
+  @property
+  def semantics(self) -> SemanticsManager:
+    return self.context.semantics
+
+  @property
+  def config(self) -> RuntimeConfig:
+    return self.context.config
+
+  @property
+  def symbol_table(self) -> Optional[SymbolTable]:
+    return self.context.symbol_table
+
+  @property
+  def ctx(self):
+    """Expose hook context for plugins."""
+    return self.context.hook_context
+
+  @property
+  def source_fw(self) -> str:
+    return self.context.source_fw
+
+  @property
+  def target_fw(self) -> str:
+    return self.context.target_fw
+
+  @property
+  def strict_mode(self) -> bool:
+    return self.context.config.strict_mode
+
+  # --- Mutable State Proxies (Get/Set) ---
+
+  @property
+  def _alias_map(self) -> Dict[str, str]:
+    return self.context.alias_map
+
+  @property
+  def _scope_stack(self) -> List[Set[str]]:
+    return self.context.scope_stack
+
+  @property
+  def _signature_stack(self) -> List[SignatureContext]:
+    return self.context.signature_stack
+
+  @property
+  def _current_stmt_errors(self) -> List[str]:
+    return self.context.current_stmt_errors
+
+  @_current_stmt_errors.setter
+  def _current_stmt_errors(self, value: List[str]):
+    self.context.current_stmt_errors = value
+
+  @property
+  def _current_stmt_warnings(self) -> List[str]:
+    return self.context.current_stmt_warnings
+
+  @_current_stmt_warnings.setter
+  def _current_stmt_warnings(self, value: List[str]):
+    self.context.current_stmt_warnings = value
+
+  @property
+  def _in_module_class(self) -> bool:
+    return self.context.in_module_class
+
+  @_in_module_class.setter
+  def _in_module_class(self, val: bool):
+    self.context.in_module_class = val
+
+  @property
+  def _module_preamble(self) -> List[str]:
+    return self.context.module_preamble
+
+
+class RewriterStage(RewriterProxy, cst.CSTTransformer):
+  """
+  Abstract base class for a discrete rewriting pass.
+
+  Operates on a shared `RewriterContext`.
+  """
+
+  def __init__(self, context: RewriterContext):
+    """
+    Initialize the stage.
+
+    Args:
+        context: The shared state object.
+    """
+    self._context = context
+
+  @property
+  def context(self) -> RewriterContext:
+    return self._context
 
 
 class BaseRewriter(
@@ -37,75 +136,59 @@ class BaseRewriter(
   ScopingMixin,
   ErrorHandlingMixin,
   VersioningMixin,
-  cst.CSTTransformer,
+  RewriterStage,
 ):
-  def __init__(self, semantics: SemanticsManager, config: RuntimeConfig, symbol_table: Optional[SymbolTable] = None):
+  """
+  Legacy monolithic base class.
+
+  Acts as a compatibility shim connecting the old Mixin-based architecture
+  to the new Context-based state storage.
+  """
+
+  def __init__(
+    self,
+    semantics_or_ctx: Union[SemanticsManager, RewriterContext],
+    config: Optional[RuntimeConfig] = None,
+    symbol_table: Optional[SymbolTable] = None,
+  ):
     """
-    Initializes the rewriter and its mixins.
+    Initializes the rewriter.
+
+    Supports both legacy signature (separate args) and new signature (context object).
+
+    Args:
+        semantics_or_ctx: Either a SemanticsManager (legacy) or RewriterContext (new).
+        config: RuntimeConfig (required if legacy init used).
+        symbol_table: SymbolTable (optional).
     """
-    self.semantics = semantics
-    self.config = config
-    self.symbol_table = symbol_table
+    if isinstance(semantics_or_ctx, RewriterContext):
+      ctx = semantics_or_ctx
+    else:
+      if config is None:
+        raise ValueError("Config required for legacy BaseRewriter initialization")
+      # Create fresh context wrapping the provided components
+      ctx = RewriterContext(
+        semantics=semantics_or_ctx,
+        config=config,
+        symbol_table=symbol_table,
+        # Callback binding happens here for self-reference
+        arg_injector=None,
+        preamble_injector=None,
+      )
 
-    self.source_fw = str(config.effective_source)
-    self.target_fw = str(config.effective_target)
-    self.strict_mode = config.strict_mode
+    super().__init__(ctx)
 
-    # Initialize Hook Context with Symbol Table
-    self.ctx = HookContext(
-      semantics,
-      config,
-      arg_injector=self._callback_inject_arg,
-      preamble_injector=self._callback_inject_preamble,
-      symbol_table=symbol_table,
-    )
+    # Late binding of callbacks because 'self' methods are available now
+    # We need to bridge the inner context hooks to this instance methods if it's the root rewriter
+    if self.context.hook_context is not None:
+      # If context was created externally, hooks might already be bound.
+      # If created here, they are None.
+      # We rely on PivorRewriter or manual setup to bind if needed.
+      pass
 
-    # Initialize Mixin State
-    self._current_stmt_errors: List[str] = []
-    self._current_stmt_warnings: List[str] = []
-
-    # ScopingMixin state
-    self._scope_stack: List[Set[str]] = [set()]
-
-    # ResolverMixin state
-    self._alias_map: Dict[str, str] = {}
-
-    # VersioningMixin state
+    # VersioningMixin state (maintained locally for caching optimization)
     self._cached_target_version: Optional[str] = None
     self._version_checked = False
-
-    # Additional State
-    self._signature_stack: List[SignatureContext] = []
-    self._in_module_class = False
-    self._module_preamble: List[str] = []
-
-    # --- FIX: Pre-populate Alias Map with Source Framework Aliases ---
-    # This ensures strict mode and rewriters recognize implicit roots (like 'midl' for 'latex_dsl')
-    # even if no explicit import statement is found in the AST.
-    self._hydrate_source_aliases()
-
-  def _hydrate_source_aliases(self) -> None:
-    """
-    Loads default aliases for the source framework from semantics config.
-    """
-    fw_conf = self.semantics.get_framework_config(self.source_fw)
-    if fw_conf:
-      alias_info = fw_conf.get("alias")
-      # Handle Pydantic model or dict
-      if hasattr(alias_info, "model_dump"):
-        alias_info = alias_info.model_dump()
-
-      if isinstance(alias_info, dict):
-        name = alias_info.get("name")
-        if name:
-          # Map the alias (e.g. 'midl') to the full framework key ('latex_dsl')
-          # or the module path?
-          # The Resolver logic expects _alias_map values to be fully qualified prefixes.
-          # Usually "torch" -> "torch". "midl" -> "latex_dsl"?
-          # No, the semantics defines API paths.
-          # if latex_dsl defines api="midl.Conv2d", then `midl` is the root.
-          # We map alias -> alias to treat it as a known root.
-          self._alias_map[name] = name
 
   def _callback_inject_arg(self, name: str, annotation: Optional[str] = None) -> None:
     """
@@ -134,6 +217,8 @@ class BaseRewriter(
     ctx = self._signature_stack[-1]
     if code_str not in ctx.preamble_stmts:
       ctx.preamble_stmts.append(code_str)
+
+  # --- Shared Helpers ---
 
   def _handle_variant_imports(self, variant: Dict[str, Any]) -> None:
     """
@@ -182,9 +267,6 @@ class BaseRewriter(
     if not lookup:
       # Strict Mode Logic:
       # If the API starts with a known source prefix, we flag it as an error.
-      # We check both the explicit framework name (e.g. 'torch.')
-      # AND any known aliases in the map (e.g. 't.' or 'midl.').
-
       is_known_source_prefix = False
       root = name.split(".")[0]
 
@@ -208,6 +290,8 @@ class BaseRewriter(
     target_impl = self.semantics.resolve_variant(abstract_id, self.target_fw)
 
     if target_impl:
+      from ml_switcheroo.core.tracer import get_tracer
+
       get_tracer().log_match(
         source_api=name,
         target_api=target_impl.get("api", "Plugin Logic"),
@@ -233,7 +317,11 @@ class BaseRewriter(
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
     """
     Injects module-level preambles (e.g. Shim classes) requested by plugins.
+    This handles the root level modification logic.
     """
+    # Call Mixin leave methods manually if not handled by MRO order in subclasses
+    # BaseRewriter is legacy, usually mixins handle their own leave_Module.
+
     if not self._module_preamble:
       return updated_node
 

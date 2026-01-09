@@ -44,14 +44,13 @@ def test_ignore_wrong_target(rewriter):
   Verify that targeting 'numpy' (which has no wiring for this op)
   results in pass-through.
   """
-  rewriter.ctx._runtime_config.target_framework = "numpy"
-  rewriter.ctx.target_fw = "numpy"
+  # PivotRewriter.target_fw is read-only property from config.
+  # To change it, we update the config object in the context.
+  rewriter.context.config.target_framework = "numpy"
+  rewriter.context.hook_context.target_fw = "numpy"
 
-  # Sync Rewriter state
-  rewriter.target_fw = "numpy"
-
-  # Ensure resolve returns None for numpy (Implicit via fixture, but explicit here for safety)
-  rewriter.semantics.resolve_variant.side_effect = lambda a, f: None
+  # Ensure resolve returns None for numpy (Implicit via fixture logic for 'jax' only)
+  rewriter.semantics.resolve_variant.side_effect = lambda a, f: None if f == "numpy" else {}
 
   code = "x = torch.cuda.is_available()"
   # Should preserve original code

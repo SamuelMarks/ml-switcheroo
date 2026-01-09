@@ -144,3 +144,20 @@ def test_collect_optimizers_logic(mock_keras_env):
   names = {r.name for r in results}
   assert "Adam" in names
   assert "Optimizer" not in names
+
+
+def test_weight_conversion_imports(mock_keras_env):
+  """Verify h5py import required for generic saving."""
+  adapter = mock_keras_env
+  imports = adapter.get_weight_conversion_imports()
+  assert "import h5py" in imports
+  assert "import keras" in imports
+
+
+def test_weight_save_code_generation(mock_keras_env):
+  """Verify generic HDF5 save logic generation."""
+  adapter = mock_keras_env
+  code = adapter.get_weight_save_code("state", "path")
+  assert "h5py.File" in code
+  assert "create_dataset" in code
+  assert "state.items()" in code

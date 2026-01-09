@@ -63,7 +63,8 @@ def rewriter():
 
   # 3. Config
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
-  return PivotRewriter(semantics=mgr, config=cfg)
+  # Fix: Use positional arguments for initialization
+  return PivotRewriter(mgr, cfg)
 
 
 def test_strip_inplace_underscore(rewriter):

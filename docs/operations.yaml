@@ -17,7 +17,7 @@
       args: {}
       required_imports: []
 - operation: Abs
-  description: Absolute Value
+  description: Definition for Abs
   op_type: function
   std_args:
     - name: x
@@ -26,30 +26,30 @@
     jax:
       api: jnp.abs
       required_imports: []
-    torch:
-      api: torch.abs
+    keras:
+      api: keras.ops.abs
+      args:
+        x: x
       required_imports: []
     mlx:
       api: mlx.core.abs
       args: {}
       required_imports: []
+    numpy:
+      api: numpy.abs
+      args: {}
+      required_imports: []
     tensorflow:
       api: tf.abs
+      required_imports: []
+    torch:
+      api: torch.abs
       required_imports: []
     rdna:
       api: v_and_b32
       required_imports: []
     sass:
       api: IABS
-    keras:
-      api: keras.ops.abs
-      args:
-        x: x
-      required_imports: []
-    numpy:
-      api: numpy.abs
-      args: {}
-      required_imports: []
     flax_nnx:
       api: jnp.abs
       required_imports: []
@@ -2251,7 +2251,7 @@
       api: torch.Tensor.double
       required_imports: []
 - operation: CastFloat
-  description: Cast to Float
+  description: Definition for CastFloat
   op_type: function
   std_args:
     - name: x
@@ -5722,7 +5722,7 @@
         x: x
       required_imports: []
 - operation: Float32
-  description: Type Float32
+  description: Definition for Float32
   op_type: function
   std_args: []
   variants:
@@ -5739,9 +5739,6 @@
       api: numpy.float32
       args: {}
       required_imports: []
-    torch:
-      api: torch.float32
-      required_imports: []
     mlx:
       api: mx.float32
       args: {}
@@ -5753,6 +5750,9 @@
       api: jax.numpy.float32
       args:
         x: x
+      required_imports: []
+    torch:
+      api: torch.float32
       required_imports: []
 - operation: Float64
   description: 64-bit floating point type (Double).

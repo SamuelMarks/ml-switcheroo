@@ -9,7 +9,7 @@ It handles:
 2.  **Layers**: Mapping `keras.layers.*`.
 3.  **Discovery**: Runtime introspection of the Keras API surface.
 4.  **Ghost Mode**: Silent fallback when Keras is not installed.
-5.  **Weight Migration**: Loading/saving .h5 or .keras files (stubs provided).
+5.  **Weight Migration**: Loading/saving .h5 or .keras files via h5py.
 """
 
 import inspect
@@ -406,8 +406,11 @@ class KerasAdapter:
   def get_weight_conversion_imports(self) -> List[str]:
     """
     Returns imports required for the generated weight migration script.
+
+    Returns:
+        List[str]: List of import statements.
     """
-    return ["import keras", "import numpy as np"]
+    return ["import keras", "import numpy as np", "import h5py"]
 
   def get_weight_load_code(self, path_var: str) -> str:
     """
@@ -446,13 +449,27 @@ class KerasAdapter:
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """
-    Returns warning that saving raw dictionary to Keras checkpoint is complex without model definition.
+    Returns Python code to save the dictionary `state_var` (mapping flat keys to numpy arrays)
+    to `path_var` using h5py.
+
+    Args:
+        state_var (str): Variable name of the state dictionary.
+        path_var (str): Variable name of the output path.
+
+    Returns:
+        str: Generated Python code block.
     """
     return textwrap.dedent(
-      """ 
-            print("WARNING: Saving raw dictionary to Keras checkpoint is not directly supported without model structure.") 
-            print("To save weights for Keras, instantiate the model and use `model.set_weights()`.") 
-            print(f"Weights available in converted_state variable for manual assignment.") 
+      f""" 
+            print(f"Saving generic HDF5 weights to {{ {path_var} }} using h5py...") 
+            with h5py.File({path_var}, "w") as f: 
+                for key, val in {state_var}.items(): 
+                    # Save flat keys as datasets
+                    # We use '/' replacement to create groups if key implies hierarchy, 
+                    # or just flat keys if preferred. 
+                    # Keras variable names usually allowed in HDF5 keys. 
+                    f.create_dataset(str(key), data=val) 
+            print("Done.") 
             """
     )
 

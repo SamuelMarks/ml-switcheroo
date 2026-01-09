@@ -2,19 +2,15 @@
 Orchestration Engine for AST Transformations.
 
 This module provides the ``ASTEngine``, the primary driver for the transpilation process.
-It coordinates the various analysis and transformation passes required to convert code
-from a source framework to a target framework.
+It coordinates the various analysis and transformation passes.
 
-Pipeline:
-
-1.  **Ingestion**: Adapter Hooks (LaTeX) or Standard Parsing (Python/MLIR/TikZ).
-2.  **Emission**: Adapter Hooks (LaTeX) or Standard Emission (Python/MLIR/TikZ).
-3.  **Analysis**: Symbol Table Inference, Purity, Lifecycle, Dependency checks.
-4.  **Transformation**: Rewriting via PivotRewriter.
-5.  **Refinement**: Import Fixing and Linting.
+Updates:
+- Integrates Snapshot emission at phase boundaries.
+- Supports conditional Graph Optimization and Import Fixing logic via RuntimeConfig.
+- Captures source code alongside AST graphs for "Time Travel" debugging.
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 import libcst as cst
 
@@ -25,22 +21,18 @@ from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.conversion_result import ConversionResult
-from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 from ml_switcheroo.core.hooks import load_plugins
-from ml_switcheroo.core.import_fixer import ImportFixer
+from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
 from ml_switcheroo.core.ingestion import ingest_code
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 from ml_switcheroo.core.mlir_bridge import run_mlir_roundtrip
 from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.core.scanners import UsageScanner
-from ml_switcheroo.core.tikz.analyser import GraphExtractor
-from ml_switcheroo.core.tikz.emitter import TikzEmitter
-from ml_switcheroo.core.tikz.synthesizer import GraphSynthesizer
-from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import PluginTraits
 from ml_switcheroo.testing.linter import StructuralLinter
 from ml_switcheroo.utils.visualizer import MermaidGenerator
+from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 
 
 class ASTEngine:
@@ -63,16 +55,6 @@ class ASTEngine:
   ):
     """
     Initializes the Engine.
-
-    Args:
-        semantics: The Knowledge Base manager. If None, a new default manager is loaded.
-        config: A specific RuntimeConfig object. If provided, overrides single attributes.
-        source: Source framework key (e.g. 'torch').
-        target: Target framework key (e.g. 'jax').
-        strict_mode: If True, fail on unmapped APIs instead of preserving them.
-        enable_fusion: If True, performs graph-level fusion pass.
-        plugin_config: Dictionary of settings passed to plugins.
-        intermediate: Optional intermediate representation ('mlir', 'tikz') or None.
     """
     self.semantics = semantics or SemanticsManager()
 
@@ -94,63 +76,40 @@ class ASTEngine:
     self.source = self.config.effective_source
     self.target = self.config.effective_target
     self.strict_mode = self.config.strict_mode
-    # Prioritize explicit argument if provided, else check config
     self.intermediate = intermediate or self.config.intermediate
 
     self.source_adapter = fw_registry.get_adapter(self.source)
     self.target_adapter = fw_registry.get_adapter(self.target)
 
-    # Ensure built-in plugins are loaded now, so that hooks are available during rewrite
-    # This prevents "Missing required plugin" errors in programmatic usage.
+    # Ensure built-in plugins are loaded now
     load_plugins()
 
   def parse(self, code: str) -> cst.Module:
-    """
-    Parses Python source code into a LibCST module.
-
-    Args:
-        code: Source code string.
-
-    Returns:
-        A parsed CST object.
-    """
+    """Parses Python source code into a LibCST module."""
     return cst.parse_module(code)
 
   def to_source(self, tree: cst.Module) -> str:
-    """
-    Converts a LibCST module back to source code string.
-
-    Args:
-        tree: The modified CST module.
-
-    Returns:
-        The generated Python code.
-    """
+    """Converts a LibCST module back to source code string."""
     return tree.code
 
   def _generate_snapshot(self, tree: cst.CSTNode, phase_label: str) -> None:
-    """
-    Generates a Mermaid graph snapshot of the current AST state for the tracer.
-
-    Args:
-        tree: The AST to visualize.
-        phase_label: Description of the current phase (e.g. "Before Pivot").
-    """
+    """Generates a Mermaid graph snapshot and captures current source."""
     tracer = get_tracer()
     try:
       viz = MermaidGenerator()
       graph = viz.generate(tree)
-      tracer.log_snapshot(phase_label, graph)
+      # Capture current state of the code for time-travel
+      if isinstance(tree, cst.Module):
+        source = self.to_source(tree)
+      else:
+        # Handle partial nodes safety
+        source = "<Partial Node>"
+      tracer.log_snapshot(phase_label, graph, source)
     except Exception as e:
       tracer.log_warning(f"Visualizer Error {phase_label}: {str(e)}")
 
   def _should_enforce_purity(self) -> bool:
-    """
-    Determines if Purity Analysis should run based on target traits.
-
-    Returns:
-        True if the target framework requires functional purity (e.g. JAX).
-    """
+    """Determines if Purity Analysis should run."""
     conf = self.semantics.get_framework_config(self.target)
     if conf:
       traits = conf.get("plugin_traits")
@@ -159,7 +118,8 @@ class ASTEngine:
           return traits.get("enforce_purity_analysis", False)
         if isinstance(traits, PluginTraits):
           return traits.enforce_purity_analysis
-        return getattr(traits, "enforce_purity_analysis", False)
+        if hasattr(traits, "enforce_purity_analysis"):
+          return getattr(traits, "enforce_purity_analysis", False)
 
     if self.target_adapter and hasattr(self.target_adapter, "plugin_traits"):
       return self.target_adapter.plugin_traits.enforce_purity_analysis
@@ -167,48 +127,21 @@ class ASTEngine:
     return False
 
   def _run_mlir_roundtrip(self, tree: cst.Module, tracer: Any) -> cst.Module:
-    """
-    Wrapper to execute CST -> MLIR Text -> CST pipeline.
-
-    This method is maintained for backward compatibility with tests which expect
-    it to exist as a private method of the Engine class. It delegates to the
-    module-level `run_mlir_roundtrip` function.
-
-    Args:
-        tree: The Python CST.
-        tracer: The active trace logger.
-
-    Returns:
-        A reconstructed Python CST (via MLIR).
-    """
+    """Executes the MLIR bridge pipeline."""
     return run_mlir_roundtrip(tree, tracer)
 
   def run(self, code: str) -> ConversionResult:
     """
     Executes the full transpilation pipeline.
-
-    Steps:
-
-    1.  **Ingestion**: Parse source (Python/MLIR/LaTeX) to AST.
-    2.  **Short-Circuit**: If target is non-Python (MLIR/TikZ/Latex), emit immediately.
-    3.  **Analysis**:
-        - Run Symbol Table Analyzer for type inference.
-        - Run Purity, Lifecycle, and Dependency checks.
-    4.  **Transformation**: Rewriting via PivotRewriter.
-    5.  **Refinement**: Run `ImportFixer` and `StructuralLinter` to clean results.
-
-    Args:
-        code: The source code string to transpile.
-
-    Returns:
-        A `ConversionResult` containing the output code, errors, and execution trace.
     """
     reset_tracer()
     tracer = get_tracer()
     tracer.start_phase("Transpilation Pipeline", f"{self.source} -> {self.target}")
 
+    # --- PHASE 1: INGESTION ---
     try:
       tree = ingest_code(code, self.source, self.target, self.source_adapter, tracer)
+      self._generate_snapshot(tree, "After Ingestion")
     except Exception as e:
       tracer.end_phase()  # Root
       return ConversionResult(
@@ -224,8 +157,6 @@ class ASTEngine:
       effective_source_pruning_root = "midl"
 
     # --- PHASE 2: EMISSION SHORT-CIRCUIT ---
-
-    # 1. Adapter Hook (e.g. LatexEmitter)
     if self.target_adapter and hasattr(self.target_adapter, "create_emitter"):
       tracer.start_phase("Custom Emission", f"{self.target} Emitter")
       try:
@@ -250,166 +181,123 @@ class ASTEngine:
           trace_events=tracer.export(),
         )
 
-    # 2. MLIR Emission
     if self.target == "mlir":
-      tracer.start_phase("MLIR Emission", "CST -> MLIR Text")
       try:
         emitter = PythonToMlirEmitter()
         mlir_cst = emitter.convert(tree)
         mlir_text = mlir_cst.to_text()
-        tracer.log_mutation("Emission", "(Python CST)", mlir_text)
-        tracer.end_phase()
-        tracer.end_phase()
         return ConversionResult(code=mlir_text, success=True, trace_events=tracer.export())
       except Exception as e:
-        tracer.end_phase()
-        tracer.end_phase()
-        return ConversionResult(
-          code="",
-          errors=[f"MLIR Emit Error: {e}"],
-          success=False,
-          trace_events=tracer.export(),
-        )
+        return ConversionResult(code="", errors=[f"MLIR Error: {e}"], success=False)
 
-    # 3. TikZ Emission
-    if self.target == "tikz":
-      tracer.start_phase("TikZ Emission", "CST -> Logical Graph -> TikZ Text")
-      try:
-        extractor = GraphExtractor()
-        tree.visit(extractor)
-        emitter = TikzEmitter()
-        tikz_code = emitter.emit(extractor.graph)
-        tracer.log_mutation("Emission", "(Python CST)", "(TikZ Source)")
-        tracer.end_phase()
-        tracer.end_phase()
-        return ConversionResult(code=tikz_code, success=True, trace_events=tracer.export())
-      except Exception as e:
-        tracer.end_phase()
-        tracer.end_phase()
-        return ConversionResult(
-          code="",
-          errors=[f"TikZ Emit Error: {e}"],
-          success=False,
-          trace_events=tracer.export(),
-        )
+    # --- PHASE 3: ANALYSIS ---
+    errors_log: List[str] = []
 
-    # --- PHASE 3: ANALYSIS & REWRITING ---
-    errors_log = []
-
-    # 1. Symbol Table Analysis (New Step)
+    # Symbol Table Analysis (Updates symbol table for context)
     tracer.start_phase("Symbol Table Analysis", "Inferring types and scopes")
+    symbol_table = None
     try:
       symbol_analyzer = SymbolTableAnalyzer(self.semantics)
       tree.visit(symbol_analyzer)
       symbol_table = symbol_analyzer.table
     except Exception as e:
       tracer.log_warning(f"Symbol Table analysis failed: {e}")
-      symbol_table = None
     tracer.end_phase()
 
     if self._should_enforce_purity():
-      tracer.start_phase("Purity Check", "Scanning for side-effects")
+      tracer.start_phase("Purity Analysis", "Scanning for side effects")
       purity_scanner = PurityScanner(semantics=self.semantics, source_fw=self.source)
       tree = tree.visit(purity_scanner)
       tracer.end_phase()
 
     lifecycle_tracker = InitializationTracker()
     tree.visit(lifecycle_tracker)
-    if lifecycle_tracker.warnings:
-      errors_log.extend([f"Lifecycle: {w}" for w in lifecycle_tracker.warnings])
 
     dep_scanner = DependencyScanner(self.semantics, self.source)
     tree.visit(dep_scanner)
-    if dep_scanner.unknown_imports:
-      errors_log.append(f"Deps: {dep_scanner.unknown_imports}")
 
-    self._generate_snapshot(tree, "AST Before Pivot")
+    self._generate_snapshot(tree, "After Analysis")
 
-    # --- Graph Fusion Optimization Pass ---
-    if self.config.enable_fusion:
-      tracer.start_phase("Graph Optimization", "Pattern-Based Fusion")
+    # --- PHASE 4: OPTIMIZATION (Optional) ---
+    if self.config.enable_graph_optimization:
+      tracer.start_phase("Graph Optimization", "Fusion & Restructuring")
       try:
-        # 1. Extract Logic Graph
+        from ml_switcheroo.core.graph import GraphExtractor
+        from ml_switcheroo.core.graph_optimizer import GraphOptimizer
+        from ml_switcheroo.core.graph_synthesizer import GraphSynthesizer
+
+        # 1. Extract Logic
         extractor = GraphExtractor()
         tree.visit(extractor)
-        logical_graph = extractor.graph
+        graph = extractor.graph
 
-        if logical_graph.nodes:
-          # 2. Run Fusion
-          optimizer = GraphOptimizer(patterns=self.semantics.get_patterns())
-          optimized_graph = optimizer.optimize(logical_graph)
+        # 2. Optimize
+        patterns = self.semantics.get_patterns()
+        optimizer = GraphOptimizer(patterns)
+        optimized_graph = optimizer.optimize(graph)
 
-          # 3. Synthesize Code (Replaces Rewriter Logic)
-          # Note: Synthesizer needs framework target 'jax' or 'torch'
-          synth_target = "jax" if self.target in ["jax", "flax", "flax_nnx"] else "torch"
-          synthesizer = GraphSynthesizer(framework=self.target)  # Pass actual target for better alias handling
-          generated_code = synthesizer.generate(optimized_graph)
+        # 3. Synthesize
+        synthesizer = GraphSynthesizer(framework=self.target)
+        src_code = synthesizer.generate(optimized_graph)
 
-          tracer.log_mutation("Fusion Synthesis", "(Original AST)", generated_code)
-
-          # Re-parse generated code back to CST for ImportFixer/Linting
-          tree = self.parse(generated_code)
+        # Update AST
+        tree = self.parse(src_code)
+        tracer.log_mutation("Graph Optimization", "AST", "Optimized AST")
 
       except Exception as e:
-        tracer.log_warning(f"Optimization pass failed: {e}")
-        # Fallback to standard flow (continue with original tree)
+        tracer.log_warning(f"Optimization failed: {e}")
 
       tracer.end_phase()
+      self._generate_snapshot(tree, "After Optimization")
 
-    # Standard AST Rewriter (Only run if fusion didn't entirely replace pipeline or if fallback needed)
-    # If fusion ran, 'tree' is now the optimized tree.
-    # We run rewriter anyway to handle nuanced expression rewrites not captured by graph extraction.
+    # --- PHASE 5: REWRITING ---
     tracer.start_phase("Rewrite Engine", "Visitor Traversal")
-    # Inject symbol_table for intelligent rewriting
-    rewriter = PivotRewriter(self.semantics, self.config, symbol_table=symbol_table)
+
+    rewriter = PivotRewriter(self.semantics, self.config, symbol_table)
     tree = tree.visit(rewriter)
+
     tracer.end_phase()
 
-    self._generate_snapshot(tree, "AST After Pivot")
+    self._generate_snapshot(tree, "After Rewriting")
 
-    # Only run MLIR bridge if specifically requested via config
+    # Only run MLIR bridge if specifically requested and valid
     if self.intermediate == "mlir":
       tree = self._run_mlir_roundtrip(tree, tracer)
 
-    # Import Fixing logic
-    if effective_source_pruning_root != self.target:
+    # --- PHASE 6: IMPORT FIXING (Optional) ---
+    if self.config.enable_import_fixer and effective_source_pruning_root != self.target:
+      tracer.start_phase("Import Fixer", "Resolving Dependencies")
+
       roots_to_prune = {effective_source_pruning_root}
       if self.source_adapter:
         if hasattr(self.source_adapter, "import_alias") and self.source_adapter.import_alias:
           roots_to_prune.add(self.source_adapter.import_alias[0].split(".")[0])
 
-      tracer.start_phase("Import Fixer", "Resolving Dependencies")
-      submodule_map = self.semantics.get_import_map(self.target)
-      alias_map = self.semantics.get_framework_aliases()
-
       usage_scanner = UsageScanner(effective_source_pruning_root)
       tree.visit(usage_scanner)
       should_preserve = usage_scanner.get_result()
 
-      fixer = ImportFixer(
-        sorted(list(roots_to_prune)),
-        self.target,
-        submodule_map,
-        alias_map,
-        should_preserve,
-      )
+      resolver = ImportResolver(self.semantics)
+      plan = resolver.resolve(tree, self.target)
+
+      fixer = ImportFixer(plan=plan, source_fws=roots_to_prune, preserve_source=should_preserve, target_fw=self.target)
       tree = tree.visit(fixer)
       tracer.end_phase()
 
+      self._generate_snapshot(tree, "After Import Fixing")
+
     final_code = self.to_source(tree)
 
+    # Linting
     if effective_source_pruning_root != self.target:
-      tracer.start_phase("Structural Linter", "Verifying Cleanup")
-      # Recalculate forbidden set
-      linter_forbidden = {effective_source_pruning_root}
-      if self.source_adapter and hasattr(self.source_adapter, "import_alias") and self.source_adapter.import_alias:
-        linter_forbidden.add(self.source_adapter.import_alias[0].split(".")[0])
-
-      linter = StructuralLinter(forbidden_roots=linter_forbidden)
+      linter = StructuralLinter(forbidden_roots={effective_source_pruning_root})
       lint_errors = linter.check(final_code)
       if lint_errors:
         errors_log.extend(lint_errors)
-      tracer.end_phase()
+        tracer.start_phase("Structural Linter", "Detected Violations")
+        for e in lint_errors:
+          tracer.log_warning(e)
+        tracer.end_phase()
 
     if "# <SWITCHEROO_FAILED_TO_TRANS>" in final_code:
       errors_log.append("Escape Hatches Detected")

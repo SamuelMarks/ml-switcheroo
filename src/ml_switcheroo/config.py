@@ -9,7 +9,8 @@ to the specific libraries installed.
 
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type, TypeVar, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
+
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
 # Optional TOML support
@@ -121,11 +122,24 @@ class RuntimeConfig(BaseModel):
     description="Intermediate representation layer (e.g. 'mlir', 'tikz') for round-trip verification.",
   )
 
-  enable_fusion: bool = Field(False, description="If True, performs graph-level optimization and fusion.")
+  # Pipeline Control Flags
+  enable_graph_optimization: bool = Field(False, description="If True, performs graph-level optimization and fusion.")
+  enable_import_fixer: bool = Field(True, description="If True, performs import resolution, pruning, and injection.")
+
+  # Legacy alias support for fusion
+  enable_fusion: bool = Field(False, description="Legacy alias for enable_graph_optimization.", deprecated=True)
 
   plugin_settings: Dict[str, Any] = Field(default_factory=dict, description="Configuration passed to plugins.")
   plugin_paths: List[Path] = Field(default_factory=list, description="External directories to scan for plugins.")
   validation_report: Optional[Path] = Field(None, description="Path to a verification lockfile.")
+
+  def model_post_init(self, __context: Any) -> None:
+    """
+    Sync legacy fields.
+    """
+    # If user set enable_fusion explicitly to True but left enable_graph_optimization False, sync it.
+    if self.enable_fusion and not self.enable_graph_optimization:
+      self.enable_graph_optimization = True
 
   @field_validator("source_framework", "target_framework")
   @classmethod
@@ -220,7 +234,7 @@ class RuntimeConfig(BaseModel):
         target_flavour (Optional[str]): Override target flavour.
         strict_mode (Optional[bool]): Override strict mode setting.
         intermediate (Optional[str]): Override intermediate representation mode.
-        enable_fusion (Optional[bool]): Override fusion optimization setting.
+        enable_fusion (Optional[bool]): Override fusion/optimization setting (Maps to enable_graph_optimization).
         plugin_settings (Optional[Dict]): Additional plugin settings.
         validation_report (Optional[Path]): Override validation report path.
         search_path (Optional[Path]): Directory path to search for config file.
@@ -248,11 +262,17 @@ class RuntimeConfig(BaseModel):
     # 2b. Intermediate Mode
     final_intermediate = intermediate or toml_config.get("intermediate")
 
-    # 2c. Fusion
+    # 2c. Fusion / Graph Optimization
+    # Map enable_fusion arg to enable_graph_optimization config
     if enable_fusion is not None:
-      final_fusion = enable_fusion
+      final_graph_opt = enable_fusion
     else:
-      final_fusion = toml_config.get("enable_fusion", False)
+      # Check for specific flag first, then fallback to legacy 'enable_fusion'
+      final_graph_opt = toml_config.get("enable_graph_optimization", toml_config.get("enable_fusion", False))
+
+    # 2d. Import Fixer
+    # Can be set via TOML
+    final_import_fixer = toml_config.get("enable_import_fixer", True)
 
     # 3. Plugin Settings (Merge TOML + CLI, CLI wins)
     toml_plugins = toml_config.get("plugin_settings", {})
@@ -281,7 +301,9 @@ class RuntimeConfig(BaseModel):
       target_flavour=final_tgt_flavour,
       strict_mode=final_strict,
       intermediate=final_intermediate,
-      enable_fusion=final_fusion,
+      enable_graph_optimization=final_graph_opt,
+      enable_fusion=final_graph_opt,  # Sync legacy field
+      enable_import_fixer=final_import_fixer,
       plugin_settings=final_plugins,
       plugin_paths=final_plugin_paths,
       validation_report=final_report,

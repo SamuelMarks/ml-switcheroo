@@ -1,20 +1,13 @@
 """
 Function Invocation Rewriter.
 
-This module provides the :class:`InvocationMixin`, a component of the
-:class:`PivotRewriter` responsible for transforming function call nodes within
-the Abstract Syntax Tree (AST).
-
-It orchestrates three phases of processing:
-
-1.  **Pre-Processing**: Checks for functional unwrapping, plugin claims, and lifecycle methods.
-2.  **Strategy Execution**: Switches API calls based on Semantic Definitions, handling
-    infix operators, macros, and standard function renaming. This phase includes compatibility checks
-    and deprecation warnings.
-3.  **Post-Processing**: Applies output adapters, casting, and state threading logic.
+Orchestrates the rewrite of a Call node (`func(...)`) via:
+1.  Pre-checks (Unwrapping, Plugins, Lifecycle).
+2.  Strategy execution (Infix, Lambda, Standard).
+3.  Post-processing (Casting, Adapters).
 """
 
-from typing import Union
+from typing import Union, TYPE_CHECKING
 
 import libcst as cst
 
@@ -31,25 +24,27 @@ from ml_switcheroo.core.rewriter.calls.pre import (
 from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
 
+if TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.calls.mixer import ApiStage
+
 
 class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
   """
   Mixin for transforming :class:`libcst.Call` nodes.
-  Integrates normalization, trait lookup, and transformation strategies.
+
+  Compatible with `ApiStage`.
   """
 
   def leave_Call(
-    self, original: cst.Call, updated: cst.Call
+    self: "ApiStage", original: cst.Call, updated: cst.Call
   ) -> Union[cst.Call, cst.BinaryOperation, cst.UnaryOperation, cst.CSTNode]:
     """
     Visits and rewrites a function call node.
-    Delegates logic to Pre/Strategy/Post handler modules.
     """
     # 1. Identify Function Name
     func_name = self._get_qualified_name(original.func)
 
     # 2. RUN PRE-CHECKS (Safe transformations & short-circuits)
-    # Handles: Functional Unwrap, Plugin Claims, Lifecycle Strip/Warn, Stateful Calls
     handled, result_node = handle_pre_checks(self, original, updated, func_name)
     if handled:
       return result_node
@@ -91,7 +86,7 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
       self._report_warning(version_warning)
 
     # 5b. Retrieve Definition Details
-    lookup = self.semantics.get_definition(func_name)
+    lookup = self.context.semantics.get_definition(func_name)
     if not lookup:
       return updated
 
@@ -105,11 +100,9 @@ class InvocationMixin(NormalizationMixin, TraitsCachingMixin):
       self._report_warning(msg)
 
     # 6. EXECUTE REWRITE STRATEGY
-    # Handles: Imports, Dispatch, Infix, Lambda, Plugin, Macro, Standard
     result_node = execute_strategy(self, original, updated, mapping, details, abstract_id)
 
     # 7. EXECUTE POST-PROCESSING
-    # Handles: Output Index/Adapter, Casting, State Threading
     result_node = handle_post_processing(self, result_node, mapping, abstract_id)
 
     log_diff(f"Operation ({abstract_id})", original, result_node)

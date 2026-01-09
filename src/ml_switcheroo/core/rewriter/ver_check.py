@@ -18,15 +18,19 @@ class VersioningMixin:
   Provides methods to load the current version (from config or environment)
   and compare it against min/max constraints defined in ODL.
 
-  Assumed attributes on self (from BaseRewriter):
-      target_fw (str): The target framework key.
-      semantics (SemanticsManager): The knowledge base.
+  Assumes it is mixed into a class providing `target_fw` and `semantics`.
   """
 
-  def __init__(self):
-    """Initialize cache state."""
+  def __init__(self, *args, **kwargs):
+    """
+    Initialize cache state.
+
+    Accepts *args, **kwargs to support cooperative multiple inheritance chains
+    where `super().__init__` propagates arguments (like `context`).
+    """
     self._cached_target_version: Optional[str] = None
     self._version_checked = False
+    super().__init__(*args, **kwargs)
 
   def _get_target_version(self) -> Optional[str]:
     """

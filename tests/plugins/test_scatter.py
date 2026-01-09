@@ -95,12 +95,8 @@ def test_ignore_tf_target(rewriter):
   Implementation relies on the SemanticsManager returning None for 'tensorflow'.
   """
   # Update Context Config
-  rewriter.ctx._runtime_config.target_framework = "tensorflow"
-  rewriter.ctx.target_fw = "tensorflow"
-
-  # CRITICAL FIX: Update the Rewriter's target_fw string so the wiring lookup logic
-  # passes 'tensorflow' to resolve_variant instead of the initialized 'jax'.
-  rewriter.target_fw = "tensorflow"
+  rewriter.context.config.target_framework = "tensorflow"
+  rewriter.context.hook_context.target_fw = "tensorflow"
 
   code = "x.scatter_(1, i, v)"
   res = rewrite_code(rewriter, code)

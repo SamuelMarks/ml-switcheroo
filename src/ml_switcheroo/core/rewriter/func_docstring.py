@@ -1,9 +1,7 @@
 """
-Docstring Rewriting Logic for Function Definitions.
+Docstring Rewriting Logic.
 
-This module provides the `FuncDocstringMixin` used by the `structure_func` rewriter.
-It handles parsing, parsing, and updating Python docstrings (Google/NumPy style)
-to document arguments injected during transpilation (e.g., `rngs`).
+Updates Google/NumPy style docstrings to document injected arguments.
 """
 
 import re
@@ -14,25 +12,12 @@ from libcst import IndentedBlock, SimpleStatementLine
 
 class FuncDocstringMixin:
   """
-  Mixin for updating function docstrings.
-
-  Provides methods to inject parameter descriptions into existing docstrings,
-  creating `Args:` or `Parameters` sections if they don't exist.
+  Mixin for updating docstrings.
   """
 
   def _update_docstring(self, node: cst.FunctionDef, injected_args: List[Tuple[str, Optional[str]]]) -> cst.FunctionDef:
     """
-    Updates the function docstring to describe injected arguments.
-
-    Supports Google and NumPy style docstrings. Creates an ``Args:`` section
-    if one does not exist.
-
-    Args:
-        node: The function definition.
-        injected_args: List of (name, type) tuples that were added to signature.
-
-    Returns:
-        The function definition with updated docstring.
+    Updates docstring to include injected arguments.
     """
     body = node.body
     if not isinstance(body, IndentedBlock) or not body.body:
@@ -89,14 +74,7 @@ class FuncDocstringMixin:
 
   def _modify_docstring_text(self, text: str, args: List[Tuple[str, Optional[str]]]) -> str:
     """
-    Applies regex replacements to inject argument descriptions into docstring text.
-
-    Args:
-        text: The inner text of the docstring.
-        args: Arguments to document.
-
-    Returns:
-        The modified text.
+    Injects descriptions into docstring text.
     """
     lines = text.splitlines()
     if not lines:
@@ -105,7 +83,9 @@ class FuncDocstringMixin:
     indent = ""
     for line in lines[1:]:
       if line.strip():
-        indent = re.match(r"^\s*", line).group(0)
+        match = re.match(r"^\s*", line)
+        if match:
+          indent = match.group(0)
         break
     if not indent and len(lines) > 0:
       indent = "    "
@@ -133,7 +113,13 @@ class FuncDocstringMixin:
       return text[:split_idx] + block + "\n" + text[split_idx:]
 
     if lines:
-      final_indent = re.match(r"^\s*", lines[-1]).group(0) if lines[-1].strip() == "" else indent
+      final_indent = ""
+      if lines[-1].strip() == "":
+        match = re.match(r"^\s*", lines[-1])
+        final_indent = match.group(0) if match else indent
+      else:
+        final_indent = indent
+
       header = f"\n\n{final_indent}Args:\n"
       block = "\n".join([f"{final_indent}    {e.strip()}" for e in new_entries])
       return text + header + block + "\n"

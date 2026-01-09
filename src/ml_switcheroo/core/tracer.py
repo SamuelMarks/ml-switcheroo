@@ -58,7 +58,7 @@ class TraceLogger:
   relationships between events (e.g. an AST mutation inside a specific Rewrite pass).
   """
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes a new TraceLogger."""
     self._events: List[TraceEvent] = []
     self._active_phases: List[str] = []  # Stack of phase IDs
@@ -179,18 +179,19 @@ class TraceLogger:
       {"outcome": outcome, "detail": detail},
     )
 
-  def log_snapshot(self, description: str, mermaid_graph: str) -> None:
+  def log_snapshot(self, description: str, mermaid_graph: str, code_snapshot: Optional[str] = None) -> None:
     """
     Logs a full AST snapshot for visualization.
 
     Args:
         description: Label for the snapshot (e.g. "Before Pivot").
         mermaid_graph: string containing Mermaid diagram definition.
+        code_snapshot: Optional string containing source code state.
     """
     self._log_simple(
       TraceEventType.AST_SNAPSHOT,
       description,
-      {"mermaid": mermaid_graph},
+      {"mermaid": mermaid_graph, "code": code_snapshot},
     )
 
   def _log_simple(

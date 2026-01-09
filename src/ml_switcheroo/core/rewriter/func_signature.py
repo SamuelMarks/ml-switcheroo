@@ -1,36 +1,27 @@
 """
-Signature Rewriting Logic for Function Definitions.
+Signature Rewriting Logic.
 
-This module provides the `FuncSignatureMixin` used by the `structure_func` rewriter.
-It handles the injection and stripping of arguments in function definitions.
+Handles argument injection and stripping.
 """
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 import libcst as cst
+
+if TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.structure import StructureStage
 
 
 class FuncSignatureMixin:
   """
   Mixin for modifying function signatures.
-
-  Assumes the host class provides:
-  - ``_create_dotted_name(str) -> cst.BaseExpression`` (from BaseRewriter).
+  Expecting host to provide _create_dotted_name.
   """
 
   def _inject_argument_to_signature(
-    self, node: cst.FunctionDef, arg_name: str, annotation: Optional[str] = None
+    self: "StructureStage", node: cst.FunctionDef, arg_name: str, annotation: Optional[str] = None
   ) -> cst.FunctionDef:
     """
-    Injects a typed argument into the function signature.
-    Inserts after ``self`` if present, otherwise at index 0.
-
-    Args:
-        node: The function definition.
-        arg_name: The name of the argument to inject.
-        annotation: Optional type hint string (dotted notation supported).
-
-    Returns:
-        The modified function definition.
+    Injects typed argument into signature.
     """
     params = list(node.params.params)
 
@@ -40,7 +31,7 @@ class FuncSignatureMixin:
 
     anno_node = None
     if annotation:
-      # Note: _create_dotted_name is required from the BaseRewriter context
+      # Relies on StructureStage._create_dotted_name
       anno_node = cst.Annotation(annotation=self._create_dotted_name(annotation))
 
     new_param = cst.Param(name=cst.Name(arg_name), annotation=anno_node, comma=cst.MaybeSentinel.DEFAULT)
@@ -61,19 +52,11 @@ class FuncSignatureMixin:
 
   def _strip_argument_from_signature(self, node: cst.FunctionDef, arg_name: str) -> cst.FunctionDef:
     """
-    Removes an argument by name from the function signature.
-
-    Args:
-        node: The function definition.
-        arg_name: The argument name to strip.
-
-    Returns:
-        The modified function definition.
+    Removes argument by name.
     """
     params = list(node.params.params)
     new_params = [p for p in params if not (isinstance(p.name, cst.Name) and p.name.value == arg_name)]
 
-    # Fix commas
     for i in range(len(new_params) - 1):
       if new_params[i].comma == cst.MaybeSentinel.DEFAULT:
         new_params[i] = new_params[i].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))

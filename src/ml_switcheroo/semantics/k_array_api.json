@@ -366,15 +366,25 @@
     ]
   },
   "permute_dims": {
-    "description": "Permutes tensor dimensions.",
+    "description": "Definition for permute_dims",
+    "operation": "permute_dims",
     "std_args": [
-      "input",
+      "x",
       {
         "is_variadic": true,
-        "name": "dims",
-        "type": "int"
+        "name": "axes"
       }
-    ]
+    ],
+    "variants": {
+      "jax": {
+        "api": "jnp.transpose",
+        "pack_to_tuple": "axes"
+      },
+      "numpy": {
+        "api": "numpy.transpose",
+        "pack_to_tuple": "axes"
+      }
+    }
   },
   "randn": {
     "description": "Returns a tensor filled with random numbers from a normal distribution.",

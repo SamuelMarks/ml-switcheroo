@@ -1,6 +1,6 @@
 {
   "Abs": {
-    "description": "Absolute Value",
+    "description": "Definition for Abs",
     "operation": "Abs",
     "std_args": [
       "x"
@@ -8,6 +8,18 @@
     "variants": {
       "jax": {
         "api": "jax.numpy.abs"
+      },
+      "keras": {
+        "api": "keras.ops.abs"
+      },
+      "mlx": {
+        "api": "mlx.core.abs"
+      },
+      "numpy": {
+        "api": "numpy.abs"
+      },
+      "tensorflow": {
+        "api": "tf.abs"
       },
       "torch": {
         "api": "torch.abs"
@@ -47,7 +59,7 @@
     ]
   },
   "CastFloat": {
-    "description": "Cast to Float",
+    "description": "Definition for CastFloat",
     "operation": "CastFloat",
     "std_args": [
       "x"
@@ -154,7 +166,7 @@
     }
   },
   "Float32": {
-    "description": "Type Float32",
+    "description": "Definition for Float32",
     "operation": "Float32",
     "std_args": [],
     "variants": {
@@ -166,9 +178,6 @@
       },
       "numpy": {
         "api": "numpy.float32"
-      },
-      "torch": {
-        "api": "torch.float32"
       }
     }
   },

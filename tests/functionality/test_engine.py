@@ -4,6 +4,9 @@ Tests for the main ASTEngine and result structures.
 
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.core.tracer import TraceEventType
+from unittest.mock import MagicMock, patch
 import libcst as cst
 
 
@@ -59,3 +62,75 @@ def test_escape_hatch_injection():
     errors.append("Failure detected")
 
   assert len(errors) == 1
+
+
+def test_engine_emits_snapshots():
+  """Verify snapshot events are emitted during run."""
+  source_code = "import torch\nx = torch.abs(y)"
+  # Use config that enables import fixer to verify multiple snapshots
+  cfg = RuntimeConfig(source_framework="torch", target_framework="jax", enable_import_fixer=True)
+  engine = ASTEngine(config=cfg)
+
+  result = engine.run(source_code)
+
+  events = result.trace_events
+  snapshots = [e for e in events if e["type"] == TraceEventType.AST_SNAPSHOT]
+
+  # Expect at least Ingestion, Analysis, Rewrite, Fixing
+  assert len(snapshots) >= 3
+  labels = [s["description"] for s in snapshots]
+
+  assert "After Ingestion" in labels
+  assert "After Analysis" in labels
+  assert "After Rewriting" in labels
+  assert "After Import Fixing" in labels
+
+  # Check source code capture
+  assert snapshots[0]["metadata"]["code"] is not None
+
+
+def test_conditional_import_fixer_skip():
+  """Verify enabling/disabling import fixer works."""
+  source_code = "import torch\nx = torch.abs(y)"
+
+  # Disable Fixer
+  cfg = RuntimeConfig(source_framework="torch", target_framework="jax", enable_import_fixer=False)
+  engine = ASTEngine(config=cfg)
+
+  result = engine.run(source_code)
+
+  # Torch import should persist because Fixer skipped
+  assert "import torch" in result.code
+
+  # Check trace for absence of Fixing snapshot
+  events = result.trace_events
+  labels = [e["description"] for e in events if e["type"] == TraceEventType.AST_SNAPSHOT]
+  assert "After Import Fixing" not in labels
+
+
+@patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer.optimize")
+def test_conditional_graph_optimization(mock_opt):
+  """Verify graph optimization is gated."""
+  source_code = "x = torch.relu(x)"
+
+  # 1. Disabled (Default)
+  cfg1 = RuntimeConfig(enable_graph_optimization=False)
+  engine1 = ASTEngine(config=cfg1)
+  engine1.run(source_code)
+  mock_opt.assert_not_called()
+
+  # 2. Enabled
+  # Mock behavior to just return graph
+  mock_opt.return_value = MagicMock()
+  # Mock synthesis to avoid crash on mocked graph
+  with patch("ml_switcheroo.core.graph_synthesizer.GraphSynthesizer.generate", return_value="x=1"):
+    cfg2 = RuntimeConfig(enable_graph_optimization=True)
+    engine2 = ASTEngine(config=cfg2)
+    engine2.run(source_code)
+
+    mock_opt.assert_called_once()
+
+    # Check snapshot emission
+    events = engine2.run(source_code).trace_events
+    labels = [e["description"] for e in events if e["type"] == TraceEventType.AST_SNAPSHOT]
+    assert "After Optimization" in labels

@@ -4,7 +4,7 @@
  * Logic for rendering the "Git Graph" visualization of the transpilation process.
  * Consumes the JSON event stream from the ASTEngine.
  *
- * Update: Supports 'hover' callback for editor line correlation.
+ * Update: Supports Time Travel debugging via TimeTravelController.
  */
 
 class TraceGraph {
@@ -92,6 +92,17 @@ class TraceGraph {
                 row.style.backgroundColor = 'transparent';
             });
         }
+        
+        // --- Timeline Seek Interaction ---
+        if (event.type === 'ast_snapshot') {
+            row.style.cursor = "pointer";
+            row.title = "Click to jump to this state";
+            row.addEventListener('click', () => {
+                // Dispatch event for TimeTravelController
+                const evt = new CustomEvent('tt-seek-request', { detail: { eventId: event.id } });
+                document.dispatchEvent(evt);
+            });
+        }
 
         // --- 1. Timestamp Column ---
         const meta = document.createElement('div');
@@ -133,6 +144,8 @@ class TraceGraph {
             header.innerHTML += `<span class="trace-tag tag-warn">WARN</span>`;
         } else if (event.type === 'inspection') {
             header.innerHTML += `<span class="trace-tag tag-inspect">SCAN</span>`;
+        } else if (event.type === 'ast_snapshot') {
+            header.innerHTML += `<span class="trace-tag tag-snap">STATE</span>`;
         }
 
         const titleText = document.createElement('span');
@@ -217,5 +230,136 @@ class TraceGraph {
     }
 }
 
+/**
+ * Controller for Time Travel Debugging.
+ * Indexes AST_SNAPSHOT events and manages UI state (slider, buttons).
+ */
+class TimeTravelController {
+    /**
+     * @param {Object} callbacks - Functions to update the UI.
+     * @param {function} callbacks.onUpdateCode - (codeStr) => void
+     * @param {function} callbacks.onUpdateGraph - (mermaidStr) => void
+     */
+    constructor(callbacks) {
+        this.snapshots = [];
+        this.currentIndex = -1;
+        this.callbacks = callbacks;
+
+        // UI Elements
+        this.slider = document.getElementById("tt-slider");
+        this.btnPrev = document.getElementById("btn-tt-prev");
+        this.btnNext = document.getElementById("btn-tt-next");
+        this.label = document.getElementById("tt-phase-label");
+
+        this._bindEvents();
+        
+        // Listen for timeline clicks
+        document.addEventListener('tt-seek-request', (e) => {
+            if (e.detail && e.detail.eventId) {
+                this.seekToId(e.detail.eventId);
+            }
+        });
+    }
+    
+    _bindEvents() {
+        if (!this.slider) return;
+
+        this.slider.addEventListener('input', (e) => {
+            this.seek(parseInt(e.target.value));
+        });
+
+        if (this.btnPrev) {
+            this.btnPrev.addEventListener('click', () => this.step(-1));
+        }
+        if (this.btnNext) {
+            this.btnNext.addEventListener('click', () => this.step(1));
+        }
+    }
+
+    /**
+     * Loads a new trace event stream.
+     * @param {Array} events - Full list of TraceEvents from engine.
+     */
+    loadEvents(events) {
+        if (!events) return;
+        
+        // Filter for snapshots and sort by timestamp implicitly via list order
+        this.snapshots = events.filter(e => e.type === "ast_snapshot");
+        
+        if (this.snapshots.length === 0) {
+            this._resetUI(false);
+            return;
+        }
+
+        // Configure Slider
+        const maxIdx = this.snapshots.length - 1;
+        if (this.slider) {
+            this.slider.min = "0";
+            this.slider.max = maxIdx.toString();
+            this.slider.value = maxIdx.toString();
+            this.slider.disabled = false;
+        }
+
+        this._resetUI(true);
+        // Default to latest state
+        this.seek(maxIdx);
+    }
+    
+    _resetUI(enabled) {
+        if (this.btnPrev) this.btnPrev.disabled = !enabled;
+        if (this.btnNext) this.btnNext.disabled = !enabled;
+        if (this.label) this.label.textContent = enabled ? "Ready" : "No Snapshots";
+        if (!enabled && this.slider) this.slider.disabled = true;
+    }
+
+    /**
+     * Steps forward or backward relative to current index.
+     * @param {number} delta - +1 or -1.
+     */
+    step(delta) {
+        this.seek(this.currentIndex + delta);
+    }
+
+    /**
+     * Seeks to a specific index in the snapshot array.
+     * @param {number} index - The target index.
+     */
+    seek(index) {
+        if (index < 0 || index >= this.snapshots.length) return;
+        
+        this.currentIndex = index;
+        const snap = this.snapshots[index];
+
+        // Update UI
+        if (this.slider) this.slider.value = index;
+        if (this.label) this.label.textContent = `${index + 1}/${this.snapshots.length}: ${snap.description}`;
+        
+        if (this.btnPrev) this.btnPrev.disabled = (index === 0);
+        if (this.btnNext) this.btnNext.disabled = (index === this.snapshots.length - 1);
+
+        // Fire Callbacks
+        if (snap.metadata) {
+            if (this.callbacks.onUpdateCode && snap.metadata.code) {
+                this.callbacks.onUpdateCode(snap.metadata.code);
+            }
+            if (this.callbacks.onUpdateGraph && snap.metadata.mermaid) {
+                this.callbacks.onUpdateGraph(snap.metadata.mermaid);
+            }
+        }
+    }
+    
+    /**
+     * Seeks to the snapshot with the matching Event ID.
+     * @param {string} id - The event uuid.
+     */
+    seekToId(id) {
+        const idx = this.snapshots.findIndex(s => s.id === id);
+        if (idx !== -1) {
+            this.seek(idx);
+        }
+    }
+}
+
 // Export
 window.TraceGraph = TraceGraph;
+window.TimeTravelController = TimeTravelController;

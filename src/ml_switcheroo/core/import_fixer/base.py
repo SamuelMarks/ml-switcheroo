@@ -2,7 +2,7 @@
 Base Import Fixer Logic.
 
 Defines the base class for the ImportFixer, handling initialization, state tracking,
-and configuration management.
+and configuration management via the ResolutionPlan.
 """
 
 from typing import Dict, List, Optional, Set, Tuple, Union
@@ -10,63 +10,75 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 import libcst as cst
 
 from ml_switcheroo.core.scanners import get_full_name
+from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan, ImportReq
 
 
 class BaseImportFixer(cst.CSTTransformer):
   """
   Base class for import manipulation.
 
-  Manages configuration for source removal and target injection, and tracks
-  the state of the module being transforming (e.g., defined aliases, existing imports).
+  Manages configuration for source removal and target injection via `ResolutionPlan`.
   """
 
   def __init__(
     self,
-    source_fws: Union[str, List[str]],
-    target_fw: str,
-    submodule_map: Dict[str, Tuple[str, Optional[str], Optional[str]]],
-    alias_map: Optional[Dict[str, Tuple[str, str]]] = None,
+    plan: ResolutionPlan,
+    source_fws: Optional[Union[str, Set[str]]] = None,
     preserve_source: bool = False,
+    # Legacy arguments for backward compatibility during refactor transition
+    target_fw: Optional[str] = None,
+    submodule_map: Optional[Dict] = None,
+    alias_map: Optional[Dict] = None,
   ):
     """
     Initializes the fixer state.
 
     Args:
-        source_fws: Framework(s) to strip imports for (e.g. 'torch' or ['torch', 'flax']).
-        target_fw: The target framework we are converting to.
-        submodule_map: Mapping for rewriting specific imports (source_path -> target_config).
-        alias_map: Configuration for standard aliases (e.g. jax -> jnp).
+        plan: The pre-calculated ResolutionPlan describing required imports and mappings.
+        source_fws: Framework(s) to strip imports for (e.g. 'torch').
         preserve_source: If True, do not delete imports even if matched.
     """
-    if isinstance(source_fws, str):
+    self.plan = plan
+    self.preserve_source = preserve_source
+
+    # Normalize source frameworks set
+    if source_fws is None:
+      self.source_fws = set()
+    elif isinstance(source_fws, str):
       self.source_fws = {source_fws}
     else:
       self.source_fws = set(source_fws)
 
-    self.target_fw = target_fw
-    self.submodule_map = submodule_map
-    self.alias_map = alias_map or {}
-    self.preserve_source = preserve_source
-
     # State Tracking
-    self._target_found = False
     self._defined_names: Set[str] = set()
-    self._injected_code_sigs: Set[str] = set()
 
-    # Build Collapsing Map: target_full_path -> alias
-    # Used for collapsing `jax.numpy.abs` -> `jnp.abs`
-    self._path_to_alias: Dict[str, str] = {}
+    # Tracks which required imports have been satisfied by existing/rewritten nodes
+    self._satisfied_injections: Set[str] = set()
 
-    # 1. From Submodules Config (Result of Tier Mapping)
-    for _, (root, sub, alias) in self.submodule_map.items():
-      if alias:
+    # Legacy attributes for mixin compatibility (AttributeMixin reads _path_to_alias)
+    # We populate this from the PLAN now.
+    self._path_to_alias = self.plan.path_to_alias
+
+    # If legacy init usage detected from old tests, integrate map
+    if submodule_map:
+      # Map old structure (src -> (root, sub, alias)) to new ImportReq in plan.mappings
+      for src, (root, sub, alias) in submodule_map.items():
+        self.plan.mappings[src] = ImportReq(module=root, subcomponent=sub, alias=alias)
+
+        # Also populate path_to_alias for attributes mixin
         full_path = f"{root}.{sub}" if sub else root
-        self._path_to_alias[full_path] = alias
+        if alias:
+          self._path_to_alias[full_path] = alias
 
-    # 2. From Framework Aliases Config
-    for _, (mod, alias) in self.alias_map.items():
-      if alias:
+    if alias_map:
+      for fw, (mod, alias) in alias_map.items():
         self._path_to_alias[mod] = alias
+        # Add implicit requirement if used (simulate RESOLVER logic for legacy tests)
+        req = ImportReq(module=mod, alias=alias)
+        self.plan.required_imports.append(req)
+
+    # We store target_fw mainly for cleaning re-exports in AttributeMixin if needed
+    self.target_fw = target_fw or ""
 
   def _track_definition(self, alias_node: cst.ImportAlias) -> None:
     """

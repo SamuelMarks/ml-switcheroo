@@ -9,6 +9,8 @@
  * - Weight Script Generation.
  * - TikZ/LaTeX Rendering Integration (TikZJax).
  * - Mermaid AST Visualization.
+ * - **Time Travel Control**: Manages snapshot playback.
+ * - **Configuration**: Passes user pipeline options to the engine.
  */
 
 // Global State
@@ -19,17 +21,19 @@ let weightEditor = null;
 let EXAMPLES = {};
 let FW_TIERS = {};
 let tikzLoaded = false;
+let timeTravel = null; // Controller instance
 
 // Default CDN fallback in case local assets are missing
 const DEFAULT_TIKZJAX_URL = "https://tikzjax.com/v1/tikzjax.js";
-
-// Trace Data State
-let currentAstGraphs = { pre: "", post: "" };
 
 /**
  * Python Script to be executed inside the Pyodide environment.
  * It imports the ml_switcheroo package, configures the ASTEngine,
  * runs the conversion, and generates weight scripts if applicable.
+ *
+ * Updates:
+ * - Reads `js_enable_*` flags from globals for pipeline control.
+ * - Passes flags to RuntimeConfig.
  */
 const PYTHON_BRIDGE = `
 import json
@@ -61,12 +65,18 @@ try:
     real_source = src_flavour if src_flavour else js_src_fw
     real_target = tgt_flavour if tgt_flavour else js_tgt_fw
     
+    # Read optional flags (default False/True as set in JS)
+    opt_graph = js_enable_graph_opt if 'js_enable_graph_opt' in globals() else False
+    opt_imports = js_enable_import_fixer if 'js_enable_import_fixer' in globals() else True
+
     config = RuntimeConfig(
         source_framework=js_src_fw,
         target_framework=js_tgt_fw,
         source_flavour=src_flavour,
         target_flavour=tgt_flavour,
-        strict_mode=js_strict_mode
+        strict_mode=js_strict_mode,
+        enable_graph_optimization=opt_graph,
+        enable_import_fixer=opt_imports
     )
     
     # 1. Run Transpilation
@@ -215,6 +225,22 @@ importlib.util.find_spec("ml_switcheroo") is not None
         initExampleSelector();
         initFrameworkListeners();
         updateRenderTabVisibility();
+
+        // Initialize TimeTravel Logic with callbacks
+        if (window.TimeTravelController) {
+            timeTravel = new window.TimeTravelController({
+                onUpdateCode: (code) => {
+                    if (tgtEditor) {
+                        tgtEditor.setValue(code);
+                        // Refresh wrapper state for visual update
+                        let mode = "python";
+                        if (document.getElementById("select-tgt").value === 'html') mode = "htmlmixed";
+                        tgtEditor.setOption("mode", mode);
+                    }
+                },
+                onUpdateGraph: (mermaidStr) => renderMermaid(mermaidStr)
+            });
+        }
 
         statusEl.innerText = "Ready";
         statusEl.className = "status-badge status-ready";
@@ -414,7 +440,7 @@ async function renderMermaid(graphDef) {
     }
 
     // Set loading state
-    element.innerHTML = '<div style="padding:20px; color:#666">Generating Graph...</div>';
+    element.innerHTML = '<div style="padding:20px; color:#666">Rendered Graph</div>';
 
     try {
         if (typeof mermaid === "undefined") {
@@ -491,13 +517,22 @@ async function runTranspilation() {
     if(srcReg && srcReg.style.display !== 'none') srcFlav = document.getElementById("src-flavour").value;
     if(tgtReg && tgtReg.style.display !== 'none') tgtFlav = document.getElementById("tgt-flavour").value;
 
+    // Gather Pipeline Options
+    const optStrictMode = !!document.getElementById("chk-strict-mode").checked;
+    const optGraph = !!document.getElementById("chk-opt-graph").checked;
+    const optImports = !!document.getElementById("chk-opt-imports").checked;
+
     try {
         pyodide.globals.set("js_source_code", srcCode);
         pyodide.globals.set("js_src_fw", srcFw);
         pyodide.globals.set("js_tgt_fw", tgtFw);
         pyodide.globals.set("js_src_flavour", srcFlav);
         pyodide.globals.set("js_tgt_flavour", tgtFlav);
-        pyodide.globals.set("js_strict_mode", !!document.getElementById("chk-strict-mode").checked);
+        pyodide.globals.set("js_strict_mode", optStrictMode);
+        
+        // Pass pipeline flags
+        pyodide.globals.set("js_enable_graph_opt", optGraph);
+        pyodide.globals.set("js_enable_import_fixer", optImports);
 
         // Execute Python
         await pyodide.runPythonAsync(PYTHON_BRIDGE);
@@ -550,7 +585,7 @@ async function runTranspilation() {
 
              if (tgtFw === 'tikz' || srcFw === 'tikz') {
                  document.getElementById("tab-render").checked = true;
-                 setTimeout(() => renderTikZ(result.code), 150);
+                 setTimeout(() => renderTikZ(result.code), 150); 
              } else if (tgtFw === 'html' || srcFw === 'html') {
                  document.getElementById("tab-render").checked = true;
                  renderHtmlDSL(result.code);
@@ -563,19 +598,17 @@ async function runTranspilation() {
         // Trace Handling (Viz)
         if (result.trace_events) {
              if (window.TraceGraph) {
-                 new TraceGraph('trace-visualizer', updateLineHighlight).render(result.trace_events);
+                 // Render the timeline list
+                 new window.TraceGraph('trace-visualizer', updateLineHighlight).render(result.trace_events);
              }
-             const snapshots = result.trace_events.filter(e => e.type === "ast_snapshot");
-             currentAstGraphs.pre = "";
-             currentAstGraphs.post = "";
-
-             snapshots.forEach(s => {
-                 if (s.description.includes("Before")) currentAstGraphs.pre = s.metadata.mermaid;
-                 if (s.description.includes("After")) currentAstGraphs.post = s.metadata.mermaid;
-             });
-
-             // Use the fixed renderMermaid logic
-             await renderMermaid(currentAstGraphs.pre || currentAstGraphs.post);
+             
+             // Initialize Time Travel Controller
+             if (timeTravel) {
+                 timeTravel.loadEvents(result.trace_events);
+             }
+             
+             // Initial Graph Render (Final state if available, or first valid snapshot?)
+             // TimeTravel seek to last does this automatically now. 
         }
     } catch (err) {
         console.error("Transpilation JS Error", err);
@@ -593,10 +626,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-retro").addEventListener("click", toggleRetroMode);
 
     document.getElementById("btn-ast-prev")?.addEventListener("click", (e) => {
-        renderMermaid(currentAstGraphs.pre);
+        // Legacy buttons support if timeline not used
     });
 
     document.getElementById("btn-ast-next")?.addEventListener("click", (e) => {
-        renderMermaid(currentAstGraphs.post);
     });
 });

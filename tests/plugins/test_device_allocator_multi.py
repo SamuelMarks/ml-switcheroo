@@ -37,7 +37,8 @@ def base_semantics():
 # We use a factory to install the patch per-test invocation context
 def get_rewriter(mgr, target):
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
-  return PivotRewriter(semantics=mgr, config=cfg)
+  # Fix: Use positional arguments for initialization
+  return PivotRewriter(mgr, cfg)
 
 
 @pytest.fixture(autouse=True)

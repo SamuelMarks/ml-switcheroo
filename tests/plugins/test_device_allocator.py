@@ -45,17 +45,20 @@ def rewriter():
     "variants": {
       "torch": {"api": "torch.device"},
       "jax": {"api": "jax.devices", "requires_plugin": "device_allocator"},
+      "numpy": {"api": "cpu", "requires_plugin": "device_allocator"},
     },
   }
 
+  # Lookup Logic
   mgr.get_definition.side_effect = lambda name: ("device", device_def) if name == "torch.device" else None
   mgr.get_known_apis.return_value = {"device": device_def}
   mgr.is_verified.return_value = True
 
-  # Mock resolve_variant
+  # Resolution Logic
   def resolve_variant(aid, fw):
-    if aid == "device" and fw == "jax":
-      return device_def["variants"]["jax"]
+    # Return valid dict if variant exists
+    if aid == "device" and fw in device_def["variants"]:
+      return device_def["variants"][fw]
     return None
 
   mgr.resolve_variant.side_effect = resolve_variant
@@ -63,8 +66,7 @@ def rewriter():
   # 3. Config
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
 
-  # 4. Patch get_adapter to return REAL JAX adapter logic to test E2E flow
-  # This ensures the plugin correctly calls the adapter protocol
+  # 4. Patch get_adapter to return REAL JAX/Numpy adapter logic
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get_adapter:
 
     def adapter_side_effect(name):
@@ -76,7 +78,7 @@ def rewriter():
 
     mock_get_adapter.side_effect = adapter_side_effect
 
-    yield PivotRewriter(semantics=mgr, config=cfg)
+    yield PivotRewriter(mgr, cfg)
 
 
 def test_cuda_mapping_default_index(rewriter):
@@ -116,14 +118,13 @@ def test_mps_mapping(rewriter):
 
 
 def test_ignore_wrong_fw(rewriter):
-  # Reconfigure context to generic numpy (which returns fixed string)
+  # Reconfigure context to generic numpy
+  # Note: Must use config setter to update PivotRewriter's property source
   rewriter.ctx._runtime_config.target_framework = "numpy"
   rewriter.ctx.target_fw = "numpy"
 
   code = "d = torch.device('cuda')"
   result = rewrite_code(rewriter, code)
 
-  # Numpy adapter returns 'cpu' string, but formatted as expression?
-  # NumpyAdapter.get_device_syntax returns "'cpu'"
-  # So result should contain 'cpu'
+  # Numpy adapter returns 'cpu' string code.
   assert "'cpu'" in result

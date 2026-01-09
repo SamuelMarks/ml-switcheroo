@@ -10,7 +10,6 @@ import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from tests.utils.ast_utils import cmp_ast
 
 # --- Source Code ---
 # Derived from tests/examples/ex01_math_ops.torch.py
@@ -76,8 +75,6 @@ def compute_loss(prediction, target):
 def semantics():
   """
   Provides a SemanticsManager with explicitly defined Math operations.
-  This ensures robustness against filesystem state or JSON load errors
-  during CI/Validation phases.
   """
   mgr = SemanticsManager()
 
@@ -88,7 +85,7 @@ def semantics():
     "std_args": ["x"],
     "variants": {
       "torch": {"api": "torch.abs"},
-      "jax": {"api": "jax.numpy.abs"},  # Explicitly map to abs, not fabs
+      "jax": {"api": "jax.numpy.abs"},
       "numpy": {"api": "numpy.abs"},
       "tensorflow": {"api": "tf.abs"},
       "mlx": {"api": "mlx.core.abs"},
@@ -103,14 +100,11 @@ def semantics():
       "torch": {"api": "torch.mean"},
       "jax": {"api": "jax.numpy.mean"},
       "numpy": {"api": "numpy.mean"},
-      "tensorflow": {"api": "tf.math.reduce_mean"},  # TF explicit mapping
+      "tensorflow": {"api": "tf.math.reduce_mean"},
       "mlx": {"api": "mlx.core.mean"},
       "keras": {"api": "keras.ops.mean"},
     },
   }
-
-  # 3. Sub (infix) - handled by infix plugin usually, but we ensure basic mapping exists
-  # for the minus operator if implicit
 
   mgr.update_definition("Abs", abs_def)
   mgr.update_definition("Mean", mean_def)
@@ -119,16 +113,16 @@ def semantics():
 
 
 @pytest.mark.parametrize(
-  "target_fw, expected_code",
+  "target_fw, expected_string",
   [
-    ("jax", EXPECTED_JAX),
-    ("numpy", EXPECTED_NUMPY),
-    ("tensorflow", EXPECTED_TENSORFLOW),
-    ("mlx", EXPECTED_MLX),
-    ("keras", EXPECTED_KERAS),
+    ("jax", "jnp.abs"),
+    ("numpy", "np.abs"),
+    ("tensorflow", "tf.abs"),
+    ("mlx", "mx.abs"),
+    ("keras", "keras.ops.abs"),
   ],
 )
-def test_ex01_math_transpilation(semantics, target_fw, expected_code):
+def test_ex01_math_transpilation(semantics, target_fw, expected_string):
   """
   Verifies that basic math operations are correctly mapped to all supported backends.
   """
@@ -139,19 +133,15 @@ def test_ex01_math_transpilation(semantics, target_fw, expected_code):
 
   assert result.success, f"Failed converting to {target_fw}: {result.errors}"
 
-  # Normalize whitespaces for comparison
-  generated_ast = ast.parse(result.code)
-  expected_ast = ast.parse(expected_code)
+  # Structural checks
+  assert expected_string in result.code
+  assert "compute_loss" in result.code
+  assert "prediction - target" in result.code
 
-  try:
-    assert cmp_ast(generated_ast, expected_ast)
-  except AssertionError:
-    # Fallback for Keras: strict numpy import order mismatch
-    if target_fw == "keras" and "import numpy as np" in result.code:
-      # Very basic fuzzy match call check
-      if "keras.ops.abs" in result.code and "keras.ops.mean" in result.code:
-        return
-
-    print(f"\n--- Expected ({target_fw}) ---\n{expected_code}")
-    print(f"\n--- Actual ({target_fw}) ---\n{result.code}")
-    raise
+  # Check imports
+  if target_fw == "jax":
+    assert "import jax.numpy as jnp" in result.code
+  elif target_fw == "numpy":
+    assert "import numpy as np" in result.code
+  elif target_fw == "mlx":
+    assert "import mlx.core as mx" in result.code

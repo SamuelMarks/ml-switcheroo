@@ -203,7 +203,7 @@
     ],
     "variants": {
       "jax": {
-        "api": "jax.numpy.transpose",
+        "api": "jnp.transpose",
         "pack_to_tuple": "axes"
       },
       "numpy": {
@@ -213,9 +213,6 @@
       "tensorflow": {
         "api": "tf.transpose",
         "pack_to_tuple": "perm"
-      },
-      "torch": {
-        "api": "torch.permute"
       }
     }
   },

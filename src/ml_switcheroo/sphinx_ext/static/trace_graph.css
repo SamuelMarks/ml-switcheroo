@@ -11,8 +11,7 @@
     --c-match: #43a047;
     --c-mut: #f57f17;
     --c-err: #e53935;
-
-    --c-inspect: #9e9e9e; /* Grey for scans */
+    --c-inspect: #9e9e9e;
 }
 
 /* Node coloring */
@@ -20,7 +19,7 @@
     border-color: var(--c-inspect);
     background: #f5f5f5;
     width: 8px;
-    height: 8px; /* Slightly smaller */
+    height: 8px;
 }
 
 /* Tag coloring */
@@ -38,12 +37,162 @@
     overflow-y: auto;
 }
 
+/* --- Time Travel Bar --- */
+.time-travel-bar {
+    display: flex;
+    align-items: center;
+    background: #f1f3f4;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.tt-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1; /* Slider takes spare space */
+}
+
+.tt-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 6px;
+    background: #d3d3d3;
+    outline: none;
+    border-radius: 3px;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.tt-slider:hover {
+    background: #bbb;
+}
+
+.tt-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #2196f3;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.tt-slider:disabled {
+    cursor: not-allowed;
+    background: #eee;
+}
+.tt-slider:disabled::-webkit-slider-thumb {
+    background: #ccc;
+}
+
+.tt-info {
+    min-width: 140px;
+    text-align: center;
+    font-size: 12px;
+    font-family: 'Roboto Mono', monospace;
+    color: #455a64;
+    font-weight: bold;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    padding: 0 10px;
+}
+
+.tt-phase {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Pipeline Config Dropdown */
+.tt-config {
+    position: relative;
+    font-size: 13px;
+}
+
+.tt-config summary {
+    cursor: pointer;
+    list-style: none;
+    color: #1976d2;
+    font-weight: 500;
+    user-select: none;
+}
+.tt-config summary::-webkit-details-marker {
+    display: none;
+}
+.tt-config summary::after {
+    content: "⚙️"; 
+    margin-left: 4px;
+}
+
+.tt-config-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    padding: 8px 0;
+    min-width: 180px;
+    z-index: 50;
+}
+
+.tt-config-item {
+    padding: 6px 12px;
+    display: block;
+}
+.tt-config-item:hover {
+    background: #f5f5f5;
+}
+.tt-config-item label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+/* CRT Overrides */
+body.crt-mode .time-travel-bar {
+    background: #001100;
+    border-color: #003b00;
+}
+body.crt-mode .tt-info {
+    color: #00ff41;
+    border-color: #003b00;
+}
+body.crt-mode .tt-slider {
+    background: #003b00;
+}
+body.crt-mode .tt-slider::-webkit-slider-thumb {
+    background: #00ff41;
+}
+body.crt-mode .tt-config summary {
+    color: #00ff41;
+}
+body.crt-mode .tt-config-menu {
+    background: #000;
+    border-color: #003b00;
+    box-shadow: 0 0 10px #003b00;
+}
+body.crt-mode .tt-config-item:hover {
+    background: #001100;
+}
+body.crt-mode .tt-config-item label {
+    color: #00ff41;
+}
+
 /* --- Row Layout --- */
 .trace-row {
     display: flex;
     padding: 0 15px;
     position: relative;
-    /* Min height to ensure connection lines stretch */
     min-height: 40px;
 }
 
@@ -84,11 +233,11 @@
     background: #fff;
     border: 2px solid #78909c;
     position: absolute;
-    top: 8px; /* Offset from top */
+    top: 8px;
     left: 50%;
     margin-left: -5px;
     z-index: 2;
-    box-shadow: 0 0 0 3px #fff; /* White halo to break line */
+    box-shadow: 0 0 0 3px #fff;
 }
 
 /* Contextual Node Colors */
@@ -96,13 +245,14 @@
 .type-match_semantics .trace-node { border-color: var(--c-match); }
 .type-ast_mutation .trace-node { border-color: var(--c-mut); background: #fff3e0; }
 .type-analysis_warning .trace-node { border-color: var(--c-err); }
+.type-ast_snapshot .trace-node { border-color: #2196f3; background: #e3f2fd; width: 12px; height: 12px; margin-left: -6px; }
 
 /* --- 3. Content --- */
 .trace-content {
     flex: 1;
-    padding-bottom: 25px; /* Spacing between items */
+    padding-bottom: 25px;
     padding-left: 10px;
-    overflow: hidden; /* Contain code blocks */
+    overflow: hidden;
 }
 
 /* Indentation Scaling */
@@ -110,13 +260,6 @@
 .trace-depth-1 .trace-content { padding-left: 30px; }
 .trace-depth-2 .trace-content { padding-left: 50px; }
 .trace-depth-3 .trace-content { padding-left: 70px; }
-
-/* Visual connectors for indentation (optional L-shape) */
-.trace-depth-1 .trace-graph-col::after,
-.trace-depth-2 .trace-graph-col::after,
-.trace-depth-3 .trace-graph-col::after {
-    /* Implicit via margin, keeping it clean */
-}
 
 /* Header Typography */
 .trace-header {
@@ -151,6 +294,7 @@
 .tag-phase { background: #ede7f6; color: var(--c-phase); }
 .tag-match { background: #e8f5e9; color: var(--c-match); }
 .tag-warn  { background: #ffebee; color: var(--c-err); }
+.tag-snap { background: #e3f2fd; color: #1976d2; }
 
 /* --- Details & Payloads --- */
 .trace-details {
@@ -208,7 +352,7 @@
 .diff-del {
     color: #c62828;
     background-color: rgba(255, 235, 238, 0.5);
-    text-decoration: line-through; /* Visual cue for removal */
+    text-decoration: line-through;
 }
 
 .diff-add {

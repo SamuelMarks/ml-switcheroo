@@ -1,61 +1,55 @@
 """
-Decorator Rewriting Mixin.
+Auxiliary Stage: Decorator Handling Logic (Partial Definition).
 
-This module provides logic to handle Python decorators (e.g., `@torch.jit.script`).
-It enables:
+This module defines the `AuxiliaryStage` class, which aggregates decorator
+processing logic. It handles renaming or removing decorators based on semantic
+mappings and target framework traits.
 
-1.  **Renaming**: Mapping decorators between frameworks (e.g., `@torch.jit.script` -> `@jax.jit`).
-2.  **Removal**: stripping decorators that have no equivalent in the target framework (if mapped to null).
-3.  **Trait-Based Handling**: Removes decorators marked as irrelevant by the target framework's traits,
-    decoupling renaming logic from hardcoded framework strings.
-
-Logic robustness handles conflict with `CallMixin`. Since `leave_Decorator` runs
-after child nodes (the decorator expression) are visited, `CallMixin` might have
-already transformed calls inside the decorator (e.g. `@torch.jit.script(optk=True)`).
-To perform accurate lookups, we inspect the `original_node` (preserving Source semantics)
-before applying target logic.
+Note: This file provides the `DecoratorMixin` logic which is mixed into `AuxiliaryStage`
+alongside `ControlFlowMixin` from `control_flow.py`.
 """
 
-from typing import Union, Set, Optional
+from typing import Union, Optional, TYPE_CHECKING
 import libcst as cst
-from ml_switcheroo.core.rewriter.base import BaseRewriter
 from ml_switcheroo.semantics.schema import StructuralTraits
 
+if TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.control_flow import AuxiliaryStage
 
-class DecoratorMixin(BaseRewriter):
+
+class DecoratorMixin:
   """
   Mixin for transforming Decorator nodes.
-  Part of PivotRewriter.
+
+  Expects to be mixed into `AuxiliaryStage` which provides `context`.
   """
 
   _cached_traits: Optional[StructuralTraits] = None
 
-  def _get_traits(self) -> StructuralTraits:
+  def _get_traits(self: "AuxiliaryStage") -> StructuralTraits:
     """Lazily loads structural traits for the current target framework."""
     if self._cached_traits:
       return self._cached_traits
 
-    conf = self.semantics.get_framework_config(self.target_fw)
+    conf = self.context.semantics.get_framework_config(self.context.target_fw)
     if conf and "traits" in conf:
       self._cached_traits = StructuralTraits.model_validate(conf["traits"])
-      return self._cached_traits
+      return self._cached_traits  # type: ignore
 
     return StructuralTraits()
 
   def leave_Decorator(
-    self, original_node: cst.Decorator, updated_node: cst.Decorator
+    self: "AuxiliaryStage", original_node: cst.Decorator, updated_node: cst.Decorator
   ) -> Union[cst.Decorator, cst.RemovalSentinel]:
     """
     Processes decorators attached to functions or classes.
 
     Logic:
-
     1. Identifies the decorator name from `original_node` to ensure we key off the
-       Source Framework API, even if `CallMixin` modified the children in `updated_node`.
+       Source Framework API.
     2. Looks up the semantic definition.
-    3. Checks Target Structural Traits for explicit stripping requirements (e.g. `strip_decorators`).
-    4. If the target variant is explicitly `null` (None), removes the decorator.
-    5. If the target variant specifies a new API, rewrites the name.
+    3. If the target variant is explicitly `null` (None), returns RemovalSentinel.
+    4. If the target variant specifies a new API, rewrites the name.
     """
     # 1. Extract the name expression from ORIGINAL node for lookup stability
     expr = original_node.decorator
@@ -66,19 +60,13 @@ class DecoratorMixin(BaseRewriter):
     else:
       func_node = expr
 
-    # Use helper from BaseRewriter to resolve alias (t.jit -> torch.jit)
+    # Use helper from BaseRewriter logic (via Stage mixin/context) to resolve alias
     name = self._get_qualified_name(func_node)
     if not name:
       return updated_node
 
-    # 2. Check Traits implementation (Decoupling)
-    # Allows a framework to declare "I don't support X type decorators" without
-    # explicit void mapping in JSON if configured via generic traits.
-    # Currently StructuralTraits focuses on lifecycle methods, but we can extend this pattern
-    # for future decorator traits if needed.
-
-    # 3. Lookup Semantics
-    lookup = self.semantics.get_definition(name)
+    # 2. Lookup Semantics
+    lookup = self.context.semantics.get_definition(name)
     if not lookup:
       return updated_node
 
@@ -86,14 +74,15 @@ class DecoratorMixin(BaseRewriter):
     variants = details.get("variants", {})
 
     # Check if target framework has a definition
-    if self.target_fw not in variants:
-      # If not mapped, preserve original (or updated node if children changed)
+    if self.context.target_fw not in variants:
+      # If not mapped, preserve original
       return updated_node
 
-    target_variant = variants[self.target_fw]
+    target_variant = variants[self.context.target_fw]
 
     # Case A: Explicit Removal (mapped to null)
     if target_variant is None:
+      # FIXED: Use correct LibCST sentinel
       return cst.RemoveFromParent()
 
     # Case B: Rewrite Name (API Mapping)
@@ -107,7 +96,6 @@ class DecoratorMixin(BaseRewriter):
       # Apply replacement logic based on syntactic structure
       if isinstance(current_expr, cst.Call):
         # The decorator has arguments: @foo(bar=1)
-        # CallMixin might have already processed arguments (renamed keywords/values).
         # We simply swap the function name being called.
         new_expr = current_expr.with_changes(func=new_name_node)
       else:
@@ -118,3 +106,38 @@ class DecoratorMixin(BaseRewriter):
       return updated_node.with_changes(decorator=new_expr)
 
     return updated_node
+
+  # --- Helpers expected from Aggregator --
+
+  def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
+    """Proxy: implemented in context-aware base."""
+    full_str = self.__cst_to_string(node)
+    if not full_str:
+      return None
+
+    parts = full_str.split(".")
+    root = parts[0]
+
+    if root in self.context.alias_map:
+      canonical_root = self.context.alias_map[root]
+      if len(parts) > 1:
+        return f"{canonical_root}.{'.'.join(parts[1:])}"
+      return canonical_root
+
+    return full_str
+
+  def __cst_to_string(self, node: cst.BaseExpression) -> Optional[str]:
+    if isinstance(node, cst.Name):
+      return node.value
+    elif isinstance(node, cst.Attribute):
+      base = self.__cst_to_string(node.value)
+      if base:
+        return f"{base}.{node.attr.value}"
+    return None
+
+  def _create_dotted_name(self, name_str: str) -> cst.BaseExpression:
+    parts = name_str.split(".")
+    node = cst.Name(parts[0])
+    for part in parts[1:]:
+      node = cst.Attribute(value=node, attr=cst.Name(part))
+    return node

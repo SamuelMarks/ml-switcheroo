@@ -1,12 +1,11 @@
 """
 Assignment Unwrapping Logic.
 
-This module provides the ``AssignmentUnwrapMixin``, which implements the logic for
-handling assignment statements during the rewriting process. Specifically, it
-focuses on unwrapping functional patterns (like ``apply((vars, x))``) into
-cleaner object-oriented calls when targeting frameworks that support it.
+Handles unwrapping functional patterns (like ``apply((vars, x))``) into
+cleaner object-oriented calls (like ``layer(x)``).
 """
 
+from typing import TYPE_CHECKING
 import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.traits_cache import TraitsCachingMixin
@@ -14,23 +13,21 @@ from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
 from ml_switcheroo.core.tracer import get_tracer
 from ml_switcheroo.utils.node_diff import capture_node_source
 
+if TYPE_CHECKING:
+  from ml_switcheroo.core.rewriter.calls.mixer import ApiStage
+
 
 class AssignmentUnwrapMixin(TraitsCachingMixin):
   """
-  Mixin for transforming Assign nodes.
-
-  Responsible for detecting functional assignments (e.g. ``y, state = layer.apply(...)``)
-  and simplifying them based on the source framework's traits (e.g. converting to ``y = layer(...)``).
+  Mixin for transforming Assign nodes inside ApiStage.
   """
 
-  def leave_Assign(self, original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
+  def leave_Assign(self: "ApiStage", original_node: cst.Assign, updated_node: cst.Assign) -> cst.Assign:
     """
     Handles assignment unwrapping for Functional -> OOP transitions.
 
     Scenario: ``y, updates = layer.apply(vars, x)``
     Target:   ``y = layer(x)`` (NNX/Torch style)
-
-    Reads ``functional_execution_method`` from Source Traits to detect pattern.
 
     Args:
         original_node: The node before transformation.
@@ -40,7 +37,17 @@ class AssignmentUnwrapMixin(TraitsCachingMixin):
         The potentially unwrapped assignment node.
     """
     if not isinstance(original_node.value, cst.Call):
-      return super().leave_Assign(original_node, updated_node)
+      # If AttributeMixin (via ApiStage inheritance) has logic for assignment,
+      # this mixin should ideally call a "super" if composed, but currently
+      # ApiStage dictates mixin order.
+      # ApiStage inherits: Invocation, AssignmentUnwrap, Attribute, Base.
+      # AttributeMixin also defines leave_Assign.
+      # We must explicit call next mixin logic?
+      # Ideally, both should run. But typical python MRO:
+      # ApiStage -> Invocation -> Assignment -> Attribute -> ...
+      # AttributeMixin has leave_Assign.
+      # So super().leave_Assign() will call AttributeMixin.leave_Assign
+      return super().leave_Assign(original_node, updated_node)  # type: ignore
 
     # Dynamic detection based on source trait (e.g. "apply", "call_fn")
     source_traits = self._get_source_traits()
@@ -63,4 +70,5 @@ class AssignmentUnwrapMixin(TraitsCachingMixin):
             )
             return new_node
 
-    return super().leave_Assign(original_node, updated_node)
+    # Call AttributesMixin logic (via MRO)
+    return super().leave_Assign(original_node, updated_node)  # type: ignore

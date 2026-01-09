@@ -10,12 +10,14 @@ Features:
 - Framework Flavours support.
 - Render Tab (TikZ) structure.
 - **Weight Script Tab**: Integration of checkpoint migration generator.
+- **Time Travel UI**: Playback controls for AST snapshots.
 - Wheel auto-discovery for Pyodide injection.
 """
 
 import os
 from collections import defaultdict
 from pathlib import Path
+from typing import Dict, List
 
 from ml_switcheroo.config import get_framework_priority_order
 from ml_switcheroo.frameworks import get_adapter
@@ -118,9 +120,8 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   src_flavours_html = _render_flavour_dropdown("src", hierarchy, def_source)
   tgt_flavours_html = _render_flavour_dropdown("tgt", hierarchy, def_target)
 
-  # Note: Logic to show/hide weight tab is handled in JS (switcheroo_demo.js) based on
-  # return data from the engine.
-  return f""" 
+  # Note: Layout upgraded for Time Travel UI
+  return f"""
         <div id="switcheroo-wasm-root" class="switcheroo-material-card" data-wheel="{wheel_name}">
             <script>
                 window.SWITCHEROO_PRELOADED_EXAMPLES = {examples_json}; 
@@ -188,28 +189,22 @@ class Model(nn.Module):
                 <div class="controls-bar">
                     <button type="button" id="btn-retro" class="icon-btn" title="Matrix Mode">🕶️</button>
 
-                    <label class="md-switch" title="Strict Mode: Fail on unknown APIs.">
-                        <input type="checkbox" id="chk-strict-mode">
-                        <span class="md-switch-track"><span class="md-switch-thumb"></span></span>
-                        <span class="md-switch-text">Strict Mode</span>
-                    </label>
-
                     <button id="btn-convert" class="md-btn md-btn-accent" disabled>Run Translation</button>
                 </div>
 
                 <!-- Output Tabs -->
                 <div class="output-tabs">
-                    <!-- Tab 1: Console -->
-                    <input type="radio" name="wm-tabs" id="tab-console">
-                    <label for="tab-console" class="tab-label"><span class="tab-icon">💻</span> Console</label>
-
-                    <!-- Tab 2: Mermaid AST -->
-                    <input type="radio" name="wm-tabs" id="tab-mermaid">
-                    <label for="tab-mermaid" class="tab-label"><span class="tab-icon">🌳</span> AST Graph</label>
-
-                    <!-- Tab 3: Timeline Trace (Default) -->
+                    <!-- Tab 1: Trace (Timeline) - Default -->
                     <input type="radio" name="wm-tabs" id="tab-trace" checked>
-                    <label for="tab-trace" class="tab-label"><span class="tab-icon">⏱️</span> Timeline</label>
+                    <label for="tab-trace" class="tab-label"><span class="tab-icon">⏱️</span> Time Travel</label>
+
+                     <!-- Tab 2: Console -->
+                    <input type="radio" name="wm-tabs" id="tab-console">
+                    <label for="tab-console" class="tab-label"><span class="tab-icon">💻</span> Logs</label>
+
+                    <!-- Tab 3: Mermaid AST -->
+                    <input type="radio" name="wm-tabs" id="tab-mermaid">
+                    <label for="tab-mermaid" class="tab-label"><span class="tab-icon">🌳</span> Graph</label>
 
                     <!-- Tab 4: Render (TikZ / HTML) - Hidden by default -->
                     <input type="radio" name="wm-tabs" id="tab-render">
@@ -217,8 +212,48 @@ class Model(nn.Module):
 
                     <!-- Tab 5: Weight Script (New) -->
                     <input type="radio" name="wm-tabs" id="tab-weights">
-                    <!-- Added data-supported attribute hook for JS control --> 
                     <label for="tab-weights" id="label-tab-weights" class="tab-label" style="display:none;"><span class="tab-icon">🏋️</span> Weight Script</label>
+
+                    <!-- Content: Trace & Time Travel -->
+                    <div class="tab-panel" id="panel-trace">
+                        <!-- Playback Toolbar -->
+                        <div class="time-travel-bar">
+                             <!-- Playback Controls -->
+                            <div class="tt-controls">
+                                <button id="btn-tt-prev" class="icon-btn" title="Step Back" disabled>⏪</button>
+                                <input type="range" id="tt-slider" min="0" max="0" value="0" class="tt-slider" disabled>
+                                <button id="btn-tt-next" class="icon-btn" title="Step Forward" disabled>⏩</button>
+                            </div>
+                            
+                            <!-- Status Display -->
+                            <div class="tt-info">
+                                 <span id="tt-phase-label" class="tt-phase">Waiting...</span>
+                            </div>
+
+                            <!-- Pipeline Config Dropdown -->
+                            <details class="tt-config">
+                                <summary>Pipeline Config</summary>
+                                <div class="tt-config-menu">
+                                    <div class="tt-config-item">
+                                        <label title="Enable Strict Mode (Fail on unknown symbols)">
+                                            <input type="checkbox" id="chk-strict-mode"> Strict Mode
+                                        </label>
+                                    </div>
+                                    <div class="tt-config-item">
+                                        <label title="Enable Import Fixer logic (Pruning/Injection)">
+                                            <input type="checkbox" id="chk-opt-imports" checked> Import Fixer
+                                        </label>
+                                    </div>
+                                    <div class="tt-config-item">
+                                        <label title="Enable Graph Fusion/Optimization (Experimental)">
+                                            <input type="checkbox" id="chk-opt-graph"> Graph Opt
+                                        </label>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+                        <div id="trace-visualizer" class="trace-container"></div>
+                    </div>
 
                     <!-- Content: Console -->
                     <div class="tab-panel" id="panel-console">
@@ -227,18 +262,9 @@ class Model(nn.Module):
 
                     <!-- Content: Mermaid -->
                     <div class="tab-panel" id="panel-mermaid">
-                        <div class="ast-toolbar">
-                            <button id="btn-ast-prev" class="md-btn md-btn-primary" style="padding:4px 10px; font-size:12px;">Before Pivot</button>
-                            <button id="btn-ast-next" class="md-btn md-btn-primary" style="padding:4px 10px; font-size:12px; opacity:0.6;">After Pivot</button>
-                        </div>
                         <div id="ast-mermaid-target" class="mermaid" style="text-align:center; overflow-x:auto;">
                             <em style="color:#999">Run a translation to generate the AST graph.</em>
                         </div>
-                    </div>
-
-                    <!-- Content: Trace -->
-                    <div class="tab-panel" id="panel-trace">
-                        <div id="trace-visualizer" class="trace-container"></div>
                     </div>
 
                     <!-- Content: Render (TikZ) -->
@@ -273,7 +299,7 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
       HTML string of option/optgroup elements.
   """
   # Organizes roots into buckets
-  grouped = defaultdict(list)
+  grouped: Dict[str, List[str]] = defaultdict(list)
 
   # Get framework priority list to sort within groups
   priorities = get_framework_priority_order()
@@ -333,8 +359,8 @@ def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: st
     # Fallback filler
     opts.append('<option value="" disabled selected>No Flavours</option>')
 
-  return f""" 
+  return f"""
         <select id="{side}-flavour" class="material-select-sm" style="{style}">
-            {"".join(opts)} 
+            {"".join(opts)}
         </select>
         """

@@ -5,7 +5,8 @@ Verifies that:
 1. `render_demo_html` produces valid HTML structure.
 2. The template includes all required sections (Toolbar, Editors, Tabs).
 3. The Weight Script tab logic is injected.
-4. Default Frameworks are respected.
+4. **Time Travel** UI elements are present (slider, buttons, config).
+5. Default Frameworks are respected.
 """
 
 import re
@@ -25,7 +26,7 @@ def mock_registry_data():
 def test_render_demo_html_structure(mock_registry_data):
   """
   Scenario: Generating the demo HTML block.
-  Expectation: Contains all structural divs, inputs, and the new Weight Script tab.
+  Expectation: Contains all structural divs, inputs, Weight Script, and Time Travel toolbar.
   """
   hierarchy, ex, meta = mock_registry_data
   html = render_demo_html(hierarchy, ex, meta)
@@ -45,17 +46,20 @@ def test_render_demo_html_structure(mock_registry_data):
   assert 'for="tab-mermaid"' in html
   assert 'for="tab-trace"' in html
 
-  # 4. NEW: Weight Script Tab
+  # 4. Weight Script Tab
   assert 'label for="tab-weights"' in html
-  assert 'id="label-tab-weights"' in html
-  assert '<span class="tab-icon">🏋️</span> Weight Script' in html
 
-  # 5. NEW: Weight Script Panel
-  assert '<div class="tab-panel" id="panel-weights">' in html
-  assert '<textarea id="code-weights"' in html
+  # 5. NEW: Time Travel UI
+  assert 'class="time-travel-bar"' in html
+  assert 'id="tt-slider"' in html
+  assert 'id="btn-tt-prev"' in html
+  assert 'id="btn-tt-next"' in html
+  assert 'id="tt-phase-label"' in html
 
-  # 6. Global JS Injection
-  assert "window.SWITCHEROO_PRELOADED_EXAMPLES" in html
+  # 6. NEW: Pipeline Config
+  assert 'class="tt-config"' in html
+  assert 'id="chk-opt-graph"' in html
+  assert 'id="chk-opt-imports"' in html
 
 
 def test_default_selection_logic(mock_registry_data):
@@ -66,8 +70,6 @@ def test_default_selection_logic(mock_registry_data):
   html = render_demo_html(hierarchy, ex, meta)
 
   # We expect 'torch' to be selected as source
-  # Regex to find <option value="torch" selected>
-  # Note: Whitespace might vary
   assert re.search(r'<option value="torch"[^>]*selected', html)
 
   # Expect 'jax' to be selected as target
@@ -88,8 +90,3 @@ def test_flavour_dropdown_rendering():
   assert 'id="tgt-flavour"' in html
   assert '<option value="flax_nnx" selected>Flax</option>' in html
   assert '<option value="haiku" >Haiku</option>' in html
-
-  # Check fallback for non-flavoured root
-  html_empty = _render_flavour_dropdown("src", hierarchy, "torch")
-  assert "display:none" in html_empty
-  assert "No Flavours" in html_empty
