@@ -2480,6 +2480,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "TorchLoad": {
+    "api": "load",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "io_handler"
+  },
+  "TorchSave": {
+    "api": "save",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "io_handler"
+  },
   "TraceState": {
     "api": "optax.TraceState",
     "args": {},
@@ -2508,6 +2522,17 @@
   },
   "Unique": {
     "api": "jax.numpy.unique",
+    "args": {
+      "ar": "ar",
+      "axis": "axis",
+      "equal_nan": "equal_nan",
+      "fill_value": "fill_value",
+      "return_counts": "return_counts",
+      "return_index": "return_index",
+      "return_inverse": "return_inverse",
+      "size": "size",
+      "sorted": "sorted"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2644,6 +2669,7 @@
   },
   "Where": {
     "api": "jax.numpy.where",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2664,6 +2690,12 @@
   },
   "Zeros": {
     "api": "jax.numpy.zeros",
+    "args": {
+      "device": "device",
+      "dtype": "dtype",
+      "out_sharding": "out_sharding",
+      "shape": "shape"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

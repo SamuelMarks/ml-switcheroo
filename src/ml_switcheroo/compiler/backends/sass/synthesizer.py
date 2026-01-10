@@ -2,7 +2,7 @@
 SASS Synthesizer and Register Allocator.
 
 This module provides the "Middle-End" logic for the SASS compiler pipeline.
-It bridges the gap between high-level Abstract Logic (LogicalGraphs/Python AST)
+It bridges the gap between high-level Abstract Logic (LogicalGraph)
 and low-level Physical Assembly (Instruction nodes/Registers).
 
 It contains:
@@ -14,11 +14,13 @@ It contains:
         semantics and 1:N expansion via Kernel Macros (e.g. Conv2d loops).
     -   **Source Transformation (`to_python`)**: Converts SASS AST nodes back into
         Python LibCST nodes for high-level analysis or documentation.
+3.  **SassBackend**: The CompilerBackend adapter for the Registry.
 """
 
-from typing import Dict, List, Optional, Union, Callable
+from typing import Dict, List, Optional, Union, Callable, TYPE_CHECKING
 import libcst as cst
 
+# Direct Import from Frontend to avoid circular dependency via core shims
 from ml_switcheroo.compiler.frontends.sass.nodes import (
   Instruction,
   Register,
@@ -27,13 +29,16 @@ from ml_switcheroo.compiler.frontends.sass.nodes import (
   Comment,
   Operand,
   Label,
-  SGPR,
 )
 from ml_switcheroo.compiler.backend import CompilerBackend
 from ml_switcheroo.compiler.backends.sass.emitter import SassEmitter
-from ml_switcheroo.core.graph import LogicalGraph, topological_sort
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+# Import IR directly to avoid parsing overhead and cycles with core.graph
+from ml_switcheroo.compiler.ir import LogicalGraph, topological_sort
 from ml_switcheroo.compiler.backends.sass.macros import expand_conv2d, expand_linear
+
+if TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 # Maximum number of general-purpose 32-bit registers per thread in CUDA
 MAX_REGISTERS = 255
@@ -61,7 +66,7 @@ class RegisterAllocator:
     If new, allocates the next available physical register.
 
     Args:
-        var_name (str): The logic identifier (e.g., 'input_1', 'bias').
+        var_name (str): The logical identifier (e.g., 'input_1', 'bias').
 
     Returns:
         Register: A populated Register node (e.g., Register('R0')).
@@ -110,7 +115,7 @@ class SassSynthesizer:
   2.  **Reverse (SASS -> Python)**: Synthesizes Python AST from Assembly nodes.
   """
 
-  def __init__(self, semantics: SemanticsManager):
+  def __init__(self, semantics: "SemanticsManager"):
     """
     Initializes the synthesizer.
 
@@ -148,10 +153,6 @@ class SassSynthesizer:
     Returns:
         List[SassNode]: A structured list of assembly nodes.
     """
-    return self.synthesize(graph)
-
-  def synthesize(self, graph: LogicalGraph) -> List[SassNode]:
-    """Converts graph to SASS AST nodes."""
     self.allocator.reset()
     output_nodes: List[SassNode] = []
 
@@ -266,12 +267,10 @@ class SassSynthesizer:
         # Labels usually denote blocks. Python doesn't have labels.
         # We emit a comment marker for clarity in decompilation.
         # To attach comment, we need a node.
-        # LibCST Module body expects Statements, not EmptyLines directly.
         stmt = cst.SimpleStatementLine(
           body=[cst.Pass()],
           trailing_whitespace=cst.TrailingWhitespace(comment=cst.Comment(f"# Label: {node.name}")),
         )
-        pass
 
       if stmt:
         body_stmts.append(stmt)
@@ -311,7 +310,7 @@ class SassSynthesizer:
 
     is_store = inst.opcode.startswith("ST")
     is_branch = inst.opcode in ["BRA", "BRX", "EXIT", "RET"]
-    is_cmp = inst.opcode.startswith("ISETP") or inst.opcode.startswith("ISETP")
+    # is_cmp = inst.opcode.startswith("ISETP") or inst.opcode.startswith("ISETP")
 
     # ISETP typically writes to Predicate register P0
     if is_store or is_branch:
@@ -381,36 +380,35 @@ class SassSynthesizer:
   def _make_call(self, opcode: str, args: List[cst.Arg]) -> cst.Call:
     """
     Constructs `sass.OPCODE(...)`.
-
-    Args:
-        opcode (str): The instruction mnemonic.
-        args (List[cst.Arg]): Arguments for the call.
-
-    Returns:
-        cst.Call: The constructed call node.
     """
     return cst.Call(func=cst.Attribute(value=cst.Name("sass"), attr=cst.Name(opcode)), args=args)
 
 
 class SassBackend(CompilerBackend):
   """
-  SASS Compiler Backend impl wrapping Synthesizer and Emitter.
+  Compiler Backend implementation for NVIDIA SASS.
+  Orchestrates the synthesis (Graph -> AST) and emission (AST -> Text).
   """
 
-  def __init__(self, semantics: SemanticsManager) -> None:
-    """
-    Args:
-        semantics: Knowledge base for opcode lookup.
-    """
+  def __init__(self, semantics: Optional["SemanticsManager"] = None) -> None:
+    # Lazy load if not provided, but typically passed from Registry/Engine
+    if semantics is None:
+      from ml_switcheroo.semantics.manager import SemanticsManager
+
+      semantics = SemanticsManager()
+
     self.synthesizer = SassSynthesizer(semantics)
     self.emitter = SassEmitter()
 
   def compile(self, graph: LogicalGraph) -> str:
     """
-    Compiles the LogicalGraph to SASS Assembly text.
+    Compiles LogicalGraph to SASS Assembly string.
 
-    1. Graph -> AST Nodes (Synthesis)
-    2. AST Nodes -> Text (Emission)
+    Args:
+        graph: The intermediate representation.
+
+    Returns:
+        str: The SASS code.
     """
-    nodes = self.synthesizer.synthesize(graph)
-    return self.emitter.emit(nodes)
+    sass_nodes = self.synthesizer.from_graph(graph)
+    return self.emitter.emit(sass_nodes)

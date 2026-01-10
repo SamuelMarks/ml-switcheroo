@@ -4,7 +4,7 @@ AMD RDNA / GCN Framework Adapter.
 Provides metadata and legacy hooks for the RDNA compiler stack.
 """
 
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
 
 import libcst as cst
 
@@ -21,7 +21,6 @@ from ml_switcheroo.frameworks.base import (
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
-from ml_switcheroo.semantics.manager import SemanticsManager
 
 # Import compiler components for legacy wrappers
 from ml_switcheroo.compiler.frontends.rdna.parser import RdnaParser
@@ -29,6 +28,9 @@ from ml_switcheroo.compiler.frontends.rdna.lifter import RdnaLifter
 from ml_switcheroo.compiler.backends.rdna.synthesizer import RdnaSynthesizer
 from ml_switcheroo.compiler.backends.rdna.emitter import RdnaEmitter
 from ml_switcheroo.compiler.frontends.python import PythonFrontend
+
+if TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class PythonToRdnaEmitter:
@@ -38,6 +40,9 @@ class PythonToRdnaEmitter:
   """
 
   def __init__(self, target_arch: str = "gfx1030"):
+    # Lazy Import to break cycle
+    from ml_switcheroo.semantics.manager import SemanticsManager
+
     self.target_arch = target_arch
     self.semantics = SemanticsManager()
     self.synthesizer = RdnaSynthesizer(self.semantics)
@@ -69,15 +74,11 @@ class RdnaToPythonParser:
 
   def parse(self) -> cst.Module:
     # 1. Parse RDNA to AST
+    from ml_switcheroo.semantics.manager import SemanticsManager
+
     nodes = self.parser.parse()
 
-    # 2. Lift to Graph (Not fully utilized in this legacy wrapper return type)
-    # The legacy parser expected to return a LibCST module directly or
-    # was used in a context where ASTEngine handled the flow.
-    # Here we return a stub module or try to synthesize python from SASS nodes.
-    # Since 'RdnaSynthesizer' has to_python, we can use that if we want RDNA AST -> Py AST.
-
-    # Determine intent: Tests check result is cst.Module
+    # 2. Lift to Graph
     synth = RdnaSynthesizer(SemanticsManager())
     return synth.to_python(nodes)
 

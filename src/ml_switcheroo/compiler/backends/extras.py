@@ -8,16 +8,19 @@ Provides CompilerBackend implementations for:
 - MLIR (StableHLO)
 """
 
+from typing import TYPE_CHECKING
 from ml_switcheroo.compiler.backend import CompilerBackend
 from ml_switcheroo.compiler.ir import LogicalGraph
 from ml_switcheroo.core.tikz.emitter import TikzEmitter as LegacyTikzEmitter
 from ml_switcheroo.core.html.emitter import HtmlEmitter as LegacyHtmlEmitter
 from ml_switcheroo.core.latex.emitter import LatexEmitter as LegacyLatexEmitter
-from ml_switcheroo.semantics.manager import SemanticsManager
+
+if TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class TikzBackend(CompilerBackend):
-  def __init__(self, semantics: SemanticsManager = None):
+  def __init__(self, semantics: "SemanticsManager" = None):
     self.emitter = LegacyTikzEmitter()
 
   def compile(self, graph: LogicalGraph) -> str:
@@ -25,20 +28,19 @@ class TikzBackend(CompilerBackend):
 
 
 class HtmlBackend(CompilerBackend):
-  def __init__(self, semantics: SemanticsManager = None):
+  def __init__(self, semantics: "SemanticsManager" = None):
     self.emitter = LegacyHtmlEmitter()
 
   def compile(self, graph: LogicalGraph) -> str:
     children = self.emitter._layout_graph(graph)
     from ml_switcheroo.core.html.nodes import HtmlDocument
 
-    # Use graph name populated by GraphExtractor
     doc = HtmlDocument(model_name=graph.name, children=children)
     return doc.to_html()
 
 
 class LatexBackend(CompilerBackend):
-  def __init__(self, semantics: SemanticsManager = None):
+  def __init__(self, semantics: "SemanticsManager" = None):
     self.emitter = LegacyLatexEmitter()
 
   def compile(self, graph: LogicalGraph) -> str:
@@ -47,11 +49,10 @@ class LatexBackend(CompilerBackend):
 
 
 class MlirBackend(CompilerBackend):
-  def __init__(self, semantics: SemanticsManager = None):
+  def __init__(self, semantics: "SemanticsManager" = None):
     pass
 
   def compile(self, graph: LogicalGraph) -> str:
-    # Stub implementation to satisfying basic MLIR structure tests
     lines = ["// Graph -> MLIR compilation output"]
     lines.append("module {")
     for node in graph.nodes:
@@ -65,7 +66,7 @@ class MlirBackend(CompilerBackend):
 
 
 class StableHloBackend(CompilerBackend):
-  def __init__(self, semantics: SemanticsManager = None):
+  def __init__(self, semantics: "SemanticsManager" = None):
     pass
 
   def compile(self, graph: LogicalGraph) -> str:

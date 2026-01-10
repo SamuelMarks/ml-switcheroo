@@ -14,7 +14,6 @@ internal `_ADAPTER_REGISTRY`.
 import importlib
 import pkgutil
 import logging
-from pathlib import Path
 from typing import List, Optional
 
 from ml_switcheroo.frameworks.base import (
@@ -27,19 +26,18 @@ from ml_switcheroo.frameworks.base import (
 
 # Modules to exclude from the automatic adapter registration scan.
 # These are infrastructure or helper modules, not Framework Adapters.
-_EXCLUDED_MODULES = {"base", "__init__", "common", "optax_shim"}
+_EXCLUDED_MODULES = {"base", "__init__", "common", "optax_shim", "loader"}
 
 
 def _auto_register_adapters() -> None:
   """
-  Scans the current directory for .py files and imports them.
+  Scans the current package for modules and imports them.
 
   Importing the module triggers the @register_framework decorator defined
   within the adapter implementation, populating the global registry.
   """
-  pkg_path = str(Path(__file__).parent)
-
-  for _, module_name, _ in pkgutil.iter_modules([pkg_path]):
+  # Use __path__ to support zip imports and standard package discovery
+  for _, module_name, _ in pkgutil.iter_modules(__path__):
     if module_name in _EXCLUDED_MODULES:
       continue
 
@@ -50,7 +48,7 @@ def _auto_register_adapters() -> None:
     except Exception as e:
       # We log exceptions but do not crash. This ensures that one broken
       # plugin/adapter does not prevent the entire engine from starting.
-      logging.warning(f"⚠️  Failed to load framework module '{module_name}': {e}. This framework will not be available.")
+      logging.warning(f"⚠️  Failed to load framework module '{module_name}': {e}")
 
 
 # Execute discovery on import

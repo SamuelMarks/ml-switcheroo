@@ -11,6 +11,14 @@
       "api": "mlx.core.array.abs",
       "args": {}
     },
+    "Acos": {
+      "api": "mlx.core.arccos",
+      "required_imports": []
+    },
+    "Acosh": {
+      "api": "mlx.core.arccosh",
+      "required_imports": []
+    },
     "Adadelta": {
       "api": "mlx.optimizers.optimizers.AdaDelta",
       "args": {
@@ -80,6 +88,17 @@
         "kwargs": "kwargs"
       }
     },
+    "All": {
+      "api": "mlx.core.array.all",
+      "args": {}
+    },
+    "AllClose": {
+      "api": "mlx.core.allclose",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "AllToShardedLinear": {
       "api": "mlx.nn.layers.distributed.AllToShardedLinear",
       "args": {
@@ -89,6 +108,10 @@
         "output_dims": "output_dims",
         "self": "self"
       }
+    },
+    "Any": {
+      "api": "mlx.core.array.any",
+      "args": {}
     },
     "Arange": {
       "api": "mlx.core.arange",
@@ -104,6 +127,20 @@
     "ArgMin": {
       "api": "mlx.core.array.argmin",
       "args": {}
+    },
+    "ArgPartition": {
+      "api": "mlx.core.argpartition",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "ArgSort": {
+      "api": "mlx.core.argsort",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
     },
     "Array": {
       "api": "mlx.core.array",
@@ -129,8 +166,36 @@
       "api": "mlx.core.ArrayLike",
       "args": {}
     },
+    "AsArray": {
+      "api": "mlx.core.array",
+      "required_imports": []
+    },
+    "Asin": {
+      "api": "mlx.core.arcsin",
+      "required_imports": []
+    },
+    "Asinh": {
+      "api": "mlx.core.arcsinh",
+      "required_imports": []
+    },
     "AssertClose": {
       "macro_template": "assert {actual}.allclose({expected}, rtol={rtol}, atol={atol}).item()",
+      "required_imports": []
+    },
+    "Astype": {
+      "api": "mlx.core.array.astype",
+      "args": {}
+    },
+    "Atan": {
+      "api": "mlx.core.arctan",
+      "required_imports": []
+    },
+    "Atan2": {
+      "api": "mlx.core.arctan2",
+      "required_imports": []
+    },
+    "Atanh": {
+      "api": "mlx.core.arctanh",
       "required_imports": []
     },
     "Attention": {
@@ -170,11 +235,20 @@
         "kernel_size": "kernel_size",
         "padding": "padding",
         "stride": "stride"
-      }
+      },
+      "required_imports": []
     },
     "B": {
       "api": "mlx.nn.layers.recurrent.GRU.b",
       "args": {}
+    },
+    "BLOCK_M": {
+      "api": "mlx.core.block_masked_mm",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "BatchNorm": {
       "api": "mlx.nn.layers.normalization.BatchNorm",
@@ -196,6 +270,10 @@
         "stream": "stream"
       }
     },
+    "Bfloat16": {
+      "api": "mlx.core.bfloat16",
+      "args": {}
+    },
     "Bilinear": {
       "api": "mlx.nn.layers.linear.Bilinear",
       "args": {
@@ -206,8 +284,43 @@
         "self": "self"
       }
     },
+    "BitwiseAnd": {
+      "api": "mlx.core.bitwise_and",
+      "required_imports": []
+    },
+    "BitwiseInvert": {
+      "api": "mlx.core.bitwise_invert",
+      "required_imports": []
+    },
+    "BitwiseLeftShift": {
+      "api": "mlx.core.bitwise_left_shift",
+      "required_imports": []
+    },
+    "BitwiseNot": {
+      "api": "mlx.core.bitwise_not",
+      "required_imports": []
+    },
+    "BitwiseOr": {
+      "api": "mlx.core.bitwise_or",
+      "required_imports": []
+    },
+    "BitwiseRightShift": {
+      "api": "mlx.core.bitwise_right_shift",
+      "required_imports": []
+    },
+    "BitwiseXor": {
+      "api": "mlx.core.bitwise_xor",
+      "required_imports": []
+    },
     "Bool": {
       "api": "mx.bool_",
+      "required_imports": []
+    },
+    "BroadcastTo": {
+      "api": "mlx.core.broadcast_to",
+      "args": {
+        "array": "a"
+      },
       "required_imports": []
     },
     "CastBool": {
@@ -278,6 +391,10 @@
         "kwargs": "kwargs"
       }
     },
+    "Complex64": {
+      "api": "mlx.core.complex64",
+      "args": {}
+    },
     "Concat": {
       "api": "mlx.core.concat",
       "args": {
@@ -287,6 +404,20 @@
     },
     "Concatenate": {
       "api": "mlx.core.concatenate",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Conj": {
+      "api": "mlx.core.conj",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Conjugate": {
+      "api": "mlx.core.conjugate",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
@@ -382,6 +513,13 @@
         "stride": "stride"
       }
     },
+    "Convolve": {
+      "api": "mlx.core.convolve",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Cos": {
       "api": "mlx.core.cos",
       "args": {
@@ -401,10 +539,41 @@
       "args": {
         "dim": "axis",
         "reduction": "reduction"
+      },
+      "required_imports": []
+    },
+    "Cross": {
+      "api": "mlx.core.linalg.cross",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "b": "b",
+        "stream": "stream"
       }
     },
     "CumSum": {
       "api": "mlx.core.cumsum",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Cumprod": {
+      "api": "mlx.core.cumprod",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Cumsum": {
+      "api": "mlx.core.cumsum"
+    },
+    "Deg2rad": {
+      "api": "mlx.core.radians",
+      "required_imports": []
+    },
+    "Degrees": {
+      "api": "mlx.core.degrees",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
@@ -418,8 +587,44 @@
       "api": "mlx.core.DeviceType",
       "args": {}
     },
+    "Diag": {
+      "api": "mlx.core.diag",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Diagonal": {
+      "api": "mlx.core.diagonal",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Digitize": {
+      "api": "mlx.core.digitize",
+      "required_imports": []
+    },
     "Div": {
       "api": "mx.divide",
+      "required_imports": []
+    },
+    "Divide": {
+      "api": "mlx.core.divide",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Divmod": {
+      "api": "mlx.core.divmod",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Dot": {
+      "api": "mlx.core.dot",
       "required_imports": []
     },
     "Dropout": {
@@ -443,8 +648,16 @@
         "self": "self"
       }
     },
+    "Dtype": {
+      "api": "mlx.core.iinfo.dtype",
+      "args": {}
+    },
     "DtypeCategory": {
       "api": "mlx.core.DtypeCategory",
+      "args": {}
+    },
+    "E": {
+      "api": "mlx.core.e",
       "args": {}
     },
     "Einsum": {
@@ -490,6 +703,32 @@
         "kwargs": "kwargs"
       }
     },
+    "ExpandDims": {
+      "api": "mlx.core.expand_dims",
+      "args": {
+        "a": "a",
+        "axis": "axis"
+      },
+      "required_imports": []
+    },
+    "Expm1": {
+      "api": "mlx.core.expm1",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Eye": {
+      "api": "mlx.core.eye",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Finfo": {
+      "api": "mlx.core.finfo",
+      "args": {}
+    },
     "Flatten": {
       "api": "mlx.core.flatten",
       "args": {
@@ -509,8 +748,25 @@
       "api": "mlx.core.float64",
       "args": {}
     },
+    "Floating": {
+      "api": "mlx.core.floating",
+      "args": {}
+    },
     "Floor": {
       "api": "mlx.core.floor",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "FloorDivide": {
+      "api": "mlx.core.floor_divide",
+      "operator": "//",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
+    "Full": {
+      "api": "mlx.core.full",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
@@ -546,13 +802,18 @@
         "eps": "eps",
         "full": "full",
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "Gelu": {
       "api": "mlx.nn.layers.activations.gelu",
       "args": {
         "x": "x"
       }
+    },
+    "Generic": {
+      "api": "mlx.core.generic",
+      "args": {}
     },
     "Glu": {
       "api": "mlx.nn.layers.activations.GLU",
@@ -568,8 +829,14 @@
         "kwargs": "kwargs"
       }
     },
+    "GreaterEqual": {
+      "api": "mlx.core.greater_equal",
+      "operator": ">=",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
     "Group": {
-      "api": "mlx.core.distributed.Group",
+      "api": "mlx.nn.layers.distributed.QuantizedShardedToAllLinear.group",
       "args": {}
     },
     "Groupnorm": {
@@ -607,12 +874,30 @@
         "self": "self"
       }
     },
+    "INTEGER": {
+      "api": "mlx.core.integer",
+      "args": {}
+    },
     "Identity": {
       "api": "mlx.nn.layers.linear.Identity",
       "args": {
         "args": "args",
         "kwargs": "kwargs",
         "self": "self"
+      }
+    },
+    "Imag": {
+      "api": "mlx.core.imag",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Inner": {
+      "api": "mlx.core.inner",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
       }
     },
     "Instancenorm": {
@@ -636,6 +921,21 @@
       "api": "mlx.core.int64",
       "args": {}
     },
+    "Int8": {
+      "api": "mlx.core.int8",
+      "args": {}
+    },
+    "Invert": {
+      "api": "mlx.core.bitwise_invert",
+      "required_imports": []
+    },
+    "IsFinite": {
+      "api": "mlx.core.isfinite",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "IsInf": {
       "api": "mlx.core.isinf",
       "args": {
@@ -644,7 +944,38 @@
       }
     },
     "IsNaN": {
+      "api": "mlx.core.isnan"
+    },
+    "IsNan": {
       "api": "mlx.core.isnan",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "IsNegInf": {
+      "api": "mlx.core.isneginf",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "IsPosInf": {
+      "api": "mlx.core.isposinf",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "IsSubDtype": {
+      "api": "mlx.core.issubdtype",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Isclose": {
+      "api": "mlx.core.isclose",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
@@ -654,13 +985,22 @@
       "api": "mlx.nn.losses.kl_div_loss",
       "args": {
         "reduction": "reduction"
+      },
+      "required_imports": []
+    },
+    "Kron": {
+      "api": "mlx.core.kron",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
       }
     },
     "L1": {
       "api": "mlx.nn.losses.l1_loss",
       "args": {
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "LSTM": {
       "api": "mlx.nn.layers.recurrent.LSTM",
@@ -681,12 +1021,40 @@
         "self": "self"
       }
     },
+    "LazyConvTranspose1d": {
+      "api": "mlx.core.conv_transpose1d",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
+    "LazyConvTranspose2d": {
+      "api": "mlx.core.conv_transpose2d",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
+    "LazyConvTranspose3d": {
+      "api": "mlx.core.conv_transpose3d",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
     "LeakyRelu": {
       "api": "mlx.nn.layers.activations.LeakyReLU",
       "args": {
         "negative_slope": "negative_slope",
         "self": "self"
       }
+    },
+    "LeftShift": {
+      "api": "mlx.core.bitwise_left_shift",
+      "required_imports": []
     },
     "Less": {
       "api": "mlx.core.less",
@@ -695,6 +1063,12 @@
         "kwargs": "kwargs"
       }
     },
+    "LessEqual": {
+      "api": "mlx.core.less_equal",
+      "operator": "<=",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
     "Linear": {
       "api": "mlx.nn.layers.linear.Linear",
       "args": {
@@ -702,6 +1076,18 @@
         "input_dims": "input_dims",
         "output_dims": "output_dims",
         "self": "self"
+      }
+    },
+    "LinearT": {
+      "api": "mlx.nn.layers.transformer.TransformerEncoderLayer.linear2",
+      "args": {},
+      "required_imports": []
+    },
+    "Linspace": {
+      "api": "mlx.core.linspace",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
       }
     },
     "Lion": {
@@ -730,17 +1116,58 @@
         "kwargs": "kwargs"
       }
     },
+    "Log10": {
+      "api": "mlx.core.log10",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Log1p": {
+      "api": "mlx.core.log1p",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Log2": {
+      "api": "mlx.core.log2",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "LogSoftmax": {
       "api": "mlx.nn.layers.activations.LogSoftmax",
       "args": {
         "self": "self"
       }
     },
+    "Logaddexp": {
+      "api": "mlx.core.logaddexp",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Logcosh": {
       "api": "mlx.nn.losses.log_cosh_loss",
       "args": {
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
+    },
+    "LogicalAnd": {
+      "api": "mlx.core.logical_and",
+      "required_imports": []
+    },
+    "LogicalNot": {
+      "api": "mlx.core.logical_not",
+      "required_imports": []
+    },
+    "LogicalOr": {
+      "api": "mlx.core.logical_or",
+      "required_imports": []
     },
     "Logsigmoid": {
       "api": "mlx.nn.layers.activations.LogSigmoid",
@@ -755,14 +1182,29 @@
         "kwargs": "kwargs"
       }
     },
+    "MarginRankingLoss": {
+      "api": "mlx.nn.losses.margin_ranking_loss",
+      "args": {
+        "inputs1": "inputs1",
+        "inputs2": "inputs2",
+        "margin": "margin",
+        "reduction": "reduction",
+        "targets": "targets"
+      },
+      "required_imports": []
+    },
     "Marginranking": {
       "api": "mlx.nn.losses.margin_ranking_loss",
       "args": {
         "margin": "margin",
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "MatMul": {
+      "api": "mlx.core.matmul"
+    },
+    "Matmul": {
       "api": "mlx.core.matmul",
       "args": {
         "args": "args",
@@ -803,16 +1245,68 @@
         "stride": "stride"
       }
     },
+    "MaxUnpool1d": {
+      "api": "mlx.nn.layers.pooling.MaxPool1d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "self": "self",
+        "stride": "stride"
+      },
+      "required_imports": []
+    },
+    "MaxUnpool2d": {
+      "api": "mlx.nn.layers.pooling.MaxPool2d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "self": "self",
+        "stride": "stride"
+      },
+      "required_imports": []
+    },
+    "MaxUnpool3d": {
+      "api": "mlx.nn.layers.pooling.MaxPool3d",
+      "args": {
+        "kernel_size": "kernel_size",
+        "padding": "padding",
+        "self": "self",
+        "stride": "stride"
+      },
+      "required_imports": []
+    },
+    "Maximum": {
+      "api": "mlx.core.maximum",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Maxpool": {
       "api": "mlx.nn.MaxPool3d",
       "args": {
         "kernel_size": "kernel_size",
         "padding": "padding",
         "stride": "stride"
-      }
+      },
+      "required_imports": []
     },
     "Mean": {
       "api": "mlx.core.mean",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Median": {
+      "api": "mlx.core.median",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Meshgrid": {
+      "api": "mlx.core.meshgrid",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
@@ -825,11 +1319,24 @@
         "kwargs": "kwargs"
       }
     },
+    "Minimum": {
+      "api": "mlx.core.minimum",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Mish": {
       "api": "mlx.nn.layers.activations.Mish",
       "args": {
         "self": "self"
       }
+    },
+    "Mod": {
+      "api": "mlx.core.remainder",
+      "operator": "%",
+      "required_imports": [],
+      "transformation_type": "infix"
     },
     "Module": {
       "api": "mlx.nn.layers.base.Module",
@@ -837,11 +1344,19 @@
         "self": "self"
       }
     },
+    "Moveaxis": {
+      "api": "mlx.core.moveaxis",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Mse": {
       "api": "mlx.nn.losses.mse_loss",
       "args": {
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "Mul": {
       "api": "mx.multiply",
@@ -869,6 +1384,13 @@
         "value_output_dims": "value_output_dims"
       }
     },
+    "Multiply": {
+      "api": "mlx.core.multiply",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Muon": {
       "api": "mlx.optimizers.optimizers.Muon",
       "args": {
@@ -880,11 +1402,16 @@
         "weight_decay": "weight_decay"
       }
     },
+    "Nan": {
+      "api": "mlx.core.nan",
+      "args": {}
+    },
     "Nll": {
       "api": "mlx.nn.losses.nll_loss",
       "args": {
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "OneHot": {
       "api": "mlx.nn.OneHot",
@@ -921,6 +1448,35 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "Pow": {
+      "api": "mlx.core.power",
+      "args": {
+        "x1": "a",
+        "x2": "b"
+      },
+      "required_imports": []
+    },
+    "Power": {
+      "api": "mlx.core.power",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Prod": {
+      "api": "mlx.core.prod",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Quantile": {
+      "api": "mlx.core.quantile",
+      "args": {
+        "a": "a"
+      },
+      "required_imports": []
     },
     "QuantizeLinear": {
       "api": "mlx.nn.layers.quantized.QuantizedLinear",
@@ -988,6 +1544,25 @@
         "self": "self"
       }
     },
+    "RPC_AVAILABLE": {
+      "api": "mlx.core.cuda.is_available",
+      "args": {},
+      "required_imports": []
+    },
+    "Rad2deg": {
+      "api": "mlx.core.degrees",
+      "args": {
+        "x": "a"
+      },
+      "required_imports": []
+    },
+    "Radians": {
+      "api": "mlx.core.radians",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "RandInt": {
       "api": "mlx.core.random.randint",
       "args": {
@@ -999,6 +1574,13 @@
         "stream": "stream"
       }
     },
+    "Ravel": {
+      "api": "mlx.core.flatten",
+      "args": {
+        "a": "a"
+      },
+      "required_imports": []
+    },
     "ReLU": {
       "api": "mlx.nn.layers.activations.ReLU",
       "args": {
@@ -1009,6 +1591,13 @@
       "api": "mlx.nn.layers.activations.ReLU2",
       "args": {
         "self": "self"
+      }
+    },
+    "Real": {
+      "api": "mlx.core.real",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
       }
     },
     "Reciprocal": {
@@ -1026,12 +1615,27 @@
       "api": "mlx.nn.layers.activations.relu",
       "args": {
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "Relu6": {
       "api": "mlx.nn.layers.activations.ReLU6",
       "args": {
         "self": "self"
+      }
+    },
+    "Remainder": {
+      "api": "mlx.core.remainder",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Repeat": {
+      "api": "mlx.core.repeat",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
       }
     },
     "Reshape": {
@@ -1040,6 +1644,17 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "RightShift": {
+      "api": "mlx.core.bitwise_right_shift",
+      "required_imports": []
+    },
+    "Rint": {
+      "api": "mlx.core.round",
+      "args": {
+        "x": "a"
+      },
+      "required_imports": []
     },
     "Rmsnorm": {
       "api": "mlx.nn.layers.normalization.RMSNorm",
@@ -1057,6 +1672,13 @@
         "scale": "scale",
         "self": "self",
         "traditional": "traditional"
+      }
+    },
+    "Roll": {
+      "api": "mlx.core.roll",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
       }
     },
     "Round": {
@@ -1079,6 +1701,13 @@
     },
     "Save": {
       "api": "mlx.core.save",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Savez": {
+      "api": "mlx.core.savez",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
@@ -1130,6 +1759,17 @@
         "kwargs": "kwargs"
       }
     },
+    "SignedInteger": {
+      "api": "mlx.core.signedinteger",
+      "args": {}
+    },
+    "Silu": {
+      "api": "mlx.nn.layers.activations.silu",
+      "args": {
+        "x": "x"
+      },
+      "required_imports": []
+    },
     "Sin": {
       "api": "mlx.core.sin",
       "args": {
@@ -1174,13 +1814,22 @@
       "args": {
         "beta": "beta",
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "Softmax": {
       "api": "mlx.nn.layers.activations.Softmax",
       "args": {
         "self": "self"
       }
+    },
+    "Softmax2d": {
+      "api": "mlx.core.softmax",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "Softmin": {
       "api": "mlx.nn.layers.activations.Softmin",
@@ -1207,6 +1856,13 @@
         "self": "self"
       }
     },
+    "Sort": {
+      "api": "mlx.core.sort",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Split": {
       "api": "mlx.core.split",
       "args": {
@@ -1221,8 +1877,29 @@
         "kwargs": "kwargs"
       }
     },
+    "Square": {
+      "api": "mlx.core.square",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Squeeze": {
       "api": "mlx.core.squeeze",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Stack": {
+      "api": "mlx.core.stack",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Std": {
+      "api": "mlx.core.std",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
@@ -1243,6 +1920,13 @@
     "Sub": {
       "api": "mx.subtract",
       "required_imports": []
+    },
+    "Subtract": {
+      "api": "mlx.core.subtract",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
     },
     "Sum": {
       "api": "mlx.core.sum",
@@ -1277,6 +1961,14 @@
       "args": {
         "self": "self"
       }
+    },
+    "Tanhshrink": {
+      "api": "mlx.core.tanh",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "TensorType": {
       "api": "mlx.core.array",
@@ -1387,6 +2079,21 @@
         "kwargs": "kwargs"
       }
     },
+    "Unique": {
+      "api": "mlx.core.unique",
+      "args": {
+        "ar": "a"
+      },
+      "required_imports": []
+    },
+    "UnravelIndex": {
+      "api": "mlx.core.unravel_index",
+      "required_imports": []
+    },
+    "UnsignedInteger": {
+      "api": "mlx.core.unsignedinteger",
+      "args": {}
+    },
     "Upsample": {
       "api": "mlx.nn.layers.upsample.Upsample",
       "args": {
@@ -1394,6 +2101,13 @@
         "mode": "mode",
         "scale_factor": "scale_factor",
         "self": "self"
+      }
+    },
+    "Var": {
+      "api": "mlx.core.var",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
       }
     },
     "Variable": {
@@ -1437,12 +2151,21 @@
         "kwargs": "kwargs"
       }
     },
+    "ZerosLike": {
+      "api": "mlx.core.zeros_like",
+      "required_imports": []
+    },
     "abs": {
       "api": "mlx.core.abs"
     },
     "activation": {
       "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.activation",
       "args": {}
+    },
+    "activation_relu_or_gelu": {
+      "api": "mlx.nn.layers.transformer.TransformerEncoderLayer.activation",
+      "args": {},
+      "required_imports": []
     },
     "add": {
       "api": "mlx.core.add"
@@ -1459,8 +2182,7 @@
       "args": {}
     },
     "all": {
-      "api": "mlx.core.array.all",
-      "args": {}
+      "api": "mlx.core.all"
     },
     "all_gather": {
       "api": "mlx.core.distributed.all_gather",
@@ -1499,15 +2221,15 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "alpha": {
       "api": "mlx.optimizers.optimizers.RMSprop.alpha",
       "args": {}
     },
     "any": {
-      "api": "mlx.core.array.any",
-      "args": {}
+      "api": "mlx.core.any"
     },
     "apply": {
       "api": "mlx.nn.layers.base.Module.apply",
@@ -1604,14 +2326,11 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "argsort": {
-      "api": "mlx.core.argsort",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.argsort"
     },
     "array": {
       "api": "mlx.core.array"
@@ -1639,7 +2358,8 @@
     },
     "astype": {
       "api": "mlx.core.array.astype",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "async_eval": {
       "api": "mlx.core.async_eval",
@@ -1701,7 +2421,8 @@
     },
     "bfloat16": {
       "api": "mlx.core.bfloat16",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "bhn": {
       "api": "mlx.nn.layers.recurrent.GRU.bhn",
@@ -1714,6 +2435,26 @@
     "bias_correction": {
       "api": "mlx.optimizers.optimizers.Adam.bias_correction",
       "args": {}
+    },
+    "bias_hh": {
+      "api": "mlx.nn.layers.convolution.Conv1d.bias",
+      "args": {},
+      "required_imports": []
+    },
+    "bias_ih": {
+      "api": "mlx.nn.layers.convolution.Conv1d.bias",
+      "args": {},
+      "required_imports": []
+    },
+    "bias_k": {
+      "api": "mlx.nn.layers.convolution.Conv1d.bias",
+      "args": {},
+      "required_imports": []
+    },
+    "bias_v": {
+      "api": "mlx.nn.layers.convolution.Conv1d.bias",
+      "args": {},
+      "required_imports": []
     },
     "biases": {
       "api": "mlx.nn.layers.quantized.QuantizedLinear.biases",
@@ -1807,6 +2548,14 @@
     "ceil": {
       "api": "mlx.core.ceil"
     },
+    "ceil_mode": {
+      "api": "mlx.core.ceil",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
     "checkpoint": {
       "api": "mlx.nn.layers.transformer.TransformerDecoder.checkpoint",
       "args": {}
@@ -1857,7 +2606,8 @@
     },
     "complex64": {
       "api": "mlx.core.complex64",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "complexfloating": {
       "api": "mlx.core.complexfloating",
@@ -1867,18 +2617,23 @@
       "api": "mlx.core.concat"
     },
     "conj": {
-      "api": "mlx.core.conj",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.conj"
     },
     "conjugate": {
       "api": "mlx.core.conjugate",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
+    },
+    "constant_": {
+      "api": "mlx.nn.init.constant",
+      "args": {
+        "dtype": "dtype",
+        "value": "value"
+      },
+      "required_imports": []
     },
     "contiguous": {
       "api": "mlx.core.contiguous",
@@ -1892,14 +2647,64 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
+    },
+    "conv1d_input": {
+      "api": "mlx.core.conv1d",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
+    "conv1d_weight": {
+      "api": "mlx.core.conv1d",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
+    "conv2d_input": {
+      "api": "mlx.core.conv2d",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
+    "conv2d_weight": {
+      "api": "mlx.core.conv2d",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "conv3d": {
       "api": "mlx.core.conv3d",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
+    },
+    "conv3d_input": {
+      "api": "mlx.core.conv3d",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
+    "conv3d_weight": {
+      "api": "mlx.core.conv3d",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "conv_general": {
       "api": "mlx.core.conv_general",
@@ -1934,7 +2739,8 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "cos": {
       "api": "mlx.core.cos"
@@ -1993,13 +2799,7 @@
       }
     },
     "cross": {
-      "api": "mlx.core.linalg.cross",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "b": "b",
-        "stream": "stream"
-      }
+      "api": "mlx.core.linalg.cross"
     },
     "cross_attention": {
       "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.cross_attention",
@@ -2047,7 +2847,8 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "custom_function": {
       "api": "mlx.core.custom_function",
@@ -2084,7 +2885,8 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "depends": {
       "api": "mlx.core.depends",
@@ -2100,27 +2902,49 @@
         "kwargs": "kwargs"
       }
     },
+    "device": {
+      "api": "mlx.core.Device",
+      "args": {},
+      "required_imports": []
+    },
+    "device_ids": {
+      "api": "mlx.core.Device",
+      "args": {},
+      "required_imports": []
+    },
     "device_info": {
       "api": "mlx.core.metal.device_info",
       "args": {}
+    },
+    "device_mesh": {
+      "api": "mlx.core.Device",
+      "args": {},
+      "required_imports": []
+    },
+    "device_type": {
+      "api": "mlx.core.DeviceType",
+      "args": {},
+      "required_imports": []
     },
     "diag": {
       "api": "mlx.core.diag",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "diagonal": {
-      "api": "mlx.core.diagonal",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.diagonal"
     },
     "dilation": {
       "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.dilation",
       "args": {}
+    },
+    "dim": {
+      "api": "mlx.core.array.ndim",
+      "args": {},
+      "required_imports": []
     },
     "dims": {
       "api": "mlx.nn.layers.normalization.GroupNorm.dims",
@@ -2134,18 +2958,20 @@
       }
     },
     "divide": {
-      "api": "mlx.core.divide",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.divide"
     },
     "divmod": {
       "api": "mlx.core.divmod",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
+    },
+    "downscale_factor": {
+      "api": "mlx.nn.layers.upsample.Upsample.scale_factor",
+      "args": {},
+      "required_imports": []
     },
     "dropout1": {
       "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.dropout1",
@@ -2156,22 +2982,26 @@
       "args": {}
     },
     "dropout2d": {
-      "api": "mlx.nn.Dropout2d"
+      "api": "mlx.nn.Dropout2d",
+      "required_imports": []
     },
     "dropout3": {
       "api": "mlx.nn.layers.transformer.TransformerDecoderLayer.dropout3",
       "args": {}
     },
     "dropout3d": {
-      "api": "mlx.nn.Dropout3d"
+      "api": "mlx.nn.Dropout3d",
+      "required_imports": []
     },
     "dtype": {
       "api": "mlx.core.iinfo.dtype",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "e": {
       "api": "mlx.core.e",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "eig": {
       "api": "mlx.core.linalg.eig",
@@ -2233,6 +3063,22 @@
     "equal": {
       "api": "mlx.core.equal"
     },
+    "erfc": {
+      "api": "mlx.core.erf",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
+    "erfcx": {
+      "api": "mlx.core.erf",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
     "erfinv": {
       "api": "mlx.core.erfinv",
       "args": {
@@ -2260,12 +3106,13 @@
         "kwargs": "kwargs"
       }
     },
+    "expit": {
+      "api": "mlx.core.array.exp",
+      "args": {},
+      "required_imports": []
+    },
     "expm1": {
-      "api": "mlx.core.expm1",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.expm1"
     },
     "exponential_decay": {
       "api": "mlx.optimizers.schedulers.exponential_decay",
@@ -2296,11 +3143,15 @@
       }
     },
     "eye": {
+      "api": "mlx.core.eye"
+    },
+    "eye_": {
       "api": "mlx.core.eye",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "fft": {
       "api": "mlx.core.fft.fft",
@@ -2351,12 +3202,20 @@
       "args": {}
     },
     "finfo": {
-      "api": "mlx.core.finfo",
-      "args": {}
+      "api": "mlx.core.finfo"
+    },
+    "flatten_parameters": {
+      "api": "mlx.core.flatten",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "floating": {
       "api": "mlx.core.floating",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "floor": {
       "api": "mlx.core.floor"
@@ -2406,11 +3265,7 @@
       }
     },
     "full": {
-      "api": "mlx.core.full",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.full"
     },
     "gather_mm": {
       "api": "mlx.core.gather_mm",
@@ -2451,7 +3306,8 @@
     },
     "generic": {
       "api": "mlx.core.generic",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "get_active_memory": {
       "api": "mlx.core.metal.get_active_memory",
@@ -2500,7 +3356,8 @@
     },
     "group": {
       "api": "mlx.nn.layers.distributed.QuantizedShardedToAllLinear.group",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "group_size": {
       "api": "mlx.nn.layers.distributed.QuantizedShardedToAllLinear.group_size",
@@ -2614,11 +3471,7 @@
       "args": {}
     },
     "imag": {
-      "api": "mlx.core.imag",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.imag"
     },
     "import_function": {
       "api": "mlx.core.import_function",
@@ -2626,6 +3479,16 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "in1_features": {
+      "api": "mlx.nn.layers.normalization.BatchNorm.num_features",
+      "args": {},
+      "required_imports": []
+    },
+    "in2_features": {
+      "api": "mlx.nn.layers.normalization.BatchNorm.num_features",
+      "args": {},
+      "required_imports": []
     },
     "inexact": {
       "api": "mlx.core.inexact",
@@ -2655,15 +3518,26 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
+    },
+    "inplace": {
+      "api": "mlx.core.linspace",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "int8": {
       "api": "mlx.core.int8",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "integer": {
       "api": "mlx.core.integer",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "inv": {
       "api": "mlx.core.linalg.inv",
@@ -2714,14 +3588,11 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "isfinite": {
-      "api": "mlx.core.isfinite",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.isfinite"
     },
     "isinf": {
       "api": "mlx.core.isinf"
@@ -2734,21 +3605,24 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "isposinf": {
       "api": "mlx.core.isposinf",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "issubdtype": {
       "api": "mlx.core.issubdtype",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "item": {
       "api": "mlx.core.array.item",
@@ -2782,6 +3656,13 @@
       "api": "mlx.nn.layers.transformer.MultiHeadAttention.key_proj",
       "args": {}
     },
+    "keys": {
+      "api": "mlx.core.random.key",
+      "args": {
+        "seed": "seed"
+      },
+      "required_imports": []
+    },
     "kl_div_loss": {
       "api": "mlx.nn.losses.kl_div_loss",
       "args": {
@@ -2796,7 +3677,8 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "l1_loss": {
       "api": "mlx.nn.losses.l1_loss",
@@ -2886,11 +3768,7 @@
       }
     },
     "linspace": {
-      "api": "mlx.core.linspace",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.linspace"
     },
     "list_or_scalar": {
       "api": "mlx.core.list_or_scalar",
@@ -2924,25 +3802,13 @@
       "api": "mlx.core.log"
     },
     "log10": {
-      "api": "mlx.core.log10",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.log10"
     },
     "log1p": {
-      "api": "mlx.core.log1p",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.log1p"
     },
     "log2": {
-      "api": "mlx.core.log2",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.log2"
     },
     "log_cosh_loss": {
       "api": "mlx.nn.losses.log_cosh_loss",
@@ -2951,6 +3817,19 @@
         "reduction": "reduction",
         "targets": "targets"
       }
+    },
+    "log_ndtr": {
+      "api": "mlx.core.array.log",
+      "args": {},
+      "required_imports": []
+    },
+    "log_prob": {
+      "api": "mlx.core.log",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "log_sigmoid": {
       "api": "mlx.nn.layers.activations.log_sigmoid",
@@ -2966,11 +3845,7 @@
       }
     },
     "logaddexp": {
-      "api": "mlx.core.logaddexp",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.logaddexp"
     },
     "logcumsumexp": {
       "api": "mlx.core.logcumsumexp",
@@ -2978,6 +3853,11 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "logger": {
+      "api": "mlx.core.array.log",
+      "args": {},
+      "required_imports": []
     },
     "logical_and": {
       "api": "mlx.core.logical_and",
@@ -3000,6 +3880,11 @@
         "kwargs": "kwargs"
       }
     },
+    "logit": {
+      "api": "mlx.core.array.log",
+      "args": {},
+      "required_imports": []
+    },
     "lu": {
       "api": "mlx.core.linalg.lu",
       "args": {
@@ -3013,6 +3898,14 @@
         "a": "a",
         "stream": "stream"
       }
+    },
+    "margin": {
+      "api": "mlx.core.argmin",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "margin_ranking_loss": {
       "api": "mlx.nn.losses.margin_ranking_loss",
@@ -3030,12 +3923,13 @@
     "max": {
       "api": "mlx.core.max"
     },
+    "max_val": {
+      "api": "mlx.core.array.max",
+      "args": {},
+      "required_imports": []
+    },
     "maximum": {
-      "api": "mlx.core.maximum",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.maximum"
     },
     "mean": {
       "api": "mlx.core.mean"
@@ -3045,14 +3939,11 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "meshgrid": {
-      "api": "mlx.core.meshgrid",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.meshgrid"
     },
     "metal_kernel": {
       "api": "mlx.core.fast.metal_kernel",
@@ -3069,12 +3960,13 @@
     "min": {
       "api": "mlx.core.min"
     },
+    "min_val": {
+      "api": "mlx.core.array.min",
+      "args": {},
+      "required_imports": []
+    },
     "minimum": {
-      "api": "mlx.core.minimum",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.minimum"
     },
     "mode": {
       "api": "mlx.nn.layers.upsample.Upsample.mode",
@@ -3091,11 +3983,7 @@
       "args": {}
     },
     "moveaxis": {
-      "api": "mlx.core.moveaxis",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.moveaxis"
     },
     "mse_loss": {
       "api": "mlx.nn.losses.mse_loss",
@@ -3106,11 +3994,7 @@
       }
     },
     "multiply": {
-      "api": "mlx.core.multiply",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.multiply"
     },
     "multivariate_normal": {
       "api": "mlx.core.random.multivariate_normal",
@@ -3131,7 +4015,8 @@
     },
     "nan": {
       "api": "mlx.core.nan",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "nan_to_num": {
       "api": "mlx.core.nan_to_num",
@@ -3244,6 +4129,14 @@
     "ones": {
       "api": "mlx.core.ones"
     },
+    "ones_": {
+      "api": "mlx.core.ones",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
     "ones_like": {
       "api": "mlx.core.ones_like",
       "args": {
@@ -3261,6 +4154,14 @@
         "dtype": "dtype",
         "gain": "gain"
       }
+    },
+    "orthogonal_": {
+      "api": "mlx.nn.init.orthogonal",
+      "args": {
+        "dtype": "dtype",
+        "gain": "gain"
+      },
+      "required_imports": []
     },
     "out_proj": {
       "api": "mlx.nn.layers.transformer.MultiHeadAttention.out_proj",
@@ -3281,11 +4182,23 @@
       "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.padding",
       "args": {}
     },
+    "padding_idx": {
+      "api": "mlx.nn.layers.convolution.Conv1d.padding",
+      "args": {},
+      "required_imports": []
+    },
     "parameters": {
       "api": "mlx.nn.layers.base.Module.parameters",
       "args": {
         "self": "self"
       }
+    },
+    "parameters_to_vector": {
+      "api": "mlx.nn.layers.base.Module.parameters",
+      "args": {
+        "self": "self"
+      },
+      "required_imports": []
     },
     "partition": {
       "api": "mlx.core.partition",
@@ -3326,7 +4239,8 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "precompiled_cuda_kernel": {
       "api": "mlx.core.fast.precompiled_cuda_kernel",
@@ -3346,11 +4260,12 @@
       }
     },
     "prod": {
-      "api": "mlx.core.prod",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.prod"
+    },
+    "psi": {
+      "api": "mlx.core.pi",
+      "args": {},
+      "required_imports": []
     },
     "put_along_axis": {
       "api": "mlx.core.put_along_axis",
@@ -3403,7 +4318,8 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "randn": {
       "api": "mlx.random.normal",
@@ -3416,11 +4332,7 @@
       }
     },
     "real": {
-      "api": "mlx.core.real",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.real"
     },
     "reciprocal": {
       "api": "mlx.core.reciprocal"
@@ -3449,7 +4361,8 @@
       "args": {}
     },
     "relu": {
-      "api": "mlx.nn.relu"
+      "api": "mlx.nn.relu",
+      "required_imports": []
     },
     "relu2": {
       "api": "mlx.nn.layers.activations.relu2",
@@ -3458,18 +4371,10 @@
       }
     },
     "remainder": {
-      "api": "mlx.core.remainder",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.remainder"
     },
     "repeat": {
-      "api": "mlx.core.repeat",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.repeat"
     },
     "reset_peak_memory": {
       "api": "mlx.core.reset_peak_memory",
@@ -3480,6 +4385,14 @@
     },
     "reshape": {
       "api": "mlx.core.reshape"
+    },
+    "reshape_weight_to_matrix": {
+      "api": "mlx.core.reshape",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "rfft": {
       "api": "mlx.core.fft.rfft",
@@ -3529,11 +4442,7 @@
       }
     },
     "roll": {
-      "api": "mlx.core.roll",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.roll"
     },
     "rope": {
       "api": "mlx.core.fast.rope",
@@ -3592,7 +4501,8 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "savez_compressed": {
       "api": "mlx.core.savez_compressed",
@@ -3721,10 +4631,16 @@
     },
     "signedinteger": {
       "api": "mlx.core.signedinteger",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "sin": {
       "api": "mlx.core.sin"
+    },
+    "sinc": {
+      "api": "mlx.core.array.sin",
+      "args": {},
+      "required_imports": []
     },
     "sinh": {
       "api": "mlx.core.sinh"
@@ -3745,12 +4661,20 @@
         "targets": "targets"
       }
     },
+    "soft_shrink": {
+      "api": "mlx.nn.layers.activations.softshrink",
+      "args": {
+        "lambd": "lambd",
+        "x": "x"
+      }
+    },
     "softmax": {
-      "api": "mlx.nn.layers.activations.softmax",
+      "api": "mlx.core.softmax",
       "args": {
         "axis": "axis",
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "solve": {
       "api": "mlx.core.linalg.solve",
@@ -3770,11 +4694,7 @@
       }
     },
     "sort": {
-      "api": "mlx.core.sort",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.sort"
     },
     "sparse": {
       "api": "mlx.nn.init.sparse",
@@ -3785,25 +4705,27 @@
         "std": "std"
       }
     },
+    "sparse_": {
+      "api": "mlx.nn.init.sparse",
+      "args": {
+        "dtype": "dtype",
+        "mean": "mean",
+        "sparsity": "sparsity",
+        "std": "std"
+      },
+      "required_imports": []
+    },
     "sqrt": {
       "api": "mlx.core.sqrt"
     },
     "square": {
-      "api": "mlx.core.square",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.square"
     },
     "squeeze": {
       "api": "mlx.core.squeeze"
     },
     "stack": {
-      "api": "mlx.core.stack",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.stack"
     },
     "start_capture": {
       "api": "mlx.core.metal.start_capture",
@@ -3816,11 +4738,7 @@
       "args": {}
     },
     "std": {
-      "api": "mlx.core.std",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.std"
     },
     "step": {
       "api": "mlx.optimizers.optimizers.Optimizer.step",
@@ -3857,11 +4775,7 @@
       "args": {}
     },
     "subtract": {
-      "api": "mlx.core.subtract",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.subtract"
     },
     "sum": {
       "api": "mlx.core.sum"
@@ -3887,6 +4801,11 @@
         "compute_uv": "compute_uv",
         "stream": "stream"
       }
+    },
+    "swap": {
+      "api": "mlx.core.array.swapaxes",
+      "args": {},
+      "required_imports": []
     },
     "swapaxes": {
       "api": "mlx.core.swapaxes",
@@ -3921,6 +4840,11 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "threshold_": {
+      "api": "mlx.nn.layers.activations.Step.threshold",
+      "args": {},
+      "required_imports": []
     },
     "tile": {
       "api": "mlx.core.tile"
@@ -4020,6 +4944,18 @@
         "kwargs": "kwargs"
       }
     },
+    "trunc_normal_": {
+      "api": "mlx.core.random.truncated_normal",
+      "args": {
+        "dtype": "dtype",
+        "key": "key",
+        "lower": "lower",
+        "shape": "shape",
+        "stream": "stream",
+        "upper": "upper"
+      },
+      "required_imports": []
+    },
     "truncated_normal": {
       "api": "mlx.core.random.truncated_normal",
       "args": {
@@ -4047,6 +4983,14 @@
       "api": "mlx.core.uint64",
       "args": {}
     },
+    "unflattened_size": {
+      "api": "mlx.core.unflatten",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
+    },
     "unfreeze": {
       "api": "mlx.nn.layers.base.Module.unfreeze",
       "args": {
@@ -4066,7 +5010,8 @@
     },
     "unsignedinteger": {
       "api": "mlx.core.unsignedinteger",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "update": {
       "api": "mlx.optimizers.optimizers.Optimizer.update",
@@ -4083,6 +5028,15 @@
         "self": "self",
         "strict": "strict"
       }
+    },
+    "upsample_bilinear": {
+      "api": "mlx.nn.layers.upsample.upsample_linear",
+      "args": {
+        "align_corners": "align_corners",
+        "scale_factor": "scale_factor",
+        "x": "x"
+      },
+      "required_imports": []
     },
     "upsample_cubic": {
       "api": "mlx.nn.layers.upsample.upsample_cubic",
@@ -4106,6 +5060,11 @@
         "scale_factor": "scale_factor",
         "x": "x"
       }
+    },
+    "upscale_factor": {
+      "api": "mlx.nn.layers.upsample.Upsample.scale_factor",
+      "args": {},
+      "required_imports": []
     },
     "valid_child_filter": {
       "api": "mlx.nn.layers.base.Module.valid_child_filter",
@@ -4135,11 +5094,12 @@
       "args": {}
     },
     "var": {
-      "api": "mlx.core.var",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.var"
+    },
+    "variant": {
+      "api": "mlx.core.array.var",
+      "args": {},
+      "required_imports": []
     },
     "vjp": {
       "api": "mlx.core.vjp",
@@ -4167,8 +5127,23 @@
       "api": "mlx.optimizers.optimizers.Muon.weight_decay",
       "args": {}
     },
+    "weight_hh": {
+      "api": "mlx.nn.layers.convolution.Conv1d.weight",
+      "args": {},
+      "required_imports": []
+    },
+    "weight_ih": {
+      "api": "mlx.nn.layers.convolution.Conv1d.weight",
+      "args": {},
+      "required_imports": []
+    },
     "where": {
       "api": "mlx.core.where"
+    },
+    "xlog1py": {
+      "api": "mlx.core.array.log1p",
+      "args": {},
+      "required_imports": []
     },
     "zero_grad": {
       "api": "optimizer_zero_grad",
@@ -4177,6 +5152,14 @@
     },
     "zeros": {
       "api": "mlx.core.zeros"
+    },
+    "zeros_": {
+      "api": "mlx.core.zeros",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      },
+      "required_imports": []
     },
     "zeros_like": {
       "api": "mlx.core.zeros_like",

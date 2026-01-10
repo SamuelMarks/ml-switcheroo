@@ -5,6 +5,14 @@
       "api": "torch.abs",
       "required_imports": []
     },
+    "Acos": {
+      "api": "torch.acos",
+      "required_imports": []
+    },
+    "Acosh": {
+      "api": "torch.acosh",
+      "required_imports": []
+    },
     "Adam": {
       "api": "torch.optim.Adam",
       "required_imports": []
@@ -69,6 +77,24 @@
     },
     "Add": {
       "api": "torch.add",
+      "operator": "+",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
+    "All": {
+      "api": "torch.all",
+      "args": {
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
+    },
+    "AllClose": {
+      "api": "torch.allclose",
+      "args": {
+        "a": "input",
+        "b": "other"
+      },
       "required_imports": []
     },
     "Alphadropout": {
@@ -79,27 +105,130 @@
         "self": "self"
       }
     },
+    "Angle": {
+      "api": "torch.angle",
+      "args": {
+        "z": "input"
+      },
+      "required_imports": []
+    },
+    "Any": {
+      "api": "torch.any",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
+    },
+    "Append": {
+      "api": "torch.nn.modules.container.ParameterList.append",
+      "args": {
+        "self": "self",
+        "value": "value"
+      }
+    },
     "Arange": {
       "api": "torch.arange",
-      "args": {
-        "stop": "end"
-      },
       "required_imports": []
     },
     "ArgMax": {
       "api": "torch.argmax",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
       "required_imports": []
     },
     "ArgMin": {
       "api": "torch.argmin",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
+    },
+    "ArgSort": {
+      "api": "torch.argsort",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "ArgWhere": {
+      "api": "torch.argwhere",
+      "args": {
+        "a": "input"
+      },
       "required_imports": []
     },
     "Array": {
       "api": "torch.tensor",
+      "args": {
+        "object": "data"
+      },
+      "required_imports": []
+    },
+    "ArrayEqual": {
+      "api": "torch.equal",
+      "required_imports": []
+    },
+    "ArraySplit": {
+      "api": "torch.tensor_split",
+      "args": {
+        "ary": "input",
+        "indices_or_sections": "indices"
+      },
+      "required_imports": []
+    },
+    "AsArray": {
+      "api": "torch.as_tensor",
+      "args": {
+        "a": "data"
+      },
+      "required_imports": []
+    },
+    "Asin": {
+      "api": "torch.asin",
+      "required_imports": []
+    },
+    "Asinh": {
+      "api": "torch.asinh",
       "required_imports": []
     },
     "AssertClose": {
       "api": "torch.testing.assert_close",
+      "required_imports": []
+    },
+    "Atan": {
+      "api": "torch.atan",
+      "required_imports": []
+    },
+    "Atan2": {
+      "api": "torch.atan2",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "Atanh": {
+      "api": "torch.atanh",
+      "required_imports": []
+    },
+    "Atleast1d": {
+      "api": "torch.atleast_1d",
+      "required_imports": []
+    },
+    "Atleast2d": {
+      "api": "torch.atleast_2d",
+      "required_imports": []
+    },
+    "Atleast3d": {
+      "api": "torch.atleast_3d",
       "required_imports": []
     },
     "AuxOutput": {
@@ -151,7 +280,8 @@
         "kernel_size": "kernel_size",
         "padding": "padding",
         "stride": "stride"
-      }
+      },
+      "required_imports": []
     },
     "BCELoss": {
       "api": "torch.nn.modules.loss.BCELoss",
@@ -206,6 +336,13 @@
       "api": "torch.nn.attention.flex_attention.BlockMask.BLOCK_SIZE",
       "args": {}
     },
+    "Bartlett": {
+      "api": "torch.bartlett_window",
+      "args": {
+        "M": "window_length"
+      },
+      "required_imports": []
+    },
     "BasePruningMethod": {
       "api": "torch.nn.utils.prune.BasePruningMethod",
       "args": {}
@@ -253,6 +390,12 @@
         "track_running_stats": "track_running_stats"
       }
     },
+    "Bfloat16": {
+      "api": "torch.nn.modules.module.Module.bfloat16",
+      "args": {
+        "self": "self"
+      }
+    },
     "Bidirectional": {
       "api": "torch.nn.modules.rnn.RNNBase.bidirectional",
       "args": {}
@@ -268,6 +411,48 @@
         "out_features": "out_features",
         "self": "self"
       }
+    },
+    "Bincount": {
+      "api": "torch.bincount",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "BitwiseAnd": {
+      "api": "torch.bitwise_and",
+      "required_imports": []
+    },
+    "BitwiseInvert": {
+      "api": "torch.bitwise_not",
+      "required_imports": []
+    },
+    "BitwiseLeftShift": {
+      "api": "torch.bitwise_left_shift",
+      "required_imports": []
+    },
+    "BitwiseNot": {
+      "api": "torch.bitwise_not",
+      "required_imports": []
+    },
+    "BitwiseOr": {
+      "api": "torch.bitwise_or",
+      "required_imports": []
+    },
+    "BitwiseRightShift": {
+      "api": "torch.bitwise_right_shift",
+      "required_imports": []
+    },
+    "BitwiseXor": {
+      "api": "torch.bitwise_xor",
+      "required_imports": []
+    },
+    "Blackman": {
+      "api": "torch.blackman_window",
+      "args": {
+        "M": "window_length"
+      },
+      "required_imports": []
     },
     "BlockMask": {
       "api": "torch.nn.attention.flex_attention.BlockMask",
@@ -287,7 +472,25 @@
       }
     },
     "Bool": {
-      "api": "torch.bool",
+      "api": "torch.tensor",
+      "args": {
+        "x": "data"
+      },
+      "inject_args": {
+        "dtype": "bool"
+      },
+      "required_imports": []
+    },
+    "BroadcastArrays": {
+      "api": "torch.broadcast_tensors",
+      "required_imports": []
+    },
+    "BroadcastShapes": {
+      "api": "torch.broadcast_shapes",
+      "required_imports": []
+    },
+    "BroadcastTo": {
+      "api": "torch.broadcast_to",
       "required_imports": []
     },
     "Buffer": {
@@ -312,6 +515,10 @@
       "api": "torch.nn.Parameter",
       "required_imports": [],
       "requires_plugin": "nnx_param_to_torch"
+    },
+    "CanCast": {
+      "api": "torch.can_cast",
+      "required_imports": []
     },
     "CastBool": {
       "api": "torch.Tensor.bool",
@@ -362,6 +569,13 @@
       "api": "torch.nn.attention.bias.CausalVariant",
       "args": {}
     },
+    "Ceil": {
+      "api": "torch.ceil",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
     "Celu": {
       "api": "torch.nn.modules.activation.CELU",
       "args": {
@@ -406,8 +620,19 @@
       "api": "torch.clamp",
       "required_imports": []
     },
+    "Clip": {
+      "api": "torch.clamp",
+      "args": {
+        "arr": "input"
+      },
+      "required_imports": []
+    },
     "ClipGradNorm": {
       "api": "torch.nn.utils.clip_grad_norm_",
+      "required_imports": []
+    },
+    "ColumnStack": {
+      "api": "torch.column_stack",
       "required_imports": []
     },
     "Compile": {
@@ -418,14 +643,45 @@
         "self": "self"
       }
     },
+    "Complex128": {
+      "api": "torch.complex128",
+      "required_imports": []
+    },
+    "Complex64": {
+      "api": "torch.complex64",
+      "required_imports": []
+    },
     "ComplexOp": {
       "api": "torch.complex",
+      "required_imports": []
+    },
+    "Concat": {
+      "api": "torch.cat",
+      "args": {
+        "arrays": "tensors",
+        "axis": "dim"
+      },
       "required_imports": []
     },
     "Concatenate": {
       "api": "torch.cat",
       "args": {
+        "arrays": "tensors",
         "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "Conj": {
+      "api": "torch.conj",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Conjugate": {
+      "api": "torch.conj",
+      "args": {
+        "x": "input"
       },
       "required_imports": []
     },
@@ -573,6 +829,41 @@
         "stride": "stride"
       }
     },
+    "Copy": {
+      "api": "torch.nn.modules.container.ParameterDict.copy",
+      "args": {
+        "self": "self"
+      }
+    },
+    "Copysign": {
+      "api": "torch.copysign",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "Corrcoef": {
+      "api": "torch.corrcoef",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Cos": {
+      "api": "torch.cos",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Cosh": {
+      "api": "torch.cosh",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
     "CosineAnnealingLR": {
       "api": "torch.optim.lr_scheduler.CosineAnnealingLR",
       "required_imports": []
@@ -587,13 +878,41 @@
         "size_average": "size_average"
       }
     },
-    "Cosinesimilarity": {
+    "CosineSimilarity": {
       "api": "torch.nn.modules.distance.CosineSimilarity",
       "args": {
         "dim": "dim",
         "eps": "eps",
         "self": "self"
       }
+    },
+    "Cosinesimilarity": {
+      "api": "torch.nn.modules.distance.CosineSimilarity",
+      "args": {
+        "dim": "dim",
+        "eps": "eps",
+        "self": "self"
+      },
+      "required_imports": []
+    },
+    "CountNonzero": {
+      "api": "torch.count_nonzero",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "Cov": {
+      "api": "torch.cov",
+      "args": {
+        "m": "input"
+      },
+      "required_imports": []
+    },
+    "Cross": {
+      "api": "torch.linalg.cross",
+      "args": {}
     },
     "CrossEntropyLoss": {
       "api": "torch.nn.modules.loss.CrossEntropyLoss",
@@ -621,6 +940,30 @@
       "api": "torch.cuda.is_available",
       "required_imports": []
     },
+    "CumSum": {
+      "api": "torch.cumsum",
+      "args": {
+        "axis": "dim",
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Cumprod": {
+      "api": "torch.cumprod",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "Cumsum": {
+      "api": "torch.cumsum",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
     "CustomFromMask": {
       "api": "torch.nn.utils.prune.CustomFromMask",
       "args": {
@@ -642,6 +985,20 @@
         "self": "self"
       }
     },
+    "Deg2rad": {
+      "api": "torch.deg2rad",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Degrees": {
+      "api": "torch.rad2deg",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
     "Det": {
       "api": "torch.linalg.det",
       "args": {}
@@ -649,6 +1006,43 @@
     "Device": {
       "api": "torch.nn.parallel.distributed.DistributedDataParallel.device",
       "args": {}
+    },
+    "Diag": {
+      "api": "torch.diag",
+      "args": {
+        "k": "diagonal",
+        "v": "input"
+      },
+      "required_imports": []
+    },
+    "Diagflat": {
+      "api": "torch.diagflat",
+      "args": {
+        "k": "offset",
+        "v": "input"
+      },
+      "required_imports": []
+    },
+    "Diagonal": {
+      "api": "torch.linalg.diagonal",
+      "args": {}
+    },
+    "Diff": {
+      "api": "torch.diff",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "Digitize": {
+      "api": "torch.bucketize",
+      "args": {
+        "bins": "boundaries",
+        "right": "right",
+        "x": "input"
+      },
+      "required_imports": []
     },
     "DistributedDataParallel": {
       "api": "torch.nn.parallel.distributed.DistributedDataParallel",
@@ -700,6 +1094,26 @@
       "api": "torch.div",
       "required_imports": []
     },
+    "Divide": {
+      "api": "torch.div",
+      "operator": "/",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
+    "Divmod": {
+      "macro_template": "(torch.div({x1}, {x2}, rounding_mode='floor'), torch.remainder({x1}, {x2}))",
+      "required_imports": []
+    },
+    "Dot": {
+      "api": "torch.dot",
+      "required_imports": []
+    },
+    "Double": {
+      "api": "torch.nn.modules.module.Module.double",
+      "args": {
+        "self": "self"
+      }
+    },
     "Dropout": {
       "api": "torch.nn.modules.rnn.RNNBase.dropout",
       "args": {}
@@ -728,8 +1142,29 @@
         "self": "self"
       }
     },
+    "Dsplit": {
+      "api": "torch.dsplit",
+      "args": {
+        "ary": "input"
+      },
+      "required_imports": []
+    },
+    "Dstack": {
+      "api": "torch.dstack",
+      "required_imports": []
+    },
+    "Dtype": {
+      "api": "torch.nn.functional.DType"
+    },
+    "E": {
+      "api": "torch.e",
+      "required_imports": []
+    },
     "Einsum": {
       "api": "torch.einsum",
+      "args": {
+        "subscripts": "equation"
+      },
       "required_imports": []
     },
     "Elu": {
@@ -775,13 +1210,67 @@
         "sparse": "sparse"
       }
     },
+    "Empty": {
+      "api": "torch.empty",
+      "args": {
+        "shape": "size"
+      },
+      "required_imports": []
+    },
+    "EmptyLike": {
+      "api": "torch.empty_like",
+      "args": {
+        "prototype": "input"
+      },
+      "required_imports": []
+    },
+    "Equal": {
+      "api": "torch.eq",
+      "operator": "==",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
     "Erf": {
       "api": "torch.special.erf",
+      "args": {}
+    },
+    "Exp": {
+      "api": "torch.exp",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Exp2": {
+      "api": "torch.special.exp2",
+      "args": {}
+    },
+    "ExpandDims": {
+      "api": "torch.unsqueeze",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "Expm1": {
+      "api": "torch.special.expm1",
+      "args": {}
+    },
+    "Eye": {
+      "api": "torch.nn.init.eye",
       "args": {}
     },
     "FORCE_USE_FLEX_ATTENTION": {
       "api": "torch.nn.attention.flex_attention.FlexKernelOptions.FORCE_USE_FLEX_ATTENTION",
       "args": {}
+    },
+    "Fabs": {
+      "api": "torch.abs",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
     },
     "FeatureAlphaDropout": {
       "api": "torch.nn.modules.dropout.FeatureAlphaDropout",
@@ -790,6 +1279,26 @@
         "p": "p",
         "self": "self"
       }
+    },
+    "FillDiagonal": {
+      "api": "torch.fill_diagonal_",
+      "args": {
+        "a": "input",
+        "val": "fill_value",
+        "wrap": "wrap"
+      },
+      "required_imports": []
+    },
+    "Finfo": {
+      "api": "torch.finfo",
+      "required_imports": []
+    },
+    "Fix": {
+      "api": "torch.fix",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
     },
     "Flatten": {
       "api": "torch.nn.modules.flatten.Flatten",
@@ -803,6 +1312,28 @@
       "api": "torch.nn.attention.flex_attention.FlexKernelOptions",
       "args": {}
     },
+    "Flip": {
+      "api": "torch.flip",
+      "args": {
+        "axis": "dims",
+        "m": "input"
+      },
+      "required_imports": []
+    },
+    "Fliplr": {
+      "api": "torch.fliplr",
+      "args": {
+        "m": "input"
+      },
+      "required_imports": []
+    },
+    "Flipud": {
+      "api": "torch.flipud",
+      "args": {
+        "m": "input"
+      },
+      "required_imports": []
+    },
     "Float16": {
       "api": "torch.float16",
       "required_imports": []
@@ -813,6 +1344,70 @@
     },
     "Float64": {
       "api": "torch.float64",
+      "required_imports": []
+    },
+    "Float8_e4m3": {
+      "api": "torch.float8_e4m3fn",
+      "required_imports": []
+    },
+    "Float8_e4m3fn": {
+      "api": "torch.float8_e4m3fn",
+      "required_imports": []
+    },
+    "Float8_e4m3fnuz": {
+      "api": "torch.float8_e4m3fnuz",
+      "required_imports": []
+    },
+    "Float8_e5m2": {
+      "api": "torch.float8_e5m2",
+      "required_imports": []
+    },
+    "Float8_e5m2fnuz": {
+      "api": "torch.float8_e5m2fnuz",
+      "required_imports": []
+    },
+    "FloatPower": {
+      "api": "torch.pow",
+      "args": {
+        "x": "input",
+        "y": "exponent"
+      },
+      "required_imports": []
+    },
+    "Floor": {
+      "api": "torch.floor",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "FloorDivide": {
+      "api": "torch.floor_divide",
+      "macro_template": "torch.div({x1}, {x2}, rounding_mode='floor')",
+      "required_imports": []
+    },
+    "Fmax": {
+      "api": "torch.fmax",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "Fmin": {
+      "api": "torch.fmin",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "Fmod": {
+      "api": "torch.fmod",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
       "required_imports": []
     },
     "Fold": {
@@ -847,6 +1442,42 @@
         "return_indices": "return_indices",
         "self": "self"
       }
+    },
+    "Frexp": {
+      "api": "torch.frexp",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "FromBuffer": {
+      "api": "torch.frombuffer",
+      "args": {
+        "buffer": "view",
+        "count": "count",
+        "dtype": "dtype",
+        "offset": "offset"
+      },
+      "required_imports": []
+    },
+    "FromDlpack": {
+      "api": "torch.from_dlpack",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Full": {
+      "api": "torch.nn.modules.loss.GaussianNLLLoss.full",
+      "args": {}
+    },
+    "FullLike": {
+      "api": "torch.full_like",
+      "args": {
+        "a": "input",
+        "fill_value": "fill_value"
+      },
+      "required_imports": []
     },
     "GELU": {
       "api": "torch.nn.modules.activation.GELU",
@@ -894,11 +1525,24 @@
         "eps": "eps",
         "full": "full",
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
+    },
+    "Gcd": {
+      "api": "torch.gcd",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
     },
     "Gelu": {
-      "api": "torch.nn.functional.gelu",
-      "args": {}
+      "api": "torch.nn.GELU"
+    },
+    "Geomspace": {
+      "api": "torch.logspace",
+      "macro_template": "torch.logspace(torch.log10(torch.tensor({start})), torch.log10(torch.tensor({stop})), {num}, base=10.0)",
+      "required_imports": []
     },
     "Glu": {
       "api": "torch.nn.modules.activation.GLU",
@@ -907,9 +1551,29 @@
         "self": "self"
       }
     },
+    "Gradient": {
+      "api": "torch.gradient",
+      "args": {
+        "axis": "dim",
+        "f": "input"
+      },
+      "required_imports": []
+    },
     "Grayscale": {
       "api": "torchvision.transforms.Grayscale",
       "required_imports": []
+    },
+    "Greater": {
+      "api": "torch.gt",
+      "operator": ">",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
+    "GreaterEqual": {
+      "api": "torch.ge",
+      "operator": ">=",
+      "required_imports": [],
+      "transformation_type": "infix"
     },
     "Groupnorm": {
       "api": "torch.nn.modules.normalization.GroupNorm",
@@ -933,6 +1597,20 @@
         "input_size": "input_size",
         "self": "self"
       }
+    },
+    "Hamming": {
+      "api": "torch.hamming_window",
+      "args": {
+        "M": "window_length"
+      },
+      "required_imports": []
+    },
+    "Hanning": {
+      "api": "torch.hann_window",
+      "args": {
+        "M": "window_length"
+      },
+      "required_imports": []
     },
     "HardSigmoid": {
       "api": "torch.nn.modules.activation.Hardsigmoid",
@@ -969,6 +1647,14 @@
         "self": "self"
       }
     },
+    "Heaviside": {
+      "api": "torch.heaviside",
+      "args": {
+        "x1": "input",
+        "x2": "values"
+      },
+      "required_imports": []
+    },
     "HingeEmbeddingLoss": {
       "api": "torch.nn.modules.loss.HingeEmbeddingLoss",
       "args": {
@@ -979,6 +1665,37 @@
         "size_average": "size_average"
       }
     },
+    "Histogram": {
+      "api": "torch.histogram",
+      "args": {
+        "a": "input",
+        "bins": "bins",
+        "range": "range",
+        "weights": "weight"
+      },
+      "required_imports": []
+    },
+    "Histogramdd": {
+      "api": "torch.histogramdd",
+      "args": {
+        "bins": "bins",
+        "range": "range",
+        "sample": "input",
+        "weights": "weight"
+      },
+      "required_imports": []
+    },
+    "Hsplit": {
+      "api": "torch.hsplit",
+      "args": {
+        "ary": "input"
+      },
+      "required_imports": []
+    },
+    "Hstack": {
+      "api": "torch.hstack",
+      "required_imports": []
+    },
     "HuberLoss": {
       "api": "torch.nn.modules.loss.HuberLoss",
       "args": {
@@ -987,11 +1704,46 @@
         "self": "self"
       }
     },
+    "Hypot": {
+      "api": "torch.hypot",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "I0": {
+      "api": "torch.special.i0",
+      "args": {}
+    },
     "Identity": {
       "api": "torch.nn.modules.linear.Identity",
       "args": {
         "args": "args",
         "kwargs": "kwargs",
+        "self": "self"
+      }
+    },
+    "Imag": {
+      "api": "torch.imag",
+      "args": {
+        "val": "input"
+      },
+      "required_imports": []
+    },
+    "Inner": {
+      "api": "torch.inner",
+      "args": {
+        "a": "input",
+        "b": "other"
+      },
+      "required_imports": []
+    },
+    "Insert": {
+      "api": "torch.nn.modules.container.ModuleList.insert",
+      "args": {
+        "index": "index",
+        "module": "module",
         "self": "self"
       }
     },
@@ -1046,6 +1798,91 @@
       "api": "torch.int64",
       "required_imports": []
     },
+    "Int8": {
+      "api": "torch.int8",
+      "required_imports": []
+    },
+    "Invert": {
+      "api": "torch.bitwise_not",
+      "required_imports": []
+    },
+    "IsComplex": {
+      "api": "torch.is_complex",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "IsFinite": {
+      "api": "torch.isfinite",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "IsIn": {
+      "api": "torch.isin",
+      "args": {
+        "element": "elements",
+        "test_elements": "test_elements"
+      },
+      "required_imports": []
+    },
+    "IsInf": {
+      "api": "torch.isinf",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "IsNan": {
+      "api": "torch.isnan",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "IsNegInf": {
+      "api": "torch.isneginf",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "IsPosInf": {
+      "api": "torch.isposinf",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "IsReal": {
+      "api": "torch.is_real",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Isclose": {
+      "api": "torch.isclose",
+      "args": {
+        "a": "input",
+        "b": "other"
+      },
+      "required_imports": []
+    },
+    "Isin": {
+      "api": "torch.isin",
+      "args": {
+        "element": "elements",
+        "test_elements": "test_elements"
+      },
+      "required_imports": []
+    },
+    "Ix_": {
+      "api": "torch.meshgrid",
+      "required_imports": []
+    },
     "KLDivLoss": {
       "api": "torch.nn.modules.loss.KLDivLoss",
       "args": {
@@ -1056,17 +1893,34 @@
         "size_average": "size_average"
       }
     },
+    "Kaiser": {
+      "api": "torch.kaiser_window",
+      "args": {
+        "M": "window_length"
+      },
+      "required_imports": []
+    },
     "Kldiv": {
       "api": "torch.nn.KLDivLoss",
       "args": {
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
+    },
+    "Kron": {
+      "api": "torch.kron",
+      "args": {
+        "a": "input",
+        "b": "other"
+      },
+      "required_imports": []
     },
     "L1": {
       "api": "torch.nn.L1Loss",
       "args": {
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "L1Loss": {
       "api": "torch.nn.modules.loss.L1Loss",
@@ -1327,6 +2181,22 @@
         "self": "self"
       }
     },
+    "Lcm": {
+      "api": "torch.lcm",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "Ldexp": {
+      "api": "torch.ldexp",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
     "LeakyRelu": {
       "api": "torch.nn.modules.activation.LeakyReLU",
       "args": {
@@ -1334,6 +2204,22 @@
         "negative_slope": "negative_slope",
         "self": "self"
       }
+    },
+    "LeftShift": {
+      "api": "torch.bitwise_left_shift",
+      "required_imports": []
+    },
+    "Less": {
+      "api": "torch.lt",
+      "operator": "<",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
+    "LessEqual": {
+      "api": "torch.le",
+      "operator": "<=",
+      "required_imports": [],
+      "transformation_type": "infix"
     },
     "Linear": {
       "api": "torch.nn.modules.linear.Linear",
@@ -1350,6 +2236,13 @@
       "api": "torch.nn.utils.fusion.LinearT",
       "args": {}
     },
+    "Linspace": {
+      "api": "torch.linspace",
+      "args": {
+        "num": "steps"
+      },
+      "required_imports": []
+    },
     "LnStructured": {
       "api": "torch.nn.utils.prune.LnStructured",
       "args": {
@@ -1362,7 +2255,7 @@
     "Load": {
       "api": "torch.load",
       "args": {
-        "f": "f"
+        "file": "f"
       },
       "required_imports": []
     },
@@ -1376,12 +2269,84 @@
         "size": "size"
       }
     },
+    "Log": {
+      "api": "torch.log",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Log10": {
+      "api": "torch.log10",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Log1p": {
+      "api": "torch.special.log1p",
+      "args": {}
+    },
+    "Log2": {
+      "api": "torch.log2",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
     "LogSoftmax": {
       "api": "torch.nn.modules.activation.LogSoftmax",
       "args": {
         "dim": "dim",
         "self": "self"
       }
+    },
+    "Logaddexp": {
+      "api": "torch.logaddexp",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "Logaddexp2": {
+      "api": "torch.logaddexp2",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "LogicalAnd": {
+      "api": "torch.logical_and",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "LogicalNot": {
+      "api": "torch.logical_not",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "LogicalOr": {
+      "api": "torch.logical_or",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "LogicalXor": {
+      "api": "torch.logical_xor",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
     },
     "Logsigmoid": {
       "api": "torch.nn.modules.activation.LogSigmoid",
@@ -1390,6 +2355,13 @@
         "kwargs": "kwargs",
         "self": "self"
       }
+    },
+    "Logspace": {
+      "api": "torch.logspace",
+      "args": {
+        "num": "steps"
+      },
+      "required_imports": []
     },
     "Logsumexp": {
       "api": "torch.special.logsumexp",
@@ -1430,11 +2402,37 @@
       "args": {
         "margin": "margin",
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "MatMul": {
+      "api": "torch.linalg.matmul"
+    },
+    "Matmul": {
       "api": "torch.linalg.matmul",
       "args": {}
+    },
+    "MatrixTranspose": {
+      "api": "torch.transpose",
+      "macro_template": "torch.transpose({x}, -2, -1)",
+      "required_imports": []
+    },
+    "Matvec": {
+      "api": "torch.mv",
+      "args": {
+        "x1": "input",
+        "x2": "vec"
+      },
+      "required_imports": []
+    },
+    "Max": {
+      "api": "torch.max",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
     },
     "MaxPool1d": {
       "api": "torch.nn.modules.pooling.MaxPool1d",
@@ -1499,16 +2497,59 @@
         "stride": "stride"
       }
     },
+    "Maximum": {
+      "api": "torch.maximum",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
     "Maxpool": {
       "api": "torch.nn.MaxPool3d",
       "args": {
         "kernel_size": "kernel_size",
         "padding": "padding",
         "stride": "stride"
-      }
+      },
+      "required_imports": []
     },
     "Mean": {
       "api": "torch.mean",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "Median": {
+      "api": "torch.median",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
+    },
+    "Meshgrid": {
+      "api": "torch.meshgrid",
+      "required_imports": []
+    },
+    "Min": {
+      "api": "torch.min",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
+    },
+    "Minimum": {
+      "api": "torch.minimum",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
       "required_imports": []
     },
     "Mish": {
@@ -1517,6 +2558,16 @@
         "inplace": "inplace",
         "self": "self"
       }
+    },
+    "Mod": {
+      "api": "torch.remainder",
+      "operator": "%",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
+    "Modf": {
+      "macro_template": "(torch.frac({x}), torch.trunc({x}))",
+      "required_imports": []
     },
     "Module": {
       "api": "torch.nn.modules.module.Module",
@@ -1547,11 +2598,19 @@
         "self": "self"
       }
     },
+    "Moveaxis": {
+      "api": "torch.movedim",
+      "args": {
+        "a": "input"
+      },
+      "required_imports": []
+    },
     "Mse": {
       "api": "torch.nn.MSELoss",
       "args": {
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "Mul": {
       "api": "torch.mul",
@@ -1605,6 +2664,12 @@
         "vdim": "vdim"
       }
     },
+    "Multiply": {
+      "api": "torch.mul",
+      "operator": "*",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
     "NLLLoss": {
       "api": "torch.nn.modules.loss.NLLLoss",
       "args": {
@@ -1631,11 +2696,65 @@
       "api": "torch.nn.modules.flatten.Unflatten.NamedShape",
       "args": {}
     },
+    "Nan": {
+      "api": "torch.nan",
+      "required_imports": []
+    },
+    "NanMax": {
+      "api": "torch.nanmax",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "NanMean": {
+      "api": "torch.nanmean",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "NanMedian": {
+      "api": "torch.nanmedian",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
+    },
+    "NanMin": {
+      "api": "torch.nanmin",
+      "args": {
+        "a": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "NanPercentile": {
+      "api": "torch.nanquantile",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "q": "q"
+      },
+      "required_imports": []
+    },
+    "NanToNum": {
+      "api": "torch.nan_to_num",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
     "Nll": {
       "api": "torch.nn.NLLLoss",
       "args": {
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "NonDynamicallyQuantizableLinear": {
       "api": "torch.nn.modules.linear.NonDynamicallyQuantizableLinear",
@@ -1785,8 +2904,37 @@
         "size_average": "size_average"
       }
     },
+    "Positive": {
+      "api": "torch.positive",
+      "required_imports": []
+    },
     "Pow": {
       "api": "torch.pow",
+      "args": {
+        "x1": "input",
+        "x2": "exponent"
+      },
+      "required_imports": []
+    },
+    "Power": {
+      "api": "torch.pow",
+      "args": {
+        "x1": "input",
+        "x2": "exponent"
+      },
+      "required_imports": []
+    },
+    "Prod": {
+      "api": "torch.prod",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
+    },
+    "PromoteTypes": {
+      "api": "torch.promote_types",
       "required_imports": []
     },
     "PruningContainer": {
@@ -1795,6 +2943,38 @@
         "args": "args",
         "self": "self"
       }
+    },
+    "Ptp": {
+      "macro_template": "{a}.max(dim={axis}, keepdim={keepdims}).values - {a}.min(dim={axis}, keepdim={keepdims}).values",
+      "required_imports": []
+    },
+    "Put": {
+      "api": "torch.put",
+      "args": {
+        "a": "input",
+        "ind": "index",
+        "v": "source"
+      },
+      "required_imports": []
+    },
+    "PutAlongAxis": {
+      "api": "torch.scatter",
+      "args": {
+        "arr": "input",
+        "axis": "dim",
+        "indices": "index",
+        "values": "src"
+      },
+      "required_imports": []
+    },
+    "Quantile": {
+      "api": "torch.quantile",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
     },
     "RMSprop": {
       "api": "torch.optim.RMSprop",
@@ -1854,6 +3034,20 @@
         "upper": "upper"
       }
     },
+    "Rad2deg": {
+      "api": "torch.rad2deg",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
+    "Radians": {
+      "api": "torch.deg2rad",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
+    },
     "RandInt": {
       "api": "torch.randint",
       "args": {
@@ -1888,12 +3082,38 @@
       "api": "torchvision.transforms.RandomVerticalFlip",
       "required_imports": []
     },
+    "Ravel": {
+      "api": "torch.flatten",
+      "args": {
+        "a": "input"
+      },
+      "required_imports": []
+    },
+    "RavelMultiIndex": {
+      "api": "torch.ravel_multi_index",
+      "missing_message": "Precise equivalent not standard in PyTorch.",
+      "required_imports": []
+    },
     "ReLU": {
       "api": "torch.nn.modules.activation.ReLU",
       "args": {
         "inplace": "inplace",
         "self": "self"
       }
+    },
+    "Real": {
+      "api": "torch.real",
+      "args": {
+        "val": "input"
+      },
+      "required_imports": []
+    },
+    "Reciprocal": {
+      "api": "torch.reciprocal",
+      "args": {
+        "x": "input"
+      },
+      "required_imports": []
     },
     "ReflectionPad1d": {
       "api": "torch.nn.modules.padding.ReflectionPad1d",
@@ -1930,6 +3150,23 @@
         "self": "self"
       }
     },
+    "Remainder": {
+      "api": "torch.remainder",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "Repeat": {
+      "api": "torch.repeat_interleave",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "repeats": "repeats"
+      },
+      "required_imports": []
+    },
     "ReplicationPad1d": {
       "api": "torch.nn.modules.padding.ReplicationPad1d",
       "args": {
@@ -1953,10 +3190,36 @@
     },
     "Reshape": {
       "api": "torch.reshape",
+      "args": {
+        "a": "input",
+        "shape": "shape"
+      },
       "required_imports": []
     },
     "Resize": {
       "api": "torchvision.transforms.Resize",
+      "required_imports": []
+    },
+    "ResultType": {
+      "api": "torch.result_type",
+      "args": {
+        "args": "tensors"
+      },
+      "required_imports": []
+    },
+    "RightShift": {
+      "api": "torch.bitwise_right_shift",
+      "args": {
+        "x1": "input",
+        "x2": "other"
+      },
+      "required_imports": []
+    },
+    "Rint": {
+      "api": "torch.round",
+      "args": {
+        "x": "input"
+      },
       "required_imports": []
     },
     "Rmsnorm": {
@@ -1981,6 +3244,19 @@
         "num_chunks": "num_chunks",
         "self": "self"
       }
+    },
+    "Roll": {
+      "api": "torch.roll",
+      "args": {
+        "a": "input",
+        "axis": "dims",
+        "shift": "shifts"
+      },
+      "required_imports": []
+    },
+    "Rollaxis": {
+      "missing_message": "Use moveaxis semantics instead of rollaxis for torch.",
+      "required_imports": []
     },
     "Round": {
       "api": "torch.special.round",
@@ -2044,6 +3320,18 @@
         "self": "self"
       }
     },
+    "Silu": {
+      "api": "torch.nn.modules.activation.SiLU",
+      "args": {
+        "inplace": "inplace",
+        "self": "self"
+      },
+      "required_imports": []
+    },
+    "Sinc": {
+      "api": "torch.special.sinc",
+      "args": {}
+    },
     "Size": {
       "api": "torch.nn.modules.normalization.CrossMapLRN2d.size",
       "args": {}
@@ -2063,7 +3351,8 @@
       "args": {
         "beta": "beta",
         "reduction": "reduction"
-      }
+      },
+      "required_imports": []
     },
     "SoftMarginLoss": {
       "api": "torch.nn.modules.loss.SoftMarginLoss",
@@ -2075,11 +3364,8 @@
       }
     },
     "Softmax": {
-      "api": "torch.nn.modules.activation.Softmax",
-      "args": {
-        "dim": "dim",
-        "self": "self"
-      }
+      "api": "torch.special.softmax",
+      "args": {}
     },
     "Softmax2d": {
       "api": "torch.nn.modules.activation.Softmax2d",
@@ -2378,8 +3664,28 @@
       "api": "torch.nn.parameter.UninitializedTensorMixin",
       "args": {}
     },
+    "Unique": {
+      "api": "torch.unique",
+      "args": {
+        "ar": "input",
+        "axis": "dim"
+      },
+      "required_imports": []
+    },
+    "UnravelIndex": {
+      "api": "torch.unravel_index",
+      "required_imports": []
+    },
     "Unsqueeze": {
       "api": "torch.unsqueeze",
+      "required_imports": []
+    },
+    "Unstack": {
+      "api": "torch.unbind",
+      "args": {
+        "axis": "dim",
+        "x": "input"
+      },
       "required_imports": []
     },
     "Upsample": {
@@ -2409,13 +3715,50 @@
         "size": "size"
       }
     },
+    "Vander": {
+      "api": "torch.linalg.vander",
+      "args": {}
+    },
+    "Var": {
+      "api": "torch.var",
+      "args": {
+        "a": "input",
+        "axis": "dim",
+        "ddof": "correction",
+        "keepdims": "keepdim"
+      },
+      "required_imports": []
+    },
     "Variable": {
       "api": "torch.nn.Parameter",
       "required_imports": [],
       "requires_plugin": "nnx_param_to_torch"
     },
+    "Vdot": {
+      "api": "torch.vdot",
+      "args": {
+        "a": "input",
+        "b": "other"
+      },
+      "required_imports": []
+    },
+    "Vecdot": {
+      "api": "torch.linalg.vecdot",
+      "args": {}
+    },
     "View": {
       "api": "torch.Tensor.view",
+      "required_imports": []
+    },
+    "Vsplit": {
+      "api": "torch.vsplit",
+      "args": {
+        "ary": "input"
+      },
+      "required_imports": []
+    },
+    "Vstack": {
+      "api": "torch.vstack",
       "required_imports": []
     },
     "WARN_FOR_UNFUSED_KERNELS": {
@@ -2433,6 +3776,14 @@
         "name": "name",
         "self": "self"
       }
+    },
+    "Where": {
+      "api": "torch.where",
+      "args": {
+        "x": "input",
+        "y": "other"
+      },
+      "required_imports": []
     },
     "ZeroPad1d": {
       "api": "torch.nn.modules.padding.ZeroPad1d",
@@ -2459,6 +3810,13 @@
       "api": "torch.zeros",
       "args": {
         "shape": "size"
+      },
+      "required_imports": []
+    },
+    "ZerosLike": {
+      "api": "torch.zeros_like",
+      "args": {
+        "a": "input"
       },
       "required_imports": []
     },
@@ -2595,7 +3953,8 @@
       "args": {
         "self": "self",
         "value": "value"
-      }
+      },
+      "required_imports": []
     },
     "apply": {
       "api": "torch.nn.modules.module.Module.apply",
@@ -2699,7 +4058,8 @@
       "api": "torch.nn.modules.module.Module.bfloat16",
       "args": {
         "self": "self"
-      }
+      },
+      "required_imports": []
     },
     "bias": {
       "api": "torch.nn.modules.rnn.RNNCellBase.bias",
@@ -2917,16 +4277,6 @@
         "parameters": "parameters"
       }
     },
-    "clip_grad_norm_": {
-      "api": "torch.nn.utils.clip_grad.clip_grad_norm_",
-      "args": {
-        "error_if_nonfinite": "error_if_nonfinite",
-        "foreach": "foreach",
-        "max_norm": "max_norm",
-        "norm_type": "norm_type",
-        "parameters": "parameters"
-      }
-    },
     "clip_grad_value_": {
       "api": "torch.nn.utils.clip_grad.clip_grad_value_",
       "args": {
@@ -2978,7 +4328,8 @@
     },
     "conv1d": {
       "api": "torch.nn.functional.conv1d",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "conv1d_input": {
       "api": "torch.nn.grad.conv1d_input",
@@ -3030,7 +4381,8 @@
     },
     "conv3d": {
       "api": "torch.nn.functional.conv3d",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "conv3d_input": {
       "api": "torch.nn.grad.conv3d_input",
@@ -3102,7 +4454,8 @@
       "api": "torch.nn.modules.container.ParameterDict.copy",
       "args": {
         "self": "self"
-      }
+      },
+      "required_imports": []
     },
     "cosine_embedding_loss": {
       "api": "torch.nn.functional.cosine_embedding_loss",
@@ -3175,8 +4528,7 @@
       }
     },
     "cross": {
-      "api": "torch.linalg.cross",
-      "args": {}
+      "api": "torch.linalg.cross"
     },
     "cross_entropy": {
       "api": "torch.nn.functional.cross_entropy",
@@ -3252,6 +4604,11 @@
     "det": {
       "api": "torch.linalg.det"
     },
+    "device": {
+      "api": "torch.nn.parallel.distributed.DistributedDataParallel.device",
+      "args": {},
+      "required_imports": []
+    },
     "device_ids": {
       "api": "torch.nn.parallel.distributed.DistributedDataParallel.device_ids",
       "args": {}
@@ -3265,8 +4622,7 @@
       "args": {}
     },
     "diagonal": {
-      "api": "torch.linalg.diagonal",
-      "args": {}
+      "api": "torch.linalg.diagonal"
     },
     "digamma": {
       "api": "torch.special.digamma",
@@ -3307,7 +4663,8 @@
       "api": "torch.nn.modules.module.Module.double",
       "args": {
         "self": "self"
-      }
+      },
+      "required_imports": []
     },
     "downscale_factor": {
       "api": "torch.nn.modules.pixelshuffle.PixelUnshuffle.downscale_factor",
@@ -3337,7 +4694,8 @@
         "input": "input",
         "p": "p",
         "training": "training"
-      }
+      },
+      "required_imports": []
     },
     "dropout3": {
       "api": "torch.nn.modules.transformer.TransformerDecoderLayer.dropout3",
@@ -3350,10 +4708,12 @@
         "input": "input",
         "p": "p",
         "training": "training"
-      }
+      },
+      "required_imports": []
     },
     "dtype": {
-      "api": "torch.nn.functional.DType"
+      "api": "torch.nn.functional.DType",
+      "required_imports": []
     },
     "dump_patches": {
       "api": "torch.nn.modules.module.Module.dump_patches",
@@ -3455,15 +4815,15 @@
     },
     "exp2": {
       "api": "torch.special.exp2",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "expit": {
       "api": "torch.special.expit",
       "args": {}
     },
     "expm1": {
-      "api": "torch.special.expm1",
-      "args": {}
+      "api": "torch.special.expm1"
     },
     "extend": {
       "api": "torch.nn.modules.container.ParameterList.extend",
@@ -3480,7 +4840,8 @@
     },
     "eye": {
       "api": "torch.nn.init.eye",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "eye_": {
       "api": "torch.nn.init.eye_",
@@ -3649,7 +5010,8 @@
     },
     "full": {
       "api": "torch.nn.modules.loss.GaussianNLLLoss.full",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "full_kv_indices": {
       "api": "torch.nn.attention.flex_attention.BlockMask.full_kv_indices",
@@ -3938,10 +5300,6 @@
         "weight": "weight"
       }
     },
-    "i0": {
-      "api": "torch.special.i0",
-      "args": {}
-    },
     "i0e": {
       "api": "torch.special.i0e",
       "args": {}
@@ -4036,7 +5394,8 @@
         "index": "index",
         "module": "module",
         "self": "self"
-      }
+      },
+      "required_imports": []
     },
     "instance_norm": {
       "api": "torch.nn.functional.instance_norm",
@@ -4191,29 +5550,9 @@
       "api": "torch.nn.init.kaiming_normal",
       "args": {}
     },
-    "kaiming_normal_": {
-      "api": "torch.nn.init.kaiming_normal_",
-      "args": {
-        "a": "a",
-        "generator": "generator",
-        "mode": "mode",
-        "nonlinearity": "nonlinearity",
-        "tensor": "tensor"
-      }
-    },
     "kaiming_uniform": {
       "api": "torch.nn.init.kaiming_uniform",
       "args": {}
-    },
-    "kaiming_uniform_": {
-      "api": "torch.nn.init.kaiming_uniform_",
-      "args": {
-        "a": "a",
-        "generator": "generator",
-        "mode": "mode",
-        "nonlinearity": "nonlinearity",
-        "tensor": "tensor"
-      }
     },
     "kdim": {
       "api": "torch.nn.modules.activation.MultiheadAttention.kdim",
@@ -4315,14 +5654,6 @@
       "args": {}
     },
     "leaky_relu": {
-      "api": "torch.nn.functional.leaky_relu",
-      "args": {
-        "inplace": "inplace",
-        "input": "input",
-        "negative_slope": "negative_slope"
-      }
-    },
-    "leaky_relu_": {
       "api": "torch.nn.functional.leaky_relu_",
       "args": {}
     },
@@ -4373,8 +5704,7 @@
       "required_imports": []
     },
     "log1p": {
-      "api": "torch.special.log1p",
-      "args": {}
+      "api": "torch.special.log1p"
     },
     "log_input": {
       "api": "torch.nn.modules.loss.PoissonNLLLoss.log_input",
@@ -5416,7 +6746,8 @@
       }
     },
     "relu": {
-      "api": "torch.nn.ReLU"
+      "api": "torch.nn.functional.relu",
+      "required_imports": []
     },
     "relu_": {
       "api": "torch.nn.functional.relu_",
@@ -5660,7 +6991,8 @@
     },
     "sinc": {
       "api": "torch.special.sinc",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "size": {
       "api": "torch.Tensor.size",
@@ -5703,9 +7035,14 @@
         "target": "target"
       }
     },
-    "softmax": {
-      "api": "torch.special.softmax",
+    "soft_shrink": {
+      "api": "torch.nn.functional.softshrink",
       "args": {}
+    },
+    "softmax": {
+      "api": "torch.nn.functional.softmax",
+      "args": {},
+      "required_imports": []
     },
     "solve": {
       "api": "torch.linalg.solve",
@@ -5812,6 +7149,12 @@
     },
     "tanh": {
       "api": "torch.nn.Tanh"
+    },
+    "tanh_shrink": {
+      "api": "torch.nn.functional.tanhshrink",
+      "args": {
+        "input": "input"
+      }
     },
     "tensorinv": {
       "api": "torch.linalg.tensorinv",
@@ -5946,7 +7289,8 @@
         "kernel_size": "kernel_size",
         "padding": "padding",
         "stride": "stride"
-      }
+      },
+      "required_imports": []
     },
     "uniform": {
       "api": "torch.nn.init.uniform",
@@ -6038,7 +7382,8 @@
     },
     "vander": {
       "api": "torch.linalg.vander",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "variant": {
       "api": "torch.nn.attention.bias.CausalBias.variant",
@@ -6049,8 +7394,7 @@
       "args": {}
     },
     "vecdot": {
-      "api": "torch.linalg.vecdot",
-      "args": {}
+      "api": "torch.linalg.vecdot"
     },
     "vector_norm": {
       "api": "torch.linalg.vector_norm",
@@ -6106,25 +7450,9 @@
       "api": "torch.nn.init.xavier_normal",
       "args": {}
     },
-    "xavier_normal_": {
-      "api": "torch.nn.init.xavier_normal_",
-      "args": {
-        "gain": "gain",
-        "generator": "generator",
-        "tensor": "tensor"
-      }
-    },
     "xavier_uniform": {
       "api": "torch.nn.init.xavier_uniform",
       "args": {}
-    },
-    "xavier_uniform_": {
-      "api": "torch.nn.init.xavier_uniform_",
-      "args": {
-        "gain": "gain",
-        "generator": "generator",
-        "tensor": "tensor"
-      }
     },
     "xlog1py": {
       "api": "torch.special.xlog1py",

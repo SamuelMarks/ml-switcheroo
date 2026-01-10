@@ -12,7 +12,9 @@ to ``adapter.get_device_check_syntax()``.
 import libcst as cst
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
-from ml_switcheroo.frameworks import get_adapter
+
+# Fix: Import directly from base
+from ml_switcheroo.frameworks.base import get_adapter
 
 
 @register_hook("cuda_is_available")

@@ -365,6 +365,27 @@
         "has_varargs": false
       },
       {
+        "name": "relu",
+        "api_path": "tf.nn.relu",
+        "kind": "function",
+        "params": [
+          {
+            "name": "features",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": null,
+            "annotation": "Annotated"
+          },
+          {
+            "name": "name",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": null
+          }
+        ],
+        "docstring": "Computes rectified linear: `max(features, 0)`.\n\nSee: https://en.wikipedia.org/wiki/Rectifier_(neural_networks)\nExample usage:\n>>> tf.nn.relu([-2., 0., 3.]).numpy()\narray([0., 0., 3.], dtype=float32)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `int64`, `bfloat16`, `uint16`, `half`, `uint32`, `uint64`, `qint8`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
+        "has_varargs": false
+      },
+      {
         "name": "sigmoid",
         "api_path": "tf.nn.sigmoid",
         "kind": "function",
@@ -431,27 +452,6 @@
           }
         ],
         "docstring": "Computes the exponential linear function.\n\nThe ELU function is defined as:\n\n * $ e ^ x - 1 $ if $ x < 0 $\n * $ x $ if $ x >= 0 $\n\nExamples:\n\n>>> tf.nn.elu(1.0)\n<tf.Tensor: shape=(), dtype=float32, numpy=1.0>\n>>> tf.nn.elu(0.0)\n<tf.Tensor: shape=(), dtype=float32, numpy=0.0>\n>>> tf.nn.elu(-1000.0)\n<tf.Tensor: shape=(), dtype=float32, numpy=-1.0>\n\nSee [Fast and Accurate Deep Network Learning by Exponential Linear Units (ELUs)\n](http://arxiv.org/abs/1511.07289)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `half`, `bfloat16`, `float32`, `float64`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
-        "has_varargs": false
-      },
-      {
-        "name": "relu",
-        "api_path": "tf.nn.relu",
-        "kind": "function",
-        "params": [
-          {
-            "name": "features",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": "Annotated"
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
-        "docstring": "Computes rectified linear: `max(features, 0)`.\n\nSee: https://en.wikipedia.org/wiki/Rectifier_(neural_networks)\nExample usage:\n>>> tf.nn.relu([-2., 0., 3.]).numpy()\narray([0., 0., 3.], dtype=float32)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `int64`, `bfloat16`, `uint16`, `half`, `uint32`, `uint64`, `qint8`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
         "has_varargs": false
       },
       {

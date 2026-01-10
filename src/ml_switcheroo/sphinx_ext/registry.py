@@ -19,14 +19,9 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
   """
   Scans registered adapters to build hierarchy, examples, and tier metadata.
 
-  Introspects `ml_switcheroo.frameworks` to determining:
-  1. Which frameworks act as parents/children (e.g. JAX -> Flax).
-  2. What semantic tiers each framework supports.
-  3. What interactive examples are provided.
-
   Returns:
       Tuple[HierarchyMap, str, str]:
-          - The hierarchy dictionary mapping parents to children.
+          - The hierarchy dictionary mapping frameworks.
           - JSON string of preloaded examples.
           - JSON string of framework tier mapping.
   """
@@ -53,7 +48,6 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
     if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
       tiers = [t.value for t in adapter.supported_tiers]
     else:
-      # Fallback if property missing to prevent breakage
       tiers = ["array", "neural", "extras"]
     tier_metadata[key] = tiers
 
@@ -61,7 +55,7 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
       # This is a child node (e.g. flax_nnx -> jax)
       hierarchy[parent].append({"key": key, "label": label})
     else:
-      # This is a root node (e.g. torch, jax)
+      # This is a root node (e.g. torch, jax, sass, rdna)
       roots.add(key)
 
   # 2. Convert to Render-Ready structures & Gather Examples
@@ -73,6 +67,7 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
     key=lambda x: priorities.index(x) if x in priorities else 999,
   )
 
+  # FIX: Iterate over sorted_roots to ensure keys exist in final_hierarchy
   final_hierarchy = {root: sorted(hierarchy.get(root, []), key=lambda x: x["label"]) for root in sorted_roots}
 
   # Collect Examples from Adapters
@@ -83,10 +78,8 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
       parent_key = getattr(adapter, "inherits_from", None)
 
       for tier_name, code in tiers.items():
-        # Unique ID for the example entry
         uid = f"{key}_{tier_name}"
 
-        # Determine Source configuration
         if parent_key:
           src_fw = parent_key
           src_flavour = key
@@ -94,14 +87,12 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
           src_fw = key
           src_flavour = None
 
-        # Use tier_name to deduce required tier.
         req_tier = "extras"
         if "math" in tier_name:
           req_tier = "array"
         elif "neural" in tier_name:
           req_tier = "neural"
 
-        # Simple cleanup for label
         clean_tier_name = tier_name.replace("tier", "")
         clean_label = (
           clean_tier_name.split("_")[-1].capitalize() if "_" in clean_tier_name else clean_tier_name.capitalize()
@@ -110,19 +101,15 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
         display_fw = getattr(adapter, "display_name", key.title())
         label = f"{display_fw}: {clean_label}"
 
-        # Dynamic Target Heuristic: Next available in priority list
+        # Dynamic Target Heuristic
         tgt_fw = None
         tgt_flavour = None
 
-        # Filter candidates: Must not be source, and not be parent of source
         candidates = [fw for fw in priorities if fw != src_fw and fw != parent_key and fw != src_flavour]
 
-        # Pick the first viable candidate, searching forward from current src position if possible
-        # This creates a logical rotation effect (A -> B, B -> C, C -> A)
         if candidates:
           try:
             curr_idx = priorities.index(src_fw)
-            # Create round robin slice
             rotated = priorities[curr_idx + 1 :] + priorities[:curr_idx]
             for c in rotated:
               if c in candidates:
@@ -131,12 +118,9 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
           except ValueError:
             tgt_fw = candidates[0]
 
-        # Ultimate fallback
         if not tgt_fw:
           tgt_fw = "target_placeholder"
 
-        # --- FIX: Default Flavour Selection for Target ---
-        # If target has flavours (e.g. JAX -> Flax), pick default one to update dropdown
         if tgt_fw in final_hierarchy and final_hierarchy[tgt_fw]:
           tgt_flavour = final_hierarchy[tgt_fw][0]["key"]
 

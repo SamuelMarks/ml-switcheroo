@@ -74,10 +74,12 @@
       "api": "CALL"
     },
     "CastFloat": {
-      "api": "I2F"
+      "api": "I2F",
+      "required_imports": []
     },
     "CastInt": {
-      "api": "F2I"
+      "api": "F2I",
+      "required_imports": []
     },
     "Cctl": {
       "api": "CCTL"
@@ -449,7 +451,8 @@
       "api": "SUATOM"
     },
     "Sub": {
-      "api": "FADD"
+      "api": "FADD",
+      "required_imports": []
     },
     "Suld": {
       "api": "SULD"

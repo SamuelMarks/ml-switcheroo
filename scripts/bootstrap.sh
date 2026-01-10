@@ -389,6 +389,11 @@ else
     printf '   💡 Tip: Run "python3 scripts/build_docs.py" to regenerate it from the Knowledge Base.\n'
 fi
 
+# Bring in the various ODML files I have currently in the repo
+for yml in "$ROOT_DIR"/src/ml_switcheroo/frameworks/definitions/*.yml; do
+    ml_switcheroo define --no-test-gen -- "$yml"
+done
+
 # ------------------------------------------------------------------------------
 # 8. CLEANUP
 # ------------------------------------------------------------------------------

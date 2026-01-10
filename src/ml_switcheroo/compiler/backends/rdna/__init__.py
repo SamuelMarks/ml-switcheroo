@@ -9,5 +9,6 @@ from ml_switcheroo.compiler.backends.rdna.synthesizer import (
   RdnaSynthesizer,
   RdnaBackend,
 )
+from ml_switcheroo.compiler.backends.rdna.emitter import RdnaEmitter
 
-__all__ = ["RdnaSynthesizer", "RdnaBackend"]
+__all__ = ["RdnaSynthesizer", "RdnaBackend", "RdnaEmitter"]

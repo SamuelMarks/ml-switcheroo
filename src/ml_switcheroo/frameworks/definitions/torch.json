@@ -1510,6 +1510,7 @@
   },
   "Gelu": {
     "api": "torch.nn.GELU",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2964,6 +2965,10 @@
   },
   "Relu": {
     "api": "torch.nn.ReLU",
+    "args": {
+      "inplace": "inplace",
+      "input": "input"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3377,6 +3382,18 @@
   },
   "TorchFunctional": {
     "api": "torch.nn.functional",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TorchLoad": {
+    "api": "torch.load",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TorchSave": {
+    "api": "torch.save",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

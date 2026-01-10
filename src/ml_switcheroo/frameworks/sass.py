@@ -4,8 +4,7 @@ NVIDIA SASS (Streaming Assembler) Framework Adapter.
 Provides metadata and legacy hooks for the SASS compiler stack.
 """
 
-from typing import Dict, List, Optional, Set, Tuple
-from typing import Any
+from typing import Dict, List, Optional, Set, Tuple, Any, TYPE_CHECKING
 
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.ghost import GhostRef
@@ -20,12 +19,14 @@ from ml_switcheroo.frameworks.base import (
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
-from ml_switcheroo.semantics.manager import SemanticsManager
 
 # Import compiler components for legacy wrappers
 from ml_switcheroo.compiler.backends.sass.synthesizer import SassSynthesizer
 from ml_switcheroo.compiler.backends.sass.emitter import SassEmitter
 from ml_switcheroo.compiler.frontends.python import PythonFrontend
+
+if TYPE_CHECKING:
+  from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class PythonToSassEmitter:
@@ -35,6 +36,9 @@ class PythonToSassEmitter:
   """
 
   def __init__(self):
+    # Lazy import to break circular dependency
+    from ml_switcheroo.semantics.manager import SemanticsManager
+
     # Create a fresh semantics manager to ensure macros are registered if needed
     self.semantics = SemanticsManager()
     self.synth = SassSynthesizer(self.semantics)

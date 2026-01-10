@@ -22,7 +22,9 @@ import libcst as cst
 from typing import List
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
-from ml_switcheroo.frameworks import get_adapter
+
+# Fix: Import directly from base
+from ml_switcheroo.frameworks.base import get_adapter
 
 
 def _remove_generator_arg(args: List[cst.Arg]) -> List[cst.Arg]:

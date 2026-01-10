@@ -2,43 +2,52 @@
   "__framework__": "rdna",
   "mappings": {
     "Abs": {
-      "api": "v_and_b32"
+      "api": "v_and_b32",
+      "required_imports": []
     },
     "Add": {
-      "api": "v_add_f32"
+      "api": "v_add_f32",
+      "required_imports": []
     },
     "Branch": {
       "api": "s_cbranch_scc1"
     },
     "Clamp": {
-      "api": "v_med3_f32"
+      "api": "v_med3_f32",
+      "required_imports": []
     },
     "Compare": {
       "api": "v_cmp_lt_f32"
     },
     "Div": {
-      "api": "v_div_f32_e32"
+      "api": "v_div_f32_e32",
+      "required_imports": []
     },
     "FusedMultiplyAdd": {
-      "api": "v_fmac_f32"
+      "api": "v_fmac_f32",
+      "required_imports": []
     },
     "Max": {
-      "api": "v_max_f32"
+      "api": "v_max_f32",
+      "required_imports": []
     },
     "Min": {
-      "api": "v_min_f32"
+      "api": "v_min_f32",
+      "required_imports": []
     },
     "Move": {
       "api": "v_mov_b32"
     },
     "Mul": {
-      "api": "v_mul_f32"
+      "api": "v_mul_f32",
+      "required_imports": []
     },
     "ScalarMove": {
       "api": "s_mov_b32"
     },
     "Sub": {
-      "api": "v_sub_f32"
+      "api": "v_sub_f32",
+      "required_imports": []
     }
   },
   "templates": {

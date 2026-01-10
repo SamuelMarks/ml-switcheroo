@@ -7,7 +7,7 @@ to map Python source APIs (like `torch.abs`) to StableHLO operations (like `stab
 """
 
 import libcst as cst
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, TYPE_CHECKING
 
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 from ml_switcheroo.core.mlir.nodes import (
@@ -18,15 +18,16 @@ from ml_switcheroo.core.mlir.nodes import (
   ValueNode,
   BlockNode,
 )
-from ml_switcheroo.semantics.manager import SemanticsManager
 
+if TYPE_CHECKING:
+    from ml_switcheroo.semantics.manager import SemanticsManager
 
 class StableHloEmitter(PythonToMlirEmitter):
   """
   Specialized Emitter that produces StableHLO, Func, and Builtin dialect operations.
   """
 
-  def __init__(self, semantics: SemanticsManager):
+  def __init__(self, semantics: "SemanticsManager"):
     """
     Initialize the emitter with access to the Semantic Knowledge Base.
 

@@ -2156,6 +2156,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "TorchLoad": {
+    "api": "load",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "io_handler"
+  },
+  "TorchSave": {
+    "api": "save",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "io_handler"
+  },
   "Transpose": {
     "api": "numpy.ma.core.transpose",
     "args": {
@@ -2175,6 +2189,11 @@
   },
   "Unique": {
     "api": "numpy.unique",
+    "args": {
+      "ar1": "ar1",
+      "return_index": "return_index",
+      "return_inverse": "return_inverse"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2294,12 +2313,18 @@
   },
   "Where": {
     "api": "numpy.where",
+    "args": {
+      "condition": "condition",
+      "x": "x",
+      "y": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Zeros": {
     "api": "numpy.zeros",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

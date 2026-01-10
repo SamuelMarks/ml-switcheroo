@@ -1,417 +1,5039 @@
 {
-  "Abs": {
-    "description": "Calculates the absolute value.",
-    "std_args": [
-      "x"
-    ]
-  },
-  "Add": {
-    "description": "Element-wise addition.",
-    "std_args": [
-      "x",
-      "y"
-    ]
-  },
-  "ArgMax": {
-    "description": "Returns the indices of the maximum value of all elements in the input tensor.",
-    "std_args": [
-      "input",
-      "dim",
-      "keepdim"
-    ]
-  },
-  "ArgMin": {
-    "description": "Returns the indices of the minimum value of all elements in the input tensor.",
-    "std_args": [
-      "input",
-      "dim",
-      "keepdim"
-    ]
-  },
-  "Bool": {
-    "description": "Boolean type.",
+  "__array_namespace_info__": {
+    "description": "Returns a namespace with Array API namespace inspection utilities.",
+    "from": "_2024_12/info.py",
     "std_args": []
   },
-  "CastBool": {
-    "description": "Cast tensor to bool",
-    "metadata": {
-      "target_type": "Bool"
-    },
+  "__eq__": {
+    "description": "Computes the truth value of ``self == other`` in order to test for data type object equality.",
+    "from": "_2024_12/data_types.py",
     "std_args": [
-      "x"
+      [
+        "self",
+        "dtype"
+      ],
+      [
+        "other",
+        "dtype"
+      ]
     ]
   },
-  "CastByte": {
-    "description": "Cast to UIint8",
-    "operation": "CastByte",
+  "abs": {
+    "description": "Calculates the absolute value for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
-      "x"
-    ],
-    "variants": {
-      "jax": {
-        "api": "astype",
-        "requires_plugin": "type_methods"
-      },
-      "torch": {
-        "api": "byte"
-      }
-    }
-  },
-  "CastChar": {
-    "description": "Cast tensor to int8/char",
-    "metadata": {
-      "target_type": "Int8"
-    },
-    "std_args": [
-      "x"
+      [
+        "x",
+        "array"
+      ]
     ]
   },
-  "CastDouble": {
-    "description": "Cast tensor to float64",
-    "metadata": {
-      "target_type": "Float64"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastFloat": {
-    "description": "Cast tensor to float32",
-    "metadata": {
-      "target_type": "Float32"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastHalf": {
-    "description": "Cast tensor to float16",
-    "metadata": {
-      "target_type": "Float16"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastInt": {
-    "description": "Cast tensor to int32",
-    "metadata": {
-      "target_type": "Int32"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastLong": {
-    "description": "Cast tensor to int64",
-    "metadata": {
-      "target_type": "Int64"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "CastShort": {
-    "description": "Cast tensor to int16",
-    "metadata": {
-      "target_type": "Int16"
-    },
-    "std_args": [
-      "x"
-    ]
-  },
-  "Clamp": {
-    "description": "Clamp all elements in input into the range [min, max].",
-    "std_args": [
-      "input",
-      "min",
-      "max"
-    ]
-  },
-  "Div": {
-    "description": "Element-wise division.",
-    "std_args": [
-      "x",
-      "y"
-    ]
-  },
-  "Einsum": {
-    "description": "Sums the product of the elements of the input operands along dimensions specified using a notation.",
-    "std_args": [
-      "equation",
-      "operands"
-    ]
-  },
-  "Flatten": {
-    "description": "Flattens input by reshaping it into a one-dimensional tensor.",
-    "std_args": [
-      "input",
-      "start_dim",
-      "end_dim"
-    ]
-  },
-  "Float16": {
-    "description": "16-bit floating point type (Half).",
-    "std_args": []
-  },
-  "Float32": {
-    "description": "32-bit floating point type.",
-    "std_args": []
-  },
-  "Float64": {
-    "description": "64-bit floating point type (Double).",
-    "std_args": []
-  },
-  "Gather": {
-    "description": "Gathers values along an axis specified by dim.",
-    "std_args": [
-      "input",
-      "dim",
-      "index"
-    ]
-  },
-  "Int16": {
-    "description": "16-bit signed integer type (Short).",
-    "std_args": []
-  },
-  "Int32": {
-    "description": "32-bit signed integer type (Int).",
-    "std_args": []
-  },
-  "Int64": {
-    "description": "64-bit signed integer type (Long).",
-    "std_args": []
-  },
-  "Mean": {
-    "description": "Calculates the mean value.",
-    "std_args": [
-      "x"
-    ]
-  },
-  "Mul": {
-    "description": "Element-wise multiplication.",
-    "std_args": [
-      "x",
-      "y"
-    ]
-  },
-  "OneHot": {
-    "description": "Takes LongTensor with index values of shape (*) and returns a tensor of shape (*, num_classes).",
-    "std_args": [
-      "tensor",
-      "num_classes"
-    ]
-  },
-  "Pad": {
-    "description": "Pads input tensor.",
-    "std_args": [
-      "input",
-      "pad",
-      "mode",
-      "value"
-    ]
-  },
-  "Pow": {
-    "description": "Element-wise power.",
-    "std_args": [
-      "x",
-      "y"
-    ]
-  },
-  "Reshape": {
-    "description": "Returns a tensor with the same data and number of elements as input, but with the specified shape.",
-    "std_args": [
-      "input",
-      "shape"
-    ]
-  },
-  "Scatter": {
-    "description": "Writes all values from the tensor src into indices specified.",
-    "std_args": [
-      "input",
-      "dim",
-      "index",
-      "src"
-    ]
-  },
-  "Squeeze": {
-    "description": "Returns a tensor with all the dimensions of input of size 1 removed.",
-    "std_args": [
-      "input",
-      "dim"
-    ]
-  },
-  "Sub": {
-    "description": "Element-wise subtraction.",
-    "std_args": [
-      "x",
-      "y"
-    ]
-  },
-  "Sum": {
-    "description": "Calculates the sum value.",
-    "std_args": [
-      "x"
-    ]
-  },
-  "TopK": {
-    "description": "Returns the k largest elements of the given input tensor along a given dimension.",
-    "std_args": [
-      "input",
-      "k",
-      "dim",
-      "largest",
-      "sorted"
-    ]
-  },
-  "TorchFunctional": {
-    "description": "Abstract Functional Namespace (e.g. F in torch.nn.functional)",
-    "std_args": []
-  },
-  "TorchLoad": {
-    "description": "Definition for TorchLoad",
-    "operation": "TorchLoad",
-    "std_args": [
-      "f"
-    ],
-    "variants": {
-      "jax": {
-        "api": "load",
-        "requires_plugin": "io_handler"
-      },
-      "numpy": {
-        "api": "load",
-        "requires_plugin": "io_handler"
-      },
-      "torch": {
-        "api": "torch.load"
-      }
-    }
-  },
-  "TorchSave": {
-    "description": "Definition for TorchSave",
-    "operation": "TorchSave",
-    "std_args": [
-      "obj",
-      "f"
-    ],
-    "variants": {
-      "jax": {
-        "api": "save",
-        "requires_plugin": "io_handler"
-      },
-      "numpy": {
-        "api": "save",
-        "requires_plugin": "io_handler"
-      },
-      "torch": {
-        "api": "torch.save"
-      }
-    }
-  },
-  "UInt8": {
-    "description": "Type UInt8",
-    "operation": "UInt8",
+  "absolute": {
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
-    "variants": {
-      "jax": {
-        "api": "jnp.uint8"
-      },
-      "torch": {
-        "api": "torch.uint8"
-      }
-    }
+    "type": "function"
   },
-  "Unsqueeze": {
-    "description": "Returns a new tensor with a dimension of size one inserted at the specified position.",
+  "acos": {
+    "description": "Calculates an implementation-dependent approximation of the principal value of the inverse cosine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
-      "input",
-      "dim"
+      [
+        "x",
+        "array"
+      ]
     ]
   },
-  "View": {
-    "description": "Returns a new tensor with the same data and elements but different shape.",
+  "acosh": {
+    "description": "Calculates an implementation-dependent approximation to the inverse hyperbolic cosine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
-      "input",
-      "shape"
+      [
+        "x",
+        "array"
+      ]
     ]
   },
-  "__comment__": "DO NOT EDIT. Auto-generated from standards_internal.py migration.",
-  "data_ptr": {
-    "description": "Get valid data pointer or buffer access.",
+  "activation": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "activation_relu_or_gelu": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "adaptive_average_pool": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "adaptive_grad_clip": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "adaptive_max_pool": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "add": {
+    "description": "Calculates the sum for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float, complex]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float, complex]"
+      ]
+    ]
+  },
+  "add_decayed_weights": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "add_noise": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "add_scale": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "addressable_data": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "align_corners": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "all": {
+    "description": "Tests whether all input array elements evaluate to ``True`` along a specified axis.",
+    "from": "_2024_12/utility_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ]
+  },
+  "alpha": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "amax": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "amin": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "any": {
+    "description": "Tests whether any input array element evaluates to ``True`` along a specified axis.",
+    "from": "_2024_12/utility_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ]
+  },
+  "apply": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "apply_along_axis": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "apply_gradients": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "apply_if_finite": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "apply_mask": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "apply_over_axes": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "approximate": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "arange": {
+    "description": "Returns evenly spaced values within the half-open interval ``[start, stop)`` as a one-dimensional array.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      [
+        "start",
+        "Union[int, float]"
+      ],
+      [
+        "stop",
+        "Optional[Union[int, float]]"
+      ],
+      [
+        "step",
+        "Union[int, float]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ]
+  },
+  "arccos": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "arccosh": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "arcsin": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "arcsinh": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "arctan": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "arctan2": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "arctanh": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "argmax": {
+    "description": "Returns the indices of the maximum values along a specified axis.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[int]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ]
+  },
+  "argmin": {
+    "description": "Returns the indices of the minimum values along a specified axis.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[int]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ]
+  },
+  "args": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "argsort": {
+    "description": "Returns the indices that sort an array ``x`` along a specified axis.",
+    "from": "_2024_12/sorting_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "descending",
+        "bool"
+      ],
+      [
+        "stable",
+        "bool"
+      ]
+    ]
+  },
+  "array": {
+    "description": "Constant: array",
+    "from": "_2024_12/array_object.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "array_equal": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "array_equiv": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "array_split": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "as_string": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "asarray": {
+    "description": "Convert the input to an array.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      [
+        "obj",
+        "Union[array, bool, int, float, complex, NestedSequence, SupportsBufferProtocol]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ],
+      [
+        "copy",
+        "Optional[bool]"
+      ]
+    ]
+  },
+  "asin": {
+    "description": "Calculates an implementation-dependent approximation of the principal value of the inverse sine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "asinh": {
+    "description": "Calculates an implementation-dependent approximation to the inverse hyperbolic sine for each element ``x_i`` in the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "assert_equal": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "associative_scan": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "astype": {
+    "description": "Copies an array to a specified data type irrespective of :ref:`type-promotion` rules.",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "dtype",
+        "dtype"
+      ],
+      [
+        "copy",
+        "bool"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ]
+  },
+  "at": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "atan": {
+    "description": "Calculates an implementation-dependent approximation of the principal value of the inverse tangent for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "atan2": {
+    "description": "Calculates an implementation-dependent approximation of the inverse tangent of the quotient ``x1/x2``, having domain ``[-infinity, +infinity] x [-infinity, +infinity]`` (where the ``x`` notation denotes the set of ordered pairs of elements ``(x1_i, x2_i)``) and codomain ``[-\u03c0, +\u03c0]``, for each pair of elements ``(x1_i, x2_i)`` of the input arrays ``x1`` and ``x2``, respectively. Each element-wise result is expressed in radians.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ]
+  },
+  "atanh": {
+    "description": "Calculates an implementation-dependent approximation to the inverse hyperbolic tangent for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "atleast_1d": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "atleast_2d": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "atleast_3d": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "attr": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "average_pool": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "axis": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "base": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "batch_normalization": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "batch_shape": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "beta": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "bias": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bias_correction": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bias_hh": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bias_ih": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bias_k": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bias_v": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "binary_cross_entropy": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "binomial": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "bits": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bitwise_and": {
+    "description": "Computes the bitwise AND of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, bool]"
+      ],
+      [
+        "x2",
+        "Union[array, int, bool]"
+      ]
+    ],
+    "type": "function"
+  },
+  "bitwise_invert": {
+    "description": "Inverts (flips) each bit for each element ``x_i`` of the input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "bitwise_left_shift": {
+    "description": "Shifts the bits of each element ``x1_i`` of the input array ``x1`` to the left by appending ``x2_i`` (i.e., the respective element in the input array ``x2``) zeros to the right of ``x1_i``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int]"
+      ],
+      [
+        "x2",
+        "Union[array, int]"
+      ]
+    ],
+    "type": "function"
+  },
+  "bitwise_not": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "bitwise_or": {
+    "description": "Computes the bitwise OR of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, bool]"
+      ],
+      [
+        "x2",
+        "Union[array, int, bool]"
+      ]
+    ],
+    "type": "function"
+  },
+  "bitwise_right_shift": {
+    "description": "Shifts the bits of each element ``x1_i`` of the input array ``x1`` to the right according to the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int]"
+      ],
+      [
+        "x2",
+        "Union[array, int]"
+      ]
+    ],
+    "type": "function"
+  },
+  "bitwise_xor": {
+    "description": "Computes the bitwise XOR of the underlying binary representation of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, bool]"
+      ],
+      [
+        "x2",
+        "Union[array, int, bool]"
+      ]
+    ],
+    "type": "function"
+  },
+  "bool_": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "broadcast": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "broadcast_arrays": {
+    "description": "Broadcasts one or more arrays against one another.",
+    "std_args": [],
+    "type": "function"
+  },
+  "broadcast_shapes": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "broadcast_to": {
+    "description": "Broadcasts an array to a specified shape.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "shape",
+        "Tuple[int, Ellipsis]"
+      ]
+    ],
+    "type": "function"
+  },
+  "byte": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cached": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "can_cast": {
+    "description": "Determines if one data type can be cast to another data type according to type promotion rules (see :ref:`type-promotion`).",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [
+      [
+        "from_",
+        "Union[dtype, array]"
+      ],
+      [
+        "to",
+        "dtype"
+      ]
+    ]
+  },
+  "capabilities": {
+    "description": "Returns a dictionary of array library capabilities.",
+    "from": "_2024_12/info.py",
     "std_args": []
+  },
+  "cast_like": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "categorical": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "categorical_crossentropy": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "cdouble": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ceil": {
+    "description": "Rounds each element ``x_i`` of the input array ``x`` to the smallest (i.e., closest to ``-infinity``) integer-valued number that is not less than ``x_i``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "ceil_mode": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "chain": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "char": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "character": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "children": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "chisquare": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "choice": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cholesky": {
+    "description": "Returns the lower (upper) Cholesky decomposition of a complex Hermitian or real symmetric positive-definite matrix ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "upper",
+        "bool"
+      ]
+    ],
+    "type": "function"
+  },
+  "cholesky_inverse": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "clear": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "clip": {
+    "description": "Clamps each element ``x_i`` of the input array ``x`` to the range ``[min, max]``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "min",
+        "Optional[Union[int, float, array]]"
+      ],
+      [
+        "max",
+        "Optional[Union[int, float, array]]"
+      ]
+    ]
+  },
+  "clip_by_block_rms": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "clip_by_global_norm": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "clip_grad_norm": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "close": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "column_stack": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "complex_": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "complexfloating": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "compute_mask": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "concat": {
+    "description": "Joins a sequence of arrays along an existing axis.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "arrays",
+        "Union[Tuple[array, Ellipsis], List[array]]"
+      ],
+      [
+        "axis",
+        "Optional[int]"
+      ]
+    ]
+  },
+  "cond": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conditionally_mask": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "conditionally_transform": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "conj": {
+    "description": "Returns the complex conjugate for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "constant_": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "constant_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "control_delta_method": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "control_variates_jacobians": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv1d_input": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv1d_weight": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv2d_input": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv2d_weight": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv3d_input": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv3d_weight": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv_transpose": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv_transpose1d": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv_transpose2d": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "conv_transpose3d": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "convert_to_numpy": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "convert_to_tensor": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "convex_kl_divergence": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "copy_to_host_async": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "copysign": {
+    "description": "Composes a floating-point value with the magnitude of ``x1_i`` and the sign of ``x2_i`` for each element of the input array ``x1``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ]
+  },
+  "cos": {
+    "description": "Calculates an implementation-dependent approximation to the cosine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "cosh": {
+    "description": "Calculates an implementation-dependent approximation to the hyperbolic cosine for each element ``x_i`` in the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "cosine_decay_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cosine_distance": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cosine_onecycle_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cosine_similarity": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "count": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "count_nonzero": {
+    "description": "Counts the number of array elements which are non-zero.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ],
+    "type": "function"
+  },
+  "cpu": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "create_mask": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "cross": {
+    "description": "Returns the cross product of 3-element vectors.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      [
+        "x1",
+        "array"
+      ],
+      [
+        "x2",
+        "array"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ]
+  },
+  "cross_entropy": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "ctc_decode": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "ctc_loss": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "ctc_loss_with_forward_probs": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cumulative_prod": {
+    "description": "Calculates the cumulative product of elements in the input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[int]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "include_initial",
+        "bool"
+      ]
+    ],
+    "type": "function"
+  },
+  "cumulative_sum": {
+    "description": "Calculates the cumulative sum of elements in the input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[int]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "include_initial",
+        "bool"
+      ]
+    ],
+    "type": "function"
+  },
+  "custom_gradient": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "d_model": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "data": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "decoder": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "default_device": {
+    "description": "Returns the default device.",
+    "std_args": [],
+    "type": "function"
+  },
+  "default_dtypes": {
+    "description": "Returns a dictionary containing default data types.",
+    "from": "_2024_12/info.py",
+    "std_args": [
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ]
+  },
+  "depthwise_conv": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "deserialize": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "det": {
+    "description": "Returns the determinant of a square matrix (or a stack of square matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "device_ids": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "device_mesh": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "device_type": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "devices": {
+    "description": "Returns a list of supported devices which are available at runtime.",
+    "from": "_2024_12/info.py",
+    "std_args": []
+  },
+  "diag_indices": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "diag_indices_from": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "diagonal": {
+    "description": "Returns the specified diagonals of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "offset",
+        "int"
+      ]
+    ]
+  },
+  "diff": {
+    "description": "Calculates the n-th discrete forward difference along a specified axis.",
+    "from": "_2024_12/utility_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "n",
+        "int"
+      ],
+      [
+        "prepend",
+        "Optional[array]"
+      ],
+      [
+        "append",
+        "Optional[array]"
+      ]
+    ]
+  },
+  "digamma": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dilation": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dim": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dims": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dirichlet": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "div_value": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "divide": {
+    "description": "Calculates the division of each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float, complex]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float, complex]"
+      ]
+    ]
+  },
+  "divide_no_nan": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "dot_product_attention": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "downscale_factor": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dropout1": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dropout2": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dropout3": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dtypes": {
+    "description": "Returns a dictionary of supported *Array API* data types.",
+    "std_args": [
+      [
+        "device",
+        "Optional[device]"
+      ],
+      [
+        "kind",
+        "Optional[Union[str, Tuple[str, Ellipsis]]]"
+      ]
+    ],
+    "type": "attribute"
+  },
+  "e": {
+    "description": "IEEE 754 floating-point representation of Euler's constant.",
+    "from": "_2024_12/constants.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "eig": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "eigh": {
+    "description": "Returns an eigenvalue decomposition of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "eigvals": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "eigvalsh": {
+    "description": "Returns the eigenvalues of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "einsum_path": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "ema": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "embedding_dim": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "empty": {
+    "description": "Returns an uninitialized array having a specified `shape`.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      [
+        "shape",
+        "Union[int, Tuple[int, Ellipsis]]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ]
+  },
+  "empty_like": {
+    "description": "Returns an uninitialized array with the same ``shape`` as an input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ],
+    "type": "function"
+  },
+  "encoder": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "end_dim": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "eps": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "equal": {
+    "description": "Computes the truth value of ``x1_i == x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float, complex, bool]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float, complex, bool]"
+      ]
+    ]
+  },
+  "erfc": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "erfcx": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "erfinv": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "estimate_control_variate_coefficients": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "euler_gamma": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "eval": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
   },
   "exp": {
-    "description": "Exponential.",
+    "description": "Calculates an implementation-dependent approximation to the exponential function for each element ``x_i`` of the input array ``x`` (``e`` raised to the power of ``x_i``, where ``e`` is the base of the natural logarithm).",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
-      "x"
+      [
+        "x",
+        "array"
+      ]
     ]
+  },
+  "expand_dims": {
+    "description": "Expands the shape of an array by inserting a new axis (dimension) of size one at the position specified by ``axis``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "type": "function"
+  },
+  "expit": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "expm1": {
+    "description": "Calculates an implementation-dependent approximation to ``exp(x)-1`` for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "exponential": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "exponential_decay": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "extend": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "extract_sequences": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "eye": {
+    "description": "Returns a two-dimensional array with ones on the ``k``\\th diagonal and zeros elsewhere.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      [
+        "n_rows",
+        "int"
+      ],
+      [
+        "n_cols",
+        "Optional[int]"
+      ],
+      [
+        "k",
+        "int"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ]
+  },
+  "eye_": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "f": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "fft": {
+    "description": "Computes the one-dimensional discrete Fourier transform.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "n",
+        "Optional[int]"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "fft2": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "fftfreq": {
+    "description": "Computes the discrete Fourier transform sample frequencies.",
+    "std_args": [
+      [
+        "n",
+        "int"
+      ],
+      [
+        "d",
+        "float"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ],
+    "type": "function"
+  },
+  "fftn": {
+    "description": "Computes the n-dimensional discrete Fourier transform.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "s",
+        "Optional[Sequence[int]]"
+      ],
+      [
+        "axes",
+        "Optional[Sequence[int]]"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "fftshift": {
+    "description": "Shifts the zero-frequency component to the center of the spectrum.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axes",
+        "Optional[Union[int, Sequence[int]]]"
+      ]
+    ],
+    "type": "function"
+  },
+  "fill_diagonal": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "filters": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "find_duplicates": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "finfo": {
+    "description": "Machine limits for floating-point data types.",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [
+      [
+        "type",
+        "Union[dtype, array]"
+      ]
+    ]
+  },
+  "flatten_parameters": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "flip": {
+    "description": "Reverses the order of elements in an array along the given axis. The shape of the array must be preserved.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ]
+    ]
+  },
+  "float": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "floor": {
+    "description": "Rounds each element ``x_i`` of the input array ``x`` to the greatest (i.e., closest to ``+infinity``) integer-valued number that is not greater than ``x_i``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "floor_divide": {
+    "description": "Rounds the result of dividing each element ``x1_i`` of the input array ``x1`` by the respective element ``x2_i`` of the input array ``x2`` to the greatest (i.e., closest to `+infinity`) integer-value number that is not greater than the division result.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ],
+    "type": "function"
+  },
+  "fn": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "fori_loop": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "forward": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "freeze": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "from_dlpack": {
+    "description": "Returns a new array containing the data from another (array) object with a ``__dlpack__`` method.",
+    "std_args": [
+      [
+        "x",
+        "object"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ],
+      [
+        "copy",
+        "Optional[bool]"
+      ]
+    ],
+    "type": "function"
+  },
+  "full": {
+    "description": "Returns a new array having a specified ``shape`` and filled with ``fill_value``.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      [
+        "shape",
+        "Union[int, Tuple[int, Ellipsis]]"
+      ],
+      [
+        "fill_value",
+        "Union[bool, int, float, complex]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ]
+  },
+  "full_like": {
+    "description": "Returns a new array filled with ``fill_value`` and having the same ``shape`` as an input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "fill_value",
+        "Union[bool, int, float, complex]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ],
+    "type": "function"
+  },
+  "gamma": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "gammainc": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "gammaincc": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "gammaln": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "gaussian_nll_loss": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "geometric": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "get": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "get_all_with_path": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "get_item": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "get_parameter": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "get_printoptions": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "glorot_normal": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "glorot_uniform": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "grad": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "greater": {
+    "description": "Computes the truth value of ``x1_i > x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ]
+  },
+  "greater_equal": {
+    "description": "Computes the truth value of ``x1_i >= x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ],
+    "type": "function"
+  },
+  "group_size": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "groups": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "gumbel": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "half": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "hard_shrink": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "hard_sigmoid": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "hard_silu": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "hard_swish": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "hard_tanh": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "he_normal": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "he_uniform": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "head": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "head_dim": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "hfft": {
+    "description": "Computes the one-dimensional discrete Fourier transform of a signal with Hermitian symmetry.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "n",
+        "Optional[int]"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "hidden_size": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "hinge_loss": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "histogram_bin_edges": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "huber_loss": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "hypot": {
+    "description": "Computes the square root of the sum of squares for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ]
+  },
+  "ifft": {
+    "description": "Computes the one-dimensional inverse discrete Fourier transform.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "n",
+        "Optional[int]"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "ifft2": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "ifftn": {
+    "description": "Computes the n-dimensional inverse discrete Fourier transform.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "s",
+        "Optional[Sequence[int]]"
+      ],
+      [
+        "axes",
+        "Optional[Sequence[int]]"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "ifftshift": {
+    "description": "Inverse of ``fftshift``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axes",
+        "Optional[Union[int, Sequence[int]]]"
+      ]
+    ],
+    "type": "function"
+  },
+  "ihfft": {
+    "description": "Computes the one-dimensional inverse discrete Fourier transform of a signal with Hermitian symmetry.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "n",
+        "Optional[int]"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "iinfo": {
+    "description": "Machine limits for integer data types.",
+    "std_args": [
+      [
+        "type",
+        "Union[dtype, array]"
+      ]
+    ],
+    "type": "class"
+  },
+  "imag": {
+    "description": "Returns the imaginary component of a complex number for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "in1_features": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "in2_features": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "in_features": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "in_top_k": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "index": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "inexact": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "inf": {
+    "description": "IEEE 754 floating-point representation of (positive) infinity.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "init": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "inject_hyperparams": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "inject_stateful_hyperparams": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "inplace": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "int": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "int2": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "int4": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "int_": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "interpolate": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "inv": {
+    "description": "Returns the multiplicative inverse of a square matrix (or a stack of square matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "invert_permutation": {
+    "description": "Auto-generated from tensorflow_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "irfft": {
+    "description": "Computes the one-dimensional inverse of ``rfft`` for complex-valued input.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "n",
+        "Optional[int]"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "irfft2": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "irfftn": {
+    "description": "Computes the n-dimensional inverse of ``rfftn`` for complex-valued input.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "s",
+        "Optional[Sequence[int]]"
+      ],
+      [
+        "axes",
+        "Optional[Sequence[int]]"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "is_tensor": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "isdtype": {
+    "description": "Returns a boolean indicating whether a provided dtype is of a specified data type \"kind\".",
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": [
+      [
+        "dtype",
+        "dtype"
+      ],
+      [
+        "kind",
+        "Union[dtype, str, Tuple[Union[dtype, str], Ellipsis]]"
+      ]
+    ]
+  },
+  "isfinite": {
+    "description": "Tests each element ``x_i`` of the input array ``x`` to determine if finite.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "isinf": {
+    "description": "Tests each element ``x_i`` of the input array ``x`` to determine if equal to positive or negative infinity.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "isnan": {
+    "description": "Tests each element ``x_i`` of the input array ``x`` to determine whether the element is ``NaN``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "istft": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "item": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "items": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "itemsize": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "jit": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "join": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "join_schedules": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "jvp": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "k": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kaiming_normal": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kaiming_uniform": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "keep_params_nonnegative": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kernel_size": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "key": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "keys": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "kl_divergence": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "l1_loss": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "l2_loss": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "label_smoothing": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "lambd": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "laplace": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "layer_norm": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "layers": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "leaky_relu": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "left_shift": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "less": {
+    "description": "Computes the truth value of ``x1_i < x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ]
+  },
+  "less_equal": {
+    "description": "Computes the truth value of ``x1_i <= x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ],
+    "type": "function"
+  },
+  "linear1": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "linear2": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "linear_onecycle_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "linear_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "linear_to_mel_weight_matrix": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "linspace": {
+    "description": "Returns evenly spaced numbers over a specified interval.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      [
+        "start",
+        "Union[int, float, complex]"
+      ],
+      [
+        "stop",
+        "Union[int, float, complex]"
+      ],
+      [
+        "num",
+        "int"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ],
+      [
+        "endpoint",
+        "bool"
+      ]
+    ]
+  },
+  "load_state_dict": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
   },
   "log": {
-    "description": "Logarithm.",
+    "description": "Calculates an implementation-dependent approximation to the natural (base ``e``) logarithm for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
-      "x"
+      [
+        "x",
+        "array"
+      ]
     ]
+  },
+  "log10": {
+    "description": "Calculates an implementation-dependent approximation to the base ``10`` logarithm for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "log1p": {
+    "description": "Calculates an implementation-dependent approximation to ``log(1+x)``, where ``log`` refers to the natural (base ``e``) logarithm, for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "log2": {
+    "description": "Calculates an implementation-dependent approximation to the base ``2`` logarithm for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "log_cosh": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "log_ndtr": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "log_prob": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "log_sigmoid": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "log_softmax": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "logaddexp": {
+    "description": "Calculates the logarithm of the sum of exponentiations ``log(exp(x1) + exp(x2))`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ]
+  },
+  "logdet": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "logger": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "logical_and": {
+    "description": "Computes the logical AND for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, bool]"
+      ],
+      [
+        "x2",
+        "Union[array, bool]"
+      ]
+    ],
+    "type": "function"
+  },
+  "logical_not": {
+    "description": "Computes the logical NOT for each element ``x_i`` of the input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "logical_or": {
+    "description": "Computes the logical OR for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, bool]"
+      ],
+      [
+        "x2",
+        "Union[array, bool]"
+      ]
+    ],
+    "type": "function"
+  },
+  "logical_xor": {
+    "description": "Computes the logical XOR for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, bool]"
+      ],
+      [
+        "x2",
+        "Union[array, bool]"
+      ]
+    ],
+    "type": "function"
+  },
+  "logistic": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "logit": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "lognormal": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "long": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "lower": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "lstsq": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "lu": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "lu_factor": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "map": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "map_params": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "margin": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "margin_ranking_loss": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "mask": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "mask_check": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "mask_indices": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "mask_mod": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "masked": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "matmul": {
+    "description": "Computes the matrix product.",
+    "from": "_2024_12/linear_algebra_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "array"
+      ],
+      [
+        "x2",
+        "array"
+      ]
+    ]
+  },
+  "matrix_norm": {
+    "description": "Computes the matrix norm of a matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ],
+      [
+        "ord",
+        "Optional[Union[int, float, Literal[inf, Any, fro, nuc]]]"
+      ]
+    ],
+    "type": "function"
+  },
+  "matrix_power": {
+    "description": "Raises a square matrix (or a stack of square matrices) ``x`` to an integer power ``n``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "n",
+        "int"
+      ]
+    ],
+    "type": "attribute"
+  },
+  "matrix_rank": {
+    "description": "Returns the rank (i.e., number of non-zero singular values) of a matrix (or a stack of matrices).",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "rtol",
+        "Optional[Union[float, array]]"
+      ]
+    ],
+    "type": "attribute"
+  },
+  "matrix_transpose": {
+    "description": "Transposes a matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
   },
   "max": {
-    "description": "Element-wise maximum or reduction.",
+    "description": "Calculates the maximum value of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
     "std_args": [
-      "x"
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
     ]
+  },
+  "max_norm": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "max_pool": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "max_pool1d": {
+    "description": "Auto-generated from paxml_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "max_pool2d": {
+    "description": "Auto-generated from paxml_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "max_pool3d": {
+    "description": "Auto-generated from paxml_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "max_val": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "maximum": {
+    "description": "Computes the maximum value for each element ``x1_i`` of the input array ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ]
+  },
+  "mean": {
+    "description": "Calculates the arithmetic mean of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ]
+  },
+  "measure_valued_estimation_mean": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "measure_valued_estimation_std": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "measure_valued_jacobians": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "merge_masks": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "meshgrid": {
+    "description": "Returns coordinate matrices from coordinate vectors.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      [
+        "indexing",
+        "str"
+      ]
+    ]
+  },
+  "metadata": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
   },
   "min": {
-    "description": "Element-wise minimum or reduction.",
+    "description": "Calculates the minimum value of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
     "std_args": [
-      "x"
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
     ]
+  },
+  "min_val": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "minimum": {
+    "description": "Computes the minimum value for each element ``x1_i`` of the input array ``x1`` relative to the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ]
+  },
+  "mode": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "modules": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "moments": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "momentum": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "moveaxis": {
+    "description": "Moves array axes (dimensions) to new positions, while leaving other axes in their original positions.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "source",
+        "Union[int, Tuple[int, Ellipsis]]"
+      ],
+      [
+        "destination",
+        "Union[int, Tuple[int, Ellipsis]]"
+      ]
+    ]
+  },
+  "moving_avg_baseline": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "mse_loss": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "multi_dot": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "multi_transform": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "multiply": {
+    "description": "Calculates the product for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float, complex]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float, complex]"
+      ]
+    ]
+  },
+  "multivariate_normal": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "n": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "name": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "named_chain": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "named_modules": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "named_parameters": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "nan": {
+    "description": "IEEE 754 floating-point representation of Not a Number (``NaN``).",
+    "from": "_2024_12/constants.py",
+    "std_args": [],
+    "variants": {}
+  },
+  "nan_to_num": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "nbytes": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ndarray": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "ndim": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "negative": {
+    "description": "Computes the numerical negative of each element ``x_i`` (i.e., ``y_i = -x_i``) of the input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "negative_slope": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "newaxis": {
+    "description": "An alias for ``None`` which is useful for indexing arrays.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "nextafter": {
+    "description": "Returns the next representable floating-point value for each element ``x1_i`` of the input array ``x1`` in the direction of the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ],
+    "type": "attribute"
+  },
+  "nll_loss": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "nonlinearity": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "nonzero": {
+    "description": "Returns the indices of the array elements which are non-zero.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "norm": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "norm1": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "norm2": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "norm3": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "norm_first": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "norm_type": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "normal": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "not_equal": {
+    "description": "Computes the truth value of ``x1_i != x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float, complex, bool]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float, complex, bool]"
+      ]
+    ],
+    "type": "function"
+  },
+  "ntxent": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_embeddings": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_features": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_groups": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_heads": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_layers": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "number": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "object_": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "one_hot": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "ones": {
+    "description": "Returns a new array having a specified ``shape`` and filled with ones.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      [
+        "shape",
+        "Union[int, Tuple[int, Ellipsis]]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ]
+  },
+  "ones_": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "ones_like": {
+    "description": "Returns a new array filled with ones and having the same ``shape`` as an input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ],
+    "type": "function"
+  },
+  "orthogonal": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "orthogonal_": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "out_features": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "out_proj": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "outer": {
+    "description": "Returns the outer product of two vectors ``x1`` and ``x2``.",
+    "std_args": [
+      [
+        "x1",
+        "array"
+      ],
+      [
+        "x2",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "output_device": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "output_ratio": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "output_size": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "p": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "padding": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "padding_idx": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "parameters": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "parameters_to_vector": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "params": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "pareto": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "partition": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "pathwise_jacobians": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "per_example_global_norm_clip": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "per_example_layer_norm_clip": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "permutation": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
   },
   "permute_dims": {
-    "description": "Definition for permute_dims",
-    "operation": "permute_dims",
+    "description": "Permutes the axes (dimensions) of an array ``x``.",
     "std_args": [
-      "x",
-      {
-        "is_variadic": true,
-        "name": "axes"
-      }
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axes",
+        "Tuple[int, Ellipsis]"
+      ]
     ],
-    "variants": {
-      "jax": {
-        "api": "jnp.transpose",
-        "pack_to_tuple": "axes"
-      },
-      "numpy": {
-        "api": "numpy.transpose",
-        "pack_to_tuple": "axes"
-      }
-    }
+    "type": "function"
+  },
+  "pi": {
+    "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "piecewise": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "piecewise_constant_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "piecewise_interpolate_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "pinv": {
+    "description": "Returns the (Moore-Penrose) pseudo-inverse of a matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "rtol",
+        "Optional[Union[float, array]]"
+      ]
+    ],
+    "type": "function"
+  },
+  "place": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "poisson": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "polar": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "polydiv": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "polynomial_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "pop": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "popitem": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "positive": {
+    "description": "Computes the numerical positive of each element ``x_i`` (i.e., ``y_i = +x_i``) of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "pow": {
+    "description": "Calculates an implementation-dependent approximation of exponentiation by raising each element ``x1_i`` (the base) of the input array ``x1`` to the power of ``x2_i`` (the exponent), where ``x2_i`` is the corresponding element of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float, complex]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float, complex]"
+      ]
+    ]
+  },
+  "predict": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "prod": {
+    "description": "Calculates the product of input array ``x`` elements.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ]
+  },
+  "promote_types": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "psi": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "psnr": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "qr": {
+    "description": "Returns the QR decomposition of a full column rank matrix (or a stack of matrices).",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "mode",
+        "Literal[reduced, complete]"
+      ]
+    ],
+    "type": "function"
+  },
+  "quantize": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
   },
   "randn": {
-    "description": "Returns a tensor filled with random numbers from a normal distribution.",
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "random_like": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "rank": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "ravel_multi_index": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "rayleigh": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "real": {
+    "description": "Returns the real component of a complex number for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
-      "shape"
+      [
+        "x",
+        "array"
+      ]
     ]
   },
-  "relu": {
-    "description": "Rectified Linear Unit.",
+  "reciprocal": {
+    "description": "Returns the reciprocal for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
-      "x"
+      [
+        "x",
+        "array"
+      ]
     ]
   },
-  "size": {
-    "description": "Get tensor shape",
-    "std_args": []
+  "register_buffer": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "register_parameter": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "remainder": {
+    "description": "Returns the remainder of division for each element ``x1_i`` of the input array ``x1`` and the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float]"
+      ]
+    ]
+  },
+  "remove": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "remove_axis": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "repeat": {
+    "description": "Repeats each element of an array a specified number of times on a per-element basis.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "repeats",
+        "Union[int, array]"
+      ],
+      [
+        "axis",
+        "Optional[int]"
+      ]
+    ]
+  },
+  "replace": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "reset": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "reshape": {
+    "description": "Reshapes an array without changing its data.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "shape",
+        "Tuple[int, Ellipsis]"
+      ],
+      [
+        "copy",
+        "Optional[bool]"
+      ]
+    ]
+  },
+  "reshape_weight_to_matrix": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "result_type": {
+    "description": "Returns the dtype that results from applying type promotion rules (see :ref:`type-promotion`) to the arguments.",
+    "std_args": [],
+    "type": "function"
+  },
+  "rfft": {
+    "description": "Computes the one-dimensional discrete Fourier transform for real-valued input.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "n",
+        "Optional[int]"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "rfft2": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "rfftfreq": {
+    "description": "Computes the discrete Fourier transform sample frequencies (for ``rfft`` and ``irfft``).",
+    "std_args": [
+      [
+        "n",
+        "int"
+      ],
+      [
+        "d",
+        "float"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ],
+    "type": "function"
+  },
+  "rfftn": {
+    "description": "Computes the n-dimensional discrete Fourier transform for real-valued input.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "s",
+        "Optional[Sequence[int]]"
+      ],
+      [
+        "axes",
+        "Optional[Sequence[int]]"
+      ],
+      [
+        "norm",
+        "Literal[backward, ortho, forward]"
+      ]
+    ],
+    "type": "function"
+  },
+  "right_shift": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "rms_norm": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "rms_normalization": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "roll": {
+    "description": "Rolls array elements along a specified axis. Array elements that roll beyond the last position are re-introduced at the first position. Array elements that roll beyond the first position are re-introduced at the last position.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "shift",
+        "Union[int, Tuple[int, Ellipsis]]"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ]
+    ]
+  },
+  "round": {
+    "description": "Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "rsqrt": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "safe_softmax_cross_entropy": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "saturate_cast": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "savez_compressed": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "scale": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "scale_factor": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "scale_grad_by_freq": {
+    "description": "Auto-generated from paxml_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "scaled_dot_product_attention": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "scatter_update": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "score_function_jacobians": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "searchsorted": {
+    "description": "Finds the indices into ``x1`` such that, if the corresponding elements in ``x2`` were inserted before the indices, the order of ``x1``, when sorted in ascending order, would be preserved.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "array"
+      ],
+      [
+        "x2",
+        "array"
+      ],
+      [
+        "side",
+        "Literal[left, right]"
+      ],
+      [
+        "sorter",
+        "Optional[array]"
+      ]
+    ]
+  },
+  "seed": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "segment_max": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "segment_sum": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "selective_transform": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "separable_conv": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "serialize": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "set": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "set_printoptions": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "sgdr_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "short": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "shuffle": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "sigmoid_binary_cross_entropy": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "sigmoid_focal_loss": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "sign": {
+    "description": "Returns an indication of the sign of a number for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "signbit": {
+    "description": "Determines whether the sign bit is set for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "sin": {
+    "description": "Calculates an implementation-dependent approximation to the sine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "sinh": {
+    "description": "Calculates an implementation-dependent approximation to the hyperbolic sine for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "skip_large_updates": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "skip_not_finite": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "slice_update": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "slogdet": {
+    "description": "Returns the sign and the natural logarithm of the absolute value of the determinant of a square matrix (or a stack of square matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "smooth_l1_loss": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "smooth_labels": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "snapshot": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "soft_shrink": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "softmax_cross_entropy": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "softmax_cross_entropy_with_integer_labels": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "solve": {
+    "description": "Returns the solution of a square system of linear equations with a unique solution.",
+    "std_args": [
+      [
+        "x1",
+        "array"
+      ],
+      [
+        "x2",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "solve_triangular": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "sort": {
+    "description": "Returns a sorted copy of an input array ``x``.",
+    "from": "_2024_12/sorting_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "int"
+      ],
+      [
+        "descending",
+        "bool"
+      ],
+      [
+        "stable",
+        "bool"
+      ]
+    ]
+  },
+  "sparse": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "sparse_": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "sparse_categorical_crossentropy": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "sparse_plus": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "sparse_sigmoid": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "split_key_like": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
   },
   "sqrt": {
-    "description": "Square root.",
+    "description": "Calculates the principal square root for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
-      "x"
+      [
+        "x",
+        "array"
+      ]
     ]
   },
   "square": {
-    "description": "Square.",
+    "description": "Squares each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
-      "x"
+      [
+        "x",
+        "array"
+      ]
     ]
+  },
+  "squared_error": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "squareplus": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "squeeze": {
+    "description": "Removes singleton dimensions (axes) from ``x``.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Union[int, Tuple[int, Ellipsis]]"
+      ]
+    ]
+  },
+  "stack": {
+    "description": "Joins a sequence of arrays along a new axis.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "arrays",
+        "Union[Tuple[array, Ellipsis], List[array]]"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ]
+  },
+  "start_dim": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "state": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "state_dict": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "static_graph": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "std": {
+    "description": "Calculates the standard deviation of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "correction",
+        "Union[int, float]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ]
+  },
+  "step": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "stop_gradient": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "stride": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "strides": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "subtract": {
+    "description": "Calculates the difference for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "Union[array, int, float, complex]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float, complex]"
+      ]
+    ]
+  },
+  "sum": {
+    "description": "Calculates the sum of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ]
+  },
+  "svd": {
+    "description": "Returns a singular value decomposition (SVD) of a matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "full_matrices",
+        "bool"
+      ]
+    ],
+    "type": "function"
+  },
+  "svdvals": {
+    "description": "Returns the singular values of a matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "swap": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "swapaxes": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "switch": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "take": {
+    "description": "Returns elements of an array along an axis.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "indices",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[int]"
+      ]
+    ],
+    "type": "function"
+  },
+  "take_along_axis": {
+    "description": "Returns elements from an array at the one-dimensional indices specified by ``indices`` along a provided ``axis``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "indices",
+        "array"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ],
+    "type": "function"
+  },
+  "tan": {
+    "description": "Calculates an implementation-dependent approximation to the tangent for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "tanh": {
+    "description": "Calculates an implementation-dependent approximation to the hyperbolic tangent for each element ``x_i`` of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ]
+  },
+  "tanh_shrink": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "tensordot": {
+    "description": "Returns a tensor contraction of ``x1`` and ``x2`` over specific axes.",
+    "std_args": [
+      [
+        "x1",
+        "array"
+      ],
+      [
+        "x2",
+        "array"
+      ],
+      [
+        "axes",
+        "Union[int, Tuple[Sequence[int], Sequence[int]]]"
+      ]
+    ],
+    "type": "function"
+  },
+  "tensorinv": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "tensorsolve": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "test_import": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "threshold_": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "tile": {
+    "description": "Constructs an array by tiling an input array.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "repetitions",
+        "Tuple[int, Ellipsis]"
+      ]
+    ]
+  },
+  "to_dense": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "to_device": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "tolist": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "top_k": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "trace": {
+    "description": "Returns the sum along the specified diagonals of a matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "offset",
+        "int"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ]
+    ],
+    "type": "function"
+  },
+  "train": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "training": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "trapezoid": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "tree_add_scalar_mul": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "tree_l1_norm": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "tree_l2_norm": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "tree_linf_norm": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "tree_map_params": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "tree_scalar_mul": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "tri": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "triangular": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "tril": {
+    "description": "Returns the lower triangular part of a matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "k",
+        "int"
+      ]
+    ],
+    "type": "function"
+  },
+  "tril_indices": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "tril_indices_from": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "trim_zeros": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "triu": {
+    "description": "Returns the upper triangular part of a matrix (or a stack of matrices) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "k",
+        "int"
+      ]
+    ],
+    "type": "function"
+  },
+  "triu_indices": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "triu_indices_from": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "true_divide": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "trunc": {
+    "description": "Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number that is closer to zero than ``x_i``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "trunc_normal_": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "truncated_normal": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "type": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ufunc": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "uint": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "uint16": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "uint2": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "uint32": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "uint4": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "uint64": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "unflattened_size": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "uniform": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "union1d": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "unique_all": {
+    "description": "Returns the unique elements of an input array ``x``, the first occurring indices for each unique element in ``x``, the indices from the set of unique elements that reconstruct ``x``, and the corresponding counts for each unique element in ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "unique_counts": {
+    "description": "Returns the unique elements of an input array ``x`` and the corresponding counts for each unique element in ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "unique_inverse": {
+    "description": "Returns the unique elements of an input array ``x`` and the indices from the set of unique elements that reconstruct ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "unique_values": {
+    "description": "Returns the unique elements of an input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ]
+    ],
+    "type": "function"
+  },
+  "unravel_index": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "unstack": {
+    "description": "Splits an array into a sequence of arrays along the given axis.",
+    "from": "_2024_12/manipulation_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ]
+  },
+  "unwrap_random_key_data": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "update": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "update_infinity_moment": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "update_moment": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "update_moment_per_elem_norm": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "upper": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "upsample_bilinear": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "upsample_nearest": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "upscale_factor": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "value": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "value_and_grad": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "values": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "var": {
+    "description": "Calculates the variance of the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "correction",
+        "Union[int, float]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ]
+    ]
+  },
+  "variant": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "vecdot": {
+    "description": "Computes the (vector) dot product of two arrays.",
+    "from": "_2024_12/linear_algebra_functions.py",
+    "std_args": [
+      [
+        "x1",
+        "array"
+      ],
+      [
+        "x2",
+        "array"
+      ],
+      [
+        "axis",
+        "int"
+      ]
+    ]
+  },
+  "vector_norm": {
+    "description": "Computes the vector norm of a vector (or batch of vectors) ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axis",
+        "Optional[Union[int, Tuple[int, Ellipsis]]]"
+      ],
+      [
+        "keepdims",
+        "bool"
+      ],
+      [
+        "ord",
+        "Union[int, float, Literal[inf, Any]]"
+      ]
+    ],
+    "type": "function"
+  },
+  "vectorized_map": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "view_as_complex": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "view_as_real": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "vmap": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "wald": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "warmup_constant_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "warmup_cosine_decay_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "warmup_exponential_decay_schedule": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "weight": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "weight_hh": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "weight_ih": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "where": {
+    "description": "Returns elements chosen from ``x1`` or ``x2`` depending on ``condition``.",
+    "from": "_2024_12/searching_functions.py",
+    "std_args": [
+      [
+        "condition",
+        "array"
+      ],
+      [
+        "x1",
+        "Union[array, int, float, complex, bool]"
+      ],
+      [
+        "x2",
+        "Union[array, int, float, complex, bool]"
+      ]
+    ]
+  },
+  "while_loop": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "xavier_normal": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "xavier_uniform": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "xlog1py": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "zero_grad": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "zero_nans": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "zeros": {
+    "description": "Returns a new array having a specified ``shape`` and filled with zeros.",
+    "from": "_2024_12/creation_functions.py",
+    "std_args": [
+      [
+        "shape",
+        "Union[int, Tuple[int, Ellipsis]]"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ]
+  },
+  "zeros_": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
+  "zeros_like": {
+    "description": "Returns a new array filled with zeros and having the same ``shape`` as an input array ``x``.",
+    "std_args": [
+      [
+        "x",
+        "array"
+      ],
+      [
+        "dtype",
+        "Optional[dtype]"
+      ],
+      [
+        "device",
+        "Optional[device]"
+      ]
+    ],
+    "type": "function"
   }
 }

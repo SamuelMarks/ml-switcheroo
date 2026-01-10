@@ -5590,10 +5590,6 @@
         self: self
         start_dim: start_dim
       required_imports: []
-    html:
-      api: html_dsl.Flatten
-      args:
-        start_dim: start
     latex_dsl:
       api: midl.Flatten
       args:
@@ -8526,11 +8522,6 @@
         out_features: out_features
         self: self
       required_imports: []
-    html:
-      api: html_dsl.Linear
-      args:
-        in_features: i
-        out_features: o
     latex_dsl:
       api: midl.Linear
       args:
@@ -12176,8 +12167,6 @@
         inplace: inplace
         self: self
       required_imports: []
-    html:
-      api: html_dsl.ReLU
     latex_dsl:
       api: midl.ReLU
       required_imports: []
@@ -14149,6 +14138,7 @@
       required_imports: []
     sass:
       api: FADD
+      required_imports: []
     keras:
       api: keras.ops.subtract
       args:
@@ -28272,8 +28262,6 @@
     torch:
       api: torch.nn.functional.relu
       required_imports: []
-    html:
-      api: html_dsl.relu
     latex_dsl:
       api: midl.relu
       required_imports: []

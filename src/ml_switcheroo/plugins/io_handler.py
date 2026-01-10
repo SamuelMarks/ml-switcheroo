@@ -15,7 +15,9 @@ import libcst as cst
 from typing import List, Optional
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
-from ml_switcheroo.frameworks import get_adapter
+
+# Fix: Import directly from base
+from ml_switcheroo.frameworks.base import get_adapter
 from ml_switcheroo.utils.node_diff import capture_node_source
 
 
