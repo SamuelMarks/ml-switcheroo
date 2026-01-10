@@ -9,6 +9,7 @@ It operates as a mixin to be combined with expression generation logic in the ma
 import libcst as cst
 from collections import defaultdict
 from typing import Optional, List
+import ast
 
 from ml_switcheroo.core.mlir.nodes import OperationNode, BlockNode
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
@@ -18,10 +19,6 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 class StatementGeneratorMixin(BaseGeneratorMixin):
   """
   Mixin class for generating LibCST Statements from MLIR Operations.
-
-  This class handles high-level structures (Classes, Functions) and statement-level
-  operations like Assignments (`sw.setattr`) and Returns (`sw.return`).
-  It relies on the host class to provide context and expression resolution methods.
   """
 
   # Interface requirements from host class (MlirToPythonGenerator)
@@ -30,53 +27,17 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
   usage_consumers: dict
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-    """
-    Abstract method: Resolves an SSA ID to a Python Expression.
-    Must be implemented by the host generator.
-
-    Args:
-        ssa_name: The SSA identifier (e.g. "%0").
-
-    Returns:
-        A LibCST Expression representing the variable or value.
-    """
     raise NotImplementedError
 
   def _convert_block(self, block: BlockNode) -> List[cst.BaseStatement]:
-    """
-    Abstract method: Converts a Block of operations into a list of Statements.
-    Must be implemented by the host generator.
-
-    Args:
-        block: The MLIR BlockNode.
-
-    Returns:
-        List of python statements.
-    """
     raise NotImplementedError
 
   def _scan_block_usage(self, block: BlockNode) -> None:
-    """
-    Abstract method: Pre-scans a block to determine variable usage counts.
-    Must be implemented by the host generator.
-
-    Args:
-        block: The MLIR BlockNode.
-    """
     raise NotImplementedError
 
   def _convert_setattr(self, op: OperationNode) -> cst.SimpleStatementLine:
     """
     Converts a `sw.setattr` operation to a Python assignment statement.
-
-    Structure: `sw.setattr %base %val {name="attr"}` becomes `base.attr = val`.
-
-    Args:
-        op: The `sw.setattr` OperationNode.
-
-    Returns:
-        A LibCST SimpleStatementLine containing the assignment.
-        Returns `pass` if operands are missing (error recovery).
     """
     if len(op.operands) < 2:
       return cst.SimpleStatementLine(body=[cst.Pass()])
@@ -89,15 +50,55 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     assign = cst.Assign(targets=[cst.AssignTarget(target=target)], value=val_expr)
     return cst.SimpleStatementLine(body=[assign])
 
+  def _convert_import(self, op: OperationNode) -> cst.SimpleStatementLine:
+    """
+    Converts `sw.import` back to Import/ImportFrom statement.
+    """
+    module_attr = self._get_attr(op, "module")
+    names_attr = self._get_attr(op, "names")
+    aliases_attr = self._get_attr(op, "aliases")
+
+    # Parse list strings using ast.literal_eval for safety
+    names = []
+    aliases = []
+    try:
+      if names_attr:
+        names = ast.literal_eval(names_attr)
+      if aliases_attr:
+        aliases = ast.literal_eval(aliases_attr)
+    except:
+      pass
+
+    module_val = module_attr.strip('"') if module_attr else None
+
+    import_aliases = []
+    for n, a in zip(names, aliases):
+      # Clean quotes
+      n = str(n).strip("'").strip('"')
+      a = str(a).strip("'").strip('"')
+
+      if n == "*":
+        # ImportStar
+        return cst.SimpleStatementLine(
+          body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=cst.ImportStar())]
+        )
+
+      asname = None
+      if a and a != n:
+        asname = cst.AsName(name=cst.Name(a))
+
+      import_aliases.append(cst.ImportAlias(name=self._create_dotted_name(n), asname=asname))
+
+    if module_val:
+      return cst.SimpleStatementLine(
+        body=[cst.ImportFrom(module=self._create_dotted_name(module_val), names=import_aliases)]
+      )
+    else:
+      return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])
+
   def _convert_return(self, op: OperationNode) -> cst.SimpleStatementLine:
     """
     Converts a `sw.return` operation to a Python return statement.
-
-    Args:
-        op: The `sw.return` OperationNode.
-
-    Returns:
-        A LibCST SimpleStatementLine.
     """
     val_node = None
     if op.operands:
@@ -107,15 +108,6 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
   def _convert_class_def(self, op: OperationNode) -> cst.ClassDef:
     """
     Converts a `sw.module` operation to a Python Class definition.
-
-    Extracts the class name from `sym_name` attribute and base classes from `bases`.
-    Recursively converts the inner region.
-
-    Args:
-        op: The `sw.module` OperationNode.
-
-    Returns:
-        A LibCST ClassDef node.
     """
     name_attr = self._get_attr(op, "sym_name")
     class_name = name_attr.strip('"') if name_attr else "UnknownClass"
@@ -144,28 +136,15 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
   def _convert_func_def(self, op: OperationNode) -> cst.FunctionDef:
     """
     Converts a `sw.func` operation to a Python Function definition.
-
-    Handles:
-    1.  Creating a fresh `NamingContext` to isolate function scope variables.
-    2.  Resetting usage counts for local analysis.
-    3.  Registering block arguments as function parameters.
-    4.  Parsing type hints from MLIR types.
-
-    Args:
-        op: The `sw.func` OperationNode.
-
-    Returns:
-        A LibCST FunctionDef node.
     """
     name_attr = self._get_attr(op, "sym_name")
     func_name = name_attr.strip('"') if name_attr else "unknown_func"
 
-    # Scope Reset: Logic for functions should be isolated from parent naming context (mostly)
-    # This prevents 'self' from becoming 'self13' due to collisions with constructor context.
+    # Scope Reset
     prev_ctx = self.ctx
     self.ctx = NamingContext()
 
-    # Reset Usage Counts for new scope to prevent external block counts affecting internal logic
+    # Reset Usage Counts
     prev_usage_counts = self.usage_counts
     self.usage_counts = defaultdict(int)
     # Also reset consumers map
@@ -181,7 +160,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
         # Pre-analyze usage for this scope
         self._scan_block_usage(block0)
 
-        # Register arguments in local context to establish 'self', 'x', etc.
+        # Register arguments in local context
         for val, typ in block0.arguments:
           py_name = self.ctx.register(val.name, hint=val.name)
           annotation = None

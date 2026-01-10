@@ -24,7 +24,14 @@ ml_switcheroo = "ml_switcheroo.cli.__main__:main"
 testpaths = ["tests"]
 pythonpath = ["src"]
 filterwarnings = [
-    "ignore:.*np.object will be defined.*:FutureWarning"
+    "ignore::FutureWarning:keras.src.export.tf2onnx_lib",
+    "ignore:.*np\\.object.*:FutureWarning",
+    "ignore:In the future .*np\\.object.* will be defined:FutureWarning",
+    "ignore::FutureWarning:tensorflow.*",
+    "ignore::FutureWarning:keras.*",
+    "ignore::FutureWarning:tensorboard.*",
+
+#    "error"
 ]
 
 [tool.ruff]

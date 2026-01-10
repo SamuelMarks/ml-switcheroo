@@ -1,16 +1,15 @@
-"""
-Pytest Configuration and Fixtures.
-
-Includes:
-- Syspath patching for local imports.
-- Snapshot testing fixture for visual verification.
-- Global registry isolation to prevent tests with custom adapters from leaking.
-"""
-
 import sys
 import pytest
+import warnings
 from pathlib import Path
 from typing import Callable, Optional
+
+# --- FIX: Global Warning Suppression for Collection Phase ---
+# Suppress the Keras/NumPy 'np.object' FutureWarning that crashes collection
+warnings.filterwarnings("ignore", message=".*np\\.object.*")
+warnings.filterwarnings("ignore", category=FutureWarning, module="keras.*")
+warnings.filterwarnings("ignore", category=FutureWarning, module="tensorflow.*")
+# ------------------------------------------------------------
 
 # Add src to path so we can import 'ml_switcheroo' without installing it
 src_path = Path(__file__).parent.parent / "src"

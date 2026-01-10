@@ -61,15 +61,14 @@ class MockSemantics(SemanticsManager):
 @pytest.fixture
 def engine():
   mgr = MockSemantics()
-  config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
+  # FIX: Enable strict_mode so linter runs for all tests using this fixture
+  config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
 
   # Setup robust mocks for adapters
   mock_torch = MagicMock()
   mock_torch.configure_mock(import_alias=("torch", "torch"), inherits_from=None)
 
   # CRITICAL FIX: Ensure no parser/emitter is found to prevent engine from running custom hooks
-  # MagicMock has all attributes by default, so hasattr(mock, 'create_parser') is True.
-  # We must delete them to force the engine to use standard Python parsing.
   del mock_torch.create_emitter
   del mock_torch.create_parser
 
@@ -98,10 +97,12 @@ def test_engine_catches_leaked_import(engine):
 import torch
 x = 1
 """
+  # We mock UsageScanner to ensure config doesn't bypass logic, but strict_mode is key
   with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
     result = engine.run(code)
 
   assert result.success is True
+  # Expect failure due to linter violation in strict mode
   assert len(result.errors) > 0
   assert any("Forbidden Import: 'torch'" in e for e in result.errors)
 
@@ -119,6 +120,7 @@ y = torch.abs(x)
   result = engine.run(code)
 
   assert "torch.abs(x)" in result.code
+  # Should have linter errors
   assert result.has_errors
   errors_str = str(result.errors)
   assert "Forbidden" in errors_str
@@ -127,11 +129,13 @@ y = torch.abs(x)
 def test_linter_trace_event(engine):
   """
   Verify linter execution is logged in trace.
+  The linter runs as a distinct phase "Structural Linter" in strict mode.
   """
   code = "import torch"
 
   with patch("ml_switcheroo.core.engine.UsageScanner", side_effect=MockUsageScanner):
     result = engine.run(code)
 
-  phases = [e["description"] for e in result.trace_events if e["type"] == "phase_start"]
-  assert "Structural Linter" in phases
+  # The linter runs a phase start "Structural Linter"
+  phase_descriptions = [e["description"] for e in result.trace_events if e["type"] == "phase_start"]
+  assert "Structural Linter" in phase_descriptions

@@ -1,48 +1,53 @@
 """
-AMD RDNA / GCN ISA support package.
+Shim layer for RDNA components.
 
-This package defines the Concrete Syntax Tree (CST) nodes for representing
-AMD RDNA / GCN assembly code. It provides structures for Instructions,
-Scalar/Vector registers, Memory operands, Labels, and Comments.
-
-These nodes provide deterministic string representation matching standard
-AMD GCN/RDNA assembler syntax (e.g., `v_add_f32 v0, v1, v2`).
+Re-exports new compiler components for backward compatibility.
 """
 
-from ml_switcheroo.core.rdna.nodes import (
-  RdnaNode,
+from ml_switcheroo.compiler.frontends.rdna.nodes import (
+  Comment,
+  Directive,
+  Immediate,
   Instruction,
   Label,
-  Directive,
-  Comment,
-  Operand,
-  SGPR,
-  VGPR,
-  c_SGPR,
-  c_VGPR,
-  Immediate,
+  LabelRef,
   Memory,
   Modifier,
-  LabelRef,
+  Operand,
+  RdnaNode,
+  SGPR,
+  VGPR,
 )
-from ml_switcheroo.core.rdna.tokens import RdnaLexer, Token, TokenType
+from ml_switcheroo.compiler.frontends.rdna.parser import RdnaParser
+from ml_switcheroo.compiler.frontends.rdna.tokens import RdnaLexer, Token, TokenType
+from ml_switcheroo.compiler.frontends.rdna.lifter import RdnaLifter
+from ml_switcheroo.compiler.frontends.rdna.analysis import RdnaAnalyzer
+
+from ml_switcheroo.compiler.backends.rdna.emitter import RdnaEmitter
+from ml_switcheroo.compiler.backends.rdna.synthesizer import RdnaSynthesizer
+from ml_switcheroo.compiler.backends.rdna.macros import expand_conv2d, expand_linear
 
 __all__ = [
-  "RdnaNode",
+  "Comment",
+  "Directive",
+  "Immediate",
   "Instruction",
   "Label",
-  "Directive",
-  "Comment",
-  "Operand",
-  "SGPR",
-  "VGPR",
-  "c_SGPR",
-  "c_VGPR",
-  "Immediate",
+  "LabelRef",
   "Memory",
   "Modifier",
-  "LabelRef",
+  "Operand",
+  "RdnaNode",
+  "SGPR",
+  "VGPR",
+  "RdnaParser",
   "RdnaLexer",
   "Token",
   "TokenType",
+  "RdnaLifter",
+  "RdnaAnalyzer",
+  "RdnaEmitter",
+  "RdnaSynthesizer",
+  "expand_conv2d",
+  "expand_linear",
 ]

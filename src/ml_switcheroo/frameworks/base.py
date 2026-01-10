@@ -2,16 +2,8 @@
 Base Protocol and Registry for Framework Adapters.
 
 This module defines the interface that all Framework Adapters must implement.
-It acts as the primary contact point between the ``ASTEngine`` and the specific
-ML library implementations (plugins).
-
-Key Capabilities (Hybrid Loading):
-- Adapters possess an ``init_mode`` (LIVE or GHOST).
-- In **LIVE** mode, they introspect installed packages module-by-module.
-- In **GHOST** mode, they load cached JSON snapshots.
-
-The ``definitions`` and ``specifications`` properties allow adapters to
-self-declare their capabilities and new standards to the SemanticsManager.
+Updated to remove legacy `create_parser` and `create_emitter` hooks,
+enforcing the new Pipeline Routing architecture.
 """
 
 import json
@@ -45,374 +37,129 @@ class InitMode(str, Enum):
 
 
 class ImportConfig(BaseModel):
-  """
-  Configuration for an exposed namespace.
-
-  Used by adapters to self-declare the semantic role of their modules.
-  Example: ``torch.nn`` declares itself as ``tier=NEURAL``.
-  """
+  """Configuration for an exposed namespace."""
 
   tier: SemanticTier = Field(description="The semantic category of this namespace.")
   recommended_alias: Optional[str] = Field(default=None, description="Preferred alias (e.g., 'nn').")
 
 
 class StandardMap(BaseModel):
-  """
-  Defines how a Framework implements a Middle Layer standard.
-  Used for declaring static definitions in adapters.
-  """
+  """Defines how a Framework implements a Middle Layer standard."""
 
-  api: Optional[str] = Field(
-    default=None,
-    description="Fully qualified API path in the target framework. If None, implies missing/unsupported functionality.",
-  )
-  args: Optional[Dict[str, str]] = Field(
-    default=None,
-    description="Map of {StandardArg: FrameworkArg}. Keys must match the Abstract Standard.",
-  )
-  inject_args: Optional[Dict[str, Union[str, int, float, bool]]] = Field(
-    default=None,
-    description="Dictionary of new arguments to inject with fixed literal values.",
-  )
-  requires_plugin: Optional[str] = Field(
-    default=None,
-    description="Name of the plugin hook required to handle this operation.",
-  )
-  output_adapter: Optional[str] = Field(
-    default=None,
-    description="Lambda string to wrap result (e.g. 'lambda x: x[0]').",
-  )
-  transformation_type: Optional[str] = Field(
-    default=None,
-    description="Rewrite mode (e.g. 'infix', 'inline_lambda').",
-  )
-  operator: Optional[str] = Field(
-    default=None,
-    description="Infix operator symbol if transformation_type='infix'.",
-  )
-  pack_to_tuple: Optional[str] = Field(
-    default=None,
-    description="If set (e.g. 'axes'), collects variadic positional args into a tuple kwargs.",
-  )
-  macro_template: Optional[str] = Field(
-    default=None,
-    description="Expression template for composite ops (e.g. '{x} * functional.sigmoid({x})').",
-  )
-  output_cast: Optional[str] = Field(
-    default=None,
-    description="Target Dtype string (e.g. 'jnp.int64') to cast the output to via .astype().",
-  )
-  arg_values: Optional[Dict[str, Dict[str, str]]] = Field(
-    default=None,
-    description="Map of {StandardArg: {SourceValue: TargetValue}} for enum value translation.",
-  )
-  required_imports: List[Union[str, Any]] = Field(
-    default_factory=list,
-    description="List of imports required by this variant.",
-  )
-  missing_message: Optional[str] = Field(
-    default=None,
-    description="Custom error message to display if this mapping fails or is explicitly unsupported.",
-  )
-  layout_map: Optional[Dict[str, str]] = Field(
-    default=None,
-    description="Layout permutation map for tensors (e.g. 'NCHW->NHWC').",
-  )
+  api: Optional[str] = Field(default=None)
+  args: Optional[Dict[str, str]] = Field(default=None)
+  inject_args: Optional[Dict[str, Any]] = Field(default=None)
+  requires_plugin: Optional[str] = Field(default=None)
+  output_adapter: Optional[str] = Field(default=None)
+  transformation_type: Optional[str] = Field(default=None)
+  operator: Optional[str] = Field(default=None)
+  pack_to_tuple: Optional[str] = Field(default=None)
+  macro_template: Optional[str] = Field(default=None)
+  output_cast: Optional[str] = Field(default=None)
+  arg_values: Optional[Dict[str, Dict[str, str]]] = Field(default=None)
+  required_imports: List[Union[str, Any]] = Field(default_factory=list)
+  missing_message: Optional[str] = Field(default=None)
+  layout_map: Optional[Dict[str, str]] = Field(default=None)
 
 
 class FrameworkAdapter(Protocol):
   """
   Protocol definition for a Framework Adapter.
-
-  Adapters provide translation traits, discovery logic, and syntax generation
-  for specific machine learning frameworks.
   """
 
   _mode: InitMode = InitMode.LIVE
   _snapshot_data: Dict[str, Any] = {}
 
-  def __init__(self) -> None:
-    """Initialize the adapter."""
-    ...
+  def __init__(self) -> None: ...
 
-  def convert(self, data: Any) -> Any:
-    """
-    Converts input data (List, NumPy) to the framework's Tensor format.
-    Used by the Fuzzer for validation.
-
-    Args:
-       data (Any): Input data in standard format (numpy, list).
-
-    Returns:
-       Any: The data converted to the framework's tensor type.
-    """
-    ...
+  def convert(self, data: Any) -> Any: ...
 
   @property
-  def test_config(self) -> Dict[str, str]:
-    """Templates for generating physical test files (imports, conversions)."""
-    ...
+  def test_config(self) -> Dict[str, str]: ...
 
   @property
-  def harness_imports(self) -> List[str]:
-    """
-    Returns a list of import statements required for the verification harness initialization logic.
-    E.g. ["import jax", "import jax.random"]
-    """
-    ...
+  def harness_imports(self) -> List[str]: ...
 
-  def get_harness_init_code(self) -> str:
-    """
-    Returns Python code to define initialization helpers for the verification harness.
-    Used to inject framework-specific PRNG key generation logic into the generated test script.
-    """
-    ...
+  def get_harness_init_code(self) -> str: ...
 
-  def get_to_numpy_code(self) -> str:
-    """
-    Returns a python code snippet that checks if an object 'obj' is a tensor of this framework
-    and returns its numpy representation.
-
-    Example:
-        return "if hasattr(obj, 'numpy'): return obj.numpy()"
-    """
-    ...
+  def get_to_numpy_code(self) -> str: ...
 
   @property
-  def search_modules(self) -> List[str]:
-    """List of module names to scan during discovery."""
-    ...
+  def search_modules(self) -> List[str]: ...
 
   @property
-  def display_name(self) -> str:
-    """Human-readable name of the framework."""
-    ...
+  def display_name(self) -> str: ...
 
   @property
-  def ui_priority(self) -> int:
-    """Sort priority for UI display (lower is earlier)."""
-    ...
+  def ui_priority(self) -> int: ...
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Dictionary of Regex patterns for categorizing APIs."""
-    ...
+  def discovery_heuristics(self) -> Dict[str, List[str]]: ...
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]:
-    """List of semantic tiers supported by this framework."""
-    ...
+  def supported_tiers(self) -> List[SemanticTier]: ...
 
   @property
-  def import_alias(self) -> Tuple[str, str]:
-    """The primary import tuple (e.g. ('torch', 'torch'))."""
-    ...
+  def import_alias(self) -> Tuple[str, str]: ...
 
   @property
-  def inherits_from(self) -> Optional[str]:
-    """Optional parent framework key to inherit behavior from."""
-    ...
+  def inherits_from(self) -> Optional[str]: ...
 
   @property
-  def structural_traits(self) -> StructuralTraits:
-    """Configuration for class/function rewriting."""
-    ...
+  def structural_traits(self) -> StructuralTraits: ...
 
   @property
-  def plugin_traits(self) -> PluginTraits:
-    """
-    Returns flags controlling plugin behavior (e.g. supported casting syntax).
-    Default should be PluginTraits().
-    """
-    ...
+  def plugin_traits(self) -> PluginTraits: ...
 
   @property
-  def rng_seed_methods(self) -> List[str]:
-    """List of global RNG seeding method names."""
-    ...
+  def rng_seed_methods(self) -> List[str]: ...
 
   @property
-  def declared_magic_args(self) -> List[str]:
-    """
-    List of state/context argument names this framework injects/uses
-    (e.g., ['rngs'] for Flax, ['key'] for JAX).
-    Used to build the global list of arguments to strip from other frameworks.
-    """
-    ...
+  def declared_magic_args(self) -> List[str]: ...
 
   @property
-  def unsafe_submodules(self) -> Set[str]:
-    """
-    Returns a set of submodule names to exclude from recursive introspection.
-    Prevents crashes on C-extensions or internals (e.g., '_C', 'distributed').
-    """
-    ...
+  def unsafe_submodules(self) -> Set[str]: ...
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """
-    Generates code for device object creation.
+  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str: ...
 
-    Args:
-        device_type (str): Type of device (e.g. 'cuda', 'cpu').
-        device_index (Optional[str]): Index of device.
+  def get_device_check_syntax(self) -> str: ...
 
-    Returns:
-        str: Code string.
-    """
-    ...
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str: ...
 
-  def get_device_check_syntax(self) -> str:
-    """
-    Returns syntax for checking GPU/Accelerator availability.
-    Example: ``torch.cuda.is_available()`` or ``len(jax.devices('gpu')) > 0``.
-    """
-    ...
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str: ...
 
-  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """
-    Returns syntax for splitting RNG state (Preamble Injection).
-    Example: ``rng, key = jax.random.split(rng)``.
+  def get_serialization_imports(self) -> List[str]: ...
 
-    Args:
-        rng_var (str): Variable name of current RNG state.
-        key_var (str): Variable name for new key.
-    """
-    ...
+  def get_weight_conversion_imports(self) -> List[str]: ...
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """
-    Generates code for save/load operations (Model Persistence).
+  def get_weight_load_code(self, path_var: str) -> str: ...
 
-    Args:
-        op (str): 'save' or 'load'.
-        file_arg (str): File path variable/string.
-        object_arg (Optional[str]): Object to save.
-    """
-    ...
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str: ...
 
-  def get_serialization_imports(self) -> List[str]:
-    """Returns list of imports required for serialization."""
-    ...
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str: ...
 
-  # --- Weight Handling Logic (New) ---
-
-  def get_weight_conversion_imports(self) -> List[str]:
-    """
-    Returns list of imports required for the generated weight migration script.
-    """
-    ...
-
-  def get_weight_load_code(self, path_var: str) -> str:
-    """
-    Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
-    The `raw_state` should be a dict-like object where keys are strings (e.g. 'layer.weight').
-
-    Args:
-        path_var: The name of the variable holding the file path.
-    """
-    ...
-
-  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """
-    Returns a python expression string that converts `tensor_var` from framework tensor to numpy array.
-    Used within the migration loop to normalize data before permutation.
-
-    Args:
-        tensor_var: The variable name of the framework tensor.
-    """
-    ...
-
-  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """
-    Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays)
-    to `path_var`. The adapter is responsible for any restructuring (unflattening) required.
-
-    Args:
-        state_var: The variable containing the flat state dictionary.
-        path_var: The variable containign the output path.
-    """
-    ...
-
-  def get_doc_url(self, api_name: str) -> Optional[str]:
-    """
-    Returns the official documentation URL for a given API string.
-    Can be a direct deep link or a search query if direct linking is ambiguous.
-
-    Args:
-        api_name (str): The fully qualified API name (e.g., 'torch.nn.Linear').
-
-    Returns:
-        Optional[str]: The URL to the documentation page, or None if not available.
-    """
-    ...
+  def get_doc_url(self, api_name: str) -> Optional[str]: ...
 
   @classmethod
-  def get_example_code(cls) -> str:
-    """Returns the primary code example for documentation."""
-    ...
+  def get_example_code(cls) -> str: ...
 
-  def get_tiered_examples(self) -> Dict[str, str]:
-    """Returns examples for each supported tier."""
-    ...
+  def get_tiered_examples(self) -> Dict[str, str]: ...
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]:
-    """Returns the framework's static implementation of Middle Layer Operations."""
-    ...
+  def definitions(self) -> Dict[str, StandardMap]: ...
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]:
-    """
-    Returns the framework's DEFINITION of operations (The Hub reference).
-    Allows adapters to introduce new Abstract Standards to the system.
-    """
-    ...
+  def specifications(self) -> Dict[str, OpDefinition]: ...
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
-    """
-    Exposes namespaces provided by this framework with Tier metadata.
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]: ...
 
-    New Self-Declaration Format:
-        { "torch.nn": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="nn") }
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]: ...
 
-    Legacy Format (Deprecated):
-        { "source.mod": {"root": "target", "sub": "mod", "alias": "alias"} }
-    """
-    ...
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Collects APIs for consensus discovery.
-
-    Args:
-        category (StandardCategory): The category to scan (e.g. LOSS, LAYER).
-
-    Returns:
-        List[GhostRef]: Found API metadata.
-    """
-    ...
-
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """
-    Applies manual patches to the snapshot dictionary.
-
-    Args:
-        snapshot (Dict[str, Any]): The snapshot structure to modify in place.
-    """
-    ...
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None: ...
 
 
 def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
-  """
-  Locates the most recent snapshot for a given framework key.
-
-  Args:
-      fw_key: The framework identifier.
-
-  Returns:
-      The loaded JSON dictionary or an empty dict if not found.
-  """
   if not SNAPSHOT_DIR.exists():
     return {}
   candidates = sorted(list(SNAPSHOT_DIR.glob(f"{fw_key}_v*.json")))
@@ -431,13 +178,6 @@ _ADAPTER_REGISTRY: Dict[str, Type[FrameworkAdapter]] = {}
 
 
 def register_framework(name: str):
-  """
-  Decorator to register a framework adapter class.
-
-  Args:
-      name: The unique key for the framework (e.g., 'torch').
-  """
-
   def wrapper(cls):
     _ADAPTER_REGISTRY[name] = cls
     return cls
@@ -446,30 +186,10 @@ def register_framework(name: str):
 
 
 def available_frameworks() -> List[str]:
-  """
-  Returns a list of all registered framework keys.
-
-  The keys are populated dynamically. Usage example:
-  >>> if "tinygrad" in available_frameworks():
-  ...     print("TinyGrad is supported!")
-
-  Returns:
-      List[str]: A list of identifier strings (e.g. ['torch', 'jax']).
-  """
-  # Keys correspond to the string passed to @register_framework("key")
   return list(_ADAPTER_REGISTRY.keys())
 
 
 def get_adapter(name: str) -> Optional[FrameworkAdapter]:
-  """
-  Factory to retrieve an instantiated adapter.
-
-  Args:
-      name: The framework key.
-
-  Returns:
-      An instance of the registered adapter, or None if not found.
-  """
   cls = _ADAPTER_REGISTRY.get(name)
   if cls:
     return cls()

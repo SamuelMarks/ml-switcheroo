@@ -14,6 +14,7 @@ Operations:
 - `sw.setattr`: Represents attribute assignment (self.layer = v).
 - `sw.constant`: Represents literals.
 - `sw.return`: Control flow exit.
+- `sw.import`: Represents import statements.
 """
 
 from typing import Dict, Any, List, Optional
@@ -93,6 +94,8 @@ SW_CONSTANT = OpSchema(name="sw.constant", required_attributes=["value"], has_re
 
 SW_RETURN = OpSchema(name="sw.return")
 
+SW_IMPORT = OpSchema(name="sw.import", required_attributes=["names"], has_results=False)
+
 
 class DialectRegistry:
   """
@@ -108,6 +111,7 @@ class DialectRegistry:
     "sw.setattr": SW_SETATTR,
     "sw.constant": SW_CONSTANT,
     "sw.return": SW_RETURN,
+    "sw.import": SW_IMPORT,
   }
 
   @classmethod

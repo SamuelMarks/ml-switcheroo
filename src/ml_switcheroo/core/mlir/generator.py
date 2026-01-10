@@ -3,24 +3,6 @@ MLIR to Python (LibCST) Generator.
 
 This module provides the `MlirToPythonGenerator` class, which consumes the
 MLIR CST object model and reconstructs valid Python code via LibCST.
-
-It performs the inverse operation of the Emitter:
-
-1.  **Dialect Interpretation**: Maps `sw.*` ops back to Python constructs.
-2.  **SSA Resolution**: Converts `%id` references into readable Python variable names.
-3.  **Trivia Restoration**: Transforms `// comment` back to `# comment`.
-4.  **Expression Folding**: Inlines specific single-use intermediates (Atoms, Fused Statements)
-    to produce Pythonic code.
-
-Feature Hardening:
-- Robustly handles `sw.op` "type" attributes for deep class hierarchies.
-- Distinguishes between static operation calls and dynamic calls.
-- Ensures valid assignment generation for results.
-- **Naming Heuristics**: Preserves variable names based on SSA IDs or Type Hints.
-- **Type Reconstruction**: Restores Python type hints from MLIR.
-- **Void Assignment Suppression**: Strips unused assignments.
-- **Explicit Re-rolling**: Enforces sequential statements for clarity unless fusion triggers.
-- **Statement Fusion**: Fuses operations into `setattr` and `return`.
 """
 
 from typing import Dict, List, Optional
@@ -144,7 +126,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
             stmt_node = stmt_node.with_changes(leading_lines=leading)
           stmts.append(stmt_node)
       else:
-        # Handle statements that are never expressions (Control Flow, Class Defs, Defs)
+        # Handle statements that are never expressions (Control Flow, Class Defs, Defs, Imports)
         # These are handled by StatementGeneratorMixin
         stmt_node = self._convert_statement_op(op)
         if stmt_node:
@@ -247,6 +229,8 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
       return self._convert_return(op)
     elif op_name == "sw.setattr":
       return self._convert_setattr(op)
+    elif op_name == "sw.import":
+      return self._convert_import(op)
 
     return None
 

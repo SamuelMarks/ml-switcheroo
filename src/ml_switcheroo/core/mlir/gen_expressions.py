@@ -4,8 +4,9 @@ Expression Generation Mixin for MLIR->Python.
 Handles converting operation nodes (`sw.op`, `sw.call`) into CST Expressions.
 """
 
-from typing import List
+from typing import List, Optional
 import libcst as cst
+import ast
 
 from ml_switcheroo.core.mlir.nodes import OperationNode
 from ml_switcheroo.core.mlir.gen_base import BaseGeneratorMixin
@@ -23,6 +24,31 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     Must be implemented by the main Generator class to resolve variables.
     """
     raise NotImplementedError
+
+  def _parse_keywords(self, op: OperationNode) -> List[Optional[str]]:
+    """
+    Extracts arg_keywords attribute from operation.
+    Returns a list of strings (keyword names or empty strings).
+    """
+    for attr in op.attributes:
+      if attr.name == "arg_keywords":
+        # Case 1: Already list (from in-memory object)
+        if isinstance(attr.value, list):
+          return [v.strip('"') for v in attr.value]
+
+        # Case 2: String representation (from parser)
+        # e.g. '["", "rngs"]'
+        if isinstance(attr.value, str):
+          try:
+            # Safe evaluation of list literal
+            val = ast.literal_eval(attr.value)
+            if isinstance(val, list):
+              # Ensure strings are clean
+              return [str(v).strip('"').strip("'") for v in val]
+          except (ValueError, SyntaxError):
+            pass
+
+    return []
 
   def _expr_sw_constant(self, op: OperationNode) -> cst.BaseExpression:
     """Generates constant literal expression."""
@@ -47,10 +73,27 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
       return cst.Call(func=cst.Name("unknown"))
 
     func_expr = self._resolve_operand(op.operands[0].name)
+    keywords = self._parse_keywords(op)
+
     args = []
-    for op_val in op.operands[1:]:
+    # args correspond to operands[1:]
+
+    for i, op_val in enumerate(op.operands[1:]):
       arg_expr = self._resolve_operand(op_val.name)
-      args.append(cst.Arg(value=arg_expr))
+
+      kw_node = None
+      if i < len(keywords) and keywords[i]:
+        kw_node = cst.Name(keywords[i])
+
+      args.append(
+        cst.Arg(
+          value=arg_expr,
+          keyword=kw_node,
+          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))
+          if kw_node
+          else None,
+        )
+      )
 
     return cst.Call(func=func_expr, args=args)
 
@@ -65,10 +108,25 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
     dotted_path = type_name.strip('"')
     func_node = self._create_dotted_name(dotted_path)
+
+    keywords = self._parse_keywords(op)
     args = []
-    for op_val in op.operands:
+
+    for i, op_val in enumerate(op.operands):
       arg_expr = self._resolve_operand(op_val.name)
-      args.append(cst.Arg(value=arg_expr))
+      kw_node = None
+      if i < len(keywords) and keywords[i]:
+        kw_node = cst.Name(keywords[i])
+
+      args.append(
+        cst.Arg(
+          value=arg_expr,
+          keyword=kw_node,
+          equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace(""))
+          if kw_node
+          else None,
+        )
+      )
 
     return cst.Call(func=func_node, args=args)
 

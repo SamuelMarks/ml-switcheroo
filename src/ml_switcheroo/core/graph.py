@@ -1,115 +1,27 @@
 """
-Shared Graph Intermediate Representation.
+Graph Extraction Frontend.
 
-This module provides the language-agnostic data structures and extraction logic
-used to convert Python ASTs into a logical graph of operations (Layers) and
-data flow (Edges).
+This module is responsible for analyzing Python Abstract Syntax Trees (ASTs) using LibCST
+and extracting a `LogicalGraph` Intermediate Representation.
 
-Shared by:
+It re-exports the `LogicalGraph` and related classes from `ml_switcheroo.compiler.ir`
+to maintain backward compatibility with existing code that imports from `ml_switcheroo.core.graph`.
 
-- TikZ Backend (Visualizer)
-- HTML Backend (Grid Layout)
+Logic:
+    - Init Pass: Extracts `self.layer = ...` assignments.
+    - Forward Pass: Traces data flow `y = self.layer(x)`.
 """
 
-from dataclasses import dataclass, field
 from typing import Dict, List, Optional
-from collections import defaultdict, deque
 import libcst as cst
 from libcst import matchers as m
 
+# Re-export Core IR definitions for backward compatibility
+from ml_switcheroo.compiler.ir import LogicalNode, LogicalEdge, LogicalGraph, topological_sort
 from ml_switcheroo.core.scanners import get_full_name
 from ml_switcheroo.utils.node_diff import capture_node_source
 
-
-@dataclass
-class LogicalNode:
-  """
-  Represents a computation unit (Layer) in the graph.
-  """
-
-  id: str
-  """Unique identifier (e.g. 'conv1')."""
-
-  kind: str
-  """Operation type (e.g. 'Conv2d', 'Input', 'Output')."""
-
-  metadata: Dict[str, str] = field(default_factory=dict)
-  """Dictionary of configuration parameters (e.g. ``kernel_size=3``)."""
-
-
-@dataclass
-class LogicalEdge:
-  """
-  Represents data flow between two nodes.
-  """
-
-  source: str
-  """Source node ID."""
-
-  target: str
-  """Target node ID."""
-
-
-@dataclass
-class LogicalGraph:
-  """
-  Language-agnostic representation of the neural network structure.
-  """
-
-  nodes: List[LogicalNode] = field(default_factory=list)
-  """Ordered list of nodes in the graph."""
-
-  edges: List[LogicalEdge] = field(default_factory=list)
-  """List of directed edges between nodes."""
-
-
-def topological_sort(graph: LogicalGraph) -> List[LogicalNode]:
-  """
-  Sorts graph nodes by dependency order.
-
-  Args:
-      graph: The logical graph.
-
-  Returns:
-      List of nodes in execution order.
-  """
-  adj = defaultdict(list)
-  in_degree = defaultdict(int)
-  nodes_by_id = {n.id: n for n in graph.nodes}
-
-  # Initialize in-degree
-  for n in graph.nodes:
-    in_degree[n.id] = 0
-
-  for edge in graph.edges:
-    adj[edge.source].append(edge.target)
-    in_degree[edge.target] += 1
-
-  # Simple queue-based toposort
-  # Note: Using sorted keys for determinism in queue initialization
-  initial_roots = sorted([n.id for n in graph.nodes if in_degree[n.id] == 0])
-  queue = deque(initial_roots)
-  sorted_nodes = []
-
-  while queue:
-    u = queue.popleft()
-    if u in nodes_by_id:
-      sorted_nodes.append(nodes_by_id[u])
-
-    for v in adj[u]:
-      in_degree[v] -= 1
-      if in_degree[v] == 0:
-        queue.append(v)
-
-  # Handle disconnected components or cycles by appending remaining nodes
-  if len(sorted_nodes) < len(graph.nodes):
-    seen = {n.id for n in sorted_nodes}
-    # Append remaining nodes in definition order (fallback)
-    for n in graph.nodes:
-      if n.id not in seen:
-        sorted_nodes.append(n)
-
-  return sorted_nodes
+__all__ = ["LogicalNode", "LogicalEdge", "LogicalGraph", "topological_sort", "GraphExtractor"]
 
 
 class GraphExtractor(cst.CSTVisitor):
@@ -314,11 +226,26 @@ class GraphExtractor(cst.CSTVisitor):
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
     """
-    Parses ``x = self.layer(x)`` assignments in forward.
+    Parses `x = self.layer(x)` or constant `x = 1`.
 
     Args:
         node: The assignment statement.
     """
+    # Handle simple constants/inputs in script mode
+    if self._scope_depth == 0 and isinstance(node.value, (cst.Integer, cst.Float, cst.Name)):
+      # Treat simple assignments as potential Inputs in script context
+      for target in node.targets:
+        var_name = self._get_var_name(target.target)
+        if var_name:
+          # Create Input node for this constant/var
+          input_id = f"Input_{var_name}"
+          if input_id not in self.layer_registry:
+            # Use capture to get value representation for metadata if constant
+            val_str = capture_node_source(node.value)
+            self.layer_registry[input_id] = LogicalNode(input_id, "Input", {"name": var_name, "value": val_str})
+            self.provenance[var_name] = input_id
+      return
+
     if not isinstance(node.value, cst.Call):
       return
 
@@ -408,3 +335,5 @@ class GraphExtractor(cst.CSTVisitor):
     """Populates the graph nodes list from the registry."""
     if self.layer_registry:
       self.graph.nodes = list(self.layer_registry.values())
+    # Feature: Propagate model name to graph
+    self.graph.name = self.model_name

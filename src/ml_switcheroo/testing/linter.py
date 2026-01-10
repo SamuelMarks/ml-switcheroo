@@ -15,6 +15,7 @@ import libcst as cst
 from typing import List, Set, Dict, Tuple, Optional
 
 from ml_switcheroo.frameworks import get_adapter
+from ml_switcheroo.core.scanners import get_full_name
 
 
 class StructuralLinter(cst.CSTVisitor):
@@ -78,6 +79,7 @@ class StructuralLinter(cst.CSTVisitor):
         # Track alias for usage detection
         # import torch -> alias 'torch', import torch as t -> alias 't'
         local_name = alias.asname.name.value if alias.asname else root
+        # Store what it maps to (the forbidden root)
         self._local_aliases[local_name] = root
 
   def leave_Import(self, node: cst.Import) -> None:
@@ -140,12 +142,21 @@ class StructuralLinter(cst.CSTVisitor):
     if "import" in self._context_stack:
       return
 
+    # Check for direct usage of known bad aliases
     if node.value in self._local_aliases:
       root = self._local_aliases[node.value]
       # Format explicitly matches existing test expectations "alias of {root}"
       msg = f"Forbidden Usage: Alias '{node.value}' (alias of {root})"
       if msg not in self.violations:
         self.violations.append(msg)
+
+    # Check for direct usage of forbidden roots if implicit import (e.g. built-ins or leaked)
+    elif node.value in self.forbidden_roots:
+      # Don't duplicate if already caught via alias logic (case where alias == root)
+      if node.value not in self._local_aliases:
+        msg = f"Forbidden Usage: Direct access '{node.value}'"
+        if msg not in self.violations:
+          self.violations.append(msg)
 
   def visit_Attribute(self, node: cst.Attribute) -> None:
     """
@@ -165,16 +176,14 @@ class StructuralLinter(cst.CSTVisitor):
         msg = f"Forbidden Attribute: '{name}.{node.attr.value}' (alias of {root})"
         if msg not in self.violations:
           self.violations.append(msg)
+      elif name in self.forbidden_roots:
+        msg = f"Forbidden Attribute: Direct root '{name}.{node.attr.value}'"
+        if msg not in self.violations:
+          self.violations.append(msg)
 
   def _get_root_name(self, node: cst.BaseExpression) -> str:
     """
     Extracts root package from dotted path node (e.g. 'torch' from 'torch.nn').
-
-    Args:
-        node: CST expression node (Name or Attribute).
-
-    Returns:
-        str: The root identifier.
     """
     if isinstance(node, cst.Name):
       return node.value
@@ -185,12 +194,6 @@ class StructuralLinter(cst.CSTVisitor):
   def _get_full_name_from_node(self, node: cst.BaseExpression) -> str:
     """
     Recursively resolves CST node to dot-separated string.
-
-    Args:
-        node: CST expression node.
-
-    Returns:
-        str: The full path (e.g. "torch.nn.functional").
     """
     if isinstance(node, cst.Name):
       return node.value

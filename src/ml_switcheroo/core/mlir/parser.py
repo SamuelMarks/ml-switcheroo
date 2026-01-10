@@ -169,7 +169,7 @@ class MlirParser:
 
   def expect(self, kind: str) -> Token:
     """
-    Consumes the current token if it matches, otherwise raises SyntaxError.
+    Consume the current token if it matches kind, otherwise raise SyntaxError.
 
     Args:
         kind (str): The expected token kind or text.
@@ -436,16 +436,30 @@ class MlirParser:
             if self.match(Symbol.EQUAL):
               self.consume()
               self._absorb_trivia()
+
+              # ATTRIBUTE VALUE PARSING (Updated to handle nested brackets)
               val_s = []
+              depth = 0
               while True:
-                txt = self.peek().text
-                if txt in [Symbol.COMMA, Symbol.RBRACE, Symbol.COLON]:
+                tk = self.peek()
+                txt = tk.text
+
+                # Delimiter check respecting nesting depth
+                if depth == 0 and txt in [Symbol.COMMA, Symbol.RBRACE, Symbol.COLON]:
                   break
-                if self.peek().kind == TokenKind.EOF:
+
+                if tk.kind == TokenKind.EOF:
                   break
 
                 tk = self.consume()
                 val_s.append(tk.text)
+
+                # Check nesting
+                if tk.text == Symbol.LBRACKET:
+                  depth += 1
+                elif tk.text == Symbol.RBRACKET:
+                  depth -= 1
+
                 if self.peek().kind == TokenKind.WHITESPACE:
                   self.consume()
 

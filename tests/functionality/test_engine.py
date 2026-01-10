@@ -110,22 +110,35 @@ def test_conditional_import_fixer_skip():
 
 @patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer.optimize")
 def test_conditional_graph_optimization(mock_opt):
-  """Verify graph optimization is gated."""
+  """
+  Verify graph optimization is gated.
+
+  Updated to use SASS target which triggers the compiler pipeline where optimization runs.
+  """
   source_code = "x = torch.relu(x)"
 
-  # 1. Disabled (Default)
-  cfg1 = RuntimeConfig(enable_graph_optimization=False)
+  # 1. Disabled (Default) using SASS target to access compiler pipe
+  cfg1 = RuntimeConfig(source_framework="torch", target_framework="sass", enable_graph_optimization=False)
   engine1 = ASTEngine(config=cfg1)
-  engine1.run(source_code)
+  # Mock backends to avoid needing full semantics for sass
+  with patch("ml_switcheroo.core.engine.get_backend_class") as m_backend:
+    m_backend.return_value = MagicMock()
+    engine1.run(source_code)
   mock_opt.assert_not_called()
 
   # 2. Enabled
   # Mock behavior to just return graph
   mock_opt.return_value = MagicMock()
   # Mock synthesis to avoid crash on mocked graph
-  with patch("ml_switcheroo.core.graph_synthesizer.GraphSynthesizer.generate", return_value="x=1"):
-    cfg2 = RuntimeConfig(enable_graph_optimization=True)
-    engine2 = ASTEngine(config=cfg2)
+
+  cfg2 = RuntimeConfig(source_framework="torch", target_framework="sass", enable_graph_optimization=True)
+  engine2 = ASTEngine(config=cfg2)
+
+  with patch("ml_switcheroo.core.engine.get_backend_class") as m_backend:
+    backend_instance = MagicMock()
+    backend_instance.compile.return_value = "optimized_code"
+    m_backend.return_value.return_value = backend_instance
+
     engine2.run(source_code)
 
     mock_opt.assert_called_once()

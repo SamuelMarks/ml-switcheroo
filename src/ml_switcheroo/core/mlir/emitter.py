@@ -18,6 +18,7 @@ from ml_switcheroo.core.mlir.nodes import (
   AttributeNode,
   TriviaNode,
 )
+from ml_switcheroo.core.scanners import get_full_name
 
 
 class SSAContext:
@@ -210,7 +211,47 @@ class PythonToMlirEmitter:
     elif isinstance(node, cst.Expr):
       _, ops = self._emit_expression(node.value)
       return ops
+    elif isinstance(node, (cst.Import, cst.ImportFrom)):
+      return [self._emit_import(node)]
     return []
+
+  def _emit_import(self, node: Union[cst.Import, cst.ImportFrom]) -> OperationNode:
+    """
+    Converts Import/ImportFrom to `sw.import`.
+    """
+    names = []
+    aliases = []
+    module_val = ""
+
+    if isinstance(node, cst.ImportFrom) and node.module:
+      module_val = get_full_name(node.module)
+
+    # Extract names and aliases
+    # For ImportFrom, name.name is the object imported.
+    # For Import, name.name is the module being imported.
+    if isinstance(node.names, cst.ImportStar):
+      names.append("*")
+      aliases.append("")
+    else:
+      for alias in node.names:
+        names.append(get_full_name(alias.name))
+        if alias.asname:
+          aliases.append(alias.asname.name.value)
+        else:
+          aliases.append("")
+
+    attrs = []
+    if module_val:
+      attrs.append(AttributeNode(name="module", value=f'"{module_val}"'))
+
+    # Format list strings properly for MLIR array attribute
+    quoted_names = [f'"{n}"' for n in names]
+    quoted_aliases = [f'"{a}"' for a in aliases]
+
+    attrs.append(AttributeNode(name="names", value=quoted_names))
+    attrs.append(AttributeNode(name="aliases", value=quoted_aliases))
+
+    return OperationNode(name="sw.import", attributes=attrs)
 
   def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
     """
@@ -313,9 +354,13 @@ class PythonToMlirEmitter:
               name="sw.setattr", operands=[base_val, val], attributes=[AttributeNode("name", f'"{attr_name}"')]
             )
             ops.append(set_op)
+
+            # Feature: Register the Attribute name in context for future lookup
+            # This allows subsequent `self.layer` access to map back to this val if needed
+            # But SSA logic handles lookup by name. self.layer is complex.
+            pass
           else:
-            # Fallback if base not resolved: Just declare flat name?
-            # self.x usually means we track it on scope if we are in init.
+            # Fallback if base not resolved
             pass
 
     return ops
@@ -404,7 +449,7 @@ class PythonToMlirEmitter:
 
     Handles:
     - Variables (Names)
-    - Function Calls
+    - Function Calls (capturing keywords)
     - Binary Operations
     - Constants
 
@@ -422,10 +467,19 @@ class PythonToMlirEmitter:
       return val, ops
     elif isinstance(expr, cst.Call):
       operands = []
+      arg_keywords = []  # new feature
+
+      # Process arguments
       for arg in expr.args:
         v, o = self._emit_expression(arg.value)
         ops.extend(o)
         operands.append(v)
+
+        # Capture keyword if present
+        kw = ""
+        if arg.keyword:
+          kw = arg.keyword.value
+        arg_keywords.append(kw)
 
       flat_name = self._flatten_attr(expr.func)
       root_var = flat_name.split(".")[0] if flat_name else ""
@@ -433,13 +487,24 @@ class PythonToMlirEmitter:
       if flat_name and not self.ctx.lookup(root_var):
         is_static_op = True
 
+      common_attrs = []
+      # Pack keywords into attribute if any are non-empty
+      if any(arg_keywords):
+        # AttributeNode needs a list of strings formatted for the printer
+        # e.g. ["k=val", ""] -> we just need to store the keys.
+        # "arg_keywords" = ["a", "", "b"]
+        # We store as list of quoted strings
+        kw_vals = [f'"{k}"' for k in arg_keywords]
+        common_attrs.append(AttributeNode("arg_keywords", kw_vals))
+
       if is_static_op:
         result = self.ctx.allocate_ssa()
+        attrs = [AttributeNode("type", f'"{flat_name}"')] + common_attrs
         op = OperationNode(
           name="sw.op",
           results=[result],
           operands=operands,
-          attributes=[AttributeNode("type", f'"{flat_name}"')],
+          attributes=attrs,
         )
         ops.append(op)
         return result, ops
@@ -456,7 +521,10 @@ class PythonToMlirEmitter:
         )
         ops.append(get_op)
         res_val = self.ctx.allocate_ssa()
-        call_op = OperationNode(name="sw.call", results=[res_val], operands=[attr_val] + operands)
+        # Attach keywords
+        call_op = OperationNode(
+          name="sw.call", results=[res_val], operands=[attr_val] + operands, attributes=common_attrs
+        )
         ops.append(call_op)
         return res_val, ops
 
@@ -464,7 +532,7 @@ class PythonToMlirEmitter:
         func_val, f_ops = self._emit_expression(expr.func)
         ops.extend(f_ops)
         result = self.ctx.allocate_ssa()
-        call_op = OperationNode(name="sw.call", results=[result], operands=[func_val] + operands)
+        call_op = OperationNode(name="sw.call", results=[result], operands=[func_val] + operands, attributes=common_attrs)
         ops.append(call_op)
         return result, ops
 

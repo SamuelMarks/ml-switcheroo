@@ -44,8 +44,9 @@ def test_mlir_example_code():
   assert "sw.module" in code
   assert "sw.func" in code
   assert "sw.op" in code
-  # Ensure attributes are present
-  assert 'type="torch.abs"' in code
+  # Attributes are rendered with spaces around '=' in MLIR emitter
+  # e.g. type = "torch.abs"
+  assert 'type = "torch.abs"' in code
 
   adapter = MlirAdapter()
   examples = adapter.get_tiered_examples()
