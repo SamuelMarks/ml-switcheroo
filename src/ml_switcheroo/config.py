@@ -127,7 +127,7 @@ class RuntimeConfig(BaseModel):
   enable_import_fixer: bool = Field(True, description="If True, performs import resolution, pruning, and injection.")
 
   # Legacy alias support for fusion
-  enable_fusion: bool = Field(False, description="Legacy alias for enable_graph_optimization.", deprecated=True)
+  enable_fusion: bool = Field(False, description="Legacy alias for enable_graph_optimization.")
 
   plugin_settings: Dict[str, Any] = Field(default_factory=dict, description="Configuration passed to plugins.")
   plugin_paths: List[Path] = Field(default_factory=list, description="External directories to scan for plugins.")

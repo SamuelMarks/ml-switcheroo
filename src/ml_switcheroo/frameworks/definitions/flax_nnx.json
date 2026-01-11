@@ -912,7 +912,6 @@
   },
   "Module": {
     "api": "flax.nnx.Module",
-    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

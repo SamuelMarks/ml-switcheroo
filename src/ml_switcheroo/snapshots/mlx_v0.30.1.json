@@ -2415,7 +2415,7 @@
           {
             "name": "activation",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "<mlx.gc_func object at 0x126897470>",
+            "default": "<mlx.gc_func object at 0x125a13560>",
             "annotation": "Callable"
           },
           {
@@ -2484,7 +2484,7 @@
           {
             "name": "activation",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "<mlx.gc_func object at 0x126897470>",
+            "default": "<mlx.gc_func object at 0x125a13560>",
             "annotation": null
           },
           {
@@ -2535,7 +2535,7 @@
           {
             "name": "activation",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "<mlx.gc_func object at 0x126897470>",
+            "default": "<mlx.gc_func object at 0x125a13560>",
             "annotation": "Callable"
           },
           {
@@ -2586,7 +2586,7 @@
           {
             "name": "activation",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "<mlx.gc_func object at 0x126897470>",
+            "default": "<mlx.gc_func object at 0x125a13560>",
             "annotation": null
           },
           {
@@ -2637,7 +2637,7 @@
           {
             "name": "activation",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "<mlx.gc_func object at 0x126897470>",
+            "default": "<mlx.gc_func object at 0x125a13560>",
             "annotation": "Callable"
           },
           {

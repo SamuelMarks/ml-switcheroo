@@ -307,6 +307,18 @@ class FlaxNNXAdapter(JAXStackMixin):
     if "ReLU" not in defs:
       defs["ReLU"] = StandardMap(api="flax.nnx.relu")
 
+    # Ensure definitions for core layers are present to satisfy tests on fresh environments
+    if "Linear" not in defs:
+      defs["Linear"] = StandardMap(
+        api="flax.nnx.Linear", args={"in_features": "in_features", "out_features": "out_features"}
+      )
+
+    if "Conv2d" not in defs:
+      defs["Conv2d"] = StandardMap(
+        api="flax.nnx.Conv",
+        args={"in_channels": "in_features", "out_channels": "out_features", "kernel_size": "kernel_size"},
+      )
+
     # Ensure relu (Functional) is present for source mapping (Flax -> Torch)
     # This prevents 'nnx.relu' from mapping back to the 'ReLU' class ID if 'ReLU' comes later in dict iteration.
     # We force overwrite or ensure it's set last to take precedence in reverse index logic

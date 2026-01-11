@@ -2551,6 +2551,10 @@
         "self": "self"
       }
     },
+    "Swapaxes": {
+      "api": "numpy.ma.core.swapaxes",
+      "args": {}
+    },
     "T": {
       "api": "numpy.matrixlib.defmatrix.matrix.T",
       "args": {}
@@ -2619,6 +2623,24 @@
       "api": "numpy.lib.tests.test_function_base.TestPercentile.TYPE_CODES",
       "args": {}
     },
+    "Take": {
+      "api": "numpy.ma.core.take",
+      "args": {
+        "a": "a",
+        "axis": "axis",
+        "indices": "indices",
+        "mode": "mode",
+        "out": "out"
+      }
+    },
+    "TakeAlongAxis": {
+      "api": "numpy.take_along_axis",
+      "args": {
+        "fill_value": null,
+        "mode": null
+      },
+      "required_imports": []
+    },
     "Tan": {
       "api": "numpy.ma.core.tan",
       "args": {}
@@ -2629,6 +2651,14 @@
     },
     "TensorType": {
       "api": "numpy.ndarray",
+      "required_imports": []
+    },
+    "Tensordot": {
+      "api": "numpy.tensordot",
+      "args": {
+        "precision": null,
+        "preferred_element_type": null
+      },
       "required_imports": []
     },
     "TestAbstractInterface": {
@@ -4225,12 +4255,73 @@
       "api": "numpy.exceptions.TooHardError",
       "args": {}
     },
+    "TorchLoad": {
+      "api": "load",
+      "required_imports": [],
+      "requires_plugin": "io_handler"
+    },
+    "TorchSave": {
+      "api": "save",
+      "required_imports": [],
+      "requires_plugin": "io_handler"
+    },
+    "Trace": {
+      "api": "numpy.ma.core.trace",
+      "args": {}
+    },
     "Transpose": {
       "api": "numpy.ma.core.transpose",
       "args": {
         "a": "a",
         "axes": "axes"
       }
+    },
+    "Trapezoid": {
+      "api": "numpy.trapezoid",
+      "required_imports": []
+    },
+    "Tri": {
+      "api": "numpy.tri",
+      "required_imports": []
+    },
+    "Tril": {
+      "api": "numpy.tril",
+      "required_imports": []
+    },
+    "TrilIndices": {
+      "api": "numpy.tril_indices",
+      "required_imports": []
+    },
+    "TrilIndicesFrom": {
+      "api": "numpy.tril_indices_from",
+      "required_imports": []
+    },
+    "TrimZeros": {
+      "api": "numpy.trim_zeros",
+      "args": {
+        "axis": null
+      },
+      "required_imports": []
+    },
+    "Triu": {
+      "api": "numpy.triu",
+      "required_imports": []
+    },
+    "TriuIndices": {
+      "api": "numpy.triu_indices",
+      "required_imports": []
+    },
+    "TriuIndicesFrom": {
+      "api": "numpy.triu_indices_from",
+      "required_imports": []
+    },
+    "TrueDivide": {
+      "api": "numpy.true_divide",
+      "required_imports": []
+    },
+    "Trunc": {
+      "api": "numpy.trunc",
+      "args": {}
     },
     "TypeTup": {
       "api": "numpy.typing.tests.test_runtime.TypeTup",
@@ -4253,8 +4344,7 @@
       "args": {}
     },
     "UInt8": {
-      "api": "numpy.uint8",
-      "args": {}
+      "api": "numpy.uint8"
     },
     "UInt8DType": {
       "api": "numpy.dtypes.UInt8DType",
@@ -4279,6 +4369,37 @@
     "UShortDType": {
       "api": "numpy.dtypes.UShortDType",
       "args": {}
+    },
+    "Ufunc": {
+      "api": "numpy.ufunc",
+      "args": {}
+    },
+    "Uint": {
+      "api": "numpy.uint",
+      "args": {}
+    },
+    "Uint16": {
+      "api": "numpy.uint16",
+      "args": {}
+    },
+    "Uint32": {
+      "api": "numpy.uint32",
+      "args": {}
+    },
+    "Uint64": {
+      "api": "numpy.uint64",
+      "args": {}
+    },
+    "Uint8": {
+      "api": "numpy.uint8",
+      "args": {}
+    },
+    "Union1d": {
+      "api": "numpy.ma.extras.union1d",
+      "args": {
+        "ar1": "ar1",
+        "ar2": "ar2"
+      }
     },
     "Unique": {
       "api": "numpy.ma.extras.unique",
@@ -11514,7 +11635,8 @@
     },
     "swapaxes": {
       "api": "numpy.ma.core.swapaxes",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "switchdir": {
       "api": "numpy.f2py.tests.util.switchdir",
@@ -11537,14 +11659,7 @@
       "args": {}
     },
     "take": {
-      "api": "numpy.ma.core.take",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "indices": "indices",
-        "mode": "mode",
-        "out": "out"
-      }
+      "api": "numpy.take"
     },
     "take_along_axis": {
       "api": "numpy.take_along_axis"
@@ -27475,8 +27590,7 @@
       }
     },
     "trace": {
-      "api": "numpy.ma.core.trace",
-      "args": {}
+      "api": "numpy.trace"
     },
     "trapezoid": {
       "api": "numpy.trapezoid",
@@ -27555,8 +27669,7 @@
       }
     },
     "trunc": {
-      "api": "numpy.trunc",
-      "args": {}
+      "api": "numpy.trunc"
     },
     "typ": {
       "api": "numpy.typing.tests.test_runtime.TypeTup.typ",
@@ -27600,7 +27713,8 @@
     },
     "ufunc": {
       "api": "numpy.ufunc",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "ufunc_domain": {
       "api": "numpy.ma.core.ufunc_domain",
@@ -27612,15 +27726,18 @@
     },
     "uint": {
       "api": "numpy.uint",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "uint16": {
       "api": "numpy.uint16",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "uint32": {
       "api": "numpy.uint32",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "uint32_to_float32": {
       "api": "numpy.random.tests.test_direct.uint32_to_float32",
@@ -27630,7 +27747,8 @@
     },
     "uint64": {
       "api": "numpy.uint64",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "uintc": {
       "api": "numpy.uintc",
@@ -27725,7 +27843,8 @@
       "args": {
         "ar1": "ar1",
         "ar2": "ar2"
-      }
+      },
+      "required_imports": []
     },
     "unique_all": {
       "api": "numpy.unique_all"

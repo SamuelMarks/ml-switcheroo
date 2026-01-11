@@ -3515,6 +3515,14 @@
       "api": "torch.nn.functional",
       "required_imports": []
     },
+    "TorchLoad": {
+      "api": "torch.load",
+      "required_imports": []
+    },
+    "TorchSave": {
+      "api": "torch.save",
+      "required_imports": []
+    },
     "Transformer": {
       "api": "torch.nn.modules.transformer.Transformer",
       "args": {

@@ -153,7 +153,8 @@ def merge_tier_data(
 
   Handles precedence logic: Neural definitions overwrite Array definitions silently
   for upgrades. Duplicate definitions at the same tier level with conflicting signatures
-  trigger warnings.
+  trigger warnings only if signatures are ambiguous (same length, different names).
+  Otherwise, prefers the richer signature (Superset/Length).
 
   Args:
       data: Master dictionary of operations.
@@ -264,10 +265,23 @@ def merge_tier_data(
             new_names = _normalize_args(new_args_raw)
 
             if old_names != new_names and not suppress_internal_conflict:
-              warnings.warn(
-                f"Conflict detected for '{op_name}': Signature mismatch within '{tier.value}'. Overwriting.",
-                UserWarning,
-              )
+              # Conflict Resolution Strategy: Greatest Argument Count Wins
+              # This behaves like 'merging until most complete version'
+              if len(new_names) > len(old_names):
+                # Upgrade: New spec is richer. Silent overwrite.
+                pass
+              elif len(new_names) < len(old_names):
+                # Downgrade: New spec is a subset. Preserve old spec details.
+                stored_dict["std_args"] = existing_entry.get("std_args")
+                stored_dict["description"] = existing_entry.get("description")
+                # Variants were merged above, so we keep the variants from new logic
+                pass
+              else:
+                # Equal length but different names. Ambiguous 1-to-1 conflict.
+                warnings.warn(
+                  f"Conflict detected for '{op_name}': Signature mismatch within '{tier.value}'. Overwriting.",
+                  UserWarning,
+                )
 
       # Merge dictionaries (Overwrite properties with new spec, but variants are merged above)
       data[op_name] = stored_dict

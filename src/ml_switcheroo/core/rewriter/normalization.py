@@ -223,7 +223,14 @@ class NormalizationMixin:
           new_args_list.append(current_arg)
           continue
 
+        # Check if argument is explicitly dropped
+        # Logic: If arg is mapped to None in target_arg_map, we skip it.
+        # get(key, default) returns None if key found and value is None.
         tg_alias = target_arg_map.get(std_name, std_name)
+
+        if tg_alias is None:
+          continue
+
         final_val_node = current_arg.value
 
         if target_val_map and std_name in target_val_map:

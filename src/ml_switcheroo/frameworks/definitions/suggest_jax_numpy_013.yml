@@ -373,7 +373,7 @@ variants:
 ---
 operation: "Ufunc"
 description: "Universal functions which operation element-by-element on arrays."
-op_type: "class"
+op_type: "function"
 std_args:
   - name: "func"
     type: "Callable"

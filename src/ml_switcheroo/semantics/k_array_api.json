@@ -3453,18 +3453,25 @@
     "type": "function"
   },
   "permute_dims": {
-    "description": "Permutes the axes (dimensions) of an array ``x``.",
+    "description": "Definition for permute_dims",
+    "operation": "permute_dims",
     "std_args": [
-      [
-        "x",
-        "array"
-      ],
-      [
-        "axes",
-        "Tuple[int, Ellipsis]"
-      ]
+      "x",
+      {
+        "is_variadic": true,
+        "name": "axes"
+      }
     ],
-    "type": "function"
+    "variants": {
+      "jax": {
+        "api": "jnp.transpose",
+        "pack_to_tuple": "axes"
+      },
+      "numpy": {
+        "api": "numpy.transpose",
+        "pack_to_tuple": "axes"
+      }
+    }
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
@@ -4357,11 +4364,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "swapaxes": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "switch": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -4369,6 +4371,7 @@
   },
   "take": {
     "description": "Returns elements of an array along an axis.",
+    "from": "_2024_12/indexing_functions.py",
     "std_args": [
       [
         "x",
@@ -4382,8 +4385,7 @@
         "axis",
         "Optional[int]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "take_along_axis": {
     "description": "Returns elements from an array at the one-dimensional indices specified by ``indices`` along a provided ``axis``.",
@@ -4430,6 +4432,7 @@
   },
   "tensordot": {
     "description": "Returns a tensor contraction of ``x1`` and ``x2`` over specific axes.",
+    "from": "_2024_12/linear_algebra_functions.py",
     "std_args": [
       [
         "x1",
@@ -4443,8 +4446,7 @@
         "axes",
         "Union[int, Tuple[Sequence[int], Sequence[int]]]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "tensorinv": {
     "description": "Auto-generated from jax_code_defs",
@@ -4502,6 +4504,7 @@
   },
   "trace": {
     "description": "Returns the sum along the specified diagonals of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -4515,8 +4518,7 @@
         "dtype",
         "Optional[dtype]"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "train": {
     "description": "Auto-generated from flax_nnx_code_defs",
@@ -4527,11 +4529,6 @@
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "type": "attribute"
-  },
-  "trapezoid": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "tree_add_scalar_mul": {
     "description": "Auto-generated from jax_code_defs",
@@ -4563,11 +4560,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "tri": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "triangular": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -4575,6 +4567,7 @@
   },
   "tril": {
     "description": "Returns the lower triangular part of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/creation_functions.py",
     "std_args": [
       [
         "x",
@@ -4584,8 +4577,7 @@
         "k",
         "int"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "tril_indices": {
     "description": "Auto-generated from jax_code_defs",
@@ -4604,6 +4596,7 @@
   },
   "triu": {
     "description": "Returns the upper triangular part of a matrix (or a stack of matrices) ``x``.",
+    "from": "_2024_12/creation_functions.py",
     "std_args": [
       [
         "x",
@@ -4613,8 +4606,7 @@
         "k",
         "int"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "triu_indices": {
     "description": "Auto-generated from jax_code_defs",
@@ -4633,13 +4625,13 @@
   },
   "trunc": {
     "description": "Rounds each element ``x_i`` of the input array ``x`` to the nearest integer-valued number that is closer to zero than ``x_i``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "trunc_normal_": {
     "description": "Auto-generated from mlx_code_defs",
@@ -4656,41 +4648,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "ufunc": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
-  "uint": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "uint16": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "uint2": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
-  "uint32": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "uint4": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
-  "uint64": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "unflattened_size": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -4698,11 +4655,6 @@
   },
   "uniform": {
     "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "union1d": {
-    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "function"
   },

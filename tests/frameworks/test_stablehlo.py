@@ -20,7 +20,9 @@ from ml_switcheroo.frameworks.base import (
 
 @pytest.fixture
 def mock_semantics_patch():
-  with patch("ml_switcheroo.frameworks.stablehlo.SemanticsManager") as MockMgr:
+  # FIX: Patch the definition of SemanticsManager instead of the import,
+  # as local imports inside methods cannot be patched via module attribute access.
+  with patch("ml_switcheroo.semantics.manager.SemanticsManager") as MockMgr:
     mgr = MockMgr.return_value
     mgr.data = {"Abs": {"variants": {"stablehlo": {"api": "stablehlo.abs"}}}}
     mgr.get_definition.return_value = ("Abs", mgr.data["Abs"])

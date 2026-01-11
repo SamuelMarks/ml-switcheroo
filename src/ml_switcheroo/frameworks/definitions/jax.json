@@ -2433,8 +2433,25 @@
     "transformation_type": "infix"
   },
   "Sum": {
-    "api": "jnp.sum",
-    "args": {},
+    "api": "jax.numpy.sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Swapaxes": {
+    "api": "jax.numpy.swapaxes",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Take": {
+    "api": "jax.numpy.take",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TakeAlongAxis": {
+    "api": "jax.numpy.take_along_axis",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2457,12 +2474,14 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Tensordot": {
+    "api": "jax.numpy.tensordot",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Tile": {
     "api": "jax.numpy.tile",
-    "args": {
-      "A": "A",
-      "reps": "reps"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2494,6 +2513,12 @@
     "required_imports": [],
     "requires_plugin": "io_handler"
   },
+  "Trace": {
+    "api": "jax.numpy.trace",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "TraceState": {
     "api": "optax.TraceState",
     "args": {},
@@ -2503,10 +2528,72 @@
   },
   "Transpose": {
     "api": "jax.numpy.transpose",
-    "args": {
-      "a": "a",
-      "axes": "axes"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Trapezoid": {
+    "api": "jax.numpy.trapezoid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tri": {
+    "api": "jax.numpy.tri",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tril": {
+    "api": "jax.numpy.tril",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrilIndices": {
+    "api": "jax.numpy.tril_indices",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrilIndicesFrom": {
+    "api": "jax.numpy.tril_indices_from",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrimZeros": {
+    "api": "jax.numpy.trim_zeros",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Triu": {
+    "api": "jax.numpy.triu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TriuIndices": {
+    "api": "jax.numpy.triu_indices",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TriuIndicesFrom": {
+    "api": "jax.numpy.triu_indices_from",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrueDivide": {
+    "api": "jax.numpy.true_divide",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Trunc": {
+    "api": "jax.numpy.trunc",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2520,19 +2607,62 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Ufunc": {
+    "api": "jax.numpy.ufunc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint": {
+    "api": "jax.numpy.uint",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint16": {
+    "api": "jax.numpy.uint16",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint2": {
+    "api": "jax.numpy.uint2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint32": {
+    "api": "jax.numpy.uint32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint4": {
+    "api": "jax.numpy.uint4",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint64": {
+    "api": "jax.numpy.uint64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint8": {
+    "api": "jax.numpy.uint8",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Union1d": {
+    "api": "jax.numpy.union1d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Unique": {
     "api": "jax.numpy.unique",
-    "args": {
-      "ar": "ar",
-      "axis": "axis",
-      "equal_nan": "equal_nan",
-      "fill_value": "fill_value",
-      "return_counts": "return_counts",
-      "return_index": "return_index",
-      "return_inverse": "return_inverse",
-      "size": "size",
-      "sorted": "sorted"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2669,7 +2799,6 @@
   },
   "Where": {
     "api": "jax.numpy.where",
-    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2690,12 +2819,6 @@
   },
   "Zeros": {
     "api": "jax.numpy.zeros",
-    "args": {
-      "device": "device",
-      "dtype": "dtype",
-      "out_sharding": "out_sharding",
-      "shape": "shape"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

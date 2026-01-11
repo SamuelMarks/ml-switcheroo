@@ -320,6 +320,17 @@ class TorchAdapter:
     if "relu" not in defs:
       defs["relu"] = StandardMap(api="torch.nn.functional.relu")
 
+    if "Linear" not in defs:
+      defs["Linear"] = StandardMap(
+        api="torch.nn.Linear", args={"in_features": "in_features", "out_features": "out_features"}
+      )
+
+    if "Conv2d" not in defs:
+      defs["Conv2d"] = StandardMap(
+        api="torch.nn.Conv2d",
+        args={"in_channels": "in_channels", "out_channels": "out_channels", "kernel_size": "kernel_size"},
+      )
+
     return defs
 
   # --- Syntax Generators ---

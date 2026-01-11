@@ -2381,20 +2381,12 @@
   },
   "Where": {
     "api": "mlx.core.where",
-    "args": {
-      "args": "args",
-      "kwargs": "kwargs"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Zeros": {
     "api": "mlx.core.zeros",
-    "args": {
-      "args": "args",
-      "kwargs": "kwargs"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

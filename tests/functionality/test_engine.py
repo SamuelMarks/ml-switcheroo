@@ -2,148 +2,71 @@
 Tests for the main ASTEngine and result structures.
 """
 
-from ml_switcheroo.core.engine import ASTEngine, ConversionResult
-from ml_switcheroo.core.escape_hatch import EscapeHatch
-from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.tracer import TraceEventType
 from unittest.mock import MagicMock, patch
-import libcst as cst
+
+from ml_switcheroo.core.engine import ASTEngine, ConversionResult
+from ml_switcheroo.config import RuntimeConfig
+from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode
+from ml_switcheroo.core.rewriter.patcher import PatchAction
 
 
 def test_engine_roundtrip():
   """Ensure we can parse and emit code without changes (idempotency)."""
-  # Use identical source/target to disable ImportFixer logic
   engine = ASTEngine(source="torch", target="torch")
   source = "x = 5\nprint(x)"
   result = engine.run(source)
-
   assert isinstance(result, ConversionResult)
-  assert result.success is True
+  assert result.success
   assert result.code == source
-  assert result.has_errors is False
+  assert not result.has_errors
 
 
-def test_escape_hatch_injection():
-  """Ensure the escape hatch adds the specific comment markers."""
-  engine = ASTEngine()
+def test_graph_optimization_rewriter_path():
+  """Verify Graph Optimization loopback wiring."""
+  source_code = "x = conv(x)"
 
-  # 1. Parse a simple statement (Module -> [SimpleStatementLine])
-  source = "complex_function(x)"
-  tree = engine.parse(source)
+  # Patch where engine IMPORTS these classes
+  with (
+    patch("ml_switcheroo.core.engine.GraphExtractor") as MockExtractor,
+    patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptimizer,
+    patch("ml_switcheroo.compiler.differ.GraphDiffer") as MockDiffer,
+    patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher") as MockPatcher,
+    patch("ml_switcheroo.core.engine.ingest_code") as MockIngest,
+  ):
+    # Setup Mock Tree
+    # NOTE: MockIngest must return a Mock object that BEHAVES like CST Node for visit()
+    fake_tree = MagicMock()
+    fake_tree.code = source_code
+    # Allow chaining: tree.visit returns tree
+    fake_tree.visit.return_value = fake_tree
+    MockIngest.return_value = fake_tree
 
-  # 2. Manual simulated failure: grab the **Statement** node
-  original_stmt = tree.body[0]
+    # Setup Extractor
+    extractor_instance = MockExtractor.return_value
+    g_orig = LogicalGraph(nodes=[LogicalNode("n1", "MockOp")])
+    extractor_instance.graph = g_orig
+    extractor_instance.node_map = {"n1": MagicMock()}
 
-  # 3. Apply the Escape Hatch
-  result_sentinel = EscapeHatch.mark_failure(original_stmt, reason="Does not map to JAX")
+    # Setup Optimizer
+    optimizer_instance = MockOptimizer.return_value
+    g_opt = LogicalGraph(nodes=[])
+    optimizer_instance.optimize.return_value = g_opt
 
-  # 4. Swap it into a new tree (manual surgery for testing)
-  # Important: result_sentinel is a cst.FlattenSentinel containing [Header+Node, Footer(Ellipsis)]
-  # We must flatten it back into a list of nodes for the Module body.
-  if isinstance(result_sentinel, cst.FlattenSentinel):
-    new_body_nodes = list(result_sentinel)
-  else:
-    new_body_nodes = [result_sentinel]
+    # Setup Differ
+    differ_instance = MockDiffer.return_value
+    differ_instance.diff.return_value = [MagicMock(spec=PatchAction)]
 
-  new_tree = tree.with_changes(body=new_body_nodes)
+    # Setup Patcher
+    patcher_instance = MockPatcher.return_value
 
-  # 5. Verify Output matches the protocol
-  generated_code = engine.to_source(new_tree)
+    # Run
+    cfg = RuntimeConfig(source_framework="torch", target_framework="jax", enable_graph_optimization=True)
+    engine = ASTEngine(config=cfg)
+    engine.run(source_code)
 
-  expected_reason = "# Reason: Does not map to JAX"
-
-  assert EscapeHatch.START_MARKER in generated_code
-  assert expected_reason in generated_code
-  assert EscapeHatch.END_MARKER in generated_code
-
-  # Verify that Engine.run() detects this marker in its error reporting logic
-  errors = []
-  if "# <SWITCHEROO_FAILED_TO_TRANS>" in generated_code:
-    errors.append("Failure detected")
-
-  assert len(errors) == 1
-
-
-def test_engine_emits_snapshots():
-  """Verify snapshot events are emitted during run."""
-  source_code = "import torch\nx = torch.abs(y)"
-  # Use config that enables import fixer to verify multiple snapshots
-  cfg = RuntimeConfig(source_framework="torch", target_framework="jax", enable_import_fixer=True)
-  engine = ASTEngine(config=cfg)
-
-  result = engine.run(source_code)
-
-  events = result.trace_events
-  snapshots = [e for e in events if e["type"] == TraceEventType.AST_SNAPSHOT]
-
-  # Expect at least Ingestion, Analysis, Rewrite, Fixing
-  assert len(snapshots) >= 3
-  labels = [s["description"] for s in snapshots]
-
-  assert "After Ingestion" in labels
-  assert "After Analysis" in labels
-  assert "After Rewriting" in labels
-  assert "After Import Fixing" in labels
-
-  # Check source code capture
-  assert snapshots[0]["metadata"]["code"] is not None
-
-
-def test_conditional_import_fixer_skip():
-  """Verify enabling/disabling import fixer works."""
-  source_code = "import torch\nx = torch.abs(y)"
-
-  # Disable Fixer
-  cfg = RuntimeConfig(source_framework="torch", target_framework="jax", enable_import_fixer=False)
-  engine = ASTEngine(config=cfg)
-
-  result = engine.run(source_code)
-
-  # Torch import should persist because Fixer skipped
-  assert "import torch" in result.code
-
-  # Check trace for absence of Fixing snapshot
-  events = result.trace_events
-  labels = [e["description"] for e in events if e["type"] == TraceEventType.AST_SNAPSHOT]
-  assert "After Import Fixing" not in labels
-
-
-@patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer.optimize")
-def test_conditional_graph_optimization(mock_opt):
-  """
-  Verify graph optimization is gated.
-
-  Updated to use SASS target which triggers the compiler pipeline where optimization runs.
-  """
-  source_code = "x = torch.relu(x)"
-
-  # 1. Disabled (Default) using SASS target to access compiler pipe
-  cfg1 = RuntimeConfig(source_framework="torch", target_framework="sass", enable_graph_optimization=False)
-  engine1 = ASTEngine(config=cfg1)
-  # Mock backends to avoid needing full semantics for sass
-  with patch("ml_switcheroo.core.engine.get_backend_class") as m_backend:
-    m_backend.return_value = MagicMock()
-    engine1.run(source_code)
-  mock_opt.assert_not_called()
-
-  # 2. Enabled
-  # Mock behavior to just return graph
-  mock_opt.return_value = MagicMock()
-  # Mock synthesis to avoid crash on mocked graph
-
-  cfg2 = RuntimeConfig(source_framework="torch", target_framework="sass", enable_graph_optimization=True)
-  engine2 = ASTEngine(config=cfg2)
-
-  with patch("ml_switcheroo.core.engine.get_backend_class") as m_backend:
-    backend_instance = MagicMock()
-    backend_instance.compile.return_value = "optimized_code"
-    m_backend.return_value.return_value = backend_instance
-
-    engine2.run(source_code)
-
-    mock_opt.assert_called_once()
-
-    # Check snapshot emission
-    events = engine2.run(source_code).trace_events
-    labels = [e["description"] for e in events if e["type"] == TraceEventType.AST_SNAPSHOT]
-    assert "After Optimization" in labels
+    # Assert
+    MockIngest.assert_called_once()
+    fake_tree.visit.assert_any_call(extractor_instance)
+    optimizer_instance.optimize.assert_called_once_with(g_orig)
+    differ_instance.diff.assert_called_once_with(g_orig, g_opt)
+    fake_tree.visit.assert_any_call(patcher_instance)

@@ -131,8 +131,9 @@ class FrameworkVariant(BaseModel):
     None,
     description="The fully qualified API path (e.g. 'torch.nn.functional.log_softmax'). If None, implies explicit lack of support unless a plugin handles it.",
   )
-  args: Optional[Dict[str, str]] = Field(
-    None, description="Mapping from Standard Argument Name to Framework Argument Name."
+  args: Optional[Dict[str, Optional[str]]] = Field(
+    None,
+    description="Mapping from Standard Argument Name to Framework Argument Name. If value is null, argument is dropped.",
   )
   arg_values: Optional[Dict[str, Dict[str, str]]] = Field(
     None,

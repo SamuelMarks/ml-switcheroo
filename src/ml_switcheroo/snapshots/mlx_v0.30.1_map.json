@@ -944,14 +944,14 @@
       }
     },
     "IsNaN": {
-      "api": "mlx.core.isnan"
-    },
-    "IsNan": {
       "api": "mlx.core.isnan",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "IsNan": {
+      "api": "mlx.core.isnan"
     },
     "IsNegInf": {
       "api": "mlx.core.isneginf",
@@ -1615,8 +1615,7 @@
       "api": "mlx.nn.layers.activations.relu",
       "args": {
         "x": "x"
-      },
-      "required_imports": []
+      }
     },
     "Relu6": {
       "api": "mlx.nn.layers.activations.ReLU6",
@@ -1935,6 +1934,13 @@
         "kwargs": "kwargs"
       }
     },
+    "Swapaxes": {
+      "api": "mlx.core.swapaxes",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Synchronize": {
       "api": "mlx.core.synchronize",
       "args": {
@@ -1948,6 +1954,13 @@
     },
     "TUPLE": {
       "api": "mlx.optimizers.Tuple"
+    },
+    "Take": {
+      "api": "mlx.core.take",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
     },
     "Tan": {
       "api": "mlx.core.tan",
@@ -1974,6 +1987,13 @@
       "api": "mlx.core.array",
       "required_imports": []
     },
+    "Tensordot": {
+      "api": "mlx.core.tensordot",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "Threshold": {
       "api": "mlx.nn.layers.activations.Step.threshold",
       "args": {}
@@ -1987,6 +2007,13 @@
     },
     "TopK": {
       "api": "mlx.core.topk",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Trace": {
+      "api": "mlx.core.trace",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
@@ -2068,8 +2095,41 @@
         "kwargs": "kwargs"
       }
     },
+    "Tri": {
+      "api": "mlx.core.tri",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Tril": {
+      "api": "mlx.core.tril",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
+    "Triu": {
+      "api": "mlx.core.triu",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "UInt8": {
       "api": "mlx.core.uint8",
+      "args": {}
+    },
+    "Uint16": {
+      "api": "mlx.core.uint16",
+      "args": {}
+    },
+    "Uint32": {
+      "api": "mlx.core.uint32",
+      "args": {}
+    },
+    "Uint64": {
+      "api": "mlx.core.uint64",
       "args": {}
     },
     "Unflatten": {
@@ -4812,14 +4872,11 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "take": {
-      "api": "mlx.core.take",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.take"
     },
     "take_along_axis": {
       "api": "mlx.core.take_along_axis",
@@ -4835,11 +4892,7 @@
       "api": "mlx.core.tanh"
     },
     "tensordot": {
-      "api": "mlx.core.tensordot",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.tensordot"
     },
     "threshold_": {
       "api": "mlx.nn.layers.activations.Step.threshold",
@@ -4863,11 +4916,7 @@
       "args": {}
     },
     "trace": {
-      "api": "mlx.core.trace",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.trace"
     },
     "track_running_stats": {
       "api": "mlx.nn.layers.normalization.BatchNorm.track_running_stats",
@@ -4907,7 +4956,8 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "tri_inv": {
       "api": "mlx.core.linalg.tri_inv",
@@ -4918,11 +4968,7 @@
       }
     },
     "tril": {
-      "api": "mlx.core.tril",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.tril"
     },
     "triplet_loss": {
       "api": "mlx.nn.losses.triplet_loss",
@@ -4938,11 +4984,7 @@
       }
     },
     "triu": {
-      "api": "mlx.core.triu",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.triu"
     },
     "trunc_normal_": {
       "api": "mlx.core.random.truncated_normal",
@@ -4973,15 +5015,18 @@
     },
     "uint16": {
       "api": "mlx.core.uint16",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "uint32": {
       "api": "mlx.core.uint32",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "uint64": {
       "api": "mlx.core.uint64",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "unflattened_size": {
       "api": "mlx.core.unflatten",

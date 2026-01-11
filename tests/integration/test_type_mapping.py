@@ -46,6 +46,8 @@ def run_transpile(code: str, target: str) -> str:
       }
     },
   )
+  # FIX: Ensure source mapping exists so rewriter can identify 'torch.float32'
+  mgr._reverse_index["torch.float32"] = ("Float32", mgr.data["Float32"])
 
   # Providers for Import Injection
   mgr._providers = {}

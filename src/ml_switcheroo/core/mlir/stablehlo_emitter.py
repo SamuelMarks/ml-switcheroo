@@ -20,7 +20,8 @@ from ml_switcheroo.core.mlir.nodes import (
 )
 
 if TYPE_CHECKING:
-    from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
 
 class StableHloEmitter(PythonToMlirEmitter):
   """

@@ -4057,10 +4057,6 @@
   },
   "Zeros": {
     "api": "keras.ops.zeros",
-    "args": {
-      "dtype": "dtype",
-      "shape": "shape"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

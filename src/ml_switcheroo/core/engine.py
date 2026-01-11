@@ -4,6 +4,8 @@ Orchestration Engine for AST Transformations.
 This module provides the ``ASTEngine``, generating code via:
 1.  **Compiler Pipeline**: For ISA/Visuals (Source -> Graph -> Backend -> Target).
 2.  **Rewriter Pipeline**: For High-Level Frameworks (Source -> CST -> Rewriter -> Target).
+    - Supports optional **Graph-Guided Rewriting** (Loopback):
+      (Source -> CST -> Graph -> Optimizer -> Diff -> Patch -> CST -> Rewriter -> Target).
 """
 
 from typing import Any, Dict, Optional
@@ -20,6 +22,7 @@ from ml_switcheroo.testing.linter import StructuralLinter
 from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 from ml_switcheroo.core.ingestion import ingest_code
 from ml_switcheroo.core.escape_hatch import EscapeHatch
+from ml_switcheroo.core.graph import GraphExtractor
 
 # Compiler Components
 from ml_switcheroo.compiler.registry import (
@@ -34,6 +37,8 @@ from ml_switcheroo.core.mlir_bridge import run_mlir_roundtrip
 
 
 class ASTEngine:
+  """The main driver for the conversion process."""
+
   def __init__(
     self,
     semantics: Optional[SemanticsManager] = None,
@@ -67,10 +72,7 @@ class ASTEngine:
     load_plugins()
 
   def run(self, code: str) -> ConversionResult:
-    """
-    Main execution point for the pipeline.
-    Dispatches to either the Compiler (IR) or Rewriter (AST) path.
-    """
+    """Main execution point."""
     reset_tracer()
     tracer = get_tracer()
     tracer.start_phase("Pipeline Start", f"{self.source} -> {self.target}")
@@ -79,7 +81,6 @@ class ASTEngine:
       if is_isa_source(self.source) or is_isa_target(self.target):
         result = self._run_compiler_pipeline(code, tracer)
       else:
-        # Default for high-level frameworks
         result = self._run_rewriter_pipeline(code, tracer)
       tracer.end_phase()
       return result
@@ -93,11 +94,9 @@ class ASTEngine:
       )
 
   def parse(self, code: str) -> cst.Module:
-    """Parses python source into a CST (Helper for tests)."""
     return cst.parse_module(code)
 
   def to_source(self, tree: cst.Module) -> str:
-    """Converts CST back to source code."""
     return tree.code
 
   def _run_mlir_roundtrip(self, input_obj: Any, tracer: Any) -> Any:
@@ -152,6 +151,7 @@ class ASTEngine:
     return ConversionResult(code=output_code, success=True, trace_events=tracer.export())
 
   def _run_rewriter_pipeline(self, code: str, tracer: Any) -> ConversionResult:
+    """Structural pipeline with optional graph loopback."""
     tracer.start_phase("Rewriter Pipeline", "AST Transformation")
 
     # 1. Ingestion
@@ -160,14 +160,56 @@ class ASTEngine:
     source_adapter = get_adapter(self.source)
     tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
     tracer.log_snapshot("After Ingestion", self.to_source(tree), self.to_source(tree))
+
+    # 1.5. Graph-Guided Optimization (The "Loopback")
+    if self.config.enable_graph_optimization:
+      tracer.start_phase("Graph Guided Rewriting", "Fusion & Surgery")
+      try:
+        from ml_switcheroo.core.graph_optimizer import GraphOptimizer
+        from ml_switcheroo.compiler.differ import GraphDiffer
+        from ml_switcheroo.core.rewriter.patcher import GraphPatcher
+        from ml_switcheroo.compiler.backends.python_snippet import PythonSnippetEmitter
+
+        # A. Extraction
+        extractor = GraphExtractor()
+        tree.visit(extractor)
+        original_graph = extractor.graph
+        provenance = extractor.node_map
+
+        if original_graph.nodes:
+          # B. Optimization
+          patterns = self.semantics.get_patterns()
+          optimizer = GraphOptimizer(patterns)
+          optimized_graph = optimizer.optimize(original_graph)
+
+          # C. Differ
+          differ = GraphDiffer()
+          plan = differ.diff(original_graph, optimized_graph)
+
+          # D. Patching
+          if plan:
+            emitter = PythonSnippetEmitter(framework=self.target)
+            patcher = GraphPatcher(plan, provenance, emitter)
+            tree = tree.visit(patcher)
+            tracer.log_mutation(
+              "Graph Patching",
+              "Original CST",
+              self.to_source(tree),
+            )
+            tracer.log_snapshot("After Graph Patching", self.to_source(tree), self.to_source(tree))
+      except Exception as e:
+        tracer.log_warning(f"Graph Optimization failed, proceeding with raw CST: {e}")
+      tracer.end_phase()
+
+    # 2. Analysis
     tracer.log_snapshot("After Analysis", self.to_source(tree), self.to_source(tree))
 
-    # 2. Rewriting
+    # 3. Rewriting (The Pivot)
     rewriter = PivotRewriter(self.semantics, self.config)
     tree = tree.visit(rewriter)
     tracer.log_snapshot("After Rewriting", self.to_source(tree), self.to_source(tree))
 
-    # 3. Import Fixing
+    # 4. Import Fixing
     if self.config.enable_import_fixer:
       usage_scanner = UsageScanner(self.source)
       tree.visit(usage_scanner)
@@ -183,11 +225,11 @@ class ASTEngine:
       tree = tree.visit(fixer)
       tracer.log_snapshot("After Import Fixing", self.to_source(tree), self.to_source(tree))
 
-    # 4. Optional MLIR
+    # 5. Optional MLIR
     if self.config.intermediate == "mlir":
       tree = self._run_mlir_roundtrip(tree, tracer)
 
-    # 5. Emission
+    # 6. Emission
     final_code = tree.code
     target_adapter = get_adapter(self.target)
     if target_adapter and hasattr(target_adapter, "create_emitter"):
@@ -200,21 +242,18 @@ class ASTEngine:
       except Exception as e:
         tracer.log_warning(f"Emitter output failed: {e}")
 
-    # Trace for debugging logic if needed
+    # Trace
     if self.target == "mlir" or self.target == "stablehlo":
       tracer.log_mutation("Final Emission", "(Python CST)", final_code)
 
-    # 6. Checks
+    # 7. Checks
     errors = []
-
-    # Check for Escape Hatches markers in output
     if EscapeHatch.START_MARKER in final_code:
       msg = "Escape Hatches Detected: Partial conversion. Inspect output for '# <SWITCHEROO...' blocks."
       errors.append(msg)
       tracer.log_warning(msg)
 
     if self.strict_mode and self.target not in ["mlir", "stablehlo", "latex_dsl", "tikz"]:
-      # Start Phase to register in trace
       tracer.start_phase("Structural Linter", "Safety Verification")
       linter = StructuralLinter(forbidden_roots={self.source})
       list_errors = linter.check(final_code)

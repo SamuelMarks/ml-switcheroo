@@ -20,6 +20,7 @@ from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import OpDefinition, PluginTraits, StructuralTraits
 from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 
+
 class PythonToStableHloEmitter:
   """
   Wrapper to adapt the CST-based StableHloEmitter to the simpler emit() protocol
@@ -42,6 +43,7 @@ class PythonToStableHloEmitter:
       return mlir_node.to_text()
     except Exception as e:
       return f"// Error parsing Python source: {e}"
+
 
 @register_framework("stablehlo")
 class StableHloAdapter(FrameworkAdapter):

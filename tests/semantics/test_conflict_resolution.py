@@ -5,7 +5,8 @@ Verifies that:
 1. Loading defines origins.
 2. Extras override Array/Neural without standard warnings, BUT preserve high-value tiers.
 3. Array vs Neural conflicts handle upgrades silently.
-4. Genuine signature mismatches trigger warnings.
+4. Genuine ambiguous signature mismatches trigger warnings.
+5. Subset/Superset signature updates are silent (Merge Logic).
 """
 
 import pytest
@@ -131,15 +132,88 @@ def test_extras_override_silence():
   assert mgr._key_origins["DataLoader"] == SemanticTier.NEURAL.value
 
 
-def test_duplicate_same_tier_signature_mismatch_warning():
+def test_duplicate_same_tier_arg_count_upgrade_silent():
   """
-  Scenario: Same key appears twice in same Tier with CONFLICTING signatures.
-  Expectation: Warning issued.
+  Scenario: Same key, same tier. New def has MORE args (Superset).
+  Expectation: Silent Upgrade.
   """
   mgr = MockConflictSemantics()
 
   content_a = {"add": {"std_args": ["a"]}}
   content_b = {"add": {"std_args": ["x", "y"]}}
+
+  # 1. Load First (1 arg)
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content=content_a,
+    tier=SemanticTier.ARRAY_API,
+  )
+
+  # 2. Load Second (2 args, upgrade)
+  with warnings.catch_warnings(record=True) as w:
+    warnings.simplefilter("always")
+    merge_tier_data(
+      data=mgr.data,
+      key_origins=mgr._key_origins,
+      import_data=mgr.import_data,
+      framework_configs=mgr.framework_configs,
+      new_content=content_b,
+      tier=SemanticTier.ARRAY_API,
+    )
+    relevant = [x for x in w if "Conflict detected" in str(x.message)]
+    assert len(relevant) == 0
+
+  # Verify Upgrade
+  assert mgr.data["add"]["std_args"] == ["x", "y"]
+
+
+def test_duplicate_same_tier_arg_count_downgrade_protects_old():
+  """
+  Scenario: Same key, same tier. New def has FEWER args (Subset).
+  Expectation: Silent Persistence of Old Data.
+  """
+  mgr = MockConflictSemantics()
+
+  content_rich = {"add": {"std_args": ["x", "y"], "description": "Rich"}}
+  content_poor = {"add": {"std_args": ["x"], "description": "Poor"}}
+
+  # 1. Load Rich
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content=content_rich,
+    tier=SemanticTier.ARRAY_API,
+  )
+
+  # 2. Load Poor
+  merge_tier_data(
+    data=mgr.data,
+    key_origins=mgr._key_origins,
+    import_data=mgr.import_data,
+    framework_configs=mgr.framework_configs,
+    new_content=content_poor,
+    tier=SemanticTier.ARRAY_API,
+  )
+
+  # Verify Preservation
+  assert mgr.data["add"]["std_args"] == ["x", "y"]
+  assert mgr.data["add"]["description"] == "Rich"
+
+
+def test_duplicate_same_tier_ambiguous_warning():
+  """
+  Scenario: Same key, same tier, SAME LENGTH, different names.
+  Expectation: Warning issued.
+  """
+  mgr = MockConflictSemantics()
+
+  content_a = {"add": {"std_args": ["x", "y"]}}
+  content_b = {"add": {"std_args": ["a", "b"]}}
 
   # 1. Load First
   merge_tier_data(
@@ -151,7 +225,7 @@ def test_duplicate_same_tier_signature_mismatch_warning():
     tier=SemanticTier.ARRAY_API,
   )
 
-  # 2. Load Second (Collision with different signature)
+  # 2. Load Second (Collision)
   with pytest.warns(UserWarning, match="Signature mismatch"):
     merge_tier_data(
       data=mgr.data,

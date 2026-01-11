@@ -1,20 +1,35 @@
 {
   "A": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Abs": {
-    "description": "Calculate the absolute value element-wise.",
+    "description": "Definition for Abs",
+    "operation": "Abs",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Tensor"
-      }
+      "x"
     ],
-    "variants": {}
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.abs"
+      },
+      "keras": {
+        "api": "keras.ops.abs"
+      },
+      "mlx": {
+        "api": "mlx.core.abs"
+      },
+      "numpy": {
+        "api": "numpy.abs"
+      },
+      "tensorflow": {
+        "api": "tf.abs"
+      },
+      "torch": {
+        "api": "torch.abs"
+      }
+    }
   },
   "Acos": {
     "description": "Compute element-wise inverse of trigonometric cosine of input.",
@@ -41,7 +56,7 @@
     "variants": {}
   },
   "ActivityRegularization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -184,37 +199,37 @@
     "variants": {}
   },
   "AdaptiveAveragePooling1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AdaptiveAveragePooling2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AdaptiveAveragePooling3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AdaptiveGradClipState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AdaptiveMaxPooling1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AdaptiveMaxPooling2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AdaptiveMaxPooling3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -237,17 +252,17 @@
     "variants": {}
   },
   "AddDecayedWeightsState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AddNoiseState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AdditiveAttention": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -457,7 +472,7 @@
     "variants": {}
   },
   "ApplyIfFiniteState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -702,7 +717,7 @@
     "variants": {}
   },
   "ArrayLike": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -780,7 +795,7 @@
     "variants": {}
   },
   "AssertClose": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -888,27 +903,112 @@
     "variants": {}
   },
   "Atom": {
-    "description": "Auto-generated from sass_vunknown_map.json",
+    "description": "Auto-generated from numpy_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Attention": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "Computes scaled dot product attention on query, key and value tensors, using an optional attention mask if passed. This operator covers self and cross variants of the attention operation based on sequence lengths of K, Q and V. For self attention, `kv_sequence_length` equals to `q_sequence_length`. ...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "Q",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "K",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "V",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "attn_mask",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "past_key",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "past_value",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "nonpad_kv_seqlen",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "is_causal",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "kv_num_heads",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "q_num_heads",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "qk_matmul_output_mode",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "scale",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "softcap",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "softmax_precision",
+        "type": "int"
+      }
+    ],
     "variants": {}
   },
   "AugMix": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AutoContrast": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AuxOutput": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -989,66 +1089,47 @@
     ]
   },
   "AveragePooling1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AveragePooling2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AveragePooling3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AvgPool1d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AvgPool2d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "AvgPool3d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Avgpool": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "kernel_size",
-        "type": "Union"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "padding",
-        "type": "Union"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "stride",
-        "type": "Union"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "B": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "BLOCK_M": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -1065,7 +1146,71 @@
     "variants": {}
   },
   "BatchNorm": {
-    "description": "Batch Normalization.",
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "BatchNormalization": {
+    "description": "Carries out batch normalization as described in the paper https://arxiv.org/abs/1502.03167. Depending on the mode it is being run, There are five required inputs 'X', 'scale', 'B', 'input_mean' and 'input_var'. Note that 'input_mean' and 'input_var' are expected to be the estimated statistics in inf...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "X",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "scale",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "B",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "input_mean",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "input_var",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "epsilon",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "momentum",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "training_mode",
+        "type": "int"
+      }
+    ],
+    "variants": {}
+  },
+  "BatchStat": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "type": "class"
+  },
+  "Bernoulli": {
+    "description": "Draws binary random numbers (0 or 1) from a Bernoulli distribution. The input tensor should be a tensor containing probabilities p (a value in the range [0,1]) to be used for drawing the binary random number, where an output of 1 is produced with probability p and an output of 0 is produced with pro...",
     "std_args": [
       {
         "is_variadic": false,
@@ -1076,25 +1221,16 @@
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "eps",
-        "type": "Any"
+        "name": "dtype",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "seed",
+        "type": "float"
       }
     ],
-    "variants": {}
-  },
-  "BatchNormalization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "BatchStat": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
-  "Bernoulli": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
     "variants": {}
   },
   "Bfloat16": {
@@ -1115,15 +1251,8 @@
     "variants": {}
   },
   "Bilinear": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "bias",
-        "type": "bool"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Bincount": {
@@ -1398,29 +1527,22 @@
     "variants": {}
   },
   "C": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "CTCLoss": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Cache": {
-    "description": "Container for mutable state.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "value",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Call": {
-    "description": "Auto-generated from sass_vunknown_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -1450,92 +1572,79 @@
     "variants": {}
   },
   "Cast": {
-    "description": "Auto-generated from keras_v3.13.0_map.json",
-    "std_args": [],
+    "description": "The operator casts the elements of a given input tensor to a data type specified by the 'to' argument and returns an output tensor of the same size in the converted type. The 'to' argument must be one of the data types specified in the 'DataType' enum field in the TensorProto message. Casting from s...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "input",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "round_mode",
+        "type": "str"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "saturate",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "to",
+        "type": "int"
+      }
+    ],
     "variants": {}
   },
   "CastBool": {
-    "description": "Cast tensor to bool",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CastByte": {
-    "description": "Cast to UIint8",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CastChar": {
-    "description": "Cast tensor to int8/char",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CastDouble": {
-    "description": "Cast tensor to float64",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CastFloat": {
     "description": "Definition for CastFloat",
+    "operation": "CastFloat",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
+      "x"
     ],
-    "variants": {}
+    "variants": {
+      "jax": {
+        "api": "astype",
+        "requires_plugin": "type_methods"
+      },
+      "torch": {
+        "api": "float"
+      }
+    }
   },
   "CastHalf": {
-    "description": "Cast to Half",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CastInt": {
-    "description": "Cast tensor to int32",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CastLike": {
@@ -1561,31 +1670,17 @@
     ]
   },
   "CastLong": {
-    "description": "Cast to Long",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CastShort": {
-    "description": "Cast tensor to int16",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CategoryEncoding": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -1626,15 +1721,8 @@
     "variants": {}
   },
   "CenterCrop": {
-    "description": "Crops the given image at the center.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "size",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CenterCropPad": {
@@ -1681,27 +1769,8 @@
     "variants": {}
   },
   "Clamp": {
-    "description": "Clamp all elements in input into the range [min, max].",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "input",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "min",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "max",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Clip": {
@@ -1729,30 +1798,17 @@
     "variants": {}
   },
   "ClipByGlobalNormState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ClipGradNorm": {
-    "description": "Clips gradient norm of an iterable of parameters.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "parameters",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "max_norm",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "ClipState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -1799,15 +1855,8 @@
     "variants": {}
   },
   "Compile": {
-    "description": "JIT Alias.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "func",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Complex128": {
@@ -1834,8 +1883,13 @@
     ],
     "variants": {}
   },
+  "ComplexOp": {
+    "description": "Desc",
+    "std_args": [],
+    "variants": {}
+  },
   "ComplexWarning": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -1864,7 +1918,7 @@
     "variants": {}
   },
   "ComputeCv": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -1931,12 +1985,12 @@
     "variants": {}
   },
   "ConditionallyMaskState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ConditionallyTransformState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -1965,8 +2019,57 @@
     "variants": {}
   },
   "Constant": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "This operator produces a constant tensor. Exactly one of the provided attributes, either value, sparse_value, or value_* must be specified.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "sparse_value",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "value",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "value_float",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "value_floats",
+        "type": "List[float]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "value_int",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "value_ints",
+        "type": "List[int]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "value_string",
+        "type": "str"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "value_strings",
+        "type": "List[str]"
+      }
+    ],
     "variants": {}
   },
   "ConstantOfShape": {
@@ -1984,7 +2087,7 @@
     ]
   },
   "ControlVariate": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -2037,87 +2140,32 @@
     "variants": {}
   },
   "Conv1DTranspose": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Conv1d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Conv2DTranspose": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Conv2d": {
-    "description": "Applies a 2D convolution over an input signal composed of several input planes.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "in_channels",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "out_channels",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "kernel_size",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "stride",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "padding",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "dilation",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "groups",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "bias",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "padding_mode",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Conv3DTranspose": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Conv3d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -2168,22 +2216,22 @@
     ]
   },
   "ConvLSTM1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ConvLSTM2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ConvLSTM3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ConvT": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -2238,47 +2286,47 @@
     "type": "class"
   },
   "ConvTranspose1d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ConvTranspose2d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ConvTranspose3d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Convolution1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Convolution1DTranspose": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Convolution2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Convolution2DTranspose": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Convolution3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Convolution3DTranspose": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -2412,21 +2460,8 @@
     "variants": {}
   },
   "CosineAnnealingLR": {
-    "description": "Set the learning rate of each parameter group using a cosine annealing schedule.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "optimizer",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "T_max",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CosineSimilarity": {
@@ -2435,21 +2470,8 @@
     "variants": {}
   },
   "Cosinesimilarity": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "dim",
-        "type": "int"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "reduction",
-        "type": "Literal"
-      }
-    ],
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "CountNonzero": {
@@ -2528,17 +2550,17 @@
     "variants": {}
   },
   "Cropping1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Cropping2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Cropping3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -2588,27 +2610,8 @@
     "variants": {}
   },
   "CrossEntropyLoss": {
-    "description": "Cross Entropy Loss.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "input",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "target",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "weight",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Csingle": {
@@ -2624,13 +2627,38 @@
     "variants": {}
   },
   "CudaAvailable": {
-    "description": "Checks if a CUDA device is available.",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "CumSum": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "Performs cumulative sum of the input elements along the given axis. By default, it will do the sum inclusively meaning the first element is copied as is. Through an `exclusive` attribute, this behavior can change to exclude the first element. It can also perform summation in the opposite direction o...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "exclusive",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "reverse",
+        "type": "int"
+      }
+    ],
     "variants": {}
   },
   "Cumprod": {
@@ -2732,17 +2760,17 @@
     "variants": {}
   },
   "CutMix": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "CvExpectedValue": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "CvState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -2773,109 +2801,12 @@
     ]
   },
   "DataLoader": {
-    "description": "Foundational PyTorch Data Loader. Mapped to GenericDataLoader shim via Plugin.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "dataset",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "batch_size",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "shuffle",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "sampler",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "batch_sampler",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "num_workers",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "collate_fn",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "pin_memory",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "drop_last",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "timeout",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "worker_init_fn",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "multiprocessing_context",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "generator",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "prefetch_factor",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "persistent_workers",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "pin_memory_device",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "DataParallel": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -2978,7 +2909,7 @@
     "variants": {}
   },
   "Dense": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -3001,12 +2932,12 @@
     ]
   },
   "DepthwiseConv1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "DepthwiseConv2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -3041,26 +2972,20 @@
     ]
   },
   "Det": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Device": {
-    "description": "Abstract Device placement context.",
+    "description": "Det calculates determinant of a square matrix or batches of square matrices. Det takes one input tensor of shape `[*, M, M]`, where `*` is zero or more batch dimensions, and the inner-most 2 dimensions form square matrices. The output is a tensor of shape `[*]`, containing the determinants of all in...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "type",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "index",
-        "type": "Any"
+        "name": "X",
+        "type": "Tensor"
       }
     ],
+    "variants": {}
+  },
+  "Device": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Diag": {
@@ -3217,24 +3142,24 @@
     "variants": {}
   },
   "Discretization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Div": {
-    "description": "Element-wise division.",
+    "description": "Performs element-wise binary division (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md). (Opset 14 change): Extend supported types to include uint8, int8, uint16, and int16.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
+        "name": "A",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "y",
-        "type": "Any"
+        "name": "B",
+        "type": "Tensor"
       }
     ],
     "variants": {}
@@ -3318,12 +3243,12 @@
     "variants": {}
   },
   "Dropout2d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Dropout3d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -3441,7 +3366,7 @@
     "variants": {}
   },
   "EinsumDense": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -3483,7 +3408,7 @@
     "variants": {}
   },
   "EmaState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -3553,13 +3478,20 @@
     "variants": {}
   },
   "Equalization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Erf": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "Computes the error function of the given input tensor element-wise.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "input",
+        "type": "Tensor"
+      }
+    ],
     "variants": {}
   },
   "EulerGamma": {
@@ -3839,7 +3771,7 @@
     "variants": {}
   },
   "FlaxLayer": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -3903,16 +3835,20 @@
     "variants": {}
   },
   "Float32": {
-    "description": "Float32 data type constructor.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
+    "description": "Definition for Float32",
+    "operation": "Float32",
+    "std_args": [],
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.float32"
+      },
+      "keras": {
+        "api": "numpy.float32"
+      },
+      "numpy": {
+        "api": "numpy.float32"
       }
-    ],
-    "variants": {}
+    }
   },
   "Float4_e2m1fn": {
     "description": "Float4_e2m1fn data type constructor.",
@@ -4388,47 +4324,125 @@
     "variants": {}
   },
   "FusedMultiplyAdd": {
-    "description": "Auto-generated from rdna_vunknown_map.json",
+    "description": "Auto-generated from rdna_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GELU": {
-    "description": "Gaussian Error Linear Unit.",
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "GRU": {
+    "description": "Computes an one-layer GRU. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `z` - update gate * `r` - reset gate * `h` - hidden gate * `t` - time step (t-1 means previous time step) * `W[zrh]` - W parameter weight matrix for update, r...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "input",
+        "name": "X",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "W",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "R",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "B",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "sequence_lens",
         "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "initial_h",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "activation_alpha",
+        "type": "List[float]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "activation_beta",
+        "type": "List[float]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "activations",
+        "type": "List[str]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "clip",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "direction",
+        "type": "str"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "hidden_size",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "layout",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "linear_before_reset",
+        "type": "int"
       }
     ],
     "variants": {}
   },
-  "GRU": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
-    "variants": {}
-  },
   "Gather": {
-    "description": "Gathers values along an axis specified by dim.",
+    "description": "Given `data` tensor of rank r >= 1, and `indices` tensor of rank q, gather entries of the axis dimension of `data` (by default outer-most one as axis=0) indexed by `indices`, and concatenates them in an output tensor of rank q + (r - 1). It is an indexing operation that indexes into the input `data`...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "input",
+        "name": "data",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "indices",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "dim",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "index",
-        "type": "Any"
+        "name": "axis",
+        "type": "int"
       }
     ],
     "variants": {}
@@ -4470,37 +4484,18 @@
     ]
   },
   "GaussianDropout": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GaussianNoise": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Gaussiannll": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "eps",
-        "type": "float"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "full",
-        "type": "bool"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "reduction",
-        "type": "str"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Gcd": {
@@ -4639,32 +4634,32 @@
     ]
   },
   "GlobalAveragePooling1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalAveragePooling2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalAveragePooling3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalAvgPool1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalAvgPool2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalAvgPool3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -4693,32 +4688,32 @@
     ]
   },
   "GlobalMaxPool1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalMaxPool2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalMaxPool3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalMaxPooling1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalMaxPooling2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GlobalMaxPooling3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -4759,15 +4754,8 @@
     "variants": {}
   },
   "Grayscale": {
-    "description": "Convert image to grayscale.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "num_output_channels",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Greater": {
@@ -4847,17 +4835,54 @@
     ]
   },
   "Group": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "GroupNormalization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
+    "description": "A GroupNormalization function. Carries out group normalization as described in the paper https://arxiv.org/abs/1803.08494 This operator transforms input according to ``` y = scale * (x - mean) / sqrt(variance + epsilon) + bias, ``` where the mean and variance are computed per instance per group of c...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "X",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "scale",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "bias",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "epsilon",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "num_groups",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stash_type",
+        "type": "int"
+      }
+    ],
     "variants": {}
   },
   "GroupQueryAttention": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -4958,13 +4983,39 @@
     "variants": {}
   },
   "HardSigmoid": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
-    "std_args": [],
+    "description": "HardSigmoid takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the HardSigmoid function, y = max(0, min(1, alpha * x + beta)), is applied to the tensor elementwise.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "X",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "alpha",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "beta",
+        "type": "float"
+      }
+    ],
     "variants": {}
   },
   "HardSwish": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "HardSwish takes one input data (Tensor<T>) and produces one output data (Tensor<T>) where the HardSwish function, y = x * max(0, min(1, alpha * x + beta)) = x * HardSigmoid<alpha, beta>(x), where alpha = 1/6 and beta = 0.5, is applied to the tensor elementwise.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "X",
+        "type": "Tensor"
+      }
+    ],
     "variants": {}
   },
   "Hardmax": {
@@ -4982,12 +5033,12 @@
     ]
   },
   "Hardshrink": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Hardswish": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -4997,12 +5048,12 @@
     "variants": {}
   },
   "HashedCrossing": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Hashing": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -5236,7 +5287,7 @@
     "variants": {}
   },
   "INTEGER": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -5327,13 +5378,18 @@
     ],
     "variants": {}
   },
+  "InferredOp": {
+    "description": "Auto Op",
+    "std_args": [],
+    "variants": {}
+  },
   "InjectHyperparamsState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "InjectStatefulHyperparamsState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -5356,12 +5412,12 @@
     "variants": {}
   },
   "InputLayer": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "InputSpec": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -5490,7 +5546,7 @@
     "variants": {}
   },
   "IntegerLookup": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -5693,8 +5749,15 @@
     "variants": {}
   },
   "IsNaN": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "Returns which elements of the input are NaN.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "X",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "IsNan": {
@@ -5883,7 +5946,7 @@
     "variants": {}
   },
   "JaxLayer": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -5906,15 +5969,8 @@
     "variants": {}
   },
   "Kldiv": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "reduction",
-        "type": "str"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Kron": {
@@ -5936,19 +5992,12 @@
     "variants": {}
   },
   "L1": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "reduction",
-        "type": "str"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "LOWER_RIGHT": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -5979,67 +6028,176 @@
     ]
   },
   "LSTM": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Lambda": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Layer": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "LayerNorm": {
-    "description": "Applies Layer Normalization over a mini-batch of inputs.",
+    "description": "Computes an one-layer LSTM. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `i` - input gate * `o` - output gate * `f` - forget gate * `c` - cell gate * `t` - time step (t-1 means previous time step) * `W[iofc]` - W parameter weight ...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "normalized_shape",
+        "name": "X",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "W",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "R",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "B",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "sequence_lens",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "eps",
-        "type": "Any"
+        "name": "initial_h",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "elementwise_affine",
-        "type": "Any"
+        "name": "initial_c",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "bias",
-        "type": "Any"
+        "name": "P",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "activation_alpha",
+        "type": "List[float]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "activation_beta",
+        "type": "List[float]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "activations",
+        "type": "List[str]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "clip",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "direction",
+        "type": "str"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "hidden_size",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "input_forget",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "layout",
+        "type": "int"
       }
     ],
     "variants": {}
   },
-  "LayerNormalization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+  "Lambda": {
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
+  "Layer": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "LayerNorm": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "LayerNormalization": {
+    "description": "This is layer normalization defined in ONNX as function. The overall computation can be split into two stages. The first stage is standardization, which makes the normalized elements have zero mean and unit variances. The computation required by standardization can be described by the following equa...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "X",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "Scale",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "B",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "epsilon",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "stash_type",
+        "type": "int"
+      }
+    ],
+    "variants": {}
+  },
   "LazyConvTranspose1d": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "LazyConvTranspose2d": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "LazyConvTranspose3d": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -6089,8 +6247,21 @@
     "variants": {}
   },
   "LeakyRelu": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "LeakyRelu takes input data (Tensor<T>) and an argument alpha, and produces one output data (Tensor<T>) where the function `f(x) = alpha * x for x < 0`, `f(x) = x for x >= 0`, is applied to the data tensor elementwise.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "X",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "alpha",
+        "type": "float"
+      }
+    ],
     "variants": {}
   },
   "LeftShift": {
@@ -6210,7 +6381,7 @@
     "variants": {}
   },
   "LinearT": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -6309,7 +6480,7 @@
     "variants": {}
   },
   "List": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -6374,8 +6545,21 @@
     "variants": {}
   },
   "LogSoftmax": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "The operator computes the log of softmax values for the given input: LogSoftmax(input, axis) = Log(Softmax(input, axis=axis)) The \"axis\" attribute indicates the dimension along which LogSoftmax will be performed. The output tensor has the same shape and contains the LogSoftmax values of the correspo...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "input",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      }
+    ],
     "variants": {}
   },
   "Logaddexp": {
@@ -6415,15 +6599,8 @@
     "variants": {}
   },
   "Logcosh": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "reduction",
-        "type": "Literal"
-      }
-    ],
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "LogicalAnd": {
@@ -6493,7 +6670,7 @@
     "variants": {}
   },
   "Logsigmoid": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -6682,54 +6859,28 @@
     "variants": {}
   },
   "M": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MA": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MSELoss": {
-    "description": "Mean Squared Error.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "input",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "target",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "MarginRankingLoss": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Marginranking": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "margin",
-        "type": "float"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "reduction",
-        "type": "str"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "MaskIndices": {
@@ -6758,23 +6909,36 @@
     "variants": {}
   },
   "MaskedNode": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MaskedState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Masking": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MatMul": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "Matrix product that behaves like [numpy.matmul](https://numpy.org/doc/stable/reference/generated/numpy.matmul.html).",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "A",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "B",
+        "type": "Tensor"
+      }
+    ],
     "variants": {}
   },
   "MatMulInteger": {
@@ -6873,7 +7037,7 @@
     "variants": {}
   },
   "MaxNumBoundingBoxes": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -6916,69 +7080,32 @@
     ]
   },
   "MaxPool1d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MaxPool2d": {
-    "description": "Applies a 2D max pooling over an input signal composed of several input planes.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "kernel_size",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "stride",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "padding",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "dilation",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "return_indices",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "ceil_mode",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "MaxPool3d": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MaxPooling1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MaxPooling2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MaxPooling3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -7035,17 +7162,17 @@
     ]
   },
   "MaxUnpool1d": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MaxUnpool2d": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MaxUnpool3d": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -7068,59 +7195,36 @@
     "variants": {}
   },
   "Maxpool": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "kernel_size",
-        "type": "Union"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "padding",
-        "type": "Union"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "stride",
-        "type": "Union"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Mean": {
-    "description": "Return the mean of array elements along a given axis.",
+    "description": "Definition for Mean",
+    "operation": "Mean",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "a",
-        "type": "Tensor"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "axis",
-        "type": "int | tuple | None"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "dtype",
-        "type": "DType | None"
-      },
-      {
-        "default": false,
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "keepdims",
-        "type": "bool"
-      }
+      "x"
     ],
-    "variants": {}
+    "variants": {
+      "jax": {
+        "api": "jax.numpy.mean"
+      },
+      "keras": {
+        "api": "keras.ops.mean"
+      },
+      "mlx": {
+        "api": "mlx.core.mean"
+      },
+      "numpy": {
+        "api": "numpy.mean"
+      },
+      "tensorflow": {
+        "api": "tf.math.reduce_mean"
+      },
+      "torch": {
+        "api": "torch.mean"
+      }
+    }
   },
   "MeanVarianceNormalization": {
     "description": "A MeanVarianceNormalization Function: Perform mean variance normalization on the input tensor X using formula: `(X-EX)/sqrt(E(X-EX)^2)`",
@@ -7162,7 +7266,7 @@
     "variants": {}
   },
   "MelSpectrogram": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -7290,7 +7394,7 @@
     "variants": {}
   },
   "MixUp": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -7325,7 +7429,7 @@
     "variants": {}
   },
   "Module": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -7361,7 +7465,7 @@
     "type": "class"
   },
   "ModuleList": {
-    "description": "Auto-generated from keras_v3.13.0_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -7422,113 +7526,76 @@
     "variants": {}
   },
   "Mse": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "reduction",
-        "type": "str"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Mul": {
-    "description": "Element-wise multiplication.",
+    "description": "Performs element-wise binary multiplication (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md). (Opset 14 change): Extend supported types to include uint8, int8, uint16, and i...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
+        "name": "A",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "y",
-        "type": "Any"
+        "name": "B",
+        "type": "Tensor"
       }
     ],
     "variants": {}
   },
   "MultiSteps": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MultiStepsState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MultiTransformState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "MultiheadAttention": {
-    "description": "Multi-head attention mechanism.",
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Multinomial": {
+    "description": "Generate a tensor of samples from a multinomial distribution according to the probabilities of each of the possible outcomes.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "embed_dim",
+        "name": "input",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "num_heads",
-        "type": "Any"
+        "name": "dtype",
+        "type": "int"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "dropout",
-        "type": "Any"
+        "name": "sample_size",
+        "type": "int"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "bias",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "add_bias_kv",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "add_zero_attn",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "kdim",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "vdim",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "batch_first",
-        "type": "Any"
+        "name": "seed",
+        "type": "float"
       }
     ],
-    "variants": {}
-  },
-  "Multinomial": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
-    "std_args": [],
     "variants": {}
   },
   "Multiply": {
@@ -7550,12 +7617,12 @@
     "variants": {}
   },
   "NONE": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Names": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -7941,16 +8008,21 @@
       ]
     ]
   },
-  "Nll": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
+  "NewOp": {
+    "description": "A new operation",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "reduction",
-        "type": "str"
+        "name": "x",
+        "type": "Tensor"
       }
     ],
+    "variants": {}
+  },
+  "Nll": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "NonMaxSuppression": {
@@ -7984,47 +8056,35 @@
     ]
   },
   "NonNegativeParamsState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "NonZero": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Nop": {
-    "description": "Auto-generated from sass_vunknown_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Normalization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Normalize": {
-    "description": "Normalize a tensor image with mean and standard deviation.",
+    "description": "Returns the indices of the elements that are non-zero (in row-major order - by dimension). NonZero behaves similar to numpy.nonzero: https://docs.scipy.org/doc/numpy/reference/generated/numpy.nonzero.html, but for scalar input, NonZero produces output shape (0, N) instead of (1, N), which is differe...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "mean",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "std",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "inplace",
-        "type": "Any"
+        "name": "X",
+        "type": "Tensor"
       }
     ],
+    "variants": {}
+  },
+  "Nop": {
+    "description": "Auto-generated from numpy_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Normalization": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Normalize": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Not": {
@@ -8038,51 +8098,76 @@
     "type": "class"
   },
   "Object": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "OneHot": {
-    "description": "Takes LongTensor with index values of shape (*) and returns a tensor of shape (*, num_classes).",
+    "description": "Produces a one-hot tensor based on inputs. The locations represented by the index values in the 'indices' input tensor will have 'on_value' and the other locations will have 'off_value' in the output tensor, where 'on_value' and 'off_value' are specified as part of required input argument 'values', ...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "tensor",
+        "name": "indices",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "num_classes",
+        "name": "depth",
         "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "values",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
       }
     ],
     "variants": {}
   },
   "Ones": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "OptState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "OptaxTest": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Optimizer": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Optional": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "Constructs an optional-type value containing either an empty optional of a certain type specified by the attribute, or a non-empty value containing the input element.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "input",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "type",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "OptionalGetElement": {
@@ -8120,79 +8205,91 @@
     ]
   },
   "PRelu": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Pad": {
-    "description": "Pads input tensor.",
+    "description": "PRelu takes input data (Tensor<T>) and slope tensor as input, and produces one output data (Tensor<T>) where the function `f(x) = slope * x for x < 0`, `f(x) = x for x >= 0`., is applied to the data tensor elementwise. This operator supports **unidirectional broadcasting** (tensor slope should be un...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "input",
-        "type": "Any"
+        "name": "X",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "pad",
+        "name": "slope",
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "Pad": {
+    "description": "Given a tensor containing the data to be padded (`data`), a tensor containing the number of start and end pad values for axis (`pads`), (optionally) a `mode`, and (optionally) `constant_value`, a padded tensor (`output`) is generated. The three supported `modes` are (similar to corresponding modes s...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "data",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "pads",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "constant_value",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
         "name": "mode",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "value",
-        "type": "Any"
+        "type": "str"
       }
     ],
     "variants": {}
   },
   "Param": {
-    "description": "Container for trainable parameter.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "value",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Parameter": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ParameterList": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "PartitionState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Permute": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Pipeline": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Poly": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -8674,70 +8771,137 @@
     "type": "class"
   },
   "RMSNormalization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "RMSprop": {
-    "description": "Root Mean Square Propagation optimizer.",
+    "description": "This is RMS normalization defined in ONNX as function as described in the paper https://arxiv.org/pdf/1910.07467. The overall computation can be split into two stages. The root mean squared norm is taken over the last D dimensions, where D is the dimension of normalized_shape. For example, if normal...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "params",
+        "name": "X",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "scale",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "lr",
-        "type": "Any"
+        "name": "axis",
+        "type": "int"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "rho",
-        "type": "Any"
+        "name": "epsilon",
+        "type": "float"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "eps",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "weight_decay",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "momentum",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "centered",
-        "type": "Any"
+        "name": "stash_type",
+        "type": "int"
       }
     ],
     "variants": {}
   },
-  "RNN": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+  "RMSprop": {
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
+  "RNN": {
+    "description": "Computes an one-layer simple RNN. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `i` - input gate * `t` - time step (t-1 means previous time step) * `Wi` - W parameter weight matrix for input gate * `Ri` - R recurrence weight matrix...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "X",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "W",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "R",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "B",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "sequence_lens",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "initial_h",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "activation_alpha",
+        "type": "List[float]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "activation_beta",
+        "type": "List[float]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "activations",
+        "type": "List[str]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "clip",
+        "type": "float"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "direction",
+        "type": "str"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "hidden_size",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "layout",
+        "type": "int"
+      }
+    ],
+    "variants": {}
+  },
   "RNNBase": {
-    "description": "Auto-generated from flax_nnx_v0.12.2_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RPC_AVAILABLE": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -8778,115 +8942,77 @@
     "variants": {}
   },
   "RandAugment": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandInt": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomBrightness": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomColorDegeneration": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomColorJitter": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomContrast": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomCrop": {
-    "description": "Crop the given image at a random location.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "size",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "padding",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "pad_if_needed",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "fill",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "padding_mode",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "RandomElasticTransform": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomErasing": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomFlip": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomGaussianBlur": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomGrayscale": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomHorizontalFlip": {
-    "description": "Horizontally flip the image randomly with a given probability.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "p",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "RandomHue": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomInvert": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -8943,37 +9069,37 @@
     ]
   },
   "RandomPerspective": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomPosterization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomRotation": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomSaturation": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomSharpness": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomShear": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "RandomTranslation": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -9030,19 +9156,12 @@
     ]
   },
   "RandomVerticalFlip": {
-    "description": "Vertically flip the image randomly with a given probability.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "p",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "RandomZoom": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -9116,7 +9235,7 @@
     "variants": {}
   },
   "ReLU": {
-    "description": "Rectified Linear Unit.",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -9431,12 +9550,12 @@
     "variants": {}
   },
   "RepeatVector": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Rescaling": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -9484,7 +9603,7 @@
     "variants": {}
   },
   "Resizing": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -9523,7 +9642,7 @@
     ]
   },
   "ReversibleEmbedding": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -9779,59 +9898,53 @@
     "variants": {}
   },
   "SGD": {
-    "description": "Stochastic Gradient Descent optimizer.",
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "STFT": {
+    "description": "Computes the Short-time Fourier Transform of the signal.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "params",
+        "name": "signal",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "lr",
+        "name": "frame_step",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "momentum",
+        "name": "window",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "dampening",
+        "name": "frame_length",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "weight_decay",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "nesterov",
-        "type": "Any"
+        "name": "onesided",
+        "type": "int"
       }
     ],
     "variants": {}
   },
-  "STFT": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
   "STFTSpectrogram": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "STRING": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -9892,48 +10005,66 @@
     "variants": {}
   },
   "ScaleByTrustRatioState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ScaleState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Scan": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Scatter": {
-    "description": "Writes all values from the tensor src into indices specified.",
+    "description": "Scan can be used to iterate over one or more scan_input tensors, constructing zero or more scan_output tensors. It combines ideas from general recurrences, functional programming constructs such as scan, fold, map, and zip, and is intended to enable generalizations of RNN-like constructs for sequenc...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "input",
+        "name": "initial_state_and_scan_inputs",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "dim",
+        "name": "body",
         "type": "Any"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "index",
-        "type": "Any"
+        "name": "num_scan_inputs",
+        "type": "int"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "src",
-        "type": "Any"
+        "name": "scan_input_axes",
+        "type": "List[int]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "scan_input_directions",
+        "type": "List[int]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "scan_output_axes",
+        "type": "List[int]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "scan_output_directions",
+        "type": "List[int]"
       }
     ],
+    "variants": {}
+  },
+  "Scatter": {
+    "description": "This operator is deprecated. Please use ScatterElements, which provides the same functionality. Scatter takes three inputs `data`, `updates`, and `indices` of the same rank r >= 1 and an optional attribute axis that identifies an axis of `data` (by default, the outer-most axis, that is axis 0). The ...",
+    "std_args": [],
     "variants": {}
   },
   "ScatterElements": {
@@ -10053,22 +10184,22 @@
     "variants": {}
   },
   "SeparableConv1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "SeparableConv2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "SeparableConvolution1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "SeparableConvolution2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10276,7 +10407,7 @@
     "variants": {}
   },
   "ShouldSkipUpdateFunction": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10299,7 +10430,7 @@
     ]
   },
   "SiLU": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10357,12 +10488,12 @@
     "variants": {}
   },
   "SimpleRNN": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "SimpleRNNCell": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10433,30 +10564,48 @@
     "variants": {}
   },
   "Slice": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Smoothl1": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "description": "Produces a slice of the input tensor along multiple axes. Similar to numpy: https://numpy.org/doc/stable/user/basics.indexing.html?highlight=slice#slicing-and-striding Slice uses the `starts`, `ends`, `axes` and `steps` inputs to select a sub-tensor of its input `data` tensor. An effective `starts[i...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "beta",
-        "type": "float"
+        "name": "data",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "reduction",
-        "type": "str"
+        "name": "starts",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "ends",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "steps",
+        "type": "Any"
       }
     ],
     "variants": {}
   },
+  "Smoothl1": {
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
   "SnapshotState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10473,7 +10622,7 @@
     "variants": {}
   },
   "Softmax2d": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10504,7 +10653,7 @@
     ]
   },
   "Softmin": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10524,7 +10673,7 @@
     "variants": {}
   },
   "Solarization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10630,27 +10779,27 @@
     "variants": {}
   },
   "SpatialDropout1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "SpatialDropout2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "SpatialDropout3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "SpectralNorm": {
-    "description": "Auto-generated from flax_nnx_v0.12.2_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "SpectralNormalization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10775,7 +10924,7 @@
     "variants": {}
   },
   "StackedRNNCells": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10842,27 +10991,8 @@
     "variants": {}
   },
   "StepLR": {
-    "description": "Decays the learning rate of each parameter group by gamma every step_size epochs.",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "optimizer",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "step_size",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "gamma",
-        "type": "Any"
-      }
-    ],
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "StringConcat": {
@@ -10880,7 +11010,7 @@
     ]
   },
   "StringLookup": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -10929,19 +11059,19 @@
     ]
   },
   "Sub": {
-    "description": "Element-wise subtraction.",
+    "description": "Performs element-wise binary subtraction (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md). (Opset 14 change): Extend supported types to include uint8, int8, uint16, and int1...",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
+        "name": "A",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "y",
-        "type": "Any"
+        "name": "B",
+        "type": "Tensor"
       }
     ],
     "variants": {}
@@ -10977,13 +11107,75 @@
     "variants": {}
   },
   "Sum": {
-    "description": "Calculates the sum value.",
+    "description": "Sum of the elements of the array over a given axis.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "x",
+        "name": "a",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int | tuple[int, ...] | None"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "dtype",
+        "type": "DType | None"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "keepdims",
+        "type": "bool"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "initial",
         "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "where",
+        "type": "Tensor | None"
+      },
+      {
+        "default": true,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "promote_integers",
+        "type": "bool"
+      }
+    ],
+    "variants": {}
+  },
+  "Swapaxes": {
+    "description": "Swap two axes of an array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis1",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis2",
+        "type": "int"
       }
     ],
     "variants": {}
@@ -11003,43 +11195,137 @@
     "type": "function"
   },
   "Synchronize": {
-    "description": "Execution Barrier.",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "T": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "TFSMLayer": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "TUPLE": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "T_module": {
-    "description": "Auto-generated from torch_v2.9.1_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
+    "variants": {}
+  },
+  "Take": {
+    "description": "Take elements from an array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "indices",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int | None"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "mode",
+        "type": "str | None"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fill_value",
+        "type": "Any"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "unique_indices",
+        "type": "bool"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "indices_are_sorted",
+        "type": "bool"
+      }
+    ],
+    "variants": {}
+  },
+  "TakeAlongAxis": {
+    "description": "Take elements from an array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "arr",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "indices",
+        "type": "Tensor"
+      },
+      {
+        "default": -1,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int | None"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "mode",
+        "type": "str | None"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fill_value",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "Tan": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Tanh": {
-    "description": "Auto-discovered via Consensus (Score: 3.0)",
+    "description": "Compute a trigonometric tangent of each element of input.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
         "name": "x",
-        "type": "Any"
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "Tanh": {
+    "description": "Calculate element-wise hyperbolic tangent of input.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
       }
     ],
     "variants": {}
@@ -11050,7 +11336,7 @@
     "variants": {}
   },
   "Tensor": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from tensorflow_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -11081,8 +11367,45 @@
     ]
   },
   "TensorType": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
+    "variants": {}
+  },
+  "Tensordot": {
+    "description": "Compute the tensor dot product of two N-dimensional arrays.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Tensor"
+      },
+      {
+        "default": 2,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "int | Sequence[int] | Sequence[Sequence[int]]"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "precision",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "preferred_element_type",
+        "type": "DType | None"
+      }
+    ],
     "variants": {}
   },
   "TestAssignmentOnlyModules": {
@@ -11136,7 +11459,7 @@
     "type": "class"
   },
   "TextVectorization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -11213,210 +11536,331 @@
     ]
   },
   "Tile": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "TimeDistributed": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "ToTensor": {
-    "description": "Convert a PIL Image or numpy.ndarray to tensor.",
-    "std_args": [],
-    "variants": {}
-  },
-  "TopK": {
-    "description": "Returns the k largest elements of the given input tensor along a given dimension.",
+    "description": "Construct an array by repeating A along specified dimensions.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "input",
-        "type": "Any"
+        "name": "A",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "k",
-        "type": "Any"
+        "name": "reps",
+        "type": "int | Sequence[int]"
+      }
+    ],
+    "variants": {}
+  },
+  "TimeDistributed": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "ToTensor": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "TopK": {
+    "description": "Retrieve the top-K largest or smallest elements along a specified axis. Given an input tensor of shape [a_0, a_1, ..., a_{n-1}] and integer argument k, return two outputs: * Value tensor of shape [a_0, a_1, ..., a_{axis-1}, k, a_{axis+1}, ... a_{n-1}] which contains the values of the top k elements ...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "X",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "dim",
-        "type": "Any"
+        "name": "K",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
         "name": "largest",
-        "type": "Any"
+        "type": "int"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
         "name": "sorted",
-        "type": "Any"
+        "type": "int"
       }
     ],
     "variants": {}
   },
   "TorchFunctional": {
-    "description": "Abstract Functional Namespace (e.g. F in torch.nn.functional)",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "TorchLoad": {
     "description": "Definition for TorchLoad",
+    "operation": "TorchLoad",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "f",
-        "type": "Any"
-      }
+      "f"
     ],
-    "variants": {}
+    "variants": {
+      "jax": {
+        "api": "load",
+        "requires_plugin": "io_handler"
+      },
+      "numpy": {
+        "api": "load",
+        "requires_plugin": "io_handler"
+      },
+      "torch": {
+        "api": "torch.load"
+      }
+    }
   },
   "TorchModuleWrapper": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "TorchSave": {
     "description": "Definition for TorchSave",
+    "operation": "TorchSave",
+    "std_args": [
+      "obj",
+      "f"
+    ],
+    "variants": {
+      "jax": {
+        "api": "save",
+        "requires_plugin": "io_handler"
+      },
+      "numpy": {
+        "api": "save",
+        "requires_plugin": "io_handler"
+      },
+      "torch": {
+        "api": "torch.save"
+      }
+    }
+  },
+  "Trace": {
+    "description": "Calculate sum of the diagonal of input along the given axes.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "obj",
-        "type": "Any"
+        "name": "a",
+        "type": "Tensor"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "offset",
+        "type": "int | Tensor"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis1",
+        "type": "int"
+      },
+      {
+        "default": 1,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis2",
+        "type": "int"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "f",
-        "type": "Any"
+        "name": "dtype",
+        "type": "DType | None"
       }
     ],
     "variants": {}
   },
   "TraceState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Transformer": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "activation",
-        "type": "Union"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "custom_decoder",
-        "type": "Optional"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "custom_encoder",
-        "type": "Optional"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "dropout",
-        "type": "float"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "norm_first",
-        "type": "bool"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "num_decoder_layers",
-        "type": "int"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "num_encoder_layers",
-        "type": "int"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "TransformerDecoderLayer": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "TransformerEncoderLayer": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
+    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Transformerdecoder": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "activation",
-        "type": "Union"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "dropout",
-        "type": "float"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "norm_first",
-        "type": "bool"
-      }
-    ],
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
     "variants": {}
   },
   "Transformerencoder": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
+    "description": "Auto-generated from mlx_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Transpose": {
+    "description": "Return a transposed version of an N-dimensional array.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "activation",
-        "type": "Union"
+        "name": "a",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "dropout",
-        "type": "float"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "norm_first",
-        "type": "bool"
+        "name": "axes",
+        "type": "Sequence[int] | None"
       }
     ],
     "variants": {}
   },
-  "Transpose": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+  "Trapezoid": {
+    "description": "Integrate along the given axis using the composite trapezoidal rule.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor | None"
+      },
+      {
+        "default": 1.0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "dx",
+        "type": "float | Tensor"
+      },
+      {
+        "default": -1,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      }
+    ],
+    "variants": {}
+  },
+  "Tri": {
+    "description": "Return an array with ones on and below the diagonal and zeros elsewhere.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "N",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "M",
+        "type": "int | None"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "k",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "dtype",
+        "type": "DType | None"
+      }
+    ],
+    "variants": {}
+  },
+  "Tril": {
+    "description": "Return lower triangle of an array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "m",
+        "type": "Tensor"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "k",
+        "type": "int"
+      }
+    ],
+    "variants": {}
+  },
+  "TrilIndices": {
+    "description": "Return the indices of lower triangle of an array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "n",
+        "type": "int"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "k",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "m",
+        "type": "int | None"
+      }
+    ],
+    "variants": {}
+  },
+  "TrilIndicesFrom": {
+    "description": "Return the indices of lower triangle of a given array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "arr",
+        "type": "Tensor"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "k",
+        "type": "int"
+      }
+    ],
     "variants": {}
   },
   "Trilu": {
@@ -11437,174 +11881,490 @@
       ]
     ]
   },
-  "UInt8": {
-    "description": "Type UInt8",
-    "std_args": [],
-    "variants": {}
-  },
-  "Unflatten": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Unfold": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Unique": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "UniqueAll": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "UniqueCounts": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "UniqueInverse": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "UniqueValues": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "UnitNormalization": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "UnpackBits": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "UnravelIndex": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "UnsignedInteger": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "Unsqueeze": {
-    "description": "Returns a new tensor with a dimension of size one inserted at the specified position.",
+  "TrimZeros": {
+    "description": "Trim leading and/or trailing zeros of the input array.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "input",
-        "type": "Any"
+        "name": "filt",
+        "type": "Tensor"
+      },
+      {
+        "default": "fb",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "trim",
+        "type": "str"
       },
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "dim",
+        "name": "axis",
+        "type": "int | Sequence[int] | None"
+      }
+    ],
+    "variants": {}
+  },
+  "Triu": {
+    "description": "Return upper triangle of an array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "m",
+        "type": "Tensor"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "k",
+        "type": "int"
+      }
+    ],
+    "variants": {}
+  },
+  "TriuIndices": {
+    "description": "Return the indices of upper triangle of an array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "n",
+        "type": "int"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "k",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "m",
+        "type": "int | None"
+      }
+    ],
+    "variants": {}
+  },
+  "TriuIndicesFrom": {
+    "description": "Return the indices of upper triangle of a given array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "arr",
+        "type": "Tensor"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "k",
+        "type": "int"
+      }
+    ],
+    "variants": {}
+  },
+  "TrueDivide": {
+    "description": "Calculates the division of x1 by x2 element-wise.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x1",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x2",
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "Trunc": {
+    "description": "Round input to the nearest integer towards zero.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "UInt8": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Ufunc": {
+    "description": "Universal functions which operation element-by-element on arrays.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "func",
+        "type": "Callable"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "nin",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "nout",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "identity",
         "type": "Any"
       }
     ],
     "variants": {}
   },
-  "Unstack": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "Unwrap": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "UpSampling1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "UpSampling2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "UpSampling3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "UpdateCvState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Upsample": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "V": {
-    "description": "Auto-generated from numpy_v2.4.0_map.json",
-    "std_args": [],
-    "variants": {}
-  },
-  "Vander": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "Var": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "Variable": {
-    "description": "Generic state container.",
+  "Uint": {
+    "description": "A JAX scalar constructor of type uint64.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "value",
+        "name": "x",
         "type": "Any"
       }
     ],
     "variants": {}
   },
-  "Vdot": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "Vecdot": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "Vecmat": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "Vectorize": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "variants": {}
-  },
-  "View": {
-    "description": "Returns a new tensor with the same data and elements but different shape.",
+  "Uint16": {
+    "description": "A JAX scalar constructor of type uint16.",
     "std_args": [
       {
         "is_variadic": false,
         "kind": "positional_or_keyword",
-        "name": "input",
+        "name": "x",
         "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "Uint2": {
+    "description": "A JAX scalar constructor of type uint2.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "Uint32": {
+    "description": "A JAX scalar constructor of type uint32.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "Uint4": {
+    "description": "A JAX scalar constructor of type uint4.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "Uint64": {
+    "description": "A JAX scalar constructor of type uint64.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "Uint8": {
+    "description": "A JAX scalar constructor of type uint8.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "Unflatten": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Unfold": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Union1d": {
+    "description": "Compute the set union of two 1D arrays.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "ar1",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "ar2",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "size",
+        "type": "int | None"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fill_value",
+        "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "Unique": {
+    "description": "Return the unique values from an array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "ar",
+        "type": "Tensor"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "return_index",
+        "type": "bool"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "return_inverse",
+        "type": "bool"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "return_counts",
+        "type": "bool"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      },
+      {
+        "default": true,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "equal_nan",
+        "type": "bool"
+      },
+      {
+        "doc": "JAX-specific argument for static output size.",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "size",
+        "type": "int"
+      },
+      {
+        "doc": "JAX-specific argument for padding.",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fill_value",
+        "type": "Tensor"
+      },
+      {
+        "default": true,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "sorted",
+        "type": "bool"
+      }
+    ],
+    "variants": {}
+  },
+  "UniqueAll": {
+    "description": "Return unique values from x, along with indices, inverse indices, and counts.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "size",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fill_value",
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "UniqueCounts": {
+    "description": "Return unique values from x, along with counts.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "size",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fill_value",
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "UniqueInverse": {
+    "description": "Return unique values from x, along with indices, inverse indices, and counts.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "size",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fill_value",
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "UniqueValues": {
+    "description": "Return unique values from x, along with indices, inverse indices, and counts.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "size",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fill_value",
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "UnitNormalization": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "UnpackBits": {
+    "description": "Unpack the bits in a uint8 array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "count",
+        "type": "int"
+      },
+      {
+        "default": "big",
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "bitorder",
+        "type": "str"
+      }
+    ],
+    "variants": {}
+  },
+  "UnravelIndex": {
+    "description": "Convert flat indices into multi-dimensional indices.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "indices",
+        "type": "Tensor"
       },
       {
         "is_variadic": false,
@@ -11615,33 +12375,400 @@
     ],
     "variants": {}
   },
-  "Vsplit": {
+  "UnsignedInteger": {
+    "description": "Abstract base class of all unsigned integer scalar types.",
+    "std_args": [],
+    "variants": {}
+  },
+  "Unsqueeze": {
+    "description": "Insert single-dimensional entries to the shape of an input tensor (`data`). Takes one required input `axes` - which contains a list of dimension indices and this operator will insert a dimension of value `1` into the corresponding index of the output tensor (`expanded`). For example, given an input ...",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "data",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axes",
+        "type": "int"
+      }
+    ],
+    "variants": {}
+  },
+  "Unstack": {
+    "description": "Unstack an array along an axis.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      }
+    ],
+    "variants": {}
+  },
+  "Unwrap": {
+    "description": "Unwrap a periodic signal.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "p",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "discont",
+        "type": "Tensor"
+      },
+      {
+        "default": -1,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      },
+      {
+        "default": 6.283185307179586,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "period",
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "UpSampling1D": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "UpSampling2D": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "UpSampling3D": {
+    "description": "Auto-generated from keras_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "UpdateCvState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
+    "variants": {}
+  },
+  "Upsample": {
+    "description": "Upsample the input tensor. Each dimension value of the output tensor is: output_dimension = floor(input_dimension * scale).",
+    "std_args": [],
+    "variants": {}
+  },
+  "V": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Vander": {
+    "description": "Generate a Vandermonde matrix.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "N",
+        "type": "int"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "increasing",
+        "type": "bool"
+      }
+    ],
+    "variants": {}
+  },
+  "Var": {
+    "description": "Compute the variance along a given axis.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "dtype",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "out",
+        "type": "Any"
+      },
+      {
+        "default": 0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "ddof",
+        "type": "int"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "keepdims",
+        "type": "bool"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "where",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "mean",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "correction",
+        "type": "float"
+      }
+    ],
+    "variants": {}
+  },
+  "Variable": {
+    "description": "Auto-generated from flax_nnx_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Vdot": {
+    "description": "Perform a conjugate multiplication of two 1D vectors.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "b",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "precision",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "preferred_element_type",
+        "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "Vecdot": {
+    "description": "Perform a conjugate multiplication of two batched vectors.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x1",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x2",
+        "type": "Tensor"
+      },
+      {
+        "default": -1,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "precision",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "preferred_element_type",
+        "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "Vecmat": {
+    "description": "Batched conjugate vector-matrix product.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x1",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x2",
+        "type": "Tensor"
+      }
+    ],
+    "variants": {}
+  },
+  "Vectorize": {
+    "description": "Define a vectorized function with broadcasting.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "pyfunc",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "excluded",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "signature",
+        "type": "Any"
+      }
+    ],
+    "variants": {}
+  },
+  "View": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "variants": {}
+  },
+  "Vsplit": {
+    "description": "Split an array into sub-arrays vertically.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "ary",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "indices_or_sections",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "Vstack": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
+    "description": "Vertically stack arrays.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "tup",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "dtype",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "WeightNorm": {
-    "description": "Auto-generated from flax_nnx_v0.12.2_map.json",
+    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Where": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "Select elements from two arrays based on a condition.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "condition",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "size",
+        "type": "int"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "fill_value",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "WrappedSchedule": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Wrapper": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
@@ -11672,33 +12799,89 @@
     ]
   },
   "ZeroNansState": {
-    "description": "Auto-generated from jax_v0.8.2_map.json",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ZeroPadding1D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ZeroPadding2D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "ZeroPadding3D": {
-    "description": "Auto-generated from tensorflow_v2.20.0_map.json",
+    "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
   },
   "Zeros": {
-    "description": "Auto-generated from mlx_v0.30.1_map.json",
-    "std_args": [],
+    "description": "Create an array full of zeros.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "shape",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "dtype",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "device",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "out_sharding",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "ZerosLike": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
+    "description": "Create an array full of zeros with the same shape and dtype as an array.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Tensor"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "dtype",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "shape",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "device",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "out_sharding",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "add_module": {
