@@ -12,7 +12,9 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.device_allocator import transform_device_allocator
@@ -22,9 +24,10 @@ from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 # Helper to avoid import errors
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
+  """Executes the pipeline."""
   tree = cst.parse_module(code)
   try:
-    new_tree = tree.visit(rewriter)
+    new_tree = rewriter.convert(tree)
     return new_tree.code
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
@@ -120,8 +123,9 @@ def test_mps_mapping(rewriter):
 def test_ignore_wrong_fw(rewriter):
   # Reconfigure context to generic numpy
   # Note: Must use config setter to update PivotRewriter's property source
-  rewriter.ctx._runtime_config.target_framework = "numpy"
-  rewriter.ctx.target_fw = "numpy"
+  rewriter.context.config.target_framework = "numpy"
+  # Also update hook context explicitly if it was copied
+  rewriter.context.hook_context.target_fw = "numpy"
 
   code = "d = torch.device('cuda')"
   result = rewrite_code(rewriter, code)

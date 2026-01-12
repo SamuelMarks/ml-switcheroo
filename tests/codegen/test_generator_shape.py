@@ -9,11 +9,9 @@ guard injection feature, satisfying the requirement to test "Strict Shape Guards
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter import PivotRewriter
+from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.frameworks import register_framework
-from ml_switcheroo.core.hooks import HookContext
 
 # --- Mock Infrastructure ---
 
@@ -46,12 +44,14 @@ class MockShapeSemantics(SemanticsManager):
     self._reverse_index["torch.nn.functional.linear"] = ("Linear", self.data["Linear"])
 
     # Pre-populate index for intermediate modules to handle strict mode checks on attributes
-    # The Mock needs to return valid mappings for these so BaseRewriter attribute check doesn't fail
     self.data["torch_nn"] = {"variants": {"jax": {"api": "jax.nn"}}}
     self._reverse_index["torch.nn"] = ("torch_nn", self.data["torch_nn"])
 
     self.data["torch_nn_functional"] = {"variants": {"jax": {"api": "jax.nn"}}}
-    self._reverse_index["torch.nn.functional"] = ("torch_nn_functional", self.data["torch_nn_functional"])
+    self._reverse_index["torch.nn.functional"] = (
+      "torch_nn_functional",
+      self.data["torch_nn_functional"],
+    )
 
   def get_definition(self, name):
     # Return empty dict for intermediate modules to pass attribute check
@@ -76,15 +76,13 @@ def rewriter_factory():
 
 def rewrite(rewriter, code):
   tree = cst.parse_module(code)
-  new_tree = tree.visit(rewriter)
+  # Use pipeline conversion
+  new_tree = rewriter.convert(tree)
   # If preamble exists, inject it manually for source str generation logic in test
-  # BaseRewriter.leave_Module usually handles this logic in real execution
-  if hasattr(rewriter, "_module_preamble") and rewriter._module_preamble:
-    preamble_stmts = []
-    for code_str in rewriter._module_preamble:
-      preamble_stmts.extend(cst.parse_module(code_str).body)
-    new_tree = new_tree.with_changes(body=preamble_stmts + list(new_tree.body))
-
+  # Note: rewriter.context might have module_preamble, but with Pipeline architecture
+  # the module-level leave_Module handles injection. However, TestRewriter might need to
+  # expose context if manual intervention is required, or just rely on pipeline output.
+  # Pipeline execution returns the fully transformed module.
   return new_tree.code
 
 

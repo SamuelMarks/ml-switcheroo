@@ -3,9 +3,8 @@ Orchestration Engine for AST Transformations.
 
 This module provides the ``ASTEngine``, generating code via:
 1.  **Compiler Pipeline**: For ISA/Visuals (Source -> Graph -> Backend -> Target).
-2.  **Rewriter Pipeline**: For High-Level Frameworks (Source -> CST -> Rewriter -> Target).
-    - Supports optional **Graph-Guided Rewriting** (Loopback):
-      (Source -> CST -> Graph -> Optimizer -> Diff -> Patch -> CST -> Rewriter -> Target).
+2.  **Rewriter Pipeline**: For High-Level Frameworks (Source -> CST -> Pipeline(Structure, API, Aux) -> Target).
+    - Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
 from typing import Any, Dict, Optional
@@ -15,7 +14,6 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.conversion_result import ConversionResult
 from ml_switcheroo.core.hooks import load_plugins
 from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
-from ml_switcheroo.core.rewriter import PivotRewriter
 from ml_switcheroo.core.scanners import UsageScanner
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.testing.linter import StructuralLinter
@@ -23,6 +21,13 @@ from ml_switcheroo.core.tracer import get_tracer, reset_tracer
 from ml_switcheroo.core.ingestion import ingest_code
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.graph import GraphExtractor
+
+# Rewriter Components
+from ml_switcheroo.core.rewriter.context import RewriterContext
+from ml_switcheroo.core.rewriter.pipeline import RewriterPipeline
+from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
+from ml_switcheroo.core.rewriter.passes.api import ApiPass
+from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
 
 # Compiler Components
 from ml_switcheroo.compiler.registry import (
@@ -33,7 +38,6 @@ from ml_switcheroo.compiler.registry import (
 from ml_switcheroo.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.compiler.frontends.sass import SassParser, SassLifter
 from ml_switcheroo.compiler.frontends.rdna import RdnaParser, RdnaLifter
-from ml_switcheroo.core.mlir_bridge import run_mlir_roundtrip
 
 
 class ASTEngine:
@@ -99,12 +103,6 @@ class ASTEngine:
   def to_source(self, tree: cst.Module) -> str:
     return tree.code
 
-  def _run_mlir_roundtrip(self, input_obj: Any, tracer: Any) -> Any:
-    if not isinstance(input_obj, cst.Module):
-      tracer.log_warning("Skipping MLIR roundtrip: Input is not a CST Module.")
-      return input_obj
-    return run_mlir_roundtrip(input_obj, tracer)
-
   def _run_compiler_pipeline(self, code: str, tracer: Any) -> ConversionResult:
     tracer.start_phase("Compiler Pipeline", f"{self.source}->Graph->{self.target}")
     graph = None
@@ -155,9 +153,13 @@ class ASTEngine:
     tracer.start_phase("Rewriter Pipeline", "AST Transformation")
 
     # 1. Ingestion
-    from ml_switcheroo.frameworks.base import get_adapter
+    try:
+      from ml_switcheroo.frameworks.base import get_adapter
 
-    source_adapter = get_adapter(self.source)
+      source_adapter = get_adapter(self.source)
+    except ImportError:
+      source_adapter = None
+
     tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
     tracer.log_snapshot("After Ingestion", self.to_source(tree), self.to_source(tree))
 
@@ -168,7 +170,9 @@ class ASTEngine:
         from ml_switcheroo.core.graph_optimizer import GraphOptimizer
         from ml_switcheroo.compiler.differ import GraphDiffer
         from ml_switcheroo.core.rewriter.patcher import GraphPatcher
-        from ml_switcheroo.compiler.backends.python_snippet import PythonSnippetEmitter
+        from ml_switcheroo.compiler.backends.python_snippet import (
+          PythonSnippetEmitter,
+        )
 
         # A. Extraction
         extractor = GraphExtractor()
@@ -196,7 +200,11 @@ class ASTEngine:
               "Original CST",
               self.to_source(tree),
             )
-            tracer.log_snapshot("After Graph Patching", self.to_source(tree), self.to_source(tree))
+            tracer.log_snapshot(
+              "After Graph Patching",
+              self.to_source(tree),
+              self.to_source(tree),
+            )
       except Exception as e:
         tracer.log_warning(f"Graph Optimization failed, proceeding with raw CST: {e}")
       tracer.end_phase()
@@ -204,9 +212,25 @@ class ASTEngine:
     # 2. Analysis
     tracer.log_snapshot("After Analysis", self.to_source(tree), self.to_source(tree))
 
-    # 3. Rewriting (The Pivot)
-    rewriter = PivotRewriter(self.semantics, self.config)
-    tree = tree.visit(rewriter)
+    # 3. Rewriting (Pipeline)
+    # Construct Context
+    context = RewriterContext(
+      semantics=self.semantics,
+      config=self.config,
+      # Symbol table logic can be injected here if analysis passes are added to engine
+      symbol_table=None,
+    )
+
+    # Construct Pipeline
+    pipeline = RewriterPipeline(
+      [
+        StructuralPass(),  # Class and signature changes
+        ApiPass(),  # Core logic, calls, attributes
+        AuxiliaryPass(),  # Decorators and safety mechanisms
+      ]
+    )
+
+    tree = pipeline.run(tree, context)
     tracer.log_snapshot("After Rewriting", self.to_source(tree), self.to_source(tree))
 
     # 4. Import Fixing
@@ -225,28 +249,31 @@ class ASTEngine:
       tree = tree.visit(fixer)
       tracer.log_snapshot("After Import Fixing", self.to_source(tree), self.to_source(tree))
 
-    # 5. Optional MLIR
-    if self.config.intermediate == "mlir":
-      tree = self._run_mlir_roundtrip(tree, tracer)
-
-    # 6. Emission
+    # 5. Emission
     final_code = tree.code
-    target_adapter = get_adapter(self.target)
-    if target_adapter and hasattr(target_adapter, "create_emitter"):
-      try:
-        emitter = target_adapter.create_emitter()
-        if hasattr(emitter, "convert") and isinstance(tree, cst.Module):
-          final_code = emitter.convert(tree).to_text()
-        elif hasattr(emitter, "emit"):
-          final_code = emitter.emit(final_code)
-      except Exception as e:
-        tracer.log_warning(f"Emitter output failed: {e}")
+    # Legacy hook: If target adapter defines 'create_emitter' for CST-based emission logic
+    # (Though most targets use standard CST code generation)
+    try:
+      from ml_switcheroo.frameworks.base import get_adapter
+
+      target_adapter = get_adapter(self.target)
+      if target_adapter and hasattr(target_adapter, "create_emitter"):
+        try:
+          emitter = target_adapter.create_emitter()
+          if hasattr(emitter, "convert") and isinstance(tree, cst.Module):
+            final_code = emitter.convert(tree).to_text()
+          elif hasattr(emitter, "emit"):
+            final_code = emitter.emit(final_code)
+        except Exception as e:
+          tracer.log_warning(f"Emitter output failed: {e}")
+    except ImportError:
+      pass
 
     # Trace
     if self.target == "mlir" or self.target == "stablehlo":
       tracer.log_mutation("Final Emission", "(Python CST)", final_code)
 
-    # 7. Checks
+    # 6. Checks
     errors = []
     if EscapeHatch.START_MARKER in final_code:
       msg = "Escape Hatches Detected: Partial conversion. Inspect output for '# <SWITCHEROO...' blocks."
@@ -263,7 +290,12 @@ class ASTEngine:
       tracer.end_phase()
 
     tracer.end_phase()
-    return ConversionResult(code=final_code, success=True, errors=errors, trace_events=tracer.export())
+    return ConversionResult(
+      code=final_code,
+      success=True,
+      errors=errors,
+      trace_events=tracer.export(),
+    )
 
   @property
   def strict_mode(self) -> bool:

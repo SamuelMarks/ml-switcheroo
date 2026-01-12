@@ -12,14 +12,17 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim as PivotRewriter
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  """Use conversion pipeline."""
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -33,7 +36,6 @@ def rewriter_factory():
   mgr = MagicMock()
 
   # Define CrossEntropy
-  # Note: We include mappings for multiple frameworks to prove decoupling
   ce_def = {
     "variants": {
       "torch": {"api": "torch.nn.functional.cross_entropy"},
@@ -41,7 +43,10 @@ def rewriter_factory():
         "api": "optax.softmax_cross_entropy_with_integer_labels",
         "requires_plugin": "loss_reduction",
       },
-      "tensorflow": {"api": "tf.nn.sparse_softmax_cross_entropy_with_logits", "requires_plugin": "loss_reduction"},
+      "tensorflow": {
+        "api": "tf.nn.sparse_softmax_cross_entropy_with_logits",
+        "requires_plugin": "loss_reduction",
+      },
     }
   }
 
@@ -75,6 +80,7 @@ def rewriter_factory():
   mgr.resolve_variant.side_effect = resolve_variant
   mgr.get_known_apis.return_value = all_defs
   mgr.is_verified.return_value = True
+  mgr.get_framework_config.return_value = {}
 
   def create(target_fw):
     cfg = RuntimeConfig(source_framework="torch", target_framework=target_fw)

@@ -1,14 +1,18 @@
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.method_property import transform_method_to_property
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  """Execution shim."""
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -23,15 +27,9 @@ def rewriter():
 
   all_defs = {"size": size_def, "data_ptr": data_ptr_def}
 
-  # Update: rewriter.py calls _get_qualified_name which might resolve to just "size"
-  # if 'x' is not a known module alias. To allow the plugin to trigger on generic calls,
-  # we must ensure get_definition returns the mapping for "size".
-  # In a real app, this happens if "size" is in the Spec or mapped via heuristics.
   def get_def_side_effect(name):
     if name == "size" or name.endswith(".size"):
       return ("size", size_def)
-    # Rewriter core might not call get_definition for plugin internals,
-    # but let's be consistent.
     return None
 
   mgr.get_definition.side_effect = get_def_side_effect
@@ -48,15 +46,15 @@ def rewriter():
   mgr.resolve_variant.side_effect = resolve_variant_side_effect
   mgr.is_verified.return_value = True
 
+  # Safe defaults
+  mgr.get_framework_config.return_value = {}
+
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 
 
 def test_simple_size_conversion(rewriter):
   # This tests the rewriter flow calling the plugin
-  # Note: Input must match what rewriter expects if it does a lookup first.
-  # Here we test the plugin logic output passed through rewriter.
-  # The plugin extracts method name "size".
   assert "x.shape" in rewrite_code(rewriter, "s = x.size()")
 
 

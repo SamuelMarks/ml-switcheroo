@@ -6,14 +6,16 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.scatter import transform_scatter
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -44,6 +46,7 @@ def rewriter():
 
   mgr.is_verified.return_value = True
   mgr.get_known_apis.return_value = {"Scatter": scatter_def}
+  mgr.get_framework_config.return_value = {}
 
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)

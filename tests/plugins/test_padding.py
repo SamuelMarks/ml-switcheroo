@@ -6,7 +6,9 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.padding import transform_padding
@@ -14,7 +16,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -31,7 +33,7 @@ def rewriter():
     }
   }
 
-  mgr.get_definition.side_effect = lambda n: ("Pad", pad_def) if "pad" in n else None
+  mgr.get_definition.side_effect = lambda n: (("Pad", pad_def) if "pad" in n else None)
 
   def resolve(aid, fw):
     if aid == "Pad" and fw == "jax":
@@ -62,7 +64,10 @@ def test_padding_2d_nchw(rewriter):
 
 
 def test_padding_passthrough_missing(rewriter):
-  rewriter.ctx.target_fw = "unknown"
+  # Change target to one without definitions but keep rewriter valid config
+  rewriter.context.config.target_framework = "unknown"
+  rewriter.context.hook_context.target_fw = "unknown"
+
   code = "y = F.pad(x, (1, 2, 3, 4))"
   res = rewrite_code(rewriter, code)
   assert "F.pad" in res

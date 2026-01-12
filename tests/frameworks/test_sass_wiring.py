@@ -1,25 +1,24 @@
 """
-Tests for SASS Framework Adapter Wiring.
+Tests for SASS Framework Wiring (Backend Level).
 
 Verifies:
-1.  **Macro Registration**: `PythonToSassEmitter` injects `expand_conv2d`/`expand_linear` into `SassSynthesizer`.
-2.  **Logic Continuity**: The `SassSynthesizer` instantiated by the emitter is correctly configured.
+1.  **Macro Registration**: `SassSynthesizer` correctly registers `expand_conv2d`/`expand_linear`.
+2.  **Logic Continuity**: The `SassBackend` initializes the synthesizer with macros.
 """
 
-from ml_switcheroo.frameworks.sass import PythonToSassEmitter, SassAdapter
+from unittest.mock import MagicMock
+from ml_switcheroo.compiler.backends.sass import SassBackend, SassSynthesizer
 from ml_switcheroo.core.sass.macros import expand_conv2d, expand_linear
 
 
-def test_emitter_wires_macros() -> None:
+def test_synthesizer_wires_macros() -> None:
   """
-  Verify that PythonToSassEmitter populates the macro_registry on init.
+  Verify that SassSynthesizer populates the macro_registry on init.
   """
-  emitter = PythonToSassEmitter()
+  semantics_mock = MagicMock()
+  synth = SassSynthesizer(semantics_mock)
 
-  # Access the internal synthesizer instance
-  synth = emitter.synth
-
-  # Check registration
+  # Check registration matches macros
   assert "Conv2d" in synth.macro_registry
   assert synth.macro_registry["Conv2d"] == expand_conv2d
 
@@ -27,12 +26,12 @@ def test_emitter_wires_macros() -> None:
   assert synth.macro_registry["Linear"] == expand_linear
 
 
-def test_adapter_creates_valid_emitter() -> None:
+def test_backend_wires_synthesizer() -> None:
   """
-  Verify SassAdapter.create_emitter() returns a properly configured instance.
+  Verify SassBackend initializes the synthesizer correctly.
   """
-  adapter = SassAdapter()
-  emitter = adapter.create_emitter()
+  semantics_mock = MagicMock()
+  backend = SassBackend(semantics=semantics_mock)
 
-  assert isinstance(emitter, PythonToSassEmitter)
-  assert "Conv2d" in emitter.synth.macro_registry
+  assert isinstance(backend.synthesizer, SassSynthesizer)
+  assert "Conv2d" in backend.synthesizer.macro_registry

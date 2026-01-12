@@ -50,13 +50,23 @@ def test_routing_to_rewriter_pipeline_high_level(mock_managers):
   engine._run_compiler_pipeline.assert_not_called()
 
 
-def test_python_frontend_invoked(mock_managers):
-  """Verify python source ingestion logic."""
+def test_python_frontend_invoked_in_compiler_pipeline(mock_managers):
+  """
+  Verify python source ingestion logic when targeting an ISA.
+  If source is 'torch' and target is 'sass', we enter compiler pipeline,
+  and should use PythonFrontend because 'torch' is not an ISA source.
+  """
   config = RuntimeConfig(source_framework="torch", target_framework="sass")
   engine = ASTEngine(mock_managers, config)
+
+  # Mock dependencies inside _run_compiler_pipeline
   with patch("ml_switcheroo.core.engine.PythonFrontend") as MockFront:
     MockFront.return_value.parse_to_graph.return_value = LogicalGraph()
-    with patch("ml_switcheroo.core.engine.get_backend_class") as mock_get:
-      mock_get.return_value = MagicMock()
+
+    # Mock backend usage to avoid errors
+    with patch("ml_switcheroo.core.engine.get_backend_class") as mock_get_backend:
+      mock_get_backend.return_value = MagicMock()
       engine.run("x=1")
+
+      # Must invoke PythonFrontend
       MockFront.assert_called_with("x=1")

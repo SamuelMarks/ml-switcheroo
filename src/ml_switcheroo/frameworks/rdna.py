@@ -1,12 +1,16 @@
 """
 AMD RDNA / GCN Framework Adapter.
 
-Provides metadata and legacy hooks for the RDNA compiler stack.
+Provides metadata and configuration for the RDNA compiler stack.
+This adapter acts as a metadata container for the Compiler Registry,
+identifying RDNA as a target language and providing static definitions.
+
+Migration Note:
+    Legacy shim classes (`PythonToRdnaEmitter`, `RdnaToPythonParser`)
+    have been removed. Routing now occurs via `compiler.registry`.
 """
 
 from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING
-
-import libcst as cst
 
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.ghost import GhostRef
@@ -22,70 +26,15 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 
-# Import compiler components for legacy wrappers
-from ml_switcheroo.compiler.frontends.rdna.parser import RdnaParser
-from ml_switcheroo.compiler.frontends.rdna.lifter import RdnaLifter
-from ml_switcheroo.compiler.backends.rdna.synthesizer import RdnaSynthesizer
-from ml_switcheroo.compiler.backends.rdna.emitter import RdnaEmitter
-from ml_switcheroo.compiler.frontends.python import PythonFrontend
-
 if TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class PythonToRdnaEmitter:
-  """
-  Legacy wrapper for compilation pipeline (Python -> RDNA).
-  Matches interface expected by old tests.
-  """
-
-  def __init__(self, target_arch: str = "gfx1030"):
-    # Lazy Import to break cycle
-    from ml_switcheroo.semantics.manager import SemanticsManager
-
-    self.target_arch = target_arch
-    self.semantics = SemanticsManager()
-    self.synthesizer = RdnaSynthesizer(self.semantics)
-    self.emitter = RdnaEmitter()
-
-  def emit(self, code: str) -> str:
-    # 1. Parse Python to Graph
-    frontend = PythonFrontend(code)
-    graph = frontend.parse_to_graph()
-
-    # 2. Synthesize RDNA AST
-    rdna_nodes = self.synthesizer.from_graph(graph)
-
-    # 3. Emit Text
-    body = self.emitter.emit(rdna_nodes)
-    header = f"; RDNA Code Generation Initialized (Arch: {self.target_arch})\n"
-    return header + body
-
-
-class RdnaToPythonParser:
-  """
-  Legacy wrapper for decompilation pipeline (RDNA -> Python).
-  """
-
-  def __init__(self, code: str):
-    self.code = code
-    self.parser = RdnaParser(code)
-    self.lifter = RdnaLifter()
-
-  def parse(self) -> cst.Module:
-    # 1. Parse RDNA to AST
-    from ml_switcheroo.semantics.manager import SemanticsManager
-
-    nodes = self.parser.parse()
-
-    # 2. Lift to Graph
-    synth = RdnaSynthesizer(SemanticsManager())
-    return synth.to_python(nodes)
-
-
 @register_framework("rdna")
 class RdnaAdapter(FrameworkAdapter):
-  """Adapter for AMD RDNA."""
+  """
+  Adapter for AMD RDNA.
+  """
 
   display_name: str = "AMD RDNA"
   inherits_from: Optional[str] = None
@@ -93,15 +42,14 @@ class RdnaAdapter(FrameworkAdapter):
   _mode: InitMode = InitMode.GHOST
 
   def __init__(self, target_arch: str = "gfx1030") -> None:
+    """
+    Initialize the adapter.
+
+    Args:
+        target_arch: Target GPU architecture (e.g. gfx1030).
+                     Note: This property is primarily informational in the new architecture.
+    """
     self.target_arch = target_arch
-
-  def create_emitter(self) -> PythonToRdnaEmitter:
-    """Factory for legacy emitter shim."""
-    return PythonToRdnaEmitter(target_arch=self.target_arch)
-
-  def create_parser(self, code: str) -> RdnaToPythonParser:
-    """Factory for legacy parser shim."""
-    return RdnaToPythonParser(code)
 
   @property
   def search_modules(self) -> List[str]:

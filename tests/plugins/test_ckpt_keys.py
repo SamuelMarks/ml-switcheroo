@@ -6,14 +6,19 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.checkpoint_keys import transform_checkpoint_keys, KEY_MAPPER_SOURCE
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  """Executes the rewriter pipeline."""
+  tree = cst.parse_module(code)
+  # Use convert() via shim
+  return rewriter.convert(tree).code
 
 
 @pytest.fixture
@@ -34,7 +39,7 @@ def rewriter():
     }
   }
 
-  mgr.get_definition.side_effect = lambda n: ("LoadState", load_def) if "load_state_dict" in n else None
+  mgr.get_definition.side_effect = lambda n: (("LoadState", load_def) if "load_state_dict" in n else None)
   mgr.resolve_variant.side_effect = lambda aid, fw: load_def["variants"]["jax"]
   mgr.get_known_apis.return_value = {"LoadState": load_def}
   mgr.is_verified.return_value = True

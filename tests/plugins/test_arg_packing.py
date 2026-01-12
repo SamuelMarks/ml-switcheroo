@@ -2,7 +2,9 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 
@@ -10,7 +12,7 @@ import ml_switcheroo.core.hooks as hooks
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
   tree = cst.parse_module(code)
   try:
-    new_tree = tree.visit(rewriter)
+    new_tree = rewriter.convert(tree)
     return new_tree.code
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
@@ -19,9 +21,6 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 def get_rewriter_for_target(target_fw, pack_kw, pack_as=None):
   """
   Creates a rewriter with mocked semantics.
-  If pack_as is set ('List' or 'Tuple'), it is injected into the variant.
-  Note: This test uses the *Core Normalization* packing logic by NOT requesting the plugin,
-  thus verifying the generalizability of the feature implemented in `normalization.py`.
   """
   hooks._PLUGINS_LOADED = True
 
@@ -74,15 +73,13 @@ def test_generic_axis_packing_tuple():
   result = rewrite_code(rewriter, code)
 
   assert "target.transpose" in result
-  # "y=target.transpose(x,axes=(2,0,1))"
   clean = result.replace(" ", "")
   assert "axes=(2,0,1)" in clean
 
 
 def test_custom_perm_packing_list():
   """
-  Verify packing to 'perm' into a List (e.g. for list-based APIs like torch.cat).
-  Features: pack_as="List".
+  Verify packing to 'perm' into a List.
   """
   rewriter = get_rewriter_for_target("tensorflow", pack_kw="perm", pack_as="List")
 

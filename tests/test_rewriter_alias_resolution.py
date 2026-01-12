@@ -1,5 +1,5 @@
 """
-Tests for Alias-Aware Semantic Lookup in BaseRewriter.
+Tests for Alias-Aware Semantic Lookup in BaseRewriter (via TestRewriter).
 
 Verifies that:
 1. `import as` aliases are resolved correctly (e.g., `import torch as t; t.abs` -> `torch.abs`).
@@ -11,7 +11,7 @@ Verifies that:
 
 import pytest
 import libcst as cst
-from ml_switcheroo.core.rewriter import PivotRewriter
+from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 
@@ -39,6 +39,7 @@ class MockAliasSemantics(SemanticsManager):
     self._inject("relu", "torch.nn.functional.relu", "jax.nn.relu")
 
   def get_framework_config(self, framework: str):
+    """Mock config return."""
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name, s_api, t_api):
@@ -51,6 +52,7 @@ class MockAliasSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
+  """Returns a configured TestRewriter."""
   semantics = MockAliasSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(semantics, config)
@@ -59,8 +61,7 @@ def rewriter():
 def rewrite_code(rewriter, code):
   """Parses code, applies rewriter, and returns generated source."""
   tree = cst.parse_module(code)
-  # PivotRewriter subclasses BaseRewriter, so alias tracking happens in visitor walks
-  new_tree = tree.visit(rewriter)
+  new_tree = rewriter.convert(tree)
   return new_tree.code
 
 
@@ -69,16 +70,14 @@ def test_import_as_alias(rewriter):
   Scenario: `import torch as t; t.abs(x)`
   Expectation: `t` resolves to `torch`, lookup `torch.abs` succeeds -> `jax.numpy.abs(x)`.
   """
-  code = """ 
+  code = """
 import torch as t
-y = t.abs(x) 
+y = t.abs(x)
 """
   result = rewrite_code(rewriter, code)
 
   # Check that t.abs became jax.numpy.abs
   assert "jax.numpy.abs(x)" in result
-  # Imports might be pruned or kept by ImportFixer later, but rewriter just transforms Call
-  # Note: ImportFixer is separate. Rewriter preserves structure.
 
 
 def test_from_import_binding(rewriter):
@@ -86,9 +85,9 @@ def test_from_import_binding(rewriter):
   Scenario: `from torch import nn; nn.Linear(1, 2)`
   Expectation: `nn` resolves to `torch.nn`, lookup `torch.nn.Linear` succeeds -> `flax.nnx.Linear(1, 2)`.
   """
-  code = """ 
+  code = """
 from torch import nn
-layer = nn.Linear(1, 2) 
+layer = nn.Linear(1, 2)
 """
   result = rewrite_code(rewriter, code)
 
@@ -100,9 +99,9 @@ def test_from_import_as_binding(rewriter):
   Scenario: `from torch import nn as n; n.Linear(1, 2)`
   Expectation: `n` -> `torch.nn` -> lookup `torch.nn.Linear`.
   """
-  code = """ 
+  code = """
 from torch import nn as n
-layer = n.Linear(1, 2) 
+layer = n.Linear(1, 2)
 """
   result = rewrite_code(rewriter, code)
 
@@ -114,9 +113,9 @@ def test_deep_import_chains(rewriter):
   Scenario: `import torch.nn.functional as F; F.relu(x)`
   Expectation: `F` -> `torch.nn.functional` -> lookup `torch.nn.functional.relu`.
   """
-  code = """ 
+  code = """
 import torch.nn.functional as F
-y = F.relu(x) 
+y = F.relu(x)
 """
   result = rewrite_code(rewriter, code)
 
@@ -128,9 +127,9 @@ def test_standard_import_no_alias(rewriter):
   Scenario: `import torch; torch.abs(x)`
   Expectation: `torch` -> `torch` -> lookup `torch.abs`.
   """
-  code = """ 
+  code = """
 import torch
-y = torch.abs(x) 
+y = torch.abs(x)
 """
   result = rewrite_code(rewriter, code)
 
@@ -142,10 +141,10 @@ def test_relative_import_ignored(rewriter):
   Scenario: `from . import utils; utils.abs(x)`
   Expectation: Relative import ignored, map not updated. `utils.abs` looked up as-is (fails/ignored).
   """
-  code = """ 
+  code = """
 from . import utils
 # utils.abs in this context is likely local, so it shouldn't match torch.abs
-y = utils.abs(x) 
+y = utils.abs(x)
 """
   result = rewrite_code(rewriter, code)
 
@@ -158,12 +157,12 @@ def test_alias_redefinition(rewriter):
   """
   Scenario: Alias redefined in file. Assumes linear execution flow for updating map.
   """
-  code = """ 
+  code = """
 import torch as t
-y1 = t.abs(x) 
+y1 = t.abs(x)
 
 import numpy as t
-y2 = t.abs(x) 
+y2 = t.abs(x)
 """
   # NOTE: LibCST visits nodes structurally.
   # The visit_Import happens when encountered.
@@ -183,9 +182,9 @@ def test_alias_shadowing_imported_name(rewriter):
   Scenario: `from torch import nn` binds 'nn'.
   But `nn` usually resolves to `torch.nn` via explicit logic.
   """
-  code = """ 
+  code = """
 from torch import nn
-l = nn.Linear(1, 2) 
+l = nn.Linear(1, 2)
 """
   result = rewrite_code(rewriter, code)
   assert "flax.nnx.Linear" in result

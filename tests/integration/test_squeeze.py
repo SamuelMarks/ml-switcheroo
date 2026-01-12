@@ -1,13 +1,16 @@
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -16,11 +19,17 @@ def rewriter():
   mgr = MagicMock()
   squeeze_def = {
     "std_args": ["input", "dim"],
-    "variants": {"torch": {"api": "torch.squeeze"}, "jax": {"api": "jax.numpy.squeeze", "args": {"dim": "axis"}}},
+    "variants": {
+      "torch": {"api": "torch.squeeze"},
+      "jax": {"api": "jax.numpy.squeeze", "args": {"dim": "axis"}},
+    },
   }
   unsqueeze_def = {
     "std_args": ["input", "dim"],
-    "variants": {"torch": {"api": "torch.unsqueeze"}, "jax": {"api": "jax.numpy.expand_dims", "args": {"dim": "axis"}}},
+    "variants": {
+      "torch": {"api": "torch.unsqueeze"},
+      "jax": {"api": "jax.numpy.expand_dims", "args": {"dim": "axis"}},
+    },
   }
 
   def get_def(name):
@@ -40,7 +49,10 @@ def rewriter():
   mgr.get_definition.side_effect = get_def
   mgr.resolve_variant.side_effect = resolve
   mgr.is_verified.return_value = True
-  mgr.get_known_apis.return_value = {"Squeeze": squeeze_def, "Unsqueeze": unsqueeze_def}
+  mgr.get_known_apis.return_value = {
+    "Squeeze": squeeze_def,
+    "Unsqueeze": unsqueeze_def,
+  }
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 

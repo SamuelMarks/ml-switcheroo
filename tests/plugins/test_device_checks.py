@@ -1,14 +1,18 @@
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.device_checks import transform_cuda_check
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  """Executes pipeline."""
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -39,7 +43,7 @@ def test_assignment_transform(rewriter):
   assert "len(jax.devices('gpu')) > 0" in res
 
 
-def test_ignore_wrong_target(rewriter):
+def test_ignore_wrong_fw(rewriter):
   """
   Verify that targeting 'numpy' (which has no wiring for this op)
   results in pass-through.
@@ -47,6 +51,7 @@ def test_ignore_wrong_target(rewriter):
   # PivotRewriter.target_fw is read-only property from config.
   # To change it, we update the config object in the context.
   rewriter.context.config.target_framework = "numpy"
+  # Also update hook context explicitly if it was copied
   rewriter.context.hook_context.target_fw = "numpy"
 
   # Ensure resolve returns None for numpy (Implicit via fixture logic for 'jax' only)

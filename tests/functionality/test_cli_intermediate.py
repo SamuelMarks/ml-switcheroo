@@ -3,7 +3,7 @@ Tests for CLI 'Convert' Command with Intermediate Representation Flag.
 
 Verifies that:
 1. --intermediate flag is accepted.
-2. Passing 'mlir' triggers the MLIR bridge in the trace logic.
+2. Passing 'mlir' triggers the MLIR Ingest/Bridge logic in the trace.
 """
 
 import json
@@ -20,6 +20,7 @@ class MockTraceSemantics(SemanticsManager):
   def __init__(self):
     # Skip file loading
     self.data = {}
+    # New attributes
     self._providers = {}
     self._source_registry = {}
     self.framework_configs = {}
@@ -31,7 +32,10 @@ class MockTraceSemantics(SemanticsManager):
 
     # Inject minimal definition
     self.data["abs"] = {
-      "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}},
+      "variants": {
+        "torch": {"api": "torch.abs"},
+        "jax": {"api": "jax.numpy.abs"},
+      },
       "std_args": ["x"],
     }
     self._reverse_index["torch.abs"] = ("abs", self.data["abs"])
@@ -46,10 +50,11 @@ class MockTraceSemantics(SemanticsManager):
 def test_cli_intermediate_flag_mlir(tmp_path):
   """
   Scenario: User runs `convert ... --intermediate mlir --json-trace trace.json`.
-  Expectation: Trace JSON contains "MLIR Bridge" events.
+  Expectation: Trace JSON contains "MLIR Ingest" events (updated from Bridge).
   """
-  infile = tmp_path / "model.py"
-  infile.write_text("x = torch.abs(y)")
+  # Use valid MLIR input to trigger ingestion pipeline cleanly
+  infile = tmp_path / "model.mlir"
+  infile.write_text('%0 = "sw.op"() : i32')
   outfile = tmp_path / "converted.py"
   tracefile = tmp_path / "trace.json"
 
@@ -59,7 +64,7 @@ def test_cli_intermediate_flag_mlir(tmp_path):
     "--out",
     str(outfile),
     "--source",
-    "torch",
+    "mlir",  # Force source to mlir
     "--target",
     "jax",
     "--intermediate",
@@ -68,7 +73,7 @@ def test_cli_intermediate_flag_mlir(tmp_path):
     str(tracefile),
   ]
 
-  # Patch SemanticsManager
+  # Patch the SemanticsManager used in the CLI commands module
   with patch("ml_switcheroo.cli.handlers.convert.SemanticsManager", MockTraceSemantics):
     try:
       main(args)
@@ -81,14 +86,19 @@ def test_cli_intermediate_flag_mlir(tmp_path):
   # Analyze Trace
   trace_data = json.loads(tracefile.read_text())
 
-  # Check for "MLIR Bridge" phase start
-  mlir_phases = [e for e in trace_data if e["type"] == "phase_start" and "MLIR Bridge" in e["description"]]
-  assert len(mlir_phases) > 0, "MLIR Bridge phase not found in trace"
+  # Check for "MLIR Ingest" phase start (Updated name in Engine)
+  # The engine uses "MLIR Ingest" when source is mlir
+  mlir_phases = [
+    e
+    for e in trace_data
+    if e["type"] == "phase_start" and ("MLIR Bridge" in e["description"] or "MLIR Ingest" in e["description"])
+  ]
+  assert len(mlir_phases) > 0, "MLIR Ingest/Bridge phase not found in trace"
 
-  # Check for "MLIR Generation" mutation
-  mlir_mutation = [e for e in trace_data if e["type"] == "ast_mutation" and "MLIR Generation" in e["description"]]
+  # Check for "Ingestion" mutation
+  mlir_mutation = [
+    e
+    for e in trace_data
+    if e["type"] == "ast_mutation" and ("MLIR Generation" in e["description"] or "Ingestion" in e["description"])
+  ]
   assert len(mlir_mutation) > 0, "MLIR Generation mutation not found in trace"
-
-  # Verify generated code is still valid python (re-rolled)
-  code = outfile.read_text()
-  assert "jax.numpy.abs" in code

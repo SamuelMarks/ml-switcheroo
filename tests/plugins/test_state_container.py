@@ -11,7 +11,9 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim from conftest
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.state_container import (
@@ -24,9 +26,10 @@ from ml_switcheroo.plugins.state_container import (
 
 
 def rewrite_code(rewriter, code: str) -> str:
+  """Executes the rewriter pipeline."""
   tree = cst.parse_module(code)
   try:
-    new_tree = tree.visit(rewriter)
+    new_tree = rewriter.convert(tree)
     return new_tree.code
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")

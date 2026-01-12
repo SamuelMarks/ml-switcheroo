@@ -3,7 +3,6 @@ import sys
 import inspect
 import warnings
 from datetime import datetime
-from pathlib import Path
 
 # -- Warning Suppression -----------------------------------------------------
 # Silence common upstream warnings in dependencies during doc generation

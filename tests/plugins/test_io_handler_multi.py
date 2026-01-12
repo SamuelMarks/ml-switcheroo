@@ -5,7 +5,10 @@ Tests for Multi-Backend IO Logic (Numpy, TF).
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.io_handler import transform_io_calls
@@ -15,7 +18,8 @@ from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  """Executes pipeline."""
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -24,7 +28,12 @@ def base_semantics():
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
 
-  io_def = {"variants": {"numpy": {"requires_plugin": "io_handler"}, "tensorflow": {"requires_plugin": "io_handler"}}}
+  io_def = {
+    "variants": {
+      "numpy": {"requires_plugin": "io_handler"},
+      "tensorflow": {"requires_plugin": "io_handler"},
+    }
+  }
 
   mgr.get_definition.return_value = ("io", io_def)
   mgr.resolve_variant.side_effect = lambda aid, fw: io_def["variants"].get(fw)
@@ -61,9 +70,10 @@ def test_numpy_load(mock_get, base_semantics):
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_tensorflow_save(mock_get, base_semantics):
+  # Fix import scope for mock
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
 
-  rw = get_rewriter(base_semantics, "tensorflow")
+  rw = get_rw(base_semantics, "tensorflow")
   res = rewrite_code(rw, "def f():\n  torch.save(d, 'p')")
 
   assert "import tensorflow as tf" in res
@@ -74,13 +84,7 @@ def test_tensorflow_save(mock_get, base_semantics):
 def test_tensorflow_load(mock_get, base_semantics):
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
 
-  rw = get_rewriter(base_semantics, "tensorflow")
+  rw = get_rw(base_semantics, "tensorflow")
   res = rewrite_code(rw, "def f():\n  x = torch.load('p')")
 
   assert "tf.io.read_file('p')" in res
-
-
-# Helper reused in tests but defined outside in snippet context usually
-def get_rewriter(mgr, target):
-  cfg = RuntimeConfig(source_framework="torch", target_framework=target)
-  return PivotRewriter(mgr, cfg)

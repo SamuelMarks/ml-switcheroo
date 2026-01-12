@@ -56,7 +56,7 @@ def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, con
   Can inject arguments (e.g. `variables`) and change method names (e.g. `__call__` -> `apply`).
 
   Args:
-      rewriter: The BaseRewriter instance (for access to signature stacks and context).
+      rewriter: The Transformer instance (must expose context).
       node (cst.Call): The original call node.
       instance_name (str): The name of the object instance being called.
       config (Dict[str, str]): Configuration dict containing 'prepend_arg' and 'method'.
@@ -68,13 +68,24 @@ def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, con
   target_arg_name = config.get("prepend_arg", "variables")
 
   # Track injection requirement in the enclosing function signature
-  if rewriter._signature_stack:
-    sig_ctx = rewriter._signature_stack[-1]
+  # FIX: Access signature_stack via context, avoiding direct attribute error on Pipeline passes
+  sig_stack = None
+
+  # Check if rewriter has 'context' attribute (Standard Pass)
+  if hasattr(rewriter, "context") and hasattr(rewriter.context, "signature_stack"):
+    sig_stack = rewriter.context.signature_stack
+  # Fallback for legacy shim (if using internal attributes directly)
+  elif hasattr(rewriter, "_signature_stack"):
+    sig_stack = rewriter._signature_stack
+
+  if sig_stack:
+    sig_ctx = sig_stack[-1]
     if target_arg_name not in sig_ctx.existing_args:
       found = any(n == target_arg_name for n, _ in sig_ctx.injected_args)
       if not found:
         sig_ctx.injected_args.append((target_arg_name, None))
-        rewriter._report_warning(f"Injected missing state argument '{target_arg_name}' into signature.")
+        if hasattr(rewriter, "_report_warning"):
+          rewriter._report_warning(f"Injected missing state argument '{target_arg_name}' into signature.")
 
   injected_arg = cst.Arg(
     value=cst.Name(target_arg_name),
@@ -84,8 +95,14 @@ def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, con
 
   method_name = config.get("method")
   if method_name:
+    # Must use rewriter helper if available to handle alias logic, or fall back
+    if hasattr(rewriter, "_create_dotted_name"):
+      base = rewriter._create_dotted_name(instance_name)
+    else:
+      base = cst.Name(instance_name)
+
     new_func = cst.Attribute(
-      value=rewriter._create_dotted_name(instance_name),
+      value=base,
       attr=cst.Name(method_name),
     )
   else:

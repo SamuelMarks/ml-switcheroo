@@ -11,7 +11,10 @@ Verifies that:
 
 import pytest
 import libcst as cst
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.config import RuntimeConfig
@@ -60,7 +63,8 @@ def rewriter():
 def rewrite_code(rewriter, code):
   """Parses code, runs rewriter, returns generated source."""
   tree = cst.parse_module(code)
-  new_tree = tree.visit(rewriter)
+  # Fix: Use pipeline conversion
+  new_tree = rewriter.convert(tree)
   return new_tree.code
 
 
@@ -124,9 +128,9 @@ def test_multiple_statements_handled_independently(rewriter):
   """
   Verify that a failure in one line doesn't affect the next line.
   """
-  code = """ 
-y = torch.bad(x) 
-z = torch.good(x) 
+  code = """
+y = torch.bad(x)
+z = torch.good(x)
 """
   result = rewrite_code(rewriter, code)
 

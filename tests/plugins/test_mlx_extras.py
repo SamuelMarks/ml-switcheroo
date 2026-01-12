@@ -6,7 +6,9 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.mlx_extras import transform_compiler, transform_synchronize
@@ -43,6 +45,7 @@ def rewriter():
     return None
 
   mgr.resolve_variant.side_effect = resolve
+  mgr.get_framework_config.return_value = {}
 
   # --- FIX: Register dummy framework ---
   @register_framework("custom_fw")
@@ -55,7 +58,8 @@ def rewriter():
 
 def rewrite(rewriter, code):
   mod = cst.parse_module(code)
-  return mod.visit(rewriter).code
+  # Fix: Pipeline execution
+  return rewriter.convert(mod).code
 
 
 def test_compiler_decorator(rewriter):
@@ -66,9 +70,8 @@ def test_compiler_decorator(rewriter):
   """
   code = "@torch.compile(fullgraph=True)\ndef f(x): pass"
 
-  # Manually invoke hook because DecoratorMixin integration isn't fully stubbed
+  # Manually invoke hook
   module = cst.parse_module(code)
-  # Access decorator node: body[0] is FunctionDef, decorators[0] is Decorator
   decorator = module.body[0].decorators[0]
 
   rewriter.ctx.lookup_api = MagicMock(return_value="custom.jit")
@@ -85,10 +88,6 @@ def test_compiler_decorator(rewriter):
 def test_compiler_functional(rewriter):
   """Verify functional wrapper replacement via direct hook."""
   code = "opt_fn = torch.compile(fn)"
-  # Access Call node inside Assign
-  # module.body[0] is SimpleStatementLine
-  # module.body[0].body[0] is Assign
-  # Assign.value is the Call node (torch.compile(fn))
   call_node = cst.parse_module(code).body[0].body[0].value
 
   rewriter.ctx.lookup_api = MagicMock(return_value="custom.jit")

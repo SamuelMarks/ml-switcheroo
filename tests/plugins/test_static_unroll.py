@@ -1,21 +1,30 @@
 """
-Tests for Static Loop Unrolling.
+Tests for Static Loop Unrolling Plugin.
+
+Verifies:
+1.  **Detection**: Identifies `for i in range(N)` where N is a static integer.
+2.  **Expansion**: Unrolls the loop body N times.
+3.  **Substitution**: Replaces the loop variable 'i' with the literal index.
+4.  **Safety**: Preserves dynamic loops or loops extending safety limits.
 """
 
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Correctly import the Test shim instead of the deleted core class
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.static_unroll import unroll_static_loops
 
 
 def rewrite_code(rewriter, code):
+  """Parses code, runs pipeline via rewriter shim, returns new code."""
   tree = cst.parse_module(code)
   try:
-    new_tree = tree.visit(rewriter)
+    new_tree = rewriter.convert(tree)
     return new_tree.code
   except Exception as e:
     pytest.fail(f"Rewrite failed: {e}")
@@ -31,6 +40,8 @@ def rewriter():
   mgr = MagicMock()
   # No definitions needed for control flow but ensure get_definition doesn't return Truthy mock
   mgr.get_definition.return_value = None
+  # Ensure trait lookups don't crash
+  mgr.get_framework_config.return_value = {}
 
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
@@ -71,6 +82,8 @@ for i in range(2):
 """
   res = rewrite_code(rewriter, code)
 
+  # Indentation might vary slightly depending on LibCST codegen version/whitespace
+  # We check for structural presence
   assert "x = x + 0" in res
   assert "x = x + 1" in res
 

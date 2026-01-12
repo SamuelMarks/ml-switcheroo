@@ -6,14 +6,19 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim from conftest
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.schedulers import transform_scheduler_init, transform_scheduler_step
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  """Executes the rewriter pipeline."""
+  tree = cst.parse_module(code)
+  # Use .convert() instead of .visit() for the pipeline shim
+  return rewriter.convert(tree).code
 
 
 @pytest.fixture
@@ -36,7 +41,10 @@ def rewriter():
       "keras": {
         "api": "keras.optimizers.schedules.ExponentialDecay",
         "requires_plugin": "scheduler_rewire",
-        "args": {"step_size": "decay_steps", "initial_learning_rate": "initial_learning_rate"},
+        "args": {
+          "step_size": "decay_steps",
+          "initial_learning_rate": "initial_learning_rate",
+        },
       },
     }
   }
@@ -48,7 +56,7 @@ def rewriter():
     return None
 
   mgr.get_definition.side_effect = get_def
-  mgr.get_definition_by_id.side_effect = lambda aid: step_def if aid == "StepLR" else None
+  mgr.get_definition_by_id.side_effect = lambda aid: (step_def if aid == "StepLR" else None)
 
   # Helper for variant resolution
   def resolve(aid, fw):
@@ -77,20 +85,24 @@ def test_step_lr_rewire_jax(rewriter):
   1. API string 'optax.custom_decay' loaded from mock (not hardcoded).
   2. Arg rename 'step_size' -> 'steps' loaded from mock.
   """
+  # Context state usually set by ApiPass logic
   rewriter.ctx.current_op_id = "StepLR"
 
   code = "sched = StepLR(optimizer, step_size=30, gamma=0.1)"
 
-  # Manual hook check
-  tree = cst.parse_module(code)
-  call_node = tree.body[0].body[0].value
+  # Manual hook check is complex because hooks need node args context.
+  # We verify hook logic via direct invocation here or full pipeline.
+  # The 'rewrite_code' helper runs full pipeline.
+  # BUT, full pipeline needs ApiPass to detect 'StepLR' call.
+  # Since 'StepLR' is just a name here, we rely on test fixture mocking get_definition.
 
-  # Sync context
-  rewriter.ctx.target_fw = "jax"
+  # Fix: Pipeline won't detect 'StepLR' if we don't have imports or full qual name
+  # unless we use lax detection. PyTorch source usually is torch.optim.lr_scheduler.StepLR.
+  # Let's adjust helper or rely on mocked get_definition accepting "StepLR".
 
-  res_node = transform_scheduler_init(call_node, rewriter.ctx)
-  wrapper = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])])
-  res = wrapper.code
+  # The helper rewrite_code(rewriter, code) runs the pipeline using the mocked semantics.
+  # Mock semantics returns "StepLR" definition for "StepLR".
+  res = rewrite_code(rewriter, code)
 
   assert "optax.custom_decay" in res
   assert "init_value=1.0" in res
@@ -108,10 +120,14 @@ def test_step_lr_retarget_keras(rewriter):
 
   Verifies argument remapping handled dynamically based on framework variant.
   """
-  rewriter.ctx.current_op_id = "StepLR"
-  rewriter.ctx.target_fw = "keras"
+  # Update Context Config directly
+  rewriter.context.config.target_framework = "keras"
+  rewriter.context.hook_context.target_fw = "keras"
+  rewriter.context.hook_context.current_op_id = "StepLR"
 
   code = "sched = StepLR(optimizer, step_size=50)"
+
+  # Direct hook transform test since full pipeline might reset context
   tree = cst.parse_module(code)
   call_node = tree.body[0].body[0].value
 

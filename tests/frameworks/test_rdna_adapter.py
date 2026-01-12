@@ -1,19 +1,17 @@
 """
-Tests for AMD RDNA Framework Adapter.
+Tests for AMD RDNA Framework Adapter and Backend Wiring.
 
 Verifies:
 1. Registration in `_ADAPTER_REGISTRY`.
 2. Protocol compliance (Ghost mode, empty defaults).
 3. Correct loading of Math definitions (v_add_f32).
-4. Engine Hooks (create_parser, create_emitter, target_arch configuration).
+4. Backend connectivity (RdnaBackend).
 """
 
-import libcst as cst
-from ml_switcheroo.frameworks.rdna import (
-  RdnaAdapter,
-  PythonToRdnaEmitter,
-  RdnaToPythonParser,
-)
+from unittest.mock import MagicMock
+from ml_switcheroo.frameworks.rdna import RdnaAdapter
+from ml_switcheroo.compiler.backends.rdna import RdnaBackend
+
 from ml_switcheroo.frameworks.base import (
   _ADAPTER_REGISTRY,
   get_adapter,
@@ -36,7 +34,7 @@ def test_initialization_defaults() -> None:
   assert adapter._mode == InitMode.GHOST
   assert adapter.search_modules == []
   assert adapter.import_alias == ("rdna", "asm")
-  # Verify default architecture updated to gfx1030
+  # Verify default architecture
   assert adapter.target_arch == "gfx1030"
 
 
@@ -73,36 +71,17 @@ def test_example_code() -> None:
   assert "v_add_f32" in code
 
 
-def test_emitter_creation_with_arch() -> None:
-  """Verify factory returns valid emitter instance with arch config."""
-  adapter = RdnaAdapter(target_arch="gfx1100")
-  assert adapter.target_arch == "gfx1100"
-
-  emitter = adapter.create_emitter()
-  assert isinstance(emitter, PythonToRdnaEmitter)
-  assert hasattr(emitter, "emit")
-  assert emitter.target_arch == "gfx1100"
-
-  # Verify basic emit behavior using a functional call to generate a graph
-  # "x=1" does not produce graph nodes for current GraphExtractor.
-  # Use "y = torch.abs(x)" assuming GraphExtractor can parse the call.
-  # Note: Requires semantics to be partially working or fallback to unmapped but
-  # valid node generation.
-  out = emitter.emit("y = torch.abs(x)")
-  assert "; RDNA Code Generation Initialized" in out
-  assert "Arch: gfx1100" in out
-
-
-def test_parser_creation() -> None:
-  """Verify factory returns valid parser instance."""
-  adapter = RdnaAdapter()
-  code = "v_mov_b32 v0, s0"
-  parser = adapter.create_parser(code)
-  assert isinstance(parser, RdnaToPythonParser)
-
-  # Basic parse check
-  tree = parser.parse()
-  assert isinstance(tree, cst.Module)
+def test_rdna_backend_instantiation() -> None:
+  """
+  Verify that RdnaBackend can be instantiated with a SemanticsManager.
+  Replaces the old test `create_emitter`.
+  """
+  semantics_mock = MagicMock()
+  backend = RdnaBackend(semantics=semantics_mock)
+  assert backend is not None
+  assert hasattr(backend, "compile")
+  # Check default architecture in backend
+  assert backend.target_arch == "gfx1030"
 
 
 def test_no_op_methods() -> None:

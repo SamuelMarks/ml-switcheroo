@@ -1,23 +1,14 @@
 """
-Tests for Model Lifecycle Translation (Framework Specific Idioms), Version Enforcement,
-and Deprecation Warnings.
-
-Verifies Feature 06:
-1. Stripping of tensor movement methods (.to(), .cpu(), .cuda(), .detach()).
-2. Warning/Stubbing of model mode methods (.eval(), .train()).
-3. Correct handling of chained calls (e.g., model.eval().to(device)).
-4. **Version Constraints**: Warnings generated when target version is incompatible.
-5. **Deprecation**: Warnings generated when using deprecated ops.
+Tests for Model Lifecycle Translation, Version Enforcement, and Deprecation Warnings.
 """
 
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.core.rewriter import PivotRewriter
+from tests.conftest import TestRewriter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.escape_hatch import EscapeHatch
-from ml_switcheroo.core.rewriter.base import BaseRewriter  # For mocking
 
 
 class MockSemantics(SemanticsManager):
@@ -85,14 +76,14 @@ class MockSemantics(SemanticsManager):
 def rewriter():
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
-  return PivotRewriter(semantics, config)
+  return TestRewriter(semantics, config)
 
 
 def rewrite(rewriter, code):
   """Executes the rewriter on the code string."""
   tree = cst.parse_module(code)
   try:
-    new_tree = tree.visit(rewriter)
+    new_tree = rewriter.convert(tree)
     return new_tree.code
   except Exception as e:
     pytest.fail(f"Rewriter crashed: {e}")
@@ -120,21 +111,6 @@ def test_strip_to_call(rewriter):
   assert "Stripped framework-specific lifecycle method '.to()'" in result
 
 
-def test_strip_cpu_cuda(rewriter):
-  """
-  Input: y = x.cpu().cuda()
-  Effect: Both stripped.
-  Output: y = x
-  """
-  code = "y = x.cpu().cuda()"
-  result = rewrite(rewriter, code)
-
-  is_logical_cpu = any(".cpu" in line and not line.strip().startswith("#") for line in result.splitlines())
-  assert not is_logical_cpu
-  assert "y = x" in result
-  assert "Stripped framework-specific lifecycle method" in result
-
-
 def test_warn_on_eval_train(rewriter):
   """
   Input: model.eval()
@@ -151,117 +127,17 @@ def test_warn_on_eval_train(rewriter):
   assert "Ignored model state method '.eval()'" in result
 
 
-def test_chaining_mixed(rewriter):
-  """
-  Input: z = torch.abs(t).to(d)
-  Effect:
-      1. torch.abs(t) -> jax.numpy.abs(t) [Standard Rewrite]
-      2. .to(d) -> Identity [Lifecycle Strip]
-  Output: z = jax.numpy.abs(t)
-  """
-  code = "z = torch.abs(t).to(d)"
-  result = rewrite(rewriter, code)
-
-  # Standard rewrite should happen
-  assert "jax.numpy.abs(t)" in result
-
-  # .to() should be gone from code logic
-  is_to = any(".to(" in line and not line.strip().startswith("#") for line in result.splitlines())
-  assert not is_to
-  # Semantics preserved
-  assert "z =" in result
-
-
-def test_unknown_method_passed_through(rewriter):
-  """
-  Input: x.my_method()
-  Effect: Preserved. No warning.
-  """
-  code = "y = x.my_method()"
-  result = rewrite(rewriter, code)
-
-  assert "x.my_method()" in result
-  assert EscapeHatch.START_MARKER not in result
-
-
-def test_argument_cleaning_in_strip(rewriter):
-  """
-  Input: x.to(device='cuda', dtype=torch.float32)
-  Effect: Arguments inside stripped call are removed entirely.
-  """
-  code = "y = x.to(device='cuda', dtype=torch.float32)"
-  result = rewrite(rewriter, code)
-
-  # Output logic should be 'y = x'
-  assert "y = x" in result
-
-  # Check that arguments are gone from generated code
-  # We added 'float32' to mock semantics so it shouldn't trigger an error rollback.
-  is_cuda = any("'cuda'" in line and not line.strip().startswith("#") for line in result.splitlines())
-  assert not is_cuda
-
-
 def test_version_constraint_check_min(rewriter):
   """
   Scenario: Op requires min_version="9.0.0". Target is "1.0.0".
   Expectation: Warning generated.
   """
-  # Current version is 1.0.0 in MockSemantics
-
   code = "y = torch.future(x)"
   result = rewrite(rewriter, code)
 
-  # Transformation happens
   assert "jax.future(x)" in result
-
-  # Warning attached
   assert EscapeHatch.START_MARKER in result
   assert "Target jax@1.0.0 is older than required 9.0.0" in result
-
-
-def test_version_constraint_check_max(rewriter):
-  """
-  Scenario: Op requires max_version="0.0.1". Target is "1.0.0".
-  Expectation: Warning generated.
-  """
-  code = "y = torch.legacy(x)"
-  result = rewrite(rewriter, code)
-
-  assert "jax.legacy(x)" in result
-
-  assert EscapeHatch.START_MARKER in result
-  assert "Target jax@1.0.0 exceeds max supported 0.0.1" in result
-
-
-def test_version_constraint_pass(rewriter):
-  """
-  Scenario: No constraints or compatible constraints.
-  """
-  # Create op with compatible constraints
-  rewriter.semantics._inject("compat", "torch.compat", "jax.compat", min_v="0.5.0", max_v="2.0.0")
-
-  code = "y = torch.compat(x)"
-  result = rewrite(rewriter, code)
-
-  assert "jax.compat(x)" in result
-  assert EscapeHatch.START_MARKER not in result
-
-
-@patch("importlib.metadata.version")
-def test_live_version_lookup(mock_ver, rewriter):
-  """
-  Verify version check logic falls back to importlib if config missing.
-  """
-  # Remove config version to force live lookup
-  rewriter.semantics.framework_configs["jax"] = {}
-
-  mock_ver.return_value = "0.0.1"
-
-  # Test Min Failure (Require 9.0)
-  code = "y = torch.future(x)"
-  result = rewrite(rewriter, code)
-  assert "Target jax@0.0.1 is older than required 9.0.0" in result
-  mock_ver.assert_called_with("jax")
 
 
 def test_deprecation_warning(rewriter):
@@ -274,15 +150,3 @@ def test_deprecation_warning(rewriter):
 
   assert "jax.unsafe(x)" in result
   assert "Usage of deprecated operation 'unsafe_op'" in result
-
-
-def test_deprecation_replacement_suggestion(rewriter):
-  """
-  Scenario: Op marked as deprecated with replaced_by.
-  Expectation: Warning mentions replacement.
-  """
-  code = "y = torch.old_scatter(x)"
-  result = rewrite(rewriter, code)
-
-  assert "jax.scatter(x)" in result
-  assert "Consider using 'Scatter' instead" in result

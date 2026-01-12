@@ -11,7 +11,9 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.casting import transform_casting
@@ -19,7 +21,7 @@ from ml_switcheroo.plugins.casting import transform_casting
 
 def rewrite_call(rewriter, code):
   """Executes specific rewriter phase on code string."""
-  return cst.parse_module(code).visit(rewriter).code
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -52,7 +54,12 @@ def rewriter():
   int64_def = {"variants": {"jax": {"api": "jax.numpy.int64"}}}
 
   # Aggregate Definitions
-  all_defs = {"CastFloat": cast_float_def, "CastLong": cast_long_def, "Float32": float32_def, "Int64": int64_def}
+  all_defs = {
+    "CastFloat": cast_float_def,
+    "CastLong": cast_long_def,
+    "Float32": float32_def,
+    "Int64": int64_def,
+  }
 
   # Mock Lookup Logic
   def get_def(name):
@@ -78,6 +85,9 @@ def rewriter():
   mgr.get_known_apis.return_value = all_defs
   mgr.is_verified.return_value = True
 
+  # Safe Config Defaults
+  mgr.get_framework_config.return_value = {"plugin_traits": {"has_numpy_compatible_arrays": True}}
+
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 
@@ -91,6 +101,9 @@ def test_float_cast(rewriter):
     3. Resolve 'Float32' (JAX) -> 'jax.numpy.float32'
   Output: x.astype(jax.numpy.float32)
   """
+  # Rewriter requires context propagation
+  rewriter.ctx.current_op_id = "CastFloat"
+
   code = "y = x.float()"
   res = rewrite_call(rewriter, code)
 
@@ -103,6 +116,8 @@ def test_long_cast(rewriter):
   Input: x.long()
   Logic: 'CastLong' -> 'Int64' -> 'jax.numpy.int64'
   """
+  rewriter.ctx.current_op_id = "CastLong"
+
   code = "idx = mask.long()"
   res = rewrite_call(rewriter, code)
 
@@ -112,7 +127,7 @@ def test_long_cast(rewriter):
 
 def test_metadata_missing_fallback(rewriter):
   """
-  Scenario: Op definition exists but metadata missing (e.g. legacy json).
+  Scenario: Op definition exists but metadata missing.
   Expectation: Return original node.
   """
   # Inject bad definition
@@ -122,7 +137,6 @@ def test_metadata_missing_fallback(rewriter):
   }
   rewriter.semantics.get_definition_by_id.side_effect = lambda oid: cast_bad_def if oid == "CastBad" else None
 
-  # We must hack context to assume current op is CastBad since BaseRewriter won't trigger it via string lookup here
   rewriter.ctx.current_op_id = "CastBad"
 
   call_node = cst.parse_expression("x.bad()")
@@ -134,11 +148,14 @@ def test_metadata_missing_fallback(rewriter):
 
 def test_type_resolution_failure(rewriter):
   """
-  Scenario: Target Framework doesn't map the abstract type (e.g. 'Int128').
+  Scenario: Target Framework doesn't map the abstract type.
   Expectation: Return original node.
   """
   # Define cast asking for 'Int128'
-  cast_huge = {"metadata": {"target_type": "Int128"}, "variants": {"jax": {"requires_plugin": "type_methods"}}}
+  cast_huge = {
+    "metadata": {"target_type": "Int128"},
+    "variants": {"jax": {"requires_plugin": "type_methods"}},
+  }
   rewriter.semantics.get_definition_by_id.side_effect = lambda oid: cast_huge if oid == "CastHuge" else None
   rewriter.ctx.current_op_id = "CastHuge"
 

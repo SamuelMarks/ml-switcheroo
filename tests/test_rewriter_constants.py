@@ -9,12 +9,16 @@ Verifies that:
 
 import pytest
 import libcst as cst
-from ml_switcheroo.core.rewriter import PivotRewriter
+from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 
 
 class MockSemantics(SemanticsManager):
+  """
+  Mock Semantics Manager for constants checking.
+  """
+
   def __init__(self):
     # Skip init to avoid file load
     self.data = {}
@@ -34,6 +38,7 @@ class MockSemantics(SemanticsManager):
     self._inject_const("cpu", {"torch": "torch.cpu", "jax": "jax.devices('cpu')[0]"})
 
   def get_framework_config(self, framework: str):
+    """Mock config retrieval."""
     return self.framework_configs.get(framework, {})
 
   def _inject_const(self, name, mapping):
@@ -53,13 +58,15 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
+  """Returns a test rewriter instance."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(MockSemantics(), config)
 
 
 def rewrite(rewriter, code):
+  """Helper to convert code."""
   tree = cst.parse_module(code)
-  return tree.visit(rewriter).code
+  return rewriter.convert(tree).code
 
 
 def test_constant_rewrite_assignment(rewriter):
@@ -90,8 +97,6 @@ def test_function_attribute_bypass(rewriter):
 
   Why: By design, we skip rewriting attributes that look like functions
   (have std_args) in leave_Attribute, to avoid conflict with leave_Call.
-  If 'torch.abs' is passed as an object, it's safer to leave it or handle via special rule.
-  Currently, we prevent leave_Attribute from messing up leave_Call.
   """
   code = "f = torch.abs"
   res = rewrite(rewriter, code)

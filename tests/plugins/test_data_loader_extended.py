@@ -12,16 +12,19 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.data_loader import transform_dataloader
 
 
 def rewrite_code(rewriter, code: str) -> str:
+  """Executes the rewriter pipeline."""
   tree = cst.parse_module(code)
-  new_tree = tree.visit(rewriter)
-  return new_tree.code
+  # Use convert() via shim
+  return rewriter.convert(tree).code
 
 
 @pytest.fixture
@@ -34,8 +37,14 @@ def rewriter():
   # Mock definition
   dl_def = {
     "variants": {
-      "torch": {"api": "torch.utils.data.DataLoader", "requires_plugin": "convert_dataloader"},
-      "jax": {"api": "GenericDataLoader", "requires_plugin": "convert_dataloader"},
+      "torch": {
+        "api": "torch.utils.data.DataLoader",
+        "requires_plugin": "convert_dataloader",
+      },
+      "jax": {
+        "api": "GenericDataLoader",
+        "requires_plugin": "convert_dataloader",
+      },
     }
   }
 

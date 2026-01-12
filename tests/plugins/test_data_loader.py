@@ -11,7 +11,9 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.data_loader import transform_dataloader
@@ -19,8 +21,10 @@ from ml_switcheroo.frameworks.base import register_framework
 
 
 def rewrite_code(rewriter, code: str) -> str:
+  """Executes the rewriter pipeline."""
   tree = cst.parse_module(code)
-  new_tree = tree.visit(rewriter)
+  # Use .convert()
+  new_tree = rewriter.convert(tree)
   return new_tree.code
 
 
@@ -33,8 +37,6 @@ def rewriter_factory():
   mgr = MagicMock()
 
   # Mock Definition: multiple frameworks request the plugin.
-  # This setup proves that the plugin runs blindly if requested,
-  # breaking the coupling where "torch" was formerly hardcoded to skip.
   dl_def = {
     "variants": {
       "torch": {"api": "TorchShim", "requires_plugin": "convert_dataloader"},
@@ -50,8 +52,7 @@ def rewriter_factory():
   # Fix: Ensure fallback defaults for trait lookups
   mgr.get_framework_config.return_value = {}
 
-  # --- FIX: Register dummy framework 'custom' to allow RuntimeConfig validation to pass ---
-  # We define it locally so it affects only tests consuming this fixture.
+  # --- FIX: Register dummy framework 'custom' ---
   @register_framework("custom")
   class CustomAdapter:
     pass
@@ -71,9 +72,9 @@ def test_blind_execution(rewriter_factory):
   """
   rw = rewriter_factory("torch")
   # Wrap in function to ensure preamble injection works (FuncStructureMixin logic)
-  code = """ 
-def load_data(): 
-    loader = torch.utils.data.DataLoader(dataset) 
+  code = """
+def load_data():
+    loader = torch.utils.data.DataLoader(dataset)
 """
   res = rewrite_code(rw, code)
 
@@ -86,9 +87,9 @@ def load_data():
 def test_jax_shim_injection(rewriter_factory):
   """Verify Standard JAX replacement."""
   rw = rewriter_factory("jax")
-  code = """ 
-def load_data(): 
-    loader = torch.utils.data.DataLoader(dataset, batch_size=32) 
+  code = """
+def load_data():
+    loader = torch.utils.data.DataLoader(dataset, batch_size=32)
 """
   res = rewrite_code(rw, code)
 
@@ -105,9 +106,9 @@ def load_data():
 def test_dataloader_arg_extraction(rewriter_factory):
   """Verify positional args are correctly mapped."""
   rw = rewriter_factory("jax")
-  code = """ 
-def train(): 
-    dl = DataLoader(my_ds, batch_size=64, shuffle=True) 
+  code = """
+def train():
+    dl = DataLoader(my_ds, batch_size=64, shuffle=True)
 """
   res = rewrite_code(rw, code)
   clean = res.replace(" ", "")
@@ -120,10 +121,10 @@ def train():
 def test_dataloader_idempotent_injection(rewriter_factory):
   """Verify shim class isn't duplicated if multiple calls exist."""
   rw = rewriter_factory("jax")
-  code = """ 
-def run(): 
-    dl1 = DataLoader(d1) 
-    dl2 = DataLoader(d2) 
+  code = """
+def run():
+    dl1 = DataLoader(d1)
+    dl2 = DataLoader(d2)
 """
   res = rewrite_code(rw, code)
 

@@ -1,13 +1,16 @@
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -17,7 +20,10 @@ def rewriter():
   onehot_def = {
     "std_args": ["input", "num_classes"],
     "variants": {
-      "torch": {"api": "torch.nn.functional.one_hot", "args": {"input": "tensor"}},
+      "torch": {
+        "api": "torch.nn.functional.one_hot",
+        "args": {"input": "tensor"},
+      },
       "jax": {"api": "jax.nn.one_hot", "args": {"tensor": "x", "input": "x"}},
     },
   }
@@ -27,26 +33,21 @@ def rewriter():
   mgr.get_known_apis.return_value = {"OneHot": onehot_def}
 
   # FIX: Populate framework aliases for dynamic module detection
-  mgr.framework_configs = {"torch": {"alias": {"module": "torch.nn.functional", "name": "F"}}, "jax": {}}
+  mgr.framework_configs = {
+    "torch": {"alias": {"module": "torch.nn.functional", "name": "F"}},
+    "jax": {},
+  }
 
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
   return PivotRewriter(mgr, cfg)
 
 
 def test_onehot_positional(rewriter):
-  # Added imports to allow BaseRewriter to track alias 'F',
-  # or rely on framework_configs mock above.
-  # NormalizationMixin uses self.semantics.framework_configs OR self._alias_map.
-  # BaseRewriter only populates _alias_map if it visits imports.
-  # But NormalizationMixin also checks semantics.framework_configs directly.
-  # Mock above sets 'F' as alias for 'torch'.
-
   code = "import torch.nn.functional as F\ny = F.one_hot(x, 10)"
   res = rewrite_code(rewriter, code)
 
   assert "jax.nn.one_hot" in res
-  # Should be cleanly rewritten arguments (x, 10)
-  # If F was injected as arg 0, it would look like (F, x, 10)
+  # Argument re-ordering or normalization happens here
   assert "(x,10)" in res.replace(" ", "")
 
 

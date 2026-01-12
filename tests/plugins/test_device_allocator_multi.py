@@ -5,7 +5,10 @@ Tests for Polygot Device Allocation using Adapter Delegation.
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.device_allocator import transform_device_allocator
@@ -17,7 +20,8 @@ from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  """Executes pipeline."""
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture

@@ -11,7 +11,9 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.gather import transform_gather
@@ -19,7 +21,8 @@ from ml_switcheroo.frameworks.base import register_framework
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  """Executes pipeline."""
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @register_framework("custom_fw")
@@ -52,7 +55,10 @@ def rewriter_factory():
     "variants": {
       "torch": {"api": "torch.gather"},
       "jax": {"api": "jnp.take_along_axis", "requires_plugin": "gather_adapter"},
-      "custom_fw": {"api": "custom.gather_nd", "requires_plugin": "gather_adapter"},
+      "custom_fw": {
+        "api": "custom.gather_nd",
+        "requires_plugin": "gather_adapter",
+      },
     }
   }
 
@@ -105,15 +111,12 @@ def test_gather_missing_target_passthrough(rewriter_factory):
   """
   rw = rewriter_factory("numpy")
   # Force context update
-  rw.ctx.target_fw = "numpy"
+  rw.context.hook_context.target_fw = "numpy"
 
   code = "y = torch.gather(x, 1, idx)"
   res = rewrite_code(rw, code)
 
   # Should remain torch.gather or return unmodified node which rewriter might keep as-is
-  # BaseRewriter logic calls hook. Hook returns node.
-  # Since rewriter lookup logic also fails to find 'numpy' variant API string,
-  # it defaults to returning original.
   assert "torch.gather" in res
   assert "jnp" not in res
   assert "take_along_axis" not in res

@@ -1,5 +1,5 @@
 """
-Tests for Graph Synthesizer.
+Tests for Python Backend (formerly Graph Synthesizer).
 
 Verifies that LogicalGraphs are correctly converted into valid Python/PyTorch source code.
 Covers:
@@ -13,13 +13,13 @@ Covers:
 import ast
 import pytest
 import libcst as cst
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.graph_synthesizer import GraphSynthesizer
+from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.compiler.backends.python import PythonBackend
 
 
 @pytest.fixture
-def synthesizer() -> GraphSynthesizer:
-  return GraphSynthesizer()
+def synthesizer() -> PythonBackend:
+  return PythonBackend()
 
 
 def validate_python(code: str) -> None:
@@ -30,7 +30,7 @@ def validate_python(code: str) -> None:
     pytest.fail(f"Generated Invalid Python:\n{e}\n\nCode:\n{code}")
 
 
-def test_synthesize_simple_chain(synthesizer: GraphSynthesizer) -> None:
+def test_synthesize_simple_chain(synthesizer: PythonBackend) -> None:
   """
   Scenario: Input -> Conv2d -> Output.
   Expectation: Fresh class generation with __init__ and forward.
@@ -53,7 +53,7 @@ def test_synthesize_simple_chain(synthesizer: GraphSynthesizer) -> None:
   assert "return x" in code
 
 
-def test_synthesize_functional_mix(synthesizer: GraphSynthesizer) -> None:
+def test_synthesize_functional_mix(synthesizer: PythonBackend) -> None:
   """
   Scenario: Input -> Layer -> Functional -> Output.
   """
@@ -81,7 +81,7 @@ def test_synthesize_functional_mix(synthesizer: GraphSynthesizer) -> None:
   assert "x = torch.flatten(x)" in code
 
 
-def test_synthesize_metadata_args(synthesizer: GraphSynthesizer) -> None:
+def test_synthesize_metadata_args(synthesizer: PythonBackend) -> None:
   """
   Scenario: Nodes have argument metadata.
   Expectation: Arguments injected into init/call.
@@ -102,13 +102,17 @@ def test_synthesize_metadata_args(synthesizer: GraphSynthesizer) -> None:
   assert "nn.Conv2d(1, 32, kernel_size=3)" in code
 
 
-def test_synthesize_custom_input_name(synthesizer: GraphSynthesizer) -> None:
+def test_synthesize_custom_input_name(synthesizer: PythonBackend) -> None:
   """
   Scenario: Input node has specific name 'img'.
   Expectation: forward argument is 'img'.
   """
   g = LogicalGraph()
-  g.nodes = [LogicalNode("in_node", "Input", {"name": "img"}), LogicalNode("l1", "Linear"), LogicalNode("out", "Output")]
+  g.nodes = [
+    LogicalNode("in_node", "Input", {"name": "img"}),
+    LogicalNode("l1", "Linear"),
+    LogicalNode("out", "Output"),
+  ]
 
   code = synthesizer.generate(g)
   validate_python(code)
@@ -118,7 +122,7 @@ def test_synthesize_custom_input_name(synthesizer: GraphSynthesizer) -> None:
   assert "return img" in code
 
 
-def test_context_preservation(synthesizer: GraphSynthesizer) -> None:
+def test_context_preservation(synthesizer: PythonBackend) -> None:
   """
   Scenario: Patching an existing class while keeping other methods/docstrings.
   Expectation: __init__ and forward are replaced, but helper methods and docs remain.
@@ -142,7 +146,13 @@ class MyNet(nn.Module):
   original_tree = cst.parse_module(original_source)
 
   # New graph logic to inject
-  g = LogicalGraph(nodes=[LogicalNode("x", "Input"), LogicalNode("new_conv", "Conv2d"), LogicalNode("out", "Output")])
+  g = LogicalGraph(
+    nodes=[
+      LogicalNode("x", "Input"),
+      LogicalNode("new_conv", "Conv2d"),
+      LogicalNode("out", "Output"),
+    ]
+  )
 
   # Run Synthesizer in Patch Mode
   new_code = synthesizer.generate(g, class_name="MyNet", original_tree=original_tree)
@@ -158,7 +168,7 @@ class MyNet(nn.Module):
   assert "self.new_conv = nn.Conv2d" in new_code
 
 
-def test_missing_class_fallback(synthesizer: GraphSynthesizer) -> None:
+def test_missing_class_fallback(synthesizer: PythonBackend) -> None:
   """
   Scenario: Original tree provided, but target class name not found.
   Expectation: Fallback to fresh generation (or appending, depending on implementation).
@@ -167,7 +177,13 @@ def test_missing_class_fallback(synthesizer: GraphSynthesizer) -> None:
   """
   original_tree = cst.parse_module("class OtherClass: pass")
 
-  g = LogicalGraph(nodes=[LogicalNode("x", "Input"), LogicalNode("l1", "Linear"), LogicalNode("out", "Output")])
+  g = LogicalGraph(
+    nodes=[
+      LogicalNode("x", "Input"),
+      LogicalNode("l1", "Linear"),
+      LogicalNode("out", "Output"),
+    ]
+  )
 
   new_code = synthesizer.generate(g, class_name="MissingClass", original_tree=original_tree)
   validate_python(new_code)
@@ -178,7 +194,7 @@ def test_missing_class_fallback(synthesizer: GraphSynthesizer) -> None:
   assert "class OtherClass" not in new_code  # Fresh generation replaces file currently
 
 
-def test_format_args_helper(synthesizer: GraphSynthesizer) -> None:
+def test_format_args_helper(synthesizer: PythonBackend) -> None:
   """Test metadata formatting private helper directly."""
   meta = {"arg_1": "b", "arg_0": "a", "key": "val", "dropout": "0.5"}
   # Explicitly verify sorting: arg_0, arg_1, then alphabetical kwargs
@@ -186,7 +202,7 @@ def test_format_args_helper(synthesizer: GraphSynthesizer) -> None:
   assert res == "a, b, dropout=0.5, key=val"
 
 
-def test_is_stateful_layer_helper(synthesizer: GraphSynthesizer) -> None:
+def test_is_stateful_layer_helper(synthesizer: PythonBackend) -> None:
   """Test differentiation between layers and functional ops."""
   # Functional cases
   n1 = LogicalNode("f", "torch.flatten", {})
@@ -203,10 +219,13 @@ def test_is_stateful_layer_helper(synthesizer: GraphSynthesizer) -> None:
   assert synthesizer._is_stateful_layer(n4) is True
 
 
-def test_return_insertion(synthesizer: GraphSynthesizer) -> None:
+def test_return_insertion(synthesizer: PythonBackend) -> None:
   """Ensure return statement is added if graph ends without explicit Output node logic."""
   # Graph with no Output node kind (stops at last computation)
-  g = LogicalGraph(nodes=[LogicalNode("x", "Input", {"name": "y"}), LogicalNode("l1", "Linear")], edges=[])
+  g = LogicalGraph(
+    nodes=[LogicalNode("x", "Input", {"name": "y"}), LogicalNode("l1", "Linear")],
+    edges=[],
+  )
   code = synthesizer.generate(g)
   # The synthesizer should append a return for the last current_var
   assert "return y" in code

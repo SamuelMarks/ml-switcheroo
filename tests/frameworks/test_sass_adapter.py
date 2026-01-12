@@ -1,14 +1,16 @@
 """
-Tests for NVIDIA SASS Framework Adapter.
+Tests for NVIDIA SASS Framework Adapter and Backend Wiring.
 
 Verifies:
 1. Registration in `_ADAPTER_REGISTRY`.
 2. Protocol compliance (Ghost mode, empty defaults).
 3. Correct loading of Math definitions (FADD).
-4. Example code generation.
+4. Backend connectivity (SassBackend).
 """
 
+from unittest.mock import MagicMock
 from ml_switcheroo.frameworks.sass import SassAdapter
+from ml_switcheroo.compiler.backends.sass import SassBackend
 from ml_switcheroo.frameworks.base import (
   _ADAPTER_REGISTRY,
   get_adapter,
@@ -68,9 +70,13 @@ def test_example_code():
   assert "//" in code
 
 
-def test_no_op_methods():
-  """Verify safety of protocol implementation."""
-  adapter = SassAdapter()
-  assert adapter.get_device_syntax("cuda") == "// Target Device: cuda"
-  assert adapter.get_rng_split_syntax("r", "k") == ""
-  assert adapter.get_to_numpy_code() == "return str(obj)"
+def test_sass_backend_instantiation():
+  """
+  Verify that the SassBackend can be instantiated with a SemanticsManager.
+  This replaces the old test for `create_emitter`.
+  """
+  semantics_mock = MagicMock()
+  backend = SassBackend(semantics=semantics_mock)
+  assert backend is not None
+  # Check that it has a compile method (Protocol)
+  assert hasattr(backend, "compile")

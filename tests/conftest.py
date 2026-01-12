@@ -16,13 +16,54 @@ src_path = Path(__file__).parent.parent / "src"
 sys.path.insert(0, str(src_path))
 
 # Force load of default adapters so they provide the "clean state" baseline
-# This ensures that standard frameworks (Torch, JAX, etc.) are present in the
-# snapshot we take for isolation, so they remain available after restoration.
 try:
   import ml_switcheroo.frameworks
   from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY
 except ImportError:
   _ADAPTER_REGISTRY = {}
+
+# Import Rewriter components for TestRewriter shim
+from ml_switcheroo.core.rewriter import (
+  RewriterContext,
+  RewriterPipeline,
+  StructuralPass,
+  ApiPass,
+  AuxiliaryPass,
+)
+
+
+class TestRewriter:
+  """
+  Test-scoped shim replacing the legacy PivotRewriter.
+
+  Wraps the RewriterPipeline to allow tests to execute transformations
+  deterministically without the full Engine overhead. It mimics the
+  interface used by legacy tests while using the modern pipeline architecture.
+  """
+
+  # Prevent pytest from trying to collect this as a test class containing tests
+  __test__ = False
+
+  def __init__(self, semantics, config, symbol_table=None):
+    self.context = RewriterContext(semantics, config, symbol_table)
+    self.pipeline = RewriterPipeline([StructuralPass(), ApiPass(), AuxiliaryPass()])
+
+  @property
+  def ctx(self):
+    """Access hook context for tests that inspect internal state."""
+    return self.context.hook_context
+
+  @property
+  def semantics(self):
+    """Access semantics manager from context."""
+    return self.context.semantics
+
+  def convert(self, module):
+    """
+    Executes the pipeline on the given CST module.
+    Replaces the old pattern `tree.visit(rewriter)`.
+    """
+    return self.pipeline.run(module, self.context)
 
 
 class SnapshotAssert:
@@ -55,10 +96,7 @@ class SnapshotAssert:
     content = content.replace("\r\n", "\n")
 
     if self.update_mode or not snapshot_file.exists():
-      # We write the raw content (without external normalization) to disk
-      # so the file remains human-readable/representative of raw output if preferred,
-      # or we could write normalized. Usually better to write raw and normalize on read
-      # for comparison robustness.
+      # Write raw content to disk
       normalized_to_write = normalizer(content) if normalizer else content
       snapshot_file.write_text(normalized_to_write, encoding="utf-8")
       if self.update_mode:
@@ -73,10 +111,7 @@ class SnapshotAssert:
       lhs = normalizer(lhs)
       rhs = normalizer(rhs)
 
-    # Simple assertion. Diff tools in IDE handles failures well.
-    assert lhs == rhs, (
-      f"Snapshot mismatch for {snapshot_file.name}. Run check script or pytest with --update-snapshots to accept changes."
-    )
+    assert lhs == rhs, f"Snapshot mismatch for {snapshot_file.name}. Run with --update-snapshots to accept changes."
 
 
 @pytest.fixture
@@ -91,10 +126,8 @@ def isolate_framework_registry():
   Ensures that modifications to the framework adapter registry
   (adding custom frameworks for tests) do not leak between tests.
   """
-  # Capture the state (which ideally contains torch, jax, etc. loaded via imports above)
   original_registry = _ADAPTER_REGISTRY.copy()
   yield
-  # Restore state after test completion
   _ADAPTER_REGISTRY.clear()
   _ADAPTER_REGISTRY.update(original_registry)
 

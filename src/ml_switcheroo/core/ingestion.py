@@ -16,7 +16,7 @@ from ml_switcheroo.core.mlir.parser import MlirParser
 
 # TikZ Bridge
 from ml_switcheroo.core.tikz.parser import TikzParser
-from ml_switcheroo.core.tikz.synthesizer import GraphSynthesizer
+from ml_switcheroo.compiler.backends.python import PythonBackend
 from ml_switcheroo.frameworks.base import FrameworkAdapter
 
 
@@ -85,7 +85,7 @@ def ingest_code(
       graph = parser.parse()
       # Determine synthesis flavour
       synth_target = "jax" if target_fw in ["jax", "flax", "flax_nnx"] else "torch"
-      synthesizer = GraphSynthesizer(framework=synth_target)
+      synthesizer = PythonBackend(framework=synth_target)
       py_code = synthesizer.generate(graph, class_name="SwitcherooNet")
       # Parse the synthesized python code
       tree = cst.parse_module(py_code)

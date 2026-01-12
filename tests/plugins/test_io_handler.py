@@ -11,7 +11,9 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.io_handler import transform_io_calls
@@ -20,12 +22,8 @@ from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 
 def rewrite_code(rewriter, code: str) -> str:
-  tree = cst.parse_module(code)
-  try:
-    new_tree = tree.visit(rewriter)
-    return new_tree.code
-  except Exception as e:
-    pytest.fail(f"Rewrite failed: {e}")
+  """Executes pipeline."""
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -91,8 +89,9 @@ def test_load_transform(rewriter):
 
 def test_ignored_if_wrong_target(rewriter):
   # Reconfigure context
-  rewriter.ctx._runtime_config.target_framework = "numpy"
-  rewriter.ctx.target_fw = "numpy"
+  rewriter.context.config.target_framework = "numpy"
+  # Also update hook context explicitly if it was copied
+  rewriter.context.hook_context.target_fw = "numpy"
 
   # Ensure adapter returns None in patch
   with patch("ml_switcheroo.plugins.io_handler.get_adapter", return_value=None):

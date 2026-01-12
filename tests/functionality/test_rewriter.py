@@ -1,5 +1,5 @@
 """
-Comprehensive Integration Tests for the PivotRewriter.
+Comprehensive Integration Tests for the PivotRewriter (TestRewriter).
 
 Verifies:
 1.  **API Swapping**: Calls are correctly mapped (torch.abs -> jax.numpy.abs).
@@ -12,7 +12,7 @@ Verifies:
 
 import pytest
 import libcst as cst
-from ml_switcheroo.core.rewriter import PivotRewriter
+from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 
@@ -70,7 +70,8 @@ def rewriter():
 def rewrite(rewriter, code):
   """Helper to parse and return code string."""
   tree = cst.parse_module(code)
-  new_tree = tree.visit(rewriter)
+  # Using pipeline conversion via shim
+  new_tree = rewriter.convert(tree)
   return new_tree.code
 
 
@@ -182,9 +183,9 @@ def test_aliased_usage(rewriter):
       ...
       y = jax.numpy.abs(x)
   """
-  code = """ 
+  code = """
 import torch as t
-y = t.abs(x) 
+y = t.abs(x)
 """
   result = rewrite(rewriter, code)
   assert "jax.numpy.abs(x)" in result

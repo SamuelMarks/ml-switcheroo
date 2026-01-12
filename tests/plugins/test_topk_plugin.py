@@ -6,14 +6,17 @@ import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.rewriter import PivotRewriter
+from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.topk import transform_topk
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  tree = cst.parse_module(code)
+  # Use pipeline conversion
+  new_tree = rewriter.convert(tree)
+  return new_tree.code
 
 
 @pytest.fixture
@@ -26,12 +29,18 @@ def rewriter_factory():
   topk_def = {
     "variants": {
       "torch": {"api": "torch.topk"},
-      "jax": {"api": "jax.lax.top_k", "requires_plugin": "topk_adapter"},
-      "tensorflow": {"api": "tf.math.top_k", "requires_plugin": "topk_adapter"},
+      "jax": {
+        "api": "jax.lax.top_k",
+        "requires_plugin": "topk_adapter",
+      },
+      "tensorflow": {
+        "api": "tf.math.top_k",
+        "requires_plugin": "topk_adapter",
+      },
     }
   }
 
-  mgr.get_definition.side_effect = lambda n: ("TopK", topk_def) if "topk" in n else None
+  mgr.get_definition.side_effect = lambda n: (("TopK", topk_def) if "topk" in n else None)
 
   # Dynamic resolver
   def resolve(aid, fw):
@@ -63,7 +72,7 @@ def test_topk_rewrapping_jax(rewriter_factory):
 def test_topk_passthrough_missing_target(rewriter_factory):
   """Verify missing target returns original."""
   rewriter = rewriter_factory("numpy")
-  rewriter.ctx.target_fw = "numpy"
+  rewriter.context.hook_context.target_fw = "numpy"
   code = "res = torch.topk(x, 5)"
   res = rewrite_code(rewriter, code)
 

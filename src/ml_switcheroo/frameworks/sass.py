@@ -1,7 +1,13 @@
 """
 NVIDIA SASS (Streaming Assembler) Framework Adapter.
 
-Provides metadata and legacy hooks for the SASS compiler stack.
+Provides metadata and configuration for the SASS compiler stack.
+This adapter acts as a metadata container for the Compiler Registry,
+identifying SASS as a target language and providing static definitions.
+
+Migration Note:
+    Legacy shim classes (`PythonToSassEmitter`) have been removed.
+    Compilation logic is now handled by `ml_switcheroo.compiler.backends.sass.SassBackend`.
 """
 
 from typing import Dict, List, Optional, Set, Tuple, Any, TYPE_CHECKING
@@ -20,54 +26,20 @@ from ml_switcheroo.frameworks.base import (
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 
-# Import compiler components for legacy wrappers
-from ml_switcheroo.compiler.backends.sass.synthesizer import SassSynthesizer
-from ml_switcheroo.compiler.backends.sass.emitter import SassEmitter
-from ml_switcheroo.compiler.frontends.python import PythonFrontend
-
 if TYPE_CHECKING:
   from ml_switcheroo.semantics.manager import SemanticsManager
 
 
-class PythonToSassEmitter:
-  """
-  Legacy wrapper for compilation pipeline (Python -> SASS).
-  Matches interface expected by old tests.
-  """
-
-  def __init__(self):
-    # Lazy import to break circular dependency
-    from ml_switcheroo.semantics.manager import SemanticsManager
-
-    # Create a fresh semantics manager to ensure macros are registered if needed
-    self.semantics = SemanticsManager()
-    self.synth = SassSynthesizer(self.semantics)
-    self.emitter = SassEmitter()
-
-  def emit(self, code: str) -> str:
-    # 1. Parse Python to Graph
-    frontend = PythonFrontend(code)
-    graph = frontend.parse_to_graph()
-
-    # 2. Synthesize SASS AST
-    sass_nodes = self.synth.from_graph(graph)
-
-    # 3. Emit Text
-    return self.emitter.emit(sass_nodes)
-
-
 @register_framework("sass")
 class SassAdapter(FrameworkAdapter):
-  """Adapter for NVIDIA SASS Assembly Generation."""
+  """
+  Adapter for NVIDIA SASS Assembly Generation.
+  """
 
   display_name: str = "NVIDIA SASS"
   inherits_from: Optional[str] = None
   ui_priority: int = 150
   _mode: InitMode = InitMode.GHOST
-
-  def create_emitter(self) -> PythonToSassEmitter:
-    """Factory for legacy emitter shim."""
-    return PythonToSassEmitter()
 
   # --- Standard Protocol Implementation ---
 

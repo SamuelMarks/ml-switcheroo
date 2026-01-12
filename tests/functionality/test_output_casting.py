@@ -8,10 +8,12 @@ is defined in the semantics mapping.
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 class MockCastSemantics(SemanticsManager):
@@ -57,7 +59,8 @@ def rewriter():
 
 def rewrite(rewriter, code):
   tree = cst.parse_module(code)
-  new_tree = tree.visit(rewriter)
+  # Fix: Use pipeline conversion
+  new_tree = rewriter.convert(tree)
   return new_tree.code
 
 

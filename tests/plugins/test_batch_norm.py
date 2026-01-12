@@ -5,7 +5,10 @@ Tests for BatchNorm Functionalization Plugin.
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.batch_norm import transform_batch_norm
@@ -13,12 +16,7 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def rewrite_code(rewriter, code):
-  tree = cst.parse_module(code)
-  try:
-    new_tree = tree.visit(rewriter)
-    return new_tree.code
-  except Exception as e:
-    pytest.fail(f"Rewrite failed: {e}")
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -29,7 +27,10 @@ def rewriter():
   bn_def = {
     "variants": {
       "torch": {"api": "torch.nn.BatchNorm2d"},
-      "jax": {"api": "flax.nnx.BatchNorm", "requires_plugin": "batch_norm_unwrap"},
+      "jax": {
+        "api": "flax.nnx.BatchNorm",
+        "requires_plugin": "batch_norm_unwrap",
+      },
     }
   }
 
@@ -37,7 +38,6 @@ def rewriter():
     return ("BatchNorm", bn_def) if "BatchNorm" in name or "bn" in name else None
 
   # Implement trait retrieval logic
-  # The plugin checks ctx.plugin_traits.requires_functional_state
   def get_fw_config(fw):
     if fw == "jax":
       return {"plugin_traits": PluginTraits(requires_functional_state=True)}
@@ -47,7 +47,6 @@ def rewriter():
   mgr.get_framework_config.side_effect = get_fw_config
 
   def resolve(aid, fw):
-    # Plugin logic doesn't call resolve, but rewriter does for API renaming
     return bn_def["variants"]["jax"] if fw == "jax" and aid == "BatchNorm" else None
 
   mgr.resolve_variant.side_effect = resolve
@@ -71,7 +70,6 @@ def test_bn_injection_and_unwrap(rewriter):
   assert "use_running_average=nottraining" in clean
   assert "mutable=['batch_stats']" in clean
   # Check that it ends with subscript [0]
-  # Note: Whitespace might vary, check structure
   assert res.strip().endswith(")[0]")
 
 

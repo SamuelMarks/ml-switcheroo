@@ -5,13 +5,17 @@ Integration Tests for Clamp/Clip Semantics.
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 
 
 def rewrite_code(rewriter, code):
-  return cst.parse_module(code).visit(rewriter).code
+  # Fix: Pipeline conversion
+  return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
@@ -22,7 +26,10 @@ def rewriter():
     "std_args": ["input", "min", "max"],
     "variants": {
       "torch": {"api": "torch.clamp"},
-      "jax": {"api": "jax.numpy.clip", "args": {"min": "a_min", "max": "a_max", "input": "a"}},
+      "jax": {
+        "api": "jax.numpy.clip",
+        "args": {"min": "a_min", "max": "a_max", "input": "a"},
+      },
     },
   }
   mgr.get_definition.side_effect = lambda n: ("Clamp", clamp_def) if "clamp" in n or "clip" in n else None

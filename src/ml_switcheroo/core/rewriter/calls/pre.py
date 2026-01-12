@@ -1,14 +1,8 @@
 """
 Pre-processing Phase for Call Rewriting.
 
-Handles logic that must occur before the core semantic lookup:
-
-1.  **Functional Unwrapping**: Converting ``apply`` patterns if converting from functional frameworks.
-2.  **Plugin Claims**: Heuristic execution of plugins (like in-place unrolling).
-3.  **Lifecycle Management**: Stripping methods like ``.cuda()`` or ``.eval()``.
-4.  **Stateful Calls**: Rewriting calls that require state injection.
-5.  **Implicit Resolution**: Guessing API paths for method calls on objects, using
-    Symbol Table inference or heuristic fallbacks.
+Handles functional unwrapping, plugin claims, and lifecycle method stripping.
+Updated to remove dependencies on deleted legacy modules.
 """
 
 from typing import Tuple, Any, Optional
@@ -29,44 +23,56 @@ def handle_pre_checks(
   """
   Executes pre-lookup checks and transformations.
 
-  These checks handle framework-specific idioms that don't map cleanly via
-  simple API renaming (e.g., in-place operations, lifecycle management,
-  functional state patterns).
-
   Args:
-      rewriter: The parent Rewriter instance containing context and config.
-      original: The original CST node (before traversal).
-      updated: The updated CST node (after children handling).
-      func_name: The resolved fully qualified name of the function, or None if unresolved.
+      rewriter: The calling transformer (duck typing: needs _get_source_traits,
+                _report_warning, _is_stateful, semantics, target_fw, ctx).
+      original: The original CST node.
+      updated: The updated CST node.
+      func_name: Resolved function name.
 
   Returns:
-      Tuple[bool, cst.CSTNode]: A tuple containing:
-
-      -   ``handled (bool)``: If True, the transformation is complete and should return early.
-      -   ``node (cst.CSTNode)``: The result node (or updated node if not handled).
+      Tuple(handled, result_node).
   """
-
   # 1. Functional 'apply' unwrapping (Dynamic Trait)
-  # Checks if source uses functional patterns (e.g. Flax 'apply') that need unwrapping
-  source_traits = rewriter._get_source_traits()
-  unwrap_method = source_traits.functional_execution_method
+  # FIX: Check for property 'source_traits' OR method '_get_source_traits' to be robust
+  has_traits = hasattr(rewriter, "source_traits") or hasattr(rewriter, "_get_source_traits")
 
-  if is_functional_apply(original, unwrap_method):
-    if isinstance(updated.func, cst.Attribute):
-      receiver = updated.func.value
-      # Strip the first argument (variables/params) and use receiver as callable
-      new_args = updated.args[1:] if len(updated.args) > 0 else []
-      result_node = updated.with_changes(func=receiver, args=new_args)
-      log_diff("Functional Unwrap", original, result_node)
-      return True, result_node
+  if has_traits:
+    if hasattr(rewriter, "source_traits"):
+      source_traits = rewriter.source_traits
+    else:
+      source_traits = rewriter._get_source_traits()
+
+    unwrap_method = source_traits.functional_execution_method
+
+    if is_functional_apply(original, unwrap_method):
+      if isinstance(updated.func, cst.Attribute):
+        receiver = updated.func.value
+        # Strip the first argument (variables/params) and use receiver as callable
+        # e.g. layer.apply(vars, x) -> layer(x)
+        # Check args exist
+        if len(updated.args) > 0:
+          new_args = updated.args[1:]
+        else:
+          new_args = []
+
+        result_node = updated.with_changes(func=receiver, args=new_args)
+        log_diff("Functional Unwrap", original, result_node)
+        return True, result_node
+  else:
+    # Fallback if traits not available
+    pass
 
   # 2. Plugin Check (Explicit Requirement or ODL In-Place Metadata)
-  # If the known function name maps to a plugin-required stub, we flag it.
   plugin_claim = False
   is_inplace = False
 
   if func_name:
-    mapping = rewriter._get_mapping(func_name, silent=True)
+    # Use rewriter._get_mapping logic if available
+    mapping = None
+    if hasattr(rewriter, "_get_mapping"):
+      mapping = rewriter._get_mapping(func_name, silent=True)
+
     if mapping and "requires_plugin" in mapping:
       plugin_claim = True
 
@@ -77,10 +83,7 @@ def handle_pre_checks(
       if details.get("is_inplace"):
         is_inplace = True
 
-  # 2b. Heuristic Plugin: In-Place Unrolling
-  # Triggers if:
-  # A) 'is_inplace' is set in ODL metadata
-  # B) Method ends with '_' (heuristic) AND isn't claimed by another plugin
+  # 2b. Heuristic: In-Place Unrolling
   should_unroll = False
   if is_inplace:
     should_unroll = True
@@ -90,36 +93,34 @@ def handle_pre_checks(
   if should_unroll:
     hook = get_hook("unroll_inplace_ops")
     if hook:
-      new_node = hook(updated, rewriter.ctx)
+      new_node = hook(updated, rewriter.context.hook_context)
       if new_node != updated:
         log_diff("In-place Unroll", updated, new_node)
-        # If transformed, we return it as final result for this phase
         return True, new_node
 
   # 3. Lifecycle Method Handling (Strip/Warn)
-  strip_set, warn_set = rewriter._get_source_lifecycle_lists()
+  if hasattr(rewriter, "_get_source_lifecycle_lists"):
+    strip_set, warn_set = rewriter._get_source_lifecycle_lists()
 
-  if not plugin_claim and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
-    method_name = original.func.attr.value
+    if not plugin_claim and isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
+      method_name = original.func.attr.value
 
-    if method_name in strip_set:
-      if isinstance(updated.func, cst.Attribute):
-        # Identity transform: x.cuda() -> x
-        rewriter._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
-        result_node = updated.func.value
-        log_diff("Lifecycle Strip", original, result_node)
-        return True, result_node
+      if method_name in strip_set:
+        if isinstance(updated.func, cst.Attribute):
+          rewriter._report_warning(f"Stripped framework-specific lifecycle method '.{method_name}()'.")
+          result_node = updated.func.value
+          log_diff("Lifecycle Strip", original, result_node)
+          return True, result_node
 
-    if method_name in warn_set:
-      if isinstance(updated.func, cst.Attribute):
-        # Identity transform with warning
-        rewriter._report_warning(f"Ignored model state method '.{method_name}()'.")
-        result_node = updated.func.value
-        log_diff("Lifecycle Warn", original, result_node)
-        return True, result_node
+      if method_name in warn_set:
+        if isinstance(updated.func, cst.Attribute):
+          rewriter._report_warning(f"Ignored model state method '.{method_name}()'.")
+          result_node = updated.func.value
+          log_diff("Lifecycle Warn", original, result_node)
+          return True, result_node
 
-  # 4. Stateful Call (e.g. self.layer(x) -> self.layer.apply(params, x))
-  if func_name and rewriter._is_stateful(func_name):
+  # 4. Stateful Call
+  if func_name and hasattr(rewriter, "_is_stateful") and rewriter._is_stateful(func_name):
     fw_config = rewriter.semantics.get_framework_config(rewriter.target_fw)
     stateful_spec = fw_config.get("stateful_call")
     if stateful_spec:
@@ -133,63 +134,54 @@ def handle_pre_checks(
 def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Optional[str]) -> Optional[str]:
   """
   Attempts to resolve method calls on objects to full API paths.
-
-  Example:
-      ``x.view()`` -> ``torch.Tensor.view``
-
-  Logic:
-
-  1.  **Type Inference**: Consults the Symbol Table (if available) to determine
-      the type of the receiver object (e.g., it is a Tensor).
-  2.  **Heuristic Fallback**: Checks implicit root classes (e.g. ``torch.Tensor``)
-      defined in the source traits to guess if the method belongs to them.
-
-  Args:
-      rewriter: The calling rewriter instance.
-      original: The original CST node structure.
-      func_name: The currently resolved name (usually None or the failed name).
-
-  Returns:
-      Optional[str]: Resolved fully qualified name, or None if no match found.
   """
-  # Check if it looks like a method call: object.method(...)
   if isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
     receiver = original.func.value
     leaf_method = original.func.attr.value
 
-    # Ensure we aren't misinterpreting module alias `torch.abs` as `obj.abs`
-    is_module = rewriter._is_module_alias(receiver)
     # Check for 'self'
     is_self = isinstance(receiver, cst.Name) and receiver.value == "self"
 
+    # Check if module alias (requires rewriter alias checker)
+    is_module = False
+    if hasattr(rewriter, "_is_module_alias"):
+      is_module = rewriter._is_module_alias(receiver)
+
     if not is_self and not is_module:
       # --- 1. Symbol Table Inference ---
-      if hasattr(rewriter, "symbol_table") and rewriter.symbol_table:
-        sym_type = rewriter.symbol_table.get_type(receiver)
+      if hasattr(rewriter, "context") and rewriter.context.symbol_table:
+        sym_type = rewriter.context.symbol_table.get_type(receiver)
         if sym_type:
           # Construct API path based on inferred type
-          # e.g., if type is TensorType(framework='torch'), try 'torch.Tensor.view'
           candidate_api = f"{sym_type.name}.{leaf_method}"
 
-          # Handle Tensor special casing map if frameworks define 'Tensor' roots differently
           if "Tensor" in sym_type.name and hasattr(sym_type, "framework"):
-            # 'torch.Tensor.view'
             candidate_api = f"{sym_type.framework}.Tensor.{leaf_method}"
 
-          mapping = rewriter._get_mapping(candidate_api, silent=True)
-          if mapping:
-            return candidate_api
+          if hasattr(rewriter, "_get_mapping"):
+            mapping = rewriter._get_mapping(candidate_api, silent=True)
+            if mapping:
+              return candidate_api
 
       # --- 2. Legacy Heuristic Fallback ---
-      source_traits = rewriter._get_source_traits()
-      implicit_roots = source_traits.implicit_method_roots
+      if hasattr(rewriter, "_get_target_traits"):
+        # Note: Implicit roots usually belong to SOURCE traits
+        if hasattr(rewriter, "source_traits"):
+          traits = rewriter.source_traits
+        else:
+          # Fallback if property missing (shouldn't happen in ApiPass)
+          config_dict = rewriter.semantics.get_framework_config(rewriter.source_fw)
+          from ml_switcheroo.semantics.schema import StructuralTraits
 
-      for root in implicit_roots:
-        candidate_api = f"{root}.{leaf_method}"
-        # Silent lookup
-        candidate_mapping = rewriter._get_mapping(candidate_api, silent=True)
-        if candidate_mapping:
-          # Found a match via implicit root
-          return candidate_api
+          traits = StructuralTraits.model_validate(config_dict.get("traits", {}))
+
+        implicit_roots = traits.implicit_method_roots
+
+        for root in implicit_roots:
+          candidate_api = f"{root}.{leaf_method}"
+          if hasattr(rewriter, "_get_mapping"):
+            mapping = rewriter._get_mapping(candidate_api, silent=True)
+            if mapping:
+              return candidate_api
 
   return None

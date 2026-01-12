@@ -11,7 +11,10 @@ Verifies that:
 
 import pytest
 import libcst as cst
-from ml_switcheroo.core.rewriter import PivotRewriter
+
+# Fix: Import TestRewriter shim
+from tests.conftest import TestRewriter as PivotRewriter
+
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.dsl import Rule, LogicOp
@@ -35,8 +38,18 @@ class MockDispatchSemantics(SemanticsManager):
           "api": "jax.image.resize",  # Default
           "args": {},
           "dispatch_rules": [
-            Rule(if_arg="mode", op=LogicOp.EQ, val="nearest", use_api="jax.image.resize_nearest"),
-            Rule(if_arg="mode", op=LogicOp.IN, val=["bilinear", "bicubic"], use_api="jax.image.resize_bi"),
+            Rule(
+              if_arg="mode",
+              op=LogicOp.EQ,
+              val="nearest",
+              use_api="jax.image.resize_nearest",
+            ),
+            Rule(
+              if_arg="mode",
+              op=LogicOp.IN,
+              val=["bilinear", "bicubic"],
+              use_api="jax.image.resize_bi",
+            ),
           ],
         },
       },
@@ -51,7 +64,14 @@ class MockDispatchSemantics(SemanticsManager):
         "torch": {"api": "torch.clamp"},
         "jax": {
           "api": "jnp.clip",
-          "dispatch_rules": [Rule(if_arg="limit", op=LogicOp.GT, val=100, use_api="jnp.heavy_clip")],
+          "dispatch_rules": [
+            Rule(
+              if_arg="limit",
+              op=LogicOp.GT,
+              val=100,
+              use_api="jnp.heavy_clip",
+            )
+          ],
         },
       },
     }
@@ -59,9 +79,6 @@ class MockDispatchSemantics(SemanticsManager):
     self._reverse_index["torch.clamp"] = ("clamp", clamp_def)
 
     # Define op with Type-Based Dispatch
-    # process(data) -> single_process (default)
-    # if data is List -> batch_process
-    # if data is Int -> int_process
     process_def = {
       "std_args": ["data"],
       "variants": {
@@ -69,8 +86,18 @@ class MockDispatchSemantics(SemanticsManager):
         "jax": {
           "api": "jax.single_process",
           "dispatch_rules": [
-            Rule(if_arg="data", op=LogicOp.IS_TYPE, val="list", use_api="jax.batch_process"),
-            Rule(if_arg="data", op=LogicOp.IS_TYPE, val="int", use_api="jax.int_process"),
+            Rule(
+              if_arg="data",
+              op=LogicOp.IS_TYPE,
+              val="list",
+              use_api="jax.batch_process",
+            ),
+            Rule(
+              if_arg="data",
+              op=LogicOp.IS_TYPE,
+              val="int",
+              use_api="jax.int_process",
+            ),
           ],
         },
       },
@@ -80,7 +107,6 @@ class MockDispatchSemantics(SemanticsManager):
 
   def get_definition(self, name):
     # Heuristic lookup to handle method calls like "x.clamp"
-    # In real scenarios, this is handled by fuller indexing or upstream discovery
     if name.endswith("resize"):
       return ("resize", self.data["resize"])
     if name.endswith("clamp"):
@@ -102,7 +128,8 @@ def rewriter():
 
 def rewrite(rewriter, code):
   tree = cst.parse_module(code)
-  return tree.visit(rewriter).code
+  # Fix: Use pipeline conversion
+  return rewriter.convert(tree).code
 
 
 def test_dispatch_equality_string(rewriter):
