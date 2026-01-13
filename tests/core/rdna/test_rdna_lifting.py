@@ -1,16 +1,9 @@
-"""
-Tests for the RDNA Lifter analysis logic.
-
-Verifies that RDNA comments are correctly parsed into a LogicalGraph structure
-reflecting the original model, including parameter recovery via analysis.
-"""
-
 from typing import List
 
-from ml_switcheroo.core.graph import LogicalGraph
-from ml_switcheroo.core.rdna.analysis import RdnaAnalyzer
-from ml_switcheroo.core.rdna.lifter import RdnaLifter
-from ml_switcheroo.core.rdna.nodes import (
+from ml_switcheroo.compiler.ir import LogicalGraph
+from ml_switcheroo.compiler.frontends.rdna.analysis import RdnaAnalyzer
+from ml_switcheroo.compiler.frontends.rdna.lifter import RdnaLifter
+from ml_switcheroo.compiler.frontends.rdna.nodes import (
   Comment,
   Immediate,
   Instruction,
@@ -101,10 +94,12 @@ def test_lift_unmapped_op() -> None:
 
 def test_lift_no_markers() -> None:
   """
-  Scenario: Raw assembly without semantic comments.
-  Expect: Empty graph.
+  Scenario: Raw assembly without markers.
+  Expect: Nodes for each instruction (1:1 lifting).
   """
   nodes: List[RdnaNode] = [make_inst("v_add_f32", VGPR(0), VGPR(1), VGPR(2))]
   lifter = RdnaLifter()
   graph = lifter.lift(nodes)
-  assert len(graph.nodes) == 0
+
+  assert len(graph.nodes) == 1
+  assert graph.nodes[0].kind == "rdna.v_add_f32"

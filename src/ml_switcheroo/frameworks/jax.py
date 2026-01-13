@@ -144,13 +144,13 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     Returns logic to create JAX PRNG Keys.
     """
-    return textwrap.dedent("""
-            def _make_jax_key(seed):
-                "Attempts to create a JAX PRNGKey."
-                try:
-                    return jax.random.PRNGKey(seed)
-                except (ImportError, AttributeError):
-                    return "mock_jax_key"
+    return textwrap.dedent(""" 
+            def _make_jax_key(seed): 
+                "Attempts to create a JAX PRNGKey." 
+                try: 
+                    return jax.random.PRNGKey(seed) 
+                except (ImportError, AttributeError): 
+                    return "mock_jax_key" 
         """).strip()
 
   @property
@@ -325,16 +325,6 @@ class JaxCoreAdapter(JAXStackMixin):
 
   # --- Examples ---
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    """
-    Returns a generic JAX example.
-
-    Returns:
-        str: Source code.
-    """
-    return """import jax.numpy as jnp\nfrom jax import grad, jit\n\ndef predict(params, x):\n  return jnp.dot(x, params['w']) + params['b']"""
-
   def get_tiered_examples(self) -> Dict[str, str]:
     """
     Provides default tiered examples for the base adapter.
@@ -343,7 +333,7 @@ class JaxCoreAdapter(JAXStackMixin):
         Dict[str, str]: Mapping of tier name to source code.
     """
     return {
-      "tier1_math": self.get_example_code(),
+      "tier1_math": """import jax.numpy as jnp\nfrom jax import grad, jit\n\ndef predict(params, x):\n  return jnp.dot(x, params['w']) + params['b']""",
       "tier2_neural": "# JAX (Core) does not include a neural network layer library.\n# Use Flax or Haiku for layer abstractions.",
       "tier3_extras": "# Use Optax for optimization:\nimport optax\noptimizer = optax.adam(learning_rate=0.01)",
     }
@@ -359,7 +349,3 @@ class JaxCoreAdapter(JAXStackMixin):
         Optional[str]: URL string.
     """
     return super().get_doc_url(api_name)
-
-
-# Backwards compatibility alias
-JaxAdapter = JaxCoreAdapter

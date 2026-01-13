@@ -114,7 +114,6 @@ class RegistryLoader:
       merge_tier_data(
         data=self.mgr.data,
         key_origins=self.mgr._key_origins,
-        import_data={},
         framework_configs=self.mgr.framework_configs,
         new_content=spec_content,
         tier=tier,
@@ -138,7 +137,6 @@ class RegistryLoader:
       merge_overlay_data(
         data=self.mgr.data,
         key_origins=self.mgr._key_origins,
-        import_data={},
         framework_configs=self.mgr.framework_configs,
         test_templates=self.mgr.test_templates,
         content=virtual_snap,
@@ -154,13 +152,10 @@ class RegistryLoader:
       tier = None
       alias = None
 
+      # Only accept structured ImportConfig objects
       if isinstance(config_obj, ImportConfig):
         tier = config_obj.tier
         alias = config_obj.recommended_alias
-      elif isinstance(config_obj, dict):
-        # Legacy format fallback
-        tier = SemanticTier.EXTRAS
-        alias = config_obj.get("alias")
 
       if tier:
         # 1. Register PROVIDER capabilities
@@ -194,7 +189,6 @@ class RegistryLoader:
         merge_overlay_data(
           data=self.mgr.data,
           key_origins=self.mgr._key_origins,
-          import_data={},
           framework_configs=self.mgr.framework_configs,
           test_templates=self.mgr.test_templates,
           content=dummy_snap,
@@ -213,7 +207,6 @@ class RegistryLoader:
         merge_tier_data(
           data=self.mgr.data,
           key_origins=self.mgr._key_origins,
-          import_data={},
           framework_configs=self.mgr.framework_configs,
           new_content={op_name: op_details},
           tier=SemanticTier.EXTRAS,

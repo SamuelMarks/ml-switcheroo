@@ -45,12 +45,10 @@ def test_tikz_conversion():
 def test_tikz_examples():
   """Verify sample code generation."""
   adapter = TikzAdapter()
-  code = adapter.get_example_code()
+  examples = adapter.get_tiered_examples()
 
+  assert "tier2_neural" in examples
+  code = examples["tier2_neural"]
   # Corrected assertions to match the implementation
   assert "\\begin{tikzpicture}" in code
   assert "\\end{tikzpicture}" in code
-
-  tiered = adapter.get_tiered_examples()
-  assert "tier2_neural" in tiered
-  assert tiered["tier2_neural"] == code

@@ -21,7 +21,7 @@ from ml_switcheroo.frameworks.base import (
   StandardCategory,
   ImportConfig,
   InitMode,
-  OpDefinition,
+  OperationDef,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
@@ -109,7 +109,7 @@ class SassAdapter(FrameworkAdapter):
     return defs
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]:
+  def specifications(self) -> Dict[str, OperationDef]:
     return {}
 
   @property
@@ -155,13 +155,9 @@ class SassAdapter(FrameworkAdapter):
   def convert(self, data: Any) -> Any:
     return str(data)
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    return "// Example SASS\nFADD R1, R2, R3;"
-
   def get_tiered_examples(self) -> Dict[str, str]:
     return {
-      "tier1_math": self.get_example_code(),
+      "tier1_math": "// Example SASS\nFADD R1, R2, R3;",
       "tier2_neural": "// Neural layers map to comment blocks",
       "tier3_extras": "// Extras ignored",
     }

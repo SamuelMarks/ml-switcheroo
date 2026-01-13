@@ -1,14 +1,7 @@
-"""
-Tests for SASS Framework Wiring (Backend Level).
-
-Verifies:
-1.  **Macro Registration**: `SassSynthesizer` correctly registers `expand_conv2d`/`expand_linear`.
-2.  **Logic Continuity**: The `SassBackend` initializes the synthesizer with macros.
-"""
-
 from unittest.mock import MagicMock
-from ml_switcheroo.compiler.backends.sass import SassBackend, SassSynthesizer
-from ml_switcheroo.core.sass.macros import expand_conv2d, expand_linear
+from ml_switcheroo.compiler.backends.sass.synthesizer import SassSynthesizer
+from ml_switcheroo.compiler.backends.sass import SassBackend
+from ml_switcheroo.compiler.backends.sass.macros import expand_conv2d, expand_linear
 
 
 def test_synthesizer_wires_macros() -> None:

@@ -203,8 +203,3 @@ class Comment(SassNode):
 
   def __str__(self) -> str:
     return f"// {self.text}"
-
-
-# Compat alias: SGPR is not native in SASS but needed for macros sharing patterns if any
-class SGPR(Operand):
-  pass

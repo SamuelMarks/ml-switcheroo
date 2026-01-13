@@ -17,7 +17,7 @@ from typing import Dict, Optional, Tuple, Any, Set, List
 from pydantic import ValidationError
 
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.schema import OpDefinition, PatternDef
+from ml_switcheroo.semantics.schema import OperationDef, PatternDef
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 
 # Use base directly to avoid cycle
@@ -46,7 +46,6 @@ class SemanticsManager:
     self._known_rng_methods: Set[str] = set()
     self.known_magic_args: Set[str] = set()
     self.patterns: List[PatternDef] = []
-    self.import_data: Dict[str, Dict] = {}
 
     # Indexes
     self._reverse_index: Dict[str, Tuple[str, Dict]] = {}
@@ -261,7 +260,7 @@ class SemanticsManager:
       details_to_validate["std_args"] = []
 
     try:
-      validated = OpDefinition.model_validate(details_to_validate)
+      validated = OperationDef.model_validate(details_to_validate)
       final_data = validated.model_dump(by_alias=True, exclude_unset=True)
     except ValidationError as e:
       print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")

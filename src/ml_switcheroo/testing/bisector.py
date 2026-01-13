@@ -15,7 +15,7 @@ Capabilities:
 
 import copy
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from ml_switcheroo.testing.runner import EquivalenceRunner
 
@@ -23,10 +23,15 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 class SemanticsBisector:
   """
   Automated tool to find working constraints for an operation.
+
+  Iterates through progressively relaxed constraints (e.g., tolerances) to find
+  a configuration where the operation passes verification across frameworks.
   """
 
-  def __init__(self, runner: EquivalenceRunner):
+  def __init__(self, runner: EquivalenceRunner) -> None:
     """
+    Initialize the bisector.
+
     Args:
         runner: The initialized EquivalenceRunner to execute verification.
     """
@@ -63,16 +68,16 @@ class SemanticsBisector:
     output_shape_calc = op_def.get("output_shape_calc")
 
     # Unpack info using runner helpers logic (simplified manual unpack here)
-    params = []
-    hints = {}
-    constraints = {}
+    params: List[str] = []
+    hints: Dict[str, str] = {}
+    constraints: Dict[str, Dict[str, Any]] = {}
 
     for arg in std_args_raw:
       if isinstance(arg, dict):
         name = arg.get("name", "unknown")
         params.append(name)
         if "type" in arg:
-          hints[name] = arg["type"]
+          hints[name] = str(arg["type"])
         # Collect constraints
         cons = {}
         for k in ["min", "max", "options", "rank", "dtype", "shape_spec"]:
@@ -82,10 +87,10 @@ class SemanticsBisector:
           constraints[name] = cons
 
       elif isinstance(arg, (list, tuple)) and len(arg) >= 1:
-        name = arg[0]
+        name = str(arg[0])
         params.append(name)
         if len(arg) > 1:
-          hints[name] = arg[1]
+          hints[name] = str(arg[1])
 
       elif isinstance(arg, str):
         params.append(arg)

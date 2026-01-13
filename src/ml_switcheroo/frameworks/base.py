@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any, Protocol, Type, Dict, List, Tuple, Optional, Union, Set
 from pydantic import BaseModel, Field
 
-from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits, OpDefinition
+from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits, OperationDef
 from ml_switcheroo.core.ghost import GhostRef, GhostInspector
 from ml_switcheroo.enums import SemanticTier
 
@@ -50,7 +50,6 @@ class StandardMap(BaseModel):
   args: Optional[Dict[str, Optional[str]]] = Field(default=None)
   inject_args: Optional[Dict[str, Any]] = Field(default=None)
   requires_plugin: Optional[str] = Field(default=None)
-  output_adapter: Optional[str] = Field(default=None)
   transformation_type: Optional[str] = Field(default=None)
   operator: Optional[str] = Field(default=None)
   pack_to_tuple: Optional[str] = Field(default=None)
@@ -140,16 +139,13 @@ class FrameworkAdapter(Protocol):
 
   def get_doc_url(self, api_name: str) -> Optional[str]: ...
 
-  @classmethod
-  def get_example_code(cls) -> str: ...
-
   def get_tiered_examples(self) -> Dict[str, str]: ...
 
   @property
   def definitions(self) -> Dict[str, StandardMap]: ...
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]: ...
+  def specifications(self) -> Dict[str, OperationDef]: ...
 
   @property
   def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]: ...

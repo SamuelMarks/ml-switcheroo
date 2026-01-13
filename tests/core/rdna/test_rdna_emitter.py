@@ -1,14 +1,5 @@
-"""
-Tests for RDNA Emitter formatting logic.
-
-Verifies:
-1.  **Instruction Formatting**: opcodes, operands, and indentation.
-2.  **Control Flow**: Labels flush-left vs indented instructions.
-3.  **Complex Operands**: Register ranges.
-"""
-
-from ml_switcheroo.core.rdna.emitter import RdnaEmitter
-from ml_switcheroo.core.rdna.nodes import (
+from ml_switcheroo.compiler.backends.rdna.emitter import RdnaEmitter
+from ml_switcheroo.compiler.frontends.rdna.nodes import (
   Comment,
   Directive,
   Immediate,

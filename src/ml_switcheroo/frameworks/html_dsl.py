@@ -15,11 +15,10 @@ from ml_switcheroo.frameworks.base import (
   ImportConfig,
   InitMode,
 )
-from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits, OpDefinition
+from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits, OperationDef
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.core.html.parser import HtmlParser
-from ml_switcheroo.core.html.emitter import HtmlEmitter
 
 
 @register_framework("html")
@@ -37,10 +36,6 @@ class HtmlDSLAdapter(FrameworkAdapter):
   def create_parser(self, code: str) -> HtmlParser:
     """Factory for the HTML Parser used by Ingestion."""
     return HtmlParser(code)
-
-  def create_emitter(self) -> HtmlEmitter:
-    """Factory for the HTML Emitter used by Engine."""
-    return HtmlEmitter()
 
   @property
   def search_modules(self) -> List[str]:
@@ -114,7 +109,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return defs
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]:
+  def specifications(self) -> Dict[str, OperationDef]:
     return {}
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
@@ -156,16 +151,14 @@ class HtmlDSLAdapter(FrameworkAdapter):
   def get_doc_url(self, api_name: str) -> Optional[str]:
     return None
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    return """ 
+  def get_tiered_examples(self) -> Dict[str, str]:
+    return {
+      "tier2_neural": """ 
 <div class="grid">
   <div class="box r">
     <span class="header-txt">conv: Conv2d</span>
-    <code>i=1, o=32</code>
+    <code>i=1, o=32, k=3</code>
   </div>
 </div>
 """
-
-  def get_tiered_examples(self) -> Dict[str, str]:
-    return {"tier2_neural": self.get_example_code()}
+    }

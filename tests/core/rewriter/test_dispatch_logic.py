@@ -1,5 +1,5 @@
 """
-Tests for Conditional API Dispatch in PivotRewriter.
+Tests for Conditional API Dispatch in TestRewriter.
 
 Verifies that:
 1.  Runtime rules trigger API switching based on argument values.
@@ -12,8 +12,8 @@ Verifies that:
 import pytest
 import libcst as cst
 
-# Fix: Import TestRewriter shim
-from tests.conftest import TestRewriter as PivotRewriter
+# Use direct TestRewriter import
+from tests.conftest import TestRewriter
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -123,12 +123,12 @@ class MockDispatchSemantics(SemanticsManager):
 def rewriter():
   semantics = MockDispatchSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
-  return PivotRewriter(semantics, config)
+  return TestRewriter(semantics, config)
 
 
 def rewrite(rewriter, code):
   tree = cst.parse_module(code)
-  # Fix: Use pipeline conversion
+  # Use pipeline conversion via convert method
   return rewriter.convert(tree).code
 
 

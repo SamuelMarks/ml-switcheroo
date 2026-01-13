@@ -67,7 +67,7 @@ def test_supported_tiers() -> None:
 
 def test_example_code() -> None:
   """Verify example code structure."""
-  code = RdnaAdapter.get_example_code()
+  code = RdnaAdapter().get_tiered_examples()["tier1_math"]
   assert "v_add_f32" in code
 
 

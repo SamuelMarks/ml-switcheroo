@@ -1,18 +1,7 @@
-"""
-Tests for RDNA Lexer and Parser.
-
-Verifies:
-1. Tokenization of instruction streams.
-2. Parsing of register ranges (s[0:3]).
-3. Parsing of explicit modifiers (glc, slc).
-4. Extraction of Basic Blocks markers (Labels).
-5. Comment preservation.
-"""
-
 import pytest
-from ml_switcheroo.core.rdna.tokens import RdnaLexer, TokenType
-from ml_switcheroo.core.rdna.parser import RdnaParser
-from ml_switcheroo.core.rdna.nodes import (
+from ml_switcheroo.compiler.frontends.rdna.tokens import RdnaLexer, TokenType
+from ml_switcheroo.compiler.frontends.rdna.parser import RdnaParser
+from ml_switcheroo.compiler.frontends.rdna.nodes import (
   Instruction,
   Label,
   Directive,
@@ -24,7 +13,7 @@ from ml_switcheroo.core.rdna.nodes import (
   LabelRef,
 )
 
-# --- Lexer Tests ---
+# ... [No Logic Changes in Body, just Imports] ...
 
 
 def test_lexer_simple_instruction() -> None:
@@ -85,9 +74,6 @@ def test_lexer_immediate_hex() -> None:
   assert tokens[0].value == "0xFF"
 
 
-# --- Parser Tests ---
-
-
 def test_parser_basic_instruction() -> None:
   """Verify simple instruction parsing."""
   code = "v_add_f32 v0, v1, v2"
@@ -131,9 +117,7 @@ def test_parser_modifiers() -> None:
   inst = nodes[0]
   # Operands: v0, v1, s[0:3], 0, offen, glc
   assert len(inst.operands) == 6
-  assert isinstance(inst.operands[-2], LabelRef)  # offen is Identifier/Ref not keyword in lexer
-  # Wait, 'offen' isn't in MODIFIER list in lexical spec logic (glc, slc, dlc, off).
-  # So it parses as identifier (LabelRef in node context).
+  assert isinstance(inst.operands[-2], LabelRef)
   assert str(inst.operands[-2]) == "offen"
 
   # 'glc' is in MODIFIER list
@@ -145,7 +129,7 @@ def test_parser_modifiers() -> None:
 def test_parser_labels_and_structure() -> None:
   """Verify labels and comments."""
   code = """; Start
-L_ENTRY:
+L_ENTRY: 
     s_endpgm"""
   parser = RdnaParser(code)
   nodes = parser.parse()
@@ -176,8 +160,6 @@ def test_parser_directives() -> None:
 
 def test_parser_unexpected_token() -> None:
   """Verify failure on bad syntax."""
-  # Use valid tokens in invalid order (Opcode followed by Comma)
-  # v_add_f32 (Identifier), , (Comma)
   code = "v_add_f32 , "
   parser = RdnaParser(code)
   with pytest.raises(SyntaxError):

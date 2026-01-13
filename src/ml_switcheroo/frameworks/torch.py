@@ -60,7 +60,7 @@ class TorchAdapter:
     """
     Initializes the adapter.
 
-    Detects if PyTorch is installed to switch between LIVE inspection
+    Detects if PyTorch is installed. to switch between LIVE inspection
     and GHOST snapshot loading.
     """
     self._mode = InitMode.LIVE
@@ -158,12 +158,12 @@ class TorchAdapter:
         Dictionary mapping category names to list of regex patterns.
     """
     return {
-      "neural": [r"\\.nn\\.", r"\\.modules\\.", r"\\.layers\\.", r"Module$"],
+      "neural": [r"\.nn\.", r"\.modules\.", r"\.layers\.", r"Module$"],
       "extras": [
-        r"\\.utils\\.",
-        r"\\.hub\\.",
-        r"\\.distributed\\.",
-        r"\\.autograd\\.",
+        r"\.utils\.",
+        r"\.hub\.",
+        r"\.distributed\.",
+        r"\.autograd\.",
         r"save$",
         r"load$",
         r"seed$",
@@ -488,16 +488,6 @@ class TorchAdapter:
 
     return f"https://pytorch.org/docs/stable/generated/{api_name}.html"
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    """
-    Default example for documentation.
-
-    Returns:
-        Source code string.
-    """
-    return cls().get_tiered_examples()["tier1_math"]
-
   def get_tiered_examples(self) -> Dict[str, str]:
     """
     Provides code snippets for "Wizard" or "Demo" usage.
@@ -711,6 +701,3 @@ class TorchAdapter:
         snapshot: The snapshot dictionary to update in-place.
     """
     mappings = snapshot.setdefault("mappings", {})
-    # Example of manual wiring for sort output adaptation
-    if "sort" in mappings:
-      mappings["sort"]["output_adapter"] = "lambda x: x.values"

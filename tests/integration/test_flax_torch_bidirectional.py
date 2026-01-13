@@ -22,41 +22,41 @@ from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.enums import SemanticTier
 from tests.utils.ast_utils import cmp_ast
 
-# Fix: Import specific adapter for Neural traits to ensure test consistency
+# Fix: Import specific adapter for Neural traits
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 
-flax_nnx_tier2_ex0 = """   
+flax_nnx_tier2_ex0 = """  
 from flax import nnx
   
-class Net(nnx.Module):   
-    def __init__(self, rngs: nnx.Rngs):   
+class Net(nnx.Module):  
+    def __init__(self, rngs: nnx.Rngs):  
         # State injection pattern  
-        self.linear = nnx.Linear(10, 10, rngs=rngs)   
+        self.linear = nnx.Linear(10, 10, rngs=rngs)  
   
-    def __call__(self, x):   
-        x = self.linear(x)   
+    def __call__(self, x):  
+        x = self.linear(x)  
         # Functional activation  
-        return nnx.relu(x)   
+        return nnx.relu(x)  
 """
 
 # Revised expectation: ImportFixer (RegistryLoader) splits "torch.nn" -> root "torch", sub "nn".
 # ImportMixin converts `import torch.nn as nn` to `from torch import nn` if redundant alias logic triggers,
 # or standard import if not.
 # Based on current ImportFixer behavior in tests:
-torch_tier2_ex0 = """ 
+torch_tier2_ex0 = """
 import torch.nn.functional as F
 from torch import nn
 
-class Net(nn.Module): 
-    def __init__(self): 
-        super().__init__() 
+class Net(nn.Module):
+    def __init__(self):
+        super().__init__()
         # State injection pattern
-        self.linear = nn.Linear(10, 10) 
+        self.linear = nn.Linear(10, 10)
 
-    def forward(self, x): 
-        x = self.linear(x) 
+    def forward(self, x):
+        x = self.linear(x)
         # Functional activation
-        return F.relu(x) 
+        return F.relu(x)
 """
 
 
@@ -151,7 +151,6 @@ class FixedSemantics(SemanticsManager):
     merge_overlay_data(
       data=self.data,
       key_origins=self._key_origins,
-      import_data=self.import_data,
       framework_configs=self.framework_configs,
       test_templates=self.test_templates,
       content=snapshot,
@@ -192,21 +191,21 @@ class FixedSemantics(SemanticsManager):
 
 
 def test_specific_abs_conversion():
-  input_torch = """ 
+  input_torch = """
 import torch
 import torch.nn as nn
 
-class Model(nn.Module): 
-    def forward(self, x): 
-        return torch.abs(x) 
+class Model(nn.Module):
+    def forward(self, x):
+        return torch.abs(x)
 """
-  output_jax_flax = """ 
+  output_jax_flax = """
 import jax.numpy as jnp
 import flax.nnx as nnx
 
-class Model(nnx.Module): 
-    def __call__(self, x): 
-        return jnp.abs(x) 
+class Model(nnx.Module):
+    def __call__(self, x):
+        return jnp.abs(x)
 """
 
   semantics = FixedSemantics()

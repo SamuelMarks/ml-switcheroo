@@ -77,7 +77,7 @@ def test_hook_context_initialization():
   assert len(ctx.metadata) == 0
 
   # Test placeholder config method
-  assert ctx.config("any_key", default=999) == 123
+  assert ctx.raw_config("any_key", default=999) == 123
 
 
 def test_registration_flow():

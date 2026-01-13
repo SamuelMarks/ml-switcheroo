@@ -22,7 +22,7 @@ try:
 except ImportError:
   _ADAPTER_REGISTRY = {}
 
-# Import Rewriter components for TestRewriter shim
+# Import Rewriter components for TestRewriter helper
 from ml_switcheroo.core.rewriter import (
   RewriterContext,
   RewriterPipeline,
@@ -34,11 +34,12 @@ from ml_switcheroo.core.rewriter import (
 
 class TestRewriter:
   """
-  Test-scoped shim replacing the legacy PivotRewriter.
+  Test helper wrapping the RewriterPipeline.
 
-  Wraps the RewriterPipeline to allow tests to execute transformations
-  deterministically without the full Engine overhead. It mimics the
-  interface used by legacy tests while using the modern pipeline architecture.
+  Orchestrates the execution of the standard pipeline passes (Structure, API, Auxiliary)
+  on a CST module using a provided configuration and semantics manager. This allows
+  unit tests to verify transformation logic deterministically without invoking the
+  full ASTEngine.
   """
 
   # Prevent pytest from trying to collect this as a test class containing tests
@@ -61,7 +62,6 @@ class TestRewriter:
   def convert(self, module):
     """
     Executes the pipeline on the given CST module.
-    Replaces the old pattern `tree.visit(rewriter)`.
     """
     return self.pipeline.run(module, self.context)
 

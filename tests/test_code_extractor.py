@@ -74,5 +74,4 @@ def test_real_fuzzer_extraction():
 
   extracted = CodeExtractor.extract_class(InputFuzzer)
   assert "class InputFuzzer" in extracted
-  assert "generate_inputs" in extracted
-  assert "MAX_RECURSION_DEPTH" in extracted
+  assert "build_strategies" in extracted

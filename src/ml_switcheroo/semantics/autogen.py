@@ -76,7 +76,7 @@ class SemanticPersister:
         spec_entry = {
           "std_args": sorted(cand.std_args, key=_arg_sort_key),
           "description": f"Auto-discovered via Consensus (Score: {cand.score})",
-          # Variants keys removed from Hub in new architecture
+          # FrameworkVariants keys removed from Hub in new architecture
         }
         spec_updates[cand.name] = spec_entry
         stats["spec_writes"] += 1

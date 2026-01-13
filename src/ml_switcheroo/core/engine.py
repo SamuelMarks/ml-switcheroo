@@ -7,7 +7,7 @@ This module provides the ``ASTEngine``, generating code via:
     - Supports optional **Graph-Guided Rewriting** (Loopback).
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 import libcst as cst
 
 from ml_switcheroo.config import RuntimeConfig
@@ -38,6 +38,11 @@ from ml_switcheroo.compiler.registry import (
 from ml_switcheroo.compiler.frontends.python import PythonFrontend
 from ml_switcheroo.compiler.frontends.sass import SassParser, SassLifter
 from ml_switcheroo.compiler.frontends.rdna import RdnaParser, RdnaLifter
+from ml_switcheroo.compiler.backend import CompilerBackend
+from ml_switcheroo.frameworks.base import get_adapter
+
+# Visualization
+from ml_switcheroo.utils.visualizer import MermaidGenerator
 
 
 class ASTEngine:
@@ -50,11 +55,24 @@ class ASTEngine:
     source: Optional[str] = None,
     target: Optional[str] = None,
     strict_mode: bool = False,
-    enable_fusion: bool = False,
+    enable_graph_optimization: bool = False,
     plugin_config: Optional[Dict[str, Any]] = None,
     intermediate: Optional[str] = None,
-  ):
-    self.semantics = semantics or SemanticsManager()
+  ) -> None:
+    """
+    Initializes the engine with semantics and configuration.
+
+    Args:
+        semantics: Valid SemanticsManager instance.
+        config: Runtime configuration object.
+        source: Source framework key override.
+        target: Target framework key override.
+        strict_mode: Whether to fail on unmapped operations.
+        enable_graph_optimization: Whether to run fusion pass.
+        plugin_config: Dictionary of settings for plugins.
+        intermediate: Intermediate generation format.
+    """
+    self.semantics: SemanticsManager = semantics or SemanticsManager()
     if config:
       self.config = config
       if intermediate is not None:
@@ -65,7 +83,7 @@ class ASTEngine:
         target=target,
         strict_mode=strict_mode,
         intermediate=intermediate,
-        enable_fusion=enable_fusion,
+        enable_graph_optimization=enable_graph_optimization,
         plugin_settings=plugin_config or {},
       )
     if self.config.validation_report:
@@ -98,15 +116,49 @@ class ASTEngine:
       )
 
   def parse(self, code: str) -> cst.Module:
+    """Parses python string to CST Module."""
     return cst.parse_module(code)
 
   def to_source(self, tree: cst.Module) -> str:
+    """Converts CST Module back to string."""
     return tree.code
 
+  def _graph_to_mermaid(self, tree: cst.CSTNode) -> str:
+    """Helper to generate mermaid definition from CST."""
+    return MermaidGenerator().generate(tree)
+
   def _run_compiler_pipeline(self, code: str, tracer: Any) -> ConversionResult:
+    """Runs the Graph-based compiler pipeline for ISAs."""
     tracer.start_phase("Compiler Pipeline", f"{self.source}->Graph->{self.target}")
     graph = None
-    if is_isa_source(self.source):
+    if not is_isa_source(self.source):
+      # Special case: MLIR source ingestion is handled by ingest_code which returns CST,
+      # but for MLIR roundtrip we want to reach MlirBackend via graph only if possible.
+      # But MlirToPythonGenerator produces CST.
+      # If source is MLIR and target is MLIR, logic requires special bridge.
+      # The Registry identifies 'python' as the frontend for 'mlir', which is PythonFrontend.
+      # PythonFrontend works on Python Code (CST).
+      # If we pass MLIR *text* to PythonFrontend, it will fail to parse as python.
+      # We need to use ingest_code's logic to parse MLIR to Python CST first IF we need python intermediate.
+
+      # However, `is_isa_source` returns False for MLIR. So we arrive here.
+      # If source is not an ISA, assume python structure.
+      # If the input text is actually MLIR, PythonFrontend crashes.
+      # We must use ingest_code to normalize to AST, THEN extract Graph.
+      try:
+        # We reuse the ingestion logic to get a Python CST from the source, whatever it is
+        source_adapter = get_adapter(self.source)
+        cst_tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
+        code_for_graph = self.to_source(cst_tree)
+        frontend = PythonFrontend(code_for_graph)
+        graph = frontend.parse_to_graph()
+      except Exception:
+        # Fallback: Maybe it's valid python code already
+        frontend = PythonFrontend(code)
+        graph = frontend.parse_to_graph()
+
+    else:
+      # ISA Source (SASS/RDNA) logic
       if self.source == "sass":
         parser = SassParser(code)
         nodes = parser.parse()
@@ -119,9 +171,6 @@ class ASTEngine:
         graph = lifter.lift(nodes)
       else:
         raise NotImplementedError(f"No frontend for {self.source}")
-    else:
-      frontend = PythonFrontend(code)
-      graph = frontend.parse_to_graph()
 
     if self.config.enable_graph_optimization:
       from ml_switcheroo.core.graph_optimizer import GraphOptimizer
@@ -131,7 +180,7 @@ class ASTEngine:
       optimizer = GraphOptimizer(patterns)
       graph = optimizer.optimize(graph)
       tracer.log_mutation("Graph Optimization", "(Graph)", "(Optimized Graph)")
-      tracer.log_snapshot("After Optimization", "graph TD...", "...")
+      tracer.log_snapshot("After Optimization", "graph TD; A-->B;", "...")
       tracer.end_phase()
 
     backend_cls = get_backend_class(self.target)
@@ -139,9 +188,9 @@ class ASTEngine:
       raise ValueError(f"No backend found for {self.target}")
 
     if backend_cls.__name__ == "PythonBackend":
-      backend = backend_cls(framework=self.target)
+      backend = backend_cls(framework=self.target)  # type: ignore
     else:
-      backend = backend_cls(self.semantics)
+      backend = cast(CompilerBackend, backend_cls(self.semantics))
 
     output_code = backend.compile(graph)
     tracer.log_mutation("Codegen", "(Graph)", output_code)
@@ -153,15 +202,9 @@ class ASTEngine:
     tracer.start_phase("Rewriter Pipeline", "AST Transformation")
 
     # 1. Ingestion
-    try:
-      from ml_switcheroo.frameworks.base import get_adapter
-
-      source_adapter = get_adapter(self.source)
-    except ImportError:
-      source_adapter = None
-
+    source_adapter = get_adapter(self.source)
     tree = ingest_code(code, self.source, self.target, source_adapter, tracer)
-    tracer.log_snapshot("After Ingestion", self.to_source(tree), self.to_source(tree))
+    tracer.log_snapshot("After Ingestion", self._graph_to_mermaid(tree), self.to_source(tree))
 
     # 1.5. Graph-Guided Optimization (The "Loopback")
     if self.config.enable_graph_optimization:
@@ -202,7 +245,7 @@ class ASTEngine:
             )
             tracer.log_snapshot(
               "After Graph Patching",
-              self.to_source(tree),
+              self._graph_to_mermaid(tree),
               self.to_source(tree),
             )
       except Exception as e:
@@ -210,7 +253,7 @@ class ASTEngine:
       tracer.end_phase()
 
     # 2. Analysis
-    tracer.log_snapshot("After Analysis", self.to_source(tree), self.to_source(tree))
+    tracer.log_snapshot("After Analysis", self._graph_to_mermaid(tree), self.to_source(tree))
 
     # 3. Rewriting (Pipeline)
     # Construct Context
@@ -231,7 +274,7 @@ class ASTEngine:
     )
 
     tree = pipeline.run(tree, context)
-    tracer.log_snapshot("After Rewriting", self.to_source(tree), self.to_source(tree))
+    tracer.log_snapshot("After Rewriting", self._graph_to_mermaid(tree), self.to_source(tree))
 
     # 4. Import Fixing
     if self.config.enable_import_fixer:
@@ -244,30 +287,12 @@ class ASTEngine:
         plan=plan,
         source_fws={self.source},
         preserve_source=should_preserve,
-        target_fw=self.target,
       )
       tree = tree.visit(fixer)
-      tracer.log_snapshot("After Import Fixing", self.to_source(tree), self.to_source(tree))
+      tracer.log_snapshot("After Import Fixing", self._graph_to_mermaid(tree), self.to_source(tree))
 
     # 5. Emission
     final_code = tree.code
-    # Legacy hook: If target adapter defines 'create_emitter' for CST-based emission logic
-    # (Though most targets use standard CST code generation)
-    try:
-      from ml_switcheroo.frameworks.base import get_adapter
-
-      target_adapter = get_adapter(self.target)
-      if target_adapter and hasattr(target_adapter, "create_emitter"):
-        try:
-          emitter = target_adapter.create_emitter()
-          if hasattr(emitter, "convert") and isinstance(tree, cst.Module):
-            final_code = emitter.convert(tree).to_text()
-          elif hasattr(emitter, "emit"):
-            final_code = emitter.emit(final_code)
-        except Exception as e:
-          tracer.log_warning(f"Emitter output failed: {e}")
-    except ImportError:
-      pass
 
     # Trace
     if self.target == "mlir" or self.target == "stablehlo":
@@ -299,4 +324,5 @@ class ASTEngine:
 
   @property
   def strict_mode(self) -> bool:
+    """Helper property for strict mode config."""
     return self.config.strict_mode

@@ -188,11 +188,7 @@ class FrameworkVariant(BaseModel):
   # --- Output Destructuring and Adaptation ---
   output_select_index: Optional[int] = Field(
     None,
-    description="Integer index to extract from a tuple return value (e.g. 0). Structured replacement for `output_adapter`.",
-  )
-  output_adapter: Optional[str] = Field(
-    None,
-    description="Lambda string to normalize return values (e.g. 'lambda x: x[0]'). Deprecated in favor of `output_select_index` for simple indexing.",
+    description="Integer index to extract from a tuple return value (e.g. 0). Structured replacement for deprecated `output_adapter`.",
   )
 
   # --- Feature: Output Dtype Casting (Limitation 12) ---

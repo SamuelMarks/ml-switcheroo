@@ -1,5 +1,5 @@
 """
-Comprehensive Integration Tests for the PivotRewriter (TestRewriter).
+Comprehensive Integration Tests for the TestRewriter pipeline.
 
 Verifies:
 1.  **API Swapping**: Calls are correctly mapped (torch.abs -> jax.numpy.abs).
@@ -12,7 +12,7 @@ Verifies:
 
 import pytest
 import libcst as cst
-from tests.conftest import TestRewriter as PivotRewriter
+from tests.conftest import TestRewriter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 
@@ -64,13 +64,13 @@ class MockSemantics(SemanticsManager):
 def rewriter():
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
-  return PivotRewriter(semantics, config)
+  return TestRewriter(semantics, config)
 
 
 def rewrite(rewriter, code):
   """Helper to parse and return code string."""
   tree = cst.parse_module(code)
-  # Using pipeline conversion via shim
+  # Using pipeline conversion via helper
   new_tree = rewriter.convert(tree)
   return new_tree.code
 

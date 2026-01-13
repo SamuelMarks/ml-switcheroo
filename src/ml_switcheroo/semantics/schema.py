@@ -24,8 +24,8 @@ from ml_switcheroo.core.dsl import (
   FrameworkVariant,
   PluginType,
   PluginScaffoldDef,
-  PatternDef,  # Added re-export
-  OperationDef,  # Added re-export
+  PatternDef,
+  OperationDef,
 )
 
 
@@ -131,18 +131,6 @@ class FrameworkTraits(BaseModel):
   plugin_traits: Optional[PluginTraits] = Field(
     default_factory=PluginTraits, description="Configuration logic flags for plugins."
   )
-
-
-# Re-expose Variant to maintain compatibility with manager.py usage
-Variant = FrameworkVariant
-
-
-class OpDefinition(OperationDef):
-  """
-  Compat alias for OperationDef to match existing codebase usage.
-  """
-
-  pass
 
 
 class SemanticsFile(BaseModel):

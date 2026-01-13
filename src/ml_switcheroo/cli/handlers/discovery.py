@@ -73,7 +73,7 @@ def handle_import_spec(target: Path) -> int:
   into the local semantics Hub.
 
   Args:
-      target (Path): Code resource to import ('internal', .md file, .html file, or directory).
+      target (Path): .md file, .html file, or directory to parse.
 
   Returns:
       int: Exit code.
@@ -81,14 +81,8 @@ def handle_import_spec(target: Path) -> int:
   out_dir = resolve_semantics_dir()
   out_dir.mkdir(parents=True, exist_ok=True)
 
-  # 1. Internal Standards (Deprecated Path)
-  if str(target) == "internal":
-    log_warning("Importing 'internal' standard from python file is deprecated.")
-    log_info("The Knowledge Base is now JSON-native. This step is no longer required.")
-    return 0
-
-  # 2. Parsing Logic for Markdown Files
-  elif target.is_file() and target.suffix == ".md":
+  # 1. Parsing Logic for Markdown Files
+  if target.is_file() and target.suffix == ".md":
     # Distinguish between ONNX and StableHLO based on content header
     try:
       content_header = target.read_text(encoding="utf-8", errors="ignore")[:300]
@@ -109,7 +103,7 @@ def handle_import_spec(target: Path) -> int:
       _save_spec(out_dir, "k_neural_net.json", data)
       return 0
 
-  # 3. Parsing Logic for HTML Files (NVIDIA SASS)
+  # 2. Parsing Logic for HTML Files (NVIDIA SASS)
   elif target.is_file() and target.suffix == ".html":
     log_info(f"Detected SASS HTML Spec: {target.name}")
     importer = SassSpecImporter()
@@ -122,7 +116,7 @@ def handle_import_spec(target: Path) -> int:
     _save_spec(sass_def_path.parent, sass_def_path.name, data)
     return 0
 
-  # 4. Array API Stubs (Tier A)
+  # 3. Array API Stubs (Tier A)
   elif target.is_dir():
     log_info("Detected Array API Stubs Directory")
     importer = ArrayApiSpecImporter()

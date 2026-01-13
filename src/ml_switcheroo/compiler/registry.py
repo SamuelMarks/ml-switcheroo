@@ -80,7 +80,15 @@ _FRONTENDS: Dict[str, Any] = {
 
 
 def get_backend_class(target: str) -> Optional[Type[CompilerBackend]]:
-  """Returns the backend class for the target (e.g. 'sass')."""
+  """
+  Returns the backend class for the target (e.g. 'sass').
+
+  Args:
+      target: The target framework identifier.
+
+  Returns:
+      The backend class type or PythonBackend if not found, or None.
+  """
   return _BACKENDS.get(target, _BACKENDS.get("python"))
 
 
@@ -91,16 +99,27 @@ def is_isa_target(target: str) -> bool:
   Only Low-Level Assembly targets handling Registers or Visualization
   backends that strictly consume Graphs are routed here.
 
-  Note: MLIR/StableHLO/TikZ/Latex are high-level structural representations,
-  so they are routed through the Rewriter/CST pipeline (via Emitters)
-  for maximum fidelity, unless explicitly requested via CLI intermediate flags.
+  Note: MLIR/StableHLO/TikZ/Latex/HTML/RDNA/SASS use this path for graph-based generation
+  if selected as target in CLI, bypassing the CST rewriter.
+
+  Args:
+      target: The target framework identifier.
+
+  Returns:
+      True if the target is an ISA or Graph-based format.
   """
-  return target in ["sass", "rdna", "html"]
+  return target in ["sass", "rdna", "html", "tikz", "latex_dsl", "mlir", "stablehlo"]
 
 
 def is_isa_source(source: str) -> bool:
   """
   Determines if the source requires Lifting (ASM -> Graph -> AST).
   Only SASS and RDNA are treated as low-level source inputs.
+
+  Args:
+      source: The source framework identifier.
+
+  Returns:
+      True if the source is an ISA requiring lifting.
   """
   return source in ["sass", "rdna"]

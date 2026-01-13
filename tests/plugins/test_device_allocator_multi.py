@@ -14,7 +14,7 @@ import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.device_allocator import transform_device_allocator
 
 # Import Real Adapters to verify logic
-from ml_switcheroo.frameworks.jax import JaxAdapter
+from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.mlx import MLXAdapter
 from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
@@ -53,7 +53,7 @@ def setup_hooks():
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_jax_output(mock_get, base_semantics):
-  mock_get.side_effect = lambda n: JaxAdapter() if n == "jax" else None
+  mock_get.side_effect = lambda n: JaxCoreAdapter() if n == "jax" else None
 
   rw = get_rewriter(base_semantics, "jax")
   res = rewrite_code(rw, "d = torch.device('cuda')")

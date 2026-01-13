@@ -65,7 +65,7 @@ def test_supported_tiers():
 
 def test_example_code():
   """Verify example code structure."""
-  code = SassAdapter.get_example_code()
+  code = SassAdapter().get_tiered_examples()["tier1_math"]
   assert "FADD" in code
   assert "//" in code
 

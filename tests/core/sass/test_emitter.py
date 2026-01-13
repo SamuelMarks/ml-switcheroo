@@ -1,22 +1,10 @@
-"""
-Tests for SASS Emitter formatting logic.
-
-Verifies:
-1.  **Instruction Formatting**: opcodes, operands, and indentation.
-2.  **Control Flow**: Labels flush-left vs indented instructions.
-3.  **Comment Fallback**: Ensuring unmapped operations output valid comments.
-4.  **Complex Blocks**: Full logic block generation.
-"""
-
 import pytest
 from unittest.mock import MagicMock
 
-from ml_switcheroo.core.sass.emitter import SassEmitter
-from ml_switcheroo.core.sass.nodes import Instruction, Register, Comment, Label, Directive, Immediate
-
-# We import Synthesizer logic to verify the end-to-end "Comment Fallback" requirement flow
-from ml_switcheroo.core.sass.synthesizer import SassSynthesizer
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
+from ml_switcheroo.compiler.backends.sass.emitter import SassEmitter
+from ml_switcheroo.compiler.frontends.sass.nodes import Instruction, Register, Comment, Label, Directive, Immediate
+from ml_switcheroo.compiler.backends.sass.synthesizer import SassSynthesizer
+from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
@@ -38,8 +26,7 @@ def test_emit_basic_instruction():
 
 def test_emit_label_flush_left():
   """
-  Requirement: Splitting logic into Basic Blocks via Labels/Branches.
-  Labels must be flush-left.
+  Requirement: Labels must be flush-left.
   """
   emitter = SassEmitter()
   block = [Label("L_START"), Instruction("MOV", [Register("R0"), Register("RZ")])]
@@ -56,20 +43,14 @@ def test_emit_label_flush_left():
 def test_emit_unmapped_op_fallback():
   """
   Requirement: If an op isn't in sass.json, output `// Op: {Name}`.
-
-  We simulate this by feeding an unmapped LogicalNode into the Synthesizer
-  (mocking semantics lookup failure) and verifying the Emitter's output.
   """
   # 1. Setup Mock Semantics (Empty for 'Conv2d')
   mgr = MagicMock(spec=SemanticsManager)
-  # resolve_variant returns None causing Synthesizer to emit Comment
   mgr.resolve_variant.return_value = None
 
   # 2. Synthesize Graph
   synth = SassSynthesizer(mgr)
   graph = LogicalGraph(nodes=[LogicalNode(id="conv1", kind="Conv2d", metadata={})])
-
-  # Synthesizer produces [Comment("Unmapped Op: Conv2d (conv1)")]
   ast_nodes = synth.from_graph(graph)
 
   # 3. Emit

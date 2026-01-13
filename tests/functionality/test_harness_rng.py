@@ -31,7 +31,7 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess:
 # These override imports logic so the generated harness doesn't crash if libs missing in CI
 
 
-class SafeJaxAdapter(JaxCoreAdapter):
+class SafeJaxCoreAdapter(JaxCoreAdapter):
   @property
   def harness_imports(self):
     # Return empty imports. Tests using this ensure JAX isn't required to run generated harness.
@@ -68,11 +68,11 @@ def test_rng_injection_jax(mock_get_adapter, tmp_path):
       Harness detects 'rng' in target, creates jax.random.PRNGKey, and calls target.
   """
   # Use Safe Adapter
-  adapter = SafeJaxAdapter()
+  adapter = SafeJaxCoreAdapter()
 
   # We force 'rng' into magic args for this test case specifically
   # Normally JAX uses 'key', but standardizing on 'rng' for this test logic
-  with patch.object(SafeJaxAdapter, "declared_magic_args", ["rng"]):
+  with patch.object(SafeJaxCoreAdapter, "declared_magic_args", ["rng"]):
     mock_get_adapter.return_value = adapter
 
     # 1. Source (Torch-like, no RNG arg)
@@ -137,7 +137,7 @@ def test_key_injection_alias(mock_get_adapter, tmp_path):
   """
   Scenario: Target uses 'key' argument instead of 'rng'.
   """
-  adapter = SafeJaxAdapter()
+  adapter = SafeJaxCoreAdapter()
   # 'key' is standard for JAX adapter
   mock_get_adapter.return_value = adapter
 

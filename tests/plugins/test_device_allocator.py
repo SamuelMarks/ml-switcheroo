@@ -18,7 +18,7 @@ from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.device_allocator import transform_device_allocator
-from ml_switcheroo.frameworks.jax import JaxAdapter
+from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 
@@ -74,7 +74,7 @@ def rewriter():
 
     def adapter_side_effect(name):
       if name == "jax":
-        return JaxAdapter()
+        return JaxCoreAdapter()
       if name == "numpy":
         return NumpyAdapter()
       return None

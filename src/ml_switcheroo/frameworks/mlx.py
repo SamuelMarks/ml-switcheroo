@@ -308,16 +308,6 @@ class MLXAdapter:
       pass
     return data
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    """
-    Returns default example.
-
-    Returns:
-        str: Code.
-    """
-    return cls().get_tiered_examples()["tier2_neural"]
-
   def get_tiered_examples(self) -> Dict[str, str]:
     """
     Returns MLX idiomatic examples used for validity testing.
@@ -328,49 +318,49 @@ class MLXAdapter:
     return {
       "tier1_math": """import mlx.core as mx
 
-def math_ops(x, y):
+def math_ops(x, y): 
     # Tier 1: Unified Buffer Architecture Math
     # MLX uses lazy evaluation by default
-    a = mx.abs(x)
-    b = mx.add(a, y)
+    a = mx.abs(x) 
+    b = mx.add(a, y) 
 
     # Reductions
-    return mx.mean(b, axis=0)
+    return mx.mean(b, axis=0) 
 """,
       "tier2_neural": """import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
 
-class MLP(nn.Module):
+class MLP(nn.Module): 
     # Tier 2: Neural Modules
     # Inherits from nn.Module, uses __call__ for inference
-    def __init__(self, in_dims: int, out_dims: int):
-        super().__init__()
-        self.layers = [
-            nn.Linear(in_dims, 64),
-            nn.ReLU(),
-            nn.Linear(64, out_dims)
-        ]
+    def __init__(self, in_dims: int, out_dims: int): 
+        super().__init__() 
+        self.layers = [ 
+            nn.Linear(in_dims, 64), 
+            nn.ReLU(), 
+            nn.Linear(64, out_dims) 
+        ] 
 
-    def __call__(self, x):
-        for l in self.layers:
-            x = l(x)
+    def __call__(self, x): 
+        for l in self.layers: 
+            x = l(x) 
         return x
         
-def train_step(model, optimizer, x, y):
+def train_step(model, optimizer, x, y): 
     # Backward pass handled by value_and_grad via mx.compile typically
     pass
 """,
       "tier3_extras": """import mlx.core as mx
 
-def compute_on_gpu(x):
-    # Tier 3: Extras (Streams & Devices)
+def compute_on_gpu(x): 
+    # Tier 3: Extras (Streams & Devices) 
     # Explicitly schedule computation on the GPU stream
-    with mx.stream(mx.gpu):
+    with mx.stream(mx.gpu): 
         y = mx.array(x) * 2
 
-        # Trigger evaluation (sync)
-        mx.eval(y)
+        # Trigger evaluation (sync) 
+        mx.eval(y) 
         return y
 """,
     }
@@ -454,17 +444,17 @@ def compute_on_gpu(x):
   def get_weight_load_code(self, path_var: str) -> str:
     """Loads weights using mx.load (npz/safetensors) into a raw dictionary."""
     return textwrap.dedent(
-      f"""
-            if str({path_var}).endswith(".npz"):
-                loaded = mx.load({path_var})
-            else:
+      f""" 
+            if str({path_var}).endswith(".npz"): 
+                loaded = mx.load({path_var}) 
+            else: 
                 loaded = mx.load({path_var}) # supports safetensors implicitly usually
                 
             # If load returns array, wrap in dict
-            if isinstance(loaded, dict):
+            if isinstance(loaded, dict): 
                  raw_state = loaded
-            else:
-                 # Flatten if nested or assume single array?
+            else: 
+                 # Flatten if nested or assume single array? 
                  # MLX usually loads dict of arrays
                  raw_state = loaded
             """
@@ -477,10 +467,10 @@ def compute_on_gpu(x):
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Saves dictionary of arrays to .npz or .safetensors."""
     return textwrap.dedent(
-      f"""
+      f""" 
             # Convert to MLX arrays if numpy
-            mlx_state = {{k: mx.array(v) for k, v in {state_var}.items()}}
-            mx.save_safetensors({path_var}, mlx_state)
+            mlx_state = {{k: mx.array(v) for k, v in {state_var}.items()}} 
+            mx.save_safetensors({path_var}, mlx_state) 
             """
     )
 

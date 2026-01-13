@@ -38,7 +38,6 @@ def test_merge_clean_insert():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content=data,
     tier=SemanticTier.ARRAY_API,
@@ -59,7 +58,6 @@ def test_array_vs_neural_silent_upgrade():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content={"sigmoid": {"type": "math"}},
     tier=SemanticTier.ARRAY_API,
@@ -71,7 +69,6 @@ def test_array_vs_neural_silent_upgrade():
     merge_tier_data(
       data=mgr.data,
       key_origins=mgr._key_origins,
-      import_data=mgr.import_data,
       framework_configs=mgr.framework_configs,
       new_content={"sigmoid": {"type": "layer"}},
       tier=SemanticTier.NEURAL,
@@ -101,7 +98,6 @@ def test_extras_override_silence():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content={"DataLoader": {"ver": 1}},
     tier=SemanticTier.NEURAL,
@@ -114,7 +110,6 @@ def test_extras_override_silence():
     merge_tier_data(
       data=mgr.data,
       key_origins=mgr._key_origins,
-      import_data=mgr.import_data,
       framework_configs=mgr.framework_configs,
       new_content={"DataLoader": {"ver": 2}},
       tier=SemanticTier.EXTRAS,
@@ -146,7 +141,6 @@ def test_duplicate_same_tier_arg_count_upgrade_silent():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content=content_a,
     tier=SemanticTier.ARRAY_API,
@@ -158,7 +152,6 @@ def test_duplicate_same_tier_arg_count_upgrade_silent():
     merge_tier_data(
       data=mgr.data,
       key_origins=mgr._key_origins,
-      import_data=mgr.import_data,
       framework_configs=mgr.framework_configs,
       new_content=content_b,
       tier=SemanticTier.ARRAY_API,
@@ -184,7 +177,6 @@ def test_duplicate_same_tier_arg_count_downgrade_protects_old():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content=content_rich,
     tier=SemanticTier.ARRAY_API,
@@ -194,7 +186,6 @@ def test_duplicate_same_tier_arg_count_downgrade_protects_old():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content=content_poor,
     tier=SemanticTier.ARRAY_API,
@@ -219,7 +210,6 @@ def test_duplicate_same_tier_ambiguous_warning():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content=content_a,
     tier=SemanticTier.ARRAY_API,
@@ -230,7 +220,6 @@ def test_duplicate_same_tier_ambiguous_warning():
     merge_tier_data(
       data=mgr.data,
       key_origins=mgr._key_origins,
-      import_data=mgr.import_data,
       framework_configs=mgr.framework_configs,
       new_content=content_b,
       tier=SemanticTier.ARRAY_API,
@@ -251,7 +240,6 @@ def test_duplicate_same_tier_identical_is_silent():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content=content_a,
     tier=SemanticTier.ARRAY_API,
@@ -262,7 +250,6 @@ def test_duplicate_same_tier_identical_is_silent():
     merge_tier_data(
       data=mgr.data,
       key_origins=mgr._key_origins,
-      import_data=mgr.import_data,
       framework_configs=mgr.framework_configs,
       new_content=content_b,
       tier=SemanticTier.ARRAY_API,
@@ -287,7 +274,6 @@ def test_build_index_refresh():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content=data_a,
     tier=SemanticTier.ARRAY_API,
@@ -299,7 +285,6 @@ def test_build_index_refresh():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content=data_c,
     tier=SemanticTier.EXTRAS,

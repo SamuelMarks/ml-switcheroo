@@ -110,7 +110,6 @@ class KnowledgeBaseLoader:
     merge_tier_data(
       data=self.mgr.data,
       key_origins=self.mgr._key_origins,
-      import_data={},  # Deprecated legacy import field
       framework_configs=self.mgr.framework_configs,
       new_content=content,
       tier=tier,
@@ -127,7 +126,6 @@ class KnowledgeBaseLoader:
     merge_overlay_data(
       data=self.mgr.data,
       key_origins=self.mgr._key_origins,
-      import_data={},
       framework_configs=self.mgr.framework_configs,
       test_templates=self.mgr.test_templates,
       content=content,

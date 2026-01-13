@@ -2,6 +2,8 @@
 StableHLO Framework Adapter.
 
 Provides metadata and hooks for the MLIR/StableHLO stack.
+This adapter acts as a metadata container for the Compiler Registry,
+identifying StableHLO as a target language and providing static definitions.
 """
 
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -17,32 +19,7 @@ from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
-from ml_switcheroo.semantics.schema import OpDefinition, PluginTraits, StructuralTraits
-from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
-
-
-class PythonToStableHloEmitter:
-  """
-  Wrapper to adapt the CST-based StableHloEmitter to the simpler emit() protocol
-  expected by tests/engine logic if used via fallback.
-  """
-
-  def __init__(self):
-    # Lazy import prevents circular dependency when initializing framework registry
-    from ml_switcheroo.semantics.manager import SemanticsManager
-
-    self.semantics = SemanticsManager()
-    self.emitter = StableHloEmitter(self.semantics)
-
-  def emit(self, code: str) -> str:
-    import libcst as cst
-
-    try:
-      tree = cst.parse_module(code)
-      mlir_node = self.emitter.convert(tree)
-      return mlir_node.to_text()
-    except Exception as e:
-      return f"// Error parsing Python source: {e}"
+from ml_switcheroo.semantics.schema import OperationDef, PluginTraits, StructuralTraits
 
 
 @register_framework("stablehlo")
@@ -56,10 +33,6 @@ class StableHloAdapter(FrameworkAdapter):
 
   def __init__(self) -> None:
     pass
-
-  def create_emitter(self) -> PythonToStableHloEmitter:
-    """Factory for the StableHLO Emitter."""
-    return PythonToStableHloEmitter()
 
   @property
   def search_modules(self) -> List[str]:
@@ -120,7 +93,7 @@ class StableHloAdapter(FrameworkAdapter):
     return load_definitions("stablehlo")
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]:
+  def specifications(self) -> Dict[str, OperationDef]:
     return {}
 
   @property
@@ -169,13 +142,9 @@ class StableHloAdapter(FrameworkAdapter):
   def convert(self, data: Any) -> Any:
     return str(data)
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    return "%0 = stablehlo.abs %arg0 : tensor<*xf32>"
-
   def get_tiered_examples(self) -> Dict[str, str]:
     return {
-      "tier1_math": self.get_example_code(),
+      "tier1_math": "%0 = stablehlo.abs %arg0 : tensor<*xf32>",
       "tier2_neural": "module { func.func @main() { %0 = stablehlo.convolution(...) } }",
       "tier3_extras": "// Extras ignored",
     }

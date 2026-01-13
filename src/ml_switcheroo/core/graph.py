@@ -98,6 +98,17 @@ class GraphExtractor(cst.CSTVisitor):
       self._analyze_data_flow(node)
     return True
 
+  def visit_Expr(self, node: cst.Expr) -> Optional[bool]:
+    """
+    Handles standalone expression statements (e.g. `func(x)` without assignment).
+    Used for 1:1 translations where top-level expressions are valid (e.g. MLIR roundtrips).
+    """
+    if self._scope_depth == 0 or self._in_forward:
+      if isinstance(node.value, cst.Call):
+        # Pass the expression statement as context to link provenance to the line not just the call
+        self._analyze_call_expression(node.value, output_vars=[], context_node=node)
+    return True
+
   def visit_Return(self, node: cst.Return) -> Optional[bool]:
     """Handles return statements to identify Output nodes."""
     if self._in_forward and node.value:

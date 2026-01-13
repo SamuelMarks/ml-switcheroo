@@ -10,6 +10,8 @@ Verifies that:
 
 import pytest
 import numpy as np
+import hypothesis.strategies as st
+from hypothesis import given, settings, HealthCheck
 from typing import Callable
 
 from ml_switcheroo.testing.fuzzer.core import InputFuzzer
@@ -20,13 +22,16 @@ def fuzzer():
   return InputFuzzer()
 
 
-def test_generate_simple_callable(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_generate_simple_callable(fuzzer, data):
   """
   Scenario: User hints 'Callable'.
   Expectation: Return a python function (lambda).
   """
   hints = {"fn": "Callable"}
-  inputs = fuzzer.generate_inputs(["fn"], hints=hints)
+  strats = fuzzer.build_strategies(["fn"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   val = inputs["fn"]
   assert callable(val)
@@ -36,25 +41,31 @@ def test_generate_simple_callable(fuzzer):
   assert val("foo") == "foo"
 
 
-def test_generate_complex_callable_hint(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_generate_complex_callable_hint(fuzzer, data):
   """
   Scenario: User hints 'Callable[[int], int]'.
   Expectation: Fuzzer handles the brackets gracefully and returns basic callable.
   """
   hints = {"op": "Callable[[int], int]"}
-  inputs = fuzzer.generate_inputs(["op"], hints=hints)
+  strats = fuzzer.build_strategies(["op"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   val = inputs["op"]
   assert callable(val)
   assert val(10) == 10
 
 
-def test_generate_func_shorthand(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_generate_func_shorthand(fuzzer, data):
   """
   Scenario: User hints 'func' or 'function' (often used in ODL for vmap/grad).
   """
   hints = {"f": "func", "g": "function"}
-  inputs = fuzzer.generate_inputs(["f", "g"], hints=hints)
+  strats = fuzzer.build_strategies(["f", "g"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   assert callable(inputs["f"])
   assert callable(inputs["g"])
@@ -64,13 +75,16 @@ def test_generate_func_shorthand(fuzzer):
   assert inputs["f"](1, 2, 3) == 1
 
 
-def test_callable_in_list(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_callable_in_list(fuzzer, data):
   """
   Scenario: List[Callable].
   Expectation: A list of functions.
   """
   hints = {"ops": "List[Callable]"}
-  inputs = fuzzer.generate_inputs(["ops"], hints=hints)
+  strats = fuzzer.build_strategies(["ops"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   lst = inputs["ops"]
   assert isinstance(lst, list)
@@ -93,12 +107,15 @@ def test_fallback_depth_recursion(fuzzer):
   assert val("test") == "test"
 
 
-def test_vmap_usage_simulation(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_vmap_usage_simulation(fuzzer, data):
   """
   Scenario: Simulating a vmap test where 'func' is generated.
   """
   hints = {"func": "Callable", "in_axes": "int"}
-  inputs = fuzzer.generate_inputs(["func", "in_axes"], hints=hints)
+  strats = fuzzer.build_strategies(["func", "in_axes"], hints=hints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   fn = inputs["func"]
 

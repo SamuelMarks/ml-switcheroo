@@ -2,25 +2,12 @@
 AST Transformation Helpers.
 
 Provides logic to reconstruct CST nodes for Infix operators, Inline Lambdas,
-Output Adapters, and Structured Index Selection.
+and Structured Index Selection.
 """
 
 import libcst as cst
 from typing import List, Union
 from ml_switcheroo.utils.node_diff import capture_node_source
-
-
-def apply_output_adapter(inner_node: cst.CSTNode, adapter_str: str) -> cst.Call:
-  """
-  Wraps a node with a lambda adapter to normalize output via string parsing.
-  Transform: `node` -> `(adapter_str)(node)`
-  """
-  try:
-    lambda_node = cst.parse_expression(adapter_str)
-    parenthesized = lambda_node.with_changes(lpar=[cst.LeftParen()], rpar=[cst.RightParen()])
-    return cst.Call(func=parenthesized, args=[cst.Arg(value=inner_node)])
-  except cst.ParserSyntaxError:
-    raise ValueError(f"Invalid syntax in output_adapter: {adapter_str}")
 
 
 def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
@@ -65,7 +52,7 @@ def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: lis
   Replaces an operation call with a python expression defined in the template.
 
   Arguments are substituted into the template string using placeholders matching
-  the standard argument names (e.g. ``{x}``).
+  the standard argument names (e.g. `{x}`).
 
   Args:
       template (str): The macro string (e.g. "{x} * jax.nn.sigmoid({x})").

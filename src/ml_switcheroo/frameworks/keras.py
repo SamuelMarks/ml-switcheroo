@@ -526,16 +526,6 @@ class KerasAdapter:
     """
     return f"https://keras.io/search.html?q={api_name}"
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    """
-    Returns example code.
-
-    Returns:
-        str: Source code.
-    """
-    return cls().get_tiered_examples()["tier2_neural"]
-
   def get_tiered_examples(self) -> Dict[str, str]:
     """
     Returns tiered examples.
@@ -544,7 +534,7 @@ class KerasAdapter:
         Dict[str, str]: Map of tiers to examples.
     """
     return {
-      "tier1_math": "import keras\nfrom keras import ops\n\ndef math_ops(x, y):\n  # Tier 1: Using keras.ops for backend-agnostic math\n  a = ops.abs(x)\n  b = ops.add(a, y)\n  return ops.mean(b)\n",
+      "tier1_math": """import keras\nfrom keras import ops\n\ndef math_ops(x, y):\n  # Tier 1: Using keras.ops for backend-agnostic math\n  a = ops.abs(x)\n  b = ops.add(a, y)\n  return ops.mean(b)\n""",
       "tier2_neural": 'import keras\nfrom keras import layers\n\ndef build_model(input_shape):\n  inputs = keras.Input(shape=input_shape)\n  x = layers.Conv2D(32, 3, activation="relu")(inputs)\n  x = layers.Flatten()(x)\n  outputs = layers.Dense(10)(x)\n  return keras.Model(inputs, outputs)\n',
       "tier3_extras": "import keras\nfrom keras import random\n\ndef generate_noise(shape):\n  seed_gen = random.SeedGenerator(42)\n  return random.normal(shape, seed=seed_gen)\n",
     }

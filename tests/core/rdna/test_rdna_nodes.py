@@ -1,14 +1,4 @@
-"""
-Tests for RDNA AST Node Representation.
-
-Verifies:
-1. Instruction formatting (Opcode, Operands).
-2. Register formatting (SGPR, VGPR, Ranges).
-3. Operand formatting (Immediates, Modifiers, Memory).
-4. Structural nodes (Labels, Directives, Comments).
-"""
-
-from ml_switcheroo.core.rdna.nodes import (
+from ml_switcheroo.compiler.frontends.rdna.nodes import (
   Comment,
   Directive,
   Immediate,

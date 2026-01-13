@@ -17,7 +17,4 @@ It handles:
 from ml_switcheroo.tools.injector_fw.core import FrameworkInjector
 from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 
-# Internal alias to maintain compatibility with tests expecting the private name
-_convert_to_cst_literal = convert_to_cst_literal
-
-__all__ = ["FrameworkInjector", "_convert_to_cst_literal", "convert_to_cst_literal"]
+__all__ = ["FrameworkInjector", "convert_to_cst_literal"]

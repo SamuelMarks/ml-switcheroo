@@ -11,7 +11,7 @@ representation (like dotted imports) robustly.
 """
 
 import uuid
-from typing import List, Optional
+from typing import List, Optional, Any
 
 import libcst as cst
 
@@ -39,20 +39,20 @@ class MermaidGenerator(cst.CSTVisitor):
   }
 
   # Mermaid Style Definitions
-  # Note: Class names mapped to avoid Mermaid keywords (call, import, etc.)
-  STYLES = f"""
+  STYLES = f""" 
     %% Styles
-    classDef default font-family:'Google Sans Normal',color:{COLORS["navy"]},stroke:{COLORS["navy"]};
-    classDef modNode fill:{COLORS["navy"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium';
-    classDef classNode fill:{COLORS["red"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium';
-    classDef funcNode fill:{COLORS["blue"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium';
-    classDef callNode fill:{COLORS["green"]},stroke:{COLORS["navy"]},stroke-width:2px,color:{COLORS["white"]},rx:5px,font-family:'Roboto Mono Normal';
-    classDef stmtNode fill:{COLORS["white"]},stroke:{COLORS["navy"]},stroke-dasharray: 2 2,color:{COLORS["navy"]},font-family:'Roboto Mono Normal';
-    classDef argNode fill:{COLORS["yellow"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:2px,font-size:10px;
-    classDef impNode fill:{COLORS["halftone_blue"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:5px;
+    classDef default font-family:'Google Sans Normal',color:{COLORS["navy"]},stroke:{COLORS["navy"]}; 
+    classDef modNode fill:{COLORS["navy"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium'; 
+    classDef classNode fill:{COLORS["red"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium'; 
+    classDef funcNode fill:{COLORS["blue"]},stroke:{COLORS["navy"]},color:{COLORS["white"]},rx:5px,font-family:'Google Sans Medium'; 
+    classDef callNode fill:{COLORS["green"]},stroke:{COLORS["navy"]},stroke-width:2px,color:{COLORS["white"]},rx:5px,font-family:'Roboto Mono Normal'; 
+    classDef stmtNode fill:{COLORS["white"]},stroke:{COLORS["navy"]},stroke-dasharray: 2 2,color:{COLORS["navy"]},font-family:'Roboto Mono Normal'; 
+    classDef argNode fill:{COLORS["yellow"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:2px,font-size:10px; 
+    classDef impNode fill:{COLORS["halftone_blue"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:5px; 
+    classDef valNode fill:{COLORS["halftone_red"]},stroke:{COLORS["navy"]},color:{COLORS["navy"]},rx:5px; 
     """
 
-  def __init__(self):
+  def __init__(self) -> None:
     """Initializes the generator with empty buffers."""
     self.nodes: List[str] = []
     self.edges: List[str] = []
@@ -125,9 +125,11 @@ class MermaidGenerator(cst.CSTVisitor):
     elif isinstance(node, cst.Integer):
       return node.value
     elif isinstance(node, cst.Float):
-      return node.value
+      # Casting to str is safe
+      return str(node.value)
     elif isinstance(node, cst.SimpleString):
-      return node.value
+      # Strip quotes for display
+      return node.value.strip("'").strip('"')
 
     # Fallback to code generator for complex expressions (e.g. calls, tuples)
     try:
@@ -137,8 +139,8 @@ class MermaidGenerator(cst.CSTVisitor):
 
   def visit_Module(self, node: cst.Module) -> Optional[bool]:
     """Visits Module root."""
-    id = self._add_node("Module", "modNode")
-    self.stack.append(id)
+    uid = self._add_node("Module", "modNode")
+    self.stack.append(uid)
     return True
 
   def leave_Module(self, node: cst.Module) -> None:
@@ -148,8 +150,8 @@ class MermaidGenerator(cst.CSTVisitor):
 
   def visit_ClassDef(self, node: cst.ClassDef) -> Optional[bool]:
     """Visits Class Definitions."""
-    id = self._add_node(f"Class: {node.name.value}", "classNode")
-    self.stack.append(id)
+    uid = self._add_node(f"Class: {node.name.value}", "classNode")
+    self.stack.append(uid)
     return True
 
   def leave_ClassDef(self, node: cst.ClassDef) -> None:
@@ -159,8 +161,8 @@ class MermaidGenerator(cst.CSTVisitor):
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
     """Visits Function Definitions."""
-    id = self._add_node(f"Def: {node.name.value}", "funcNode")
-    self.stack.append(id)
+    uid = self._add_node(f"Def: {node.name.value}", "funcNode")
+    self.stack.append(uid)
     return True
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
@@ -177,12 +179,13 @@ class MermaidGenerator(cst.CSTVisitor):
         # Fallback if renderer made something too complex
         name = "Call"
       else:
-        name = f"{name}()"
+        # Standardize prefix "Call" to satisfy test expectations and clarity
+        name = f"Call: {name}()"
     except Exception:
       name = "Call"
 
-    id = self._add_node(name, "callNode")
-    self.stack.append(id)
+    uid = self._add_node(name, "callNode")
+    self.stack.append(uid)
     return True  # Visit args
 
   def leave_Call(self, node: cst.Call) -> None:
@@ -196,20 +199,27 @@ class MermaidGenerator(cst.CSTVisitor):
     label = "arg"
     if node.keyword:
       label = f"{node.keyword.value}="
+    else:
+      # If no keyword, it's positional. Use empty suffix or 'arg'
+      label = "arg"
 
     # Check for simple literals to inline them into the Arg label
     is_simple = False
+    val_code: Any = ""
     if isinstance(node.value, (cst.Name, cst.Integer, cst.Float, cst.SimpleString)):
       try:
         val_code = self._node_to_str(node.value)
-        label += val_code
+        if label == "arg":
+          label = val_code
+        else:
+          label += val_code
         is_simple = True
       except Exception:
         pass
 
     # Always add node and push to stack to maintain symmetry for leave_Arg
-    id = self._add_node(label, "argNode")
-    self.stack.append(id)
+    uid = self._add_node(label, "argNode")
+    self.stack.append(uid)
 
     if is_simple:
       return False  # Don't recurse into simple value nodes
@@ -249,11 +259,20 @@ class MermaidGenerator(cst.CSTVisitor):
 
   def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
     """Visits Assignment statements."""
-    id = self._add_node("Assign (=)", "stmtNode")
-    self.stack.append(id)
+    uid = self._add_node("Assign (=)", "stmtNode")
+    self.stack.append(uid)
     return True
 
   def leave_Assign(self, node: cst.Assign) -> None:
     """Leaves Assignment statements."""
     if self.stack:
       self.stack.pop()
+
+  def visit_SimpleString(self, node: cst.SimpleString) -> Optional[bool]:
+    """Visits Strings to allow visualizing constant values directly in the graph."""
+    val = self._node_to_str(node)
+    uid = self._add_node(val, "valNode")
+    # Leaf node - don't stack
+    # wait, add_node adds edge. If we don't push stack, children of THIS node (if any) won't link.
+    # Strings don't have children.
+    return False

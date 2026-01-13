@@ -1,27 +1,16 @@
-"""
-Tests for RDNA Synthesizer and Register Allocator.
-
-Verifies:
-1.  **Register Allocation**: Dual pools (scalar/vector), overflow handling.
-2.  **Target Synthesis**: Graph -> RDNA logic (1:1 mapping).
-3.  **Source Synthesis**: RDNA -> Python AST logic.
-"""
-
 import pytest
 from unittest.mock import MagicMock
 import libcst as cst
 
-from ml_switcheroo.core.rdna.synthesizer import (
+from ml_switcheroo.compiler.backends.rdna.synthesizer import (
   RegisterAllocator,
   RdnaSynthesizer,
   MAX_VGPR,
   MAX_SGPR,
 )
-from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
-from ml_switcheroo.core.rdna.nodes import Instruction, VGPR, SGPR, Comment, Label
+from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.compiler.frontends.rdna.nodes import Instruction, VGPR, SGPR, Comment, Label
 from ml_switcheroo.semantics.manager import SemanticsManager
-
-# --- 1. Allocator Tests ---
 
 
 def test_allocator_dual_pools() -> None:
@@ -74,9 +63,6 @@ def test_allocator_temps() -> None:
   assert t3.index == 1
 
 
-# --- 2. Target Synthesis (Graph -> RDNA) ---
-
-
 @pytest.fixture
 def mock_semantics() -> MagicMock:
   mgr = MagicMock(spec=SemanticsManager)
@@ -99,10 +85,6 @@ def mock_semantics() -> MagicMock:
 def test_graph_to_rdna_basic_math(mock_semantics: MagicMock) -> None:
   """
   Scenario: x -> Add(y) -> z.
-  Expectation:
-      ; Input x -> v0
-      ; Input y -> v1
-      v_add_f32 v2, v0, v1
   """
   synth = RdnaSynthesizer(mock_semantics)
   g = LogicalGraph()
@@ -140,9 +122,6 @@ def test_graph_to_rdna_unmapped(mock_semantics: MagicMock) -> None:
   assert "Unmapped Op: MysteryOp" in str(nodes[0])
 
 
-# --- 3. Source Synthesis (RDNA -> Python) ---
-
-
 def test_rdna_to_python_instruction() -> None:
   """
   Input: v_add_f32 v0, v1, v2
@@ -161,14 +140,11 @@ def test_rdna_to_python_ranges() -> None:
   Output: v_0_3 = rdna.image_load(v_4_7, s_0_3)
   """
   synth = RdnaSynthesizer(MagicMock())
-  inst = Instruction("image_load", [VGPR(0, 4), VGPR(4, 4), SGPR(0, 4)])  # count=4 -> internal indices
+  inst = Instruction("image_load", [VGPR(0, 4), VGPR(4, 4), SGPR(0, 4)])
 
   mod = synth.to_python([inst])
   code = mod.code
 
-  # The allocator stringifies count > 1 as v[start:end].
-  # Synthesizer `_convert_instruction_to_py` sanitizes brackets.
-  # v[0:3] -> v_0_3
   assert "v_0_3 = rdna.image_load(v_4_7, s_0_3)" in code
 
 
@@ -181,5 +157,4 @@ def test_rdna_to_python_label() -> None:
   nodes = [Label("L_LOOP")]
   mod = synth.to_python(nodes)
   code = mod.code
-  # Should contain comment
   assert "# Label: L_LOOP" in code

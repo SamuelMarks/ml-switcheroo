@@ -94,8 +94,9 @@ def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
           return True
 
     # Check import map roots (e.g. "torch.nn" implies "torch" is known)
-    import_data = getattr(ctx.semantics, "import_data", {})
-    for mod_path in import_data.keys():
+    # Replaced legacy import_data usages with _source_registry check
+    source_registry = getattr(ctx.semantics, "_source_registry", {})
+    for mod_path in source_registry.keys():
       known_root = mod_path.split(".")[0]
       if name == known_root:
         return True

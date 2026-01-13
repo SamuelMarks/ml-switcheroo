@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 # We import RuntimeConfig for type hinting
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.schema import PluginTraits, Variant
+from ml_switcheroo.semantics.schema import PluginTraits, FrameworkVariant
 
 # Lazy import to avoid circular dependency
 # TYPE_CHECKING block logic or Any is sufficient for runtime
@@ -143,13 +143,13 @@ class HookContext:
     return PluginTraits()
 
   @property
-  def current_variant(self) -> Optional[Variant]:
+  def current_variant(self) -> Optional[FrameworkVariant]:
     """
     Returns the Variant definition for the current operation/target.
     Allows plugins to read extra metadata defined in the JSON (e.g. pack_to_tuple).
 
     Returns:
-        Optional[Variant]: The variant definition if resolved, else None.
+        Optional[FrameworkVariant]: The variant definition if resolved, else None.
     """
     if not self.semantics or not self.current_op_id:
       return None
@@ -160,7 +160,7 @@ class HookContext:
     if not data:
       return None
 
-    return Variant.model_validate(data)
+    return FrameworkVariant.model_validate(data)
 
   def inject_signature_arg(self, name: str, annotation: Optional[str] = None) -> None:
     """
@@ -195,19 +195,6 @@ class HookContext:
         Any: The configuration value.
     """
     return self._runtime_config.plugin_settings.get(key, default)
-
-  def config(self, key: str, default: Any = None) -> Any:
-    """
-    Legacy alias for raw_config.
-
-    Args:
-        key (str): Configuration key.
-        default (Any): Default value.
-
-    Returns:
-        Any: The configuration value.
-    """
-    return self.raw_config(key, default)
 
   def validate_settings(self, model: Type[T]) -> T:
     """

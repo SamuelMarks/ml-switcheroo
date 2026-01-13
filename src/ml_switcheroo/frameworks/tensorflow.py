@@ -384,16 +384,6 @@ class TensorFlowAdapter:
         new_api = "tf." + api[11:]
         entry["api"] = new_api
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    """
-    Returns the primary example code used for documentation.
-
-    Returns:
-        str: The Neural Tier (Tier 2) example code.
-    """
-    return cls().get_tiered_examples()["tier2_neural"]
-
   def get_tiered_examples(self) -> Dict[str, str]:
     """
     Returns example snippets for each semantic tier.

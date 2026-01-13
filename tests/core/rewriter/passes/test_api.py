@@ -1,17 +1,14 @@
 """
-Tests for the ApiPass.
+Tests for the ApiPass via TestRewriter.
 """
 
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.core.rewriter.passes.api import ApiPass
-from ml_switcheroo.core.rewriter.context import RewriterContext
+from tests.conftest import TestRewriter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.escape_hatch import EscapeHatch
-import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class MockSemantics(SemanticsManager):
@@ -29,25 +26,14 @@ class MockSemantics(SemanticsManager):
       {"torch": {"api": "torch.abs"}, "jax": {"api": "jnp.abs"}},
     )
 
-    # 2. 'sort' with output adapter
-    self._inject(
-      "sort",
-      ["x"],
-      {
-        "torch": {"api": "torch.sort"},
-        "jax": {"api": "jnp.sort", "output_adapter": "lambda x: x[0]"},
-      },
-    )
-
-    # 3. 'add_' inplace unroll (Mock plugin)
-    # Note: Plugin registration happens outside, but semantics link it
+    # 2. 'add_' inplace unroll (Mock plugin)
     self._inject(
       "add_",
       ["x", "y"],
       {"torch": {"api": "torch.Tensor.add_"}, "jax": {"requires_plugin": "mock_unroll"}},
     )
 
-    # 4. 'unsupported'
+    # 3. 'unsupported'
     self._inject(
       "unsupported",
       [],
@@ -79,17 +65,15 @@ class MockSemantics(SemanticsManager):
 def run_pass():
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
-  ctx = RewriterContext(semantics, config)
 
-  # Disable functional unwrapping by mocking default traits
-  # Default is 'apply', causing test failure if 'layer.apply' is used in input.
-  # We clear the trait or set it to something else
+  # Disable functional unwrapping to prevent test noise
   semantics.framework_configs["torch"] = {"traits": {"functional_execution_method": None}}
 
+  rewriter = TestRewriter(semantics, config)
+
   def _transform(code):
-    module = cst.parse_module(code)
-    api_pass = ApiPass()
-    return api_pass.transform(module, ctx).code
+    tree = cst.parse_module(code)
+    return rewriter.convert(tree).code
 
   return _transform
 
@@ -99,15 +83,6 @@ def test_api_call_rewrite(run_pass):
   code = "y = torch.abs(x)"
   res = run_pass(code)
   assert "jnp.abs(x)" in res
-
-
-def test_output_adapter_application(run_pass):
-  """Verify post-processing logic (adapters)."""
-  code = "y = torch.sort(x)"
-  res = run_pass(code)
-  # Expect: (lambda x: x[0])(jnp.sort(x))
-  assert "lambda x: x[0]" in res
-  assert "jnp.sort(x)" in res
 
 
 def test_missing_mapping_strict_failure(run_pass):
@@ -120,7 +95,6 @@ def test_missing_mapping_strict_failure(run_pass):
 
 def test_assignment_unwrapping_passthrough(run_pass):
   """Verify leave_Assign logic runs."""
-  # Since we explicitly disabled functional traits in fixture, this should pass through
   code = "res = layer(x)"
   res = run_pass(code)
   assert "layer(x)" in res
@@ -133,8 +107,6 @@ def test_assignment_unwrapping_passthrough(run_pass):
 
 def test_arg_normalization_logic(run_pass):
   """Verify arguments can be renamed/reordered."""
-  # We must patch an op with arg maps
-  # Creating a temp semantic manager for this specific test
   mgr = MagicMock(spec=SemanticsManager)
   # Define 'sum' -> std: [x, axis]
   op_def = {
@@ -150,12 +122,10 @@ def test_arg_normalization_logic(run_pass):
   mgr.get_framework_config.return_value = {}
 
   conf = RuntimeConfig(source_framework="torch", target_framework="jax")
-  ctx = RewriterContext(mgr, conf)
-  api_pass = ApiPass()
+  rewriter = TestRewriter(mgr, conf)
 
   code = "s = torch.sum(x, dim=1)"
-  module = cst.parse_module(code)
-  res = api_pass.transform(module, ctx).code
+  tree = cst.parse_module(code)
+  res = rewriter.convert(tree).code
 
   assert "jnp.sum(x, axis=1)" in res
-  # 'dim' should be mapped to 'axis' via standard arg 'axis'

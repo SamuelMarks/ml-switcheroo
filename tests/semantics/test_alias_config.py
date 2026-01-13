@@ -49,7 +49,6 @@ def test_manager_parses_json_alias_override():
   merge_tier_data(
     data=mgr.data,
     key_origins=mgr._key_origins,
-    import_data=mgr.import_data,
     framework_configs=mgr.framework_configs,
     new_content=mock_data,
     tier=SemanticTier.EXTRAS,

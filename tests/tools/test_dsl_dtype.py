@@ -9,10 +9,11 @@ Verifies:
 
 import pytest
 import numpy as np
+import hypothesis.strategies as st
+from hypothesis import given, settings, HealthCheck
 from pydantic import ValidationError
 from ml_switcheroo.core.dsl import ParameterDef, OperationDef, FrameworkVariant
 from ml_switcheroo.testing.fuzzer import InputFuzzer
-
 
 # --- Part 1: Schema Validation Tests ---
 
@@ -63,62 +64,79 @@ def fuzzer():
   return InputFuzzer()
 
 
-def test_fuzzer_respects_dtype_int64(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_fuzzer_respects_dtype_int64(fuzzer, data):
   """
   Scenario: Constraint declares dtype='int64'.
   Expectation: Generated array is int64, even if default is float32 or int32.
   """
   constraints = {"x": {"dtype": "int64"}}
   # Heuristic for 'x' normally yields float32
-  inputs = fuzzer.generate_inputs(["x"], constraints=constraints)
+  strats = fuzzer.build_strategies(["x"], constraints=constraints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   arr = inputs["x"]
   assert isinstance(arr, np.ndarray)
   assert arr.dtype == np.int64
 
 
-def test_fuzzer_respects_dtype_float16(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_fuzzer_respects_dtype_float16(fuzzer, data):
   """
   Scenario: Constraint declares dtype='float16'.
   """
   constraints = {"x": {"dtype": "float16"}}
-  inputs = fuzzer.generate_inputs(["x"], constraints=constraints)
+  strats = fuzzer.build_strategies(["x"], constraints=constraints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   arr = inputs["x"]
   assert arr.dtype == np.float16
 
 
-def test_fuzzer_respects_dtype_bool(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_fuzzer_respects_dtype_bool(fuzzer, data):
   """
   Scenario: Constraint declares dtype='bool'.
   """
   constraints = {"mask": {"dtype": "bool"}}
-  inputs = fuzzer.generate_inputs(["mask"], constraints=constraints)
+  strats = fuzzer.build_strategies(["mask"], constraints=constraints)
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   arr = inputs["mask"]
   assert arr.dtype == bool
 
 
-def test_fuzzer_dtype_priority_over_heuristic(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_fuzzer_dtype_priority_over_heuristic(fuzzer, data):
   """
   Scenario: Name 'mask' implies bool via heuristic.
             Constraint 'dtype' explicitly asks for 'float32' (e.g. attention mask floats).
   Expectation: Float32 wins.
   """
   constraints = {"mask": {"dtype": "float32"}}
-  inputs = fuzzer.generate_inputs(["mask"], constraints=constraints)
+  strats = fuzzer.build_strategies(["mask"], constraints=constraints)
+
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   arr = inputs["mask"]
   assert arr.dtype == np.float32
 
 
-def test_fuzzer_dtype_with_symbolic_shape(fuzzer):
+@given(data=st.data())
+@settings(max_examples=10, suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_fuzzer_dtype_with_symbolic_shape(fuzzer, data):
   """
   Scenario: Typed hint with symbolic shape AND dtype constraint.
   """
   hints = {"x": "Array['N']"}
   constraints = {"x": {"dtype": "int32"}}
-  inputs = fuzzer.generate_inputs(["x"], hints=hints, constraints=constraints)
+  strats = fuzzer.build_strategies(["x"], hints=hints, constraints=constraints)
+
+  inputs = data.draw(st.fixed_dictionaries(strats))
 
   arr = inputs["x"]
   assert arr.dtype == np.int32

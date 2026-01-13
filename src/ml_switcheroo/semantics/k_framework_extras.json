@@ -593,7 +593,7 @@
     "type": "class"
   },
   "CausalBias": {
-    "description": "A bias representing causal attention patterns. For an overview of the bias structure, see the :class:`CausalVariant` enum.",
+    "description": "A bias representing causal attention patterns. For an overview of the bias structure, see the :class:`CausalFrameworkVariant` enum.",
     "std_args": [
       "self",
       "variant",
@@ -602,7 +602,7 @@
     ],
     "type": "class"
   },
-  "CausalVariant": {
+  "CausalFrameworkVariant": {
     "description": "Enum for causal variants used in attention mechanisms.",
     "std_args": [],
     "type": "class"

@@ -19,15 +19,16 @@ DOCS_DIR = PROJECT_ROOT / "docs"
 BUILD_DIR = DOCS_DIR / "_build"
 
 # Files to copy from root to docs/ to be rendered
-ROOT_FILES = [
-  "README.md",
+ROOT_FILES = (
   "ARCHITECTURE.md",
   "EXTENDING.md",
   "EXTENDING_WITH_DSL.md",
   "IDEAS.md",
-  "MAINTENANCE.md",
+  "INTERNALS.md",
   "LICENSE",
-]
+  "MAINTENANCE.md",
+  "README.md",
+)
 
 
 def clean() -> None:

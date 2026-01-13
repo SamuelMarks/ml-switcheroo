@@ -27,7 +27,7 @@ from ml_switcheroo.frameworks.mlx import MLXAdapter
 from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 from ml_switcheroo.frameworks.torch import TorchAdapter
-from ml_switcheroo.frameworks.jax import JaxAdapter
+from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 
 from ml_switcheroo.testing.fuzzer import InputFuzzer
 
@@ -60,7 +60,7 @@ def test_jax_metadata():
   """
   # Simulate jax being present to force InitMode.LIVE
   with patch("ml_switcheroo.frameworks.jax.jax", MagicMock()):
-    adapter = JaxAdapter()
+    adapter = JaxCoreAdapter()
 
     assert "JAX" in adapter.display_name
     assert "jax.numpy" in adapter.search_modules

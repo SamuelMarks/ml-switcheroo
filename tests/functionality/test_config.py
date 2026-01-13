@@ -28,8 +28,8 @@ def test_config_flags():
 
 
 def test_legacy_fusion_alias():
-  """Verify enable_fusion aliases to enable_graph_optimization."""
-  c = RuntimeConfig(enable_fusion=True)
+  """Verify enable_graph_optimization aliases to enable_graph_optimization."""
+  c = RuntimeConfig(enable_graph_optimization=True)
   assert c.enable_graph_optimization is True
 
 

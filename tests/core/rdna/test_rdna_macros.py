@@ -1,15 +1,6 @@
-"""
-Tests for RDNA Macro Expansion Logic.
-
-Verifies that:
-1.  `expand_conv2d` produces the correct structure (Nested Loops, Waitcnt).
-2.  `expand_linear` produces GEMM loop logic.
-3.  Register allocation uses correct pools (Scalars for counters, Vectors for data).
-"""
-
 import pytest
-from ml_switcheroo.core.rdna.macros import expand_conv2d, expand_linear
-from ml_switcheroo.core.rdna.nodes import (
+from ml_switcheroo.compiler.backends.rdna.macros import expand_conv2d, expand_linear
+from ml_switcheroo.compiler.frontends.rdna.nodes import (
   Instruction,
   Label,
   SGPR,

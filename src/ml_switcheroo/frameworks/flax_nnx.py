@@ -384,15 +384,15 @@ class FlaxNNXAdapter(JAXStackMixin):
     mappings.setdefault("load_state_dict", {"requires_plugin": "torch_load_state_dict_to_nnx"})
     mappings.setdefault("parameters", {"requires_plugin": "torch_parameters_to_nnx"})
 
-  @classmethod
-  def get_example_code(cls) -> str:
+  def get_tiered_examples(self) -> Dict[str, str]:
     """
-    Example neural network showcasing Flax NNX idiomatic usage.
+    Provides tier-specific example usages for documentation and tests.
 
     Returns:
-        str: Example source code string.
+        Dict[str, str]: Dictionary mapping tier names to code snippets.
     """
-    return """from flax import nnx
+    return {
+      "tier2_neural": """from flax import nnx
 import jax.numpy as jnp
 
 class Net(nnx.Module): 
@@ -402,17 +402,7 @@ class Net(nnx.Module):
     def __call__(self, x): 
         x = self.linear(x) 
         return nnx.relu(x) 
-"""
-
-  def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Provides tier-specific example usages for documentation and tests.
-
-    Returns:
-        Dict[str, str]: Dictionary mapping tier names to code snippets.
-    """
-    return {
-      "tier2_neural": self.get_example_code(),
+""",
       "tier3_extras": "# Flax NNX State Management\n# See repo for details on nnx.Variable interactions.",
     }
 

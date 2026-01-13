@@ -15,7 +15,7 @@ from ml_switcheroo.frameworks.base import (
   StandardCategory,
   ImportConfig,
   InitMode,
-  OpDefinition,
+  OperationDef,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
@@ -92,7 +92,7 @@ class TikzAdapter(FrameworkAdapter):
     return load_definitions("tikz")
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]:
+  def specifications(self) -> Dict[str, OperationDef]:
     return {}
 
   @property
@@ -138,13 +138,9 @@ class TikzAdapter(FrameworkAdapter):
   def convert(self, data: Any) -> Any:
     return str(data)
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    return r"\begin{tikzpicture}\node (input) {Input}; \node (layer) [right of=input] {Layer}; \draw[->] (input) -- (layer);\end{tikzpicture}"
-
   def get_tiered_examples(self) -> Dict[str, str]:
     return {
       "tier1_math": "% Math ops not visualized directly",
-      "tier2_neural": self.get_example_code(),
+      "tier2_neural": r"\begin{tikzpicture}\node (input) {Input}; \node (layer) [right of=input] {Layer}; \draw[->] (input) -- (layer);\end{tikzpicture}",
       "tier3_extras": "% Extras ignored",
     }

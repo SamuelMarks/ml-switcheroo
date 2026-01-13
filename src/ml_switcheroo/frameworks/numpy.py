@@ -289,16 +289,16 @@ class NumpyAdapter:
   def get_weight_load_code(self, path_var: str) -> str:
     """Loads .npz files into a dictionary."""
     return textwrap.dedent(
-      f"""
-            loaded = np.load({path_var}, allow_pickle=True)
+      f""" 
+            loaded = np.load({path_var}, allow_pickle=True) 
             # If NpzFile wrapper, convert to dict
-            if hasattr(loaded, 'files'):
-                raw_state = {{k: loaded[k] for k in loaded.files}}
-            elif isinstance(loaded.item(), dict):
-                # Handle 0-d array wrapping a dict (common in np.save)
-                raw_state = loaded.item()
-            else:
-                raw_state = {{'data': loaded}}
+            if hasattr(loaded, 'files'): 
+                raw_state = {{k: loaded[k] for k in loaded.files}} 
+            elif isinstance(loaded.item(), dict): 
+                # Handle 0-d array wrapping a dict (common in np.save) 
+                raw_state = loaded.item() 
+            else: 
+                raw_state = {{'data': loaded}} 
             """
     )
 
@@ -359,16 +359,6 @@ class NumpyAdapter:
         pass
     return data
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    """
-    Returns the primary example code used for instant demos.
-
-    Returns:
-        str: Math example.
-    """
-    return cls().get_tiered_examples()["tier1_math"]
-
   def get_tiered_examples(self) -> Dict[str, str]:
     """
     Returns NumPy idiomatic examples.
@@ -379,34 +369,34 @@ class NumpyAdapter:
     return {
       "tier1_math": """import numpy as np
 
-def linear_algebra_ops(a, b):
+def linear_algebra_ops(a, b): 
     # Tier 1: Standard Numeric Computing
     # Matrix Multiplication
-    dot = np.matmul(a, b)
+    dot = np.matmul(a, b) 
 
     # Element-wise operations
-    diff = np.abs(a - b)
+    diff = np.abs(a - b) 
 
     # Aggregation
-    norm = np.linalg.norm(diff)
+    norm = np.linalg.norm(diff) 
     return dot, norm
 """,
       "tier2_neural": """import numpy as np
 
-# Tier 2: Neural Networks (Out of Scope for NumPy)
-# NumPy does not offer a built-in neural layer API.
+# Tier 2: Neural Networks (Out of Scope for NumPy) 
+# NumPy does not offer a built-in neural layer API. 
 # While possible to write one from scratch, it is not
-# supported by the ml-switcheroo transpiler out-of-the-box.
+# supported by the ml-switcheroo transpiler out-of-the-box. 
 """,
       "tier3_extras": """import numpy as np
 
-def serialize_data(arr, filename):
+def serialize_data(arr, filename): 
     # Tier 3: IO Persistence
-    # Use standard binary format (.npy)
-    np.save(file=filename, arr=arr)
+    # Use standard binary format (.npy) 
+    np.save(file=filename, arr=arr) 
 
     # Reload
-    loaded = np.load(file=filename)
+    loaded = np.load(file=filename) 
     return loaded
 """,
     }

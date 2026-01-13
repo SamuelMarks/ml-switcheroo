@@ -4,7 +4,7 @@ Tests for StableHLO Framework Adapter.
 Verifies:
 1.  Registration in `_ADAPTER_REGISTRY`.
 2.  Protocol compliance.
-3.  `create_emitter` hook correctness.
+3.  Backend route availability via Registry (Replacing legacy create_emitter).
 """
 
 import pytest
@@ -16,6 +16,7 @@ from ml_switcheroo.frameworks.base import (
   get_adapter,
   InitMode,
 )
+from ml_switcheroo.compiler.registry import get_backend_class, is_isa_target
 
 
 @pytest.fixture
@@ -39,22 +40,21 @@ def mock_semantics_patch():
     yield
 
 
-def test_emitter_integration(tmp_path, mock_semantics_patch):
+def test_backend_registered(mock_semantics_patch):
   """
-  Verify the facade correctly instantiates logic and returns a string.
+  Verify the backend registry routes 'stablehlo' correctly.
+  Replaces deprecated `create_emitter` test logic.
   """
-  adapter = StableHloAdapter()
-  emitter = adapter.create_emitter()
+  # Verify it is flagged as a graph/ISA target to trigger compiler pipeline
+  assert is_isa_target("stablehlo")
 
-  code = "x = torch.abs(y)"
-  mlir_output = emitter.emit(code)
-
-  # The StableHloEmitter replaces 'sw.op' with 'stablehlo.abs' if semantics allow
-  assert "stablehlo.abs" in mlir_output
-  assert "tensor<*xf32>" in mlir_output
+  # Verify the backend class is resolvable
+  cls = get_backend_class("stablehlo")
+  assert cls is not None
+  assert cls.__name__ == "StableHloBackend"
 
 
 def test_example_code():
   """Verify example getter."""
-  code = StableHloAdapter.get_example_code()
+  code = StableHloAdapter().get_tiered_examples()["tier1_math"]
   assert "stablehlo.abs" in code

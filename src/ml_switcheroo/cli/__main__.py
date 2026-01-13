@@ -138,7 +138,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     help="Print updates without writing to disk",
   )
 
-  # --- Command: CI (Validation & Readme & Lockfile) ---
+  # --- Command: CI (Validation & Readme & Lockfile & Repair) ---
   cmd_ci = subparsers.add_parser("ci", help="Run validation suite")
   cmd_ci.add_argument("--update-readme", action="store_true", help="Rewrite README.md with results")
   cmd_ci.add_argument("--readme-path", type=Path, default=Path("README.md"))
@@ -147,6 +147,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     type=Path,
     default=None,
     help="Save verification results to a JSON file (Lockfile)",
+  )
+  cmd_ci.add_argument(
+    "--repair",
+    action="store_true",
+    help="Automatically relax constraints (tolerances) for failing tests and update specs accordingly.",
   )
 
   # --- Command: SNAPSHOT (Ghost Protocol) ---
@@ -250,7 +255,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     return commands.handle_harvest(args.path, args.target, args.dry_run)
 
   elif args.command == "ci":
-    return commands.handle_ci(args.update_readme, args.readme_path, args.json_report)
+    return commands.handle_ci(args.update_readme, args.readme_path, args.json_report, args.repair)
 
   elif args.command == "snapshot":
     return commands.handle_snapshot(args.out_dir)

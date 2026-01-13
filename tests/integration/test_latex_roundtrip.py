@@ -45,6 +45,8 @@ def test_torch_to_latex_generation(semantics):
   assert result.success, f"To-LaTeX Conversion Failed: {result.errors}"
   latex_code = result.code
 
+  print(latex_code)
+
   # Structural Checks
   assert r"\documentclass[tikz" in latex_code
   assert r"\begin{DefModel}{ConvNet}" in latex_code
@@ -81,7 +83,7 @@ def test_torch_to_latex_generation(semantics):
 
 
 def test_latex_to_flax_generation(semantics):
-  latex_source = r""" 
+  latex_source = r"""
 \documentclass[tikz]{standalone} 
 \begin{DefModel}{ConvNet} 
     \Attribute{conv}{Conv2d}{in=1, out=32, k=3} 

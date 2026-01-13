@@ -2,16 +2,13 @@
 Post-processing Phase for Call Rewriting.
 
 Handles output adaptation and state threading.
-Updated to prevent imports from legacy modules.
+Updated to prevent imports from legacy modules and removed deprecated output adapter hooks.
 """
 
 from typing import Any, Dict
 import libcst as cst
 
-from ml_switcheroo.core.rewriter.calls.transformers import (
-  apply_index_select,
-  apply_output_adapter,
-)
+from ml_switcheroo.core.rewriter.calls.transformers import apply_index_select
 from ml_switcheroo.core.rewriter.calls.utils import inject_kwarg, strip_kwarg
 from ml_switcheroo.enums import SemanticTier
 
@@ -28,19 +25,14 @@ def handle_post_processing(
   result_node = node
 
   # 1. Output Adaptation (Tuple selection / formatting)
+  # Note: Legacy 'output_adapter' string logic has been deprecated and removed.
+  # We only support structured 'output_select_index' for tuple destructuring.
   if "output_select_index" in mapping and mapping["output_select_index"] is not None:
     try:
       result_node = apply_index_select(result_node, mapping["output_select_index"])
     except Exception as e:
       if hasattr(rewriter, "_report_failure"):
         rewriter._report_failure(f"Output indexing failed: {e}")
-      return result_node
-  elif "output_adapter" in mapping and mapping["output_adapter"]:
-    try:
-      result_node = apply_output_adapter(result_node, mapping["output_adapter"])
-    except Exception as e:
-      if hasattr(rewriter, "_report_failure"):
-        rewriter._report_failure(f"Output adapter failed: {e}")
       return result_node
 
   # 2. Output Casting

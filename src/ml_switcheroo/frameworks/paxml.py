@@ -252,13 +252,13 @@ class PaxmlAdapter(JAXStackMixin):
     Returns:
         str: Source code for ``_make_jax_key``.
     """
-    return textwrap.dedent("""
-            def _make_jax_key(seed):
-                try:
+    return textwrap.dedent(""" 
+            def _make_jax_key(seed): 
+                try: 
                     import jax
-                    return jax.random.PRNGKey(seed)
-                except ImportError:
-                    return "mock_jax_key"
+                    return jax.random.PRNGKey(seed) 
+                except ImportError: 
+                    return "mock_jax_key" 
         """).strip()
 
   @property
@@ -377,16 +377,6 @@ class PaxmlAdapter(JAXStackMixin):
     """
     return f"https://github.com/search?q=repo%3Agoogle%2Fpaxml+{api_name}&type=code"
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    """
-    Returns default documentation example code.
-
-    Returns:
-        str: Neural Tier (Level 2) example.
-    """
-    return cls().get_tiered_examples()["tier2_neural"]
-
   def get_tiered_examples(self) -> Dict[str, str]:
     """
     Returns tiered example code snippets for documentation.
@@ -395,34 +385,34 @@ class PaxmlAdapter(JAXStackMixin):
         Dict[str, str]: Mapping of tier IDs to code.
     """
     return {
-      "tier1_math": JaxCoreAdapter.get_example_code(),
+      "tier1_math": JaxCoreAdapter().get_tiered_examples()["tier1_math"],
       "tier2_neural": """import praxis.layers as pl
 from praxis import base_layer
 
-class SimpleMLP(base_layer.BaseLayer):
+class SimpleMLP(base_layer.BaseLayer): 
     # Tier 2: Praxis Layer Definition
-    # Note the use of 'setup()' instead of '__init__'
+    # Note the use of 'setup()' instead of '__init__' 
 
-    def setup(self):
-        # Layers are instantiated in setup()
-        self.fc1 = pl.Linear(output_dims=128)
-        self.fc2 = pl.Linear(output_dims=10)
-        self.dropout = pl.Dropout(keep_prob=0.5)
+    def setup(self): 
+        # Layers are instantiated in setup() 
+        self.fc1 = pl.Linear(output_dims=128) 
+        self.fc2 = pl.Linear(output_dims=10) 
+        self.dropout = pl.Dropout(keep_prob=0.5) 
 
-    def __call__(self, x):
-        x = self.fc1(x)
-        x = pl.relu(x)
-        x = self.dropout(x)
-        return self.fc2(x)
+    def __call__(self, x): 
+        x = self.fc1(x) 
+        x = pl.relu(x) 
+        x = self.dropout(x) 
+        return self.fc2(x) 
 """,
       "tier3_extras": """import praxis.layers as pl
 from praxis import pax_fiddle
 
-def get_model_config():
+def get_model_config(): 
     # Tier 3: HParams Configuration
     # Praxis often relies on fiddle/HParams for configuration
 
-    p = pax_fiddle.Config(pl.Linear, name="my_linear")
+    p = pax_fiddle.Config(pl.Linear, name="my_linear") 
     p.input_dims = 64
     p.output_dims = 10
 

@@ -152,21 +152,6 @@ def inject_kwarg(node: cst.Call, arg_name: str, val_name: str) -> cst.Call:
   return node.with_changes(args=new_args)
 
 
-def inject_rngs_kwarg(node: cst.Call) -> cst.Call:
-  """
-  Legacy wrapper for `inject_kwarg`.
-  Injects `rngs=rngs` into a call. Preserved for backward compatibility
-  until all consumers migrate to `inject_kwarg`.
-
-  Args:
-      node (cst.Call): The call node.
-
-  Returns:
-      cst.Call: The updated call.
-  """
-  return inject_kwarg(node, "rngs", "rngs")
-
-
 def strip_kwarg(node: cst.Call, kw_name: str) -> cst.Call:
   """
   Removes a specified keyword argument from a function call.
@@ -288,23 +273,6 @@ def compute_permutation(source_layout: str, target_layout: str) -> Optional[Tupl
     indices.append(src_map[char])
 
   return tuple(indices)
-
-
-def inject_custom_api_call(
-  func_name_node: cst.BaseExpression,
-  args: List[cst.Arg],
-) -> cst.Call:
-  """
-  Constructs a generic Call node from a name node and argument list.
-
-  Args:
-      func_name_node (cst.BaseExpression): The function identifier.
-      args (List[cst.Arg]): List of arguments.
-
-  Returns:
-      cst.Call: The constructed call.
-  """
-  return cst.Call(func=func_name_node, args=args)
 
 
 def inject_permute_call(

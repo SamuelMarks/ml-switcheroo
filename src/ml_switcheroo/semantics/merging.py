@@ -19,7 +19,7 @@ from typing import Dict, Any, List, Optional, Union
 from pydantic import ValidationError
 
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.schema import OpDefinition, PatternDef
+from ml_switcheroo.semantics.schema import OperationDef, PatternDef
 
 # Hierarchy of tier importance for overwriting checks
 # Higher numbers mean higher importance (harder to overwrite the Tier Origin)
@@ -48,25 +48,6 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
   if priority == 20:
     return SemanticTier.NEURAL
   return SemanticTier.EXTRAS
-
-
-def merge_imports(master_import_data: Dict[str, Dict], new_imports: Dict[str, Any]) -> None:
-  """
-  Merges new import definitions (from __imports__ block) into the master dictionary.
-  Updates in-place.
-
-  Args:
-      master_import_data: The central import dictionary.
-      new_imports: Dictionary of new import rules to merge.
-  """
-  for src_mod, details in new_imports.items():
-    if src_mod not in master_import_data:
-      master_import_data[src_mod] = details
-    else:
-      existing_variants = master_import_data[src_mod].get("variants", {})
-      new_variants = details.get("variants", {})
-      existing_variants.update(new_variants)
-      master_import_data[src_mod]["variants"] = existing_variants
 
 
 def merge_frameworks(master_configs: Dict[str, Dict], new_configs: Dict[str, Any]) -> None:
@@ -141,7 +122,6 @@ def _normalize_args(args_list: List[Any]) -> List[str]:
 def merge_tier_data(
   data: Dict[str, Dict],
   key_origins: Dict[str, str],
-  import_data: Dict[str, Dict],
   framework_configs: Dict[str, Dict],
   new_content: Dict[str, Any],
   tier: SemanticTier,
@@ -159,7 +139,6 @@ def merge_tier_data(
   Args:
       data: Master dictionary of operations.
       key_origins: Dict tracking where an op was defined (Math vs Neural).
-      import_data: Master dictionary of import mappings.
       framework_configs: Master dictionary of framework traits.
       new_content: The JSON content being loaded.
       tier: The Semantic Tier of the file being loaded.
@@ -171,9 +150,6 @@ def merge_tier_data(
     return
 
   data_copy = new_content.copy()
-
-  if "__imports__" in data_copy:
-    merge_imports(import_data, data_copy.pop("__imports__"))
 
   if "__frameworks__" in data_copy:
     merge_frameworks(framework_configs, data_copy.pop("__frameworks__"))
@@ -204,7 +180,7 @@ def merge_tier_data(
       if "std_args" not in details_to_validate:
         details_to_validate["std_args"] = []
 
-      validated_op = OpDefinition.model_validate(details_to_validate)
+      validated_op = OperationDef.model_validate(details_to_validate)
 
       # FIX: We want to store a dictionary that includes valid schema fields
       # BUT PRESERVES extra fields (like 'ver', 'type' in unit tests) that
@@ -274,7 +250,7 @@ def merge_tier_data(
                 # Downgrade: New spec is a subset. Preserve old spec details.
                 stored_dict["std_args"] = existing_entry.get("std_args")
                 stored_dict["description"] = existing_entry.get("description")
-                # Variants were merged above, so we keep the variants from new logic
+                # FrameworkVariants were merged above, so we keep the variants from new logic
                 pass
               else:
                 # Equal length but different names. Ambiguous 1-to-1 conflict.
@@ -298,7 +274,6 @@ def merge_tier_data(
 def merge_overlay_data(
   data: Dict[str, Dict],
   key_origins: Dict[str, str],
-  import_data: Dict[str, Dict],
   framework_configs: Dict[str, Dict],
   test_templates: Dict[str, Dict],
   content: Dict[str, Any],
@@ -313,7 +288,6 @@ def merge_overlay_data(
   Args:
       data: Master dictionary of operations.
       key_origins: Dict tracking tier origins.
-      import_data: Master dictionary of import mappings.
       framework_configs: Master dictionary of framework traits.
       test_templates: Master dictionary of testing templates.
       content: The JSON content of the snapshot file.
@@ -340,16 +314,6 @@ def merge_overlay_data(
     else:
       framework_configs[target_fw].update(content["framework"])
 
-  # 3. Merge Import Maps
-  if "imports" in content:
-    # Handle inversion: Snapshot has { "torch.nn": { "root": "flax", ... } }
-    # Manager structure is { "torch.nn": { "variants": { "jax": { ... } } } }
-    for src_mod, details in content["imports"].items():
-      if src_mod not in import_data:
-        import_data[src_mod] = {"variants": {}}
-
-      import_data[src_mod]["variants"][target_fw] = details
-
   # 4. Merge Mappings
   mappings = content.get("mappings", {})
   for op_name, implementation in mappings.items():
@@ -373,7 +337,7 @@ def merge_overlay_data(
     if "variants" not in data[op_name]:
       data[op_name]["variants"] = {}
 
-    # C. Inject Variant
+    # C. Inject FrameworkVariant
     if implementation is None:
       data[op_name]["variants"][target_fw] = None
     else:

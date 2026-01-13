@@ -16,12 +16,11 @@ from ml_switcheroo.frameworks.base import (
   StandardCategory,
   ImportConfig,
   InitMode,
-  OpDefinition,
+  OperationDef,
 )
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.core.latex.parser import LatexParser
-from ml_switcheroo.core.latex.emitter import LatexEmitter
 
 
 @register_framework("latex_dsl")
@@ -39,10 +38,6 @@ class LatexDSLAdapter:
   def create_parser(self, code: str) -> LatexParser:
     """Factory for the LaTeX Parser."""
     return LatexParser(code)
-
-  def create_emitter(self) -> LatexEmitter:
-    """Factory for the LaTeX Emitter."""
-    return LatexEmitter()
 
   @property
   def search_modules(self) -> List[str]:
@@ -124,7 +119,7 @@ class LatexDSLAdapter:
     return defs
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]:
+  def specifications(self) -> Dict[str, OperationDef]:
     from ml_switcheroo.core.dsl import ParameterDef
 
     # Populate implicit Hub definitions if files are missing
@@ -132,7 +127,7 @@ class LatexDSLAdapter:
     specs = {}
 
     if "Conv2d" not in specs:
-      specs["Conv2d"] = OpDefinition(
+      specs["Conv2d"] = OperationDef(
         operation="Conv2d",
         description="2D Convolution",
         std_args=[ParameterDef(name="in_channels"), ParameterDef(name="out_channels"), ParameterDef(name="kernel_size")],
@@ -140,7 +135,7 @@ class LatexDSLAdapter:
       )
 
     if "Linear" not in specs:
-      specs["Linear"] = OpDefinition(
+      specs["Linear"] = OperationDef(
         operation="Linear",
         description="Linear Layer",
         std_args=[ParameterDef(name="in_features"), ParameterDef(name="out_features")],
@@ -192,13 +187,9 @@ class LatexDSLAdapter:
   def convert(self, data: Any) -> Any:
     return str(data)
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    return r"\begin{DefModel}{ConvNet} \Attribute{conv}{Conv2d}{} \end{DefModel}"
-
   def get_tiered_examples(self) -> Dict[str, str]:
     return {
       "tier1_math": "y = |x| + z",
-      "tier2_neural": self.get_example_code(),
+      "tier2_neural": r"\begin{DefModel}{ConvNet} \Attribute{conv}{Conv2d}{} \end{DefModel}",
       "tier3_extras": "% Extras ignored",
     }

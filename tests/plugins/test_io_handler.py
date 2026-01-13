@@ -17,7 +17,7 @@ from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.io_handler import transform_io_calls
-from ml_switcheroo.frameworks.jax import JaxAdapter
+from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 
@@ -43,7 +43,7 @@ def rewriter():
 
   # Patch get_adapter to return real JAX adapter
   with patch("ml_switcheroo.plugins.io_handler.get_adapter") as mock_get:
-    mock_get.side_effect = lambda n: JaxAdapter() if n == "jax" else None
+    mock_get.side_effect = lambda n: JaxCoreAdapter() if n == "jax" else None
     yield PivotRewriter(mgr, cfg)
 
 

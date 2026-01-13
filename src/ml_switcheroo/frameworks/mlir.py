@@ -15,19 +15,10 @@ from ml_switcheroo.frameworks.base import (
   StandardCategory,
   ImportConfig,
   InitMode,
-  OpDefinition,
+  OperationDef,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
-from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
-
-
-class MlirEmitterWrapper:
-  def __init__(self):
-    self.emitter = PythonToMlirEmitter()
-
-  def convert(self, tree):
-    return self.emitter.convert(tree)
 
 
 @register_framework("mlir")
@@ -41,9 +32,6 @@ class MlirAdapter(FrameworkAdapter):
 
   def __init__(self) -> None:
     pass
-
-  def create_emitter(self) -> MlirEmitterWrapper:
-    return MlirEmitterWrapper()
 
   @property
   def search_modules(self) -> List[str]:
@@ -104,7 +92,7 @@ class MlirAdapter(FrameworkAdapter):
     return load_definitions("mlir")
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]:
+  def specifications(self) -> Dict[str, OperationDef]:
     return {}
 
   @property

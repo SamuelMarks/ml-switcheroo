@@ -21,7 +21,7 @@ from ml_switcheroo.frameworks.base import (
   StandardCategory,
   ImportConfig,
   InitMode,
-  OpDefinition,
+  OperationDef,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
@@ -110,7 +110,7 @@ class RdnaAdapter(FrameworkAdapter):
     return load_definitions("rdna")
 
   @property
-  def specifications(self) -> Dict[str, OpDefinition]:
+  def specifications(self) -> Dict[str, OperationDef]:
     return {}
 
   @property
@@ -156,13 +156,9 @@ class RdnaAdapter(FrameworkAdapter):
   def convert(self, data: Any) -> Any:
     return str(data)
 
-  @classmethod
-  def get_example_code(cls) -> str:
-    return "v_add_f32 v0, v1, v2"
-
   def get_tiered_examples(self) -> Dict[str, str]:
     return {
-      "tier1_math": self.get_example_code(),
+      "tier1_math": "v_add_f32 v0, v1, v2",
       "tier2_neural": "; Neural layers map to comment blocks",
       "tier3_extras": "; Extras ignored",
     }
