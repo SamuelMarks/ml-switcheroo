@@ -3,270 +3,230 @@ Internal Architecture & Theoretical Mechanics
 
 **Document Version**: 0.0.1
 
-**Scope**: Core Engine, Compiler Pipeline, Ontology Maintenance, and Extension Architecture
+**Scope**: Core Engine, Compiler Mechanics, IR Design, and Knowledge Acquisition.
 
 ## 1. Abstract
 
-`ml-switcheroo` is a deterministic, specification-driven source-to-source compiler engineered to solve the $O(N^2)$
-interoperability challenge in deep learning infrastructure. It creates a semantic bridge between high-level frameworks (
-PyTorch, JAX, TensorFlow, Keras, MLX, Flax NNX, PaxML), low-level representations (MLIR, StableHLO, NVIDIA SASS, AMD
-RDNA), and visual domain-specific languages (TikZ, HTML).
+`ml-switcheroo` is a deterministic, specification-driven source-to-source compiler architecture. Unlike traditional
+transpilers that map syntax 1:1, it employs a **Hub-and-Spoke** semantic model to solve the $O(N^2)$ interoperability
+problem.
 
-The system's fundamental axiom is **Bidirectional Isomorphism**: every supported language is treated potentially as both
-a *Source* and a *Target*. Whether the input is a Python AST defining a neural network or a stream of RDNA assembly
-instructions, the engine lifts the code into a centralized **Abstract Standard (The Hub)** before projecting it into the
-desired destination dialect (The Spoke).
+The system treats every deep learning representation—whether high-level Python (PyTorch, JAX), intermediate
+representation (StableHLO, MLIR), or hardware assembly (SASS, RDNA)—as a dialect of a central mathematical logic.
 
-This document details the internal subsystems, justifying the architectural bifurcation between the **High-Fidelity
-Rewriter** (for structured languages) and the **Graph Compiler** (for linear/unstructured languages), and elucidating
-the automated mechanisms of knowledge acquisition that keep the internal ontology synchronized with the evolving ML
-ecosystem using LLM-assisted loops and upstream standards ingestion.
+The runtime engine uses a **Dual-Pipeline Strategy** to handle the distinct topological requirements of structured
+code (ASTs) versus linear instruction streams (Graphs/ASM).
 
 ---
 
 ## 2. The Grand Unified Architecture
 
-The `ASTEngine` serves as the central dispatch controller. It classifies the input and output languages based on their
-structural properties and routes them through one of two isomorphic pipelines.
+The `ASTEngine` (`src/ml_switcheroo/core/engine.py`) is the central orchestration unit. Upon receiving source code, it
+classifies the Input/Output languages to route execution through one of two isomorphic pipelines.
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'Google Sans', 'fontSize': '14px', 'lineColor': '#20344b'}}}%%
 graph TD
-    %% --- DESIGN CONSTRAINTS ---
-    classDef header font-family:'Google Sans Medium',fill:#20344b,color:#ffffff,stroke:#20344b;
-    classDef process fill:#4285f4,stroke:#20344b,stroke-width:1px,color:#ffffff,font-family:'Google Sans',rx:4px;
-    classDef decision fill:#f9ab00,stroke:#20344b,stroke-width:1px,color:#20344b,font-family:'Google Sans Medium',rx:20px;
-    classDef artifact fill:#ffffff,stroke:#20344b,stroke-width:1px,color:#20344b,font-family:'Roboto Mono',stroke-dasharray: 2 2;
-    classDef storage fill:#ea4335,stroke:#20344b,stroke-width:1px,color:#ffffff,font-family:'Google Sans',rx:4px;
-    classDef asm fill:#20344b,stroke:#20344b,stroke-width:1px,color:#ffffff,font-family:'Roboto Mono',rx:2px;
+    classDef process fill: #4285f4, stroke: #20344b, stroke-width: 1px, color: #ffffff, rx: 4px;
+    classDef decision fill: #f9ab00, stroke: #20344b, stroke-width: 1px, color: #20344b, rx: 20px;
+    classDef storage fill: #ea4335, stroke: #20344b, stroke-width: 1px, color: #ffffff, rx: 4px;
+    classDef artifact fill: #ffffff, stroke: #20344b, stroke-width: 1px, stroke-dasharray: 2 2;
+    SRC("Input Code"):::artifact
 
-    SRC("Input Artifact<br/>(Source)"):::artifact
-    
-    subgraph ENGINE [" ⚡ ASTEngine Orchestration "]
-        direction TB
-        DISPATCH{"Language Topology?"}:::decision
-        
-        subgraph PATH_A [" 🟢 Path A: Rewriter (CST Preservation) "]
-            direction TB
-            INGEST_CST("<b>Ingest / Parse</b><br/>(Source &rarr; CST)"):::process
-            TRANSFORM("<b>Pivot Transformation</b><br/>(CST &harr; Hub &harr; CST)"):::process
-            EMIT_CST("<b>Emission</b><br/>(CST &rarr; Target)"):::process
-            
-            INGEST_CST --> TRANSFORM --> EMIT_CST
-        end
+subgraph ENGINE [AST Engine]
+direction TB
+ROUTER{"Target Type?"}:::decision
 
-        subgraph PATH_B [" 🔵 Path B: Compiler (Graph Synthesis) "]
-            direction TB
-            LIFT("<b>Lifter</b><br/>(Source &rarr; IR)"):::process
-            IR("<b>LogicalGraph</b><br/>(Topological DAG)"):::artifact
-            SYNTH("<b>Synthesizer</b><br/>(IR &rarr; Target)"):::process
-            
-            LIFT --> IR --> SYNTH
-        end
-    end
+subgraph PATH_A [🟢 Path A: Semantic Rewriter]
+direction TB
+INGEST("Ingestion (LibCST)"):::process
+PIPELINE("Pass Pipeline<br/>(Structure &rarr; API &rarr; Aux)"):::process
+FIXER("Refinement<br/>(Import Fixer)"):::process
+INGEST --> PIPELINE --> FIXER
+end
 
-    KB[("<b>Semantics Manager</b><br/>(The Abstract Standard)")]:::storage
+subgraph PATH_B [🔵 Path B: Graph Compiler]
+direction TB
+LIFT("Lifter / Parser<br/>(Source &rarr; IR)"):::process
+OPT("Graph Optimizer<br/>(Fusion)"):::process
+SYNTH("Backend Synthesizer<br/>(IR &rarr; Target)"):::process
+LIFT --> OPT --> SYNTH
+end
+end
 
-    TGT("Output Artifact<br/>(Target)"):::artifact
+KB[("<b>Semantics Manager</b><br/>(The Hub)")]:::storage
 
-    %% --- EDGES ---
-    SRC --> DISPATCH
-    
-    DISPATCH -->|" Structured (Python, MLIR, StableHLO) "| PATH_A
-    DISPATCH -->|" Unstructured (ASM, TikZ, HTML) "| PATH_B
+TGT("Output Artifact"):::artifact
 
-    TRANSFORM <-->|" Query Specs / Inject Plugins "| KB
-    SYNTH <-->|" Query Macros "| KB
+SRC --> ROUTER
+ROUTER -->|" High-Level<br/>(Python/MLIR) "|PATH_A
+ROUTER -->|" Low-Level / Visual<br/>(ASM/TikZ/HTML) "|PATH_B
 
-    EMIT_CST --> TGT
-    SYNTH --> TGT
+PIPELINE <--> KB
+SYNTH <--> KB
+
+FIXER --> TGT
+SYNTH --> TGT
 ```
 
 ### 2.1. Path A: The High-Fidelity Rewriter
 
-**Ecosystem**: Pure Python (PyTorch, JAX, Flax, TF, Keras, MLX, PaxML) and Textual IRs (MLIR, StableHLO).
+**Used for:** Python $\leftrightarrow$ Python (Torch, JAX, TF, Keras, Flax)
 
-This path treats code as a mutable abstract document. The primary objective is **preservation**. When transcoding
-high-level code, comments, whitespace, and variable names must be retained.
+This path treats code as a mutable, structured document. The goal is **preservation**. Comments, whitespace, and
+variable naming conventions are retained where possible.
 
-* **Mechanism**: The `PivotRewriter` walks the tree, identifies semantic nodes (Calls, Classes), maps them to the
-  Abstract Hub, and mutates them in-place to match the Target Spoke configuration.
-* **Intermediate Representations**: MLIR and StableHLO are treated as textual formats in this path to allow
-  high-fidelity refactoring (structure preservation) without lossy graph compilation.
+* **Intermediate Representation:** Concrete Syntax Tree (LibCST).
+* **Mechanism:** A pipeline of visitor passes modifies the tree in-place, guided by the Semantic Knowledge Base.
 
 ### 2.2. Path B: The Graph Compiler
 
-**Ecosystem**: Hardware ISAs (SASS, RDNA) and Visual DSLs (HTML Grid, TikZ).
+**Used for:** Assembly (SASS, RDNA), Visuals (TikZ, HTML), and IR roundtrips.
 
-This path treats code as a reconstructible logic flow. Assembly languages are linear streams of instructions; they lack
-the hierarchical structure (classes, functions) required by Path A.
+This path treats code as a reconstructible logic flow. It "lifts" linear instruction streams into a topological graph,
+optimizing and fusing nodes before synthesizing completely fresh output code.
 
-* **Mechanism**: A `Lifter` parses source text (e.g., SASS Mnemonics) into a `LogicalGraph` Intermediate
-  Representation (IR). The `Synthesizer` then reconstructs valid target code (e.g., TikZ diagrams or Python
-  Re-implementation) from the topology.
+* **Intermediate Representation:** `LogicalGraph` (DAG).
+* **Mechanism:** Parsers convert text to Nodes; Backends synthesize target text from the graph topology.
 
 ---
 
 ## 3. The Knowledge Base (The Hub)
 
-The cornerstone of the system is the **Internal Abstract Standard**, an ontology defining the Platonic ideal of
-mathematical operations. It resides in `src/ml_switcheroo/semantics/`.
+The system intelligence resides in `src/ml_switcheroo/semantics/`. It decouples **Specification** (What) from *
+*Implementation** (How).
 
-The Hub defines *what* an operation is (Identity, Signature, Constraints), while the Spokes (Framework Adapters) define
-*how* it is implemented.
+### 3.1. Distributed Specifications
 
-### 3.1. Construction via The LLM Feedback Loop
+The knowledge base is not a single file; it is an aggregate view composed of:
 
-The maintenance of the Knowledge Base is semi-automated, utilizing Large Language Models (LLMs) to bridge the gap
-between library APIs and the formal Schema.
+1. **JSON Specs (`semantics/`)**: Defines abstract operations (e.g., `LogSoftmax`, `Conv2d`).
+2. **Snapshots (`snapshots/`)**: JSON overlays defining how specific frameworks implement those specs.
+3. **Registry (`frameworks/`)**: Live Python adapter classes that provide logic traits.
 
-1. **Introspection (`ml_switcheroo suggest`)**: The system performs runtime reflection on installed libraries.
-    * Command: `ml_switcheroo suggest 'jax.numpy.*'` or `ml_switcheroo suggest 'mlx.nn.layers.*'`
-    * Action: It scans the namespace, extracts signatures and docstrings, and generates a structured prompt.
-2. **LLM Processing**: This prompt is fed to an LLM, which is tasked with mapping the discovered APIs to the Operation
-   Definition Language (ODL). It generates a YAML file reconciling the signatures of PyTorch, JAX, TensorFlow, MLX, and
-   Flax NNX into a single abstract definition.
-3. **Hydration (`ml_switcheroo define`)**: The resulting YAML files are injected into the system.
-    * Command: `ml_switcheroo define my_new_ops.yaml`
-    * Action: This hydrates the JSON storage (`semantics/*.json` for specifications, `snapshots/*.json` for mappings),
-      effectively "teaching" the compiler new math.
+The `SemanticsManager` merges these sources at runtime using a priority system (Neural > Math > Extras).
 
-### 3.2. Construction via Standards Ingestion
+### 3.2. Lifecycle: Discovery & Consensus
 
-To ground the Abstract Standard in reality, `ml-switcheroo` ingests upstream specifications directly.
+New knowledge is acquired via the **Discovery** package:
 
-* **ONNX (Neural)**: The `OnnxSpecImporter` parses the official `Operators.md` from the ONNX repository, populating
-  `k_neural_net.json` with layer definitions common to all frameworks.
-* **Array API (Math)**: The `ArrayApiSpecImporter` parses the Python Consortium's standard stubs, populating
-  `k_array_api.json` with mathematically rigorous tensor operations.
+1. **Inspection (`ApiInspector`)**: Scans installed libraries or JSON snapshots (`GhostRef`).
+2. **Consensus (`ConsensusEngine`)**: Clusters APIs from different frameworks (e.g., grouping `HuberLoss`, `huber_loss`)
+   to propose new standards.
+3. **Persistence (`SemanticPersister`)**: Writes abstract definitions to the Hub and implementation maps to the Spokes.
 
 ---
 
-## 4. Path A: The Rewriter Internals
+## 4. Path A: The Rewriter Pipeline
 
-This component executes the bidirectional translation for structured languages using `LibCST`.
+Implemented in `src/ml_switcheroo/core/rewriter/`.
 
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'Google Sans', 'fontSize': '14px'}}}%%
-classDiagram
-    direction TD
+The transformation is orchestrated by a `RewriterPipeline` executing sequential **Passes** over a shared
+`RewriterContext`.
 
-    class RewriterContext {
-        +SemanticsManager semantics
-        +SymbolTable symbols
-        +List~Scope~ scope_stack
-    }
+### 4.1. Core Passes
 
-    class RewriterStage {
-        +visit()
-        +leave()
-    }
+1. **StructuralPass**: Handles class inheritance rewriting (e.g., `nn.Module` $\to$ `nnx.Module`), method renaming (
+   `forward` $\to$ `__call__`), and signature injection (threading `rng` keys).
+2. **ApiPass**: The workhorse. Resolves function calls and attributes.
+    * **Dispatch Rules**: Runtime checks on argument values (e.g., if `mode='nearest'`, swap API).
+    * **Argument Pivoting**: Renames/reorders arguments to match the Standard.
+    * **Strategy Execution**: Applies transforms (Macros, Infix operators, Inline Lambdas).
+3. **AuxiliaryPass**: Handles decorators (`@jit`) and control flow safety checks (loop unrolling warnings).
 
-    class StructureStage {
-        +leave_ClassDef()
-        +leave_FunctionDef()
-    }
-    class Note_Struct["<b>Topology Rewriter</b><br/>Inheritance & Signatures"]
+### 4.2. Plugin System & Hooks (`src/ml_switcheroo/plugins`)
 
-    class ApiStage {
-        +leave_Call()
-        +leave_Attribute()
-    }
-    class Note_Api["<b>Logic Rewriter</b><br/>Function dispatch"]
+Complex architectural mismatches are handled by Python hooks.
 
-    RewriterStage <|-- StructureStage
-    RewriterStage <|-- ApiStage
-    RewriterStage *-- RewriterContext
-%% Styles
-    style RewriterContext fill: #4285f4, color: #fff, stroke: #20344b
-    style RewriterStage fill: #fff, color: #20344b, stroke: #20344b
-    style StructureStage fill: #5cdb6d, color: #20344b, stroke: #20344b
-    style ApiStage fill: #57caff, color: #20344b, stroke: #20344b
-    style Note_Api fill: #20344b, color: white, stroke: none, font-family: 'Roboto Mono', font-size: 10px
-    style Note_Struct fill: #20344b, color: white, stroke: none, font-family: 'Roboto Mono', font-size: 10px
-```
+* **Registration**: Plugins use `@register_hook("trigger")`.
+* **Auto-Wiring**: Plugins can declare their own semantic definitions via the `auto_wire` parameter, removing the need
+  for manual JSON editing.
+* **HookContext**: Provides plugins access to the Symbol Table and Semantic/Trait configuration of the target framework.
 
-### 4.1. Adding New Python Frameworks
+### 4.3. Import Fixer
 
-Any framework is both a source and a target. Adding support requires implementing the `FrameworkAdapter` protocol in
-`src/ml_switcheroo/frameworks/`.
+A post-processing phase (`src/ml_switcheroo/core/import_fixer`). It generates a `ResolutionPlan` based on:
 
-1. **Registry**: Add a file (e.g., `tinygrad.py`) decorated with `@register_framework`.
-2. **Structural Traits**: Define base classes (e.g., `tinygrad.Tensor`) and lifecycle methods.
-3. **Discovery**: Define `search_modules` to opt-in to the `suggest` loop.
-4. **Auto-Wiring**: The system automatically generates the inverse mapping. If `TinyGrad` maps to Hub Operation `Add`,
-   the engine inherently knows how to translate `Add` back to `TinyGrad`.
-
-### 4.2. Handling MLIR & StableHLO
-
-These are treated as structured text. The `MlirParser` ingests MLIR into a custom CST. The `PivotRewriter` treats
-`stablehlo.abs` identical to `jax.numpy.abs`, allowing seamless refactoring of IR code using the same semantic database
-as Python code.
+* **Injection**: Adding imports required by the target (e.g., `import jax.numpy as jnp`).
+* **Pruning**: Removing unused source imports.
+* **Refinement**: Collapsing fully qualified names (`jax.numpy.abs`) into aliases (`jnp.abs`).
 
 ---
 
-## 5. Path B: The Compiler Internals
+## 5. Path B: The Graph Compiler
 
-This path handles linear instruction streams, enabling "Decompilation" (ASM $\to$ Python) and Visualization (
-Python $\to$ Diagram).
+Implemented in `src/ml_switcheroo/compiler/`.
 
-```mermaid
-%%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'Google Sans', 'fontSize': '14px'}}}%%
-graph TD
-    classDef ir fill:#f9ab00,color:#20344b,stroke:#20344b;
-    classDef step fill:#4285f4,color:#ffffff,stroke:#20344b,rx:5px;
-    classDef artifact fill:#ffffff,stroke:#20344b,stroke-width:1px,color:#20344b,font-family:'Roboto Mono';
+### 5.1. Intermediate Representation (IR)
 
-    SRC_ASM("Source (Assembly/TikZ)"):::artifact
-    
-    subgraph LIFTER_BLOCK [" 1. Lifting (Frontends) "]
-        REGEX("<b>Lexer</b><br/>(Regex Patterns)"):::step
-        LIFT("<b>Lifter</b><br/>(CFG/DFG Analysis)"):::step
-        
-        REGEX --> LIFT
-    end
-    
-    GRAPH("<b>LogicalGraph (DAG)</b>"):::ir
-    
-    subgraph SYNTH_BLOCK [" 2. Synthesis (Backends) "]
-        MACRO("<b>Macro Expander</b><br/>(e.g. loops &rarr; instructions)"):::step
-        EMIT("<b>Emitter</b><br/>(Text Generation)"):::step
-        MACRO --> EMIT
-    end
+The `LogicalGraph` is the lingua franca.
 
-    TGT_ASM("Target (Assembly/TikZ)"):::artifact
+* **LogicalNode**: Represents an operation (e.g., `Conv2d`, `Add`). Contains metadata (kernel size, stride).
+* **LogicalEdge**: Represents data flow dependencies.
 
-    SRC_ASM --> LIFTER_BLOCK
-    LIFT --> GRAPH
-    GRAPH --> SYNTH_BLOCK
-    EMIT --> TGT_ASM
-```
+### 5.2. Frontends (Lifters)
 
-### 5.1. Adding New ISAs (ASM)
+* **ASM Lifters (`sass`, `rdna`)**: Parse assembly text. They use `Analyzer` heuristics to reverse-engineer high-level
+  semantics (e.g., detecting loop bounds to infer kernel size 3x3).
+* **Python Frontend**: Extracts a graph from Python ASTs using provenance tracking to link Logic back to Source Lines.
 
-To add a new ISA (e.g., a custom accelerator):
+### 5.3. Backends (Synthesizers)
 
-1. **Frontend**: Implement a `Lifter` that parses the textual assembly into `LogicalNodes`. It must reverse-engineer
-   loops to infer high-level semantics (e.g., detecting a 3x3 convolution loop).
-2. **Backend**: Implement a `Synthesizer` with a `RegisterAllocator` to map symbolic variables to physical registers.
+* **Python/Code Backends**: Reconstruct class definitions and forward passes.
+* **Assembler Backends**: Use `RegisterAllocator` to map symbolic variables to physical registers (`R0`, `v0`) and
+  expand macros (e.g., generating nested loops for `Conv2d`).
+* **Visual Backends (`tikz`, `html`)**: Perform topological sorting to calculate rank-based layouts for diagrams.
 
-### 5.2. Visual DSLs as Targets & Sources
+### 5.4. Graph Optimization
 
-* **Target (Rendering)**: The `HtmlBackend` calculates topological rank from the `LogicalGraph` to output CSS Grid
-  coordinates.
-* **Source (OCR/Diagrams)**: The `TikzParser` reads LaTeX diagram code, lifting nodes and edges into the `LogicalGraph`.
-  This allows converting a paper's architecture diagram directly into executable PyTorch code.
+The `GraphOptimizer` applies fusion patterns to the IR (e.g., `Conv -> BN -> ReLU` becomes `FusedCBR`). This is used for
+generating optimized kernels or simplified visualizations.
 
 ---
 
-## 6. Verification Loop
+## 6. Verification & Fuzzing
 
-The system ensures fidelity through the `HarnessGenerator`.
+Fidelity is ensured via `src/ml_switcheroo/testing/`.
 
-1. **Constraint Satisfaction**: It reads the ODL constraints (Rank, Dtype) from the JSON Hub.
-2. **Fuzzing**: It uses Hypothesis to generate random tensors valid for *both* Source and Target frameworks.
-3. **Cross-Check**: It executes both the Source implementation and the Transpiled Target, asserting
-   `np.allclose(result_src, result_tgt)`.
+### 6.1. The Harness Generator
 
-This closes the loop: **Introspection (Suggest) $\to$ Definition (Hub) $\to$ Implementation (Spoke) $\to$ Verification (
-Fuzzer).**
+Generates standalone Python scripts that verify `source(x) == target(x)`.
+
+* **Code Extraction**: Uses `inspect` to serialize the `InputFuzzer` logic into the generated script, solving the "
+  split-brain" dependency problem.
+* **Runtime Injection**: Injects a `runtime.py` module containing cross-framework comparison logic (`verify_results`)
+  and determinism fixtures.
+
+### 6.2. Input Fuzzer
+
+Uses `Hypothesis` strategies derived from ODL type hints.
+
+* **Symbolic Shapes**: Resolves constraints like `Array['B', 'N']` to ensure consistent tensor dimensions across
+  arguments.
+* **Rich Constraints**: Respects `min`, `max`, `dtype`, and `options` from the Spec.
+
+---
+
+## 7. Extensions: MLIR & StableHLO
+
+`ml-switcheroo` bridges Python and Textual IRs.
+
+* **MLIR Bridge**: Parsing MLIR text preserves comments and whitespace (Trivia).
+* **StableHLO**: Handled as a dialect. The `StableHloEmitter` maps Python ASTs to `stablehlo.*` ops, allowing Python
+  code to be compiled to XLA IR.
+
+---
+
+## 8. Glossary of Components
+
+| Component            | Responsibility                                                   |
+|:---------------------|:-----------------------------------------------------------------|
+| **ASTEngine**        | Orchestrator. Routes code to Rewriter or Compiler pipeline.      |
+| **SemanticsManager** | Database. Loads JSON specs/snapshots and manages lookup indexes. |
+| **PivotRewriter**    | Legacy shim wrapping the Rewriter Pipeline for testing.          |
+| **ApiPass**          | Transformer. Swaps function calls based on Hub definitions.      |
+| **ImportFixer**      | Refiner. Manages `import` statements and aliasing.               |
+| **Lifter**           | Frontend. Converts Assembly/Text to `LogicalGraph`.              |
+| **Synthesizer**      | Backend. Converts `LogicalGraph` to target code.                 |
+| **ConsensusEngine**  | Discovery. Finds common denominators in diverse APIs.            |
+| **HarnessGenerator** | Verification. Creates physical validation scripts.               |
