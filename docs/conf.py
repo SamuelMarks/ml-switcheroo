@@ -17,9 +17,7 @@ version = "0.0.1"
 release = version
 
 # -- Path setup --------------------------------------------------------------
-# Updated: Use __file__ anchors to ensure we find 'src' regardless of CWD.
-# We insert at 0 to prioritize local code over site-packages (fixing potential Split Brain).
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")))
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -57,7 +55,7 @@ autoapi_ignore = ["*migrations*", "*/tests/*", "*test_*.py", "*/sphinx_ext/*"]
 
 # -- Mermaid Configuration ---------------------------------------------------
 # Optional: Explicitly set the CDN version if rendering fails locally
-mermaid_version = "10.6.1"
+mermaid_version = "11.12.0"
 
 # -- MyST Parser Configuration -----------------------------------------------
 myst_enable_extensions = [
