@@ -82,6 +82,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Append": {
+    "api": "torch.nn.modules.container.ParameterList.append",
+    "args": {
+      "self": "self",
+      "value": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Arange": {
     "api": "torch.arange",
     "dispatch_rules": [],
@@ -1763,6 +1773,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Insert": {
+    "api": "torch.nn.modules.container.ModuleList.insert",
+    "args": {
+      "index": "index",
+      "module": "module",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Int16": {
     "api": "torch.int16",
     "dispatch_rules": [],
@@ -3185,6 +3206,13 @@
       "inplace": "inplace",
       "self": "self"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sinc": {
+    "api": "torch.special.sinc",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5667,6 +5695,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "soft_shrink": {
+    "api": "torch.nn.functional.softshrink",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "softmax": {
     "api": "torch.nn.functional.softmax",
     "args": {},
@@ -5782,6 +5817,15 @@
   },
   "tanh": {
     "api": "torch.nn.Tanh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tanh_shrink": {
+    "api": "torch.nn.functional.tanhshrink",
+    "args": {
+      "input": "input"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

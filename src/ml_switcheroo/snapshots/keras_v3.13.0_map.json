@@ -1041,8 +1041,7 @@
         "axis": "axis",
         "dtype": "dtype",
         "x": "x"
-      },
-      "required_imports": []
+      }
     },
     "Cumprod": {
       "api": "keras.ops.numpy.cumprod",
@@ -1053,12 +1052,11 @@
       }
     },
     "Cumsum": {
-      "api": "keras.ops.numpy.cumsum",
+      "api": "keras.ops.cumsum",
       "args": {
-        "axis": "axis",
-        "dtype": "dtype",
-        "x": "x"
-      }
+        "a": "x"
+      },
+      "required_imports": []
     },
     "CutMix": {
       "api": "keras.layers.CutMix",
@@ -1424,11 +1422,13 @@
       "required_imports": []
     },
     "GELU": {
-      "api": "keras.activations.gelu",
+      "api": "keras.layers.Activation",
       "args": {
-        "approximate": "approximate",
-        "x": "x"
-      }
+        "input": "gelu"
+      },
+      "operator": "keras.activations.gelu",
+      "required_imports": [],
+      "transformation_type": "inline_lambda"
     },
     "GRU": {
       "api": "keras.layers.GRU",
@@ -1484,7 +1484,11 @@
       }
     },
     "Gelu": {
-      "api": "keras.ops.gelu"
+      "api": "keras.activations.gelu",
+      "args": {
+        "approximate": "approximate",
+        "x": "x"
+      }
     },
     "GlobalAveragePooling1D": {
       "api": "keras.layers.GlobalAveragePooling1D",
@@ -1861,13 +1865,14 @@
       }
     },
     "IsNaN": {
-      "api": "keras.ops.isnan"
-    },
-    "IsNan": {
       "api": "keras.ops.numpy.isnan",
       "args": {
         "x": "x"
       }
+    },
+    "IsNan": {
+      "api": "keras.ops.isnan",
+      "required_imports": []
     },
     "IsNegInf": {
       "api": "keras.ops.numpy.isneginf",
@@ -2809,12 +2814,12 @@
       }
     },
     "ReLU": {
-      "api": "keras.activations.relu",
+      "api": "keras.layers.ReLU",
       "args": {
+        "kwargs": "kwargs",
         "max_value": "max_value",
         "negative_slope": "negative_slope",
-        "threshold": "threshold",
-        "x": "x"
+        "threshold": "threshold"
       }
     },
     "Real": {
@@ -2830,7 +2835,13 @@
       }
     },
     "Relu": {
-      "api": "keras.layers.ReLU"
+      "api": "keras.activations.relu",
+      "args": {
+        "max_value": "max_value",
+        "negative_slope": "negative_slope",
+        "threshold": "threshold",
+        "x": "x"
+      }
     },
     "Relu6": {
       "api": "keras.activations.relu6",

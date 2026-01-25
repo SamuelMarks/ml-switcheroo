@@ -1537,7 +1537,8 @@
       "required_imports": []
     },
     "Gelu": {
-      "api": "torch.nn.GELU"
+      "api": "torch.nn.functional.gelu",
+      "args": {}
     },
     "Geomspace": {
       "api": "torch.logspace",
@@ -1620,7 +1621,11 @@
       }
     },
     "HardSwish": {
-      "api": "torch.nn.Hardswish"
+      "api": "torch.nn.functional.hardswish",
+      "args": {
+        "inplace": "inplace",
+        "input": "input"
+      }
     },
     "Hardshrink": {
       "api": "torch.nn.modules.activation.Hardshrink",
@@ -2406,11 +2411,11 @@
       "required_imports": []
     },
     "MatMul": {
-      "api": "torch.linalg.matmul"
-    },
-    "Matmul": {
       "api": "torch.linalg.matmul",
       "args": {}
+    },
+    "Matmul": {
+      "api": "torch.linalg.matmul"
     },
     "MatrixTranspose": {
       "api": "torch.transpose",

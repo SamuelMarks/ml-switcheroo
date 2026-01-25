@@ -668,7 +668,13 @@
       }
     },
     "CumSum": {
-      "api": "jax.numpy.cumsum"
+      "api": "jax.numpy.ndarray.cumsum",
+      "args": {
+        "axis": "axis",
+        "dtype": "dtype",
+        "out": "out",
+        "self": "self"
+      }
     },
     "Cumprod": {
       "api": "jax.numpy.ndarray.cumprod",
@@ -686,7 +692,8 @@
         "dtype": "dtype",
         "out": "out",
         "self": "self"
-      }
+      },
+      "required_imports": []
     },
     "CustomVjp": {
       "api": "nnx.transforms.autodiff.CustomVjp",
@@ -1566,7 +1573,8 @@
         "invert": "invert",
         "method": "method",
         "test_elements": "test_elements"
-      }
+      },
+      "required_imports": []
     },
     "IsLeafCallable": {
       "api": "nnx.traversals.IsLeafCallable",
@@ -1606,6 +1614,16 @@
       "args": {
         "arg1": "arg1",
         "arg2": "arg2"
+      }
+    },
+    "Isin": {
+      "api": "jax.numpy.isin",
+      "args": {
+        "assume_unique": "assume_unique",
+        "element": "element",
+        "invert": "invert",
+        "method": "method",
+        "test_elements": "test_elements"
       }
     },
     "Ix_": {
@@ -3398,8 +3416,7 @@
       "api": "jax.numpy.uint8",
       "args": {
         "x": "x"
-      },
-      "required_imports": []
+      }
     },
     "UUID": {
       "api": "nnx.ids.UUID",
@@ -3470,7 +3487,8 @@
       "api": "jax.numpy.uint8",
       "args": {
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "Unflatten": {
       "api": "nnx.graph.MergeContext.unflatten",

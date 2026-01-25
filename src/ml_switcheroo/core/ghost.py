@@ -9,6 +9,7 @@ instead of requiring heavy libraries (Torch/TensorFlow) to be installed.
 Updates:
 - Robust C-Extension handling (try/except around `inspect.signature`).
 - Validates parameter kinds to support `*args` (VarPositional).
+- Sanitizes default values to avoid serializing memory addresses.
 """
 
 import inspect
@@ -104,10 +105,20 @@ class GhostInspector:
         # Serialize defaults safely (convert objects to string representation)
         default_val = None
         if param.default is not inspect.Parameter.empty:
-          try:
-            default_val = str(param.default)
-          except Exception:
-            default_val = "<unrepresentable>"
+          val = param.default
+
+          # Sanitize callables or objects with memory addresses to ensure deterministic JSON
+          # e.g. <function mean at 0x...> -> null
+          if callable(val) or " at 0x" in repr(val):
+            default_val = None
+          else:
+            try:
+              default_val = str(val)
+              # Double check string conversion didn't leak address
+              if " at 0x" in default_val:
+                default_val = None
+            except Exception:
+              default_val = "<unrepresentable>"
 
         # Serialize annotation
         anno_val = None

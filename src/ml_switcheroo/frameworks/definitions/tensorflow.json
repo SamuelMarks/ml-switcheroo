@@ -228,6 +228,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Average": {
+    "api": "keras.layers.Average",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AveragePooling1D": {
     "api": "keras.layers.AveragePooling1D",
     "dispatch_rules": [],
@@ -761,6 +767,12 @@
   },
   "Dropout": {
     "api": "keras.layers.Dropout",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dtype": {
+    "api": "tf.DType",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2125,6 +2137,12 @@
   },
   "Sub": {
     "api": "tf.math.subtract",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Subtract": {
+    "api": "keras.layers.Subtract",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

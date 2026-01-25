@@ -4,32 +4,24 @@
     "std_args": [],
     "variants": {}
   },
-  "Abs": {
-    "description": "Definition for Abs",
-    "operation": "Abs",
+  "ALiBi": {
+    "description": "The class representing a Python class.",
     "std_args": [
-      "x"
+      "self"
     ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.abs"
-      },
-      "keras": {
-        "api": "keras.ops.abs"
-      },
-      "mlx": {
-        "api": "mlx.core.abs"
-      },
-      "numpy": {
-        "api": "numpy.abs"
-      },
-      "tensorflow": {
-        "api": "tf.abs"
-      },
-      "torch": {
-        "api": "torch.abs"
+    "type": "class"
+  },
+  "Abs": {
+    "description": "Calculate the absolute value element-wise.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Tensor"
       }
-    }
+    ],
+    "variants": {}
   },
   "Acos": {
     "description": "Compute element-wise inverse of trigonometric cosine of input.",
@@ -213,10 +205,75 @@
     "std_args": [],
     "variants": {}
   },
+  "AdaptiveAvgPool1d": {
+    "description": "Applies a 1D adaptive average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "output_size"
+    ],
+    "type": "class"
+  },
+  "AdaptiveAvgPool2d": {
+    "description": "Applies a 2D adaptive average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "output_size"
+    ],
+    "type": "class"
+  },
+  "AdaptiveAvgPool3d": {
+    "description": "Applies a 3D adaptive average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "output_size"
+    ],
+    "type": "class"
+  },
   "AdaptiveGradClipState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "AdaptiveLogSoftmaxWithLoss": {
+    "description": "Efficient softmax approximation.",
+    "std_args": [
+      "self",
+      "in_features",
+      "n_classes",
+      "cutoffs",
+      "div_value",
+      "head_bias",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "AdaptiveMaxPool1d": {
+    "description": "Applies a 1D adaptive max pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "output_size",
+      "return_indices"
+    ],
+    "type": "class"
+  },
+  "AdaptiveMaxPool2d": {
+    "description": "Applies a 2D adaptive max pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "output_size",
+      "return_indices"
+    ],
+    "type": "class"
+  },
+  "AdaptiveMaxPool3d": {
+    "description": "Applies a 3D adaptive max pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "output_size",
+      "return_indices"
+    ],
+    "type": "class"
   },
   "AdaptiveMaxPooling1D": {
     "description": "Auto-generated from keras_code_defs",
@@ -347,6 +404,17 @@
       }
     ],
     "variants": {}
+  },
+  "AllToShardedLinear": {
+    "description": "Each member of the group applies part of the affine transformation such",
+    "std_args": [
+      "self",
+      "input_dims",
+      "output_dims",
+      "bias",
+      "group"
+    ],
+    "type": "class"
   },
   "Alphadropout": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
@@ -1012,6 +1080,11 @@
     "std_args": [],
     "variants": {}
   },
+  "AuxRequest": {
+    "description": "Request which auxiliary outputs to compute from flex_attention.",
+    "std_args": [],
+    "type": "class"
+  },
   "Average": {
     "description": "Compute the weighted average.",
     "std_args": [
@@ -1128,10 +1201,68 @@
     "std_args": [],
     "variants": {}
   },
+  "BCELoss": {
+    "description": "Creates a criterion that measures the Binary Cross Entropy between the target and",
+    "std_args": [
+      "self",
+      "weight",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
+  "BCEWithLogitsLoss": {
+    "description": "This loss combines a `Sigmoid` layer and the `BCELoss` in one single",
+    "std_args": [
+      "self",
+      "weight",
+      "size_average",
+      "reduce",
+      "reduction",
+      "pos_weight"
+    ],
+    "type": "class"
+  },
+  "BLOCKS_ARE_CONTIGUOUS": {
+    "description": "If True, guarantees that all blocks in the mask are contiguous.",
+    "std_args": [],
+    "type": "attribute"
+  },
   "BLOCK_M": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "BLOCK_M1": {
+    "description": "Thread block size for Q dimension in backward pass. Use as 'bwd_BLOCK_M1'.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "BLOCK_M2": {
+    "description": "Thread block size for second Q dimension in backward pass. Use as 'bwd_BLOCK_M2'.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "BLOCK_N": {
+    "description": "Thread block size for the sequence length dimension of K/V in forward pass.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "BLOCK_N1": {
+    "description": "Thread block size for K/V dimension in backward pass. Use as 'bwd_BLOCK_N1'.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "BLOCK_N2": {
+    "description": "Thread block size for second K/V dimension in backward pass. Use as 'bwd_BLOCK_N2'.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "BLOCK_SIZE": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "Bartlett": {
     "description": "Return a Bartlett window of size M.",
@@ -1145,10 +1276,57 @@
     ],
     "variants": {}
   },
+  "BasePruningMethod": {
+    "description": "Abstract base class for creation of new pruning techniques.",
+    "std_args": [],
+    "type": "class"
+  },
   "BatchNorm": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "BatchNorm1d": {
+    "description": "Applies Batch Normalization over a 2D or 3D input.",
+    "std_args": [
+      "self",
+      "num_features",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "BatchNorm2d": {
+    "description": "Applies Batch Normalization over a 4D input.",
+    "std_args": [
+      "self",
+      "num_features",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "BatchNorm3d": {
+    "description": "Applies Batch Normalization over a 5D input.",
+    "std_args": [
+      "self",
+      "num_features",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
   },
   "BatchNormalization": {
     "description": "Carries out batch normalization as described in the paper https://arxiv.org/abs/1502.03167. Depending on the mode it is being run, There are five required inputs 'X', 'scale', 'B', 'input_mean' and 'input_var'. Note that 'input_mean' and 'input_var' are expected to be the estimated statistics in inf...",
@@ -1472,6 +1650,24 @@
     ],
     "variants": {}
   },
+  "BlockMask": {
+    "description": "BlockMask is our format for representing a block-sparse attention mask.",
+    "std_args": [
+      "self",
+      "seq_lengths",
+      "kv_num_blocks",
+      "kv_indices",
+      "full_kv_num_blocks",
+      "full_kv_indices",
+      "q_num_blocks",
+      "q_indices",
+      "full_q_num_blocks",
+      "full_q_indices",
+      "BLOCK_SIZE",
+      "mask_mod"
+    ],
+    "type": "class"
+  },
   "Bool": {
     "description": "A specialized scalar constructor for boolean types.",
     "std_args": [
@@ -1526,6 +1722,16 @@
     ],
     "variants": {}
   },
+  "Buffer": {
+    "description": "A kind of Tensor that should not be considered a model",
+    "std_args": [
+      "self",
+      "data",
+      "requires_grad",
+      "persistent"
+    ],
+    "type": "class"
+  },
   "C": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -1570,6 +1776,11 @@
       }
     ],
     "variants": {}
+  },
+  "Carry": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "Cast": {
     "description": "The operator casts the elements of a given input tensor to a data type specified by the 'to' argument and returns an output tensor of the same size in the converted type. The 'to' argument must be one of the data types specified in the 'DataType' enum field in the TensorProto message. Casting from s...",
@@ -1623,19 +1834,15 @@
   },
   "CastFloat": {
     "description": "Definition for CastFloat",
-    "operation": "CastFloat",
     "std_args": [
-      "x"
-    ],
-    "variants": {
-      "jax": {
-        "api": "astype",
-        "requires_plugin": "type_methods"
-      },
-      "torch": {
-        "api": "float"
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Any"
       }
-    }
+    ],
+    "variants": {}
   },
   "CastHalf": {
     "description": "Auto-generated from jax_code_defs",
@@ -1683,6 +1890,21 @@
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "CausalBias": {
+    "description": "A bias representing causal attention patterns. For an overview of the bias structure, see the :class:`CausalVariant` enum.",
+    "std_args": [
+      "self",
+      "variant",
+      "seq_len_q",
+      "seq_len_kv"
+    ],
+    "type": "class"
+  },
+  "CausalVariant": {
+    "description": "Enum for causal variants used in attention mechanisms.",
+    "std_args": [],
+    "type": "class"
   },
   "Cbrt": {
     "description": "Calculates element-wise cube root of the input array.",
@@ -1743,6 +1965,14 @@
       ]
     ]
   },
+  "ChannelShuffle": {
+    "description": "Divides and rearranges the channels in a tensor.",
+    "std_args": [
+      "self",
+      "groups"
+    ],
+    "type": "class"
+  },
   "Choose": {
     "description": "Construct an array by stacking slices of choice arrays.",
     "std_args": [
@@ -1767,6 +1997,30 @@
       }
     ],
     "variants": {}
+  },
+  "CircularPad1d": {
+    "description": "Pads the input tensor using circular padding of the input boundary.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
+  },
+  "CircularPad2d": {
+    "description": "Pads the input tensor using circular padding of the input boundary.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
+  },
+  "CircularPad3d": {
+    "description": "Pads the input tensor using circular padding of the input boundary.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
   },
   "Clamp": {
     "description": "Auto-generated from jax_code_defs",
@@ -1881,11 +2135,6 @@
         "type": "Any"
       }
     ],
-    "variants": {}
-  },
-  "ComplexOp": {
-    "description": "Desc",
-    "std_args": [],
     "variants": {}
   },
   "ComplexWarning": {
@@ -2086,6 +2335,41 @@
       ]
     ]
   },
+  "ConstantPad1d": {
+    "description": "Pads the input tensor boundaries with a constant value.",
+    "std_args": [
+      "self",
+      "padding",
+      "value"
+    ],
+    "type": "class"
+  },
+  "ConstantPad2d": {
+    "description": "Pads the input tensor boundaries with a constant value.",
+    "std_args": [
+      "self",
+      "padding",
+      "value"
+    ],
+    "type": "class"
+  },
+  "ConstantPad3d": {
+    "description": "Pads the input tensor boundaries with a constant value.",
+    "std_args": [
+      "self",
+      "padding",
+      "value"
+    ],
+    "type": "class"
+  },
+  "Container": {
+    "description": "The class representing a Python class.",
+    "std_args": [
+      "self",
+      "kwargs"
+    ],
+    "type": "class"
+  },
   "ControlVariate": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -2155,8 +2439,27 @@
     "variants": {}
   },
   "Conv2d": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
+    "description": "2D Convolution",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "in_channels",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "out_channels",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "kernel_size",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "Conv3DTranspose": {
@@ -2464,6 +2767,17 @@
     "std_args": [],
     "variants": {}
   },
+  "CosineEmbeddingLoss": {
+    "description": "Creates a criterion that measures the loss given input tensors",
+    "std_args": [
+      "self",
+      "margin",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
   "CosineSimilarity": {
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
@@ -2614,6 +2928,17 @@
     "std_args": [],
     "variants": {}
   },
+  "CrossMapLRN2d": {
+    "description": "The class representing a Python class.",
+    "std_args": [
+      "self",
+      "size",
+      "alpha",
+      "beta",
+      "k"
+    ],
+    "type": "class"
+  },
   "Csingle": {
     "description": "Complex64 data type constructor (CSingle).",
     "std_args": [
@@ -2758,6 +3083,14 @@
       }
     ],
     "variants": {}
+  },
+  "CustomFromMask": {
+    "description": "The class representing a Python class.",
+    "std_args": [
+      "self",
+      "mask"
+    ],
+    "type": "class"
   },
   "CutMix": {
     "description": "Auto-generated from keras_code_defs",
@@ -3146,6 +3479,54 @@
     "std_args": [],
     "variants": {}
   },
+  "DistributedDataParallel": {
+    "description": "Implement distributed data parallelism based on ``torch.distributed`` at module level.",
+    "std_args": [
+      "self",
+      "module",
+      "device_ids",
+      "output_device",
+      "dim",
+      "broadcast_buffers",
+      "init_sync",
+      "process_group",
+      "bucket_cap_mb",
+      "find_unused_parameters",
+      "check_reduction",
+      "gradient_as_bucket_view",
+      "static_graph",
+      "delay_all_reduce_named_params",
+      "param_to_hook_all_reduce",
+      "mixed_precision",
+      "device_mesh",
+      "skip_all_reduce_unused_params"
+    ],
+    "type": "class"
+  },
+  "DistributedDataParallelCPU": {
+    "description": "The class representing a Python class.",
+    "std_args": [
+      "self",
+      "module",
+      "device_ids",
+      "output_device",
+      "dim",
+      "broadcast_buffers",
+      "init_sync",
+      "process_group",
+      "bucket_cap_mb",
+      "find_unused_parameters",
+      "check_reduction",
+      "gradient_as_bucket_view",
+      "static_graph",
+      "delay_all_reduce_named_params",
+      "param_to_hook_all_reduce",
+      "mixed_precision",
+      "device_mesh",
+      "skip_all_reduce_unused_params"
+    ],
+    "type": "class"
+  },
   "Div": {
     "description": "Performs element-wise binary division (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md). (Opset 14 change): Extend supported types to include uint8, int8, uint16, and int16.",
     "std_args": [
@@ -3242,6 +3623,15 @@
     ],
     "variants": {}
   },
+  "Dropout1d": {
+    "description": "Randomly zero out entire channels.",
+    "std_args": [
+      "self",
+      "p",
+      "inplace"
+    ],
+    "type": "class"
+  },
   "Dropout2d": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
@@ -3307,6 +3697,11 @@
       }
     ],
     "variants": {}
+  },
+  "DtypeLikeInexact": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "DynamicQuantizeLinear": {
     "description": "A Function to fuse calculation for Scale, Zero Point and FP32->8Bit conversion of FP32 Input data. Outputs Scale, ZeroPoint and Quantized Input for a given FP32 Input. Scale is calculated as: ``` y_scale = (maximum(0, max(x)) - minimum(0, min(x))) / (qmax - qmin) ``` * where qmax and qmin are max an...",
@@ -3412,10 +3807,44 @@
     "std_args": [],
     "variants": {}
   },
+  "Embed": {
+    "description": "Embedding Module.",
+    "std_args": [
+      "self",
+      "num_embeddings",
+      "features",
+      "dtype",
+      "param_dtype",
+      "embedding_init",
+      "promote_dtype",
+      "rngs",
+      "embedding_metadata"
+    ],
+    "type": "class"
+  },
   "Embedding": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [],
     "variants": {}
+  },
+  "EmbeddingBag": {
+    "description": "Compute sums or means of 'bags' of embeddings, without instantiating the intermediate embeddings.",
+    "std_args": [
+      "self",
+      "num_embeddings",
+      "embedding_dim",
+      "max_norm",
+      "norm_type",
+      "scale_grad_by_freq",
+      "mode",
+      "sparse",
+      "_weight",
+      "include_last_offset",
+      "padding_idx",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
   },
   "Empty": {
     "description": "Return a new array of given shape and type, without initializing entries.",
@@ -3647,6 +4076,11 @@
       ]
     ]
   },
+  "FORCE_USE_FLEX_ATTENTION": {
+    "description": "If True, forces the use of the flex attention kernel instead of potentially using",
+    "std_args": [],
+    "type": "attribute"
+  },
   "Fabs": {
     "description": "Compute the element-wise absolute values of real input.",
     "std_args": [
@@ -3658,6 +4092,15 @@
       }
     ],
     "variants": {}
+  },
+  "FeatureAlphaDropout": {
+    "description": "Randomly masks out entire channels.",
+    "std_args": [
+      "self",
+      "p",
+      "inplace"
+    ],
+    "type": "class"
   },
   "FillDiagonal": {
     "description": "Fill the main diagonal of the given array of any dimensionality.",
@@ -3775,6 +4218,11 @@
     "std_args": [],
     "variants": {}
   },
+  "FlexKernelOptions": {
+    "description": "Options for controlling the behavior of FlexAttention kernels.",
+    "std_args": [],
+    "type": "class"
+  },
   "Flexible": {
     "description": "Flexible data type base class.",
     "std_args": [],
@@ -3835,20 +4283,16 @@
     "variants": {}
   },
   "Float32": {
-    "description": "Definition for Float32",
-    "operation": "Float32",
-    "std_args": [],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.float32"
-      },
-      "keras": {
-        "api": "numpy.float32"
-      },
-      "numpy": {
-        "api": "numpy.float32"
+    "description": "Float32 data type constructor.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "x",
+        "type": "Any"
       }
-    }
+    ],
+    "variants": {}
   },
   "Float4_e2m1fn": {
     "description": "Float4_e2m1fn data type constructor.",
@@ -4088,6 +4532,42 @@
       }
     ],
     "variants": {}
+  },
+  "Fold": {
+    "description": "Combines an array of sliding local blocks into a large containing tensor.",
+    "std_args": [
+      "self",
+      "output_size",
+      "kernel_size",
+      "dilation",
+      "padding",
+      "stride"
+    ],
+    "type": "class"
+  },
+  "FractionalMaxPool2d": {
+    "description": "Applies a 2D fractional max pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "kernel_size",
+      "output_size",
+      "output_ratio",
+      "return_indices",
+      "_random_samples"
+    ],
+    "type": "class"
+  },
+  "FractionalMaxPool3d": {
+    "description": "Applies a 3D fractional max pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "kernel_size",
+      "output_size",
+      "output_ratio",
+      "return_indices",
+      "_random_samples"
+    ],
+    "type": "class"
   },
   "Frexp": {
     "description": "Split floating point values into mantissa and twos exponent.",
@@ -4333,6 +4813,16 @@
     "std_args": [],
     "variants": {}
   },
+  "GRID_SAMPLE_INTERPOLATION_MODES": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "GRID_SAMPLE_PADDING_MODES": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
   "GRU": {
     "description": "Computes an one-layer GRU. This operator is usually supported via some custom implementation such as CuDNN. Notations: * `X` - input tensor * `z` - update gate * `r` - reset gate * `h` - hidden gate * `t` - time step (t-1 means previous time step) * `W[zrh]` - W parameter weight matrix for update, r...",
     "std_args": [
@@ -4487,6 +4977,16 @@
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "GaussianNLLLoss": {
+    "description": "Gaussian negative log likelihood loss.",
+    "std_args": [
+      "self",
+      "full",
+      "eps",
+      "reduction"
+    ],
+    "type": "class"
   },
   "GaussianNoise": {
     "description": "Auto-generated from keras_code_defs",
@@ -5075,6 +5575,17 @@
     ],
     "variants": {}
   },
+  "HingeEmbeddingLoss": {
+    "description": "Measures the loss given an input tensor :math:`x` and a labels tensor :math:`y`",
+    "std_args": [
+      "self",
+      "margin",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
   "Histogram": {
     "description": "Compute a 1-dimensional histogram.",
     "std_args": [
@@ -5256,6 +5767,15 @@
     ],
     "variants": {}
   },
+  "HuberLoss": {
+    "description": "Creates a criterion that uses a squared term if the absolute",
+    "std_args": [
+      "self",
+      "reduction",
+      "delta"
+    ],
+    "type": "class"
+  },
   "Hypot": {
     "description": "Return element-wise hypotenuse for the given legs.",
     "std_args": [
@@ -5378,11 +5898,6 @@
     ],
     "variants": {}
   },
-  "InferredOp": {
-    "description": "Auto Op",
-    "std_args": [],
-    "variants": {}
-  },
   "InjectHyperparamsState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -5450,6 +5965,48 @@
       }
     ],
     "variants": {}
+  },
+  "InstanceNorm1d": {
+    "description": "Applies Instance Normalization.",
+    "std_args": [
+      "self",
+      "num_features",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "InstanceNorm2d": {
+    "description": "Applies Instance Normalization.",
+    "std_args": [
+      "self",
+      "num_features",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "InstanceNorm3d": {
+    "description": "Applies Instance Normalization.",
+    "std_args": [
+      "self",
+      "num_features",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
   },
   "InstanceNormalization": {
     "description": "Carries out instance normalization as described in the paper https://arxiv.org/abs/1607.08022. y = scale * (x - mean) / sqrt(variance + epsilon) + B, where mean and variance are computed per instance per channel.",
@@ -5950,6 +6507,17 @@
     "std_args": [],
     "variants": {}
   },
+  "KLDivLoss": {
+    "description": "The Kullback-Leibler divergence loss.",
+    "std_args": [
+      "self",
+      "size_average",
+      "reduce",
+      "reduction",
+      "log_target"
+    ],
+    "type": "class"
+  },
   "Kaiser": {
     "description": "Return a Kaiser window.",
     "std_args": [
@@ -5996,10 +6564,61 @@
     "std_args": [],
     "variants": {}
   },
+  "L1Loss": {
+    "description": "Creates a criterion that measures the mean absolute error (MAE) between each element in",
+    "std_args": [
+      "self",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
+  "L1Unstructured": {
+    "description": "Prune (currently unpruned) units in a tensor by zeroing out the ones with the lowest L1-norm.",
+    "std_args": [
+      "self",
+      "amount"
+    ],
+    "type": "class"
+  },
   "LOWER_RIGHT": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "LPPool1d": {
+    "description": "Applies a 1D power-average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "norm_type",
+      "kernel_size",
+      "stride",
+      "ceil_mode"
+    ],
+    "type": "class"
+  },
+  "LPPool2d": {
+    "description": "Applies a 2D power-average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "norm_type",
+      "kernel_size",
+      "stride",
+      "ceil_mode"
+    ],
+    "type": "class"
+  },
+  "LPPool3d": {
+    "description": "Applies a 3D power-average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "self",
+      "norm_type",
+      "kernel_size",
+      "stride",
+      "ceil_mode"
+    ],
+    "type": "class"
   },
   "LRN": {
     "description": "Local Response Normalization proposed in the [AlexNet paper](https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf). It normalizes over local input regions. The local region is defined across the channels. For an element `X[n, c, d1, ..., dk]` in a ten...",
@@ -6186,6 +6805,96 @@
     ],
     "variants": {}
   },
+  "LazyBatchNorm1d": {
+    "description": "A :class:`torch.nn.BatchNorm1d` module with lazy initialization.",
+    "std_args": [
+      "self",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "LazyBatchNorm2d": {
+    "description": "A :class:`torch.nn.BatchNorm2d` module with lazy initialization.",
+    "std_args": [
+      "self",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "LazyBatchNorm3d": {
+    "description": "A :class:`torch.nn.BatchNorm3d` module with lazy initialization.",
+    "std_args": [
+      "self",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "LazyConv1d": {
+    "description": "A :class:`torch.nn.Conv1d` module with lazy initialization of the ``in_channels`` argument.",
+    "std_args": [
+      "self",
+      "out_channels",
+      "kernel_size",
+      "stride",
+      "padding",
+      "dilation",
+      "groups",
+      "bias",
+      "padding_mode",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "LazyConv2d": {
+    "description": "A :class:`torch.nn.Conv2d` module with lazy initialization of the ``in_channels`` argument.",
+    "std_args": [
+      "self",
+      "out_channels",
+      "kernel_size",
+      "stride",
+      "padding",
+      "dilation",
+      "groups",
+      "bias",
+      "padding_mode",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "LazyConv3d": {
+    "description": "A :class:`torch.nn.Conv3d` module with lazy initialization of the ``in_channels`` argument.",
+    "std_args": [
+      "self",
+      "out_channels",
+      "kernel_size",
+      "stride",
+      "padding",
+      "dilation",
+      "groups",
+      "bias",
+      "padding_mode",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
   "LazyConvTranspose1d": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
@@ -6200,6 +6909,56 @@
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "LazyInstanceNorm1d": {
+    "description": "A :class:`torch.nn.InstanceNorm1d` module with lazy initialization of the ``num_features`` argument.",
+    "std_args": [
+      "self",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "LazyInstanceNorm2d": {
+    "description": "A :class:`torch.nn.InstanceNorm2d` module with lazy initialization of the ``num_features`` argument.",
+    "std_args": [
+      "self",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "LazyInstanceNorm3d": {
+    "description": "A :class:`torch.nn.InstanceNorm3d` module with lazy initialization of the ``num_features`` argument.",
+    "std_args": [
+      "self",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "LazyLinear": {
+    "description": "A :class:`torch.nn.Linear` module where `in_features` is inferred.",
+    "std_args": [
+      "self",
+      "out_features",
+      "bias",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
   },
   "LazyModuleMixin": {
     "description": "A mixin for modules that lazily initialize parameters, also known as \"lazy modules\".",
@@ -6380,6 +7139,30 @@
     ],
     "variants": {}
   },
+  "LinearGeneral": {
+    "description": "A linear transformation with flexible axes.",
+    "std_args": [
+      "self",
+      "in_features",
+      "out_features",
+      "axis",
+      "batch_axis",
+      "use_bias",
+      "dtype",
+      "param_dtype",
+      "kernel_init",
+      "bias_init",
+      "precision",
+      "promote_dtype",
+      "dot_general",
+      "dot_general_cls",
+      "preferred_element_type",
+      "rngs",
+      "kernel_metadata",
+      "bias_metadata"
+    ],
+    "type": "class"
+  },
   "LinearT": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
@@ -6484,6 +7267,69 @@
     "std_args": [],
     "variants": {}
   },
+  "LnStructured": {
+    "description": "Prune entire (currently unpruned) channels in a tensor based on their L\\ ``n``-norm.",
+    "std_args": [
+      "self",
+      "amount",
+      "n",
+      "dim"
+    ],
+    "type": "class"
+  },
+  "LoRA": {
+    "description": "A standalone LoRA layer.",
+    "std_args": [
+      "self",
+      "in_features",
+      "lora_rank",
+      "out_features",
+      "base_module",
+      "dtype",
+      "param_dtype",
+      "a_initializer",
+      "b_initializer",
+      "lora_param_type",
+      "promote_dtype",
+      "rngs",
+      "a_metadata",
+      "b_metadata"
+    ],
+    "type": "class"
+  },
+  "LoRALinear": {
+    "description": "An `nnx.Linear` layer in which the output will be LoRAified.",
+    "std_args": [
+      "self",
+      "in_features",
+      "out_features",
+      "lora_rank",
+      "lora_dtype",
+      "lora_param_dtype",
+      "a_initializer",
+      "b_initializer",
+      "lora_param_type",
+      "lora_promote_dtype",
+      "rngs",
+      "a_metadata",
+      "b_metadata",
+      "kwargs"
+    ],
+    "type": "class"
+  },
+  "LoRAParam": {
+    "description": "The class representing a Python class.",
+    "std_args": [
+      "self",
+      "value",
+      "is_hijax",
+      "has_ref",
+      "is_mutable",
+      "eager_sharding",
+      "metadata"
+    ],
+    "type": "class"
+  },
   "Load": {
     "description": "Load arrays from file.",
     "std_args": [
@@ -6495,6 +7341,17 @@
       }
     ],
     "variants": {}
+  },
+  "LocalResponseNorm": {
+    "description": "Applies local response normalization over an input signal.",
+    "std_args": [
+      "self",
+      "size",
+      "alpha",
+      "beta",
+      "k"
+    ],
+    "type": "class"
   },
   "Log": {
     "description": "Natural logarithm, element-wise.",
@@ -7200,31 +8057,35 @@
     "variants": {}
   },
   "Mean": {
-    "description": "Definition for Mean",
-    "operation": "Mean",
+    "description": "Return the mean of array elements along a given axis.",
     "std_args": [
-      "x"
-    ],
-    "variants": {
-      "jax": {
-        "api": "jax.numpy.mean"
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "a",
+        "type": "Tensor"
       },
-      "keras": {
-        "api": "keras.ops.mean"
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "axis",
+        "type": "int | tuple | None"
       },
-      "mlx": {
-        "api": "mlx.core.mean"
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "dtype",
+        "type": "DType | None"
       },
-      "numpy": {
-        "api": "numpy.mean"
-      },
-      "tensorflow": {
-        "api": "tf.math.reduce_mean"
-      },
-      "torch": {
-        "api": "torch.mean"
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "keepdims",
+        "type": "bool"
       }
-    }
+    ],
+    "variants": {}
   },
   "MeanVarianceNormalization": {
     "description": "A MeanVarianceNormalization Function: Perform mean variance normalization on the input tensor X using formula: `(X-EX)/sqrt(E(X-EX)^2)`",
@@ -7548,6 +8409,40 @@
     ],
     "variants": {}
   },
+  "MultiLabelMarginLoss": {
+    "description": "Creates a criterion that optimizes a multi-class multi-classification",
+    "std_args": [
+      "self",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
+  "MultiLabelSoftMarginLoss": {
+    "description": "Creates a criterion that optimizes a multi-label one-versus-all",
+    "std_args": [
+      "self",
+      "weight",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
+  "MultiMarginLoss": {
+    "description": "Creates a criterion that optimizes a multi-class classification hinge",
+    "std_args": [
+      "self",
+      "p",
+      "margin",
+      "weight",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
   "MultiSteps": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -7616,10 +8511,39 @@
     ],
     "variants": {}
   },
+  "NLLLoss": {
+    "description": "The negative log likelihood loss. It is useful to train a classification",
+    "std_args": [
+      "self",
+      "weight",
+      "size_average",
+      "ignore_index",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
+  "NLLLoss2d": {
+    "description": "The class representing a Python class.",
+    "std_args": [
+      "self",
+      "weight",
+      "size_average",
+      "ignore_index",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
   "NONE": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "NamedShape": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "Names": {
     "description": "Auto-generated from flax_nnx_code_defs",
@@ -8008,22 +8932,22 @@
       ]
     ]
   },
-  "NewOp": {
-    "description": "A new operation",
-    "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Tensor"
-      }
-    ],
-    "variants": {}
-  },
   "Nll": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "NonDynamicallyQuantizableLinear": {
+    "description": "The class representing a Python class.",
+    "std_args": [
+      "self",
+      "in_features",
+      "out_features",
+      "bias",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
   },
   "NonMaxSuppression": {
     "description": "Filter out boxes that have high intersection-over-union (IOU) overlap with previously selected boxes. Bounding boxes with score less than score_threshold are removed. Bounding box format is indicated by attribute center_point_box. Note that this algorithm is agnostic to where the origin is in the co...",
@@ -8147,6 +9071,29 @@
     "std_args": [],
     "variants": {}
   },
+  "OptimizedLSTMCell": {
+    "description": "More efficient LSTM Cell that concatenates state components before matmul.",
+    "std_args": [
+      "self",
+      "in_features",
+      "hidden_features",
+      "gate_fn",
+      "activation_fn",
+      "kernel_init",
+      "recurrent_kernel_init",
+      "bias_init",
+      "dtype",
+      "param_dtype",
+      "carry_init",
+      "promote_dtype",
+      "keep_rngs",
+      "rngs",
+      "kernel_metadata",
+      "recurrent_kernel_metadata",
+      "bias_metadata"
+    ],
+    "type": "class"
+  },
   "Optimizer": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -8204,6 +9151,30 @@
       ]
     ]
   },
+  "OrderedDictWrapper": {
+    "description": "A wrapper around a C++ OrderedDict.",
+    "std_args": [
+      "self",
+      "cpp_module",
+      "attr"
+    ],
+    "type": "class"
+  },
+  "Output": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "PRESCALE_QK": {
+    "description": "Whether to pre-scale QK by 1/sqrt(d) and change of base. This is slightly faster but",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "PRUNING_TYPE": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
   "PRelu": {
     "description": "PRelu takes input data (Tensor<T>) and slope tensor as input, and produces one output data (Tensor<T>) where the function `f(x) = slope * x for x < 0`, `f(x) = x for x >= 0`., is applied to the data tensor elementwise. This operator supports **unidirectional broadcasting** (tensor slope should be un...",
     "std_args": [
@@ -8221,6 +9192,16 @@
       }
     ],
     "variants": {}
+  },
+  "PackedSequence": {
+    "description": "Holds the data and list of :attr:`batch_sizes` of a packed sequence.",
+    "std_args": [],
+    "type": "class"
+  },
+  "PackedSequence_": {
+    "description": "The class representing a Python class.",
+    "std_args": [],
+    "type": "class"
   },
   "Pad": {
     "description": "Given a tensor containing the data to be padded (`data`), a tensor containing the number of start and end pad values for axis (`pads`), (optionally) a `mode`, and (optionally) `constant_value`, a padded tensor (`output`) is generated. The three supported `modes` are (similar to corresponding modes s...",
@@ -8258,6 +9239,16 @@
     ],
     "variants": {}
   },
+  "PairwiseDistance": {
+    "description": "Computes the pairwise distance between input vectors, or between columns of input matrices.",
+    "std_args": [
+      "self",
+      "p",
+      "eps",
+      "keepdim"
+    ],
+    "type": "class"
+  },
   "Param": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -8268,10 +9259,28 @@
     "std_args": [],
     "variants": {}
   },
+  "ParameterDict": {
+    "description": "Holds parameters in a dictionary.",
+    "std_args": [
+      "self",
+      "parameters"
+    ],
+    "type": "class"
+  },
   "ParameterList": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "ParametrizationList": {
+    "description": "A sequential container that holds and manages the original parameters or buffers of a parametrized :class:`torch.nn.Module`.",
+    "std_args": [
+      "self",
+      "modules",
+      "original",
+      "unsafe"
+    ],
+    "type": "class"
   },
   "PartitionState": {
     "description": "Auto-generated from jax_code_defs",
@@ -8287,6 +9296,35 @@
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "PixelShuffle": {
+    "description": "Rearrange elements in a tensor according to an upscaling factor.",
+    "std_args": [
+      "self",
+      "upscale_factor"
+    ],
+    "type": "class"
+  },
+  "PixelUnshuffle": {
+    "description": "Reverse the PixelShuffle operation.",
+    "std_args": [
+      "self",
+      "downscale_factor"
+    ],
+    "type": "class"
+  },
+  "PoissonNLLLoss": {
+    "description": "Negative log likelihood loss with Poisson distribution of target.",
+    "std_args": [
+      "self",
+      "log_input",
+      "full",
+      "size_average",
+      "eps",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
   },
   "Poly": {
     "description": "Auto-generated from jax_code_defs",
@@ -8498,6 +9536,14 @@
       }
     ],
     "variants": {}
+  },
+  "PruningContainer": {
+    "description": "Container holding a sequence of pruning methods for iterative pruning.",
+    "std_args": [
+      "self",
+      "args"
+    ],
+    "type": "class"
   },
   "Ptp": {
     "description": "Return the peak-to-peak range along a given axis.",
@@ -8770,6 +9816,44 @@
     ],
     "type": "class"
   },
+  "QuantizedAllToShardedLinear": {
+    "description": "Each member of the group applies part of the affine transformation with",
+    "std_args": [
+      "self",
+      "input_dims",
+      "output_dims",
+      "bias",
+      "group_size",
+      "bits",
+      "group"
+    ],
+    "type": "class"
+  },
+  "QuantizedEmbedding": {
+    "description": "The same as :obj:`Embedding` but with a  quantized weight matrix.",
+    "std_args": [
+      "self",
+      "num_embeddings",
+      "dims",
+      "group_size",
+      "bits",
+      "mode"
+    ],
+    "type": "class"
+  },
+  "QuantizedShardedToAllLinear": {
+    "description": "Each member of the group applies part of the affine transformation using",
+    "std_args": [
+      "self",
+      "input_dims",
+      "output_dims",
+      "bias",
+      "group_size",
+      "bits",
+      "group"
+    ],
+    "type": "class"
+  },
   "RMSNormalization": {
     "description": "This is RMS normalization defined in ONNX as function as described in the paper https://arxiv.org/pdf/1910.07467. The overall computation can be split into two stages. The root mean squared norm is taken over the last D dimensions, where D is the dimension of normalized_shape. For example, if normal...",
     "std_args": [
@@ -8900,10 +9984,38 @@
     "std_args": [],
     "variants": {}
   },
+  "RNNCell": {
+    "description": "An Elman RNN cell with tanh or ReLU non-linearity.",
+    "std_args": [
+      "self",
+      "input_size",
+      "hidden_size",
+      "bias",
+      "nonlinearity",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
+  "ROWS_GUARANTEED_SAFE": {
+    "description": "If True, guarantees that at least one value in each row is not masked out.",
+    "std_args": [],
+    "type": "attribute"
+  },
   "RPC_AVAILABLE": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "RReLU": {
+    "description": "Applies the randomized leaky rectified linear unit function, element-wise.",
+    "std_args": [
+      "self",
+      "lower",
+      "upper",
+      "inplace"
+    ],
+    "type": "class"
   },
   "R_": {
     "description": "Concatenate slices, scalars and array-like objects along the first axis.",
@@ -9098,6 +10210,15 @@
     "std_args": [],
     "variants": {}
   },
+  "RandomStructured": {
+    "description": "Prune entire (currently unpruned) channels in a tensor at random.",
+    "std_args": [
+      "self",
+      "amount",
+      "dim"
+    ],
+    "type": "class"
+  },
   "RandomTranslation": {
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
@@ -9154,6 +10275,14 @@
         "float"
       ]
     ]
+  },
+  "RandomUnstructured": {
+    "description": "Prune (currently unpruned) units in a tensor at random.",
+    "std_args": [
+      "self",
+      "amount"
+    ],
+    "type": "class"
   },
   "RandomVerticalFlip": {
     "description": "Auto-generated from keras_code_defs",
@@ -9238,6 +10367,13 @@
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "ReLU2": {
+    "description": "Applies the ReLU\u00b2 activation function.",
+    "std_args": [
+      "self"
+    ],
+    "type": "class"
   },
   "Real": {
     "description": "Return element-wise real part of the complex argument.",
@@ -9483,6 +10619,35 @@
       ]
     ]
   },
+  "Reduction": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ReflectionPad1d": {
+    "description": "Pads the input tensor using the reflection of the input boundary.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
+  },
+  "ReflectionPad2d": {
+    "description": "Pads the input tensor using the reflection of the input boundary.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
+  },
+  "ReflectionPad3d": {
+    "description": "Pads the input tensor using the reflection of the input boundary.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
+  },
   "RegexFullMatch": {
     "description": "RegexFullMatch performs a full regex match on each element of the input tensor. If an element fully matches the regex pattern specified as an attribute, the corresponding element in the output is True and it is False otherwise. [RE2](https://github.com/google/re2/wiki/Syntax) regex syntax is used.",
     "from": "Operators.md",
@@ -9553,6 +10718,30 @@
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "ReplicationPad1d": {
+    "description": "Pads the input tensor using replication of the input boundary.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
+  },
+  "ReplicationPad2d": {
+    "description": "Pads the input tensor using replication of the input boundary.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
+  },
+  "ReplicationPad3d": {
+    "description": "Pads the input tensor using replication of the input boundary.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
   },
   "Rescaling": {
     "description": "Auto-generated from keras_code_defs",
@@ -9698,6 +10887,17 @@
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [],
     "variants": {}
+  },
+  "RoPE": {
+    "description": "Implements the rotary positional encoding.",
+    "std_args": [
+      "self",
+      "dims",
+      "traditional",
+      "base",
+      "scale"
+    ],
+    "type": "class"
   },
   "RoiAlign": {
     "description": "Region of Interest (RoI) align operation described in the [Mask R-CNN paper](https://arxiv.org/abs/1703.06870). RoiAlign consumes an input tensor X and region of interests (rois) to apply pooling across each RoI; it produces a 4-D tensor of shape (num_rois, C, output_height, output_width). RoiAlign ...",
@@ -9896,6 +11096,11 @@
       }
     ],
     "variants": {}
+  },
+  "SDPBackend": {
+    "description": "An enum-like class that contains the different backends for scaled dot product attention.",
+    "std_args": [],
+    "type": "attribute"
   },
   "SGD": {
     "description": "Auto-generated from jax_code_defs",
@@ -10406,6 +11611,17 @@
     ],
     "variants": {}
   },
+  "ShardedToAllLinear": {
+    "description": "Each member of the group applies part of the affine transformation and",
+    "std_args": [
+      "self",
+      "input_dims",
+      "output_dims",
+      "bias",
+      "group"
+    ],
+    "type": "class"
+  },
   "ShouldSkipUpdateFunction": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -10487,6 +11703,29 @@
     ],
     "variants": {}
   },
+  "SimpleCell": {
+    "description": "Simple cell.",
+    "std_args": [
+      "self",
+      "in_features",
+      "hidden_features",
+      "dtype",
+      "param_dtype",
+      "carry_init",
+      "residual",
+      "activation_fn",
+      "kernel_init",
+      "recurrent_kernel_init",
+      "bias_init",
+      "promote_dtype",
+      "keep_rngs",
+      "rngs",
+      "kernel_metadata",
+      "recurrent_kernel_metadata",
+      "bias_metadata"
+    ],
+    "type": "class"
+  },
   "SimpleRNN": {
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
@@ -10545,6 +11784,19 @@
     ],
     "variants": {}
   },
+  "SinusoidalPositionalEncoding": {
+    "description": "Implements sinusoidal positional encoding.",
+    "std_args": [
+      "self",
+      "dims",
+      "min_freq",
+      "max_freq",
+      "scale",
+      "cos_first",
+      "full_turns"
+    ],
+    "type": "class"
+  },
   "Size": {
     "description": "Return number of elements along a given axis.",
     "std_args": [
@@ -10599,6 +11851,17 @@
     ],
     "variants": {}
   },
+  "SmoothL1Loss": {
+    "description": "Creates a criterion that uses a squared term if the absolute",
+    "std_args": [
+      "self",
+      "size_average",
+      "reduce",
+      "reduction",
+      "beta"
+    ],
+    "type": "class"
+  },
   "Smoothl1": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
@@ -10608,6 +11871,16 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "SoftMarginLoss": {
+    "description": "Creates a criterion that optimizes a two-class classification",
+    "std_args": [
+      "self",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
   },
   "Softmax": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
@@ -10797,6 +12070,22 @@
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "SpectralNormLoadStateDictPreHook": {
+    "description": "The class representing a Python class.",
+    "std_args": [
+      "self",
+      "fn"
+    ],
+    "type": "class"
+  },
+  "SpectralNormStateDictHook": {
+    "description": "The class representing a Python class.",
+    "std_args": [
+      "self",
+      "fn"
+    ],
+    "type": "class"
   },
   "SpectralNormalization": {
     "description": "Auto-generated from keras_code_defs",
@@ -11194,6 +12483,21 @@
     ],
     "type": "function"
   },
+  "SyncBatchNorm": {
+    "description": "Applies Batch Normalization over a N-Dimensional input.",
+    "std_args": [
+      "self",
+      "num_features",
+      "eps",
+      "momentum",
+      "affine",
+      "track_running_stats",
+      "process_group",
+      "device",
+      "dtype"
+    ],
+    "type": "class"
+  },
   "Synchronize": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
@@ -11213,6 +12517,11 @@
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "T_destination": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "T_module": {
     "description": "Auto-generated from flax_nnx_code_defs",
@@ -11606,23 +12915,15 @@
   },
   "TorchLoad": {
     "description": "Definition for TorchLoad",
-    "operation": "TorchLoad",
     "std_args": [
-      "f"
-    ],
-    "variants": {
-      "jax": {
-        "api": "load",
-        "requires_plugin": "io_handler"
-      },
-      "numpy": {
-        "api": "load",
-        "requires_plugin": "io_handler"
-      },
-      "torch": {
-        "api": "torch.load"
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "f",
+        "type": "Any"
       }
-    }
+    ],
+    "variants": {}
   },
   "TorchModuleWrapper": {
     "description": "Auto-generated from keras_code_defs",
@@ -11631,24 +12932,21 @@
   },
   "TorchSave": {
     "description": "Definition for TorchSave",
-    "operation": "TorchSave",
     "std_args": [
-      "obj",
-      "f"
-    ],
-    "variants": {
-      "jax": {
-        "api": "save",
-        "requires_plugin": "io_handler"
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "obj",
+        "type": "Any"
       },
-      "numpy": {
-        "api": "save",
-        "requires_plugin": "io_handler"
-      },
-      "torch": {
-        "api": "torch.save"
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "f",
+        "type": "Any"
       }
-    }
+    ],
+    "variants": {}
   },
   "Trace": {
     "description": "Calculate sum of the diagonal of input along the given axes.",
@@ -11906,6 +13204,31 @@
     ],
     "variants": {}
   },
+  "TripletMarginLoss": {
+    "description": "Creates a criterion that measures the triplet loss given an input",
+    "std_args": [
+      "self",
+      "margin",
+      "p",
+      "eps",
+      "swap",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "class"
+  },
+  "TripletMarginWithDistanceLoss": {
+    "description": "Creates a criterion that measures the triplet loss given input",
+    "std_args": [
+      "self",
+      "distance_function",
+      "margin",
+      "swap",
+      "reduction"
+    ],
+    "type": "class"
+  },
   "Triu": {
     "description": "Return upper triangle of an array.",
     "std_args": [
@@ -12003,6 +13326,16 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "UPPER_LEFT": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "USE_TMA": {
+    "description": "Whether to use Tensor Memory Accelerator (TMA) on supported hardware.",
+    "std_args": [],
+    "type": "attribute"
   },
   "Ufunc": {
     "description": "Universal functions which operation element-by-element on arrays.",
@@ -12127,6 +13460,30 @@
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "UninitializedBuffer": {
+    "description": "A buffer that is not initialized.",
+    "std_args": [
+      "self",
+      "data",
+      "requires_grad",
+      "persistent"
+    ],
+    "type": "class"
+  },
+  "UninitializedParameter": {
+    "description": "A parameter that is not initialized.",
+    "std_args": [
+      "self",
+      "data",
+      "requires_grad"
+    ],
+    "type": "class"
+  },
+  "UninitializedTensorMixin": {
+    "description": "The class representing a Python class.",
+    "std_args": [],
+    "type": "class"
   },
   "Union1d": {
     "description": "Compute the set union of two 1D arrays.",
@@ -12474,6 +13831,24 @@
     "std_args": [],
     "variants": {}
   },
+  "UpsamplingBilinear2d": {
+    "description": "Applies a 2D bilinear upsampling to an input signal composed of several input channels.",
+    "std_args": [
+      "self",
+      "size",
+      "scale_factor"
+    ],
+    "type": "class"
+  },
+  "UpsamplingNearest2d": {
+    "description": "Applies a 2D nearest neighbor upsampling to an input signal composed of several input channels.",
+    "std_args": [
+      "self",
+      "size",
+      "scale_factor"
+    ],
+    "type": "class"
+  },
   "V": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -12721,10 +14096,25 @@
     ],
     "variants": {}
   },
+  "WARN_FOR_UNFUSED_KERNELS": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "WRITE_DQ": {
+    "description": "Controls whether gradient scatters are done in the DQ iteration loop of the backward pass.",
+    "std_args": [],
+    "type": "attribute"
+  },
   "WeightNorm": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "Wh": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "Where": {
     "description": "Select elements from two arrays based on a condition.",
@@ -12762,6 +14152,11 @@
     ],
     "variants": {}
   },
+  "Whh": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
   "WrappedSchedule": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -12771,6 +14166,16 @@
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "Wx": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "Wxh": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "Xor": {
     "description": "Returns the tensor resulted from performing the `xor` logical operation elementwise on the input tensors `A` and `B` (with Numpy-style broadcasting support). This operator supports **multidirectional (i.e., Numpy-style) broadcasting**; for more details please check [the doc](Broadcasting.md).",
@@ -12802,6 +14207,30 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "ZeroPad1d": {
+    "description": "Pads the input tensor boundaries with zero.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
+  },
+  "ZeroPad2d": {
+    "description": "Pads the input tensor boundaries with zero.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
+  },
+  "ZeroPad3d": {
+    "description": "Pads the input tensor boundaries with zero.",
+    "std_args": [
+      "self",
+      "padding"
+    ],
+    "type": "class"
   },
   "ZeroPadding1D": {
     "description": "Auto-generated from keras_code_defs",
@@ -12884,6 +14313,101 @@
     ],
     "variants": {}
   },
+  "activation_fn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "adapt": {
+    "description": "Computes a vocabulary of string terms from tokens in a dataset.\n\nCalling `adapt()` on a `TextVectorization` layer is an alternative to\npassing in a precomputed vocabulary on construction via the `vocabulary`\nargument. A `TextVectorization` layer should always be either adapted\nover a dataset or supplied with a vocabulary.\n\nDuring `adapt()`, the layer will build a vocabulary of all string tokens\nseen in the dataset, sorted by occurrence count, with ties broken by\nsort order of the tokens (high to low). At the end of `adapt()`, if\n`max_tokens` is set, the vocabulary will be truncated to `max_tokens`\nsize. For example, adapting a layer with `max_tokens=1000` will compute\nthe 1000 most frequent tokens occurring in the input dataset. If\n`output_mode='tf-idf'`, `adapt()` will also learn the document\nfrequencies of each token in the input dataset.\n\nArguments:\n    data: The data to train on. It can be passed either as a\n        batched `tf.data.Dataset`, as a list of strings,\n        or as a NumPy array.\n    steps: Integer or `None`.\n        Total number of steps (batches of samples) to process.\n        If `data` is a `tf.data.Dataset`, and `steps` is `None`,\n        `adapt()` will run until the input dataset is exhausted.\n        When passing an infinitely\n        repeating dataset, you must specify the `steps` argument. This\n        argument is not supported with array inputs or list inputs.",
+    "std_args": [
+      "self",
+      "data",
+      "batch_size",
+      "steps"
+    ],
+    "type": "function"
+  },
+  "adaptive_avg_pool1d": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "adaptive_avg_pool2d": {
+    "description": "Apply a 2D adaptive average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "input",
+      "output_size"
+    ],
+    "type": "function"
+  },
+  "adaptive_avg_pool3d": {
+    "description": "Apply a 3D adaptive average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "input",
+      "output_size"
+    ],
+    "type": "function"
+  },
+  "adaptive_max_pool1d": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "adaptive_max_pool1d_with_indices": {
+    "description": "adaptive_max_pool1d(input, output_size, return_indices=False)",
+    "std_args": [
+      "input",
+      "output_size",
+      "return_indices"
+    ],
+    "type": "function"
+  },
+  "adaptive_max_pool2d": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "adaptive_max_pool2d_with_indices": {
+    "description": "adaptive_max_pool2d(input, output_size, return_indices=False)",
+    "std_args": [
+      "input",
+      "output_size",
+      "return_indices"
+    ],
+    "type": "function"
+  },
+  "adaptive_max_pool3d": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "adaptive_max_pool3d_with_indices": {
+    "description": "adaptive_max_pool3d(input, output_size, return_indices=False)",
+    "std_args": [
+      "input",
+      "output_size",
+      "return_indices"
+    ],
+    "type": "function"
+  },
+  "add_loss": {
+    "description": "Can be called inside of the `call()` method to add a scalar loss.\n\nExample:\n\n```python\nclass MyLayer(Layer):\n    ...\n    def call(self, x):\n        self.add_loss(ops.sum(x))\n        return x\n```",
+    "std_args": [
+      "self",
+      "loss"
+    ],
+    "type": "function"
+  },
+  "add_metric": {
+    "description": "",
+    "std_args": [
+      "self",
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
   "add_module": {
     "description": "Add a child module to the current module.",
     "std_args": [
@@ -12893,10 +14417,335 @@
     ],
     "type": "function"
   },
+  "add_pruning_method": {
+    "description": "Add a child pruning ``method`` to the container.",
+    "std_args": [
+      "self",
+      "method"
+    ],
+    "type": "function"
+  },
+  "add_variable": {
+    "description": "Add a weight variable to the layer.\n\nAlias of `add_weight()`.",
+    "std_args": [
+      "self",
+      "shape",
+      "initializer",
+      "dtype",
+      "trainable",
+      "autocast",
+      "regularizer",
+      "constraint",
+      "name"
+    ],
+    "type": "function"
+  },
+  "add_weight": {
+    "description": "Add a weight variable to the layer.\n\nArgs:\n    shape: Shape tuple for the variable. Must be fully-defined\n        (no `None` entries). Defaults to `()` (scalar) if unspecified.\n    initializer: Initializer object to use to populate the initial\n        variable value, or string name of a built-in initializer\n        (e.g. `\"random_normal\"`). If unspecified, defaults to\n        `\"glorot_uniform\"` for floating-point variables and to `\"zeros\"`\n        for all other types (e.g. int, bool).\n    dtype: Dtype of the variable to create, e.g. `\"float32\"`. If\n        unspecified, defaults to the layer's variable dtype\n        (which itself defaults to `\"float32\"` if unspecified).\n    trainable: Boolean, whether the variable should be trainable via\n        backprop or whether its updates are managed manually. Defaults\n        to `True`.\n    autocast: Boolean, whether to autocast layers variables when\n        accessing them. Defaults to `True`.\n    regularizer: Regularizer object to call to apply penalty on the\n        weight. These penalties are summed into the loss function\n        during optimization. Defaults to `None`.\n    constraint: Contrainst object to call on the variable after any\n        optimizer update, or string name of a built-in constraint.\n        Defaults to `None`.\n    aggregation: Optional string, one of `None`, `\"none\"`, `\"mean\"`,\n        `\"sum\"` or `\"only_first_replica\"`. Annotates the variable with\n        the type of multi-replica aggregation to be used for this\n        variable when writing custom data parallel training loops.\n        Defaults to `\"none\"`.\n    overwrite_with_gradient: Boolean, whether to overwrite the variable\n        with the computed gradient. This is useful for float8 training.\n        Defaults to `False`.\n    name: String name of the variable. Useful for debugging purposes.",
+    "std_args": [
+      "self",
+      "shape",
+      "initializer",
+      "dtype",
+      "trainable",
+      "autocast",
+      "regularizer",
+      "constraint",
+      "aggregation",
+      "overwrite_with_gradient",
+      "name"
+    ],
+    "type": "function"
+  },
+  "add_zero_attn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "affine": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "affine_grid": {
+    "description": "Generate 2D or 3D flow field (sampling grid), given a batch of affine matrices :attr:`theta`.",
+    "std_args": [
+      "theta",
+      "size",
+      "align_corners"
+    ],
+    "type": "function"
+  },
+  "all_weights": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "alpha_dropout": {
+    "description": "Apply alpha dropout to the input.",
+    "std_args": [
+      "input",
+      "p",
+      "training",
+      "inplace"
+    ],
+    "type": "function"
+  },
+  "amount": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "and_masks": {
+    "description": "Returns a mask_mod that's the intersection of provided mask_mods",
+    "std_args": [
+      "mask_mods"
+    ],
+    "type": "function"
+  },
+  "apply_permutation": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "tensor",
+      "permutation",
+      "dim"
+    ],
+    "type": "function"
+  },
+  "apply_to_modules": {
+    "description": "Apply a function to all the modules in this instance (including this",
+    "std_args": [
+      "self",
+      "apply_fn"
+    ],
+    "type": "function"
+  },
+  "as_linear": {
+    "description": "Call the embedding layer as a linear layer.",
+    "std_args": [
+      "self",
+      "x"
+    ],
+    "type": "function"
+  },
+  "as_tuple": {
+    "description": "Returns a tuple of the attributes of the BlockMask.",
+    "std_args": [
+      "self",
+      "flatten"
+    ],
+    "type": "function"
+  },
+  "assert_int_or_pair": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "arg",
+      "arg_name",
+      "message"
+    ],
+    "type": "function"
+  },
+  "attend": {
+    "description": "Attend over the embedding using a query array.",
+    "std_args": [
+      "self",
+      "query"
+    ],
+    "type": "function"
+  },
+  "attention_fn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "average_gradients": {
+    "description": "Average the gradients across the distributed processes in the passed group.",
+    "std_args": [
+      "gradients",
+      "group",
+      "all_reduce_size",
+      "communication_type",
+      "communication_stream"
+    ],
+    "type": "function"
+  },
+  "avg_pool1d": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "avg_pool2d": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "avg_pool3d": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "axis_index_groups": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "axis_name": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "backward_rnn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
   "base_module": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
+  },
+  "batch_axis": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "batch_first": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "batch_norm": {
+    "description": "Apply Batch Normalization for each channel across a batch of data.",
+    "std_args": [
+      "input",
+      "running_mean",
+      "running_var",
+      "weight",
+      "bias",
+      "training",
+      "momentum",
+      "eps"
+    ],
+    "type": "function"
+  },
+  "batch_sizes": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "batch_stats": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bhn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bias_shape": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "biases": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "binary_cross_entropy_with_logits": {
+    "description": "Compute Binary Cross Entropy between target and input logits.",
+    "std_args": [
+      "input",
+      "target",
+      "weight",
+      "size_average",
+      "reduce",
+      "reduction",
+      "pos_weight"
+    ],
+    "type": "function"
+  },
+  "bind": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "optional",
+      "fn"
+    ],
+    "type": "function"
+  },
+  "blank": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "broadcast_bucket_size": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "broadcast_buffers": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "broadcast_coalesced": {
+    "description": "Broadcast a sequence of tensors to the specified GPUs.",
+    "std_args": [
+      "tensors",
+      "devices",
+      "buffer_size"
+    ],
+    "type": "function"
+  },
+  "broadcast_dims": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "broadcast_dropout": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "broadcast_rngs": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bucket_bytes_cap": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "bucket_bytes_cap_default": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "buffers": {
+    "description": "Return an iterator over module buffers.",
+    "std_args": [
+      "self",
+      "recurse"
+    ],
+    "type": "function"
+  },
+  "build": {
+    "description": "",
+    "std_args": [
+      "self",
+      "input_shape"
+    ],
+    "type": "function"
+  },
+  "build_from_config": {
+    "description": "Builds the layer's states with the supplied config dict.\n\nBy default, this method calls the `build(config[\"input_shape\"])` method,\nwhich creates weights based on the layer's input shape in the supplied\nconfig. If your config contains other information needed to load the\nlayer's state, you should override this method.\n\nArgs:\n    config: Dict containing the input shape associated with this layer.",
+    "std_args": [
+      "self",
+      "config"
+    ],
+    "type": "function"
   },
   "build_module": {
     "description": "Compile and import a f2py module, built from the given files.",
@@ -12917,6 +14766,174 @@
     ],
     "type": "function"
   },
+  "cache_index": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cached_key": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cached_value": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "calculate_gain": {
+    "description": "Return the recommended gain value for the given nonlinearity function.",
+    "std_args": [
+      "nonlinearity",
+      "param"
+    ],
+    "type": "function"
+  },
+  "call_super_init": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "canonicalize_dtype": {
+    "description": "Canonicalize an optional dtype to the definitive dtype.",
+    "std_args": [
+      "args",
+      "dtype",
+      "inexact"
+    ],
+    "type": "function"
+  },
+  "canonicalize_padding": {
+    "description": "\"Canonicalizes conv padding to a jax.lax supported format.",
+    "std_args": [
+      "padding",
+      "rank"
+    ],
+    "type": "function"
+  },
+  "carry_init": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "causal_lower_right": {
+    "description": "Creates a lower-right triangular causal bias.",
+    "std_args": [
+      "size"
+    ],
+    "type": "function"
+  },
+  "causal_upper_left": {
+    "description": "Creates an upper-left triangular causal bias.",
+    "std_args": [
+      "size"
+    ],
+    "type": "function"
+  },
+  "cell": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "celu_": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "channel_shuffle": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "check_forward_args": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "input",
+      "hidden",
+      "batch_sizes"
+    ],
+    "type": "function"
+  },
+  "check_hidden_size": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "hx",
+      "expected_hidden_size",
+      "msg"
+    ],
+    "type": "function"
+  },
+  "check_input": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "input",
+      "batch_sizes"
+    ],
+    "type": "function"
+  },
+  "checkpoint": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "clip_grad_value_": {
+    "description": "Clip the gradients of an iterable of parameters at specified value.",
+    "std_args": [
+      "parameters",
+      "clip_value",
+      "foreach"
+    ],
+    "type": "function"
+  },
+  "cls_to_become": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "combine_masks": {
+    "description": "Combine attention masks.",
+    "std_args": [
+      "masks",
+      "dtype"
+    ],
+    "type": "function"
+  },
+  "compute_output_shape": {
+    "description": "",
+    "std_args": [
+      "self",
+      "input_shape"
+    ],
+    "type": "function"
+  },
+  "compute_output_spec": {
+    "description": "",
+    "std_args": [
+      "self",
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "compute_weight": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "module"
+    ],
+    "type": "function"
+  },
+  "consume_prefix_in_state_dict_if_present": {
+    "description": "Strip the prefix in state_dict in place, if any.",
+    "std_args": [
+      "state_dict",
+      "prefix"
+    ],
+    "type": "function"
+  },
   "containsmodule": {
     "description": "The class representing a Python function.",
     "std_args": [
@@ -12924,10 +14941,180 @@
     ],
     "type": "function"
   },
+  "conv_general_dilated": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "conv_tbc": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "convert_conv2d_weight_memory_format": {
+    "description": "Convert ``memory_format`` of ``nn.Conv2d.weight`` to ``memory_format``.",
+    "std_args": [
+      "module",
+      "memory_format"
+    ],
+    "type": "function"
+  },
+  "convert_conv3d_weight_memory_format": {
+    "description": "Convert ``memory_format`` of ``nn.Conv3d.weight`` to ``memory_format``",
+    "std_args": [
+      "module",
+      "memory_format"
+    ],
+    "type": "function"
+  },
+  "convert_sync_batchnorm": {
+    "description": "Converts all :attr:`BatchNorm*D` layers in the model to :class:`torch.nn.SyncBatchNorm` layers.",
+    "std_args": [
+      "cls",
+      "module",
+      "process_group"
+    ],
+    "type": "function"
+  },
+  "convert_weight": {
+    "description": "Convert the weight if it is from the a different backend.",
+    "std_args": [
+      "self",
+      "weight"
+    ],
+    "type": "function"
+  },
+  "convolution_notes": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "convolution_op": {
+    "description": "",
+    "std_args": [
+      "self",
+      "inputs",
+      "kernel"
+    ],
+    "type": "function"
+  },
+  "cos_first": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cosine_embedding_loss": {
+    "description": "Compute the cosine embedding loss.",
+    "std_args": [
+      "input1",
+      "input2",
+      "target",
+      "margin",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "cosine_similarity_loss": {
+    "description": "Computes the cosine similarity between the two inputs.",
+    "std_args": [
+      "x1",
+      "x2",
+      "axis",
+      "eps",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "count_include_pad": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "count_params": {
+    "description": "Count the total number of scalars composing the weights.\n\nReturns:\n    An integer count.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "cpp_dict": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
   "cpp_module": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
+  },
+  "create_additive_causal_mask": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "N",
+      "dtype"
+    ],
+    "type": "function"
+  },
+  "create_alibi_matrix": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "cls",
+      "q_sequence_length",
+      "k_sequence_length",
+      "num_heads",
+      "offset",
+      "dtype"
+    ],
+    "type": "function"
+  },
+  "create_alibi_slope": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "num_heads"
+    ],
+    "type": "function"
+  },
+  "create_block_mask": {
+    "description": "This function creates a block mask tuple from a mask_mod function.",
+    "std_args": [
+      "mask_mod",
+      "B",
+      "H",
+      "Q_LEN",
+      "KV_LEN",
+      "device",
+      "BLOCK_SIZE",
+      "_compile"
+    ],
+    "type": "function"
+  },
+  "create_nested_block_mask": {
+    "description": "This function creates a nested tensor compatible block mask tuple from a mask_mod",
+    "std_args": [
+      "mask_mod",
+      "B",
+      "H",
+      "q_nt",
+      "kv_nt",
+      "BLOCK_SIZE",
+      "_compile"
+    ],
+    "type": "function"
+  },
+  "cross_attention": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "cuda": {
+    "description": "Move all model parameters and buffers to the GPU.",
+    "std_args": [
+      "self",
+      "device"
+    ],
+    "type": "function"
   },
   "current_linen_module": {
     "description": "Get the current Linen module from the Linen context.",
@@ -12939,6 +15126,554 @@
     "std_args": [],
     "type": "function"
   },
+  "custom_from_mask": {
+    "description": "Prune tensor corresponding to parameter called ``name`` in ``module`` by applying the pre-computed mask in ``mask``.",
+    "std_args": [
+      "module",
+      "name",
+      "mask"
+    ],
+    "type": "function"
+  },
+  "cutoffs": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "data_parallel": {
+    "description": "Evaluate module(input) in parallel across the GPUs given in device_ids.",
+    "std_args": [
+      "module",
+      "inputs",
+      "device_ids",
+      "output_device",
+      "dim",
+      "module_kwargs"
+    ],
+    "type": "function"
+  },
+  "decode": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "default_a_initializer": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "default_b_initializer": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "default_bias_init": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "default_embed_init": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "default_kernel_init": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "delta": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dense_h": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dense_i": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "deterministic": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dirac": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dirac_": {
+    "description": "Fill the {3, 4, 5}-dimensional input `Tensor` with the Dirac delta function.",
+    "std_args": [
+      "tensor",
+      "groups"
+    ],
+    "type": "function"
+  },
+  "distance_function": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "divisor_override": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dot_general": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dot_general_cls": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dot_product_attention_weights": {
+    "description": "Computes dot-product attention weights given query and key.",
+    "std_args": [
+      "query",
+      "key",
+      "bias",
+      "mask",
+      "broadcast_dropout",
+      "dropout_rng",
+      "dropout_rate",
+      "deterministic",
+      "dtype",
+      "precision",
+      "module",
+      "promote_dtype",
+      "is_causal"
+    ],
+    "type": "function"
+  },
+  "dropout1d": {
+    "description": "Randomly zero out entire channels (a channel is a 1D feature map).",
+    "std_args": [
+      "input",
+      "p",
+      "training",
+      "inplace"
+    ],
+    "type": "function"
+  },
+  "dropout_rate": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "dump_patches": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "einsum_op": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "einsum_str": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "elementwise_affine": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "elu_": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "embed_dim": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "embedding_bag": {
+    "description": "Compute sums, means or maxes of `bags` of embeddings.",
+    "std_args": [
+      "input",
+      "weight",
+      "offsets",
+      "max_norm",
+      "norm_type",
+      "scale_grad_by_freq",
+      "mode",
+      "sparse",
+      "per_sample_weights",
+      "include_last_offset",
+      "padding_idx"
+    ],
+    "type": "function"
+  },
+  "enable_lora": {
+    "description": "",
+    "std_args": [
+      "self",
+      "rank",
+      "lora_alpha",
+      "a_initializer",
+      "b_initializer"
+    ],
+    "type": "function"
+  },
+  "enable_nested_tensor": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "epsilon": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "error_on_non_matrix": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "extra_repr": {
+    "description": "Return the extra representation of the module.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "factory_kwargs": {
+    "description": "Return a canonicalized dict of factory kwargs.",
+    "std_args": [
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "feature_alpha_dropout": {
+    "description": "Randomly masks out entire channels (a channel is a feature map).",
+    "std_args": [
+      "input",
+      "p",
+      "training",
+      "inplace"
+    ],
+    "type": "function"
+  },
+  "feature_axes": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "feature_axis": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "feature_group_count": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "features": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "filter_and_map": {
+    "description": "Recursively filter the contents of the module using ``filter_fn``,",
+    "std_args": [
+      "self",
+      "filter_fn",
+      "map_fn",
+      "is_leaf_fn"
+    ],
+    "type": "function"
+  },
+  "finalize_state": {
+    "description": "",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "find_unused_parameters": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "flex_attention": {
+    "description": "This function implements scaled dot product attention with an arbitrary attention score modification function.",
+    "std_args": [
+      "query",
+      "key",
+      "value",
+      "score_mod",
+      "block_mask",
+      "scale",
+      "enable_gqa",
+      "return_lse",
+      "kernel_options",
+      "return_aux"
+    ],
+    "type": "function"
+  },
+  "flip_sequences": {
+    "description": "Flips a sequence of inputs along the time axis.",
+    "std_args": [
+      "inputs",
+      "seq_lengths",
+      "num_batch_dims",
+      "time_major"
+    ],
+    "type": "function"
+  },
+  "fold": {
+    "description": "Combine an array of sliding local blocks into a large containing tensor.",
+    "std_args": [
+      "input",
+      "output_size",
+      "kernel_size",
+      "dilation",
+      "padding",
+      "stride"
+    ],
+    "type": "function"
+  },
+  "forward_rnn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "fractional_max_pool2d": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "fractional_max_pool2d_with_indices": {
+    "description": "fractional_max_pool2d(input, kernel_size, output_size=None, output_ratio=None, return_indices=False, _random_samples=None)",
+    "std_args": [
+      "input",
+      "kernel_size",
+      "output_size",
+      "output_ratio",
+      "return_indices",
+      "_random_samples"
+    ],
+    "type": "function"
+  },
+  "fractional_max_pool3d": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "fractional_max_pool3d_with_indices": {
+    "description": "fractional_max_pool3d(input, kernel_size, output_size=None, output_ratio=None, return_indices=False, _random_samples=None)",
+    "std_args": [
+      "input",
+      "kernel_size",
+      "output_size",
+      "output_ratio",
+      "return_indices",
+      "_random_samples"
+    ],
+    "type": "function"
+  },
+  "from_config": {
+    "description": "Creates an operation from its config.\n\nThis method is the reverse of `get_config`, capable of instantiating the\nsame operation from the config dictionary.\n\nNote: If you override this method, you might receive a serialized dtype\nconfig, which is a `dict`. You can deserialize it as follows:\n\n```python\nif \"dtype\" in config and isinstance(config[\"dtype\"], dict):\n    policy = dtype_policies.deserialize(config[\"dtype\"])\n```\n\nArgs:\n    config: A Python dictionary, typically the output of `get_config`.\n\nReturns:\n    An operation instance.",
+    "std_args": [
+      "config"
+    ],
+    "type": "function"
+  },
+  "from_embedding": {
+    "description": "Create a :obj:`QuantizedEmbedding` layer from an :obj:`Embedding` layer.",
+    "std_args": [
+      "cls",
+      "embedding_layer",
+      "group_size",
+      "bits",
+      "mode"
+    ],
+    "type": "function"
+  },
+  "from_kv_blocks": {
+    "description": "Creates a BlockMask instance from key-value block information.",
+    "std_args": [
+      "cls",
+      "kv_num_blocks",
+      "kv_indices",
+      "full_kv_num_blocks",
+      "full_kv_indices",
+      "BLOCK_SIZE",
+      "mask_mod",
+      "seq_lengths",
+      "compute_q_blocks"
+    ],
+    "type": "function"
+  },
+  "from_linear": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "cls",
+      "linear_layer",
+      "segments",
+      "group"
+    ],
+    "type": "function"
+  },
+  "from_pretrained": {
+    "description": "Create EmbeddingBag instance from given 2-dimensional FloatTensor.",
+    "std_args": [
+      "cls",
+      "embeddings",
+      "freeze",
+      "max_norm",
+      "norm_type",
+      "scale_grad_by_freq",
+      "mode",
+      "sparse",
+      "include_last_offset",
+      "padding_idx"
+    ],
+    "type": "function"
+  },
+  "from_quantized_linear": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "cls",
+      "quantized_linear_layer",
+      "segments",
+      "group"
+    ],
+    "type": "function"
+  },
+  "fromkeys": {
+    "description": "Return a new ParameterDict with the keys provided.",
+    "std_args": [
+      "self",
+      "keys",
+      "default"
+    ],
+    "type": "function"
+  },
+  "full_kv_indices": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "full_kv_num_blocks": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "full_q_indices": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "full_q_num_blocks": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "functional_call": {
+    "description": "Perform a functional call on the module by replacing the module parameters and buffers with the provided ones.",
+    "std_args": [
+      "module",
+      "parameters_and_buffers",
+      "args",
+      "kwargs",
+      "tie_weights",
+      "strict"
+    ],
+    "type": "function"
+  },
+  "fuse_conv_bn_eval": {
+    "description": "Fuse a convolutional module and a BatchNorm module into a single, new convolutional module.",
+    "std_args": [
+      "conv",
+      "bn",
+      "transpose"
+    ],
+    "type": "function"
+  },
+  "fuse_conv_bn_weights": {
+    "description": "Fuse convolutional module parameters and BatchNorm module parameters into new convolutional module parameters.",
+    "std_args": [
+      "conv_w",
+      "conv_b",
+      "bn_rm",
+      "bn_rv",
+      "bn_eps",
+      "bn_w",
+      "bn_b",
+      "transpose"
+    ],
+    "type": "function"
+  },
+  "fuse_linear_bn_eval": {
+    "description": "Fuse a linear module and a BatchNorm module into a single, new linear module.",
+    "std_args": [
+      "linear",
+      "bn"
+    ],
+    "type": "function"
+  },
+  "fuse_linear_bn_weights": {
+    "description": "Fuse linear module parameters and BatchNorm module parameters into new linear module parameters.",
+    "std_args": [
+      "linear_w",
+      "linear_b",
+      "bn_rm",
+      "bn_rv",
+      "bn_eps",
+      "bn_w",
+      "bn_b"
+    ],
+    "type": "function"
+  },
+  "gate_fn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "gelu_approx": {
+    "description": "An approximation to Gaussian Error Linear Unit.",
+    "std_args": [
+      "x"
+    ],
+    "type": "function"
+  },
+  "gelu_fast_approx": {
+    "description": "A fast approximation to Gaussian Error Linear Unit.",
+    "std_args": [
+      "x"
+    ],
+    "type": "function"
+  },
+  "generate_square_subsequent_mask": {
+    "description": "Generate a square causal mask for the sequence.",
+    "std_args": [
+      "sz",
+      "device",
+      "dtype"
+    ],
+    "type": "function"
+  },
+  "get_a_var": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "obj"
+    ],
+    "type": "function"
+  },
   "get_abstract_model": {
     "description": "The class representing a Python function.",
     "std_args": [
@@ -12947,11 +15682,384 @@
     ],
     "type": "function"
   },
+  "get_buffer": {
+    "description": "Return the buffer given by ``target`` if it exists, otherwise throw an error.",
+    "std_args": [
+      "self",
+      "target"
+    ],
+    "type": "function"
+  },
+  "get_build_config": {
+    "description": "Returns a dictionary with the layer's input shape.\n\nThis method returns a config dict that can be used by\n`build_from_config(config)` to create all states (e.g. Variables and\nLookup tables) needed by the layer.\n\nBy default, the config only contains the input shape that the layer\nwas built with. If you're writing a custom layer that creates state in\nan unusual way, you should override this method to make sure this state\nis already created when Keras attempts to load its value upon model\nloading.\n\nReturns:\n    A dict containing the input shape associated with the layer.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "get_clipped_bbox": {
+    "description": "",
+    "std_args": [
+      "self",
+      "bounding_boxes",
+      "h_end",
+      "h_start",
+      "w_end",
+      "w_start"
+    ],
+    "type": "function"
+  },
+  "get_config": {
+    "description": "Returns the config of the object.\n\nAn object config is a Python dictionary (serializable)\ncontaining the information needed to re-instantiate it.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "get_dropout_mask": {
+    "description": "",
+    "std_args": [
+      "self",
+      "step_input"
+    ],
+    "type": "function"
+  },
+  "get_elastic_transform_params": {
+    "description": "",
+    "std_args": [
+      "self",
+      "height",
+      "width",
+      "factor"
+    ],
+    "type": "function"
+  },
+  "get_expected_cell_size": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "input",
+      "batch_sizes"
+    ],
+    "type": "function"
+  },
+  "get_expected_hidden_size": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "input",
+      "batch_sizes"
+    ],
+    "type": "function"
+  },
+  "get_extra_state": {
+    "description": "Return any extra state to include in the module's state_dict.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "get_initial_state": {
+    "description": "",
+    "std_args": [
+      "self",
+      "batch_size"
+    ],
+    "type": "function"
+  },
+  "get_random_transformation": {
+    "description": "",
+    "std_args": [
+      "self",
+      "data",
+      "training",
+      "seed"
+    ],
+    "type": "function"
+  },
+  "get_recurrent_dropout_mask": {
+    "description": "",
+    "std_args": [
+      "self",
+      "step_input"
+    ],
+    "type": "function"
+  },
+  "get_shifted_bbox": {
+    "description": "",
+    "std_args": [
+      "self",
+      "bounding_boxes",
+      "w_shift_factor",
+      "h_shift_factor"
+    ],
+    "type": "function"
+  },
   "get_submodule": {
     "description": "Return the submodule given by ``target`` if it exists, otherwise throw an error.",
     "std_args": [
       "self",
       "target"
+    ],
+    "type": "function"
+  },
+  "get_transformed_x_y": {
+    "description": "",
+    "std_args": [
+      "self",
+      "x",
+      "y",
+      "transform"
+    ],
+    "type": "function"
+  },
+  "get_vocabulary": {
+    "description": "Returns the current vocabulary of the layer.\n\nArgs:\n    include_special_tokens: If `True`, the returned vocabulary\n        will include the padding and OOV tokens,\n        and a term's index in the vocabulary will equal\n        the term's index when calling the layer. If `False`, the\n        returned vocabulary will not include any padding\n        or OOV tokens.",
+    "std_args": [
+      "self",
+      "include_special_tokens"
+    ],
+    "type": "function"
+  },
+  "get_weights": {
+    "description": "Return the values of `layer.weights` as a list of NumPy arrays.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "global_unstructured": {
+    "description": "Globally prunes tensors corresponding to all parameters in ``parameters`` by applying the specified ``pruning_method``.",
+    "std_args": [
+      "parameters",
+      "pruning_method",
+      "importance_scores",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "gradient_as_bucket_view": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "grid_sample": {
+    "description": "Compute grid sample.",
+    "std_args": [
+      "input",
+      "grid",
+      "mode",
+      "padding_mode",
+      "align_corners"
+    ],
+    "type": "function"
+  },
+  "group_norm": {
+    "description": "Apply Group Normalization for last certain number of dimensions.",
+    "std_args": [
+      "input",
+      "num_groups",
+      "weight",
+      "bias",
+      "eps"
+    ],
+    "type": "function"
+  },
+  "gumbel_softmax": {
+    "description": "Sample from the Gumbel-Softmax distribution (`Link 1`_  `Link 2`_) and optionally discretize.",
+    "std_args": [
+      "logits",
+      "tau",
+      "hard",
+      "eps",
+      "dim"
+    ],
+    "type": "function"
+  },
+  "hardtanh_": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "has_uninitialized_params": {
+    "description": "Check if a module has parameters that are not initialized.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "head_bias": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "head_size": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "hf": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "hg": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "hi": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "hidden_features": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "hinge_embedding_loss": {
+    "description": "Compute the hinge embedding loss.",
+    "std_args": [
+      "input",
+      "target",
+      "margin",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "ho": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "if_": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ig": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ignore_index": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ii": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "in_kv_features": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "in_proj_bias": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "in_proj_weight": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "include_last_offset": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "init_cache": {
+    "description": "Initializes cache for fast autoregressive decoding. When",
+    "std_args": [
+      "self",
+      "input_shape",
+      "dtype"
+    ],
+    "type": "function"
+  },
+  "initialize_carry": {
+    "description": "Initialize the RNN cell carry.",
+    "std_args": [
+      "self",
+      "input_shape",
+      "rngs",
+      "carry_init"
+    ],
+    "type": "function"
+  },
+  "initialize_parameters": {
+    "description": "Initialize parameters according to the input batch properties.",
+    "std_args": [
+      "self",
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "inner_loop": {
+    "description": "",
+    "std_args": [
+      "self",
+      "sequences",
+      "initial_state",
+      "mask",
+      "training"
+    ],
+    "type": "function"
+  },
+  "input_dilation": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "input_size": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "instance_norm": {
+    "description": "Apply Instance Normalization independently for each channel in every data sample within a batch.",
+    "std_args": [
+      "input",
+      "running_mean",
+      "running_var",
+      "weight",
+      "bias",
+      "use_input_stats",
+      "momentum",
+      "eps"
+    ],
+    "type": "function"
+  },
+  "io": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ipu": {
+    "description": "Move all model parameters and buffers to the IPU.",
+    "std_args": [
+      "self",
+      "device"
+    ],
+    "type": "function"
+  },
+  "is_cuda": {
+    "description": "Return true if `self.data` stored on a gpu.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "is_lazy": {
+    "description": "Returns whether ``param`` is an ``UninitializedParameter`` or ``UninitializedBuffer``.",
+    "std_args": [
+      "param"
     ],
     "type": "function"
   },
@@ -12967,6 +16075,35 @@
     "std_args": [],
     "type": "attribute"
   },
+  "is_namedtuple": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "obj"
+    ],
+    "type": "function"
+  },
+  "is_parametrized": {
+    "description": "Determine if a module has a parametrization.",
+    "std_args": [
+      "module",
+      "tensor_name"
+    ],
+    "type": "function"
+  },
+  "is_pinned": {
+    "description": "Return true if `self.data` stored on in pinned memory.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "is_pruned": {
+    "description": "Check if a module is pruned by looking for pruning pre-hooks.",
+    "std_args": [
+      "module"
+    ],
+    "type": "function"
+  },
   "ismodule": {
     "description": "The class representing a Python function.",
     "std_args": [
@@ -12974,7 +16111,560 @@
     ],
     "type": "function"
   },
+  "join_device": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "join_hook": {
+    "description": "DDP join hook enables training on uneven inputs by mirroring communications in forward and backward passes.",
+    "std_args": [
+      "self",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "join_process_group": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "k_proj_weight": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kdim": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "keep_order": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "keepdim": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kernel": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kernel_dilation": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kernel_shape": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "key_ln": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "key_proj": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kl_div": {
+    "description": "Compute the KL Divergence loss.",
+    "std_args": [
+      "input",
+      "target",
+      "size_average",
+      "reduce",
+      "reduction",
+      "log_target"
+    ],
+    "type": "function"
+  },
+  "kl_div_loss": {
+    "description": "Computes the Kullback-Leibler divergence loss.",
+    "std_args": [
+      "inputs",
+      "targets",
+      "axis",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "kpack": {
+    "description": "ROCm-specific kernel packing parameter.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kv_indices": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "kv_num_blocks": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "l1_unstructured": {
+    "description": "Prune tensor by removing units with the lowest L1-norm.",
+    "std_args": [
+      "module",
+      "name",
+      "amount",
+      "importance_scores"
+    ],
+    "type": "function"
+  },
+  "layer_instance": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "layer_normalization": {
+    "description": "Layer normalization layer (Ba et al., 2016).\n\nNormalize the activations of the previous layer for each given example in a\nbatch independently, rather than across a batch like Batch Normalization.\ni.e. applies a transformation that maintains the mean activation within each\nexample close to 0 and the activation standard deviation close to 1.\n\nArgs:\n    x: Input tensor.\n    gamma: Optional scaling factor for the normalization.\n    beta: Optional add offset for the normalized tensor.\n    axis: The axis or axes along which to perform normalization. Default to\n        `-1`.\n    epsilon: A lower bound value for the norm.\n        Defaults to `backend.epsilon()`.\n\nReturns:\n    The normalized array.\n\nExample:\n\n>>> x = keras.ops.arange(5, dtype=\"float32\")\n>>> keras.ops.layer_normalization(x)\narray([-1.4142135, -0.70710677, 0.0, 0.7071067, 1.4142135])",
+    "std_args": [
+      "x",
+      "gamma",
+      "beta",
+      "axis",
+      "epsilon",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "leaf_modules": {
+    "description": "Return the submodules that do not contain other modules.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "ln": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ln1": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ln2": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ln3": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ln_promote_dtype": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "ln_structured": {
+    "description": "Prune tensor by removing channels with the lowest L\\ ``n``-norm along the specified dimension.",
+    "std_args": [
+      "module",
+      "name",
+      "amount",
+      "n",
+      "dim",
+      "importance_scores"
+    ],
+    "type": "function"
+  },
+  "load_assets": {
+    "description": "",
+    "std_args": [
+      "self",
+      "dir_path"
+    ],
+    "type": "function"
+  },
+  "load_own_variables": {
+    "description": "Loads the state of the layer.\n\nYou can override this method to take full control of how the state of\nthe layer is loaded upon calling `keras.models.load_model()`.\n\nArgs:\n    store: Dict from which the state of the model will be loaded.",
+    "std_args": [
+      "self",
+      "store"
+    ],
+    "type": "function"
+  },
+  "load_weights": {
+    "description": "Update the model's weights from a ``.npz``, a ``.safetensors`` file, or a list.",
+    "std_args": [
+      "self",
+      "file_or_weights",
+      "strict"
+    ],
+    "type": "function"
+  },
+  "local_response_norm": {
+    "description": "Apply local response normalization over an input signal.",
+    "std_args": [
+      "input",
+      "size",
+      "alpha",
+      "beta",
+      "k"
+    ],
+    "type": "function"
+  },
+  "log_cosh_loss": {
+    "description": "Computes the log cosh loss between inputs and targets.",
+    "std_args": [
+      "inputs",
+      "targets",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "log_input": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "log_target": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "lora": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "lora_a": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "lora_b": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "lora_param_type": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "lp_pool1d": {
+    "description": "Apply a 1D power-average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "input",
+      "norm_type",
+      "kernel_size",
+      "stride",
+      "ceil_mode"
+    ],
+    "type": "function"
+  },
+  "lp_pool2d": {
+    "description": "Apply a 2D power-average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "input",
+      "norm_type",
+      "kernel_size",
+      "stride",
+      "ceil_mode"
+    ],
+    "type": "function"
+  },
+  "lp_pool3d": {
+    "description": "Apply a 3D power-average pooling over an input signal composed of several input planes.",
+    "std_args": [
+      "input",
+      "norm_type",
+      "kernel_size",
+      "stride",
+      "ceil_mode"
+    ],
+    "type": "function"
+  },
+  "lse": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "make_attention_mask": {
+    "description": "Mask-making helper for attention weights.",
+    "std_args": [
+      "query_input",
+      "key_input",
+      "pairwise_fn",
+      "extra_batch_dims",
+      "dtype"
+    ],
+    "type": "function"
+  },
+  "make_causal_mask": {
+    "description": "Make a causal mask for self-attention.",
+    "std_args": [
+      "x",
+      "extra_batch_dims",
+      "dtype"
+    ],
+    "type": "function"
+  },
+  "materialize": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "shape",
+      "device",
+      "dtype"
+    ],
+    "type": "function"
+  },
+  "matrix_instr_nonkdim": {
+    "description": "ROCm-specific matrix instruction non-K dimension.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "max_pool1d_with_indices": {
+    "description": "max_pool1d(input, kernel_size, stride=None, padding=0, dilation=1, ceil_mode=False, return_indices=False)",
+    "std_args": [
+      "input",
+      "kernel_size",
+      "stride",
+      "padding",
+      "dilation",
+      "ceil_mode",
+      "return_indices"
+    ],
+    "type": "function"
+  },
+  "max_pool2d_with_indices": {
+    "description": "max_pool2d(input, kernel_size, stride=None, padding=0, dilation=1, ceil_mode=False, return_indices=False)",
+    "std_args": [
+      "input",
+      "kernel_size",
+      "stride",
+      "padding",
+      "dilation",
+      "ceil_mode",
+      "return_indices"
+    ],
+    "type": "function"
+  },
+  "max_pool3d_with_indices": {
+    "description": "max_pool3d(input, kernel_size, stride=None, padding=0, dilation=1, ceil_mode=False, return_indices=False)",
+    "std_args": [
+      "input",
+      "kernel_size",
+      "stride",
+      "padding",
+      "dilation",
+      "ceil_mode",
+      "return_indices"
+    ],
+    "type": "function"
+  },
+  "max_scores": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "max_unpool1d": {
+    "description": "Compute a partial inverse of :class:`MaxPool1d`.",
+    "std_args": [
+      "input",
+      "indices",
+      "kernel_size",
+      "stride",
+      "padding",
+      "output_size"
+    ],
+    "type": "function"
+  },
+  "max_unpool2d": {
+    "description": "Compute a partial inverse of :class:`MaxPool2d`.",
+    "std_args": [
+      "input",
+      "indices",
+      "kernel_size",
+      "stride",
+      "padding",
+      "output_size"
+    ],
+    "type": "function"
+  },
+  "max_unpool3d": {
+    "description": "Compute a partial inverse of :class:`MaxPool3d`.",
+    "std_args": [
+      "input",
+      "indices",
+      "kernel_size",
+      "stride",
+      "padding",
+      "output_size"
+    ],
+    "type": "function"
+  },
+  "merge_fn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "mixed_precision": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
   "model": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "modified_orthogonal": {
+    "description": "Modified orthogonal initializer for compatibility with half precision.",
+    "std_args": [
+      "key",
+      "shape",
+      "dtype"
+    ],
+    "type": "function"
+  },
+  "mtia": {
+    "description": "Move all model parameters and buffers to the MTIA.",
+    "std_args": [
+      "self",
+      "device"
+    ],
+    "type": "function"
+  },
+  "multi_head_attention_forward": {
+    "description": "Forward method for MultiHeadAttention.",
+    "std_args": [
+      "query",
+      "key",
+      "value",
+      "embed_dim_to_check",
+      "num_heads",
+      "in_proj_weight",
+      "in_proj_bias",
+      "bias_k",
+      "bias_v",
+      "add_zero_attn",
+      "dropout_p",
+      "out_proj_weight",
+      "out_proj_bias",
+      "training",
+      "key_padding_mask",
+      "need_weights",
+      "attn_mask",
+      "use_separate_proj_weight",
+      "q_proj_weight",
+      "k_proj_weight",
+      "v_proj_weight",
+      "static_k",
+      "static_v",
+      "average_attn_weights",
+      "is_causal"
+    ],
+    "type": "function"
+  },
+  "multi_hot": {
+    "description": "Encodes integer labels as multi-hot vectors.\n\nThis function encodes integer labels as multi-hot vectors, where each label\nis mapped to a binary value in the resulting vector.\n\nArgs:\n    inputs: Tensor of integer labels to be converted to multi-hot vectors.\n    num_classes: Integer, the total number of unique classes.\n    axis: (optional) Axis along which the multi-hot encoding should be\n        added. Defaults to `-1`, which corresponds to the last dimension.\n    dtype: (optional) The data type of the resulting tensor. Default\n        is backend's float type.\n    sparse: Whether to return a sparse tensor; for backends that support\n        sparse tensors.\n\nReturns:\n    Tensor: The multi-hot encoded tensor.\n\nExample:\n\n>>> data = keras.ops.convert_to_tensor([0, 4])\n>>> keras.ops.multi_hot(data, num_classes=5)\narray([1.0, 0.0, 0.0, 0.0, 1.0], dtype=float32)",
+    "std_args": [
+      "inputs",
+      "num_classes",
+      "axis",
+      "dtype",
+      "sparse",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "multi_margin_loss": {
+    "description": "Compute the multi margin loss, with optional weighting.",
+    "std_args": [
+      "input",
+      "target",
+      "p",
+      "margin",
+      "weight",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "multihead_attn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "multilabel_margin_loss": {
+    "description": "Compute the multilabel margin loss.",
+    "std_args": [
+      "input",
+      "target",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "multilabel_soft_margin_loss": {
+    "description": "Compute the multilabel soft margin loss.",
+    "std_args": [
+      "input",
+      "target",
+      "weight",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "n_classes": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "n_clusters": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "n_power_iterations": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "n_steps": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "named_buffers": {
+    "description": "Return an iterator over module buffers, yielding both the name of the buffer as well as the buffer itself.",
+    "std_args": [
+      "self",
+      "prefix",
+      "recurse",
+      "remove_duplicate"
+    ],
+    "type": "function"
+  },
+  "named_children": {
+    "description": "Return an iterator over immediate children modules, yielding both the name of the module as well as the module itself.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "native_channel_shuffle": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
@@ -12984,12 +16674,859 @@
     "std_args": [],
     "type": "attribute"
   },
+  "nhead": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "no_sync": {
+    "description": "Context manager to disable gradient synchronizations across DDP processes.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "noop_mask": {
+    "description": "Returns a noop mask_mod",
+    "std_args": [
+      "batch",
+      "head",
+      "token_q",
+      "token_kv"
+    ],
+    "type": "function"
+  },
+  "normal_": {
+    "description": "Fill the input Tensor with values drawn from the normal distribution.",
+    "std_args": [
+      "tensor",
+      "mean",
+      "std",
+      "generator"
+    ],
+    "type": "function"
+  },
+  "normalize_qk": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "normalized_shape": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "normalized_weights": {
+    "description": "Generate spectral normalized weights.\n\nThis method returns the updated value for `self.kernel` with the\nspectral normalized value, so that the layer is ready for `call()`.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "ntensors": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_channels": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_feature_axes": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_parameters": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_stages": {
+    "description": "Number of pipeline stages in the CUDA kernel. Higher values may improve performance",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "num_warps": {
+    "description": "Number of warps to use in the CUDA kernel. Higher values may improve performance",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "numel": {
+    "description": "Returns the number of elements (not accounting for sparsity) in the mask.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "ones_init": {
+    "description": "Builds an initializer that returns a constant array full of ones.",
+    "std_args": [],
+    "type": "function"
+  },
+  "or_masks": {
+    "description": "Returns a mask_mod that's the union of provided mask_mods",
+    "std_args": [
+      "mask_mods"
+    ],
+    "type": "function"
+  },
+  "original": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "out": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "out_channels": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "out_dot_general": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "out_dot_general_cls": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "out_promote_dtype": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "output_padding": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "pack_padded_sequence": {
+    "description": "Packs a Tensor containing padded sequences of variable length.",
+    "std_args": [
+      "input",
+      "lengths",
+      "batch_first",
+      "enforce_sorted"
+    ],
+    "type": "function"
+  },
+  "pack_sequence": {
+    "description": "Packs a list of variable length Tensors.",
+    "std_args": [
+      "sequences",
+      "enforce_sorted"
+    ],
+    "type": "function"
+  },
+  "pad_packed_sequence": {
+    "description": "Pad a packed batch of variable length sequences.",
+    "std_args": [
+      "sequence",
+      "batch_first",
+      "padding_value",
+      "total_length"
+    ],
+    "type": "function"
+  },
+  "pad_sequence": {
+    "description": "Pad a list of variable length Tensors with :attr:`padding_value`.",
+    "std_args": [
+      "sequences",
+      "batch_first",
+      "padding_value",
+      "padding_side"
+    ],
+    "type": "function"
+  },
+  "pairwise_distance": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "parallel_apply": {
+    "description": "Apply each `module` in :attr:`modules` in parallel on each of :attr:`devices`.",
+    "std_args": [
+      "modules",
+      "inputs",
+      "kwargs_tup",
+      "devices"
+    ],
+    "type": "function"
+  },
+  "param_dtype": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "parameters_to_ignore": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "pdist": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "permute_hidden": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "hx",
+      "permutation"
+    ],
+    "type": "function"
+  },
+  "persistent": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "pin_memory": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "pixel_shuffle": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "pixel_unshuffle": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "poisson_nll_loss": {
+    "description": "Compute the Poisson negative log likelihood loss.",
+    "std_args": [
+      "input",
+      "target",
+      "log_input",
+      "full",
+      "size_average",
+      "eps",
+      "reduce",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "pos_weight": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "precision": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "preferred_element_type": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "process_group": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "proj_size": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "promote_dtype": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "prune": {
+    "description": "Compute and returns a pruned version of input tensor ``t``.",
+    "std_args": [
+      "self",
+      "t",
+      "default_mask",
+      "importance_scores"
+    ],
+    "type": "function"
+  },
+  "pytorch_compatible": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "q_indices": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "q_num_blocks": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "q_proj_weight": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "qkv_dot_general": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "qkv_dot_general_cls": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "qkv_features": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "qkv_promote_dtype": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "quantized_build": {
+    "description": "",
+    "std_args": [
+      "self",
+      "input_shape",
+      "mode"
+    ],
+    "type": "function"
+  },
+  "quantized_call": {
+    "description": "",
+    "std_args": [
+      "self",
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "query": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "query_ln": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "query_proj": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "random_structured": {
+    "description": "Prune tensor by removing random channels along the specified dimension.",
+    "std_args": [
+      "module",
+      "name",
+      "amount",
+      "dim"
+    ],
+    "type": "function"
+  },
+  "random_unstructured": {
+    "description": "Prune tensor by removing random (currently unpruned) units.",
+    "std_args": [
+      "module",
+      "name",
+      "amount"
+    ],
+    "type": "function"
+  },
+  "rate": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "recompute_scale_factor": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "reduce_add": {
+    "description": "Sum tensors from multiple GPUs.",
+    "std_args": [
+      "inputs",
+      "destination"
+    ],
+    "type": "function"
+  },
+  "reduce_add_coalesced": {
+    "description": "Sum tensors from multiple GPUs.",
+    "std_args": [
+      "inputs",
+      "destination",
+      "buffer_size"
+    ],
+    "type": "function"
+  },
+  "reduction_axes": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "register_backward_hook": {
+    "description": "Register a backward hook on the module.",
+    "std_args": [
+      "self",
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_comm_hook": {
+    "description": "Register communication hook for user-defined DDP aggregation of gradients across multiple workers.",
+    "std_args": [
+      "self",
+      "state",
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_forward_hook": {
+    "description": "Register a forward hook on the module.",
+    "std_args": [
+      "self",
+      "hook",
+      "prepend",
+      "with_kwargs",
+      "always_call"
+    ],
+    "type": "function"
+  },
+  "register_forward_pre_hook": {
+    "description": "Register a forward pre-hook on the module.",
+    "std_args": [
+      "self",
+      "hook",
+      "prepend",
+      "with_kwargs"
+    ],
+    "type": "function"
+  },
+  "register_full_backward_hook": {
+    "description": "Register a backward hook on the module.",
+    "std_args": [
+      "self",
+      "hook",
+      "prepend"
+    ],
+    "type": "function"
+  },
+  "register_full_backward_pre_hook": {
+    "description": "Register a backward pre-hook on the module.",
+    "std_args": [
+      "self",
+      "hook",
+      "prepend"
+    ],
+    "type": "function"
+  },
+  "register_load_state_dict_post_hook": {
+    "description": "Register a post-hook to be run after module's :meth:`~nn.Module.load_state_dict` is called.",
+    "std_args": [
+      "self",
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_load_state_dict_pre_hook": {
+    "description": "Register a pre-hook to be run before module's :meth:`~nn.Module.load_state_dict` is called.",
+    "std_args": [
+      "self",
+      "hook"
+    ],
+    "type": "function"
+  },
   "register_module": {
     "description": "Alias for :func:`add_module`.",
     "std_args": [
       "self",
       "name",
       "module"
+    ],
+    "type": "function"
+  },
+  "register_module_backward_hook": {
+    "description": "Register a backward hook common to all the modules.",
+    "std_args": [
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_module_buffer_registration_hook": {
+    "description": "Register a buffer registration hook common to all modules.",
+    "std_args": [
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_module_forward_hook": {
+    "description": "Register a global forward hook for all the modules.",
+    "std_args": [
+      "hook",
+      "with_kwargs",
+      "always_call"
+    ],
+    "type": "function"
+  },
+  "register_module_forward_pre_hook": {
+    "description": "Register a forward pre-hook common to all modules.",
+    "std_args": [
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_module_full_backward_hook": {
+    "description": "Register a backward hook common to all the modules.",
+    "std_args": [
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_module_full_backward_pre_hook": {
+    "description": "Register a backward pre-hook common to all the modules.",
+    "std_args": [
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_module_module_registration_hook": {
+    "description": "Register a module registration hook common to all modules.",
+    "std_args": [
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_module_parameter_registration_hook": {
+    "description": "Register a parameter registration hook common to all modules.",
+    "std_args": [
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_parametrization": {
+    "description": "Register a parametrization to a tensor in a module.",
+    "std_args": [
+      "module",
+      "tensor_name",
+      "parametrization",
+      "unsafe"
+    ],
+    "type": "function"
+  },
+  "register_state_dict_post_hook": {
+    "description": "Register a post-hook for the :meth:`~torch.nn.Module.state_dict` method.",
+    "std_args": [
+      "self",
+      "hook"
+    ],
+    "type": "function"
+  },
+  "register_state_dict_pre_hook": {
+    "description": "Register a pre-hook for the :meth:`~torch.nn.Module.state_dict` method.",
+    "std_args": [
+      "self",
+      "hook"
+    ],
+    "type": "function"
+  },
+  "relu2": {
+    "description": "Applies the ReLU\u00b2 activation function.",
+    "std_args": [
+      "x"
+    ],
+    "type": "function"
+  },
+  "relu_": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "rematerialized_call": {
+    "description": "Enable rematerialization dynamically for layer's call method.\n\nArgs:\n    layer_call: The original `call` method of a layer.\n\nReturns:\n    Rematerialized layer's `call` method.",
+    "std_args": [
+      "self",
+      "layer_call",
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "remove_parametrizations": {
+    "description": "Remove the parametrizations on a tensor in a module.",
+    "std_args": [
+      "module",
+      "tensor_name",
+      "leave_parametrized"
+    ],
+    "type": "function"
+  },
+  "remove_spectral_norm": {
+    "description": "Remove the spectral normalization reparameterization from a module.",
+    "std_args": [
+      "module",
+      "name"
+    ],
+    "type": "function"
+  },
+  "remove_weight_norm": {
+    "description": "Remove the weight normalization reparameterization from a module.",
+    "std_args": [
+      "module",
+      "name"
+    ],
+    "type": "function"
+  },
+  "replicate": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "network",
+      "devices",
+      "detach"
+    ],
+    "type": "function"
+  },
+  "require_backward_grad_sync": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "require_forward_param_sync": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "requires_grad_": {
+    "description": "Change if autograd should record operations on parameters in this module.",
+    "std_args": [
+      "self",
+      "requires_grad"
+    ],
+    "type": "function"
+  },
+  "reset_dropout_mask": {
+    "description": "Reset the cached dropout mask if any.\n\nThe RNN layer invokes this in the `call()` method\nso that the cached mask is cleared after calling `cell.call()`. The\nmask should be cached across all timestep within the same batch, but\nshouldn't be cached between batches.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "reset_parameters": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "reset_recurrent_dropout_mask": {
+    "description": "",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "reset_state": {
+    "description": "",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "reset_states": {
+    "description": "",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "residual": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "return_carry": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "return_indices": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "reverse": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "right_inverse": {
+    "description": "Call the ``right_inverse`` methods of the parametrizations in the inverse registration order.",
+    "std_args": [
+      "self",
+      "value"
+    ],
+    "type": "function"
+  },
+  "rng_collection": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "rngs": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "rrelu": {
+    "description": "rrelu(input, lower=1./8, upper=1./3, training=False, inplace=False) -> Tensor",
+    "std_args": [
+      "input",
+      "lower",
+      "upper",
+      "training",
+      "inplace"
+    ],
+    "type": "function"
+  },
+  "rrelu_": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "running_mean": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "running_var": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "save_assets": {
+    "description": "",
+    "std_args": [
+      "self",
+      "dir_path"
+    ],
+    "type": "function"
+  },
+  "save_own_variables": {
+    "description": "Saves the state of the layer.\n\nYou can override this method to take full control of how the state of\nthe layer is saved upon calling `model.save()`.\n\nArgs:\n    store: Dict where the state of the model will be saved.",
+    "std_args": [
+      "self",
+      "store"
+    ],
+    "type": "function"
+  },
+  "save_weights": {
+    "description": "Save the model's weights to a file. The saving method is determined by the file extension:",
+    "std_args": [
+      "self",
+      "file"
+    ],
+    "type": "function"
+  },
+  "scale_init": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "scales": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "scatter_kwargs": {
+    "description": "Scatter with support for kwargs dictionary.",
+    "std_args": [
+      "inputs",
+      "kwargs",
+      "target_gpus",
+      "dim"
+    ],
+    "type": "function"
+  },
+  "sdpa_kernel": {
+    "description": "Context manager to select which backend to use for scaled dot product attention.",
+    "std_args": [
+      "backends",
+      "set_priority"
+    ],
+    "type": "function"
+  },
+  "self_attention": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "self_attn": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "selu_": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "seq_len_kv": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "seq_len_q": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "seq_lengths": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "set_dtype": {
+    "description": "Set the dtype of the module's parameters.",
+    "std_args": [
+      "self",
+      "dtype",
+      "predicate"
+    ],
+    "type": "function"
+  },
+  "set_extra_state": {
+    "description": "Set extra state contained in the loaded `state_dict`.",
+    "std_args": [
+      "self",
+      "state"
+    ],
+    "type": "function"
+  },
+  "set_mode": {
+    "description": "Class method used by ``nnx.set_mode``.",
+    "std_args": [
+      "self",
+      "use_running_average",
+      "kwargs"
     ],
     "type": "function"
   },
@@ -13003,10 +17540,166 @@
     ],
     "type": "function"
   },
+  "set_vocabulary": {
+    "description": "Sets vocabulary (and optionally document frequency) for this layer.\n\nThis method sets the vocabulary and IDF weights for this layer directly,\ninstead of analyzing a dataset through `adapt()`. It should be used\nwhenever the vocab (and optionally document frequency) information is\nalready known. If vocabulary data is already present in the layer, this\nmethod will replace it.\n\nArgs:\n    vocabulary: Either an array or a string path to a text file.\n        If passing an array, can pass a tuple, list, 1D NumPy array,\n        or 1D tensor containing the vocabulary terms.\n        If passing a file path, the file should contain one line\n        per term in the vocabulary.\n    idf_weights: A tuple, list, 1D NumPy array, or 1D tensor of inverse\n        document frequency weights with equal length to vocabulary.\n        Must be set if `output_mode` is `\"tf_idf\"`.\n        Should not be set otherwise.",
+    "std_args": [
+      "self",
+      "vocabulary",
+      "idf_weights"
+    ],
+    "type": "function"
+  },
+  "set_weights": {
+    "description": "Sets the values of `layer.weights` from a list of NumPy arrays.",
+    "std_args": [
+      "self",
+      "weights"
+    ],
+    "type": "function"
+  },
+  "setdefault": {
+    "description": "Set the default for a key in the Parameterdict.",
+    "std_args": [
+      "self",
+      "key",
+      "default"
+    ],
+    "type": "function"
+  },
   "setup_module": {
     "description": "The class representing a Python function.",
     "std_args": [],
     "type": "function"
+  },
+  "shard_inplace": {
+    "description": "Shard a module in-place by updating its parameter dictionary with the",
+    "std_args": [
+      "module",
+      "sharding",
+      "segments",
+      "group"
+    ],
+    "type": "function"
+  },
+  "shard_linear": {
+    "description": "Create a new linear layer that has its parameters sharded and also",
+    "std_args": [
+      "module",
+      "sharding",
+      "segments",
+      "group"
+    ],
+    "type": "function"
+  },
+  "share_memory": {
+    "description": "See :meth:`torch.Tensor.share_memory_`.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "share_memory_": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "shortlist_size": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "skip_all_reduce_unused_params": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "skip_init": {
+    "description": "Given a module class object and args / kwargs, instantiate the module without initializing parameters / buffers.",
+    "std_args": [
+      "module_cls",
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "soft_margin_loss": {
+    "description": "Compute the soft margin loss.",
+    "std_args": [
+      "input",
+      "target",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "sorted_indices": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "sparsity": {
+    "description": "Computes the percentage of blocks that are sparse (i.e. not computed)",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "spectral_norm": {
+    "description": "Apply spectral normalization to a parameter in the given module.",
+    "std_args": [
+      "module",
+      "name",
+      "n_power_iterations",
+      "eps",
+      "dim"
+    ],
+    "type": "function"
+  },
+  "src_device_obj": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "state_axes": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "stateless_call": {
+    "description": "Call the layer without any side effects.\n\nArgs:\n    trainable_variables: List of trainable variables of the model.\n    non_trainable_variables: List of non-trainable variables of the\n        model.\n    *args: Positional arguments to be passed to `call()`.\n    return_losses: If `True`, `stateless_call()` will return the list of\n        losses created during `call()` as part of its return values.\n    **kwargs: Keyword arguments to be passed to `call()`.\n\nReturns:\n    A tuple. By default, returns `(outputs, non_trainable_variables)`.\n        If `return_losses = True`, then returns\n        `(outputs, non_trainable_variables, losses)`.\n\nNote: `non_trainable_variables` include not only non-trainable weights\nsuch as `BatchNormalization` statistics, but also RNG seed state\n(if there are any random operations part of the layer, such as dropout),\nand `Metric` state (if there are any metrics attached to the layer).\nThese are all elements of state of the layer.\n\nExample:\n\n```python\nmodel = ...\ndata = ...\ntrainable_variables = model.trainable_variables\nnon_trainable_variables = model.non_trainable_variables\n# Call the model with zero side effects\noutputs, non_trainable_variables = model.stateless_call(\n    trainable_variables,\n    non_trainable_variables,\n    data,\n)\n# Attach the updated state to the model\n# (until you do this, the model is still in its pre-call state).\nfor ref_var, value in zip(\n    model.non_trainable_variables, non_trainable_variables\n):\n    ref_var.assign(value)\n```",
+    "std_args": [
+      "self",
+      "trainable_variables",
+      "non_trainable_variables",
+      "args",
+      "return_losses",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "sum_gradients": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "group"
+    ],
+    "type": "function"
+  },
+  "symbolic_call": {
+    "description": "",
+    "std_args": [
+      "self",
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "tail": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "teardown_module": {
     "description": "The class representing a Python function.",
@@ -13030,9 +17723,439 @@
     "std_args": [],
     "type": "function"
   },
+  "time_major": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "to": {
+    "description": "Move and/or cast the parameters and buffers.",
+    "std_args": [
+      "self",
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
+  "to_empty": {
+    "description": "Move the parameters and buffers to the specified device without copying storage.",
+    "std_args": [
+      "self",
+      "device",
+      "recurse"
+    ],
+    "type": "function"
+  },
+  "to_kwargs": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "inputs",
+      "kwargs",
+      "device_id"
+    ],
+    "type": "function"
+  },
   "to_nnx__module": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
+  },
+  "to_quantized": {
+    "description": "Return a :obj:`QuantizedLinear` layer that approximates this layer.",
+    "std_args": [
+      "self",
+      "group_size",
+      "bits",
+      "mode"
+    ],
+    "type": "function"
+  },
+  "to_string": {
+    "description": "Returns a string representation of the block mask. Quite nifty.",
+    "std_args": [
+      "self",
+      "grid_size",
+      "limit"
+    ],
+    "type": "function"
+  },
+  "track_running_stats": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "traditional": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "trainable_parameter_filter": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "module",
+      "key",
+      "value"
+    ],
+    "type": "function"
+  },
+  "trainable_parameters": {
+    "description": "Recursively return all the non frozen :class:`mlx.core.array` members of",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "transfer_parametrizations_and_params": {
+    "description": "Transfer parametrizations and the parameters they parametrize from :attr:`from_module` to :attr:`to_module`.",
+    "std_args": [
+      "from_module",
+      "to_module",
+      "tensor_name"
+    ],
+    "type": "function"
+  },
+  "transform_bounding_boxes": {
+    "description": "",
+    "std_args": [
+      "self",
+      "bounding_boxes",
+      "transformation",
+      "training"
+    ],
+    "type": "function"
+  },
+  "transform_images": {
+    "description": "",
+    "std_args": [
+      "self",
+      "images",
+      "transformation",
+      "training"
+    ],
+    "type": "function"
+  },
+  "transform_labels": {
+    "description": "",
+    "std_args": [
+      "self",
+      "labels",
+      "transformation",
+      "training"
+    ],
+    "type": "function"
+  },
+  "transform_segmentation_masks": {
+    "description": "",
+    "std_args": [
+      "self",
+      "segmentation_masks",
+      "transformation",
+      "training"
+    ],
+    "type": "function"
+  },
+  "transform_single_bounding_box": {
+    "description": "",
+    "std_args": [
+      "self",
+      "bounding_box",
+      "transformation",
+      "training"
+    ],
+    "type": "function"
+  },
+  "transform_single_image": {
+    "description": "",
+    "std_args": [
+      "self",
+      "image",
+      "transformation",
+      "training"
+    ],
+    "type": "function"
+  },
+  "transform_single_label": {
+    "description": "",
+    "std_args": [
+      "self",
+      "label",
+      "transformation",
+      "training"
+    ],
+    "type": "function"
+  },
+  "transform_single_segmentation_mask": {
+    "description": "",
+    "std_args": [
+      "self",
+      "segmentation_mask",
+      "transformation",
+      "training"
+    ],
+    "type": "function"
+  },
+  "transpose_kernel": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "triplet_loss": {
+    "description": "Computes the triplet loss for a set of anchor, positive, and negative samples.",
+    "std_args": [
+      "anchors",
+      "positives",
+      "negatives",
+      "axis",
+      "p",
+      "margin",
+      "eps",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "triplet_margin_loss": {
+    "description": "Compute the triplet loss between given input tensors and a margin greater than 0.",
+    "std_args": [
+      "anchor",
+      "positive",
+      "negative",
+      "margin",
+      "p",
+      "eps",
+      "swap",
+      "size_average",
+      "reduce",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "triplet_margin_with_distance_loss": {
+    "description": "Compute the triplet margin loss for input tensors using a custom distance function.",
+    "std_args": [
+      "anchor",
+      "positive",
+      "negative",
+      "distance_function",
+      "margin",
+      "swap",
+      "reduction"
+    ],
+    "type": "function"
+  },
+  "type_before_parametrizations": {
+    "description": "Return the module type before parametrizations were applied and if not, then it returns the module type.",
+    "std_args": [
+      "module"
+    ],
+    "type": "function"
+  },
+  "unfreeze": {
+    "description": "Unfreeze the Module's parameters or some of them.",
+    "std_args": [
+      "self",
+      "recurse",
+      "keys",
+      "strict"
+    ],
+    "type": "function"
+  },
+  "uniform_": {
+    "description": "Fill the input Tensor with values drawn from the uniform distribution.",
+    "std_args": [
+      "tensor",
+      "a",
+      "b",
+      "generator"
+    ],
+    "type": "function"
+  },
+  "unpack_sequence": {
+    "description": "Unpack PackedSequence into a list of variable length Tensors.",
+    "std_args": [
+      "packed_sequences"
+    ],
+    "type": "function"
+  },
+  "unpad_sequence": {
+    "description": "Unpad padded Tensor into a list of variable length Tensors.",
+    "std_args": [
+      "padded_sequences",
+      "lengths",
+      "batch_first"
+    ],
+    "type": "function"
+  },
+  "unroll": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "unsafe": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "unsorted_indices": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "update_modules": {
+    "description": "Replace the child modules of this :class:`Module` instance with the",
+    "std_args": [
+      "self",
+      "modules",
+      "strict"
+    ],
+    "type": "function"
+  },
+  "update_state": {
+    "description": "",
+    "std_args": [
+      "self",
+      "data"
+    ],
+    "type": "function"
+  },
+  "upsample_cubic": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "x",
+      "scale_factor",
+      "align_corners"
+    ],
+    "type": "function"
+  },
+  "upsample_linear": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "x",
+      "scale_factor",
+      "align_corners"
+    ],
+    "type": "function"
+  },
+  "use_bias": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "use_fast_variance": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "use_nested_tensor": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "use_running_average": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "use_scale": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "use_side_stream_for_tensor_copies": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "v_proj_weight": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "valid_child_filter": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "module",
+      "key",
+      "value"
+    ],
+    "type": "function"
+  },
+  "valid_parameter_filter": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "module",
+      "key",
+      "value"
+    ],
+    "type": "function"
+  },
+  "value_proj": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "variable_filter": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "vdim": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "vector_to_parameters": {
+    "description": "Copy slices of a vector into an iterable of parameters.",
+    "std_args": [
+      "vec",
+      "parameters"
+    ],
+    "type": "function"
+  },
+  "vocabulary_size": {
+    "description": "Gets the current size of the layer's vocabulary.\n\nReturns:\n    The integer size of the vocabulary, including optional\n    mask and OOV indices.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "waves_per_eu": {
+    "description": "ROCm-specific waves per execution unit.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "weight_norm": {
+    "description": "Apply weight normalization to a parameter in the given module.",
+    "std_args": [
+      "module",
+      "name",
+      "dim"
+    ],
+    "type": "function"
+  },
+  "will_sync_module_buffers": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self"
+    ],
+    "type": "function"
+  },
+  "xpu": {
+    "description": "Move all model parameters and buffers to the XPU.",
+    "std_args": [
+      "self",
+      "device"
+    ],
+    "type": "function"
+  },
+  "zero_infinity": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
+  },
+  "zeros_init": {
+    "description": "Builds an initializer that returns a constant array full of zeros.",
+    "std_args": [],
+    "type": "function"
   }
 }

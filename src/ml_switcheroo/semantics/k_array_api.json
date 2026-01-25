@@ -3453,25 +3453,18 @@
     "type": "function"
   },
   "permute_dims": {
-    "description": "Definition for permute_dims",
-    "operation": "permute_dims",
+    "description": "Permutes the axes (dimensions) of an array ``x``.",
     "std_args": [
-      "x",
-      {
-        "is_variadic": true,
-        "name": "axes"
-      }
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axes",
+        "Tuple[int, Ellipsis]"
+      ]
     ],
-    "variants": {
-      "jax": {
-        "api": "jnp.transpose",
-        "pack_to_tuple": "axes"
-      },
-      "numpy": {
-        "api": "numpy.transpose",
-        "pack_to_tuple": "axes"
-      }
-    }
+    "type": "function"
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",

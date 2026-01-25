@@ -552,11 +552,7 @@
       }
     },
     "CumSum": {
-      "api": "mlx.core.cumsum",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.cumsum"
     },
     "Cumprod": {
       "api": "mlx.core.cumprod",
@@ -566,7 +562,11 @@
       }
     },
     "Cumsum": {
-      "api": "mlx.core.cumsum"
+      "api": "mlx.core.cumsum",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
     },
     "Deg2rad": {
       "api": "mlx.core.radians",
@@ -806,10 +806,7 @@
       "required_imports": []
     },
     "Gelu": {
-      "api": "mlx.nn.layers.activations.gelu",
-      "args": {
-        "x": "x"
-      }
+      "api": "mlx.nn.GELU"
     },
     "Generic": {
       "api": "mlx.core.generic",
@@ -854,7 +851,8 @@
       "api": "mlx.nn.layers.activations.hardswish",
       "args": {
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "Hardshrink": {
       "api": "mlx.nn.layers.activations.HardShrink",
@@ -944,14 +942,14 @@
       }
     },
     "IsNaN": {
+      "api": "mlx.core.isnan"
+    },
+    "IsNan": {
       "api": "mlx.core.isnan",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
       }
-    },
-    "IsNan": {
-      "api": "mlx.core.isnan"
     },
     "IsNegInf": {
       "api": "mlx.core.isneginf",
@@ -1202,14 +1200,14 @@
       "required_imports": []
     },
     "MatMul": {
-      "api": "mlx.core.matmul"
-    },
-    "Matmul": {
       "api": "mlx.core.matmul",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "Matmul": {
+      "api": "mlx.core.matmul"
     },
     "Max": {
       "api": "mlx.core.max",
@@ -2117,8 +2115,9 @@
       }
     },
     "UInt8": {
-      "api": "mlx.core.uint8",
-      "args": {}
+      "api": "mx.uint8",
+      "args": {},
+      "required_imports": []
     },
     "Uint16": {
       "api": "mlx.core.uint16",
@@ -2130,6 +2129,10 @@
     },
     "Uint64": {
       "api": "mlx.core.uint64",
+      "args": {}
+    },
+    "Uint8": {
+      "api": "mlx.core.uint8",
       "args": {}
     },
     "Unflatten": {

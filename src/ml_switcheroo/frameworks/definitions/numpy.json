@@ -2426,6 +2426,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Vecmat": {
+    "api": "numpy.vecmat",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Vectorize": {
     "api": "numpy.vectorize",
     "dispatch_rules": [],

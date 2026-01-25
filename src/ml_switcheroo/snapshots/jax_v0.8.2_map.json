@@ -549,13 +549,7 @@
       "requires_plugin": "cuda_is_available"
     },
     "CumSum": {
-      "api": "jax.numpy.ndarray.cumsum",
-      "args": {
-        "axis": "axis",
-        "dtype": "dtype",
-        "out": "out",
-        "self": "self"
-      }
+      "api": "jax.numpy.cumsum"
     },
     "Cumprod": {
       "api": "jax.numpy.ndarray.cumprod",
@@ -567,8 +561,13 @@
       }
     },
     "Cumsum": {
-      "api": "jax.numpy.cumsum",
-      "required_imports": []
+      "api": "jax.numpy.ndarray.cumsum",
+      "args": {
+        "axis": "axis",
+        "dtype": "dtype",
+        "out": "out",
+        "self": "self"
+      }
     },
     "CumulativeProd": {
       "api": "jax.numpy.cumulative_prod",
@@ -1242,7 +1241,13 @@
     },
     "IsIn": {
       "api": "jax.numpy.isin",
-      "required_imports": []
+      "args": {
+        "assume_unique": "assume_unique",
+        "element": "element",
+        "invert": "invert",
+        "method": "method",
+        "test_elements": "test_elements"
+      }
     },
     "IsInf": {
       "api": "jax.numpy.isinf",
@@ -1298,13 +1303,7 @@
     },
     "Isin": {
       "api": "jax.numpy.isin",
-      "args": {
-        "assume_unique": "assume_unique",
-        "element": "element",
-        "invert": "invert",
-        "method": "method",
-        "test_elements": "test_elements"
-      }
+      "required_imports": []
     },
     "Iterable": {
       "api": "jax.numpy.iterable",
@@ -1458,6 +1457,9 @@
       "args": {}
     },
     "MatMul": {
+      "api": "jax.numpy.matmul"
+    },
+    "Matmul": {
       "api": "jax.numpy.linalg.matmul",
       "args": {
         "precision": "precision",
@@ -1465,12 +1467,6 @@
         "x1": "x1",
         "x2": "x2"
       }
-    },
-    "Matmul": {
-      "api": "jax.numpy.matmul",
-      "operator": "@",
-      "required_imports": [],
-      "transformation_type": "infix"
     },
     "MatrixTranspose": {
       "api": "jax.numpy.matrix_transpose",

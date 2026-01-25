@@ -460,7 +460,7 @@
           {
             "name": "reduce_fn",
             "kind": "KEYWORD_ONLY",
-            "default": "<function mean at 0x10be56a20>",
+            "default": null,
             "annotation": "Optional"
           }
         ],
@@ -1409,7 +1409,7 @@
           {
             "name": "preferred_element_type",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "<class 'numpy.float32'>",
+            "default": null,
             "annotation": null
           },
           {
@@ -1460,7 +1460,7 @@
           {
             "name": "preferred_element_type",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "<class 'numpy.float32'>",
+            "default": null,
             "annotation": "DTypeLike"
           }
         ],

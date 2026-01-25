@@ -1757,11 +1757,14 @@
       "args": {}
     },
     "MatMul": {
-      "api": "numpy.matmul"
+      "api": "numpy.matmul",
+      "args": {}
     },
     "Matmul": {
       "api": "numpy.matmul",
-      "args": {}
+      "operator": "@",
+      "required_imports": [],
+      "transformation_type": "infix"
     },
     "MatrixTestCase": {
       "api": "numpy.matrixlib.tests.test_matrix_linalg.MatrixTestCase",

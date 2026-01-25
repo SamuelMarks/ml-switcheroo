@@ -365,69 +365,6 @@
         "has_varargs": false
       },
       {
-        "name": "selu",
-        "api_path": "tf.nn.selu",
-        "kind": "function",
-        "params": [
-          {
-            "name": "features",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": "Annotated"
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
-        "docstring": "Computes scaled exponential linear: `scale * alpha * (exp(features) - 1)`\n\nif < 0, `scale * features` otherwise.\n\nTo be used together with\n`initializer = tf.variance_scaling_initializer(factor=1.0, mode='FAN_IN')`.\nFor correct dropout, use `tf.contrib.nn.alpha_dropout`.\n\nSee [Self-Normalizing Neural Networks](https://arxiv.org/abs/1706.02515)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `half`, `bfloat16`, `float32`, `float64`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
-        "has_varargs": false
-      },
-      {
-        "name": "sigmoid",
-        "api_path": "tf.nn.sigmoid",
-        "kind": "function",
-        "params": [
-          {
-            "name": "x",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": null
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
-        "docstring": "Computes sigmoid of `x` element-wise.\n\nFormula for calculating $\\mathrm{sigmoid}(x) = y = 1 / (1 + \\exp(-x))$.\n\nFor $x \\in (-\\infty, \\infty)$, $\\mathrm{sigmoid}(x) \\in (0, 1)$.\n\nExample Usage:\n\nIf a positive number is large, then its sigmoid will approach to 1 since the\nformula will be `y = <large_num> / (1 + <large_num>)`\n\n>>> x = tf.constant([0.0, 1.0, 50.0, 100.0])\n>>> tf.math.sigmoid(x)\n<tf.Tensor: shape=(4,), dtype=float32,\nnumpy=array([0.5, 0.7310586, 1.0, 1.0], dtype=float32)>\n\nIf a negative number is large, its sigmoid will approach to 0 since the\nformula will be `y = 1 / (1 + <large_num>)`\n\n>>> x = tf.constant([-100.0, -50.0, -1.0, 0.0])\n>>> tf.math.sigmoid(x)\n<tf.Tensor: shape=(4,), dtype=float32, numpy=\narray([0.0000000e+00, 1.9287499e-22, 2.6894143e-01, 0.5],\n      dtype=float32)>\n\nArgs:\n  x: A Tensor with type `float16`, `float32`, `float64`, `complex64`, or\n    `complex128`.\n  name: A name for the operation (optional).\n\nReturns:\n  A Tensor with the same type as `x`.\n\nUsage Example:\n\n>>> x = tf.constant([-128.0, 0.0, 128.0], dtype=tf.float32)\n>>> tf.sigmoid(x)\n<tf.Tensor: shape=(3,), dtype=float32,\nnumpy=array([0. , 0.5, 1. ], dtype=float32)>\n\n@compatibility(scipy)\nEquivalent to scipy.special.expit\n@end_compatibility",
-        "has_varargs": false
-      },
-      {
-        "name": "relu",
-        "api_path": "tf.nn.relu",
-        "kind": "function",
-        "params": [
-          {
-            "name": "features",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": "Annotated"
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
-        "docstring": "Computes rectified linear: `max(features, 0)`.\n\nSee: https://en.wikipedia.org/wiki/Rectifier_(neural_networks)\nExample usage:\n>>> tf.nn.relu([-2., 0., 3.]).numpy()\narray([0., 0., 3.], dtype=float32)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `int64`, `bfloat16`, `uint16`, `half`, `uint32`, `uint64`, `qint8`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
-        "has_varargs": false
-      },
-      {
         "name": "softmax_v2",
         "api_path": "tf.nn.softmax",
         "kind": "function",
@@ -455,6 +392,48 @@
         "has_varargs": false
       },
       {
+        "name": "sigmoid",
+        "api_path": "tf.nn.sigmoid",
+        "kind": "function",
+        "params": [
+          {
+            "name": "x",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": null,
+            "annotation": null
+          },
+          {
+            "name": "name",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": null
+          }
+        ],
+        "docstring": "Computes sigmoid of `x` element-wise.\n\nFormula for calculating $\\mathrm{sigmoid}(x) = y = 1 / (1 + \\exp(-x))$.\n\nFor $x \\in (-\\infty, \\infty)$, $\\mathrm{sigmoid}(x) \\in (0, 1)$.\n\nExample Usage:\n\nIf a positive number is large, then its sigmoid will approach to 1 since the\nformula will be `y = <large_num> / (1 + <large_num>)`\n\n>>> x = tf.constant([0.0, 1.0, 50.0, 100.0])\n>>> tf.math.sigmoid(x)\n<tf.Tensor: shape=(4,), dtype=float32,\nnumpy=array([0.5, 0.7310586, 1.0, 1.0], dtype=float32)>\n\nIf a negative number is large, its sigmoid will approach to 0 since the\nformula will be `y = 1 / (1 + <large_num>)`\n\n>>> x = tf.constant([-100.0, -50.0, -1.0, 0.0])\n>>> tf.math.sigmoid(x)\n<tf.Tensor: shape=(4,), dtype=float32, numpy=\narray([0.0000000e+00, 1.9287499e-22, 2.6894143e-01, 0.5],\n      dtype=float32)>\n\nArgs:\n  x: A Tensor with type `float16`, `float32`, `float64`, `complex64`, or\n    `complex128`.\n  name: A name for the operation (optional).\n\nReturns:\n  A Tensor with the same type as `x`.\n\nUsage Example:\n\n>>> x = tf.constant([-128.0, 0.0, 128.0], dtype=tf.float32)\n>>> tf.sigmoid(x)\n<tf.Tensor: shape=(3,), dtype=float32,\nnumpy=array([0. , 0.5, 1. ], dtype=float32)>\n\n@compatibility(scipy)\nEquivalent to scipy.special.expit\n@end_compatibility",
+        "has_varargs": false
+      },
+      {
+        "name": "selu",
+        "api_path": "tf.nn.selu",
+        "kind": "function",
+        "params": [
+          {
+            "name": "features",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": null,
+            "annotation": "Annotated"
+          },
+          {
+            "name": "name",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": null
+          }
+        ],
+        "docstring": "Computes scaled exponential linear: `scale * alpha * (exp(features) - 1)`\n\nif < 0, `scale * features` otherwise.\n\nTo be used together with\n`initializer = tf.variance_scaling_initializer(factor=1.0, mode='FAN_IN')`.\nFor correct dropout, use `tf.contrib.nn.alpha_dropout`.\n\nSee [Self-Normalizing Neural Networks](https://arxiv.org/abs/1706.02515)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `half`, `bfloat16`, `float32`, `float64`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
+        "has_varargs": false
+      },
+      {
         "name": "elu",
         "api_path": "tf.nn.elu",
         "kind": "function",
@@ -473,6 +452,27 @@
           }
         ],
         "docstring": "Computes the exponential linear function.\n\nThe ELU function is defined as:\n\n * $ e ^ x - 1 $ if $ x < 0 $\n * $ x $ if $ x >= 0 $\n\nExamples:\n\n>>> tf.nn.elu(1.0)\n<tf.Tensor: shape=(), dtype=float32, numpy=1.0>\n>>> tf.nn.elu(0.0)\n<tf.Tensor: shape=(), dtype=float32, numpy=0.0>\n>>> tf.nn.elu(-1000.0)\n<tf.Tensor: shape=(), dtype=float32, numpy=-1.0>\n\nSee [Fast and Accurate Deep Network Learning by Exponential Linear Units (ELUs)\n](http://arxiv.org/abs/1511.07289)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `half`, `bfloat16`, `float32`, `float64`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
+        "has_varargs": false
+      },
+      {
+        "name": "relu",
+        "api_path": "tf.nn.relu",
+        "kind": "function",
+        "params": [
+          {
+            "name": "features",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": null,
+            "annotation": "Annotated"
+          },
+          {
+            "name": "name",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": null
+          }
+        ],
+        "docstring": "Computes rectified linear: `max(features, 0)`.\n\nSee: https://en.wikipedia.org/wiki/Rectifier_(neural_networks)\nExample usage:\n>>> tf.nn.relu([-2., 0., 3.]).numpy()\narray([0., 0., 3.], dtype=float32)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `int64`, `bfloat16`, `uint16`, `half`, `uint32`, `uint64`, `qint8`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
         "has_varargs": false
       }
     ]
