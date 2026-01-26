@@ -147,7 +147,10 @@ def test_html_to_python_parsing(semantics):
 
   # 2. Check Init Logic
   assert "self.conv =" in py_code
-  assert "Conv2d" in py_code
+
+  # We check for Conv2d (Class) OR F.conv2d (Func). Both are valid rewrites from 'html_dsl.Conv2d'
+  # depending on whether Semantics resolved it to Neural or Functional.
+  assert "Conv2d" in py_code or "conv2d" in py_code
 
   # 3. Check Forward Logic
   # Parser synthesized `conv_out = self.conv(x)`

@@ -1,0 +1,944 @@
+operation: "Power"
+description: "Element-wise power operation."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.power"
+  torch:
+    api: "torch.pow"
+    args:
+      a: "input"
+      b: "exponent"
+  jax:
+    api: "jax.numpy.power"
+    args:
+      a: "x1"
+      b: "x2"
+  flax_nnx:
+    api: "jax.numpy.power"
+    args:
+      a: "x1"
+      b: "x2"
+  paxml:
+    api: "jax.numpy.power"
+    args:
+      a: "x1"
+      b: "x2"
+  keras:
+    api: "keras.ops.power"
+    args:
+      a: "x1"
+      b: "x2"
+  tensorflow:
+    api: "tf.math.pow"
+    args:
+      a: "x"
+      b: "y"
+---
+operation: "Prod"
+description: "Product of array elements over a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  mlx:
+    api: "mlx.core.prod"
+  torch:
+    api: "torch.prod"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.prod"
+    args:
+      a: "a"
+      axis: "axis"
+      keepdims: "keepdims"
+  flax_nnx:
+    api: "jax.numpy.prod"
+  paxml:
+    api: "jax.numpy.prod"
+  keras:
+    api: "keras.ops.prod"
+    args:
+      a: "x"
+      axis: "axis"
+      keepdims: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_prod"
+    args:
+      a: "input_tensor"
+      axis: "axis"
+      keepdims: "keepdims"
+---
+operation: "PutAlongAxis"
+description: "Put values along an axis at the specified indices."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | None"
+    default: null
+variants:
+  mlx:
+    api: "mlx.core.put_along_axis"
+  torch:
+    api: "torch.put_along_axis"
+    args:
+      a: "input"
+      indices: "index"
+      values: "source"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.put_along_axis"
+    args:
+      a: "arr"
+      indices: "indices"
+      values: "values"
+      axis: "axis"
+  flax_nnx:
+    api: "jax.numpy.put_along_axis"
+  paxml:
+    api: "jax.numpy.put_along_axis"
+  keras:
+    api: "keras.ops.put_along_axis"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.put_along_axis"
+    args:
+      a: "arr"
+---
+operation: "Qqmm"
+description: "Quantized Matrix Multiplication."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "w"
+    type: "Tensor"
+  - name: "scales"
+    type: "Tensor | None"
+    default: null
+  - name: "group_size"
+    type: "int | None"
+    default: null
+  - name: "bits"
+    type: "int | None"
+    default: null
+  - name: "mode"
+    type: "str"
+    default: "nvfp4"
+variants:
+  mlx:
+    api: "mlx.core.qqmm"
+  torch:
+    requires_plugin: "quantized_matmul"
+  jax:
+    requires_plugin: "quantized_matmul"
+  flax_nnx:
+    requires_plugin: "quantized_matmul"
+  paxml:
+    requires_plugin: "quantized_matmul"
+  keras:
+    requires_plugin: "quantized_matmul"
+  tensorflow:
+    requires_plugin: "quantized_matmul"
+---
+operation: "Quantize"
+description: "Quantize the array w using affine or other modes."
+std_args:
+  - name: "w"
+    type: "Tensor"
+  - name: "group_size"
+    type: "int | None"
+    default: null
+  - name: "bits"
+    type: "int | None"
+    default: null
+  - name: "mode"
+    type: "str"
+    default: "affine"
+return_type: "Tuple[Tensor, Tensor, Tensor]"
+variants:
+  mlx:
+    api: "mlx.core.quantize"
+  torch:
+    requires_plugin: "quantization"
+  jax:
+    requires_plugin: "quantization"
+  flax_nnx:
+    requires_plugin: "quantization"
+  paxml:
+    requires_plugin: "quantization"
+  keras:
+    requires_plugin: "quantization"
+  tensorflow:
+    requires_plugin: "quantization"
+---
+operation: "QuantizedMatmul"
+description: "Matrix multiplication with a quantized weight matrix."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "w"
+    type: "Tensor"
+  - name: "scales"
+    type: "Tensor"
+  - name: "biases"
+    type: "Tensor | None"
+    default: null
+  - name: "transpose"
+    type: "bool"
+    default: true
+  - name: "group_size"
+    type: "int | None"
+    default: null
+  - name: "bits"
+    type: "int | None"
+    default: null
+  - name: "mode"
+    type: "str"
+    default: "affine"
+variants:
+  mlx:
+    api: "mlx.core.quantized_matmul"
+  torch:
+    requires_plugin: "quantized_matmul"
+  jax:
+    requires_plugin: "quantized_matmul"
+  flax_nnx:
+    requires_plugin: "quantized_matmul"
+  paxml:
+    requires_plugin: "quantized_matmul"
+  keras:
+    requires_plugin: "quantized_matmul"
+  tensorflow:
+    requires_plugin: "quantized_matmul"
+---
+operation: "Radians"
+description: "Convert angles from degrees to radians."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.radians"
+  torch:
+    api: "torch.deg2rad"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.radians"
+    args:
+      a: "x"
+  flax_nnx:
+    api: "jax.numpy.radians"
+    args:
+      a: "x"
+  paxml:
+    api: "jax.numpy.radians"
+    args:
+      a: "x"
+  keras:
+    macro_template: "{a} * 3.141592653589793 / 180.0"
+  tensorflow:
+    macro_template: "{a} * 3.141592653589793 / 180.0"
+---
+operation: "Real"
+description: "Returns the real part of a complex array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.real"
+  torch:
+    api: "torch.real"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.real"
+    args:
+      a: "val"
+  flax_nnx:
+    api: "jax.numpy.real"
+  paxml:
+    api: "jax.numpy.real"
+  keras:
+    api: "keras.ops.real"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.math.real"
+    args:
+      a: "input"
+---
+operation: "Reciprocal"
+description: "Element-wise reciprocal."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.reciprocal"
+  torch:
+    api: "torch.reciprocal"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.reciprocal"
+    args:
+      a: "x"
+  flax_nnx:
+    api: "jax.numpy.reciprocal"
+  paxml:
+    api: "jax.numpy.reciprocal"
+  keras:
+    api: "keras.ops.reciprocal"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.math.reciprocal"
+    args:
+      a: "x"
+---
+operation: "Remainder"
+description: "Element-wise remainder of division."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.remainder"
+  torch:
+    api: "torch.remainder"
+    args:
+      a: "input"
+      b: "other"
+  jax:
+    api: "jax.numpy.remainder"
+    args:
+      a: "x1"
+      b: "x2"
+  flax_nnx:
+    api: "jax.numpy.remainder"
+  paxml:
+    api: "jax.numpy.remainder"
+  keras:
+    api: "keras.ops.mod"
+    args:
+      a: "x1"
+      b: "x2"
+  tensorflow:
+    api: "tf.math.floormod"
+    args:
+      a: "x"
+      b: "y"
+---
+operation: "Repeat"
+description: "Repeat elements of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "repeats"
+    type: "int"
+  - name: "axis"
+    type: "int | None"
+    default: null
+variants:
+  mlx:
+    api: "mlx.core.repeat"
+    args:
+      a: "array"
+  torch:
+    api: "torch.repeat_interleave"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.repeat"
+    args:
+      a: "a"
+      axis: "axis"
+  flax_nnx:
+    api: "jax.numpy.repeat"
+  paxml:
+    api: "jax.numpy.repeat"
+  keras:
+    api: "keras.ops.repeat"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.repeat"
+    args:
+      a: "input"
+      axis: "axis"
+---
+operation: "ResetPeakMemory"
+description: "Reset the peak memory tracker."
+op_type: "function"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.reset_peak_memory"
+  torch:
+    api: "torch.cuda.reset_peak_memory_stats"
+    dispatch_rules:
+      - if_arg: "device"  # Implicit
+        op: "is_type" 
+        val: "None" 
+        use_api: "torch.cuda.reset_peak_memory_stats" 
+  jax:
+    api: null  # Not applicable
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+---
+operation: "Reshape"
+description: "Reshape an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "shape"
+    type: "Sequence[int]"
+variants:
+  mlx:
+    api: "mlx.core.reshape"
+  torch:
+    api: "torch.reshape"
+    args:
+      a: "input"
+      shape: "shape"
+  jax:
+    api: "jax.numpy.reshape"
+  flax_nnx:
+    api: "jax.numpy.reshape"
+  paxml:
+    api: "jax.numpy.reshape"
+  keras:
+    api: "keras.ops.reshape"
+    args:
+      a: "x"
+      shape: "new_shape"
+  tensorflow:
+    api: "tf.reshape"
+    args:
+      a: "tensor"
+      shape: "shape"
+---
+operation: "RightShift"
+description: "Element-wise bitwise right shift."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.right_shift"
+  torch:
+    api: "torch.bitwise_right_shift"
+    args:
+      a: "input"
+      b: "other"
+  jax:
+    api: "jax.numpy.right_shift"
+    args:
+      a: "x1"
+      b: "x2"
+  flax_nnx:
+    api: "jax.numpy.right_shift"
+  paxml:
+    api: "jax.numpy.right_shift"
+  keras:
+    transformation_type: "infix"
+    operator: ">>" 
+  tensorflow:
+    api: "tf.bitwise.right_shift"
+    args:
+      a: "x"
+      b: "y"
+---
+operation: "Roll"
+description: "Roll array elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "shift"
+    type: "int | Sequence[int]"
+  - name: "axis"
+    type: "int | Sequence[int] | None"
+    default: null
+variants:
+  mlx:
+    api: "mlx.core.roll"
+  torch:
+    api: "torch.roll"
+    args:
+      a: "input"
+      shift: "shifts"
+      axis: "dims"
+  jax:
+    api: "jax.numpy.roll"
+    args:
+      a: "a"
+  flax_nnx:
+    api: "jax.numpy.roll"
+  paxml:
+    api: "jax.numpy.roll"
+  keras:
+    api: "keras.ops.roll"
+    args:
+      a: "x"
+      shift: "shift"
+      axis: "axis"
+  tensorflow:
+    api: "tf.roll"
+    args:
+      a: "input"
+      shift: "shift"
+      axis: "axis"
+---
+operation: "Round"
+description: "Round to the given number of decimals."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "decimals"
+    type: "int"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.core.round"
+  torch:
+    api: "torch.round"
+    args:
+      a: "input"
+      decimals: "decimals"
+  jax:
+    api: "jax.numpy.round"
+    args:
+      a: "a"
+      decimals: "decimals"
+  flax_nnx:
+    api: "jax.numpy.round"
+  paxml:
+    api: "jax.numpy.round"
+  keras:
+    api: "keras.ops.round" # Note: Keras ops round often doesn't take decimals in some backends, check strictness
+    args:
+      a: "x"
+      decimals: "decimals"
+  tensorflow:
+    api: "tf.round"
+    # tf.round does not take decimals. Logic might need macro. 
+    # Macro for TF: tf.round(x * 10**decs) / 10**decs
+    macro_template: "tf.round({a} * (10**{decimals})) / (10**{decimals})" 
+---
+operation: "Rsqrt"
+description: "Element-wise reciprocal square root."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.rsqrt"
+  torch:
+    api: "torch.rsqrt"
+    args:
+      a: "input"
+  jax:
+    api: "jax.lax.rsqrt"
+    args:
+      a: "x"
+  flax_nnx:
+    api: "jax.lax.rsqrt"
+  paxml:
+    api: "jax.lax.rsqrt"
+  keras:
+    api: "keras.ops.rsqrt"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.math.rsqrt"
+    args:
+      a: "x"
+---
+operation: "Save"
+description: "Save array(s) to a binary file."
+op_type: "function"
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "arr"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.save"
+  torch:
+    api: "torch.save"
+    args:
+      file: "f"
+      arr: "obj"
+  jax:
+    api: "jax.numpy.save"
+    args:
+      file: "file"
+      arr: "arr"
+  flax_nnx:
+    api: "jax.numpy.save"
+  paxml:
+    api: "jax.numpy.save"
+  keras:
+    # No direct single-tensor save in core ops, use numpy
+    required_imports:
+      - "import numpy as np"
+    macro_template: "np.save({file}, {arr})"
+  tensorflow:
+    # No direct simple save, use IO
+    macro_template: "tf.io.write_file({file}, tf.io.serialize_tensor({arr}))" 
+---
+operation: "SaveGguf"
+description: "Save arrays to GGUF format."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "arrays"
+    type: "Dict[str, Tensor]"
+  - name: "metadata"
+    type: "Dict[str, Any]"
+variants:
+  mlx:
+    api: "mlx.core.save_gguf"
+  torch:
+    requires_plugin: "save_gguf_adapter"
+  jax:
+    requires_plugin: "save_gguf_adapter"
+  flax_nnx:
+    requires_plugin: "save_gguf_adapter"
+  paxml:
+    requires_plugin: "save_gguf_adapter"
+  keras:
+    requires_plugin: "save_gguf_adapter"
+  tensorflow:
+    requires_plugin: "save_gguf_adapter"
+---
+operation: "SaveSafetensors"
+description: "Save arrays to Safetensors format."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "arrays"
+    type: "Dict[str, Tensor]"
+  - name: "metadata"
+    type: "Dict[str, str] | None"
+    default: null
+variants:
+  mlx:
+    api: "mlx.core.save_safetensors"
+  torch:
+    required_imports:
+      - "from safetensors.torch import save_file"
+    macro_template: "save_file({arrays}, {file}, metadata={metadata})" 
+  jax:
+    required_imports:
+      - "from safetensors.flax import save_file"
+    macro_template: "save_file({arrays}, {file}, metadata={metadata})" 
+  flax_nnx:
+    required_imports:
+      - "from safetensors.flax import save_file"
+    macro_template: "save_file({arrays}, {file}, metadata={metadata})" 
+  paxml:
+    required_imports:
+      - "from safetensors.flax import save_file"
+    macro_template: "save_file({arrays}, {file}, metadata={metadata})" 
+  keras:
+    requires_plugin: "save_safetensors_adapter"
+  tensorflow:
+    requires_plugin: "save_safetensors_adapter"
+---
+operation: "Savez"
+description: "Save several arrays to an uncompressed .npz format."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "args"
+    is_variadic: true
+  - name: "kwargs" # Implicit kwargs support
+variants:
+  mlx:
+    api: "mlx.core.savez"
+  torch:
+    # Requires numpy
+    required_imports:
+      - "import numpy as np"
+    # Torch tensors need .numpy() first
+    requires_plugin: "savez_converter"
+  jax:
+    api: "jax.numpy.savez"
+    args:
+      file: "file"
+  flax_nnx:
+    api: "jax.numpy.savez"
+  paxml:
+    api: "jax.numpy.savez"
+  keras:
+    required_imports:
+      - "import numpy as np"
+    requires_plugin: "savez_converter"
+  tensorflow:
+    requires_plugin: "savez_converter"
+---
+operation: "SavezCompressed"
+description: "Save several arrays to a compressed .npz format."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "args"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.savez_compressed"
+  torch:
+    # Requires numpy
+    required_imports:
+      - "import numpy as np"
+    requires_plugin: "savez_converter"
+  jax:
+    api: "jax.numpy.savez_compressed"
+  flax_nnx:
+    api: "jax.numpy.savez_compressed"
+  paxml:
+    api: "jax.numpy.savez_compressed"
+  keras:
+    required_imports:
+      - "import numpy as np"
+    requires_plugin: "savez_converter"
+  tensorflow:
+    requires_plugin: "savez_converter"
+---
+operation: "SegmentedMm"
+description: "Segmented matrix multiplication."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "segments"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.segmented_mm"
+  torch:
+    requires_plugin: "segmented_ops"
+  jax:
+    requires_plugin: "segmented_ops"
+  flax_nnx:
+    requires_plugin: "segmented_ops"
+  paxml:
+    requires_plugin: "segmented_ops"
+  keras:
+    requires_plugin: "segmented_ops"
+  tensorflow:
+    api: "tf.math.segment_sum" # Partial match logic? Unsafe to map directly to mm. 
+    requires_plugin: "segmented_ops"
+---
+operation: "SetCacheLimit"
+description: "Set the free cache limit."
+std_args:
+  - name: "limit"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.core.set_cache_limit"
+  torch:
+    api: "torch.cuda.set_per_process_memory_fraction"
+    # Semantic mismatch: cache vs memory fraction. 
+    requires_plugin: "resource_limit_adapter"
+  jax:
+    # JAX preallocates by default
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.config.set_logical_device_configuration"
+    requires_plugin: "resource_limit_adapter"
+---
+operation: "SetDefaultDevice"
+description: "Set the default device."
+std_args:
+  - name: "device"
+    type: "Any"
+variants:
+  mlx:
+    api: "mlx.core.set_default_device"
+  torch:
+    api: "torch.cuda.set_device"
+    args:
+      device: "device"
+  jax:
+    api: "jax.default_device" # Context manager
+    op_type: "context"
+  flax_nnx:
+    api: "jax.default_device"
+    op_type: "context"
+  paxml:
+    api: "jax.default_device"
+    op_type: "context"
+  keras:
+    api: null # Keras 3 handles this via env vars or context
+  tensorflow:
+    api: "tf.device"
+    op_type: "context"
+---
+operation: "SetDefaultStream"
+description: "Set the default stream."
+std_args:
+  - name: "stream"
+    type: "Any"
+variants:
+  mlx:
+    api: "mlx.core.set_default_stream"
+  torch:
+    api: "torch.cuda.set_stream"
+    args:
+      stream: "stream"
+  jax:
+    api: null # Explicit stream management not standard JAX pattern
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+---
+operation: "SetMemoryLimit"
+description: "Set the memory limit."
+std_args:
+  - name: "limit"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.core.set_memory_limit"
+  torch:
+    api: "torch.cuda.set_per_process_memory_fraction"
+    requires_plugin: "resource_limit_adapter"
+  jax:
+    # XLA_PYTHON_CLIENT_MEM_FRACTION env var usually
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.config.set_logical_device_configuration"
+    requires_plugin: "resource_limit_adapter"
+---
+operation: "SetWiredLimit"
+description: "Set the wired memory limit (macOS)."
+std_args:
+  - name: "limit"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.core.set_wired_limit"
+  torch:
+    api: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+---
+operation: "Sigmoid"
+description: "Element-wise logistic sigmoid."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.sigmoid"
+  torch:
+    api: "torch.sigmoid"
+    args:
+      a: "input"
+  jax:
+    api: "jax.nn.sigmoid"
+    args:
+      a: "x"
+  flax_nnx:
+    api: "jax.nn.sigmoid"
+  paxml:
+    api: "jax.nn.sigmoid"
+  keras:
+    api: "keras.ops.sigmoid"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.math.sigmoid"
+    args:
+      a: "x"
+---
+operation: "Sign"
+description: "Element-wise sign."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.sign"
+  torch:
+    api: "torch.sign"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.sign"
+    args:
+      a: "x"
+  flax_nnx:
+    api: "jax.numpy.sign"
+  paxml:
+    api: "jax.numpy.sign"
+  keras:
+    api: "keras.ops.sign"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.math.sign"
+    args:
+      a: "x"

@@ -180,7 +180,8 @@ def _inspect_live_object(api_path: str) -> Dict[str, Any]:
 def _build_header(schema_json: str) -> str:
   """Returns the static prompt header with Context and Examples."""
   return f"""You are an expert AI assistant for the 'ml-switcheroo' transpiler project. 
-Your task is to generate valid YAML definitions using the Operation Definition Language (ODL). 
+Your task is to generate valid YAML definitions—for: PyTorch, MLX, Keras, TensorFlow (if different from Keras),
+Flax NNX (if different from JAX), and Pax (if different from JAX)—using the Operation Definition Language (ODL).
 
 --- OUTPUT FORMAT (JSON SCHEMA) --- 
 The YAML must conform rigidly to this Pydantic schema: 
@@ -239,7 +240,7 @@ def _build_footer(source_fw: str) -> str:
   return f"""
 --- INSTRUCTIONS --- 
 1. Analyze the Target Operations listed above. 
-2. Define standard arguments (`std_args`) that abstract the core inputs. 
+2. Define the variants block mapping the source framework ('flax') and at least one target (e.g., 'jax' or 'numpy'). The goal is all of: PyTorch, MLX, Keras, TensorFlow (if different from Keras), Flax NNX (if different from JAX), and Pax (if different from JAX).
 3. Define the `variants` block mapping the source framework ('{source_fw}') and at least one target (e.g., 'jax' or 'numpy'). 
 4. Return ONLY the valid YAML block(s), separated by '---' if multiple. 
 """

@@ -1,0 +1,649 @@
+operation: "LoRA"
+description: "A standalone LoRA (Low-Rank Adaptation) layer adapter."
+op_type: "function"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "lora_rank"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "base_module"
+    type: "Any"
+    default: null
+variants:
+  flax_nnx:
+    api: "flax.nnx.LoRA"
+  torch:
+    api: null # No direct equivalent in torch.nn
+  mlx:
+    api: null
+  keras:
+    api: null # Keras 3 LoRA often done via `keras_nlp` or manual adapter
+  tensorflow:
+    api: null
+  paxml:
+    api: null # Specific to Flax NNX structure
+---
+operation: "LoRALinear"
+description: "A Linear layer with built-in LoRA adaptation."
+op_type: "function"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "lora_rank"
+    type: "int"
+    default: 8
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.LoRALinear"
+  torch:
+    api: null # Requires PEFT library
+  mlx:
+    api: null # Requires MLX-LM or adapters
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "LoRAParam"
+description: "Parameter type specific to LoRA layers."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.LoRAParam"
+  torch:
+    api: "torch.nn.Parameter" # Fallback to standard parameter
+  mlx:
+    api: "mlx.core.array" # Fallback
+  keras:
+    api: "keras.Variable"
+  tensorflow:
+    api: "tf.Variable"
+  paxml:
+    api: null
+---
+operation: "TypeVarM"
+description: "Type variable helper."
+op_type: "function"
+std_args:
+  - name: "name"
+    type: "str"
+variants:
+  flax_nnx:
+    api: "flax.nnx.M"
+  torch:
+    api: "typing.TypeVar"
+  mlx:
+    api: "typing.TypeVar"
+  keras:
+    api: "typing.TypeVar"
+  tensorflow:
+    api: "typing.TypeVar"
+  paxml:
+    api: "typing.TypeVar"
+---
+operation: "MergeContext"
+description: "Context manager for merging states."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.MergeContext"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "Metric"
+description: "Base class for metrics."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Metric"
+  torch:
+    api: null # TorchMetrics is external
+  mlx:
+    api: null
+  keras:
+    api: "keras.metrics.Metric"
+  tensorflow:
+    api: "tf.keras.metrics.Metric"
+  paxml:
+    api: "praxis.metric_utils.Metric"
+---
+operation: "ModelAndOptimizer"
+description: "Container combining model and optimizer."
+deprecated: true
+op_type: "class"
+std_args:
+  - name: "model"
+  - name: "optimizer"
+variants:
+  flax_nnx:
+    api: "flax.nnx.ModelAndOptimizer"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "Module"
+description: "Base class for all neural network modules."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Module"
+  torch:
+    api: "torch.nn.Module"
+  mlx:
+    api: "mlx.nn.Module"
+  keras:
+    api: "keras.Layer"
+  tensorflow:
+    api: "tf.Module"
+  paxml:
+    api: "praxis.base_layer.BaseLayer"
+---
+operation: "MultiHeadAttention"
+description: "Multi-head attention layer."
+op_type: "class"
+std_args:
+  - name: "num_heads"
+    type: "int"
+  - name: "head_dim"
+    type: "int"
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+variants:
+  flax_nnx:
+    api: "flax.nnx.MultiHeadAttention"
+    args:
+      head_dim: "qkv_features"
+      dropout: "dropout_rate"
+  torch:
+    api: "torch.nn.MultiheadAttention"
+    args:
+      head_dim: "embed_dim" # Torch uses embed_dim (total) usually, logic differs
+      dropout: "dropout"
+  mlx:
+    api: "mlx.nn.MultiHeadAttention"
+    args:
+      head_dim: "dims"
+  keras:
+    api: "keras.layers.MultiHeadAttention"
+    args:
+      head_dim: "key_dim"
+  tensorflow:
+    api: "tf.keras.layers.MultiHeadAttention"
+    args:
+      head_dim: "key_dim"
+  paxml:
+    api: "praxis.layers.MultiHeadAttention"
+---
+operation: "MultiMetric"
+description: "Container for multiple metrics."
+op_type: "class"
+std_args:
+  - name: "metrics"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.MultiMetric"
+    pack_as: "List"
+  torch:
+    api: "torch.nn.ModuleDict" # Approximate structural equiv
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "NodeStates"
+description: "Internal state storage for graph nodes."
+op_type: "class"
+std_args:
+  - name: "states"
+variants:
+  flax_nnx:
+    api: "flax.nnx.NodeStates"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "Not"
+description: "Filter predicate for negation."
+op_type: "class"
+std_args:
+  - name: "filter"
+variants:
+  flax_nnx:
+    api: "flax.nnx.Not"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "Nothing"
+description: "Sentinel value."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Nothing"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "Object"
+description: "Base class for NNX objects that are not Pytrees."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Object"
+  torch:
+    api: "object"
+  mlx:
+    api: "object"
+  keras:
+    api: "object"
+  tensorflow:
+    api: "object"
+  paxml:
+    api: "object"
+---
+operation: "OfType"
+description: "Filter predicate matching a specific type."
+op_type: "class"
+std_args:
+  - name: "type"
+variants:
+  flax_nnx:
+    api: "flax.nnx.OfType"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "OptArray"
+description: "Optimizer state for an array."
+op_type: "class"
+std_args:
+  - name: "value"
+variants:
+  flax_nnx:
+    api: "flax.nnx.OptArray"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "OptState"
+description: "Optimizer state variable type."
+op_type: "class"
+std_args:
+  - name: "value"
+variants:
+  flax_nnx:
+    api: "flax.nnx.OptState"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "OptVariable"
+description: "Optimizer variable type."
+op_type: "class"
+std_args:
+  - name: "value"
+variants:
+  flax_nnx:
+    api: "flax.nnx.OptVariable"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "OptimizedLSTMCell"
+description: "LSTM Cell with optimized fused operations."
+op_type: "class"
+std_args:
+  - name: "features"
+    type: "int"
+variants:
+  flax_nnx:
+    api: "flax.nnx.OptimizedLSTMCell"
+  torch:
+    api: "torch.nn.LSTMCell"
+  mlx:
+    api: "mlx.nn.LSTM" # MLX implementation varies
+  keras:
+    api: "keras.layers.LSTMCell"
+  tensorflow:
+    api: "tf.keras.layers.LSTMCell"
+  paxml:
+    api: "praxis.layers.LSTMCell"
+---
+operation: "Optimizer"
+description: "Train state wrapper for optimizer."
+op_type: "class"
+std_args:
+  - name: "model"
+  - name: "tx"
+variants:
+  flax_nnx:
+    api: "flax.nnx.Optimizer"
+  torch:
+    api: "torch.optim.Optimizer"
+    description: "Torch optimizer is distinct from TrainState."
+  mlx:
+    api: "mlx.optimizers.Optimizer"
+  keras:
+    api: "keras.optimizers.Optimizer"
+  tensorflow:
+    api: "tf.keras.optimizers.Optimizer"
+  paxml:
+    api: null
+---
+operation: "PartitionName"
+description: "String conversion utility."
+op_type: "function"
+std_args:
+  - name: "obj"
+variants:
+  flax_nnx:
+    api: "flax.nnx.PARTITION_NAME"
+  torch:
+    api: "str"
+  mlx:
+    api: "str"
+  keras:
+    api: "str"
+  tensorflow:
+    api: "str"
+  paxml:
+    api: "str"
+---
+operation: "PReLU"
+description: "Parametric Rectified Linear Unit."
+op_type: "class"
+std_args:
+  - name: "init"
+    type: "float"
+    default: 0.25
+variants:
+  flax_nnx:
+    api: "flax.nnx.PReLU"
+    args:
+      init: "negative_slope_init"
+  torch:
+    api: "torch.nn.PReLU"
+    args:
+      init: "init"
+  mlx:
+    api: "mlx.nn.PReLU"
+    args:
+      init: "init"
+  keras:
+    api: "keras.layers.PReLU"
+    args:
+      init: "alpha_initializer"
+    arg_values:
+      init:
+        ANY: "keras.initializers.Constant(value={})" # Complex macro usually
+  tensorflow:
+    api: "tf.keras.layers.PReLU"
+    args:
+      init: "alpha_initializer"
+  paxml:
+    api: "praxis.layers.PReLU"
+---
+operation: "Param"
+description: "Variable type for learnable parameters."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.Param"
+  torch:
+    api: "torch.nn.Parameter"
+  mlx:
+    api: "mlx.core.array" # Wraps tensor implicitly
+  keras:
+    api: "keras.Variable"
+  tensorflow:
+    api: "tf.Variable"
+  paxml:
+    api: "praxis.base_layer.WeightInit" # Rough equiv
+---
+operation: "PathContains"
+description: "Path filter predicate."
+op_type: "class"
+std_args:
+  - name: "key"
+    type: "str"
+variants:
+  flax_nnx:
+    api: "flax.nnx.PathContains"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "Perturbation"
+description: "Variable type for perturbations."
+op_type: "class"
+std_args:
+  - name: "value"
+variants:
+  flax_nnx:
+    api: "flax.nnx.Perturbation"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "PureState"
+description: "Helper for tuple/state construction."
+op_type: "function"
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.PureState"
+  torch:
+    api: "tuple"
+  mlx:
+    api: "tuple"
+  keras:
+    api: "tuple"
+  tensorflow:
+    api: "tuple"
+  paxml:
+    api: "tuple"
+---
+operation: "Pytree"
+description: "Base class for Pytree-registered objects."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Pytree"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  paxml:
+    api: null
+---
+operation: "RMSNorm"
+description: "Root Mean Square Layer Normalization."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+  - name: "eps"
+    type: "float"
+    default: 1e-6
+variants:
+  flax_nnx:
+    api: "flax.nnx.RMSNorm"
+    args:
+      dim: "num_features"
+      eps: "epsilon"
+  torch:
+    api: "torch.nn.RMSNorm"
+    args:
+      dim: "normalized_shape"
+      eps: "eps"
+  mlx:
+    api: "mlx.nn.RMSNorm"
+    args:
+      dim: "dims"
+      eps: "eps"
+  keras:
+    api: "keras.layers.RMSNormalization"
+    args:
+      dim: null # Keras infers shape
+      eps: "epsilon"
+  tensorflow:
+    api: "tf.keras.layers.RMSNormalization"
+    args:
+      dim: null
+      eps: "epsilon"
+  paxml:
+    api: "praxis.layers.RMSNorm"
+    args:
+      dim: "dim"
+      eps: "epsilon"
+---
+operation: "RNN"
+description: "Recurrent Neural Network layer wrapper."
+op_type: "class"
+std_args:
+  - name: "cell"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.RNN"
+    args:
+      cell: "cell" # passed as arg positional
+  torch:
+    api: "torch.nn.RNN" # This is a specific RNN, not a general cell wrapper usually, though RNNBase is comparable.
+  mlx:
+    api: null
+  keras:
+    api: "keras.layers.RNN"
+  tensorflow:
+    api: "tf.keras.layers.RNN"
+  paxml:
+    api: "praxis.layers.RNN"
+---
+operation: "RNNCellBase"
+description: "Base class for RNN Cells."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.RNNCellBase"
+  torch:
+    api: "torch.nn.RNNCellBase"
+  mlx:
+    api: null
+  keras:
+    api: "keras.layers.Layer" # Keras cells are just Layers
+  tensorflow:
+    api: "tf.keras.layers.Layer"
+  paxml:
+    api: "praxis.layers.RNNCell"

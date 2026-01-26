@@ -1,0 +1,634 @@
+operation: "TypeVarA"
+description: "Type variable 'A' for static typing."
+op_type: "function"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.A"
+  torch:
+    api: "typing.TypeVar"
+    inject_args:
+      name: "'A'"
+
+---
+operation: "FilterAll"
+description: "Filter that matches if all sub-filters match."
+op_type: "class"
+std_args:
+  - name: "filters"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.All"
+  torch:
+    api: null # Specific to NNX state filtering
+
+---
+operation: "FilterAny"
+description: "Filter that matches if any sub-filter matches."
+op_type: "class"
+std_args:
+  - name: "filters"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.Any"
+  torch:
+    api: null # Specific to NNX state filtering
+
+---
+operation: "BatchNorm"
+description: "Batch Normalization layer."
+op_type: "class"
+std_args:
+  - name: "num_features"
+    type: "int"
+  - name: "use_running_average"
+    type: "bool"
+    default: null
+  - name: "momentum"
+    type: "float"
+    default: 0.9
+  - name: "epsilon"
+    type: "float"
+    default: 1e-5
+  - name: "use_bias"
+    type: "bool"
+    default: true
+  - name: "use_scale"
+    type: "bool"
+    default: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.BatchNorm"
+  torch:
+    api: "torch.nn.BatchNorm2d"
+    args:
+      momentum: null # Logic inversion (1-m) required via plugin usually
+      epsilon: "eps"
+      use_scale: "affine"
+      use_bias: "track_running_stats"
+  keras:
+    api: "keras.layers.BatchNormalization"
+    args:
+      num_features: null # Inferred
+      use_running_average: null
+  mlx:
+    api: "mlx.nn.BatchNorm"
+    args:
+      use_scale: "affine"
+      use_bias: "track_running_stats"
+      epsilon: "eps"
+  paxml:
+    api: "praxis.layers.BatchNorm"
+    args:
+      num_features: "dim"
+      epsilon: "epsilon"
+      momentum: "decay" # Praxis uses decay (1-momentum)
+
+---
+operation: "BatchStat"
+description: "Wrapper for Batch Statistics state."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.BatchStat"
+  torch:
+    api: null # Handled via register_buffer
+  keras:
+    api: "keras.Variable"
+    args:
+      trainable: "False"
+
+---
+operation: "Bidirectional"
+description: "Bidirectional wrapper for RNNs."
+op_type: "class"
+std_args:
+  - name: "layer"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.Bidirectional"
+  torch:
+    api: null # Torch handles this inside LSTM/GRU classes
+  keras:
+    api: "keras.layers.Bidirectional"
+  mlx:
+    api: "mlx.nn.Bidirectional"
+
+---
+operation: "Cache"
+description: "Wrapper for autoregressive cache state."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Cache"
+  torch:
+    api: null # Manual implementation
+  keras:
+    api: null
+
+---
+operation: "Carry"
+description: "Helper for scan carry state."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Carry"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "Conv"
+description: "Convolutional layer."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int]]"
+    default: 1
+  - name: "padding"
+    type: "Union[str, int, Tuple[int]]"
+    default: "SAME"
+  - name: "use_bias"
+    type: "bool"
+    default: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.Conv"
+  torch:
+    api: "torch.nn.Conv2d"
+    args:
+      in_features: "in_channels"
+      out_features: "out_channels"
+      strides: "stride"
+      use_bias: "bias"
+  keras:
+    api: "keras.layers.Conv2D"
+    args:
+      in_features: null # inferred
+      out_features: "filters"
+      use_bias: "use_bias"
+  mlx:
+    api: "mlx.nn.Conv2d"
+    args:
+      in_features: "in_channels"
+      out_features: "out_channels"
+      use_bias: "bias"
+  paxml:
+    api: "praxis.layers.Conv2D"
+    args:
+      out_features: "filter_shape"
+
+---
+operation: "ConvTranspose"
+description: "Transposed Convolutional layer."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int]]"
+    default: 1
+  - name: "padding"
+    type: "Union[str, int, Tuple[int]]"
+    default: "SAME"
+  - name: "use_bias"
+    type: "bool"
+    default: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.ConvTranspose"
+  torch:
+    api: "torch.nn.ConvTranspose2d"
+    args:
+      in_features: "in_channels"
+      out_features: "out_channels"
+      strides: "stride"
+      use_bias: "bias"
+  keras:
+    api: "keras.layers.Conv2DTranspose"
+    args:
+      out_features: "filters"
+      in_features: null
+  mlx:
+    api: "mlx.nn.ConvTranspose2d"
+    args:
+      in_features: "in_channels"
+      out_features: "out_channels"
+      use_bias: "bias"
+
+---
+operation: "Data"
+description: "Type annotation for pytree data."
+op_type: "function"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Data"
+  torch:
+    api: "torch.jit.Attribute" # Approximation
+
+---
+operation: "ModuleDict"
+description: "Module dictionary container."
+op_type: "class"
+std_args:
+  - name: "modules"
+    type: "Dict"
+    default: null
+variants:
+  flax_nnx:
+    api: "flax.nnx.Dict"
+  torch:
+    api: "torch.nn.ModuleDict"
+  keras:
+    api: null # Native dict used
+  mlx:
+    api: null # Native dict used
+
+---
+operation: "DiffState"
+description: "Differential State wrapper."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.DiffState"
+
+---
+operation: "Dropout"
+description: "Dropout layer."
+op_type: "class"
+std_args:
+  - name: "rate"
+    type: "float"
+  - name: "deterministic" # Flax/JAX convention
+    type: "bool"
+    default: null
+variants:
+  flax_nnx:
+    api: "flax.nnx.Dropout"
+  torch:
+    api: "torch.nn.Dropout"
+    args:
+      rate: "p"
+      deterministic: null # Handled via train() state
+  keras:
+    api: "keras.layers.Dropout"
+    args:
+      deterministic: null
+  mlx:
+    api: "mlx.nn.Dropout"
+    args:
+      rate: "p"
+  paxml:
+    api: "praxis.layers.Dropout"
+    args:
+      rate: "keep_prob" 
+      deterministic: null
+
+---
+operation: "EinsumLayer"
+description: "Learnable Einsum Layer."
+op_type: "class"
+std_args:
+  - name: "einsum_str"
+    type: "str"
+  - name: "kernel_shape"
+    type: "Tuple[int]"
+  - name: "bias_shape"
+    type: "Tuple[int]"
+variants:
+  flax_nnx:
+    api: "flax.nnx.Einsum"
+  keras:
+    api: "keras.layers.EinsumDense"
+    args:
+      einsum_str: "equation"
+      kernel_shape: "output_shape" # Keras infers full shape
+  torch:
+    api: null
+  paxml:
+    api: "praxis.layers.Einsum"
+
+---
+operation: "Embedding"
+description: "Embedding layer."
+op_type: "class"
+std_args:
+  - name: "num_embeddings"
+    type: "int"
+  - name: "features"
+    type: "int"
+variants:
+  flax_nnx:
+    api: "flax.nnx.Embed"
+  torch:
+    api: "torch.nn.Embedding"
+    args:
+      features: "embedding_dim"
+  keras:
+    api: "keras.layers.Embedding"
+    args:
+      num_embeddings: "input_dim"
+      features: "output_dim"
+  mlx:
+    api: "mlx.nn.Embedding"
+    args:
+      features: "dims"
+  paxml:
+    api: "praxis.layers.Embedding"
+    args:
+      features: "embedding_dims"
+
+---
+operation: "FilterEverything"
+description: "Filter matching everything."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Everything"
+
+---
+operation: "FlatState"
+description: "Flat state container."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.FlatState"
+
+---
+operation: "GRUCell"
+description: "GRU Cell."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "hidden_features"
+    type: "int"
+variants:
+  flax_nnx:
+    api: "flax.nnx.GRUCell"
+  torch:
+    api: "torch.nn.GRUCell"
+    args:
+      in_features: "input_size"
+      hidden_features: "hidden_size"
+  keras:
+    api: "keras.layers.GRUCell"
+    args:
+      in_features: null
+      hidden_features: "units"
+
+---
+operation: "GraphDef"
+description: "Graph Definition container."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.GraphDef"
+
+---
+operation: "GraphState"
+description: "Graph State container."
+op_type: "function"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.GraphState"
+
+---
+operation: "GroupNorm"
+description: "Group Normalization."
+op_type: "class"
+std_args:
+  - name: "num_groups"
+    type: "int"
+  - name: "num_features"
+    type: "int"
+variants:
+  flax_nnx:
+    api: "flax.nnx.GroupNorm"
+  torch:
+    api: "torch.nn.GroupNorm"
+    args:
+      num_features: "num_channels"
+  keras:
+    api: "keras.layers.GroupNormalization"
+    args:
+      num_features: null
+      num_groups: "groups"
+  mlx:
+    api: "mlx.nn.GroupNorm"
+  paxml:
+    api: "praxis.layers.GroupNorm"
+    args:
+      num_features: "dim"
+
+---
+operation: "Initializer"
+description: "Variable initializer type."
+op_type: "function"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Initializer"
+  torch:
+    api: "torch.nn.init"
+  keras:
+    api: "keras.initializers"
+  paxml:
+    api: "praxis.base_layer.Initializer"
+
+---
+operation: "InstanceNorm"
+description: "Instance Normalization."
+op_type: "class"
+std_args:
+  - name: "num_features"
+    type: "int"
+  - name: "epsilon"
+    type: "float"
+    default: 1e-5
+variants:
+  flax_nnx:
+    api: "flax.nnx.InstanceNorm"
+  torch:
+    api: "torch.nn.InstanceNorm2d"
+    args:
+      epsilon: "eps"
+  keras:
+    api: "keras.layers.UnitNormalization" # Partial equivalent
+  mlx:
+    api: "mlx.nn.InstanceNorm"
+    args:
+      num_features: "dims"
+      epsilon: "eps"
+  paxml:
+    api: "praxis.layers.InstanceNorm"
+    args:
+      num_features: "dim"
+
+---
+operation: "Intermediate"
+description: "Intermediate variable wrapper (sow)."
+op_type: "class"
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Intermediate"
+
+---
+operation: "LSTMCell"
+description: "LSTM Cell."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "hidden_features"
+    type: "int"
+variants:
+  flax_nnx:
+    api: "flax.nnx.LSTMCell"
+  torch:
+    api: "torch.nn.LSTMCell"
+    args:
+      in_features: "input_size"
+      hidden_features: "hidden_size"
+  keras:
+    api: "keras.layers.LSTMCell"
+    args:
+      in_features: null
+      hidden_features: "units"
+  paxml:
+    api: "praxis.layers.LSTMCellSimple"
+    args:
+      in_features: null
+      hidden_features: "num_units"
+
+---
+operation: "LayerNorm"
+description: "Layer Normalization."
+op_type: "class"
+std_args:
+  - name: "normalized_shape" # Torch name used as standard
+    type: "Union[int, List[int]]"
+  - name: "epsilon"
+    type: "float"
+    default: 1e-5
+variants:
+  flax_nnx:
+    api: "flax.nnx.LayerNorm"
+    args:
+      normalized_shape: "num_features" # Approx equivalent
+  torch:
+    api: "torch.nn.LayerNorm"
+    args:
+      epsilon: "eps"
+  keras:
+    api: "keras.layers.LayerNormalization"
+    args:
+      normalized_shape: null
+  mlx:
+    api: "mlx.nn.LayerNorm"
+    args:
+      normalized_shape: "dims"
+  paxml:
+    api: "praxis.layers.LayerNorm"
+    args:
+      normalized_shape: "dim"
+
+---
+operation: "Linear"
+description: "Fully connected linear layer."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "use_bias"
+    type: "bool"
+    default: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.Linear"
+  torch:
+    api: "torch.nn.Linear"
+    args:
+      use_bias: "bias"
+  keras:
+    api: "keras.layers.Dense"
+    args:
+      out_features: "units"
+      in_features: null # inferred
+  mlx:
+    api: "mlx.nn.Linear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+      use_bias: "bias"
+  paxml:
+    api: "praxis.layers.Linear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+
+---
+operation: "LinearGeneral"
+description: "Flexible linear layer with axis specification."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "axis"
+    type: "Union[int, Tuple[int]]"
+variants:
+  flax_nnx:
+    api: "flax.nnx.LinearGeneral"
+  torch:
+    api: null # No direct equivalent in torch.nn
+    requires_plugin: "linear_general_adapter"
+  keras:
+    api: "keras.layers.Dense" # Restricted
+  paxml:
+    api: "praxis.layers.Linear" # Praxis Linear handles some general cases
+
+---
+operation: "ModuleList"
+description: "Ordered list of sub-modules."
+op_type: "class"
+std_args:
+  - name: "modules"
+    type: "List"
+    default: null
+variants:
+  flax_nnx:
+    api: "flax.nnx.List"
+  torch:
+    api: "torch.nn.ModuleList"
+  keras:
+    api: null # Uses python list
+  mlx:
+    api: null # Uses python list

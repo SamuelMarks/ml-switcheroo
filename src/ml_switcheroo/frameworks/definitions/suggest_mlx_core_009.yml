@@ -1,0 +1,451 @@
+operation: "Triu"
+description: "Zeros the array below the given diagonal."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.core.triu"
+  torch:
+    api: "torch.triu"
+    args:
+      x: "input"
+      k: "diagonal"
+  jax:
+    api: "jax.numpy.triu"
+    args:
+      x: "m"
+  flax_nnx:
+    api: "jax.numpy.triu"
+    args:
+      x: "m"
+  pax:
+    api: "jax.numpy.triu"
+    args:
+      x: "m"
+  keras:
+    api: "keras.ops.triu"
+  tensorflow:
+    api: "tf.experimental.numpy.triu"
+  numpy:
+    api: "numpy.triu"
+    args:
+      x: "m"
+---
+operation: "UInt16"
+description: "Unsigned 16-bit integer data type."
+op_type: "context" # Treated as attribute/constant
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.uint16"
+  torch:
+    api: "torch.int16" # Torch lacks uint16 in stable, mapping to short or byte (uint8) if strictness allows, else int16
+  jax:
+    api: "jax.numpy.uint16"
+  flax_nnx:
+    api: "jax.numpy.uint16"
+  pax:
+    api: "jax.numpy.uint16"
+  keras:
+    api: "'uint16'" # String representation
+  tensorflow:
+    api: "tf.uint16"
+  numpy:
+    api: "numpy.uint16"
+---
+operation: "UInt32"
+description: "Unsigned 32-bit integer data type."
+op_type: "context"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.uint32"
+  torch:
+    api: "torch.int32" # Fallback as Torch uint32 is uncommon
+  jax:
+    api: "jax.numpy.uint32"
+  flax_nnx:
+    api: "jax.numpy.uint32"
+  pax:
+    api: "jax.numpy.uint32"
+  keras:
+    api: "'uint32'"
+  tensorflow:
+    api: "tf.uint32"
+  numpy:
+    api: "numpy.uint32"
+---
+operation: "UInt64"
+description: "Unsigned 64-bit integer data type."
+op_type: "context"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.uint64"
+  torch:
+    api: "torch.int64"
+  jax:
+    api: "jax.numpy.uint64"
+  flax_nnx:
+    api: "jax.numpy.uint64"
+  pax:
+    api: "jax.numpy.uint64"
+  keras:
+    api: "'uint64'"
+  tensorflow:
+    api: "tf.uint64"
+  numpy:
+    api: "numpy.uint64"
+---
+operation: "UInt8"
+description: "Unsigned 8-bit integer data type."
+op_type: "context"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.uint8"
+  torch:
+    api: "torch.uint8"
+  jax:
+    api: "jax.numpy.uint8"
+  flax_nnx:
+    api: "jax.numpy.uint8"
+  pax:
+    api: "jax.numpy.uint8"
+  keras:
+    api: "'uint8'"
+  tensorflow:
+    api: "tf.uint8"
+  numpy:
+    api: "numpy.uint8"
+---
+operation: "Unflatten"
+description: "Unflattens a dimension of the input tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "sizes"
+    type: "Tuple[int, ...]"
+variants:
+  mlx:
+    api: "mlx.core.unflatten"
+    args:
+      x: "a"
+      dim: "axis"
+      sizes: "shape"
+  torch:
+    api: "torch.unflatten"
+    args:
+      x: "input"
+  jax:
+    # JAX requires explicit reshape usually, unflatten not direct equivalent
+    requires_plugin: "unflatten_manual"
+  flax_nnx:
+    requires_plugin: "unflatten_manual"
+  pax:
+    requires_plugin: "unflatten_manual"
+  keras:
+    api: "keras.ops.reshape" # Approximate mapping, might fail if dim logic differs
+    requires_plugin: "unflatten_to_reshape"
+  tensorflow:
+    api: "tf.reshape"
+    requires_plugin: "unflatten_manual"
+  numpy:
+    requires_plugin: "unflatten_manual"
+---
+operation: "UnsignedInteger"
+description: "Generic Unsigned Integer type."
+op_type: "context"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.unsignedinteger"
+  torch:
+    api: "torch.int32"
+  jax:
+    api: "jax.numpy.unsignedinteger"
+  flax_nnx:
+    api: "jax.numpy.unsignedinteger"
+  pax:
+    api: "jax.numpy.unsignedinteger"
+  numpy:
+    api: "numpy.unsignedinteger"
+---
+operation: "ValueAndGrad"
+description: "Returns a function which computes the value and gradient of `fun`."
+op_type: "decorator"
+std_args:
+  - name: "fun"
+    type: "Callable"
+  - name: "argnums"
+    type: "Union[int, Sequence[int]]"
+    default: 0
+  - name: "argnames"
+    type: "Union[str, Sequence[str]]"
+    default: []
+variants:
+  mlx:
+    api: "mlx.core.value_and_grad"
+  torch:
+    api: "torch.func.value_and_grad" # Newer functional API
+  jax:
+    api: "jax.value_and_grad"
+  flax_nnx:
+    api: "jax.value_and_grad"
+  pax:
+    api: "jax.value_and_grad"
+  tensorflow:
+    requires_plugin: "gradient_tape_accumulate"
+---
+operation: "Var"
+description: "Compute the variance(s) over the given axes."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "Union[int, Sequence[int]]"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+  - name: "ddof"
+    type: "int"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.core.var"
+    args:
+      x: "a"
+  torch:
+    api: "torch.var"
+    args:
+      x: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+      ddof: "correction" # Torch uses correction=1 default, need arg_values or plugin
+  jax:
+    api: "jax.numpy.var"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jnp.var"
+    args:
+      x: "a"
+  pax:
+    api: "jnp.var"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.var"
+  tensorflow:
+    api: "tf.math.reduce_variance"
+    args:
+      x: "input_tensor"
+      axis: "axis"
+      keepdims: "keepdims"
+      # tf doesn't support ddof in reduce_variance easily
+    requires_plugin: "tf_variance_ddof"
+  numpy:
+    api: "numpy.var"
+    args:
+      x: "a"
+---
+operation: "BitCast"
+description: "View (Reinterpret Cast) the array as a different type."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "dtype"
+    type: "Dtype"
+variants:
+  mlx:
+    api: "mlx.core.view"
+    args:
+      x: "a"
+  torch:
+    # Requires numpy bridge or viewing. 
+    # 'view' in torch is reshape. 'view(dtype)' is complex.
+    requires_plugin: "torch_bitcast_shim"
+  jax:
+    api: "jax.lax.bitcast_convert_type"
+    args:
+       x: "operand"
+       dtype: "new_dtype"
+  flax_nnx:
+    api: "jax.lax.bitcast_convert_type"
+    args:
+       x: "operand"
+       dtype: "new_dtype"
+  pax:
+    api: "jax.lax.bitcast_convert_type"
+    args:
+       x: "operand"
+       dtype: "new_dtype"
+  numpy:
+    api: "numpy.ndarray.view"
+    transformation_type: "infix" # Not infix, but method usage requires special handling
+    macro_template: "{x}.view({dtype})"
+---
+operation: "Vjp"
+description: "Compute the vector-Jacobian product."
+std_args:
+  - name: "fun"
+    type: "Callable"
+  - name: "primals"
+    type: "List[Tensor]"
+  - name: "cotangents"
+    type: "List[Tensor]"
+variants:
+  mlx:
+    api: "mlx.core.vjp"
+  torch:
+    api: "torch.autograd.functional.vjp"
+    args:
+      fun: "func"
+      primals: "inputs"
+      cotangents: "v"
+  jax:
+    # Jax vjp returns (primals_out, vjp_fun) not the result directly.
+    # Requires wrapper to match MLX immediate execution semantics.
+    macro_template: "lambda f, p, c: (lambda out, vjp_fn: (out, vjp_fn(c)))(*jax.vjp(f, *p))"
+  flax_nnx:
+    macro_template: "lambda f, p, c: (lambda out, vjp_fn: (out, vjp_fn(c)))(*jax.vjp(f, *p))"
+  pax:
+    macro_template: "lambda f, p, c: (lambda out, vjp_fn: (out, vjp_fn(c)))(*jax.vjp(f, *p))"
+---
+operation: "Vmap"
+description: "Returns a vectorized version of `fun`."
+op_type: "decorator"
+std_args:
+  - name: "fun"
+    type: "Callable"
+  - name: "in_axes"
+    default: 0
+  - name: "out_axes"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.core.vmap"
+  torch:
+    api: "torch.func.vmap"
+    args:
+      in_axes: "in_dims"
+      out_axes: "out_dims"
+  jax:
+    api: "jax.vmap"
+  flax_nnx:
+    api: "jax.vmap"
+  pax:
+    api: "jax.vmap"
+  tensorflow:
+    api: "tf.vectorized_map"
+    args:
+      fun: "fn"
+      in_axes: null # Not directly supported in simple API
+      out_axes: null
+---
+operation: "Where"
+description: "Select from `x` or `y` according to `condition`."
+std_args:
+  - name: "condition"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.where"
+  torch:
+    api: "torch.where"
+  jax:
+    api: "jax.numpy.where"
+  flax_nnx:
+    api: "jax.numpy.where"
+  pax:
+    api: "jax.numpy.where"
+  keras:
+    api: "keras.ops.where"
+    args:
+      x: "x1"
+      y: "x2"
+  tensorflow:
+    api: "tf.where"
+  numpy:
+    api: "numpy.where"
+---
+operation: "Zeros"
+description: "Construct an array of zeros."
+std_args:
+  - name: "shape"
+    type: "Union[int, Sequence[int]]"
+  - name: "dtype"
+    type: "Dtype"
+    default: "float32"
+variants:
+  mlx:
+    api: "mlx.core.zeros"
+  torch:
+    api: "torch.zeros"
+    args:
+      shape: "size"
+  jax:
+    api: "jax.numpy.zeros"
+  flax_nnx:
+    api: "jax.numpy.zeros"
+  pax:
+    api: "jax.numpy.zeros"
+  keras:
+    api: "keras.ops.zeros"
+  tensorflow:
+    api: "tf.zeros"
+  numpy:
+    api: "numpy.zeros"
+---
+operation: "ZerosLike"
+description: "An array of zeros like the input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  mlx:
+    api: "mlx.core.zeros_like"
+    args:
+      x: "a"
+  torch:
+    api: "torch.zeros_like"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.zeros_like"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.zeros_like"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.zeros_like"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.zeros_like"
+    args:
+      x: "x"
+  tensorflow:
+    api: "tf.zeros_like"
+    args:
+      x: "input"
+  numpy:
+    api: "numpy.zeros_like"
+    args:
+      x: "a"

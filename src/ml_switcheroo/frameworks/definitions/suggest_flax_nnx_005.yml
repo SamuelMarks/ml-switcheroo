@@ -1,0 +1,534 @@
+operation: "HardTanh"
+description: "Hard Tanh activation function: clamp(x, -1, 1)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "flax.nnx.hard_tanh"
+  torch:
+    api: "torch.nn.functional.hardtanh"
+  jax:
+    api: "jax.lax.clamp"
+    args: null
+    macro_template: "jax.lax.clamp(-1.0, {x}, 1.0)"
+  tensorflow:
+    api: "tf.clip_by_value"
+    macro_template: "tf.clip_by_value({x}, -1.0, 1.0)"
+  mlx:
+    api: "mlx.core.clip"
+    macro_template: "mx.clip({x}, -1.0, 1.0)"
+  keras:
+    api: "keras.ops.clip"
+    macro_template: "keras.ops.clip({x}, -1.0, 1.0)"
+
+---
+operation: "Identity"
+description: "Identity activation function. Returns input unmodified."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "flax.nnx.identity"
+  torch:
+    api: "torch.nn.Identity"
+    transformation_type: "inline_lambda"
+    macro_template: "{x}"
+  jax:
+    api: "lambda x: x"
+    transformation_type: "inline_lambda"
+  tensorflow:
+    api: "tf.identity"
+  keras:
+    macro_template: "{x}"
+  mlx:
+    macro_template: "{x}"
+
+---
+operation: "IsData"
+description: "Checks if a value is a registered data type (Flax NNX specific)."
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.is_data"
+  torch:
+    requires_plugin: "is_tensor_check"
+  jax:
+    macro_template: "isinstance({value}, (jax.Array, jax.numpy.ndarray))"
+
+---
+operation: "IterChildren"
+description: "Iterates over immediate children modules/layers."
+op_type: "function"
+std_args:
+  - name: "module"
+    type: "Module"
+variants:
+  flax_nnx:
+    api: "flax.nnx.iter_children"
+  torch:
+    api: "module.named_children"
+    transformation_type: "method"
+    macro_template: "{module}.named_children()"
+
+---
+operation: "IterGraph"
+description: "Iterates over all nested nodes and leaves of the graph."
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.iter_graph"
+  torch:
+    description: "Approximation using named_modules"
+    macro_template: "{node}.named_modules()"
+
+---
+operation: "IterModules"
+description: "Recursively iterates over all nested Modules."
+std_args:
+  - name: "module"
+    type: "Module"
+variants:
+  flax_nnx:
+    api: "flax.nnx.iter_modules"
+  torch:
+    api: "module.named_modules"
+    transformation_type: "method"
+    macro_template: "{module}.named_modules()"
+
+---
+operation: "Jit"
+description: "Just-In-Time compilation decorator/function."
+op_type: "decorator"
+std_args:
+  - name: "fun"
+    type: "Callable"
+  - name: "static_argnums"
+    type: "Optional[Union[int, Sequence[int]]]"
+    default: null
+variants:
+  flax_nnx:
+    api: "flax.nnx.jit"
+  jax:
+    api: "jax.jit"
+  torch:
+    api: "torch.compile"
+  tensorflow:
+    api: "tf.function"
+  mlx:
+    api: "mlx.core.compile"
+
+---
+operation: "LeakyReLU"
+description: "Leaky Rectified Linear Unit activation."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "negative_slope"
+    type: "float"
+    default: 0.01
+variants:
+  flax_nnx:
+    api: "flax.nnx.leaky_relu"
+  jax:
+    api: "jax.nn.leaky_relu"
+  torch:
+    api: "torch.nn.functional.leaky_relu"
+  tensorflow:
+    api: "tf.nn.leaky_relu"
+    args:
+      negative_slope: "alpha"
+  keras:
+    api: "keras.ops.leaky_relu"
+  mlx:
+    api: "mlx.nn.leaky_relu"
+
+---
+operation: "LogSigmoid"
+description: "Log-sigmoid activation function: log(1 / (1 + exp(-x)))."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "flax.nnx.log_sigmoid"
+  jax:
+    api: "jax.nn.log_sigmoid"
+  torch:
+    api: "torch.nn.functional.logsigmoid"
+  tensorflow:
+    api: "tf.math.log_sigmoid"
+  mlx:
+    api: "mlx.nn.log_sigmoid"
+  keras:
+    api: "keras.ops.log_sigmoid"
+
+---
+operation: "LogSoftmax"
+description: "Log-Softmax function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  flax_nnx:
+    api: "flax.nnx.log_softmax"
+  jax:
+    api: "jax.nn.log_softmax"
+  torch:
+    api: "torch.nn.functional.log_softmax"
+    args:
+      axis: "dim"
+  tensorflow:
+    api: "tf.nn.log_softmax"
+  mlx:
+    api: "mlx.nn.log_softmax"
+    args:
+      axis: "axis"
+  keras:
+    api: "keras.ops.log_softmax"
+
+---
+operation: "LogicalAxisRules"
+description: "Context manager for setting logical to mesh axis bindings."
+op_type: "context"
+std_args:
+  - name: "rules"
+    type: "Sequence"
+variants:
+  flax_nnx:
+    api: "flax.nnx.logical_axis_rules"
+  jax:
+    api: "jax.sharding.Mesh"
+    requires_plugin: "sharding_rules_shim"
+
+---
+operation: "LogSumExp"
+description: "Log-sum-exp reduction."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "Optional[Union[int, Tuple[int, ...]]]"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  flax_nnx:
+    api: "flax.nnx.logsumexp"
+  jax:
+    api: "jax.scipy.special.logsumexp"
+  torch:
+    api: "torch.logsumexp"
+    args:
+      axis: "dim"
+  tensorflow:
+    api: "tf.math.reduce_logsumexp"
+  mlx:
+    api: "mlx.core.logsumexp"
+  keras:
+    api: "keras.ops.logsumexp"
+
+---
+operation: "MakeAttentionMask"
+description: "Creates mask for attention weights (Flax utility)."
+std_args:
+  - name: "query_input"
+    type: "Tensor"
+  - name: "key_input"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "flax.nnx.make_attention_mask"
+  torch:
+    requires_plugin: "attention_mask_generator"
+
+---
+operation: "MakeCausalMask"
+description: "Creates causal mask for self-attention."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "flax.nnx.make_causal_mask"
+  torch:
+    api: "torch.nn.attention.bias.causal_upper_left"
+    requires_plugin: "causal_mask_adapter"
+
+---
+operation: "MapState"
+description: "Maps a function over a State object."
+std_args:
+  - name: "f"
+    type: "Callable"
+  - name: "state"
+    type: "State"
+variants:
+  flax_nnx:
+    api: "flax.nnx.map_state"
+  jax:
+    api: "jax.tree_util.tree_map"
+
+---
+operation: "MaxPool"
+description: "Pools the input by taking the maximum of a window slice."
+std_args:
+  - name: "inputs"
+    type: "Tensor"
+  - name: "window_shape"
+    type: "Union[int, Tuple[int, ...]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int, ...]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "VALID"
+variants:
+  flax_nnx:
+    api: "flax.nnx.max_pool"
+  jax:
+    api: "jax.lax.reduce_window"
+    requires_plugin: "pooling_shim"
+  torch:
+    api: "torch.nn.functional.max_pool2d"
+    args:
+      inputs: "input"
+      window_shape: "kernel_size"
+      padding: "padding"
+    arg_values:
+      padding:
+        VALID: 0
+        SAME: "'same'"
+
+---
+operation: "Merge"
+description: "Merges a GraphDef and State back into a module (NNX Functional API)."
+std_args:
+  - name: "graphdef"
+    type: "GraphDef"
+  - name: "state"
+    type: "State"
+variants:
+  flax_nnx:
+    api: "flax.nnx.merge"
+  torch:
+    requires_plugin: "state_dict_load_shim"
+
+---
+operation: "MergeContext"
+description: "Merges context tags."
+std_args:
+  - name: "ctxtag"
+    type: "Hashable"
+variants:
+  flax_nnx:
+    api: "flax.nnx.merge_context"
+
+---
+operation: "MergeState"
+description: "Merges multiple State objects."
+std_args:
+  - name: "state"
+    type: "Mapping"
+  - name: "states"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.merge_state"
+  jax:
+    api: "jax.tree_util.tree_map"
+    description: "Approximate merge via dict update usually"
+
+---
+operation: "MinPool"
+description: "Pools the input by taking the minimum of a window slice."
+std_args:
+  - name: "inputs"
+    type: "Tensor"
+  - name: "window_shape"
+    type: "Union[int, Tuple[int, ...]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int, ...]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "VALID"
+variants:
+  flax_nnx:
+    api: "flax.nnx.min_pool"
+  torch:
+    # Torch has no min_pool, simulate with -max_pool(-x)
+    macro_template: "-torch.nn.functional.max_pool2d(-{inputs}, kernel_size={window_shape}, stride={strides})"
+
+---
+operation: "OneHot"
+description: "One-hot encodes the given indices."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "num_classes"
+    type: "int"
+variants:
+  flax_nnx:
+    api: "flax.nnx.one_hot"
+  jax:
+    api: "jax.nn.one_hot"
+  torch:
+    api: "torch.nn.functional.one_hot"
+  tensorflow:
+    api: "tf.one_hot"
+    args:
+       x: "indices"
+       num_classes: "depth"
+  keras:
+    api: "keras.ops.one_hot"
+  mlx:
+    # MLX has no direct one_hot in core usually, check if added recent
+    requires_plugin: "mlx_one_hot_shim"
+
+---
+operation: "Pmap"
+description: "Parallel map over devices."
+op_type: "decorator"
+std_args:
+  - name: "f"
+    type: "Callable"
+variants:
+  flax_nnx:
+    api: "flax.nnx.pmap"
+  jax:
+    api: "jax.pmap"
+  torch:
+    missing_message: "PyTorch does not support single-controller pmap. Use DistributedDataParallel."
+
+---
+operation: "Pool"
+description: "Helper function to define pooling functions."
+std_args:
+  - name: "inputs"
+    type: "Tensor"
+  - name: "init"
+    type: "Any"
+  - name: "reduce_fn"
+    type: "Callable"
+  - name: "window_shape"
+    type: "Tuple"
+  - name: "strides"
+    type: "Tuple"
+  - name: "padding"
+    type: "str"
+variants:
+  flax_nnx:
+    api: "flax.nnx.pool"
+  jax:
+    api: "jax.lax.reduce_window"
+
+---
+operation: "Pop"
+description: "Pops variable types from the graph node."
+std_args:
+  - name: "node"
+    type: "Module"
+  - name: "filters"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.pop"
+
+---
+operation: "Pure"
+description: "Returns a new tree with all Variable objects replaced with inner values."
+std_args:
+  - name: "tree"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.pure"
+
+---
+operation: "RecursiveMap"
+description: "Recursively applies a function to all nodes and leaves."
+std_args:
+  - name: "f"
+    type: "Callable"
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.recursive_map"
+  torch:
+    api: "torch.nn.modules.module.Module.apply"
+    transformation_type: "method"
+
+---
+operation: "RegisterDataType"
+description: "Registers a type as pytree data type recognized by Object."
+std_args:
+  - name: "type_"
+    type: "type"
+variants:
+  flax_nnx:
+    api: "flax.nnx.register_data_type"
+  jax:
+    api: "jax.tree_util.register_pytree_node"
+
+---
+operation: "RegisterVariableName"
+description: "Register a pair of Linen collection name and its NNX type."
+std_args:
+  - name: "name"
+    type: "str"
+  - name: "typ"
+    type: "type"
+variants:
+  flax_nnx:
+    api: "flax.nnx.register_variable_name"
+
+---
+operation: "ReLU"
+description: "Rectified linear unit activation function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "flax.nnx.relu"
+  jax:
+    api: "jax.nn.relu"
+  torch:
+    api: "torch.nn.functional.relu"
+  tensorflow:
+    api: "tf.nn.relu"
+  keras:
+    api: "keras.ops.relu"
+  mlx:
+    api: "mlx.nn.relu"
+
+---
+operation: "ReLU6"
+description: "Rectified Linear Unit 6 activation function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "flax.nnx.relu6"
+  jax:
+    api: "jax.nn.relu6"
+  torch:
+    api: "torch.nn.functional.relu6"
+  tensorflow:
+    api: "tf.nn.relu6"
+  keras:
+    api: "keras.ops.relu6"
+  mlx:
+    api: "mlx.nn.relu6"

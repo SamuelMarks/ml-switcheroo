@@ -1,0 +1,915 @@
+operation: "GeneralConv"
+description: "General convolution over an input with several channels."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+  - name: "stride"
+    default: 1
+    type: "Union[int, Sequence[int]]"
+  - name: "padding"
+    default: 0
+    type: "Union[int, Sequence[int]]"
+  - name: "kernel_dilation"
+    default: 1
+    type: "Union[int, Sequence[int]]"
+  - name: "input_dilation"
+    default: 1
+    type: "Union[int, Sequence[int]]"
+  - name: "groups"
+    default: 1
+    type: "int"
+  - name: "flip"
+    default: false
+    type: "bool"
+variants:
+  mlx:
+    api: "mlx.core.conv_general"
+  jax:
+    api: "jax.lax.conv_general_dilated"
+    args:
+      input: "lhs"
+      weight: "rhs"
+      stride: "window_strides"
+      padding: "padding"
+      kernel_dilation: "rhs_dilation"
+      input_dilation: "lhs_dilation"
+      groups: "feature_group_count"
+    requires_plugin: "jax_conv_general_adapter"
+  flax_nnx:
+    api: "jax.lax.conv_general_dilated"
+    requires_plugin: "jax_conv_general_adapter"
+  paxml:
+    api: "jax.lax.conv_general_dilated"
+    requires_plugin: "jax_conv_general_adapter"
+  torch:
+    api: null # No direct equivalent for general dilated input/kernel conv without manual unfolding
+
+---
+operation: "ConvTranspose1d"
+description: "1D transposed convolution over an input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 3
+    shape_spec: "[N, L, Cin]"
+  - name: "weight"
+    type: "Tensor"
+    rank: 3
+    shape_spec: "[Cout, K, Cin]"
+  - name: "stride"
+    default: 1
+  - name: "padding"
+    default: 0
+  - name: "dilation"
+    default: 1
+  - name: "output_padding"
+    default: 0
+  - name: "groups"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.core.conv_transpose1d"
+  torch:
+    api: "torch.nn.functional.conv_transpose1d"
+    layout_map:
+      input: "NLC->NCL"
+      weight: "OIK->IOK"
+      return: "NCL->NLC"
+  keras:
+    api: "keras.ops.conv_transpose"
+  jax:
+    api: "jax.lax.conv_transpose"
+    requires_plugin: "jax_conv_transpose_adapter" # JAX requires dimension_numbers
+
+---
+operation: "ConvTranspose2d"
+description: "2D transposed convolution over an input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 4
+    shape_spec: "[N, H, W, Cin]"
+  - name: "weight"
+    type: "Tensor"
+    rank: 4
+    shape_spec: "[Cout, Kh, Kw, Cin]"
+  - name: "stride"
+    default: 1
+  - name: "padding"
+    default: 0
+  - name: "dilation"
+    default: 1
+  - name: "output_padding"
+    default: 0
+  - name: "groups"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.core.conv_transpose2d"
+  torch:
+    api: "torch.nn.functional.conv_transpose2d"
+    layout_map:
+      input: "NHWC->NCHW"
+      weight: "OIKK->IOKK"
+      return: "NCHW->NHWC"
+  keras:
+    api: "keras.ops.conv_transpose"
+  jax:
+    api: "jax.lax.conv_transpose"
+    requires_plugin: "jax_conv_transpose_adapter"
+
+---
+operation: "ConvTranspose3d"
+description: "3D transposed convolution over an input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 5
+  - name: "weight"
+    type: "Tensor"
+    rank: 5
+  - name: "stride"
+    default: 1
+  - name: "padding"
+    default: 0
+  - name: "dilation"
+    default: 1
+  - name: "output_padding"
+    default: 0
+  - name: "groups"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.core.conv_transpose3d"
+  torch:
+    api: "torch.nn.functional.conv_transpose3d"
+    layout_map:
+      input: "NDHWC->NCDHW"
+      weight: "OIKKK->IOKKK"
+      return: "NCDHW->NDHWC"
+  keras:
+    api: "keras.ops.conv_transpose"
+  jax:
+    api: "jax.lax.conv_transpose"
+    requires_plugin: "jax_conv_transpose_adapter"
+
+---
+operation: "Convolve"
+description: "The discrete convolution of 1D arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+    rank: 1
+  - name: "v"
+    type: "Tensor"
+    rank: 1
+  - name: "mode"
+    type: "str"
+    default: "full"
+variants:
+  mlx:
+    api: "mlx.core.convolve"
+  numpy:
+    api: "numpy.convolve"
+  torch:
+    # Torch lacks simple 1D convolve without reshaping to 3D for F.conv1d
+    requires_plugin: "torch_convolve_1d"
+  jax:
+    api: "jax.numpy.convolve"
+  flax_nnx:
+    api: "jax.numpy.convolve"
+  paxml:
+    api: "jax.numpy.convolve"
+  keras:
+    api: "keras.ops.correlate"
+    args:
+        mode: "mode"
+    # Note: Keras correlate/convolve naming vs behaviors vary, often need explicit flip for convolve
+
+---
+operation: "Cos"
+description: "Element-wise cosine."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.cos"
+  torch:
+    api: "torch.cos"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.cos"
+    args:
+      a: "x"
+  flax_nnx:
+    api: "jax.numpy.cos"
+    args:
+      a: "x"
+  paxml:
+    api: "jax.numpy.cos"
+    args:
+      a: "x"
+  numpy:
+    api: "numpy.cos"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.math.cos"
+    args:
+      a: "x"
+  keras:
+    api: "keras.ops.cos"
+    args:
+      a: "x"
+
+---
+operation: "Cosh"
+description: "Element-wise hyperbolic cosine."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.cosh"
+  torch:
+    api: "torch.cosh"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.cosh"
+    args:
+      a: "x"
+  flax_nnx:
+    api: "jax.numpy.cosh"
+    args:
+      a: "x"
+  paxml:
+    api: "jax.numpy.cosh"
+    args:
+      a: "x"
+  numpy:
+    api: "numpy.cosh"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.math.cosh"
+    args:
+      a: "x"
+  keras:
+    api: "keras.ops.cosh"
+    args:
+      a: "x"
+
+---
+operation: "DeviceCpu"
+description: "Returns the CPU device object."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.cpu"
+  torch:
+    macro_template: "torch.device('cpu')"
+  tensorflow:
+    macro_template: "'/CPU:0'"
+
+---
+operation: "Cummax"
+description: "Return the cumulative maximum of the elements along the given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "Optional[int]"
+    default: null
+  - name: "reverse"
+    type: "bool"
+    default: false
+  - name: "inclusive"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.core.cummax"
+  torch:
+    api: "torch.cummax"
+    args:
+       a: "input"
+       axis: "dim"
+    output_select_index: 0 # Torch returns (values, indices)
+  jax:
+    api: "jax.numpy.maximum.accumulate"
+    # JAX accumulate does not support reverse/inclusive kwargs natively in the ufunc
+    requires_plugin: "jax_cummax_adapter"
+  flax_nnx:
+    api: "jax.numpy.maximum.accumulate"
+    requires_plugin: "jax_cummax_adapter"
+  paxml:
+    api: "jax.numpy.maximum.accumulate"
+    requires_plugin: "jax_cummax_adapter"
+
+---
+operation: "Cummin"
+description: "Return the cumulative minimum of the elements along the given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "Optional[int]"
+    default: null
+  - name: "reverse"
+    type: "bool"
+    default: false
+  - name: "inclusive"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.core.cummin"
+  torch:
+    api: "torch.cummin"
+    args:
+       a: "input"
+       axis: "dim"
+    output_select_index: 0
+  jax:
+    api: "jax.numpy.minimum.accumulate"
+    requires_plugin: "jax_cummin_adapter"
+  flax_nnx:
+    api: "jax.numpy.minimum.accumulate"
+    requires_plugin: "jax_cummin_adapter"
+  paxml:
+    api: "jax.numpy.minimum.accumulate"
+    requires_plugin: "jax_cummin_adapter"
+
+---
+operation: "Cumprod"
+description: "Return the cumulative product of the elements along the given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "Optional[int]"
+    default: null
+  - name: "reverse"
+    type: "bool"
+    default: false
+  - name: "inclusive"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.core.cumprod"
+  torch:
+    api: "torch.cumprod"
+    args:
+       a: "input"
+       axis: "dim"
+  jax:
+    api: "jax.numpy.cumprod"
+    args:
+       a: "a"
+       axis: "axis"
+  flax_nnx:
+    api: "jax.numpy.cumprod"
+    args:
+       a: "a"
+       axis: "axis"
+  paxml:
+    api: "jax.numpy.cumprod"
+    args:
+       a: "a"
+       axis: "axis"
+  numpy:
+    api: "numpy.cumprod"
+    args:
+       a: "a"
+       axis: "axis"
+  tensorflow:
+    api: "tf.math.cumprod"
+    args:
+       a: "x"
+       axis: "axis"
+       reverse: "reverse"
+       inclusive: "exclusive" # TF uses exclusive=False for inclusive=True (inverted)
+    arg_values:
+       inclusive:
+          "True": "False"
+          "False": "True"
+  keras:
+    api: "keras.ops.cumprod"
+    args:
+       a: "x"
+       axis: "axis"
+
+---
+operation: "Cumsum"
+description: "Return the cumulative sum of the elements along the given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "Optional[int]"
+    default: null
+  - name: "reverse"
+    type: "bool"
+    default: false
+  - name: "inclusive"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.core.cumsum"
+  torch:
+    api: "torch.cumsum"
+    args:
+       a: "input"
+       axis: "dim"
+  jax:
+    api: "jax.numpy.cumsum"
+    args:
+       a: "a"
+       axis: "axis"
+  flax_nnx:
+    api: "jax.numpy.cumsum"
+    args:
+       a: "a"
+       axis: "axis"
+  paxml:
+    api: "jax.numpy.cumsum"
+    args:
+       a: "a"
+       axis: "axis"
+  numpy:
+    api: "numpy.cumsum"
+    args:
+       a: "a"
+       axis: "axis"
+  tensorflow:
+    api: "tf.math.cumsum"
+    args:
+       a: "x"
+       axis: "axis"
+       reverse: "reverse"
+  keras:
+    api: "keras.ops.cumsum"
+    args:
+       a: "x"
+       axis: "axis"
+
+---
+operation: "CustomAutograd"
+description: "Decorator for custom gradient definitions."
+op_type: "decorator"
+std_args:
+  - name: "fn"
+    type: "Callable"
+variants:
+  mlx:
+    api: "mlx.core.custom_function"
+  torch:
+    api: "torch.autograd.Function"
+  jax:
+    api: "jax.custom_vjp"
+  flax_nnx:
+    api: "jax.custom_vjp"
+  paxml:
+    api: "jax.custom_vjp"
+
+---
+operation: "GetDefaultDevice"
+description: "Get the default device."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.default_device"
+  torch:
+    macro_template: "torch.device('cuda' if torch.cuda.is_available() else 'cpu')"
+  jax:
+    api: "jax.default_backend"
+  flax_nnx:
+    api: "jax.default_backend"
+  paxml:
+    api: "jax.default_backend"
+
+---
+operation: "GetDefaultStream"
+description: "Get the device's default stream."
+std_args:
+  - name: "device"
+    type: "Device"
+variants:
+  mlx:
+    api: "mlx.core.default_stream"
+  torch:
+    api: "torch.cuda.current_stream"
+    args:
+       device: null # Torch implicit usually, or device arg ignored in simple map
+
+---
+operation: "Degrees"
+description: "Convert angles from radians to degrees."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.degrees"
+  torch:
+    api: "torch.rad2deg"
+    args: {a: "input"}
+  jax:
+    api: "jax.numpy.degrees"
+    args: {a: "x"}
+  flax_nnx:
+    api: "jax.numpy.degrees"
+    args: {a: "x"}
+  paxml:
+    api: "jax.numpy.degrees"
+    args: {a: "x"}
+  numpy:
+    api: "numpy.degrees"
+    args: {a: "x"}
+  tensorflow:
+    api: "tf.math.degrees"
+    args: {a: "x"}
+
+---
+operation: "ControlDependency"
+description: "Insert dependencies between arrays in the graph."
+std_args:
+  - name: "inputs"
+    type: "Union[Tensor, Sequence[Tensor]]"
+  - name: "dependencies"
+    type: "Union[Tensor, Sequence[Tensor]]"
+variants:
+  mlx:
+    api: "mlx.core.depends"
+  jax:
+    requires_plugin: "jax_control_dependencies" # Often no-op or block_until_ready logic
+  flax_nnx:
+    requires_plugin: "jax_control_dependencies"
+  paxml:
+    requires_plugin: "jax_control_dependencies"
+  tensorflow:
+    api: "tf.control_dependencies"
+
+---
+operation: "Dequantize"
+description: "Dequantize the matrix using quantization parameters."
+std_args:
+  - name: "w"
+    type: "Tensor"
+  - name: "scales"
+    type: "Tensor"
+  - name: "biases"
+    type: "Optional[Tensor]"
+    default: null
+  - name: "group_size"
+    type: "Optional[int]"
+    default: null
+  - name: "bits"
+    type: "Optional[int]"
+    default: null
+  - name: "mode"
+    type: "str"
+    default: "affine"
+variants:
+  mlx:
+    api: "mlx.core.dequantize"
+  torch:
+    api: "torch.dequantize"
+    # Signature mismatch heavily dependent on quantization scheme (tensor vs args)
+    requires_plugin: "torch_dequantize_adapter"
+
+---
+operation: "Diag"
+description: "Extract a diagonal or construct a diagonal matrix."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.core.diag"
+  torch:
+    api: "torch.diag"
+    args:
+       a: "input"
+       k: "diagonal"
+  jax:
+    api: "jax.numpy.diag"
+    args:
+       a: "v"
+  flax_nnx:
+    api: "jax.numpy.diag"
+    args:
+       a: "v"
+  paxml:
+    api: "jax.numpy.diag"
+    args:
+       a: "v"
+  numpy:
+    api: "numpy.diag"
+    args:
+       a: "v"
+  tensorflow:
+    api: "tf.linalg.diag"
+    args:
+       a: "diagonal"
+       k: "k"
+
+---
+operation: "Diagonal"
+description: "Return specified diagonals."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "offset"
+    type: "int"
+    default: 0
+  - name: "axis1"
+    type: "int"
+    default: 0
+  - name: "axis2"
+    type: "int"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.core.diagonal"
+  torch:
+    api: "torch.diagonal"
+    args:
+       a: "input"
+       axis1: "dim1"
+       axis2: "dim2"
+  jax:
+    api: "jax.numpy.diagonal"
+    args:
+       a: "a"
+  flax_nnx:
+    api: "jax.numpy.diagonal"
+    args:
+       a: "a"
+  paxml:
+    api: "jax.numpy.diagonal"
+    args:
+       a: "a"
+  numpy:
+    api: "numpy.diagonal"
+    args:
+       a: "a"
+
+---
+operation: "DisableCompile"
+description: "Globally disable compilation."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.disable_compile"
+  jax:
+    api: "jax.disable_jit" # Context manager, might need wrapping if used as func
+  flax_nnx:
+    api: "jax.disable_jit"
+  paxml:
+    api: "jax.disable_jit"
+
+---
+operation: "Divide"
+description: "Element-wise division."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.divide"
+  torch:
+    api: "torch.div"
+    args: {a: "input", b: "other"}
+  jax:
+    api: "jax.numpy.divide"
+    args: {a: "x1", b: "x2"}
+  flax_nnx:
+    api: "jax.numpy.divide"
+    args: {a: "x1", b: "x2"}
+  paxml:
+    api: "jax.numpy.divide"
+    args: {a: "x1", b: "x2"}
+  numpy:
+    api: "numpy.divide"
+    args: {a: "x1", b: "x2"}
+  tensorflow:
+    api: "tf.math.divide"
+    args: {a: "x", b: "y"}
+  keras:
+    api: "keras.ops.divide"
+    args: {a: "x1", b: "x2"}
+
+---
+operation: "DivMod"
+description: "Element-wise quotient and remainder."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.divmod"
+  torch:
+    transformation_type: "inline_lambda"
+    api: "lambda a, b: (torch.div(a, b, rounding_mode='floor'), torch.fmod(a, b))"
+  jax:
+    api: "jax.numpy.divmod"
+    args: {a: "x1", b: "x2"}
+  flax_nnx:
+    api: "jax.numpy.divmod"
+    args: {a: "x1", b: "x2"}
+  paxml:
+    api: "jax.numpy.divmod"
+    args: {a: "x1", b: "x2"}
+  numpy:
+    api: "numpy.divmod"
+    args: {a: "x1", b: "x2"}
+
+---
+operation: "E"
+description: "Euler's number."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.e"
+  numpy:
+    api: "numpy.e"
+  torch:
+    macro_template: "2.718281828459045" # Constant replacement
+  jax:
+    api: "jax.numpy.e"
+
+---
+operation: "Einsum"
+description: "Perform the Einstein summation convention on the operands."
+std_args:
+  - name: "subscripts"
+    type: "str"
+  - name: "operands"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.einsum"
+  torch:
+    api: "torch.einsum"
+    args:
+       subscripts: "equation"
+  jax:
+    api: "jax.numpy.einsum"
+  flax_nnx:
+    api: "jax.numpy.einsum"
+  paxml:
+    api: "jax.numpy.einsum"
+  numpy:
+    api: "numpy.einsum"
+  tensorflow:
+    api: "tf.einsum"
+    args:
+       subscripts: "equation"
+  keras:
+    api: "keras.ops.einsum"
+    args:
+       subscripts: "subscripts"
+
+---
+operation: "EinsumPath"
+description: "Compute the contraction order for the given Einstein summation."
+std_args:
+  - name: "subscripts"
+    type: "str"
+  - name: "operands"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.einsum_path"
+  numpy:
+    api: "numpy.einsum_path"
+    args:
+       subscripts: "subscripts"
+  jax:
+    api: "jax.numpy.einsum_path"
+  flax_nnx:
+    api: "jax.numpy.einsum_path"
+  paxml:
+    api: "jax.numpy.einsum_path"
+
+---
+operation: "EnableCompile"
+description: "Globally enable compilation."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.enable_compile"
+  # No direct equivalent global toggle in JAX/Torch usually (except JIT decoration)
+
+---
+operation: "Equal"
+description: "Element-wise equality."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.equal"
+  torch:
+    api: "torch.eq"
+    args: {a: "input", b: "other"}
+  jax:
+    api: "jax.numpy.equal"
+    args: {a: "x1", b: "x2"}
+  flax_nnx:
+    api: "jax.numpy.equal"
+    args: {a: "x1", b: "x2"}
+  paxml:
+    api: "jax.numpy.equal"
+    args: {a: "x1", b: "x2"}
+  numpy:
+    api: "numpy.equal"
+    args: {a: "x1", b: "x2"}
+  tensorflow:
+    api: "tf.math.equal"
+    args: {a: "x", b: "y"}
+  keras:
+    api: "keras.ops.equal"
+    args: {a: "x1", b: "x2"}
+
+---
+operation: "Erf"
+description: "Element-wise error function."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.erf"
+  torch:
+    api: "torch.erf"
+    args: {a: "input"}
+  jax:
+    api: "jax.scipy.special.erf"
+    args: {a: "x"}
+  flax_nnx:
+    api: "jax.scipy.special.erf"
+    args: {a: "x"}
+  paxml:
+    api: "jax.scipy.special.erf"
+    args: {a: "x"}
+  numpy:
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp"
+    api: "sp.erf"
+    args: {a: "z"}
+  tensorflow:
+    api: "tf.math.erf"
+    args: {a: "x"}
+  keras:
+    api: "keras.ops.erf"
+    args: {a: "x"}
+
+---
+operation: "ErfInv"
+description: "Element-wise inverse of erf."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.erfinv"
+  torch:
+    api: "torch.erfinv"
+    args: {a: "input"}
+  jax:
+    api: "jax.scipy.special.erfinv"
+    args: {a: "x"}
+  flax_nnx:
+    api: "jax.scipy.special.erfinv"
+    args: {a: "x"}
+  paxml:
+    api: "jax.scipy.special.erfinv"
+    args: {a: "x"}
+  numpy:
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp"
+    api: "sp.erfinv"
+    args: {a: "y"}
+  tensorflow:
+    api: "tf.math.erfinv"
+    args: {a: "x"} # TF docs list x

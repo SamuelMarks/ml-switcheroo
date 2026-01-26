@@ -1,0 +1,838 @@
+operation: "SignedInteger" 
+description: "Casts the input to a signed integer type." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.core.signedinteger" # Assuming constructor/cast behavior based on name
+  torch: 
+    api: "torch.tensor" 
+    casts: 
+      x: "int32" 
+  jax: 
+    api: "jax.numpy.array" 
+    casts: 
+      x: "int32" 
+  numpy: 
+    api: "numpy.int32" 
+---
+operation: "Sin" 
+description: "Element-wise sine." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.core.sin" 
+  torch: 
+    api: "torch.sin" 
+  jax: 
+    api: "jax.numpy.sin" 
+  flax_nnx: 
+    api: "jax.numpy.sin" 
+  paxml: 
+    api: "jax.numpy.sin" 
+  keras: 
+    api: "keras.ops.sin" 
+  tensorflow: 
+    api: "tf.math.sin" 
+  numpy: 
+    api: "numpy.sin" 
+---
+operation: "Sinh" 
+description: "Element-wise hyperbolic sine." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.core.sinh" 
+  torch: 
+    api: "torch.sinh" 
+  jax: 
+    api: "jax.numpy.sinh" 
+  flax_nnx: 
+    api: "jax.numpy.sinh" 
+  paxml: 
+    api: "jax.numpy.sinh" 
+  keras: 
+    api: "keras.ops.sinh" 
+  tensorflow: 
+    api: "tf.math.sinh" 
+  numpy: 
+    api: "numpy.sinh" 
+---
+operation: "Slice" 
+description: "Extract a sub-array from the input array using start indices and sizes." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "start_indices" 
+    type: "Union[List[int], Tensor]" 
+  - name: "slice_sizes" 
+    type: "Union[List[int], Tensor]" 
+  - name: "axes" 
+    type: "Optional[List[int]]" 
+    default: null
+variants: 
+  mlx: 
+    api: "mlx.core.slice" 
+    args: 
+      slice_sizes: "slice_size" 
+  jax: 
+    api: "jax.lax.dynamic_slice" 
+    # JAX dynamic_slice does not support axes arg directly (assumes all dims matches start_indices)
+    # Requires plugin or wrapper to handle axis mapping if axes provided
+    requires_plugin: "slice_adapter" 
+  torch: 
+    # Torch uses slicing syntax or narrow; no direct N-dim slice op without plugin
+    requires_plugin: "slice_adapter" 
+---
+operation: "SliceUpdate" 
+description: "Update a sub-array of the input array." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "update" 
+    type: "Tensor" 
+  - name: "start_indices" 
+    type: "Union[List[int], Tensor]" 
+  - name: "axes" 
+    type: "Optional[List[int]]" 
+    default: null
+variants: 
+  mlx: 
+    api: "mlx.core.slice_update" 
+  jax: 
+    api: "jax.lax.dynamic_update_slice" 
+    # JAX arg 0 is operand, arg 1 is update, arg 2 is start_indices
+    # axes not supported directly
+    requires_plugin: "slice_update_adapter" 
+  torch: 
+    requires_plugin: "slice_update_adapter" 
+---
+operation: "Softmax" 
+description: "Perform the softmax along the given axis." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: -1
+variants: 
+  mlx: 
+    api: "mlx.core.softmax" 
+  torch: 
+    api: "torch.nn.functional.softmax" 
+    args: 
+      axis: "dim" 
+  jax: 
+    api: "jax.nn.softmax" 
+  flax_nnx: 
+    api: "jax.nn.softmax" 
+  paxml: 
+    api: "jax.nn.softmax" 
+  keras: 
+    api: "keras.ops.softmax" 
+  tensorflow: 
+    api: "tf.nn.softmax" 
+  numpy: 
+    # NumPy doesn't have softmax in core
+    requires_plugin: "softmax_shim" 
+---
+operation: "Sort" 
+description: "Returns a sorted copy of the array." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: -1
+variants: 
+  mlx: 
+    api: "mlx.core.sort" 
+  torch: 
+    api: "torch.sort" 
+    args: 
+      axis: "dim" 
+    # Torch returns (values, indices) tuple; we select index 0 for values
+    output_select_index: 0
+  jax: 
+    api: "jax.numpy.sort" 
+  flax_nnx: 
+    api: "jax.numpy.sort" 
+  paxml: 
+    api: "jax.numpy.sort" 
+  keras: 
+    api: "keras.ops.sort" 
+  tensorflow: 
+    api: "tf.sort" 
+  numpy: 
+    api: "numpy.sort" 
+---
+operation: "Split" 
+description: "Split an array along a given axis." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "indices_or_sections" 
+    type: "Union[int, List[int]]" 
+  - name: "axis" 
+    type: "int" 
+    default: 0
+variants: 
+  mlx: 
+    api: "mlx.core.split" 
+  torch: 
+    api: "torch.tensor_split" 
+    args: 
+      axis: "dim" 
+  jax: 
+    api: "jax.numpy.split" 
+  flax_nnx: 
+    api: "jax.numpy.split" 
+  paxml: 
+    api: "jax.numpy.split" 
+  keras: 
+    api: "keras.ops.split" 
+  tensorflow: 
+    api: "tf.split" 
+    args: 
+      indices_or_sections: "num_or_size_splits" 
+  numpy: 
+    api: "numpy.split" 
+---
+operation: "Sqrt" 
+description: "Element-wise square root." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.core.sqrt" 
+  torch: 
+    api: "torch.sqrt" 
+  jax: 
+    api: "jax.numpy.sqrt" 
+  flax_nnx: 
+    api: "jax.numpy.sqrt" 
+  paxml: 
+    api: "jax.numpy.sqrt" 
+  keras: 
+    api: "keras.ops.sqrt" 
+  tensorflow: 
+    api: "tf.math.sqrt" 
+  numpy: 
+    api: "numpy.sqrt" 
+---
+operation: "Square" 
+description: "Element-wise square." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.core.square" 
+  torch: 
+    api: "torch.square" 
+  jax: 
+    api: "jax.numpy.square" 
+  flax_nnx: 
+    api: "jax.numpy.square" 
+  paxml: 
+    api: "jax.numpy.square" 
+  keras: 
+    api: "keras.ops.square" 
+  tensorflow: 
+    api: "tf.math.square" 
+  numpy: 
+    api: "numpy.square" 
+---
+operation: "Squeeze" 
+description: "Remove length one axes from an array." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "Union[int, List[int], None]" 
+    default: null
+variants: 
+  mlx: 
+    api: "mlx.core.squeeze" 
+  torch: 
+    api: "torch.squeeze" 
+    args: 
+      axis: "dim" 
+  jax: 
+    api: "jax.numpy.squeeze" 
+  flax_nnx: 
+    api: "jax.numpy.squeeze" 
+  paxml: 
+    api: "jax.numpy.squeeze" 
+  keras: 
+    api: "keras.ops.squeeze" 
+  tensorflow: 
+    api: "tf.squeeze" 
+  numpy: 
+    api: "numpy.squeeze" 
+---
+operation: "Stack" 
+description: "Stacks the arrays along a new axis." 
+std_args: 
+  - name: "tensors" 
+    type: "List[Tensor]" 
+  - name: "axis" 
+    type: "int" 
+    default: 0
+variants: 
+  mlx: 
+    api: "mlx.core.stack" 
+    args: 
+      tensors: "arrays" 
+  torch: 
+    api: "torch.stack" 
+    args: 
+      axis: "dim" 
+  jax: 
+    api: "jax.numpy.stack" 
+    args: 
+      tensors: "arrays" 
+  flax_nnx: 
+    api: "jax.numpy.stack" 
+    args: 
+      tensors: "arrays" 
+  paxml: 
+    api: "jax.numpy.stack" 
+    args: 
+      tensors: "arrays" 
+  keras: 
+    api: "keras.ops.stack" 
+    args: 
+      tensors: "x" 
+  tensorflow: 
+    api: "tf.stack" 
+    args: 
+      tensors: "values" 
+  numpy: 
+    api: "numpy.stack" 
+    args: 
+      tensors: "arrays" 
+---
+operation: "Std" 
+description: "Compute the standard deviation(s) over the given axes." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "Union[int, List[int], None]" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+  - name: "ddof" 
+    type: "int" 
+    default: 0
+variants: 
+  mlx: 
+    api: "mlx.core.std" 
+  torch: 
+    api: "torch.std" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+      ddof: "correction" 
+  jax: 
+    api: "jax.numpy.std" 
+  flax_nnx: 
+    api: "jax.numpy.std" 
+  paxml: 
+    api: "jax.numpy.std" 
+  keras: 
+    api: "keras.ops.std" 
+    # Keras/TF std doesn't typically accept ddof in base API, might need wrapper
+  tensorflow: 
+    api: "tf.math.reduce_std" 
+    # TF reduce_std does not have ddof param
+  numpy: 
+    api: "numpy.std" 
+---
+operation: "StopGradient" 
+description: "Stop gradients from being computed." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.core.stop_gradient" 
+  torch: 
+    # Emulate stop_gradient(x) with x.detach() 
+    api: "torch.detach" 
+  jax: 
+    api: "jax.lax.stop_gradient" 
+  flax_nnx: 
+    api: "jax.lax.stop_gradient" 
+  paxml: 
+    api: "jax.lax.stop_gradient" 
+  keras: 
+    api: "keras.ops.stop_gradient" 
+  tensorflow: 
+    api: "tf.stop_gradient" 
+---
+operation: "Stream" 
+description: "Context manager to set the default device and stream." 
+op_type: context
+std_args: 
+  - name: "device" 
+    type: "Any" 
+variants: 
+  mlx: 
+    api: "mlx.core.stream" 
+    args: 
+      device: "s" 
+  torch: 
+    api: "torch.cuda.stream" 
+    args: 
+      device: "stream" 
+  # JAX handles streams differently (jit/device_put) 
+---
+operation: "Subtract" 
+description: "Element-wise subtraction." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.core.subtract" 
+    args: 
+      x: "a" 
+      y: "b" 
+  torch: 
+    api: "torch.sub" 
+    args: 
+      x: "input" 
+      y: "other" 
+  jax: 
+    api: "jax.numpy.subtract" 
+  flax_nnx: 
+    api: "jax.numpy.subtract" 
+  paxml: 
+    api: "jax.numpy.subtract" 
+  keras: 
+    api: "keras.ops.subtract" 
+    args: 
+      x: "x1" 
+      y: "x2" 
+  tensorflow: 
+    api: "tf.math.subtract" 
+  numpy: 
+    api: "numpy.subtract" 
+    args: 
+      x: "x1" 
+      y: "x2" 
+---
+operation: "Sum" 
+description: "Sum reduce the array over the given axes." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "Union[int, List[int], None]" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  mlx: 
+    api: "mlx.core.sum" 
+  torch: 
+    api: "torch.sum" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jax.numpy.sum" 
+  flax_nnx: 
+    api: "jax.numpy.sum" 
+  paxml: 
+    api: "jax.numpy.sum" 
+  keras: 
+    api: "keras.ops.sum" 
+  tensorflow: 
+    api: "tf.math.reduce_sum" 
+  numpy: 
+    api: "numpy.sum" 
+---
+operation: "SwapAxes" 
+description: "Swap two axes of an array." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis1" 
+    type: "int" 
+  - name: "axis2" 
+    type: "int" 
+variants: 
+  mlx: 
+    api: "mlx.core.swapaxes" 
+  torch: 
+    api: "torch.swapaxes" 
+  jax: 
+    api: "jax.numpy.swapaxes" 
+  flax_nnx: 
+    api: "jax.numpy.swapaxes" 
+  paxml: 
+    api: "jax.numpy.swapaxes" 
+  keras: 
+    api: "keras.ops.swapaxes" 
+  numpy: 
+    api: "numpy.swapaxes" 
+---
+operation: "Synchronize" 
+description: "Synchronize with the given stream." 
+std_args: 
+  - name: "stream" 
+    type: "Optional[Any]" 
+    default: null
+variants: 
+  mlx: 
+    api: "mlx.core.synchronize" 
+  torch: 
+    api: "torch.cuda.synchronize" 
+    args: 
+      stream: "device" 
+  jax: 
+    # JAX uses block_until_ready() on arrays, this maps to global sync shim 
+    requires_plugin: "device_synchronize" 
+---
+operation: "Take" 
+description: "Take elements along an axis." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "indices" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "Optional[int]" 
+    default: null
+variants: 
+  mlx: 
+    api: "mlx.core.take" 
+  torch: 
+    api: "torch.take" 
+    # Torch.take does not support axis (always flattened). 
+    # Torch.index_select supports axis. 
+    # Dispatch required if axis is provided. 
+    dispatch_rules: 
+      - if_arg: "axis" 
+        op: "neq" 
+        val: null
+        use_api: "torch.index_select" 
+    args: 
+      indices: "index" 
+      axis: "dim" 
+  jax: 
+    api: "jax.numpy.take" 
+  flax_nnx: 
+    api: "jax.numpy.take" 
+  paxml: 
+    api: "jax.numpy.take" 
+  keras: 
+    api: "keras.ops.take" 
+  tensorflow: 
+    api: "tf.gather" 
+  numpy: 
+    api: "numpy.take" 
+---
+operation: "TakeAlongAxis" 
+description: "Take values along an axis at the specified indices." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "indices" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "Optional[int]" 
+    default: null
+variants: 
+  mlx: 
+    api: "mlx.core.take_along_axis" 
+  torch: 
+    api: "torch.gather" 
+    args: 
+      indices: "index" 
+      axis: "dim" 
+    # Torch gather argument order is (input, dim, index) 
+    # Standard is (x, indices, axis). Requires 'gather_adapter' plugin to reorder. 
+    requires_plugin: "gather_adapter" 
+  jax: 
+    api: "jax.numpy.take_along_axis" 
+  flax_nnx: 
+    api: "jax.numpy.take_along_axis" 
+  paxml: 
+    api: "jax.numpy.take_along_axis" 
+  keras: 
+    api: "keras.ops.take_along_axis" 
+  numpy: 
+    api: "numpy.take_along_axis" 
+---
+operation: "Tan" 
+description: "Element-wise tangent." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.core.tan" 
+  torch: 
+    api: "torch.tan" 
+  jax: 
+    api: "jax.numpy.tan" 
+  flax_nnx: 
+    api: "jax.numpy.tan" 
+  paxml: 
+    api: "jax.numpy.tan" 
+  keras: 
+    api: "keras.ops.tan" 
+  tensorflow: 
+    api: "tf.math.tan" 
+  numpy: 
+    api: "numpy.tan" 
+---
+operation: "Tanh" 
+description: "Element-wise hyperbolic tangent." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.core.tanh" 
+  torch: 
+    api: "torch.tanh" 
+  jax: 
+    api: "jax.numpy.tanh" 
+  flax_nnx: 
+    api: "jax.numpy.tanh" 
+  paxml: 
+    api: "jax.numpy.tanh" 
+  keras: 
+    api: "keras.ops.tanh" 
+  tensorflow: 
+    api: "tf.math.tanh" 
+  numpy: 
+    api: "numpy.tanh" 
+---
+operation: "Tensordot" 
+description: "Compute the tensor dot product along the specified axes." 
+std_args: 
+  - name: "a" 
+    type: "Tensor" 
+  - name: "b" 
+    type: "Tensor" 
+  - name: "axes" 
+    type: "Union[int, List[int]]" 
+    default: 2
+variants: 
+  mlx: 
+    api: "mlx.core.tensordot" 
+  torch: 
+    api: "torch.tensordot" 
+    args: 
+      axes: "dims" 
+  jax: 
+    api: "jax.numpy.tensordot" 
+  flax_nnx: 
+    api: "jax.numpy.tensordot" 
+  paxml: 
+    api: "jax.numpy.tensordot" 
+  keras: 
+    api: "keras.ops.tensordot" 
+  tensorflow: 
+    api: "tf.tensordot" 
+  numpy: 
+    api: "numpy.tensordot" 
+---
+operation: "Tile" 
+description: "Construct an array by repeating a the number of times given by reps." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "reps" 
+    type: "Union[int, List[int]]" 
+variants: 
+  mlx: 
+    api: "mlx.core.tile" 
+  torch: 
+    api: "torch.tile" 
+  jax: 
+    api: "jax.numpy.tile" 
+  flax_nnx: 
+    api: "jax.numpy.tile" 
+  paxml: 
+    api: "jax.numpy.tile" 
+  keras: 
+    api: "keras.ops.tile" 
+    args: 
+      reps: "repeats" 
+  tensorflow: 
+    api: "tf.tile" 
+    args: 
+      reps: "multiples" 
+  numpy: 
+    api: "numpy.tile" 
+---
+operation: "TopKValues" 
+description: "Returns the k largest elements from the input (Values only)." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "k" 
+    type: "int" 
+  - name: "axis" 
+    type: "int" 
+    default: -1
+variants: 
+  mlx: 
+    # MLX topk returns array (values) 
+    api: "mlx.core.topk" 
+  torch: 
+    # Torch returns (values, indices), select 0
+    api: "torch.topk" 
+    args: 
+      axis: "dim" 
+    output_select_index: 0
+  jax: 
+    # JAX returns (values, indices), select 0
+    api: "jax.lax.top_k" 
+    # JAX top_k operates on last dim only, might need swapaxes or semantic constraint
+    # ODL for TopK usually assumes last axis or requires plugin to enforce axis support in JAX
+    output_select_index: 0
+  keras: 
+    api: "keras.ops.top_k" 
+    output_select_index: 0
+  tensorflow: 
+    api: "tf.math.top_k" 
+    output_select_index: 0
+---
+operation: "Trace" 
+description: "Return the sum along a specified diagonal." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "offset" 
+    type: "int" 
+    default: 0
+  - name: "axis1" 
+    type: "int" 
+    default: 0
+  - name: "axis2" 
+    type: "int" 
+    default: 1
+variants: 
+  mlx: 
+    api: "mlx.core.trace" 
+  torch: 
+    api: "torch.diagonal" 
+    # Torch trace is specific to 2D. diagonal + sum is needed for general. 
+    # OR torch.trace (only 2D). 
+    # Mapping to Macro for general case or plugin
+    macro_template: "torch.sum(torch.diagonal({x}, {offset}, {axis1}, {axis2}))" 
+  jax: 
+    api: "jax.numpy.trace" 
+  flax_nnx: 
+    api: "jax.numpy.trace" 
+  paxml: 
+    api: "jax.numpy.trace" 
+  numpy: 
+    api: "numpy.trace" 
+---
+operation: "Transpose" 
+description: "Transpose the dimensions of the array." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axes" 
+    type: "Optional[List[int]]" 
+    default: null
+variants: 
+  mlx: 
+    api: "mlx.core.transpose" 
+  torch: 
+    api: "torch.permute" 
+    # Torch permute expects args, not list. Requires unpacking
+    pack_to_tuple: "axes" 
+    # args: axes map to positional
+  jax: 
+    api: "jax.numpy.transpose" 
+  flax_nnx: 
+    api: "jax.numpy.transpose" 
+  paxml: 
+    api: "jax.numpy.transpose" 
+  keras: 
+    api: "keras.ops.transpose" 
+  tensorflow: 
+    api: "tf.transpose" 
+    args: 
+      axes: "perm" 
+  numpy: 
+    api: "numpy.transpose" 
+---
+operation: "Tri" 
+description: "An array with ones at and below the given diagonal and zeros elsewhere." 
+std_args: 
+  - name: "n" 
+    type: "int" 
+  - name: "m" 
+    type: "Optional[int]" 
+    default: null
+  - name: "k" 
+    type: "int" 
+    default: 0
+variants: 
+  mlx: 
+    api: "mlx.core.tri" 
+  torch: 
+    api: "torch.tril" 
+    # Torch tri is torch.ones(...) then tril? 
+    # or torch.tril(torch.ones((n, m))) 
+    macro_template: "torch.tril(torch.ones(({n}, {m} or {n})), diagonal={k})" 
+  jax: 
+    api: "jax.numpy.tri" 
+  flax_nnx: 
+    api: "jax.numpy.tri" 
+  paxml: 
+    api: "jax.numpy.tri" 
+  numpy: 
+    api: "numpy.tri" 
+---
+operation: "Tril" 
+description: "Zeros the array above the given diagonal." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "k" 
+    type: "int" 
+    default: 0
+variants: 
+  mlx: 
+    api: "mlx.core.tril" 
+  torch: 
+    api: "torch.tril" 
+    args: 
+      k: "diagonal" 
+  jax: 
+    api: "jax.numpy.tril" 
+  flax_nnx: 
+    api: "jax.numpy.tril" 
+  paxml: 
+    api: "jax.numpy.tril" 
+  keras: 
+    api: "keras.ops.tril" 
+  tensorflow: 
+    api: "tf.linalg.band_part" 
+    # TF band_part logic is complex (-1, 0 for tril), requires macro/plugin
+    requires_plugin: "tf_tril_macro" 
+  numpy: 
+    api: "numpy.tril"

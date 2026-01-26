@@ -55,7 +55,10 @@ class StandardMap(BaseModel):
   pack_to_tuple: Optional[str] = Field(default=None)
   macro_template: Optional[str] = Field(default=None)
   output_cast: Optional[str] = Field(default=None)
-  arg_values: Optional[Dict[str, Dict[str, str]]] = Field(default=None)
+  arg_values: Optional[Dict[str, Union[Dict[str, Any], Any]]] = Field(default=None)
+  kwargs_map: Optional[Dict[str, Optional[str]]] = Field(
+    default=None, description="Mapping for specific keys within a **kwargs expansion. Values can be null to drop the key."
+  )
   required_imports: List[Union[str, Any]] = Field(default_factory=list)
   missing_message: Optional[str] = Field(default=None)
   layout_map: Optional[Dict[str, str]] = Field(default=None)

@@ -7,7 +7,7 @@
     "required_imports": []
   },
   "Abs": {
-    "api": "jnp.abs",
+    "api": "jax.numpy.abs",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -69,8 +69,7 @@
     "required_imports": []
   },
   "Add": {
-    "api": "optax.tree.add",
-    "args": {},
+    "api": "jax.numpy.add",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -228,6 +227,42 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AsArrayVars": {
+    "api": "flax.nnx.as_array_vars",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsHijaxVars": {
+    "api": "flax.nnx.as_hijax_vars",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsImmutableVars": {
+    "api": "flax.nnx.as_immutable_vars",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsMutableVars": {
+    "api": "flax.nnx.as_mutable_vars",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsPytreeVars": {
+    "api": "flax.nnx.as_pytree_vars",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsRefVars": {
+    "api": "flax.nnx.as_ref_vars",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Asin": {
     "api": "jax.numpy.asin",
     "dispatch_rules": [],
@@ -292,6 +327,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AvgPool": {
+    "api": "flax.nnx.avg_pool",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "B": {
     "api": "nnx.transforms.transforms.B",
     "args": {},
@@ -310,16 +351,14 @@
   },
   "BatchNorm": {
     "api": "flax.nnx.BatchNorm",
-    "args": {
-      "eps": "epsilon"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "batch_norm_unwrap"
+    "required_imports": []
   },
   "BatchStat": {
     "api": "flax.nnx.BatchStat",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "Bernoulli": {
@@ -339,16 +378,7 @@
     "required_imports": []
   },
   "Bidirectional": {
-    "api": "nnx.nn.recurrent.Bidirectional",
-    "args": {
-      "backward_rnn": "backward_rnn",
-      "forward_rnn": "forward_rnn",
-      "merge_fn": "merge_fn",
-      "return_carry": "return_carry",
-      "rngs": "rngs",
-      "self": "self",
-      "time_major": "time_major"
-    },
+    "api": "flax.nnx.Bidirectional",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -360,6 +390,16 @@
       "minlength": "minlength",
       "weights": "weights",
       "x": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BitCast": {
+    "api": "jax.lax.bitcast_convert_type",
+    "args": {
+      "dtype": "new_dtype",
+      "x": "operand"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -390,25 +430,24 @@
   },
   "Cache": {
     "api": "flax.nnx.Cache",
-    "args": {
-      "eager_sharding": "eager_sharding",
-      "has_ref": "has_ref",
-      "is_hijax": "is_hijax",
-      "is_mutable": "is_mutable",
-      "metadata": "metadata",
-      "self": "self",
-      "value": "value"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CachedPartial": {
+    "api": "flax.nnx.cached_partial",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Call": {
-    "api": "nnx.transforms.compilation.Compiled.call",
-    "args": {
-      "args": "args",
-      "kwargs": "kwargs"
-    },
+    "api": "flax.nnx.call",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Carry": {
+    "api": "flax.nnx.Carry",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -427,7 +466,19 @@
     "required_imports": []
   },
   "Celu": {
-    "api": "nnx.celu",
+    "api": "flax.nnx.celu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CheckPytree": {
+    "api": "flax.nnx.check_pytree",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Checkify": {
+    "api": "flax.nnx.checkify",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -461,6 +512,18 @@
   "ClipState": {
     "api": "optax.ClipState",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Clone": {
+    "api": "flax.nnx.clone",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CombineMasks": {
+    "api": "flax.nnx.combine_masks",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -541,6 +604,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Cond": {
+    "api": "flax.nnx.cond",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ConditionallyMaskState": {
     "api": "optax.ConditionallyMaskState",
     "args": {},
@@ -571,6 +640,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ControlDependency": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "jax_control_dependencies"
+  },
   "ControlVariate": {
     "api": "optax.monte_carlo.control_variates.ControlVariate",
     "args": {},
@@ -579,31 +654,7 @@
     "required_imports": []
   },
   "Conv": {
-    "api": "nnx.nn.linear.Conv",
-    "args": {
-      "bias_init": "bias_init",
-      "bias_metadata": "bias_metadata",
-      "conv_general_dilated": "conv_general_dilated",
-      "dtype": "dtype",
-      "feature_group_count": "feature_group_count",
-      "in_features": "in_features",
-      "input_dilation": "input_dilation",
-      "kernel_dilation": "kernel_dilation",
-      "kernel_init": "kernel_init",
-      "kernel_metadata": "kernel_metadata",
-      "kernel_size": "kernel_size",
-      "mask": "mask",
-      "out_features": "out_features",
-      "padding": "padding",
-      "param_dtype": "param_dtype",
-      "precision": "precision",
-      "preferred_element_type": "preferred_element_type",
-      "promote_dtype": "promote_dtype",
-      "rngs": "rngs",
-      "self": "self",
-      "strides": "strides",
-      "use_bias": "use_bias"
-    },
+    "api": "flax.nnx.Conv",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -621,6 +672,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ConvTranspose": {
+    "api": "flax.nnx.ConvTranspose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Convolve": {
+    "api": "jax.numpy.convolve",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Copy": {
     "api": "nnx.bridge.module.Scope.copy",
     "args": {
@@ -632,12 +695,18 @@
   },
   "Cos": {
     "api": "jax.numpy.cos",
+    "args": {
+      "a": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Cosh": {
     "api": "jax.numpy.cosh",
+    "args": {
+      "a": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -674,26 +743,54 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Cummax": {
+    "api": "jax.numpy.maximum.accumulate",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "jax_cummax_adapter"
+  },
+  "Cummin": {
+    "api": "jax.numpy.minimum.accumulate",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "jax_cummin_adapter"
+  },
   "Cumprod": {
-    "api": "jax.numpy.ndarray.cumprod",
+    "api": "jax.numpy.cumprod",
     "args": {
-      "axis": "axis",
-      "dtype": "dtype",
-      "out": "out",
-      "self": "self"
+      "a": "a",
+      "axis": "axis"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Cumsum": {
-    "api": "jax.numpy.ndarray.cumsum",
+    "api": "jax.numpy.cumsum",
     "args": {
-      "axis": "axis",
-      "dtype": "dtype",
-      "out": "out",
-      "self": "self"
+      "a": "a",
+      "axis": "axis"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CurrentUpdateContext": {
+    "api": "flax.nnx.current_update_context",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CustomAutograd": {
+    "api": "jax.custom_vjp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CustomVjp": {
+    "api": "flax.nnx.custom_vjp",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -712,10 +809,22 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Data": {
+    "api": "flax.nnx.data",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dataclass": {
+    "api": "flax.nnx.dataclass",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Degrees": {
     "api": "jax.numpy.degrees",
     "args": {
-      "x": "x"
+      "a": "x"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -736,8 +845,7 @@
   "Diag": {
     "api": "jax.numpy.diag",
     "args": {
-      "k": "k",
-      "v": "v"
+      "a": "v"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -754,12 +862,9 @@
     "required_imports": []
   },
   "Diagonal": {
-    "api": "jax.numpy.ndarray.diagonal",
+    "api": "jax.numpy.diagonal",
     "args": {
-      "axis1": "axis1",
-      "axis2": "axis2",
-      "offset": "offset",
-      "self": "self"
+      "a": "a"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -775,6 +880,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DiffState": {
+    "api": "flax.nnx.DiffState",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DisableCompile": {
+    "api": "jax.disable_jit",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Display": {
+    "api": "flax.nnx.display",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Div": {
     "api": "optax.tree.div",
     "args": {},
@@ -782,11 +905,21 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DivMod": {
+    "api": "jax.numpy.divmod",
+    "args": {
+      "a": "x1",
+      "b": "x2"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Divide": {
     "api": "jax.numpy.divide",
     "args": {
-      "x1": "x1",
-      "x2": "x2"
+      "a": "x1",
+      "b": "x2"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -804,6 +937,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DotProductAttention": {
+    "api": "flax.nnx.dot_product_attention",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Double": {
     "api": "jax.numpy.double",
     "args": {
@@ -815,14 +954,6 @@
   },
   "Dropout": {
     "api": "flax.nnx.Dropout",
-    "args": {
-      "broadcast_dims": "broadcast_dims",
-      "deterministic": "deterministic",
-      "rate": "rate",
-      "rng_collection": "rng_collection",
-      "rngs": "rngs",
-      "self": "self"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -862,14 +993,25 @@
     "required_imports": []
   },
   "Einsum": {
-    "api": "jnp.einsum",
+    "api": "jax.numpy.einsum",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "einsum_normalizer"
+    "required_imports": []
+  },
+  "EinsumLayer": {
+    "api": "flax.nnx.Einsum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EinsumPath": {
+    "api": "jax.numpy.einsum_path",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Elu": {
-    "api": "nnx.elu",
+    "api": "flax.nnx.elu",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -883,9 +1025,6 @@
   },
   "Embedding": {
     "api": "flax.nnx.Embed",
-    "args": {
-      "embedding_dim": "features"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -904,6 +1043,40 @@
   },
   "Equal": {
     "api": "jax.numpy.equal",
+    "args": {
+      "a": "x1",
+      "b": "x2"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Erf": {
+    "api": "jax.scipy.special.erf",
+    "args": {
+      "a": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ErfInv": {
+    "api": "jax.scipy.special.erfinv",
+    "args": {
+      "a": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EvalMode": {
+    "api": "flax.nnx.eval_mode",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EvalShape": {
+    "api": "flax.nnx.eval_shape",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -939,8 +1112,44 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "FilterAll": {
+    "api": "flax.nnx.All",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FilterAny": {
+    "api": "flax.nnx.Any",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FilterEverything": {
+    "api": "flax.nnx.Everything",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FilterState": {
+    "api": "flax.nnx.filter_state",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FindDuplicates": {
+    "api": "flax.nnx.find_duplicates",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Finfo": {
     "api": "jax.numpy.finfo",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FlatState": {
+    "api": "flax.nnx.FlatState",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -957,8 +1166,7 @@
     "required_imports": []
   },
   "Flatten": {
-    "api": "flax.nnx.Flatten",
-    "args": {},
+    "api": "flax.nnx.flatten",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1126,6 +1334,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ForiLoop": {
+    "api": "flax.nnx.fori_loop",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ForkRngs": {
+    "api": "flax.nnx.fork_rngs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "FromBuffer": {
     "api": "jax.numpy.frombuffer",
     "args": {
@@ -1144,6 +1364,12 @@
       "args": "args",
       "kwargs": "kwargs"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FromFlatState": {
+    "api": "flax.nnx.from_flat_state",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1194,13 +1420,22 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "FromTree": {
+    "api": "flax.nnx.from_tree",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Full": {
     "api": "jax.numpy.full",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FullLike": {
+    "api": "jax.numpy.full_like",
     "args": {
-      "device": "device",
-      "dtype": "dtype",
-      "fill_value": "fill_value",
-      "shape": "shape"
+      "x": "a"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1212,11 +1447,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Gelu": {
-    "api": "nnx.gelu",
+  "GRUCell": {
+    "api": "flax.nnx.GRUCell",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Gelu": {
+    "api": "flax.nnx.gelu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GeneralConv": {
+    "api": "jax.lax.conv_general_dilated",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "jax_conv_general_adapter"
   },
   "Generic": {
     "api": "jax.numpy.generic",
@@ -1238,14 +1486,74 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "GetAbstractModel": {
+    "api": "flax.nnx.get_abstract_model",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetDefaultDevice": {
+    "api": "jax.default_backend",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetNamedSharding": {
+    "api": "flax.nnx.get_named_sharding",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetPartitionSpec": {
+    "api": "flax.nnx.get_partition_spec",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetState": {
+    "api": "flax.nnx.variables",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Glu": {
-    "api": "nnx.glu",
+    "api": "flax.nnx.glu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Grad": {
+    "api": "flax.nnx.grad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GraphDef": {
+    "api": "flax.nnx.GraphDef",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GraphState": {
+    "api": "flax.nnx.GraphState",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Graphdef": {
+    "api": "flax.nnx.graphdef",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Greater": {
     "api": "jax.numpy.greater",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GroupNorm": {
+    "api": "flax.nnx.GroupNorm",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1320,6 +1628,30 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "HardSigmoid": {
+    "api": "flax.nnx.hard_sigmoid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HardSilu": {
+    "api": "flax.nnx.hard_silu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HardSwish": {
+    "api": "flax.nnx.hard_swish",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HardTanh": {
+    "api": "flax.nnx.hard_tanh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Histogram": {
     "api": "jax.numpy.histogram",
     "args": {
@@ -1380,6 +1712,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IInfo": {
+    "api": "jax.numpy.iinfo",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "INTEGER": {
     "api": "jax.numpy.integer",
     "dispatch_rules": [],
@@ -1387,11 +1725,13 @@
     "required_imports": []
   },
   "Identity": {
-    "api": "jax.numpy.identity",
-    "args": {
-      "dtype": "dtype",
-      "n": "n"
-    },
+    "api": "flax.nnx.identity",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Imag": {
+    "api": "jax.numpy.imag",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1403,6 +1743,12 @@
       "dtype": "dtype",
       "sparse": "sparse"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Initializer": {
+    "api": "flax.nnx.Initializer",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1428,6 +1774,12 @@
       "self": "self",
       "value": "value"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "InstanceNorm": {
+    "api": "flax.nnx.InstanceNorm",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1493,6 +1845,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Intermediate": {
+    "api": "flax.nnx.Intermediate",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Interp": {
     "api": "jax.numpy.interp",
     "args": {
@@ -1526,6 +1884,12 @@
     "args": {
       "x": "x"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsData": {
+    "api": "flax.nnx.is_data",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1607,11 +1971,35 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IterChildren": {
+    "api": "flax.nnx.iter_children",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IterGraph": {
+    "api": "flax.nnx.iter_graph",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IterModules": {
+    "api": "flax.nnx.iter_modules",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Ix_": {
     "api": "jax.numpy.ix_",
     "args": {
       "args": "args"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Jit": {
+    "api": "flax.nnx.jit",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1637,12 +2025,29 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LSTMCell": {
+    "api": "flax.nnx.LSTMCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "LayerNorm": {
     "api": "flax.nnx.LayerNorm",
     "args": {
-      "eps": "epsilon",
       "normalized_shape": "num_features"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LeakyReLU": {
+    "api": "flax.nnx.leaky_relu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LeftShift": {
+    "api": "jax.numpy.left_shift",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1655,11 +2060,12 @@
   },
   "Linear": {
     "api": "flax.nnx.Linear",
-    "args": {
-      "bias": "use_bias",
-      "in_features": "in_features",
-      "out_features": "out_features"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LinearGeneral": {
+    "api": "flax.nnx.LinearGeneral",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1696,6 +2102,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LoRA": {
+    "api": "flax.nnx.LoRA",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LoRALinear": {
+    "api": "flax.nnx.LoRALinear",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LoRAParam": {
+    "api": "flax.nnx.LoRAParam",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Load": {
     "api": "jax.numpy.load",
     "args": {
@@ -1713,6 +2137,45 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Log10": {
+    "api": "jax.numpy.log10",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogAddExp": {
+    "api": "jax.numpy.logaddexp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogCumSumExp": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "ufunc_methods"
+  },
+  "LogSigmoid": {
+    "api": "flax.nnx.log_sigmoid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSoftmax": {
+    "api": "flax.nnx.log_softmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSumExp": {
+    "api": "jax.scipy.special.logsumexp",
+    "args": {
+      "x": "a"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Logaddexp": {
     "api": "jax.numpy.logaddexp",
     "dispatch_rules": [],
@@ -1721,6 +2184,30 @@
   },
   "Logaddexp2": {
     "api": "jax.numpy.logaddexp2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogicalAnd": {
+    "api": "jax.numpy.logical_and",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogicalAxisRules": {
+    "api": "flax.nnx.logical_axis_rules",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogicalNot": {
+    "api": "jax.numpy.logical_not",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogicalOr": {
+    "api": "jax.numpy.logical_or",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1785,6 +2272,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MakeAttentionMask": {
+    "api": "flax.nnx.make_attention_mask",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MakeCausalMask": {
+    "api": "flax.nnx.make_causal_mask",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MapState": {
+    "api": "flax.nnx.map_state",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "MaskedNode": {
     "api": "optax.MaskedNode",
     "args": {},
@@ -1800,12 +2305,10 @@
     "required_imports": []
   },
   "MatMul": {
-    "api": "jax.numpy.linalg.matmul",
+    "api": "jax.numpy.matmul",
     "args": {
-      "precision": "precision",
-      "preferred_element_type": "preferred_element_type",
-      "x1": "x1",
-      "x2": "x2"
+      "x1": "a",
+      "x2": "b"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1824,8 +2327,16 @@
     "required_imports": []
   },
   "Max": {
-    "api": "optax.tree.max",
-    "args": {},
+    "api": "jax.numpy.max",
+    "args": {
+      "x": "a"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool": {
+    "api": "flax.nnx.max_pool",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1838,38 +2349,84 @@
   },
   "Maximum": {
     "api": "jax.numpy.maximum",
+    "args": {
+      "x1": "x1",
+      "x2": "x2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Mean": {
-    "api": "nnx.training.metrics.Welford.mean",
-    "args": {},
+    "api": "jax.numpy.mean",
+    "args": {
+      "x": "a"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Median": {
+    "api": "jax.numpy.median",
+    "args": {
+      "x": "a"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Merge": {
+    "api": "flax.nnx.merge",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MergeContext": {
+    "api": "flax.nnx.merge_context",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MergeState": {
+    "api": "flax.nnx.merge_state",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Meshgrid": {
     "api": "jax.numpy.meshgrid",
-    "args": {
-      "copy": "copy",
-      "indexing": "indexing",
-      "sparse": "sparse",
-      "xi": "xi"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "pack_to_tuple": "xi",
+    "required_imports": []
+  },
+  "Metric": {
+    "api": "flax.nnx.Metric",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Min": {
-    "api": "optax.tree.min",
-    "args": {},
+    "api": "jax.numpy.min",
+    "args": {
+      "x": "a"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MinPool": {
+    "api": "flax.nnx.min_pool",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Minimum": {
     "api": "jax.numpy.minimum",
+    "args": {
+      "x1": "x1",
+      "x2": "x2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1884,15 +2441,35 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ModelAndOptimizer": {
+    "api": "flax.nnx.ModelAndOptimizer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Module": {
     "api": "flax.nnx.Module",
-    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ModuleDict": {
+    "api": "flax.nnx.Dict",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ModuleList": {
     "api": "flax.nnx.List",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MoveAxis": {
+    "api": "jax.numpy.moveaxis",
+    "args": {
+      "x": "a"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1913,6 +2490,22 @@
     "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MultiHeadAttention": {
+    "api": "flax.nnx.MultiHeadAttention",
+    "args": {
+      "dropout": "dropout_rate",
+      "head_dim": "qkv_features"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MultiMetric": {
+    "api": "flax.nnx.MultiMetric",
+    "dispatch_rules": [],
+    "pack_as": "List",
     "required_imports": []
   },
   "MultiSteps": {
@@ -1989,6 +2582,10 @@
   },
   "Multiply": {
     "api": "jax.numpy.multiply",
+    "args": {
+      "x1": "x1",
+      "x2": "x2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2038,6 +2635,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "NanToNum": {
+    "api": "jax.numpy.nan_to_num",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Negative": {
+    "api": "jax.numpy.negative",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NodeStates": {
+    "api": "flax.nnx.NodeStates",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "NonNegativeParamsState": {
     "api": "optax.NonNegativeParamsState",
     "args": {},
@@ -2065,46 +2680,71 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Not": {
+    "api": "flax.nnx.Not",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NotEqual": {
+    "api": "jax.numpy.not_equal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Nothing": {
+    "api": "flax.nnx.Nothing",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Object": {
-    "api": "nnx.reprlib.Object",
-    "args": {
-      "comment": "comment",
-      "empty_repr": "empty_repr",
-      "end": "end",
-      "indent": "indent",
-      "kv_sep": "kv_sep",
-      "same_line": "same_line",
-      "self": "self",
-      "start": "start",
-      "type": "type"
-    },
+    "api": "flax.nnx.Object",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OfType": {
+    "api": "flax.nnx.OfType",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OneHot": {
+    "api": "flax.nnx.one_hot",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Ones": {
     "api": "jax.numpy.ones",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OnesLike": {
+    "api": "jax.numpy.ones_like",
     "args": {
-      "device": "device",
-      "dtype": "dtype",
-      "out_sharding": "out_sharding",
-      "shape": "shape"
+      "x": "a"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "OptArray": {
+    "api": "flax.nnx.OptArray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "OptState": {
-    "api": "nnx.training.optimizer.OptState",
-    "args": {
-      "eager_sharding": "eager_sharding",
-      "has_ref": "has_ref",
-      "is_hijax": "is_hijax",
-      "is_mutable": "is_mutable",
-      "metadata": "metadata",
-      "self": "self",
-      "value": "value"
-    },
+    "api": "flax.nnx.OptState",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OptVariable": {
+    "api": "flax.nnx.OptVariable",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2116,13 +2756,32 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "OptimizedLSTMCell": {
+    "api": "flax.nnx.OptimizedLSTMCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Optimizer": {
-    "api": "nnx.training.optimizer.Optimizer",
+    "api": "flax.nnx.Optimizer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Outer": {
+    "api": "jax.numpy.outer",
     "args": {
-      "model": "model",
-      "self": "self",
-      "tx": "tx",
-      "wrt": "wrt"
+      "x1": "a",
+      "x2": "b"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PReLU": {
+    "api": "flax.nnx.PReLU",
+    "args": {
+      "init": "negative_slope_init"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2145,25 +2804,15 @@
   "Pad": {
     "api": "jax.numpy.pad",
     "args": {
-      "input": "array",
-      "pad": "pad_width",
-      "value": "constant_values"
+      "value": "constant_values",
+      "x": "array"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "padding_converter"
+    "required_imports": []
   },
   "Param": {
     "api": "flax.nnx.Param",
-    "args": {
-      "init_args": "init_args",
-      "init_fn": "init_fn",
-      "init_kwargs": "init_kwargs",
-      "name": "name",
-      "self": "self",
-      "unbox": "unbox"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2196,9 +2845,58 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Partition": {
+    "api": "jax.numpy.partition",
+    "args": {
+      "k": "kth",
+      "x": "a"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PartitionName": {
+    "api": "flax.nnx.PARTITION_NAME",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "PartitionState": {
     "api": "optax.PartitionState",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PathContains": {
+    "api": "flax.nnx.PathContains",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PermuteDims": {
+    "api": "jax.numpy.transpose",
+    "args": {
+      "x": "a"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Perturbation": {
+    "api": "flax.nnx.Perturbation",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pi": {
+    "api": "jax.numpy.pi",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pmap": {
+    "api": "flax.nnx.pmap",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2220,6 +2918,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Pool": {
+    "api": "flax.nnx.pool",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pop": {
+    "api": "flax.nnx.pop",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Pow": {
     "api": "jax.numpy.pow",
     "args": {
@@ -2233,8 +2943,8 @@
   "Power": {
     "api": "jax.numpy.power",
     "args": {
-      "x1": "x1",
-      "x2": "x2"
+      "a": "x1",
+      "b": "x2"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2252,16 +2962,6 @@
   },
   "Prod": {
     "api": "jax.numpy.prod",
-    "args": {
-      "a": "a",
-      "axis": "axis",
-      "dtype": "dtype",
-      "initial": "initial",
-      "keepdims": "keepdims",
-      "out": "out",
-      "promote_integers": "promote_integers",
-      "where": "where"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2274,6 +2974,18 @@
       "keepdims": "keepdims",
       "out": "out"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pure": {
+    "api": "flax.nnx.pure",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PureState": {
+    "api": "flax.nnx.PureState",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2291,6 +3003,46 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "PutAlongAxis": {
+    "api": "jax.numpy.put_along_axis",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pytree": {
+    "api": "flax.nnx.Pytree",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Qqmm": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "quantized_matmul"
+  },
+  "Quantize": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "quantization"
+  },
+  "QuantizedMatmul": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "quantized_matmul"
+  },
+  "RMSNorm": {
+    "api": "flax.nnx.RMSNorm",
+    "args": {
+      "dim": "num_features",
+      "eps": "epsilon"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "RMSprop": {
     "api": "optax.rmsprop",
     "dispatch_rules": [],
@@ -2298,18 +3050,9 @@
     "required_imports": []
   },
   "RNN": {
-    "api": "nnx.nn.recurrent.RNN",
+    "api": "flax.nnx.RNN",
     "args": {
-      "broadcast_rngs": "broadcast_rngs",
-      "cell": "cell",
-      "keep_order": "keep_order",
-      "return_carry": "return_carry",
-      "reverse": "reverse",
-      "rngs": "rngs",
-      "self": "self",
-      "state_axes": "state_axes",
-      "time_major": "time_major",
-      "unroll": "unroll"
+      "cell": "cell"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2322,10 +3065,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "RNNCellBase": {
+    "api": "flax.nnx.RNNCellBase",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Radians": {
     "api": "jax.numpy.radians",
     "args": {
-      "x": "x"
+      "a": "x"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2355,9 +3104,14 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ReLU6": {
+    "api": "flax.nnx.relu6",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Real": {
-    "api": "optax.tree.real",
-    "args": {},
+    "api": "jax.numpy.real",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2368,28 +3122,85 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "RecursiveMap": {
+    "api": "flax.nnx.recursive_map",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RegisterDataType": {
+    "api": "flax.nnx.register_data_type",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RegisterVariableName": {
+    "api": "flax.nnx.register_variable_name",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Relu": {
+    "api": "flax.nnx.relu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Remainder": {
+    "api": "jax.numpy.remainder",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Remat": {
+    "api": "flax.nnx.remat",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Repeat": {
     "api": "jax.numpy.repeat",
-    "args": {
-      "a": "a",
-      "axis": "axis",
-      "out_sharding": "out_sharding",
-      "repeats": "repeats",
-      "total_repeat_length": "total_repeat_length"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReplaceByPureDict": {
+    "api": "flax.nnx.replace_by_pure_dict",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Reseed": {
+    "api": "flax.nnx.reseed",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ResetPeakMemory": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Reshape": {
     "api": "jax.numpy.reshape",
-    "args": {
-      "a": "a",
-      "copy": "copy",
-      "order": "order",
-      "out_sharding": "out_sharding",
-      "shape": "shape"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RestoreIntPaths": {
+    "api": "flax.nnx.restore_int_paths",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RestoreRngs": {
+    "api": "flax.nnx.restore_rngs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RightShift": {
+    "api": "jax.numpy.right_shift",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2417,6 +3228,36 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "RngCount": {
+    "api": "flax.nnx.RngCount",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RngKey": {
+    "api": "flax.nnx.RngKey",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RngState": {
+    "api": "flax.nnx.RngState",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RngStream": {
+    "api": "flax.nnx.RngStream",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rngs": {
+    "api": "flax.nnx.Rngs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Rnncellbase": {
     "api": "nnx.nn.recurrent.RNNCellBase",
     "args": {},
@@ -2426,11 +3267,6 @@
   },
   "Roll": {
     "api": "jax.numpy.roll",
-    "args": {
-      "a": "a",
-      "axis": "axis",
-      "shift": "shift"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2446,12 +3282,13 @@
     "required_imports": []
   },
   "Round": {
-    "api": "jax.numpy.ndarray.round",
-    "args": {
-      "decimals": "decimals",
-      "out": "out",
-      "self": "self"
-    },
+    "api": "jax.numpy.round",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rsqrt": {
+    "api": "jax.lax.rsqrt",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2469,8 +3306,28 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SaveGguf": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "save_gguf_adapter"
+  },
+  "SaveSafetensors": {
+    "dispatch_rules": [],
+    "macro_template": "save_file({arrays}, {file}, metadata={metadata})",
+    "pack_as": "Tuple",
+    "required_imports": [
+      "from safetensors.flax import save_file"
+    ]
+  },
   "Savez": {
     "api": "jax.numpy.savez",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SavezCompressed": {
+    "api": "jax.numpy.savez_compressed",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2490,17 +3347,7 @@
     "required_imports": []
   },
   "Scan": {
-    "api": "nnx.transforms.iteration.scan",
-    "args": {
-      "_split_transpose": "_split_transpose",
-      "f": "f",
-      "in_axes": "in_axes",
-      "length": "length",
-      "out_axes": "out_axes",
-      "reverse": "reverse",
-      "transform_metadata": "transform_metadata",
-      "unroll": "unroll"
-    },
+    "api": "flax.nnx.scan",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2518,6 +3365,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SegmentedMm": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "segmented_ops"
+  },
   "Select": {
     "api": "jax.numpy.select",
     "args": {
@@ -2529,12 +3382,30 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Selu": {
+    "api": "flax.nnx.selu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sequential": {
     "api": "flax.nnx.Sequential",
-    "args": {
-      "fns": "fns",
-      "self": "self"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetCacheLimit": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetDefaultDevice": {
+    "api": "jax.default_device",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetDefaultStream": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2548,6 +3419,34 @@
       "fill_value": "fill_value",
       "size": "size"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetMemoryLimit": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetMetadata": {
+    "api": "flax.nnx.set_metadata",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetMode": {
+    "api": "flax.nnx.set_mode",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetModeInfo": {
+    "api": "flax.nnx.set_mode_info",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetWiredLimit": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2572,6 +3471,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ShardMap": {
+    "api": "flax.nnx.shard_map",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ShouldSkipUpdateFunction": {
     "api": "optax.ShouldSkipUpdateFunction",
     "args": {},
@@ -2586,7 +3491,7 @@
     "required_imports": []
   },
   "Sigmoid": {
-    "api": "nnx.sigmoid",
+    "api": "jax.nn.sigmoid",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2604,7 +3509,13 @@
     "required_imports": []
   },
   "Silu": {
-    "api": "nnx.silu",
+    "api": "flax.nnx.silu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SimpleCell": {
+    "api": "flax.nnx.SimpleCell",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2644,49 +3555,65 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SoftSign": {
+    "api": "flax.nnx.soft_sign",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Softmax": {
-    "api": "nnx.softmax",
+    "api": "jax.nn.softmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softplus": {
+    "api": "flax.nnx.softplus",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Sort": {
-    "api": "jax.numpy.ndarray.sort",
-    "args": {
-      "axis": "axis",
-      "descending": "descending",
-      "kind": "kind",
-      "order": "order",
-      "self": "self",
-      "stable": "stable"
-    },
+    "api": "jax.numpy.sort",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SpectralNorm": {
-    "api": "nnx.nn.normalization.SpectralNorm",
+    "api": "flax.nnx.SpectralNorm",
     "args": {
-      "dtype": "dtype",
-      "epsilon": "epsilon",
-      "error_on_non_matrix": "error_on_non_matrix",
-      "layer_instance": "layer_instance",
-      "n_steps": "n_steps",
-      "param_dtype": "param_dtype",
-      "rngs": "rngs",
-      "self": "self",
-      "update_stats": "update_stats"
+      "layer": "layer_instance"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Split": {
-    "api": "nnx.training.metrics.Metric.split",
-    "args": {
-      "filters": "filters",
-      "self": "self"
-    },
+    "api": "jax.numpy.split",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SplitContext": {
+    "api": "flax.nnx.split_context",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SplitGraph": {
+    "api": "flax.nnx.split",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SplitRngs": {
+    "api": "flax.nnx.split_rngs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SplitState": {
+    "api": "flax.nnx.split_state",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2697,12 +3624,14 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Square": {
+    "api": "jax.numpy.square",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Squeeze": {
     "api": "jax.numpy.squeeze",
-    "args": {
-      "a": "a",
-      "axis": "axis"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2710,28 +3639,50 @@
   "Stack": {
     "api": "jax.numpy.stack",
     "args": {
-      "arrays": "arrays",
-      "axis": "axis",
-      "dtype": "dtype",
-      "out": "out"
+      "tensors": "arrays"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Standardize": {
+    "api": "flax.nnx.standardize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "State": {
+    "api": "flax.nnx.state",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "StateAxes": {
+    "api": "flax.nnx.StateAxes",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "StateSharding": {
+    "api": "flax.nnx.StateSharding",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Static": {
+    "api": "flax.nnx.static",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Std": {
     "api": "jax.numpy.std",
-    "args": {
-      "a": "a",
-      "axis": "axis",
-      "correction": "correction",
-      "ddof": "ddof",
-      "dtype": "dtype",
-      "keepdims": "keepdims",
-      "mean": "mean",
-      "out": "out",
-      "where": "where"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "StopGradient": {
+    "api": "jax.lax.stop_gradient",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2750,8 +3701,13 @@
     "required_imports": []
   },
   "Sum": {
-    "api": "optax.tree.sum",
-    "args": {},
+    "api": "jax.numpy.sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SwapAxes": {
+    "api": "jax.numpy.swapaxes",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2763,6 +3719,18 @@
       "axis2": "axis2",
       "self": "self"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Swish": {
+    "api": "flax.nnx.swish",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Switch": {
+    "api": "flax.nnx.switch",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2781,18 +3749,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Tabulate": {
+    "api": "flax.nnx.tabulate",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Take": {
     "api": "jax.numpy.take",
-    "args": {
-      "a": "a",
-      "axis": "axis",
-      "fill_value": "fill_value",
-      "indices": "indices",
-      "indices_are_sorted": "indices_are_sorted",
-      "mode": "mode",
-      "out": "out",
-      "unique_indices": "unique_indices"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TakeAlongAxis": {
+    "api": "jax.numpy.take_along_axis",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2817,14 +3787,6 @@
   },
   "Tensordot": {
     "api": "jax.numpy.tensordot",
-    "args": {
-      "a": "a",
-      "axes": "axes",
-      "b": "b",
-      "out_sharding": "out_sharding",
-      "precision": "precision",
-      "preferred_element_type": "preferred_element_type"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2838,17 +3800,30 @@
   },
   "Tile": {
     "api": "jax.numpy.tile",
-    "args": {
-      "A": "A",
-      "reps": "reps"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ToFlatState": {
+    "api": "flax.nnx.to_flat_state",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ToPureDict": {
+    "api": "flax.nnx.to_pure_dict",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ToTree": {
+    "api": "flax.nnx.to_tree",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Trace": {
-    "api": "optax.trace",
-    "args": {},
+    "api": "jax.numpy.trace",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2860,33 +3835,77 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "TrainMode": {
+    "api": "flax.nnx.train_mode",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrainState": {
+    "api": "flax.nnx.TrainState",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Transpose": {
-    "api": "nnx.variablelib.GetVariable.transpose",
-    "args": {
-      "_": "_",
-      "args": "args"
-    },
+    "api": "jax.numpy.transpose",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Tri": {
     "api": "jax.numpy.tri",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tril": {
+    "api": "jax.numpy.tril",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Triu": {
+    "api": "jax.numpy.triu",
     "args": {
-      "M": "M",
-      "N": "N",
-      "dtype": "dtype",
-      "k": "k"
+      "x": "m"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TypeVarA": {
+    "api": "flax.nnx.A",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TypeVarM": {
+    "api": "flax.nnx.M",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt16": {
+    "api": "jax.numpy.uint16",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt32": {
+    "api": "jax.numpy.uint32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt64": {
+    "api": "jax.numpy.uint64",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "UInt8": {
     "api": "jax.numpy.uint8",
-    "args": {
-      "x": "x"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2974,16 +3993,10 @@
     "required_imports": []
   },
   "Unflatten": {
-    "api": "nnx.graph.MergeContext.unflatten",
-    "args": {
-      "flat_state": "flat_state",
-      "flat_states": "flat_states",
-      "graphdef": "graphdef",
-      "self": "self"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "requires_plugin": "unflatten_manual"
   },
   "Union1d": {
     "api": "jax.numpy.union1d",
@@ -3020,9 +4033,45 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "UpdateContext": {
+    "api": "flax.nnx.update_context",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "UpdateCvState": {
     "api": "optax.monte_carlo.control_variates.UpdateCvState",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UpdateState": {
+    "api": "flax.nnx.update",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UseEagerSharding": {
+    "api": "flax.nnx.use_eager_sharding",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UseHijax": {
+    "api": "flax.nnx.use_hijax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UsingEagerSharding": {
+    "api": "flax.nnx.using_eager_sharding",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UsingHijax": {
+    "api": "flax.nnx.using_hijax",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3034,24 +4083,47 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "VMap": {
+    "api": "flax.nnx.vmap",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ValueAndGrad": {
+    "api": "jax.value_and_grad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Var": {
-    "api": "nnx.nn.normalization.BatchNorm.var",
-    "args": {},
+    "api": "jnp.var",
+    "args": {
+      "x": "a"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Variable": {
     "api": "flax.nnx.Variable",
-    "args": {
-      "col": "col",
-      "init_args": "init_args",
-      "init_fn": "init_fn",
-      "init_kwargs": "init_kwargs",
-      "name": "name",
-      "self": "self",
-      "unbox": "unbox"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "VariableMetadata": {
+    "api": "flax.nnx.VariableMetadata",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "VariableNameFromType": {
+    "api": "flax.nnx.variable_name_from_type",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "VariableTypeFromName": {
+    "api": "flax.nnx.variable_type_from_name",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3098,6 +4170,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Vjp": {
+    "dispatch_rules": [],
+    "macro_template": "lambda f, p, c: (lambda out, vjp_fn: (out, vjp_fn(c)))(*jax.vjp(f, *p))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Vmap": {
+    "api": "jax.vmap",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Vsplit": {
     "api": "jax.numpy.vsplit",
     "args": {
@@ -3119,27 +4203,40 @@
     "required_imports": []
   },
   "WeightNorm": {
-    "api": "nnx.nn.normalization.WeightNorm",
+    "api": "flax.nnx.WeightNorm",
     "args": {
-      "dtype": "dtype",
-      "epsilon": "epsilon",
-      "feature_axes": "feature_axes",
-      "layer_instance": "layer_instance",
-      "param_dtype": "param_dtype",
-      "promote_dtype": "promote_dtype",
-      "rngs": "rngs",
-      "scale_init": "scale_init",
-      "self": "self",
-      "use_scale": "use_scale",
-      "variable_filter": "variable_filter"
+      "layer": "layer_instance"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Where": {
-    "api": "optax.tree.where",
-    "args": {},
+    "api": "jax.numpy.where",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "WhileLoop": {
+    "api": "flax.nnx.while_loop",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "WithMetadata": {
+    "api": "flax.nnx.with_metadata",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "WithPartitioning": {
+    "api": "flax.nnx.with_partitioning",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "WithTag": {
+    "api": "flax.nnx.WithTag",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3160,11 +4257,14 @@
   },
   "Zeros": {
     "api": "jax.numpy.zeros",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ZerosLike": {
+    "api": "jax.numpy.zeros_like",
     "args": {
-      "device": "device",
-      "dtype": "dtype",
-      "out_sharding": "out_sharding",
-      "shape": "shape"
+      "x": "a"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",

@@ -1,0 +1,1192 @@
+operation: "LogAddExp"
+description: "Computes the logarithm of the sum of exponentiations of the inputs."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.logaddexp"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.logaddexp"
+    args:
+      x1: "a"
+      x2: "b"
+  jax:
+    api: "jax.numpy.logaddexp"
+  flax_nnx:
+    api: "jax.numpy.logaddexp"
+  pax:
+    api: "jax.numpy.logaddexp"
+  keras:
+    api: "keras.ops.logaddexp"
+  tensorflow:
+    api: "tf.math.reduce_logsumexp"
+    macro_template: "tf.math.reduce_logsumexp(tf.stack([{x1}, {x2}]), axis=0)"
+  numpy:
+    api: "numpy.logaddexp"
+
+---
+operation: "LogCumSumExp"
+description: "Returns the logarithm of the cumulative summation of the exponentiation of elements of input in the dimension dim."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.logcumsumexp"
+    args:
+      axis: "dim"
+  mlx:
+    api: "mlx.core.logcumsumexp"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.logaddexp.accumulate" 
+    requires_plugin: "ufunc_methods" # JAX doesn't support ufunc methods directly usually
+  flax_nnx:
+    requires_plugin: "ufunc_methods"
+  pax:
+    requires_plugin: "ufunc_methods"
+  numpy:
+    api: "numpy.logaddexp.accumulate"
+    transformation_type: "method_call"
+
+---
+operation: "LogicalAnd"
+description: "Computes the element-wise logical AND of the given input tensors."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.logical_and"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.logical_and"
+    args:
+      x1: "a"
+      x2: "b"
+  jax:
+    api: "jax.numpy.logical_and"
+  flax_nnx:
+    api: "jax.numpy.logical_and"
+  pax:
+    api: "jax.numpy.logical_and"
+  keras:
+    api: "keras.ops.logical_and"
+  tensorflow:
+    api: "tf.math.logical_and"
+  numpy:
+    api: "numpy.logical_and"
+
+---
+operation: "LogicalNot"
+description: "Computes the element-wise logical NOT of the given input tensor."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.logical_not"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.logical_not"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.logical_not"
+  flax_nnx:
+    api: "jax.numpy.logical_not"
+  pax:
+    api: "jax.numpy.logical_not"
+  keras:
+    api: "keras.ops.logical_not"
+  tensorflow:
+    api: "tf.math.logical_not"
+  numpy:
+    api: "numpy.logical_not"
+
+---
+operation: "LogicalOr"
+description: "Computes the element-wise logical OR of the given input tensors."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.logical_or"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.logical_or"
+    args:
+      x1: "a"
+      x2: "b"
+  jax:
+    api: "jax.numpy.logical_or"
+  flax_nnx:
+    api: "jax.numpy.logical_or"
+  pax:
+    api: "jax.numpy.logical_or"
+  keras:
+    api: "keras.ops.logical_or"
+  tensorflow:
+    api: "tf.math.logical_or"
+  numpy:
+    api: "numpy.logical_or"
+
+---
+operation: "LogSumExp"
+description: "Computes the logarithm of the sum of the exponentials of the elements in the input tensor."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.logsumexp"
+    args:
+      x: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  mlx:
+    api: "mlx.core.logsumexp"
+    args:
+      x: "a"
+  jax:
+    api: "jax.scipy.special.logsumexp"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.scipy.special.logsumexp"
+    args:
+      x: "a"
+  pax:
+    api: "jax.scipy.special.logsumexp"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.logsumexp"
+  tensorflow:
+    api: "tf.math.reduce_logsumexp"
+    args:
+      x: "input_tensor"
+  numpy:
+    api: "numpy.logaddexp.reduce" # Typical numpy fallback
+    requires_plugin: "numpy_logsumexp_shim"
+
+---
+operation: "MatMul"
+description: "Matrix product of two tensors."
+std_args:
+  - name: "x1"
+    type: "Array"
+    rank: 2
+  - name: "x2"
+    type: "Array"
+    rank: 2
+variants:
+  torch:
+    api: "torch.matmul"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.matmul"
+    args:
+      x1: "a"
+      x2: "b"
+  jax:
+    api: "jax.numpy.matmul"
+    args:
+      x1: "a"
+      x2: "b"
+  flax_nnx:
+    api: "jax.numpy.matmul"
+    args:
+      x1: "a"
+      x2: "b"
+  pax:
+    api: "jax.numpy.matmul"
+    args:
+      x1: "a"
+      x2: "b"
+  keras:
+    api: "keras.ops.matmul"
+  tensorflow:
+    api: "tf.linalg.matmul"
+    args:
+      x1: "a"
+      x2: "b"
+  numpy:
+    api: "numpy.matmul"
+    args:
+      x1: "x1"
+      x2: "x2"
+
+---
+operation: "Max"
+description: "Returns the maximum value of each row of the input tensor in the given dimension(s)."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.amax"
+    args:
+      x: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  mlx:
+    api: "mlx.core.max"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.max"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.max"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.max"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.max"
+  tensorflow:
+    api: "tf.math.reduce_max"
+    args:
+      x: "input_tensor"
+  numpy:
+    api: "numpy.max"
+    args:
+      x: "a"
+
+---
+operation: "Maximum"
+description: "Computes the element-wise maximum of input and other."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.maximum"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.maximum"
+    args:
+      x1: "a"
+      x2: "b"
+  jax:
+    api: "jax.numpy.maximum"
+    args:
+      x1: "x1"
+      x2: "x2"
+  flax_nnx:
+    api: "jax.numpy.maximum"
+    args:
+      x1: "x1"
+      x2: "x2"
+  pax:
+    api: "jax.numpy.maximum"
+    args:
+      x1: "x1"
+      x2: "x2"
+  keras:
+    api: "keras.ops.maximum"
+  tensorflow:
+    api: "tf.math.maximum"
+    args:
+      x1: "x"
+      x2: "y"
+  numpy:
+    api: "numpy.maximum"
+    args:
+      x1: "x1"
+      x2: "x2"
+
+---
+operation: "Mean"
+description: "Returns the mean value of each row of the input tensor in the given dimension dimensionality."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.mean"
+    args:
+      x: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  mlx:
+    api: "mlx.core.mean"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.mean"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.mean"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.mean"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.mean"
+  tensorflow:
+    api: "tf.math.reduce_mean"
+    args:
+      x: "input_tensor"
+  numpy:
+    api: "numpy.mean"
+    args:
+      x: "a"
+
+---
+operation: "Median"
+description: "Returns the median value of elements in the input tensor."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nanmedian" # More robust equivalent for general median
+    args:
+      x: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  mlx:
+    api: "mlx.core.median"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.median"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.median"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.median"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.median" # Note: Verify Keras version support
+    missing_message: "Keras Ops may not support median directly, check version."
+  tensorflow:
+    requires_plugin: "tf_probability_median" # TF Core lacks direct median usually
+  numpy:
+    api: "numpy.median"
+    args:
+      x: "a"
+
+---
+operation: "Meshgrid"
+description: "Creates coordinate grids from vectors."
+std_args:
+  - name: "tensors"
+    is_variadic: true
+    type: "Array"
+  - name: "indexing"
+    type: "str"
+    options: ["xy", "ij"]
+    default: "xy"
+variants:
+  torch:
+    api: "torch.meshgrid"
+    pack_to_tuple: "tensors"
+    pack_as: "List" # Torch meshgrid takes *tensors usually, depends on version
+  mlx:
+    api: "mlx.core.meshgrid"
+    pack_to_tuple: "arrays"
+  jax:
+    api: "jax.numpy.meshgrid"
+    pack_to_tuple: "xi"
+    args:
+      tensors: "xi"
+  flax_nnx:
+    api: "jax.numpy.meshgrid"
+    pack_to_tuple: "xi"
+  pax:
+    api: "jax.numpy.meshgrid"
+    pack_to_tuple: "xi"
+  keras:
+    api: "keras.ops.meshgrid"
+  tensorflow:
+    api: "tf.meshgrid"
+    pack_to_tuple: "args"
+  numpy:
+    api: "numpy.meshgrid"
+    pack_to_tuple: "xi"
+
+---
+operation: "Min"
+description: "Returns the minimum value of each row of the input tensor in the given dimension(s)."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.amin"
+    args:
+      x: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  mlx:
+    api: "mlx.core.min"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.min"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.min"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.min"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.min"
+  tensorflow:
+    api: "tf.math.reduce_min"
+    args:
+      x: "input_tensor"
+  numpy:
+    api: "numpy.min"
+    args:
+      x: "a"
+
+---
+operation: "Minimum"
+description: "Computes the element-wise minimum of input and other."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.minimum"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.minimum"
+    args:
+      x1: "a"
+      x2: "b"
+  jax:
+    api: "jax.numpy.minimum"
+    args:
+      x1: "x1"
+      x2: "x2"
+  flax_nnx:
+    api: "jax.numpy.minimum"
+    args:
+      x1: "x1"
+      x2: "x2"
+  pax:
+    api: "jax.numpy.minimum"
+    args:
+      x1: "x1"
+      x2: "x2"
+  keras:
+    api: "keras.ops.minimum"
+  tensorflow:
+    api: "tf.math.minimum"
+    args:
+      x1: "x"
+      x2: "y"
+  numpy:
+    api: "numpy.minimum"
+    args:
+      x1: "x1"
+      x2: "x2"
+
+---
+operation: "MoveAxis"
+description: "Move axes of an array to new positions."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "source"
+    type: "int"
+  - name: "destination"
+    type: "int"
+variants:
+  torch:
+    api: "torch.moveaxis"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.moveaxis"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.moveaxis"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.moveaxis"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.moveaxis"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.moveaxis"
+  tensorflow:
+    api: "tf.experimental.numpy.moveaxis"
+    args:
+      x: "a"
+  numpy:
+    api: "numpy.moveaxis"
+    args:
+      x: "a"
+
+---
+operation: "Multiply"
+description: "Multiplies input by other."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.mul"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.multiply"
+    args:
+      x1: "a"
+      x2: "b"
+  jax:
+    api: "jax.numpy.multiply"
+    args:
+      x1: "x1"
+      x2: "x2"
+  flax_nnx:
+    api: "jax.numpy.multiply"
+    args:
+      x1: "x1"
+      x2: "x2"
+  pax:
+    api: "jax.numpy.multiply"
+    args:
+      x1: "x1"
+      x2: "x2"
+  keras:
+    api: "keras.ops.multiply"
+  tensorflow:
+    api: "tf.math.multiply"
+    args:
+      x1: "x"
+      x2: "y"
+  numpy:
+    api: "numpy.multiply"
+    args:
+      x1: "x1"
+      x2: "x2"
+
+---
+operation: "NanToNum"
+description: "Replaces NaN, positive infinity, and negative infinity values in input with valid numbers."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "nan"
+    type: "float"
+    default: 0.0
+  - name: "posinf"
+    type: "float"
+    default: null
+  - name: "neginf"
+    type: "float"
+    default: null
+variants:
+  torch:
+    api: "torch.nan_to_num"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.nan_to_num"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.nan_to_num"
+  flax_nnx:
+    api: "jax.numpy.nan_to_num"
+  pax:
+    api: "jax.numpy.nan_to_num"
+  keras:
+    api: "keras.ops.nan_to_num"
+  tensorflow:
+    api: "tf.math.xdivy" # Tricky mapping in TF for full nan_to_num. Requires custom logic or experimental numpy.
+    requires_plugin: "nan_to_num_shim"
+  numpy:
+    api: "numpy.nan_to_num"
+
+---
+operation: "Negative"
+description: "Numerical negative, element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.neg"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.negative"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.negative"
+  flax_nnx:
+    api: "jax.numpy.negative"
+  pax:
+    api: "jax.numpy.negative"
+  keras:
+    api: "keras.ops.negative"
+  tensorflow:
+    api: "tf.math.negative"
+  numpy:
+    api: "numpy.negative"
+
+---
+operation: "NotEqual"
+description: "Computes element-wise inequality."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.not_equal"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.not_equal"
+    args:
+      x1: "a"
+      x2: "b"
+  jax:
+    api: "jax.numpy.not_equal"
+  flax_nnx:
+    api: "jax.numpy.not_equal"
+  pax:
+    api: "jax.numpy.not_equal"
+  keras:
+    api: "keras.ops.not_equal"
+  tensorflow:
+    api: "tf.math.not_equal"
+    args:
+      x1: "x"
+      x2: "y"
+  numpy:
+    api: "numpy.not_equal"
+
+---
+operation: "Ones"
+description: "Returns a tensor filled with the scalar value 1."
+std_args:
+  - name: "shape"
+    type: "List[int]"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.ones"
+    args:
+      shape: "size"
+  mlx:
+    api: "mlx.core.ones"
+  jax:
+    api: "jax.numpy.ones"
+  flax_nnx:
+    api: "jax.numpy.ones"
+  pax:
+    api: "jax.numpy.ones"
+  keras:
+    api: "keras.ops.ones"
+  tensorflow:
+    api: "tf.ones"
+  numpy:
+    api: "numpy.ones"
+
+---
+operation: "OnesLike"
+description: "Returns a tensor filled with the scalar value 1, with the same size as input."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.ones_like"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.ones_like"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.ones_like"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.ones_like"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.ones_like"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.ones_like"
+  tensorflow:
+    api: "tf.ones_like"
+    args:
+      x: "input"
+  numpy:
+    api: "numpy.ones_like"
+    args:
+      x: "a"
+
+---
+operation: "Outer"
+description: "Compute the outer product of two vectors."
+std_args:
+  - name: "x1"
+    type: "Array"
+    rank: 1
+  - name: "x2"
+    type: "Array"
+    rank: 1
+variants:
+  torch:
+    api: "torch.outer"
+    args:
+      x1: "input"
+      x2: "vec2"
+  mlx:
+    api: "mlx.core.outer"
+    args:
+      x1: "a"
+      x2: "b"
+  jax:
+    api: "jax.numpy.outer"
+    args:
+      x1: "a"
+      x2: "b"
+  flax_nnx:
+    api: "jax.numpy.outer"
+    args:
+      x1: "a"
+      x2: "b"
+  pax:
+    api: "jax.numpy.outer"
+    args:
+      x1: "a"
+      x2: "b"
+  keras:
+    api: "keras.ops.outer"
+  tensorflow:
+    api: "tf.tensordot" # Outer is tensordot with axes=1 if rank=1? No, axis=0. Or tf.einsum
+    macro_template: "tf.tensordot({x1}, {x2}, axes=0)"
+  numpy:
+    api: "numpy.outer"
+    args:
+      x1: "a"
+      x2: "b"
+
+---
+operation: "Pad"
+description: "Pads a tensor."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "pad_width"
+    type: "List[int]"
+  - name: "mode"
+    type: "str"
+    default: "constant"
+  - name: "value"
+    type: "float"
+    default: 0
+variants:
+  torch:
+    api: "torch.nn.functional.pad"
+    requires_plugin: "padding_converter" # Mismatch tuple format
+    args:
+      x: "input"
+      pad_width: "pad"
+  mlx:
+    api: "mlx.core.pad"
+    args:
+      x: "a"
+      value: "constant_values"
+  jax:
+    api: "jax.numpy.pad"
+    args:
+      x: "array"
+      value: "constant_values"
+  flax_nnx:
+    api: "jax.numpy.pad"
+    args:
+      x: "array"
+      value: "constant_values"
+  pax:
+    api: "jax.numpy.pad"
+    args:
+      x: "array"
+      value: "constant_values"
+  keras:
+    api: "keras.ops.pad"
+  tensorflow:
+    api: "tf.pad"
+    args:
+      x: "tensor"
+      pad_width: "paddings"
+      value: "constant_values"
+  numpy:
+    api: "numpy.pad"
+    args:
+      x: "array"
+      value: "constant_values"
+
+---
+operation: "Partition"
+description: "Partitions the array elements."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "k"
+    type: "int"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  torch:
+    api: "torch.kthvalue"
+    args:
+      x: "input"
+      axis: "dim"
+    output_select_index: 0 # kthvalue returns (values, indices)
+  mlx:
+    api: "mlx.core.partition"
+    args:
+      x: "a"
+      k: "kth"
+  jax:
+    api: "jax.numpy.partition"
+    args:
+      x: "a"
+      k: "kth"
+  flax_nnx:
+    api: "jax.numpy.partition"
+    args:
+      x: "a"
+      k: "kth"
+  pax:
+    api: "jax.numpy.partition"
+    args:
+      x: "a"
+      k: "kth"
+  keras:
+    api: "keras.ops.top_k" # Approx mapping if simple, else requires custom
+    requires_plugin: "partition_shim"
+  tensorflow:
+    api: "tf.math.top_k"
+    requires_plugin: "partition_shim"
+  numpy:
+    api: "numpy.partition"
+    args:
+      x: "a"
+      k: "kth"
+
+---
+operation: "PermuteDims"
+description: "Permutes the dimensions of the input tensor."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axes"
+    type: "List[int]"
+variants:
+  torch:
+    api: "torch.permute"
+    args:
+      x: "input"
+      axes: "dims"
+    pack_to_tuple: "dims"
+  mlx:
+    api: "mlx.core.permute_dims"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.transpose"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.transpose"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.transpose"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.transpose"
+  tensorflow:
+    api: "tf.transpose"
+    args:
+      x: "a"
+      axes: "perm"
+  numpy:
+    api: "numpy.transpose"
+    args:
+      x: "a"
+
+---
+operation: "Pi"
+description: "The floating-point constant pi."
+std_args: []
+op_type: "function" # Represented as factory or constant accessor
+variants:
+  torch:
+    api: "torch.pi"
+    transformation_type: "inline_lambda" # Or just literal replacement
+    macro_template: "None" # Pi is often attr. Handled by Attributes.
+  mlx:
+    api: "mlx.core.pi"
+  jax:
+    api: "jax.numpy.pi"
+  flax_nnx:
+    api: "jax.numpy.pi"
+  pax:
+    api: "jax.numpy.pi"
+  keras:
+    api: "keras.ops.pi"
+  tensorflow:
+    api: "tf.constant" # Hard
+    macro_template: "3.1415926535"
+  numpy:
+    api: "numpy.pi"
+
+---
+operation: "Zeros"
+description: "Returns a tensor filled with the scalar value 0."
+std_args:
+  - name: "shape"
+    type: "List[int]"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.zeros"
+    args:
+      shape: "size"
+  mlx:
+    api: "mlx.core.zeros"
+  jax:
+    api: "jax.numpy.zeros"
+  flax_nnx:
+    api: "jax.numpy.zeros"
+  pax:
+    api: "jax.numpy.zeros"
+  keras:
+    api: "keras.ops.zeros"
+  tensorflow:
+    api: "tf.zeros"
+  numpy:
+    api: "numpy.zeros"
+
+---
+operation: "ZerosLike"
+description: "Returns a tensor filled with the scalar value 0, with the same size as input."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.zeros_like"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.zeros_like"
+    args:
+      x: "a"
+  jax:
+    api: "jax.numpy.zeros_like"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.zeros_like"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.zeros_like"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.zeros_like"
+  tensorflow:
+    api: "tf.zeros_like"
+    args:
+      x: "input"
+  numpy:
+    api: "numpy.zeros_like"
+    args:
+      x: "a"
+
+---
+operation: "Full"
+description: "Returns a tensor of given size filled with fill_value."
+std_args:
+  - name: "shape"
+    type: "List[int]"
+  - name: "fill_value"
+    type: "float"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.full"
+    args:
+      shape: "size"
+  mlx:
+    api: "mlx.core.full"
+    args:
+      fill_value: "vals"
+  jax:
+    api: "jax.numpy.full"
+  flax_nnx:
+    api: "jax.numpy.full"
+  pax:
+    api: "jax.numpy.full"
+  keras:
+    api: "keras.ops.full"
+  tensorflow:
+    api: "tf.fill"
+    args:
+      shape: "dims"
+      fill_value: "value"
+  numpy:
+    api: "numpy.full"
+
+---
+operation: "FullLike"
+description: "Returns a tensor with the same size as input filled with fill_value."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "fill_value"
+    type: "float"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.full_like"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.full_like"
+    args:
+      x: "a"
+      fill_value: "vals"
+  jax:
+    api: "jax.numpy.full_like"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.full_like"
+    args:
+      x: "a"
+  pax:
+    api: "jax.numpy.full_like"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.full_like"
+  tensorflow:
+    api: "tf.fill"
+    macro_template: "tf.fill(tf.shape({x}), {fill_value})"
+  numpy:
+    api: "numpy.full_like"
+    args:
+      x: "a"

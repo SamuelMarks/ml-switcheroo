@@ -1,0 +1,560 @@
+operation: "TrainMode"
+description: "Puts the model or node into training mode (enabling dropout, batch norm updating)."
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.train_mode"
+  torch:
+    # PyTorch performs inplace mutation on the module
+    macro_template: "{node}.train()"
+  keras:
+    # Keras doesn't have a direct 'return new node in train mode' equivalent, but setting trainable property is closest
+    macro_template: "setattr({node}, 'trainable', True) or {node}"
+  jax:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+---
+operation: "Unflatten"
+description: "Reconstructs a graph node from a GraphDef and State."
+std_args:
+  - name: "graphdef"
+    type: "Any"
+  - name: "state"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.unflatten"
+  torch:
+    # PyTorch doesn't expose graph definition objects like this.
+    api: null
+  jax:
+    api: null
+---
+operation: "UpdateState"
+description: "Updates a graph node with a new state dictionary in-place."
+std_args:
+  - name: "node"
+    type: "Any"
+  - name: "state"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.update"
+  torch:
+    # Maps to load_state_dict
+    macro_template: "{node}.load_state_dict({state})"
+  keras:
+    # Maps to set_weights (requires valid list usually)
+    api: "keras.Model.set_weights"
+  jax:
+    api: null
+---
+operation: "UpdateContext"
+description: "Context manager/decorator for handling complex state updates with graph mutations."
+std_args:
+  - name: "tag"
+    type: "str"
+    default: "'default'"
+op_type: "context"
+variants:
+  flax_nnx:
+    api: "flax.nnx.update_context"
+  torch:
+    api: null
+  jax:
+    api: null
+---
+operation: "UseEagerSharding"
+description: "Sets whether Variables should use eager sharding by default."
+std_args:
+  - name: "value"
+    type: "bool"
+op_type: "function"
+variants:
+  flax_nnx:
+    api: "flax.nnx.use_eager_sharding"
+  jax:
+    api: null
+---
+operation: "UseHijax"
+description: "Enables or disables Hijax mode."
+std_args:
+  - name: "value"
+    type: "bool"
+variants:
+  flax_nnx:
+    api: "flax.nnx.use_hijax"
+---
+operation: "UsingEagerSharding"
+description: "Returns True if eager sharding is currently enabled."
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.using_eager_sharding"
+---
+operation: "UsingHijax"
+description: "Returns True if Hijax mode is currently enabled."
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.using_hijax"
+---
+operation: "ValueAndGrad"
+description: "Creates a function that evaluates both the value and gradient of a function."
+std_args:
+  - name: "f"
+    type: "Callable"
+  - name: "argnums"
+    type: "Union[int, Sequence[int]]"
+    default: "0"
+  - name: "has_aux"
+    type: "bool"
+    default: "False"
+variants:
+  flax_nnx:
+    api: "flax.nnx.value_and_grad"
+  jax:
+    api: "jax.value_and_grad"
+  torch:
+    api: "torch.func.grad_and_value"
+  tensorflow:
+    api: "tf.math.value_and_gradient"
+---
+operation: "VariableNameFromType"
+description: "Gets the collection name for a Variable type."
+std_args:
+  - name: "typ"
+    type: "type"
+variants:
+  flax_nnx:
+    api: "flax.nnx.variable_name_from_type"
+---
+operation: "VariableTypeFromName"
+description: "Gets the Variable class from a collection name."
+std_args:
+  - name: "name"
+    type: "str"
+variants:
+  flax_nnx:
+    api: "flax.nnx.variable_type_from_name"
+---
+operation: "GetState"
+description: "Retrieves the state (parameters/variables) from a model node."
+std_args:
+  - name: "node"
+    type: "Any"
+  - name: "filters"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.variables"
+  torch:
+    # Returns an iterator/dict of params. Using state_dict as closest equivalent for data extraction.
+    macro_template: "{node}.state_dict()"
+  keras:
+    # Returns list of variables
+    macro_template: "{node}.weights"
+---
+operation: "VMap"
+description: "Vectorizing map. Creates a function that maps f over array axes."
+std_args:
+  - name: "f"
+    type: "Callable"
+  - name: "in_axes"
+    type: "Any"
+    default: 0
+  - name: "out_axes"
+    type: "Any"
+    default: 0
+variants:
+  flax_nnx:
+    api: "flax.nnx.vmap"
+  jax:
+    api: "jax.vmap"
+  torch:
+    api: "torch.vmap"
+    args:
+      in_axes: "in_dims"
+      out_axes: "out_dims"
+  tensorflow:
+    api: "tf.vectorized_map"
+    # TF vmap arg structure is different, requires adapter logic usually, implying plugin
+    requires_plugin: "vmap_adapter"
+---
+operation: "WhileLoop"
+description: "Functional while loop: while cond(val): val = body(val)."
+std_args:
+  - name: "cond_fun"
+    type: "Callable[[Any], bool]"
+  - name: "body_fun"
+    type: "Callable[[Any], Any]"
+  - name: "init_val"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.while_loop"
+  jax:
+    api: "jax.lax.while_loop"
+  tensorflow:
+    api: "tf.while_loop"
+    args:
+      cond_fun: "cond"
+      body_fun: "body"
+      init_val: "loop_vars"
+  torch:
+    # Torch uses Python loops. No direct functional equivalent without specific compiler IR (e.g. torch.cond)
+    api: null
+---
+operation: "WithMetadata"
+description: "Annotates an initializer or variable with metadata hooks."
+std_args:
+  - name: "initializer"
+    type: "Callable"
+variants:
+  flax_nnx:
+    api: "flax.nnx.with_metadata"
+---
+operation: "WithPartitioning"
+description: "Annotates an initializer with sharding constraints."
+std_args:
+  - name: "initializer"
+    type: "Callable"
+  - name: "sharding"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.with_partitioning"
+  jax:
+    api: "jax.lax.with_sharding_constraint"
+---
+operation: "Add"
+description: "Element-wise addition."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.add"
+  paxml:
+    api: "jax.numpy.add"
+  torch:
+    api: "torch.add"
+  mlx:
+    api: "mlx.core.add"
+  keras:
+    api: "keras.ops.add"
+  tensorflow:
+    api: "tf.add"
+  jax:
+    api: "jax.numpy.add"
+---
+operation: "Subtract"
+description: "Element-wise subtraction."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.subtract"
+  paxml:
+    api: "jax.numpy.subtract"
+  torch:
+    api: "torch.sub"
+  mlx:
+    api: "mlx.core.subtract"
+  keras:
+    api: "keras.ops.subtract"
+  tensorflow:
+    api: "tf.subtract"
+  jax:
+    api: "jax.numpy.subtract"
+---
+operation: "Multiply"
+description: "Element-wise multiplication."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.multiply"
+  paxml:
+    api: "jax.numpy.multiply"
+  torch:
+    api: "torch.mul"
+  mlx:
+    api: "mlx.core.multiply"
+  keras:
+    api: "keras.ops.multiply"
+  tensorflow:
+    api: "tf.multiply"
+  jax:
+    api: "jax.numpy.multiply"
+---
+operation: "Divide"
+description: "Element-wise division."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.divide"
+  paxml:
+    api: "jax.numpy.divide"
+  torch:
+    api: "torch.div"
+  mlx:
+    api: "mlx.core.divide"
+  keras:
+    api: "keras.ops.divide"
+  tensorflow:
+    api: "tf.math.divide"
+  jax:
+    api: "jax.numpy.divide"
+---
+operation: "MatMul"
+description: "Matrix multiplication."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.matmul"
+  paxml:
+    api: "jax.numpy.matmul"
+  torch:
+    api: "torch.matmul"
+  mlx:
+    api: "mlx.core.matmul"
+  keras:
+    api: "keras.ops.matmul"
+  tensorflow:
+    api: "tf.linalg.matmul"
+  jax:
+    api: "jax.numpy.matmul"
+---
+operation: "Exp"
+description: "Element-wise exponential."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.exp"
+  paxml:
+    api: "jax.numpy.exp"
+  torch:
+    api: "torch.exp"
+  mlx:
+    api: "mlx.core.exp"
+  keras:
+    api: "keras.ops.exp"
+  tensorflow:
+    api: "tf.math.exp"
+  jax:
+    api: "jax.numpy.exp"
+---
+operation: "Log"
+description: "Element-wise natural logarithm."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.log"
+  paxml:
+    api: "jax.numpy.log"
+  torch:
+    api: "torch.log"
+  mlx:
+    api: "mlx.core.log"
+  keras:
+    api: "keras.ops.log"
+  tensorflow:
+    api: "tf.math.log"
+  jax:
+    api: "jax.numpy.log"
+---
+operation: "Sqrt"
+description: "Element-wise square root."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.sqrt"
+  paxml:
+    api: "jax.numpy.sqrt"
+  torch:
+    api: "torch.sqrt"
+  mlx:
+    api: "mlx.core.sqrt"
+  keras:
+    api: "keras.ops.sqrt"
+  tensorflow:
+    api: "tf.math.sqrt"
+  jax:
+    api: "jax.numpy.sqrt"
+---
+operation: "Sin"
+description: "Element-wise sine."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.sin"
+  paxml:
+    api: "jax.numpy.sin"
+  torch:
+    api: "torch.sin"
+  mlx:
+    api: "mlx.core.sin"
+  keras:
+    api: "keras.ops.sin"
+  tensorflow:
+    api: "tf.math.sin"
+  jax:
+    api: "jax.numpy.sin"
+---
+operation: "Cos"
+description: "Element-wise cosine."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "jax.numpy.cos"
+  paxml:
+    api: "jax.numpy.cos"
+  torch:
+    api: "torch.cos"
+  mlx:
+    api: "mlx.core.cos"
+  keras:
+    api: "keras.ops.cos"
+  tensorflow:
+    api: "tf.math.cos"
+  jax:
+    api: "jax.numpy.cos"
+---
+operation: "Sum"
+description: "Sum of array elements over a given axis."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  flax_nnx:
+    api: "jax.numpy.sum"
+  paxml:
+    api: "jax.numpy.sum"
+  torch:
+    api: "torch.sum"
+    args:
+      axis: "dim"
+      keepdims: "keepdim"
+  mlx:
+    api: "mlx.core.sum"
+  keras:
+    api: "keras.ops.sum"
+  tensorflow:
+    api: "tf.reduce_sum"
+  jax:
+    api: "jax.numpy.sum"
+---
+operation: "Mean"
+description: "Mean of array elements over a given axis."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  flax_nnx:
+    api: "jax.numpy.mean"
+  paxml:
+    api: "jax.numpy.mean"
+  torch:
+    api: "torch.mean"
+    args:
+      axis: "dim"
+      keepdims: "keepdim"
+  mlx:
+    api: "mlx.core.mean"
+  keras:
+    api: "keras.ops.mean"
+  tensorflow:
+    api: "tf.reduce_mean"
+  jax:
+    api: "jax.numpy.mean"
+---
+operation: "Relu"
+description: "Rectified Linear Unit activation function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  flax_nnx:
+    api: "flax.nnx.relu"
+  paxml:
+    api: "jax.nn.relu"
+  torch:
+    api: "torch.nn.functional.relu"
+  mlx:
+    api: "mlx.nn.relu"
+  keras:
+    api: "keras.activations.relu"
+  tensorflow:
+    api: "tf.nn.relu"
+  jax:
+    api: "jax.nn.relu"
+---
+operation: "Softmax"
+description: "Softmax activation function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  flax_nnx:
+    api: "flax.nnx.softmax"
+  paxml:
+    api: "jax.nn.softmax"
+  torch:
+    api: "torch.nn.functional.softmax"
+    args:
+      axis: "dim"
+  mlx:
+    api: "mlx.core.softmax"
+  keras:
+    api: "keras.activations.softmax"
+  tensorflow:
+    api: "tf.nn.softmax"
+  jax:
+    api: "jax.nn.softmax"

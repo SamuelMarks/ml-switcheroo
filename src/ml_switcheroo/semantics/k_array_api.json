@@ -846,11 +846,6 @@
     "std_args": [],
     "type": "class"
   },
-  "complexfloating": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "compute_mask": {
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
@@ -869,11 +864,6 @@
         "Optional[int]"
       ]
     ]
-  },
-  "cond": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "conditionally_mask": {
     "description": "Auto-generated from jax_code_defs",
@@ -1160,11 +1150,6 @@
     "type": "function"
   },
   "d_model": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "data": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "type": "attribute"
@@ -1493,11 +1478,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "erfinv": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "estimate_control_variate_coefficients": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -1507,11 +1487,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "attribute"
-  },
-  "eval": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "exp": {
     "description": "Calculates an implementation-dependent approximation to the exponential function for each element ``x_i`` of the input array ``x`` (``e`` raised to the power of ``x_i``, where ``e`` is the base of the natural logarithm).",
@@ -1913,11 +1888,6 @@
     "std_args": [],
     "type": "function"
   },
-  "grad": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "greater": {
     "description": "Computes the truth value of ``x1_i > x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
     "from": "_2024_12/elementwise_functions.py",
@@ -2154,13 +2124,13 @@
   },
   "iinfo": {
     "description": "Machine limits for integer data types.",
+    "from": "_2024_12/data_type_functions.py",
     "std_args": [
       [
         "type",
         "Union[dtype, array]"
       ]
-    ],
-    "type": "class"
+    ]
   },
   "imag": {
     "description": "Returns the imaginary component of a complex number for each element ``x_i`` of the input array ``x``.",
@@ -2197,15 +2167,11 @@
     "std_args": [],
     "type": "attribute"
   },
-  "inexact": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "inf": {
     "description": "IEEE 754 floating-point representation of (positive) infinity.",
+    "from": "_2024_12/constants.py",
     "std_args": [],
-    "type": "attribute"
+    "variants": {}
   },
   "init": {
     "description": "Auto-generated from flax_nnx_code_defs",
@@ -2385,11 +2351,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "jit": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "join": {
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
@@ -2397,11 +2358,6 @@
   },
   "join_schedules": {
     "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "jvp": {
-    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "type": "function"
   },
@@ -3156,13 +3112,13 @@
   },
   "negative": {
     "description": "Computes the numerical negative of each element ``x_i`` (i.e., ``y_i = -x_i``) of the input array ``x``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "negative_slope": {
     "description": "Auto-generated from flax_nnx_code_defs",
@@ -3365,6 +3321,7 @@
   },
   "outer": {
     "description": "Returns the outer product of two vectors ``x1`` and ``x2``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x1",
@@ -3374,8 +3331,7 @@
         "x2",
         "array"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "output_device": {
     "description": "Auto-generated from flax_nnx_code_defs",
@@ -3427,11 +3383,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "partition": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "pathwise_jacobians": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -3468,8 +3419,9 @@
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
+    "from": "_2024_12/constants.py",
     "std_args": [],
-    "type": "attribute"
+    "variants": {}
   },
   "piecewise": {
     "description": "Auto-generated from jax_code_defs",
@@ -3524,11 +3476,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "attribute"
-  },
-  "pop": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "popitem": {
     "description": "Auto-generated from flax_nnx_code_defs",
@@ -3613,11 +3560,6 @@
         "Literal[reduced, complete]"
       ]
     ],
-    "type": "function"
-  },
-  "quantize": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
     "type": "function"
   },
   "randn": {
@@ -3868,11 +3810,6 @@
         "array"
       ]
     ]
-  },
-  "rsqrt": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "safe_softmax_cross_entropy": {
     "description": "Auto-generated from jax_code_defs",
@@ -4235,11 +4172,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "state": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "state_dict": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -4356,11 +4288,6 @@
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "type": "attribute"
-  },
-  "switch": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "take": {
     "description": "Returns elements of an array along an axis.",
@@ -4849,11 +4776,6 @@
   },
   "view_as_real": {
     "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "vmap": {
-    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "function"
   },

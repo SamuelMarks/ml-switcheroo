@@ -1,0 +1,668 @@
+operation: "Checkify"
+description: "Reference-aware version of `jax.experimental.checkify`. Checks for errors (like NaN/Inf) during execution."
+op_type: "function"
+std_args:
+  - name: "f"
+    type: "Callable"
+  - name: "errors"
+    type: "frozenset"
+    default: "frozenset({<class 'jax._src.checkify.FailedCheckError'>})"
+variants:
+  flax_nnx:
+    api: "flax.nnx.checkify"
+  jax:
+    api: "jax.experimental.checkify.checkify"
+  paxml:
+    api: "jax.experimental.checkify.checkify"
+  torch:
+    api: null
+    missing_message: "PyTorch handles runtime checks via eager execution or anomaly detection contexts."
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.debugging.check_numerics"
+  mlx:
+    api: null
+
+---
+operation: "Clone"
+description: "Create a deep copy of the given graph node."
+op_type: "function"
+std_args:
+  - name: "node"
+    type: "Any"
+  - name: "variables"
+    type: "bool"
+    default: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.clone"
+  torch:
+    api: "copy.deepcopy"
+    required_imports: ["import copy"]
+  jax:
+    api: "copy.deepcopy"
+    required_imports: ["import copy"]
+  keras:
+    api: "keras.models.clone_model"
+  tensorflow:
+    api: "tf.identity"
+  mlx:
+    api: "copy.deepcopy"
+    required_imports: ["import copy"]
+
+---
+operation: "CombineMasks"
+description: "Combine attention masks using logical AND."
+op_type: "function"
+std_args:
+  - name: "masks"
+    type: "Array"
+    is_variadic: true
+  - name: "dtype"
+    type: "Dtype"
+    default: "float32"
+variants:
+  flax_nnx:
+    api: "flax.nnx.combine_masks"
+  jax:
+    api: "flax.linen.combine_masks"
+    required_imports: ["import flax.linen"]
+  paxml:
+    api: "praxis.layers.combine_masks"
+  torch:
+    requires_plugin: "combine_masks_logic"
+  keras:
+    requires_plugin: "combine_masks_logic"
+  mlx:
+    requires_plugin: "combine_masks_logic"
+
+---
+operation: "Cond"
+description: "Conditional execution (if/else) compatible with XLA/Graph tracing."
+op_type: "function"
+std_args:
+  - name: "pred"
+    type: "bool"
+  - name: "true_fun"
+    type: "Callable"
+  - name: "false_fun"
+    type: "Callable"
+  - name: "operands"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.cond"
+  jax:
+    api: "jax.lax.cond"
+  paxml:
+    api: "jax.lax.cond"
+  torch:
+    api: "torch.cond"
+  tensorflow:
+    api: "tf.cond"
+  keras:
+    api: "tf.cond"
+  mlx:
+    api: null 
+    missing_message: "MLX relies on standard Python if/else."
+
+---
+operation: "CurrentUpdateContext"
+description: "Returns the current active UpdateContext for the given tag."
+op_type: "function"
+std_args:
+  - name: "tag"
+    type: "Hashable"
+variants:
+  flax_nnx:
+    api: "flax.nnx.current_update_context"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "CustomVjp"
+description: "Define custom Vision-Jacobian Product (backward pass) for valid differentiation."
+op_type: "decorator"
+std_args:
+  - name: "fun"
+    type: "Callable"
+  - name: "nondiff_argnums"
+    type: "tuple"
+    default: "()"
+variants:
+  flax_nnx:
+    api: "flax.nnx.custom_vjp"
+  jax:
+    api: "jax.custom_vjp"
+  paxml:
+    api: "jax.custom_vjp"
+  torch:
+    api: "torch.autograd.function.Function"
+    missing_message: "Requires manual implementation of forward/backward static methods."
+  tensorflow:
+    api: "tf.custom_gradient"
+
+---
+operation: "Data"
+description: "Annotates an attribute as pytree data."
+op_type: "function"
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.data"
+  jax:
+    api: null
+  torch:
+    api: "torch.nn.Parameter"
+    args: 
+      value: "data"
+    arg_values:
+      requires_grad: "False"
+
+---
+operation: "Display"
+description: "Display objects using Treescope pretty-printer."
+op_type: "function"
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.display"
+  jax:
+    api: "print"
+  torch:
+    api: "print"
+  python:
+    api: "print"
+
+---
+operation: "DotProductAttention"
+description: "Computes dot-product attention given query, key, and value."
+op_type: "function"
+std_args:
+  - name: "query"
+    type: "Array"
+  - name: "key"
+    type: "Array"
+  - name: "value"
+    type: "Array"
+  - name: "bias"
+    default: null
+  - name: "mask"
+    default: null
+  - name: "dropout_rate"
+    type: "float"
+    default: 0.0
+  - name: "is_causal"
+    type: "bool"
+    default: false
+variants:
+  flax_nnx:
+    api: "flax.nnx.dot_product_attention"
+  jax:
+    api: "jax.nn.dot_product_attention"
+    args:
+      dropout_rate: null # JAX NN doesn't take rate directly here usually, mapped manually
+  torch:
+    api: "torch.nn.functional.scaled_dot_product_attention"
+    args:
+      bias: null # Incompatible interface logic often
+      mask: "attn_mask"
+      dropout_rate: "dropout_p"
+  keras:
+    api: "keras.layers.Attention" # Class-based
+    transformation_type: "macro"
+    macro_template: "keras.layers.Attention(dropout={dropout_rate})({query}, {value}, key={key}, attention_mask={mask})"
+  mlx:
+    api: "mlx.core.fast.scaled_dot_product_attention"
+
+---
+operation: "Elu"
+description: "Exponential linear unit activation function."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  flax_nnx:
+    api: "flax.nnx.elu"
+  jax:
+    api: "jax.nn.elu"
+  paxml:
+    api: "jax.nn.elu"
+  torch:
+    api: "torch.nn.functional.elu"
+  keras:
+    api: "keras.ops.elu"
+  tensorflow:
+    api: "tf.nn.elu"
+    args:
+      alpha: null # TF elu doesn't always expose alpha in functional
+  mlx:
+    api: "mlx.nn.elu"
+
+---
+operation: "EvalMode"
+description: "Creates a new node/module set to evaluation mode (deterministic=True)."
+op_type: "function"
+std_args:
+  - name: "node"
+    type: "Module"
+variants:
+  flax_nnx:
+    api: "flax.nnx.eval_mode"
+  torch:
+    api: "model.eval"
+    transformation_type: "method_call"
+  keras:
+    api: null 
+    missing_message: "Keras handles evaluation mode via the 'training=False' argument in call."
+  jax:
+    api: null # Functional models pass train=False args
+
+---
+operation: "EvalShape"
+description: "Computes the shape/dtype of a function without performing actual computation."
+op_type: "function"
+std_args:
+  - name: "f"
+    type: "Callable"
+  - name: "args"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.eval_shape"
+  jax:
+    api: "jax.eval_shape"
+  torch:
+    api: "torch.func.eval_shape" 
+    min_version: "2.0"
+  tensorflow:
+    api: null 
+
+---
+operation: "FilterState"
+description: "Filter a State into one or more States based on types/predicates."
+op_type: "function"
+std_args:
+  - name: "state"
+    type: "State"
+  - name: "filters"
+    is_variadic: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.filter_state"
+  jax:
+    api: "flax.core.traverse_util.filter_state" # hypothetical match or None
+  torch:
+    api: null
+    missing_message: "PyTorch state dicts are flat; filtering requires list comprehensions."
+
+---
+operation: "FindDuplicates"
+description: "Finds duplicate nodes or node leaves in the given node graph."
+op_type: "function"
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.find_duplicates"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "Flatten"
+description: "Flattens a graph node into a (graphdef, state) pair."
+op_type: "function"
+std_args:
+  - name: "node"
+    type: "Node"
+  - name: "with_paths"
+    type: "bool"
+    default: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.flatten"
+  jax:
+    api: "jax.tree_util.tree_flatten"
+  torch:
+    api: null
+
+---
+operation: "ForiLoop"
+description: "Functional loop from lower to upper bound."
+op_type: "function"
+std_args:
+  - name: "lower"
+    type: "int"
+  - name: "upper"
+    type: "int"
+  - name: "body_fun"
+    type: "Callable"
+  - name: "init_val"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.fori_loop"
+  jax:
+    api: "jax.lax.fori_loop"
+  paxml:
+    api: "jax.lax.fori_loop"
+  tensorflow:
+    api: "tf.while_loop"
+  torch:
+    requires_plugin: "transform_for_loop"
+
+---
+operation: "ForkRngs"
+description: "Forks the (nested) Rng states of the given node."
+op_type: "function"
+std_args:
+  - name: "node"
+    type: "Any"
+  - name: "split"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.fork_rngs"
+  jax:
+    api: "jax.random.split" # Approximate
+  torch:
+    api: null # Global RNG state
+
+---
+operation: "FromFlatState"
+description: "Convert flat state object into State object."
+op_type: "function"
+std_args:
+  - name: "flat_state"
+    type: "Mapping"
+variants:
+  flax_nnx:
+    api: "flax.nnx.from_flat_state"
+  torch:
+    api: "model.load_state_dict"
+  jax:
+    api: "flax.serialization.from_state_dict"
+
+---
+operation: "FromTree"
+description: "Reconstructs object from tree definition."
+op_type: "function"
+std_args:
+  - name: "tree"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.from_tree"
+  jax:
+    api: "jax.tree_util.tree_unflatten"
+
+---
+operation: "Gelu"
+description: "Gaussian error linear unit activation function."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "approximate"
+    type: "bool"
+    default: true
+variants:
+  flax_nnx:
+    api: "flax.nnx.gelu"
+  jax:
+    api: "jax.nn.gelu"
+  paxml:
+    api: "jax.nn.gelu"
+  torch:
+    api: "torch.nn.functional.gelu"
+    args:
+        approximate: "approximate" 
+    arg_values:
+        approximate:
+            "True": "'tanh'"
+            "False": "'none'"
+  keras:
+    api: "keras.ops.gelu"
+  tensorflow:
+    api: "tf.nn.gelu"
+  mlx:
+    api: "mlx.nn.gelu"
+
+---
+operation: "GetAbstractModel"
+description: "Get Abstract model definition."
+op_type: "function"
+std_args:
+  - name: "init_fn"
+  - name: "mesh"
+variants:
+  flax_nnx:
+    api: "flax.nnx.get_abstract_model"
+  jax:
+    api: null
+
+---
+operation: "GetNamedSharding"
+description: "Construct named sharding for distributed computation."
+op_type: "function"
+std_args:
+  - name: "tree"
+    type: "Any"
+  - name: "mesh"
+    type: "jax.sharding.Mesh"
+variants:
+  flax_nnx:
+    api: "flax.nnx.get_named_sharding"
+  jax:
+    api: "jax.sharding.NamedSharding"
+
+---
+operation: "GetPartitionSpec"
+description: "Extracts a PartitionSpec tree from a PyTree."
+op_type: "function"
+std_args:
+  - name: "tree"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.get_partition_spec"
+  jax:
+    api: "jax.sharding.PartitionSpec"
+
+---
+operation: "Glu"
+description: "Gated linear unit activation function."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  flax_nnx:
+    api: "flax.nnx.glu"
+  jax:
+    api: "jax.nn.glu"
+  paxml:
+    api: "jax.nn.glu"
+  torch:
+    api: "torch.nn.functional.glu"
+    args:
+      axis: "dim"
+  keras:
+    api: "keras.ops.glu"
+  tensorflow:
+    api: "tf.nn.glu"
+  mlx:
+    api: "mlx.nn.glu"
+
+---
+operation: "Grad"
+description: "Creates a function that evaluates the gradient of the input function."
+op_type: "function"
+std_args:
+  - name: "f"
+    type: "Callable"
+  - name: "argnums"
+    type: "int | Sequence[int]"
+    default: 0
+  - name: "has_aux"
+    type: "bool"
+    default: false
+variants:
+  flax_nnx:
+    api: "flax.nnx.grad"
+  jax:
+    api: "jax.grad"
+  paxml:
+    api: "jax.grad"
+  torch:
+    api: "torch.func.grad"
+    min_version: "2.0"
+  tensorflow:
+    api: "tf.gradients"
+
+---
+operation: "Graphdef"
+description: "Get the GraphDef of the given graph node."
+op_type: "function"
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.graphdef"
+  jax:
+    api: null
+  torch:
+    api: null
+
+---
+operation: "HardSigmoid"
+description: "Hard Sigmoid activation function."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  flax_nnx:
+    api: "flax.nnx.hard_sigmoid"
+  jax:
+    api: "jax.nn.hard_sigmoid"
+  paxml:
+    api: "jax.nn.hard_sigmoid"
+  torch:
+    api: "torch.nn.functional.hardsigmoid"
+  keras:
+    api: "keras.ops.hard_sigmoid"
+  tensorflow:
+    api: "tf.keras.activations.hard_sigmoid"
+  mlx:
+    api: "mlx.core.hard_sigmoid" # Note: MLX puts activations in core sometimes, checking specific adapter mapping recommended
+
+---
+operation: "HardSilu"
+description: "Hard SiLU (swish) activation function."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  flax_nnx:
+    api: "flax.nnx.hard_silu"
+  jax:
+    api: "jax.nn.hard_swish"
+  paxml:
+    api: "jax.nn.hard_swish"
+  torch:
+    api: "torch.nn.functional.hardswish"
+  keras:
+    api: "keras.ops.hard_swish"
+  tensorflow:
+    api: "tf.nn.hard_swish"
+  mlx:
+    api: "mlx.nn.hard_swish"
+
+---
+operation: "HardSwish"
+description: "Hard SiLU (swish) activation function."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  flax_nnx:
+    api: "flax.nnx.hard_swish"
+  jax:
+    api: "jax.nn.hard_swish"
+  paxml:
+    api: "jax.nn.hard_swish"
+  torch:
+    api: "torch.nn.functional.hardswish"
+  keras:
+    api: "keras.ops.hard_swish"
+  tensorflow:
+    api: "tf.nn.hard_swish"
+  mlx:
+    api: "mlx.nn.hard_swish"
+
+---
+operation: "Dataclass"
+description: "Decorator to create a dataclass that is automatically registered as a PyTree node."
+op_type: "decorator"
+std_args:
+  - name: "cls"
+    type: "Type"
+    default: null
+  - name: "init"
+    type: "bool"
+    default: true
+  - name: "repr"
+    type: "bool"
+    default: true
+  - name: "eq"
+    type: "bool"
+    default: true
+  - name: "frozen"
+    type: "bool"
+    default: false
+variants:
+  flax_nnx:
+    api: "flax.nnx.dataclass"
+  jax:
+    api: "flax.struct.dataclass"
+    required_imports: ["import flax.struct"]
+  paxml:
+    api: "dataclasses.dataclass"
+    required_imports: ["import dataclasses"]
+    missing_message: "PaxML uses standard dataclasses or specific base layers; direct mapping to Pytree registry varies."
+  torch:
+    api: "dataclasses.dataclass"
+    required_imports: ["import dataclasses"]
+    args:
+      frozen: "frozen"
+      init: "init"
+  keras:
+    api: "dataclasses.dataclass"
+    required_imports: ["import dataclasses"]
+  tensorflow:
+    api: "dataclasses.dataclass"
+    required_imports: ["import dataclasses"]
+  mlx:
+    api: "dataclasses.dataclass"
+    required_imports: ["import dataclasses"]

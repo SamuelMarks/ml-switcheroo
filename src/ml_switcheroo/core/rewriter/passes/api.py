@@ -13,6 +13,7 @@ This module consolidates all API-level transformations, including:
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 import re
 import libcst as cst
+from libcst import Attribute, CSTNode, Name
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.escape_hatch import EscapeHatch
@@ -596,10 +597,9 @@ class ApiTransformer(cst.CSTTransformer):
 
     return updated_node
 
-  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
+  def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> Attribute | Name | CSTNode:
     """
     Rewrites attributes and constants (e.g. torch.float32).
-    Skips rewriting if the attribute looks like a function call (handled by leave_Call).
     """
     name = self._get_qualified_name(original_node)
     if not name:
@@ -614,15 +614,33 @@ class ApiTransformer(cst.CSTTransformer):
       if target_var and "requires_plugin" in target_var:
         return updated_node
 
-      # Function guard: If it has args, let leave_Call handle it
-      if "std_args" in details and details["std_args"]:
-        return updated_node
+      # Check Op Type
+      op_type = details.get("op_type", "function")
 
-    # Perform mapping logic for constant/enum
+      # Function guard: If it is a function, let leave_Call handle it.
+      # attributes should be processed here.
+      if op_type == "function":
+        if "std_args" in details and details["std_args"]:
+          return updated_node
+
+    # Perform mapping logic for constant/enum/attribute
     target_impl = self._get_mapping(name, silent=True)
-    if target_impl and "api" in target_impl:
-      self._handle_variant_imports(target_impl)
-      return self._create_name_node(target_impl["api"])
+
+    if target_impl:
+      # If semantic definition says it's an attribute/context, we rewrite aliases
+      if "api" in target_impl:
+        self._handle_variant_imports(target_impl)
+        return self._create_dotted_name(target_impl["api"])
+
+        # Support macros for constants (e.g. inf -> float('inf'))
+      if "macro_template" in target_impl:
+        try:
+          from ml_switcheroo.core.rewriter.calls.transformers import rewrite_as_macro
+
+          # Constants have no args, pass empty lists
+          return rewrite_as_macro(target_impl["macro_template"], [], [])
+        except Exception:
+          pass
 
     return updated_node
 
@@ -764,6 +782,7 @@ class ApiTransformer(cst.CSTTransformer):
     pack_target_kw = target_impl.get("pack_to_tuple")
     pack_as_type = target_impl.get("pack_as", "Tuple")
     target_inject_map = target_impl.get("inject_args", {}) or {}
+    kwargs_map = target_impl.get("kwargs_map", {}) or {}
 
     lib_to_std = {v: k for k, v in source_arg_map.items()}
 
@@ -889,13 +908,29 @@ class ApiTransformer(cst.CSTTransformer):
 
         if target_val_map and std_name in target_val_map:
           val_options = target_val_map[std_name]
-          raw_key = extract_primitive_key(current_arg.value)
-          if raw_key is not None and str(raw_key) in val_options:
-            target_code = val_options[str(raw_key)]
-            try:
-              final_val_node = cst.parse_expression(target_code)
-            except cst.ParserSyntaxError:
-              pass
+
+          # If val_options is a dict, it's an enum mapping (val -> code)
+          if isinstance(val_options, dict):
+            raw_key = extract_primitive_key(current_arg.value)
+            if raw_key is not None and str(raw_key) in val_options:
+              target_code = val_options[str(raw_key)]
+              try:
+                final_val_node = cst.parse_expression(target_code)
+              except cst.ParserSyntaxError:
+                pass
+          # Otherwise it's a constant injection (literal override)
+          # e.g. "False" string or boolean value
+          else:
+            target_code = val_options
+            if isinstance(target_code, str):
+              try:
+                final_val_node = cst.parse_expression(target_code)
+              except cst.ParserSyntaxError:
+                # Fallback if string isn't an expression but a literal name is invalid
+                # Or treat as simple string
+                final_val_node = cst.SimpleString(f"'{target_code}'")
+            else:
+              final_val_node = convert_value_to_cst(target_code)
 
         should_use_keyword = current_arg.keyword is not None
 
@@ -917,15 +952,40 @@ class ApiTransformer(cst.CSTTransformer):
             new_args_list.append(current_arg)
 
     # Append extras
+    # Feature: Filtering based on kwargs_map
+    # If a keyword is explicitly set to null in kwargs_map, it should be dropped from extra_args
+    if kwargs_map:
+      filtered_extras = []
+      for arg in extra_args:
+        if arg.keyword and arg.keyword.value in kwargs_map and kwargs_map[arg.keyword.value] is None:
+          continue
+        filtered_extras.append(arg)
+      extra_args = filtered_extras
+
     new_args_list.extend(extra_args)
 
     # 7. Inject Args
-    if target_inject_map:
-      for arg_name, arg_val in target_inject_map.items():
+
+    # Merge inject_args and constant arg_values
+    injections = target_inject_map.copy()
+    if target_val_map:
+      for k, v in target_val_map.items():
+        if not isinstance(v, dict) and k not in std_args_order:
+          injections[k] = v
+
+    # Processing injections
+    if injections:
+      for arg_name, arg_val in injections.items():
         if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):
           continue
 
-        val_node = convert_value_to_cst(arg_val)
+        if isinstance(arg_val, str):
+          try:
+            val_node = cst.parse_expression(arg_val)
+          except cst.ParserSyntaxError:
+            val_node = cst.SimpleString(f"'{arg_val}'")
+        else:
+          val_node = convert_value_to_cst(arg_val)
 
         if len(new_args_list) > 0 and new_args_list[-1].comma == cst.MaybeSentinel.DEFAULT:
           new_args_list[-1] = new_args_list[-1].with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))

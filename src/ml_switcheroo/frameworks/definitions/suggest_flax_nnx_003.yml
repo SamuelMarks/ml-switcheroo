@@ -1,0 +1,471 @@
+operation: "RngCount"
+description: "The base class for all Variable types. Create custom Variable types by subclassing this class."
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.RngCount"
+  torch: null
+  mlx: null
+  keras: null
+  tensorflow: null
+  paxml: null
+
+---
+operation: "RngKey"
+description: "The base class for all Variable types. Create custom Variable types by subclassing this class."
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.RngKey"
+  torch: null
+  mlx: null
+  keras: null
+  tensorflow: null
+  paxml: null
+
+---
+operation: "RngState"
+description: "The base class for all Variable types. Create custom Variable types by subclassing this class."
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.RngState"
+  torch: null
+  mlx: null
+  keras: null
+  tensorflow: null
+  paxml: null
+
+---
+operation: "RngStream"
+description: "Base class for all NNX objects."
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.RngStream"
+  torch: null
+  mlx: null
+  keras: null
+  tensorflow: null
+  paxml: null
+
+---
+operation: "Rngs"
+description: "A small abstraction to manage RNG state."
+std_args:
+  - name: "seed"
+    type: "int"
+    default: 0
+variants:
+  flax_nnx:
+    api: "flax.nnx.Rngs"
+  torch:
+    api: "torch.Generator"
+  mlx: null
+  keras: null
+  tensorflow: null
+  paxml: null
+
+---
+operation: "Sequential"
+description: "A Module that applies a sequence of callables."
+std_args:
+  - name: "layers"
+    is_variadic: true
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.Sequential"
+  torch:
+    api: "torch.nn.Sequential"
+  mlx:
+    api: "mlx.nn.Sequential"
+    pack_as: "List"
+  keras:
+    api: "keras.Sequential"
+    pack_as: "List"
+  tensorflow:
+    api: "tf.keras.Sequential"
+    pack_as: "List"
+  paxml:
+    api: "praxis.layers.Sequential"
+
+---
+operation: "SimpleCell"
+description: "Simple RNN cell."
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "hidden_features"
+    type: "int"
+variants:
+  flax_nnx:
+    api: "flax.nnx.SimpleCell"
+  torch:
+    api: "torch.nn.RNNCell"
+    args:
+      in_features: "input_size"
+      hidden_features: "hidden_size"
+  mlx: null
+  keras:
+    api: "keras.layers.SimpleRNNCell"
+    args:
+      in_features: null
+      hidden_features: "units"
+  tensorflow:
+    api: "tf.keras.layers.SimpleRNNCell"
+    args:
+      in_features: null
+      hidden_features: "units"
+
+---
+operation: "SpectralNorm"
+description: "Spectral normalization."
+std_args:
+  - name: "layer"
+    type: "Any"
+  - name: "n_steps"
+    type: "int"
+    default: 1
+  - name: "epsilon"
+    type: "float"
+    default: 1e-12
+variants:
+  flax_nnx:
+    api: "flax.nnx.SpectralNorm"
+    args:
+      layer: "layer_instance"
+  torch:
+    api: "torch.nn.utils.spectral_norm"
+    args:
+      layer: "module"
+      n_steps: "n_power_iterations"
+      epsilon: "eps"
+  keras:
+    api: "keras.layers.SpectralNormalization"
+    args:
+      n_steps: "power_iterations"
+      epsilon: null
+  tensorflow:
+    api: "tf.keras.layers.SpectralNormalization"
+    args:
+      n_steps: "power_iterations"
+      epsilon: null
+
+---
+operation: "SplitContext"
+description: "Context manager for splitting state."
+std_args:
+  - name: "ctxtag"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.SplitContext"
+  torch: null
+  mlx: null
+
+---
+operation: "State"
+description: "A pytree-like Mapping with hashable and comparable keys."
+std_args:
+  - name: "mapping"
+    type: "dict"
+variants:
+  flax_nnx:
+    api: "flax.nnx.State"
+  torch:
+    api: "dict"
+    requires_plugin: "torch_state_dict_to_nnx"
+  mlx: null
+
+---
+operation: "StateAxes"
+description: "Helper class that provides a standard way to create an ABC using inheritance."
+std_args:
+  - name: "filter_axes"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.StateAxes"
+  torch: null
+  mlx: null
+
+---
+operation: "StateSharding"
+description: "Helper class that provides a standard way to create an ABC using inheritance."
+std_args:
+  - name: "filter_sharding"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.StateSharding"
+  torch: null
+  mlx: null
+
+---
+operation: "Static"
+description: "Static marks attributes of a class as static using type annotations."
+std_args: []
+variants:
+  flax_nnx:
+    api: "flax.nnx.Static"
+  torch: null
+  mlx: null
+
+---
+operation: "TrainState"
+description: "TrainState container."
+std_args:
+  - name: "graphdef"
+    type: "Any"
+  - name: "params"
+    type: "Any"
+  - name: "opt_state"
+    type: "Any"
+  - name: "step"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.TrainState"
+  torch: null
+  mlx: null
+
+---
+operation: "UpdateContext"
+description: "A context manager for handling complex state updates."
+std_args:
+  - name: "tag"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.UpdateContext"
+  torch: null
+  mlx: null
+
+---
+operation: "Variable"
+description: "The base class for all Variable types."
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.Variable"
+  torch:
+    api: "torch.nn.Parameter"
+    requires_plugin: "nnx_param_to_torch"
+  keras:
+    api: "keras.Variable"
+  tensorflow:
+    api: "tf.Variable"
+
+---
+operation: "VariableMetadata"
+description: "Metadata container for variables."
+std_args:
+  - name: "raw_value"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.VariableMetadata"
+  torch: null
+  mlx: null
+
+---
+operation: "WeightNorm"
+description: "L2 weight normalization."
+std_args:
+  - name: "layer"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.WeightNorm"
+    args:
+      layer: "layer_instance"
+  torch:
+    api: "torch.nn.utils.weight_norm"
+    args:
+      layer: "module"
+  keras: null # Removed in Keras 3?
+  tensorflow:
+    api: "tf.keras.layers.WeightNormalization"
+    args:
+      layer: "layer"
+
+---
+operation: "WithTag"
+description: "Tags a variable."
+std_args:
+  - name: "tag"
+    type: "str"
+variants:
+  flax_nnx:
+    api: "flax.nnx.WithTag"
+  torch: null
+  mlx: null
+
+---
+operation: "AsArrayVars"
+description: "Converts specific variables."
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.as_array_vars"
+  torch: null
+  mlx: null
+
+---
+operation: "AsHijaxVars"
+description: "Converts specific variables."
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.as_hijax_vars"
+  torch: null
+  mlx: null
+
+---
+operation: "AsImmutableVars"
+description: "Converts specific variables."
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.as_immutable_vars"
+  torch: null
+  mlx: null
+
+---
+operation: "AsMutableVars"
+description: "Converts specific variables."
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.as_mutable_vars"
+  torch: null
+  mlx: null
+
+---
+operation: "AsPytreeVars"
+description: "Converts specific variables."
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.as_pytree_vars"
+  torch: null
+  mlx: null
+
+---
+operation: "AsRefVars"
+description: "Converts a Variable or structure of Variables to Variables with has_ref=True."
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.as_ref_vars"
+  torch: null
+  mlx: null
+
+---
+operation: "AvgPool"
+description: "Pools the input by taking the average over a window."
+std_args:
+  - name: "inputs"
+    type: "Tensor"
+  - name: "window_shape"
+    type: "Tuple[int, ...]"
+  - name: "strides"
+    type: "Tuple[int, ...]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "VALID"
+variants:
+  flax_nnx:
+    api: "flax.nnx.avg_pool"
+  torch:
+    api: "torch.nn.functional.avg_pool2d"
+    args:
+      inputs: "input"
+      window_shape: "kernel_size"
+      strides: "stride"
+  keras:
+    api: "keras.ops.average_pool"
+    args:
+      window_shape: "pool_size"
+  tensorflow:
+    api: "tf.nn.avg_pool"
+    args:
+      inputs: "input"
+      window_shape: "ksize"
+
+---
+operation: "CachedPartial"
+description: "Create a partial from a NNX transformed function."
+std_args:
+  - name: "f"
+    type: "Callable"
+variants:
+  flax_nnx:
+    api: "flax.nnx.cached_partial"
+  torch:
+    api: "functools.partial"
+  jax:
+    api: "jax.tree_util.Partial"
+
+---
+operation: "Call"
+description: "Calls a method underlying graph node defined by a (GraphDef, State) pair."
+std_args:
+  - name: "graphdef_state"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.call"
+  torch: null
+  mlx: null
+
+---
+operation: "Celu"
+description: "Continuously-differentiable exponential linear unit activation."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  flax_nnx:
+    api: "flax.nnx.celu"
+  torch:
+    api: "torch.nn.functional.celu"
+  keras:
+    api: "keras.activations.celu"
+  tensorflow:
+    api: "tf.keras.activations.celu"
+  jax:
+    api: "jax.nn.celu"
+  mlx:
+    api: "mlx.nn.celu"
+
+---
+operation: "CheckPytree"
+description: "Checks if a pytree is valid."
+std_args:
+  - name: "pytree"
+    type: "Any"
+variants:
+  flax_nnx:
+    api: "flax.nnx.check_pytree"
+  torch: null
+  mlx: null

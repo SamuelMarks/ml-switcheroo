@@ -1,0 +1,471 @@
+operation: "Remat" 
+description: "Applies gradient checkpointing (rematerialization) to a function to save memory at the cost of compute." 
+op_type: "decorator" 
+std_args: 
+  - name: "f" 
+    type: "Callable" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.remat" 
+  jax: 
+    api: "jax.checkpoint" 
+  torch: 
+    api: "torch.utils.checkpoint.checkpoint" 
+    requires_plugin: "checkpoint_wrapper" 
+---
+operation: "ReplaceByPureDict" 
+description: "Updates the state of a module/node using a dictionary of values." 
+op_type: "function" 
+std_args: 
+  - name: "state" 
+    type: "Any" 
+  - name: "pure_dict" 
+    type: "dict" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.replace_by_pure_dict" 
+  torch: 
+    api: "load_state_dict" 
+    requires_plugin: "load_state_dict_wrapper" 
+  keras: 
+    api: "set_weights" 
+    requires_plugin: "keras_weights_wrapper" 
+---
+operation: "Reseed" 
+description: "Resets the RNG keys for a module or node." 
+op_type: "function" 
+std_args: 
+  - name: "node" 
+    type: "Any" 
+  - name: "seed" 
+    type: "int" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.reseed" 
+  torch: 
+    api: "torch.manual_seed" 
+  tensorflow: 
+    api: "tf.random.set_seed" 
+  numpy: 
+    api: "np.random.seed" 
+  mlx: 
+    api: "mlx.core.random.seed" 
+---
+operation: "RestoreIntPaths" 
+description: "Restores integer keys in a state dictionary (often stringified by JSON)." 
+op_type: "function" 
+std_args: 
+  - name: "pure_dict" 
+    type: "dict" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.restore_int_paths" 
+---
+operation: "RestoreRngs" 
+description: "Restores RNG states from a backup." 
+op_type: "function" 
+std_args: 
+  - name: "backups" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.restore_rngs" 
+---
+operation: "Scan" 
+description: "Functional loop operation carrying state across iterations." 
+op_type: "function" 
+std_args: 
+  - name: "f" 
+    type: "Callable" 
+  - name: "init" 
+    type: "Any" 
+  - name: "xs" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.scan" 
+  jax: 
+    api: "jax.lax.scan" 
+  tensorflow: 
+    api: "tf.scan" 
+---
+operation: "Selu" 
+description: "Scaled Exponential Linear Unit activation." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.selu" 
+  jax: 
+    api: "jax.nn.selu" 
+  paxml: 
+    api: "jax.nn.selu" 
+  torch: 
+    api: "torch.nn.functional.selu" 
+  keras: 
+    api: "keras.activations.selu" 
+  tensorflow: 
+    api: "tf.nn.selu" 
+  mlx: 
+    api: "mlx.nn.selu" 
+---
+operation: "SetMetadata" 
+description: "Attaches metadata to a graph node." 
+op_type: "function" 
+std_args: 
+  - name: "node" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.set_metadata" 
+---
+operation: "SetMode" 
+description: "Sets the execution mode (train/eval) for a module." 
+op_type: "function" 
+std_args: 
+  - name: "node" 
+    type: "Any" 
+  - name: "training" 
+    type: "bool" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.set_mode" 
+  torch: 
+    api: "train" 
+    requires_plugin: "torch_mode_switch" 
+  keras: 
+    api: "set_training_mode" # conceptually via call argument
+---
+operation: "SetModeInfo" 
+description: "Introspects mode information for a module." 
+op_type: "function" 
+std_args: 
+  - name: "node" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.set_mode_info" 
+---
+operation: "ShardMap" 
+description: "Transformation for sharded parallel execution over a mesh." 
+op_type: "function" 
+std_args: 
+  - name: "f" 
+    type: "Callable" 
+  - name: "mesh" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.shard_map" 
+  jax: 
+    api: "jax.experimental.shard_map.shard_map" 
+---
+operation: "Sigmoid" 
+description: "Sigmoid activation function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.sigmoid" 
+  jax: 
+    api: "jax.nn.sigmoid" 
+  paxml: 
+    api: "jax.nn.sigmoid" 
+  torch: 
+    api: "torch.sigmoid" 
+  tensorflow: 
+    api: "tf.math.sigmoid" 
+  keras: 
+    api: "keras.ops.sigmoid" 
+  mlx: 
+    api: "mlx.core.sigmoid" 
+  numpy: 
+    api: "scipy.special.expit" 
+    required_imports: 
+      - module: "scipy.special" 
+---
+operation: "Silu" 
+description: "Sigmoid Linear Unit (SiLU), also known as Swish." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.silu" 
+  jax: 
+    api: "jax.nn.silu" 
+  paxml: 
+    api: "jax.nn.silu" 
+  torch: 
+    api: "torch.nn.functional.silu" 
+  tensorflow: 
+    api: "tf.nn.silu" 
+  keras: 
+    api: "keras.activations.silu" 
+  mlx: 
+    api: "mlx.nn.silu" 
+---
+operation: "SoftSign" 
+description: "SoftSign activation function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.soft_sign" 
+  jax: 
+    api: "jax.nn.soft_sign" 
+  paxml: 
+    api: "jax.nn.soft_sign" 
+  torch: 
+    api: "torch.nn.functional.softsign" 
+  tensorflow: 
+    api: "tf.nn.softsign" 
+  keras: 
+    api: "keras.activations.softsign" 
+---
+operation: "Softmax" 
+description: "Softmax function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: -1
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.softmax" 
+  jax: 
+    api: "jax.nn.softmax" 
+  paxml: 
+    api: "jax.nn.softmax" 
+  torch: 
+    api: "torch.softmax" 
+    args: 
+      axis: "dim" 
+  tensorflow: 
+    api: "tf.nn.softmax" 
+  keras: 
+    api: "keras.ops.softmax" 
+  mlx: 
+    api: "mlx.core.softmax" 
+---
+operation: "Softplus" 
+description: "Softplus activation function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.softplus" 
+  jax: 
+    api: "jax.nn.softplus" 
+  paxml: 
+    api: "jax.nn.softplus" 
+  torch: 
+    api: "torch.nn.functional.softplus" 
+  tensorflow: 
+    api: "tf.math.softplus" 
+  keras: 
+    api: "keras.activations.softplus" 
+  mlx: 
+    api: "mlx.nn.softplus" 
+---
+operation: "SplitGraph" 
+description: "Splits a stateful graph node into structure (GraphDef) and state." 
+op_type: "function" 
+std_args: 
+  - name: "node" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.split" 
+---
+operation: "SplitContext" 
+description: "Splits a context object?" 
+op_type: "function" 
+std_args: [] 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.split_context" 
+---
+operation: "SplitRngs" 
+description: "Splits RNG keys for stochastic operations." 
+op_type: "function" 
+std_args: 
+  - name: "key" 
+    type: "Any" 
+  - name: "count" 
+    type: "int" 
+    default: 2
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.split_rngs" 
+  jax: 
+    api: "jax.random.split" 
+    args: 
+       count: "num" 
+   
+---
+operation: "SplitState" 
+description: "Splits a State object into multiple subsets based on filters." 
+op_type: "function" 
+std_args: 
+  - name: "state" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.split_state" 
+---
+operation: "Standardize" 
+description: "Standardizes input (centering and scaling)." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.standardize" 
+  jax: 
+    api: "jax.nn.standardize" 
+  torch: 
+    macro_template: "({x} - {x}.mean()) / ({x}.std() + 1e-5)" 
+---
+operation: "State" 
+description: "Extracts state dictionary from a node." 
+op_type: "function" 
+std_args: 
+  - name: "node" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.state" 
+  torch: 
+    api: "state_dict" 
+    requires_plugin: "torch_state_dict_to_nnx" 
+---
+operation: "Static" 
+description: "Marks a value as static (non-traceable) within a Pytree." 
+op_type: "function" 
+std_args: 
+  - name: "value" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.static" 
+---
+operation: "Swish" 
+description: "Swish activation (alias for SiLU)." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.swish" 
+  jax: 
+    api: "jax.nn.swish" 
+  torch: 
+    api: "torch.nn.functional.silu" 
+  tensorflow: 
+    api: "tf.nn.swish" 
+  mlx: 
+    api: "mlx.nn.swish" 
+---
+operation: "Switch" 
+description: "Functional branch selection." 
+op_type: "function" 
+std_args: 
+  - name: "index" 
+    type: "int" 
+  - name: "branches" 
+    type: "List[Callable]" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.switch" 
+  jax: 
+    api: "jax.lax.switch" 
+---
+operation: "Tabulate" 
+description: "Generates a summary table of the model architecture." 
+op_type: "function" 
+std_args: 
+  - name: "model" 
+    type: "Any" 
+  - name: "input_size" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.tabulate" 
+  torch: 
+    api: "torchinfo.summary" 
+    required_imports: 
+      - "import torchinfo" 
+  keras: 
+    api: "summary" 
+    requires_plugin: "method_call"  # obj.summary() 
+---
+operation: "Tanh" 
+description: "Hyperbolic tangent activation." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.tanh" 
+  jax: 
+    api: "jax.numpy.tanh" 
+  paxml: 
+    api: "jax.numpy.tanh" 
+  torch: 
+    api: "torch.tanh" 
+  tensorflow: 
+    api: "tf.math.tanh" 
+  keras: 
+    api: "keras.ops.tanh" 
+  mlx: 
+    api: "mlx.core.tanh" 
+  numpy: 
+    api: "numpy.tanh" 
+---
+operation: "ToFlatState" 
+description: "Flattens a nested state dictionary." 
+op_type: "function" 
+std_args: 
+  - name: "state" 
+    type: "dict" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.to_flat_state" 
+---
+operation: "ToPureDict" 
+description: "Converts a State object to a standard Python dictionary." 
+op_type: "function" 
+std_args: 
+  - name: "state" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.to_pure_dict" 
+  torch: 
+    api: "state_dict" 
+    requires_plugin: "torch_state_dict_to_nnx" 
+---
+operation: "ToTree" 
+description: "Reconstructs a PyTree from flat state?" 
+op_type: "function" 
+std_args: 
+  - name: "tree" 
+    type: "Any" 
+variants: 
+  flax_nnx: 
+    api: "flax.nnx.to_tree"

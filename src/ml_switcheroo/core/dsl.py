@@ -29,6 +29,8 @@ class OpType(str, Enum):
   FUNCTION = "function"
   CONTEXT = "context"
   DECORATOR = "decorator"
+  ATTRIBUTE = "attribute"
+  CLASS = "class"
 
 
 class ContainerType(str, Enum):
@@ -135,12 +137,13 @@ class FrameworkVariant(BaseModel):
     None,
     description="Mapping from Standard Argument Name to Framework Argument Name. If value is null, argument is dropped.",
   )
-  arg_values: Optional[Dict[str, Dict[str, str]]] = Field(
+  arg_values: Optional[Dict[str, Union[Dict[str, Any], Any]]] = Field(
     None,
-    description="Map of {StandardArg: {SourceValueString: TargetValueCode}} for enum value mapping. Keys should match stringified source values (e.g. 'mean' or '0'). Values are target code strings.",
+    description="Map of {StandardArg: {SourceValue: TargetCode}} for enums, OR {StandardArg: TargetCode} for constant injection.",
   )
-  kwargs_map: Optional[Dict[str, str]] = Field(None, description="Mapping for specific keys within a **kwargs expansion.")
-
+  kwargs_map: Optional[Dict[str, Optional[str]]] = Field(
+    None, description="Mapping for specific keys within a **kwargs expansion. Values can be null to drop the key."
+  )
   inject_args: Optional[Dict[str, Any]] = Field(
     None,
     description="Dictionary of new arguments to inject with fixed default values (supports primitives and complex types).",
@@ -265,7 +268,7 @@ class OperationDef(BaseModel):
 
   # --- Feature: Operation Type ---
   # Classifies the op usage pattern (Function call, Context Manager, etc.)
-  op_type: OpType = Field(OpType.FUNCTION, description="Syntactic type: function, context, decorator.")
+  op_type: OpType = Field(OpType.FUNCTION, description="Syntactic type: function, context, decorator, attribute, class.")
 
   std_args: List[Union[str, Tuple[str, str], ParameterDef, Dict[str, Any]]] = Field(
     default_factory=list, description="List of standardized arguments."

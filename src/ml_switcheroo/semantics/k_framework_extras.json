@@ -115,15 +115,6 @@
     "std_args": [],
     "type": "class"
   },
-  "ArrayAt": {
-    "description": "A helper object to apply updates at specific indices.",
-    "std_args": [
-      "self",
-      "args",
-      "kwargs"
-    ],
-    "type": "class"
-  },
   "ArrayAttr": {
     "description": "The class representing a Python class.",
     "std_args": [
@@ -135,15 +126,6 @@
     "description": "The class representing a Python class.",
     "std_args": [
       "self"
-    ],
-    "type": "class"
-  },
-  "ArrayIterator": {
-    "description": "A helper object to iterate over the 1st dimension of an array.",
-    "std_args": [
-      "self",
-      "args",
-      "kwargs"
     ],
     "type": "class"
   },
@@ -366,11 +348,6 @@
     ],
     "type": "class"
   },
-  "Carry": {
-    "description": "Helper class for :func:`flax.nnx.scan` function to mark input and output axis as carry.",
-    "std_args": [],
-    "type": "class"
-  },
   "Chebyshev": {
     "description": "A Chebyshev series class.",
     "std_args": [
@@ -446,15 +423,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "CustomVjp": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "fun",
-      "nondiff_argnums"
-    ],
-    "type": "class"
-  },
   "CustomVjpFnWrapper": {
     "description": "The class representing a Python class.",
     "std_args": [
@@ -525,11 +493,6 @@
     "std_args": [],
     "type": "class"
   },
-  "DeviceType": {
-    "description": "The class representing a Python class.",
-    "std_args": [],
-    "type": "class"
-  },
   "Dict": {
     "description": "A Module that implements a mutable mapping.",
     "std_args": [
@@ -537,20 +500,6 @@
       "args",
       "kwargs"
     ],
-    "type": "class"
-  },
-  "DiffState": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "argnum",
-      "filter"
-    ],
-    "type": "class"
-  },
-  "DtypeCategory": {
-    "description": "Type to hold categories of :class:`dtypes <Dtype>`.",
-    "std_args": [],
     "type": "class"
   },
   "END": {
@@ -650,15 +599,6 @@
     ],
     "type": "class"
   },
-  "FlatState": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "items",
-      "sort"
-    ],
-    "type": "class"
-  },
   "Float16DType": {
     "description": "The class representing a Python class.",
     "std_args": [],
@@ -686,15 +626,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "FunctionExporter": {
-    "description": "A context managing class for exporting multiple traces of the same",
-    "std_args": [
-      "self",
-      "args",
-      "kwargs"
-    ],
-    "type": "class"
   },
   "Functional": {
     "description": "The class representing a Python class.",
@@ -812,16 +743,6 @@
     ],
     "type": "class"
   },
-  "GraphDef": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "nodes",
-      "attributes",
-      "num_leaves"
-    ],
-    "type": "class"
-  },
   "GraphDefState": {
     "description": "The class representing a Python class.",
     "std_args": [
@@ -847,27 +768,6 @@
       "create_empty",
       "clear",
       "init"
-    ],
-    "type": "class"
-  },
-  "GraphState": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "Groupnorm": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "dtype",
-      "eps",
-      "num_groups"
-    ],
-    "type": "class"
-  },
-  "Grucell": {
-    "description": "Auto-discovered via Consensus (Score: 3.0)",
-    "std_args": [
-      "dtype"
     ],
     "type": "class"
   },
@@ -960,11 +860,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "Hardtanh": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
-    "type": "class"
   },
   "HasTag": {
     "description": "The class representing a Python class.",
@@ -1168,15 +1063,6 @@
     ],
     "type": "function"
   },
-  "Instancenorm": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "dtype",
-      "eps",
-      "num_features"
-    ],
-    "type": "class"
-  },
   "Int16DType": {
     "description": "The class representing a Python class.",
     "std_args": [],
@@ -1207,19 +1093,6 @@
     "std_args": [
       "self",
       "intent_list"
-    ],
-    "type": "class"
-  },
-  "Intermediate": {
-    "description": ":class:`Variable` type that is typically used for",
-    "std_args": [
-      "self",
-      "value",
-      "is_hijax",
-      "has_ref",
-      "is_mutable",
-      "eager_sharding",
-      "metadata"
     ],
     "type": "class"
   },
@@ -1482,18 +1355,6 @@
     "std_args": [],
     "type": "class"
   },
-  "Logsumexp": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "b",
-      "dim",
-      "keepdim",
-      "return_sign",
-      "where",
-      "x"
-    ],
-    "type": "function"
-  },
   "LongDType": {
     "description": "The class representing a Python class.",
     "std_args": [],
@@ -1515,13 +1376,6 @@
       "self",
       "lowered",
       "jit_wrapped"
-    ],
-    "type": "class"
-  },
-  "Lstmcell": {
-    "description": "Auto-discovered via Consensus (Score: 3.0)",
-    "std_args": [
-      "dtype"
     ],
     "type": "class"
   },
@@ -1644,23 +1498,6 @@
     "std_args": [],
     "type": "class"
   },
-  "MergeContext": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "ctxtag",
-      "index_ref",
-      "is_inner"
-    ],
-    "type": "class"
-  },
-  "Metric": {
-    "description": "Base class for metrics. Any class that subclasses ``Metric`` should",
-    "std_args": [
-      "self"
-    ],
-    "type": "class"
-  },
   "MetricState": {
     "description": "Wrapper class for Metric Variables.",
     "std_args": [
@@ -1671,24 +1508,6 @@
       "is_mutable",
       "eager_sharding",
       "metadata"
-    ],
-    "type": "class"
-  },
-  "ModelAndOptimizer": {
-    "description": "A convenience class that combines a model and an optimizer.",
-    "std_args": [
-      "self",
-      "model",
-      "tx",
-      "wrt"
-    ],
-    "type": "class"
-  },
-  "MultiMetric": {
-    "description": "MultiMetric class to store multiple metrics and update them in a single call.",
-    "std_args": [
-      "self",
-      "metrics"
     ],
     "type": "class"
   },
@@ -1864,15 +1683,6 @@
     ],
     "type": "class"
   },
-  "NodeStates": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "args",
-      "kwargs"
-    ],
-    "type": "class"
-  },
   "NodeStats": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -1887,11 +1697,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "Nothing": {
-    "description": "The class representing a Python class.",
-    "std_args": [],
-    "type": "class"
   },
   "OBJECT_CONTEXT": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -1927,14 +1732,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "OfType": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "type"
-    ],
-    "type": "class"
-  },
   "Op": {
     "description": "Used as Expr op attribute.",
     "std_args": [],
@@ -1943,32 +1740,6 @@
   "OpError": {
     "description": "The class representing a Python class.",
     "std_args": [],
-    "type": "class"
-  },
-  "OptArray": {
-    "description": "Optimizer state for an array.",
-    "std_args": [
-      "self",
-      "value",
-      "is_hijax",
-      "has_ref",
-      "is_mutable",
-      "eager_sharding",
-      "metadata"
-    ],
-    "type": "class"
-  },
-  "OptVariable": {
-    "description": "Optimizer state for a Variable.",
-    "std_args": [
-      "self",
-      "value",
-      "is_hijax",
-      "has_ref",
-      "is_mutable",
-      "eager_sharding",
-      "metadata"
-    ],
     "type": "class"
   },
   "OutShardingType": {
@@ -2053,15 +1824,6 @@
     ],
     "type": "class"
   },
-  "PathContains": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "key",
-      "exact"
-    ],
-    "type": "class"
-  },
   "PathIn": {
     "description": "The class representing a Python class.",
     "std_args": [
@@ -2079,19 +1841,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "Perturbation": {
-    "description": ":class:`Variable` type that is typically used for",
-    "std_args": [
-      "self",
-      "value",
-      "is_hijax",
-      "has_ref",
-      "is_mutable",
-      "eager_sharding",
-      "metadata"
-    ],
-    "type": "class"
   },
   "PinvCases": {
     "description": "The class representing a Python class.",
@@ -2176,11 +1925,6 @@
     "std_args": [],
     "type": "class"
   },
-  "PureState": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "PyTreeDef": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -2195,11 +1939,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "Pytree": {
-    "description": "Base class for all NNX objects.",
-    "std_args": [],
-    "type": "class"
   },
   "PytreeMeta": {
     "description": "The class representing a Python class.",
@@ -2316,11 +2055,6 @@
     "std_args": [],
     "type": "class"
   },
-  "Relu6": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
-    "type": "class"
-  },
   "RemoveAxisHook": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -2347,80 +2081,10 @@
     "std_args": [],
     "type": "class"
   },
-  "Rmsnorm": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "dtype",
-      "eps"
-    ],
-    "type": "class"
-  },
-  "RngCount": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "value",
-      "is_hijax",
-      "has_ref",
-      "is_mutable",
-      "eager_sharding",
-      "metadata"
-    ],
-    "type": "class"
-  },
-  "RngKey": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "value",
-      "is_hijax",
-      "has_ref",
-      "is_mutable",
-      "eager_sharding",
-      "metadata"
-    ],
-    "type": "class"
-  },
-  "RngState": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "value",
-      "is_hijax",
-      "has_ref",
-      "is_mutable",
-      "eager_sharding",
-      "metadata"
-    ],
-    "type": "class"
-  },
-  "RngStream": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "key",
-      "tag"
-    ],
-    "type": "class"
-  },
   "RngValue": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "Rngs": {
-    "description": "A small abstraction to manage RNG state.",
-    "std_args": [
-      "self",
-      "default",
-      "rngs"
-    ],
-    "type": "class"
-  },
-  "Rnncellbase": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
-    "type": "class"
   },
   "RoundtripTest": {
     "description": "The class representing a Python class.",
@@ -2629,16 +2293,6 @@
     ],
     "type": "class"
   },
-  "SplitContext": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "ctxtag",
-      "ref_index",
-      "is_inner"
-    ],
-    "type": "class"
-  },
   "SplitPattern": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -2649,34 +2303,10 @@
     "std_args": [],
     "type": "class"
   },
-  "StateAxes": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "filter_axes"
-    ],
-    "type": "class"
-  },
   "StateMapping": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "StateSharding": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "filter_sharding"
-    ],
-    "type": "class"
-  },
-  "Static": {
-    "description": "An empty pytree node that treats its inner value as static.",
-    "std_args": [
-      "self",
-      "value"
-    ],
-    "type": "class"
   },
   "StaticAnnotation": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -2703,24 +2333,10 @@
     "std_args": [],
     "type": "attribute"
   },
-  "Stream": {
-    "description": "A stream for running operations on a given device.",
-    "std_args": [
-      "self",
-      "args",
-      "kwargs"
-    ],
-    "type": "class"
-  },
   "StreamBackup": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "StreamContext": {
-    "description": "A context manager for setting the current device and stream.",
-    "std_args": [],
-    "type": "class"
   },
   "StringDType": {
     "description": "The class representing a Python class.",
@@ -4794,15 +4410,6 @@
     ],
     "type": "class"
   },
-  "TrainState": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "args",
-      "kwargs"
-    ],
-    "type": "class"
-  },
   "TypeTup": {
     "description": "The class representing a Python class.",
     "std_args": [],
@@ -4870,19 +4477,6 @@
     "description": "Globally unique counter-based id manager.",
     "std_args": [
       "self"
-    ],
-    "type": "class"
-  },
-  "UpdateContext": {
-    "description": "A context manager for handling complex state updates.",
-    "std_args": [
-      "self",
-      "tag",
-      "outer_ref_outer_index",
-      "outer_index_inner_ref",
-      "outer_index_outer_ref",
-      "inner_ref_outer_index",
-      "static_cache"
     ],
     "type": "class"
   },
@@ -4956,20 +4550,6 @@
   "VariableMeta": {
     "description": "The class representing a Python class.",
     "std_args": [],
-    "type": "class"
-  },
-  "VariableMetadata": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "raw_value",
-      "set_value_hooks",
-      "get_value_hooks",
-      "create_value_hooks",
-      "add_axis_hooks",
-      "remove_axis_hooks",
-      "metadata"
-    ],
     "type": "class"
   },
   "VariableQDD": {
@@ -5058,14 +4638,6 @@
     "std_args": [
       "self",
       "f"
-    ],
-    "type": "class"
-  },
-  "WithTag": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "tag"
     ],
     "type": "class"
   },
@@ -5234,14 +4806,6 @@
       "mrecord",
       "newfield",
       "newfieldname"
-    ],
-    "type": "function"
-  },
-  "addmm": {
-    "description": "addmm(c: array, a: array, b: array, /, alpha: float = 1.0, beta: float = 1.0,  *, stream: Union[None, Stream, Device] = None) -> array",
-    "std_args": [
-      "args",
-      "kwargs"
     ],
     "type": "function"
   },
@@ -7647,22 +7211,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "checkify": {
-    "description": "Reference-aware version of `jax.experimental.checkify",
-    "std_args": [
-      "f",
-      "errors"
-    ],
-    "type": "function"
-  },
-  "checkpoint": {
-    "description": "checkpoint(fun: collections.abc.Callable) -> collections.abc.Callable",
-    "std_args": [
-      "args",
-      "kwargs"
-    ],
-    "type": "function"
-  },
   "children": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
@@ -7805,14 +7353,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "clone": {
-    "description": "Create a deep copy of the given graph node.",
-    "std_args": [
-      "node",
-      "variables"
-    ],
-    "type": "function"
   },
   "clongdouble": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -8134,14 +7674,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "contiguous": {
-    "description": "contiguous(a: array, /, allow_col_major: bool = False, *, stream: Union[None, Stream, Device] = None) -> array",
-    "std_args": [
-      "args",
-      "kwargs"
-    ],
-    "type": "function"
   },
   "control_delta_method": {
     "description": "Auto-generated from jax_code_defs",
@@ -8610,22 +8142,6 @@
     ],
     "type": "function"
   },
-  "cummax": {
-    "description": "cummax(a: array, /, axis: Optional[int] = None, *, reverse: bool = False, inclusive: bool = True, stream: Union[None, Stream, Device] = None) -> array",
-    "std_args": [
-      "args",
-      "kwargs"
-    ],
-    "type": "function"
-  },
-  "cummin": {
-    "description": "cummin(a: array, /, axis: Optional[int] = None, *, reverse: bool = False, inclusive: bool = True, stream: Union[None, Stream, Device] = None) -> array",
-    "std_args": [
-      "args",
-      "kwargs"
-    ],
-    "type": "function"
-  },
   "cumprod": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -8777,21 +8293,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "dataclass": {
-    "description": "The class representing a Python function.",
-    "std_args": [
-      "cls",
-      "init",
-      "eq",
-      "order",
-      "unsafe_hash",
-      "match_args",
-      "kw_only",
-      "slots",
-      "weakref_slot"
-    ],
-    "type": "function"
   },
   "dataiter": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -8947,14 +8448,6 @@
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "dequantize": {
-    "description": "dequantize(w: array, /, scales: array, biases: Optional[array] = None, group_size: Optional[int] = None, bits: Optional[int] = None, mode: str = 'affine', dtype: Optional[Dtype] = None, *, stream: Union[None, Stream, Device] = None) -> array",
-    "std_args": [
-      "args",
-      "kwargs"
-    ],
-    "type": "function"
   },
   "descr": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -9182,13 +8675,6 @@
     "std_args": [
       "args",
       "kwargs"
-    ],
-    "type": "function"
-  },
-  "display": {
-    "description": "Display the given objects using the Treescope pretty-printer.",
-    "std_args": [
-      "args"
     ],
     "type": "function"
   },
@@ -9851,14 +9337,6 @@
   },
   "export_to_dot": {
     "description": "export_to_dot(file: object, *args, **kwargs) -> None",
-    "std_args": [
-      "args",
-      "kwargs"
-    ],
-    "type": "function"
-  },
-  "exporter": {
-    "description": "exporter(file: str, fun: collections.abc.Callable, *, shapeless: bool = False) -> mlx.core.FunctionExporter",
     "std_args": [
       "args",
       "kwargs"
@@ -11728,11 +11206,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "gpu": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "grad": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -11745,11 +11218,6 @@
       "filters"
     ],
     "type": "function"
-  },
-  "graphdef": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
   },
   "greater": {
     "description": "Computes the truth value of ``x1_i > x2_i`` for each element ``x1_i`` of the input array ``x1`` with the respective element ``x2_i`` of the input array ``x2``.",
@@ -15021,14 +14489,6 @@
     "std_args": [],
     "variants": {}
   },
-  "logcumsumexp": {
-    "description": "logcumsumexp(a: array, /, axis: Optional[int] = None, *, reverse: bool = False, inclusive: bool = True, stream: Union[None, Stream, Device] = None) -> array",
-    "std_args": [
-      "args",
-      "kwargs"
-    ],
-    "type": "function"
-  },
   "logdet": {
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
@@ -15817,16 +15277,6 @@
     "description": "A summary of estimated memory requirements.",
     "std_args": [
       "self"
-    ],
-    "type": "function"
-  },
-  "merge": {
-    "description": "The inverse of :func:`flax.nnx.split`.",
-    "std_args": [
-      "graphdef",
-      "state",
-      "states",
-      "copy"
     ],
     "type": "function"
   },
@@ -17338,23 +16788,6 @@
     ],
     "type": "function"
   },
-  "pmap": {
-    "description": "Reference-aware version of `jax.vmap <https://jax.readthedocs.io/en/latest/_autosummary/jax.vmap.html>`__.",
-    "std_args": [
-      "f",
-      "axis_name",
-      "in_axes",
-      "out_axes",
-      "static_broadcasted_argnums",
-      "devices",
-      "backend",
-      "axis_size",
-      "donate_argnums",
-      "global_arg_shapes",
-      "transform_metadata"
-    ],
-    "type": "function"
-  },
   "poisson": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -17527,11 +16960,6 @@
     "type": "attribute"
   },
   "polyzero": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "pool": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
@@ -17774,13 +17202,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "pure": {
-    "description": "Returns a new tree with all ``Variable`` objects replaced with inner values.",
-    "std_args": [
-      "tree"
-    ],
-    "type": "function"
-  },
   "put": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -17874,14 +17295,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "qqmm": {
-    "description": "qqmm(x: array, w: array, scales: Optional[array] = None, group_size: Optional[int] = None, bits: Optional[int] = None, mode: str = 'nvfp4', *, stream: Union[None, Stream, Device] = None) -> array",
-    "std_args": [
-      "args",
-      "kwargs"
-    ],
-    "type": "function"
   },
   "qr": {
     "description": "Returns the QR decomposition of a full column rank matrix (or a stack of matrices).",
@@ -18277,16 +17690,6 @@
     ],
     "variants": {}
   },
-  "remat": {
-    "description": "A 'lifted' version of the",
-    "std_args": [
-      "f",
-      "prevent_cse",
-      "static_argnums",
-      "policy"
-    ],
-    "type": "function"
-  },
   "remove": {
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
@@ -18452,15 +17855,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "reseed": {
-    "description": "Update the keys of the specified RNG streams with new keys.",
-    "std_args": [
-      "node",
-      "policy",
-      "stream_keys"
-    ],
-    "type": "function"
   },
   "reserved_fields": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -18719,11 +18113,6 @@
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "rngs": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
   },
   "roll": {
     "description": "Rolls array elements along a specified axis. Array elements that roll beyond the last position are re-introduced at the first position. Array elements that roll beyond the first position are re-introduced at the last position.",
@@ -20021,14 +19410,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "static": {
-    "description": "Annotates a an attribute as static.",
-    "std_args": [
-      "value",
-      "kwargs"
-    ],
-    "type": "function"
-  },
   "static_argnums": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -20129,14 +19510,6 @@
       "self",
       "short_dtypes",
       "_"
-    ],
-    "type": "function"
-  },
-  "stream": {
-    "description": "stream(s: mlx.core.Stream | mlx.core.Device) -> mlx.core.StreamContext",
-    "std_args": [
-      "args",
-      "kwargs"
     ],
     "type": "function"
   },
@@ -20345,23 +19718,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "tabulate": {
-    "description": "Creates a summary of the graph object represented as a table.",
-    "std_args": [
-      "obj",
-      "input_args",
-      "depth",
-      "method",
-      "row_filter",
-      "table_kwargs",
-      "column_kwargs",
-      "console_kwargs",
-      "compute_flops",
-      "compute_vjp_flops",
-      "input_kwargs"
-    ],
-    "type": "function"
   },
   "tag": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -40327,14 +39683,6 @@
     "std_args": [
       "self",
       "node"
-    ],
-    "type": "function"
-  },
-  "vjp": {
-    "description": "vjp(fun: Callable, primals: list[array], cotangents: list[array]) -> tuple[list[array], list[array]]",
-    "std_args": [
-      "args",
-      "kwargs"
     ],
     "type": "function"
   },

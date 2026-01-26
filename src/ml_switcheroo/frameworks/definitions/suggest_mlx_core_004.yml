@@ -1,0 +1,556 @@
+operation: "EulerGamma"
+description: "Mathematical constant Euler's gamma (approximately 0.57721)."
+return_type: "float"
+variants:
+  mlx:
+    api: "mlx.core.euler_gamma"
+  numpy:
+    api: "numpy.euler_gamma"
+  torch:
+    # Use macro to access constant via numpy or hardcode if needed
+    macro_template: "0.57721566490153286060" 
+  jax:
+    macro_template: "0.57721566490153286060"
+
+---
+operation: "Eval"
+description: "Evaluates arrays or trees of arrays, forcing materialization."
+op_type: "function"
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.eval"
+  jax:
+    # JAX uses block_until_ready() on array futures
+    api: "jax.block_until_ready"
+    pack_to_tuple: "x" 
+    # This is rough mapping; proper JAX usage is per-array
+  torch:
+    # Torch is eager, no-op usually for eval (not mode)
+    macro_template: "None"
+
+---
+operation: "Exp"
+description: "Element-wise exponential."
+std_args:
+  - name: "x"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.exp"
+  torch:
+    api: "torch.exp"
+  jax:
+    api: "jax.numpy.exp"
+  keras:
+    api: "keras.ops.exp"
+  numpy:
+    api: "numpy.exp"
+  tensorflow:
+    api: "tf.math.exp"
+
+---
+operation: "ExpandDims"
+description: "Add a size one dimension at the given axis."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.expand_dims"
+    args:
+      axis: "axis"
+  torch:
+    api: "torch.unsqueeze"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.expand_dims"
+  keras:
+    api: "keras.ops.expand_dims"
+  numpy:
+    api: "numpy.expand_dims"
+  tensorflow:
+    api: "tf.expand_dims"
+
+---
+operation: "Expm1"
+description: "Element-wise exponential minus 1."
+std_args:
+  - name: "x"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.expm1"
+  torch:
+    api: "torch.expm1"
+  jax:
+    api: "jax.numpy.expm1"
+  keras:
+    api: "keras.ops.expm1"
+  numpy:
+    api: "numpy.expm1"
+  tensorflow:
+    api: "tf.math.expm1"
+
+---
+operation: "ExportFunction"
+description: "Export an MLX function (MLX Specific)."
+op_type: "function"
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "fun"
+    type: "Callable"
+  - name: "args"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.export_function"
+  torch:
+    api: "torch.export.export" # Closest approximate in newer torch
+  tensorflow:
+    api: "tf.saved_model.save"
+
+---
+operation: "ExportToDot"
+description: "Export a graph to DOT format for visualization."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "args"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.export_to_dot"
+  jax:
+    api: "jax.debug.visualize_array_sharding" # Weak map, JAX has no direct DOT export in core
+
+---
+operation: "Exporter"
+description: "Context manager to export execution traces."
+op_type: "context"
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "fun"
+    type: "Callable"
+variants:
+  mlx:
+    api: "mlx.core.exporter"
+
+---
+operation: "Eye"
+description: "Create an identity matrix or a general diagonal matrix."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "m"
+    type: "int"
+    default: null
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.eye"
+  torch:
+    api: "torch.eye"
+    # Torch does not support 'k' in eye directly (identity). Diag creation is different. 
+    # Use fallback or macro if k != 0
+  jax:
+    api: "jax.numpy.eye"
+  keras:
+    api: "keras.ops.eye"
+  numpy:
+    api: "numpy.eye"
+
+---
+operation: "FInfo"
+description: "Get information on floating-point types."
+std_args:
+  - name: "dtype"
+    type: "Dtype"
+variants:
+  mlx:
+    api: "mlx.core.finfo"
+  torch:
+    api: "torch.finfo"
+  jax:
+    api: "jax.numpy.finfo"
+  numpy:
+    api: "numpy.finfo"
+
+---
+operation: "Flatten"
+description: "Flatten an array between start and end axes."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "start_axis"
+    type: "int"
+    default: 0
+  - name: "end_axis"
+    type: "int"
+    default: -1
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.flatten"
+  torch:
+    api: "torch.flatten"
+    args:
+      start_axis: "start_dim"
+      end_axis: "end_dim"
+  jax:
+    # JAX ravel is full flatten. Uses plugin/reshape for range flatten.
+    requires_plugin: "flatten_range"
+  keras:
+    api: "keras.layers.Flatten" # Object-oriented layer, or reshape ops
+    requires_plugin: "flatten_range" # Ops reshape logic better
+
+---
+operation: "Float16"
+description: "16-bit floating point type."
+return_type: "Dtype"
+variants:
+  mlx:
+    api: "mlx.core.float16"
+  torch:
+    api: "torch.float16"
+  jax:
+    api: "jax.numpy.float16"
+  numpy:
+    api: "numpy.float16"
+  tensorflow:
+    api: "tf.float16"
+
+---
+operation: "Float32"
+description: "32-bit floating point type."
+return_type: "Dtype"
+variants:
+  mlx:
+    api: "mlx.core.float32"
+  torch:
+    api: "torch.float32"
+  jax:
+    api: "jax.numpy.float32"
+  numpy:
+    api: "numpy.float32"
+  tensorflow:
+    api: "tf.float32"
+
+---
+operation: "Float64"
+description: "64-bit floating point type."
+return_type: "Dtype"
+variants:
+  mlx:
+    api: "mlx.core.float64"
+  torch:
+    api: "torch.float64"
+  jax:
+    api: "jax.numpy.float64"
+  numpy:
+    api: "numpy.float64"
+  tensorflow:
+    api: "tf.float64"
+
+---
+operation: "Floating"
+description: "Generic floating point type category."
+return_type: "Dtype"
+variants:
+  mlx:
+    api: "mlx.core.floating"
+  numpy:
+    api: "numpy.floating"
+
+---
+operation: "Floor"
+description: "Element-wise floor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.floor"
+  torch:
+    api: "torch.floor"
+  jax:
+    api: "jax.numpy.floor"
+  keras:
+    api: "keras.ops.floor"
+  numpy:
+    api: "numpy.floor"
+  tensorflow:
+    api: "tf.math.floor"
+
+---
+operation: "FloorDivide"
+description: "Element-wise integer division."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.floor_divide"
+  torch:
+    api: "torch.floor_divide"
+  jax:
+    api: "jax.numpy.floor_divide"
+  keras:
+    api: "keras.ops.floor_divide"
+  numpy:
+    api: "numpy.floor_divide"
+  tensorflow:
+    api: "tf.math.floordiv"
+
+---
+operation: "Full"
+description: "Construct an array with the given value."
+std_args:
+  - name: "shape"
+    type: "Sequence[int]"
+  - name: "vals"
+    type: "Union[float, int, Tensor]"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.full"
+  torch:
+    api: "torch.full"
+    args:
+      shape: "size"
+      vals: "fill_value"
+  jax:
+    api: "jax.numpy.full"
+    args:
+      vals: "fill_value"
+  keras:
+    api: "keras.ops.full"
+    args:
+      vals: "fill_value"
+  numpy:
+    api: "numpy.full"
+    args:
+      vals: "fill_value"
+
+---
+operation: "GatherMM"
+description: "Matrix multiplication with matrix-level gather."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "lhs_indices"
+    type: "Tensor"
+  - name: "rhs_indices"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.gather_mm"
+  torch:
+    # No direct single op in Torch, requires efficient implementation or plugin
+    missing_message: "Torch requires custom implementation for GatherMM"
+  jax:
+    # Can use vmap(matmul) with take
+    missing_message: "JAX requires vmap/take composition for GatherMM"
+
+---
+operation: "GatherQMM"
+description: "Perform quantized matrix multiplication with matrix-level gather."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "w"
+    type: "Tensor"
+  - name: "scales"
+    type: "Tensor"
+  - name: "biases"
+    type: "Tensor"
+    default: null
+  - name: "lhs_indices"
+    type: "Tensor"
+    default: null
+  - name: "rhs_indices"
+    type: "Tensor"
+    default: null
+variants:
+  mlx:
+    api: "mlx.core.gather_qmm"
+
+---
+operation: "Generic"
+description: "Generic type category."
+return_type: "Dtype"
+variants:
+  mlx:
+    api: "mlx.core.generic"
+  numpy:
+    api: "numpy.generic"
+
+---
+operation: "GetActiveMemory"
+description: "Get the actively used memory in bytes."
+return_type: "int"
+variants:
+  mlx:
+    api: "mlx.core.get_active_memory"
+  torch:
+    api: "torch.cuda.memory_allocated"
+  # JAX/TF memory management is abstracted
+
+---
+operation: "GetCacheMemory"
+description: "Get the cache size in bytes."
+return_type: "int"
+variants:
+  mlx:
+    api: "mlx.core.get_cache_memory"
+  torch:
+    api: "torch.cuda.memory_reserved"
+
+---
+operation: "GetPeakMemory"
+description: "Get the peak amount of used memory in bytes."
+return_type: "int"
+variants:
+  mlx:
+    api: "mlx.core.get_peak_memory"
+  torch:
+    api: "torch.cuda.max_memory_allocated"
+
+---
+operation: "Gpu"
+description: "GPU Device Identifier."
+return_type: "Device"
+variants:
+  mlx:
+    api: "mlx.core.gpu"
+  torch:
+    macro_template: "torch.device('cuda')"
+
+---
+operation: "Grad"
+description: "Returns a function which computes the gradient."
+op_type: "decorator"
+std_args:
+  - name: "fun"
+    type: "Callable"
+  - name: "argnums"
+    type: "Union[int, list[int]]"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.core.grad"
+  jax:
+    api: "jax.grad"
+  torch:
+    api: "torch.func.grad" # Use functional transform
+    min_version: "2.0"
+
+---
+operation: "Greater"
+description: "Element-wise greater than."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.greater"
+  torch:
+    api: "torch.gt"
+  jax:
+    api: "jax.numpy.greater"
+  keras:
+    api: "keras.ops.greater"
+  numpy:
+    api: "numpy.greater"
+  tensorflow:
+    api: "tf.math.greater"
+
+---
+operation: "GreaterEqual"
+description: "Element-wise greater or equal."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.greater_equal"
+  torch:
+    api: "torch.ge"
+  jax:
+    api: "jax.numpy.greater_equal"
+  keras:
+    api: "keras.ops.greater_equal"
+  numpy:
+    api: "numpy.greater_equal"
+  tensorflow:
+    api: "tf.math.greater_equal"
+
+---
+operation: "HadamardTransform"
+description: "Perform the Walsh-Hadamard transform along the final axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "scale"
+    type: "float"
+    default: null
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.hadamard_transform"
+  scipy:
+    api: "scipy.linalg.hadamard"
+    # Logic requires macro
+
+---
+operation: "Identity"
+description: "Create a square identity matrix."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+return_type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.identity"
+  torch:
+    api: "torch.eye" # Identity is just eye with 1 arg in torch usually
+  jax:
+    api: "jax.numpy.identity"
+  numpy:
+    api: "numpy.identity"
+  tensorflow:
+    api: "tf.eye" # TF uses eye

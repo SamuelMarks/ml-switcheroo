@@ -1,0 +1,670 @@
+operation: "IInfo"
+description: "Get information on integer types."
+std_args:
+  - name: "type"
+    type: "Dtype"
+variants:
+  mlx:
+    api: "mlx.core.iinfo"
+  torch:
+    api: "torch.iinfo"
+  jax:
+    api: "jax.numpy.iinfo"
+  numpy:
+    api: "numpy.iinfo"
+  tensorflow:
+    api: "tf.experimental.numpy.iinfo"
+  keras:
+    api: null # Not exposed in keras.ops
+  flax_nnx:
+    api: "jax.numpy.iinfo"
+  paxml:
+    api: "jax.numpy.iinfo"
+---
+operation: "Imag"
+description: "Returns the imaginary part of a complex array."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.imag"
+  torch:
+    api: "torch.imag"
+  jax:
+    api: "jax.numpy.imag"
+  numpy:
+    api: "numpy.imag"
+  tensorflow:
+    api: "tf.math.imag"
+  keras:
+    api: "keras.ops.imag"
+  flax_nnx:
+    api: "jax.numpy.imag"
+  paxml:
+    api: "jax.numpy.imag"
+---
+operation: "ImportFunction"
+description: "Import a function from a serialized file format (MLX specific, mapping to JIT/SavedModel load)."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "map_location"
+    type: "str"
+    default: "cpu"
+variants:
+  mlx:
+    api: "mlx.core.import_function"
+  torch:
+    api: "torch.jit.load"
+    args:
+      file: "f"
+  tensorflow:
+    api: "tf.saved_model.load"
+    args:
+      file: "export_dir"
+  jax:
+    api: null # Requires heavy serialization lib like Orbax
+  keras:
+    api: "keras.saving.load_model"
+---
+operation: "Inexact"
+description: "Type category representing inexact (floating-point/complex) numbers."
+op_type: "attribute"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.inexact"
+  numpy:
+    api: "numpy.inexact"
+  torch:
+    api: null # PyTorch uses specific dtypes
+  jax:
+    api: "jax.numpy.inexact"
+---
+operation: "Inf"
+description: "Floating point positive infinity value."
+op_type: "attribute"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.inf"
+  torch:
+    api: "torch.inf"
+  jax:
+    api: "jax.numpy.inf"
+  numpy:
+    api: "numpy.inf"
+  tensorflow:
+    api: "tf.constant"
+    macro_template: "tf.constant(float('inf'))"
+  keras:
+    api: null
+---
+operation: "Inner"
+description: "Ordinary inner product of vectors."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.inner"
+  torch:
+    api: "torch.inner"
+  jax:
+    api: "jax.numpy.inner"
+  numpy:
+    api: "numpy.inner"
+  tensorflow:
+    api: "tf.experimental.numpy.inner"
+  keras:
+    api: "keras.ops.inner" # Keras 3 may not expose inner directly, falling back to matmul or dot usually
+---
+operation: "Int16"
+description: "16-bit signed integer data type."
+op_type: "attribute"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.int16"
+  torch:
+    api: "torch.int16"
+  jax:
+    api: "jax.numpy.int16"
+  numpy:
+    api: "numpy.int16"
+  tensorflow:
+    api: "tf.int16"
+---
+operation: "Int32"
+description: "32-bit signed integer data type."
+op_type: "attribute"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.int32"
+  torch:
+    api: "torch.int32"
+  jax:
+    api: "jax.numpy.int32"
+  numpy:
+    api: "numpy.int32"
+  tensorflow:
+    api: "tf.int32"
+---
+operation: "Int64"
+description: "64-bit signed integer data type."
+op_type: "attribute"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.int64"
+  torch:
+    api: "torch.int64"
+  jax:
+    api: "jax.numpy.int64"
+  numpy:
+    api: "numpy.int64"
+  tensorflow:
+    api: "tf.int64"
+---
+operation: "Int8"
+description: "8-bit signed integer data type."
+op_type: "attribute"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.int8"
+  torch:
+    api: "torch.int8"
+  jax:
+    api: "jax.numpy.int8"
+  numpy:
+    api: "numpy.int8"
+  tensorflow:
+    api: "tf.int8"
+---
+operation: "Integer"
+description: "Type category representing integer numbers."
+op_type: "attribute"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.integer"
+  numpy:
+    api: "numpy.integer"
+  jax:
+    api: "jax.numpy.integer"
+---
+operation: "IsAvailable"
+description: "Check if the accelerator backend is available."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.is_available"
+  torch:
+    api: "torch.cuda.is_available"
+  jax:
+    macro_template: "len(jax.devices('gpu')) > 0"
+  tensorflow:
+    macro_template: "len(tf.config.list_physical_devices('GPU')) > 0"
+---
+operation: "IsClose"
+description: "Returns a boolean array where two arrays are element-wise equal within a tolerance."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "rtol"
+    type: "float"
+    default: 1e-05
+  - name: "atol"
+    type: "float"
+    default: 1e-08
+  - name: "equal_nan"
+    type: "bool"
+    default: false
+variants:
+  mlx:
+    api: "mlx.core.isclose"
+  torch:
+    api: "torch.isclose"
+    args:
+      a: "input"
+      b: "other"
+  jax:
+    api: "jax.numpy.isclose"
+  numpy:
+    api: "numpy.isclose"
+  tensorflow:
+    api: "tf.experimental.numpy.isclose"
+  keras:
+    api: "keras.ops.isclose"
+---
+operation: "IsFinite"
+description: "Return a boolean array indicating which elements are finite."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.isfinite"
+    args:
+      input: "a"
+  torch:
+    api: "torch.isfinite"
+  jax:
+    api: "jax.numpy.isfinite"
+  numpy:
+    api: "numpy.isfinite"
+  tensorflow:
+    api: "tf.math.is_finite"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.isfinite"
+    args:
+      input: "x"
+---
+operation: "IsInf"
+description: "Return a boolean array indicating which elements are +/- infinity."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.isinf"
+    args:
+      input: "a"
+  torch:
+    api: "torch.isinf"
+  jax:
+    api: "jax.numpy.isinf"
+  numpy:
+    api: "numpy.isinf"
+  tensorflow:
+    api: "tf.math.is_inf"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.isinf"
+    args:
+      input: "x"
+---
+operation: "IsNan"
+description: "Return a boolean array indicating which elements are NaN."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.isnan"
+    args:
+      input: "a"
+  torch:
+    api: "torch.isnan"
+  jax:
+    api: "jax.numpy.isnan"
+  numpy:
+    api: "numpy.isnan"
+  tensorflow:
+    api: "tf.math.is_nan"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.isnan"
+    args:
+      input: "x"
+---
+operation: "IsNegInf"
+description: "Return a boolean array indicating which elements are negative infinity."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.isneginf"
+    args:
+      input: "a"
+  torch:
+    api: "torch.isneginf"
+  jax:
+    api: "jax.numpy.isneginf"
+  numpy:
+    api: "numpy.isneginf"
+  tensorflow:
+    macro_template: "tf.equal({input}, float('-inf'))"
+---
+operation: "IsPosInf"
+description: "Return a boolean array indicating which elements are positive infinity."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.isposinf"
+    args:
+      input: "a"
+  torch:
+    api: "torch.isposinf"
+  jax:
+    api: "jax.numpy.isposinf"
+  numpy:
+    api: "numpy.isposinf"
+  tensorflow:
+    macro_template: "tf.equal({input}, float('inf'))"
+---
+operation: "IsSubDtype"
+description: "Check if a Dtype or Category is a subtype of another."
+std_args:
+  - name: "arg1"
+    type: "Dtype"
+  - name: "arg2"
+    type: "Dtype"
+variants:
+  mlx:
+    api: "mlx.core.issubdtype"
+  jax:
+    api: "jax.numpy.issubdtype"
+  numpy:
+    api: "numpy.issubdtype"
+---
+operation: "JVP"
+description: "Compute the Jacobian-vector product."
+op_type: "function"
+std_args:
+  - name: "func"
+    type: "Callable"
+  - name: "primals"
+    type: "List[Tensor]"
+  - name: "tangents"
+    type: "List[Tensor]"
+variants:
+  mlx:
+    api: "mlx.core.jvp"
+  torch:
+    api: "torch.autograd.functional.jvp"
+    args:
+      primals: "inputs"
+      tangents: "v"
+  jax:
+    api: "jax.jvp"
+    args:
+      func: "fun"
+---
+operation: "Kron"
+description: "Compute the Kronecker product of two arrays."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.kron"
+    args:
+      input: "a"
+      other: "b"
+  torch:
+    api: "torch.kron"
+  jax:
+    api: "jax.numpy.kron"
+  numpy:
+    api: "numpy.kron"
+  tensorflow:
+    api: "tf.experimental.numpy.kron"
+---
+operation: "LeftShift"
+description: "Element-wise bitwise left shift."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.left_shift"
+    args:
+      input: "a"
+      other: "b"
+  torch:
+    api: "torch.bitwise_left_shift"
+  jax:
+    api: "jax.numpy.left_shift"
+  numpy:
+    api: "numpy.left_shift"
+  tensorflow:
+    api: "tf.bitwise.left_shift"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: null # Keras ops doesn't expose bitwise currently
+  flax_nnx:
+    api: "jax.numpy.left_shift"
+  paxml:
+    api: "jax.numpy.left_shift"
+---
+operation: "Less"
+description: "Element-wise strict less than comparison."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.less"
+    args:
+      input: "a"
+      other: "b"
+  torch:
+    api: "torch.lt"
+  jax:
+    api: "jax.numpy.less"
+  numpy:
+    api: "numpy.less"
+  tensorflow:
+    api: "tf.math.less"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.less"
+    args:
+      input: "x1"
+      other: "x2"
+---
+operation: "LessEqual"
+description: "Element-wise less than or equal comparison."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.less_equal"
+    args:
+      input: "a"
+      other: "b"
+  torch:
+    api: "torch.le"
+  jax:
+    api: "jax.numpy.less_equal"
+  numpy:
+    api: "numpy.less_equal"
+  tensorflow:
+    api: "tf.math.less_equal"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+---
+operation: "Linspace"
+description: "Generate evenly spaced numbers over an interval."
+std_args:
+  - name: "start"
+    type: "float"
+  - name: "stop"
+    type: "float"
+  - name: "num"
+    type: "int"
+    default: 50
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  mlx:
+    api: "mlx.core.linspace"
+    args:
+      num: "num"
+      dtype: "dtype"
+  torch:
+    api: "torch.linspace"
+    args:
+      start: "start"
+      stop: "end"
+      num: "steps"
+  jax:
+    api: "jax.numpy.linspace"
+  numpy:
+    api: "numpy.linspace"
+  tensorflow:
+    api: "tf.linspace"
+    args:
+      num: "num"
+  keras:
+    api: "keras.ops.linspace"
+---
+operation: "Load"
+description: "Load array(s) from a binary file."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "format"
+    type: "str"
+    default: null
+variants:
+  mlx:
+    api: "mlx.core.load"
+  torch:
+    api: "torch.load"
+    args:
+      file: "f"
+      format: null
+  jax:
+    api: "jax.numpy.load"
+  numpy:
+    api: "numpy.load"
+---
+operation: "Log"
+description: "Element-wise natural logarithm."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.log"
+    args:
+      input: "a"
+  torch:
+    api: "torch.log"
+  jax:
+    api: "jax.numpy.log"
+  numpy:
+    api: "numpy.log"
+  tensorflow:
+    api: "tf.math.log"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.log"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.log"
+  paxml:
+    api: "jax.numpy.log"
+---
+operation: "Log10"
+description: "Element-wise base-10 logarithm."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.log10"
+    args:
+      input: "a"
+  torch:
+    api: "torch.log10"
+  jax:
+    api: "jax.numpy.log10"
+  numpy:
+    api: "numpy.log10"
+  tensorflow:
+    api: "tf.experimental.numpy.log10"
+    args:
+      input: "x"
+  keras:
+    macro_template: "keras.ops.log({input}) / keras.ops.log(10.0)"
+  flax_nnx:
+    api: "jax.numpy.log10"
+  paxml:
+    api: "jax.numpy.log10"
+---
+operation: "Log1p"
+description: "Element-wise natural log of one plus the array."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.log1p"
+    args:
+      input: "a"
+  torch:
+    api: "torch.log1p"
+  jax:
+    api: "jax.numpy.log1p"
+  numpy:
+    api: "numpy.log1p"
+  tensorflow:
+    api: "tf.math.log1p"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.log1p"
+    args:
+      input: "x"
+---
+operation: "Log2"
+description: "Element-wise base-2 logarithm."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.log2"
+    args:
+      input: "a"
+  torch:
+    api: "torch.log2"
+  jax:
+    api: "jax.numpy.log2"
+  numpy:
+    api: "numpy.log2"
+  tensorflow:
+    api: "tf.experimental.numpy.log2"
+    args:
+      input: "x"
+  keras:
+    macro_template: "keras.ops.log({input}) / keras.ops.log(2.0)"

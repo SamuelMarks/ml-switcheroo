@@ -26,16 +26,19 @@
   "Add": {
     "api": "torch.add",
     "dispatch_rules": [],
-    "operator": "+",
     "pack_as": "Tuple",
-    "required_imports": [],
-    "transformation_type": "infix"
+    "required_imports": []
+  },
+  "Addmm": {
+    "api": "torch.addmm",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "All": {
     "api": "torch.all",
     "args": {
-      "axis": "dim",
-      "keepdims": "keepdim"
+      "axis": "dim"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -44,8 +47,8 @@
   "AllClose": {
     "api": "torch.allclose",
     "args": {
-      "a": "input",
-      "b": "other"
+      "x": "input",
+      "y": "other"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -74,9 +77,7 @@
   "Any": {
     "api": "torch.any",
     "args": {
-      "a": "input",
-      "axis": "dim",
-      "keepdims": "keepdim"
+      "axis": "dim"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -94,6 +95,9 @@
   },
   "Arange": {
     "api": "torch.arange",
+    "args": {
+      "stop": "end"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -101,9 +105,7 @@
   "ArgMax": {
     "api": "torch.argmax",
     "args": {
-      "a": "input",
-      "axis": "dim",
-      "keepdims": "keepdim"
+      "axis": "dim"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -112,9 +114,18 @@
   "ArgMin": {
     "api": "torch.argmin",
     "args": {
-      "a": "input",
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ArgPartition": {
+    "api": "torch.topk",
+    "args": {
       "axis": "dim",
-      "keepdims": "keepdim"
+      "kth": "k",
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -123,7 +134,6 @@
   "ArgSort": {
     "api": "torch.argsort",
     "args": {
-      "a": "input",
       "axis": "dim"
     },
     "dispatch_rules": [],
@@ -141,15 +151,23 @@
   },
   "Array": {
     "api": "torch.tensor",
-    "args": {
-      "object": "data"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ArrayEqual": {
     "api": "torch.equal",
+    "args": {
+      "equal_nan": null,
+      "x": "input",
+      "y": "other"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ArrayIterator": {
+    "api": "iter",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -173,6 +191,15 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AsStrided": {
+    "api": "torch.as_strided",
+    "args": {
+      "offset": "storage_offset"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Asin": {
     "api": "torch.asin",
     "dispatch_rules": [],
@@ -191,6 +218,31 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AsyncEval": {
+    "api": "torch.cuda.synchronize",
+    "dispatch_rules": [],
+    "missing_message": "Syncs global device, not specific tensors.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AtLeast1D": {
+    "api": "torch.atleast_1d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AtLeast2D": {
+    "api": "torch.atleast_2d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AtLeast3D": {
+    "api": "torch.atleast_3d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Atan": {
     "api": "torch.atan",
     "dispatch_rules": [],
@@ -200,8 +252,8 @@
   "Atan2": {
     "api": "torch.atan2",
     "args": {
-      "x1": "input",
-      "x2": "other"
+      "x": "other",
+      "y": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -234,6 +286,17 @@
   "AuxOutput": {
     "api": "torch.nn.attention.flex_attention.AuxOutput",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool": {
+    "api": "torch.nn.functional.avg_pool2d",
+    "args": {
+      "inputs": "input",
+      "strides": "stride",
+      "window_shape": "kernel_size"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -293,6 +356,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "BFloat16": {
+    "api": "torch.bfloat16",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "BLOCK_M": {
     "api": "torch.nn.attention.flex_attention.FlexKernelOptions.BLOCK_M",
     "args": {},
@@ -311,6 +380,17 @@
   },
   "BatchNorm": {
     "api": "torch.nn.BatchNorm2d",
+    "args": {
+      "epsilon": "eps",
+      "momentum": null,
+      "use_bias": "track_running_stats",
+      "use_scale": "affine"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchStat": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -322,8 +402,6 @@
     "required_imports": []
   },
   "Bidirectional": {
-    "api": "torch.nn.modules.rnn.RNNBase.bidirectional",
-    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -351,6 +429,12 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "BitCast": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "torch_bitcast_shim"
   },
   "BitwiseAnd": {
     "api": "torch.bitwise_and",
@@ -403,15 +487,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Bool": {
-    "api": "torch.tensor",
-    "args": {
-      "x": "data"
-    },
+  "BlockMaskedMM": {
+    "api": "torch.sparse.bsr_spmm",
     "dispatch_rules": [],
-    "inject_args": {
-      "dtype": "bool"
-    },
+    "missing_message": "Requires BSR format.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bool": {
+    "api": "torch.bool",
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -429,6 +514,9 @@
   },
   "BroadcastTo": {
     "api": "torch.broadcast_to",
+    "args": {
+      "array": "input"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -446,14 +534,23 @@
     "required_imports": []
   },
   "Cache": {
-    "api": "torch.nn.Parameter",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "nnx_param_to_torch"
+    "required_imports": []
+  },
+  "CachedPartial": {
+    "api": "functools.partial",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "CanCast": {
     "api": "torch.can_cast",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Carry": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -522,12 +619,7 @@
     "required_imports": []
   },
   "Celu": {
-    "api": "torch.nn.modules.activation.CELU",
-    "args": {
-      "alpha": "alpha",
-      "inplace": "inplace",
-      "self": "self"
-    },
+    "api": "torch.nn.functional.celu",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -538,8 +630,26 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Checkify": {
+    "dispatch_rules": [],
+    "missing_message": "PyTorch handles runtime checks via eager execution or anomaly detection contexts.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Checkpoint": {
+    "api": "torch.utils.checkpoint.checkpoint",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Clamp": {
     "api": "torch.clamp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ClearCache": {
+    "api": "torch.cuda.empty_cache",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -547,7 +657,7 @@
   "Clip": {
     "api": "torch.clamp",
     "args": {
-      "arr": "input"
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -559,19 +669,28 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Clone": {
+    "api": "copy.deepcopy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import copy"
+    ]
+  },
   "ColumnStack": {
     "api": "torch.column_stack",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "CombineMasks": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "combine_masks_logic"
+  },
   "Compile": {
     "api": "torch.compile",
-    "args": {
-      "args": "args",
-      "kwargs": "kwargs",
-      "self": "self"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -596,38 +715,30 @@
   },
   "Concat": {
     "api": "torch.cat",
-    "args": {
-      "arrays": "tensors",
-      "axis": "dim"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Concatenate": {
     "api": "torch.cat",
-    "args": {
-      "arrays": "tensors",
-      "axis": "dim"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cond": {
+    "api": "torch.cond",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Conj": {
     "api": "torch.conj",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Conjugate": {
     "api": "torch.conj",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -639,62 +750,39 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Conv1d": {
-    "api": "torch.nn.modules.conv.Conv1d",
+  "Contiguous": {
+    "api": "torch.Tensor.contiguous",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "method"
+  },
+  "Conv": {
+    "api": "torch.nn.Conv2d",
     "args": {
-      "bias": "bias",
-      "device": "device",
-      "dilation": "dilation",
-      "dtype": "dtype",
-      "groups": "groups",
-      "in_channels": "in_channels",
-      "kernel_size": "kernel_size",
-      "out_channels": "out_channels",
-      "padding": "padding",
-      "padding_mode": "padding_mode",
-      "self": "self",
-      "stride": "stride"
+      "in_features": "in_channels",
+      "out_features": "out_channels",
+      "strides": "stride",
+      "use_bias": "bias"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv1d": {
+    "api": "torch.nn.functional.conv1d",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Conv2d": {
-    "api": "torch.nn.Conv2d",
-    "args": {
-      "bias": "bias",
-      "device": "device",
-      "dilation": "dilation",
-      "dtype": "dtype",
-      "groups": "groups",
-      "in_channels": "in_channels",
-      "kernel_size": "kernel_size",
-      "out_channels": "out_channels",
-      "padding": "padding",
-      "padding_mode": "padding_mode",
-      "self": "self",
-      "stride": "stride"
-    },
+    "api": "torch.nn.functional.conv2d",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Conv3d": {
-    "api": "torch.nn.modules.conv.Conv3d",
-    "args": {
-      "bias": "bias",
-      "device": "device",
-      "dilation": "dilation",
-      "dtype": "dtype",
-      "groups": "groups",
-      "in_channels": "in_channels",
-      "kernel_size": "kernel_size",
-      "out_channels": "out_channels",
-      "padding": "padding",
-      "padding_mode": "padding_mode",
-      "self": "self",
-      "stride": "stride"
-    },
+    "api": "torch.nn.functional.conv3d",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -706,68 +794,56 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "ConvTranspose1d": {
-    "api": "torch.nn.modules.conv.ConvTranspose1d",
+  "ConvTranspose": {
+    "api": "torch.nn.ConvTranspose2d",
     "args": {
-      "bias": "bias",
-      "device": "device",
-      "dilation": "dilation",
-      "dtype": "dtype",
-      "groups": "groups",
-      "in_channels": "in_channels",
-      "kernel_size": "kernel_size",
-      "out_channels": "out_channels",
-      "output_padding": "output_padding",
-      "padding": "padding",
-      "padding_mode": "padding_mode",
-      "self": "self",
-      "stride": "stride"
+      "in_features": "in_channels",
+      "out_features": "out_channels",
+      "strides": "stride",
+      "use_bias": "bias"
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose1d": {
+    "api": "torch.nn.functional.conv_transpose1d",
+    "dispatch_rules": [],
+    "layout_map": {
+      "input": "NLC->NCL",
+      "return": "NCL->NLC",
+      "weight": "OIK->IOK"
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ConvTranspose2d": {
-    "api": "torch.nn.modules.conv.ConvTranspose2d",
-    "args": {
-      "bias": "bias",
-      "device": "device",
-      "dilation": "dilation",
-      "dtype": "dtype",
-      "groups": "groups",
-      "in_channels": "in_channels",
-      "kernel_size": "kernel_size",
-      "out_channels": "out_channels",
-      "output_padding": "output_padding",
-      "padding": "padding",
-      "padding_mode": "padding_mode",
-      "self": "self",
-      "stride": "stride"
-    },
+    "api": "torch.nn.functional.conv_transpose2d",
     "dispatch_rules": [],
+    "layout_map": {
+      "input": "NHWC->NCHW",
+      "return": "NCHW->NHWC",
+      "weight": "OIKK->IOKK"
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ConvTranspose3d": {
-    "api": "torch.nn.modules.conv.ConvTranspose3d",
-    "args": {
-      "bias": "bias",
-      "device": "device",
-      "dilation": "dilation",
-      "dtype": "dtype",
-      "groups": "groups",
-      "in_channels": "in_channels",
-      "kernel_size": "kernel_size",
-      "out_channels": "out_channels",
-      "output_padding": "output_padding",
-      "padding": "padding",
-      "padding_mode": "padding_mode",
-      "self": "self",
-      "stride": "stride"
-    },
+    "api": "torch.nn.functional.conv_transpose3d",
     "dispatch_rules": [],
+    "layout_map": {
+      "input": "NDHWC->NCDHW",
+      "return": "NCDHW->NDHWC",
+      "weight": "OIKKK->IOKKK"
+    },
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Convolve": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "torch_convolve_1d"
   },
   "Copy": {
     "api": "torch.clone",
@@ -800,7 +876,7 @@
   "Cos": {
     "api": "torch.cos",
     "args": {
-      "x": "input"
+      "a": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -809,7 +885,7 @@
   "Cosh": {
     "api": "torch.cosh",
     "args": {
-      "x": "input"
+      "a": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -904,6 +980,28 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Cummax": {
+    "api": "torch.cummax",
+    "args": {
+      "a": "input",
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "output_select_index": 0,
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cummin": {
+    "api": "torch.cummin",
+    "args": {
+      "a": "input",
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "output_select_index": 0,
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Cumprod": {
     "api": "torch.cumprod",
     "args": {
@@ -919,6 +1017,36 @@
     "args": {
       "a": "input",
       "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CurrentUpdateContext": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CustomAutograd": {
+    "api": "torch.autograd.Function",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CustomVjp": {
+    "api": "torch.autograd.function.Function",
+    "dispatch_rules": [],
+    "missing_message": "Requires manual implementation of forward/backward static methods.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Data": {
+    "api": "torch.nn.Parameter",
+    "arg_values": {
+      "requires_grad": "False"
+    },
+    "args": {
+      "value": "data"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -943,6 +1071,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Dataclass": {
+    "api": "dataclasses.dataclass",
+    "args": {
+      "frozen": "frozen",
+      "init": "init"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import dataclasses"
+    ]
+  },
   "Deg2rad": {
     "api": "torch.deg2rad",
     "args": {
@@ -955,11 +1095,18 @@
   "Degrees": {
     "api": "torch.rad2deg",
     "args": {
-      "x": "input"
+      "a": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Dequantize": {
+    "api": "torch.dequantize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "torch_dequantize_adapter"
   },
   "Det": {
     "api": "torch.linalg.det",
@@ -970,17 +1117,21 @@
   },
   "Device": {
     "api": "torch.device",
-    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "device_allocator"
+    "required_imports": []
+  },
+  "DeviceCpu": {
+    "dispatch_rules": [],
+    "macro_template": "torch.device('cpu')",
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Diag": {
     "api": "torch.diag",
     "args": {
-      "k": "diagonal",
-      "v": "input"
+      "a": "input",
+      "k": "diagonal"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1001,8 +1152,7 @@
     "args": {
       "a": "input",
       "axis1": "dim1",
-      "axis2": "dim2",
-      "offset": "offset"
+      "axis2": "dim2"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1029,19 +1179,34 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Display": {
+    "api": "print",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Div": {
     "api": "torch.div",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Divide": {
-    "api": "torch.div",
+  "DivMod": {
+    "api": "lambda a, b: (torch.div(a, b, rounding_mode='floor'), torch.fmod(a, b))",
     "dispatch_rules": [],
-    "operator": "/",
     "pack_as": "Tuple",
     "required_imports": [],
-    "transformation_type": "infix"
+    "transformation_type": "inline_lambda"
+  },
+  "Divide": {
+    "api": "torch.div",
+    "args": {
+      "a": "input",
+      "b": "other"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Divmod": {
     "dispatch_rules": [],
@@ -1055,6 +1220,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DotProductAttention": {
+    "api": "torch.nn.functional.scaled_dot_product_attention",
+    "args": {
+      "bias": null,
+      "dropout_rate": "dropout_p",
+      "mask": "attn_mask"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Double": {
     "api": "torch.double",
     "dispatch_rules": [],
@@ -1063,7 +1239,10 @@
   },
   "Dropout": {
     "api": "torch.nn.Dropout",
-    "args": {},
+    "args": {
+      "deterministic": null,
+      "rate": "p"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1112,8 +1291,8 @@
     "required_imports": []
   },
   "E": {
-    "api": "torch.e",
     "dispatch_rules": [],
+    "macro_template": "2.718281828459045",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1126,13 +1305,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "EinsumLayer": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Elu": {
-    "api": "torch.nn.modules.activation.ELU",
-    "args": {
-      "alpha": "alpha",
-      "inplace": "inplace",
-      "self": "self"
-    },
+    "api": "torch.nn.functional.elu",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1140,18 +1319,7 @@
   "Embedding": {
     "api": "torch.nn.Embedding",
     "args": {
-      "_freeze": "_freeze",
-      "_weight": "_weight",
-      "device": "device",
-      "dtype": "dtype",
-      "embedding_dim": "embedding_dim",
-      "max_norm": "max_norm",
-      "norm_type": "norm_type",
-      "num_embeddings": "num_embeddings",
-      "padding_idx": "padding_idx",
-      "scale_grad_by_freq": "scale_grad_by_freq",
-      "self": "self",
-      "sparse": "sparse"
+      "features": "embedding_dim"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1177,24 +1345,60 @@
   },
   "Equal": {
     "api": "torch.eq",
+    "args": {
+      "a": "input",
+      "b": "other"
+    },
     "dispatch_rules": [],
-    "operator": "==",
     "pack_as": "Tuple",
-    "required_imports": [],
-    "transformation_type": "infix"
+    "required_imports": []
   },
   "Erf": {
-    "api": "torch.special.erf",
-    "args": {},
+    "api": "torch.erf",
+    "args": {
+      "a": "input"
+    },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ErfInv": {
+    "api": "torch.erfinv",
+    "args": {
+      "a": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EulerGamma": {
+    "dispatch_rules": [],
+    "macro_template": "0.57721566490153286060",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Eval": {
+    "dispatch_rules": [],
+    "macro_template": "None",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EvalMode": {
+    "api": "model.eval",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "method_call"
+  },
+  "EvalShape": {
+    "api": "torch.func.eval_shape",
+    "dispatch_rules": [],
+    "min_version": "2.0",
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Exp": {
     "api": "torch.exp",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1211,7 +1415,6 @@
   "ExpandDims": {
     "api": "torch.unsqueeze",
     "args": {
-      "a": "input",
       "axis": "dim"
     },
     "dispatch_rules": [],
@@ -1220,19 +1423,24 @@
   },
   "Expm1": {
     "api": "torch.expm1",
-    "args": {
-      "x": "input"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ExportFunction": {
+    "api": "torch.export.export",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Eye": {
     "api": "torch.eye",
-    "args": {
-      "M": "m",
-      "N": "n"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FInfo": {
+    "api": "torch.finfo",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1257,6 +1465,27 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "FilterAll": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FilterAny": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FilterState": {
+    "dispatch_rules": [],
+    "missing_message": "PyTorch state dicts are flat; filtering requires list comprehensions.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FindDuplicates": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Finfo": {
     "api": "torch.finfo",
     "dispatch_rules": [],
@@ -1275,9 +1504,8 @@
   "Flatten": {
     "api": "torch.flatten",
     "args": {
-      "end_dim": "end_dim",
-      "self": "self",
-      "start_dim": "start_dim"
+      "end_axis": "end_dim",
+      "start_axis": "start_dim"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1371,9 +1599,6 @@
   },
   "Floor": {
     "api": "torch.floor",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1381,7 +1606,6 @@
   "FloorDivide": {
     "api": "torch.floor_divide",
     "dispatch_rules": [],
-    "macro_template": "torch.div({x1}, {x2}, rounding_mode='floor')",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1411,6 +1635,17 @@
       "x1": "input",
       "x2": "other"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ForiLoop": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "transform_for_loop"
+  },
+  "ForkRngs": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1445,10 +1680,15 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "FromFlatState": {
+    "api": "model.load_state_dict",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Full": {
     "api": "torch.full",
     "args": {
-      "fill_value": "fill_value",
       "shape": "size"
     },
     "dispatch_rules": [],
@@ -1458,8 +1698,7 @@
   "FullLike": {
     "api": "torch.full_like",
     "args": {
-      "a": "input",
-      "fill_value": "fill_value"
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1486,6 +1725,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "GRUCell": {
+    "api": "torch.nn.GRUCell",
+    "args": {
+      "hidden_features": "hidden_size",
+      "in_features": "input_size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Gather": {
     "api": "torch.gather",
     "args": {
@@ -1494,6 +1743,12 @@
       "self": "self"
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GatherMM": {
+    "dispatch_rules": [],
+    "missing_message": "Torch requires custom implementation for GatherMM",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1519,8 +1774,21 @@
     "required_imports": []
   },
   "Gelu": {
-    "api": "torch.nn.GELU",
-    "args": {},
+    "api": "torch.nn.functional.gelu",
+    "arg_values": {
+      "approximate": {
+        "False": "'none'",
+        "True": "'tanh'"
+      }
+    },
+    "args": {
+      "approximate": "approximate"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GeneralConv": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1532,13 +1800,64 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Glu": {
-    "api": "torch.nn.modules.activation.GLU",
+  "GetActiveMemory": {
+    "api": "torch.cuda.memory_allocated",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetCacheMemory": {
+    "api": "torch.cuda.memory_reserved",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetDefaultDevice": {
+    "dispatch_rules": [],
+    "macro_template": "torch.device('cuda' if torch.cuda.is_available() else 'cpu')",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetDefaultStream": {
+    "api": "torch.cuda.current_stream",
     "args": {
-      "dim": "dim",
-      "self": "self"
+      "device": null
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetPeakMemory": {
+    "api": "torch.cuda.max_memory_allocated",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetState": {
+    "dispatch_rules": [],
+    "macro_template": "{node}.state_dict()",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Glu": {
+    "api": "torch.nn.functional.glu",
+    "args": {
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Gpu": {
+    "dispatch_rules": [],
+    "macro_template": "torch.device('cuda')",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Grad": {
+    "api": "torch.func.grad",
+    "dispatch_rules": [],
+    "min_version": "2.0",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1552,6 +1871,11 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Graphdef": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Grayscale": {
     "api": "torchvision.transforms.Grayscale",
     "dispatch_rules": [],
@@ -1561,18 +1885,23 @@
   "Greater": {
     "api": "torch.gt",
     "dispatch_rules": [],
-    "operator": ">",
     "pack_as": "Tuple",
-    "required_imports": [],
-    "transformation_type": "infix"
+    "required_imports": []
   },
   "GreaterEqual": {
     "api": "torch.ge",
     "dispatch_rules": [],
-    "operator": ">=",
     "pack_as": "Tuple",
-    "required_imports": [],
-    "transformation_type": "infix"
+    "required_imports": []
+  },
+  "GroupNorm": {
+    "api": "torch.nn.GroupNorm",
+    "args": {
+      "num_features": "num_channels"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Groupnorm": {
     "api": "torch.nn.modules.normalization.GroupNorm",
@@ -1622,21 +1951,25 @@
     "required_imports": []
   },
   "HardSigmoid": {
-    "api": "torch.nn.modules.activation.Hardsigmoid",
-    "args": {
-      "inplace": "inplace",
-      "self": "self"
-    },
+    "api": "torch.nn.functional.hardsigmoid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HardSilu": {
+    "api": "torch.nn.functional.hardswish",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "HardSwish": {
     "api": "torch.nn.functional.hardswish",
-    "args": {
-      "inplace": "inplace",
-      "input": "input"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HardTanh": {
+    "api": "torch.nn.functional.hardtanh",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1743,32 +2076,52 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IInfo": {
+    "api": "torch.iinfo",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Identity": {
-    "api": "torch.nn.modules.linear.Identity",
-    "args": {
-      "args": "args",
-      "kwargs": "kwargs",
-      "self": "self"
-    },
+    "api": "torch.eye",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Imag": {
     "api": "torch.imag",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ImportFunction": {
+    "api": "torch.jit.load",
     "args": {
-      "val": "input"
+      "file": "f"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Inexact": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Inf": {
+    "api": "torch.inf",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Initializer": {
+    "api": "torch.nn.init",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Inner": {
     "api": "torch.inner",
-    "args": {
-      "a": "input",
-      "b": "other"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1779,6 +2132,15 @@
       "index": "index",
       "module": "module",
       "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "InstanceNorm": {
+    "api": "torch.nn.InstanceNorm2d",
+    "args": {
+      "epsilon": "eps"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1814,6 +2176,22 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IsAvailable": {
+    "api": "torch.cuda.is_available",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsClose": {
+    "api": "torch.isclose",
+    "args": {
+      "a": "input",
+      "b": "other"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "IsComplex": {
     "api": "torch.is_complex",
     "args": {
@@ -1823,11 +2201,14 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IsData": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "is_tensor_check"
+  },
   "IsFinite": {
     "api": "torch.isfinite",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1844,36 +2225,24 @@
   },
   "IsInf": {
     "api": "torch.isinf",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "IsNan": {
     "api": "torch.isnan",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "IsNegInf": {
     "api": "torch.isneginf",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "IsPosInf": {
     "api": "torch.isposinf",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1907,8 +2276,46 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IterChildren": {
+    "api": "module.named_children",
+    "dispatch_rules": [],
+    "macro_template": "{module}.named_children()",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "method"
+  },
+  "IterGraph": {
+    "dispatch_rules": [],
+    "macro_template": "{node}.named_modules()",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IterModules": {
+    "api": "module.named_modules",
+    "dispatch_rules": [],
+    "macro_template": "{module}.named_modules()",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "method"
+  },
   "Ix_": {
     "api": "torch.meshgrid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "JVP": {
+    "api": "torch.autograd.functional.jvp",
+    "args": {
+      "primals": "inputs",
+      "tangents": "v"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Jit": {
+    "api": "torch.compile",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1933,10 +2340,6 @@
   },
   "Kron": {
     "api": "torch.kron",
-    "args": {
-      "a": "input",
-      "b": "other"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1968,16 +2371,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LSTMCell": {
+    "api": "torch.nn.LSTMCell",
+    "args": {
+      "hidden_features": "hidden_size",
+      "in_features": "input_size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "LayerNorm": {
     "api": "torch.nn.LayerNorm",
     "args": {
-      "bias": "bias",
-      "device": "device",
-      "dtype": "dtype",
-      "elementwise_affine": "elementwise_affine",
-      "eps": "eps",
-      "normalized_shape": "normalized_shape",
-      "self": "self"
+      "epsilon": "eps"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2063,6 +2470,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LeakyReLU": {
+    "api": "torch.nn.functional.leaky_relu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "LeakyRelu": {
     "api": "torch.nn.modules.activation.LeakyReLU",
     "args": {
@@ -2083,32 +2496,29 @@
   "Less": {
     "api": "torch.lt",
     "dispatch_rules": [],
-    "operator": "<",
     "pack_as": "Tuple",
-    "required_imports": [],
-    "transformation_type": "infix"
+    "required_imports": []
   },
   "LessEqual": {
     "api": "torch.le",
     "dispatch_rules": [],
-    "operator": "<=",
     "pack_as": "Tuple",
-    "required_imports": [],
-    "transformation_type": "infix"
+    "required_imports": []
   },
   "Linear": {
     "api": "torch.nn.Linear",
     "args": {
-      "bias": "bias",
-      "device": "device",
-      "dtype": "dtype",
-      "in_features": "in_features",
-      "out_features": "out_features",
-      "self": "self"
+      "use_bias": "bias"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "LinearGeneral": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "linear_general_adapter"
   },
   "LinearT": {
     "api": "torch.nn.utils.fusion.LinearT",
@@ -2120,8 +2530,26 @@
   "Linspace": {
     "api": "torch.linspace",
     "args": {
-      "num": "steps"
+      "num": "steps",
+      "start": "start",
+      "stop": "end"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LoRA": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LoRALinear": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LoRAParam": {
+    "api": "torch.nn.Parameter",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2129,7 +2557,8 @@
   "Load": {
     "api": "torch.load",
     "args": {
-      "file": "f"
+      "file": "f",
+      "format": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2137,45 +2566,68 @@
   },
   "Log": {
     "api": "torch.log",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Log10": {
     "api": "torch.log10",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Log1p": {
     "api": "torch.log1p",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Log2": {
     "api": "torch.log2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogAddExp": {
+    "api": "torch.logaddexp",
     "args": {
-      "x": "input"
+      "x1": "input",
+      "x2": "other"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "LogSoftmax": {
-    "api": "torch.nn.modules.activation.LogSoftmax",
+  "LogCumSumExp": {
+    "api": "torch.logcumsumexp",
     "args": {
-      "dim": "dim",
-      "self": "self"
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSigmoid": {
+    "api": "torch.nn.functional.logsigmoid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSoftmax": {
+    "api": "torch.nn.functional.log_softmax",
+    "args": {
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSumExp": {
+    "api": "torch.logsumexp",
+    "args": {
+      "axis": "dim",
+      "keepdims": "keepdim",
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2293,6 +2745,19 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MakeAttentionMask": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "attention_mask_generator"
+  },
+  "MakeCausalMask": {
+    "api": "torch.nn.attention.bias.causal_upper_left",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "causal_mask_adapter"
+  },
   "MarginRankingLoss": {
     "api": "torch.nn.modules.loss.MarginRankingLoss",
     "args": {
@@ -2317,8 +2782,11 @@
     "required_imports": []
   },
   "MatMul": {
-    "api": "torch.linalg.matmul",
-    "args": {},
+    "api": "torch.matmul",
+    "args": {
+      "x1": "input",
+      "x2": "other"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2349,11 +2817,28 @@
     "required_imports": []
   },
   "Max": {
-    "api": "torch.max",
+    "api": "torch.amax",
     "args": {
-      "a": "input",
       "axis": "dim",
-      "keepdims": "keepdim"
+      "keepdims": "keepdim",
+      "x": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool": {
+    "api": "torch.nn.functional.max_pool2d",
+    "arg_values": {
+      "padding": {
+        "SAME": "'same'",
+        "VALID": 0
+      }
+    },
+    "args": {
+      "inputs": "input",
+      "padding": "padding",
+      "window_shape": "kernel_size"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2464,20 +2949,32 @@
   "Mean": {
     "api": "torch.mean",
     "args": {
-      "a": "input",
-      "axis": "dim"
+      "axis": "dim",
+      "keepdims": "keepdim",
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Median": {
-    "api": "torch.median",
+    "api": "torch.nanmedian",
     "args": {
-      "a": "input",
       "axis": "dim",
-      "keepdims": "keepdim"
+      "keepdims": "keepdim",
+      "x": "input"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Merge": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "state_dict_load_shim"
+  },
+  "MergeContext": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2485,17 +2982,29 @@
   "Meshgrid": {
     "api": "torch.meshgrid",
     "dispatch_rules": [],
+    "pack_as": "List",
+    "pack_to_tuple": "tensors",
+    "required_imports": []
+  },
+  "Metric": {
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Min": {
-    "api": "torch.min",
+    "api": "torch.amin",
     "args": {
-      "a": "input",
       "axis": "dim",
-      "keepdims": "keepdim"
+      "keepdims": "keepdim",
+      "x": "input"
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MinPool": {
+    "dispatch_rules": [],
+    "macro_template": "-torch.nn.functional.max_pool2d(-{inputs}, kernel_size={window_shape}, stride={strides})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -2527,6 +3036,11 @@
     "required_imports": [],
     "transformation_type": "infix"
   },
+  "ModelAndOptimizer": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Modf": {
     "dispatch_rules": [],
     "macro_template": "(torch.frac({x}), torch.trunc({x}))",
@@ -2534,21 +3048,27 @@
     "required_imports": []
   },
   "Module": {
-    "api": "torch.nn.modules.module.Module",
-    "args": {
-      "args": "args",
-      "kwargs": "kwargs",
-      "self": "self"
-    },
+    "api": "torch.nn.Module",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ModuleDict": {
+    "api": "torch.nn.ModuleDict",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ModuleList": {
     "api": "torch.nn.ModuleList",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MoveAxis": {
+    "api": "torch.moveaxis",
     "args": {
-      "modules": "modules",
-      "self": "self"
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2578,6 +3098,22 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MultiHeadAttention": {
+    "api": "torch.nn.MultiheadAttention",
+    "args": {
+      "dropout": "dropout",
+      "head_dim": "embed_dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MultiMetric": {
+    "api": "torch.nn.ModuleDict",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "MultiheadAttention": {
     "api": "torch.nn.MultiheadAttention",
     "args": {
@@ -2600,11 +3136,13 @@
   },
   "Multiply": {
     "api": "torch.mul",
+    "args": {
+      "x1": "input",
+      "x2": "other"
+    },
     "dispatch_rules": [],
-    "operator": "*",
     "pack_as": "Tuple",
-    "required_imports": [],
-    "transformation_type": "infix"
+    "required_imports": []
   },
   "Nan": {
     "api": "torch.nan",
@@ -2673,11 +3211,25 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Negative": {
+    "api": "torch.neg",
+    "args": {
+      "x": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Nll": {
     "api": "torch.nn.NLLLoss",
     "args": {
       "reduction": "reduction"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NodeStates": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2691,6 +3243,37 @@
       "out": "out",
       "p": "p"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Not": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NotEqual": {
+    "api": "torch.not_equal",
+    "args": {
+      "x1": "input",
+      "x2": "other"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Nothing": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Object": {
+    "api": "object",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OfType": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2710,8 +3293,63 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "OnesLike": {
+    "api": "torch.ones_like",
+    "args": {
+      "x": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OptArray": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OptState": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OptVariable": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OptimizedLSTMCell": {
+    "api": "torch.nn.LSTMCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Optimizer": {
+    "api": "torch.optim.Optimizer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Optional": {
     "api": "torch.nn.functional.Optional",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Outer": {
+    "api": "torch.outer",
+    "args": {
+      "x1": "input",
+      "x2": "vec2"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PReLU": {
+    "api": "torch.nn.PReLU",
+    "args": {
+      "init": "init"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2732,14 +3370,13 @@
   "Pad": {
     "api": "torch.nn.functional.pad",
     "args": {
-      "input": "input",
-      "mode": "mode",
-      "pad": "pad",
-      "value": "value"
+      "pad_width": "pad",
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "requires_plugin": "padding_converter"
   },
   "Param": {
     "api": "torch.nn.Parameter",
@@ -2768,6 +3405,58 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Partition": {
+    "api": "torch.kthvalue",
+    "args": {
+      "axis": "dim",
+      "x": "input"
+    },
+    "dispatch_rules": [],
+    "output_select_index": 0,
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PartitionName": {
+    "api": "str",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PathContains": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PermuteDims": {
+    "api": "torch.permute",
+    "args": {
+      "axes": "dims",
+      "x": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "pack_to_tuple": "dims",
+    "required_imports": []
+  },
+  "Perturbation": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pi": {
+    "api": "torch.pi",
+    "dispatch_rules": [],
+    "macro_template": "None",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "inline_lambda"
+  },
+  "Pmap": {
+    "dispatch_rules": [],
+    "missing_message": "PyTorch does not support single-controller pmap. Use DistributedDataParallel.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Positive": {
     "api": "torch.positive",
     "dispatch_rules": [],
@@ -2787,8 +3476,8 @@
   "Power": {
     "api": "torch.pow",
     "args": {
-      "x1": "input",
-      "x2": "exponent"
+      "a": "input",
+      "b": "exponent"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2817,6 +3506,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "PureState": {
+    "api": "tuple",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Put": {
     "api": "torch.put",
     "args": {
@@ -2829,16 +3524,27 @@
     "required_imports": []
   },
   "PutAlongAxis": {
-    "api": "torch.scatter",
+    "api": "torch.put_along_axis",
     "args": {
-      "arr": "input",
+      "a": "input",
       "axis": "dim",
       "indices": "index",
-      "values": "src"
+      "values": "source"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Pytree": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Qqmm": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "quantized_matmul"
   },
   "Quantile": {
     "api": "torch.quantile",
@@ -2851,6 +3557,28 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Quantize": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "quantization"
+  },
+  "QuantizedMatmul": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "quantized_matmul"
+  },
+  "RMSNorm": {
+    "api": "torch.nn.RMSNorm",
+    "args": {
+      "dim": "normalized_shape",
+      "eps": "eps"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "RMSprop": {
     "api": "torch.optim.RMSprop",
     "dispatch_rules": [],
@@ -2858,12 +3586,7 @@
     "required_imports": []
   },
   "RNN": {
-    "api": "torch.nn.modules.rnn.RNN",
-    "args": {
-      "args": "args",
-      "kwargs": "kwargs",
-      "self": "self"
-    },
+    "api": "torch.nn.RNN",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2888,6 +3611,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "RNNCellBase": {
+    "api": "torch.nn.RNNCellBase",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "RPC_AVAILABLE": {
     "api": "torch.nn.parallel.distributed.RPC_AVAILABLE",
     "args": {},
@@ -2907,7 +3636,7 @@
   "Radians": {
     "api": "torch.deg2rad",
     "args": {
-      "x": "input"
+      "a": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2957,11 +3686,13 @@
     "required_imports": []
   },
   "ReLU": {
-    "api": "torch.nn.ReLU",
-    "args": {
-      "inplace": "inplace",
-      "self": "self"
-    },
+    "api": "torch.nn.functional.relu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReLU6": {
+    "api": "torch.nn.functional.relu6",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2969,7 +3700,7 @@
   "Real": {
     "api": "torch.real",
     "args": {
-      "val": "input"
+      "a": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2978,18 +3709,21 @@
   "Reciprocal": {
     "api": "torch.reciprocal",
     "args": {
-      "x": "input"
+      "a": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "RecursiveMap": {
+    "api": "torch.nn.modules.module.Module.apply",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "method"
+  },
   "Relu": {
-    "api": "torch.nn.ReLU",
-    "args": {
-      "inplace": "inplace",
-      "input": "input"
-    },
+    "api": "torch.nn.functional.relu",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3007,21 +3741,53 @@
   "Remainder": {
     "api": "torch.remainder",
     "args": {
-      "x1": "input",
-      "x2": "other"
+      "a": "input",
+      "b": "other"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Remat": {
+    "api": "torch.utils.checkpoint.checkpoint",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "checkpoint_wrapper"
+  },
   "Repeat": {
     "api": "torch.repeat_interleave",
     "args": {
       "a": "input",
-      "axis": "dim",
-      "repeats": "repeats"
+      "axis": "dim"
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReplaceByPureDict": {
+    "api": "load_state_dict",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "load_state_dict_wrapper"
+  },
+  "Reseed": {
+    "api": "torch.manual_seed",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ResetPeakMemory": {
+    "api": "torch.cuda.reset_peak_memory_stats",
+    "dispatch_rules": [
+      {
+        "if_arg": "device",
+        "is_val": "None",
+        "op": "is_type",
+        "use_api": "torch.cuda.reset_peak_memory_stats"
+      }
+    ],
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3053,8 +3819,8 @@
   "RightShift": {
     "api": "torch.bitwise_right_shift",
     "args": {
-      "x1": "input",
-      "x2": "other"
+      "a": "input",
+      "b": "other"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3079,6 +3845,12 @@
       "normalized_shape": "normalized_shape",
       "self": "self"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rngs": {
+    "api": "torch.Generator",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3118,6 +3890,16 @@
   "Round": {
     "api": "torch.round",
     "args": {
+      "a": "input",
+      "decimals": "decimals"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rsqrt": {
+    "api": "torch.rsqrt",
+    "args": {
       "a": "input"
     },
     "dispatch_rules": [],
@@ -3133,12 +3915,42 @@
   "Save": {
     "api": "torch.save",
     "args": {
-      "f": "f",
-      "obj": "obj"
+      "arr": "obj",
+      "file": "f"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "SaveGguf": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "save_gguf_adapter"
+  },
+  "SaveSafetensors": {
+    "dispatch_rules": [],
+    "macro_template": "save_file({arrays}, {file}, metadata={metadata})",
+    "pack_as": "Tuple",
+    "required_imports": [
+      "from safetensors.torch import save_file"
+    ]
+  },
+  "Savez": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import numpy as np"
+    ],
+    "requires_plugin": "savez_converter"
+  },
+  "SavezCompressed": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import numpy as np"
+    ],
+    "requires_plugin": "savez_converter"
   },
   "Scatter": {
     "api": "torch.Tensor.scatter_",
@@ -3152,22 +3964,64 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SegmentedMm": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "segmented_ops"
+  },
   "Selu": {
-    "api": "torch.nn.modules.activation.SELU",
-    "args": {
-      "inplace": "inplace",
-      "self": "self"
-    },
+    "api": "torch.nn.functional.selu",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Sequential": {
     "api": "torch.nn.Sequential",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetCacheLimit": {
+    "api": "torch.cuda.set_per_process_memory_fraction",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "resource_limit_adapter"
+  },
+  "SetDefaultDevice": {
+    "api": "torch.cuda.set_device",
     "args": {
-      "args": "args",
-      "self": "self"
+      "device": "device"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetDefaultStream": {
+    "api": "torch.cuda.set_stream",
+    "args": {
+      "stream": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetMemoryLimit": {
+    "api": "torch.cuda.set_per_process_memory_fraction",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "resource_limit_adapter"
+  },
+  "SetMode": {
+    "api": "train",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "torch_mode_switch"
+  },
+  "SetWiredLimit": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3190,22 +4044,50 @@
     "required_imports": []
   },
   "Sigmoid": {
-    "api": "torch.nn.modules.activation.Sigmoid",
+    "api": "torch.sigmoid",
     "args": {
-      "args": "args",
-      "kwargs": "kwargs",
-      "self": "self"
+      "a": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sign": {
+    "api": "torch.sign",
+    "args": {
+      "a": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SignedInteger": {
+    "api": "torch.tensor",
+    "casts": {
+      "x": "int32"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Silu": {
-    "api": "torch.nn.modules.activation.SiLU",
+    "api": "torch.nn.functional.silu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SimpleCell": {
+    "api": "torch.nn.RNNCell",
     "args": {
-      "inplace": "inplace",
-      "self": "self"
+      "hidden_features": "hidden_size",
+      "in_features": "input_size"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sin": {
+    "api": "torch.sin",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3217,12 +4099,30 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Sinh": {
+    "api": "torch.sinh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Size": {
     "api": "torch.nn.modules.normalization.CrossMapLRN2d.size",
     "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Slice": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "slice_adapter"
+  },
+  "SliceUpdate": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "slice_update_adapter"
   },
   "Smoothl1": {
     "api": "torch.nn.SmoothL1Loss",
@@ -3234,11 +4134,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SoftSign": {
+    "api": "torch.nn.functional.softsign",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Softmax": {
-    "api": "torch.nn.modules.activation.Softmax",
+    "api": "torch.nn.functional.softmax",
     "args": {
-      "dim": "dim",
-      "self": "self"
+      "axis": "dim"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3266,12 +4171,7 @@
     "required_imports": []
   },
   "Softplus": {
-    "api": "torch.nn.modules.activation.Softplus",
-    "args": {
-      "beta": "beta",
-      "self": "self",
-      "threshold": "threshold"
-    },
+    "api": "torch.nn.functional.softplus",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3297,21 +4197,86 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "SpectralNorm": {
-    "api": "torch.nn.utils.spectral_norm.SpectralNorm",
+  "Sort": {
+    "api": "torch.sort",
     "args": {
-      "dim": "dim",
-      "eps": "eps",
-      "n_power_iterations": "n_power_iterations",
-      "name": "name",
-      "self": "self"
+      "axis": "dim"
     },
+    "dispatch_rules": [],
+    "output_select_index": 0,
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SpectralNorm": {
+    "api": "torch.nn.utils.spectral_norm",
+    "args": {
+      "epsilon": "eps",
+      "layer": "module",
+      "n_steps": "n_power_iterations"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Split": {
+    "api": "torch.tensor_split",
+    "args": {
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sqrt": {
+    "api": "torch.sqrt",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Square": {
+    "api": "torch.square",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Squeeze": {
     "api": "torch.squeeze",
+    "args": {
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Stack": {
+    "api": "torch.stack",
+    "args": {
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Standardize": {
+    "dispatch_rules": [],
+    "macro_template": "({x} - {x}.mean()) / ({x}.std() + 1e-5)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "State": {
+    "api": "state_dict",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "torch_state_dict_to_nnx"
+  },
+  "Std": {
+    "api": "torch.std",
+    "args": {
+      "axis": "dim",
+      "ddof": "correction",
+      "keepdims": "keepdim"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3322,20 +4287,70 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "StopGradient": {
+    "api": "torch.detach",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Stream": {
+    "api": "torch.cuda.stream",
+    "args": {
+      "device": "stream"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "StreamContext": {
+    "api": "torch.cuda.stream",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sub": {
     "api": "torch.sub",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Subtract": {
+    "api": "torch.sub",
+    "args": {
+      "x": "input",
+      "y": "other"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sum": {
     "api": "torch.sum",
+    "args": {
+      "axis": "dim",
+      "keepdims": "keepdim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SwapAxes": {
+    "api": "torch.swapaxes",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Swish": {
+    "api": "torch.nn.functional.silu",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Synchronize": {
     "api": "torch.cuda.synchronize",
+    "args": {
+      "stream": "device"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3354,13 +4369,49 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Tanh": {
-    "api": "torch.nn.modules.activation.Tanh",
+  "Tabulate": {
+    "api": "torchinfo.summary",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import torchinfo"
+    ]
+  },
+  "Take": {
+    "api": "torch.take",
     "args": {
-      "args": "args",
-      "kwargs": "kwargs",
-      "self": "self"
+      "axis": "dim",
+      "indices": "index"
     },
+    "dispatch_rules": [
+      {
+        "if_arg": "axis",
+        "op": "neq",
+        "use_api": "torch.index_select"
+      }
+    ],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TakeAlongAxis": {
+    "api": "torch.gather",
+    "args": {
+      "axis": "dim",
+      "indices": "index"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "gather_adapter"
+  },
+  "Tan": {
+    "api": "torch.tan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tanh": {
+    "api": "torch.tanh",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3389,12 +4440,34 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Tensordot": {
+    "api": "torch.tensordot",
+    "args": {
+      "axes": "dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Threshold": {
     "api": "torch.nn.modules.activation.Softplus.threshold",
     "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Tile": {
+    "api": "torch.tile",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ToPureDict": {
+    "api": "state_dict",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "torch_state_dict_to_nnx"
   },
   "ToTensor": {
     "api": "torchvision.transforms.ToTensor",
@@ -3405,6 +4478,16 @@
   "TopK": {
     "api": "torch.topk",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TopKValues": {
+    "api": "torch.topk",
+    "args": {
+      "axis": "dim"
+    },
+    "dispatch_rules": [],
+    "output_select_index": 0,
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3423,6 +4506,19 @@
   "TorchSave": {
     "api": "torch.save",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Trace": {
+    "api": "torch.diagonal",
+    "dispatch_rules": [],
+    "macro_template": "torch.sum(torch.diagonal({x}, {offset}, {axis1}, {axis2}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrainMode": {
+    "dispatch_rules": [],
+    "macro_template": "{node}.train()",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3516,6 +4612,72 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Transpose": {
+    "api": "torch.permute",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "pack_to_tuple": "axes",
+    "required_imports": []
+  },
+  "Tri": {
+    "api": "torch.tril",
+    "dispatch_rules": [],
+    "macro_template": "torch.tril(torch.ones(({n}, {m} or {n})), diagonal={k})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tril": {
+    "api": "torch.tril",
+    "args": {
+      "k": "diagonal"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Triu": {
+    "api": "torch.triu",
+    "args": {
+      "k": "diagonal",
+      "x": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TypeVarA": {
+    "api": "typing.TypeVar",
+    "dispatch_rules": [],
+    "inject_args": {
+      "name": "'A'"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TypeVarM": {
+    "api": "typing.TypeVar",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt16": {
+    "api": "torch.int16",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt32": {
+    "api": "torch.int32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt64": {
+    "api": "torch.int64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "UInt8": {
     "api": "torch.uint8",
     "dispatch_rules": [],
@@ -3523,11 +4685,9 @@
     "required_imports": []
   },
   "Unflatten": {
-    "api": "torch.nn.modules.flatten.Unflatten",
+    "api": "torch.unflatten",
     "args": {
-      "dim": "dim",
-      "self": "self",
-      "unflattened_size": "unflattened_size"
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3562,6 +4722,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "UnsignedInteger": {
+    "api": "torch.int32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Unsqueeze": {
     "api": "torch.unsqueeze",
     "dispatch_rules": [],
@@ -3575,6 +4741,17 @@
       "x": "input"
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UpdateContext": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UpdateState": {
+    "dispatch_rules": [],
+    "macro_template": "{node}.load_state_dict({state})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3592,6 +4769,22 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "VMap": {
+    "api": "torch.vmap",
+    "args": {
+      "in_axes": "in_dims",
+      "out_axes": "out_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ValueAndGrad": {
+    "api": "torch.func.value_and_grad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Vander": {
     "api": "torch.vander",
     "dispatch_rules": [],
@@ -3601,10 +4794,10 @@
   "Var": {
     "api": "torch.var",
     "args": {
-      "a": "input",
       "axis": "dim",
       "ddof": "correction",
-      "keepdims": "keepdim"
+      "keepdims": "keepdim",
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3644,6 +4837,27 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Vjp": {
+    "api": "torch.autograd.functional.vjp",
+    "args": {
+      "cotangents": "v",
+      "fun": "func",
+      "primals": "inputs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Vmap": {
+    "api": "torch.func.vmap",
+    "args": {
+      "in_axes": "in_dims",
+      "out_axes": "out_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Vsplit": {
     "api": "torch.vsplit",
     "args": {
@@ -3660,11 +4874,9 @@
     "required_imports": []
   },
   "WeightNorm": {
-    "api": "torch.nn.utils.weight_norm.WeightNorm",
+    "api": "torch.nn.utils.weight_norm",
     "args": {
-      "dim": "dim",
-      "name": "name",
-      "self": "self"
+      "layer": "module"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3672,10 +4884,11 @@
   },
   "Where": {
     "api": "torch.where",
-    "args": {
-      "x": "input",
-      "y": "other"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "WhileLoop": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3692,7 +4905,7 @@
   "ZerosLike": {
     "api": "torch.zeros_like",
     "args": {
-      "a": "input"
+      "x": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",

@@ -1,0 +1,659 @@
+operation: "AsStrided"
+description: "Create a view into the array with the given shape and strides."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "shape"
+    type: "Sequence[int]"
+  - name: "strides"
+    type: "Sequence[int]"
+  - name: "offset"
+    type: "int"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.core.as_strided"
+    args:
+        input: "a"
+  torch:
+    api: "torch.as_strided"
+    args:
+        offset: "storage_offset"
+  numpy:
+    api: "numpy.lib.stride_tricks.as_strided"
+    args:
+        input: "x"
+    kwargs_map:
+        offset: null
+    required_imports:
+      - "import numpy.lib.stride_tricks"
+  jax:
+    api: null
+    missing_message: "JAX does not support arbitrary strided views."
+---
+operation: "AsyncEval"
+description: "Asynchronously evaluate an array or tree of arrays."
+std_args:
+  - name: "tensors"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.async_eval"
+    pack_as: "List"
+  jax:
+    api: null
+    transformation_type: "inline_lambda"
+    macro_template: "[t.block_until_ready() for t in {tensors}]"
+  torch:
+    api: "torch.cuda.synchronize"
+    missing_message: "Syncs global device, not specific tensors."
+---
+operation: "AtLeast1D"
+description: "Convert inputs to arrays with at least one dimension."
+std_args:
+  - name: "arys"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.atleast_1d"
+  torch:
+    api: "torch.atleast_1d"
+  jax:
+    api: "jax.numpy.atleast_1d"
+  numpy:
+    api: "numpy.atleast_1d"
+  tensorflow:
+    api: "tf.experimental.numpy.atleast_1d"
+  keras:
+    api: "keras.ops.atleast_1d"
+---
+operation: "AtLeast2D"
+description: "Convert inputs to arrays with at least two dimensions."
+std_args:
+  - name: "arys"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.atleast_2d"
+  torch:
+    api: "torch.atleast_2d"
+  jax:
+    api: "jax.numpy.atleast_2d"
+  numpy:
+    api: "numpy.atleast_2d"
+  tensorflow:
+    api: "tf.experimental.numpy.atleast_2d"
+  keras:
+    api: "keras.ops.atleast_2d"
+---
+operation: "AtLeast3D"
+description: "Convert inputs to arrays with at least three dimensions."
+std_args:
+  - name: "arys"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.atleast_3d"
+  torch:
+    api: "torch.atleast_3d"
+  jax:
+    api: "jax.numpy.atleast_3d"
+  numpy:
+    api: "numpy.atleast_3d"
+  tensorflow:
+    api: "tf.experimental.numpy.atleast_3d"
+  keras:
+    api: "keras.ops.atleast_3d"
+---
+operation: "BFloat16"
+description: "Data type constant for brain floating point 16."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.bfloat16"
+  torch:
+    api: "torch.bfloat16"
+  jax:
+    api: "jax.numpy.bfloat16"
+  tensorflow:
+    api: "tf.bfloat16"
+---
+operation: "BitwiseAnd"
+description: "Element-wise bitwise and."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.bitwise_and"
+  torch:
+    api: "torch.bitwise_and"
+  jax:
+    api: "jax.numpy.bitwise_and"
+  numpy:
+    api: "numpy.bitwise_and"
+  tensorflow:
+    api: "tf.bitwise.bitwise_and"
+  keras:
+    api: "keras.ops.bitwise_and"
+---
+operation: "BitwiseInvert"
+description: "Element-wise bitwise inverse."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.bitwise_invert"
+  torch:
+    api: "torch.bitwise_not"
+  jax:
+    api: "jax.numpy.invert"
+  numpy:
+    api: "numpy.invert"
+  tensorflow:
+    api: "tf.bitwise.invert"
+  keras:
+    api: "keras.ops.invert"
+---
+operation: "BitwiseOr"
+description: "Element-wise bitwise or."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.bitwise_or"
+  torch:
+    api: "torch.bitwise_or"
+  jax:
+    api: "jax.numpy.bitwise_or"
+  numpy:
+    api: "numpy.bitwise_or"
+  tensorflow:
+    api: "tf.bitwise.bitwise_or"
+  keras:
+    api: "keras.ops.bitwise_or"
+---
+operation: "BitwiseXor"
+description: "Element-wise bitwise xor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.bitwise_xor"
+  torch:
+    api: "torch.bitwise_xor"
+  jax:
+    api: "jax.numpy.bitwise_xor"
+  numpy:
+    api: "numpy.bitwise_xor"
+  tensorflow:
+    api: "tf.bitwise.bitwise_xor"
+  keras:
+    api: "keras.ops.bitwise_xor"
+---
+operation: "BlockMaskedMM"
+description: "Matrix multiplication with block masking."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "block_size"
+    type: "int"
+    default: 64
+  - name: "mask_out"
+    type: "Tensor"
+  - name: "mask_lhs"
+    type: "Tensor"
+  - name: "mask_rhs"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.block_masked_mm"
+  torch:
+    api: "torch.sparse.bsr_spmm" 
+    missing_message: "Requires BSR format."
+---
+operation: "Bool"
+description: "Data type constant for boolean."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.bool_"
+  torch:
+    api: "torch.bool"
+  jax:
+    api: "jax.numpy.bool_"
+  numpy:
+    api: "numpy.bool_"
+  tensorflow:
+    api: "tf.bool"
+---
+operation: "BroadcastArrays"
+description: "Broadcast arrays against one another."
+std_args:
+  - name: "arrays"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.broadcast_arrays"
+  torch:
+    api: "torch.broadcast_tensors"
+  jax:
+    api: "jax.numpy.broadcast_arrays"
+  numpy:
+    api: "numpy.broadcast_arrays"
+---
+operation: "BroadcastShapes"
+description: "Broadcast shapes to find common shape."
+std_args:
+  - name: "shapes"
+    type: "Sequence[int]"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.broadcast_shapes"
+  torch:
+    api: "torch.broadcast_shapes"
+  jax:
+    api: "jax.numpy.broadcast_shapes"
+  numpy:
+    api: "numpy.broadcast_shapes"
+---
+operation: "BroadcastTo"
+description: "Broadcast an array to the given shape."
+std_args:
+  - name: "array"
+    type: "Tensor"
+  - name: "shape"
+    type: "Sequence[int]"
+variants:
+  mlx:
+    api: "mlx.core.broadcast_to"
+    args:
+        array: "a"
+  torch:
+    api: "torch.broadcast_to"
+    args:
+        array: "input"
+  jax:
+    api: "jax.numpy.broadcast_to"
+  numpy:
+    api: "numpy.broadcast_to"
+  tensorflow:
+    api: "tf.broadcast_to"
+    args:
+        array: "input"
+  keras:
+    api: "keras.ops.broadcast_to"
+    args:
+        array: "x"
+---
+operation: "Ceil"
+description: "Element-wise ceil."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.ceil"
+    args:
+        x: "a"
+  torch:
+    api: "torch.ceil"
+    args:
+        x: "input"
+  jax:
+    api: "jax.numpy.ceil"
+  numpy:
+    api: "numpy.ceil"
+  tensorflow:
+    api: "tf.math.ceil"
+  keras:
+    api: "keras.ops.ceil"
+---
+operation: "Checkpoint"
+description: "Checkpoint logic for gradient reduction."
+std_args:
+  - name: "function"
+    type: "Callable"
+  - name: "args"
+    type: "Any"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.core.checkpoint"
+    pack_to_tuple: null 
+  torch:
+    api: "torch.utils.checkpoint.checkpoint"
+  jax:
+    api: "jax.checkpoint"
+    transformation_type: "decorator"
+---
+operation: "ClearCache"
+description: "Clear the memory cache."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.clear_cache"
+  torch:
+    api: "torch.cuda.empty_cache"
+  jax:
+    api: "jax.clear_caches"
+---
+operation: "Clip"
+description: "Clip values between minimum and maximum."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "min"
+    type: "float"
+    default: null
+  - name: "max"
+    type: "float"
+    default: null
+variants:
+  mlx:
+    api: "mlx.core.clip"
+    args:
+        x: "a"
+        min: "a_min"
+        max: "a_max"
+  torch:
+    api: "torch.clamp"
+    args:
+        x: "input"
+  jax:
+    api: "jax.numpy.clip"
+    args:
+        min: "a_min"
+        max: "a_max"
+  numpy:
+    api: "numpy.clip"
+    args:
+        min: "a_min"
+        max: "a_max"
+  tensorflow:
+    api: "tf.clip_by_value"
+    args:
+        x: "t"
+        min: "clip_value_min"
+        max: "clip_value_max"
+  keras:
+    api: "keras.ops.clip"
+    args:
+        min: "min_value"
+        max: "max_value"
+---
+operation: "Compile"
+description: "Compile function for optimization."
+std_args:
+  - name: "fun"
+    type: "Callable"
+variants:
+  mlx:
+    api: "mlx.core.compile"
+  torch:
+    api: "torch.compile"
+  jax:
+    api: "jax.jit"
+  tensorflow:
+    api: "tf.function"
+    args:
+        fun: "func"
+---
+operation: "Complex64"
+description: "Data type constant for complex 64."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.complex64"
+  torch:
+    api: "torch.complex64"
+  jax:
+    api: "jax.numpy.complex64"
+  tensorflow:
+    api: "tf.complex64"
+---
+operation: "ComplexFloating"
+description: "Abstract data type constant for complex floating point."
+std_args: []
+variants:
+  mlx:
+    api: "mlx.core.complexfloating"
+  jax:
+    api: "jax.numpy.complexfloating"
+  numpy:
+    api: "numpy.complexfloating"
+---
+operation: "Concat"
+description: "Concatenate arrays along axis."
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.core.concat"
+    args:
+        tensors: "arrays"
+        dim: "axis"
+  torch:
+    api: "torch.cat"
+  jax:
+    api: "jax.numpy.concatenate"
+    args:
+        tensors: "arrays"
+        dim: "axis"
+  numpy:
+    api: "numpy.concatenate"
+    args:
+        tensors: "arrays"
+        dim: "axis"
+  tensorflow:
+    api: "tf.concat"
+    args:
+        tensors: "values"
+        dim: "axis"
+  keras:
+    api: "keras.ops.concatenate"
+    args:
+        tensors: "inputs"
+        dim: "axis"
+---
+operation: "Concatenate"
+description: "Concatenate arrays (Synonym of Concat)."
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.core.concatenate"
+    args:
+        tensors: "arrays"
+        dim: "axis"
+  torch:
+    api: "torch.cat"
+  jax:
+    api: "jax.numpy.concatenate"
+    args:
+        tensors: "arrays"
+        dim: "axis"
+---
+operation: "Conj"
+description: "Return the elementwise complex conjugate."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.conj"
+    args:
+        input: "a"
+  torch:
+    api: "torch.conj"
+  jax:
+    api: "jax.numpy.conj"
+    args:
+        input: "x"
+  numpy:
+    api: "numpy.conj"
+    args:
+        input: "x"
+  tensorflow:
+    api: "tf.math.conj"
+    args:
+        input: "x"
+  keras:
+    api: "keras.ops.conj"
+    args:
+        input: "x"
+---
+operation: "Conjugate"
+description: "Complex conjugate (Synonym of Conj)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.conjugate"
+    args:
+        input: "a"
+  torch:
+    api: "torch.conj"
+  jax:
+    api: "jax.numpy.conjugate"
+    args:
+        input: "x"
+---
+operation: "Contiguous"
+description: "Force an array to be row contiguous."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.core.contiguous"
+    args:
+        x: "a"
+  torch:
+    api: "torch.Tensor.contiguous"
+    transformation_type: "method"
+  jax:
+    api: "jax.numpy.ascontiguousarray"
+    args:
+        x: "a"
+  numpy:
+    api: "numpy.ascontiguousarray"
+    args:
+        x: "a"
+---
+operation: "Conv1d"
+description: "1D convolution over input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 3
+  - name: "weight"
+    type: "Tensor"
+  - name: "stride"
+    type: "int"
+    default: 1
+  - name: "padding"
+    type: "int"
+    default: 0
+  - name: "dilation"
+    type: "int"
+    default: 1
+  - name: "groups"
+    type: "int"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.core.conv1d"
+  torch:
+    api: "torch.nn.functional.conv1d"
+  jax:
+    api: "jax.lax.conv_general_dilated"
+    missing_message: "JAX Core conv1d requires explicit dimension strings."
+  keras:
+    api: "keras.ops.conv"
+---
+operation: "Conv2d"
+description: "2D convolution over input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 4
+  - name: "weight"
+    type: "Tensor"
+  - name: "stride"
+    type: "int"
+    default: 1
+  - name: "padding"
+    type: "int"
+    default: 0
+  - name: "dilation"
+    type: "int"
+    default: 1
+  - name: "groups"
+    type: "int"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.core.conv2d"
+  torch:
+    api: "torch.nn.functional.conv2d"
+  jax:
+    api: "jax.lax.conv_general_dilated"
+  keras:
+    api: "keras.ops.conv"
+---
+operation: "Conv3d"
+description: "3D convolution over input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 5
+  - name: "weight"
+    type: "Tensor"
+  - name: "stride"
+    type: "int"
+    default: 1
+  - name: "padding"
+    type: "int"
+    default: 0
+  - name: "dilation"
+    type: "int"
+    default: 1
+  - name: "groups"
+    type: "int"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.core.conv3d"
+  torch:
+    api: "torch.nn.functional.conv3d"
+  jax:
+    api: "jax.lax.conv_general_dilated"
+  keras:
+    api: "keras.ops.conv"
