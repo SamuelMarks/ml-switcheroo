@@ -1,0 +1,799 @@
+operation: "Multiply"
+description: "Element-wise multiplication."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.mul"
+  mlx:
+    api: "mlx.core.multiply"
+  keras:
+    api: "keras.ops.multiply"
+  tensorflow:
+    api: "tf.multiply"
+  flax_nnx:
+    api: "jax.numpy.multiply"
+  paxml:
+    api: "jax.numpy.multiply"
+---
+operation: "NanMean"
+description: "Computes the arithmetic mean along the specified axis, ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nanmean"
+    args:
+      axis: "dim"
+  mlx:
+    api: null # Not supported in MLX core
+  keras:
+    api: null # Not strictly present in Keras Ops
+  tensorflow:
+    api: "tf.experimental.numpy.nanmean"
+  flax_nnx:
+    api: "jax.numpy.nanmean"
+  paxml:
+    api: "jax.numpy.nanmean"
+---
+operation: "NanProd"
+description: "Computes the product of array elements over a given axis, treating NaNs as ones."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: null
+    missing_message: "PyTorch has no direct 'nanprod'. Requires masking."
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.nanprod"
+  flax_nnx:
+    api: "jax.numpy.nanprod"
+  paxml:
+    api: "jax.numpy.nanprod"
+---
+operation: "NanSum"
+description: "Return the sum of array elements over a given axis treating Not a Numbers (NaNs) as zero."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nansum"
+    args:
+      axis: "dim"
+  mlx:
+    api: null # Not supported
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.nansum"
+  flax_nnx:
+    api: "jax.numpy.nansum"
+  paxml:
+    api: "jax.numpy.nansum"
+---
+operation: "Array"
+description: "Constructs a tensor from data."
+op_type: "class"
+std_args:
+  - name: "object"
+    type: "Any"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.tensor"
+    args:
+      object: "data"
+  mlx:
+    api: "mlx.core.array"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    args:
+      object: "x"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    args:
+      object: "value"
+  flax_nnx:
+    api: "jax.numpy.array"
+  paxml:
+    api: "jax.numpy.array"
+---
+operation: "Ndim"
+description: "Return the number of dimensions of an array."
+op_type: "attribute"
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  torch:
+    api: "ndim"
+    macro_template: "{a}.ndim"
+  mlx:
+    api: "ndim"
+    macro_template: "{a}.ndim"
+  keras:
+    api: "ndim"
+    macro_template: "len({a}.shape)"
+  tensorflow:
+    api: "tf.rank" # tf.rank returns a tensor, usually .ndim is preferred for static shape
+    macro_template: "{a}.ndim"
+  flax_nnx:
+    api: "jax.numpy.ndim"
+  paxml:
+    api: "jax.numpy.ndim"
+---
+operation: "Negative"
+description: "Numerical negative, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.negative"
+  mlx:
+    api: "mlx.core.negative"
+  keras:
+    api: "keras.ops.negative"
+  tensorflow:
+    api: "tf.math.negative"
+  flax_nnx:
+    api: "jax.numpy.negative"
+  paxml:
+    api: "jax.numpy.negative"
+---
+operation: "NewAxis"
+description: "A convenient alias for None, useful for indexing arrays."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "None"
+    macro_template: "None"
+  mlx:
+    api: "None"
+    macro_template: "None"
+  keras:
+    api: "None"
+    macro_template: "None"
+  tensorflow:
+    api: "tf.newaxis"
+  flax_nnx:
+    api: "jax.numpy.newaxis"
+  paxml:
+    api: "jax.numpy.newaxis"
+---
+operation: "NextAfter"
+description: "Return the next floating-point value after x1 towards x2, element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.nextafter"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: null # Not directly supported
+  keras:
+    api: null # Not in generic ops
+  tensorflow:
+    api: "tf.experimental.numpy.nextafter"
+  flax_nnx:
+    api: "jax.numpy.nextafter"
+  paxml:
+    api: "jax.numpy.nextafter"
+---
+operation: "NonZero"
+description: "Return the indices of the elements that are non-zero."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.nonzero"
+    args:
+      a: "input"
+    macro_template: "torch.nonzero({a}, as_tuple=True)" # Match tuple return semantics of numpy
+  mlx:
+    api: null # MLX core doesn't expose nonzero, only via array indexing
+  keras:
+    api: "keras.ops.nonzero"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.nonzero"
+  flax_nnx:
+    api: "jax.numpy.nonzero"
+  paxml:
+    api: "jax.numpy.nonzero"
+---
+operation: "NotEqual"
+description: "Return (x1 != x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ne"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.not_equal"
+  keras:
+    api: "keras.ops.not_equal"
+  tensorflow:
+    api: "tf.not_equal"
+  flax_nnx:
+    api: "jax.numpy.not_equal"
+  paxml:
+    api: "jax.numpy.not_equal"
+---
+operation: "Ones"
+description: "Return a new array of given shape and type, filled with ones."
+std_args:
+  - name: "shape"
+    type: "Sequence[int]"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.ones"
+    args:
+      shape: "size"
+  mlx:
+    api: "mlx.core.ones"
+  keras:
+    api: "keras.ops.ones"
+  tensorflow:
+    api: "tf.ones"
+  flax_nnx:
+    api: "jax.numpy.ones"
+  paxml:
+    api: "jax.numpy.ones"
+---
+operation: "OnesLike"
+description: "Return an array of ones with the same shape and type as a given array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.ones_like"
+    args:
+      a: "input"
+  mlx:
+    api: "mlx.core.ones_like"
+  keras:
+    api: "keras.ops.ones_like"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.ones_like"
+    args:
+      a: "input"
+  flax_nnx:
+    api: "jax.numpy.ones_like"
+  paxml:
+    api: "jax.numpy.ones_like"
+---
+operation: "Outer"
+description: "Compute the outer product of two vectors."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.outer"
+    args:
+      a: "input"
+      b: "vec2"
+  mlx:
+    api: "mlx.core.outer"
+  keras:
+    api: "keras.ops.outer"
+    args:
+      a: "x1"
+      b: "x2"
+  tensorflow:
+    api: "tf.experimental.numpy.outer"
+  flax_nnx:
+    api: "jax.numpy.outer"
+  paxml:
+    api: "jax.numpy.outer"
+---
+operation: "Pad"
+description: "Pad an array."
+std_args:
+  - name: "array"
+    type: "Tensor"
+  - name: "pad_width"
+    type: "Sequence"
+  - name: "mode"
+    type: "str"
+    default: "constant"
+variants:
+  torch:
+    api: "torch.nn.functional.pad"
+    requires_plugin: "padding_converter" # Torch formatting differs from Numpy
+  mlx:
+    api: "mlx.core.pad"
+  keras:
+    api: "keras.ops.pad"
+    args:
+      array: "x"
+  tensorflow:
+    api: "tf.pad"
+    args:
+      array: "tensor"
+      pad_width: "paddings"
+  flax_nnx:
+    api: "jax.numpy.pad"
+  paxml:
+    api: "jax.numpy.pad"
+---
+operation: "Pi"
+description: "Mathematical constant pi."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.pi"
+    macro_template: "torch.pi"
+  mlx:
+    api: "math.pi"
+    macro_template: "math.pi" # MLX doesn't expose pi in core
+    required_imports:
+      - "import math"
+  keras:
+    api: "keras.ops.pi"
+    macro_template: "keras.ops.pi"
+  tensorflow:
+    api: "math.pi"
+    macro_template: "math.pi"
+    required_imports:
+      - "import math"
+  flax_nnx:
+    api: "jax.numpy.pi"
+    macro_template: "jax.numpy.pi"
+  paxml:
+    api: "jax.numpy.pi"
+    macro_template: "jax.numpy.pi"
+---
+operation: "Polyval"
+description: "Evaluate a polynomial at specific values."
+std_args:
+  - name: "p"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: null # No direct equivalent in newer torch
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.math.polyval"
+    args:
+      p: "coeffs"
+  flax_nnx:
+    api: "jax.numpy.polyval"
+  paxml:
+    api: "jax.numpy.polyval"
+---
+operation: "Positive"
+description: "Numerical positive, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: null
+    transformation_type: "prefix"
+    operator: "+"
+  mlx:
+    api: null
+    transformation_type: "prefix"
+    operator: "+"
+  keras:
+    api: null
+    transformation_type: "prefix"
+    operator: "+"
+  tensorflow:
+    api: "tf.experimental.numpy.positive"
+  flax_nnx:
+    api: "jax.numpy.positive"
+  paxml:
+    api: "jax.numpy.positive"
+---
+operation: "Power"
+description: "First array elements raised to powers from second array, element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.pow"
+    args:
+      x1: "input"
+      x2: "exponent"
+  mlx:
+    api: "mlx.core.power"
+    args:
+      x1: "base"
+      x2: "power"
+  keras:
+    api: "keras.ops.power"
+    args:
+      x1: "x1"
+      x2: "x2"
+  tensorflow:
+    api: "tf.math.pow"
+    args:
+      x1: "x"
+      x2: "y"
+  flax_nnx:
+    api: "jax.numpy.power"
+  paxml:
+    api: "jax.numpy.power"
+---
+operation: "Prod"
+description: "Return the product of array elements over a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.prod"
+    args:
+      a: "input"
+      axis: "dim"
+  mlx:
+    api: "mlx.core.prod"
+    args:
+      a: "a"
+      axis: "axis"
+      keepdims: "keepdims"
+  keras:
+    api: "keras.ops.prod"
+    args:
+      a: "x"
+      axis: "axis"
+      keepdims: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_prod"
+    args:
+      a: "input_tensor"
+      axis: "axis"
+      keepdims: "keepdims"
+  flax_nnx:
+    api: "jax.numpy.prod"
+  paxml:
+    api: "jax.numpy.prod"
+---
+operation: "PromoteTypes"
+description: "Returns the data type with the smallest size and smallest scalar kind to which both type1 and type2 may be safely cast."
+std_args:
+  - name: "type1"
+    type: "Dtype"
+  - name: "type2"
+    type: "Dtype"
+variants:
+  torch:
+    api: "torch.promote_types"
+  mlx:
+    api: null # Not exposed
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.promote_types"
+  flax_nnx:
+    api: "jax.numpy.promote_types"
+  paxml:
+    api: "jax.numpy.promote_types"
+---
+operation: "Ptp"
+description: "Range of values (maximum - minimum) along an axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: null
+    macro_template: "lambda a, axis, keepdims: a.max(axis, keepdims)[0] - a.min(axis, keepdims)[0]"
+  mlx:
+    api: null # No direct PTP
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.ptp"
+  flax_nnx:
+    api: "jax.numpy.ptp"
+  paxml:
+    api: "jax.numpy.ptp"
+---
+operation: "Rad2Deg"
+description: "Convert angles from radians to degrees."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.rad2deg"
+    args:
+      x: "input"
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.rad2deg"
+  flax_nnx:
+    api: "jax.numpy.rad2deg"
+  paxml:
+    api: "jax.numpy.rad2deg"
+---
+operation: "Ravel"
+description: "Return a contiguous flattened array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ravel"
+    args:
+      a: "input"
+  mlx:
+    api: "mlx.core.flatten"
+    args:
+      a: "x"
+  keras:
+    api: "keras.ops.ravel"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.ravel"
+  flax_nnx:
+    api: "jax.numpy.ravel"
+  paxml:
+    api: "jax.numpy.ravel"
+---
+operation: "Real"
+description: "Return the real part of the complex argument."
+std_args:
+  - name: "val"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.real"
+    args:
+      val: "input"
+  mlx:
+    api: null # Complex support limited/implicit
+  keras:
+    api: "keras.ops.real"
+    args:
+      val: "x"
+  tensorflow:
+    api: "tf.math.real"
+    args:
+      val: "input"
+  flax_nnx:
+    api: "jax.numpy.real"
+  paxml:
+    api: "jax.numpy.real"
+---
+operation: "Reciprocal"
+description: "Return the reciprocal of the argument, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.reciprocal"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.reciprocal"
+  keras:
+    api: "keras.ops.reciprocal"
+  tensorflow:
+    api: "tf.math.reciprocal"
+  flax_nnx:
+    api: "jax.numpy.reciprocal"
+  paxml:
+    api: "jax.numpy.reciprocal"
+---
+operation: "Remainder"
+description: "Return element-wise remainder of division."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.remainder"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.remainder"
+    args:
+      x1: "a"
+      x2: "b"
+  keras:
+    api: "keras.ops.mod"
+  tensorflow:
+    api: "tf.math.mod"
+    args:
+      x1: "x"
+      x2: "y"
+  flax_nnx:
+    api: "jax.numpy.remainder"
+  paxml:
+    api: "jax.numpy.remainder"
+---
+operation: "Repeat"
+description: "Repeat elements of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "repeats"
+    type: "int"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.repeat_interleave"
+    args:
+      a: "input"
+      repeats: "repeats"
+      axis: "dim"
+  mlx:
+    api: "mlx.core.repeat"
+    args:
+      a: "array"
+      repeats: "repeats"
+      axis: "axis"
+  keras:
+    api: "keras.ops.repeat"
+    args:
+      a: "x"
+      repeats: "repeats"
+      axis: "axis"
+  tensorflow:
+    api: "tf.repeat"
+    args:
+      a: "input"
+      repeats: "repeats"
+      axis: "axis"
+  flax_nnx:
+    api: "jax.numpy.repeat"
+  paxml:
+    api: "jax.numpy.repeat"
+---
+operation: "Reshape"
+description: "Gives a new shape to an array without changing its data."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "newshape"
+    type: "Sequence[int]"
+  - name: "order"
+    type: "str"
+    default: "C"
+variants:
+  torch:
+    api: "torch.reshape"
+    args:
+      a: "input"
+      newshape: "shape"
+  mlx:
+    api: "mlx.core.reshape"
+    args:
+      a: "a"
+      newshape: "shape"
+  keras:
+    api: "keras.ops.reshape"
+    args:
+      a: "x"
+      newshape: "new_shape"
+  tensorflow:
+    api: "tf.reshape"
+    args:
+      a: "tensor"
+      newshape: "shape"
+  flax_nnx:
+    api: "jax.numpy.reshape"
+  paxml:
+    api: "jax.numpy.reshape"
+---
+operation: "DtypeObject"
+description: "Object dtype indicator."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: null # Unsupported
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null # Generic object arrays not supported
+  flax_nnx:
+    api: "jax.numpy.object_"
+    # JAX doesn't support object arrays in JIT but allows the dtype handle
+  paxml:
+    api: "jax.numpy.object_"

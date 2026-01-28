@@ -1,0 +1,589 @@
+operation: "AdaptedTransformerFeedForward"
+description: "A wrapper for MultitaskResidualAdapter inserted before residual connections."
+op_type: "class"
+std_args:
+  - name: "input_dims"
+    type: "int"
+    default: 0
+  - name: "hidden_dims"
+    type: "int"
+    default: 0
+  - name: "dropout_prob"
+    type: "float"
+    default: 0.0
+variants:
+  paxml:
+    api: "praxis.layers.AdaptedTransformerFeedForward"
+    args:
+      input_dims: "input_dims"
+      hidden_dims: "hidden_dims"
+      dropout_prob: "residual_dropout_prob"
+  torch:
+    api: null # Specific to Google Pax architecture
+  flax_nnx:
+    api: null
+
+---
+operation: "AttentionProjection"
+description: "Layer that computes multi-head projection for dot-product attention."
+op_type: "class"
+std_args:
+  - name: "input_dim"
+    type: "int"
+  - name: "num_heads"
+    type: "int"
+  - name: "dim_per_head"
+    type: "int"
+  - name: "is_output"
+    type: "bool"
+    default: false
+variants:
+  paxml:
+    api: "praxis.layers.AttentionProjection"
+    args:
+      input_dim: "input_dim"
+      num_heads: "num_heads"
+      dim_per_head: "dim_per_head"
+      is_output: "is_output_projection"
+  torch:
+    api: "torch.nn.Linear" # Approximation
+    args:
+      input_dim: "in_features"
+  flax_nnx:
+    api: "flax.nnx.Linear"
+    args:
+      input_dim: "in_features"
+
+---
+operation: "AutodiffCheckpointType"
+description: "Enumeration for JAX checkpoint types."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.AutodiffCheckpointType"
+  jax:
+    api: "jax.remat" # Functional equivalent concepts
+
+---
+operation: "BaseActivation"
+description: "Base class for activation functions."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.BaseActivation"
+  keras:
+    api: "keras.layers.Layer"
+
+---
+operation: "BaseNormalization"
+description: "Base class for normalization layers."
+op_type: "class"
+std_args:
+  - name: "input_dim"
+    type: "int"
+    default: 0
+variants:
+  paxml:
+    api: "praxis.layers.BaseNormalization"
+    args:
+      input_dim: "dim"
+  torch:
+    api: "torch.nn.Module"
+
+---
+operation: "BatchNorm"
+description: "Batch normalization layer."
+op_type: "class"
+std_args:
+  - name: "num_features"
+    type: "int"
+  - name: "decay"
+    type: "float"
+    default: 0.9
+  - name: "eps"
+    type: "float"
+    default: 1e-5
+variants:
+  paxml:
+    api: "praxis.layers.BatchNorm"
+    args:
+      num_features: "dim"
+      decay: "decay"
+  torch:
+    api: "torch.nn.BatchNorm2d"
+    args:
+      num_features: "num_features"
+      decay: "momentum" # Semantics differ (momentum = 1-decay in torch)
+  flax_nnx:
+    api: "flax.nnx.BatchNorm"
+    args:
+      num_features: "num_features"
+      decay: "momentum"
+  keras:
+    api: "keras.layers.BatchNormalization"
+    args:
+      decay: "momentum"
+      eps: "epsilon"
+  mlx:
+    api: "mlx.nn.BatchNorm"
+    args:
+      num_features: "num_features"
+      eps: "eps"
+      decay: "momentum"
+
+---
+operation: "BertModel"
+description: "BERT Model base task."
+op_type: "class"
+std_args:
+  - name: "mask_token_id"
+    type: "int"
+    default: 0
+variants:
+  paxml:
+    api: "praxis.layers.BertModel"
+  # Other frameworks would require HuggingFace Transformers, not core libs
+
+---
+operation: "BiTemperedLoss"
+description: "Bi-tempered logistic loss for noisy labels."
+op_type: "class"
+std_args:
+  - name: "t1"
+    type: "float"
+    default: 1.0
+  - name: "t2"
+    type: "float"
+    default: 1.0
+variants:
+  paxml:
+    api: "praxis.layers.BiTemperedLoss"
+  # Specialized loss, likely custom in others
+
+---
+operation: "Bias"
+description: "Simple learnable bias layer."
+op_type: "class"
+std_args:
+  - name: "dims"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.Bias"
+    args:
+      dims: "dims"
+  keras:
+    api: "keras.layers.Bias" # Hypothetically if it existed as standalone
+    macro_template: "lambda x: x + keras.Variable(shape=({dims},))"
+
+---
+operation: "BregmanPCA"
+description: "Online Bregman PCA layer."
+op_type: "class"
+std_args:
+  - name: "num_components"
+    type: "int"
+  - name: "input_dims"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.BregmanPCA"
+
+---
+operation: "CausalDepthwiseConv1D"
+description: "Causal depth-wise convolution applied to a 1-d sequence."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "int"
+  - name: "hidden_dims"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.CausalDepthwiseConv1D"
+  torch:
+    api: "torch.nn.Conv1d"
+    args:
+      hidden_dims: "in_channels"
+      # Requires groups=in_channels for depthwise
+    inject_args:
+      groups: "{hidden_dims}"
+
+---
+operation: "CifgLstmCellSimple"
+description: "Coupled Input and Forget Gate (CIFG) LSTM Cell."
+op_type: "class"
+std_args:
+  - name: "input_size"
+    type: "int"
+  - name: "hidden_size"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.CifgLstmCellSimple"
+    args:
+      input_size: "num_input_nodes"
+      hidden_size: "num_hidden_nodes"
+  torch:
+    api: "torch.nn.LSTMCell"
+    # Note: Standard LSTM has input/forget gates separated, CIFG is a variant
+
+---
+operation: "ClassificationMLPModel"
+description: "Simple MLP model for Classification."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.ClassificationMLPModel"
+
+---
+operation: "ClassificationModel"
+description: "Classification task for images/video."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.ClassificationModel"
+
+---
+operation: "Conformer"
+description: "Conformer layer (CNN + Transformer)."
+op_type: "class"
+std_args:
+  - name: "model_dims"
+    type: "int"
+  - name: "kernel_size"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.Conformer"
+  torch:
+    api: "torchaudio.models.Conformer" # If torchaudio is available
+
+---
+operation: "Conv2d"
+description: "2D Convolution Layer."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "out_channels"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, getattr(Tuple, 'getitem', lambda x: x)(int, int)]"
+  - name: "stride"
+    type: "Union[int, getattr(Tuple, 'getitem', lambda x: x)(int, int)]"
+    default: 1
+  - name: "padding"
+    type: "str"
+    default: "SAME"
+variants:
+  paxml:
+    api: "praxis.layers.Conv2D"
+    args:
+      in_channels: null # Pax infers from filter_shape[2] 
+      out_channels: null # Pax infers from filter_shape[3]
+      kernel_size: null # Pax uses filter_shape tuple
+      stride: "filter_stride" # Tuple
+      padding: "padding"
+    # Note: Pax expects filter_shape as (H, W, I, O) tuple
+  torch:
+    api: "torch.nn.Conv2d"
+    args:
+      in_channels: "in_channels"
+      out_channels: "out_channels"
+      kernel_size: "kernel_size"
+      stride: "stride"
+      padding: "padding"
+  flax_nnx:
+    api: "flax.nnx.Conv"
+    args:
+      in_channels: "in_features"
+      out_channels: "features"
+      kernel_size: "kernel_size"
+      stride: "strides" # Flax expects tuple
+  keras:
+    api: "keras.layers.Conv2D"
+    args:
+      out_channels: "filters"
+      kernel_size: "kernel_size"
+      stride: "strides"
+  mlx:
+    api: "mlx.nn.Conv2d"
+    args:
+      in_channels: "in_channels"
+      out_channels: "out_channels"
+      kernel_size: "kernel_size"
+      stride: "stride"
+  tensorflow:
+    api: "tf.keras.layers.Conv2D"
+    args:
+      out_channels: "filters"
+
+---
+operation: "ConvBNAct"
+description: "Fused Block: Convolution -> BatcNorm -> Activation."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.ConvBNAct"
+  # Others would implement as Sequential(Conv, BN, Act)
+
+---
+operation: "ConvBNActWithPadding"
+description: "Fused Block with Padding support."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.ConvBNActWithPadding"
+
+---
+operation: "CubedReLU"
+description: "Activation: max(0, x)^3."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.CubedReLU"
+  torch:
+    macro_template: "lambda x: torch.relu(x)**3"
+
+---
+operation: "DepthwiseConv1d"
+description: "1D Depthwise Convolution."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.DepthwiseConv1D"
+  torch:
+    api: "torch.nn.Conv1d"
+    # Requires groups=in_channels logic via plugin or macro
+
+---
+operation: "MultiheadAttention"
+description: "Dot-product attention with multiple heads."
+op_type: "class"
+std_args:
+  - name: "embed_dim"
+    type: "int"
+  - name: "num_heads"
+    type: "int"
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+variants:
+  paxml:
+    api: "praxis.layers.DotProductAttention"
+    args:
+      embed_dim: "input_dim"
+      num_heads: "num_heads"
+      dropout: "atten_dropout_prob"
+  torch:
+    api: "torch.nn.MultiheadAttention"
+    args:
+      embed_dim: "embed_dim"
+      num_heads: "num_heads"
+      dropout: "dropout"
+  flax_nnx:
+    api: "flax.nnx.MultiHeadAttention"
+    args:
+      num_heads: "num_heads"
+  keras:
+    api: "keras.layers.MultiHeadAttention"
+    args:
+      num_heads: "num_heads"
+      embed_dim: "key_dim" # Keras behavior differs slightly
+      dropout: "dropout"
+  mlx:
+    api: "mlx.nn.MultiHeadAttention"
+    args:
+      embed_dim: "dims"
+      num_heads: "num_heads"
+
+---
+operation: "DotProductAttentionWithContext"
+description: "Attention with local/global context constraints."
+op_type: "class"
+std_args:
+  - name: "left_context"
+    type: "int"
+  - name: "right_context"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.DotProductAttentionWithContext"
+
+---
+operation: "DotProductAttentionWithContextXL"
+description: "Transformer-XL style attention with context."
+op_type: "class"
+std_args:
+  - name: "rel_pos_emb_dim"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.DotProductAttentionWithContextXL"
+
+---
+operation: "DotProductAttentionXL"
+description: "Transformer-XL attention."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.DotProductAttentionXL"
+
+---
+operation: "Dropout"
+description: "Applies dropout to input."
+op_type: "class"
+std_args:
+  - name: "p"
+    type: "float"
+    default: 0.5
+    doc: "Probability of an element to be zeroed."
+variants:
+  paxml:
+    api: "praxis.layers.Dropout"
+    # Pax uses keep_prob = 1 - p
+    macro_template: "praxis.layers.Dropout(keep_prob=1.0-{p})"
+  torch:
+    api: "torch.nn.Dropout"
+    args:
+      p: "p"
+  flax_nnx:
+    api: "flax.nnx.Dropout"
+    args:
+      p: "rate"
+  keras:
+    api: "keras.layers.Dropout"
+    args:
+      p: "rate"
+  mlx:
+    api: "mlx.nn.Dropout"
+    args:
+      p: "p"
+  tensorflow:
+    api: "tf.keras.layers.Dropout"
+    args:
+      p: "rate"
+
+---
+operation: "ELU"
+description: "Exponential Linear Unit activation."
+op_type: "class"
+std_args:
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  paxml:
+    api: "praxis.layers.ELU"
+    # Pax ELU usually doesn't expose alpha in constructor, might be fixed
+  torch:
+    api: "torch.nn.ELU"
+    args:
+      alpha: "alpha"
+  flax_nnx:
+    api: "flax.nnx.ELU"
+    args:
+      alpha: "alpha"
+  keras:
+    api: "keras.layers.ELU"
+    args:
+      alpha: "alpha"
+  mlx:
+    api: "mlx.nn.ELU"
+    args:
+      alpha: "alpha"
+
+---
+operation: "EinsumLayer"
+description: "Layer that computes an einsum and optional bias."
+op_type: "class"
+std_args:
+  - name: "equation"
+    type: "str"
+variants:
+  paxml:
+    api: "praxis.layers.Einsum"
+    args:
+      equation: "eqn"
+  keras:
+    api: "keras.layers.EinsumDense"
+    # Keras signature differs (equation, output_shape, ...)
+    args:
+      equation: "equation"
+
+---
+operation: "EinsumOp"
+description: "Functional einsum operation wrapper."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.EinsumOp"
+
+---
+operation: "Embedding"
+description: "Lookup table for embeddings."
+op_type: "class"
+std_args:
+  - name: "num_embeddings"
+    type: "int"
+  - name: "embedding_dim"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.Embedding"
+    args:
+      num_embeddings: "num_classes"
+      embedding_dim: "input_dims"
+  torch:
+    api: "torch.nn.Embedding"
+    args:
+      num_embeddings: "num_embeddings"
+      embedding_dim: "embedding_dim"
+  flax_nnx:
+    api: "flax.nnx.Embed"
+    args:
+      num_embeddings: "num_embeddings"
+      embedding_dim: "features"
+  keras:
+    api: "keras.layers.Embedding"
+    args:
+      num_embeddings: "input_dim"
+      embedding_dim: "output_dim"
+  mlx:
+    api: "mlx.nn.Embedding"
+    args:
+      num_embeddings: "num_embeddings"
+      embedding_dim: "dims"
+  tensorflow:
+    api: "tf.keras.layers.Embedding"
+    args:
+      num_embeddings: "input_dim"
+      embedding_dim: "output_dim"
+
+---
+operation: "FRnn"
+description: "Generic RNN layer wrapper."
+op_type: "class"
+std_args:
+  - name: "cell"
+    type: "Any"
+variants:
+  paxml:
+    api: "praxis.layers.FRnn"
+    args:
+      cell: "cell_tpl"
+  torch:
+    api: "torch.nn.RNN" # Generic RNN, not wrapper

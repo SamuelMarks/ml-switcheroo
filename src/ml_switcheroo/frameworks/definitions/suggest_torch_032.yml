@@ -1,0 +1,920 @@
+operation: "UnfoldCopy"
+description: "Extracts sliding local blocks from a batched input tensor. Copy variant."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "dimension"
+    type: "int"
+  - name: "size"
+    type: "int"
+  - name: "step"
+    type: "int"
+variants:
+  torch:
+    api: "torch.unfold_copy"
+  jax:
+    # JAX doesn't have a direct equivalent in numpy namespace, usually uses lax or specialized func
+    requires_plugin: "unfold_op"
+  flax_nnx:
+    requires_plugin: "unfold_op"
+  paxml:
+    requires_plugin: "unfold_op"
+  keras:
+    # Keras ops often lack unfold/sliding_window in core
+    api: null
+  tensorflow:
+    api: "tf.image.extract_patches" # closest approximation, usually requires plugin logic for dims
+  mlx:
+    # MLX generally lacks unfold in core currently
+    api: null
+  numpy:
+    requires_plugin: "unfold_op" # skimage view_as_windows
+---
+operation: "UnifyTypeList"
+description: "Internal type unification utility. No-op in transpilation contexts."
+op_type: "function"
+std_args:
+  - name: "types"
+    type: "List[Any]"
+variants:
+  torch:
+    api: "torch.unify_type_list"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+---
+operation: "Unique"
+description: "Returns the unique elements of the input tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "sorted"
+    type: "bool"
+    default: true
+  - name: "return_inverse"
+    type: "bool"
+    default: false
+  - name: "return_counts"
+    type: "bool"
+    default: false
+  - name: "axis"
+    type: "int"
+    default: null
+return_type: "Tuple[Tensor, ...]"
+variants:
+  torch:
+    api: "torch.unique"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.unique"
+    # JAX ignores sorted (always sorted), maps axis directly
+  flax_nnx:
+    api: "jax.numpy.unique"
+  paxml:
+    api: "jax.numpy.unique"
+  numpy:
+    api: "numpy.unique"
+  keras:
+    api: null # Keras ops.unique not standard in all backends yet
+  tensorflow:
+    api: "tf.unique" # Limited args support compared to Torch
+  mlx:
+    api: "mlx.core.unique"
+---
+operation: "UniqueConsecutive"
+description: "Eliminates all but the first element from every consecutive group of equivalent elements."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "return_inverse"
+    type: "bool"
+    default: false
+  - name: "return_counts"
+    type: "bool"
+    default: false
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.unique_consecutive"
+    args:
+      axis: "dim"
+  jax:
+    # Requires custom implementation
+    requires_plugin: "unique_consecutive_plugin"
+  flax_nnx:
+    requires_plugin: "unique_consecutive_plugin"
+  paxml:
+    requires_plugin: "unique_consecutive_plugin"
+  numpy:
+    # Can be implemented with np.diff
+    requires_plugin: "unique_consecutive_plugin"
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.unique_with_counts" # Approximate, usually needs plugin
+  mlx:
+    api: null
+---
+operation: "UnravelIndex"
+description: "Converts a flat index or array of flat indices into a tuple of coordinate arrays."
+std_args:
+  - name: "indices"
+    type: "Tensor"
+  - name: "shape"
+    type: "Tuple[int]"
+variants:
+  torch:
+    api: "torch.unravel_index"
+  jax:
+    api: "jax.numpy.unravel_index"
+  flax_nnx:
+    api: "jax.numpy.unravel_index"
+  paxml:
+    api: "jax.numpy.unravel_index"
+  numpy:
+    api: "numpy.unravel_index"
+  keras:
+    api: "keras.ops.unravel_index"
+  tensorflow:
+    api: "tf.unravel_index"
+  mlx:
+    # Not available in core MLX yet
+    api: null
+---
+operation: "UnsafeChunk"
+description: "Chunks a tensor into specific number of chunks. Alias for Chunk where unsafe optimization is ignored."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "chunks"
+    type: "int"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.unsafe_chunk"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.array_split"
+    args:
+      chunks: "indices_or_sections"
+      input: "ary"
+  flax_nnx:
+    api: "jax.numpy.array_split"
+  paxml:
+    api: "jax.numpy.array_split"
+  numpy:
+    api: "numpy.array_split"
+  keras:
+    api: "keras.ops.split"
+  tensorflow:
+    api: "tf.split"
+    args:
+      chunks: "num_or_size_splits"
+  mlx:
+    api: "mlx.core.split"
+    args:
+      chunks: "num_or_size_splits"
+---
+operation: "UnsafeSplit"
+description: "Splits a tensor into sections. Alias for Split."
+std_args:
+  - name: "tensor"
+    type: "Tensor"
+  - name: "split_size_or_sections"
+    type: "Union[int, List[int]]"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.unsafe_split"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.split"
+    args:
+      tensor: "ary"
+      split_size_or_sections: "indices_or_sections"
+  flax_nnx:
+    api: "jax.numpy.split"
+  paxml:
+    api: "jax.numpy.split"
+  numpy:
+    api: "numpy.split"
+  keras:
+    api: "keras.ops.split"
+  tensorflow:
+    api: "tf.split"
+    args:
+      tensor: "value"
+      split_size_or_sections: "num_or_size_splits"
+  mlx:
+    api: "mlx.core.split"
+    args:
+      tensor: "ary"
+      split_size_or_sections: "num_or_size_splits"
+---
+operation: "UnsafeSplitWithSizes"
+description: "Splits tensor with explicit sizes."
+std_args:
+  - name: "tensor"
+    type: "Tensor"
+  - name: "split_sizes"
+    type: "List[int]"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.unsafe_split_with_sizes"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.split"
+  flax_nnx:
+    api: "jax.numpy.split"
+  paxml:
+    api: "jax.numpy.split"
+  numpy:
+    api: "numpy.split"
+  keras:
+    api: "keras.ops.split"
+  tensorflow:
+    api: "tf.split"
+  mlx:
+    api: "mlx.core.split"
+---
+operation: "Unsqueeze"
+description: "Returns a new tensor with a dimension of size one inserted at the specified position."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    min: -5
+    max: 5
+variants:
+  torch:
+    api: "torch.unsqueeze"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.expand_dims"
+  flax_nnx:
+    api: "jax.numpy.expand_dims"
+  paxml:
+    api: "jax.numpy.expand_dims"
+  numpy:
+    api: "numpy.expand_dims"
+  keras:
+    api: "keras.ops.expand_dims"
+  tensorflow:
+    api: "tf.expand_dims"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.expand_dims"
+    args:
+      x: "a"
+---
+operation: "UnsqueezeCopy"
+description: "Copy-variant of Unsqueeze."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+variants:
+  torch:
+    api: "torch.unsqueeze_copy"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.expand_dims"
+  flax_nnx:
+    api: "jax.numpy.expand_dims"
+  paxml:
+    api: "jax.numpy.expand_dims"
+  numpy:
+    api: "numpy.expand_dims"
+  keras:
+    api: "keras.ops.expand_dims"
+  tensorflow:
+    api: "tf.expand_dims"
+  mlx:
+    api: "mlx.core.expand_dims"
+---
+operation: "UseDeterministicAlgorithms"
+description: "Sets whether operations must use deterministic algorithms."
+op_type: "function"
+std_args:
+  - name: "mode"
+    type: "bool"
+  - name: "warn_only"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.use_deterministic_algorithms"
+  jax:
+    api: null # Configured via jax.config
+    missing_message: "JAX determinism is set via 'jax.config.update'. Transpilation of global config setters is unsafe."
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.config.experimental.enable_op_determinism"
+  mlx:
+    api: null
+---
+operation: "ValuesCopy"
+description: "Copy-variant of .values() accessor (typically for sparse tensors)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.values_copy"
+  jax:
+    # Sparse not fully standardized in core spec
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+---
+operation: "Vander"
+description: "Generates a Vandermonde matrix."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "N"
+    type: "int"
+    default: null
+  - name: "increasing"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.vander"
+  jax:
+    api: "jax.numpy.vander"
+  flax_nnx:
+    api: "jax.numpy.vander"
+  paxml:
+    api: "jax.numpy.vander"
+  numpy:
+    api: "numpy.vander"
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.vander"
+  mlx:
+    # Manual implementation if missing from mlx.core
+    requires_plugin: "vander_plugin"
+---
+operation: "Var"
+description: "Calculates the variance."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "correction"
+    type: "int"
+    default: 1
+    description: "Delta degrees of freedom (Bessel correction)."
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.var"
+    args:
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.var"
+    args:
+      x: "a"
+      correction: "ddof"
+  flax_nnx:
+    api: "jax.numpy.var"
+    args:
+      correction: "ddof"
+  paxml:
+    api: "jax.numpy.var"
+    args:
+      correction: "ddof"
+  numpy:
+    api: "numpy.var"
+    args:
+      x: "a"
+      correction: "ddof"
+  keras:
+    api: "keras.ops.var"
+    # Keras ops.var arguments: x, axis=None, keepdims=False
+    # Correction support might be missing
+  tensorflow:
+    api: "tf.math.reduce_variance"
+    args:
+      x: "input_tensor"
+      axis: "axis"
+      keepdims: "keepdims"
+      # TF doesn't easily support correction param in reduce_variance directly
+  mlx:
+    api: "mlx.core.var"
+    args:
+      x: "a"
+      correction: "ddof"
+---
+operation: "VarMean"
+description: "Returns (var, mean)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "correction"
+    type: "int"
+    default: 1
+  - name: "keepdims"
+    type: "bool"
+    default: false
+output_select_index: null # Returns tuple
+variants:
+  torch:
+    api: "torch.var_mean"
+    args:
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    # Macro to tuple
+    macro_template: "(jax.numpy.var({x}, axis={axis}, ddof={correction}, keepdims={keepdims}), jax.numpy.mean({x}, axis={axis}, keepdims={keepdims}))"
+  flax_nnx:
+    macro_template: "(jax.numpy.var({x}, axis={axis}, ddof={correction}, keepdims={keepdims}), jax.numpy.mean({x}, axis={axis}, keepdims={keepdims}))"
+  paxml:
+    macro_template: "(jax.numpy.var({x}, axis={axis}, ddof={correction}, keepdims={keepdims}), jax.numpy.mean({x}, axis={axis}, keepdims={keepdims}))"
+  numpy:
+    macro_template: "(numpy.var({x}, axis={axis}, ddof={correction}, keepdims={keepdims}), numpy.mean({x}, axis={axis}, keepdims={keepdims}))"
+  keras:
+    macro_template: "(keras.ops.var({x}, axis={axis}, keepdims={keepdims}), keras.ops.mean({x}, axis={axis}, keepdims={keepdims}))"
+  tensorflow:
+    # TF specific tuple return function exists?
+    api: "tf.nn.moments" # Returns (mean, variance) - Reversed!
+    # Better to use macro
+    macro_template: "(tf.math.reduce_variance({x}, axis={axis}, keepdims={keepdims}), tf.math.reduce_mean({x}, axis={axis}, keepdims={keepdims}))"
+  mlx:
+    macro_template: "(mlx.core.var({x}, axis={axis}, ddof={correction}, keepdims={keepdims}), mlx.core.mean({x}, axis={axis}, keepdims={keepdims}))"
+---
+operation: "Vdot"
+description: "Computes the dot product of two vectors (conjugating the first if complex)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.vdot"
+  jax:
+    api: "jax.numpy.vdot"
+    args:
+      x: "a"
+      y: "b"
+  flax_nnx:
+    api: "jax.numpy.vdot"
+  paxml:
+    api: "jax.numpy.vdot"
+  numpy:
+    api: "numpy.vdot"
+    args:
+      x: "a"
+      y: "b"
+  keras:
+    api: "keras.ops.vdot"
+  tensorflow:
+    api: "tf.tensordot" 
+    # TF vdot semantics are slightly different, often uses tensordot
+  mlx:
+    api: "mlx.core.matmul" # For 1D behaves as dot? 
+    # MLX doesn't have explicit vdot, usually dot or matmul
+---
+operation: "ViewAsComplex"
+description: "Views a real float tensor as a complex tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.view_as_complex"
+  jax:
+    macro_template: "jax.lax.complex({x}[..., 0], {x}[..., 1])"
+  flax_nnx:
+    macro_template: "jax.lax.complex({x}[..., 0], {x}[..., 1])"
+  paxml:
+    macro_template: "jax.lax.complex({x}[..., 0], {x}[..., 1])"
+  numpy:
+    macro_template: "{x}.view(dtype=numpy.complex64)" # Dtype depends on input
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.complex"
+  mlx:
+    api: null
+---
+operation: "ViewAsComplexCopy"
+description: "Copy-variant of view_as_complex."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.view_as_complex_copy"
+  jax:
+    macro_template: "jax.lax.complex({x}[..., 0], {x}[..., 1])"
+  flax_nnx:
+    macro_template: "jax.lax.complex({x}[..., 0], {x}[..., 1])"
+  paxml:
+    macro_template: "jax.lax.complex({x}[..., 0], {x}[..., 1])"
+  numpy:
+    macro_template: "{x}.view(dtype=numpy.complex64).copy()"
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.complex"
+  mlx:
+    api: null
+---
+operation: "ViewAsReal"
+description: "Views a complex tensor as a real tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.view_as_real"
+  jax:
+    macro_template: "jax.numpy.stack([jax.numpy.real({x}), jax.numpy.imag({x})], axis=-1)"
+  flax_nnx:
+    macro_template: "jax.numpy.stack([jax.numpy.real({x}), jax.numpy.imag({x})], axis=-1)"
+  paxml:
+    macro_template: "jax.numpy.stack([jax.numpy.real({x}), jax.numpy.imag({x})], axis=-1)"
+  numpy:
+    macro_template: "numpy.stack([numpy.real({x}), numpy.imag({x})], axis=-1)"
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.math.real" # Only real part? view_as_real typically expands last dim
+    macro_template: "tf.stack([tf.math.real({x}), tf.math.imag({x})], axis=-1)"
+  mlx:
+    api: null
+---
+operation: "ViewAsRealCopy"
+description: "Copy-variant of view_as_real."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.view_as_real_copy"
+  jax:
+    macro_template: "jax.numpy.stack([jax.numpy.real({x}), jax.numpy.imag({x})], axis=-1)"
+  flax_nnx:
+    macro_template: "jax.numpy.stack([jax.numpy.real({x}), jax.numpy.imag({x})], axis=-1)"
+  paxml:
+    macro_template: "jax.numpy.stack([jax.numpy.real({x}), jax.numpy.imag({x})], axis=-1)"
+  numpy:
+    macro_template: "numpy.stack([numpy.real({x}), numpy.imag({x})], axis=-1)"
+  keras:
+    api: null
+  tensorflow:
+    macro_template: "tf.stack([tf.math.real({x}), tf.math.imag({x})], axis=-1)"
+  mlx:
+    api: null
+---
+operation: "ViewCopy"
+description: "Copy-variant of View (Reshape)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "shape"
+    is_variadic: true
+    type: "int"
+variants:
+  torch:
+    api: "torch.view_copy"
+    pack_to_tuple: "size"
+  jax:
+    api: "jax.numpy.reshape"
+    args:
+      x: "a"
+      shape: "newshape"
+    pack_to_tuple: "shape"
+  flax_nnx:
+    api: "jax.numpy.reshape"
+    pack_to_tuple: "shape"
+  paxml:
+    api: "jax.numpy.reshape"
+    pack_to_tuple: "shape"
+  numpy:
+    api: "numpy.reshape"
+    pack_to_tuple: "newshape"
+  keras:
+    api: "keras.ops.reshape"
+    pack_to_tuple: "newshape"
+  tensorflow:
+    api: "tf.reshape"
+    pack_to_tuple: "shape"
+  mlx:
+    api: "mlx.core.reshape"
+    pack_to_tuple: "shape"
+---
+operation: "VitalsEnabled"
+description: "Checks if vitals are enabled. Internal."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.vitals_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "Vmap"
+description: "Vectorizing map. Creates a function that maps a computation over a batch axis."
+op_type: "function"
+std_args:
+  - name: "func"
+    type: "Callable"
+  - name: "in_axes"
+    default: 0
+  - name: "out_axes"
+    default: 0
+variants:
+  torch:
+    api: "torch.vmap"
+    args:
+      in_axes: "in_dims"
+      out_axes: "out_dims"
+  jax:
+    api: "jax.vmap"
+  flax_nnx:
+    api: "jax.vmap"
+  paxml:
+    api: "jax.vmap"
+  numpy:
+    api: "numpy.vectorize" # Rough approx
+  keras:
+    api: "keras.ops.vectorized_map"
+  tensorflow:
+    api: "tf.vectorized_map"
+  mlx:
+    api: "mlx.core.vmap"
+    args:
+      in_axes: "in_axes"
+      out_axes: "out_axes"
+---
+operation: "Vsplit"
+description: "Splits an array into multiple sub-arrays vertically (row-wise)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "Union[int, List[int]]"
+variants:
+  torch:
+    api: "torch.vsplit"
+  jax:
+    api: "jax.numpy.vsplit"
+    args:
+      x: "ary"
+  flax_nnx:
+    api: "jax.numpy.vsplit"
+  paxml:
+    api: "jax.numpy.vsplit"
+  numpy:
+    api: "numpy.vsplit"
+    args:
+      x: "ary"
+  keras:
+    api: "keras.ops.vsplit"
+  tensorflow:
+    # TF lacks explicit vsplit, uses split with axis
+    api: null
+  mlx:
+    # MLX lacks explict vsplit
+    api: null
+---
+operation: "Vstack"
+description: "Stacks arrays in sequence vertically (row wise)."
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+variants:
+  torch:
+    api: "torch.vstack"
+  jax:
+    api: "jax.numpy.vstack"
+    args:
+      tensors: "tup"
+  flax_nnx:
+    api: "jax.numpy.vstack"
+  paxml:
+    api: "jax.numpy.vstack"
+  numpy:
+    api: "numpy.vstack"
+    args:
+      tensors: "tup"
+  keras:
+    api: "keras.ops.vstack"
+    args:
+      tensors: "xs"
+  tensorflow:
+    api: "tf.experimental.numpy.vstack"
+    args:
+      tensors: "tup"
+  mlx:
+    api: "mlx.core.concatenate" # Fallback, no explicit vstack in core? 
+    # Check mlx.core.stack/concat. Usually axis=0. 
+    # Stick to null/plugin as strict match
+    api: null
+---
+operation: "Wait"
+description: "Waits on a future."
+std_args:
+  - name: "future"
+variants:
+  torch:
+    api: "torch.wait"
+  jax:
+    macro_template: "{future}.block_until_ready() if hasattr({future}, 'block_until_ready') else None"
+  flax_nnx:
+    macro_template: "{future}.block_until_ready() if hasattr({future}, 'block_until_ready') else None"
+  paxml:
+    macro_template: "{future}.block_until_ready() if hasattr({future}, 'block_until_ready') else None"
+  numpy:
+    macro_template: "None"
+  keras:
+    macro_template: "None"
+  tensorflow:
+    macro_template: "None"
+  mlx:
+    api: "mlx.core.eval"
+---
+operation: "Where"
+description: "Selects elements from x or y depending on condition."
+std_args:
+  - name: "condition"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.where"
+  jax:
+    api: "jax.numpy.where"
+  flax_nnx:
+    api: "jax.numpy.where"
+  paxml:
+    api: "jax.numpy.where"
+  numpy:
+    api: "numpy.where"
+  keras:
+    api: "keras.ops.where"
+  tensorflow:
+    api: "tf.where"
+  mlx:
+    api: "mlx.core.where"
+---
+operation: "WhileLoop"
+description: "Constructs a loop that executes body_fn while cond_fn is true."
+op_type: "function"
+std_args:
+  - name: "cond_fn"
+    type: "Callable"
+  - name: "body_fn"
+    type: "Callable"
+  - name: "init_val"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.while_loop"
+    args:
+      init_val: "carried_inputs"
+  jax:
+    api: "jax.lax.while_loop"
+  flax_nnx:
+    api: "jax.lax.while_loop"
+  paxml:
+    api: "jax.lax.while_loop"
+  numpy:
+    api: null # Python while
+  keras:
+    api: "keras.ops.while_loop"
+  tensorflow:
+    api: "tf.while_loop"
+    args:
+       cond_fn: "cond"
+       body_fn: "body"
+       init_val: "loop_vars"
+  mlx:
+    api: null # Python while
+---
+operation: "Xlogy"
+description: "Computes x * log(y)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.xlogy"
+  jax:
+    api: "jax.scipy.special.xlogy"
+  flax_nnx:
+    api: "jax.scipy.special.xlogy"
+  paxml:
+    api: "jax.scipy.special.xlogy"
+  numpy:
+    # Often in scipy
+    required_imports:
+       - module: "scipy.special"
+         alias: "scipy_special"
+    api: "scipy_special.xlogy"
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.math.xlogy"
+  mlx:
+    # Not standard in MLX core
+    macro_template: "{x} * mlx.core.log({y})"
+---
+operation: "Xlogy_"
+description: "In-place variant of Xlogy."
+is_inplace: true
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.xlogy_"
+  jax:
+    api: "jax.scipy.special.xlogy"
+  flax_nnx:
+    api: "jax.scipy.special.xlogy"
+  paxml:
+    api: "jax.scipy.special.xlogy"
+  numpy:
+    required_imports:
+       - module: "scipy.special"
+         alias: "scipy_special"
+    api: "scipy_special.xlogy"
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.math.xlogy"
+  mlx:
+    macro_template: "{x} * mlx.core.log({y})"

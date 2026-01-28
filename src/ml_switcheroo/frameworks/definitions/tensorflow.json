@@ -5,6 +5,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Absolute": {
+    "api": "tf.math.abs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AccumulateN": {
+    "api": "tf.math.accumulate_n",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Acos": {
     "api": "tf.math.acos",
     "dispatch_rules": [],
@@ -17,44 +29,86 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ActivationLayer": {
+    "api": "tf.keras.layers.Activation",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ActivityRegularization": {
-    "api": "keras.layers.ActivityRegularization",
+    "api": "tf.keras.layers.ActivityRegularization",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adadelta": {
+    "api": "tf.keras.optimizers.Adadelta",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adafactor": {
+    "api": "tf.keras.optimizers.Adafactor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adagrad": {
+    "api": "tf.keras.optimizers.Adagrad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adam": {
+    "api": "tf.keras.optimizers.Adam",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AdamW": {
+    "api": "tf.keras.optimizers.AdamW",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adamax": {
+    "api": "tf.keras.optimizers.Adamax",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AdaptiveAveragePooling1D": {
-    "api": "keras.layers.AdaptiveAveragePooling1D",
+    "api": "tf.keras.layers.AdaptiveAveragePooling1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AdaptiveAveragePooling2D": {
-    "api": "keras.layers.AdaptiveAveragePooling2D",
+    "api": "tf.keras.layers.AdaptiveAveragePooling2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AdaptiveAveragePooling3D": {
-    "api": "keras.layers.AdaptiveAveragePooling3D",
+    "api": "tf.keras.layers.AdaptiveAveragePooling3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AdaptiveMaxPooling1D": {
-    "api": "keras.layers.AdaptiveMaxPooling1D",
+    "api": "tf.keras.layers.AdaptiveMaxPooling1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AdaptiveMaxPooling2D": {
-    "api": "keras.layers.AdaptiveMaxPooling2D",
+    "api": "tf.keras.layers.AdaptiveMaxPooling2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AdaptiveMaxPooling3D": {
-    "api": "keras.layers.AdaptiveMaxPooling3D",
+    "api": "tf.keras.layers.AdaptiveMaxPooling3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -65,14 +119,43 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AddLayer": {
+    "api": "tf.keras.layers.Add",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AddN": {
+    "api": "tf.math.add_n",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AdditiveAttention": {
-    "api": "keras.layers.AdditiveAttention",
+    "api": "tf.keras.layers.AdditiveAttention",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "All": {
     "api": "tf.reduce_all",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AllClose": {
+    "api": "tf.experimental.numpy.allclose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AlphaDropout": {
+    "api": "tf.keras.layers.AlphaDropout",
+    "args": {
+      "noise_shape": "noise_shape",
+      "rate": "rate",
+      "seed": "seed"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -101,12 +184,72 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Append": {
+    "api": "tf.experimental.numpy.append",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ApproxMaxK": {
+    "api": "tf.math.approx_max_k",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ApproxMinK": {
+    "api": "tf.math.approx_min_k",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Arange": {
     "api": "tf.range",
     "args": {
       "step": "delta",
       "stop": "limit"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arccos": {
+    "api": "tf.math.acos",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arccosh": {
+    "api": "tf.math.acosh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arcsin": {
+    "api": "tf.math.asin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arcsinh": {
+    "api": "tf.math.asinh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctan": {
+    "api": "tf.math.atan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctan2": {
+    "api": "tf.math.atan2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctanh": {
+    "api": "tf.math.atanh",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -141,11 +284,65 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Argmax": {
+    "api": "tf.math.argmax",
+    "args": {
+      "a": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Argmin": {
+    "api": "tf.math.argmin",
+    "args": {
+      "a": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Argsort": {
+    "api": "tf.argsort",
+    "args": {
+      "a": "values"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Array": {
     "api": "tf.constant",
     "args": {
       "data": "value"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ArrayEqual": {
+    "api": "tf.experimental.numpy.array_equal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsAnyArray": {
+    "api": "tf.experimental.numpy.asanyarray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsArray": {
+    "api": "tf.convert_to_tensor",
+    "args": {
+      "a": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsContiguousArray": {
+    "api": "tf.experimental.numpy.ascontiguousarray",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -214,44 +411,77 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Atleast1d": {
+    "api": "tf.experimental.numpy.atleast_1d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Atleast2d": {
+    "api": "tf.experimental.numpy.atleast_2d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Atleast3d": {
+    "api": "tf.experimental.numpy.atleast_3d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Attention": {
     "api": "keras.layers.Attention",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AttentionLayer": {
+    "api": "tf.keras.layers.Attention",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AugMix": {
-    "api": "keras.layers.AugMix",
+    "api": "tf.keras.layers.AugMix",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AutoContrast": {
-    "api": "keras.layers.AutoContrast",
+    "api": "tf.keras.layers.AutoContrast",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Average": {
-    "api": "keras.layers.Average",
+    "api": "tf.math.reduce_mean",
+    "args": {
+      "axis": "axis"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AverageLayer": {
+    "api": "tf.keras.layers.Average",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AveragePooling1D": {
-    "api": "keras.layers.AveragePooling1D",
+    "api": "tf.keras.layers.AveragePooling1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AveragePooling2D": {
-    "api": "keras.layers.AveragePooling2D",
+    "api": "tf.keras.layers.AveragePooling2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AveragePooling3D": {
-    "api": "keras.layers.AveragePooling3D",
+    "api": "tf.keras.layers.AveragePooling3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -266,14 +496,32 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AvgPool1D": {
+    "api": "tf.keras.layers.AvgPool1D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AvgPool1d": {
     "api": "keras.layers.AvgPool1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AvgPool2D": {
+    "api": "tf.keras.layers.AvgPool2D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AvgPool2d": {
     "api": "keras.layers.AvgPool2D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool3D": {
+    "api": "tf.keras.layers.AvgPool3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -291,13 +539,55 @@
     "required_imports": []
   },
   "BatchNormalization": {
-    "api": "keras.layers.BatchNormalization",
+    "api": "tf.keras.layers.BatchNormalization",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BesselI0": {
+    "api": "tf.math.bessel_i0",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BesselI0e": {
+    "api": "tf.math.bessel_i0e",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BesselI1": {
+    "api": "tf.math.bessel_i1",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BesselI1e": {
+    "api": "tf.math.bessel_i1e",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Betainc": {
+    "api": "tf.math.betainc",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Bidirectional": {
-    "api": "keras.layers.Bidirectional",
+    "api": "tf.keras.layers.Bidirectional",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BinaryCrossentropy": {
+    "api": "tf.keras.losses.BinaryCrossentropy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BinaryFocalCrossentropy": {
+    "api": "tf.keras.losses.BinaryFocalCrossentropy",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -365,11 +655,23 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "BroadcastArrays": {
+    "api": "tf.broadcast_to",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "BroadcastTo": {
     "api": "tf.broadcast_to",
     "args": {
       "array": "input"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CTCLoss": {
+    "api": "tf.keras.losses.ctc",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -446,9 +748,34 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "CategoryEncoding": {
-    "api": "keras.layers.CategoryEncoding",
+  "CategoricalCrossentropy": {
+    "api": "tf.keras.losses.CategoricalCrossentropy",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CategoricalFocalCrossentropy": {
+    "api": "tf.keras.losses.CategoricalFocalCrossentropy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CategoricalHinge": {
+    "api": "tf.keras.losses.CategoricalHinge",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CategoryEncoding": {
+    "api": "tf.keras.layers.CategoryEncoding",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cbrt": {
+    "api": "tf.math.pow",
+    "dispatch_rules": [],
+    "macro_template": "tf.math.pow({x}, 1/3)",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -465,13 +792,19 @@
     "required_imports": []
   },
   "CenterCrop": {
-    "api": "keras.layers.CenterCrop",
+    "api": "tf.keras.layers.CenterCrop",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Checkify": {
     "api": "tf.debugging.check_numerics",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CircleLoss": {
+    "api": "tf.keras.losses.Circle",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -502,8 +835,31 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Complex": {
+    "api": "tf.complex128",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Complex128": {
+    "api": "tf.complex128",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Complex64": {
     "api": "tf.complex64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Compress": {
+    "api": "tf.boolean_mask",
+    "args": {
+      "a": "tensor",
+      "axis": "axis",
+      "condition": "mask"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -527,8 +883,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ConcatenateLayer": {
+    "api": "tf.keras.layers.Concatenate",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Cond": {
     "api": "tf.cond",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConfusionMatrix": {
+    "api": "tf.math.confusion_matrix",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -560,26 +928,52 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Conv1D": {
+    "api": "tf.keras.layers.Conv1D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Conv1DTranspose": {
-    "api": "keras.layers.Conv1DTranspose",
+    "api": "tf.keras.layers.Conv1DTranspose",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Conv1d": {
-    "api": "keras.layers.Conv1D",
+    "api": "tf.keras.layers.Convolution1D",
+    "args": {
+      "bias": "use_bias",
+      "dilation": "dilation_rate",
+      "in_channels": null,
+      "out_channels": "filters",
+      "stride": "strides"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv2D": {
+    "api": "tf.keras.layers.Conv2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Conv2DTranspose": {
-    "api": "keras.layers.Conv2DTranspose",
+    "api": "tf.keras.layers.Conv2DTranspose",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Conv2d": {
-    "api": "keras.layers.Conv2D",
+    "api": "tf.keras.layers.Convolution2D",
+    "args": {
+      "bias": "use_bias",
+      "dilation": "dilation_rate",
+      "in_channels": null,
+      "out_channels": "filters",
+      "stride": "strides"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -591,7 +985,14 @@
     "required_imports": []
   },
   "Conv3d": {
-    "api": "keras.layers.Conv3D",
+    "api": "tf.keras.layers.Conv3D",
+    "args": {
+      "bias": "use_bias",
+      "dilation": "dilation_rate",
+      "in_channels": null,
+      "out_channels": "filters",
+      "stride": "strides"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -602,14 +1003,86 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ConvLSTM1d": {
+    "api": "tf.keras.layers.ConvLSTM1D",
+    "args": {
+      "bias": "use_bias",
+      "hidden_size": "filters",
+      "input_size": null
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ConvLSTM2D": {
     "api": "keras.layers.ConvLSTM2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ConvLSTM2d": {
+    "api": "tf.keras.layers.ConvLSTM2D",
+    "args": {
+      "bias": "use_bias",
+      "hidden_size": "filters",
+      "input_size": null
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ConvLSTM3D": {
     "api": "keras.layers.ConvLSTM3D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvLSTM3d": {
+    "api": "tf.keras.layers.ConvLSTM3D",
+    "args": {
+      "bias": "use_bias",
+      "hidden_size": "filters",
+      "input_size": null
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose1d": {
+    "api": "tf.keras.layers.Convolution1DTranspose",
+    "args": {
+      "bias": "use_bias",
+      "dilation": "dilation_rate",
+      "in_channels": null,
+      "out_channels": "filters",
+      "stride": "strides"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose2d": {
+    "api": "tf.keras.layers.Convolution2DTranspose",
+    "args": {
+      "bias": "use_bias",
+      "dilation": "dilation_rate",
+      "in_channels": null,
+      "out_channels": "filters",
+      "stride": "strides"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose3d": {
+    "api": "tf.keras.layers.Conv3DTranspose",
+    "args": {
+      "bias": "use_bias",
+      "dilation": "dilation_rate",
+      "in_channels": null,
+      "out_channels": "filters",
+      "stride": "strides"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -650,6 +1123,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Convolution3d": {
+    "api": "tf.keras.layers.Convolution3D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Convolution3dTranspose": {
+    "api": "tf.keras.layers.Convolution3DTranspose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Copy": {
     "api": "tf.identity",
     "args": {
@@ -677,6 +1162,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "CosineSimilarityLoss": {
+    "api": "tf.keras.losses.cosine_similarity",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "CountNonzero": {
     "api": "tf.math.count_nonzero",
     "args": {
@@ -699,14 +1190,32 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Cropping1d": {
+    "api": "tf.keras.layers.Cropping1D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Cropping2D": {
     "api": "keras.layers.Cropping2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Cropping2d": {
+    "api": "tf.keras.layers.Cropping2D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Cropping3D": {
     "api": "keras.layers.Cropping3D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cropping3d": {
+    "api": "tf.keras.layers.Cropping3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -769,7 +1278,19 @@
     "required_imports": []
   },
   "CutMix": {
-    "api": "keras.layers.CutMix",
+    "api": "tf.keras.layers.CutMix",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DSplit": {
+    "api": "tf.experimental.numpy.dsplit",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DStack": {
+    "api": "tf.experimental.numpy.dstack",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -788,6 +1309,13 @@
     "required_imports": [
       "import dataclasses"
     ]
+  },
+  "Deg2Rad": {
+    "api": "tf.math.multiply",
+    "dispatch_rules": [],
+    "macro_template": "{x} * (3.141592653589793 / 180.0)",
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Deg2rad": {
     "api": "tf.math.multiply",
@@ -817,8 +1345,40 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DepthwiseConv1d": {
+    "api": "tf.keras.layers.DepthwiseConv1D",
+    "args": {
+      "bias": "use_bias",
+      "stride": "strides"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "DepthwiseConv2D": {
     "api": "keras.layers.DepthwiseConv2D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DepthwiseConv2d": {
+    "api": "tf.keras.layers.DepthwiseConv2D",
+    "args": {
+      "bias": "use_bias",
+      "stride": "strides"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DeserializeLoss": {
+    "api": "tf.keras.losses.deserialize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DeserializeOptimizer": {
+    "api": "tf.keras.optimizers.deserialize",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -845,20 +1405,56 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DiagIndices": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Diagflat": {
+    "api": "tf.linalg.diag",
+    "dispatch_rules": [],
+    "macro_template": "tf.linalg.diag(tf.reshape({v}, [-1]), k={k})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Diagonal": {
     "api": "tf.linalg.diag_part",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DiceLoss": {
+    "api": "tf.keras.losses.dice",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Diff": {
+    "api": "tf.experimental.numpy.diff",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Digamma": {
+    "api": "tf.math.digamma",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Discretization": {
-    "api": "keras.layers.Discretization",
+    "api": "tf.keras.layers.Discretization",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Div": {
     "api": "tf.math.divide",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DivMod": {
+    "api": "tf.experimental.numpy.divmod",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -873,20 +1469,52 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DivideNoNan": {
+    "api": "tf.math.divide_no_nan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Dot": {
-    "api": "tf.tensordot",
+    "api": "tf.keras.layers.Dot",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DotList": {
+    "api": "tf.keras.layers.dot",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Dropout": {
-    "api": "keras.layers.Dropout",
+    "api": "tf.keras.layers.Dropout",
+    "args": {
+      "p": "rate"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Dtype": {
     "api": "tf.DType",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DtypeObject": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "E": {
+    "api": "tf.experimental.numpy.e",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ELU": {
+    "api": "tf.keras.layers.ELU",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -901,7 +1529,7 @@
     "required_imports": []
   },
   "EinsumDense": {
-    "api": "keras.layers.EinsumDense",
+    "api": "tf.keras.layers.EinsumDense",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -916,7 +1544,26 @@
     "required_imports": []
   },
   "Embedding": {
-    "api": "keras.layers.Embedding",
+    "api": "tf.keras.layers.Embedding",
+    "args": {
+      "embedding_dim": "output_dim",
+      "num_embeddings": "input_dim"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Empty": {
+    "api": "tf.experimental.numpy.empty",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EmptyLike": {
+    "api": "tf.experimental.numpy.empty_like",
+    "args": {
+      "a": "prototype"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -932,7 +1579,7 @@
     "required_imports": []
   },
   "Equalization": {
-    "api": "keras.layers.Equalization",
+    "api": "tf.keras.layers.Equalization",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -950,6 +1597,27 @@
     "api": "tf.math.erfinv",
     "args": {
       "a": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Erfc": {
+    "api": "tf.math.erfc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ErfcInv": {
+    "api": "tf.math.erfcinv",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EuclideanNorm": {
+    "api": "tf.math.reduce_euclidean_norm",
+    "args": {
+      "x": "input_tensor"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -975,6 +1643,12 @@
   },
   "ExpandDims": {
     "api": "tf.expand_dims",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ExperimentalEnableNumpyBehavior": {
+    "api": "tf.experimental.numpy.experimental_enable_numpy_behavior",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1007,8 +1681,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Finfo": {
+    "api": "tf.experimental.numpy.finfo",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Fix": {
+    "api": "tf.experimental.numpy.fix",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Flatten": {
-    "api": "keras.layers.Flatten",
+    "api": "tf.keras.layers.Flatten",
+    "args": {
+      "end_dim": null,
+      "start_dim": null
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1025,6 +1715,18 @@
       "axis": "axis",
       "m": "tensor"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Fliplr": {
+    "api": "tf.experimental.numpy.fliplr",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Flipud": {
+    "api": "tf.experimental.numpy.flipud",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1057,6 +1759,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Float_": {
+    "api": "tf.experimental.numpy.float_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Floor": {
     "api": "tf.math.floor",
     "dispatch_rules": [],
@@ -1065,6 +1773,12 @@
   },
   "FloorDivide": {
     "api": "tf.math.floordiv",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FloorMod": {
+    "api": "tf.math.floormod",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1080,6 +1794,12 @@
     "args": {
       "x": "dlcapsule"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ftrl": {
+    "api": "tf.keras.optimizers.Ftrl",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1108,7 +1828,23 @@
     "required_imports": []
   },
   "GRU": {
-    "api": "keras.layers.GRU",
+    "api": "tf.keras.layers.GRU",
+    "args": {
+      "bias": "use_bias",
+      "hidden_size": "units",
+      "input_size": null
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GRUCell": {
+    "api": "tf.keras.layers.GRUCell",
+    "args": {
+      "bias": "use_bias",
+      "hidden_size": "units",
+      "input_size": null
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1120,13 +1856,19 @@
     "required_imports": []
   },
   "GaussianDropout": {
-    "api": "keras.layers.GaussianDropout",
+    "api": "tf.keras.layers.GaussianDropout",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GaussianNoise": {
-    "api": "keras.layers.GaussianNoise",
+    "api": "tf.keras.layers.GaussianNoise",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Gcd": {
+    "api": "tf.math.gcd",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1137,74 +1879,92 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Geomspace": {
+    "api": "tf.experimental.numpy.geomspace",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetLoss": {
+    "api": "tf.keras.losses.get",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetOptimizer": {
+    "api": "tf.keras.optimizers.get",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "GlobalAveragePooling1D": {
-    "api": "keras.layers.GlobalAveragePooling1D",
+    "api": "tf.keras.layers.GlobalAveragePooling1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalAveragePooling2D": {
-    "api": "keras.layers.GlobalAveragePooling2D",
+    "api": "tf.keras.layers.GlobalAveragePooling2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalAveragePooling3D": {
-    "api": "keras.layers.GlobalAveragePooling3D",
+    "api": "tf.keras.layers.GlobalAveragePooling3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalAvgPool1D": {
-    "api": "keras.layers.GlobalAvgPool1D",
+    "api": "tf.keras.layers.GlobalAvgPool1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalAvgPool2D": {
-    "api": "keras.layers.GlobalAvgPool2D",
+    "api": "tf.keras.layers.GlobalAvgPool2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalAvgPool3D": {
-    "api": "keras.layers.GlobalAvgPool3D",
+    "api": "tf.keras.layers.GlobalAvgPool3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalMaxPool1D": {
-    "api": "keras.layers.GlobalMaxPool1D",
+    "api": "tf.keras.layers.GlobalMaxPool1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalMaxPool2D": {
-    "api": "keras.layers.GlobalMaxPool2D",
+    "api": "tf.keras.layers.GlobalMaxPool2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalMaxPool3D": {
-    "api": "keras.layers.GlobalMaxPool3D",
+    "api": "tf.keras.layers.GlobalMaxPool3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalMaxPooling1D": {
-    "api": "keras.layers.GlobalMaxPooling1D",
+    "api": "tf.keras.layers.GlobalMaxPooling1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalMaxPooling2D": {
-    "api": "keras.layers.GlobalMaxPooling2D",
+    "api": "tf.keras.layers.GlobalMaxPooling2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GlobalMaxPooling3D": {
-    "api": "keras.layers.GlobalMaxPooling3D",
+    "api": "tf.keras.layers.GlobalMaxPooling3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1240,19 +2000,31 @@
     "required_imports": []
   },
   "GroupNormalization": {
-    "api": "keras.layers.GroupNormalization",
+    "api": "tf.keras.layers.GroupNormalization",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GroupQueryAttention": {
-    "api": "keras.layers.GroupQueryAttention",
+    "api": "tf.keras.layers.GroupQueryAttention",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Grucell": {
     "api": "keras.layers.GRUCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HSplit": {
+    "api": "tf.experimental.numpy.hsplit",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HStack": {
+    "api": "tf.experimental.numpy.hstack",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1283,13 +2055,25 @@
     "required_imports": []
   },
   "HashedCrossing": {
-    "api": "keras.layers.HashedCrossing",
+    "api": "tf.keras.layers.HashedCrossing",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Hashing": {
-    "api": "keras.layers.Hashing",
+    "api": "tf.keras.layers.Hashing",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Heaviside": {
+    "api": "tf.experimental.numpy.heaviside",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HingeLoss": {
+    "api": "tf.keras.losses.hinge",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1297,6 +2081,19 @@
   "Histogram": {
     "api": "tf.histogram_fixed_width",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HuberLoss": {
+    "api": "tf.keras.losses.huber",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hypot": {
+    "api": "tf.math.reduce_euclidean_norm",
+    "dispatch_rules": [],
+    "macro_template": "tf.math.sqrt(tf.math.square({x1}) + tf.math.square({x2}))",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1318,6 +2115,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Igamma": {
+    "api": "tf.math.igamma",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Igammac": {
+    "api": "tf.math.igammac",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Imag": {
     "api": "tf.math.imag",
     "dispatch_rules": [],
@@ -1329,6 +2138,18 @@
     "args": {
       "file": "export_dir"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "InTopK": {
+    "api": "tf.math.in_top_k",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Inexact": {
+    "api": "tf.experimental.numpy.inexact",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1346,14 +2167,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Input": {
+    "api": "tf.keras.layers.Input",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "InputLayer": {
-    "api": "keras.layers.InputLayer",
+    "api": "tf.keras.layers.InputLayer",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "InputSpec": {
-    "api": "keras.layers.InputSpec",
+    "api": "tf.keras.layers.InputSpec",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1382,14 +2209,26 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Int_": {
+    "api": "tf.int64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "IntegerLookup": {
-    "api": "keras.layers.IntegerLookup",
+    "api": "tf.keras.layers.IntegerLookup",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Invert": {
     "api": "tf.bitwise.invert",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "InvertPermutation": {
+    "api": "tf.math.invert_permutation",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1402,6 +2241,18 @@
   },
   "IsClose": {
     "api": "tf.experimental.numpy.isclose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsComplex": {
+    "api": "tf.math.is_complex",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsComplexObj": {
+    "api": "tf.experimental.numpy.iscomplexobj",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1445,9 +2296,51 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IsNonDecreasing": {
+    "api": "tf.math.is_non_decreasing",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "IsPosInf": {
     "dispatch_rules": [],
     "macro_template": "tf.equal({input}, float('inf'))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsReal": {
+    "api": "tf.math.is_real",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsRealObj": {
+    "api": "tf.experimental.numpy.isrealobj",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsScalar": {
+    "api": "tf.experimental.numpy.isscalar",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsStrictlyIncreasing": {
+    "api": "tf.math.is_strictly_increasing",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsSubDtype": {
+    "api": "tf.experimental.numpy.issubdtype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ix_": {
+    "api": "tf.experimental.numpy.ix_",
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1463,41 +2356,86 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "KLDivergence": {
+    "api": "tf.keras.losses.kl_divergence",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "KLDivergenceLoss": {
+    "api": "tf.keras.losses.KLDivergence",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Kron": {
     "api": "tf.experimental.numpy.kron",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "L2Normalize": {
+    "api": "tf.math.l2_normalize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LBeta": {
+    "api": "tf.math.lbeta",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "LSTM": {
-    "api": "keras.layers.LSTM",
+    "api": "tf.keras.layers.LSTM",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LSTMCell": {
+    "api": "tf.keras.layers.LSTMCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Lamb": {
+    "api": "tf.keras.optimizers.Lamb",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Lambda": {
-    "api": "keras.layers.Lambda",
+    "api": "tf.keras.layers.Lambda",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Layer": {
-    "api": "keras.layers.Layer",
+    "api": "tf.keras.layers.Layer",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "LayerNormalization": {
-    "api": "keras.layers.LayerNormalization",
+    "api": "tf.keras.layers.LayerNormalization",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LayerWrapper": {
+    "api": "tf.keras.layers.Wrapper",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Lcm": {
+    "api": "tf.experimental.numpy.lcm",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "LeakyReLU": {
-    "api": "tf.nn.leaky_relu",
-    "args": {
-      "negative_slope": "alpha"
-    },
+    "api": "tf.keras.layers.LeakyReLU",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1538,6 +2476,23 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Lgamma": {
+    "api": "tf.math.lgamma",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Linear": {
+    "api": "tf.keras.layers.Dense",
+    "args": {
+      "bias": "use_bias",
+      "in_features": null,
+      "out_features": "units"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Linspace": {
     "api": "tf.linspace",
     "args": {
@@ -1546,6 +2501,40 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Lion": {
+    "api": "tf.keras.optimizers.Lion",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ListAdd": {
+    "api": "tf.add_n",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ListAverage": {
+    "api": "tf.keras.layers.average",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ListConcatenate": {
+    "api": "tf.concat",
+    "args": {
+      "inputs": "values"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ListMaximum": {
+    "api": "tf.math.reduce_max",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "reduce_max_list"
   },
   "LoRA": {
     "dispatch_rules": [],
@@ -1615,6 +2604,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LogAddExp2": {
+    "api": "tf.experimental.numpy.logaddexp2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogCoshLoss": {
+    "api": "tf.keras.losses.log_cosh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogCumSumExp": {
+    "api": "tf.math.cumulative_logsumexp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "LogSigmoid": {
     "api": "tf.math.log_sigmoid",
     "dispatch_rules": [],
@@ -1670,6 +2677,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Logspace": {
+    "api": "tf.experimental.numpy.logspace",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Loss": {
+    "api": "tf.keras.losses.Loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LossScaleOptimizer": {
+    "api": "tf.keras.mixed_precision.LossScaleOptimizer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Lstmcell": {
     "api": "keras.layers.LSTMCell",
     "dispatch_rules": [],
@@ -1677,7 +2702,7 @@
     "required_imports": []
   },
   "Masking": {
-    "api": "keras.layers.Masking",
+    "api": "tf.keras.layers.Masking",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1720,25 +2745,26 @@
     "required_imports": []
   },
   "MaxNumBoundingBoxes": {
-    "api": "keras.layers.MaxNumBoundingBoxes",
+    "api": "tf.image.pad_to_bounding_box",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "requires_plugin": "tf_bbox_ops"
   },
   "MaxPool1d": {
-    "api": "keras.layers.MaxPool1D",
+    "api": "tf.keras.layers.MaxPool1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "MaxPool2d": {
-    "api": "keras.layers.MaxPool2D",
+    "api": "tf.keras.layers.MaxPool2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "MaxPool3d": {
-    "api": "keras.layers.MaxPool3D",
+    "api": "tf.keras.layers.MaxPool3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1749,14 +2775,32 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MaxPooling1d": {
+    "api": "tf.keras.layers.MaxPooling1D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "MaxPooling2D": {
     "api": "keras.layers.MaxPooling2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MaxPooling2d": {
+    "api": "tf.keras.layers.MaxPooling2D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "MaxPooling3D": {
     "api": "keras.layers.MaxPooling3D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPooling3d": {
+    "api": "tf.keras.layers.MaxPooling3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1780,6 +2824,30 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MeanAbsoluteError": {
+    "api": "tf.keras.losses.mean_absolute_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MeanAbsolutePercentageError": {
+    "api": "tf.keras.losses.mean_absolute_percentage_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MeanSquaredError": {
+    "api": "tf.keras.losses.mean_squared_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MeanSquaredLogarithmicError": {
+    "api": "tf.keras.losses.mean_squared_logarithmic_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Median": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1787,7 +2855,7 @@
     "requires_plugin": "tf_probability_median"
   },
   "MelSpectrogram": {
-    "api": "keras.layers.MelSpectrogram",
+    "api": "tf.keras.layers.MelSpectrogram",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1830,7 +2898,7 @@
     "required_imports": []
   },
   "MixUp": {
-    "api": "keras.layers.MixUp",
+    "api": "tf.keras.layers.MixUp",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1880,9 +2948,6 @@
   },
   "MultiHeadAttention": {
     "api": "tf.keras.layers.MultiHeadAttention",
-    "args": {
-      "head_dim": "key_dim"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1908,6 +2973,36 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MultiplyNoNan": {
+    "api": "tf.math.multiply_no_nan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Nadam": {
+    "api": "tf.keras.optimizers.Nadam",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanMean": {
+    "api": "tf.experimental.numpy.nanmean",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanProd": {
+    "api": "tf.experimental.numpy.nanprod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanSum": {
+    "api": "tf.experimental.numpy.nansum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "NanToNum": {
     "api": "tf.math.xdivy",
     "dispatch_rules": [],
@@ -1915,8 +3010,37 @@
     "required_imports": [],
     "requires_plugin": "nan_to_num_shim"
   },
+  "Ndim": {
+    "api": "tf.rank",
+    "dispatch_rules": [],
+    "macro_template": "{a}.ndim",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ndtri": {
+    "api": "tf.math.ndtri",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Negative": {
     "api": "tf.math.negative",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NewAxis": {
+    "api": "tf.newaxis",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NextAfter": {
+    "api": "tf.math.nextafter",
+    "args": {
+      "other": "x2",
+      "x": "x1"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1927,13 +3051,13 @@
     "required_imports": []
   },
   "NonZero": {
-    "api": "keras.ops.nonzero",
+    "api": "tf.experimental.numpy.nonzero",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Normalization": {
-    "api": "keras.layers.Normalization",
+    "api": "tf.keras.layers.Normalization",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2036,9 +3160,6 @@
   },
   "PReLU": {
     "api": "tf.keras.layers.PReLU",
-    "args": {
-      "init": "alpha_initializer"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2085,7 +3206,7 @@
     "required_imports": []
   },
   "Permute": {
-    "api": "keras.layers.Permute",
+    "api": "tf.keras.layers.Permute",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2113,7 +3234,28 @@
     "required_imports": []
   },
   "Pipeline": {
-    "api": "keras.layers.Pipeline",
+    "api": "tf.keras.layers.Pipeline",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Poisson": {
+    "api": "tf.keras.losses.Poisson",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PoissonLoss": {
+    "api": "tf.keras.losses.poisson",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Polygamma": {
+    "api": "tf.math.polygamma",
+    "args": {
+      "n": "a"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2162,6 +3304,18 @@
       "axis": "axis",
       "keepdims": "keepdims"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PromoteTypes": {
+    "api": "tf.experimental.numpy.promote_types",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ptp": {
+    "api": "tf.experimental.numpy.ptp",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2229,7 +3383,13 @@
     "required_imports": []
   },
   "RMSNormalization": {
-    "api": "keras.layers.RMSNormalization",
+    "api": "tf.keras.layers.RMSNormalization",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RMSprop": {
+    "api": "tf.keras.optimizers.RMSprop",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2242,6 +3402,12 @@
   },
   "RNNCellBase": {
     "api": "tf.keras.layers.Layer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rad2Deg": {
+    "api": "tf.experimental.numpy.rad2deg",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2259,7 +3425,7 @@
     "required_imports": []
   },
   "RandAugment": {
-    "api": "keras.layers.RandAugment",
+    "api": "tf.keras.layers.RandAugment",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2278,61 +3444,61 @@
     "required_imports": []
   },
   "RandomBrightness": {
-    "api": "keras.layers.RandomBrightness",
+    "api": "tf.keras.layers.RandomBrightness",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomColorDegeneration": {
-    "api": "keras.layers.RandomColorDegeneration",
+    "api": "tf.keras.layers.RandomColorDegeneration",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomColorJitter": {
-    "api": "keras.layers.RandomColorJitter",
+    "api": "tf.keras.layers.RandomColorJitter",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomContrast": {
-    "api": "keras.layers.RandomContrast",
+    "api": "tf.keras.layers.RandomContrast",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomCrop": {
-    "api": "keras.layers.RandomCrop",
+    "api": "tf.keras.layers.RandomCrop",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomElasticTransform": {
-    "api": "keras.layers.RandomElasticTransform",
+    "api": "tf.keras.layers.RandomElasticTransform",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomErasing": {
-    "api": "keras.layers.RandomErasing",
+    "api": "tf.keras.layers.RandomErasing",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomFlip": {
-    "api": "keras.layers.RandomFlip",
+    "api": "tf.keras.layers.RandomFlip",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomGaussianBlur": {
-    "api": "keras.layers.RandomGaussianBlur",
+    "api": "tf.keras.layers.RandomGaussianBlur",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "RandomGrayscale": {
-    "api": "keras.layers.RandomGrayscale",
+    "api": "tf.keras.layers.RandomGrayscale",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2405,7 +3571,7 @@
     "required_imports": []
   },
   "ReLU": {
-    "api": "tf.nn.relu",
+    "api": "tf.keras.layers.ReLU",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2429,6 +3595,57 @@
     "api": "tf.math.reciprocal",
     "args": {
       "a": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReciprocalNoNan": {
+    "api": "tf.math.reciprocal_no_nan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceMin": {
+    "api": "tf.math.reduce_min",
+    "args": {
+      "input": "input_tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceProd": {
+    "api": "tf.math.reduce_prod",
+    "args": {
+      "input": "input_tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceStd": {
+    "api": "tf.math.reduce_std",
+    "args": {
+      "input": "input_tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceSum": {
+    "api": "tf.math.reduce_sum",
+    "args": {
+      "input": "input_tensor"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceVariance": {
+    "api": "tf.math.reduce_variance",
+    "args": {
+      "input": "input_tensor"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2461,13 +3678,13 @@
     "required_imports": []
   },
   "RepeatVector": {
-    "api": "keras.layers.RepeatVector",
+    "api": "tf.keras.layers.RepeatVector",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Rescaling": {
-    "api": "keras.layers.Rescaling",
+    "api": "tf.keras.layers.Rescaling",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2494,7 +3711,13 @@
     "required_imports": []
   },
   "Resizing": {
-    "api": "keras.layers.Resizing",
+    "api": "tf.keras.layers.Resizing",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ResultType": {
+    "api": "tf.experimental.numpy.result_type",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2532,6 +3755,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Rot90": {
+    "api": "tf.image.rot90",
+    "args": {
+      "axes": null,
+      "m": "image"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Round": {
     "api": "tf.round",
     "dispatch_rules": [],
@@ -2544,6 +3777,12 @@
     "args": {
       "a": "x"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SGD": {
+    "api": "tf.keras.optimizers.SGD",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2590,8 +3829,44 @@
     "required_imports": [],
     "requires_plugin": "savez_converter"
   },
+  "ScalarMul": {
+    "api": "tf.math.scalar_mul",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Scan": {
     "api": "tf.scan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentMax": {
+    "api": "tf.math.segment_max",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentMean": {
+    "api": "tf.math.segment_mean",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentMin": {
+    "api": "tf.math.segment_min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentProd": {
+    "api": "tf.math.segment_prod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentSum": {
+    "api": "tf.math.segment_sum",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2603,6 +3878,12 @@
     "required_imports": [],
     "requires_plugin": "segmented_ops"
   },
+  "Select": {
+    "api": "tf.experimental.numpy.select",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Selu": {
     "api": "tf.nn.selu",
     "dispatch_rules": [],
@@ -2610,25 +3891,25 @@
     "required_imports": []
   },
   "SeparableConv1D": {
-    "api": "keras.layers.SeparableConv1D",
+    "api": "tf.keras.layers.SeparableConv1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SeparableConv2D": {
-    "api": "keras.layers.SeparableConv2D",
+    "api": "tf.keras.layers.SeparableConv2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SeparableConvolution1D": {
-    "api": "keras.layers.SeparableConvolution1D",
+    "api": "tf.keras.layers.SeparableConvolution1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SeparableConvolution2D": {
-    "api": "keras.layers.SeparableConvolution2D",
+    "api": "tf.keras.layers.SeparableConvolution2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2637,6 +3918,18 @@
     "api": "tf.keras.Sequential",
     "dispatch_rules": [],
     "pack_as": "List",
+    "required_imports": []
+  },
+  "SerializeLoss": {
+    "api": "tf.keras.losses.serialize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SerializeOptimizer": {
+    "api": "tf.keras.optimizers.serialize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "SetCacheLimit": {
@@ -2671,6 +3964,9 @@
   },
   "Shape": {
     "api": "tf.shape",
+    "args": {
+      "a": "input"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2699,6 +3995,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Signbit": {
+    "api": "tf.math.signbit",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Silu": {
     "api": "tf.nn.silu",
     "dispatch_rules": [],
@@ -2716,19 +4018,25 @@
     "required_imports": []
   },
   "SimpleRNN": {
-    "api": "keras.layers.SimpleRNN",
+    "api": "tf.keras.layers.SimpleRNN",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SimpleRNNCell": {
-    "api": "keras.layers.SimpleRNNCell",
+    "api": "tf.keras.layers.SimpleRNNCell",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Sin": {
     "api": "tf.math.sin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sinc": {
+    "api": "tf.experimental.numpy.sinc",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2741,6 +4049,16 @@
   },
   "Size": {
     "api": "tf.size",
+    "args": {
+      "axis": null,
+      "x": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SobolSample": {
+    "api": "tf.math.sobol_sample",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2763,6 +4081,15 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Softsign": {
+    "api": "tf.math.softsign",
+    "args": {
+      "x": "features"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Solarization": {
     "api": "keras.layers.Solarization",
     "dispatch_rules": [],
@@ -2775,6 +4102,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SparseCategoricalCrossentropy": {
+    "api": "tf.keras.losses.sparse_categorical_crossentropy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sparsemax": {
     "api": "keras.ops.sparsemax",
     "dispatch_rules": [],
@@ -2782,19 +4115,19 @@
     "required_imports": []
   },
   "SpatialDropout1D": {
-    "api": "keras.layers.SpatialDropout1D",
+    "api": "tf.keras.layers.SpatialDropout1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SpatialDropout2D": {
-    "api": "keras.layers.SpatialDropout2D",
+    "api": "tf.keras.layers.SpatialDropout2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SpatialDropout3D": {
-    "api": "keras.layers.SpatialDropout3D",
+    "api": "tf.keras.layers.SpatialDropout3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2810,7 +4143,7 @@
     "required_imports": []
   },
   "SpectralNormalization": {
-    "api": "keras.layers.SpectralNormalization",
+    "api": "tf.keras.layers.SpectralNormalization",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2836,6 +4169,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SquaredDifference": {
+    "api": "tf.math.squared_difference",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SquaredHinge": {
+    "api": "tf.keras.losses.SquaredHinge",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SquaredHingeLoss": {
+    "api": "tf.keras.losses.squared_hinge",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Squeeze": {
     "api": "tf.squeeze",
     "dispatch_rules": [],
@@ -2852,7 +4203,7 @@
     "required_imports": []
   },
   "StackedRNNCells": {
-    "api": "keras.layers.StackedRNNCells",
+    "api": "tf.keras.layers.StackedRNNCells",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2869,8 +4220,14 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "String": {
+    "api": "tf.experimental.numpy.string_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "StringLookup": {
-    "api": "keras.layers.StringLookup",
+    "api": "tf.keras.layers.StringLookup",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2887,8 +4244,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SubtractLayer": {
+    "api": "tf.keras.layers.Subtract",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sum": {
     "api": "tf.math.reduce_sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Swapaxes": {
+    "api": "tf.experimental.numpy.swapaxes",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2899,14 +4268,26 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Switch": {
+    "api": "keras.ops.switch",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "TFSMLayer": {
-    "api": "keras.layers.TFSMLayer",
+    "api": "tf.keras.layers.TFSMLayer",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Take": {
     "api": "tf.gather",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TakeAlongAxis": {
+    "api": "tf.experimental.numpy.take_along_axis",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2942,7 +4323,7 @@
     "required_imports": []
   },
   "TextVectorization": {
-    "api": "keras.layers.TextVectorization",
+    "api": "tf.keras.layers.TextVectorization",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2957,7 +4338,13 @@
     "required_imports": []
   },
   "TimeDistributed": {
-    "api": "keras.layers.TimeDistributed",
+    "api": "tf.keras.layers.TimeDistributed",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TopK": {
+    "api": "tf.math.top_k",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2971,6 +4358,12 @@
   },
   "TorchModuleWrapper": {
     "api": "keras.layers.TorchModuleWrapper",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Trace": {
+    "api": "tf.linalg.trace",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2989,6 +4382,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Tri": {
+    "api": "tf.experimental.numpy.tri",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Tril": {
     "api": "tf.linalg.band_part",
     "dispatch_rules": [],
@@ -2998,6 +4397,24 @@
   },
   "Triu": {
     "api": "tf.experimental.numpy.triu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrueDiv": {
+    "api": "tf.math.truediv",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrueDivide": {
+    "api": "tf.math.divide",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TverskyLoss": {
+    "api": "tf.keras.losses.tversky",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3045,6 +4462,11 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Unicode": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Unique": {
     "api": "tf.unique",
     "dispatch_rules": [],
@@ -3052,7 +4474,43 @@
     "required_imports": []
   },
   "UnitNormalization": {
-    "api": "keras.layers.UnitNormalization",
+    "api": "tf.keras.layers.UnitNormalization",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentMax": {
+    "api": "tf.math.unsorted_segment_max",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentMean": {
+    "api": "tf.math.unsorted_segment_mean",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentMin": {
+    "api": "tf.math.unsorted_segment_min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentProd": {
+    "api": "tf.math.unsorted_segment_prod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentSqrtN": {
+    "api": "tf.math.unsorted_segment_sqrt_n",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentSum": {
+    "api": "tf.math.unsorted_segment_sum",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3069,14 +4527,32 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "UpSampling1d": {
+    "api": "tf.keras.layers.UpSampling1D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "UpSampling2D": {
     "api": "keras.layers.UpSampling2D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "UpSampling2d": {
+    "api": "tf.keras.layers.UpSampling2D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "UpSampling3D": {
     "api": "keras.layers.UpSampling3D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UpSampling3d": {
+    "api": "tf.keras.layers.UpSampling3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3093,6 +4569,12 @@
     "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "gradient_tape_accumulate"
+  },
+  "Vander": {
+    "api": "tf.experimental.numpy.vander",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Var": {
     "api": "tf.math.reduce_variance",
@@ -3112,6 +4594,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Variance": {
+    "api": "tf.math.reduce_variance",
+    "args": {
+      "a": "input_tensor",
+      "axis": "axis",
+      "ddof": null,
+      "keepdims": "keepdims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Vdot": {
+    "api": "tf.experimental.numpy.vdot",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "View": {
     "api": "keras.ops.view",
     "dispatch_rules": [],
@@ -3125,6 +4625,18 @@
       "in_axes": null,
       "out_axes": null
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Vsplit": {
+    "api": "tf.experimental.numpy.vsplit",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Vstack": {
+    "api": "tf.experimental.numpy.vstack",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3161,8 +4673,38 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Xdivy": {
+    "api": "tf.math.xdivy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Xlog1py": {
+    "api": "tf.math.xlog1py",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Xlogy": {
+    "api": "tf.math.xlogy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ZeroFraction": {
+    "api": "tf.math.zero_fraction",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ZeroPadding1D": {
     "api": "keras.layers.ZeroPadding1D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ZeroPadding1d": {
+    "api": "tf.keras.layers.ZeroPadding1D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3173,8 +4715,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ZeroPadding2d": {
+    "api": "tf.keras.layers.ZeroPadding2D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ZeroPadding3D": {
     "api": "keras.layers.ZeroPadding3D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ZeroPadding3d": {
+    "api": "tf.keras.layers.ZeroPadding3D",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3190,6 +4744,12 @@
     "args": {
       "x": "input"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Zeta": {
+    "api": "tf.math.zeta",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3350,6 +4910,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "binary_crossentropy": {
+    "api": "tf.keras.losses.binary_crossentropy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "binary_focal_crossentropy": {
+    "api": "tf.keras.losses.binary_focal_crossentropy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "bincount": {
     "api": "tf.math.bincount",
     "dispatch_rules": [],
@@ -3411,7 +4983,13 @@
     "required_imports": []
   },
   "categorical_crossentropy": {
-    "api": "keras.ops.categorical_crossentropy",
+    "api": "tf.keras.losses.categorical_crossentropy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "categorical_hinge": {
+    "api": "tf.keras.losses.categorical_hinge",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

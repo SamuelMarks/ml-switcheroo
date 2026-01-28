@@ -1,0 +1,681 @@
+operation: "Real"
+description: "Returns the real part of a complex tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.real"
+  jax:
+    api: "jax.numpy.real"
+  flax_nnx:
+    api: "jax.numpy.real"
+  paxml:
+    api: "jax.numpy.real"
+  keras:
+    api: "keras.ops.real"
+  tensorflow:
+    api: "tf.math.real"
+  numpy:
+    api: "numpy.real"
+  mlx:
+    api: "mlx.core.real"
+
+---
+
+operation: "Reciprocal"
+description: "Returns a new tensor with the reciprocal of the elements of input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.reciprocal"
+  jax:
+    api: "jax.numpy.reciprocal"
+  flax_nnx:
+    api: "jax.numpy.reciprocal"
+  paxml:
+    api: "jax.numpy.reciprocal"
+  keras:
+    api: "keras.ops.reciprocal"
+  tensorflow:
+    api: "tf.math.reciprocal"
+  numpy:
+    api: "numpy.reciprocal"
+  mlx:
+    api: "mlx.core.reciprocal"
+
+---
+
+operation: "Reciprocal_"
+description: "In-place version of Reciprocal."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.reciprocal_"
+  jax:
+    api: "jax.numpy.reciprocal"
+
+---
+
+operation: "Relu"
+description: "Applies the rectified linear unit function element-wise."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.relu"
+  jax:
+    api: "jax.nn.relu"
+  flax_nnx:
+    api: "jax.nn.relu"
+  paxml:
+    api: "jax.nn.relu"
+  keras:
+    api: "keras.activations.relu"
+  tensorflow:
+    api: "tf.nn.relu"
+  numpy:
+    macro_template: "numpy.maximum({input}, 0)"
+  mlx:
+    api: "mlx.nn.relu"
+
+---
+
+operation: "Relu_"
+description: "In-place version of Relu."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.relu_"
+  jax:
+    api: "jax.nn.relu"
+
+---
+
+operation: "Remainder"
+description: "Computes the element-wise remainder of division."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.remainder"
+  jax:
+    api: "jax.numpy.remainder"
+  flax_nnx:
+    api: "jax.numpy.remainder"
+  paxml:
+    api: "jax.numpy.remainder"
+  keras:
+    api: "keras.ops.mod"
+  tensorflow:
+    api: "tf.math.floormod"
+  numpy:
+    api: "numpy.remainder"
+  mlx:
+    api: "mlx.core.remainder"
+
+---
+
+operation: "Renorm"
+description: "Renormalizes sub-tensors along a dimension."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+  - name: "dim"
+    type: "int"
+  - name: "maxnorm"
+    type: "float"
+variants:
+  torch:
+    api: "torch.renorm"
+  jax:
+    requires_plugin: "renorm_impl"
+
+---
+
+operation: "RepeatInterleave"
+description: "Repeat elements of a tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "repeats"
+    type: "int"
+  - name: "dim"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.repeat_interleave"
+  jax:
+    api: "jax.numpy.repeat"
+    args:
+      dim: "axis"
+  flax_nnx:
+    api: "jax.numpy.repeat"
+    args:
+      dim: "axis"
+  paxml:
+    api: "jax.numpy.repeat"
+    args:
+      dim: "axis"
+  keras:
+    api: "keras.ops.repeat"
+    args:
+      dim: "axis"
+  tensorflow:
+    api: "tf.repeat"
+    args:
+      dim: "axis"
+  numpy:
+    api: "numpy.repeat"
+    args:
+      dim: "axis"
+  mlx:
+    api: "mlx.core.repeat"
+    args:
+      dim: "axis"
+
+---
+
+operation: "Reshape"
+description: "Returns a tensor with the same data and number of elements as input, but with the specified shape."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "shape"
+    type: "Tuple[int]"
+variants:
+  torch:
+    api: "torch.reshape"
+  jax:
+    api: "jax.numpy.reshape"
+  flax_nnx:
+    api: "jax.numpy.reshape"
+  paxml:
+    api: "jax.numpy.reshape"
+  keras:
+    api: "keras.ops.reshape"
+    args:
+      shape: "new_shape"
+  tensorflow:
+    api: "tf.reshape"
+  numpy:
+    api: "numpy.reshape"
+    args:
+      shape: "newshape"
+  mlx:
+    api: "mlx.core.reshape"
+
+---
+
+operation: "ResizeAs_"
+description: "Resizes the tensor to match another."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.resize_as_"
+
+---
+
+operation: "ResizeAsSparse_"
+description: "Resizes the tensor to match another (sparse)."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.resize_as_sparse_"
+
+---
+
+operation: "ResolveConj"
+description: "Returns the tensor with materialized conjugation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.resolve_conj"
+  jax:
+    api: "jax.numpy.conj"
+  flax_nnx:
+    api: "jax.numpy.conj"
+  paxml:
+    api: "jax.numpy.conj"
+  numpy:
+    api: "numpy.conj"
+  tensorflow:
+    api: "tf.math.conj"
+  mlx:
+    api: "mlx.core.conj"
+  keras:
+    api: "keras.ops.conj"
+
+---
+
+operation: "ResolveNeg"
+description: "Returns the tensor with materialized negation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.resolve_neg"
+  jax:
+    api: "jax.numpy.negative"
+  flax_nnx:
+    api: "jax.numpy.negative"
+  paxml:
+    api: "jax.numpy.negative"
+  numpy:
+    api: "numpy.negative"
+  tensorflow:
+    api: "tf.math.negative"
+  mlx:
+    api: "mlx.core.negative"
+  keras:
+    api: "keras.ops.negative"
+
+---
+
+operation: "ResultType"
+description: "Returns the promotion type of arguments."
+std_args:
+  - name: "tensor1"
+    type: "Tensor"
+  - name: "tensor2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.result_type"
+  jax:
+    api: "jax.numpy.result_type"
+  flax_nnx:
+    api: "jax.numpy.result_type"
+  paxml:
+    api: "jax.numpy.result_type"
+  numpy:
+    api: "numpy.result_type"
+
+---
+
+operation: "RmsNorm"
+description: "Applies Root Mean Square Normalization."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "normalized_shape"
+    type: "Tuple[int]"
+variants:
+  torch:
+    api: "torch.nn.functional.rms_norm"
+  jax:
+    requires_plugin: "rms_norm_impl"
+  flax_nnx:
+    api: "flax.nnx.RMSNorm"
+  mlx:
+    api: "mlx.fast.rms_norm"
+
+---
+
+operation: "RnnRelu"
+description: "RNN with ReLU activation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "params"
+    type: "List[Tensor]"
+variants:
+  torch:
+    api: "torch.rnn_relu"
+
+---
+
+operation: "RnnReluCell"
+description: "RNN Cell with ReLU activation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "w_ih"
+    type: "Tensor"
+  - name: "w_hh"
+    type: "Tensor"
+  - name: "b_ih"
+    type: "Tensor"
+  - name: "b_hh"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.rnn_relu_cell"
+
+---
+
+operation: "RnnTanh"
+description: "RNN with Tanh activation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "params"
+    type: "List[Tensor]"
+variants:
+  torch:
+    api: "torch.rnn_tanh"
+
+---
+
+operation: "RnnTanhCell"
+description: "RNN Cell with Tanh activation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "w_ih"
+    type: "Tensor"
+  - name: "w_hh"
+    type: "Tensor"
+  - name: "b_ih"
+    type: "Tensor"
+  - name: "b_hh"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.rnn_tanh_cell"
+
+---
+
+operation: "Roll"
+description: "Roll the tensor along the given dimension(s)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "shifts"
+    type: "Union[int, Tuple[int]]"
+  - name: "dims"
+    type: "Union[int, Tuple[int]]"
+    default: null
+variants:
+  torch:
+    api: "torch.roll"
+  jax:
+    api: "jax.numpy.roll"
+    args:
+      dims: "axis"
+      shifts: "shift"
+  flax_nnx:
+    api: "jax.numpy.roll"
+    args:
+      dims: "axis"
+      shifts: "shift"
+  paxml:
+    api: "jax.numpy.roll"
+    args:
+      dims: "axis"
+      shifts: "shift"
+  keras:
+    api: "keras.ops.roll"
+    args:
+      dims: "axis"
+      shifts: "shift"
+  tensorflow:
+    api: "tf.roll"
+    args:
+      dims: "axis"
+      shifts: "shift"
+  numpy:
+    api: "numpy.roll"
+    args:
+      dims: "axis"
+      shifts: "shift"
+  mlx:
+    api: "mlx.core.roll"
+    args:
+      dims: "axis"
+      shifts: "shift"
+
+---
+
+operation: "Rot90"
+description: "Rotate a tensor by 90 degrees."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 1
+  - name: "dims"
+    type: "List[int]"
+    default: [0, 1]
+variants:
+  torch:
+    api: "torch.rot90"
+  jax:
+    api: "jax.numpy.rot90"
+    args:
+      dims: "axes"
+  flax_nnx:
+    api: "jax.numpy.rot90"
+    args:
+      dims: "axes"
+  paxml:
+    api: "jax.numpy.rot90"
+    args:
+      dims: "axes"
+  numpy:
+    api: "numpy.rot90"
+    args:
+      dims: "axes"
+  tensorflow:
+    api: "tf.image.rot90"
+    requires_plugin: "unsupported_nd_rot90"
+
+---
+
+operation: "Round"
+description: "Rounds elements to the nearest integer."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "decimals"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.round"
+  jax:
+    api: "jax.numpy.round"
+  flax_nnx:
+    api: "jax.numpy.round"
+  paxml:
+    api: "jax.numpy.round"
+  keras:
+    api: "keras.ops.round"
+  tensorflow:
+    api: "tf.math.round"
+  numpy:
+    api: "numpy.round"
+  mlx:
+    api: "mlx.core.round"
+
+---
+
+operation: "Round_"
+description: "In-place version of Round."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "decimals"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.round_"
+  jax:
+    api: "jax.numpy.round"
+
+---
+
+operation: "RowIndicesCopy"
+description: "Copy row indices."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "out"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.row_indices_copy"
+
+---
+
+operation: "RowStack"
+description: "Stack arrays in sequence vertically (row wise)."
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+variants:
+  torch:
+    api: "torch.row_stack"
+  jax:
+    api: "jax.numpy.vstack"
+  flax_nnx:
+    api: "jax.numpy.vstack"
+  paxml:
+    api: "jax.numpy.vstack"
+  keras:
+    api: "keras.ops.vstack"
+  tensorflow:
+    api: "tf.experimental.numpy.vstack"
+  numpy:
+    api: "numpy.vstack"
+  mlx:
+    api: "mlx.core.concatenate"
+    inject_args:
+      axis: 0
+
+---
+
+operation: "Rrelu"
+description: "Randomized ReLU."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "lower"
+    type: "float"
+    default: 0.125
+  - name: "upper"
+    type: "float"
+    default: 0.333
+variants:
+  torch:
+    api: "torch.rrelu"
+
+---
+
+operation: "Rrelu_"
+description: "In-place version of Rrelu."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.rrelu_"
+
+---
+
+operation: "Rsqrt"
+description: "Returns the reciprocal of the square root of elements."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.rsqrt"
+  jax:
+    api: "jax.lax.rsqrt"
+  flax_nnx:
+    api: "jax.lax.rsqrt"
+  paxml:
+    api: "jax.lax.rsqrt"
+  keras:
+    api: "keras.ops.rsqrt"
+  tensorflow:
+    api: "tf.math.rsqrt"
+  numpy:
+    macro_template: "1.0 / numpy.sqrt({input})"
+  mlx:
+    api: "mlx.core.rsqrt"
+
+---
+
+operation: "Rsqrt_"
+description: "In-place version of Rsqrt."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.rsqrt_"
+  jax:
+    api: "jax.lax.rsqrt"
+
+---
+
+operation: "Rsub"
+description: "Subtracts input from other (other - input) scaling input by alpha."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+  - name: "alpha"
+    type: "float"
+    default: 1
+variants:
+  torch:
+    api: "torch.rsub"
+  jax:
+    macro_template: "{other} - ({input} * {alpha})"
+  flax_nnx:
+    macro_template: "{other} - ({input} * {alpha})"
+  paxml:
+    macro_template: "{other} - ({input} * {alpha})"
+  keras:
+    macro_template: "keras.ops.subtract({other}, {input} * {alpha})"
+  tensorflow:
+    macro_template: "tf.math.subtract({other}, {input} * {alpha})"
+  numpy:
+    macro_template: "numpy.subtract({other}, {input} * {alpha})"
+  mlx:
+    macro_template: "mlx.core.subtract({other}, {input} * {alpha})"

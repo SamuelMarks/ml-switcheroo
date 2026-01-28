@@ -1,0 +1,465 @@
+operation: "PipelinedTransformer"
+description: "A pipelined Transformer layer."
+op_type: "class"
+std_args:
+  - name: "model_dims"
+    type: "int"
+  - name: "num_layers"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.PipelinedTransformer"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  flax_nnx:
+    api: null
+
+---
+operation: "Pooling"
+description: "Pooling layer, performing max or average pooling."
+op_type: "class"
+std_args:
+  - name: "window_shape"
+    type: "Sequence[int]"
+  - name: "window_stride"
+    type: "Sequence[int]"
+  - name: "pooling_type"
+    type: "str"
+    options: ["MAX", "AVG"]
+variants:
+  paxml:
+    api: "praxis.layers.Pooling"
+  torch:
+    api: "torch.nn.MaxPool2d"
+    dispatch_rules:
+      - if_arg: "pooling_type"
+        op: "eq"
+        val: "AVG"
+        use_api: "torch.nn.AvgPool2d"
+    args:
+      window_shape: "kernel_size"
+      window_stride: "stride"
+  keras:
+    api: "keras.layers.MaxPooling2D"
+    dispatch_rules:
+      - if_arg: "pooling_type"
+        op: "eq"
+        val: "AVG"
+        use_api: "keras.layers.AveragePooling2D"
+    args:
+      window_shape: "pool_size"
+      window_stride: "strides"
+  flax_nnx:
+    api: "nnx.max_pool"
+    dispatch_rules:
+      - if_arg: "pooling_type"
+        op: "eq"
+        val: "AVG"
+        use_api: "nnx.avg_pool"
+
+---
+operation: "Pooling1D"
+description: "Pooling layer over dimension 1."
+op_type: "class"
+std_args:
+  - name: "window"
+    type: "int"
+  - name: "stride"
+    type: "int"
+  - name: "pooling_type"
+    type: "str"
+    default: "AVG"
+variants:
+  paxml:
+    api: "praxis.layers.Pooling1D"
+  torch:
+    api: "torch.nn.AvgPool1d"
+    dispatch_rules:
+      - if_arg: "pooling_type"
+        op: "eq"
+        val: "MAX"
+        use_api: "torch.nn.MaxPool1d"
+    args:
+      window: "kernel_size"
+      stride: "stride"
+
+---
+operation: "PositionalEmbedding"
+description: "Generates position embedding for a given 1-d sequence."
+op_type: "class"
+std_args:
+  - name: "embedding_dims"
+    type: "int"
+  - name: "max_timescale"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.PositionalEmbedding"
+
+---
+operation: "PositionalEmbedding2D"
+description: "Generates 2-d position embedding for sequence of flattened patches."
+op_type: "class"
+std_args:
+  - name: "embedding_dims"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.PositionalEmbedding2D"
+
+---
+operation: "RandomVectorQuantizer"
+description: "Random quantization for BEST-RQ."
+op_type: "class"
+std_args:
+  - name: "projection_dim"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.RandomVectorQuantizer"
+
+---
+operation: "ReLU"
+description: "Rectified Linear Unit activation layer."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.ReLU"
+  torch:
+    api: "torch.nn.ReLU"
+  keras:
+    api: "keras.layers.ReLU"
+  mlx:
+    api: "mlx.nn.ReLU"
+  flax_nnx:
+    api: "nnx.relu" 
+
+---
+operation: "ReLU6"
+description: "ReLU6 activation layer."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.ReLU6"
+  torch:
+    api: "torch.nn.ReLU6"
+  keras:
+    api: "keras.layers.ReLU"
+    inject_args: {'max_value': 6.0}
+  flax_nnx:
+    api: "nnx.relu6"
+  mlx:
+    api: "mlx.nn.ReLU6"
+
+---
+operation: "RelativeBias"
+description: "A layer for Relative Attention Bias."
+op_type: "class"
+std_args:
+  - name: "num_heads"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.RelativeBias"
+
+---
+operation: "Repeat"
+description: "A generic repeat layer."
+op_type: "class"
+std_args:
+  - name: "x_times"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.Repeat"
+
+---
+operation: "ResNet"
+description: "ResNet model."
+op_type: "class"
+std_args:
+  - name: "blocks"
+    type: "Sequence[int]"
+variants:
+  paxml:
+    api: "praxis.layers.ResNet"
+  keras:
+    api: "keras.applications.ResNet50"
+  torch:
+    api: "torchvision.models.resnet50"
+
+---
+operation: "ResNetBlock"
+description: "ResNet Block."
+op_type: "class"
+std_args:
+  - name: "input_dim"
+    type: "int"
+  - name: "output_dim"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.ResNetBlock"
+
+---
+operation: "RmsNorm"
+description: "RMS normalization."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+  - name: "epsilon"
+    type: "float"
+    default: 1e-06
+variants:
+  paxml:
+    api: "praxis.layers.RmsNorm"
+  torch:
+    api: "torch.nn.RMSNorm"
+    args:
+      dim: "normalized_shape"
+      epsilon: "eps"
+  keras:
+    api: "keras.layers.RMSNormalization"
+    args:
+       epsilon: "epsilon"
+  mlx:
+    api: "mlx.nn.RMSNorm"
+    args:
+       dim: "dims"
+       epsilon: "eps"
+  flax_nnx:
+    api: "nnx.RMSNorm"
+    args:
+       dim: "num_features"
+       epsilon: "epsilon"
+
+---
+operation: "RmsNormNoScale"
+description: "RMS normalization without scale."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.RmsNormNoScale"
+
+---
+operation: "SSM"
+description: "State Space Model layer."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.SSM"
+
+---
+operation: "SSMGated"
+description: "Gated State Space Model."
+op_type: "class"
+std_args:
+  - name: "input_dims"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.SSMGated"
+
+---
+operation: "SSMTransformer"
+description: "Transformer layer using SSM."
+op_type: "class"
+std_args:
+  - name: "input_dims"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.SSMTransformer"
+
+---
+operation: "SelfAttentionWithNormAndResidual"
+description: "Self attention sub-layer."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.SelfAttentionWithNormAndResidual"
+
+---
+operation: "SequenceModel"
+description: "Sequence Model base task."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.SequenceModel"
+
+---
+operation: "Sequential"
+description: "Applies a linear chain of Modules."
+op_type: "class"
+std_args:
+  - name: "layers"
+    type: "Sequence"
+    is_variadic: true
+variants:
+  paxml:
+    api: "praxis.layers.Sequential"
+    pack_as: "List"
+  torch:
+    api: "torch.nn.Sequential"
+    pack_to_tuple: null # Torch accepts *args
+  keras:
+    api: "keras.Sequential"
+    pack_to_tuple: "layers"
+    pack_as: "List"
+  mlx:
+    api: "mlx.nn.Sequential"
+    pack_to_tuple: "layers"
+    pack_as: "List"
+  flax_nnx:
+    api: "nnx.Sequential"
+    pack_to_tuple: "layers"
+
+---
+operation: "SharedEmbeddingSoftmax"
+description: "Softmax layer with embedding lookups."
+op_type: "class"
+std_args:
+  - name: "input_dims"
+    type: "int"
+  - name: "num_classes"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.SharedEmbeddingSoftmax"
+
+---
+operation: "SiLU"
+description: "Sigmoid Linear Unit activation layer."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.SiLU"
+  torch:
+    api: "torch.nn.SiLU"
+  mlx:
+    api: "mlx.nn.SiLU"
+  flax_nnx:
+    api: "nnx.silu"
+  keras:
+    api: "keras.layers.Activation"
+    arg_values:
+      activation: "silu"
+
+---
+operation: "Sigmoid"
+description: "Sigmoid activation layer."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.Sigmoid"
+  torch:
+    api: "torch.nn.Sigmoid"
+  keras:
+    api: "keras.layers.Activation"
+    arg_values:
+      activation: "sigmoid"
+  flax_nnx:
+    api: "nnx.sigmoid"
+  mlx:
+    api: "mlx.nn.Sigmoid"
+
+---
+operation: "SigmoidCrossEntropy"
+description: "Sigmoid cross-entropy loss layer."
+op_type: "class"
+std_args:
+  - name: "num_classes"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.SigmoidCrossEntropy"
+  torch:
+    api: "torch.nn.BCEWithLogitsLoss"
+
+---
+operation: "SpectrumAugmenter"
+description: "SpecAugment data augmentation."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.SpectrumAugmenter"
+
+---
+operation: "SquaredReLU"
+description: "Squared ReLU activation layer."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.SquaredReLU"
+
+---
+operation: "StackFrnn"
+description: "Stacked FRNN layer."
+op_type: "class"
+std_args:
+  - name: "num_layers"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.StackFrnn"
+
+---
+operation: "StackedTransformer"
+description: "Stack of Transformer layers."
+op_type: "class"
+std_args:
+  - name: "num_layers"
+    type: "int"
+  - name: "model_dims"
+    type: "int"
+  - name: "num_heads"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.StackedTransformer"
+  torch:
+    api: "torch.nn.TransformerEncoder"
+    args:
+      model_dims: "d_model"
+      num_heads: "nhead"
+
+---
+operation: "StackedTransformerRepeated"
+description: "Stack of Transformer layers using repeat."
+op_type: "class"
+std_args:
+  - name: "x_times"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.StackedTransformerRepeated"
+
+---
+operation: "StackingOverTime"
+description: "Stacking applied along the time axis."
+op_type: "class"
+std_args:
+  - name: "stride"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.StackingOverTime"

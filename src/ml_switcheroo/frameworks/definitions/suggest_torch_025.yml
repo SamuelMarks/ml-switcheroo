@@ -1,0 +1,981 @@
+operation: "QScheme"
+description: "Class defining quantization schemes used in PyTorch."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.qscheme"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Quantile"
+description: "Computes the q-th quantiles of each row of the input tensor along the dimension dim."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "q"
+    type: "float"
+  - name: "dim"
+    type: "int"
+    default: "None"
+  - name: "keepdim"
+    type: "bool"
+    default: "False"
+  - name: "interpolation"
+    type: "str"
+    default: "'linear'"
+variants:
+  torch:
+    api: "torch.quantile"
+  jax:
+    api: "jnp.quantile"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+      interpolation: "method"
+  flax_nnx:
+    api: "jnp.quantile"
+  paxml:
+    api: "jnp.quantile"
+  keras:
+    api: "keras.ops.quantile"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tfp.stats.quantiles"
+    required_imports:
+      - module: "tensorflow_probability"
+        alias: "tfp"
+    macro_template: "tfp.stats.quantiles({input}, {q} * 100, axis={dim}, interpolation={interpolation})"
+  mlx:
+    api: "mlx.core.quantile"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "np.quantile"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+      interpolation: "method"
+
+---
+operation: "QuantizePerChannel"
+description: "Converts a float tensor to a per-channel quantized tensor with given scales and zero points."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "scales"
+    type: "Tensor"
+  - name: "zero_points"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+  - name: "dtype"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.quantize_per_channel"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.quantization.quantize_and_dequantize_v2" # Approximation for simulation
+  mlx:
+    api: null # MLX quantization is typically module-level (nn.QuantizedLinear)
+
+---
+operation: "QuantizePerTensor"
+description: "Converts a float tensor to a quantized tensor with given scale and zero point."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "scale"
+    type: "float"
+  - name: "zero_point"
+    type: "int"
+  - name: "dtype"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.quantize_per_tensor"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.quantization.quantize"
+  mlx:
+    api: null
+
+---
+operation: "QuantizePerTensorDynamic"
+description: "Converts a float tensor to a quantized tensor with scale and zero_point calculated dynamically."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dtype"
+    type: "Any"
+  - name: "reduce_range"
+    type: "bool"
+    default: "False"
+variants:
+  torch:
+    api: "torch.quantize_per_tensor_dynamic"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedBatchNorm"
+description: "Applies batch normalization on a quantized tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+  - name: "bias"
+    type: "Tensor"
+  - name: "mean"
+    type: "Tensor"
+  - name: "var"
+    type: "Tensor"
+  - name: "eps"
+    type: "float"
+  - name: "output_scale"
+    type: "float"
+  - name: "output_zero_point"
+    type: "int"
+variants:
+  torch:
+    api: "torch.quantized_batch_norm"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedGru"
+description: "Applies a multi-layer quantized GRU RNN to an input sequence."
+std_args:
+  - name: "data"
+    type: "Tensor"
+  - name: "batch_sizes"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "params"
+    type: "List[Tensor]"
+    is_variadic: false
+  - name: "has_biases"
+    type: "bool"
+  - name: "num_layers"
+    type: "int"
+  - name: "dropout"
+    type: "float"
+  - name: "train"
+    type: "bool"
+  - name: "bidirectional"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.quantized_gru"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedGruCell"
+description: "Applies a quantized GRU cell to inputs."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "w_ih"
+    type: "Tensor"
+  - name: "w_hh"
+    type: "Tensor"
+  - name: "b_ih"
+    type: "Tensor"
+  - name: "b_hh"
+    type: "Tensor"
+  - name: "packed_ih"
+    type: "Tensor"
+  - name: "packed_hh"
+    type: "Tensor"
+  - name: "col_offsets"
+    type: "Tensor"
+  - name: "scale"
+    type: "float"
+  - name: "zero_point"
+    type: "int"
+variants:
+  torch:
+    api: "torch.quantized_gru_cell"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedLstm"
+description: "Applies a multi-layer quantized LSTM RNN to an input sequence."
+std_args:
+  - name: "data"
+    type: "Tensor"
+  - name: "batch_sizes"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "params"
+    type: "List[Tensor]"
+  - name: "has_biases"
+    type: "bool"
+  - name: "num_layers"
+    type: "int"
+  - name: "dropout"
+    type: "float"
+  - name: "train"
+    type: "bool"
+  - name: "bidirectional"
+    type: "bool"
+  - name: "dtype"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.quantized_lstm"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedLstmCell"
+description: "Applies a quantized LSTM cell to inputs."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tuple[Tensor, Tensor]"
+  - name: "w_ih"
+    type: "Tensor"
+  - name: "w_hh"
+    type: "Tensor"
+  - name: "b_ih"
+    type: "Tensor"
+  - name: "b_hh"
+    type: "Tensor"
+  - name: "packed_ih"
+    type: "Tensor"
+  - name: "packed_hh"
+    type: "Tensor"
+  - name: "col_offsets"
+    type: "Tensor"
+  - name: "scale"
+    type: "float"
+  - name: "zero_point"
+    type: "int"
+variants:
+  torch:
+    api: "torch.quantized_lstm_cell"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedMaxPool1d"
+description: "Applies a 1D max pooling over an input quantized tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "kernel_size"
+    type: "Union[int, List[int]]"
+  - name: "stride"
+    type: "Union[int, List[int]]"
+    default: "[]"
+  - name: "padding"
+    type: "Union[int, List[int]]"
+    default: "0"
+  - name: "dilation"
+    type: "Union[int, List[int]]"
+    default: "1"
+  - name: "ceil_mode"
+    type: "bool"
+    default: "False"
+variants:
+  torch:
+    api: "torch.quantized_max_pool1d"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedMaxPool2d"
+description: "Applies a 2D max pooling over an input quantized tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "kernel_size"
+    type: "Union[int, List[int]]"
+  - name: "stride"
+    type: "Union[int, List[int]]"
+    default: "[]"
+  - name: "padding"
+    type: "Union[int, List[int]]"
+    default: "0"
+  - name: "dilation"
+    type: "Union[int, List[int]]"
+    default: "1"
+  - name: "ceil_mode"
+    type: "bool"
+    default: "False"
+variants:
+  torch:
+    api: "torch.quantized_max_pool2d"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedMaxPool3d"
+description: "Applies a 3D max pooling over an input quantized tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "kernel_size"
+    type: "Union[int, List[int]]"
+  - name: "stride"
+    type: "Union[int, List[int]]"
+    default: "[]"
+  - name: "padding"
+    type: "Union[int, List[int]]"
+    default: "0"
+  - name: "dilation"
+    type: "Union[int, List[int]]"
+    default: "1"
+  - name: "ceil_mode"
+    type: "bool"
+    default: "False"
+variants:
+  torch:
+    api: "torch.quantized_max_pool3d"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedRnnReluCell"
+description: "Applies a quantized RNN cell with ReLU non-linearity to inputs."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "w_ih"
+    type: "Tensor"
+  - name: "w_hh"
+    type: "Tensor"
+  - name: "b_ih"
+    type: "Tensor"
+  - name: "b_hh"
+    type: "Tensor"
+  - name: "packed_ih"
+    type: "Tensor"
+  - name: "packed_hh"
+    type: "Tensor"
+  - name: "col_offsets"
+    type: "Tensor"
+  - name: "scale"
+    type: "float"
+  - name: "zero_point"
+    type: "int"
+variants:
+  torch:
+    api: "torch.quantized_rnn_relu_cell"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QuantizedRnnTanhCell"
+description: "Applies a quantized RNN cell with Tanh non-linearity to inputs."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "w_ih"
+    type: "Tensor"
+  - name: "w_hh"
+    type: "Tensor"
+  - name: "b_ih"
+    type: "Tensor"
+  - name: "b_hh"
+    type: "Tensor"
+  - name: "packed_ih"
+    type: "Tensor"
+  - name: "packed_hh"
+    type: "Tensor"
+  - name: "col_offsets"
+    type: "Tensor"
+  - name: "scale"
+    type: "float"
+  - name: "zero_point"
+    type: "int"
+variants:
+  torch:
+    api: "torch.quantized_rnn_tanh_cell"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Quint2x4"
+description: "Data type for quint2x4 quantized tensors."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.quint2x4"
+  jax:
+    api: null # Specific quantized dtypes not standard in JAX core
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Quint4x2"
+description: "Data type for quint4x2 quantized tensors."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.quint4x2"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Quint8"
+description: "Data type for quint8 quantized tensors."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.quint8"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: "tf.quint8" # Only relevant if using TF backend in specific contexts, typically null for generic
+  tensorflow:
+    api: "tf.quint8"
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Rad2Deg"
+description: "Returns a new tensor with each of the elements of input converted from angles in radians to degrees."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.rad2deg"
+  jax:
+    api: "jnp.degrees" # jnp.rad2deg is alias
+  flax_nnx:
+    api: "jnp.degrees"
+  paxml:
+    api: "jnp.degrees"
+  keras:
+    api: "keras.ops.convert_to_numpy" # Placeholder logic, actually uses degrees macro
+    macro_template: "{input} * 180.0 / 3.141592653589793"
+  tensorflow:
+    api: "tf.experimental.numpy.rad2deg"
+    macro_template: "{input} * 180.0 / 3.141592653589793"
+  numpy:
+    api: "np.rad2deg"
+  mlx:
+    api: "mlx.core.degrees"
+
+---
+operation: "Rad2Deg_"
+description: "In-place version of rad2deg."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.rad2deg_"
+  jax:
+    api: "jnp.degrees" # In-place unrolled by engine
+  flax_nnx:
+    api: "jnp.degrees"
+  paxml:
+    api: "jnp.degrees"
+  keras:
+    macro_template: "{input} * 180.0 / 3.141592653589793"
+  tensorflow:
+    macro_template: "{input} * 180.0 / 3.141592653589793"
+  numpy:
+    api: "np.rad2deg"
+    macro_template: "{input}[:] = np.rad2deg({input})" # NumPy optimized inplace
+  mlx:
+    api: "mlx.core.degrees"
+
+---
+operation: "Rand"
+description: "Returns a tensor filled with random numbers from a uniform distribution on [0, 1)."
+nondeterministic: true
+std_args:
+  - name: "size"
+    type: "int"
+    is_variadic: true
+  - name: "dtype"
+    type: "Any"
+    default: "None"
+variants:
+  torch:
+    api: "torch.rand"
+  jax:
+    api: "jax.random.uniform"
+    requires_plugin: "inject_prng"
+    args:
+      size: "shape"
+    pack_to_tuple: "shape"
+  flax_nnx:
+    api: "jax.random.uniform"
+    requires_plugin: "inject_prng"
+    pack_to_tuple: "shape"
+  paxml:
+    api: "jax.random.uniform"
+    requires_plugin: "inject_prng"
+    pack_to_tuple: "shape"
+  keras:
+    api: "keras.random.uniform"
+    args:
+      size: "shape"
+    pack_to_tuple: "shape"
+  tensorflow:
+    api: "tf.random.uniform"
+    args:
+      size: "shape"
+    pack_to_tuple: "shape"
+  mlx:
+    api: "mlx.core.random.uniform"
+    args:
+      size: "shape"
+    pack_to_tuple: "shape"
+  numpy:
+    api: "np.random.rand"
+    # Numpy rand takes varargs, no packing needed
+
+---
+operation: "RandLike"
+description: "Returns a tensor with the same size as input that is filled with random numbers from a uniform distribution."
+nondeterministic: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dtype"
+    type: "Any"
+    default: "None"
+variants:
+  torch:
+    api: "torch.rand_like"
+  jax:
+    api: "jax.random.uniform"
+    requires_plugin: "inject_prng"
+    macro_template: "jax.random.uniform({key}, {input}.shape, dtype={dtype})"
+  flax_nnx:
+    api: "jax.random.uniform"
+    requires_plugin: "inject_prng"
+    macro_template: "jax.random.uniform({key}, {input}.shape, dtype={dtype})"
+  keras:
+    api: "keras.random.uniform"
+    macro_template: "keras.random.uniform({input}.shape, dtype={dtype})"
+  tensorflow:
+    api: "tf.random.uniform"
+    macro_template: "tf.random.uniform({input}.shape, dtype={dtype})"
+  mlx:
+    api: "mlx.core.random.uniform"
+    macro_template: "mlx.core.random.uniform({input}.shape, dtype={dtype})"
+  numpy:
+    api: "np.random.random_sample"
+    macro_template: "np.random.random_sample({input}.shape)"
+
+---
+operation: "RandInt"
+description: "Returns a tensor filled with random integers generated uniformly between low (inclusive) and high (exclusive)."
+nondeterministic: true
+std_args:
+  - name: "low"
+    type: "int"
+    default: 0
+  - name: "high"
+    type: "int"
+  - name: "size"
+    type: "int"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.randint"
+  jax:
+    api: "jax.random.randint"
+    requires_plugin: "inject_prng"
+    macro_template: "jax.random.randint({key}, shape={size}, minval={low}, maxval={high})"
+    pack_to_tuple: "size"
+  flax_nnx:
+    api: "jax.random.randint"
+    requires_plugin: "inject_prng"
+    macro_template: "jax.random.randint({key}, shape={size}, minval={low}, maxval={high})"
+    pack_to_tuple: "size"
+  keras:
+    api: "keras.random.randint"
+    args:
+      low: "minval"
+      high: "maxval"
+      size: "shape"
+    pack_to_tuple: "shape"
+  tensorflow:
+    api: "tf.random.uniform"
+    macro_template: "tf.random.uniform(shape={size}, minval={low}, maxval={high}, dtype=tf.int64)"
+    pack_to_tuple: "size"
+  mlx:
+    api: "mlx.core.random.randint"
+    args:
+      size: "shape"
+    pack_to_tuple: "shape"
+  numpy:
+    api: "np.random.randint"
+    args:
+      size: "size"
+    pack_to_tuple: "size"
+
+---
+operation: "RandIntLike"
+description: "Returns a tensor with the same shape as Tensor input filled with random integers."
+nondeterministic: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "low"
+    type: "int"
+    default: 0
+  - name: "high"
+    type: "int"
+variants:
+  torch:
+    api: "torch.randint_like"
+  jax:
+    api: "jax.random.randint"
+    requires_plugin: "inject_prng"
+    macro_template: "jax.random.randint({key}, shape={input}.shape, minval={low}, maxval={high})"
+  keras:
+    api: "keras.random.randint"
+    macro_template: "keras.random.randint({input}.shape, minval={low}, maxval={high})"
+  tensorflow:
+    api: "tf.random.uniform"
+    macro_template: "tf.random.uniform({input}.shape, minval={low}, maxval={high}, dtype=tf.int64)"
+  mlx:
+    api: "mlx.core.random.randint"
+    macro_template: "mlx.core.random.randint({low}, {high}, {input}.shape)"
+  numpy:
+    api: "np.random.randint"
+    macro_template: "np.random.randint({low}, {high}, size={input}.shape)"
+
+---
+operation: "Randn"
+description: "Returns a tensor filled with random numbers from a normal distribution with mean 0 and variance 1."
+nondeterministic: true
+std_args:
+  - name: "size"
+    type: "int"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.randn"
+  jax:
+    api: "jax.random.normal"
+    requires_plugin: "inject_prng"
+    args:
+      size: "shape"
+    pack_to_tuple: "shape"
+  flax_nnx:
+    api: "jax.random.normal"
+    requires_plugin: "inject_prng"
+    pack_to_tuple: "shape"
+  keras:
+    api: "keras.random.normal"
+    args:
+      size: "shape"
+    pack_to_tuple: "shape"
+  tensorflow:
+    api: "tf.random.normal"
+    args:
+      size: "shape"
+    pack_to_tuple: "shape"
+  mlx:
+    api: "mlx.core.random.normal"
+    args:
+      size: "shape"
+    pack_to_tuple: "shape"
+  numpy:
+    api: "np.random.randn"
+    # Numpy randn takes varargs
+
+---
+operation: "RandnLike"
+description: "Returns a tensor with the same size as input that is filled with random numbers from a normal distribution."
+nondeterministic: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.randn_like"
+  jax:
+    api: "jax.random.normal"
+    requires_plugin: "inject_prng"
+    macro_template: "jax.random.normal({key}, {input}.shape)"
+  keras:
+    api: "keras.random.normal"
+    macro_template: "keras.random.normal({input}.shape)"
+  tensorflow:
+    api: "tf.random.normal"
+    macro_template: "tf.random.normal({input}.shape)"
+  mlx:
+    api: "mlx.core.random.normal"
+    macro_template: "mlx.core.random.normal({input}.shape)"
+  numpy:
+    api: "np.random.standard_normal"
+    macro_template: "np.random.standard_normal({input}.shape)"
+
+---
+operation: "RandPerm"
+description: "Returns a random permutation of integers from 0 to n - 1."
+nondeterministic: true
+std_args:
+  - name: "n"
+    type: "int"
+variants:
+  torch:
+    api: "torch.randperm"
+  jax:
+    api: "jax.random.permutation"
+    requires_plugin: "inject_prng"
+    macro_template: "jax.random.permutation({key}, {n})"
+  flax_nnx:
+    api: "jax.random.permutation"
+    requires_plugin: "inject_prng"
+    macro_template: "jax.random.permutation({key}, {n})"
+  keras:
+    api: "keras.numpy.random.permutation"
+    macro_template: "keras.ops.convert_to_tensor(np.random.permutation({n}))" # Keras random doesn't have partial shuffle easily
+  tensorflow:
+    api: "tf.random.shuffle"
+    macro_template: "tf.random.shuffle(tf.range({n}))"
+  mlx:
+    api: "mlx.core.random.permutation"
+    macro_template: "mlx.core.random.permutation(mlx.core.arange({n}))"
+  numpy:
+    api: "np.random.permutation"
+
+---
+operation: "Range"
+description: "Returns a 1-D tensor of size floor((end - start) / step) + 1 with values from start to end with step step."
+deprecated: true
+replaced_by: "Arange"
+std_args:
+  - name: "start"
+    type: "float"
+    default: 0
+  - name: "end"
+    type: "float"
+  - name: "step"
+    type: "float"
+    default: 1
+variants:
+  torch:
+    api: "torch.range"
+  jax:
+    api: "jnp.arange"
+    macro_template: "jnp.arange({start}, {end} + {step}, {step})" # Inclusive end
+  numpy:
+    api: "np.arange"
+    macro_template: "np.arange({start}, {end} + {step}, {step})"
+  mlx:
+    api: "mlx.core.arange"
+    macro_template: "mlx.core.arange({start}, {end} + {step}, {step})"
+  tensorflow:
+    api: "tf.range"
+    macro_template: "tf.range({start}, {end} + {step}, {step})"
+  keras:
+    api: "keras.ops.arange"
+    macro_template: "keras.ops.arange({start}, {end} + {step}, {step})"
+
+---
+operation: "Ravel"
+description: "Return a contiguous flattened tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ravel"
+  jax:
+    api: "jnp.ravel"
+  flax_nnx:
+    api: "jnp.ravel"
+  paxml:
+    api: "jnp.ravel"
+  keras:
+    api: "keras.ops.ravel"
+  tensorflow:
+    api: "tf.reshape"
+    macro_template: "tf.reshape({input}, [-1])"
+  mlx:
+    api: "mlx.core.flatten"
+  numpy:
+    api: "np.ravel"
+
+---
+operation: "ReadVitals"
+description: "Reads internal system vitals. Internal utility."
+std_args: []
+variants:
+  torch:
+    api: "torch.read_vitals"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null

@@ -1,0 +1,658 @@
+operation: "Int32"
+description: "32-bit integer data type."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.int32"
+  jax:
+    api: "jax.numpy.int32"
+  flax_nnx:
+    api: "jax.numpy.int32"
+  paxml:
+    api: "jax.numpy.int32"
+  keras:
+    api: "keras.int32" # Often string "int32" or mapped manually
+  tensorflow:
+    api: "tf.int32"
+  numpy:
+    api: "numpy.int32"
+  mlx:
+    api: "mlx.core.int32"
+---
+operation: "Int64"
+description: "64-bit integer data type (Long)."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.int64"
+  jax:
+    api: "jax.numpy.int64"
+  flax_nnx:
+    api: "jax.numpy.int64"
+  paxml:
+    api: "jax.numpy.int64"
+  keras:
+    api: "keras.int64"
+  tensorflow:
+    api: "tf.int64"
+  numpy:
+    api: "numpy.int64"
+  mlx:
+    api: "mlx.core.int64"
+---
+operation: "Int8"
+description: "8-bit integer data type (Byte/Char)."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.int8"
+  jax:
+    api: "jax.numpy.int8"
+  flax_nnx:
+    api: "jax.numpy.int8"
+  paxml:
+    api: "jax.numpy.int8"
+  keras:
+    api: "keras.int8"
+  tensorflow:
+    api: "tf.int8"
+  numpy:
+    api: "numpy.int8"
+  mlx:
+    api: "mlx.core.int8"
+---
+operation: "Int4"
+description: "4-bit integer data type (Quantization)."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.int4"
+  # Support is sparse/experimental in other frameworks
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+---
+operation: "Int3"
+description: "3-bit integer data type (Quantization)."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.int3"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+---
+operation: "Int5"
+description: "5-bit integer data type (Quantization)."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.int5"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+---
+operation: "Int6"
+description: "6-bit integer data type (Quantization)."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.int6"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+---
+operation: "Int7"
+description: "7-bit integer data type (Quantization)."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.int7"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+---
+operation: "Inverse"
+description: "Computes the inverse of a square matrix."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 2
+variants:
+  torch:
+    api: "torch.inverse"
+  jax:
+    api: "jax.numpy.linalg.inv"
+    args:
+      input: "a"
+  flax_nnx:
+    api: "jax.numpy.linalg.inv"
+    args:
+      input: "a"
+  paxml:
+    api: "jax.numpy.linalg.inv"
+    args:
+      input: "a"
+  keras:
+    api: "keras.ops.inv"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.linalg.inv"
+    args:
+      input: "input"
+  numpy:
+    api: "numpy.linalg.inv"
+    args:
+      input: "a"
+  mlx:
+    api: "mlx.core.linalg.inv"
+    args:
+      input: "a"
+---
+operation: "IsComplex"
+description: "Returns True if the data type of the tensor is complex."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.is_complex"
+  jax:
+    # JIT-friendly check or python check? is_complex return bool tensor in JAX/Numpy elementwise
+    # Python iscomplexobj checks dtype.
+    api: "jax.numpy.iscomplexobj"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.iscomplexobj"
+    args:
+      input: "x"
+  paxml:
+    api: "jax.numpy.iscomplexobj"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.is_complex"
+    # Keras ops usually follow JAX/Numpy math
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.is_complex" # Elementwise? Check: tf.is_complex returns tensor of bools
+    # Torch version returns single bool. Mismatch.
+    # Use macro for type check.
+    transformation_type: "inline_lambda"
+    macro_template: "{input}.dtype.is_complex"
+  numpy:
+    api: "numpy.iscomplexobj"
+    args:
+      input: "x"
+  mlx: 
+    # Macro for checking dtypes
+    macro_template: "False" # Placeholder or custom check
+---
+operation: "IsFloatingPoint"
+description: "Returns True if the data type of the tensor is a floating point type."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.is_floating_point"
+  jax:
+    macro_template: "jax.numpy.issubdtype({input}.dtype, jax.numpy.floating)"
+  flax_nnx:
+    macro_template: "jax.numpy.issubdtype({input}.dtype, jax.numpy.floating)"
+  paxml:
+    macro_template: "jax.numpy.issubdtype({input}.dtype, jax.numpy.floating)"
+  keras:
+    macro_template: "'float' in str({input}.dtype)"
+  tensorflow:
+    macro_template: "{input}.dtype.is_floating"
+  numpy:
+    macro_template: "numpy.issubdtype({input}.dtype, numpy.floating)"
+  mlx:
+    macro_template: "False" # Placeholder
+---
+operation: "IsNonZero"
+description: "Returns True if the input is a single element tensor which is not equal to zero."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.is_nonzero"
+  jax:
+    macro_template: "{input}.size == 1 and {input}.item() != 0"
+  flax_nnx:
+    macro_template: "{input}.size == 1 and {input}.item() != 0"
+  paxml:
+    macro_template: "{input}.size == 1 and {input}.item() != 0"
+  keras:
+    macro_template: "keras.ops.size({input}) == 1 and keras.ops.convert_to_numpy({input}).item() != 0"
+  tensorflow:
+    macro_template: "tf.size({input}) == 1 and tf.get_static_value({input}) != 0"
+  numpy:
+    api: "numpy.all" # Close approximation for boolean check, but implies vector support
+    macro_template: "{input}.size == 1 and {input}.item() != 0"
+  mlx:
+    macro_template: "{input}.size == 1 and {input}.item() != 0"
+---
+operation: "IntRepr"
+description: "Returns the integer representation of a quantized tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.int_repr"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+---
+operation: "IsAnomalyCheckNanEnabled"
+description: "Returns True if anomaly check for NaNs is enabled."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_anomaly_check_nan_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsAnomalyEnabled"
+description: "Returns True if anomaly detection is enabled."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_anomaly_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsAutocastCacheEnabled"
+description: "Returns True if autocast cache is enabled."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_autocast_cache_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsAutocastCpuEnabled"
+description: "Returns True if autocast is enabled on CPU."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_autocast_cpu_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsAutocastEnabled"
+description: "Returns True if autocast is enabled."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_autocast_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsAutocastIpuEnabled"
+description: "Returns True if autocast is enabled on IPU."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_autocast_ipu_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsAutocastXlaEnabled"
+description: "Returns True if autocast is enabled on XLA."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_autocast_xla_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsConj"
+description: "Returns True if the tensor is a conjugated tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.is_conj"
+  # Concept of 'conjugate view' bit is specific to Torch/some frameworks. 
+  # JAX doesn't typically expose "is conjugated view" but resolves it.
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsDeterministicAlgorithmsWarnOnlyEnabled"
+description: "Returns True if the global deterministic flag is set to warn only."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_deterministic_algorithms_warn_only_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsDistributed"
+description: "Returns True if the DistributedRPC framework is initialized."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_distributed"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsGradEnabled"
+description: "Returns True if grad mode is currently enabled."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_grad_enabled"
+  jax:
+    macro_template: "True" # Functional frameworks imply traceability
+  flax_nnx:
+    macro_template: "True"
+  paxml:
+    macro_template: "True"
+  keras:
+    macro_template: "True"
+  tensorflow:
+    macro_template: "tf.executing_eagerly()" # Inconsistent map but best effort
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "True"
+---
+operation: "IsInference"
+description: "Returns True if input is an inference tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.is_inference"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsInferenceModeEnabled"
+description: "Returns True if inference mode is currently enabled."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.is_inference_mode_enabled"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+---
+operation: "IsNeg"
+description: "Checks if elements are negative."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.signbit" # torch.is_neg usually aliased to checking negative items or signbit? 
+  jax:
+    api: "jax.numpy.signbit"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.signbit"
+  paxml:
+    api: "jax.numpy.signbit"
+  keras:
+    api: "keras.ops.signbit" # Check if k.ops.signbit exists, usually it does or manual logic
+    macro_template: "{input} < 0"
+  tensorflow:
+    api: "tf.math.is_negative"
+  numpy:
+    api: "numpy.signbit"
+  mlx:
+    macro_template: "{input} < 0"
+---
+operation: "IsSameSize"
+description: "Returns True if two tensors have the same size."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.is_same_size"
+  jax:
+    macro_template: "{input}.shape == {other}.shape"
+  flax_nnx:
+    macro_template: "{input}.shape == {other}.shape"
+  paxml:
+    macro_template: "{input}.shape == {other}.shape"
+  keras:
+    macro_template: "keras.ops.shape({input}) == keras.ops.shape({other})"
+  tensorflow:
+    macro_template: "{input}.shape == {other}.shape"
+  numpy:
+    macro_template: "{input}.shape == {other}.shape"
+  mlx:
+    macro_template: "{input}.shape == {other}.shape"
+---
+operation: "IsSigned"
+description: "Returns True if the tensor is a signed data type."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.is_signed"
+  jax:
+    macro_template: "jax.numpy.issubdtype({input}.dtype, jax.numpy.signedinteger) or jax.numpy.issubdtype({input}.dtype, jax.numpy.floating)"
+  flax_nnx:
+    macro_template: "jax.numpy.issubdtype({input}.dtype, jax.numpy.signedinteger) or jax.numpy.issubdtype({input}.dtype, jax.numpy.floating)"
+  paxml:
+    macro_template: "jax.numpy.issubdtype({input}.dtype, jax.numpy.signedinteger) or jax.numpy.issubdtype({input}.dtype, jax.numpy.floating)"
+  keras:
+    macro_template: "True" # Fallback
+  tensorflow:
+    macro_template: "{input}.dtype.is_signed" # Removed is_floating check which also implies signed
+  numpy:
+    macro_template: "numpy.issubdtype({input}.dtype, numpy.signedinteger) or numpy.issubdtype({input}.dtype, numpy.floating)"
+  mlx:
+    macro_template: "True" # Placeholder
+---
+operation: "IsStorage"
+description: "Returns True if the object is a storage object."
+std_args:
+  - name: "obj"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.is_storage"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"

@@ -1,0 +1,271 @@
+operation: "Selu"
+description: "Applies the Scaled Exponential Linear Unit."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.nn.selu"
+  torch:
+    api: "torch.nn.functional.selu"
+  jax:
+    api: "jax.nn.selu"
+  flax_nnx:
+    api: "jax.nn.selu"
+  paxml:
+    api: "jax.nn.selu"
+  keras:
+    api: "keras.activations.selu"
+  tensorflow:
+    api: "tf.nn.selu"
+  numpy:
+    api: null # No specialized SELU in numpy
+---
+operation: "Sigmoid"
+description: "Applies the sigmoid function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.nn.sigmoid"
+  torch:
+    api: "torch.sigmoid"
+  jax:
+    api: "jax.nn.sigmoid"
+  flax_nnx:
+    api: "jax.nn.sigmoid"
+  paxml:
+    api: "jax.nn.sigmoid"
+  keras:
+    api: "keras.activations.sigmoid"
+  tensorflow:
+    api: "tf.math.sigmoid"
+  numpy:
+    macro_template: "1 / (1 + np.exp(-{x}))"
+---
+operation: "SiLU"
+description: "Applies the Sigmoid Linear Unit. Also known as Swish."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.nn.silu"
+  torch:
+    api: "torch.nn.functional.silu"
+  jax:
+    api: "jax.nn.silu"
+  flax_nnx:
+    api: "jax.nn.silu"
+  paxml:
+    api: "jax.nn.silu"
+  keras:
+    api: "keras.activations.silu"
+  tensorflow:
+    api: "tf.nn.silu"
+  numpy:
+    macro_template: "{x} * (1 / (1 + np.exp(-{x})))"
+---
+operation: "Softmax"
+description: "Applies the Softmax function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  mlx:
+    api: "mlx.nn.softmax"
+  torch:
+    api: "torch.nn.functional.softmax"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.nn.softmax"
+  flax_nnx:
+    api: "jax.nn.softmax"
+  paxml:
+    api: "jax.nn.softmax"
+  keras:
+    api: "keras.activations.softmax"
+  tensorflow:
+    api: "tf.nn.softmax"
+---
+operation: "Softmin"
+description: "Applies the Softmin function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  mlx:
+    api: "mlx.nn.softmin"
+  torch:
+    api: "torch.nn.functional.softmin"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.nn.softmin"
+  flax_nnx:
+    api: "jax.nn.softmin"
+  paxml:
+    api: "jax.nn.softmin"
+  keras:
+    # Keras doesn't have explicit softmin in activations, emulate with softmax(-x)
+    macro_template: "keras.activations.softmax(-{x}, axis={axis})"
+  tensorflow:
+    api: "tf.nn.softmin"
+---
+operation: "Softplus"
+description: "Applies the Softplus function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.nn.softplus"
+  torch:
+    api: "torch.nn.functional.softplus"
+  jax:
+    api: "jax.nn.softplus"
+  flax_nnx:
+    api: "jax.nn.softplus"
+  paxml:
+    api: "jax.nn.softplus"
+  keras:
+    api: "keras.activations.softplus"
+  tensorflow:
+    api: "tf.math.softplus"
+  numpy:
+    macro_template: "np.log(1 + np.exp({x}))"
+---
+operation: "Softshrink"
+description: "Applies the Softshrink activation function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "lambd"
+    type: "float"
+    default: 0.5
+variants:
+  mlx:
+    api: "mlx.nn.softshrink"
+  torch:
+    api: "torch.nn.functional.softshrink"
+  jax:
+    # JAX doesn't have a direct softshrink in jax.nn, use macro
+    macro_template: "jnp.sign({x}) * jnp.maximum(jnp.abs({x}) - {lambd}, 0)"
+  flax_nnx:
+    macro_template: "jnp.sign({x}) * jnp.maximum(jnp.abs({x}) - {lambd}, 0)"
+  paxml:
+    macro_template: "jnp.sign({x}) * jnp.maximum(jnp.abs({x}) - {lambd}, 0)"
+  keras:
+    # Keras/TF doesn't standardly expose this, use macro via ops
+    macro_template: "keras.ops.sign({x}) * keras.ops.maximum(keras.ops.abs({x}) - {lambd}, 0)"
+  tensorflow:
+    macro_template: "tf.math.sign({x}) * tf.math.maximum(tf.math.abs({x}) - {lambd}, 0)"
+---
+operation: "Softsign"
+description: "Applies the Softsign function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.nn.softsign"
+  torch:
+    api: "torch.nn.functional.softsign"
+  jax:
+    api: "jax.nn.softsign"
+  flax_nnx:
+    api: "jax.nn.softsign"
+  paxml:
+    api: "jax.nn.softsign"
+  keras:
+    api: "keras.activations.softsign"
+  tensorflow:
+    api: "tf.nn.softsign"
+  numpy:
+    macro_template: "{x} / (1 + np.abs({x}))"
+---
+operation: "StepActivation"
+description: "Applies the Step Activation Function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "threshold"
+    type: "float"
+    default: 0.0
+variants:
+  mlx:
+    api: "mlx.nn.step"
+  torch:
+    # torch.heaviside uses (input, values), not threshold. 
+    # Use generic conditional macro
+    macro_template: "torch.where({x} >= {threshold}, 1.0, 0.0)"
+  jax:
+    macro_template: "jnp.where({x} >= {threshold}, 1.0, 0.0)"
+  flax_nnx:
+    macro_template: "jnp.where({x} >= {threshold}, 1.0, 0.0)"
+  paxml:
+    macro_template: "jnp.where({x} >= {threshold}, 1.0, 0.0)"
+  keras:
+    macro_template: "keras.ops.cast({x} >= {threshold}, dtype='float32')"
+  tensorflow:
+    macro_template: "tf.cast({x} >= {threshold}, dtype=tf.float32)"
+  numpy:
+    macro_template: "({x} >= {threshold}).astype(float)"
+---
+operation: "Tanh"
+description: "Applies the hyperbolic tangent function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  mlx:
+    api: "mlx.nn.tanh"
+  torch:
+    api: "torch.tanh"
+  jax:
+    api: "jax.numpy.tanh"
+  flax_nnx:
+    api: "jax.numpy.tanh"
+  paxml:
+    api: "jax.numpy.tanh"
+  keras:
+    api: "keras.activations.tanh"
+  tensorflow:
+    api: "tf.math.tanh"
+  numpy:
+    api: "numpy.tanh"
+---
+operation: "ValueAndGrad"
+description: "Computes the value and gradient of a function."
+std_args:
+  - name: "model"
+    type: "Any"
+  - name: "fn"
+    type: "Callable"
+variants:
+  mlx:
+    api: "mlx.nn.value_and_grad"
+  torch:
+    # Torch uses functional API in torch.func (if available) or imperative hooks
+    # Requires plugin for complex model handling
+    requires_plugin: "torch_functional_grad"
+  jax:
+    # JAX operates on functions, not models directly. 
+    # Requires complex plugin to bind model parameters to function args.
+    requires_plugin: "jax_value_and_grad_wrapper"
+  flax_nnx:
+    api: "nnx.value_and_grad"
+  paxml:
+    requires_plugin: "pax_grad_wrapper"
+  keras:
+    requires_plugin: "keras_grad_tape"
+  tensorflow:
+    requires_plugin: "tf_grad_tape"

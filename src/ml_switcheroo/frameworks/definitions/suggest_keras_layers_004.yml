@@ -1,0 +1,832 @@
+operation: "MaxNumBoundingBoxes"
+description: "Ensure the maximum number of bounding boxes."
+op_type: "class"
+std_args:
+  - name: "max_number"
+    type: "int"
+  - name: "fill_value"
+    type: "float"
+    default: -1.0
+variants:
+  keras:
+    api: "keras.layers.MaxNumBoundingBoxes"
+  tensorflow:
+    api: "tf.image.pad_to_bounding_box"
+    requires_plugin: "tf_bbox_ops"
+  torch:
+    api: null
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+---
+operation: "MaxPool1d"
+description: "Max pooling operation for 1D temporal data."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "int"
+    default: 2
+  - name: "strides"
+    type: "int"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+    options: ["valid", "same"]
+  - name: "data_format"
+    type: "str"
+    default: "channels_last"
+variants:
+  keras:
+    api: "keras.layers.MaxPool1D"
+  torch:
+    api: "torch.nn.MaxPool1d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+    arg_values:
+      padding:
+        valid: 0
+        same: "'same'" # Requires padding calculation plugin in Torch usually
+  mlx:
+    api: "mlx.nn.MaxPool1d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  flax_nnx:
+    api: "flax.nnx.MaxPool1d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  paxml:
+    api: "praxis.layers.MaxPool1d"
+  tensorflow:
+    api: "tf.keras.layers.MaxPool1D"
+---
+operation: "MaxPool2d"
+description: "Max pooling operation for 2D spatial data."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "Union[int, Tuple[int, int]]"
+    default: [2, 2]
+  - name: "strides"
+    type: "Union[int, Tuple[int, int]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.MaxPool2D"
+  torch:
+    api: "torch.nn.MaxPool2d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  mlx:
+    api: "mlx.nn.MaxPool2d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  flax_nnx:
+    api: "flax.nnx.MaxPool2d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  paxml:
+    api: "praxis.layers.MaxPool2d"
+  tensorflow:
+    api: "tf.keras.layers.MaxPool2D"
+---
+operation: "MaxPool3d"
+description: "Max pooling operation for 3D data."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: [2, 2, 2]
+  - name: "strides"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+variants:
+  keras:
+    api: "keras.layers.MaxPool3D"
+  torch:
+    api: "torch.nn.MaxPool3d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  mlx:
+    api: "mlx.nn.MaxPool3d" # Assuming existence or null if not yet implemented
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  flax_nnx:
+    api: "flax.nnx.MaxPool3d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  paxml:
+    api: "praxis.layers.MaxPool3d"
+  tensorflow:
+    api: "tf.keras.layers.MaxPool3D"
+---
+operation: "MaxPooling1d"
+description: "Max pooling operation for 1D temporal data (Alias)."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "int"
+    default: 2
+  - name: "strides"
+    type: "int"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+variants:
+  keras:
+    api: "keras.layers.MaxPooling1D"
+  torch:
+    api: "torch.nn.MaxPool1d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  mlx:
+    api: "mlx.nn.MaxPool1d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  flax_nnx:
+    api: "flax.nnx.MaxPool1d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  paxml:
+    api: "praxis.layers.MaxPool1d"
+  tensorflow:
+    api: "tf.keras.layers.MaxPooling1D"
+---
+operation: "MaxPooling2d"
+description: "Max pooling operation for 2D spatial data (Alias)."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "Union[int, Tuple[int, int]]"
+    default: [2, 2]
+  - name: "strides"
+    type: "Union[int, Tuple[int, int]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+variants:
+  keras:
+    api: "keras.layers.MaxPooling2D"
+  torch:
+    api: "torch.nn.MaxPool2d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  mlx:
+    api: "mlx.nn.MaxPool2d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  flax_nnx:
+    api: "flax.nnx.MaxPool2d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  paxml:
+    api: "praxis.layers.MaxPool2d"
+  tensorflow:
+    api: "tf.keras.layers.MaxPooling2D"
+---
+operation: "MaxPooling3d"
+description: "Max pooling operation for 3D data (Alias)."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: [2, 2, 2]
+  - name: "strides"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+variants:
+  keras:
+    api: "keras.layers.MaxPooling3D"
+  torch:
+    api: "torch.nn.MaxPool3d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  mlx:
+    api: "mlx.nn.MaxPool3d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  flax_nnx:
+    api: "flax.nnx.MaxPool3d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+  paxml:
+    api: "praxis.layers.MaxPool3d"
+  tensorflow:
+    api: "tf.keras.layers.MaxPooling3D"
+---
+operation: "Maximum"
+description: "Computes element-wise maximum on a list of inputs."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.layers.Maximum"
+  torch:
+    api: "torch.maximum"
+    transformation_type: "inline_lambda"
+    macro_template: "lambda inputs: torch.stack(inputs).amax(dim=0)"
+  mlx:
+    api: "mlx.core.maximum"
+  flax_nnx:
+    api: "jnp.maximum"
+  paxml:
+    api: "jnp.maximum"
+  tensorflow:
+    api: "tf.keras.layers.Maximum"
+---
+operation: "MelSpectrogram"
+description: "A preprocessing layer to convert raw audio signals to Mel spectrograms."
+op_type: "class"
+std_args:
+  - name: "fft_length"
+    type: "int"
+    default: 2048
+  - name: "sequence_stride"
+    type: "int"
+    default: 512
+  - name: "num_mel_bins"
+    type: "int"
+    default: 128
+  - name: "sampling_rate"
+    type: "int"
+    default: 16000
+variants:
+  keras:
+    api: "keras.layers.MelSpectrogram"
+  torch:
+    api: "torchaudio.transforms.MelSpectrogram"
+    args:
+      fft_length: "n_fft"
+      sequence_stride: "hop_length"
+      num_mel_bins: "n_mels"
+      sampling_rate: "sample_rate"
+    required_imports:
+      - "import torchaudio"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.MelSpectrogram"
+---
+operation: "Minimum"
+description: "Computes elementwise minimum on a list of inputs."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.layers.Minimum"
+  torch:
+    api: "torch.minimum"
+  mlx:
+    api: "mlx.core.minimum"
+  flax_nnx:
+    api: "jnp.minimum"
+  paxml:
+    api: "jnp.minimum"
+  tensorflow:
+    api: "tf.keras.layers.Minimum"
+---
+operation: "MixUp"
+description: "MixUp implements the MixUp data augmentation technique."
+op_type: "class"
+std_args:
+  - name: "alpha"
+    type: "float"
+    default: 0.2
+variants:
+  keras:
+    api: "keras.layers.MixUp"
+  torch:
+    api: "torchvision.transforms.v2.MixUp"
+    required_imports:
+      - "import torchvision.transforms.v2"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.MixUp"
+---
+operation: "MultiHeadAttention"
+description: "MultiHeadAttention layer."
+op_type: "class"
+std_args:
+  - name: "num_heads"
+    type: "int"
+  - name: "key_dim"
+    type: "int"
+  - name: "value_dim"
+    type: "int"
+    default: null
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+  - name: "use_bias"
+    type: "bool"
+    default: true
+variants:
+  keras:
+    api: "keras.layers.MultiHeadAttention"
+  torch:
+    api: "torch.nn.MultiheadAttention"
+    args:
+      num_heads: "num_heads"
+      key_dim: "embed_dim" # Argument mismatch handling required via plugin ideally
+      dropout: "dropout"
+      use_bias: "bias"
+    requires_plugin: "repack_attn_torch"
+  mlx:
+    api: "mlx.nn.MultiHeadAttention"
+    args:
+      num_heads: "num_heads"
+      key_dim: "dims"
+  flax_nnx:
+    api: "flax.nnx.MultiHeadAttention"
+    args:
+      num_heads: "num_heads"
+      key_dim: "in_features"
+      dropout: "dropout_rate"
+    requires_plugin: "repack_attn_flax"
+  paxml:
+    api: "praxis.layers.MultiHeadAttention"
+  tensorflow:
+    api: "tf.keras.layers.MultiHeadAttention"
+---
+operation: "Multiply"
+description: "Performs elementwise multiplication."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.layers.Multiply"
+  torch:
+    api: "torch.mul" # Functional mapping fallback
+    transformation_type: "inline_lambda"
+    macro_template: "lambda inputs: inputs[0] * inputs[1]"
+  mlx:
+    api: "mlx.core.multiply"
+  flax_nnx:
+    api: "jnp.multiply"
+  paxml:
+    api: "jnp.multiply"
+  tensorflow:
+    api: "tf.keras.layers.Multiply"
+---
+operation: "Normalization"
+description: "A preprocessing layer that normalizes continuous features."
+op_type: "class"
+std_args:
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "mean"
+    type: "float"
+    default: null
+  - name: "variance"
+    type: "float"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.Normalization"
+  torch:
+    api: null # No direct equivalent stateful preprocessing layer in core nn
+  mlx:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.LayerNorm"
+    args: null # Partial mismatch on mean/var init
+  paxml:
+    api: "praxis.layers.LayerNorm"
+  tensorflow:
+    api: "tf.keras.layers.Normalization"
+---
+operation: "PReLU"
+description: "Parametric Rectified Linear Unit activation layer."
+op_type: "class"
+std_args:
+  - name: "shared_axes"
+    type: "List[int]"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.PReLU"
+  torch:
+    api: "torch.nn.PReLU"
+    args:
+      shared_axes: null # Torch infers from num_parameters
+  mlx:
+    api: "mlx.nn.PReLU"
+  flax_nnx:
+    api: "flax.nnx.PReLU"
+  paxml:
+    api: "praxis.layers.PReLU"
+  tensorflow:
+    api: "tf.keras.layers.PReLU"
+---
+operation: "Permute"
+description: "Permutes the dimensions of the input according to a given pattern."
+op_type: "class"
+std_args:
+  - name: "dims"
+    type: "Tuple[int, ...]"
+variants:
+  keras:
+    api: "keras.layers.Permute"
+  torch:
+    api: "torch.permute" # Functional
+    transformation_type: "inline_lambda"
+    macro_template: "lambda x: x.permute(dims)" # Wrapper logic required as layer
+  mlx:
+    api: "mlx.core.transpose"
+  flax_nnx:
+    api: "jnp.transpose"
+  paxml:
+    api: "jnp.transpose"
+  tensorflow:
+    api: "tf.keras.layers.Permute"
+---
+operation: "Pipeline"
+description: "Applies a series of layers to an input."
+op_type: "class"
+std_args:
+  - name: "layers"
+    type: "List"
+variants:
+  keras:
+    api: "keras.layers.Pipeline"
+  torch:
+    api: "torch.nn.Sequential"
+    pack_to_tuple: "args" # Sequential(*layers) vs Pipeline([layers])
+    pack_as: "List"
+  mlx:
+    api: "mlx.nn.Sequential"
+  flax_nnx:
+    api: "flax.nnx.Sequential"
+  paxml:
+    api: "praxis.layers.Sequential"
+  tensorflow:
+    api: "tf.keras.layers.Pipeline"
+---
+operation: "RMSNormalization"
+description: "Root Mean Square (RMS) Normalization layer."
+op_type: "class"
+std_args:
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "epsilon"
+    type: "float"
+    default: 1e-6
+variants:
+  keras:
+    api: "keras.layers.RMSNormalization"
+  torch:
+    api: "torch.nn.RMSNorm"
+    args:
+      axis: "dim" # Mismatch: Torch needs normalized_shape (int or tuple), not axis index
+      epsilon: "eps"
+  mlx:
+    api: "mlx.nn.RMSNorm"
+    args:
+      axis: "dims"
+      epsilon: "eps"
+  flax_nnx:
+    api: "flax.nnx.RMSNorm"
+    args:
+      axis: "axis"
+      epsilon: "epsilon"
+  paxml:
+    api: "praxis.layers.RMSNorm"
+  tensorflow:
+    api: "tf.keras.layers.RMSNormalization"
+---
+operation: "RNN"
+description: "Base class for recurrent layers."
+op_type: "class"
+std_args:
+  - name: "cell"
+    type: "Any"
+  - name: "return_sequences"
+    type: "bool"
+    default: false
+  - name: "return_state"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.RNN"
+  torch:
+    api: "torch.nn.RNN"
+  mlx:
+    api: "mlx.nn.RNN"
+  flax_nnx:
+    api: "flax.nnx.RNN"
+  paxml:
+    api: "praxis.layers.RNN"
+  tensorflow:
+    api: "tf.keras.layers.RNN"
+---
+operation: "RandAugment"
+description: "RandAugment performs the Rand Augment operation on input images."
+op_type: "class"
+std_args:
+  - name: "num_ops"
+    type: "int"
+    default: 2
+  - name: "magnitude" # Torch uses magnitude, Keras factor?
+    type: "int"
+    default: 9
+variants:
+  keras:
+    api: "keras.layers.RandAugment"
+  torch:
+    api: "torchvision.transforms.RandAugment"
+    args:
+      num_ops: "num_ops"
+      magnitude: "magnitude"
+    required_imports:
+      - "import torchvision"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandAugment"
+---
+operation: "RandomBrightness"
+description: "A preprocessing layer which randomly adjusts brightness during training."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+variants:
+  keras:
+    api: "keras.layers.RandomBrightness"
+  torch:
+    api: "torchvision.transforms.ColorJitter"
+    args:
+      factor: "brightness" # Maps direct factor to brightness jitter
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomBrightness"
+---
+operation: "RandomColorDegeneration"
+description: "Randomly performs the color degeneration operation on given images."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+variants:
+  keras:
+    api: "keras.layers.RandomColorDegeneration"
+  torch:
+    api: null
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomColorDegeneration"
+---
+operation: "RandomColorJitter"
+description: "Randomly apply brightness, contrast, saturation and hue image processing."
+op_type: "class"
+std_args:
+  - name: "brightness_factor"
+    type: "float"
+    default: null
+  - name: "contrast_factor"
+    type: "float"
+    default: null
+  - name: "saturation_factor"
+    type: "float"
+    default: null
+  - name: "hue_factor"
+    type: "float"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomColorJitter"
+  torch:
+    api: "torchvision.transforms.ColorJitter"
+    args:
+      brightness_factor: "brightness"
+      contrast_factor: "contrast"
+      saturation_factor: "saturation"
+      hue_factor: "hue"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomColorJitter"
+---
+operation: "RandomContrast"
+description: "A preprocessing layer which randomly adjusts contrast during training."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+variants:
+  keras:
+    api: "keras.layers.RandomContrast"
+  torch:
+    api: "torchvision.transforms.RandomAutocontrast"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomContrast"
+---
+operation: "RandomCrop"
+description: "A preprocessing layer which randomly crops images during training."
+op_type: "class"
+std_args:
+  - name: "height"
+    type: "int"
+  - name: "width"
+    type: "int"
+variants:
+  keras:
+    api: "keras.layers.RandomCrop"
+  torch:
+    api: "torchvision.transforms.RandomCrop"
+    macro_template: "torchvision.transforms.RandomCrop(size=({height}, {width}))"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomCrop"
+---
+operation: "RandomElasticTransform"
+description: "A preprocessing layer that applies random elastic transformations."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.layers.RandomElasticTransform"
+  torch:
+    api: "torchvision.transforms.ElasticTransform"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomElasticTransform"
+---
+operation: "RandomErasing"
+description: "Random Erasing data augmentation technique."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+    default: 1.0
+  - name: "scale"
+    type: "Tuple[float, float]"
+    default: [0.02, 0.33]
+variants:
+  keras:
+    api: "keras.layers.RandomErasing"
+  torch:
+    api: "torchvision.transforms.RandomErasing"
+    args:
+      factor: "p"
+      scale: "scale"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomErasing"
+---
+operation: "RandomFlip"
+description: "A preprocessing layer which randomly flips images during training."
+op_type: "class"
+std_args:
+  - name: "mode"
+    type: "str"
+    default: "horizontal_and_vertical"
+variants:
+  keras:
+    api: "keras.layers.RandomFlip"
+  torch:
+    api: null # Split into RandomHorizontalFlip and RandomVerticalFlip
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomFlip"
+---
+operation: "RandomGaussianBlur"
+description: "Applies random Gaussian blur to images for data augmentation."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "int"
+    default: 3
+  - name: "sigma"
+    type: "float"
+    default: 1.0
+variants:
+  keras:
+    api: "keras.layers.RandomGaussianBlur"
+  torch:
+    api: "torchvision.transforms.GaussianBlur"
+    args:
+      kernel_size: "kernel_size"
+      sigma: "sigma"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomGaussianBlur"
+---
+operation: "RandomGrayscale"
+description: "Preprocessing layer for random conversion of RGB images to grayscale."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+    default: 0.5
+variants:
+  keras:
+    api: "keras.layers.RandomGrayscale"
+  torch:
+    api: "torchvision.transforms.RandomGrayscale"
+    args:
+      factor: "p"
+  mlx:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: "tf.keras.layers.RandomGrayscale"

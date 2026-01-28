@@ -1,0 +1,773 @@
+operation: "SetDiff1d"
+description: "Find the set difference of two arrays."
+std_args:
+  - name: "ar1"
+    type: "Array"
+  - name: "ar2"
+    type: "Array"
+  - name: "assume_unique"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.setdiff1d"
+  jax:
+    api: "jax.numpy.setdiff1d"
+  flax_nnx:
+    api: "jax.numpy.setdiff1d"
+  paxml:
+    api: "jax.numpy.setdiff1d"
+  torch:
+    # Torch doesn't have direct setdiff1d, usually relies on numpy or combined ops
+    requires_plugin: "torch_setdiff1d_plugin"
+  tensorflow:
+    api: "tf.sets.difference" # Note: Returns SparseTensor, might need adaptation
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "SetXor1d"
+description: "Find the set exclusive-or of two arrays."
+std_args:
+  - name: "ar1"
+    type: "Array"
+  - name: "ar2"
+    type: "Array"
+  - name: "assume_unique"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.setxor1d"
+  jax:
+    api: "jax.numpy.setxor1d"
+  flax_nnx:
+    api: "jax.numpy.setxor1d"
+  paxml:
+    api: "jax.numpy.setxor1d"
+  torch:
+    requires_plugin: "torch_setxor1d_plugin"
+  tensorflow:
+    # Requires logic
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Shape"
+description: "Return the shape of an array."
+std_args:
+  - name: "a"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.shape"
+  jax:
+    api: "jax.numpy.shape"
+  flax_nnx:
+    api: "jax.numpy.shape"
+  paxml:
+    api: "jax.numpy.shape"
+  torch:
+    api: "torch.func.shape" # Or just attribute access transformation
+    transformation_type: "attribute" 
+    # If standard is function, mapping to x.shape property is common
+  keras:
+    api: "keras.ops.shape"
+  tensorflow:
+    api: "tf.shape"
+  mlx:
+    # MLX prefers property access, but no top level shape function in mlx.core
+    transformation_type: "inline_lambda"
+    api: "lambda x: x.shape"
+
+---
+operation: "SharesMemory"
+description: "Determine if two arrays share memory."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "b"
+    type: "Array"
+  - name: "max_work"
+    type: "int"
+    default: -1
+variants:
+  numpy:
+    api: "numpy.shares_memory"
+  torch:
+    api: "torch.shares_memory" 
+    # Logic might differ slightly
+  jax:
+    # JAX arrays are immutable/pure
+    api: null
+
+---
+operation: "Short"
+description: "Cast to signed short integer (int16)."
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.int16"
+  jax:
+    api: "jax.numpy.int16"
+  flax_nnx:
+    api: "jax.numpy.int16"
+  paxml:
+    api: "jax.numpy.int16"
+  torch:
+    api: "torch.short"
+  tensorflow:
+    api: "tf.cast" # Requires dtype arg injection
+    inject_args: { "dtype": "tf.int16" }
+  keras:
+    api: "keras.ops.cast"
+    inject_args: { "dtype": "int16" }
+  mlx:
+    api: "mlx.core.array" # Explicit casting
+    inject_args: { "dtype": "mlx.core.int16" }
+
+---
+operation: "ShowConfig"
+description: "Show libraries and system information."
+op_type: function
+std_args:
+  - name: "mode"
+    type: "str"
+    default: "'stdout'"
+variants:
+  numpy:
+    api: "numpy.show_config"
+  torch:
+    api: "torch.__config__.show"
+
+---
+operation: "ShowRuntime"
+description: "Print information about various resources in the system."
+op_type: function
+std_args: []
+variants:
+  numpy:
+    api: "numpy.show_runtime"
+
+---
+operation: "Sign"
+description: "Returns an element-wise indication of the sign of a number."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.sign"
+  jax:
+    api: "jax.numpy.sign"
+  flax_nnx:
+    api: "jax.numpy.sign"
+  paxml:
+    api: "jax.numpy.sign"
+  torch:
+    api: "torch.sign"
+  keras:
+    api: "keras.ops.sign"
+  tensorflow:
+    api: "tf.math.sign"
+  mlx:
+    api: "mlx.core.sign"
+
+---
+operation: "Signbit"
+description: "Returns element-wise True where signbit is set (less than zero)."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.signbit"
+  jax:
+    api: "jax.numpy.signbit"
+  flax_nnx:
+    api: "jax.numpy.signbit"
+  paxml:
+    api: "jax.numpy.signbit"
+  torch:
+    api: "torch.signbit"
+  tensorflow:
+    api: "tf.math.signbit"
+  mlx:
+    # Not directly in mlx.core
+    api: null 
+
+---
+operation: "Sin"
+description: "Trigonometric sine, element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.sin"
+  jax:
+    api: "jax.numpy.sin"
+  flax_nnx:
+    api: "jax.numpy.sin"
+  paxml:
+    api: "jax.numpy.sin"
+  torch:
+    api: "torch.sin"
+  keras:
+    api: "keras.ops.sin"
+  tensorflow:
+    api: "tf.math.sin"
+  mlx:
+    api: "mlx.core.sin"
+
+---
+operation: "Sinc"
+description: "Return the normalized sinc function."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.sinc"
+  jax:
+    api: "jax.numpy.sinc"
+  flax_nnx:
+    api: "jax.numpy.sinc"
+  paxml:
+    api: "jax.numpy.sinc"
+  torch:
+    api: "torch.special.sinc"
+  tensorflow:
+    api: "tf.experimental.numpy.sinc"
+  keras:
+    # Not standard in Keras ops
+    api: null
+
+---
+operation: "Single"
+description: "Cast to single-precision floating-point number (float32)."
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.float32"
+  jax:
+    api: "jax.numpy.float32"
+  flax_nnx:
+    api: "jax.numpy.float32"
+  paxml:
+    api: "jax.numpy.float32"
+  torch:
+    api: "torch.float32" # This is a dtype object, actual cast is .to or tensor(..., dtype=float32)
+    # Using float() for casting
+    api: "torch.float"
+  tensorflow:
+    api: "tf.cast"
+    inject_args: { "dtype": "tf.float32" }
+  keras:
+    api: "keras.ops.cast"
+    inject_args: { "dtype": "float32" }
+  mlx:
+    api: "mlx.core.array"
+    inject_args: { "dtype": "mlx.core.float32" }
+
+---
+operation: "Sinh"
+description: "Hyperbolic sine, element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.sinh"
+  jax:
+    api: "jax.numpy.sinh"
+  flax_nnx:
+    api: "jax.numpy.sinh"
+  paxml:
+    api: "jax.numpy.sinh"
+  torch:
+    api: "torch.sinh"
+  keras:
+    api: "keras.ops.sinh"
+  tensorflow:
+    api: "tf.math.sinh"
+  mlx:
+    api: "mlx.core.sinh"
+
+---
+operation: "Size"
+description: "Return the number of elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.size"
+  jax:
+    api: "jax.numpy.size"
+  flax_nnx:
+    api: "jax.numpy.size"
+  paxml:
+    api: "jax.numpy.size"
+  torch:
+    # torch.numel(a) if axis is None. torch.size(a, axis) doesn't exist as function, usually a.size(dim)
+    api: "torch.numel"
+    # Dispatch needed for axis parameter handling
+  keras:
+    api: "keras.ops.size"
+  tensorflow:
+    api: "tf.size"
+  mlx:
+    api: "mlx.core.size"
+
+---
+operation: "Sort"
+description: "Return a sorted copy of an array."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  numpy:
+    api: "numpy.sort"
+  jax:
+    api: "jax.numpy.sort"
+  flax_nnx:
+    api: "jax.numpy.sort"
+  paxml:
+    api: "jax.numpy.sort"
+  torch:
+    api: "torch.sort"
+    args: { "axis": "dim" }
+    # Torch sort returns (values, indices). If standard is 'values only', 
+    # we need to select output index 0.
+    output_select_index: 0
+  keras:
+    api: "keras.ops.sort"
+  tensorflow:
+    api: "tf.sort"
+  mlx:
+    api: "mlx.core.sort"
+
+---
+operation: "SortComplex"
+description: "Sort a complex array using the real part first, then the imaginary part."
+std_args:
+  - name: "a"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.sort_complex"
+  jax:
+    api: "jax.numpy.sort_complex"
+  flax_nnx:
+    api: "jax.numpy.sort_complex"
+  paxml:
+    api: "jax.numpy.sort_complex"
+  torch:
+    # Typically requires manual implementation (view as real, sort keys)
+    api: null
+
+---
+operation: "Spacing"
+description: "Return the distance between x and the nearest adjacent number."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.spacing"
+  jax:
+    api: "jax.numpy.spacing"
+  flax_nnx:
+    api: "jax.numpy.spacing"
+  paxml:
+    api: "jax.numpy.spacing"
+
+---
+operation: "Split"
+description: "Split an array into multiple sub-arrays."
+std_args:
+  - name: "ary"
+    type: "Array"
+  - name: "indices_or_sections"
+    type: "int | List[int]"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.split"
+  jax:
+    api: "jax.numpy.split"
+  flax_nnx:
+    api: "jax.numpy.split"
+  paxml:
+    api: "jax.numpy.split"
+  torch:
+    # torch.tensor_split matches numpy.split behavior (equal sections)
+    api: "torch.tensor_split"
+    args: { "ary": "input", "axis": "dim" }
+  keras:
+    api: "keras.ops.split"
+  tensorflow:
+    api: "tf.split"
+    args: { "ary": "value", "indices_or_sections": "num_or_size_splits" }
+  mlx:
+    api: "mlx.core.split"
+
+---
+operation: "Sqrt"
+description: "Return the non-negative square-root of an array, element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.sqrt"
+  jax:
+    api: "jax.numpy.sqrt"
+  flax_nnx:
+    api: "jax.numpy.sqrt"
+  paxml:
+    api: "jax.numpy.sqrt"
+  torch:
+    api: "torch.sqrt"
+    args: { "x": "input" }
+  keras:
+    api: "keras.ops.sqrt"
+  tensorflow:
+    api: "tf.math.sqrt"
+  mlx:
+    api: "mlx.core.sqrt"
+
+---
+operation: "Square"
+description: "Return the element-wise square of the input."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.square"
+  jax:
+    api: "jax.numpy.square"
+  flax_nnx:
+    api: "jax.numpy.square"
+  paxml:
+    api: "jax.numpy.square"
+  torch:
+    api: "torch.square"
+    args: { "x": "input" }
+  keras:
+    api: "keras.ops.square"
+  tensorflow:
+    api: "tf.math.square"
+  mlx:
+    api: "mlx.core.square"
+
+---
+operation: "Squeeze"
+description: "Remove axes of length one from a."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int | Tuple[int]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.squeeze"
+  jax:
+    api: "jax.numpy.squeeze"
+  flax_nnx:
+    api: "jax.numpy.squeeze"
+  paxml:
+    api: "jax.numpy.squeeze"
+  torch:
+    api: "torch.squeeze"
+    args: { "a": "input", "axis": "dim" }
+  keras:
+    api: "keras.ops.squeeze"
+  tensorflow:
+    api: "tf.squeeze"
+  mlx:
+    api: "mlx.core.squeeze"
+
+---
+operation: "Stack"
+description: "Join a sequence of arrays along a new axis."
+std_args:
+  - name: "arrays"
+    type: "List[Array]"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.stack"
+  jax:
+    api: "jax.numpy.stack"
+  flax_nnx:
+    api: "jax.numpy.stack"
+  paxml:
+    api: "jax.numpy.stack"
+  torch:
+    api: "torch.stack"
+    args: { "arrays": "tensors", "axis": "dim" }
+  keras:
+    api: "keras.ops.stack"
+    args: { "arrays": "x" }
+  tensorflow:
+    api: "tf.stack"
+    args: { "arrays": "values" }
+  mlx:
+    api: "mlx.core.stack"
+
+---
+operation: "Std"
+description: "Compute the standard deviation along the specified axis."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int | Tuple[int]"
+    default: null
+  - name: "ddof"
+    type: "int"
+    default: 0
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.std"
+  jax:
+    api: "jax.numpy.std"
+  flax_nnx:
+    api: "jax.numpy.std"
+  paxml:
+    api: "jax.numpy.std"
+  torch:
+    api: "torch.std"
+    args: { "a": "input", "axis": "dim", "keepdims": "keepdim" }
+    # Torch defaults "unbiased=True" (ddof=1). 
+    # To match standard (ddof=0), we must inject correction or map args. 
+    # Torch doesn't have `ddof` arg directly, it uses `correction`.
+    arg_values:
+      ddof:
+        0: "0"
+        1: "1"
+    kwargs_map:
+      ddof: "correction"
+  keras:
+    api: "keras.ops.std"
+  tensorflow:
+    api: "tf.math.reduce_std"
+    args: { "a": "input_tensor" } # TF reduce_std has different validation logic
+  mlx:
+    api: "mlx.core.std"
+
+---
+operation: "Str_"
+description: "A unicode string type."
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.str_"
+
+---
+operation: "Subtract"
+description: "Subtract arguments, element-wise."
+transformation_type: "infix"
+operator: "-"
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.subtract"
+  jax:
+    api: "jax.numpy.subtract"
+  flax_nnx:
+    api: "jax.numpy.subtract"
+  paxml:
+    api: "jax.numpy.subtract"
+  torch:
+    api: "torch.sub"
+    # Also valid as infix
+  keras:
+    api: "keras.ops.subtract"
+  tensorflow:
+    api: "tf.math.subtract"
+  mlx:
+    api: "mlx.core.subtract"
+
+---
+operation: "Sum"
+description: "Sum of array elements over a given axis."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int | Tuple[int]"
+    default: null
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.sum"
+  jax:
+    api: "jax.numpy.sum"
+  flax_nnx:
+    api: "jax.numpy.sum"
+  paxml:
+    api: "jax.numpy.sum"
+  torch:
+    api: "torch.sum"
+    args: { "a": "input", "axis": "dim", "keepdims": "keepdim" }
+  keras:
+    api: "keras.ops.sum"
+    args: { "a": "x" }
+  tensorflow:
+    api: "tf.math.reduce_sum"
+    args: { "a": "input_tensor", "keepdims": "keepdims" }
+  mlx:
+    api: "mlx.core.sum"
+
+---
+operation: "SwapAxes"
+description: "Interchange two axes of an array."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis1"
+    type: "int"
+  - name: "axis2"
+    type: "int"
+variants:
+  numpy:
+    api: "numpy.swapaxes"
+  jax:
+    api: "jax.numpy.swapaxes"
+  flax_nnx:
+    api: "jax.numpy.swapaxes"
+  paxml:
+    api: "jax.numpy.swapaxes"
+  torch:
+    api: "torch.swapaxes" # Aliased to transpose in recent versions
+    args: { "a": "input" }
+  keras:
+    api: "keras.ops.swapaxes"
+    args: { "a": "x" }
+  tensorflow:
+    api: "tf.experimental.numpy.swapaxes" 
+    # Fallback to macro if experimental unavailable
+    macro_template: "tf.transpose({a}, perm=...)" # Complex logic required for dynamic perms
+  mlx:
+    api: "mlx.core.swapaxes"
+---
+operation: "SetErr"
+description: "Set how floating-point errors are handled."
+op_type: "function"
+std_args:
+  - name: "all"
+    type: "str"
+    default: null
+  - name: "divide"
+    type: "str"
+    default: null
+  - name: "over"
+    type: "str"
+    default: null
+  - name: "under"
+    type: "str"
+    default: null
+  - name: "invalid"
+    type: "str"
+    default: null
+variants:
+  numpy:
+    api: "numpy.seterr"
+  jax:
+    api: "jax.numpy.seterr"
+  flax_nnx:
+    api: "jax.numpy.seterr"
+  paxml:
+    api: "jax.numpy.seterr"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "SetErrCall"
+description: "Set the floating-point error callback function or log object."
+op_type: "function"
+std_args:
+  - name: "func"
+    type: "Callable"
+variants:
+  numpy:
+    api: "numpy.seterrcall"
+  jax:
+    api: "jax.numpy.seterrcall"
+  flax_nnx:
+    api: "jax.numpy.seterrcall"
+  paxml:
+    api: "jax.numpy.seterrcall"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "SignedInteger"
+description: "Abstract base class of all signed integer scalar types."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.signedinteger"
+  jax:
+    api: "jax.numpy.signedinteger"
+  flax_nnx:
+    api: "jax.numpy.signedinteger"
+  paxml:
+    api: "jax.numpy.signedinteger"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null

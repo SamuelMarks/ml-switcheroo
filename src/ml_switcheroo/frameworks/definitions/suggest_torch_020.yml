@@ -1,0 +1,1042 @@
+operation: "Load"
+description: "Loads a serialized object or weights from a file."
+std_args:
+  - name: "f"
+    type: "str"
+  - name: "map_location"
+    type: "Any"
+    default: null
+  - name: "weights_only"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.load"
+  jax:
+    # JAX weighting loading is complex (Orbax), usually handled by plugin
+    requires_plugin: "io_handler"
+  flax_nnx:
+    requires_plugin: "io_handler"
+  paxml:
+    requires_plugin: "io_handler"
+  numpy:
+    api: "numpy.load"
+    args:
+      f: "file"
+      map_location: null # Not supported
+      weights_only: "allow_pickle" # logical mapping approximation
+    arg_values:
+      weights_only:
+        true: "False" # numpy allow_pickle=False is safer? Inverted logic. 
+  tensorflow:
+    requires_plugin: "io_handler"
+  keras:
+    requires_plugin: "io_handler"
+  mlx:
+    api: "mlx.core.load"
+    args:
+       f: "file"
+
+---
+operation: "LobPCG"
+description: "Finds the k largest/smallest eigenvalues using LOBPCG."
+std_args:
+  - name: "A"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 1
+  - name: "B"
+    type: "Tensor"
+    default: null
+variants:
+  torch:
+    api: "torch.lobpcg"
+  jax:
+    api: "jax.scipy.sparse.linalg.lobpcg"
+    args:
+        A: "A"
+        B: "B"
+        k: "k"
+  flax_nnx:
+    api: "jax.scipy.sparse.linalg.lobpcg"
+  paxml:
+    api: "jax.scipy.sparse.linalg.lobpcg"
+  numpy:
+    api: "scipy.sparse.linalg.lobpcg"
+    required_imports: ["scipy.sparse.linalg"]
+  # MLX, TF, Keras lack direct LOBPCG support usually
+
+---
+operation: "Log"
+description: "Computes the natural logarithm element-wise."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.log"
+  jax:
+    api: "jax.numpy.log"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.log"
+    args:
+      input: "x"
+  paxml:
+    api: "jax.numpy.log"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.log"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.log"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.log"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.log"
+    args:
+      input: "a"
+
+---
+operation: "Log10"
+description: "Computes the base-10 logarithm element-wise."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.log10"
+  jax:
+    api: "jax.numpy.log10"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.log10"
+    args:
+      input: "x"
+  paxml:
+    api: "jax.numpy.log10"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.log10"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.log10"
+    args:
+      input: "x"
+  keras:
+    # Macro for Keras generic: log(x)/log(10)
+    macro_template: "keras.ops.divide(keras.ops.log({input}), keras.ops.log(10.0))"
+    required_imports: ["keras"]
+  mlx:
+    api: "mlx.core.log10"
+    args:
+      input: "a"
+
+---
+operation: "Log10_"
+description: "Computes the base-10 logarithm element-wise in-place."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.log10_"
+  jax:
+    api: "jax.numpy.log10"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.log10"
+    args:
+      input: "x"
+  paxml:
+    api: "jax.numpy.log10"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.log10" # Will be assigned back by rewriter
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.log10"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.log10"
+    args:
+      input: "a"
+
+---
+operation: "Log1p"
+description: "Computes the natural logarithm of (1 + input) element-wise."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.log1p"
+  jax:
+    api: "jax.numpy.log1p"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.log1p"
+    args:
+      input: "x"
+  paxml:
+    api: "jax.numpy.log1p"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.log1p"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.log1p"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.log1p"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.log1p"
+    args:
+      input: "a"
+
+---
+operation: "Log1p_"
+description: "Computes log1p in-place."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.log1p_"
+  jax:
+    api: "jax.numpy.log1p"
+    args:
+       input: "x"
+  flax_nnx:
+    api: "jax.numpy.log1p"
+    args:
+       input: "x"
+  numpy:
+    api: "numpy.log1p"
+    args:
+       input: "x"
+  mlx:
+    api: "mlx.core.log1p"
+    args:
+       input: "a"
+
+---
+operation: "Log2"
+description: "Computes the base-2 logarithm element-wise."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.log2"
+  jax:
+    api: "jax.numpy.log2"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.log2"
+    args:
+      input: "x"
+  paxml:
+    api: "jax.numpy.log2"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.log2"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.log2"
+    args:
+      input: "x"
+  keras:
+    macro_template: "keras.ops.divide(keras.ops.log({input}), keras.ops.log(2.0))"
+  mlx:
+    api: "mlx.core.log2"
+    args:
+      input: "a"
+
+---
+operation: "Log2_"
+description: "Computes base-2 logarithm in-place."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.log2_"
+  jax:
+    api: "jax.numpy.log2"
+    args:
+       input: "x"
+  flax_nnx:
+    api: "jax.numpy.log2"
+    args:
+       input: "x"
+  numpy:
+    api: "numpy.log2"
+    args:
+       input: "x"
+  mlx:
+    api: "mlx.core.log2"
+    args:
+       input: "a"
+
+---
+operation: "Log_"
+description: "Computes natural logarithm in-place."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.log_"
+  jax:
+    api: "jax.numpy.log"
+    args:
+       input: "x"
+  flax_nnx:
+    api: "jax.numpy.log"
+    args:
+       input: "x"
+  paxml:
+    api: "jax.numpy.log"
+    args:
+       input: "x"
+  numpy:
+    api: "numpy.log"
+    args:
+       input: "x"
+  tensorflow:
+    api: "tf.math.log"
+    args:
+       input: "x"
+  mlx:
+    api: "mlx.core.log"
+    args:
+       input: "a"
+
+---
+operation: "LogSoftmax"
+description: "Applies the LogSoftmax function to an n-dimensional input Tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: -1
+variants:
+  torch:
+    api: "torch.nn.functional.log_softmax"
+  jax:
+    api: "jax.nn.log_softmax"
+    args:
+      input: "x"
+      dim: "axis"
+  flax_nnx:
+    api: "jax.nn.log_softmax"
+    args:
+      input: "x"
+      dim: "axis"
+  paxml:
+    api: "jax.nn.log_softmax"
+    args:
+      input: "x"
+      dim: "axis"
+  tensorflow:
+    api: "tf.nn.log_softmax"
+    args:
+      input: "logits"
+      dim: "axis"
+  keras:
+    api: "keras.ops.log_softmax"
+    args:
+      input: "x"
+      dim: "axis"
+  numpy:
+    # Numpy has no log_softmax in core, assuming scipy
+    api: "scipy.special.log_softmax"
+    required_imports: ["scipy.special"]
+    args:
+      input: "x"
+      dim: "axis"
+  mlx:
+    # MLX has no direct log_softmax in core, composed op
+    macro_template: "mlx.core.log(mlx.core.softmax({input}, axis={dim}))"
+    required_imports: ["import mlx.core"]
+
+---
+operation: "LogAddExp"
+description: "Logarithm of the sum of exponentiations of the inputs."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.logaddexp"
+  jax:
+    api: "jax.numpy.logaddexp"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jax.numpy.logaddexp"
+    args:
+      input: "x1"
+      other: "x2"
+  paxml:
+    api: "jax.numpy.logaddexp"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.logaddexp"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    macro_template: "tf.math.log(tf.math.add(tf.math.exp({input}), tf.math.exp({other})))"
+    # Or common stable impl: softplus(x-y)+y
+  mlx:
+    api: "mlx.core.logaddexp"
+  keras:
+    api: "keras.ops.logaddexp"
+    args:
+      input: "x1"
+      other: "x2"
+
+---
+operation: "LogAddExp2"
+description: "Logarithm of sum of exponentiations in base-2."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.logaddexp2"
+  jax:
+    api: "jax.numpy.logaddexp2"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jax.numpy.logaddexp2"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.logaddexp2"
+    args:
+      input: "x1"
+      other: "x2"
+  # Others missing native logaddexp2
+
+---
+operation: "LogCumSumExp"
+description: "Logarithm of the cumulative summation of exponentiation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+variants:
+  torch:
+    api: "torch.logcumsumexp"
+  jax:
+    macro_template: "jax.numpy.log(jax.numpy.cumsum(jax.numpy.exp({input}), axis={dim}))"
+  flax_nnx:
+    macro_template: "jax.numpy.log(jax.numpy.cumsum(jax.numpy.exp({input}), axis={dim}))"
+  numpy:
+    macro_template: "numpy.log(numpy.cumsum(numpy.exp({input}), axis={dim}))"
+  tensorflow:
+    api: "tf.math.cumulative_logsumexp"
+    args:
+      input: "x"
+      dim: "axis"
+  mlx:
+    macro_template: "mlx.core.log(mlx.core.cumsum(mlx.core.exp({input}), axis={dim}))"
+
+---
+operation: "LogDet"
+description: "Calculates log determinant of a square matrix."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.logdet"
+  jax:
+    # slogdet returns (sign, logabsdet). We often want just logabsdet for PSD matrices
+    macro_template: "jax.numpy.linalg.slogdet({input})[1]"
+  flax_nnx:
+    macro_template: "jax.numpy.linalg.slogdet({input})[1]"
+  paxml:
+    macro_template: "jax.numpy.linalg.slogdet({input})[1]"
+  numpy:
+    macro_template: "numpy.linalg.slogdet({input})[1]"
+  tensorflow:
+    api: "tf.linalg.logdet"
+  # MLX lacks linalg.logdet or slogdet in basic core
+
+---
+operation: "LogicalAnd"
+description: "Element-wise logical AND."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.logical_and"
+  jax:
+    api: "jax.numpy.logical_and"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jax.numpy.logical_and"
+    args:
+      input: "x1"
+      other: "x2"
+  paxml:
+    api: "jax.numpy.logical_and"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.logical_and"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.logical_and"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.logical_and"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.logical_and"
+    args:
+      input: "a"
+      other: "b"
+
+---
+operation: "LogicalNot"
+description: "Element-wise logical NOT."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.logical_not"
+  jax:
+    api: "jax.numpy.logical_not"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.logical_not"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.logical_not"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.logical_not"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.logical_not"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.logical_not"
+    args:
+      input: "a"
+
+---
+operation: "LogicalOr"
+description: "Element-wise logical OR."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.logical_or"
+  jax:
+    api: "jax.numpy.logical_or"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jax.numpy.logical_or"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.logical_or"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.logical_or"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.logical_or"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.logical_or"
+    args:
+      input: "a"
+      other: "b"
+
+---
+operation: "LogicalXor"
+description: "Element-wise logical XOR."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.logical_xor"
+  jax:
+    api: "jax.numpy.logical_xor"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jax.numpy.logical_xor"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.logical_xor"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.logical_xor"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.logical_xor"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    # MLX has no direct logical_xor, usually not_equal on bools suffices
+    macro_template: "mlx.core.not_equal({input}, {other})" 
+
+---
+operation: "Logit"
+description: "Inverse of the sigmoid function."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "eps"
+    type: "float"
+    default: null
+variants:
+  torch:
+    api: "torch.logit"
+  jax:
+    api: "jax.scipy.special.logit"
+    args:
+      input: "p"
+      eps: null # JAX/SciPy logit doesn't usually take eps in standard API, implemented manually if needed
+  flax_nnx:
+    api: "jax.scipy.special.logit"
+    args:
+      input: "p"
+      eps: null
+  numpy:
+    api: "scipy.special.logit"
+    required_imports: ["scipy.special"]
+    args:
+      input: "p"
+      eps: null
+  tensorflow:
+    api: "tf.math.atanh"
+    # logit(p) is atanh(2p - 1), but TF math.atanh is just atanh
+    # Strict mapping might require macro: 2*p - 1
+    macro_template: "tf.math.atanh(2 * {input} - 1)" 
+  keras:
+    # Keras ops has no logit, macro fallback
+    macro_template: "keras.ops.log({input} / (1 - {input}))" 
+  mlx:
+    macro_template: "mlx.core.log({input} / (1 - {input}))" 
+
+---
+operation: "Logit_"
+description: "In-place logit."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "eps"
+    type: "float"
+    default: null
+variants:
+  torch:
+    api: "torch.logit_"
+  jax:
+    api: "jax.scipy.special.logit"
+    args:
+      input: "p"
+      eps: null
+  flax_nnx:
+    api: "jax.scipy.special.logit"
+    args:
+      input: "p"
+      eps: null
+  mlx:
+    macro_template: "mlx.core.log({input} / (1 - {input}))" 
+
+---
+operation: "LogSpace"
+description: "Creates a tensor with values spaced evenly on a logarithmic scale."
+std_args:
+  - name: "start"
+    type: "float"
+  - name: "end"
+    type: "float"
+  - name: "steps"
+    type: "int"
+  - name: "base"
+    type: "float"
+    default: 10.0
+variants:
+  torch:
+    api: "torch.logspace"
+  jax:
+    api: "jax.numpy.logspace"
+    args:
+       start: "start"
+       end: "stop"
+       steps: "num"
+       base: "base"
+  flax_nnx:
+    api: "jax.numpy.logspace"
+    args:
+       start: "start"
+       end: "stop"
+       steps: "num"
+       base: "base"
+  numpy:
+    api: "numpy.logspace"
+    args:
+       start: "start"
+       end: "stop"
+       steps: "num"
+       base: "base"
+  tensorflow:
+    api: "tf.experimental.numpy.logspace"
+    args:
+       start: "start"
+       end: "stop"
+       steps: "num"
+       base: "base"
+
+---
+operation: "LogSumExp"
+description: "Returns the log of summed exponentials of each row."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.logsumexp"
+  jax:
+    api: "jax.scipy.special.logsumexp"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+  flax_nnx:
+    api: "jax.scipy.special.logsumexp"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "scipy.special.logsumexp"
+    required_imports: ["scipy.special"]
+    args:
+       input: "a"
+       dim: "axis"
+       keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_logsumexp"
+    args:
+       input: "input_tensor"
+       dim: "axis"
+       keepdim: "keepdims"
+  keras:
+    api: "keras.ops.logsumexp"
+    args:
+       input: "x"
+       dim: "axis"
+       keepdim: "keepdims"
+  mlx:
+    api: "mlx.core.logsumexp"
+    args:
+       input: "a"
+       dim: "axis"
+       keepdim: "keepdims"
+
+---
+operation: "CastInt64"
+description: "Casts tensor to 64-bit integer type."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    # Transformation: x.long()
+    macro_template: "{input}.long()" 
+  jax:
+    macro_template: "{input}.astype(jax.numpy.int64)" 
+  flax_nnx:
+    macro_template: "{input}.astype(jax.numpy.int64)" 
+  paxml:
+    macro_template: "{input}.astype(jax.numpy.int64)" 
+  numpy:
+     macro_template: "{input}.astype(numpy.int64)" 
+  tensorflow:
+     macro_template: "tf.cast({input}, tf.int64)" 
+  keras:
+     macro_template: "keras.ops.cast({input}, 'int64')" 
+  mlx:
+     macro_template: "{input}.astype(mlx.core.int64)" 
+
+---
+operation: "LSTM"
+description: "Applies a multi-layer long short-term memory (LSTM) RNN."
+op_type: "class"
+std_args:
+  - name: "input_size"
+    type: "int"
+  - name: "hidden_size"
+    type: "int"
+  - name: "num_layers"
+    type: "int"
+    default: 1
+variants:
+  torch:
+    api: "torch.nn.LSTM"
+  flax_nnx:
+    api: "flax.nnx.LSTM"
+    args:
+      input_size: "in_features"
+      hidden_size: "hidden_size"
+      num_layers: "num_layers" # Not standard in Flax Single Cell, requires Scan logic usually. This might be imperfect.
+  keras:
+    api: "keras.layers.LSTM"
+    args:
+       input_size: null # inferred
+       hidden_size: "units"
+  mlx:
+    # MLX has no LSTM layer in core nn, only examples
+    api: null
+
+---
+operation: "LSTMCell"
+description: "A long short-term memory (LSTM) cell."
+op_type: "class"
+std_args:
+  - name: "input_size"
+    type: "int"
+  - name: "hidden_size"
+    type: "int"
+variants:
+  torch:
+    api: "torch.nn.LSTMCell"
+  flax_nnx:
+    api: "flax.nnx.LSTMCell"
+    args:
+       input_size: "in_features"
+       hidden_size: "hidden_size"
+  keras:
+    api: "keras.layers.LSTMCell"
+    args:
+       input_size: null
+       hidden_size: "units"
+
+---
+operation: "LstSq"
+description: "Computes the solution to the least squares problem."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "A"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.linalg.lstsq"
+    args:
+      input: "A"
+      A: "B" # Torch: lstsq(A, B) -> X. Spec says inputs are input(A), A(B)? Adjusting mapping.
+  jax:
+    api: "jax.numpy.linalg.lstsq"
+    args:
+      input: "a"
+      A: "b"
+  flax_nnx:
+    api: "jax.numpy.linalg.lstsq"
+    args:
+      input: "a"
+      A: "b"
+  numpy:
+    api: "numpy.linalg.lstsq"
+    args:
+       input: "a"
+       A: "b"
+  tensorflow:
+    api: "tf.linalg.lstsq"
+    args:
+       input: "matrix"
+       A: "rhs"
+  keras:
+    api: "keras.ops.lstsq"
+    args:
+       input: "x1"
+       A: "x2"
+
+---
+operation: "Lt"
+description: "Computes input < other element-wise."
+transformation_type: "infix"
+operator: "<"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.lt"
+  jax:
+    api: "jax.numpy.less"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jax.numpy.less"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.less"
+    args:
+       input: "x1"
+       other: "x2"
+  tensorflow:
+    api: "tf.math.less"
+  keras:
+    api: "keras.ops.less"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.less"
+    args:
+      input: "a"
+      other: "b"
+
+---
+operation: "LU"
+description: "Computes the LU factorization."
+std_args:
+  - name: "A"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.linalg.lu_factor"
+  jax:
+    api: "jax.scipy.linalg.lu"
+    args:
+      A: "a"
+  numpy:
+    api: "scipy.linalg.lu"
+    required_imports: ["scipy.linalg"]
+  tensorflow:
+    api: "tf.linalg.lu"
+    args:
+      A: "input"
+
+---
+operation: "LUSolve"
+description: "Solves a system of equations using LU factorization."
+std_args:
+  - name: "b"
+    type: "Tensor"
+  - name: "LU_data"
+    type: "Tensor"
+  - name: "LU_pivots"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.linalg.lu_solve"
+  jax:
+    api: "jax.scipy.linalg.lu_solve"
+    args:
+       b: "b"
+       LU_data: "lu_and_piv" # JAX usually expects tuple (lu, piv)
+       LU_pivots: null 
+    # Macro required for packing
+  numpy:
+     api: "scipy.linalg.lu_solve"
+     required_imports: ["scipy.linalg"]
+     args:
+       b: "b"
+       LU_data: "lu_and_piv"
+       LU_pivots: null

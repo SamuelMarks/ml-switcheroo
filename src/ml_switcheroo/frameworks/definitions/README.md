@@ -46,17 +46,17 @@ To analyse what you have, use commands like:
 $ yq -r '.operation' $(fd -F 'suggest_mlx_core' -e yml) | sort -u | wc -l                
      252
 # Find number of `mlx.core` operations that map to NumPy
-$ yq -r 'select(.variants.numpy) | .operation' $(fd -F 'suggest_mlx_core' -e yml) | sort -u | wc -l
+$ yq -r 'select(.variants.numpy.api) | .operation' $(fd -F 'suggest_mlx_core' -e yml) | sort -u | wc -l
      164
 # Find number of `mlx.core` operations that map to each ${ml framework}
-$ for variant in flax_nnx jax keras mlx numpy paxml tensorflow torch; do \
-  printf '%-11s%3d\n' "$variant" "$(yq -r 'select(.variants.'"$variant"') | .operation' $(fd -F 'suggest_mlx_core' -e yml) | sort -u | wc -l )" ; done
-flax_nnx   127
-jax        229
-keras      161
-mlx        252
-numpy      164
-paxml       84
-tensorflow 173
-torch      234
+$ for variant in jax flax_nnx paxml keras mlx torch tensorflow numpy; do \
+  printf '%-11s%3d\n' "$variant" "$(yq -r 'select(.variants.'"$variant"'.api) | .operation' $(fd -F 'suggest_mlx' -e yml) | sort -u | wc -l)" ; done
+jax        226
+flax_nnx   160
+paxml       90
+keras      184
+mlx        326
+torch      271
+tensorflow 179
+numpy      161
 ```

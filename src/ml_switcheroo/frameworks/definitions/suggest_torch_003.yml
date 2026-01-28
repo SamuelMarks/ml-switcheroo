@@ -1,0 +1,565 @@
+operation: "HalfStorage"
+description: "Contiguous storage for float16 data."
+op_type: "class"
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "wrap_storage"
+    default: null
+  - name: "dtype"
+    default: null
+  - name: "device"
+    default: null
+  - name: "_internal"
+    default: false
+variants:
+  torch:
+    api: "torch.HalfStorage"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "HalfTensor"
+description: "Legacy constructor for Float16 tensor."
+op_type: "class"
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "kwargs"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.HalfTensor"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "IODescriptor"
+description: "Description of IO descriptor."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.IODescriptor"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "InferredType"
+description: "JIT internal type inference helper."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.InferredType"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "IntStorage"
+description: "Contiguous storage for int32 data."
+op_type: "class"
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "wrap_storage"
+    default: null
+  - name: "dtype"
+    default: null
+  - name: "device"
+    default: null
+  - name: "_internal"
+    default: false
+variants:
+  torch:
+    api: "torch.IntStorage"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "IntTensor"
+description: "Legacy constructor for Int32 tensor."
+op_type: "class"
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "kwargs"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.IntTensor"
+  jax:
+    api: "jnp.array"
+    missing_message: "Direct mapping of legacy IntTensor constructor is unsafe. Use jnp.array with dtype=int32."
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "IntType"
+description: "JIT type representing Int."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.IntType"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "InterfaceType"
+description: "JIT type representing Interface."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.InterfaceType"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "JITException"
+description: "Common base class for all non-exit exceptions in JIT."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.JITException"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "ListType"
+description: "JIT type representing List."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.ListType"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "LiteScriptModule"
+description: "JIT module optimized for mobile."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.LiteScriptModule"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "LockingLogger"
+description: "Internal locking logger."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.LockingLogger"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "LoggerBase"
+description: "Base class for loggers."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.LoggerBase"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "LongStorage"
+description: "Contiguous storage for int64 data."
+op_type: "class"
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "wrap_storage"
+    default: null
+  - name: "dtype"
+    default: null
+  - name: "device"
+    default: null
+  - name: "_internal"
+    default: false
+variants:
+  torch:
+    api: "torch.LongStorage"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "LongTensor"
+description: "Legacy constructor for Int64 tensor."
+op_type: "class"
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "kwargs"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.LongTensor"
+  jax:
+    api: "jnp.array"
+    missing_message: "Direct mapping of legacy LongTensor constructor is unsafe. Use jnp.array with dtype=int64."
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "ModuleDict"
+description: "Holds submodules in a dictionary."
+op_type: "class"
+std_args:
+  - name: "modules"
+    type: "Dict[str, Module]" 
+    default: null
+variants:
+  torch:
+    api: "torch.nn.ModuleDict"
+  jax:
+    missing_message: "Use native Python dict for module storage."
+  flax_nnx:
+    missing_message: "Use native Python dict for module storage."
+  paxml: null
+  keras:
+    missing_message: "Use native Python dict or list for module storage."
+  tensorflow:
+    missing_message: "Use native Python dict."
+  numpy: null
+  mlx:
+    missing_message: "Use native Python dict."
+
+---
+operation: "Node"
+description: "JIT Graph Node."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Node"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "NoneType"
+description: "JIT type representing None."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.NoneType"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "NoopLogger"
+description: "Internal no-op logger."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.NoopLogger"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "NumberType"
+description: "JIT type representing Number."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.NumberType"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "OperatorInfo"
+description: "Metadata for operators."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.OperatorInfo"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "OptionalType"
+description: "JIT type representing Optional[T]."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.OptionalType"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "OutOfMemoryError"
+description: "Exception raised when device is out of memory."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.cuda.OutOfMemoryError"
+  jax:
+    api: "jax.lib.xla_client.XlaRuntimeError"
+    missing_message: "Mapping is approximate; JAX throws XlaRuntimeError on OOM."
+  flax_nnx: null
+  paxml: null
+  keras:
+    api: "tf.errors.ResourceExhaustedError"
+  tensorflow:
+    api: "tf.errors.ResourceExhaustedError"
+  numpy:
+    api: "MemoryError"
+  mlx: null
+
+---
+operation: "PrivateOps"
+description: "Internal private operations registry."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.PRIVATE_OPS"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "ParameterDict"
+description: "Holds parameters in a dictionary."
+op_type: "class"
+std_args:
+  - name: "parameters"
+    type: "Dict[str, Any]"
+    default: null
+variants:
+  torch:
+    api: "torch.nn.ParameterDict"
+  jax:
+    missing_message: "Use native Python dict for parameter storage."
+  flax_nnx:
+    missing_message: "Use native Python dict for parameter storage."
+  paxml: null
+  keras:
+    missing_message: "Use native Python dict."
+  tensorflow:
+    missing_message: "Use native Python dict."
+  numpy: null
+  mlx:
+    missing_message: "Use native Python dict."
+
+---
+operation: "PyObjectType"
+description: "JIT type representing generic Python object."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.PyObjectType"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "PyTorchFileReader"
+description: "Internal file reader."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.PyTorchFileReader"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "PyTorchFileWriter"
+description: "Internal file writer."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.PyTorchFileWriter"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "QInt32Storage"
+description: "Contiguous storage for quantized int32 data."
+op_type: "class"
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "wrap_storage"
+    default: null
+  - name: "dtype"
+    default: null
+  - name: "device"
+    default: null
+  - name: "_internal"
+    default: false
+variants:
+  torch:
+    api: "torch.QInt32Storage"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null
+
+---
+operation: "QInt8Storage"
+description: "Contiguous storage for quantized int8 data."
+op_type: "class"
+std_args:
+  - name: "args"
+    is_variadic: true
+  - name: "wrap_storage"
+    default: null
+  - name: "dtype"
+    default: null
+  - name: "device"
+    default: null
+  - name: "_internal"
+    default: false
+variants:
+  torch:
+    api: "torch.QInt8Storage"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  numpy: null
+  mlx: null

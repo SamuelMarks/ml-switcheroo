@@ -1,0 +1,188 @@
+operation: "Zero_"
+description: "Fills the input tensor with the scalar value 0 in-place."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 0
+    dtype: "float32"
+variants:
+  torch:
+    api: "torch.Tensor.zero_"
+  jax:
+    api: "jax.numpy.zeros_like"
+  flax_nnx:
+    api: "jax.numpy.zeros_like"
+  paxml:
+    api: "jax.numpy.zeros_like"
+  keras:
+    api: "keras.ops.zeros_like"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.zeros_like"
+  mlx:
+    api: "mlx.core.zeros_like"
+    args:
+      input: "a"
+  numpy:
+    api: "numpy.zeros_like"
+    args:
+      input: "a"
+
+---
+operation: "Zeros"
+description: "Returns a tensor filled with the-scalar value 0, with the shape defined by the variable argument size."
+op_type: "function"
+std_args:
+  - name: "size"
+    type: "int"
+    is_variadic: true
+    min: 0
+  - name: "dtype"
+    type: "DType"
+    default: null
+  - name: "device"
+    type: "Device"
+    default: null
+  - name: "requires_grad"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.zeros"
+    args:
+      dtype: "dtype"
+      device: "device"
+      requires_grad: "requires_grad"
+  jax:
+    api: "jax.numpy.zeros"
+    pack_to_tuple: "shape"
+    args:
+      size: null
+      device: null
+      requires_grad: null
+  flax_nnx:
+    api: "jax.numpy.zeros"
+    pack_to_tuple: "shape"
+    args:
+      size: null
+      device: null
+      requires_grad: null
+  paxml:
+    api: "jax.numpy.zeros"
+    pack_to_tuple: "shape"
+    args:
+      size: null
+      device: null
+      requires_grad: null
+  keras:
+    api: "keras.ops.zeros"
+    pack_to_tuple: "shape"
+    args:
+      size: null
+      device: null
+      requires_grad: null
+  tensorflow:
+    api: "tf.zeros"
+    pack_to_tuple: "shape"
+    args:
+      size: null
+      device: null
+      requires_grad: null
+  mlx:
+    api: "mlx.core.zeros"
+    pack_to_tuple: "shape"
+    args:
+      size: null
+      device: null
+      requires_grad: null
+  numpy:
+    api: "numpy.zeros"
+    pack_to_tuple: "shape"
+    args:
+      size: null
+      device: null
+      requires_grad: null
+
+---
+operation: "ZerosLike"
+description: "Returns a tensor filled with the scalar value 0, with the same size as input."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dtype"
+    type: "DType"
+    default: null
+  - name: "device"
+    type: "Device"
+    default: null
+  - name: "requires_grad"
+    type: "bool"
+    default: false
+  - name: "layout"
+    type: "Layout"
+    default: null
+  - name: "memory_format"
+    type: "MemoryFormat"
+    default: null
+variants:
+  torch:
+    api: "torch.zeros_like"
+  jax:
+    api: "jax.numpy.zeros_like"
+    args:
+      input: "a"
+      device: null
+      requires_grad: null
+      layout: null
+      memory_format: null
+  flax_nnx:
+    api: "jax.numpy.zeros_like"
+    args:
+      input: "a"
+      device: null
+      requires_grad: null
+      layout: null
+      memory_format: null
+  paxml:
+    api: "jax.numpy.zeros_like"
+    args:
+      input: "a"
+      device: null
+      requires_grad: null
+      layout: null
+      memory_format: null
+  keras:
+    api: "keras.ops.zeros_like"
+    args:
+      input: "x"
+      device: null
+      requires_grad: null
+      layout: null
+      memory_format: null
+  tensorflow:
+    api: "tf.zeros_like"
+    args:
+      device: null
+      requires_grad: null
+      layout: null
+      memory_format: null
+  mlx:
+    api: "mlx.core.zeros_like"
+    args:
+      input: "a"
+      device: null
+      requires_grad: null
+      layout: null
+      memory_format: null
+  numpy:
+    api: "numpy.zeros_like"
+    args:
+      input: "a"
+      device: null
+      requires_grad: null
+      layout: null
+      memory_format: null

@@ -1,0 +1,717 @@
+operation: "IsPosInf"
+description: "Tests element-wise for positive infinity."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "out"
+    type: "Tensor"
+    default: null
+variants:
+  torch:
+    api: "torch.isposinf"
+  jax:
+    api: "jax.numpy.isposinf"
+  flax_nnx:
+    api: "jax.numpy.isposinf"
+  paxml:
+    api: "jax.numpy.isposinf"
+  numpy:
+    api: "numpy.isposinf"
+  tensorflow:
+    macro_template: "tf.math.is_inf({x}) & ({x} > 0)"
+    required_imports: ["import tensorflow as tf"]
+  mlx:
+    macro_template: "mx.isinf({x}) & ({x} > 0)"
+    required_imports: ["import mlx.core as mx"]
+  keras:
+    macro_template: "keras.ops.is_inf({x}) & ({x} > 0)"
+    required_imports: ["import keras"]
+
+---
+operation: "IsReal"
+description: "Returns a bool array, where True if input element is real."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.isreal"
+  jax:
+    api: "jax.numpy.isreal"
+  flax_nnx:
+    api: "jax.numpy.isreal"
+  paxml:
+    api: "jax.numpy.isreal"
+  numpy:
+    api: "numpy.isreal"
+  tensorflow:
+    api: "tf.math.is_real"
+    min_version: "2.16.0" # Added recently
+    missing_message: "tf.math.is_real requires TF 2.16+. Use tf.math.imag(x) == 0 for older versions."
+  mlx:
+    # MLX arrays are generally real unless complex dtype specified. 
+    # Macro check imaginary part if complex support exists, else True? 
+    # MLX dtypes are static. 
+    macro_template: "mx.full({x}.shape, True, dtype=mx.bool_)"
+
+---
+operation: "IsRealObj"
+description: "Return True if x is not a complex type or an array of complex numbers."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.isrealobj"
+  jax:
+    api: "jax.numpy.isrealobj"
+  flax_nnx:
+    api: "jax.numpy.isrealobj"
+  paxml:
+    api: "jax.numpy.isrealobj"
+  torch:
+    api: "torch.is_complex"
+    macro_template: "not {x}.is_complex()"
+
+---
+operation: "IsScalar"
+description: "Returns True if the type of element is a scalar type."
+std_args:
+  - name: "element"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.isscalar"
+  jax:
+    api: "jax.numpy.isscalar"
+  flax_nnx:
+    api: "jax.numpy.isscalar"
+  paxml:
+    api: "jax.numpy.isscalar"
+  torch:
+    macro_template: "isinstance({element}, (int, float, bool, complex)) or ({element} is not None and getattr({element}, 'ndim', 1) == 0)"
+
+---
+operation: "IsSubDtype"
+description: "Returns True if first argument is a typecode lower/equal in type hierarchy."
+std_args:
+  - name: "arg1"
+    type: "Dtype"
+  - name: "arg2"
+    type: "Dtype"
+variants:
+  numpy:
+    api: "numpy.issubdtype"
+  jax:
+    api: "jax.numpy.issubdtype"
+  flax_nnx:
+    api: "jax.numpy.issubdtype"
+  paxml:
+    api: "jax.numpy.issubdtype"
+
+---
+operation: "Iterable"
+description: "Check whether or not an object can be iterated over."
+std_args:
+  - name: "y"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.iterable"
+  jax:
+    api: "jax.numpy.iterable"
+  flax_nnx:
+    api: "jax.numpy.iterable"
+  paxml:
+    api: "jax.numpy.iterable"
+  torch:
+    macro_template: "isinstance({y}, (list, tuple, torch.nn.ModuleList, torch.nn.ParameterList))"
+
+---
+operation: "Ix_"
+description: "Construct an open mesh from multiple sequences."
+std_args:
+  - name: "args"
+    is_variadic: true
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.ix_"
+  jax:
+    api: "jax.numpy.ix_"
+  flax_nnx:
+    api: "jax.numpy.ix_"
+  paxml:
+    api: "jax.numpy.ix_"
+  torch:
+    api: "torch.meshgrid"
+    kwargs_map:
+      indexing: "'ij'"
+    # Incompatibility: torch.meshgrid returns full mesh, np.ix_ returns open mesh.
+    # Requires plugin to align behavior if strict.
+    requires_plugin: "ix_adapter" 
+
+---
+operation: "Kaiser"
+description: "Return the Kaiser window."
+std_args:
+  - name: "M"
+    type: "int"
+  - name: "beta"
+    type: "float"
+variants:
+  numpy:
+    api: "numpy.kaiser"
+  jax:
+    api: "jax.numpy.kaiser"
+  flax_nnx:
+    api: "jax.numpy.kaiser"
+  paxml:
+    api: "jax.numpy.kaiser"
+  torch:
+    api: "torch.kaiser_window"
+    args:
+      M: "window_length"
+      beta: "beta" # default beta=12.0 in torch?
+  tensorflow:
+    api: "tf.signal.kaiser_window"
+    args:
+      M: "window_length"
+      beta: "beta"
+
+---
+operation: "Kron"
+description: "Kronecker product of two arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.kron"
+  jax:
+    api: "jax.numpy.kron"
+  flax_nnx:
+    api: "jax.numpy.kron"
+  paxml:
+    api: "jax.numpy.kron"
+  torch:
+    api: "torch.kron"
+  tensorflow:
+    api: "tf.experimental.numpy.kron" 
+
+---
+operation: "Lcm"
+description: "Returns the lowest common multiple of |x1| and |x2|."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.lcm"
+  jax:
+    api: "jax.numpy.lcm"
+  flax_nnx:
+    api: "jax.numpy.lcm"
+  paxml:
+    api: "jax.numpy.lcm"
+  torch:
+    api: "torch.lcm"
+
+---
+operation: "LdExp"
+description: "Returns x1 * 2**x2, element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.ldexp"
+  jax:
+    api: "jax.numpy.ldexp"
+  flax_nnx:
+    api: "jax.numpy.ldexp"
+  paxml:
+    api: "jax.numpy.ldexp"
+  torch:
+    api: "torch.ldexp"
+  tensorflow:
+    macro_template: "{x1} * tf.math.pow(2.0, {x2})"
+  mlx:
+    macro_template: "{x1} * mx.power(2.0, {x2})"
+
+---
+operation: "LeftShift"
+description: "Shift the bits of an integer to the left."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.left_shift"
+  jax:
+    api: "jax.numpy.left_shift"
+  flax_nnx:
+    api: "jax.numpy.left_shift"
+  paxml:
+    api: "jax.numpy.left_shift"
+  torch:
+    api: "torch.bitwise_left_shift"
+  tensorflow:
+    api: "tf.bitwise.left_shift"
+  mlx:
+    transformation_type: "infix"
+    operator: "<<" 
+  keras:
+    api: "keras.ops.bitwise_left_shift"
+
+---
+operation: "Less"
+description: "Return the truth value of (x1 < x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.less"
+  jax:
+    api: "jax.numpy.less"
+  flax_nnx:
+    api: "jax.numpy.less"
+  paxml:
+    api: "jax.numpy.less"
+  torch:
+    api: "torch.lt"
+  tensorflow:
+    api: "tf.math.less"
+  mlx:
+    api: "mlx.core.less"
+  keras:
+    api: "keras.ops.less"
+
+---
+operation: "LessEqual"
+description: "Return the truth value of (x1 <= x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.less_equal"
+  jax:
+    api: "jax.numpy.less_equal"
+  flax_nnx:
+    api: "jax.numpy.less_equal"
+  paxml:
+    api: "jax.numpy.less_equal"
+  torch:
+    api: "torch.le"
+  tensorflow:
+    api: "tf.math.less_equal"
+  mlx:
+    api: "mlx.core.less_equal"
+  keras:
+    api: "keras.ops.less_equal"
+
+---
+operation: "LexSort"
+description: "Perform an indirect stable sort using a sequence of keys."
+std_args:
+  - name: "keys"
+    type: "Tensor" # or tuple of tensors
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  numpy:
+    api: "numpy.lexsort"
+  jax:
+    api: "jax.numpy.lexsort"
+  flax_nnx:
+    api: "jax.numpy.lexsort"
+  paxml:
+    api: "jax.numpy.lexsort"
+  # Torch lacks lexsort, usually requires plugins
+
+---
+operation: "LinSpace"
+description: "Return evenly spaced numbers over a specified interval."
+std_args:
+  - name: "start"
+    type: "float"
+  - name: "stop"
+    type: "float"
+  - name: "num"
+    type: "int"
+    default: 50
+  - name: "endpoint"
+    type: "bool"
+    default: true
+  - name: "retstep"
+    type: "bool"
+    default: false
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.linspace"
+  jax:
+    api: "jax.numpy.linspace"
+  flax_nnx:
+    api: "jax.numpy.linspace"
+  paxml:
+    api: "jax.numpy.linspace"
+  torch:
+    api: "torch.linspace"
+    args:
+      num: "steps" 
+      endpoint: null # torch linspace might not support endpoint keyword arg in older versions, default True. 
+      retstep: null # Not supported directly
+      axis: null
+  tensorflow:
+    api: "tf.linspace"
+  mlx:
+    # Macro for MLX: start + arange(num) * (stop-start)/(num-1)
+    # Or use existing functional if added
+    macro_template: "mx.linspace({start}, {stop}, {num})" 
+
+---
+operation: "LittleEndian"
+description: "Check if system is little endian."
+std_args: []
+variants:
+  numpy:
+    macro_template: "np.little_endian"
+  torch:
+    macro_template: "True" # Mostly True for current supported hardware (x86/ARM) 
+
+---
+operation: "Load"
+description: "Load arrays or pickled objects."
+std_args:
+  - name: "file"
+    type: "str"
+variants:
+  numpy:
+    api: "numpy.load"
+  jax:
+    api: "jax.numpy.load"
+  flax_nnx:
+    api: "jax.numpy.load"
+  paxml:
+    api: "jax.numpy.load"
+  torch:
+    api: "torch.load"
+  mlx:
+    api: "mlx.core.load" 
+
+---
+operation: "LoadTxt"
+description: "Load data from a text file."
+std_args:
+  - name: "fname"
+    type: "str"
+variants:
+  numpy:
+    api: "numpy.loadtxt"
+  jax:
+    api: "numpy.loadtxt" # Use numpy for pure text IO
+  flax_nnx:
+    api: "numpy.loadtxt"
+  paxml:
+    api: "numpy.loadtxt" 
+
+---
+operation: "Log"
+description: "Natural logarithm, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.log"
+  jax:
+    api: "jax.numpy.log"
+  flax_nnx:
+    api: "jax.numpy.log"
+  paxml:
+    api: "jax.numpy.log"
+  torch:
+    api: "torch.log"
+  tensorflow:
+    api: "tf.math.log"
+  mlx:
+    api: "mlx.core.log"
+  keras:
+    api: "keras.ops.log"
+
+---
+operation: "Log10"
+description: "Return the base 10 logarithm of the input array, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.log10"
+  jax:
+    api: "jax.numpy.log10"
+  flax_nnx:
+    api: "jax.numpy.log10"
+  paxml:
+    api: "jax.numpy.log10"
+  torch:
+    api: "torch.log10"
+  tensorflow:
+    macro_template: "tf.math.log({x}) / tf.math.log(10.0)"
+  mlx:
+    api: "mlx.core.log10"
+
+---
+operation: "Log1p"
+description: "Return the natural logarithm of one plus the input array, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.log1p"
+  jax:
+    api: "jax.numpy.log1p"
+  flax_nnx:
+    api: "jax.numpy.log1p"
+  paxml:
+    api: "jax.numpy.log1p"
+  torch:
+    api: "torch.log1p"
+  tensorflow:
+    api: "tf.math.log1p"
+  mlx:
+    api: "mlx.core.log1p"
+  keras:
+    api: "keras.ops.log1p"
+
+---
+operation: "Log2"
+description: "Base-2 logarithm of x."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.log2"
+  jax:
+    api: "jax.numpy.log2"
+  flax_nnx:
+    api: "jax.numpy.log2"
+  paxml:
+    api: "jax.numpy.log2"
+  torch:
+    api: "torch.log2"
+  tensorflow:
+    macro_template: "tf.math.log({x}) / tf.math.log(2.0)"
+  mlx:
+    api: "mlx.core.log2"
+
+---
+operation: "LogAddExp"
+description: "Logarithm of the sum of exponentiations of the inputs."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.logaddexp"
+  jax:
+    api: "jax.numpy.logaddexp"
+  flax_nnx:
+    api: "jax.numpy.logaddexp"
+  paxml:
+    api: "jax.numpy.logaddexp"
+  torch:
+    api: "torch.logaddexp"
+  tensorflow:
+    api: "tf.math.reduce_logsumexp" # Note: reduce_logsumexp is reduction, not elementwise binary. 
+    macro_template: "tf.math.log(tf.exp({x1}) + tf.exp({x2}))" 
+  mlx:
+    api: "mlx.core.logaddexp"
+  keras:
+    api: "keras.ops.logaddexp" 
+
+---
+operation: "LogAddExp2"
+description: "Logarithm of the sum of exponentiations of the inputs in base-2."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.logaddexp2"
+  jax:
+    api: "jax.numpy.logaddexp2"
+  flax_nnx:
+    api: "jax.numpy.logaddexp2"
+  paxml:
+    api: "jax.numpy.logaddexp2"
+  torch:
+    api: "torch.logaddexp2"
+  tensorflow:
+    macro_template: "tf.math.log(2.0**{x1} + 2.0**{x2}) / tf.math.log(2.0)" 
+
+---
+operation: "LogicalAnd"
+description: "Compute the truth value of x1 AND x2 element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.logical_and"
+  jax:
+    api: "jax.numpy.logical_and"
+  flax_nnx:
+    api: "jax.numpy.logical_and"
+  paxml:
+    api: "jax.numpy.logical_and"
+  torch:
+    api: "torch.logical_and"
+  tensorflow:
+    api: "tf.math.logical_and"
+  mlx:
+    # MLX has no direct logical_and func? Use operator &?
+    macro_template: "{x1} & {x2}" 
+  keras:
+    api: "keras.ops.logical_and"
+
+---
+operation: "LogicalNot"
+description: "Compute the truth value of NOT x element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.logical_not"
+  jax:
+    api: "jax.numpy.logical_not"
+  flax_nnx:
+    api: "jax.numpy.logical_not"
+  paxml:
+    api: "jax.numpy.logical_not"
+  torch:
+    api: "torch.logical_not"
+  tensorflow:
+    api: "tf.math.logical_not"
+  mlx:
+    macro_template: "~{x}" 
+  keras:
+    api: "keras.ops.logical_not"
+
+---
+operation: "LogicalOr"
+description: "Compute the truth value of x1 OR x2 element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.logical_or"
+  jax:
+    api: "jax.numpy.logical_or"
+  flax_nnx:
+    api: "jax.numpy.logical_or"
+  paxml:
+    api: "jax.numpy.logical_or"
+  torch:
+    api: "torch.logical_or"
+  tensorflow:
+    api: "tf.math.logical_or"
+  mlx:
+    macro_template: "{x1} | {x2}"
+  keras:
+    api: "keras.ops.logical_or"
+
+---
+operation: "LogicalXor"
+description: "Compute the truth value of x1 XOR x2, element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.logical_xor"
+  jax:
+    api: "jax.numpy.logical_xor"
+  flax_nnx:
+    api: "jax.numpy.logical_xor"
+  paxml:
+    api: "jax.numpy.logical_xor"
+  torch:
+    api: "torch.logical_xor"
+  tensorflow:
+    api: "tf.math.logical_xor"
+  mlx:
+    macro_template: "{x1} ^ {x2}"
+  keras:
+    api: "keras.ops.logical_xor"
+
+---
+operation: "LogSpace"
+description: "Return numbers spaced evenly on a log scale."
+std_args:
+  - name: "start"
+    type: "float"
+  - name: "stop"
+    type: "float"
+  - name: "num"
+    type: "int"
+    default: 50
+  - name: "endpoint"
+    type: "bool"
+    default: true
+  - name: "base"
+    type: "float"
+    default: 10.0
+variants:
+  numpy:
+    api: "numpy.logspace"
+  jax:
+    api: "jax.numpy.logspace"
+  flax_nnx:
+    api: "jax.numpy.logspace"
+  paxml:
+    api: "jax.numpy.logspace"
+  torch:
+    api: "torch.logspace"
+    args:
+       num: "steps" 
+  tensorflow:
+    # TF logspace usually missing directly in core math? 
+    # Logic: 
+    api: "tf.exp"
+    macro_template: "tf.math.pow({base}, tf.linspace({start}, {stop}, {num}))"

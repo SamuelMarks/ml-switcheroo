@@ -1,0 +1,823 @@
+operation: "Lgamma" 
+description: "Computes the log of the absolute value of Gamma(x) element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.lgamma" 
+  torch: 
+    api: "torch.lgamma" 
+  jax: 
+    api: "jax.lax.lgamma" 
+  flax_nnx: 
+    api: "jax.lax.lgamma" 
+  paxml: 
+    api: "jax.lax.lgamma" 
+  keras: 
+    api: "keras.ops.log_gamma" 
+  numpy: 
+    api: "scipy.special.gammaln" 
+    required_imports: 
+      - module: "scipy.special" 
+  mlx: 
+    # MLX does not have lgamma in core yet
+    api: null
+---
+operation: "Log" 
+description: "Computes natural logarithm of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.log" 
+  torch: 
+    api: "torch.log" 
+  jax: 
+    api: "jnp.log" 
+  flax_nnx: 
+    api: "jnp.log" 
+  paxml: 
+    api: "jnp.log" 
+  keras: 
+    api: "keras.ops.log" 
+  numpy: 
+    api: "np.log" 
+  mlx: 
+    api: "mx.log" 
+---
+operation: "Log1p" 
+description: "Computes natural logarithm of (1 + x) element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.log1p" 
+  torch: 
+    api: "torch.log1p" 
+  jax: 
+    api: "jnp.log1p" 
+  flax_nnx: 
+    api: "jnp.log1p" 
+  paxml: 
+    api: "jnp.log1p" 
+  keras: 
+    api: "keras.ops.log1p" 
+  numpy: 
+    api: "np.log1p" 
+  mlx: 
+    api: "mx.log1p" 
+---
+operation: "LogSigmoid" 
+description: "Computes log sigmoid of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.log_sigmoid" 
+  torch: 
+    api: "torch.nn.functional.logsigmoid" 
+  jax: 
+    api: "jax.nn.log_sigmoid" 
+  flax_nnx: 
+    api: "jax.nn.log_sigmoid" 
+  paxml: 
+    api: "jax.nn.log_sigmoid" 
+  keras: 
+    api: "keras.ops.log_sigmoid" 
+  numpy: 
+    macro_template: "-np.logaddexp(0, -{x})" 
+  mlx: 
+    macro_template: "-mx.logaddexp(0, -{x})" 
+---
+operation: "LogSoftmax" 
+description: "Computes log softmax activations." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: -1
+variants: 
+  tensorflow: 
+    api: "tf.math.log_softmax" 
+  torch: 
+    api: "torch.nn.functional.log_softmax" 
+    args: 
+      axis: "dim" 
+  jax: 
+    api: "jax.nn.log_softmax" 
+  flax_nnx: 
+    api: "jax.nn.log_softmax" 
+  paxml: 
+    api: "jax.nn.log_softmax" 
+  keras: 
+    api: "keras.ops.log_softmax" 
+  numpy: 
+    api: "scipy.special.log_softmax" 
+    required_imports: 
+      - module: "scipy.special" 
+  mlx: 
+    # Usually available in core or nn, using macro for robustness
+    macro_template: "{x} - mx.logsumexp({x}, axis={axis}, keepdims=True)" 
+---
+operation: "LogicalAnd" 
+description: "Returns the truth value of x AND y element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.logical_and" 
+  torch: 
+    api: "torch.logical_and" 
+  jax: 
+    api: "jnp.logical_and" 
+  flax_nnx: 
+    api: "jnp.logical_and" 
+  paxml: 
+    api: "jnp.logical_and" 
+  keras: 
+    api: "keras.ops.logical_and" 
+  numpy: 
+    api: "np.logical_and" 
+  mlx: 
+    api: "mx.logical_and" 
+---
+operation: "LogicalNot" 
+description: "Returns the truth value of NOT x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.logical_not" 
+  torch: 
+    api: "torch.logical_not" 
+  jax: 
+    api: "jnp.logical_not" 
+  flax_nnx: 
+    api: "jnp.logical_not" 
+  paxml: 
+    api: "jnp.logical_not" 
+  keras: 
+    api: "keras.ops.logical_not" 
+  numpy: 
+    api: "np.logical_not" 
+  mlx: 
+    api: "mx.logical_not" 
+---
+operation: "LogicalOr" 
+description: "Returns the truth value of x OR y element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.logical_or" 
+  torch: 
+    api: "torch.logical_or" 
+  jax: 
+    api: "jnp.logical_or" 
+  flax_nnx: 
+    api: "jnp.logical_or" 
+  paxml: 
+    api: "jnp.logical_or" 
+  keras: 
+    api: "keras.ops.logical_or" 
+  numpy: 
+    api: "np.logical_or" 
+  mlx: 
+    api: "mx.logical_or" 
+---
+operation: "LogicalXor" 
+description: "Returns the truth value of x XOR y element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.logical_xor" 
+  torch: 
+    api: "torch.logical_xor" 
+  jax: 
+    api: "jnp.logical_xor" 
+  flax_nnx: 
+    api: "jnp.logical_xor" 
+  paxml: 
+    api: "jnp.logical_xor" 
+  keras: 
+    api: "keras.ops.logical_xor" 
+  numpy: 
+    api: "np.logical_xor" 
+  mlx: 
+    macro_template: "{x} != {y}" # MLX logical_xor not in core top-level
+---
+operation: "Maximum" 
+description: "Element-wise maximum of two tensors." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.maximum" 
+  torch: 
+    api: "torch.maximum" 
+  jax: 
+    api: "jnp.maximum" 
+  flax_nnx: 
+    api: "jnp.maximum" 
+  paxml: 
+    api: "jnp.maximum" 
+  keras: 
+    api: "keras.ops.maximum" 
+  numpy: 
+    api: "np.maximum" 
+  mlx: 
+    api: "mx.maximum" 
+---
+operation: "Minimum" 
+description: "Element-wise minimum of two tensors." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.minimum" 
+  torch: 
+    api: "torch.minimum" 
+  jax: 
+    api: "jnp.minimum" 
+  flax_nnx: 
+    api: "jnp.minimum" 
+  paxml: 
+    api: "jnp.minimum" 
+  keras: 
+    api: "keras.ops.minimum" 
+  numpy: 
+    api: "np.minimum" 
+  mlx: 
+    api: "mx.minimum" 
+---
+operation: "Mod" 
+description: "Element-wise remainder of division." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.mod" 
+  torch: 
+    api: "torch.remainder" 
+  jax: 
+    api: "jnp.mod" 
+  flax_nnx: 
+    api: "jnp.mod" 
+  paxml: 
+    api: "jnp.mod" 
+  keras: 
+    api: "keras.ops.mod" 
+  numpy: 
+    api: "np.mod" 
+  mlx: 
+    api: "mx.remainder" 
+---
+operation: "Multiply" 
+description: "Element-wise multiplication." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.multiply" 
+  torch: 
+    api: "torch.mul" 
+  jax: 
+    api: "jnp.multiply" 
+  flax_nnx: 
+    api: "jnp.multiply" 
+  paxml: 
+    api: "jnp.multiply" 
+  keras: 
+    api: "keras.ops.multiply" 
+  numpy: 
+    api: "np.multiply" 
+  mlx: 
+    api: "mx.multiply" 
+---
+operation: "MultiplyNoNan" 
+description: "Computes product x*y, returns 0 if y is 0 (safe against NaNs in x)." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.multiply_no_nan" 
+  torch: 
+    macro_template: "torch.where({y} == 0, 0.0, {x} * {y})" 
+  jax: 
+    macro_template: "jnp.where({y} == 0, 0.0, {x} * {y})" 
+  flax_nnx: 
+    macro_template: "jnp.where({y} == 0, 0.0, {x} * {y})" 
+  paxml: 
+    macro_template: "jnp.where({y} == 0, 0.0, {x} * {y})" 
+  keras: 
+    macro_template: "keras.ops.where({y} == 0, 0.0, {x} * {y})" 
+  numpy: 
+    macro_template: "np.where({y} == 0, 0.0, {x} * {y})" 
+  mlx: 
+    macro_template: "mx.where({y} == 0, 0.0, {x} * {y})" 
+---
+operation: "Ndtri" 
+description: "Inverse error function / Quantile of Standard Normal." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.ndtri" 
+  torch: 
+    api: "torch.special.ndtri" 
+  jax: 
+    api: "jax.scipy.special.ndtri" 
+  flax_nnx: 
+    api: "jax.scipy.special.ndtri" 
+  paxml: 
+    api: "jax.scipy.special.ndtri" 
+  keras: 
+    api: "keras.ops.ndtri" # Check Keras 3 coverage, exists in some backends
+  numpy: 
+    api: "scipy.special.ndtri" 
+    required_imports: 
+      - module: "scipy.special" 
+  mlx: 
+    # Currently missing in MLX core
+    api: null
+---
+operation: "Negative" 
+description: "Computes numerical negative value element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.negative" 
+  torch: 
+    api: "torch.neg" 
+  jax: 
+    api: "jnp.negative" 
+  flax_nnx: 
+    api: "jnp.negative" 
+  paxml: 
+    api: "jnp.negative" 
+  keras: 
+    api: "keras.ops.negative" 
+  numpy: 
+    api: "np.negative" 
+  mlx: 
+    api: "mx.negative" 
+---
+operation: "NextAfter" 
+description: "Returns the next representable floating-point value." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "other" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.nextafter" 
+    args: 
+      other: "x2" 
+      x: "x1" 
+  torch: 
+    api: "torch.nextafter" 
+  jax: 
+    api: "jnp.nextafter" 
+  flax_nnx: 
+    api: "jnp.nextafter" 
+  paxml: 
+    api: "jnp.nextafter" 
+  keras: 
+    api: null
+  numpy: 
+    api: "np.nextafter" 
+  mlx: 
+    api: null
+---
+operation: "NotEqual" 
+description: "Returns the truth value of (x != y) element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.not_equal" 
+  torch: 
+    api: "torch.not_equal" 
+  jax: 
+    api: "jnp.not_equal" 
+  flax_nnx: 
+    api: "jnp.not_equal" 
+  paxml: 
+    api: "jnp.not_equal" 
+  keras: 
+    api: "keras.ops.not_equal" 
+  numpy: 
+    api: "np.not_equal" 
+  mlx: 
+    api: "mx.not_equal" 
+---
+operation: "Polygamma" 
+description: "Compute the polygamma function psi^(n)(x)." 
+std_args: 
+  - name: "n" 
+    type: "int" 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.polygamma" 
+    args: 
+      n: "a" 
+  torch: 
+    api: "torch.polygamma" 
+  jax: 
+    api: "jax.scipy.special.polygamma" 
+  flax_nnx: 
+    api: "jax.scipy.special.polygamma" 
+  paxml: 
+    api: "jax.scipy.special.polygamma" 
+  keras: 
+    api: null
+  numpy: 
+    api: "scipy.special.polygamma" 
+    required_imports: 
+      - module: "scipy.special" 
+  mlx: 
+    api: null
+---
+operation: "Polyval" 
+description: "Evaluate a polynomial at specific values." 
+std_args: 
+  - name: "coeffs" 
+    type: "List[Tensor]" 
+    description: "Polynomial coefficients (highest degree first)." 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.polyval" 
+  torch: 
+    # Torch lacks polyval, requires macro
+    api: null
+    missing_message: "torch.polyval not available, use Horner's method manually" 
+  jax: 
+    api: "jnp.polyval" 
+    args: 
+      coeffs: "p" 
+  flax_nnx: 
+    api: "jnp.polyval" 
+    args: 
+      coeffs: "p" 
+  paxml: 
+    api: "jnp.polyval" 
+    args: 
+      coeffs: "p" 
+  keras: 
+    api: null
+  numpy: 
+    api: "np.polyval" 
+    args: 
+      coeffs: "p" 
+  mlx: 
+    api: null
+---
+operation: "Pow" 
+description: "Computes the power of one value to another." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.pow" 
+  torch: 
+    api: "torch.pow" 
+  jax: 
+    api: "jnp.power" 
+  flax_nnx: 
+    api: "jnp.power" 
+  paxml: 
+    api: "jnp.power" 
+  keras: 
+    api: "keras.ops.power" 
+  numpy: 
+    api: "np.power" 
+  mlx: 
+    api: "mx.power" 
+---
+operation: "Real" 
+description: "Returns the real part of a complex (or real) tensor." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.real" 
+    args: 
+      x: "input" 
+  torch: 
+    api: "torch.real" 
+    args: 
+      x: "input" 
+  jax: 
+    api: "jnp.real" 
+  flax_nnx: 
+    api: "jnp.real" 
+  paxml: 
+    api: "jnp.real" 
+  keras: 
+    api: "keras.ops.real" 
+    args: 
+      x: "x" 
+  numpy: 
+    api: "np.real" 
+  mlx: 
+    api: null # No complex support in MLX yet
+---
+operation: "Reciprocal" 
+description: "Computes the reciprocal of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.reciprocal" 
+  torch: 
+    api: "torch.reciprocal" 
+  jax: 
+    api: "jnp.reciprocal" 
+  flax_nnx: 
+    api: "jnp.reciprocal" 
+  paxml: 
+    api: "jnp.reciprocal" 
+  keras: 
+    api: "keras.ops.reciprocal" 
+  numpy: 
+    api: "np.reciprocal" 
+  mlx: 
+    api: "mx.reciprocal" 
+---
+operation: "ReciprocalNoNan" 
+description: "Safe reciprocal, returns 0 where input is 0." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.reciprocal_no_nan" 
+  torch: 
+    macro_template: "torch.where({x} == 0, 0.0, 1.0 / {x})" 
+  jax: 
+    macro_template: "jnp.where({x} == 0, 0.0, 1.0 / {x})" 
+  flax_nnx: 
+    macro_template: "jnp.where({x} == 0, 0.0, 1.0 / {x})" 
+  paxml: 
+    macro_template: "jnp.where({x} == 0, 0.0, 1.0 / {x})" 
+  keras: 
+    macro_template: "keras.ops.where({x} == 0, 0.0, 1.0 / {x})" 
+  numpy: 
+    macro_template: "np.where({x} == 0, 0.0, 1.0 / {x})" 
+  mlx: 
+    macro_template: "mx.where({x} == 0, 0.0, 1.0 / {x})" 
+---
+operation: "All" 
+description: "Computes logical AND of elements across dimensions of a tensor." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_all" 
+    args: 
+      x: "input_tensor" 
+  torch: 
+    api: "torch.all" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jnp.all" 
+  flax_nnx: 
+    api: "jnp.all" 
+  paxml: 
+    api: "jnp.all" 
+  keras: 
+    api: "keras.ops.all" 
+  numpy: 
+    api: "np.all" 
+  mlx: 
+    api: "mx.all" 
+---
+operation: "Any" 
+description: "Computes logical OR of elements across dimensions of a tensor." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_any" 
+    args: 
+      x: "input_tensor" 
+  torch: 
+    api: "torch.any" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jnp.any" 
+  flax_nnx: 
+    api: "jnp.any" 
+  paxml: 
+    api: "jnp.any" 
+  keras: 
+    api: "keras.ops.any" 
+  numpy: 
+    api: "np.any" 
+  mlx: 
+    api: "mx.any" 
+---
+operation: "EuclideanNorm" 
+description: "Computes the Euclidean norm of elements across dimensions." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_euclidean_norm" 
+    args: 
+      x: "input_tensor" 
+  torch: 
+    api: "torch.linalg.vector_norm" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+    inject_args: 
+      ord: 2
+  jax: 
+    api: "jnp.linalg.norm" 
+  flax_nnx: 
+    api: "jnp.linalg.norm" 
+  paxml: 
+    api: "jnp.linalg.norm" 
+  keras: 
+    api: null
+  numpy: 
+    api: "np.linalg.norm" 
+  mlx: 
+    api: null # MLX has no direct euclidean reduce
+---
+operation: "LogSumExp" 
+description: "Computes log(sum(exp(x)))." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_logsumexp" 
+    args: 
+      x: "input_tensor" 
+  torch: 
+    api: "torch.logsumexp" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jax.scipy.special.logsumexp" 
+  flax_nnx: 
+    api: "jax.scipy.special.logsumexp" 
+  paxml: 
+    api: "jax.scipy.special.logsumexp" 
+  keras: 
+    api: "keras.ops.logsumexp" 
+  numpy: 
+    api: "scipy.special.logsumexp" 
+    required_imports: 
+      - module: "scipy.special" 
+  mlx: 
+    api: "mx.logsumexp" 
+---
+operation: "Max" 
+description: "Computes the maximum of elements across dimensions." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_max" 
+    args: 
+      x: "input_tensor" 
+  torch: 
+    api: "torch.amax" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jnp.max" 
+  flax_nnx: 
+    api: "jnp.max" 
+  paxml: 
+    api: "jnp.max" 
+  keras: 
+    api: "keras.ops.max" 
+  numpy: 
+    api: "np.max" 
+  mlx: 
+    api: "mx.max" 
+---
+operation: "Mean" 
+description: "Computes the mean of elements across dimensions." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_mean" 
+    args: 
+      x: "input_tensor" 
+  torch: 
+    api: "torch.mean" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jnp.mean" 
+  flax_nnx: 
+    api: "jnp.mean" 
+  paxml: 
+    api: "jnp.mean" 
+  keras: 
+    api: "keras.ops.mean" 
+  numpy: 
+    api: "np.mean" 
+  mlx: 
+    api: "mx.mean"

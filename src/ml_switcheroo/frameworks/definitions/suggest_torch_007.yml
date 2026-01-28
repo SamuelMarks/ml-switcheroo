@@ -1,0 +1,715 @@
+operation: "Arctanh"
+description: "Returns the inverse hyperbolic tangent of the elements of the input tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arctanh"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.arctanh"
+  flax_nnx:
+    api: "jax.numpy.arctanh"
+  paxml:
+    api: "jax.numpy.arctanh"
+  keras:
+    api: "keras.ops.arctanh"
+  tensorflow:
+    api: "tf.math.atanh"
+  numpy:
+    api: "numpy.arctanh"
+  mlx:
+    api: "mlx.core.arctanh"
+
+---
+operation: "Arctanh_"
+description: "In-place version of Arctanh."
+is_inplace: true
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arctanh_"
+    args:
+      x: "input"
+
+---
+operation: "AreDeterministicAlgorithmsEnabled"
+description: "Returns True if global deterministic flag is turned on."
+return_type: "boolean"
+std_args: []
+variants:
+  torch:
+    api: "torch.are_deterministic_algorithms_enabled"
+  jax:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+
+---
+operation: "Argmax"
+description: "Returns the indices of the maximum value of all elements in the input tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.argmax"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.argmax"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  flax_nnx:
+    api: "jax.numpy.argmax"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.argmax"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.argmax"
+    args:
+      dim: "axis"
+  numpy:
+    api: "numpy.argmax"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mlx.core.argmax"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+operation: "Argmin"
+description: "Returns the indices of the minimum value of all elements in the input tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.argmin"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.argmin"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.argmin"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.argmin"
+    args:
+      dim: "axis"
+  numpy:
+    api: "numpy.argmin"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mlx.core.argmin"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+operation: "Argsort"
+description: "Returns the indices that sort a tensor along a given dimension."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: -1
+  - name: "descending"
+    type: "bool"
+    default: false
+  - name: "stable"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.argsort"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.argsort"
+    args:
+      dim: "axis"
+      descending: null # JAX argsort usually ascending
+      stable: null
+  keras:
+    api: "keras.ops.argsort"
+    args:
+      dim: "axis"
+  numpy:
+    api: "numpy.argsort"
+    args:
+      dim: "axis"
+  mlx:
+    api: "mlx.core.argsort"
+    args:
+      dim: "axis"
+
+---
+operation: "Argwhere"
+description: "Returns a tensor containing the indices of all non-zero elements."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.argwhere"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.argwhere"
+    args:
+      x: "a"
+  flax_nnx:
+    api: "jax.numpy.argwhere"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.where"
+    args:
+      x: "condition"
+  tensorflow:
+    api: "tf.where"
+    args:
+      x: "condition"
+  numpy:
+    api: "numpy.argwhere"
+    args:
+      x: "a"
+  mlx:
+    api: "mlx.core.argwhere" # Assuming array API compliance
+
+---
+operation: "AsStrided"
+description: "Create a view of an existing tensor with specified size, stride and storage_offset."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "size"
+    type: "Sequence[int]"
+  - name: "stride"
+    type: "Sequence[int]"
+  - name: "storage_offset"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.as_strided"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.lib.stride_tricks.as_strided"
+    args:
+      size: "shape"
+      stride: "strides"
+  numpy:
+    api: "numpy.lib.stride_tricks.as_strided"
+    args:
+      size: "shape"
+      stride: "strides"
+
+---
+operation: "AsStrided_"
+description: "In-place version of as_strided."
+is_inplace: true
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "size"
+    type: "Sequence[int]"
+  - name: "stride"
+    type: "Sequence[int]"
+  - name: "storage_offset"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.as_strided_"
+    args:
+      x: "input"
+
+---
+operation: "AsStridedCopy"
+description: "as_strided operation, but output is freshly created."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "size"
+    type: "Sequence[int]"
+  - name: "stride"
+    type: "Sequence[int]"
+  - name: "storage_offset"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.as_strided_copy"
+    args:
+      x: "input"
+
+---
+operation: "AsStridedScatter"
+description: "Embeds values into input using strides."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "src"
+    type: "Tensor"
+  - name: "size"
+    type: "Sequence[int]"
+  - name: "stride"
+    type: "Sequence[int]"
+  - name: "storage_offset"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.as_strided_scatter"
+
+---
+operation: "AsTensor"
+description: "Converts data into a tensor, sharing data and preserving autograd history if possible."
+std_args:
+  - name: "data"
+    type: "Any"
+  - name: "dtype"
+    type: "dtype"
+    default: null
+  - name: "device"
+    type: "Device"
+    default: null
+variants:
+  torch:
+    api: "torch.as_tensor"
+  jax:
+    api: "jax.numpy.array"
+    args:
+      data: "object"
+      device: null
+      dtype: "dtype"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    args:
+      data: "x"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    args:
+      data: "value"
+  numpy:
+    api: "numpy.asarray"
+    args:
+      data: "a"
+  mlx:
+    api: "mlx.core.array"
+    args:
+      data: "object"
+
+---
+operation: "AsArray"
+description: "Converts obj to a tensor."
+std_args:
+  - name: "obj"
+    type: "Any"
+  - name: "dtype"
+    type: "dtype"
+    default: null
+  - name: "device"
+    type: "Device"
+    default: null
+  - name: "copy"
+    type: "bool"
+    default: null
+  - name: "requires_grad"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.asarray"
+  jax:
+    api: "jax.numpy.asarray"
+    args:
+      obj: "a"
+      dtype: "dtype"
+      device: null
+      requires_grad: null
+  numpy:
+    api: "numpy.asarray"
+    args:
+      obj: "a"
+      dtype: "dtype"
+      device: null
+      requires_grad: null
+
+---
+operation: "Asin"
+description: "Returns the arcsine of the elements."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.asin"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.arcsin"
+  keras:
+    api: "keras.ops.arcsin"
+  tensorflow:
+    api: "tf.math.asin"
+  numpy:
+    api: "numpy.arcsin"
+  mlx:
+    api: "mlx.core.arcsin"
+
+---
+operation: "Asin_"
+description: "In-place version of Asin."
+is_inplace: true
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.asin_"
+    args:
+      x: "input"
+
+---
+operation: "Asinh"
+description: "Returns the inverse hyperbolic sine."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.asinh"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.arcsinh"
+  keras:
+    api: "keras.ops.arcsinh"
+  tensorflow:
+    api: "tf.math.asinh"
+  numpy:
+    api: "numpy.arcsinh"
+  mlx:
+    api: "mlx.core.arcsinh"
+
+---
+operation: "Asinh_"
+description: "In-place version of Asinh."
+is_inplace: true
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.asinh_"
+    args:
+      x: "input"
+
+---
+operation: "Atan"
+description: "Returns the arctangent."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atan"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.arctan"
+  keras:
+    api: "keras.ops.arctan"
+  tensorflow:
+    api: "tf.math.atan"
+  numpy:
+    api: "numpy.arctan"
+  mlx:
+    api: "mlx.core.arctan"
+
+---
+operation: "Atan2"
+description: "Element-wise arctangent of y / x."
+std_args:
+  - name: "y"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atan2"
+    args:
+      y: "input"
+      x: "other"
+  jax:
+    api: "jax.numpy.arctan2"
+    args:
+      y: "x1"
+      x: "x2"
+  keras:
+    api: "keras.ops.arctan2"
+    args:
+      y: "x1"
+      x: "x2"
+  tensorflow:
+    api: "tf.math.atan2"
+  numpy:
+    api: "numpy.arctan2"
+    args:
+      y: "x1"
+      x: "x2"
+
+---
+operation: "Atan_"
+description: "In-place version of Atan."
+is_inplace: true
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atan_"
+    args:
+      x: "input"
+
+---
+operation: "Atanh"
+description: "Returns the inverse hyperbolic tangent."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atanh"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.arctanh"
+  keras:
+    api: "keras.ops.arctanh"
+  tensorflow:
+    api: "tf.math.atanh"
+  numpy:
+    api: "numpy.arctanh"
+  mlx:
+    api: "mlx.core.arctanh"
+
+---
+operation: "Atanh_"
+description: "In-place version of Atanh."
+is_inplace: true
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atanh_"
+    args:
+      x: "input"
+
+---
+operation: "Atleast1d"
+description: "Returns a 1-dimensional view of each input tensor with zero dimensions."
+std_args:
+  - name: "tensors"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.atleast_1d"
+  jax:
+    api: "jax.numpy.atleast_1d"
+    pack_to_tuple: "arys"
+    pack_as: "List"
+  numpy:
+    api: "numpy.atleast_1d"
+    pack_to_tuple: "arys"
+    pack_as: "List"
+
+---
+operation: "Atleast2d"
+description: "Returns a 2-dimensional view."
+std_args:
+  - name: "tensors"
+    is_variadic: true
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atleast_2d"
+  jax:
+    api: "jax.numpy.atleast_2d"
+    pack_to_tuple: "arys"
+    pack_as: "List"
+  numpy:
+    api: "numpy.atleast_2d"
+    pack_to_tuple: "arys"
+    pack_as: "List"
+
+---
+operation: "Atleast3d"
+description: "Returns a 3-dimensional view."
+std_args:
+  - name: "tensors"
+    is_variadic: true
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atleast_3d"
+  jax:
+    api: "jax.numpy.atleast_3d"
+    pack_to_tuple: "arys"
+    pack_as: "List"
+  numpy:
+    api: "numpy.atleast_3d"
+    pack_to_tuple: "arys"
+    pack_as: "List"
+
+---
+operation: "Autocast"
+description: "Context manager or decorator to allow regions of script to run in mixed precision."
+op_type: "context"
+std_args:
+  - name: "device_type"
+    type: "str"
+  - name: "dtype"
+    type: "dtype"
+    default: null
+  - name: "enabled"
+    type: "bool"
+    default: true
+  - name: "cache_enabled"
+    type: "bool"
+    default: null
+variants:
+  torch:
+    api: "torch.autocast"
+  tensorflow:
+    # Partially supported via macro/plugin usage, usually explicit policy
+    macro_template: "tf.keras.mixed_precision.Policy('mixed_float16')"
+    missing_message: "TensorFlow uses global policies for mixed precision." 
+
+---
+operation: "AutocastDecrementNesting"
+description: "Decrement nesting count for autocast."
+std_args: []
+variants:
+  torch:
+    api: "torch.autocast_decrement_nesting"
+
+---
+operation: "AutocastIncrementNesting"
+description: "Increment nesting count for autocast."
+std_args: []
+variants:
+  torch:
+    api: "torch.autocast_increment_nesting"
+
+---
+operation: "AvgPool1d"
+description: "Applies a 1D average pooling."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "kernel_size"
+    type: "int"
+  - name: "stride"
+    type: "int"
+    default: null
+  - name: "padding"
+    type: "int"
+    default: 0
+  - name: "ceil_mode"
+    type: "bool"
+    default: false
+  - name: "count_include_pad"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.nn.functional.avg_pool1d"
+  keras:
+    api: "keras.ops.average_pool"
+    args:
+      input: "inputs"
+      kernel_size: "pool_size"
+      stride: "strides"
+  tensorflow:
+    api: "tf.nn.avg_pool1d"
+    args:
+      kernel_size: "ksize"
+      stride: "strides"
+
+---
+operation: "Baddbmm"
+description: "Performs a batch matrix-matrix product of matrices in batch1 and batch2. input is added to final result."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "batch1"
+    type: "Tensor"
+  - name: "batch2"
+    type: "Tensor"
+  - name: "beta"
+    type: "float"
+    default: 1.0
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.baddbmm"
+  jax:
+    macro_template: "{beta} * {input} + {alpha} * jax.numpy.matmul({batch1}, {batch2})" 
+    required_imports:
+      - "import jax" 
+  flax_nnx:
+    macro_template: "{beta} * {input} + {alpha} * jax.numpy.matmul({batch1}, {batch2})" 
+  numpy:
+    macro_template: "{beta} * {input} + {alpha} * numpy.matmul({batch1}, {batch2})" 
+    required_imports:
+      - "import numpy" 
+  keras:
+    macro_template: "{beta} * {input} + {alpha} * keras.ops.matmul({batch1}, {batch2})" 
+    required_imports:
+      - "import keras" 
+  mlx:
+    macro_template: "{beta} * {input} + {alpha} * mlx.core.matmul({batch1}, {batch2})" 
+    required_imports:
+      - "import mlx.core"

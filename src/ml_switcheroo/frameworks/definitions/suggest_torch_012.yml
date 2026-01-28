@@ -1,0 +1,1120 @@
+operation: "Deg2Rad_" 
+description: "Converts angles from degrees to radians in-place." 
+is_inplace: true
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.deg2rad_" 
+  jax: 
+    api: "jax.numpy.deg2rad" 
+  flax_nnx: 
+    api: "jax.numpy.deg2rad" 
+  paxml: 
+    api: "jax.numpy.deg2rad" 
+  keras: 
+    macro_template: "{input} * (3.141592653589793 / 180.0)" 
+  tensorflow: 
+    macro_template: "{input} * (3.141592653589793 / 180.0)" 
+  numpy: 
+    api: "numpy.deg2rad" 
+  mlx: 
+    api: "mlx.core.radians" 
+---
+operation: "Dequantize" 
+description: "Returns an fp32 Tensor by dequantizing a quantized Tensor." 
+std_args: 
+  - name: "tensor" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.dequantize" 
+  tensorflow: 
+    api: "tf.quantization.dequantize" 
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  numpy: null
+  mlx: null
+---
+operation: "Det" 
+description: "Computes the determinant of a square matrix or batch of matrices." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+    rank: 2
+    shape_spec: "[..., N, N]" 
+variants: 
+  torch: 
+    api: "torch.det" 
+  jax: 
+    api: "jax.numpy.linalg.det" 
+  flax_nnx: 
+    api: "jax.numpy.linalg.det" 
+  paxml: 
+    api: "jax.numpy.linalg.det" 
+  keras: 
+    api: "keras.ops.det" 
+  tensorflow: 
+    api: "tf.linalg.det" 
+  numpy: 
+    api: "numpy.linalg.det" 
+  mlx: 
+    api: "mlx.core.linalg.det" 
+---
+operation: "Detach" 
+description: "Returns a new Tensor, detached from the current graph. The result will never require gradient." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.detach" 
+  jax: 
+    api: "jax.lax.stop_gradient" 
+    args: 
+      input: "x" 
+  flax_nnx: 
+    api: "jax.lax.stop_gradient" 
+    args: 
+      input: "x" 
+  paxml: 
+    api: "jax.lax.stop_gradient" 
+    args: 
+      input: "x" 
+  keras: 
+    api: "keras.ops.stop_gradient" 
+    args: 
+      input: "x" 
+  tensorflow: 
+    api: "tf.stop_gradient" 
+  numpy: 
+    macro_template: "{input}" 
+  mlx: 
+    api: "mlx.core.stop_gradient" 
+---
+operation: "Detach_" 
+description: "Detaches the Tensor from the graph in-place." 
+is_inplace: true
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.detach_" 
+  jax: 
+    api: "jax.lax.stop_gradient" 
+    args: 
+      input: "x" 
+  flax_nnx: 
+    api: "jax.lax.stop_gradient" 
+    args: 
+      input: "x" 
+  paxml: 
+    api: "jax.lax.stop_gradient" 
+    args: 
+      input: "x" 
+  keras: 
+    api: "keras.ops.stop_gradient" 
+    args: 
+      input: "x" 
+  tensorflow: 
+    api: "tf.stop_gradient" 
+  numpy: 
+    macro_template: "{input}" 
+  mlx: 
+    api: "mlx.core.stop_gradient" 
+---
+operation: "DetachCopy" 
+description: "Returns a new Tensor, detached from the current graph and copied." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.detach_copy" 
+  jax: 
+    api: "jax.lax.stop_gradient" 
+    args: 
+      input: "x" 
+  flax_nnx: 
+    api: "jax.lax.stop_gradient" 
+    args: 
+      input: "x" 
+  paxml: 
+    api: "jax.lax.stop_gradient" 
+    args: 
+      input: "x" 
+  keras: 
+    api: "keras.ops.convert_to_tensor" # Implicit copy behavior in some backends
+  tensorflow: 
+    api: "tf.identity" # Identity often implies stop_grad + copy semantics in TF graph 
+  numpy: 
+    api: "numpy.copy" 
+  mlx: 
+    api: "mlx.core.array" # Re-creation implies copy
+---
+operation: "Device" 
+description: "Constructs a device object." 
+op_type: "class" 
+std_args: 
+  - name: "type" 
+    type: "str" 
+  - name: "index" 
+    type: "int" 
+    default: null
+variants: 
+  torch: 
+    requires_plugin: "device_allocator" 
+  jax: 
+    requires_plugin: "device_allocator" 
+  flax_nnx: 
+    requires_plugin: "device_allocator" 
+  paxml: 
+    requires_plugin: "device_allocator" 
+  keras: 
+    requires_plugin: "device_allocator" 
+  tensorflow: 
+    requires_plugin: "device_allocator" 
+  numpy: 
+    macro_template: "'cpu'" 
+  mlx: 
+    requires_plugin: "device_allocator" 
+---
+operation: "Diag" 
+description: "If input is a vector, returns a diagonal matrix. If input is a matrix, returns the diagonal." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "diagonal" 
+    type: "int" 
+    default: 0
+variants: 
+  torch: 
+    api: "torch.diag" 
+  jax: 
+    api: "jax.numpy.diag" 
+    args: 
+      diagonal: "k" 
+  flax_nnx: 
+    api: "jax.numpy.diag" 
+    args: 
+      diagonal: "k" 
+  paxml: 
+    api: "jax.numpy.diag" 
+    args: 
+      diagonal: "k" 
+  keras: 
+    api: "keras.ops.diag" 
+    args: 
+      diagonal: "k" 
+  tensorflow: 
+    api: "tf.linalg.diag" 
+    dispatch_rules: 
+      - if_arg: "input" 
+        op: "is_type" 
+        val: "Tensor" 
+        use_api: "tf.linalg.diag_part" # Ambiguous map, TF separates construct vs extract
+  numpy: 
+    api: "numpy.diag" 
+    args: 
+      diagonal: "k" 
+  mlx: 
+    api: "mlx.core.diag" 
+    args: 
+      diagonal: "k" 
+---
+operation: "DiagEmbed" 
+description: "Creates a tensor whose diagonals of certain 2D planes are filled by input." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "offset" 
+    type: "int" 
+    default: 0
+  - name: "dim1" 
+    type: "int" 
+    default: -2
+  - name: "dim2" 
+    type: "int" 
+    default: -1
+variants: 
+  torch: 
+    api: "torch.diag_embed" 
+  jax: 
+    # JAX doesn't have a direct equivalent for multidimensional diag_embed, requires complex construction
+    api: null
+  tensorflow: 
+    api: "tf.linalg.diag" 
+    args: 
+      offset: "k" 
+  keras: null
+  numpy: null
+  mlx: null
+---
+operation: "Diagflat" 
+description: "Creates a diagonal matrix with the flattened input as the diagonal." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "offset" 
+    type: "int" 
+    default: 0
+variants: 
+  torch: 
+    api: "torch.diagflat" 
+  jax: 
+    api: "jax.numpy.diagflat" 
+    args: 
+      offset: "k" 
+  flax_nnx: 
+    api: "jax.numpy.diagflat" 
+    args: 
+      offset: "k" 
+  paxml: 
+    api: "jax.numpy.diagflat" 
+    args: 
+      offset: "k" 
+  keras: null
+  tensorflow: null
+  numpy: 
+    api: "numpy.diagflat" 
+    args: 
+      offset: "k" 
+  mlx: null
+---
+operation: "Diagonal" 
+description: "Returns a partial view of input with the diagonal elements appended." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "offset" 
+    type: "int" 
+    default: 0
+  - name: "dim1" 
+    type: "int" 
+    default: 0
+  - name: "dim2" 
+    type: "int" 
+    default: 1
+variants: 
+  torch: 
+    api: "torch.diagonal" 
+  jax: 
+    api: "jax.numpy.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  flax_nnx: 
+    api: "jax.numpy.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  paxml: 
+    api: "jax.numpy.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  keras: 
+    api: "keras.ops.diagonal" 
+    args: 
+      input: "x" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  tensorflow: 
+    api: "tf.linalg.diag_part" 
+    args: 
+      input: "input" 
+      offset: "k" 
+  numpy: 
+    api: "numpy.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  mlx: 
+    api: "mlx.core.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+---
+operation: "DiagonalCopy" 
+description: "Returns a fresh copy of the diagonal view." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "offset" 
+    type: "int" 
+    default: 0
+  - name: "dim1" 
+    type: "int" 
+    default: 0
+  - name: "dim2" 
+    type: "int" 
+    default: 1
+variants: 
+  torch: 
+    api: "torch.diagonal_copy" 
+  jax: 
+    api: "jax.numpy.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  flax_nnx: 
+    api: "jax.numpy.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  paxml: 
+    api: "jax.numpy.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  keras: 
+    api: "keras.ops.diagonal" 
+    args: 
+      input: "x" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  tensorflow: 
+    api: "tf.linalg.diag_part" 
+    args: 
+      input: "input" 
+      offset: "k" 
+  numpy: 
+    api: "numpy.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+  mlx: 
+    api: "mlx.core.diagonal" 
+    args: 
+      input: "a" 
+      offset: "offset" 
+      dim1: "axis1" 
+      dim2: "axis2" 
+---
+operation: "DiagonalScatter" 
+description: "Embeds vales into the diagonal." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "src" 
+    type: "Tensor" 
+  - name: "offset" 
+    type: "int" 
+    default: 0
+  - name: "dim1" 
+    type: "int" 
+    default: 0
+  - name: "dim2" 
+    type: "int" 
+    default: 1
+variants: 
+  torch: 
+    api: "torch.diagonal_scatter" 
+  jax: 
+    requires_plugin: "scatter_indexer" 
+  flax_nnx: 
+    requires_plugin: "scatter_indexer" 
+  paxml: 
+    requires_plugin: "scatter_indexer" 
+  tensorflow: 
+    api: "tf.linalg.set_diag" 
+  keras: null
+  numpy: null
+  mlx: null
+---
+operation: "Diff" 
+description: "Computes the n-th discrete difference along the given dimension." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "n" 
+    type: "int" 
+    default: 1
+  - name: "dim" 
+    type: "int" 
+    default: -1
+  - name: "prepend" 
+    type: "Tensor" 
+    default: null
+  - name: "append" 
+    type: "Tensor" 
+    default: null
+variants: 
+  torch: 
+    api: "torch.diff" 
+  jax: 
+    api: "jax.numpy.diff" 
+    args: 
+      input: "a" 
+      n: "n" 
+      dim: "axis" 
+      prepend: "prepend" 
+      append: "append" 
+  flax_nnx: 
+    api: "jax.numpy.diff" 
+    args: 
+      input: "a" 
+      n: "n" 
+      dim: "axis" 
+      prepend: "prepend" 
+      append: "append" 
+  paxml: 
+    api: "jax.numpy.diff" 
+    args: 
+      input: "a" 
+      n: "n" 
+      dim: "axis" 
+      prepend: "prepend" 
+      append: "append" 
+  keras: 
+    api: "keras.ops.diff" 
+    args: 
+      input: "x" 
+      n: "n" 
+      dim: "axis" 
+  tensorflow: 
+    api: "tf.experimental.numpy.diff" 
+    args: 
+      input: "a" 
+      n: "n" 
+      dim: "axis" 
+  numpy: 
+    api: "numpy.diff" 
+    args: 
+      input: "a" 
+      n: "n" 
+      dim: "axis" 
+      prepend: "prepend" 
+      append: "append" 
+  mlx: null
+---
+operation: "Digamma" 
+description: "Computes the logarithmic derivative of the gamma function." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.digamma" 
+  jax: 
+    api: "jax.scipy.special.digamma" 
+    args: 
+      input: "x" 
+  flax_nnx: 
+    api: "jax.scipy.special.digamma" 
+    args: 
+      input: "x" 
+  paxml: 
+    api: "jax.scipy.special.digamma" 
+    args: 
+      input: "x" 
+  keras: 
+    api: "keras.ops.digamma" 
+    args: 
+      input: "x" 
+  tensorflow: 
+    api: "tf.math.digamma" 
+    args: 
+      input: "x" 
+  numpy: 
+    api: "scipy.special.digamma" 
+    required_imports: 
+      - module: "scipy.special" 
+  mlx: null
+---
+operation: "Dist" 
+description: "Returns the p-norm of (input - other)." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "other" 
+    type: "Tensor" 
+  - name: "p" 
+    type: "float" 
+    default: 2.0
+variants: 
+  torch: 
+    api: "torch.dist" 
+  jax: 
+    api: "jax.numpy.linalg.norm" 
+    macro_template: "jax.numpy.linalg.norm({input} - {other}, ord={p})" 
+  flax_nnx: 
+    api: "jax.numpy.linalg.norm" 
+    macro_template: "jax.numpy.linalg.norm({input} - {other}, ord={p})" 
+  paxml: 
+    api: "jax.numpy.linalg.norm" 
+    macro_template: "jax.numpy.linalg.norm({input} - {other}, ord={p})" 
+  keras: 
+    api: "keras.ops.norm" 
+    macro_template: "keras.ops.norm({input} - {other}, ord={p})" 
+  tensorflow: 
+    api: "tf.norm" 
+    macro_template: "tf.norm({input} - {other}, ord={p})" 
+  numpy: 
+    api: "numpy.linalg.norm" 
+    macro_template: "numpy.linalg.norm({input} - {other}, ord={p})" 
+  mlx: 
+    api: "mlx.core.linalg.norm" 
+    macro_template: "mlx.core.linalg.norm({input} - {other}, ord={p})" 
+---
+operation: "Div" 
+description: "Divides input by other element-wise." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "other" 
+    type: "Tensor" 
+  - name: "rounding_mode" 
+    type: "str" 
+    default: null
+variants: 
+  torch: 
+    api: "torch.div" 
+  jax: 
+    api: "jax.numpy.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+    dispatch_rules: 
+      - if_arg: "rounding_mode" 
+        op: "eq" 
+        val: "floor" 
+        use_api: "jax.numpy.floor_divide" 
+      - if_arg: "rounding_mode" 
+        op: "eq" 
+        val: "trunc" 
+        use_api: "jax.numpy.fix" # Approximation, or requires macro
+  flax_nnx: 
+    api: "jax.numpy.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  paxml: 
+    api: "jax.numpy.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  keras: 
+    api: "keras.ops.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+    dispatch_rules: 
+      - if_arg: "rounding_mode" 
+        op: "eq" 
+        val: "floor" 
+        use_api: "keras.ops.floor_divide" 
+  tensorflow: 
+    api: "tf.math.divide" 
+    args: 
+      input: "x" 
+      other: "y" 
+  numpy: 
+    api: "numpy.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  mlx: 
+    api: "mlx.core.divide" 
+    args: 
+      input: "a" 
+      other: "b" 
+---
+operation: "Divide" 
+description: "Alias for Div." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "other" 
+    type: "Tensor" 
+  - name: "rounding_mode" 
+    type: "str" 
+    default: null
+variants: 
+  torch: 
+    api: "torch.divide" 
+  jax: 
+    api: "jax.numpy.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  flax_nnx: 
+    api: "jax.numpy.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  paxml: 
+    api: "jax.numpy.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  keras: 
+    api: "keras.ops.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  tensorflow: 
+    api: "tf.math.divide" 
+    args: 
+      input: "x" 
+      other: "y" 
+  numpy: 
+    api: "numpy.divide" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  mlx: 
+    api: "mlx.core.divide" 
+    args: 
+      input: "a" 
+      other: "b" 
+---
+operation: "Dot" 
+description: "Computes the dot product of two 1D tensors." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+    rank: 1
+  - name: "tensor" 
+    type: "Tensor" 
+    rank: 1
+variants: 
+  torch: 
+    api: "torch.dot" 
+  jax: 
+    api: "jax.numpy.dot" 
+    args: 
+      input: "a" 
+      tensor: "b" 
+  flax_nnx: 
+    api: "jax.numpy.dot" 
+    args: 
+      input: "a" 
+      tensor: "b" 
+  paxml: 
+    api: "jax.numpy.dot" 
+    args: 
+      input: "a" 
+      tensor: "b" 
+  keras: 
+    api: "keras.ops.dot" 
+    args: 
+      input: "x1" 
+      tensor: "x2" 
+  tensorflow: 
+    api: "tf.tensordot" 
+    args: 
+      input: "a" 
+      tensor: "b" 
+    inject_args: 
+      axes: 1
+  numpy: 
+    api: "numpy.dot" 
+    args: 
+      input: "a" 
+      tensor: "b" 
+  mlx: 
+    api: "mlx.core.matmul" # MLX matmul handles 1D dot
+    args: 
+      input: "a" 
+      tensor: "b" 
+---
+operation: "Double" 
+description: "Casts tensor to float64." 
+op_type: "function" # Used as method x.double() 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.double" 
+    requires_plugin: "type_methods" # Special handler for x.double() 
+    metadata: 
+      target_type: "Float64" 
+  jax: 
+    requires_plugin: "type_methods" 
+    metadata: 
+      target_type: "Float64" 
+  flax_nnx: 
+    requires_plugin: "type_methods" 
+    metadata: 
+      target_type: "Float64" 
+  paxml: 
+    requires_plugin: "type_methods" 
+    metadata: 
+      target_type: "Float64" 
+  keras: 
+    requires_plugin: "type_methods" 
+    metadata: 
+      target_type: "Float64" 
+  tensorflow: 
+    requires_plugin: "type_methods" 
+    metadata: 
+      target_type: "Float64" 
+  numpy: 
+    requires_plugin: "type_methods" 
+    metadata: 
+      target_type: "Float64" 
+  mlx: 
+    requires_plugin: "type_methods" 
+    metadata: 
+      target_type: "Float64" 
+---
+operation: "Dropout" 
+description: "Applies random dropout." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "p" 
+    type: "float" 
+    default: 0.5
+  - name: "training" 
+    type: "bool" 
+    default: true
+  - name: "inplace" 
+    type: "bool" 
+    default: false
+variants: 
+  torch: 
+    api: "torch.nn.functional.dropout" 
+  jax: 
+    requires_plugin: "inject_prng" 
+    api: "jax_dropout_proxy" 
+  flax_nnx: 
+    api: "flax.linen.dropout" 
+    requires_plugin: "inject_prng" 
+  paxml: 
+    api: "praxis.layers.Dropout" 
+  keras: 
+    api: "keras.random.dropout" 
+    args: 
+      input: "inputs" 
+      p: "rate" 
+      training: "training" 
+  tensorflow: 
+    api: "tf.nn.dropout" 
+    args: 
+      input: "x" 
+      p: "rate" 
+  numpy: null
+  mlx: 
+    api: "mlx.nn.Dropout" 
+    op_type: "class" 
+---
+operation: "Dropout_" 
+description: "In-place dropout." 
+is_inplace: true
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "p" 
+    type: "float" 
+    default: 0.5
+  - name: "training" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.nn.functional.dropout_" 
+  jax: 
+    # Mapped to non-inplace version via EscapeHatch mechanism usually
+    requires_plugin: "inject_prng" 
+  flax_nnx: 
+    requires_plugin: "inject_prng" 
+  tensorflow: 
+    api: "tf.nn.dropout" 
+  keras: 
+    api: "keras.random.dropout" 
+  mlx: null
+---
+operation: "Dsplit" 
+description: "Splits tensor depthwise." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "indices_or_sections" 
+    type: "int" 
+variants: 
+  torch: 
+    api: "torch.dsplit" 
+  jax: 
+    api: "jax.numpy.dsplit" 
+    args: 
+      input: "ary" 
+      indices_or_sections: "indices_or_sections" 
+  flax_nnx: 
+    api: "jax.numpy.dsplit" 
+    args: 
+      input: "ary" 
+      indices_or_sections: "indices_or_sections" 
+  paxml: 
+    api: "jax.numpy.dsplit" 
+    args: 
+      input: "ary" 
+      indices_or_sections: "indices_or_sections" 
+  keras: 
+    api: "keras.ops.split" 
+    inject_args: 
+      axis: 2
+  tensorflow: 
+    api: "tf.split" 
+    args: 
+      input: "value" 
+      indices_or_sections: "num_or_size_splits" 
+    inject_args: 
+      axis: 2
+  numpy: 
+    api: "numpy.dsplit" 
+    args: 
+      input: "ary" 
+      indices_or_sections: "indices_or_sections" 
+  mlx: null
+---
+operation: "Dstack" 
+description: "Stacks tensors in sequence depthwise." 
+std_args: 
+  - name: "tensors" 
+    type: "List[Tensor]" 
+variants: 
+  torch: 
+    api: "torch.dstack" 
+  jax: 
+    api: "jax.numpy.dstack" 
+    args: 
+      tensors: "tup" 
+  flax_nnx: 
+    api: "jax.numpy.dstack" 
+    args: 
+      tensors: "tup" 
+  paxml: 
+    api: "jax.numpy.dstack" 
+    args: 
+      tensors: "tup" 
+  keras: 
+    api: "keras.ops.stack" 
+    args: 
+      tensors: "x" 
+    inject_args: 
+      axis: 2
+  tensorflow: 
+    api: "tf.experimental.numpy.dstack" 
+    args: 
+      tensors: "tup" 
+  numpy: 
+    api: "numpy.dstack" 
+    args: 
+      tensors: "tup" 
+  mlx: null
+---
+operation: "Dtype" 
+description: "Data Type class." 
+op_type: "class" 
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.dtype" 
+  jax: 
+    api: "jax.numpy.dtype" 
+  flax_nnx: 
+    api: "jax.numpy.dtype" 
+  paxml: 
+    api: "jax.numpy.dtype" 
+  keras: 
+    api: "keras.backend.dtype" # Or map to string handling
+  tensorflow: 
+    api: "tf.dtypes.DType" 
+  numpy: 
+    api: "numpy.dtype" 
+  mlx: 
+    api: "mlx.core.Dtype" 
+---
+operation: "E" 
+description: "Eulers number." 
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.e" 
+  jax: 
+    api: "jax.numpy.e" 
+  flax_nnx: 
+    api: "jax.numpy.e" 
+  paxml: 
+    api: "jax.numpy.e" 
+  keras: 
+    api: "numpy.e" 
+  tensorflow: 
+    api: "numpy.e" 
+  numpy: 
+    api: "numpy.e" 
+  mlx: 
+    api: "numpy.e" 
+---
+operation: "Eig" 
+description: "Computes the eigenvalues and eigenvectors of a real square matrix." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "eigenvectors" 
+    type: "bool" 
+    default: false
+variants: 
+  torch: 
+    api: "torch.eig" 
+  jax: 
+    api: "jax.numpy.linalg.eig" 
+    args: 
+      input: "a" 
+  flax_nnx: 
+    api: "jax.numpy.linalg.eig" 
+    args: 
+      input: "a" 
+  paxml: 
+    api: "jax.numpy.linalg.eig" 
+    args: 
+      input: "a" 
+  keras: 
+    api: "numpy.linalg.eig" 
+  tensorflow: 
+    api: "tf.linalg.eig" 
+    args: 
+      input: "tensor" 
+  numpy: 
+    api: "numpy.linalg.eig" 
+    args: 
+      input: "a" 
+  mlx: null
+---
+operation: "Einsum" 
+description: "Einstein summation." 
+std_args: 
+  - name: "equation" 
+    type: "str" 
+  - name: "operands" 
+    is_variadic: true
+variants: 
+  torch: 
+    api: "torch.einsum" 
+  jax: 
+    api: "jax.numpy.einsum" 
+    requires_plugin: "einsum_normalizer" 
+  flax_nnx: 
+    api: "jax.numpy.einsum" 
+    requires_plugin: "einsum_normalizer" 
+  paxml: 
+    api: "jax.numpy.einsum" 
+    requires_plugin: "einsum_normalizer" 
+  keras: 
+    api: "keras.ops.einsum" 
+    requires_plugin: "einsum_normalizer" 
+  tensorflow: 
+    api: "tf.einsum" 
+    requires_plugin: "einsum_normalizer" 
+  numpy: 
+    api: "numpy.einsum" 
+    requires_plugin: "einsum_normalizer" 
+  mlx: 
+    api: "mlx.core.einsum" # Check arguments order for MLX
+---
+operation: "Embedding" 
+description: "Functional embedding lookup." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "weight" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.nn.functional.embedding" 
+  jax: 
+    api: "jax.numpy.take" 
+    args: 
+      input: "indices" 
+      weight: "a" 
+    inject_args: 
+      axis: 0
+  flax_nnx: 
+    api: "jax.numpy.take" 
+    args: 
+      input: "indices" 
+      weight: "a" 
+    inject_args: 
+      axis: 0
+  paxml: 
+    api: "jax.numpy.take" 
+    args: 
+      input: "indices" 
+      weight: "a" 
+    inject_args: 
+      axis: 0
+  keras: 
+    api: "keras.ops.take" 
+    args: 
+      input: "indices" 
+      weight: "x" 
+    inject_args: 
+      axis: 0
+  tensorflow: 
+    api: "tf.nn.embedding_lookup" 
+    args: 
+      input: "ids" 
+      weight: "params" 
+  numpy: 
+    api: "numpy.take" 
+    args: 
+      input: "indices" 
+      weight: "a" 
+    inject_args: 
+      axis: 0
+  mlx: 
+    api: "mlx.core.take" 
+    args: 
+      input: "indices" 
+      weight: "a" 
+    inject_args: 
+      axis: 0
+---
+operation: "Dsmm"
+description: "Performs a matrix multiplication of the sparse matrix input and the dense matrix mat2."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mat2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.dsmm"
+  jax:
+    api: "jax.experimental.sparse.bcoo_spdot_general" # Approximation using sparse module
+  flax_nnx:
+    api: "jax.experimental.sparse.bcoo_spdot_general"
+  paxml:
+    api: "jax.experimental.sparse.bcoo_spdot_general"
+  keras: null
+  tensorflow:
+    api: "tf.sparse.sparse_dense_matmul"
+  numpy: null
+  mlx: null

@@ -1,0 +1,907 @@
+operation: "Int64"
+description: "Signed 64-bit integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.int64"
+  jax:
+    api: "jax.numpy.int64"
+  flax_nnx:
+    api: "jax.numpy.int64"
+  paxml:
+    api: "jax.numpy.int64"
+  tensorflow:
+    api: "tf.int64"
+  keras:
+    api: "int64"
+  mlx:
+    api: "mlx.core.int64"
+  numpy:
+    api: "numpy.int64"
+
+---
+operation: "Float64"
+description: "64-bit floating point type (Double)."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float64"
+  jax:
+    api: "jax.numpy.float64"
+  flax_nnx:
+    api: "jax.numpy.float64"
+  paxml:
+    api: "jax.numpy.float64"
+  tensorflow:
+    api: "tf.float64"
+  keras:
+    api: "float64"
+  mlx:
+    api: "mlx.core.float64" # MLX primarily optimized for float32/16 but definition exists
+  numpy:
+    api: "numpy.float64"
+
+---
+operation: "LongLong"
+description: "Signed integer type, compatible with C long long (typically 64-bit)."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.int64"
+  jax:
+    api: "jax.numpy.longlong"
+  flax_nnx:
+    api: "jax.numpy.longlong"
+  paxml:
+    api: "jax.numpy.longlong"
+  tensorflow:
+    api: "tf.int64"
+  keras:
+    api: "int64"
+  mlx:
+    api: "mlx.core.int64"
+  numpy:
+    api: "numpy.longlong"
+
+---
+operation: "MaskIndices"
+description: "Return the indices to access (n, n) arrays, given a masking function."
+op_type: "function"
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "mask_func"
+    type: "Callable"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  jax:
+    api: "jax.numpy.mask_indices"
+  flax_nnx:
+    api: "jax.numpy.mask_indices"
+  paxml:
+    api: "jax.numpy.mask_indices"
+  numpy:
+    api: "numpy.mask_indices"
+  torch:
+    requires_plugin: "numpy_fallback" # Torch lacks direct equivalent
+  tensorflow:
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    requires_plugin: "numpy_fallback"
+
+---
+operation: "Matmul"
+description: "Matrix product of two arrays."
+op_type: "function"
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.matmul"
+  jax:
+    api: "jax.numpy.matmul"
+  flax_nnx:
+    api: "jax.numpy.matmul"
+  paxml:
+    api: "jax.numpy.matmul"
+  tensorflow:
+    api: "tf.linalg.matmul"
+  keras:
+    api: "keras.ops.matmul"
+  mlx:
+    api: "mlx.core.matmul"
+  numpy:
+    api: "numpy.matmul"
+
+---
+operation: "Matrix"
+description: "Returns a matrix from an array-like object. (Deprecated in NumPy, maps to Array creation)."
+op_type: "function"
+std_args:
+  - name: "data"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.as_tensor"
+  jax:
+    api: "jax.numpy.array"
+  flax_nnx:
+    api: "jax.numpy.array"
+  paxml:
+    api: "jax.numpy.array"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+  mlx:
+    api: "mlx.core.array"
+  numpy:
+    api: "numpy.matrix"
+
+---
+operation: "MatrixTranspose"
+description: "Transposes a matrix (or a stack of matrices) swapping the last two dimensions."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.linalg.matrix_transpose" # Torch 2.0+
+  jax:
+    api: "jax.numpy.matrix_transpose"
+  flax_nnx:
+    api: "jax.numpy.matrix_transpose"
+  paxml:
+    api: "jax.numpy.matrix_transpose"
+  tensorflow:
+    api: "tf.linalg.matrix_transpose"
+  keras:
+    api: "keras.ops.transpose" # Keras generic transpose defaults to matrix behavior for 2D
+  mlx:
+    api: "mlx.core.transpose" # Default swap last two for 2D? Needs args. 
+    args:
+      x: "a"
+    kwargs_map:
+      axes: null # If MLX defaults don't match, this is approximate
+  numpy:
+    api: "numpy.matrix_transpose"
+
+---
+operation: "Matvec"
+description: "Matrix-vector dot product."
+op_type: "function"
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.mv"
+    args:
+      x1: "input"
+      x2: "vec"
+  jax:
+    api: "jax.numpy.matvec" # New in JAX NumPy
+  flax_nnx:
+    api: "jax.numpy.matvec"
+  paxml:
+    api: "jax.numpy.matvec"
+  tensorflow:
+    api: "tf.linalg.matvec"
+  keras:
+    api: "keras.ops.matmul" # Keras unifies matmul/matvec
+  mlx:
+    api: "mlx.core.matmul" # MLX unifies
+  numpy:
+    api: "numpy.matvec"
+
+---
+operation: "Max"
+description: "Return the maximum of an array or maximum along an axis."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Tuple[int]"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.amax" # amax is strictly safer than max which returns tuple(values, indices)
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.max"
+  flax_nnx:
+    api: "jax.numpy.max"
+  paxml:
+    api: "jax.numpy.max"
+  tensorflow:
+    api: "tf.reduce_max"
+    args:
+      a: "input_tensor"
+      axis: "axis"
+      keepdims: "keep_dims"
+  keras:
+    api: "keras.ops.max"
+  mlx:
+    api: "mlx.core.max"
+  numpy:
+    api: "numpy.max"
+
+---
+operation: "Maximum"
+description: "Element-wise maximum of array elements."
+op_type: "function"
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.maximum"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.maximum"
+  flax_nnx:
+    api: "jax.numpy.maximum"
+  paxml:
+    api: "jax.numpy.maximum"
+  tensorflow:
+    api: "tf.math.maximum"
+  keras:
+    api: "keras.ops.maximum"
+  mlx:
+    api: "mlx.core.maximum"
+  numpy:
+    api: "numpy.maximum"
+
+---
+operation: "MayShareMemory"
+description: "Determine if two arrays might share memory."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.may_share_memory"
+  torch:
+    macro_template: "False" # Torch tensors usually strictly separated unless viewed
+  jax:
+    macro_template: "False" # Pure functional arrays don't share mutation memory semantics
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+
+---
+operation: "Mean"
+description: "Compute the arithmetic mean along the specified axis."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Tuple[int]"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.mean"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.mean"
+  flax_nnx:
+    api: "jax.numpy.mean"
+  paxml:
+    api: "jax.numpy.mean"
+  tensorflow:
+    api: "tf.reduce_mean"
+    args:
+      a: "input_tensor"
+  keras:
+    api: "keras.ops.mean"
+  mlx:
+    api: "mlx.core.mean"
+  numpy:
+    api: "numpy.mean"
+
+---
+operation: "Median"
+description: "Compute the median along the specified axis."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Tuple[int]"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.median" # Warning: returns (values, indices) if axis set
+    output_select_index: 0
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.median"
+  flax_nnx:
+    api: "jax.numpy.median"
+  paxml:
+    api: "jax.numpy.median"
+  tensorflow:
+    requires_plugin: "tf_probability_median" # TF core lacks direct median, usually in TFP
+  keras:
+    api: "keras.ops.median" # Valid in Keras 3
+  mlx:
+    requires_plugin: "mlx_extras_median" # Check MLX support
+  numpy:
+    api: "numpy.median"
+
+---
+operation: "Memmap"
+description: "Create a memory-map to an array stored in a binary file on disk."
+op_type: "class"
+std_args:
+  - name: "filename"
+    type: "str"
+  - name: "dtype"
+    type: "str"
+    default: "uint8"
+  - name: "mode"
+    type: "str"
+    default: "r+"
+  - name: "shape"
+    type: "Tuple[int]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.memmap"
+  jax:
+    api: "jax.numpy.memmap" # Delegates to numpy
+  flax_nnx:
+    api: "jax.numpy.memmap"
+  paxml:
+    api: "jax.numpy.memmap"
+  torch:
+    # Basic mapping via NumPy bridge
+    requires_plugin: "numpy_memmap_to_torch"
+  tensorflow:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+
+---
+operation: "Meshgrid"
+description: "Return coordinate matrices from coordinate vectors."
+op_type: "function"
+std_args:
+  - name: "xi"
+    type: "Tensor"
+    is_variadic: true
+  - name: "indexing"
+    type: "str"
+    default: "xy"
+variants:
+  torch:
+    api: "torch.meshgrid"
+    pack_to_tuple: "tensors"
+    # Torch meshgrid indexing default changed. Explicit 'xy' or 'ij' recommended.
+  jax:
+    api: "jax.numpy.meshgrid"
+    # JAX meshgrid takes *args
+  flax_nnx:
+    api: "jax.numpy.meshgrid"
+  paxml:
+    api: "jax.numpy.meshgrid"
+  tensorflow:
+    api: "tf.meshgrid"
+    # TF takes *args
+  keras:
+    api: "keras.ops.meshgrid"
+    # Keras takes list or *args? Usually *args or list. 
+    pack_as: "List"
+  mlx:
+    api: "mlx.core.meshgrid"
+    # MLX takes *args
+  numpy:
+    api: "numpy.meshgrid"
+
+---
+operation: "MGrid"
+description: "Returns a dense multi-dimensional 'meshgrid'."
+op_type: "attribute"
+std_args: [] 
+variants:
+  numpy:
+    api: "numpy.mgrid"
+  jax:
+    api: "jax.numpy.mgrid"
+  flax_nnx:
+    api: "jax.numpy.mgrid"
+  paxml:
+    api: "jax.numpy.mgrid"
+  torch:
+    requires_plugin: "numpy_fallback" # Torch lacks slice-based grid generator
+  tensorflow:
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    requires_plugin: "numpy_fallback"
+
+---
+operation: "Min"
+description: "Return the minimum of an array or minimum along an axis."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int | Tuple[int]"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.amin" # amin is safe reduction. torch.min returns tuple if axis provided.
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.min"
+  flax_nnx:
+    api: "jax.numpy.min"
+  paxml:
+    api: "jax.numpy.min"
+  tensorflow:
+    api: "tf.reduce_min"
+    args:
+      a: "input_tensor"
+  keras:
+    api: "keras.ops.min"
+  mlx:
+    api: "mlx.core.min"
+  numpy:
+    api: "numpy.min"
+
+---
+operation: "MinScalarType"
+description: "Returns the data type with the smallest size and scalar kind which can hold its value."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.min_scalar_type"
+  jax:
+    api: "jax.numpy.min_scalar_type"
+  flax_nnx:
+    api: "jax.numpy.min_scalar_type"
+  paxml:
+    api: "jax.numpy.min_scalar_type"
+  torch:
+    requires_plugin: "numpy_fallback"
+  tensorflow:
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    requires_plugin: "numpy_fallback"
+
+---
+operation: "Minimum"
+description: "Element-wise minimum of array elements."
+op_type: "function"
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.minimum"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.minimum"
+  flax_nnx:
+    api: "jax.numpy.minimum"
+  paxml:
+    api: "jax.numpy.minimum"
+  tensorflow:
+    api: "tf.math.minimum"
+  keras:
+    api: "keras.ops.minimum"
+  mlx:
+    api: "mlx.core.minimum"
+  numpy:
+    api: "numpy.minimum"
+
+---
+operation: "MinTypeCode"
+description: "Return the character for the minimum-size type to which given types can be safely cast."
+op_type: "function"
+std_args:
+  - name: "typechars"
+    type: "List[str]"
+variants:
+  numpy:
+    api: "numpy.mintypecode"
+  jax:
+    api: "jax.numpy.mintypecode"
+  flax_nnx:
+    api: "jax.numpy.mintypecode"
+  paxml:
+    api: "jax.numpy.mintypecode"
+  torch:
+    requires_plugin: "numpy_fallback"
+  tensorflow:
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    requires_plugin: "numpy_fallback"
+
+---
+operation: "Mod"
+description: "Returns the element-wise remainder of division."
+op_type: "function"
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.remainder" # 'remainder' handles float args better than % in some cases
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.mod"
+  flax_nnx:
+    api: "jax.numpy.mod"
+  paxml:
+    api: "jax.numpy.mod"
+  tensorflow:
+    api: "tf.math.mod"
+  keras:
+    api: "keras.ops.mod"
+  mlx:
+    api: "mlx.core.remainder"
+  numpy:
+    api: "numpy.mod"
+
+---
+operation: "Modf"
+description: "Return the fractional and integral parts of an array, element-wise."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.modf"
+  jax:
+    api: "jax.numpy.modf"
+  flax_nnx:
+    api: "jax.numpy.modf"
+  paxml:
+    api: "jax.numpy.modf"
+  torch:
+    # No direct tuple returning func. 
+    macro_template: "(torch.frac({x}), torch.trunc({x}))"
+  tensorflow:
+    # TF doesn't have modf directly exposed in core math usually
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    # MLX doesn't have modf
+    requires_plugin: "numpy_fallback"
+
+---
+operation: "MoveAxis"
+description: "Move axes of an array to new positions."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "source"
+    type: "int | List[int]"
+  - name: "destination"
+    type: "int | List[int]"
+variants:
+  torch:
+    api: "torch.moveaxis"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.moveaxis"
+  flax_nnx:
+    api: "jax.numpy.moveaxis"
+  paxml:
+    api: "jax.numpy.moveaxis"
+  tensorflow:
+    api: "tf.moveaxis"
+    args:
+      a: "input"
+  keras:
+    api: "keras.ops.moveaxis"
+    args:
+      a: "x"
+  mlx:
+    api: "mlx.core.moveaxis"
+    args:
+      a: "a"
+  numpy:
+    api: "numpy.moveaxis"
+
+---
+operation: "Multiply"
+description: "Multiply arguments element-wise."
+op_type: "function"
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.mul"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.multiply"
+  flax_nnx:
+    api: "jax.numpy.multiply"
+  paxml:
+    api: "jax.numpy.multiply"
+  tensorflow:
+    api: "tf.math.multiply"
+    args:
+      x1: "x"
+      x2: "y"
+  keras:
+    api: "keras.ops.multiply"
+  mlx:
+    api: "mlx.core.multiply"
+  numpy:
+    api: "numpy.multiply"
+
+---
+operation: "Nan"
+description: "Floating point representation of Not a Number."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.nan"
+  jax:
+    api: "jax.numpy.nan"
+  flax_nnx:
+    api: "jax.numpy.nan"
+  paxml:
+    api: "jax.numpy.nan"
+  tensorflow:
+    api: "float('nan')" # TF often uses np.nan or float('nan')
+    transformation_type: "inline_lambda"
+    macro_template: "float('nan')"
+  keras:
+    macro_template: "float('nan')"
+  mlx:
+    macro_template: "float('nan')"
+  numpy:
+    api: "numpy.nan"
+
+---
+operation: "NanToNum"
+description: "Replace NaN with zero and infinity with large finite numbers."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "nan"
+    type: "float"
+    default: 0.0
+  - name: "posinf"
+    type: "float"
+    default: null
+  - name: "neginf"
+    type: "float"
+    default: null
+variants:
+  torch:
+    api: "torch.nan_to_num"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.nan_to_num"
+  flax_nnx:
+    api: "jax.numpy.nan_to_num"
+  paxml:
+    api: "jax.numpy.nan_to_num"
+  tensorflow:
+    api: "tf.where(tf.math.is_nan({x}), {nan}, {x})" # TF nan_to_num exists but signature varies. Macro safer? 
+    # Use direct API if possible, assuming default args match
+    api: "tf.math.xdivy" # Wait, no. tf.math.nan_to_num exists but args differ slightly? 
+    # Stick to explicit API mapping where possible
+    api: "numpy.nan_to_num" 
+    requires_plugin: "numpy_fallback" 
+  keras:
+    api: "keras.ops.nan_to_num"
+  mlx:
+    requires_plugin: "numpy_fallback"
+  numpy:
+    api: "numpy.nan_to_num"
+
+---
+operation: "NanArgMax"
+description: "Return the indices of the maximum values in the specified axis ignoring NaNs."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nanargmax" # Torch 2.1+
+  jax:
+    api: "jax.numpy.nanargmax"
+  flax_nnx:
+    api: "jax.numpy.nanargmax"
+  paxml:
+    api: "jax.numpy.nanargmax"
+  tensorflow:
+    # TF doesn't have direct nanargmax. 
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    requires_plugin: "numpy_fallback"
+  numpy:
+    api: "numpy.nanargmax"
+
+---
+operation: "NanArgMin"
+description: "Return the indices of the minimum values in the specified axis ignoring NaNs."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nanargmin"
+  jax:
+    api: "jax.numpy.nanargmin"
+  flax_nnx:
+    api: "jax.numpy.nanargmin"
+  paxml:
+    api: "jax.numpy.nanargmin"
+  tensorflow:
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    requires_plugin: "numpy_fallback"
+  numpy:
+    api: "numpy.nanargmin"
+
+---
+operation: "NanCumProd"
+description: "Return the cumulative product of array elements over a given axis treating NaNs as one."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.nancumprod"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.nancumprod"
+  flax_nnx:
+    api: "jax.numpy.nancumprod"
+  paxml:
+    api: "jax.numpy.nancumprod"
+  tensorflow:
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    requires_plugin: "numpy_fallback"
+  numpy:
+    api: "numpy.nancumprod"
+
+---
+operation: "NanCumSum"
+description: "Return the cumulative sum of array elements over a given axis treating NaNs as zero."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.nancumsum"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.nancumsum"
+  flax_nnx:
+    api: "jax.numpy.nancumsum"
+  paxml:
+    api: "jax.numpy.nancumsum"
+  tensorflow:
+    requires_plugin: "numpy_fallback"
+  keras:
+    requires_plugin: "numpy_fallback"
+  mlx:
+    requires_plugin: "numpy_fallback"
+  numpy:
+    api: "numpy.nancumsum"

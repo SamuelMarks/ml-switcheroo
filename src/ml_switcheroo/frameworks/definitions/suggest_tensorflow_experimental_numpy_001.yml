@@ -1,0 +1,813 @@
+operation: "Abs"
+description: "Calculates the absolute value element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.abs"
+  jax:
+    api: "jax.numpy.abs"
+  flax_nnx:
+    api: "jax.numpy.abs"
+  paxml:
+    api: "jax.numpy.abs"
+  keras:
+    api: "keras.ops.abs"
+  tensorflow:
+    api: "tf.abs"
+  mlx:
+    api: "mlx.core.abs"
+  numpy:
+    api: "numpy.abs"
+---
+operation: "Absolute"
+description: "Calculates the absolute value element-wise (alias for Abs)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.absolute"
+  jax:
+    api: "jax.numpy.absolute"
+  flax_nnx:
+    api: "jax.numpy.absolute"
+  paxml:
+    api: "jax.numpy.absolute"
+  keras:
+    api: "keras.ops.absolute"
+  tensorflow:
+    api: "tf.math.abs"
+  mlx:
+    api: "mlx.core.abs"
+  numpy:
+    api: "numpy.absolute"
+---
+operation: "Add"
+description: "Adds arguments element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.add"
+  jax:
+    api: "jax.numpy.add"
+  flax_nnx:
+    api: "jax.numpy.add"
+  paxml:
+    api: "jax.numpy.add"
+  keras:
+    api: "keras.ops.add"
+  tensorflow:
+    api: "tf.math.add"
+  mlx:
+    api: "mlx.core.add"
+  numpy:
+    api: "numpy.add"
+---
+operation: "All"
+description: "Tests whether all array elements along a given axis evaluate to True."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.all"
+    args:
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.all"
+  flax_nnx:
+    api: "jax.numpy.all"
+  paxml:
+    api: "jax.numpy.all"
+  keras:
+    api: "keras.ops.all"
+  tensorflow:
+    api: "tf.math.reduce_all"
+    args:
+      keepdims: "keep_dims"
+  mlx:
+    api: "mlx.core.all"
+    args:
+      keepdims: "keepdims"
+  numpy:
+    api: "numpy.all"
+---
+operation: "AllClose"
+description: "Returns True if two arrays are element-wise equal within a tolerance."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "rtol"
+    type: "float"
+    default: 1e-05
+  - name: "atol"
+    type: "float"
+    default: 1e-08
+  - name: "equal_nan"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.allclose"
+  jax:
+    api: "jax.numpy.allclose"
+  flax_nnx:
+    api: "jax.numpy.allclose"
+  paxml:
+    api: "jax.numpy.allclose"
+  keras:
+    api: "keras.ops.allclose"
+  tensorflow:
+    api: "tf.experimental.numpy.allclose"
+  mlx:
+    api: "mlx.core.allclose"
+  numpy:
+    api: "numpy.allclose"
+---
+operation: "Max"
+description: "Return the maximum of an array or maximum along an axis."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.amax"
+    args:
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.max"
+  flax_nnx:
+    api: "jax.numpy.max"
+  paxml:
+    api: "jax.numpy.max"
+  keras:
+    api: "keras.ops.max"
+  tensorflow:
+    api: "tf.reduce_max"
+    args:
+      keepdims: "keep_dims"
+  mlx:
+    api: "mlx.core.max"
+  numpy:
+    api: "numpy.amax"
+---
+operation: "Min"
+description: "Return the minimum of an array or minimum along an axis."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.amin"
+    args:
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.min"
+  flax_nnx:
+    api: "jax.numpy.min"
+  paxml:
+    api: "jax.numpy.min"
+  keras:
+    api: "keras.ops.min"
+  tensorflow:
+    api: "tf.reduce_min"
+    args:
+      keepdims: "keep_dims"
+  mlx:
+    api: "mlx.core.min"
+  numpy:
+    api: "numpy.amin"
+---
+operation: "Angle"
+description: "Return the angle of the complex argument."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.angle"
+  jax:
+    api: "jax.numpy.angle"
+  flax_nnx:
+    api: "jax.numpy.angle"
+  paxml:
+    api: "jax.numpy.angle"
+  tensorflow:
+    api: "tf.math.angle"
+  numpy:
+    api: "numpy.angle"
+---
+operation: "Any"
+description: "Tests whether any array elements along a given axis evaluate to True."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.any"
+    args:
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.any"
+  flax_nnx:
+    api: "jax.numpy.any"
+  paxml:
+    api: "jax.numpy.any"
+  keras:
+    api: "keras.ops.any"
+  tensorflow:
+    api: "tf.reduce_any"
+    args:
+      keepdims: "keep_dims"
+  mlx:
+    api: "mlx.core.any"
+  numpy:
+    api: "numpy.any"
+---
+operation: "Append"
+description: "Append values to the end of an array."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.append"
+  flax_nnx:
+    api: "jax.numpy.append"
+  paxml:
+    api: "jax.numpy.append"
+  tensorflow:
+    api: "tf.experimental.numpy.append"
+  numpy:
+    api: "numpy.append"
+  keras:
+    api: "keras.ops.append"
+---
+operation: "Arange"
+description: "Return evenly spaced values within a given interval."
+std_args:
+  - name: "start"
+    type: "float"
+  - name: "stop"
+    type: "float"
+  - name: "step"
+    type: "float"
+    default: 1
+  - name: "dtype"
+    type: "str"
+    default: null
+variants:
+  torch:
+    api: "torch.arange"
+    args:
+      stop: "end"
+  jax:
+    api: "jax.numpy.arange"
+  flax_nnx:
+    api: "jax.numpy.arange"
+  paxml:
+    api: "jax.numpy.arange"
+  keras:
+    api: "keras.ops.arange"
+  tensorflow:
+    api: "tf.range"
+    args:
+      stop: "limit"
+      step: "delta"
+  mlx:
+    api: "mlx.core.arange"
+  numpy:
+    api: "numpy.arange"
+---
+operation: "Arccos"
+description: "Trigonometric inverse cosine, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.acos"
+  jax:
+    api: "jax.numpy.arccos"
+  flax_nnx:
+    api: "jax.numpy.arccos"
+  paxml:
+    api: "jax.numpy.arccos"
+  keras:
+    api: "keras.ops.arccos"
+  tensorflow:
+    api: "tf.math.acos"
+  mlx:
+    api: "mlx.core.arccos"
+  numpy:
+    api: "numpy.arccos"
+---
+operation: "Arccosh"
+description: "Inverse hyperbolic cosine, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.acosh"
+  jax:
+    api: "jax.numpy.arccosh"
+  flax_nnx:
+    api: "jax.numpy.arccosh"
+  paxml:
+    api: "jax.numpy.arccosh"
+  keras:
+    api: "keras.ops.arccosh"
+  tensorflow:
+    api: "tf.math.acosh"
+  mlx:
+    api: "mlx.core.arccosh"
+  numpy:
+    api: "numpy.arccosh"
+---
+operation: "Arcsin"
+description: "Inverse sine, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.asin"
+  jax:
+    api: "jax.numpy.arcsin"
+  flax_nnx:
+    api: "jax.numpy.arcsin"
+  paxml:
+    api: "jax.numpy.arcsin"
+  keras:
+    api: "keras.ops.arcsin"
+  tensorflow:
+    api: "tf.math.asin"
+  mlx:
+    api: "mlx.core.arcsin"
+  numpy:
+    api: "numpy.arcsin"
+---
+operation: "Arcsinh"
+description: "Inverse hyperbolic sine, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.asinh"
+  jax:
+    api: "jax.numpy.arcsinh"
+  flax_nnx:
+    api: "jax.numpy.arcsinh"
+  paxml:
+    api: "jax.numpy.arcsinh"
+  keras:
+    api: "keras.ops.arcsinh"
+  tensorflow:
+    api: "tf.math.asinh"
+  mlx:
+    api: "mlx.core.arcsinh"
+  numpy:
+    api: "numpy.arcsinh"
+---
+operation: "Arctan"
+description: "Inverse tangent, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atan"
+  jax:
+    api: "jax.numpy.arctan"
+  flax_nnx:
+    api: "jax.numpy.arctan"
+  paxml:
+    api: "jax.numpy.arctan"
+  keras:
+    api: "keras.ops.arctan"
+  tensorflow:
+    api: "tf.math.atan"
+  mlx:
+    api: "mlx.core.arctan"
+  numpy:
+    api: "numpy.arctan"
+---
+operation: "Arctan2"
+description: "Element-wise arc tangent of x1/x2 choosing the quadrant correctly."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atan2"
+  jax:
+    api: "jax.numpy.arctan2"
+  flax_nnx:
+    api: "jax.numpy.arctan2"
+  paxml:
+    api: "jax.numpy.arctan2"
+  keras:
+    api: "keras.ops.arctan2"
+  tensorflow:
+    api: "tf.math.atan2"
+  mlx:
+    api: "mlx.core.arctan2"
+  numpy:
+    api: "numpy.arctan2"
+---
+operation: "Arctanh"
+description: "Inverse hyperbolic tangent, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.atanh"
+  jax:
+    api: "jax.numpy.arctanh"
+  flax_nnx:
+    api: "jax.numpy.arctanh"
+  paxml:
+    api: "jax.numpy.arctanh"
+  keras:
+    api: "keras.ops.arctanh"
+  tensorflow:
+    api: "tf.math.atanh"
+  mlx:
+    api: "mlx.core.arctanh"
+  numpy:
+    api: "numpy.arctanh"
+---
+operation: "Argmax"
+description: "Returns the indices of the maximum values along an axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.argmax"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.argmax"
+  flax_nnx:
+    api: "jax.numpy.argmax"
+  paxml:
+    api: "jax.numpy.argmax"
+  keras:
+    api: "keras.ops.argmax"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.math.argmax"
+    args:
+      a: "input"
+  mlx:
+    api: "mlx.core.argmax"
+    args:
+      a: "a"
+      keepdims: "keepdims"
+  numpy:
+    api: "numpy.argmax"
+---
+operation: "Argmin"
+description: "Returns the indices of the minimum values along an axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.argmin"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.argmin"
+  flax_nnx:
+    api: "jax.numpy.argmin"
+  paxml:
+    api: "jax.numpy.argmin"
+  keras:
+    api: "keras.ops.argmin"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.math.argmin"
+    args:
+      a: "input"
+  mlx:
+    api: "mlx.core.argmin"
+    args:
+      a: "a"
+      keepdims: "keepdims"
+  numpy:
+    api: "numpy.argmin"
+---
+operation: "Argsort"
+description: "Returns the indices that would sort an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  torch:
+    api: "torch.argsort"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.argsort"
+  flax_nnx:
+    api: "jax.numpy.argsort"
+  paxml:
+    api: "jax.numpy.argsort"
+  keras:
+    api: "keras.ops.argsort"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.argsort"
+    args:
+      a: "values"
+  mlx:
+    api: "mlx.core.argsort"
+  numpy:
+    api: "numpy.argsort"
+---
+operation: "Round"
+description: "Round an array to the given number of decimals."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "decimals"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.round"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.around"
+  flax_nnx:
+    api: "jax.numpy.around"
+  paxml:
+    api: "jax.numpy.around"
+  tensorflow:
+    api: "tf.math.round"
+    args:
+      decimals: null
+  numpy:
+    api: "numpy.around"
+---
+operation: "Array"
+description: "Creates an array."
+std_args:
+  - name: "object"
+    type: "Any"
+  - name: "dtype"
+    type: "str"
+    default: null
+variants:
+  torch:
+    api: "torch.tensor"
+    args:
+      object: "data"
+  jax:
+    api: "jax.numpy.array"
+  flax_nnx:
+    api: "jax.numpy.array"
+  paxml:
+    api: "jax.numpy.array"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    args:
+      object: "x"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    args:
+      object: "value"
+  mlx:
+    api: "mlx.core.array"
+  numpy:
+    api: "numpy.array"
+---
+operation: "ArrayEqual"
+description: "True if two arrays have the same shape and elements."
+std_args:
+  - name: "a1"
+    type: "Tensor"
+  - name: "a2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.equal"
+    args:
+      a1: "input"
+      a2: "other"
+  jax:
+    api: "jax.numpy.array_equal"
+  flax_nnx:
+    api: "jax.numpy.array_equal"
+  paxml:
+    api: "jax.numpy.array_equal"
+  keras:
+    api: "keras.ops.all"
+    macro_template: "keras.ops.all(keras.ops.equal({a1}, {a2}))"
+  tensorflow:
+    api: "tf.experimental.numpy.array_equal"
+  mlx:
+    api: "mlx.core.array_equal"
+  numpy:
+    api: "numpy.array_equal"
+---
+operation: "AsAnyArray"
+description: "Convert the input to an ndarray, but pass ndarray subclasses through."
+std_args:
+  - name: "a"
+    type: "Any"
+  - name: "dtype"
+    type: "str"
+    default: null
+variants:
+  jax:
+    api: "jax.numpy.asanyarray"
+  flax_nnx:
+    api: "jax.numpy.asanyarray"
+  paxml:
+    api: "jax.numpy.asanyarray"
+  tensorflow:
+    api: "tf.experimental.numpy.asanyarray"
+  numpy:
+    api: "numpy.asanyarray"
+---
+operation: "AsArray"
+description: "Convert the input to an array."
+std_args:
+  - name: "a"
+    type: "Any"
+  - name: "dtype"
+    type: "str"
+    default: null
+variants:
+  torch:
+    api: "torch.as_tensor"
+    args:
+      a: "data"
+  jax:
+    api: "jax.numpy.asarray"
+  flax_nnx:
+    api: "jax.numpy.asarray"
+  paxml:
+    api: "jax.numpy.asarray"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    args:
+      a: "value"
+  numpy:
+    api: "numpy.asarray"
+---
+operation: "AsContiguousArray"
+description: "Return a contiguous array (ndim >= 1) in memory (C order)."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "dtype"
+    type: "str"
+    default: null
+variants:
+  torch:
+    api: "torch.as_tensor"
+    macro_template: "torch.as_tensor({a}, dtype={dtype}).contiguous()"
+  jax:
+    api: "jax.numpy.ascontiguousarray"
+  flax_nnx:
+    api: "jax.numpy.ascontiguousarray"
+  paxml:
+    api: "jax.numpy.ascontiguousarray"
+  tensorflow:
+    api: "tf.experimental.numpy.ascontiguousarray"
+  numpy:
+    api: "numpy.ascontiguousarray"
+---
+operation: "Atleast1d"
+description: "Convert inputs to arrays with at least one dimension."
+std_args:
+  - name: "arys"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.atleast_1d"
+  jax:
+    api: "jax.numpy.atleast_1d"
+  flax_nnx:
+    api: "jax.numpy.atleast_1d"
+  paxml:
+    api: "jax.numpy.atleast_1d"
+  tensorflow:
+    api: "tf.experimental.numpy.atleast_1d"
+  numpy:
+    api: "numpy.atleast_1d"
+---
+operation: "Atleast2d"
+description: "View inputs as arrays with at least two dimensions."
+std_args:
+  - name: "arys"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.atleast_2d"
+  jax:
+    api: "jax.numpy.atleast_2d"
+  flax_nnx:
+    api: "jax.numpy.atleast_2d"
+  paxml:
+    api: "jax.numpy.atleast_2d"
+  tensorflow:
+    api: "tf.experimental.numpy.atleast_2d"
+  numpy:
+    api: "numpy.atleast_2d"
+---
+operation: "Atleast3d"
+description: "View inputs as arrays with at least three dimensions."
+std_args:
+  - name: "arys"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.atleast_3d"
+  jax:
+    api: "jax.numpy.atleast_3d"
+  flax_nnx:
+    api: "jax.numpy.atleast_3d"
+  paxml:
+    api: "jax.numpy.atleast_3d"
+  tensorflow:
+    api: "tf.experimental.numpy.atleast_3d"
+  numpy:
+    api: "numpy.atleast_3d"

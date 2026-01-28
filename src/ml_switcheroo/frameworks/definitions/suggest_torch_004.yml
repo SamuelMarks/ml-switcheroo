@@ -1,0 +1,698 @@
+operation: "QUInt2x4Storage"
+description: "Storage for quantized 2x4 int8 tensors."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.QUInt2x4Storage"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QUInt4x2Storage"
+description: "Storage for quantized 4x2 int8 tensors."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.QUInt4x2Storage"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "QUInt8Storage"
+description: "Storage for quantized int8 tensors."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.QUInt8Storage"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "RRefType"
+description: "Type hint for Remote References (RPC)."
+std_args: []
+variants:
+  torch:
+    api: "torch.RRefType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "DistributedSum"
+description: "Enum value for Sum reduction in distributed operations."
+std_args: []
+variants:
+  torch:
+    api: "torch.distributed.ReduceOp.SUM"
+  jax:
+    macro_template: "'sum'"
+  flax_nnx:
+    macro_template: "'sum'"
+  paxml:
+    macro_template: "'sum'"
+  keras:
+    macro_template: "'sum'"
+  tensorflow:
+    macro_template: "'sum'"
+  numpy:
+    macro_template: "'sum'"
+  mlx:
+    macro_template: "'sum'"
+
+---
+operation: "ScriptClass"
+description: "Internal TorchScript class representation."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptClass"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptClassFunction"
+description: "Internal TorchScript function representation."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptClassFunction"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptDict"
+description: "Internal TorchScript dictionary representation."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptDict"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptDictIterator"
+description: "Internal TorchScript dictionary iterator."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptDictIterator"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptDictKeyIterator"
+description: "Internal TorchScript dictionary key iterator."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptDictKeyIterator"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptFunction"
+description: "Internal TorchScript function."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptFunction"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptList"
+description: "Internal TorchScript list."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptList"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptListIterator"
+description: "Internal TorchScript list iterator."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptListIterator"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptMethod"
+description: "Internal TorchScript method."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptMethod"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptModule"
+description: "Internal TorchScript module."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptModule"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptModuleSerializer"
+description: "Internal TorchScript serializer."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptModuleSerializer"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptObject"
+description: "Internal TorchScript object."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptObject"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ScriptObjectProperty"
+description: "Internal TorchScript object property."
+std_args: []
+variants:
+  torch:
+    api: "torch.ScriptObjectProperty"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SerializationStorageContext"
+description: "Internal serialization context."
+std_args: []
+variants:
+  torch:
+    api: "torch.SerializationStorageContext"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "ShortStorage"
+description: "Storage for int16 tensors."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.ShortStorage"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Int16Tensor"
+description: "Constructor/Type for 16-bit integer tensors."
+std_args:
+  - name: "data"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.ShortTensor"
+  jax:
+    macro_template: "jnp.array({data}, dtype=jnp.int16)"
+    required_imports:
+      - "import jax.numpy as jnp"
+  flax_nnx:
+    macro_template: "jnp.array({data}, dtype=jnp.int16)"
+    required_imports:
+      - "import jax.numpy as jnp"
+  paxml:
+    macro_template: "jnp.array({data}, dtype=jnp.int16)"
+    required_imports:
+      - "import jax.numpy as jnp"
+  keras:
+    macro_template: "keras.ops.cast({data}, 'int16')"
+    required_imports:
+      - "import keras"
+  tensorflow:
+    macro_template: "tf.cast({data}, tf.int16)"
+    required_imports:
+      - "import tensorflow as tf"
+  numpy:
+    macro_template: "np.array({data}, dtype=np.int16)"
+    required_imports:
+      - "import numpy as np"
+  mlx:
+    macro_template: "mx.array({data}, dtype=mx.int16)"
+    required_imports:
+      - "import mlx.core as mx"
+
+---
+operation: "Shape"
+description: "Constructs a shape tuple equivalent to torch.Size."
+std_args:
+  - name: "iterable"
+    type: "Any"
+    default: "()"
+variants:
+  torch:
+    api: "torch.Size"
+  jax:
+    macro_template: "tuple({iterable})"
+  flax_nnx:
+    macro_template: "tuple({iterable})"
+  paxml:
+    macro_template: "tuple({iterable})"
+  keras:
+    macro_template: "tuple({iterable})"
+  tensorflow:
+    macro_template: "tuple({iterable})"
+  numpy:
+    macro_template: "tuple({iterable})"
+  mlx:
+    macro_template: "tuple({iterable})"
+
+---
+operation: "StaticModule"
+description: "Internal static module wrapper."
+std_args: []
+variants:
+  torch:
+    api: "torch.StaticModule"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Storage"
+description: "Base storage class access."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.Storage"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "StorageBase"
+description: "Abstract base for storage."
+std_args: []
+variants:
+  torch:
+    api: "torch.StorageBase"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Stream"
+description: "Context manager for device streams."
+op_type: "context"
+std_args:
+  - name: "device"
+    type: "Any"
+    default: "None"
+  - name: "priority"
+    type: "int"
+    default: "0"
+variants:
+  torch:
+    api: "torch.Stream"
+  jax:
+    api: null # JAX handles streams implicitly or via pmap/shard_map
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.device" # Best effort approximation for device placement
+  numpy:
+    api: null
+  mlx:
+    api: "mlx.core.stream"
+    required_imports:
+      - "import mlx.core as mx"
+
+---
+operation: "StreamObjType"
+description: "Internal stream type."
+std_args: []
+variants:
+  torch:
+    api: "torch.StreamObjType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "StringType"
+description: "Internal string type."
+std_args: []
+variants:
+  torch:
+    api: "torch.StringType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SymBool"
+description: "Symbolic boolean for tracing."
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.SymBool"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SymBoolType"
+description: "Type hint for symbolic boolean."
+std_args: []
+variants:
+  torch:
+    api: "torch.SymBoolType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null

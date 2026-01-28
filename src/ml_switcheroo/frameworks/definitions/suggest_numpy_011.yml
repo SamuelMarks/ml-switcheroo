@@ -1,0 +1,854 @@
+operation: "NanMax"
+description: "Return the maximum of an array or maximum along an axis, ignoring any NaNs."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nanmax"
+  jax:
+    api: "jax.numpy.nanmax"
+  flax_nnx:
+    api: "jax.numpy.nanmax"
+  paxml:
+    api: "jax.numpy.nanmax"
+  tensorflow:
+    api: "tf.experimental.numpy.nanmax"
+  torch:
+    requires_plugin: "torch_nanmax_shim"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NanMean"
+description: "Compute the arithmetic mean along the specified axis, ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "dtype"
+    type: "Dtype"
+    default: "None"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nanmean"
+  jax:
+    api: "jax.numpy.nanmean"
+  flax_nnx:
+    api: "jax.numpy.nanmean"
+  paxml:
+    api: "jax.numpy.nanmean"
+  torch:
+    api: "torch.nanmean"
+    args:
+        axis: "dim"
+  tensorflow:
+    api: "tf.experimental.numpy.nanmean"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NanMedian"
+description: "Compute the median along the specified axis, while ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nanmedian"
+  jax:
+    api: "jax.numpy.nanmedian"
+  flax_nnx:
+    api: "jax.numpy.nanmedian"
+  paxml:
+    api: "jax.numpy.nanmedian"
+  torch:
+    api: "torch.nanmedian"
+    args:
+        axis: "dim"
+  tensorflow:
+    api: "tf.experimental.numpy.nanmedian"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NanMin"
+description: "Return minimum of an array or minimum along an axis, ignoring any NaNs."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nanmin"
+  jax:
+    api: "jax.numpy.nanmin"
+  flax_nnx:
+    api: "jax.numpy.nanmin"
+  paxml:
+    api: "jax.numpy.nanmin"
+  torch:
+    requires_plugin: "torch_nanmin_shim"
+  tensorflow:
+    api: "tf.experimental.numpy.nanmin"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NanPercentile"
+description: "Compute the qth percentile of the data along the specified axis, ignoring nan values."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "q"
+    type: "float"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nanpercentile"
+  jax:
+    api: "jax.numpy.nanpercentile"
+  flax_nnx:
+    api: "jax.numpy.nanpercentile"
+  paxml:
+    api: "jax.numpy.nanpercentile"
+  torch:
+    macro_template: "torch.nanquantile({a}, {q}/100.0, dim={axis}, keepdim={keepdims})"
+  tensorflow:
+    api: "tf.experimental.numpy.nanpercentile"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NanProd"
+description: "Return the product of array elements over a given axis treating NaNs as ones."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "dtype"
+    type: "Dtype"
+    default: "None"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nanprod"
+  jax:
+    api: "jax.numpy.nanprod"
+  flax_nnx:
+    api: "jax.numpy.nanprod"
+  paxml:
+    api: "jax.numpy.nanprod"
+  torch:
+    requires_plugin: "torch_nanprod_shim" # Not natively supported in torch
+  tensorflow:
+    api: "tf.experimental.numpy.nanprod"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NanQuantile"
+description: "Compute the qth quantile of the data along the specified axis, ignoring nan values."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "q"
+    type: "float"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nanquantile"
+  jax:
+    api: "jax.numpy.nanquantile"
+  flax_nnx:
+    api: "jax.numpy.nanquantile"
+  paxml:
+    api: "jax.numpy.nanquantile"
+  torch:
+    api: "torch.nanquantile"
+    args:
+        axis: "dim"
+  tensorflow:
+    api: "tf.experimental.numpy.nanquantile"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NanStd"
+description: "Compute the standard deviation along the specified axis, while ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "dtype"
+    type: "Dtype"
+    default: "None"
+  - name: "ddof"
+    type: "int"
+    default: "0"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nanstd"
+  jax:
+    api: "jax.numpy.nanstd"
+  flax_nnx:
+    api: "jax.numpy.nanstd"
+  paxml:
+    api: "jax.numpy.nanstd"
+  torch:
+    macro_template: "torch.sqrt(torch.nanvar({a}, dim={axis}, correction={ddof}, keepdim={keepdims}))"
+  tensorflow:
+    api: "tf.experimental.numpy.nanstd"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NanSum"
+description: "Return the sum of array elements over a given axis treating NaNs as zero."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "dtype"
+    type: "Dtype"
+    default: "None"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nansum"
+  jax:
+    api: "jax.numpy.nansum"
+  flax_nnx:
+    api: "jax.numpy.nansum"
+  paxml:
+    api: "jax.numpy.nansum"
+  torch:
+    api: "torch.nansum"
+    args:
+        axis: "dim"
+  tensorflow:
+    api: "tf.experimental.numpy.nansum"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NanVar"
+description: "Compute the variance along the specified axis, while ignoring NaNs."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "dtype"
+    type: "Dtype"
+    default: "None"
+  - name: "ddof"
+    type: "int"
+    default: "0"
+  - name: "keepdims"
+    type: "bool"
+    default: "False"
+variants:
+  numpy:
+    api: "numpy.nanvar"
+  jax:
+    api: "jax.numpy.nanvar"
+  flax_nnx:
+    api: "jax.numpy.nanvar"
+  paxml:
+    api: "jax.numpy.nanvar"
+  torch:
+    api: "torch.nanvar"
+    args:
+        axis: "dim"
+        ddof: "correction"
+  tensorflow:
+    api: "tf.experimental.numpy.nanvar"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NdArray"
+description: "Constructor for an array object."
+std_args:
+  - name: "shape"
+    type: "Tuple[int]"
+  - name: "dtype"
+    type: "Dtype"
+    default: "None"
+variants:
+  numpy:
+    api: "numpy.ndarray"
+  jax:
+    # JAX does not have a direct ndarray constructor, usually uses ones/zeros
+    api: null
+  torch:
+    api: "torch.Tensor"
+    # Mapping shape/dtype roughly 
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "Ndim"
+description: "Return the number of dimensions of an array."
+std_args:
+  - name: "a"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.ndim"
+  jax:
+    api: "jax.numpy.ndim"
+  flax_nnx:
+    api: "jax.numpy.ndim"
+  paxml:
+    api: "jax.numpy.ndim"
+  torch:
+    macro_template: "{a}.ndim"
+  tensorflow:
+    api: "tf.rank"
+  mlx:
+    macro_template: "{a}.ndim"
+  keras:
+    macro_template: "len({a}.shape)"
+
+---
+operation: "Negative"
+description: "Numerical negative, element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.negative"
+  jax:
+    api: "jax.numpy.negative"
+  flax_nnx:
+    api: "jax.numpy.negative"
+  paxml:
+    api: "jax.numpy.negative"
+  torch:
+    api: "torch.neg"
+  tensorflow:
+    api: "tf.math.negative"
+  mlx:
+    api: "mlx.core.negative"
+  keras:
+    api: "keras.ops.negative"
+
+---
+operation: "NewAxis"
+description: "A convenient alias for None, useful for indexing."
+std_args: [] 
+variants:
+  numpy:
+    api: "numpy.newaxis"
+  jax:
+    api: "jax.numpy.newaxis"
+  flax_nnx:
+    api: "jax.numpy.newaxis"
+  paxml:
+    api: "jax.numpy.newaxis"
+  torch:
+    macro_template: "None"
+  tensorflow:
+    api: "tf.newaxis"
+  mlx:
+    api: "mlx.core.newaxis"
+  keras:
+    macro_template: "None"
+    
+---
+operation: "NextAfter"
+description: "Return the next floating-point value after x1 towards x2, element-wise."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.nextafter"
+  jax:
+    api: "jax.numpy.nextafter"
+  flax_nnx:
+    api: "jax.numpy.nextafter"
+  paxml:
+    api: "jax.numpy.nextafter"
+  torch:
+    api: "torch.nextafter"
+  tensorflow:
+    api: "tf.math.nextafter"
+  mlx:
+    api: null # Not in core
+  keras:
+    api: null
+
+---
+operation: "NonZero"
+description: "Return the indices of the elements that are non-zero."
+std_args:
+  - name: "a"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.nonzero"
+  jax:
+    api: "jax.numpy.nonzero"
+  flax_nnx:
+    api: "jax.numpy.nonzero"
+  paxml:
+    api: "jax.numpy.nonzero"
+  torch:
+    # torch.nonzero returns [N, D], numpy returns Tuple[Array]. 
+    # Use as_tuple=True to match numpy behavior.
+    api: "torch.nonzero"
+    arg_values:
+        as_tuple: "True"
+  tensorflow:
+    # tf.where returns indices [N, D] equivalent to torch default
+    # Needs structural output adapter to match tuple semantics if strictly enforcing
+    api: "tf.where" 
+  mlx:
+    api: null
+  keras:
+    api: "keras.ops.nonzero"
+
+---
+operation: "NotEqual"
+description: "Return (x1 != x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.not_equal"
+  jax:
+    api: "jax.numpy.not_equal"
+  flax_nnx:
+    api: "jax.numpy.not_equal"
+  paxml:
+    api: "jax.numpy.not_equal"
+  torch:
+    api: "torch.ne"
+  tensorflow:
+    api: "tf.math.not_equal"
+  mlx:
+    api: "mlx.core.not_equal"
+  keras:
+    api: "keras.ops.not_equal"
+
+---
+operation: "Ones"
+description: "Return a new array of given shape and type, filled with ones."
+std_args:
+  - name: "shape"
+    type: "Tuple[int]"
+  - name: "dtype"
+    type: "Dtype"
+    default: "None"
+variants:
+  numpy:
+    api: "numpy.ones"
+  jax:
+    api: "jax.numpy.ones"
+  flax_nnx:
+    api: "jax.numpy.ones"
+  paxml:
+    api: "jax.numpy.ones"
+  torch:
+    api: "torch.ones"
+    args:
+      shape: "size"
+  tensorflow:
+    api: "tf.ones"
+  mlx:
+    api: "mlx.core.ones"
+  keras:
+    api: "keras.ops.ones"
+
+---
+operation: "OnesLike"
+description: "Return an array of ones with the same shape and type as a given array."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "dtype"
+    type: "Dtype"
+    default: "None"
+variants:
+  numpy:
+    api: "numpy.ones_like"
+  jax:
+    api: "jax.numpy.ones_like"
+  flax_nnx:
+    api: "jax.numpy.ones_like"
+  paxml:
+    api: "jax.numpy.ones_like"
+  torch:
+    api: "torch.ones_like"
+    args:
+        a: "input"
+  tensorflow:
+    api: "tf.ones_like"
+    args:
+        a: "input"
+  mlx:
+    api: "mlx.core.ones_like"
+  keras:
+    api: "keras.ops.ones_like"
+    args:
+        a: "x"
+
+---
+operation: "Outer"
+description: "Compute the outer product of two vectors."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "b"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.outer"
+  jax:
+    api: "jax.numpy.outer"
+  flax_nnx:
+    api: "jax.numpy.outer"
+  paxml:
+    api: "jax.numpy.outer"
+  torch:
+    api: "torch.outer"
+    args:
+        a: "input"
+        b: "vec2"
+  tensorflow:
+    api: "tf.experimental.numpy.outer"
+  mlx:
+    # Manual implementation or tensordot
+    api: null
+  keras:
+    api: "keras.ops.outer"
+    args:
+        a: "x1"
+        b: "x2"
+
+---
+operation: "PackBits"
+description: "Packs the elements of a binary-valued array into bits in a uint8 array."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: "None"
+  - name: "bitorder"
+    type: "str"
+    default: "'big'"
+variants:
+  numpy:
+    api: "numpy.packbits"
+  jax:
+    api: "jax.numpy.packbits"
+  flax_nnx:
+    api: "jax.numpy.packbits"
+  paxml:
+    api: "jax.numpy.packbits"
+  torch:
+    # No direct equivalent in torch yet (legacy)
+    api: null
+  tensorflow:
+    # tf.experimental.numpy.packbits
+    api: "tf.experimental.numpy.packbits"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "Pad"
+description: "Pad an array."
+std_args:
+  - name: "array"
+    type: "Array"
+  - name: "pad_width"
+    type: "Tuple"
+  - name: "mode"
+    type: "str"
+    default: "'constant'"
+variants:
+  numpy:
+    api: "numpy.pad"
+  jax:
+    api: "jax.numpy.pad"
+  flax_nnx:
+    api: "jax.numpy.pad"
+  paxml:
+    api: "jax.numpy.pad"
+  torch:
+    # Torch pad takes (left, right, top, bottom) 
+    # Use built-in plugin to convert ((t,b), (l,r)) syntax
+    api: "torch.nn.functional.pad"
+    requires_plugin: "padding_converter"
+  tensorflow:
+    api: "tf.pad"
+    args:
+      array: "tensor"
+      pad_width: "paddings"
+  mlx:
+    api: "mlx.core.pad"
+    args:
+      array: "x"
+      pad_width: "pad_width"
+  keras:
+    api: "keras.ops.pad"
+    args:
+      array: "x"
+      pad_width: "pad_width"
+
+---
+operation: "Partition"
+description: "Return a partitioned copy of an array."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "kth"
+    type: "int"
+  - name: "axis"
+    type: "int"
+    default: "-1"
+variants:
+  numpy:
+    api: "numpy.partition"
+  jax:
+    api: "jax.numpy.partition"
+  flax_nnx:
+    api: "jax.numpy.partition"
+  paxml:
+    api: "jax.numpy.partition"
+  torch:
+    # Closest is kthvalue, but it reduces. topk returns k elements.
+    # No direct partition that keeps full size.
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: "mlx.core.partition"
+  keras:
+    api: null
+
+---
+operation: "NdEnumerate"
+description: "Multidimensional index iterator."
+op_type: "function"
+std_args:
+  - name: "arr"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.ndenumerate"
+  jax:
+    api: "jax.numpy.ndenumerate"
+  torch:
+    # Not supported natively
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+
+---
+operation: "NdIndex"
+description: "An N-dimensional iterator object to index arrays."
+std_args:
+  - name: "shape"
+    type: "Tuple[int]"
+variants:
+  numpy:
+    api: "numpy.ndindex"
+  jax:
+    api: "jax.numpy.ndindex"
+  torch:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.ndindex"
+
+---
+operation: "Number"
+description: "Abstract base class of all numeric scalar types. (Type Definition)"
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.number"
+  jax:
+    api: "jax.numpy.number"
+  torch:
+    # Python stdlib mapping
+    api: "numbers.Number"
+    required_imports:
+      - "import numbers"
+  tensorflow:
+    api: "tf.experimental.numpy.number"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "Object_"
+description: "Any Python object type."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.object_"
+  jax:
+    api: "jax.numpy.object_"
+  torch:
+    # Torch doesn't strictly have object tensors in same way
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "OGrid"
+description: "An instance which returns an open multi-dimensional meshgrid."
+op_type: "attribute"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.ogrid"
+  jax:
+    api: "jax.numpy.ogrid"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NdIter"
+description: "Efficient multi-dimensional iterator object."
+op_type: "class"
+std_args: 
+  - name: "op"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.nditer"
+  jax:
+    api: "jax.numpy.nditer"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "NestedIters"
+description: "Create nditers for use in nested loops."
+std_args:
+  - name: "op"
+  - name: "axes"
+variants:
+  numpy:
+    api: "numpy.nested_iters"
+  jax:
+    api: "jax.numpy.nested_iters"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null

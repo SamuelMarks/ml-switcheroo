@@ -1,0 +1,636 @@
+operation: "NativeNorm"
+description: "Native norm operation (Internal)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 1
+variants:
+  torch:
+    api: "torch.native_norm"
+  jax:
+    api: "jax.numpy.linalg.norm"
+  flax_nnx:
+    api: "jax.numpy.linalg.norm"
+  paxml:
+    api: "jax.numpy.linalg.norm"
+  keras:
+    api: "keras.ops.norm"
+  tensorflow:
+    api: "tf.norm"
+  numpy:
+    api: "numpy.linalg.norm"
+  mlx:
+    api: "mlx.core.linalg.norm"
+
+---
+operation: "NotEqual"
+description: "Computes element-wise inequality comparison."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ne"
+  jax:
+    api: "jax.numpy.not_equal"
+  flax_nnx:
+    api: "jax.numpy.not_equal"
+  paxml:
+    api: "jax.numpy.not_equal"
+  keras:
+    api: "keras.ops.not_equal"
+  tensorflow:
+    api: "tf.not_equal"
+  numpy:
+    api: "numpy.not_equal"
+  mlx:
+    api: "mlx.core.not_equal"
+
+---
+operation: "Negative"
+description: "Returns a new tensor with the negative of the elements of input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.neg"
+  jax:
+    api: "jax.numpy.negative"
+  flax_nnx:
+    api: "jax.numpy.negative"
+  paxml:
+    api: "jax.numpy.negative"
+  keras:
+    api: "keras.ops.negative"
+  tensorflow:
+    api: "tf.math.negative"
+  numpy:
+    api: "numpy.negative"
+  mlx:
+    api: "mlx.core.negative"
+
+---
+operation: "Negative_"
+description: "In-place version of Negative."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.neg_"
+  jax:
+    api: "jax.numpy.negative"
+  flax_nnx:
+    api: "jax.numpy.negative"
+  paxml:
+    api: "jax.numpy.negative"
+  keras:
+    api: "keras.ops.negative"
+  tensorflow:
+    api: "tf.math.negative"
+  numpy:
+    api: "numpy.negative"
+  mlx:
+    api: "mlx.core.negative"
+
+---
+operation: "NegativeAlias"
+description: "Alias for Negative."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.negative"
+  jax:
+    api: "jax.numpy.negative"
+  flax_nnx:
+    api: "jax.numpy.negative"
+  paxml:
+    api: "jax.numpy.negative"
+  keras:
+    api: "keras.ops.negative"
+  tensorflow:
+    api: "tf.math.negative"
+  numpy:
+    api: "numpy.negative"
+  mlx:
+    api: "mlx.core.negative"
+
+---
+operation: "NegativeAlias_"
+description: "In-place alias for Negative."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.negative_"
+  jax:
+    api: "jax.numpy.negative"
+  flax_nnx:
+    api: "jax.numpy.negative"
+  paxml:
+    api: "jax.numpy.negative"
+  keras:
+    api: "keras.ops.negative"
+  tensorflow:
+    api: "tf.math.negative"
+  numpy:
+    api: "numpy.negative"
+  mlx:
+    api: "mlx.core.negative"
+
+---
+operation: "NewAxis"
+description: "Attribute representing a new axis (None)."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.newaxis"
+  jax:
+    api: "jax.numpy.newaxis"
+  flax_nnx:
+    api: "jax.numpy.newaxis"
+  paxml:
+    api: "jax.numpy.newaxis"
+  keras:
+    api: "keras.ops.newaxis"
+    missing_message: "Keras ops might not expose newaxis directly, use None."
+  tensorflow:
+    api: "tf.newaxis"
+  numpy:
+    api: "numpy.newaxis"
+  mlx:
+    api: "mlx.core.newaxis"
+
+---
+operation: "NextAfter"
+description: "Return the next floating-point value after input towards other."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.nextafter"
+  jax:
+    api: "jax.numpy.nextafter"
+  flax_nnx:
+    api: "jax.numpy.nextafter"
+  paxml:
+    api: "jax.numpy.nextafter"
+  tensorflow:
+    api: "tf.math.nextafter"
+  numpy:
+    api: "numpy.nextafter"
+
+---
+operation: "NoGrad"
+description: "Context manager that disables gradient calculation."
+op_type: "context"
+std_args: []
+variants:
+  torch:
+    api: "torch.no_grad"
+  jax:
+    requires_plugin: "context_to_function_wrap"
+  flax_nnx:
+    requires_plugin: "context_to_function_wrap"
+  paxml:
+    requires_plugin: "context_to_function_wrap"
+  tensorflow:
+    api: "tf.stop_gradient"
+    transformation_type: "strip_context"
+
+---
+operation: "NonZero"
+description: "Returns a tensor containing the indices of all non-zero elements of input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.nonzero"
+  jax:
+    api: "jax.numpy.argwhere"
+  flax_nnx:
+    api: "jax.numpy.argwhere"
+  paxml:
+    api: "jax.numpy.argwhere"
+  keras:
+    api: "keras.ops.nonzero"
+  tensorflow:
+    api: "tf.where"
+  numpy:
+    api: "numpy.argwhere"
+  mlx:
+    api: "mlx.core.argwhere"
+
+---
+operation: "NonZeroStatic"
+description: "Non-zero indices extraction (static). Internal/Legacy."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.nonzero_static"
+
+---
+operation: "Norm"
+description: "Returns the matrix norm or vector norm of a given tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+    default: "2"
+  - name: "dim"
+    type: "int"
+    default: "None"
+  - name: "keepdim"
+    type: "bool"
+    default: "False"
+variants:
+  torch:
+    api: "torch.norm"
+  jax:
+    api: "jax.numpy.linalg.norm"
+    args:
+      p: "ord"
+      dim: "axis"
+      keepdim: "keepdims"
+  flax_nnx:
+    api: "jax.numpy.linalg.norm"
+    args:
+      p: "ord"
+      dim: "axis"
+      keepdim: "keepdims"
+  paxml:
+    api: "jax.numpy.linalg.norm"
+  keras:
+    api: "keras.ops.norm"
+    args:
+      p: "ord"
+      dim: "axis"
+  tensorflow:
+    api: "tf.norm"
+    args:
+      p: "ord"
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "numpy.linalg.norm"
+    args:
+      p: "ord"
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+operation: "NormExceptDim"
+description: "Calculates norm over all dimensions except dim."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.norm_except_dim"
+
+---
+operation: "Normal"
+description: "Returns a tensor of random numbers drawn from separate normal distributions."
+std_args:
+  - name: "mean"
+    type: "Tensor"
+  - name: "std"
+    type: "Tensor"
+  - name: "size"
+    type: "List[int]"
+    default: "None"
+variants:
+  torch:
+    api: "torch.normal"
+  jax:
+    api: "jax.random.normal"
+    requires_plugin: "inject_prng"
+  flax_nnx:
+    api: "jax.random.normal"
+    requires_plugin: "inject_prng"
+  paxml:
+    api: "jax.random.normal"
+  keras:
+    api: "keras.random.normal"
+  tensorflow:
+    api: "tf.random.normal"
+  numpy:
+    api: "numpy.random.normal"
+    args:
+      mean: "loc"
+      std: "scale"
+  mlx:
+    api: "mlx.core.random.normal"
+    args:
+      mean: "loc"
+      std: "scale"
+
+---
+operation: "NotEqualAlias"
+description: "Alias for NotEqual."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.not_equal"
+  jax:
+    api: "jax.numpy.not_equal"
+  flax_nnx:
+    api: "jax.numpy.not_equal"
+  paxml:
+    api: "jax.numpy.not_equal"
+  keras:
+    api: "keras.ops.not_equal"
+  tensorflow:
+    api: "tf.not_equal"
+  numpy:
+    api: "numpy.not_equal"
+  mlx:
+    api: "mlx.core.not_equal"
+
+---
+operation: "NuclearNorm"
+description: "Computes the nuclear norm of a matrix."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.nuclear_norm"
+  keras:
+    api: "keras.ops.norm"
+    arg_values:
+      ord: "nuc"
+
+---
+operation: "Numel"
+description: "Returns the total number of elements in the input tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.numel"
+  jax:
+    api: "jax.numpy.size"
+  flax_nnx:
+    api: "jax.numpy.size"
+  paxml:
+    api: "jax.numpy.size"
+  keras:
+    api: "keras.ops.size"
+  tensorflow:
+    api: "tf.size"
+  numpy:
+    api: "numpy.size"
+  mlx:
+    api: "mlx.core.size"
+
+---
+operation: "Ones"
+description: "Returns a tensor filled with the scalar value 1."
+std_args:
+  - name: "size"
+    type: "List[int]"
+    is_variadic: true
+  - name: "dtype"
+    type: "DType"
+    default: "None"
+variants:
+  torch:
+    api: "torch.ones"
+    pack_to_tuple: "size"
+  jax:
+    api: "jax.numpy.ones"
+    pack_to_tuple: "shape"
+  flax_nnx:
+    api: "jax.numpy.ones"
+  paxml:
+    api: "jax.numpy.ones"
+  keras:
+    api: "keras.ops.ones"
+    pack_to_tuple: "shape"
+  tensorflow:
+    api: "tf.ones"
+    pack_to_tuple: "shape"
+  numpy:
+    api: "numpy.ones"
+    pack_to_tuple: "shape"
+  mlx:
+    api: "mlx.core.ones"
+    pack_to_tuple: "shape"
+
+---
+operation: "OnesLike"
+description: "Returns a tensor filled with the scalar value 1, with the same size as input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dtype"
+    type: "DType"
+    default: "None"
+variants:
+  torch:
+    api: "torch.ones_like"
+  jax:
+    api: "jax.numpy.ones_like"
+  flax_nnx:
+    api: "jax.numpy.ones_like"
+  paxml:
+    api: "jax.numpy.ones_like"
+  keras:
+    api: "keras.ops.ones_like"
+  tensorflow:
+    api: "tf.ones_like"
+  numpy:
+    api: "numpy.ones_like"
+  mlx:
+    api: "mlx.core.ones_like"
+
+---
+operation: "OrgQr"
+description: "Computes the orthogonal matrix Q of a QR factorization."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "tau"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.orgqr"
+  jax:
+    api: "jax.scipy.linalg.qr"
+    output_select_index: 0
+  flax_nnx:
+    api: "jax.scipy.linalg.qr"
+  numpy:
+    api: "numpy.linalg.qr"
+
+---
+operation: "OrmQr"
+description: "Multiplies a matrix by the orthogonal matrix Q of a QR factorization."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "tau"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ormqr"
+
+---
+operation: "Outer"
+description: "Outer product of input and vec2."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "vec2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.outer"
+  jax:
+    api: "jax.numpy.outer"
+  flax_nnx:
+    api: "jax.numpy.outer"
+  paxml:
+    api: "jax.numpy.outer"
+  keras:
+    api: "keras.ops.outer"
+  tensorflow:
+    api: "tf.tensordot"
+    arg_values:
+      axes: 0
+  numpy:
+    api: "numpy.outer"
+  mlx:
+    api: "mlx.core.matmul"
+
+---
+operation: "PairwiseDistance"
+description: "Computes the pairwise distance between vectors."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+    default: "2.0"
+variants:
+  torch:
+    api: "torch.pairwise_distance"
+  keras:
+    api: "keras.ops.norm"
+    macro_template: "keras.ops.norm({x1} - {x2}, ord={p})" 
+  numpy:
+    api: "numpy.linalg.norm"
+    macro_template: "np.linalg.norm({x1} - {x2}, ord={p})" 
+  jax:
+    api: "jax.numpy.linalg.norm"
+    macro_template: "jnp.linalg.norm({x1} - {x2}, ord={p})" 
+
+---
+operation: "ParseIr"
+description: "Internal JIT parser."
+std_args:
+  - name: "input"
+    type: "str"
+variants:
+  torch:
+    api: "torch.parse_ir"
+
+---
+operation: "ParseSchema"
+description: "Internal JIT parser for schemas."
+std_args:
+  - name: "schema"
+    type: "str"
+variants:
+  torch:
+    api: "torch.parse_schema"
+
+---
+operation: "ParseTypeComment"
+description: "Internal JIT parser for type comments."
+std_args:
+  - name: "arg0"
+    type: "str"
+variants:
+  torch:
+    api: "torch.parse_type_comment"
+
+---
+operation: "PcaLowRank"
+description: "Performs linear PCA on a low-rank matrix."
+std_args:
+  - name: "A"
+    type: "Tensor"
+  - name: "q"
+    type: "int"
+    default: "None"
+  - name: "center"
+    type: "bool"
+    default: "True"
+  - name: "niter"
+    type: "int"
+    default: "2"
+variants:
+  torch:
+    api: "torch.pca_lowrank"
+
+---
+operation: "Pdist"
+description: "Computes the p-norm distance between every pair of row vectors."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+    default: "2"
+variants:
+  torch:
+    api: "torch.pdist"
+  scipy:
+    api: "scipy.spatial.distance.pdist"
+
+---
+operation: "PerChannelAffine"
+description: "Per channel affine quantization (internal)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.per_channel_affine"
+
+---
+operation: "PerChannelAffineFloatQParams"
+description: "Per channel affine quantization with float params (internal)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.per_channel_affine_float_qparams"

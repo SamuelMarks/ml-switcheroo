@@ -1,0 +1,738 @@
+operation: "Bool"
+description: "Boolean data type identifier."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.bool"
+  jax:
+    api: "jax.numpy.bool_"
+  numpy:
+    api: "numpy.bool_"
+  tensorflow:
+    api: "tf.bool"
+  mlx:
+    api: "bool"
+  keras:
+    api: "'bool'"
+  flax_nnx:
+    api: "jax.numpy.bool_"
+  paxml:
+    api: "jax.numpy.bool_"
+
+---
+operation: "BroadcastShapes"
+description: "Calculates the shape resulting from broadcasting multiple shapes together."
+op_type: "function"
+std_args:
+  - name: "shapes"
+    type: "List[Tuple[int, ...]]"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.broadcast_shapes"
+  jax:
+    api: "jax.numpy.broadcast_shapes"
+    pack_to_tuple: "args"
+  numpy:
+    api: "numpy.broadcast_shapes"
+    pack_to_tuple: "args"
+  tensorflow:
+    api: "tf.broadcast_static_shape" # Only supports 2, partial mapping warning
+    missing_message: "TF broadcast_static_shape only supports 2 args."
+
+---
+operation: "BroadcastTensors"
+description: "Broadcasts the given tensors according to broadcasting semantics."
+op_type: "function"
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.broadcast_tensors"
+  jax:
+    api: "jax.numpy.broadcast_arrays" # Takes *args
+    pack_to_tuple: "args"
+  numpy:
+    api: "numpy.broadcast_arrays"
+    pack_to_tuple: "args"
+  tensorflow:
+    api: null
+    missing_message: "No direct equivalent in TF for N tensors. Use tf.broadcast_to per tensor."
+
+---
+operation: "BroadcastTo"
+description: "Broadcasts a tensor to a new shape."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "shape"
+    type: "Tuple[int, ...]"
+variants:
+  torch:
+    api: "torch.broadcast_to"
+  jax:
+    api: "jax.numpy.broadcast_to"
+    args:
+      input: "array"
+  numpy:
+    api: "numpy.broadcast_to"
+    args:
+      input: "array"
+  tensorflow:
+    api: "tf.broadcast_to"
+  mlx:
+    api: "mlx.core.broadcast_to"
+    args:
+      input: "a"
+  keras:
+    api: "keras.ops.broadcast_to"
+    args:
+      input: "x"
+
+---
+operation: "Bucketize"
+description: "Returns the indices of the buckets to which each value in the input belongs."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "boundaries"
+    type: "Tensor"
+  - name: "out_int32"
+    type: "bool"
+    default: false
+  - name: "right"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.bucketize"
+  jax:
+    api: "jax.numpy.searchsorted"
+    args:
+      boundaries: "a"
+      input: "v"
+      right: "side"
+    arg_values:
+      right:
+        True: "'right'"
+        False: "'left'"
+  numpy:
+    api: "numpy.searchsorted"
+    args:
+      boundaries: "a"
+      input: "v"
+      right: "side"
+    arg_values:
+      right:
+        True: "'right'"
+        False: "'left'"
+  tensorflow:
+    api: "tf.searchsorted"
+    args:
+      boundaries: "sorted_sequence"
+      input: "values"
+      right: "side"
+    arg_values:
+      right:
+        True: "'right'"
+        False: "'left'"
+
+---
+operation: "CanCast"
+description: "Determines if a type conversion is allowed under casting rules."
+op_type: "function"
+std_args:
+  - name: "from_dtype"
+    type: "DType"
+  - name: "to_dtype"
+    type: "DType"
+variants:
+  torch:
+    api: "torch.can_cast"
+    args:
+      from_dtype: "from_"
+      to_dtype: "to"
+  jax:
+    api: "jax.numpy.can_cast"
+    args:
+      from_dtype: "from_"
+      to_dtype: "to"
+  numpy:
+    api: "numpy.can_cast"
+    args:
+      from_dtype: "from_"
+      to_dtype: "to"
+
+---
+operation: "CartesianProd"
+description: "Performs cartesian product of the given sequence of tensors."
+op_type: "function"
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.cartesian_prod"
+  jax:
+    api: "jax.numpy.meshgrid"
+    macro_template: "jnp.stack(jnp.meshgrid(*{tensors}, indexing='ij'), -1).reshape(-1, len({tensors}))"
+  numpy:
+    api: "numpy.meshgrid"
+    macro_template: "np.stack(np.meshgrid(*{tensors}, indexing='ij'), -1).reshape(-1, len({tensors}))"
+
+---
+operation: "Concat"
+description: "Concatenates the given sequence of tensors in the given dimension."
+op_type: "function"
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+    is_variadic: true # Sometimes passed as tuple in wrappers, usually sequence
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.cat"
+    pack_to_tuple: "tensors" # torch.cat takes (tensors, dim). Tensors is a tuple/list.
+  jax:
+    api: "jax.numpy.concatenate"
+    pack_to_tuple: "arrays" # jax.numpy.concatenate((a1, a2, ...), axis=0)
+    args:
+      tensors: "arrays"
+      dim: "axis"
+  numpy:
+    api: "numpy.concatenate"
+    pack_to_tuple: "arrays"
+    args:
+      tensors: "arrays"
+      dim: "axis"
+  tensorflow:
+    api: "tf.concat"
+    pack_to_tuple: "values"
+    args:
+      tensors: "values" # tf.concat(values, axis)
+      dim: "axis"
+  mlx:
+    api: "mlx.core.concatenate"
+    pack_to_tuple: "arrays"
+    args:
+      tensors: "arrays"
+      dim: "axis"
+  keras:
+    api: "keras.ops.concatenate"
+    pack_to_tuple: "inputs"
+    args:
+      tensors: "inputs"
+      dim: "axis"
+
+---
+operation: "CColIndicesCopy"
+description: "Copies the column indices of a sparse matrix."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ccol_indices_copy"
+
+---
+operation: "Cdist"
+description: "Computes batched the p-norm distance between each pair of the two collections of row vectors."
+op_type: "function"
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+    default: 2.0
+variants:
+  torch:
+    api: "torch.cdist"
+  jax:
+    # Requires complex macro or scipy
+    api: "jax.scipy.spatial.distance.cdist"
+    args:
+      x1: "XA"
+      x2: "XB"
+      p: "p"
+
+---
+operation: "Complex128"
+description: "128-bit complex data type."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.cdouble"
+  jax:
+    api: "jax.numpy.complex128"
+  numpy:
+    api: "numpy.complex128"
+  tensorflow:
+    api: "tf.complex128"
+  flax_nnx:
+    api: "jax.numpy.complex128"
+  paxml:
+    api: "jax.numpy.complex128"
+
+---
+operation: "Ceil"
+description: "Returns the ceiling of the input, element-wise."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ceil"
+  jax:
+    api: "jax.numpy.ceil"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.ceil"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.ceil"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.ceil"
+    args:
+      input: "a"
+  keras:
+    api: "keras.ops.ceil"
+    args:
+      input: "x"
+
+---
+operation: "CeilInplace"
+description: "Returns the ceiling of the input, element-wise, in-place."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ceil_"
+  # Functional frameworks map to standard ceil
+  jax:
+    api: "jax.numpy.ceil"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.ceil" # numpy supports out=x but here we map functional
+  tensorflow:
+    api: "tf.math.ceil"
+  mlx:
+    api: "mlx.core.ceil"
+  keras:
+    api: "keras.ops.ceil"
+
+---
+operation: "Celu"
+description: "Applies the Continuously Differentiable Exponential Linear Unit."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.celu"
+  jax:
+    api: "jax.nn.celu"
+    args:
+      input: "x"
+  keras:
+    api: "keras.activations.celu"
+    args:
+      input: "x"
+  tensorflow:
+    api: "keras.activations.celu"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.nn.celu"
+    args:
+      input: "x"
+
+---
+operation: "CeluInplace"
+description: "Applies CELU in-place."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.celu_"
+  jax:
+    api: "jax.nn.celu"
+    args:
+      input: "x"
+
+---
+operation: "Complex64"
+description: "64-bit complex data type."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.cfloat"
+  jax:
+    api: "jax.numpy.complex64"
+  numpy:
+    api: "numpy.complex64"
+  tensorflow:
+    api: "tf.complex64"
+  mlx:
+    api: "mlx.core.complex64"
+  flax_nnx:
+    api: "jax.numpy.complex64"
+  paxml:
+    api: "jax.numpy.complex64"
+
+---
+operation: "ChainMatmul"
+description: "Performs matrix multiplication of N tensors."
+op_type: "function"
+deprecated: true
+replaced_by: "MultiDot"
+std_args:
+  - name: "matrices"
+    type: "List[Tensor]"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.chain_matmul"
+  jax:
+    api: "jax.numpy.linalg.multi_dot"
+    pack_to_tuple: "arrays"
+    args:
+      matrices: "arrays"
+  numpy:
+    api: "numpy.linalg.multi_dot"
+    pack_to_tuple: "arrays"
+
+---
+operation: "ComplexHalf"
+description: "Half-precision complex data type."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.chalf"
+# Others largely unsupported
+
+---
+operation: "ChannelShuffle"
+description: "Divides channels in a tensor of shape (*, C, H, W) into g groups and rearranges them."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "groups"
+    type: "int"
+variants:
+  torch:
+    api: "torch.channel_shuffle"
+  # No direct equivalent in others without macro
+  # Could implement via reshape/transpose/reshape macro
+
+---
+operation: "ChannelsLast"
+description: "Memory format constant."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.channels_last"
+
+---
+operation: "ChannelsLast3d"
+description: "Memory format constant for 3D."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.channels_last_3d"
+
+---
+operation: "Cholesky"
+description: "Computes the Cholesky decomposition of a symmetric positive-definite matrix."
+op_type: "function"
+deprecated: true
+replaced_by: "LinalgCholesky"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "upper"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.cholesky"
+  jax:
+    api: "jax.numpy.linalg.cholesky"
+    args:
+      input: "a"
+    description: "JAX cholesky returns lower triangle by default. Upper support requires transpose."
+    dispatch_rules:
+      - if_arg: "upper"
+        op: "eq" 
+        val: true
+        use_api: "jax.numpy.linalg.cholesky" # Requires macro to transpose result
+        
+  numpy:
+    api: "numpy.linalg.cholesky"
+    args:
+      input: "a"
+  tensorflow:
+    api: "tf.linalg.cholesky"
+    args:
+      input: "input"
+  mlx:
+    api: "mlx.core.linalg.cholesky"
+    args:
+      input: "a"
+  keras:
+    api: "keras.ops.cholesky"
+    args:
+      input: "x"
+
+---
+operation: "CholeskyInverse"
+description: "Computes the inverse of a symmetric positive-definite matrix using its Cholesky factor."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "upper"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.cholesky_inverse"
+    # Args: input is L
+  # Others require manual inv(L.T @ L) or similar
+  
+---
+operation: "CholeskySolve"
+description: "Solves a linear system of equations with a positive semidefinite matrix to be inverted given its Cholesky factor."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor" # The RHS 'b' 
+  - name: "input2"
+    type: "Tensor" # The Cholesky 'u' 
+  - name: "upper"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.cholesky_solve"
+  jax:
+    api: "jax.scipy.linalg.cho_solve"
+    args:
+      input: "b"
+      input2: "c_and_lower" # expects (c, lower) tuple
+      # mismatch in API design. 
+  tensorflow:
+    api: "tf.linalg.cholesky_solve"
+    args:
+      input2: "chol"
+      input: "rhs"
+
+---
+operation: "ChooseQParamsOptimized"
+description: "Quantization utility."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.choose_qparams_optimized"
+
+---
+operation: "Chunk"
+description: "Splits a tensor into a specific number of chunks."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "chunks"
+    type: "int"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.chunk"
+  jax:
+    api: "jax.numpy.array_split"
+    args:
+      input: "ary"
+      chunks: "indices_or_sections"
+      dim: "axis"
+  numpy:
+    api: "numpy.array_split"
+    args:
+      input: "ary"
+      chunks: "indices_or_sections"
+      dim: "axis"
+  tensorflow:
+    api: "tf.split"
+    args:
+      input: "value"
+      chunks: "num_or_size_splits"
+      dim: "axis"
+  mlx:
+    api: "mlx.core.split"
+    args:
+      input: "a"
+      chunks: "indices_or_sections"
+      dim: "axis"
+  keras:
+    api: "keras.ops.split"
+    args:
+      input: "x"
+      chunks: "indices_or_sections"
+      dim: "axis"
+
+---
+operation: "Clamp"
+description: "Clamps all elements in input into the range [min, max]."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "min"
+    type: "float"
+    default: null
+  - name: "max"
+    type: "float"
+    default: null
+variants:
+  torch:
+    api: "torch.clamp"
+  jax:
+    api: "jax.numpy.clip"
+    args:
+      input: "a"
+      min: "a_min"
+      max: "a_max"
+  numpy:
+    api: "numpy.clip"
+    args:
+      input: "a"
+      min: "a_min"
+      max: "a_max"
+  tensorflow:
+    api: "tf.clip_by_value"
+    args:
+      input: "t"
+      min: "clip_value_min"
+      max: "clip_value_max"
+  mlx:
+    api: "mlx.core.clip"
+    args:
+      input: "a"
+      min: "a_min"
+      max: "a_max"
+  keras:
+    api: "keras.ops.clip"
+    args:
+      input: "x"
+      min: "x_min"
+      max: "x_max"
+
+---
+operation: "ClampInplace"
+description: "Clamps elements in-place."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "min"
+    type: "float"
+  - name: "max"
+    type: "float"
+variants:
+  torch:
+    api: "torch.clamp_"
+  jax:
+    api: "jax.numpy.clip"
+    args:
+      input: "a"
+      min: "a_min"
+      max: "a_max"
+  # Others map to functional
+
+---
+operation: "ClampMax"
+description: "Clamps elements with only an upper bound."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "max"
+    type: "float"
+variants:
+  torch:
+    api: "torch.clamp_max"
+  jax:
+    api: "jax.numpy.minimum"
+    args:
+      input: "x1"
+      max: "x2"
+  numpy:
+    api: "numpy.minimum"
+    args:
+      input: "x1"
+      max: "x2"
+  tensorflow:
+    api: "tf.math.minimum"
+    args:
+      input: "x"
+      max: "y"
+  mlx:
+    api: "mlx.core.minimum"
+    args:
+      input: "a"
+      max: "b"
+  keras:
+    api: "keras.ops.minimum"
+    args:
+      input: "x1"
+      max: "x2"
+
+---
+operation: "ClampMaxInplace"
+description: "Clamps elements with only an upper bound in-place."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "max"
+    type: "float"
+variants:
+  torch:
+    api: "torch.clamp_max_"
+  jax:
+    api: "jax.numpy.minimum"
+    args:
+      input: "x1"
+      max: "x2"

@@ -1,0 +1,833 @@
+operation: "Percentile" 
+description: "Compute the q-th percentile of the data along the specified axis." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "q" 
+    type: "float" 
+  - name: "axis" 
+    type: "Optional[Union[int, Tuple[int]]]" 
+    default: "None" 
+  - name: "keepdims" 
+    type: "bool" 
+    default: "False" 
+variants: 
+  numpy: 
+    api: "numpy.percentile" 
+  torch: 
+    api: "torch.quantile" 
+    args: 
+      q: "q" # Logic warning: Torch expects 0-1, percentile is 0-100. Macro needed for full fidelity. 
+  jax: 
+    api: "jax.numpy.percentile" 
+  flax_nnx: 
+    api: "jax.numpy.percentile" 
+  paxml: 
+    api: "jax.numpy.percentile" 
+  tensorflow: 
+    api: "tfp.stats.percentile" 
+    required_imports: ["import tensorflow_probability as tfp"] 
+  keras: 
+    api: "keras.ops.quantile" # Keras quantile usually 0-1
+  mlx: 
+    api: "mlx.core.quantile" # MLX quantile is 0-1
+    args: { "q": "q" } 
+---
+operation: "PermuteDims" 
+description: "Permutes the dimensions of an array." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "axes" 
+    type: "Tuple[int]" 
+variants: 
+  numpy: 
+    api: "numpy.transpose" 
+  torch: 
+    api: "torch.permute" 
+    args: 
+      axes: "dims" 
+    pack_to_tuple: "dims" 
+  jax: 
+    api: "jax.numpy.transpose" 
+    args: 
+      axes: "axes" 
+  flax_nnx: 
+    api: "jax.numpy.transpose" 
+  paxml: 
+    api: "jax.numpy.transpose" 
+  keras: 
+    api: "keras.ops.transpose" 
+  tensorflow: 
+    api: "tf.transpose" 
+    args: 
+      axes: "perm" 
+  mlx: 
+    api: "mlx.core.transpose" 
+    args: 
+      axes: "axes" 
+---
+operation: "Pi" 
+description: "Mathematical constant pi." 
+op_type: "attribute" 
+std_args: [] 
+return_type: "float" 
+variants: 
+  numpy: 
+    api: "numpy.pi" 
+  torch: 
+    api: "torch.pi" 
+  jax: 
+    api: "jax.numpy.pi" 
+  flax_nnx: 
+    api: "jax.numpy.pi" 
+  paxml: 
+    api: "jax.numpy.pi" 
+  keras: 
+    api: "numpy.pi" 
+    required_imports: ["import numpy"] 
+  tensorflow: 
+    api: "math.pi" 
+    required_imports: ["import math"] 
+  mlx: 
+    api: "math.pi" 
+    required_imports: ["import math"] 
+---
+operation: "Piecewise" 
+description: "Evaluate a piecewise-defined function." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+  - name: "condlist" 
+    type: "List[Array]" 
+  - name: "funclist" 
+    type: "List[Callable]" 
+variants: 
+  numpy: 
+    api: "numpy.piecewise" 
+  jax: 
+    api: "jax.numpy.piecewise" 
+  flax_nnx: 
+    api: "jax.numpy.piecewise" 
+  paxml: 
+    api: "jax.numpy.piecewise" 
+  torch: 
+    # Not directly supported
+    api: null 
+  tensorflow: 
+    api: "tf.case" 
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "Place" 
+description: "Change elements of an array based on conditional and input values." 
+is_inplace: true
+std_args: 
+  - name: "arr" 
+    type: "Array" 
+  - name: "mask" 
+    type: "Array" 
+  - name: "vals" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.place" 
+  jax: 
+    api: "jax.numpy.place" 
+  flax_nnx: 
+    api: "jax.numpy.place" 
+  paxml: 
+    api: "jax.numpy.place" 
+  torch: 
+    # Use macro or indexing
+    macro_template: "{arr}.masked_scatter_({mask}, {vals})" 
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "Poly" 
+description: "Find the coefficients of a polynomial with the given sequence of roots." 
+std_args: 
+  - name: "seq_of_zeros" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.poly" 
+  jax: 
+    api: "jax.numpy.poly" 
+  flax_nnx: 
+    api: "jax.numpy.poly" 
+  paxml: 
+    api: "jax.numpy.poly" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "Poly1d" 
+description: "A one-dimensional polynomial class." 
+op_type: "class" 
+std_args: 
+  - name: "c_or_r" 
+    type: "Array" 
+  - name: "r" 
+    type: "bool" 
+    default: "False" 
+  - name: "variable" 
+    type: "str" 
+    default: "None" 
+variants: 
+  numpy: 
+    api: "numpy.poly1d" 
+  jax: 
+    api: "jax.numpy.poly1d" 
+  flax_nnx: 
+    api: "jax.numpy.poly1d" 
+  paxml: 
+    api: "jax.numpy.poly1d" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "PolyAdd" 
+description: "Find the sum of two polynomials." 
+std_args: 
+  - name: "a1" 
+    type: "Array" 
+  - name: "a2" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.polyadd" 
+  jax: 
+    api: "jax.numpy.polyadd" 
+  flax_nnx: 
+    api: "jax.numpy.polyadd" 
+  paxml: 
+    api: "jax.numpy.polyadd" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "PolyDer" 
+description: "Return the derivative of the specified order of a polynomial." 
+std_args: 
+  - name: "p" 
+    type: "Array" 
+  - name: "m" 
+    type: "int" 
+    default: "1" 
+variants: 
+  numpy: 
+    api: "numpy.polyder" 
+  jax: 
+    api: "jax.numpy.polyder" 
+  flax_nnx: 
+    api: "jax.numpy.polyder" 
+  paxml: 
+    api: "jax.numpy.polyder" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "PolyDiv" 
+description: "Returns the quotient and remainder of polynomial division." 
+std_args: 
+  - name: "u" 
+    type: "Array" 
+  - name: "v" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.polydiv" 
+  jax: 
+    api: "jax.numpy.polydiv" 
+  flax_nnx: 
+    api: "jax.numpy.polydiv" 
+  paxml: 
+    api: "jax.numpy.polydiv" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "PolyFit" 
+description: "Least squares polynomial fit." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+  - name: "y" 
+    type: "Array" 
+  - name: "deg" 
+    type: "int" 
+  - name: "rcond" 
+    type: "float" 
+    default: "None" 
+  - name: "full" 
+    type: "bool" 
+    default: "False" 
+  - name: "w" 
+    type: "Array" 
+    default: "None" 
+  - name: "cov" 
+    type: "bool" 
+    default: "False" 
+variants: 
+  numpy: 
+    api: "numpy.polyfit" 
+  jax: 
+    api: "jax.numpy.polyfit" 
+  flax_nnx: 
+    api: "jax.numpy.polyfit" 
+  paxml: 
+    api: "jax.numpy.polyfit" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "PolyInt" 
+description: "Return an antiderivative (indefinite integral) of a polynomial." 
+std_args: 
+  - name: "p" 
+    type: "Array" 
+  - name: "m" 
+    type: "int" 
+    default: "1" 
+  - name: "k" 
+    type: "Any" 
+    default: "None" 
+variants: 
+  numpy: 
+    api: "numpy.polyint" 
+  jax: 
+    api: "jax.numpy.polyint" 
+  flax_nnx: 
+    api: "jax.numpy.polyint" 
+  paxml: 
+    api: "jax.numpy.polyint" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "PolyMul" 
+description: "Find the product of two polynomials." 
+std_args: 
+  - name: "a1" 
+    type: "Array" 
+  - name: "a2" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.polymul" 
+  jax: 
+    api: "jax.numpy.polymul" 
+  flax_nnx: 
+    api: "jax.numpy.polymul" 
+  paxml: 
+    api: "jax.numpy.polymul" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "PolySub" 
+description: "Difference (subtraction) of two polynomials." 
+std_args: 
+  - name: "a1" 
+    type: "Array" 
+  - name: "a2" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.polysub" 
+  jax: 
+    api: "jax.numpy.polysub" 
+  flax_nnx: 
+    api: "jax.numpy.polysub" 
+  paxml: 
+    api: "jax.numpy.polysub" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "PolyVal" 
+description: "Evaluate a polynomial at specific values." 
+std_args: 
+  - name: "p" 
+    type: "Array" 
+  - name: "x" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.polyval" 
+  jax: 
+    api: "jax.numpy.polyval" 
+  flax_nnx: 
+    api: "jax.numpy.polyval" 
+  paxml: 
+    api: "jax.numpy.polyval" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "Positive" 
+description: "Numerical positive, element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.positive" 
+  torch: 
+    api: "torch.positive" 
+  jax: 
+    api: "jax.numpy.positive" 
+  flax_nnx: 
+    api: "jax.numpy.positive" 
+  paxml: 
+    api: "jax.numpy.positive" 
+  keras: 
+    macro_template: "+{x}" 
+  tensorflow: 
+    macro_template: "+{x}" 
+  mlx: 
+    macro_template: "+{x}" 
+---
+operation: "Pow" 
+description: "First array elements raised to powers from second array, element-wise." 
+std_args: 
+  - name: "x1" 
+    type: "Array" 
+  - name: "x2" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.power" 
+  torch: 
+    api: "torch.pow" 
+  jax: 
+    api: "jax.numpy.power" 
+  flax_nnx: 
+    api: "jax.numpy.power" 
+  paxml: 
+    api: "jax.numpy.power" 
+  keras: 
+    api: "keras.ops.power" 
+  tensorflow: 
+    api: "tf.math.pow" 
+  mlx: 
+    api: "mlx.core.power" 
+---
+operation: "Power" 
+description: "Alias for Pow." 
+std_args: 
+  - name: "x1" 
+    type: "Array" 
+  - name: "x2" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.power" 
+  torch: 
+    api: "torch.pow" 
+  jax: 
+    api: "jax.numpy.power" 
+  flax_nnx: 
+    api: "jax.numpy.power" 
+  paxml: 
+    api: "jax.numpy.power" 
+  keras: 
+    api: "keras.ops.power" 
+  tensorflow: 
+    api: "tf.math.pow" 
+  mlx: 
+    api: "mlx.core.power" 
+---
+operation: "PrintOptions" 
+description: "Context manager for setting print options." 
+op_type: "context" 
+std_args: [] 
+variants: 
+  numpy: 
+    api: "numpy.printoptions" 
+  torch: 
+    api: "torch.printoptions" 
+    missing_message: "Warning: torch.printoptions is not a direct context manager equivalent." 
+  jax: 
+    api: "jax.numpy.printoptions" 
+  flax_nnx: 
+    api: "jax.numpy.printoptions" 
+  paxml: 
+    api: "jax.numpy.printoptions" 
+  keras: 
+    api: null
+  tensorflow: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "Prod" 
+description: "Return the product of array elements over a given axis." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "axis" 
+    type: "Optional[Union[int, Tuple[int]]]" 
+    default: "None" 
+  - name: "dtype" 
+    type: "Optional[str]" 
+    default: "None" 
+  - name: "keepdims" 
+    type: "bool" 
+    default: "False" 
+variants: 
+  numpy: 
+    api: "numpy.prod" 
+  torch: 
+    api: "torch.prod" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jax.numpy.prod" 
+  flax_nnx: 
+    api: "jax.numpy.prod" 
+  paxml: 
+    api: "jax.numpy.prod" 
+  keras: 
+    api: "keras.ops.prod" 
+  tensorflow: 
+    api: "tf.math.reduce_prod" 
+    args: 
+      axis: "axis" 
+      keepdims: "keepdims" 
+  mlx: 
+    api: "mlx.core.prod" 
+---
+operation: "PromoteTypes" 
+description: "Returns the data type with the smallest size to which inputs can be cast." 
+std_args: 
+  - name: "type1" 
+    type: "Any" 
+  - name: "type2" 
+    type: "Any" 
+variants: 
+  numpy: 
+    api: "numpy.promote_types" 
+  torch: 
+    api: "torch.promote_types" 
+  jax: 
+    api: "jax.numpy.promote_types" 
+  flax_nnx: 
+    api: "jax.numpy.promote_types" 
+  paxml: 
+    api: "jax.numpy.promote_types" 
+  keras: 
+    api: null
+  tensorflow: 
+    api: "tf.experimental.numpy.promote_types" 
+  mlx: 
+    api: null
+---
+operation: "Ptp" 
+description: "Range of values (maximum - minimum) along an axis." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "axis" 
+    type: "Optional[Union[int, Tuple[int]]]" 
+    default: "None" 
+  - name: "keepdims" 
+    type: "bool" 
+    default: "False" 
+variants: 
+  numpy: 
+    api: "numpy.ptp" 
+  torch: 
+    macro_template: "{a}.max({axis}).values - {a}.min({axis}).values" 
+    # Complex macro: torch.max/min return tuple (values, indices) if dim is provided
+  jax: 
+    api: "jax.numpy.ptp" 
+  flax_nnx: 
+    api: "jax.numpy.ptp" 
+  paxml: 
+    api: "jax.numpy.ptp" 
+  keras: 
+    macro_template: "keras.ops.max({a}, {axis}, {keepdims}) - keras.ops.min({a}, {axis}, {keepdims})" 
+  tensorflow: 
+    macro_template: "tf.reduce_max({a}, {axis}, {keepdims}) - tf.reduce_min({a}, {axis}, {keepdims})" 
+  mlx: 
+    macro_template: "mx.max({a}, {axis}, {keepdims}) - mx.min({a}, {axis}, {keepdims})" 
+---
+operation: "Put" 
+description: "Replaces specified elements of an array with given values." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "ind" 
+    type: "Array" 
+  - name: "v" 
+    type: "Array" 
+  - name: "mode" 
+    type: "str" 
+    default: "'raise'" 
+variants: 
+  numpy: 
+    api: "numpy.put" 
+  jax: 
+    api: "jax.numpy.put" 
+  flax_nnx: 
+    api: "jax.numpy.put" 
+  paxml: 
+    api: "jax.numpy.put" 
+  torch: 
+    api: null # In-place logic usually
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "PutAlongAxis" 
+description: "Put values into the destination array by matching 1d index and data slices." 
+std_args: 
+  - name: "arr" 
+    type: "Array" 
+  - name: "indices" 
+    type: "Array" 
+  - name: "values" 
+    type: "Array" 
+  - name: "axis" 
+    type: "int" 
+variants: 
+  numpy: 
+    api: "numpy.put_along_axis" 
+  jax: 
+    api: "jax.numpy.put_along_axis" 
+  flax_nnx: 
+    api: "jax.numpy.put_along_axis" 
+  paxml: 
+    api: "jax.numpy.put_along_axis" 
+  torch: 
+    api: "torch.scatter" 
+    args: 
+      axis: "dim" 
+      indices: "index" 
+      values: "src" 
+    transformation_type: "infix" # Scatter is weird (out of place returns new tensor, but put_along_axis is often in-place in numpy? JAX is functional). 
+    # Actually mapping put_along_axis to scatter is roughly correct functional equiv if out-of-place. 
+  tensorflow: 
+    api: "tf.experimental.numpy.put_along_axis" 
+  keras: 
+    api: "keras.ops.take_along_axis" # No put/scatter available easily in ops
+  mlx: 
+    # MLX has scatter logic via index update syntax
+    api: null
+---
+operation: "PutMask" 
+description: "Changes elements of an array based on conditional and input values." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "mask" 
+    type: "Array" 
+  - name: "values" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.putmask" 
+  jax: 
+    api: "jax.numpy.putmask" 
+  flax_nnx: 
+    api: "jax.numpy.putmask" 
+  paxml: 
+    api: "jax.numpy.putmask" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "Quantile" 
+description: "Compute the q-th quantile of the data along the specified axis." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "q" 
+    type: "Array" 
+  - name: "axis" 
+    type: "Optional[int]" 
+    default: "None" 
+  - name: "keepdims" 
+    type: "bool" 
+    default: "False" 
+variants: 
+  numpy: 
+    api: "numpy.quantile" 
+  torch: 
+    api: "torch.quantile" 
+    args: 
+      a: "input" 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jax.numpy.quantile" 
+  flax_nnx: 
+    api: "jax.numpy.quantile" 
+  paxml: 
+    api: "jax.numpy.quantile" 
+  keras: 
+    api: "keras.ops.quantile" 
+  tensorflow: 
+    api: "tfp.stats.quantiles" 
+    required_imports: ["import tensorflow_probability as tfp"] 
+  mlx: 
+    api: "mlx.core.quantile" 
+---
+operation: "R_" 
+description: "Translates slice objects to concatenation along the first axis." 
+std_args: [] 
+op_type: "attribute" 
+variants: 
+  numpy: 
+    api: "numpy.r_" 
+  jax: 
+    api: "jax.numpy.r_" 
+  flax_nnx: 
+    api: "jax.numpy.r_" 
+  paxml: 
+    api: "jax.numpy.r_" 
+  torch: 
+    api: null
+  tensorflow: 
+    api: null
+  keras: 
+    api: null
+  mlx: 
+    api: null
+---
+operation: "Rad2Deg" 
+description: "Convert angles from radians to degrees." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.rad2deg" 
+  torch: 
+    api: "torch.rad2deg" 
+  jax: 
+    api: "jax.numpy.rad2deg" 
+  flax_nnx: 
+    api: "jax.numpy.rad2deg" 
+  paxml: 
+    api: "jax.numpy.rad2deg" 
+  keras: 
+    macro_template: "{x} * 180.0 / 3.1415926535" 
+  tensorflow: 
+    macro_template: "{x} * 180.0 / 3.1415926535" 
+  mlx: 
+    api: "mlx.core.degrees" 
+---
+operation: "Radians" 
+description: "Convert angles from degrees to radians." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.radians" 
+  torch: 
+    api: "torch.deg2rad" 
+  jax: 
+    api: "jax.numpy.radians" 
+  flax_nnx: 
+    api: "jax.numpy.radians" 
+  paxml: 
+    api: "jax.numpy.radians" 
+  keras: 
+    macro_template: "{x} * 3.1415926535 / 180.0" 
+  tensorflow: 
+    macro_template: "{x} * 3.1415926535 / 180.0" 
+  mlx: 
+    api: "mlx.core.radians" 
+---
+operation: "Ravel" 
+description: "Return a contiguous flattened array." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.ravel" 
+  torch: 
+    api: "torch.ravel" 
+  jax: 
+    api: "jax.numpy.ravel" 
+  flax_nnx: 
+    api: "jax.numpy.ravel" 
+  paxml: 
+    api: "jax.numpy.ravel" 
+  keras: 
+    api: "keras.ops.ravel" 
+  tensorflow: 
+    api: "tf.reshape" 
+    macro_template: "tf.reshape({a}, [-1])" 
+  mlx: 
+    api: "mlx.core.flatten"

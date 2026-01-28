@@ -1,0 +1,660 @@
+operation: "SvdLowrank"
+description: "Computes a low-rank approximation of the singular value decomposition."
+std_args:
+  - name: "A"
+    type: "Tensor"
+  - name: "q"
+    type: "int"
+    default: 6
+  - name: "niter"
+    type: "int"
+    default: 2
+  - name: "M"
+    type: "Tensor"
+    default: null
+variants:
+  torch:
+    api: "torch.svd_lowrank"
+  jax:
+    api: null # JAX requires full SVD or custom randomized impl
+  numpy:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+---
+operation: "Swapaxes"
+description: "Interchange two dimensions of a tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "axis0"
+    type: "int"
+  - name: "axis1"
+    type: "int"
+variants:
+  torch:
+    api: "torch.swapaxes"
+  jax:
+    api: "jax.numpy.swapaxes"
+  numpy:
+    api: "numpy.swapaxes"
+  keras:
+    api: "keras.ops.swapaxes"
+  tensorflow:
+    api: "tf.experimental.numpy.swapaxes"
+  mlx:
+    api: "mlx.core.swapaxes"
+---
+operation: "Swapdims"
+description: "Interchange two dimensions of a tensor (Alias for Swapaxes)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim0"
+    type: "int"
+  - name: "dim1"
+    type: "int"
+variants:
+  torch:
+    api: "torch.swapdims"
+  jax:
+    api: "jax.numpy.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+  numpy:
+    api: "numpy.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+  keras:
+    api: "keras.ops.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+  tensorflow:
+    api: "tf.experimental.numpy.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+  mlx:
+    api: "mlx.core.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+---
+operation: "SymConstrainRange"
+description: "Symbolic utility to constrain value range (Traced)."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Any"
+  - name: "min"
+    type: "Any"
+    default: null
+  - name: "max"
+    type: "Any"
+    default: null
+variants:
+  torch:
+    api: "torch.sym_constrain_range"
+  jax:
+    macro_template: "{x}" # No-op in eager execution
+  numpy:
+    macro_template: "{x}"
+---
+operation: "SymConstrainRangeForSize"
+description: "Symbolic utility to constrain size range (Traced)."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.sym_constrain_range_for_size"
+  jax:
+    macro_template: "{x}"
+  numpy:
+    macro_template: "{x}"
+---
+operation: "SymFloat"
+description: "Casts a symbolic integer to a float."
+std_args:
+  - name: "a"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.sym_float"
+  jax:
+    macro_template: "float({a})"
+  numpy:
+    macro_template: "float({a})"
+  mlx:
+    macro_template: "float({a})"
+---
+operation: "SymFreshSize"
+description: "Symbolic utility for creating a fresh size symbol."
+std_args:
+  - name: "expr"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.sym_fresh_size"
+  jax:
+    macro_template: "{expr}"
+  numpy:
+    macro_template: "{expr}"
+---
+operation: "SymInt"
+description: "Casts a symbolic float or object to an int."
+std_args:
+  - name: "a"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.sym_int"
+  jax:
+    macro_template: "int({a})"
+  numpy:
+    macro_template: "int({a})"
+  mlx:
+    macro_template: "int({a})"
+---
+operation: "SymIte"
+description: "Symbolic if-then-else."
+std_args:
+  - name: "b"
+    type: "bool"
+  - name: "t"
+    type: "Any"
+  - name: "f"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.sym_ite"
+  jax:
+    api: "jax.lax.cond"
+    args:
+      b: "pred"
+      t: "true_fun"
+      f: "false_fun"
+    # Logic note: JAX cond requires functions, this is direct value selection
+    macro_template: "{t} if {b} else {f}"
+  numpy:
+    macro_template: "{t} if {b} else {f}"
+---
+operation: "SymMax"
+description: "Symbolic Max operation."
+std_args:
+  - name: "a"
+  - name: "b"
+variants:
+  torch:
+    api: "torch.sym_max"
+  jax:
+    api: "max" # Builtin
+  numpy:
+    api: "max" # Builtin
+---
+operation: "SymMin"
+description: "Symbolic Min operation."
+std_args:
+  - name: "a"
+  - name: "b"
+variants:
+  torch:
+    api: "torch.sym_min"
+  jax:
+    api: "min"
+  numpy:
+    api: "min"
+---
+operation: "SymNot"
+description: "Symbolic logic negation."
+std_args:
+  - name: "a"
+variants:
+  torch:
+    api: "torch.sym_not"
+  jax:
+    macro_template: "not {a}"
+  numpy:
+    macro_template: "not {a}"
+---
+operation: "SymSqrt"
+description: "Symbolic square root."
+std_args:
+  - name: "a"
+variants:
+  torch:
+    api: "torch.sym_sqrt"
+  jax:
+    api: "math.sqrt"
+    required_imports:
+      - "import math"
+  numpy:
+    api: "math.sqrt"
+    required_imports:
+      - "import math"
+---
+operation: "SymSum"
+description: "Symbolic N-ary sum."
+std_args:
+  - name: "args"
+    type: "List"
+variants:
+  torch:
+    api: "torch.sym_sum"
+  jax:
+    api: "sum"
+  numpy:
+    api: "sum"
+---
+operation: "Symeig"
+description: "Computes eigenvalues and eigenvectors of a real symmetric matrix (Deprecated)."
+deprecated: true
+replaced_by: "LinalgEigh"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "eigenvectors"
+    type: "bool"
+    default: false
+  - name: "upper"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.symeig"
+  jax:
+    api: "jax.scipy.linalg.eigh"
+    # Arguments differ significantly (JAX takes 'lower' boolean, Torch 'upper').
+    # Full mapping requires logic.
+  numpy:
+    api: "numpy.linalg.eigh"
+---
+operation: "Transpose2D"
+description: "Transposes dimensions 0 and 1 of a tensor. Expects <= 2D input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.t"
+  jax:
+    api: "jax.numpy.transpose"
+  numpy:
+    api: "numpy.transpose"
+  keras:
+    api: "keras.ops.transpose"
+  tensorflow:
+    api: "tf.transpose"
+  mlx:
+    api: "mlx.core.transpose"
+---
+operation: "TCopy"
+description: "Performs transpose (2D) and returns a fresh copy."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.t_copy"
+  jax:
+    macro_template: "jax.numpy.transpose({input}).copy()"
+  numpy:
+    macro_template: "numpy.transpose({input}).copy()"
+  mlx:
+    # MLX arrays are generic reference counted, copy semantics implied if mutated
+    api: "mlx.core.transpose"
+---
+operation: "Take"
+description: "Returns a new tensor with the elements of input at the given indices (flattened)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "index"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.take"
+  jax:
+    api: "jax.numpy.take"
+    # JAX take flattens if axis=None, which matches Torch semantics
+  numpy:
+    api: "numpy.take"
+  keras:
+    api: "keras.ops.take"
+  tensorflow:
+    api: "tf.gather"
+    # TF gather typically requires axis, but 'tf.reshape(x, [-1])' + gather simulates flatten take
+    macro_template: "tf.gather(tf.reshape({input}, [-1]), {index})"
+  mlx:
+    # MLX take creates standard take, default axis=0? No, MLX requires axis usually or flatten.
+    macro_template: "mlx.core.take(mlx.core.flatten({input}), {index})"
+---
+operation: "TakeAlongDim"
+description: "Selects values from input at indices along the given dim."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.take_along_dim"
+  jax:
+    api: "jax.numpy.take_along_axis"
+    args:
+      dim: "axis"
+  numpy:
+    api: "numpy.take_along_axis"
+    args:
+      dim: "axis"
+  keras:
+    api: "keras.ops.take_along_axis"
+    args:
+      dim: "axis"
+  tensorflow:
+    api: "tf.experimental.numpy.take_along_axis"
+    args:
+      dim: "axis"
+  mlx:
+    api: "mlx.core.take_along_axis"
+    args:
+      dim: "axis"
+---
+operation: "Tan"
+description: "Computes the tangent of the elements."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.tan"
+  jax:
+    api: "jax.numpy.tan"
+  numpy:
+    api: "numpy.tan"
+  keras:
+    api: "keras.ops.tan"
+  tensorflow:
+    api: "tf.math.tan"
+  mlx:
+    api: "mlx.core.tan"
+---
+operation: "Tan_"
+description: "In-place version of Tan."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.tan_"
+  jax:
+    api: "jax.numpy.tan" # Functional fallback
+  numpy:
+    api: "numpy.tan"
+  keras:
+    api: "keras.ops.tan"
+  tensorflow:
+    api: "tf.math.tan"
+  mlx:
+    api: "mlx.core.tan"
+---
+operation: "Tanh"
+description: "Computes the hyperbolic tangent of the elements."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.tanh"
+  jax:
+    api: "jax.numpy.tanh"
+  numpy:
+    api: "numpy.tanh"
+  keras:
+    api: "keras.ops.tanh"
+  tensorflow:
+    api: "tf.math.tanh"
+  mlx:
+    api: "mlx.core.tanh"
+---
+operation: "Tanh_"
+description: "In-place version of Tanh."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.tanh_"
+  jax:
+    api: "jax.numpy.tanh" # Functional fallback
+  numpy:
+    api: "numpy.tanh"
+  keras:
+    api: "keras.ops.tanh"
+  tensorflow:
+    api: "tf.math.tanh"
+  mlx:
+    api: "mlx.core.tanh"
+---
+operation: "Tensor"
+description: "Constructs a tensor from data."
+std_args:
+  - name: "data"
+    type: "Any"
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "device"
+    type: "Any"
+    default: null
+  - name: "requires_grad"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.tensor"
+  jax:
+    api: "jax.numpy.array"
+    args:
+      device: null # JAX handles placement differently
+      requires_grad: null
+  numpy:
+    api: "numpy.array"
+    args:
+      device: null
+      requires_grad: null
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    args:
+      device: null
+      requires_grad: null
+      data: "x"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    args:
+      data: "value"
+      device: null
+      requires_grad: null
+  mlx:
+    api: "mlx.core.array"
+    args:
+      device: null
+      requires_grad: null
+---
+operation: "TensorSplit"
+description: "Splits a tensor into multiple sub-tensors."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "Union[int, List[int]]"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.tensor_split"
+  jax:
+    api: "jax.numpy.array_split"
+    args:
+      indices_or_sections: "indices_or_sections"
+      dim: "axis"
+  numpy:
+    api: "numpy.array_split"
+    args:
+      dim: "axis"
+  tensorflow:
+    api: "tf.split" # Semantics differ slightly (split expects num_or_size_splits)
+    missing_message: "tf.split signature differs from tensor_split. Use plugin."
+  mlx:
+    api: "mlx.core.split"
+    args:
+      dim: "axis"
+---
+operation: "Tensordot"
+description: "Returns a contraction of a and b over multiple dimensions."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "dims"
+    type: "Union[int, Tuple]"
+    default: 2
+variants:
+  torch:
+    api: "torch.tensordot"
+  jax:
+    api: "jax.numpy.tensordot"
+    args:
+      dims: "axes"
+  numpy:
+    api: "numpy.tensordot"
+    args:
+      dims: "axes"
+  keras:
+    api: "keras.ops.tensordot"
+    args:
+      dims: "axes"
+  tensorflow:
+    api: "tf.tensordot"
+    args:
+      dims: "axes"
+  mlx:
+    api: "mlx.core.tensordot"
+    args:
+      dims: "axes"
+---
+operation: "Threshold"
+description: "Thresholds each element of the input Tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "threshold"
+    type: "float"
+  - name: "value"
+    type: "float"
+variants:
+  torch:
+    api: "torch.threshold"
+  jax:
+    macro_template: "jax.numpy.where({input} > {threshold}, {input}, {value})"
+  numpy:
+    macro_template: "numpy.where({input} > {threshold}, {input}, {value})"
+  keras:
+    macro_template: "keras.ops.where({input} > {threshold}, {input}, {value})"
+  tensorflow:
+    macro_template: "tf.where({input} > {threshold}, {input}, {value})"
+  mlx:
+    macro_template: "mlx.core.where({input} > {threshold}, {input}, {value})"
+---
+operation: "Threshold_"
+description: "In-place version of Threshold."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "threshold"
+    type: "float"
+  - name: "value"
+    type: "float"
+variants:
+  torch:
+    api: "torch.threshold_"
+  jax:
+    macro_template: "jax.numpy.where({input} > {threshold}, {input}, {value})"
+  numpy:
+    # NumPy supports in-place via `out` or slicing, but macro expansion implies functional unless specialized
+    macro_template: "numpy.where({input} > {threshold}, {input}, {value})"
+  mlx:
+    macro_template: "mlx.core.where({input} > {threshold}, {input}, {value})"
+---
+operation: "Tile"
+description: "Constructs a tensor by repeating the elements of input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dims"
+    type: "Tuple[int]"
+variants:
+  torch:
+    api: "torch.tile"
+  jax:
+    api: "jax.numpy.tile"
+    args:
+      dims: "reps"
+  numpy:
+    api: "numpy.tile"
+    args:
+      dims: "reps"
+  keras:
+    api: "keras.ops.tile"
+    args:
+      dims: "repeats"
+  tensorflow:
+    api: "tf.tile"
+    args:
+      dims: "multiples"
+  mlx:
+    # MLX has no direct tile, often uses broadcast_to or concatenate.
+    # Leaving null if complex, or mapping to broadcast if semantics allow (tiling adds dims vs broadcasting existing)
+    api: null
+    missing_message: "MLX does not have a direct tile function."
+---
+operation: "ToDlpack"
+description: "Exports a tensor to a DLPack capsule."
+std_args:
+  - name: "tensor"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.to_dlpack"
+  jax:
+    api: "jax.dlpack.to_dlpack"
+    args:
+      tensor: "x"
+  numpy:
+    api: "numpy.from_dlpack" # Numpy 1.22+ has from_dlpack, to_dlpack is on array object
+    macro_template: "{tensor}.__dlpack__()"
+  keras:
+    # Keras ops might rely on backend
+    api: "keras.ops.convert_to_numpy" # Fallback? No, strict DLPack
+    macro_template: "{tensor}.__dlpack__()"
+  tensorflow:
+    api: "tf.experimental.dlpack.to_dlpack"
+  mlx:
+    # MLX has no public to_dlpack in core namespace often, check docs
+    api: null

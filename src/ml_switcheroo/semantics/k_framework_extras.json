@@ -86,24 +86,10 @@
     ],
     "type": "class"
   },
-  "Adamw": {
-    "description": "Auto-discovered via Consensus (Score: 4.0)",
-    "std_args": [
-      "eps",
-      "lr",
-      "weight_decay"
-    ],
-    "type": "class"
-  },
   "AddAxisHook": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "Alphadropout": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [],
-    "type": "class"
   },
   "ApplyCaller": {
     "description": "The class representing a Python class.",
@@ -302,11 +288,6 @@
     "type": "attribute"
   },
   "COMMON_FREE_EXTENSIONS": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "COMPLEX": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
@@ -2178,6 +2159,11 @@
   },
   "SeedlessSeedSequence": {
     "description": "A seed sequence for BitGenerators with no need for seed state.",
+    "std_args": [],
+    "type": "class"
+  },
+  "SeedlessSequence": {
+    "description": "The class representing a Python class.",
     "std_args": [],
     "type": "class"
   },
@@ -5700,15 +5686,6 @@
     ],
     "type": "function"
   },
-  "asanyarray": {
-    "description": "Convert the input to a masked array, conserving subclasses.",
-    "std_args": [
-      "a",
-      "dtype",
-      "order"
-    ],
-    "type": "function"
-  },
   "asarray": {
     "description": "Convert the input to an array.",
     "std_args": [
@@ -6270,6 +6247,63 @@
     "std_args": [],
     "variants": {}
   },
+  "binary_crossentropy": {
+    "description": "Computes the binary crossentropy loss.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_true",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_pred",
+        "type": "Any"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "from_logits",
+        "type": "bool"
+      }
+    ],
+    "variants": {}
+  },
+  "binary_focal_crossentropy": {
+    "description": "Computes the binary focal crossentropy loss.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_true",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_pred",
+        "type": "Any"
+      },
+      {
+        "default": 2.0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "gamma",
+        "type": "float"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "from_logits",
+        "type": "bool"
+      }
+    ],
+    "variants": {}
+  },
   "bincount": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -6755,8 +6789,96 @@
     "variants": {}
   },
   "categorical_crossentropy": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
+    "description": "Computes the categorical crossentropy loss.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_true",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_pred",
+        "type": "Any"
+      },
+      {
+        "default": false,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "from_logits",
+        "type": "bool"
+      }
+    ],
+    "variants": {}
+  },
+  "categorical_focal_crossentropy": {
+    "description": "Computes the categorical focal crossentropy loss.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_true",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_pred",
+        "type": "Any"
+      },
+      {
+        "default": 2.0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "gamma",
+        "type": "float"
+      }
+    ],
+    "variants": {}
+  },
+  "categorical_generalized_cross_entropy": {
+    "description": "Computes the Generalized Cross Entropy loss.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_true",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_pred",
+        "type": "Any"
+      },
+      {
+        "default": 0.5,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "q",
+        "type": "float"
+      }
+    ],
+    "variants": {}
+  },
+  "categorical_hinge": {
+    "description": "Computes the categorical hinge loss.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_true",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_pred",
+        "type": "Any"
+      }
+    ],
     "variants": {}
   },
   "cauchy": {
@@ -7271,6 +7393,31 @@
   "choose": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
+    "variants": {}
+  },
+  "circle": {
+    "description": "Computes the Circle loss.",
+    "std_args": [
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_true",
+        "type": "Any"
+      },
+      {
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "y_pred",
+        "type": "Any"
+      },
+      {
+        "default": 80.0,
+        "is_variadic": false,
+        "kind": "positional_or_keyword",
+        "name": "gamma",
+        "type": "float"
+      }
+    ],
     "variants": {}
   },
   "class_modules": {
@@ -10224,6 +10371,14 @@
     ],
     "type": "function"
   },
+  "from_fp8": {
+    "description": "from_fp8(x: array, dtype: Dtype = bfloat16, *, stream: Union[None, Stream, Device] = None) -> array",
+    "std_args": [
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
   "from_indexmap": {
     "description": "The class representing a Python function.",
     "std_args": [
@@ -12552,6 +12707,11 @@
     "description": "Auto-generated from numpy_code_defs",
     "std_args": [],
     "variants": {}
+  },
+  "interpolating_quantile_methods": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "intersect1d": {
     "description": "Auto-generated from jax_code_defs",
@@ -15794,11 +15954,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "ndtri": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "needs": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -16854,11 +17009,6 @@
     "type": "attribute"
   },
   "polyfromroots": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "polygamma": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
@@ -33387,6 +33537,23 @@
     ],
     "type": "function"
   },
+  "test_q_strong_promotion": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "method"
+    ],
+    "type": "function"
+  },
+  "test_q_weak_promotion": {
+    "description": "The class representing a Python function.",
+    "std_args": [
+      "self",
+      "method",
+      "q"
+    ],
+    "type": "function"
+  },
   "test_q_zero_one": {
     "description": "The class representing a Python function.",
     "std_args": [
@@ -38387,6 +38554,14 @@
     ],
     "type": "function"
   },
+  "to_fp8": {
+    "description": "to_fp8(x: array, *, stream: Union[None, Stream, Device] = None) -> array",
+    "std_args": [
+      "args",
+      "kwargs"
+    ],
+    "type": "function"
+  },
   "to_linen": {
     "description": "Shortcut of `nnx.bridge.ToLinen` if user is not changing any of its default fields.",
     "std_args": [
@@ -39954,11 +40129,6 @@
     "std_args": [],
     "variants": {}
   },
-  "xlogy": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "y": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -40026,11 +40196,6 @@
       }
     ],
     "variants": {}
-  },
-  "zeta": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
   },
   "zgelsd": {
     "description": "The class representing a Python function.",

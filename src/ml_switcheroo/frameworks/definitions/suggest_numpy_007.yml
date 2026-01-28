@@ -1,0 +1,782 @@
+operation: "FromString"
+description: "A new 1-D array initialized from text data in a string."
+std_args:
+  - name: "string"
+    type: "str"
+  - name: "dtype"
+    type: "type"
+    default: "float"
+  - name: "count"
+    type: "int"
+    default: -1
+  - name: "sep"
+    type: "str"
+    default: ""
+variants:
+  numpy:
+    api: "numpy.fromstring"
+  torch:
+    api: null # Explicitly unsupported in PyTorch core without complexIO parsing
+  jax:
+    api: "numpy.fromstring"
+    required_imports: ["import numpy"] # JAX often falls back to numpy for string IO
+  tensorflow:
+    api: "tf.io.decode_csv" # Approx, but fromstring is generic
+    required_imports: ["import tensorflow as tf"]
+    missing_message: "TensorFlow uses tf.io.decode_raw/csv for string parsing, exact match varying."
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Full"
+description: "Return a new array of given shape and type, filled with `fill_value`."
+std_args:
+  - name: "shape"
+    type: "Union[int, Sequence[int]]"
+  - name: "fill_value"
+    type: "Union[number, Array]"
+  - name: "dtype"
+    type: "Optional[type]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.full"
+  torch:
+    api: "torch.full"
+    args:
+      shape: "size"
+  jax:
+    api: "jax.numpy.full"
+  flax_nnx:
+    api: "jax.numpy.full"
+  paxml:
+    api: "jax.numpy.full"
+  keras:
+    api: "keras.ops.full"
+  tensorflow:
+    api: "tf.fill"
+    args:
+      shape: "dims"
+      fill_value: "value"
+      dtype: null # tf.fill infers dtype from value, usually requires cast after if different
+  mlx:
+    api: "mlx.core.full"
+
+---
+operation: "FullLike"
+description: "Return a full array with the same shape and type as a given array."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "fill_value"
+    type: "Union[number, Array]"
+  - name: "dtype"
+    type: "Optional[type]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.full_like"
+  torch:
+    api: "torch.full_like"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.full_like"
+  flax_nnx:
+    api: "jax.numpy.full_like"
+  paxml:
+    api: "jax.numpy.full_like"
+  keras:
+    api: "keras.ops.full_like"
+    args:
+      a: "x"
+  tensorflow:
+    api: "tf.fill"
+    macro_template: "tf.fill(tf.shape({a}), {fill_value})"
+  mlx:
+    api: "mlx.core.full"
+    macro_template: "mlx.core.full({a}.shape, {fill_value}, dtype={dtype} or {a}.dtype)"
+
+---
+operation: "Gcd"
+description: "Returns the greatest common divisor of |x1| and |x2|."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.gcd"
+  torch:
+    api: "torch.gcd"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.gcd"
+  flax_nnx:
+    api: "jax.numpy.gcd"
+  paxml:
+    api: "jax.numpy.gcd"
+  tensorflow:
+    api: "tf.math.reduce_gcd" # Elementwise might be different, strict check needed
+  keras:
+    api: null # Not in core ops
+  mlx:
+    api: null # Not standard in core yet
+
+---
+operation: "Generic"
+description: "Base class for numpy scalar types."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.generic"
+  torch:
+    api: "torch.Tensor" # Rough equivalent for base type
+  jax:
+    api: "jax.numpy.generic"
+
+---
+operation: "GenFromTxt"
+description: "Load data from a text file, with missing values handled as specified."
+std_args:
+  - name: "fname"
+    type: "str"
+  - name: "dtype"
+    type: "type"
+    default: "float"
+  - name: "delimiter"
+    type: "Optional[str]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.genfromtxt"
+  torch:
+    api: null
+    missing_message: "Use pandas.read_csv or numpy.genfromtxt for text IO."
+  jax:
+    api: null
+  tensorflow:
+    api: null
+    missing_message: "Use tf.data.TextLineDataset or tf.io."
+
+---
+operation: "GeomSpace"
+description: "Return numbers spaced evenly on a log scale (a geometric progression)."
+std_args:
+  - name: "start"
+    type: "number"
+  - name: "stop"
+    type: "number"
+  - name: "num"
+    type: "int"
+    default: 50
+variants:
+  numpy:
+    api: "numpy.geomspace"
+  torch:
+    api: "torch.logspace"
+    # Logic mismatch: geomspace takes start/stop values. logspace takes start/stop powers (base**start).
+    # Requires macro conversion: start -> log(start)/log(base)
+    missing_message: "Direct mapping difficult due to interface diff (values vs exponents)."
+  jax:
+    api: "jax.numpy.geomspace"
+  flax_nnx:
+    api: "jax.numpy.geomspace"
+  paxml:
+    api: "jax.numpy.geomspace"
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.geomspace"
+
+---
+operation: "GetInclude"
+description: "Return the directory that contains the NumPy *.h header files."
+std_args: []
+variants:
+  numpy:
+    api: "numpy.get_include"
+  torch:
+    api: "torch.utils.cpp_extension.include_paths"
+    macro_template: "torch.utils.cpp_extension.include_paths()[0]"
+  jax:
+    api: null
+
+---
+operation: "GetPrintOptions"
+description: "Return the current print options."
+std_args: []
+variants:
+  numpy:
+    api: "numpy.get_printoptions"
+  torch:
+    api: null
+  jax:
+    api: null
+  tensorflow:
+    api: null
+
+---
+operation: "GetBufSize"
+description: "Return the size of the buffer used in ufuncs."
+std_args: []
+variants:
+  numpy:
+    api: "numpy.getbufsize"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "GetErr"
+description: "Get the current way of handling floating-point errors."
+std_args: []
+variants:
+  numpy:
+    api: "numpy.geterr"
+  torch:
+    api: null # Floating point error handling often environment specific
+  jax:
+    api: null # JAX handles NaN/Inf differently (non-throwing)
+
+---
+operation: "GetErrCall"
+description: "Return the current callback function used on floating-point errors."
+std_args: []
+variants:
+  numpy:
+    api: "numpy.geterrcall"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "Gradient"
+description: "Return the gradient of an N-dimensional array."
+std_args:
+  - name: "f"
+    type: "Array"
+  - name: "varargs"
+    type: "Any"
+    is_variadic: true
+  - name: "axis"
+    type: "Optional[Union[int, Tuple[int]]]"
+    default: null
+  - name: "edge_order"
+    type: "int"
+    default: 1
+variants:
+  numpy:
+    api: "numpy.gradient"
+  torch:
+    api: "torch.gradient"
+    args:
+      f: "input"
+      varargs: "spacing" # Torch takes spacing as tuple/list arg, not variadic
+    pack_to_tuple: "spacing"
+  jax:
+    api: "jax.numpy.gradient"
+  flax_nnx:
+    api: "jax.numpy.gradient"
+  paxml:
+    api: "jax.numpy.gradient"
+  tensorflow:
+    api: "tf.image.image_gradients" # Image specific, usually different semantics
+
+---
+operation: "Greater"
+description: "Return the truth value of (x1 > x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.greater"
+  torch:
+    api: "torch.gt"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.greater"
+  flax_nnx:
+    api: "jax.numpy.greater"
+  paxml:
+    api: "jax.numpy.greater"
+  keras:
+    api: "keras.ops.greater"
+  tensorflow:
+    api: "tf.greater"
+    args:
+      x1: "x"
+      x2: "y"
+  mlx:
+    api: "mlx.core.greater"
+
+---
+operation: "GreaterEqual"
+description: "Return the truth value of (x1 >= x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.greater_equal"
+  torch:
+    api: "torch.ge"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.greater_equal"
+  flax_nnx:
+    api: "jax.numpy.greater_equal"
+  paxml:
+    api: "jax.numpy.greater_equal"
+  keras:
+    api: "keras.ops.greater_equal"
+  tensorflow:
+    api: "tf.greater_equal"
+    args:
+      x1: "x"
+      x2: "y"
+  mlx:
+    api: "mlx.core.greater_equal"
+
+---
+operation: "Half"
+description: "Half-precision floating-point number type."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "Any"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.half"
+  torch:
+    api: "torch.float16" # Usually used as dtype, but can constuct
+    macro_template: "torch.tensor({value}, dtype=torch.float16)"
+  jax:
+    api: "jax.numpy.float16"
+  tensorflow:
+    api: "tf.float16"
+  mlx:
+    api: "mlx.core.float16"
+
+---
+operation: "HammingWindow"
+description: "Return the Hamming window."
+std_args:
+  - name: "M"
+    type: "int"
+    doc: "Number of points in the output window."
+variants:
+  numpy:
+    api: "numpy.hamming"
+  torch:
+    api: "torch.hamming_window"
+    args:
+      M: "window_length"
+  jax:
+    api: "jax.numpy.hamming"
+  flax_nnx:
+    api: "jax.numpy.hamming"
+  paxml:
+    api: "jax.numpy.hamming"
+  tensorflow:
+    api: "tf.signal.hamming_window"
+    args:
+      M: "window_length"
+  keras:
+    api: null # Signal processing usually outside standard keras ops
+
+---
+operation: "HannWindow"
+description: "Return the Hanning window."
+std_args:
+  - name: "M"
+    type: "int"
+variants:
+  numpy:
+    api: "numpy.hanning"
+  torch:
+    api: "torch.hann_window"
+    args:
+      M: "window_length"
+  jax:
+    api: "jax.numpy.hanning"
+  flax_nnx:
+    api: "jax.numpy.hanning"
+  paxml:
+    api: "jax.numpy.hanning"
+  tensorflow:
+    api: "tf.signal.hann_window"
+    args:
+      M: "window_length"
+
+---
+operation: "Heaviside"
+description: "Compute the Heaviside step function."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+    doc: "Value at 0"
+variants:
+  numpy:
+    api: "numpy.heaviside"
+  torch:
+    api: "torch.heaviside"
+    args:
+      x1: "input"
+      x2: "values"
+  jax:
+    api: "jax.numpy.heaviside"
+  flax_nnx:
+    api: "jax.numpy.heaviside"
+  paxml:
+    api: "jax.numpy.heaviside"
+  tensorflow:
+    api: "tf.experimental.numpy.heaviside"
+  keras:
+    api: null # math only
+
+---
+operation: "Histogram"
+description: "Compute the histogram of a dataset."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "bins"
+    type: "Union[int, Array, str]"
+    default: 10
+  - name: "range"
+    type: "Optional[Tuple[float, float]]"
+    default: null
+  - name: "density"
+    type: "bool"
+    default: false
+  - name: "weights"
+    type: "Optional[Array]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.histogram"
+  torch:
+    api: "torch.histogram"
+    args:
+      a: "input"
+      # torch.histogram signature differs significantly based on arguments (Tensor vs bins)
+      # Usually torch.histogram(input, bins=..., range=..., weight=..., density=...)
+  jax:
+    api: "jax.numpy.histogram"
+  flax_nnx:
+    api: "jax.numpy.histogram"
+  paxml:
+    api: "jax.numpy.histogram"
+  tensorflow:
+    api: "tf.histogram_fixed_width" # Specific variant depends on usage
+    missing_message: "TF histogram ops are fragmented (fixed_width, nd). Verify args."
+
+---
+operation: "Histogram2d"
+description: "Compute the bi-dimensional histogram of two data samples."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "y"
+    type: "Array"
+  - name: "bins"
+    type: "Union[int, Array]"
+    default: 10
+  - name: "range"
+    type: "Optional[Array]"
+    default: null
+  - name: "density"
+    type: "bool"
+    default: false
+  - name: "weights"
+    type: "Optional[Array]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.histogram2d"
+  torch:
+    api: null # No direct 2D histogram in core, requires external or manual binning
+  jax:
+    api: "jax.numpy.histogram2d"
+  flax_nnx:
+    api: "jax.numpy.histogram2d"
+  paxml:
+    api: "jax.numpy.histogram2d"
+  tensorflow:
+    api: null
+
+---
+operation: "HistogramBinEdges"
+description: "Function to calculate only the edges of the bins used by the histogram function."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "bins"
+    type: "Union[int, str]"
+    default: 10
+  - name: "range"
+    type: "Optional[Tuple[float, float]]"
+    default: null
+  - name: "weights"
+    type: "Optional[Array]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.histogram_bin_edges"
+  torch:
+    api: null
+  jax:
+    api: "jax.numpy.histogram_bin_edges"
+  flax_nnx:
+    api: "jax.numpy.histogram_bin_edges"
+  paxml:
+    api: "jax.numpy.histogram_bin_edges"
+
+---
+operation: "HistogramDd"
+description: "Compute the multidimensional histogram of some data."
+std_args:
+  - name: "sample"
+    type: "Array"
+  - name: "bins"
+    type: "Union[int, Array]"
+    default: 10
+  - name: "range"
+    type: "Optional[Array]"
+    default: null
+  - name: "density"
+    type: "bool"
+    default: false
+  - name: "weights"
+    type: "Optional[Array]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.histogramdd"
+  torch:
+    api: "torch.histc" # Approximation for 1D, but not N-D generic
+  jax:
+    api: "jax.numpy.histogramdd"
+  flax_nnx:
+    api: "jax.numpy.histogramdd"
+  paxml:
+    api: "jax.numpy.histogramdd"
+
+---
+operation: "HSplit"
+description: "Split an array into multiple sub-arrays horizontally (column-wise)."
+std_args:
+  - name: "ary"
+    type: "Array"
+  - name: "indices_or_sections"
+    type: "Union[int, Array]"
+variants:
+  numpy:
+    api: "numpy.hsplit"
+  torch:
+    api: "torch.hsplit"
+    args:
+      ary: "input"
+  jax:
+    api: "jax.numpy.hsplit"
+  flax_nnx:
+    api: "jax.numpy.hsplit"
+  paxml:
+    api: "jax.numpy.hsplit"
+  keras:
+    api: "keras.ops.hsplit"
+  tensorflow:
+    api: "tf.split" # Needs axis=1 config via macro or plugin
+    macro_template: "tf.split({ary}, {indices_or_sections}, axis=1)"
+  mlx:
+    api: "mlx.core.split"
+    macro_template: "mlx.core.split({ary}, {indices_or_sections}, axis=1)"
+
+---
+operation: "HStack"
+description: "Stack arrays in sequence horizontally (column wise)."
+std_args:
+  - name: "tup"
+    type: "Sequence[Array]"
+variants:
+  numpy:
+    api: "numpy.hstack"
+  torch:
+    api: "torch.hstack"
+    args:
+      tup: "tensors"
+  jax:
+    api: "jax.numpy.hstack"
+  flax_nnx:
+    api: "jax.numpy.hstack"
+  paxml:
+    api: "jax.numpy.hstack"
+  keras:
+    api: "keras.ops.hstack"
+    args:
+      tup: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.hstack"
+  mlx:
+    api: "mlx.core.concatenate"
+    macro_template: "mlx.core.concatenate({tup}, axis=1)" # Assuming 2D+ for hstack behavior approx
+
+---
+operation: "Hypot"
+description: "Given the 'legs' of a right triangle, return its hypotenuse."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.hypot"
+  torch:
+    api: "torch.hypot"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.hypot"
+  flax_nnx:
+    api: "jax.numpy.hypot"
+  paxml:
+    api: "jax.numpy.hypot"
+  keras:
+    api: null # Not in core ops explicitly
+  tensorflow:
+    api: "tf.math.hypot"
+  mlx:
+    api: null # Missing in core. Use sqrt(x**2 + y**2) macro if needed.
+
+---
+operation: "I0"
+description: "Modified Bessel function of the first kind, order 0."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.i0"
+  torch:
+    api: "torch.special.i0"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.i0"
+  flax_nnx:
+    api: "jax.numpy.i0"
+  paxml:
+    api: "jax.numpy.i0"
+  tensorflow:
+    api: "tf.math.bessel_i0"
+  keras:
+    api: null
+
+---
+operation: "Identity"
+description: "Return the identity array."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "dtype"
+    type: "Optional[type]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.identity"
+  torch:
+    api: "torch.eye"
+    args:
+      n: "n"
+    # Identity implies square matrix n x n. torch.eye(n) does exactly that for 1 arg.
+  jax:
+    api: "jax.numpy.identity"
+  flax_nnx:
+    api: "jax.numpy.identity"
+  paxml:
+    api: "jax.numpy.identity"
+  keras:
+    api: "keras.ops.eye"
+  tensorflow:
+    api: "tf.eye"
+    args:
+      n: "num_rows"
+  mlx:
+    api: "mlx.core.eye"
+    args:
+      n: "n"
+
+---
+operation: "IInfo"
+description: "Machine limits for integer types."
+std_args:
+  - name: "int_type"
+    type: "Union[type, Array, int]"
+variants:
+  numpy:
+    api: "numpy.iinfo"
+  torch:
+    api: "torch.iinfo"
+    args:
+      int_type: "dtype" # Torch expects dtype or tensor
+  jax:
+    api: "jax.numpy.iinfo"
+  flax_nnx:
+    api: "jax.numpy.iinfo"
+  paxml:
+    api: "jax.numpy.iinfo"
+  tensorflow:
+    api: "tf.experimental.numpy.iinfo"
+
+---
+operation: "Imag"
+description: "Return the imaginary part of the complex argument."
+std_args:
+  - name: "val"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.imag"
+  torch:
+    api: "torch.imag"
+    args:
+      val: "input"
+  jax:
+    api: "jax.numpy.imag"
+  flax_nnx:
+    api: "jax.numpy.imag"
+  paxml:
+    api: "jax.numpy.imag"
+  keras:
+    api: "keras.ops.imag"
+    args:
+      val: "x"
+  tensorflow:
+    api: "tf.math.imag"
+    args:
+      val: "input"
+  mlx:
+    api: null # Complex support specific

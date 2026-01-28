@@ -1,0 +1,594 @@
+operation: "Transpose"
+description: "Permute the dimensions of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axes"
+    type: "List[int]"
+    default: null
+variants:
+  tensorflow:
+    api: "tf.transpose"
+    args:
+      axes: "perm"
+  torch:
+    api: "torch.permute"
+    args:
+      axes: "dims"
+      a: "input"
+  jax:
+    api: "jax.numpy.transpose"
+  flax_nnx:
+    api: "jax.numpy.transpose"
+  paxml:
+    api: "jax.numpy.transpose"
+  keras:
+    api: "keras.ops.transpose"
+  mlx:
+    api: "mlx.core.transpose"
+    args:
+      axes: "axes"
+  numpy:
+    api: "numpy.transpose"
+
+---
+operation: "Tri"
+description: "An array with ones at and below the given diagonal and zeros elsewhere."
+std_args:
+  - name: "N"
+    type: "int"
+  - name: "M"
+    type: "int"
+    default: null
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "dtype"
+    type: "dtype"
+    default: null
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.tri"
+  torch:
+    macro_template: "torch.tril(torch.ones(({N}, {M} if {M} is not None else {N}), dtype={dtype}), diagonal={k})"
+  jax:
+    api: "jax.numpy.tri"
+  flax_nnx:
+    api: "jax.numpy.tri"
+  paxml:
+    api: "jax.numpy.tri"
+  keras:
+    api: null # No direct equivalent in Keras ops
+  mlx:
+    api: null # No direct equivalent in MLX
+  numpy:
+    api: "numpy.tri"
+
+---
+operation: "Tril"
+description: "Lower triangle of an array."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.tril"
+  torch:
+    api: "torch.tril"
+    args:
+      m: "input"
+      k: "diagonal"
+  jax:
+    api: "jax.numpy.tril"
+  flax_nnx:
+    api: "jax.numpy.tril"
+  paxml:
+    api: "jax.numpy.tril"
+  keras:
+    api: "keras.ops.tril"
+    args:
+      m: "x"
+      k: "k"
+  mlx:
+    api: "mlx.core.tril"
+    args:
+      m: "x"
+      k: "k"
+  numpy:
+    api: "numpy.tril"
+
+---
+operation: "Triu"
+description: "Upper triangle of an array."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.triu"
+  torch:
+    api: "torch.triu"
+    args:
+      m: "input"
+      k: "diagonal"
+  jax:
+    api: "jax.numpy.triu"
+  flax_nnx:
+    api: "jax.numpy.triu"
+  paxml:
+    api: "jax.numpy.triu"
+  keras:
+    api: "keras.ops.triu"
+    args:
+      m: "x"
+      k: "k"
+  mlx:
+    api: "mlx.core.triu"
+    args:
+      m: "x"
+      k: "k"
+  numpy:
+    api: "numpy.triu"
+
+---
+operation: "TrueDivide"
+description: "Returns a true division of the inputs, element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.divide"
+  torch:
+    api: "torch.div"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.divide"
+  flax_nnx:
+    api: "jax.numpy.divide"
+  paxml:
+    api: "jax.numpy.divide"
+  keras:
+    api: "keras.ops.divide"
+    args:
+      x1: "x1"
+      x2: "x2"
+  mlx:
+    api: "mlx.core.divide"
+  numpy:
+    api: "numpy.true_divide"
+
+---
+operation: "UInt16"
+description: "16-bit unsigned integer type/constructor."
+std_args:
+  - name: "value"
+    type: "Any"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.cast"
+    macro_template: "tf.cast({value}, tf.uint16)"
+  torch:
+    macro_template: "torch.tensor({value}, dtype=torch.int16)" # Torch uses signed int16 often, logic may vary
+  jax:
+    api: "jax.numpy.uint16"
+  flax_nnx:
+    api: "jax.numpy.uint16"
+  paxml:
+    api: "jax.numpy.uint16"
+  keras:
+    api: "keras.ops.cast"
+    macro_template: "keras.ops.cast({value}, 'uint16')"
+  mlx:
+    api: "mlx.core.array"
+    macro_template: "mlx.core.array({value}, dtype=mlx.core.uint16)"
+  numpy:
+    api: "numpy.uint16"
+
+---
+operation: "UInt32"
+description: "32-bit unsigned integer type/constructor."
+std_args:
+  - name: "value"
+    type: "Any"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.cast"
+    macro_template: "tf.cast({value}, tf.uint32)"
+  torch:
+    macro_template: "torch.tensor({value}, dtype=torch.int32)"
+  jax:
+    api: "jax.numpy.uint32"
+  flax_nnx:
+    api: "jax.numpy.uint32"
+  paxml:
+    api: "jax.numpy.uint32"
+  keras:
+    api: "keras.ops.cast"
+    macro_template: "keras.ops.cast({value}, 'uint32')"
+  mlx:
+    api: "mlx.core.array"
+    macro_template: "mlx.core.array({value}, dtype=mlx.core.uint32)"
+  numpy:
+    api: "numpy.uint32"
+
+---
+operation: "UInt64"
+description: "64-bit unsigned integer type/constructor."
+std_args:
+  - name: "value"
+    type: "Any"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.cast"
+    macro_template: "tf.cast({value}, tf.uint64)"
+  torch:
+    macro_template: "torch.tensor({value}, dtype=torch.int64)"
+  jax:
+    api: "jax.numpy.uint64"
+  flax_nnx:
+    api: "jax.numpy.uint64"
+  paxml:
+    api: "jax.numpy.uint64"
+  keras:
+    api: "keras.ops.cast"
+    macro_template: "keras.ops.cast({value}, 'uint64')"
+  mlx:
+    api: "mlx.core.array"
+    macro_template: "mlx.core.array({value}, dtype=mlx.core.uint64)"
+  numpy:
+    api: "numpy.uint64"
+
+---
+operation: "UInt8"
+description: "8-bit unsigned integer type/constructor."
+std_args:
+  - name: "value"
+    type: "Any"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.cast"
+    macro_template: "tf.cast({value}, tf.uint8)"
+  torch:
+    macro_template: "torch.tensor({value}, dtype=torch.uint8)"
+  jax:
+    api: "jax.numpy.uint8"
+  flax_nnx:
+    api: "jax.numpy.uint8"
+  paxml:
+    api: "jax.numpy.uint8"
+  keras:
+    api: "keras.ops.cast"
+    macro_template: "keras.ops.cast({value}, 'uint8')"
+  mlx:
+    api: "mlx.core.array"
+    macro_template: "mlx.core.array({value}, dtype=mlx.core.uint8)"
+  numpy:
+    api: "numpy.uint8"
+
+---
+operation: "Unicode"
+description: "Unicode string type (NumPy). Unsupported in strict Tensor frameworks."
+std_args:
+  - name: "value"
+    default: ""
+  - name: "args"
+    is_variadic: true
+variants:
+  tensorflow:
+    api: null
+  torch:
+    api: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.unicode_"
+
+---
+operation: "Vander"
+description: "Generate a Vandermonde matrix."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "N"
+    type: "int"
+    default: null
+  - name: "increasing"
+    type: "bool"
+    default: false
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.vander"
+  torch:
+    api: "torch.vander"
+    args:
+      x: "x"
+      N: "N"
+      increasing: "increasing"
+  jax:
+    api: "jax.numpy.vander"
+  flax_nnx:
+    api: "jax.numpy.vander"
+  paxml:
+    api: "jax.numpy.vander"
+  keras:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.vander"
+
+---
+operation: "Variance"
+description: "Compute the variance along the specified axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "dtype"
+    default: null
+  - name: "out"
+    type: "Tensor"
+    default: null
+  - name: "ddof"
+    type: "int"
+    default: 0
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  tensorflow:
+    api: "tf.math.reduce_variance"
+    args:
+      a: "input_tensor"
+      axis: "axis"
+      keepdims: "keepdims"
+      ddof: null # TF main op doesn't support ddof simply
+  torch:
+    api: "torch.var"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+      ddof: "correction"
+  jax:
+    api: "jax.numpy.var"
+  flax_nnx:
+    api: "jax.numpy.var"
+  paxml:
+    api: "jax.numpy.var"
+  keras:
+    api: "keras.ops.var"
+    args:
+      a: "x"
+      axis: "axis"
+      keepdims: "keepdims"
+  mlx:
+    api: "mlx.core.var"
+    args:
+      a: "a"
+      axis: "axis"
+      keepdims: "keepdims"
+      ddof: "ddof"
+  numpy:
+    api: "numpy.var"
+
+---
+operation: "Vdot"
+description: "Return the dot product of two vectors."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.vdot"
+  torch:
+    api: "torch.vdot"
+    args:
+      a: "input"
+      b: "other"
+  jax:
+    api: "jax.numpy.vdot"
+  flax_nnx:
+    api: "jax.numpy.vdot"
+  paxml:
+    api: "jax.numpy.vdot"
+  keras:
+    api: null # Can be composed via matmul with conjunction
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.vdot"
+
+---
+operation: "Vsplit"
+description: "Split an array into multiple sub-arrays vertically (row-wise)."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "Any"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.vsplit"
+  torch:
+    api: "torch.vsplit"
+    args:
+      ary: "input"
+      indices_or_sections: "indices_or_sections"
+  jax:
+    api: "jax.numpy.vsplit"
+  flax_nnx:
+    api: "jax.numpy.vsplit"
+  paxml:
+    api: "jax.numpy.vsplit"
+  keras:
+    api: "keras.ops.vsplit"
+    args:
+      ary: "x"
+      indices_or_sections: "indices_or_sections"
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.vsplit"
+
+---
+operation: "Vstack"
+description: "Stack arrays in sequence vertically (row wise)."
+std_args:
+  - name: "tup"
+    type: "List[Tensor]"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.vstack"
+  torch:
+    api: "torch.vstack"
+    args:
+      tup: "tensors"
+  jax:
+    api: "jax.numpy.vstack"
+  flax_nnx:
+    api: "jax.numpy.vstack"
+  paxml:
+    api: "jax.numpy.vstack"
+  keras:
+    api: "keras.ops.vstack"
+    args:
+      tup: "xs"
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.vstack"
+
+---
+operation: "Where"
+description: "Return elements chosen from x or y depending on condition."
+std_args:
+  - name: "condition"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+    default: null
+  - name: "y"
+    type: "Tensor"
+    default: null
+variants:
+  tensorflow:
+    api: "tf.where"
+  torch:
+    api: "torch.where"
+    args:
+      condition: "condition"
+      x: "input"
+      y: "other"
+  jax:
+    api: "jax.numpy.where"
+  flax_nnx:
+    api: "jax.numpy.where"
+  paxml:
+    api: "jax.numpy.where"
+  keras:
+    api: "keras.ops.where"
+  mlx:
+    api: "mlx.core.where"
+  numpy:
+    api: "numpy.where"
+
+---
+operation: "Zeros"
+description: "Return a new array of given shape and type, filled with zeros."
+std_args:
+  - name: "shape"
+    type: "Tuple[int]"
+  - name: "dtype"
+    type: "dtype"
+    default: null
+variants:
+  tensorflow:
+    api: "tf.zeros"
+  torch:
+    api: "torch.zeros"
+    args:
+      shape: "size"
+      dtype: "dtype"
+  jax:
+    api: "jax.numpy.zeros"
+  flax_nnx:
+    api: "jax.numpy.zeros"
+  paxml:
+    api: "jax.numpy.zeros"
+  keras:
+    api: "keras.ops.zeros"
+  mlx:
+    api: "mlx.core.zeros"
+    args:
+      shape: "shape"
+      dtype: "dtype"
+  numpy:
+    api: "numpy.zeros"
+
+---
+operation: "ZerosLike"
+description: "Return an array of zeros with the same shape and type as a given array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "dtype"
+    type: "dtype"
+    default: null
+variants:
+  tensorflow:
+    api: "tf.zeros_like"
+    args:
+      a: "input"
+      dtype: "dtype"
+  torch:
+    api: "torch.zeros_like"
+    args:
+      a: "input"
+      dtype: "dtype"
+  jax:
+    api: "jax.numpy.zeros_like"
+  flax_nnx:
+    api: "jax.numpy.zeros_like"
+  paxml:
+    api: "jax.numpy.zeros_like"
+  keras:
+    api: "keras.ops.zeros_like"
+    args:
+      a: "x"
+      dtype: "dtype"
+  mlx:
+    api: "mlx.core.zeros_like"
+    args:
+      a: "a"
+      dtype: "dtype"
+  numpy:
+    api: "numpy.zeros_like"

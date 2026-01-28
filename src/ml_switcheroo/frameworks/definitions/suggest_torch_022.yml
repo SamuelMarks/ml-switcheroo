@@ -1,0 +1,688 @@
+operation: "MkldnnAdaptiveAvgPool2d"
+description: "Applies adaptive average pooling (MKLDNN backend optimization)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "output_size"
+    type: "int"
+variants:
+  torch:
+    api: "torch.mkldnn_adaptive_avg_pool2d"
+  jax:
+    api: "jax.image.resize" # Approximation or requires plugin
+    requires_plugin: "adaptive_pool"
+  mlx:
+    api: "mlx.nn.AvgPool2d" # Maps to standard pool if static
+  keras:
+    api: "keras.layers.GlobalAveragePooling2D" # If output_size=1
+
+---
+operation: "MkldnnConvolution"
+description: "Applies 2D convolution (MKLDNN backend optimization)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+  - name: "bias"
+    type: "Tensor"
+    default: null
+  - name: "padding"
+    type: "int"
+    default: 0
+  - name: "stride"
+    type: "int"
+    default: 1
+  - name: "dilation"
+    type: "int"
+    default: 1
+  - name: "groups"
+    type: "int"
+    default: 1
+variants:
+  torch:
+    api: "torch.mkldnn_convolution"
+  jax:
+    api: "jax.lax.conv_general_dilated"
+    requires_plugin: "conv2d_functional"
+  mlx:
+    api: "mlx.nn.Conv2d" # Layer wrapper logic commonly used
+  keras:
+    api: "keras.ops.conv"
+
+---
+operation: "MkldnnLinearBackwardWeights"
+description: "Computes backward pass for linear weights (MKLDNN)."
+std_args:
+  - name: "grad_output"
+    type: "Tensor"
+  - name: "input"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+  - name: "bias_defined"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.mkldnn_linear_backward_weights"
+  jax:
+    api: null # Gradient ops usually handled by autodiff engine
+  mlx:
+    api: null
+
+---
+operation: "MkldnnMaxPool2d"
+description: "Applies max pooling 2D (MKLDNN)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "kernel_size"
+    type: "int"
+  - name: "stride"
+    type: "int"
+    default: null
+  - name: "padding"
+    type: "int"
+    default: 0
+  - name: "dilation"
+    type: "int"
+    default: 1
+  - name: "ceil_mode"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.mkldnn_max_pool2d"
+  jax:
+    api: "jax.lax.reduce_window"
+    requires_plugin: "max_pool_functional"
+  mlx:
+    api: "mlx.core.max_pool2d"
+  keras:
+    api: "keras.ops.max_pool"
+
+---
+operation: "MkldnnMaxPool3d"
+description: "Applies max pooling 3D (MKLDNN)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "kernel_size"
+    type: "int"
+variants:
+  torch:
+    api: "torch.mkldnn_max_pool3d"
+  jax:
+    api: "jax.lax.reduce_window"
+  mlx:
+    api: null # 3D Pool support varies
+
+---
+operation: "MkldnnRnnLayer"
+description: "Applies RNN layer (MKLDNN)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "weight0"
+    type: "Tensor"
+  - name: "weight1"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.mkldnn_rnn_layer"
+  jax:
+    api: null # RNNs require structural rewrite to Scan
+  keras:
+    api: "keras.layers.SimpleRNN"
+
+---
+operation: "Mm"
+description: "Performs matrix multiplication (no broadcasting)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mat2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.mm"
+  jax:
+    api: "jax.numpy.matmul"
+  mlx:
+    api: "mlx.core.matmul"
+  keras:
+    api: "keras.ops.matmul"
+  numpy:
+    api: "numpy.matmul"
+
+---
+operation: "Mode"
+description: "Returns the mode value and indices starting with the first dimension."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: -1
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.mode"
+  jax:
+    api: "jax.scipy.stats.mode" # Note: Returns mode/count, not mode/index
+    requires_plugin: "mode_shim"
+  numpy:
+    api: "scipy.stats.mode"
+    required_imports:
+      - "import scipy.stats"
+
+---
+operation: "Moveaxis"
+description: "Moves dimensions of input at positions source to destination."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "source"
+    type: "int"
+  - name: "destination"
+    type: "int"
+variants:
+  torch:
+    api: "torch.moveaxis"
+  jax:
+    api: "jax.numpy.moveaxis"
+  mlx:
+    api: "mlx.core.moveaxis"
+  keras:
+    api: "keras.ops.moveaxis"
+  numpy:
+    api: "numpy.moveaxis"
+
+---
+operation: "Movedim"
+description: "Moves the dimension(s) of input at the position(s) in source to the position(s) in destination."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "source"
+    type: "int"
+  - name: "destination"
+    type: "int"
+variants:
+  torch:
+    api: "torch.movedim"
+  jax:
+    api: "jax.numpy.moveaxis"
+  mlx:
+    api: "mlx.core.moveaxis"
+  keras:
+    api: "keras.ops.moveaxis"
+  numpy:
+    api: "numpy.moveaxis"
+
+---
+operation: "Msort"
+description: "Sorts the elements of the input tensor along its first dimension in ascending order."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.msort"
+  jax:
+    api: "jax.numpy.sort"
+    args:
+        axis: "axis"
+    inject_args:
+        axis: 0
+  mlx:
+    api: "mlx.core.sort"
+    inject_args:
+        axis: 0
+  numpy:
+    api: "numpy.msort"
+
+---
+operation: "Mul"
+description: "Multiplies input by other."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.mul"
+  jax:
+    api: "jax.numpy.multiply"
+  mlx:
+    api: "mlx.core.multiply"
+  keras:
+    api: "keras.ops.multiply"
+  numpy:
+    api: "numpy.multiply"
+  tensorflow:
+    api: "tf.math.multiply"
+
+---
+operation: "Multinomial"
+description: "Returns a tensor where each row contains num_samples indices sampled from the multinomial probability distribution."
+std_args:
+  - name: "input" # Probabilities
+    type: "Tensor"
+  - name: "num_samples"
+    type: "int"
+  - name: "replacement"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.multinomial"
+  jax:
+    api: "jax.random.categorical"
+    requires_plugin: "inject_prng"
+    args:
+      input: "logits" # Mismatch: torch takes probs, jax takes logits? Need plugin to safe_log
+  mlx:
+    api: "mlx.random.categorical"
+    args:
+      input: "logits" 
+
+---
+operation: "Multiply"
+description: "Alias for Mul."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.multiply"
+  jax:
+    api: "jax.numpy.multiply"
+  mlx:
+    api: "mlx.core.multiply"
+  keras:
+    api: "keras.ops.multiply"
+  numpy:
+    api: "numpy.multiply"
+
+---
+operation: "Mv"
+description: "Performs a matrix-vector product of the matrix input and the vector vec."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "vec"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.mv"
+  jax:
+    api: "jax.numpy.matmul"
+  mlx:
+    api: "mlx.core.matmul"
+  keras:
+    api: "keras.ops.matmul"
+  numpy:
+    api: "numpy.matmul"
+
+---
+operation: "Mvlgamma"
+description: "Computes the multivariate log-gamma function."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "p"
+    type: "int"
+variants:
+  torch:
+    api: "torch.mvlgamma"
+  jax:
+    api: "jax.scipy.special.multigammaln"
+    args:
+      input: "a" 
+  tensorflow:
+    api: "tf.math.mvlgamma"
+    args:
+      input: "x" 
+  numpy:
+    api: "scipy.special.multigammaln"
+    required_imports: ["import scipy.special"] 
+    args:
+      input: "a" 
+
+---
+operation: "Nan"
+description: "Returns a tensor filled with NaN values."
+std_args:
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.nan"
+    op_type: "attribute" # Constant
+  jax:
+    api: "jax.numpy.nan"
+    op_type: "attribute"
+  mlx:
+    macro_template: "float('nan')" 
+  numpy:
+    api: "numpy.nan"
+    op_type: "attribute"
+
+---
+operation: "NanToNum"
+description: "Replaces NaN, positive infinity, and negative infinity values in input with valid numbers."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "nan"
+    type: "float"
+    default: 0.0
+  - name: "posinf"
+    type: "float"
+    default: null
+  - name: "neginf"
+    type: "float"
+    default: null
+variants:
+  torch:
+    api: "torch.nan_to_num"
+  jax:
+    api: "jax.numpy.nan_to_num"
+  keras:
+    api: "keras.ops.nan_to_num"
+  numpy:
+    api: "numpy.nan_to_num"
+
+---
+operation: "NanToNum_"
+description: "In-place version of nan_to_num."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "nan"
+    type: "float"
+    default: 0.0
+variants:
+  torch:
+    api: "torch.nan_to_num_"
+  jax:
+    api: "jax.numpy.nan_to_num" 
+    # Engine will unroll x.nan_to_num_() -> x = jnp.nan_to_num(x) 
+
+---
+operation: "NanMean"
+description: "Computes the mean of all non-NaN elements."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nanmean"
+  jax:
+    api: "jax.numpy.nanmean"
+    args:
+        dim: "axis"
+  numpy:
+    api: "numpy.nanmean"
+    args:
+        dim: "axis"
+
+---
+operation: "NanMedian"
+description: "Returns the median of the values in input, ignoring NaNs."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nanmedian"
+  jax:
+    api: "jax.numpy.nanmedian"
+    args:
+        dim: "axis"
+  numpy:
+    api: "numpy.nanmedian"
+    args:
+        dim: "axis"
+
+---
+operation: "NanQuantile"
+description: "Computes the q-th quantile of the values in input, ignoring NaNs."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "q"
+    type: "float"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nanquantile"
+  jax:
+    api: "jax.numpy.nanquantile"
+    args:
+        dim: "axis"
+  numpy:
+    api: "numpy.nanquantile"
+    args:
+        dim: "axis"
+
+---
+operation: "NanSum"
+description: "Returns the sum of all elements, treating NaNs as zero."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nansum"
+  jax:
+    api: "jax.numpy.nansum"
+    args:
+        dim: "axis"
+  numpy:
+    api: "numpy.nansum"
+    args:
+        dim: "axis"
+
+---
+operation: "Narrow"
+description: "Returns a new tensor that is a narrowed version of input tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "start"
+    type: "int"
+  - name: "length"
+    type: "int"
+variants:
+  torch:
+    api: "torch.narrow"
+  jax:
+    api: "jax.lax.dynamic_slice_in_dim"
+    args:
+        input: "operand"
+        dim: "axis"
+        start: "start_index"
+        length: "slice_size"
+  mlx:
+    # Macro for slicing syntax x.narrow(d, s, l) -> manually construct slice?
+    # MLX has slicing. Requires plugin to generate x[...] 
+    requires_plugin: "slice_generator"
+  numpy:
+    requires_plugin: "slice_generator"
+
+---
+operation: "NarrowCopy"
+description: "Same as narrow except this returns a copy rather than shared storage."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "start"
+    type: "int"
+  - name: "length"
+    type: "int"
+variants:
+  torch:
+    api: "torch.narrow_copy"
+  jax:
+    api: "jax.lax.dynamic_slice_in_dim" # JAX is always copy/immutable equivalent
+    args:
+        input: "operand"
+        dim: "axis"
+        start: "start_index"
+        length: "slice_size"
+
+---
+operation: "NativeBatchNorm"
+description: "Native batch normalization (often internal, maps to standard BN)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+  - name: "bias"
+    type: "Tensor"
+  - name: "running_mean"
+    type: "Tensor"
+  - name: "running_var"
+    type: "Tensor"
+  - name: "training"
+    type: "bool"
+  - name: "momentum"
+    type: "float"
+  - name: "eps"
+    type: "float"
+variants:
+  torch:
+    api: "torch.native_batch_norm"
+  jax:
+    api: "jax.nn.standardize" # Partial mapping
+    requires_plugin: "batch_norm_unwrap"
+  keras:
+    api: "keras.ops.batch_norm" # Keras ops has functional BN
+
+---
+operation: "NativeChannelShuffle"
+description: "Native kernel level implementation of the channel_shuffle."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "groups"
+    type: "int"
+variants:
+  torch:
+    api: "torch.native_channel_shuffle"
+  jax:
+    api: "jax.numpy.reshape" # Needs complex reshape+transpose macro
+    requires_plugin: "channel_shuffle_macro"
+  flutter:
+    api: null
+
+---
+operation: "NativeDropout"
+description: "Native dropout implementation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+  - name: "train"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.native_dropout"
+  jax:
+    api: "jax.random.bernoulli" # Requires manual masking logic or flax.linen.Dropout
+    requires_plugin: "dropout_macro"
+  keras:
+    api: "keras.random.dropout"
+
+---
+operation: "NativeGroupNorm"
+description: "Native group normalization."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+  - name: "bias"
+    type: "Tensor"
+  - name: "N"
+    type: "int"
+  - name: "C"
+    type: "int"
+  - name: "HxW"
+    type: "int"
+  - name: "group"
+    type: "int"
+  - name: "eps"
+    type: "float"
+variants:
+  torch:
+    api: "torch.native_group_norm"
+  jax:
+    api: "jax.nn.group_norm"
+  keras:
+    api: null
+
+---
+operation: "NativeLayerNorm"
+description: "Native layer normalization."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "normalized_shape"
+    type: "List[int]"
+  - name: "weight"
+    type: "Tensor"
+  - name: "bias"
+    type: "Tensor"
+  - name: "eps"
+    type: "float"
+variants:
+  torch:
+    api: "torch.native_layer_norm"
+  jax:
+    api: "jax.nn.layer_norm"
+    args:
+        normalized_shape: null # Inferred usually? or passed differently
+  keras:
+    api: "keras.ops.layer_norm"
+    args:
+        input: "x" 
+        normalized_shape: "axis" # Keras takes axis, Torch takes shape

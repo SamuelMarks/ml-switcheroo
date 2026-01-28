@@ -1,0 +1,694 @@
+# 1. BinaryCrossentropy (Class)
+operation: "BinaryCrossentropy"
+description: "Computes the cross-entropy loss between true labels and predicted labels."
+op_type: "class"
+std_args:
+  - name: "from_logits"
+    type: "bool"
+    default: false
+  - name: "label_smoothing"
+    type: "float"
+    default: 0.0
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+    options: ["sum", "sum_over_batch_size", "mean", "none"]
+  - name: "name"
+    type: "str"
+    default: "binary_crossentropy"
+variants:
+  keras:
+    api: "keras.losses.BinaryCrossentropy"
+  tensorflow:
+    api: "tf.keras.losses.BinaryCrossentropy"
+  torch:
+    api: "torch.nn.BCELoss"
+    dispatch_rules:
+      - if_arg: "from_logits"
+        op: "eq"
+        val: true
+        use_api: "torch.nn.BCEWithLogitsLoss"
+    args:
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+  mlx:
+    api: "mlx.nn.losses.BinaryCrossEntropy"
+    args:
+      from_logits: "with_logits"
+  flax_nnx:
+    api: "optax.sigmoid_binary_cross_entropy" # Functional mapping for class usage if supported via call wrapper
+    requires_plugin: "loss_wrapper" # Flax NNX usually functional, may need wrapper for class
+  paxml:
+    api: "optax.sigmoid_binary_cross_entropy"
+
+---
+# 2. BinaryFocalCrossentropy (Class)
+operation: "BinaryFocalCrossentropy"
+description: "Computes focal cross-entropy loss between true labels and predictions."
+op_type: "class"
+std_args:
+  - name: "apply_class_balancing"
+    type: "bool"
+    default: false
+  - name: "alpha"
+    type: "float"
+    default: 0.25
+  - name: "gamma"
+    type: "float"
+    default: 2.0
+  - name: "from_logits"
+    type: "bool"
+    default: false
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.BinaryFocalCrossentropy"
+  tensorflow:
+    api: "tf.keras.losses.BinaryFocalCrossentropy"
+  torch:
+    # Torchvision or custom often required, but kornia has focal. 
+    # Providing null implies missing in core.
+    api: null
+  mlx:
+    api: null
+
+---
+# 3. CTC (Class)
+operation: "CTCLoss"
+description: "CTC (Connectionist Temporal Classification) loss."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.CTC"
+  tensorflow:
+    api: "tf.keras.losses.CTC"
+  torch:
+    api: "torch.nn.CTCLoss"
+    args:
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+  mlx:
+    api: null
+
+---
+# 4. CategoricalCrossentropy (Class)
+operation: "CategoricalCrossentropy"
+description: "Computes the crossentropy loss between the labels and predictions."
+op_type: "class"
+std_args:
+  - name: "from_logits"
+    type: "bool"
+    default: false
+  - name: "label_smoothing"
+    type: "float"
+    default: 0.0
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.CategoricalCrossentropy"
+  tensorflow:
+    api: "tf.keras.losses.CategoricalCrossentropy"
+  torch:
+    # Torch CrossEntropyLoss requires class indices by default or soft probs. 
+    # Keras defaults to One-Hot. Torch supports probs if dim matches.
+    api: "torch.nn.CrossEntropyLoss"
+    args:
+      label_smoothing: "label_smoothing"
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+  mlx:
+    api: "mlx.nn.losses.CrossEntropy"
+    args:
+      from_logits: "with_logits"
+
+---
+# 5. CategoricalFocalCrossentropy (Class)
+operation: "CategoricalFocalCrossentropy"
+description: "Computes the alpha balanced focal crossentropy loss."
+op_type: "class"
+std_args:
+  - name: "alpha"
+    type: "float"
+    default: 0.25
+  - name: "gamma"
+    type: "float"
+    default: 2.0
+  - name: "from_logits"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.losses.CategoricalFocalCrossentropy"
+  tensorflow:
+    api: "tf.keras.losses.CategoricalFocalCrossentropy"
+  torch:
+    api: null 
+
+---
+# 6. CategoricalGeneralizedCrossEntropy (Class)
+operation: "CategoricalGeneralizedCrossEntropy"
+description: "Computes the Generalized Cross Entropy loss."
+op_type: "class"
+std_args:
+  - name: "q"
+    type: "float"
+    default: 0.5
+variants:
+  keras:
+    api: "keras.losses.CategoricalGeneralizedCrossEntropy"
+
+---
+# 7. CategoricalHinge (Class)
+operation: "CategoricalHinge"
+description: "Computes the categorical hinge loss."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.CategoricalHinge"
+  tensorflow:
+    api: "tf.keras.losses.CategoricalHinge"
+
+---
+# 8. Circle (Class)
+operation: "CircleLoss"
+description: "Computes Circle Loss between integer labels and L2-normalized embeddings."
+op_type: "class"
+std_args:
+  - name: "gamma"
+    type: "float"
+    default: 80.0
+  - name: "margin"
+    type: "float"
+    default: 0.4
+variants:
+  keras:
+    api: "keras.losses.Circle"
+  tensorflow:
+    api: "tf.keras.losses.Circle"
+
+---
+# 9. CosineSimilarityLoss (Class)
+operation: "CosineSimilarityLoss"
+description: "Computes the cosine similarity between y_true & y_pred."
+op_type: "class"
+std_args:
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.CosineSimilarity"
+  tensorflow:
+    api: "tf.keras.losses.CosineSimilarity"
+  torch:
+    api: "torch.nn.CosineEmbeddingLoss"
+    args:
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+  mlx:
+    api: "mlx.nn.losses.CosineSimilarityLoss"
+
+---
+# 10. Dice (Class)
+operation: "DiceLoss"
+description: "Computes the Dice loss value."
+op_type: "class"
+std_args:
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.Dice"
+  tensorflow:
+    api: "tf.keras.losses.Dice"
+
+---
+# 11. Hinge (Class)
+operation: "HingeLoss"
+description: "Computes the hinge loss between y_true & y_pred."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.Hinge"
+  tensorflow:
+    api: "tf.keras.losses.Hinge"
+  torch:
+    api: "torch.nn.HingeEmbeddingLoss"
+    args:
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+
+---
+# 12. Huber (Class)
+operation: "HuberLoss"
+description: "Computes the Huber loss."
+op_type: "class"
+std_args:
+  - name: "delta"
+    type: "float"
+    default: 1.0
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.Huber"
+  tensorflow:
+    api: "tf.keras.losses.Huber"
+  torch:
+    api: "torch.nn.HuberLoss"
+    args:
+      delta: "delta"
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+  mlx:
+    api: "mlx.nn.losses.HuberLoss"
+
+---
+# 13. KLDivergence (Class)
+operation: "KLDivergenceLoss"
+description: "Computes Kullback-Leibler divergence loss."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.KLDivergence"
+  tensorflow:
+    api: "tf.keras.losses.KLDivergence"
+  torch:
+    api: "torch.nn.KLDivLoss"
+    args:
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+  mlx:
+    api: "mlx.nn.losses.KLDivLoss"
+
+---
+# 14. LogCosh (Class)
+operation: "LogCoshLoss"
+description: "Computes the logarithm of the hyperbolic cosine of the prediction error."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.LogCosh"
+  tensorflow:
+    api: "tf.keras.losses.LogCosh"
+  mlx:
+    api: "mlx.nn.losses.LogCoshLoss"
+
+---
+# 15. Loss (Class)
+operation: "Loss"
+description: "Loss base class."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.losses.Loss"
+  tensorflow:
+    api: "tf.keras.losses.Loss"
+  torch:
+    api: "torch.nn.Module"
+
+---
+# 16. MeanAbsoluteError (Class)
+operation: "MeanAbsoluteError"
+description: "Computes the mean of absolute difference between labels and predictions."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.MeanAbsoluteError"
+  tensorflow:
+    api: "tf.keras.losses.MeanAbsoluteError"
+  torch:
+    api: "torch.nn.L1Loss"
+    args:
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+  mlx:
+    api: "mlx.nn.losses.L1Loss"
+
+---
+# 17. MeanAbsolutePercentageError (Class)
+operation: "MeanAbsolutePercentageError"
+description: "Computes the mean absolute percentage error."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.MeanAbsolutePercentageError"
+  tensorflow:
+    api: "tf.keras.losses.MeanAbsolutePercentageError"
+
+---
+# 18. MeanSquaredError (Class)
+operation: "MeanSquaredError"
+description: "Computes the mean of squares of errors."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.MeanSquaredError"
+  tensorflow:
+    api: "tf.keras.losses.MeanSquaredError"
+  torch:
+    api: "torch.nn.MSELoss"
+    args:
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+  mlx:
+    api: "mlx.nn.losses.MSELoss"
+
+---
+# 19. MeanSquaredLogarithmicError (Class)
+operation: "MeanSquaredLogarithmicError"
+description: "Computes the mean squared logarithmic error."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.MeanSquaredLogarithmicError"
+  tensorflow:
+    api: "tf.keras.losses.MeanSquaredLogarithmicError"
+
+---
+# 20. Poisson (Class)
+operation: "Poisson"
+description: "Computes the Poisson loss."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.Poisson"
+  tensorflow:
+    api: "tf.keras.losses.Poisson"
+  torch:
+    api: "torch.nn.PoissonNLLLoss"
+
+---
+# 21. SparseCategoricalCrossentropy (Class)
+operation: "SparseCategoricalCrossentropy"
+description: "Computes the crossentropy loss between integer labels and predictions."
+op_type: "class"
+std_args:
+  - name: "from_logits"
+    type: "bool"
+    default: false
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.SparseCategoricalCrossentropy"
+  tensorflow:
+    api: "tf.keras.losses.SparseCategoricalCrossentropy"
+  torch:
+    api: "torch.nn.CrossEntropyLoss"
+    args:
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+        sum: "'sum'"
+        none: "'none'"
+  mlx:
+    api: "mlx.nn.losses.CrossEntropy"
+    args:
+      from_logits: "with_logits"
+
+---
+# 22. SquaredHinge (Class)
+operation: "SquaredHinge"
+description: "Computes the squared hinge loss."
+op_type: "class"
+std_args:
+  - name: "reduction"
+    type: "str"
+    default: "sum_over_batch_size"
+variants:
+  keras:
+    api: "keras.losses.SquaredHinge"
+  tensorflow:
+    api: "tf.keras.losses.SquaredHinge"
+  torch:
+    api: "torch.nn.SoftMarginLoss"
+    args:
+      reduction: "reduction"
+    arg_values:
+      reduction:
+        sum_over_batch_size: "'mean'"
+  mlx:
+    api: null
+
+---
+# 23. Tversky (Class)
+operation: "TverskyLoss"
+description: "Computes the Tversky loss value."
+op_type: "class"
+std_args:
+  - name: "alpha"
+    type: "float"
+    default: 0.5
+  - name: "beta"
+    type: "float"
+    default: 0.5
+variants:
+  keras:
+    api: "keras.losses.Tversky"
+
+---
+# 24. binary_crossentropy (Function)
+operation: "binary_crossentropy"
+description: "Computes the binary crossentropy loss."
+op_type: "function"
+std_args:
+  - name: "y_true"
+  - name: "y_pred"
+  - name: "from_logits"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.losses.binary_crossentropy"
+  tensorflow:
+    api: "tf.keras.losses.binary_crossentropy"
+  torch:
+    api: "torch.nn.functional.binary_cross_entropy"
+    args:
+      y_true: "target"
+      y_pred: "input"
+    dispatch_rules:
+      - if_arg: "from_logits"
+        op: "eq"
+        val: true
+        use_api: "torch.nn.functional.binary_cross_entropy_with_logits"
+  mlx:
+    api: "mlx.nn.losses.binary_cross_entropy"
+    args:
+      y_true: "targets"
+      y_pred: "logits" # Logic assumes pred corresponds to logits if from_logits is true
+      from_logits: "with_logits"
+  jax:
+    api: "optax.sigmoid_binary_cross_entropy" # Takes logits
+  flax_nnx:
+    api: "optax.sigmoid_binary_cross_entropy"
+
+---
+# 25. binary_focal_crossentropy (Function)
+operation: "binary_focal_crossentropy"
+description: "Computes the binary focal crossentropy loss."
+op_type: "function"
+std_args:
+  - name: "y_true"
+  - name: "y_pred"
+  - name: "gamma"
+    type: "float"
+    default: 2.0
+  - name: "from_logits"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.losses.binary_focal_crossentropy"
+  tensorflow:
+    api: "tf.keras.losses.binary_focal_crossentropy"
+
+---
+# 26. categorical_crossentropy (Function)
+operation: "categorical_crossentropy"
+description: "Computes the categorical crossentropy loss."
+op_type: "function"
+std_args:
+  - name: "y_true"
+  - name: "y_pred"
+  - name: "from_logits"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.losses.categorical_crossentropy"
+  tensorflow:
+    api: "tf.keras.losses.categorical_crossentropy"
+  torch:
+    api: "torch.nn.functional.cross_entropy"
+    args:
+      y_true: "target"
+      y_pred: "input"
+  mlx:
+    api: "mlx.nn.losses.cross_entropy"
+    args:
+      y_true: "targets"
+      y_pred: "logits"
+      from_logits: "with_logits"
+  jax:
+    api: "optax.softmax_cross_entropy"
+    args:
+      y_true: "labels"
+      y_pred: "logits"
+
+---
+# 27. categorical_focal_crossentropy (Function)
+operation: "categorical_focal_crossentropy"
+description: "Computes the categorical focal crossentropy loss."
+op_type: "function"
+std_args:
+  - name: "y_true"
+  - name: "y_pred"
+  - name: "gamma"
+    type: "float"
+    default: 2.0
+variants:
+  keras:
+    api: "keras.losses.categorical_focal_crossentropy"
+
+---
+# 28. categorical_generalized_cross_entropy (Function)
+operation: "categorical_generalized_cross_entropy"
+description: "Computes the Generalized Cross Entropy loss."
+op_type: "function"
+std_args:
+  - name: "y_true"
+  - name: "y_pred"
+  - name: "q"
+    type: "float"
+    default: 0.5
+variants:
+  keras:
+    api: "keras.losses.categorical_generalized_cross_entropy"
+
+---
+# 29. categorical_hinge (Function)
+operation: "categorical_hinge"
+description: "Computes the categorical hinge loss."
+op_type: "function"
+std_args:
+  - name: "y_true"
+  - name: "y_pred"
+variants:
+  keras:
+    api: "keras.losses.categorical_hinge"
+  tensorflow:
+    api: "tf.keras.losses.categorical_hinge"
+
+---
+# 30. circle (Function)
+operation: "circle"
+description: "Computes the Circle loss."
+op_type: "function"
+std_args:
+  - name: "y_true"
+  - name: "y_pred"
+  - name: "gamma"
+    type: "float"
+    default: 80.0
+variants:
+  keras:
+    api: "keras.losses.circle"

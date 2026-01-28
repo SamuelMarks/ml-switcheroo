@@ -1,0 +1,758 @@
+operation: "EmbeddingBag"
+description: "Computes sums or means of bags of embeddings, without instantiating the intermediate embeddings."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+  - name: "offsets"
+    type: "Tensor"
+    default: null
+  - name: "max_norm"
+    type: "float"
+    default: null
+  - name: "norm_type"
+    type: "float"
+    default: 2.0
+  - name: "scale_grad_by_freq"
+    type: "bool"
+    default: false
+  - name: "mode"
+    type: "str"
+    default: "mean"
+  - name: "sparse"
+    type: "bool"
+    default: false
+  - name: "per_sample_weights"
+    type: "Tensor"
+    default: null
+  - name: "include_last_offset"
+    type: "bool"
+    default: false
+  - name: "padding_idx"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.embedding_bag"
+  jax:
+    requires_plugin: "embedding_bag"
+  flax_nnx:
+    requires_plugin: "embedding_bag"
+  tensorflow:
+    api: "tf.nn.embedding_lookup_sparse" # Approximate mapping, needs significant adaptation
+    requires_plugin: "embedding_bag_tf"
+  keras:
+    requires_plugin: "embedding_bag_keras"
+  mlx:
+    requires_plugin: "embedding_bag_mlx"
+---
+operation: "EmbeddingRenorm_"
+description: "Updates embedding weights in-place to enforce max norm."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "weight"
+    type: "Tensor"
+  - name: "input"
+    type: "Tensor"
+  - name: "max_norm"
+    type: "float"
+  - name: "norm_type"
+    type: "float"
+variants:
+  torch:
+    api: "torch.embedding_renorm_"
+  # Functional frameworks generally do not support in-place weight renormalization ops directly.
+  # This typically requires a full optimizer step or state update pattern.
+---
+operation: "Empty"
+description: "Returns a tensor filled with uninitialized data."
+std_args:
+  # Supporting *size variadic via 'size' list
+  - name: "size"
+    type: "List[int]"
+    is_variadic: true
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+  - name: "device"
+    type: "Device"
+    default: null
+  - name: "requires_grad"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.empty"
+  jax:
+    api: "jax.numpy.empty"
+    args:
+      size: "shape"
+      requires_grad: null
+  flax_nnx:
+    api: "jax.numpy.empty"
+    args:
+      size: "shape"
+      requires_grad: null
+  numpy:
+    api: "numpy.empty"
+    args:
+      size: "shape"
+      requires_grad: null
+      device: null
+  tensorflow:
+    api: "tf.experimental.numpy.empty"
+    args:
+      size: "shape"
+      requires_grad: null
+      device: null
+  keras:
+    api: "keras.ops.empty" # Usually mapped to zeros in backend if empty unavailable
+    args:
+      size: "shape"
+      requires_grad: null
+      device: null
+  mlx:
+    api: "mlx.core.zeros" # Safety fallback as MLX has no direct uninitialized alloc exposed easily
+    args:
+      size: "shape"
+      requires_grad: null
+      device: null
+---
+operation: "EmptyLike"
+description: "Returns an uninitialized tensor with the same size as input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+  - name: "device"
+    type: "Device"
+    default: null
+  - name: "requires_grad"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.empty_like"
+  jax:
+    api: "jax.numpy.empty_like"
+    args:
+      input: "a"
+      requires_grad: null
+  flax_nnx:
+    api: "jax.numpy.empty_like"
+    args:
+      input: "a"
+      requires_grad: null
+  numpy:
+    api: "numpy.empty_like"
+    args:
+      input: "prototype"
+      requires_grad: null
+      device: null
+  tensorflow:
+    api: "tf.experimental.numpy.empty_like"
+    args:
+      input: "a"
+      requires_grad: null
+      device: null
+  mlx:
+    api: "mlx.core.zeros_like" # Safe fallback
+    args:
+      input: "a"
+      requires_grad: null
+      device: null
+  keras:
+    api: "keras.ops.empty_like"
+    requires_plugin: "keras_empty_like_shim" # Keras ops might not have empty_like
+---
+operation: "EmptyPermuted"
+description: "Creates an uninitialized tensor with a specified physical layout."
+std_args:
+  - name: "size"
+    type: "List[int]"
+  - name: "physical_layout"
+    type: "List[int]"
+variants:
+  torch:
+    api: "torch.empty_permuted"
+---
+operation: "EmptyQuantized"
+description: "Creates an uninitialized quantized tensor."
+std_args:
+  - name: "size"
+    type: "List[int]"
+  - name: "qtensor"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.empty_quantized"
+---
+operation: "EmptyStrided"
+description: "Creates an uninitialized tensor with specified size and strides."
+std_args:
+  - name: "size"
+    type: "List[int]"
+  - name: "stride"
+    type: "List[int]"
+variants:
+  torch:
+    api: "torch.empty_strided"
+---
+operation: "EnableGrad"
+description: "Context-manager that enables gradient calculation."
+op_type: "context"
+std_args: []
+variants:
+  torch:
+    api: "torch.enable_grad"
+  jax:
+    # JAX handles grads purely functionally, so enabling/disabling global state is a no-op/nullcontext
+    api: "contextlib.nullcontext"
+    required_imports:
+      - "import contextlib"
+  flax_nnx:
+    api: "contextlib.nullcontext"
+    required_imports:
+      - "import contextlib"
+  tensorflow:
+    api: "tf.GradientTape" # Not exactly the same, but enables recording
+    inject_args:
+      persistent: true
+  keras:
+    api: "None" # No global switch
+---
+operation: "EqualElementwise"
+description: "Computes element-wise equality."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.eq"
+  jax:
+    api: "jax.numpy.equal"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jax.numpy.equal"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.equal"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.equal"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.equal"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.equal"
+    args:
+      input: "a"
+      other: "b"
+---
+operation: "EqualAggregate"
+description: "True if two tensors have the same size and elements, False otherwise."
+return_type: "bool"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.equal"
+  jax:
+    api: "jax.numpy.array_equal"
+    args:
+      input: "a1"
+      other: "a2"
+  flax_nnx:
+    api: "jax.numpy.array_equal"
+    args:
+      input: "a1"
+      other: "a2"
+  numpy:
+    api: "numpy.array_equal"
+    args:
+      input: "a1"
+      other: "a2"
+  tensorflow:
+    api: "tf.experimental.numpy.array_equal"
+    args:
+      input: "a1"
+      other: "a2"
+  mlx:
+    api: "mlx.core.array_equal"
+    args:
+      input: "a"
+      other: "b"
+  keras:
+    macro_template: "keras.ops.all(keras.ops.equal({input}, {other}))"
+---
+operation: "Erf"
+description: "Computes the error function of each element."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.erf"
+  jax:
+    api: "jax.scipy.special.erf"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.scipy.special.erf"
+    args:
+      input: "x"
+  numpy:
+    api: "scipy.special.erf"
+    required_imports:
+      - "import scipy.special"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.erf"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.erf"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.erf" 
+    # MLX docs show erf is in core? It appears in mlx.core. 
+    # Can verify with scaffolding if fails.
+    args:
+      input: "a"
+---
+operation: "Erf_"
+description: "In-place Erf."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.erf_"
+  jax:
+    api: "jax.scipy.special.erf"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.scipy.special.erf"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.erf"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.erf"
+    args:
+      input: "x"
+---
+operation: "Erfc"
+description: "Computes the complementary error function."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.erfc"
+  jax:
+    api: "jax.scipy.special.erfc"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.scipy.special.erfc"
+    args:
+      input: "x"
+  numpy:
+    api: "scipy.special.erfc"
+    required_imports:
+      - "import scipy.special"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.erfc"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.erfc"
+    args:
+      input: "x"
+---
+operation: "Erfc_"
+description: "In-place Erfc."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.erfc_"
+  jax:
+    api: "jax.scipy.special.erfc"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.scipy.special.erfc"
+    args:
+      input: "x"
+---
+operation: "Erfinv"
+description: "Computes the inverse error function."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.erfinv"
+  jax:
+    api: "jax.scipy.special.erfinv"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.scipy.special.erfinv"
+    args:
+      input: "x"
+  numpy:
+    api: "scipy.special.erfinv"
+    required_imports:
+      - "import scipy.special"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.erfinv"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.erfinv"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.erfinv"
+    args:
+      input: "a"
+---
+operation: "Exp"
+description: "Computes the exponential of each element."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.exp"
+  jax:
+    api: "jax.numpy.exp"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.exp"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.exp"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.exp"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.exp"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.exp"
+    args:
+      input: "a"
+---
+operation: "Exp2"
+description: "Computes the base-2 exponential of each element."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.exp2"
+  jax:
+    api: "jax.numpy.exp2"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.exp2"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.exp2"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.exp2"
+    args:
+      input: "x"
+  keras:
+    # 2**x macro
+    macro_template: "{input} ** 2"
+  mlx:
+    # MLX appears to lack explicit exp2 in core doc index, verifying availability via macro
+    macro_template: "mlx.core.power(2, {input})"
+---
+operation: "Exp2_"
+description: "In-place Exp2."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.exp2_"
+  jax:
+    api: "jax.numpy.exp2"
+    args:
+      input: "x"
+---
+operation: "Exp_"
+description: "In-place Exp."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.exp_"
+  jax:
+    api: "jax.numpy.exp"
+    args:
+      input: "x"
+---
+operation: "ExpandCopy"
+description: "Expands the tensor to size."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "size"
+    type: "List[int]"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.expand_copy"
+  jax:
+    api: "jax.numpy.broadcast_to"
+    args:
+      input: "array"
+      size: "shape"
+    pack_to_tuple: "shape"
+  flax_nnx:
+    api: "jax.numpy.broadcast_to"
+    args:
+      input: "array"
+      size: "shape"
+    pack_to_tuple: "shape"
+  numpy:
+    api: "numpy.broadcast_to"
+    args:
+      input: "array"
+      size: "shape"
+    pack_to_tuple: "shape"
+  tensorflow:
+    api: "tf.broadcast_to"
+    args:
+      input: "input"
+      size: "shape"
+    pack_to_tuple: "shape"
+  keras:
+    api: "keras.ops.broadcast_to"
+    args:
+      input: "x"
+      size: "shape"
+  mlx:
+    api: "mlx.core.broadcast_to"
+    args:
+      input: "a"
+      size: "shape"
+---
+operation: "Expm1"
+description: "Computes exp(x) - 1."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.expm1"
+  jax:
+    api: "jax.numpy.expm1"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.expm1"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.expm1"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.expm1"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.expm1" # Often missing, check if macro needed
+    macro_template: "mlx.core.exp({input}) - 1"
+---
+operation: "Expm1_"
+description: "In-place Expm1."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.expm1_"
+  jax:
+    api: "jax.numpy.expm1"
+    args:
+      input: "x"
+---
+operation: "Eye"
+description: "Returns a 2-D tensor with ones on the diagonal."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "m"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  torch:
+    api: "torch.eye"
+  jax:
+    api: "jax.numpy.eye"
+    args:
+      n: "N"
+      m: "M"
+      dtype: "dtype"
+  flax_nnx:
+    api: "jax.numpy.eye"
+    args:
+      n: "N"
+      m: "M"
+      dtype: "dtype"
+  numpy:
+    api: "numpy.eye"
+    args:
+      n: "N"
+      m: "M"
+      dtype: "dtype"
+  tensorflow:
+    api: "tf.eye"
+    args:
+      n: "num_rows"
+      m: "num_columns"
+      dtype: "dtype"
+  keras:
+    api: "keras.ops.eye"
+    args:
+      n: "N"
+      m: "M"
+      dtype: "dtype"
+  mlx:
+    api: "mlx.core.eye"
+    args:
+      n: "n"
+      m: "m"
+      dtype: "dtype"
+---
+operation: "FakeQuantizePerChannelAffine"
+description: "Simulates quantization per channel."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "scale"
+    type: "Tensor"
+  - name: "zero_point"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+  - name: "quant_min"
+    type: "int"
+  - name: "quant_max"
+    type: "int"
+variants:
+  torch:
+    api: "torch.fake_quantize_per_channel_affine"
+  tensorflow:
+    api: "tf.quantization.fake_quant_with_min_max_vars_per_channel" # Mismatched sig, requires careful adapter
+    requires_plugin: "fake_quant_adapter"
+---
+operation: "FakeQuantizePerTensorAffine"
+description: "Simulates quantization per tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "scale"
+    type: "float"
+  - name: "zero_point"
+    type: "int"
+  - name: "quant_min"
+    type: "int"
+  - name: "quant_max"
+    type: "int"
+variants:
+  torch:
+    api: "torch.fake_quantize_per_tensor_affine"
+---
+operation: "FbgemmLinearFp16Weight"
+description: "FBGEMM linear with FP16 weights."
+std_args: [] 
+variants:
+  torch:
+    api: "torch.fbgemm_linear_fp16_weight"
+---
+operation: "FbgemmLinearFp16WeightFp32Activation"
+description: "FBGEMM linear with FP16 weights and FP32 activation."
+std_args: [] 
+variants:
+  torch:
+    api: "torch.fbgemm_linear_fp16_weight_fp32_activation"
+---
+operation: "FbgemmLinearInt8Weight"
+description: "FBGEMM linear with Int8 weights."
+std_args: [] 
+variants:
+  torch:
+    api: "torch.fbgemm_linear_int8_weight"
+---
+operation: "FbgemmLinearInt8WeightFp32Activation"
+description: "FBGEMM linear with Int8 weights and FP32 activation."
+std_args: [] 
+variants:
+  torch:
+    api: "torch.fbgemm_linear_int8_weight_fp32_activation"
+---
+operation: "FbgemmLinearQuantizeWeight"
+description: "FBGEMM linear weight quantization."
+std_args: [] 
+variants:
+  torch:
+    api: "torch.fbgemm_linear_quantize_weight"

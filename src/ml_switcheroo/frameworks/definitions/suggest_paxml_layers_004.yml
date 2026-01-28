@@ -1,0 +1,482 @@
+operation: "StochasticResidual"
+description: "Stochastic residual layer that randomly drops the residual branch."
+op_type: "class"
+std_args:
+  - name: "residual_weight"
+    type: "float"
+    default: 1.0
+  - name: "survival_prob"
+    type: "float"
+    default: 1.0
+variants:
+  paxml:
+    api: "praxis.layers.StochasticResidual"
+  torch:
+    api: "torchvision.ops.StochasticDepth"
+    args:
+      survival_prob: "p"
+      residual_weight: null # Not supported directly
+  flax_nnx:
+    api: "flax.linen.StochasticDepth" # Approximate mapping to Linen
+    args:
+      survival_prob: "probability"
+
+---
+operation: "Swish"
+description: "Swish activation layer."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.Swish"
+  torch:
+    api: "torch.nn.SiLU"
+  flax_nnx:
+    api: "flax.nnx.SiLU"
+  mlx:
+    api: "mlx.nn.SiLU"
+  keras:
+    api: "keras.layers.Activation"
+    arg_values:
+      activation: "swish"
+
+---
+operation: "Tanh"
+description: "Tanh activation layer."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "praxis.layers.Tanh"
+  torch:
+    api: "torch.nn.Tanh"
+  flax_nnx:
+    api: "flax.nnx.Tanh"
+  mlx:
+    api: "mlx.nn.Tanh"
+  keras:
+    api: "keras.layers.Activation"
+    arg_values:
+      activation: "tanh"
+
+---
+operation: "TemporalShifting"
+description: "Shifts audio signals by a random amount during training."
+op_type: "class"
+std_args:
+  - name: "shift_range_ms"
+    type: "float"
+    default: 0.0
+  - name: "sample_rate"
+    type: "float"
+    default: 16000.0
+  - name: "axis"
+    type: "int"
+    default: 1
+variants:
+  paxml:
+    api: "praxis.layers.TemporalShifting"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "TrainablePositionalEmbedding"
+description: "Generates trainable position embedding for a given 1-d sequence."
+op_type: "class"
+std_args:
+  - name: "max_seq_length"
+    type: "int"
+    default: 10240
+  - name: "embedding_dims"
+    type: "int"
+    default: 0
+variants:
+  paxml:
+    api: "praxis.layers.TrainablePositionalEmbedding"
+  torch:
+    api: "torch.nn.Embedding"
+    args:
+      max_seq_length: "num_embeddings"
+      embedding_dims: "embedding_dim"
+  flax_nnx:
+    api: "flax.nnx.Embed"
+    args:
+      max_seq_length: "num_embeddings"
+      embedding_dims: "features"
+
+---
+operation: "Transformer"
+description: "Transformer layer with multi-headed attention."
+op_type: "class"
+std_args:
+  - name: "input_dims"
+    type: "int"
+  - name: "hidden_dims"
+    type: "int"
+  - name: "num_heads"
+    type: "int"
+  - name: "dim_per_head"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.Transformer"
+  torch:
+    api: "torch.nn.TransformerEncoderLayer" # Approximation
+    args:
+      input_dims: "d_model"
+      num_heads: "nhead"
+      hidden_dims: "dim_feedforward"
+      dim_per_head: null # Torch calculates as d_model / nhead
+
+---
+operation: "TransformerEncoderDecoder"
+description: "Transformer encoder/decoder class."
+op_type: "class"
+std_args:
+  - name: "model_dims"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.TransformerEncoderDecoder"
+  torch:
+    api: "torch.nn.Transformer"
+    args:
+      model_dims: "d_model"
+
+---
+operation: "TransformerFeedForward"
+description: "Transformer feedforward layer with residual connection and dropout."
+op_type: "class"
+std_args:
+  - name: "input_dims"
+    type: "int"
+  - name: "hidden_dims"
+    type: "int"
+  - name: "dropout_prob"
+    type: "float"
+    default: 0.0
+variants:
+  paxml:
+    api: "praxis.layers.TransformerFeedForward"
+    args:
+      dropout_prob: "relu_dropout_prob"
+  torch:
+    api: "torch.nn.Sequential" # Logic handled via plugin to construct MLP
+    requires_plugin: "transformer_ff_block"
+
+---
+operation: "TransformerFeedForwardMoe"
+description: "A sharded MoE Layer."
+op_type: "class"
+std_args:
+  - name: "input_dims"
+    type: "int"
+  - name: "hidden_dims"
+    type: "int"
+  - name: "num_experts"
+    type: "int"
+  - name: "num_groups"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.TransformerFeedForwardMoe"
+  torch:
+    api: null # Requires specialized MoE library
+
+---
+operation: "TransformerLm"
+description: "Packed Transformer LM with position embedding and shared softmax layer."
+op_type: "class"
+std_args:
+  - name: "vocab_size"
+    type: "int"
+  - name: "model_dims"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.TransformerLm"
+  torch:
+    api: null # Architectural construct
+
+---
+operation: "VQNgrammer"
+description: "Implements a VQ based ngrammer layer which looks up latent ngram id."
+op_type: "class"
+std_args:
+  - name: "ngram_vocab_size"
+    type: "int"
+  - name: "ngram_emb_dim"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.VQNgrammer"
+  torch:
+    api: null
+
+---
+operation: "VanillaBlock"
+description: "Vanilla Convolution Block."
+op_type: "class"
+std_args:
+  - name: "input_dim"
+    type: "int"
+  - name: "output_dim"
+    type: "int"
+  - name: "kernel_size"
+    type: "int"
+    default: 3
+variants:
+  paxml:
+    api: "praxis.layers.VanillaBlock"
+  torch:
+    api: "torch.nn.Conv2d"
+    args:
+      input_dim: "in_channels"
+      output_dim: "out_channels"
+      kernel_size: "kernel_size"
+
+---
+operation: "VanillaNet"
+description: "VanillaNet model without skip-connection or batch-norm mirroring ResNets."
+op_type: "class"
+std_args:
+  - name: "strides"
+    type: "Sequence[int]"
+  - name: "channels"
+    type: "Sequence[int]"
+variants:
+  paxml:
+    api: "praxis.layers.VanillaNet"
+  torch:
+    api: null
+
+---
+operation: "VectorQuantization"
+description: "Implements vector quantization (VQ)/online k-means clustering."
+op_type: "class"
+std_args:
+  - name: "num_clusters"
+    type: "int"
+    default: 0
+  - name: "num_heads"
+    type: "int"
+    default: 0
+  - name: "dim_per_head"
+    type: "int"
+    default: 0
+variants:
+  paxml:
+    api: "praxis.layers.VectorQuantization"
+  torch:
+    api: null
+
+---
+operation: "VectorQuantizer"
+description: "The VQ-VAE sequence vector quantizer."
+op_type: "class"
+std_args:
+  - name: "num_latent_classes"
+    type: "int"
+  - name: "latent_dim"
+    type: "int"
+  - name: "beta"
+    type: "float"
+variants:
+  paxml:
+    api: "praxis.layers.VectorQuantizer"
+  torch:
+    api: null
+
+---
+operation: "VisionTransformer"
+description: "Vision transformer model."
+op_type: "class"
+std_args:
+  - name: "entry_layers_tpl"
+    type: "Any"
+variants:
+  paxml:
+    api: "praxis.layers.VisionTransformer"
+  torch:
+    api: "torchvision.models.VisionTransformer"
+    requires_plugin: "vit_constructor"
+
+---
+operation: "VitEntryLayers"
+description: "Entry block of ViT (Patch Embed)."
+op_type: "class"
+std_args:
+  - name: "patch_size"
+    type: "int"
+  - name: "input_dims"
+    type: "int"
+  - name: "output_dims"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.VitEntryLayers"
+  torch:
+    api: null # Usually internal Conv2d
+
+---
+operation: "VitExitLayers"
+description: "Exit block of ViT."
+op_type: "class"
+std_args:
+  - name: "hidden_dim"
+    type: "int"
+  - name: "output_dim"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.VitExitLayers"
+  torch:
+    api: null
+
+---
+operation: "CausalMask"
+description: "Computes and returns causal mask."
+op_type: "function"
+std_args:
+  - name: "input_t"
+    type: "Tensor"
+variants:
+  paxml:
+    api: "praxis.layers.causal_mask"
+  torch:
+    api: "torch.nn.Transformer.generate_square_subsequent_mask"
+
+---
+operation: "CausalSegmentMask"
+description: "Computes the masks which combines causal masking and segment masks."
+op_type: "function"
+std_args:
+  - name: "segment_ids"
+    type: "Tensor"
+  - name: "causal_attention_mask"
+    type: "Tensor"
+    default: null
+variants:
+  paxml:
+    api: "praxis.layers.causal_segment_mask"
+
+---
+operation: "ComputeAttentionMasksForExtendStep"
+description: "Computes attention mask from paddings, segment masks etc for extend_step."
+op_type: "function"
+std_args:
+  - name: "time_step"
+    type: "Tensor"
+  - name: "seq_len"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.compute_attention_masks_for_extend_step"
+
+---
+operation: "ComputeAttentionMasksForFprop"
+description: "Computes attention mask from paddings, segment masks etc for fprop."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "Tensor"
+  - name: "paddings"
+    type: "Tensor"
+    default: null
+variants:
+  paxml:
+    api: "praxis.layers.compute_attention_masks_for_fprop"
+
+---
+operation: "ComputeMoments"
+description: "Computes mean and variance over the valid data points in inputs."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "Tensor"
+  - name: "padding"
+    type: "Tensor"
+  - name: "reduce_over_dims"
+    type: "List[int]"
+variants:
+  paxml:
+    api: "praxis.layers.compute_moments"
+  torch:
+    requires_plugin: "compute_moments_masked" # Torch lacks masked moments op
+
+---
+operation: "ConvertPaddingsToMask"
+description: "Converts binary paddings to a logit mask ready to add to attention matrix."
+op_type: "function"
+std_args:
+  - name: "paddings"
+    type: "Tensor"
+  - name: "dtype"
+    type: "Any"
+variants:
+  paxml:
+    api: "praxis.layers.convert_paddings_to_mask"
+
+---
+operation: "GetBigramIds"
+description: "Generate bi-gram ids from uni-gram ids."
+op_type: "function"
+std_args:
+  - name: "ids"
+    type: "Tensor"
+  - name: "vocab_size"
+    type: "int"
+variants:
+  paxml:
+    api: "praxis.layers.get_bigram_ids"
+
+---
+operation: "ProjectLastDim"
+description: "Linear projection on the last dim of the input Tensor using Einsum."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+variants:
+  paxml:
+    api: "praxis.layers.project_last_dim"
+  torch:
+    api: "torch.nn.functional.linear"
+    args:
+      inputs: "input"
+      weight: "weight"
+    layout_map:
+      weight: "IO->OI" # Pax expects [in, out], Torch expects [out, in]
+  jax:
+    api: "jax.numpy.matmul"
+    args:
+      inputs: "a"
+      weight: "b"
+
+---
+operation: "QuantizeVector"
+description: "Vector quantization."
+op_type: "function"
+std_args:
+  - name: "latent"
+    type: "Tensor"
+  - name: "codebook"
+    type: "Tensor"
+variants:
+  paxml:
+    api: "praxis.layers.quantize_vector"
+
+---
+operation: "SegmentMask"
+description: "Computes (non-causal) segment mask."
+op_type: "function"
+std_args:
+  - name: "segment_ids"
+    type: "Tensor"
+variants:
+  paxml:
+    api: "praxis.layers.segment_mask"

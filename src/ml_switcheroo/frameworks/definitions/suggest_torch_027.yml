@@ -1,0 +1,546 @@
+operation: "Saddmm"
+description: "Performs the S-ADDMM operation (Sparse Add Matrix-Matrix). Generally deprecated in favor of explicit sparse operations."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mat1"
+    type: "Tensor"
+  - name: "mat2"
+    type: "Tensor"
+  - name: "beta"
+    type: "float"
+    default: 1.0
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+  - name: "out"
+    type: "Tensor"
+    default: null
+variants:
+  torch:
+    api: "torch.saddmm"
+  jax:
+    api: null # Sparse ops require specific sparse module handling
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+---
+operation: "Save"
+description: "Saves an object (tensor or model) to a disk file."
+op_type: "function"
+std_args:
+  - name: "obj"
+    type: "Any"
+  - name: "f"
+    type: "Union[str, Path]"
+  - name: "pickle_module"
+    type: "Any"
+    default: null
+  - name: "pickle_protocol"
+    type: "int"
+    default: 2
+variants:
+  torch:
+    api: "torch.save"
+  jax:
+    # JAX saving usually handled via Orbax or platform libs; use plugin to bridge
+    requires_plugin: "io_handler"
+  tensorflow:
+    api: "tf.io.write_file" # Basic blob saving, or saved_model for objects
+    requires_plugin: "io_handler"
+  keras:
+    api: "keras.saving.save_model"
+  mlx:
+    api: "mlx.core.save"
+  numpy:
+    api: "numpy.save"
+---
+operation: "ScalarTensor"
+description: "Creates a 0-dimensional tensor containing a single value."
+std_args:
+  - name: "s"
+    type: "float"
+  - name: "dtype"
+    type: "DType"
+    default: null
+  - name: "device"
+    type: "Device"
+    default: null
+variants:
+  torch:
+    api: "torch.scalar_tensor"
+  jax:
+    api: "jax.numpy.array"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+  mlx:
+    api: "mlx.core.array"
+  numpy:
+    api: "numpy.array"
+---
+operation: "Scatter"
+description: "Writes values into a tensor at indices specified by index."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "Tensor"
+  - name: "src"
+    type: "Tensor"
+  - name: "reduce"
+    type: "str"
+    default: null
+variants:
+  torch:
+    api: "torch.scatter"
+  jax:
+    # JAX uses .at[].set() syntax which is distinct from torch.scatter API
+    requires_plugin: "scatter_indexer"
+  tensorflow:
+    api: "tf.tensor_scatter_nd_update"
+  keras:
+    api: "keras.ops.scatter"
+  mlx:
+    # MLX often relies on indexing ops
+    api: null 
+  numpy:
+    api: "numpy.put_along_axis" # Approximate equivalent
+    args:
+      input: "arr"
+      index: "indices"
+      dim: "axis"
+      src: "values"
+---
+operation: "ScatterAdd"
+description: "Adds values into a tensor at indices specified by index."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "Tensor"
+  - name: "src"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.scatter_add"
+  jax:
+    requires_plugin: "scatter_indexer" # Handles .at[].add()
+  tensorflow:
+    api: "tf.tensor_scatter_nd_add"
+  keras:
+    api: "keras.ops.scatter"
+    # Keras ops often unify scatter/update.
+  mlx:
+    api: null
+---
+operation: "ScatterReduce"
+description: "Reduces values into a tensor at indices specified by index using a reduction operation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "Tensor"
+  - name: "src"
+    type: "Tensor"
+  - name: "reduce"
+    type: "str"
+  - name: "include_self"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.scatter_reduce"
+  jax:
+    requires_plugin: "scatter_indexer"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+---
+operation: "SearchSorted"
+description: "Finds indices where elements should be inserted to maintain order."
+std_args:
+  - name: "sorted_sequence"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "out_int32"
+    type: "bool"
+    default: false
+  - name: "right"
+    type: "bool"
+    default: false
+  - name: "side"
+    type: "str"
+    default: null
+  - name: "sorter"
+    type: "Tensor"
+    default: null
+variants:
+  torch:
+    api: "torch.searchsorted"
+  jax:
+    api: "jax.numpy.searchsorted"
+    args:
+      sorted_sequence: "a"
+      values: "v"
+  tensorflow:
+    api: "tf.searchsorted"
+  keras:
+    # Not standard in Keras Core Ops yet
+    api: null
+  numpy:
+    api: "numpy.searchsorted"
+    args:
+      sorted_sequence: "a"
+      values: "v"
+---
+operation: "Seed"
+description: "Sets the seed for generating random numbers."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.seed"
+  jax:
+    # JAX is stateless; explicitly no global seed API
+    api: null
+  tensorflow:
+    api: "tf.random.set_seed"
+  mlx:
+    api: "mlx.core.random.seed"
+  numpy:
+    api: "numpy.random.seed"
+---
+operation: "SegmentReduce"
+description: "Performs a reduction along segments of a tensor."
+std_args:
+  - name: "data"
+    type: "Tensor"
+  - name: "reduce"
+    type: "str"
+  - name: "lengths"
+    type: "Tensor"
+    default: null
+  - name: "indices"
+    type: "Tensor"
+    default: null
+  - name: "offsets"
+    type: "Tensor"
+    default: null
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.segment_reduce"
+  jax:
+    api: "jax.ops.segment_sum" # Default to sum, dispatch logic required for others
+    dispatch_rules:
+      - if_arg: "reduce"
+        op: "eq"
+        val: "max"
+        use_api: "jax.ops.segment_max"
+      - if_arg: "reduce"
+        op: "eq"
+        val: "min"
+        use_api: "jax.ops.segment_min"
+      - if_arg: "reduce"
+        op: "eq"
+        val: "mean"
+        use_api: "jax.ops.segment_mean"
+  tensorflow:
+    api: "tf.math.segment_sum"
+  keras:
+    api: "keras.ops.segment_sum"
+---
+operation: "Select"
+description: "Slices the input tensor along the selected dimension at the given index."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "int"
+variants:
+  torch:
+    api: "torch.select"
+  jax:
+    api: "jax.lax.index_take"
+    args:
+      input: "operand"
+      index: "index"
+    # Or use .take with mode
+  keras:
+    api: "keras.ops.take"
+    args:
+      input: "x"
+      index: "indices"
+      dim: "axis"
+  tensorflow:
+    api: "tf.gather"
+  numpy:
+    api: "numpy.take"
+    args:
+      input: "a"
+      index: "indices"
+      dim: "axis"
+---
+operation: "SelectCopy"
+description: "Slices the tensor, returning a copy."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "int"
+variants:
+  torch:
+    api: "torch.select_copy"
+  jax:
+    # JAX arrays are immutable, select is always a view/copy semantically safe
+    api: "jax.lax.index_take"
+  numpy:
+    api: "numpy.take"
+---
+operation: "SelectScatter"
+description: "Embeds values into the tensor at the given index."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "src"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "int"
+variants:
+  torch:
+    api: "torch.select_scatter"
+  jax:
+    # Maps to .at[idx].set() via scatter logic or specific index_update
+    requires_plugin: "scatter_indexer"
+  keras:
+    api: "keras.ops.scatter_update"
+---
+operation: "SeLU"
+description: "Scaled Exponential Linear Unit activation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.selu"
+  jax:
+    api: "jax.nn.selu"
+  flax_nnx:
+    api: "flax.nnx.selu"
+  tensorflow:
+    api: "tf.nn.selu"
+  keras:
+    api: "keras.activations.selu"
+  mlx:
+    api: "mlx.nn.selu"
+---
+operation: "SeLU_"
+description: "In-place SeLU."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.selu_"
+  jax:
+    api: "jax.nn.selu" # Functional fallback
+  keras:
+    api: "keras.activations.selu"
+---
+operation: "SetAnomalyEnabled"
+description: "Context-manager/Function to enable or disable anomaly detection (NaN checks)."
+std_args:
+  - name: "mode"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.set_anomaly_enabled"
+  jax:
+    # Config update via macro
+    macro_template: "jax.config.update('jax_debug_nans', {mode})"
+  tensorflow:
+    api: "tf.debugging.enable_check_numerics"
+  mlx:
+    api: null
+---
+operation: "SetAutocastCacheEnabled"
+description: "Sets the autocast cache status."
+std_args:
+  - name: "enabled"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.set_autocast_cache_enabled"
+  # Other frameworks handle mixed precision via policy/config, not explicit cache control API
+---
+operation: "SetAutocastCpuDtype"
+description: "Sets the autocast dtype for CPU."
+std_args:
+  - name: "dtype"
+    type: "DType"
+variants:
+  torch:
+    api: "torch.set_autocast_cpu_dtype"
+---
+operation: "SetAutocastCpuEnabled"
+description: "Enables autocast for CPU."
+std_args:
+  - name: "enabled"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.set_autocast_cpu_enabled"
+---
+operation: "SetAutocastDtype"
+description: "Sets the autocast dtype."
+std_args:
+  - name: "device_type"
+    type: "str"
+  - name: "dtype"
+    type: "DType"
+variants:
+  torch:
+    api: "torch.set_autocast_dtype"
+  keras:
+    api: "keras.mixed_precision.set_dtype_policy"
+---
+operation: "SetAutocastEnabled"
+description: "Enables autocast."
+std_args:
+  - name: "device_type"
+    type: "str"
+  - name: "enabled"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.set_autocast_enabled"
+---
+operation: "SetAutocastGpuDtype"
+description: "Sets autocast dtype for GPU."
+std_args:
+  - name: "dtype"
+    type: "DType"
+variants:
+  torch:
+    api: "torch.set_autocast_gpu_dtype"
+---
+operation: "SetAutocastIpUDtype"
+description: "Sets autocast dtype for IPU."
+std_args:
+  - name: "dtype"
+    type: "DType"
+variants:
+  torch:
+    api: "torch.set_autocast_ipu_dtype"
+---
+operation: "SetAutocastIpUEnabled"
+description: "Enables autocast for IPU."
+std_args:
+  - name: "enabled"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.set_autocast_ipu_enabled"
+---
+operation: "SetAutocastXlaDtype"
+description: "Sets autocast dtype for XLA."
+std_args:
+  - name: "dtype"
+    type: "DType"
+variants:
+  torch:
+    api: "torch.set_autocast_xla_dtype"
+---
+operation: "SetAutocastXlaEnabled"
+description: "Enables autocast for XLA."
+std_args:
+  - name: "enabled"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.set_autocast_xla_enabled"
+---
+operation: "SetDefaultDevice"
+description: "Sets the default device for tensor allocation."
+std_args:
+  - name: "device"
+    type: "Union[str, Device]"
+variants:
+  torch:
+    api: "torch.set_default_device"
+  jax:
+    api: "jax.default_device"
+  mlx:
+    api: "mlx.core.set_default_device"
+---
+operation: "SetDefaultDtype"
+description: "Sets the default floating point dtype."
+std_args:
+  - name: "d"
+    type: "DType"
+variants:
+  torch:
+    api: "torch.set_default_dtype"
+  jax:
+    macro_template: "jax.config.update('jax_enable_x64', {d} == jnp.float64)"
+  keras:
+    api: "keras.config.set_floatx"
+---
+operation: "SetDefaultTensorType"
+description: "Sets the default tensor type (Deprecated)."
+deprecated: true
+std_args:
+  - name: "t"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.set_default_tensor_type"
+---
+operation: "SetDeterministicDebugMode"
+description: "Sets debug mode for deterministic operations."
+std_args:
+  - name: "debug_mode"
+    type: "Union[str, int]"
+variants:
+  torch:
+    api: "torch.set_deterministic_debug_mode"
+  tensorflow:
+    api: "tf.config.experimental.enable_op_determinism"
+  jax:
+    macro_template: "jax.config.update('jax_deterministic_ops', {debug_mode} != 0)"
+---
+operation: "SetFloat32MatmulPrecision"
+description: "Sets internal precision for float32 matrix multiplications."
+std_args:
+  - name: "precision"
+    type: "str"
+    options: ["highest", "high", "medium"]
+variants:
+  torch:
+    api: "torch.set_float32_matmul_precision"
+  jax:
+    macro_template: "jax.config.update('jax_default_matmul_precision', {precision})"

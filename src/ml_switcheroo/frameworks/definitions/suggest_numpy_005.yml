@@ -1,0 +1,740 @@
+operation: "Delete"
+description: "Return a new array with sub-arrays along an axis deleted."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "obj"
+    type: "Union[int, slice, Tensor]"
+    doc: "Indicate indices of sub-arrays to remove."
+  - name: "axis"
+    type: "int"
+    default: "None"
+variants:
+  jax:
+    api: "jax.numpy.delete"
+  numpy:
+    api: "numpy.delete"
+  tensorflow:
+    api: "tf.experimental.numpy.delete"
+  torch:
+    # Torch requires manual masking or index_select logic, essentially a plugin
+    requires_plugin: "torch_delete"
+---
+operation: "Diag"
+description: "Extract a diagonal or construct a diagonal array."
+std_args:
+  - name: "v"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.diag"
+  jax:
+    api: "jax.numpy.diag"
+  flax_nnx:
+    api: "jax.numpy.diag"
+  paxml:
+    api: "jax.numpy.diag"
+  torch:
+    api: "torch.diag"
+    args:
+      v: "input"
+      k: "diagonal"
+  mlx:
+    api: "mlx.core.diag"
+    args:
+      v: "a"
+  keras:
+    api: "keras.ops.diag"
+    args:
+      v: "x"
+  tensorflow:
+    api: "tf.linalg.diag"
+    dispatch_rules:
+      - if_arg: "v"
+        op: "is_type"
+        val: "Tensor" # Needs rank check logic ideally
+        use_api: "tf.linalg.diag" # Assume construction for now due to complexity
+---
+operation: "DiagIndices"
+description: "Return the indices to access the main diagonal of an array."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "ndim"
+    type: "int"
+    default: 2
+variants:
+  numpy:
+    api: "numpy.diag_indices"
+  jax:
+    api: "jax.numpy.diag_indices"
+  flax_nnx:
+    api: "jax.numpy.diag_indices"
+  paxml:
+    api: "jax.numpy.diag_indices"
+---
+operation: "DiagIndicesFrom"
+description: "Return the indices to access the main diagonal of an n-dimensional array."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.diag_indices_from"
+  jax:
+    api: "jax.numpy.diag_indices_from"
+  flax_nnx:
+    api: "jax.numpy.diag_indices_from"
+  paxml:
+    api: "jax.numpy.diag_indices_from"
+---
+operation: "Diagflat"
+description: "Create a two-dimensional array with the flattened input as a diagonal."
+std_args:
+  - name: "v"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.diagflat"
+  jax:
+    api: "jax.numpy.diagflat"
+  flax_nnx:
+    api: "jax.numpy.diagflat"
+  paxml:
+    api: "jax.numpy.diagflat"
+  torch:
+    api: "torch.diagflat"
+    args:
+      v: "input"
+      k: "offset"
+  tensorflow:
+    requires_plugin: "tf_diagflat"
+---
+operation: "Diagonal"
+description: "Return specified diagonals."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "offset"
+    type: "int"
+    default: 0
+  - name: "axis1"
+    type: "int"
+    default: 0
+  - name: "axis2"
+    type: "int"
+    default: 1
+variants:
+  numpy:
+    api: "numpy.diagonal"
+  jax:
+    api: "jax.numpy.diagonal"
+  flax_nnx:
+    api: "jax.numpy.diagonal"
+  paxml:
+    api: "jax.numpy.diagonal"
+  torch:
+    api: "torch.diagonal"
+    args:
+      a: "input"
+      axis1: "dim1"
+      axis2: "dim2"
+  mlx:
+    api: "mlx.core.diagonal"
+  keras:
+    # Not directly in keras.ops standard
+    requires_plugin: "keras_diagonal"
+  tensorflow:
+    api: "tf.experimental.numpy.diagonal"
+---
+operation: "Diff"
+description: "Calculate the n-th discrete difference along the given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "n"
+    type: "int"
+    default: 1
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "prepend"
+    type: "Any"
+    default: null
+  - name: "append"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.diff"
+  jax:
+    api: "jax.numpy.diff"
+  flax_nnx:
+    api: "jax.numpy.diff"
+  paxml:
+    api: "jax.numpy.diff"
+  torch:
+    api: "torch.diff"
+    args:
+      a: "input"
+      axis: "dim"
+  tensorflow:
+    api: "tf.experimental.numpy.diff"
+---
+operation: "Digitize"
+description: "Return the indices of the bins to which each value in input array belongs."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "bins"
+    type: "Tensor"
+  - name: "right"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.digitize"
+  jax:
+    api: "jax.numpy.digitize"
+  flax_nnx:
+    api: "jax.numpy.digitize"
+  paxml:
+    api: "jax.numpy.digitize"
+  torch:
+    api: "torch.bucketize"
+    args:
+      x: "input"
+      bins: "boundaries"
+  tensorflow:
+    api: "tf.experimental.numpy.digitize"
+---
+operation: "Divide"
+description: "Divide arguments element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.divide"
+  jax:
+    api: "jax.numpy.divide"
+  flax_nnx:
+    api: "jax.numpy.divide"
+  paxml:
+    api: "jax.numpy.divide"
+  torch:
+    api: "torch.divide"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.divide"
+    args:
+      x1: "a"
+      x2: "b"
+  keras:
+    api: "keras.ops.divide"
+  tensorflow:
+    api: "tf.math.divide"
+    args:
+      x1: "x"
+      x2: "y"
+---
+operation: "Divmod"
+description: "Return element-wise quotient and remainder simultaneously."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.divmod"
+  jax:
+    api: "jax.numpy.divmod"
+  flax_nnx:
+    api: "jax.numpy.divmod"
+  paxml:
+    api: "jax.numpy.divmod"
+  torch:
+    api: "torch.divmod"
+    # Available in recent Torch versions
+    args:
+      x1: "input"
+      x2: "other"
+---
+operation: "Dot"
+description: "Dot product of two arrays."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.dot"
+  jax:
+    api: "jax.numpy.dot"
+  flax_nnx:
+    api: "jax.numpy.dot"
+  paxml:
+    api: "jax.numpy.dot"
+  torch:
+    api: "torch.dot"
+    # Note: torch.dot is only 1D, differs from numpy for 2D. 
+    # Use dispatch rules or matmul based on rank if possible.
+  mlx:
+    api: "mlx.core.matmul" # Best approximation for modern usage
+  keras:
+    api: "keras.ops.matmul"
+  tensorflow:
+    api: "tf.tensordot" 
+    # Usually requires axis logic, might need macro in real use
+---
+operation: "Double"
+description: "Double-precision floating-point number type."
+op_type: "attribute"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.float64"
+  jax:
+    api: "jax.numpy.float64"
+  flax_nnx:
+    api: "jax.numpy.float64"
+  paxml:
+    api: "jax.numpy.float64"
+  torch:
+    api: "torch.float64"
+  tensorflow:
+    api: "tf.float64"
+---
+operation: "Dsplit"
+description: "Split array into multiple sub-arrays along the 3rd axis (depth)."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "Union[int, List[int]]"
+variants:
+  numpy:
+    api: "numpy.dsplit"
+  jax:
+    api: "jax.numpy.dsplit"
+  flax_nnx:
+    api: "jax.numpy.dsplit"
+  paxml:
+    api: "jax.numpy.dsplit"
+  torch:
+    api: "torch.dsplit"
+  tensorflow:
+    api: "tf.experimental.numpy.dsplit"
+---
+operation: "Dstack"
+description: "Stack arrays in sequence depth wise (along third axis)."
+std_args:
+  - name: "tup"
+    type: "List[Tensor]"
+variants:
+  numpy:
+    api: "numpy.dstack"
+  jax:
+    api: "jax.numpy.dstack"
+  flax_nnx:
+    api: "jax.numpy.dstack"
+  paxml:
+    api: "jax.numpy.dstack"
+  torch:
+    api: "torch.dstack"
+  tensorflow:
+    api: "tf.experimental.numpy.dstack"
+---
+operation: "Dtype"
+description: "Create a data type object."
+op_type: "class"
+std_args:
+  - name: "dtype"
+variants:
+  numpy:
+    api: "numpy.dtype"
+  jax:
+    api: "jax.numpy.dtype"
+  flax_nnx:
+    api: "jax.numpy.dtype"
+  paxml:
+    api: "jax.numpy.dtype"
+  torch:
+    api: "torch.dtype"
+  keras:
+    api: "keras.dtype"
+---
+operation: "E"
+description: "Euler's constant."
+op_type: "attribute"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.e"
+  jax:
+    api: "jax.numpy.e"
+  flax_nnx:
+    api: "jax.numpy.e"
+  paxml:
+    api: "jax.numpy.e"
+  torch:
+    # No direct attribute in torch, requires macro
+    api: "numpy.e" # Fallback to numpy constant often used
+    requires_imports: 
+      - "import numpy as np"
+  mlx:
+    api: "math.e"
+    requires_imports: 
+      - "import math"
+---
+operation: "Ediff1d"
+description: "The differences between consecutive elements of an array."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "to_end"
+    type: "Tensor"
+    default: null
+  - name: "to_begin"
+    type: "Tensor"
+    default: null
+variants:
+  numpy:
+    api: "numpy.ediff1d"
+  jax:
+    api: "jax.numpy.ediff1d"
+  flax_nnx:
+    api: "jax.numpy.ediff1d"
+  paxml:
+    api: "jax.numpy.ediff1d"
+  tensorflow:
+    api: "tf.experimental.numpy.ediff1d"
+---
+operation: "Einsum"
+description: "Evaluates the Einstein summation convention on the operands."
+std_args:
+  - name: "subscripts"
+    type: "str"
+  - name: "operands"
+    is_variadic: true
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.einsum"
+  jax:
+    api: "jax.numpy.einsum"
+  flax_nnx:
+    api: "jax.numpy.einsum"
+  paxml:
+    api: "jax.numpy.einsum"
+  torch:
+    api: "torch.einsum"
+    args:
+       subscripts: "equation"
+  keras:
+    api: "keras.ops.einsum"
+  tensorflow:
+    api: "tf.einsum"
+---
+operation: "EinsumPath"
+description: "Evaluates the lowest cost contraction order for an einsum expression."
+std_args:
+  - name: "subscripts"
+    type: "str"
+  - name: "operands"
+    is_variadic: true
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.einsum_path"
+  jax:
+    api: "jax.numpy.einsum_path"
+  flax_nnx:
+    api: "jax.numpy.einsum_path"
+  paxml:
+    api: "jax.numpy.einsum_path"
+---
+operation: "Empty"
+description: "Return a new array of given shape and type, without initializing entries."
+std_args:
+  - name: "shape"
+    type: "Union[int, Tuple[int]]"
+  - name: "dtype"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.empty"
+  jax:
+    api: "jax.numpy.empty"
+  flax_nnx:
+    api: "jax.numpy.empty"
+  paxml:
+    api: "jax.numpy.empty"
+  torch:
+    api: "torch.empty"
+    args:
+      shape: "size"
+  tensorflow:
+    api: "tf.experimental.numpy.empty"
+---
+operation: "EmptyLike"
+description: "Return a new array with the same shape and type as a given array."
+std_args:
+  - name: "prototype"
+    type: "Tensor"
+  - name: "dtype"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.empty_like"
+  jax:
+    api: "jax.numpy.empty_like"
+  flax_nnx:
+    api: "jax.numpy.empty_like"
+  paxml:
+    api: "jax.numpy.empty_like"
+  torch:
+    api: "torch.empty_like"
+    args:
+      prototype: "input"
+  tensorflow:
+    api: "tf.experimental.numpy.empty_like"
+---
+operation: "Equal"
+description: "Return (x1 == x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.equal"
+  jax:
+    api: "jax.numpy.equal"
+  flax_nnx:
+    api: "jax.numpy.equal"
+  paxml:
+    api: "jax.numpy.equal"
+  torch:
+    api: "torch.eq"
+    args:
+      x1: "input"
+      x2: "other"
+  mlx:
+    api: "mlx.core.equal"
+  keras:
+    api: "keras.ops.equal"
+  tensorflow:
+    api: "tf.math.equal"
+---
+operation: "Errstate"
+description: "Context manager for floating-point error handling."
+op_type: "context"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.errstate"
+  # Other frameworks often map this to a no-op context manager in transpilation
+---
+operation: "EulerGamma"
+description: "Euler-Mascheroni constant."
+op_type: "attribute"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.euler_gamma"
+  jax:
+    api: "jax.numpy.euler_gamma"
+  flax_nnx:
+    api: "jax.numpy.euler_gamma"
+  paxml:
+    api: "jax.numpy.euler_gamma"
+  torch:
+    api: "torch.euler_gamma"
+---
+operation: "Exp"
+description: "Calculate the exponential of all elements in the input array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.exp"
+  jax:
+    api: "jax.numpy.exp"
+  flax_nnx:
+    api: "jax.numpy.exp"
+  paxml:
+    api: "jax.numpy.exp"
+  torch:
+    api: "torch.exp"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.exp"
+    args:
+      x: "a"
+  keras:
+    api: "keras.ops.exp"
+  tensorflow:
+    api: "tf.math.exp"
+---
+operation: "Exp2"
+description: "Calculate 2**p for all p in the input array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.exp2"
+  jax:
+    api: "jax.numpy.exp2"
+  flax_nnx:
+    api: "jax.numpy.exp2"
+  paxml:
+    api: "jax.numpy.exp2"
+  torch:
+    api: "torch.exp2"
+    args:
+      x: "input"
+  tensorflow:
+    macro_template: "tf.math.pow(2.0, {x})"
+---
+operation: "ExpandDims"
+description: "Expand the shape of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+variants:
+  numpy:
+    api: "numpy.expand_dims"
+  jax:
+    api: "jax.numpy.expand_dims"
+  flax_nnx:
+    api: "jax.numpy.expand_dims"
+  paxml:
+    api: "jax.numpy.expand_dims"
+  torch:
+    api: "torch.unsqueeze"
+    args:
+      a: "input"
+      axis: "dim"
+  mlx:
+    api: "mlx.core.expand_dims"
+  keras:
+    api: "keras.ops.expand_dims"
+  tensorflow:
+    api: "tf.expand_dims"
+    args:
+      a: "input"
+---
+operation: "Expm1"
+description: "Calculate exp(x) - 1 for all elements in the array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.expm1"
+  jax:
+    api: "jax.numpy.expm1"
+  flax_nnx:
+    api: "jax.numpy.expm1"
+  paxml:
+    api: "jax.numpy.expm1"
+  torch:
+    api: "torch.expm1"
+    args:
+      x: "input"
+  mlx:
+    api: "mlx.core.expm1"
+  keras:
+    api: "keras.ops.expm1"
+  tensorflow:
+    api: "tf.math.expm1"
+---
+operation: "Extract"
+description: "Return the elements of an array that satisfy some condition."
+std_args:
+  - name: "condition"
+    type: "Tensor"
+  - name: "arr"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.extract"
+  jax:
+    api: "jax.numpy.extract"
+  flax_nnx:
+    api: "jax.numpy.extract"
+  paxml:
+    api: "jax.numpy.extract"
+  torch:
+    api: "torch.masked_select"
+    args:
+      condition: "mask"
+      arr: "input"
+  tensorflow:
+    api: "tf.boolean_mask"
+    args:
+      condition: "mask"
+      arr: "tensor"
+---
+operation: "Eye"
+description: "Return a 2-D array with ones on the diagonal and zeros elsewhere."
+std_args:
+  - name: "N"
+    type: "int"
+  - name: "M"
+    type: "int"
+    default: null
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "dtype"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.eye"
+  jax:
+    api: "jax.numpy.eye"
+  flax_nnx:
+    api: "jax.numpy.eye"
+  paxml:
+    api: "jax.numpy.eye"
+  torch:
+    api: "torch.eye"
+    args:
+      N: "n"
+      M: "m"
+    # k not directly supported in basic torch.eye, usually done differently or requires logic
+  mlx:
+    api: "mlx.core.eye"
+    args:
+      N: "n"
+      M: "m"
+  keras:
+    api: "keras.ops.eye"
+  tensorflow:
+    api: "tf.eye"
+    args:
+      N: "num_rows"
+      M: "num_columns"

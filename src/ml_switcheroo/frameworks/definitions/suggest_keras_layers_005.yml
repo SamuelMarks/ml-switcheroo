@@ -1,0 +1,692 @@
+operation: "RandomHue"
+description: "Randomly adjusts the hue on given images."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+    description: "Range is [0.0, 1.0]. Represents random range (-factor, factor)."
+  - name: "value_range"
+    type: "Tuple[int, int]"
+    default: [0, 255]
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomHue"
+    args:
+      factor: "factor"
+      value_range: "value_range"
+      seed: "seed"
+  torch:
+    api: "torchvision.transforms.ColorJitter"
+    args:
+      factor: "hue"
+    required_imports: ["import torchvision"]
+
+---
+operation: "RandomInvert"
+description: "Preprocessing layer for random inversion of image colors."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+    default: 1.0
+  - name: "value_range"
+    type: "Tuple[int, int]"
+    default: [0, 255]
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomInvert"
+  torch:
+    api: "torchvision.transforms.RandomInvert"
+    args:
+      factor: "p"
+    required_imports: ["import torchvision"]
+
+---
+operation: "RandomPerspective"
+description: "A preprocessing layer that applies random perspective transformations."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+    default: 1.0
+  - name: "scale"
+    type: "float"
+    default: 1.0
+    description: "Distortion scale."
+  - name: "interpolation"
+    type: "str"
+    default: "bilinear"
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomPerspective"
+  torch:
+    api: "torchvision.transforms.RandomPerspective"
+    args:
+      factor: "p"
+      scale: "distortion_scale"
+    required_imports: ["import torchvision"]
+    arg_values:
+      interpolation:
+        bilinear: "torchvision.transforms.InterpolationMode.BILINEAR"
+        nearest: "torchvision.transforms.InterpolationMode.NEAREST"
+
+---
+operation: "RandomPosterization"
+description: "Reduces the number of bits for each color channel."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "int"
+    description: "Number of bits to keep (1-8)."
+  - name: "value_range"
+    type: "Tuple[int, int]"
+    default: [0, 255]
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomPosterization"
+  torch:
+    api: "torchvision.transforms.RandomPosterize"
+    args:
+      factor: "bits"
+    required_imports: ["import torchvision"]
+
+---
+operation: "RandomRotation"
+description: "Randomly rotates images during training."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+    description: "Fraction of 2*pi."
+  - name: "fill_mode"
+    type: "str"
+    default: "reflect"
+  - name: "interpolation"
+    type: "str"
+    default: "bilinear"
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomRotation"
+  torch:
+    api: "torchvision.transforms.RandomRotation"
+    args:
+      factor: "degrees" 
+    required_imports: ["import torchvision"]
+
+---
+operation: "RandomSaturation"
+description: "Randomly adjusts the saturation on given images."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+  - name: "value_range"
+    type: "Tuple[int, int]"
+    default: [0, 255]
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomSaturation"
+  torch:
+    api: "torchvision.transforms.ColorJitter"
+    args:
+      factor: "saturation"
+    required_imports: ["import torchvision"]
+
+---
+operation: "RandomSharpness"
+description: "Randomly performs the sharpness operation on given images."
+op_type: "class"
+std_args:
+  - name: "factor"
+    type: "float"
+  - name: "value_range"
+    type: "Tuple[int, int]"
+    default: [0, 255]
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomSharpness"
+  torch:
+    api: "torchvision.transforms.RandomAdjustSharpness"
+    args:
+      factor: "sharpness_factor"
+    required_imports: ["import torchvision"]
+
+---
+operation: "RandomShear"
+description: "Randomly applies shear transformations."
+op_type: "class"
+std_args:
+  - name: "x_factor"
+    type: "float"
+    default: 0.0
+  - name: "y_factor"
+    type: "float"
+    default: 0.0
+  - name: "interpolation"
+    type: "str"
+    default: "bilinear"
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomShear"
+  torch:
+    api: "torchvision.transforms.RandomAffine"
+    args:
+      x_factor: "shear"
+    required_imports: ["import torchvision"]
+
+---
+operation: "RandomTranslation"
+description: "Randomly translates images."
+op_type: "class"
+std_args:
+  - name: "height_factor"
+    type: "float"
+  - name: "width_factor"
+    type: "float"
+  - name: "interpolation"
+    type: "str"
+    default: "bilinear"
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomTranslation"
+  torch:
+    api: "torchvision.transforms.RandomAffine"
+    args:
+      height_factor: "translate"
+    # Note: Requires manual tupling for translate arg mapping
+    required_imports: ["import torchvision"]
+
+---
+operation: "RandomZoom"
+description: "Randomly zooms images."
+op_type: "class"
+std_args:
+  - name: "height_factor"
+    type: "float"
+  - name: "width_factor"
+    type: "float"
+    default: null
+  - name: "interpolation"
+    type: "str"
+    default: "bilinear"
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.RandomZoom"
+  torch:
+    api: "torchvision.transforms.RandomAffine"
+    args:
+      height_factor: "scale"
+    required_imports: ["import torchvision"]
+
+---
+operation: "ReLU"
+description: "Rectified Linear Unit activation function layer."
+op_type: "class"
+std_args:
+  - name: "max_value"
+    type: "float"
+    default: null
+  - name: "negative_slope"
+    type: "float"
+    default: 0.0
+  - name: "threshold"
+    type: "float"
+    default: 0.0
+variants:
+  keras:
+    api: "keras.layers.ReLU"
+  torch:
+    api: "torch.nn.ReLU"
+    # Basic ReLU only supports inplace, not max_value/neg_slope. Requires plugin for advanced features.
+    dispatch_rules:
+      - if_arg: "negative_slope"
+        op: "gt"
+        val: 0
+        use_api: "torch.nn.LeakyReLU"
+      - if_arg: "max_value"
+        op: "neq"
+        val: null
+        use_api: "torch.nn.ReLU6" # Approx if max=6
+  flax_nnx:
+    api: "nnx.relu"
+  mlx:
+    api: "mlx.nn.ReLU"
+  tensorflow:
+    api: "tf.keras.layers.ReLU"
+
+---
+operation: "RepeatVector"
+description: "Repeats the input n times."
+op_type: "class"
+std_args:
+  - name: "n"
+    type: "int"
+variants:
+  keras:
+    api: "keras.layers.RepeatVector"
+  torch:
+    requires_plugin: "repeat_vector_shim"
+  tensorflow:
+    api: "tf.keras.layers.RepeatVector"
+
+---
+operation: "Rescaling"
+description: "Preprocessing layer which rescales input values to a new range."
+op_type: "class"
+std_args:
+  - name: "scale"
+    type: "float"
+  - name: "offset"
+    type: "float"
+    default: 0.0
+variants:
+  keras:
+    api: "keras.layers.Rescaling"
+  torch:
+    requires_plugin: "rescaling_shim"
+  tensorflow:
+    api: "tf.keras.layers.Rescaling"
+
+---
+operation: "Reshape"
+description: "Layer that reshapes inputs into the given shape."
+op_type: "class"
+std_args:
+  - name: "target_shape"
+    type: "Tuple[int]"
+variants:
+  keras:
+    api: "keras.layers.Reshape"
+  torch:
+    requires_plugin: "reshape_layer_shim"
+  tensorflow:
+    api: "tf.keras.layers.Reshape"
+
+---
+operation: "Resizing"
+description: "Preprocessing layer which resizes images."
+op_type: "class"
+std_args:
+  - name: "height"
+    type: "int"
+  - name: "width"
+    type: "int"
+  - name: "interpolation"
+    type: "str"
+    default: "bilinear"
+variants:
+  keras:
+    api: "keras.layers.Resizing"
+  torch:
+    api: "torchvision.transforms.Resize"
+    args:
+      height: null # Packed into size
+      width: null
+    pack_to_tuple: "size" 
+    required_imports: ["import torchvision"]
+  tensorflow:
+    api: "tf.keras.layers.Resizing"
+
+---
+operation: "ReversibleEmbedding"
+description: "Embedding layer that can project backwards to the input dim."
+op_type: "class"
+std_args:
+  - name: "input_dim"
+    type: "int"
+  - name: "output_dim"
+    type: "int"
+  - name: "tie_weights"
+    type: "bool"
+    default: true
+variants:
+  keras:
+    api: "keras.layers.ReversibleEmbedding"
+  torch:
+    requires_plugin: "reversible_embedding_shim"
+
+---
+operation: "STFTSpectrogram"
+description: "Computes the Short-Time Fourier Transform (STFT) spectrogram."
+op_type: "class"
+std_args:
+  - name: "frame_length"
+    type: "int"
+    default: 256
+  - name: "frame_step"
+    type: "int"
+    default: null
+  - name: "fft_length"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.STFTSpectrogram"
+  torch:
+    api: "torchaudio.transforms.Spectrogram"
+    args:
+      frame_length: "win_length"
+      frame_step: "hop_length"
+      fft_length: "n_fft"
+    required_imports: ["import torchaudio"]
+
+---
+operation: "SeparableConv1D"
+description: "1D separable convolution layer."
+op_type: "class"
+std_args:
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "int"
+  - name: "strides"
+    type: "int"
+    default: 1
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "depth_multiplier"
+    type: "int"
+    default: 1
+variants:
+  keras:
+    api: "keras.layers.SeparableConv1D"
+  torch:
+    requires_plugin: "separable_conv1d_shim"
+  tensorflow:
+    api: "tf.keras.layers.SeparableConv1D"
+
+---
+operation: "SeparableConv2D"
+description: "2D separable convolution layer."
+op_type: "class"
+std_args:
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "int"
+  - name: "strides"
+    type: "Tuple[int, int]"
+    default: [1, 1]
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "depth_multiplier"
+    type: "int"
+    default: 1
+variants:
+  keras:
+    api: "keras.layers.SeparableConv2D"
+  torch:
+    requires_plugin: "separable_conv2d_shim"
+  tensorflow:
+    api: "tf.keras.layers.SeparableConv2D"
+
+---
+operation: "SeparableConvolution1D"
+description: "Alias for SeparableConv1D."
+op_type: "class"
+std_args:
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "int"
+  - name: "strides"
+    type: "int"
+    default: 1
+variants:
+  keras:
+    api: "keras.layers.SeparableConvolution1D"
+  tensorflow:
+    api: "tf.keras.layers.SeparableConvolution1D"
+  torch:
+    requires_plugin: "separable_conv1d_shim"
+
+---
+operation: "SeparableConvolution2D"
+description: "Alias for SeparableConv2D."
+op_type: "class"
+std_args:
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "int"
+  - name: "strides"
+    type: "Tuple[int, int]"
+    default: [1, 1]
+variants:
+  keras:
+    api: "keras.layers.SeparableConvolution2D"
+  tensorflow:
+    api: "tf.keras.layers.SeparableConvolution2D"
+  torch:
+    requires_plugin: "separable_conv2d_shim"
+
+---
+operation: "SimpleRNN"
+description: "Fully-connected RNN where output is fed back as input."
+op_type: "class"
+std_args:
+  - name: "units"
+    type: "int"
+  - name: "activation"
+    type: "str"
+    default: "tanh"
+  - name: "return_sequences"
+    type: "bool"
+    default: false
+  - name: "return_state"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.SimpleRNN"
+  torch:
+    api: "torch.nn.RNN"
+    args:
+      units: "hidden_size"
+      return_sequences: null # Torch always returns sequences + state output
+      return_state: null
+  flax_nnx:
+    api: "nnx.RNN"
+  tensorflow:
+    api: "tf.keras.layers.SimpleRNN"
+
+---
+operation: "SimpleRNNCell"
+description: "Cell class for SimpleRNN."
+op_type: "class"
+std_args:
+  - name: "units"
+    type: "int"
+  - name: "activation"
+    type: "str"
+    default: "tanh"
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+variants:
+  keras:
+    api: "keras.layers.SimpleRNNCell"
+  torch:
+    api: "torch.nn.RNNCell"
+    args:
+      units: "hidden_size"
+      dropout: null # RNNCell in Torch often doesn't have builtin dropout
+  flax_nnx:
+    api: "nnx.RNNCell"
+  tensorflow:
+    api: "tf.keras.layers.SimpleRNNCell"
+
+---
+operation: "Softmax"
+description: "Softmax activation layer."
+op_type: "class"
+std_args:
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  keras:
+    api: "keras.layers.Softmax"
+  torch:
+    api: "torch.nn.Softmax"
+    args:
+      axis: "dim"
+  flax_nnx:
+    api: "nnx.Softmax"
+  tensorflow:
+    api: "tf.keras.layers.Softmax"
+
+---
+operation: "Solarization"
+description: "Applies max_value - pixel + min_value inversion above a threshold."
+op_type: "class"
+std_args:
+  - name: "threshold_factor"
+    type: "float"
+    default: 0.0
+  - name: "addition_factor"
+    type: "float"
+    default: 0.0
+variants:
+  keras:
+    api: "keras.layers.Solarization"
+  torch:
+    api: "torchvision.transforms.RandomSolarize"
+    args:
+      threshold_factor: "threshold"
+    required_imports: ["import torchvision"]
+
+---
+operation: "SpatialDropout1D"
+description: "Spatial 1D version of Dropout (drops entire feature maps)."
+op_type: "class"
+std_args:
+  - name: "rate"
+    type: "float"
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.SpatialDropout1D"
+  torch:
+    api: "torch.nn.Dropout1d"
+    args:
+      rate: "p"
+  tensorflow:
+    api: "tf.keras.layers.SpatialDropout1D"
+
+---
+operation: "SpatialDropout2D"
+description: "Spatial 2D version of Dropout."
+op_type: "class"
+std_args:
+  - name: "rate"
+    type: "float"
+  - name: "data_format"
+    type: "str"
+    default: null
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.SpatialDropout2D"
+  torch:
+    api: "torch.nn.Dropout2d"
+    args:
+      rate: "p"
+  tensorflow:
+    api: "tf.keras.layers.SpatialDropout2D"
+
+---
+operation: "SpatialDropout3D"
+description: "Spatial 3D version of Dropout."
+op_type: "class"
+std_args:
+  - name: "rate"
+    type: "float"
+  - name: "data_format"
+    type: "str"
+    default: null
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.SpatialDropout3D"
+  torch:
+    api: "torch.nn.Dropout3d"
+    args:
+      rate: "p"
+  tensorflow:
+    api: "tf.keras.layers.SpatialDropout3D"
+
+---
+operation: "SpectralNormalization"
+description: "Performs spectral normalization on the weights of a target layer."
+op_type: "class"
+std_args:
+  - name: "layer"
+    type: "Any"
+  - name: "power_iterations"
+    type: "int"
+    default: 1
+variants:
+  keras:
+    api: "keras.layers.SpectralNormalization"
+  torch:
+    api: "torch.nn.utils.spectral_norm"
+    args:
+      layer: "module"
+      power_iterations: "n_power_iterations"
+  tensorflow:
+    api: "tf.keras.layers.SpectralNormalization"
+
+---
+operation: "StackedRNNCells"
+description: "Wrapper allowing a stack of RNN cells to behave as a single cell."
+op_type: "class"
+std_args:
+  - name: "cells"
+    type: "List[Any]"
+variants:
+  keras:
+    api: "keras.layers.StackedRNNCells"
+  torch:
+    # Requires manual composition or MultiRNNCell if available in older torch or contrib
+    requires_plugin: "stacked_rnn_shim"
+  tensorflow:
+    api: "tf.keras.layers.StackedRNNCells"

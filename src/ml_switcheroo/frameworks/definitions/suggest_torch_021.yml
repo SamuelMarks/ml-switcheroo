@@ -1,0 +1,646 @@
+operation: "LuUnpack"
+description: "Unpacks the LU decomposition into P, L, U matrices."
+std_args:
+  - name: "LU_data"
+    type: "Tensor"
+  - name: "LU_pivots"
+    type: "Tensor"
+  - name: "unpack_data"
+    type: "bool"
+    default: true
+  - name: "unpack_pivots"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.lu_unpack"
+  tensorflow:
+    api: "tf.linalg.lu_reconstruct" # Approximate: reconstructs matrix, doesn't just unpack components identically
+    missing_message: "Direct LU unpack not fully supported in TF, closest is lu_reconstruct."
+  jax:
+    api: null # jax.scipy.linalg.lu performs decompostion, no direct unpack utility for raw factors
+    missing_message: "JAX does not support unpacking raw LU factors. Use jax.scipy.linalg.lu for decomposition."
+
+---
+operation: "ManualSeed"
+description: "Sets the seed for generating random numbers."
+std_args:
+  - name: "seed"
+    type: "int"
+variants:
+  torch:
+    api: "torch.manual_seed"
+  mlx:
+    api: "mlx.core.random.seed"
+  tensorflow:
+    api: "tf.random.set_seed"
+  numpy:
+    api: "numpy.random.seed"
+  jax:
+    # JAX uses explicit keys, not global seed. Plugin usually required to thread state.
+    requires_plugin: "rng_threading"
+
+---
+operation: "MarginRankingLoss"
+description: "Creates a criterion that measures the loss given inputs x1, x2, two 1D mini-batch Tensors, and a label 1D mini-batch tensor y."
+std_args:
+  - name: "margin"
+    type: "float"
+    default: 0.0
+  - name: "reduction"
+    type: "str"
+    default: "mean"
+    options: ["none", "mean", "sum"]
+variants:
+  torch:
+    api: "torch.nn.functional.margin_ranking_loss"
+  tensorflow:
+    api: "tf.keras.losses.margin_ranking_loss" # Note: TF kwargs might differ slightly
+  keras:
+    api: "keras.losses.MarginRankingLoss"
+    op_type: "class"
+
+---
+operation: "MaskedFill"
+description: "Fills elements of self tensor with value where mask is True."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mask"
+    type: "Tensor"
+    dtype: "bool"
+  - name: "value"
+    type: "float"
+variants:
+  torch:
+    api: "torch.masked_fill" # often method x.masked_fill
+    transformation_type: "infix" # Not infix, but method. Often needs rewrite to where.
+  jax:
+    api: "jnp.where"
+    # jnp.where(mask, value, input)
+    args:
+      mask: "condition"
+      value: "x"
+      input: "y"
+  numpy:
+    api: "numpy.where"
+    args:
+      mask: "condition"
+      value: "x"
+      input: "y"
+  tensorflow:
+    api: "tf.where"
+  mlx:
+    api: "mlx.core.where"
+
+---
+operation: "MaskedScatter"
+description: "Copies elements from source into self tensor at positions where the mask is True."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mask"
+    type: "Tensor"
+  - name: "source"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.masked_scatter"
+  jax:
+    api: "jax.numpy.where" # Can simulate with where(mask, source, input) if shapes match
+    # Note: Torch masked_scatter flattens source. JAX where expects broadcastable shapes.
+    # Strict mapping might require a plugin to emulate flatten behavior.
+    api: null
+    requires_plugin: "scatter_indexer"
+
+---
+operation: "MaskedSelect"
+description: "Returns a new 1-D tensor which indexes the input tensor according to the boolean mask."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mask"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.masked_select"
+  jax:
+    # JAX boolean indexing returns 1D array: input[mask]
+    macro_template: "{input}[{mask}]"
+  numpy:
+    macro_template: "{input}[{mask}]"
+  tensorflow:
+    api: "tf.boolean_mask"
+    args:
+      input: "tensor"
+      mask: "mask"
+
+---
+operation: "MatMul"
+description: "Matrix product of two tensors."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.matmul"
+  jax:
+    api: "jax.numpy.matmul"
+  numpy:
+    api: "numpy.matmul"
+  tensorflow:
+    api: "tf.matmul"
+    args:
+      input: "a"
+      other: "b"
+  keras:
+    api: "keras.ops.matmul"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.matmul"
+    args:
+      input: "a"
+      other: "b"
+
+---
+operation: "MatrixExp"
+description: "Computes the matrix exponential."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.matrix_exp"
+  jax:
+    api: "jax.scipy.linalg.expm"
+  numpy:
+    # numpy.linalg.matrix_power is different. scipy has expm.
+    api: null
+    requires_plugin: "scipy_shim"
+  tensorflow:
+    api: "tf.linalg.expm"
+
+---
+operation: "MatrixPower"
+description: "Computes the n-th power of a square matrix."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "n"
+    type: "int"
+variants:
+  torch:
+    api: "torch.matrix_power"
+  jax:
+    api: "jax.numpy.linalg.matrix_power"
+    args:
+      input: "a"
+      n: "n"
+  numpy:
+    api: "numpy.linalg.matrix_power"
+    args:
+      input: "a"
+      n: "n"
+  tensorflow:
+    api: "tf.linalg.matrix_power"
+    args:
+      input: "input"
+      n: "n"
+
+---
+operation: "MatrixRank"
+description: "Returns the numerical rank of a 2-D tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "tol"
+    type: "float"
+    default: null
+  - name: "symmetric"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.linalg.matrix_rank" # torch.matrix_rank is alias
+  jax:
+    api: "jax.numpy.linalg.matrix_rank"
+    args:
+      input: "M"
+      tol: "tol"
+      symmetric: "hermitian"
+  numpy:
+    api: "numpy.linalg.matrix_rank"
+    args:
+      input: "M"
+      tol: "tol"
+      symmetric: "hermitian"
+
+---
+operation: "Max"
+description: "Returns the maximum value of all elements in the input tensor, or values and indices along dim."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.max"
+  jax:
+    # JAX max is reduction only (no indices).
+    # JAX argmax returns indices.
+    # Requires plugin to return Tuple(values, indices) if dim is present.
+    api: "jax.numpy.max"
+    requires_plugin: "topk_adapter" 
+    dispatch_rules:
+      - if_arg: "dim"
+        op: "neq"
+        val: null
+        use_api: "jax_max_with_indices_shim"
+  numpy:
+    api: "numpy.max"
+  tensorflow:
+    api: "tf.reduce_max"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.max"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mlx.core.max"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+operation: "MaxPool1d"
+description: "Applies a 1D max pooling over an input signal."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "int"
+  - name: "stride"
+    type: "int"
+    default: null
+  - name: "padding"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.nn.MaxPool1d"
+  keras:
+    api: "keras.layers.MaxPooling1D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+      padding: "padding" # Torch uses int, Keras uses string 'valid'/'same'. Plugin needed for conversion.
+  jax:
+    api: "jax.lax.reduce_window" # Low level
+    requires_plugin: "cnn_pooling"
+  flax_nnx:
+    api: "flax.nnx.max_pool" # Functional
+
+---
+operation: "MaxPool1dWithIndices"
+description: "Returns max pool values and indices."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.nn.functional.max_pool1d_with_indices"
+  # Most frameworks don't support return indices from pooling easily in high-level APIs
+  jax:
+    api: null
+
+---
+operation: "MaxPool2d"
+description: "Applies a 2D max pooling over an input signal."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "stride"
+    type: "Union[int, Tuple[int, int]]"
+    default: null
+variants:
+  torch:
+    api: "torch.nn.MaxPool2d"
+  keras:
+    api: "keras.layers.MaxPooling2D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+  flax_nnx:
+    api: "flax.nnx.max_pool"
+    
+---
+operation: "MaxPool3d"
+description: "Applies a 3D max pooling over an input signal."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+  - name: "stride"
+variants:
+  torch:
+    api: "torch.nn.MaxPool3d"
+  keras:
+    api: "keras.layers.MaxPooling3D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+
+---
+operation: "Maximum"
+description: "Computes the element-wise maximum of input and other."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.maximum"
+  jax:
+    api: "jax.numpy.maximum"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.maximum"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.maximum"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.maximum"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.maximum"
+
+---
+operation: "Mean"
+description: "Returns the mean value of all elements in the input tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.mean"
+  jax:
+    api: "jax.numpy.mean"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "numpy.mean"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_mean"
+    args:
+      input: "input_tensor"
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.mean"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mlx.core.mean"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+operation: "Median"
+description: "Returns the median of the values in input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.median"
+  jax:
+    api: "jax.numpy.median"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "numpy.median"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_median" # TF probability? Note: tf.math.reduce_median exists in recent versions? Unsure, verify.
+  keras:
+    api: "keras.ops.median" # Might not exist in all versions, check
+  mlx:
+    api: "mlx.core.median" # Does not exist in core? Check docs. 
+    # MLX has no median currently. 
+    api: null
+
+---
+operation: "MemoryFormat"
+description: "Enum for memory layout."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.memory_format"
+  # Other frameworks handle layout implicitly or via specific args
+  jax: 
+    api: null
+
+---
+operation: "MergeTypeFromTypeComment"
+description: "Internal JIT utility."
+op_type: "function"
+variants:
+  torch:
+    api: "torch.merge_type_from_type_comment"
+  # Skip for others
+  jax:
+    api: null
+
+---
+operation: "Meshgrid"
+description: "Creates grids of coordinates specified by the 1D inputs."
+std_args:
+  - name: "tensors"
+    is_variadic: true
+  - name: "indexing"
+    type: "str"
+    default: "ij"
+variants:
+  torch:
+    api: "torch.meshgrid"
+    pack_to_tuple: "tensors" # Torch meshgrid takes *tensors
+  jax:
+    api: "jax.numpy.meshgrid"
+    # JAX meshgrid takes *args
+  numpy:
+    api: "numpy.meshgrid"
+  tensorflow:
+    api: "tf.meshgrid"
+    # TF takes *args
+  keras:
+    api: "keras.ops.meshgrid"
+  mlx:
+    api: "mlx.core.meshgrid"
+
+---
+operation: "Min"
+description: "Returns the minimum value of elements in the input tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.min"
+  jax:
+    api: "jax.numpy.min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "numpy.min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_min"
+    args:
+      input: "input_tensor"
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mlx.core.min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+operation: "Minimum"
+description: "Computes the element-wise minimum of input and other."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.minimum"
+  jax:
+    api: "jax.numpy.minimum"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.minimum"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.minimum"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.minimum"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.minimum"
+
+---
+operation: "MiopenBatchNorm"
+description: "Backend specific batch norm."
+variants:
+  torch:
+    api: "torch.miopen_batch_norm"
+  # Others null
+
+---
+operation: "MiopenConvolution"
+description: "Backend specific convolution."
+variants:
+  torch:
+    api: "torch.miopen_convolution"
+
+---
+operation: "MiopenConvolutionAddRelu"
+description: "Backend specific fused convolution."
+variants:
+  torch:
+    api: "torch.miopen_convolution_add_relu"
+
+---
+operation: "MiopenConvolutionRelu"
+description: "Backend specific fused convolution."
+variants:
+  torch:
+    api: "torch.miopen_convolution_relu"
+
+---
+operation: "MiopenConvolutionTranspose"
+description: "Backend specific convolution transpose."
+variants:
+  torch:
+    api: "torch.miopen_convolution_transpose"
+
+---
+operation: "MiopenDepthwiseConvolution"
+description: "Backend specific depthwise convolution."
+variants:
+  torch:
+    api: "torch.miopen_depthwise_convolution"
+
+---
+operation: "MiopenRnn"
+description: "Backend specific RNN."
+variants:
+  torch:
+    api: "torch.miopen_rnn"

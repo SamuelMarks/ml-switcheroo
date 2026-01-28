@@ -1,0 +1,739 @@
+operation: "CommonType"
+description: "Return a scalar type which is common to the input arrays."
+op_type: "function"
+std_args:
+  - name: "arrays"
+    is_variadic: true
+    type: "List[Array]"
+variants:
+  numpy:
+    api: "numpy.common_type"
+    pack_to_tuple: "arrays"
+    pack_as: "List"
+  jax:
+    api: "jax.numpy.common_type"
+    pack_to_tuple: "arrays"
+    pack_as: "List"
+  torch:
+    api: "torch.promote_types"
+    # promote_types only takes 2 arguments. For N arguments, this requires a plugin or reduction macro.
+    requires_plugin: "reduce_promote_types"
+
+---
+operation: "Complex128"
+description: "Complex number type composed of two double-precision floating-point numbers."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.complex128"
+  jax:
+    api: "jax.numpy.complex128"
+  torch:
+    api: "torch.complex128"
+  tensorflow:
+    api: "tf.complex128"
+  mlx:
+    api: "mlx.core.complex128"
+
+---
+operation: "Complex64"
+description: "Complex number type composed of two single-precision floating-point numbers."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.complex64"
+  jax:
+    api: "jax.numpy.complex64"
+  torch:
+    api: "torch.complex64"
+  tensorflow:
+    api: "tf.complex64"
+  mlx:
+    api: "mlx.core.complex64"
+
+---
+operation: "ComplexFloating"
+description: "Abstract base class of all complex number scalar types that are made up of floating-point numbers."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.complexfloating"
+  jax:
+    api: "jax.numpy.complexfloating"
+
+---
+operation: "Compress"
+description: "Return selected slices of an array along given axis."
+op_type: "function"
+std_args:
+  - name: "condition"
+    type: "Array"
+    dtype: "bool"
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.compress"
+  jax:
+    api: "jax.numpy.compress"
+  torch:
+    # Torch's masked_select is 1D only. This requires a plugin for axis support.
+    requires_plugin: "compress_with_axis"
+  tensorflow:
+    # TF uses boolean_mask(tensor, mask, axis)
+    api: "tf.boolean_mask"
+    args:
+      condition: "mask"
+      a: "tensor"
+      axis: "axis"
+
+---
+operation: "Concat"
+description: "Join a sequence of arrays along an existing axis. Alias for Concatenate."
+op_type: "function"
+std_args:
+  - name: "arrays"
+    type: "List[Array]"
+    is_variadic: true
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.concat"
+  jax:
+    api: "jax.numpy.concatenate"
+  torch:
+    api: "torch.cat"
+    args:
+      arrays: "tensors"
+      axis: "dim"
+  keras:
+    api: "keras.ops.concatenate"
+    args:
+      arrays: "inputs"
+
+---
+operation: "Concatenate"
+description: "Join a sequence of arrays along an existing axis."
+op_type: "function"
+std_args:
+  - name: "arrays"
+    type: "List[Array]"
+    is_variadic: true
+  - name: "axis"
+    type: "int"
+    default: 0
+  - name: "out"
+    type: "Array"
+    default: null
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "casting"
+    type: "str"
+    default: "same_kind"
+variants:
+  numpy:
+    api: "numpy.concatenate"
+  jax:
+    api: "jnp.concatenate"
+  torch:
+    api: "torch.cat"
+    args:
+      arrays: "tensors"
+      axis: "dim"
+      # out, dtype, casting are not directly mapped in simple cat
+      out: null
+      dtype: null
+      casting: null
+  tensorflow:
+    api: "tf.concat"
+    args:
+      arrays: "values"
+      axis: "axis"
+  keras:
+    api: "keras.ops.concatenate"
+    args:
+      arrays: "inputs"
+  mlx:
+    api: "mlx.core.concatenate"
+    args:
+      arrays: "arrays"
+      axis: "axis"
+
+---
+operation: "Conj"
+description: "Return the complex conjugate, element-wise. Alias for Conjugate."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.conj"
+  jax:
+    api: "jax.numpy.conj"
+  torch:
+    api: "torch.conj"
+    args:
+      x: "input"
+  tensorflow:
+    api: "tf.math.conj"
+  keras:
+    api: "keras.ops.conj"
+  mlx:
+    api: "mlx.core.conjugate"
+
+---
+operation: "Conjugate"
+description: "Return the complex conjugate, element-wise."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.conjugate"
+  jax:
+    api: "jax.numpy.conjugate"
+  torch:
+    api: "torch.conj"
+    args:
+      x: "input"
+  tensorflow:
+    api: "tf.math.conj"
+  keras:
+    api: "keras.ops.conj"
+
+---
+operation: "Convolve"
+description: "Returns the discrete, linear convolution of two one-dimensional sequences."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Array"
+    rank: 1
+  - name: "v"
+    type: "Array"
+    rank: 1
+  - name: "mode"
+    type: "str"
+    default: "full"
+    options: ["full", "valid", "same"]
+variants:
+  numpy:
+    api: "numpy.convolve"
+  jax:
+    api: "jax.numpy.convolve"
+  torch:
+    # Only maps if mode='valid' easily, otherwise needs padding calculation
+    requires_plugin: "convolve_1d"
+  tensorflow:
+    api: "tf.experimental.numpy.convolve"
+
+---
+operation: "Copy"
+description: "Return an array copy of the given object."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "order"
+    type: "str"
+    default: "K"
+variants:
+  numpy:
+    api: "numpy.copy"
+  jax:
+    api: "jax.numpy.copy"
+  torch:
+    api: "torch.clone"
+    args:
+      a: "input"
+      order: null
+  tensorflow:
+    api: "tf.identity"
+  mlx:
+    # MLX arrays are immutable, copy logic often redundant or handled by array() constructor
+    api: "mlx.core.array"
+
+---
+operation: "Copysign"
+description: "Change the sign of x1 to that of x2, element-wise."
+op_type: "function"
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.copysign"
+  jax:
+    api: "jax.numpy.copysign"
+  torch:
+    api: "torch.copysign"
+    args:
+      x1: "input"
+      x2: "other"
+  tensorflow:
+    api: "tf.math.copysign"
+    args:
+      x1: "x"
+      x2: "y"
+
+---
+operation: "CopyTo"
+description: "Copies values from one array to another, broadcasting as necessary."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "dst"
+    type: "Array"
+  - name: "src"
+    type: "Array"
+  - name: "casting"
+    type: "str"
+    default: "same_kind"
+  - name: "where"
+    type: "Array"
+    default: true
+variants:
+  numpy:
+    api: "numpy.copyto"
+  torch:
+    api: "torch.Tensor.copy_"
+    args:
+      dst: null # Implicit self
+      src: "func_arg_0" 
+      casting: null
+      where: null # Not directly supported in copy_
+    transformation_type: "infix" # Requires custom handling to make this a method call "dst.copy_(src)"
+
+---
+operation: "Corrcoef"
+description: "Return Pearson product-moment correlation coefficients."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "y"
+    type: "Array"
+    default: null
+  - name: "rowvar"
+    type: "bool"
+    default: true
+variants:
+  numpy:
+    api: "numpy.corrcoef"
+  jax:
+    api: "jax.numpy.corrcoef"
+  torch:
+    api: "torch.corrcoef"
+    args:
+      x: "input"
+      rowvar: null # Torch handles shapes differently or warns
+      y: null # Torch expects stacked input usually
+
+---
+operation: "Correlate"
+description: "Cross-correlation of two 1-dimensional sequences."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "v"
+    type: "Array"
+  - name: "mode"
+    type: "str"
+    default: "valid"
+variants:
+  numpy:
+    api: "numpy.correlate"
+  jax:
+    api: "jax.numpy.correlate"
+
+---
+operation: "Cos"
+description: "Cosine element-wise."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.cos"
+  jax:
+    api: "jax.numpy.cos"
+  torch:
+    api: "torch.cos"
+    args:
+      x: "input"
+  tensorflow:
+    api: "tf.math.cos"
+  keras:
+    api: "keras.ops.cos"
+  mlx:
+    api: "mlx.core.cos"
+
+---
+operation: "Cosh"
+description: "Hyperbolic cosine, element-wise."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.cosh"
+  jax:
+    api: "jax.numpy.cosh"
+  torch:
+    api: "torch.cosh"
+    args:
+      x: "input"
+  tensorflow:
+    api: "tf.math.cosh"
+  keras:
+    api: "keras.ops.cosh"
+  mlx:
+    api: "mlx.core.cosh"
+
+---
+operation: "CountNonzero"
+description: "Counts the number of non-zero values in the array."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.count_nonzero"
+  jax:
+    api: "jax.numpy.count_nonzero"
+  torch:
+    api: "torch.count_nonzero"
+    args:
+      a: "input"
+      axis: "dim"
+  tensorflow:
+    api: "tf.math.count_nonzero"
+    args:
+      a: "input"
+      axis: "axis"
+      keepdims: "keepdims"
+
+---
+operation: "Cov"
+description: "Estimate a covariance matrix, given data and weights."
+op_type: "function"
+std_args:
+  - name: "m"
+    type: "Array"
+  - name: "y"
+    type: "Array"
+    default: null
+  - name: "rowvar"
+    type: "bool"
+    default: true
+variants:
+  numpy:
+    api: "numpy.cov"
+  jax:
+    api: "jax.numpy.cov"
+  torch:
+    api: "torch.cov"
+    args:
+      m: "input"
+      # Torch cov expects stacked input if y is present
+      y: null 
+
+---
+operation: "Cross"
+description: "Return the cross product of two (arrays of) vectors."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "b"
+    type: "Array"
+  - name: "axisa"
+    type: "int"
+    default: -1
+  - name: "axisb"
+    type: "int"
+    default: -1
+  - name: "axisc"
+    type: "int"
+    default: -1
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.cross"
+  jax:
+    api: "jax.numpy.cross"
+  torch:
+    api: "torch.linalg.cross"
+    args:
+      a: "input"
+      b: "other"
+      axisa: "dim" # Approximate mapping, torch.linalg.cross takes 'dim'
+      axisb: null
+      axisc: null
+      axis: null
+  tensorflow:
+    api: "tf.linalg.cross"
+
+---
+operation: "Csingle"
+description: "Complex number type composed of two single-precision floating-point numbers."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.csingle"
+  jax:
+    api: "jax.numpy.csingle"
+
+---
+operation: "Cumprod"
+description: "Return the cumulative product of elements along a given axis."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.cumprod"
+  jax:
+    api: "jax.numpy.cumprod"
+  torch:
+    api: "torch.cumprod"
+    args:
+      a: "input"
+      axis: "dim"
+  tensorflow:
+    api: "tf.math.cumprod"
+    args:
+      a: "x"
+      axis: "axis"
+  keras:
+    api: "keras.ops.cumprod"
+  mlx:
+    api: "mlx.core.cumprod"
+
+---
+operation: "Cumsum"
+description: "Return the cumulative sum of the elements along a given axis."
+op_type: "function"
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.cumsum"
+  jax:
+    api: "jax.numpy.cumsum"
+  torch:
+    api: "torch.cumsum"
+    args:
+      a: "input"
+      axis: "dim"
+  tensorflow:
+    api: "tf.math.cumsum"
+    args:
+      a: "x"
+      axis: "axis"
+  keras:
+    api: "keras.ops.cumsum"
+  mlx:
+    api: "mlx.core.cumsum"
+
+---
+operation: "CumulativeProd"
+description: "Array API compatible alternative for cumprod."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "include_initial"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.cumulative_prod"
+  jax:
+    api: "jax.numpy.cumulative_prod"
+    min_version: "0.4.24"
+
+---
+operation: "CumulativeSum"
+description: "Array API compatible alternative for cumsum."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "include_initial"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.cumulative_sum"
+  jax:
+    api: "jax.numpy.cumulative_sum"
+    min_version: "0.4.24"
+
+---
+operation: "Datetime64"
+description: "NumPy datetime type."
+op_type: "class"
+std_args:
+  - name: "value"
+  - name: "args"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.datetime64"
+
+---
+operation: "DatetimeAsString"
+description: "Convert an array of datetimes into an array of strings."
+op_type: "function"
+std_args:
+  - name: "arr"
+    type: "Array"
+  - name: "unit"
+    type: "str"
+    default: null
+  - name: "timezone"
+    type: "str"
+    default: "naive"
+variants:
+  numpy:
+    api: "numpy.datetime_as_string"
+
+---
+operation: "DatetimeData"
+description: "Get information about the step size of a date or time type."
+op_type: "function"
+std_args:
+  - name: "dtype"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.datetime_data"
+
+---
+operation: "Deg2Rad"
+description: "Convert angles from degrees to radians."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.deg2rad"
+  jax:
+    api: "jax.numpy.deg2rad"
+  torch:
+    api: "torch.deg2rad"
+    args:
+      x: "input"
+  tensorflow:
+    api: "tf.experimental.numpy.deg2rad"
+  keras:
+    macro_template: "{x} * (3.1415926535 / 180.0)" 
+  mlx:
+    macro_template: "{x} * (3.1415926535 / 180.0)" 
+
+---
+operation: "Degrees"
+description: "Convert angles from radians to degrees."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "out"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.degrees"
+  jax:
+    api: "jax.numpy.degrees"
+  torch:
+    api: "torch.rad2deg"
+    args:
+      x: "input"
+  tensorflow:
+    api: "tf.experimental.numpy.degrees"
+  keras:
+    macro_template: "{x} * (180.0 / 3.1415926535)" 
+  mlx:
+    macro_template: "{x} * (180.0 / 3.1415926535)"

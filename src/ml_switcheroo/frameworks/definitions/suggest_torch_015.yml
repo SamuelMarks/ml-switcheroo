@@ -1,0 +1,790 @@
+operation: "Fmin"
+description: "Computes the element-wise minimum of input and other, favoring non-NaN values."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.fmin"
+  jax:
+    api: "jnp.fmin"
+  flax_nnx:
+    api: "jnp.fmin"
+  paxml:
+    api: "jnp.fmin"
+  numpy:
+    api: "np.fmin"
+  tensorflow:
+    api: "tf.math.minimum" # Approximate
+  keras:
+    api: "keras.ops.minimum"
+  mlx:
+    api: "mlx.core.minimum"
+
+---
+operation: "Fmod"
+description: "Computes the element-wise floating-point remainder of division."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.fmod"
+  jax:
+    api: "jnp.fmod"
+  flax_nnx:
+    api: "jnp.fmod"
+  paxml:
+    api: "jnp.fmod"
+  numpy:
+    api: "np.fmod"
+  tensorflow:
+    api: "tf.math.mod"
+  keras:
+    api: "keras.ops.mod"
+  mlx:
+    api: "mlx.core.remainder"
+
+---
+operation: "Fork"
+description: "Creates a task for TorchScript execution."
+op_type: "function"
+std_args:
+  - name: "func"
+  - name: "args"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.fork"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "Frac"
+description: "Computes the fractional portion of each element."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.frac"
+  jax:
+    macro_template: "{input} - jnp.trunc({input})"
+  flax_nnx:
+    macro_template: "{input} - jnp.trunc({input})"
+  paxml:
+    macro_template: "{input} - jnp.trunc({input})"
+  numpy:
+    macro_template: "{input} - np.trunc({input})"
+  tensorflow:
+    macro_template: "{input} - tf.math.trunc({input})"
+  keras:
+    macro_template: "{input} - keras.ops.trunc({input})"
+  mlx:
+    macro_template: "{input} - mlx.core.trunc({input})"
+
+---
+operation: "Frac_"
+description: "In-place version of Frac."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.frac_"
+  jax:
+    macro_template: "{input} - jnp.trunc({input})"
+  flax_nnx:
+    macro_template: "{input} - jnp.trunc({input})"
+  paxml:
+    macro_template: "{input} - jnp.trunc({input})"
+  numpy:
+    macro_template: "{input} - np.trunc({input})"
+  tensorflow:
+    macro_template: "{input} - tf.math.trunc({input})"
+  keras:
+    macro_template: "{input} - keras.ops.trunc({input})"
+  mlx:
+    macro_template: "{input} - mlx.core.trunc({input})"
+
+---
+operation: "Frexp"
+description: "Decomposes input into mantissa and exponent."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.frexp"
+  jax:
+    api: "jnp.frexp"
+  flax_nnx:
+    api: "jnp.frexp"
+  paxml:
+    api: "jnp.frexp"
+  numpy:
+    api: "np.frexp"
+  tensorflow:
+    api: "tf.math.frexp" # Note: Experimental/Raw ops mainly
+  keras: null
+  mlx: null
+
+---
+operation: "FrobeniusNorm"
+description: "Calculates the Frobenius norm of a matrix."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "List[int]"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.frobenius_norm"
+  jax:
+    api: "jnp.linalg.norm"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+    inject_args:
+      ord: "'fro'"
+  flax_nnx:
+    api: "jnp.linalg.norm"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+    inject_args:
+      ord: "'fro'"
+  paxml:
+    api: "jnp.linalg.norm"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+    inject_args:
+      ord: "'fro'"
+  numpy:
+    api: "np.linalg.norm"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+    inject_args:
+      ord: "'fro'"
+  tensorflow:
+    api: "tf.norm"
+    args:
+      dim: "axis"
+    inject_args:
+      ord: "'fro'"
+  keras:
+    api: "keras.ops.norm"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+    inject_args:
+      ord: "'fro'"
+  mlx:
+    api: "mlx.core.linalg.norm"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+    inject_args:
+      ord: "'fro'"
+
+---
+operation: "FromDlpack"
+description: "Converts a tensor from an external library into a Tensor via DLPack."
+op_type: "function"
+std_args:
+  - name: "ext_tensor"
+variants:
+  torch:
+    api: "torch.from_dlpack"
+  jax:
+    api: "jax.dlpack.from_dlpack"
+  flax_nnx:
+    api: "jax.dlpack.from_dlpack"
+  paxml:
+    api: "jax.dlpack.from_dlpack"
+  numpy:
+    api: "np.from_dlpack"
+  tensorflow:
+    api: "tf.experimental.dlpack.from_dlpack"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+  mlx:
+    api: "mlx.core.array" # Supports dlpack capsule input
+
+---
+operation: "FromFile"
+description: "Creates a CPU tensor with a storage backed by a memory-mapped file."
+op_type: "function"
+std_args:
+  - name: "filename"
+    type: "str"
+  - name: "size"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.from_file"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy:
+    api: "np.memmap"
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "FromNumpy"
+description: "Creates a Tensor from a numpy.ndarray."
+op_type: "function"
+std_args:
+  - name: "ndarray"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.from_numpy"
+  jax:
+    api: "jnp.array"
+  flax_nnx:
+    api: "jnp.array"
+  paxml:
+    api: "jnp.array"
+  numpy:
+    api: "np.array"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+  mlx:
+    api: "mlx.core.array"
+
+---
+operation: "Frombuffer"
+description: "Creates a 1-dimensional Tensor from an object that implements the buffer protocol."
+op_type: "function"
+std_args:
+  - name: "buffer"
+  - name: "dtype"
+  - name: "count"
+    default: -1
+  - name: "offset"
+    default: 0
+variants:
+  torch:
+    api: "torch.frombuffer"
+  jax:
+    api: "jnp.frombuffer"
+  flax_nnx:
+    api: "jnp.frombuffer"
+  paxml:
+    api: "jnp.frombuffer"
+  numpy:
+    api: "np.frombuffer"
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "Full"
+description: "Creates a tensor of size filled with fill_value."
+op_type: "function"
+std_args:
+  - name: "size"
+    type: "List[int]"
+  - name: "fill_value"
+    type: "float"
+variants:
+  torch:
+    api: "torch.full"
+  jax:
+    api: "jnp.full"
+    args:
+      size: "shape"
+  flax_nnx:
+    api: "jnp.full"
+    args:
+      size: "shape"
+  paxml:
+    api: "jnp.full"
+    args:
+      size: "shape"
+  numpy:
+    api: "np.full"
+    args:
+      size: "shape"
+  tensorflow:
+    api: "tf.fill"
+    args:
+      size: "dims"
+      fill_value: "value"
+  keras:
+    api: "keras.ops.full"
+    args:
+      size: "shape"
+  mlx:
+    api: "mlx.core.full"
+    args:
+      size: "shape"
+      fill_value: "vals"
+
+---
+operation: "FullLike"
+description: "Returns a tensor with the same size as input filled with fill_value."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "fill_value"
+    type: "float"
+variants:
+  torch:
+    api: "torch.full_like"
+  jax:
+    api: "jnp.full_like"
+  flax_nnx:
+    api: "jnp.full_like"
+  paxml:
+    api: "jnp.full_like"
+  numpy:
+    api: "np.full_like"
+  tensorflow: null
+  keras:
+    api: "keras.ops.full_like"
+  mlx:
+    macro_template: "mlx.core.full({input}.shape, {fill_value}, dtype={input}.dtype)"
+
+---
+operation: "FusedMovingAvgObsFakeQuant"
+description: "Quantization utility (Fused Moving Avg Fake Quant)."
+op_type: "function"
+std_args:
+  - name: "input"
+variants:
+  torch:
+    api: "torch.fused_moving_avg_obs_fake_quant"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "Gather"
+description: "Gathers values along an axis specified by dim."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.gather"
+  jax:
+    api: "jnp.take_along_axis"
+    args:
+      input: "arr"
+      dim: "axis"
+      index: "indices"
+    requires_plugin: "gather_adapter"
+  flax_nnx:
+    api: "jnp.take_along_axis"
+    args:
+      input: "arr"
+      dim: "axis"
+      index: "indices"
+    requires_plugin: "gather_adapter"
+  paxml:
+    api: "jnp.take_along_axis"
+    args:
+      input: "arr"
+      dim: "axis"
+      index: "indices"
+    requires_plugin: "gather_adapter"
+  numpy:
+    api: "np.take_along_axis"
+    args:
+      input: "arr"
+      dim: "axis"
+      index: "indices"
+    requires_plugin: "gather_adapter"
+  tensorflow:
+    # TF gather is different (slices), gather_nd is different
+    # This specifically maps to take_along_axis semantics
+    api: "tf.gather" 
+    args:
+      dim: "axis"
+      index: "indices"
+    macro_template: "tf.gather({input}, {index}, batch_dims={dim})" # Approximate
+  keras:
+    api: "keras.ops.take_along_axis"
+    args:
+      dim: "axis"
+      index: "indices"
+    requires_plugin: "gather_adapter"
+  mlx:
+    api: "mlx.core.take_along_axis"
+    args:
+      dim: "axis"
+      index: "indices"
+    requires_plugin: "gather_adapter"
+
+---
+operation: "Gcd"
+description: "Computes the element-wise greatest common divisor (GCD)."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.gcd"
+  jax:
+    api: "jnp.gcd"
+  flax_nnx:
+    api: "jnp.gcd"
+  paxml:
+    api: "jnp.gcd"
+  numpy:
+    api: "np.gcd"
+  tensorflow:
+    api: "tf.math.gcd"
+  keras: null # Not standard in OPS
+  mlx: null
+
+---
+operation: "Gcd_"
+description: "In-place GCD."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.gcd_"
+  jax:
+    api: "jnp.gcd"
+  flax_nnx:
+    api: "jnp.gcd"
+  paxml:
+    api: "jnp.gcd"
+  numpy:
+    api: "np.gcd"
+  tensorflow:
+    api: "tf.math.gcd"
+  keras: null
+  mlx: null
+
+---
+operation: "Ge"
+description: "Computes input >= other element-wise."
+op_type: "function"
+transformation_type: "infix"
+operator: ">="
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ge"
+  jax:
+    api: "jnp.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  flax_nnx:
+    api: "jnp.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  paxml:
+    api: "jnp.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  numpy:
+    api: "np.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  tensorflow:
+    api: "tf.math.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  keras:
+    api: "keras.ops.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+  mlx:
+    api: "mlx.core.greater_equal"
+    transformation_type: "infix"
+    operator: ">="
+
+---
+operation: "Geqrf"
+description: "Computes a QR decomposition of input (low-level LAPACK)."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.geqrf"
+  jax: null # High level QR available
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "Ger"
+description: "Outer product of two vectors."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "vec2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.ger"
+  jax:
+    api: "jnp.outer"
+    args:
+      input: "a"
+      vec2: "b"
+  flax_nnx:
+    api: "jnp.outer"
+    args:
+      input: "a"
+      vec2: "b"
+  paxml:
+    api: "jnp.outer"
+    args:
+      input: "a"
+      vec2: "b"
+  numpy:
+    api: "np.outer"
+    args:
+      input: "a"
+      vec2: "b"
+  tensorflow:
+    api: "tf.tensordot" 
+    # Requires complex args injection for outer product (axes=0)
+    macro_template: "tf.tensordot({input}, {vec2}, axes=0)"
+  keras:
+    api: "keras.ops.outer"
+    args:
+      input: "x1"
+      vec2: "x2"
+  mlx:
+    macro_template: "{input}[:, None] @ {vec2}[None, :]"
+
+---
+operation: "GetAutocastCpuDtype"
+description: "Get autocast CPU dtype."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.get_autocast_cpu_dtype"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "GetAutocastDtype"
+description: "Get autocast dtype."
+op_type: "function"
+std_args:
+  - name: "device_type"
+variants:
+  torch:
+    api: "torch.get_autocast_dtype"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "GetAutocastGpuDtype"
+description: "Get autocast GPU dtype."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.get_autocast_gpu_dtype"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "GetAutocastIpuDtype"
+description: "Get autocast IPU dtype."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.get_autocast_ipu_dtype"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "GetAutocastXlaDtype"
+description: "Get autocast XLA dtype."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.get_autocast_xla_dtype"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "GetDefaultDevice"
+description: "Gets the default device."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.get_default_device"
+  jax:
+    macro_template: "jax.default_backend()"
+  flax_nnx:
+    macro_template: "jax.default_backend()"
+  paxml:
+    macro_template: "jax.default_backend()"
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx:
+    api: "mlx.core.default_device"
+
+---
+operation: "GetDefaultDtype"
+description: "Get the current default floating point dtype."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.get_default_dtype"
+  jax:
+    macro_template: "jnp.float32"
+  flax_nnx:
+    macro_template: "jnp.float32"
+  paxml:
+    macro_template: "jnp.float32"
+  numpy:
+    macro_template: "np.float64"
+  tensorflow:
+    api: "tf.keras.backend.floatx"
+  keras:
+    api: "keras.backend.floatx"
+  mlx: null
+
+---
+operation: "GetDeterministicDebugMode"
+description: "Returns the current value of the debug mode for deterministic operations."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.get_deterministic_debug_mode"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "GetDevice"
+description: "Returns the device index of a tensor."
+op_type: "function"
+std_args:
+  - name: "input"
+variants:
+  torch:
+    api: "torch.get_device"
+  jax:
+    macro_template: "{input}.device()"
+  flax_nnx:
+    macro_template: "{input}.device()"
+  paxml:
+    macro_template: "{input}.device()"
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx:
+    macro_template: "mlx.core.default_device()"
+
+---
+operation: "GetDeviceModule"
+description: "Returns the module associated with a given device."
+op_type: "function"
+std_args:
+  - name: "device"
+    default: null
+variants:
+  torch:
+    api: "torch.get_device_module"
+  jax: null
+  flax_nnx: null
+  paxml: null
+  numpy: null
+  tensorflow: null
+  keras: null
+  mlx: null

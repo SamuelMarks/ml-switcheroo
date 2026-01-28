@@ -1,0 +1,710 @@
+operation: "SparseBsrTensor"
+description: "Constructs a sparse tensor in BSR (Block Compressed Sparse Row) format."
+op_type: "function"
+std_args:
+  - name: "crow_indices"
+    type: "Tensor"
+  - name: "col_indices"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "size"
+    type: "Optional[List[int]]"
+    default: null
+  - name: "dtype"
+    type: "Optional[str]"
+    default: null
+  - name: "device"
+    type: "Optional[Any]"
+    default: null
+variants:
+  torch:
+    api: "torch.sparse_bsr_tensor"
+  jax:
+    # JAX experimental sparse likely requires specific setup
+    requires_plugin: "sparse_bsr_constructor"
+  tensorflow:
+    # No direct BSR constructor equivalent in standard TF sparse (usually COO)
+    api: null
+---
+operation: "SparseCompressedTensor"
+description: "Constructs a sparse tensor in a compressed format (CSR, CSC, BSR, BSC)."
+op_type: "function"
+std_args:
+  - name: "compressed_indices"
+    type: "Tensor"
+  - name: "plain_indices"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "size"
+    type: "Optional[List[int]]"
+    default: null
+  - name: "layout"
+    type: "Optional[Any]"
+    default: null
+variants:
+  torch:
+    api: "torch.sparse_compressed_tensor"
+  jax:
+    requires_plugin: "sparse_compressed_constructor"
+---
+operation: "SparseCooTensor"
+description: "Constructs a sparse tensor in COO (Coordinate) format."
+op_type: "function"
+std_args:
+  - name: "indices"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "size"
+    type: "Optional[List[int]]"
+    default: null
+variants:
+  torch:
+    api: "torch.sparse_coo_tensor"
+  jax:
+    api: "jax.experimental.sparse.BCOO"
+    args:
+      indices: "indices"
+      values: "data"
+      size: "shape"
+  tensorflow:
+    api: "tf.sparse.SparseTensor"
+    args:
+      indices: "indices"
+      values: "values"
+      size: "dense_shape"
+---
+operation: "SparseCscTensor"
+description: "Constructs a sparse tensor in CSC (Compressed Sparse Column) format."
+op_type: "function"
+std_args:
+  - name: "ccol_indices"
+    type: "Tensor"
+  - name: "row_indices"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "size"
+    type: "Optional[List[int]]"
+    default: null
+variants:
+  torch:
+    api: "torch.sparse_csc_tensor"
+  jax:
+    # JAX BCOO/BCSR is standard, CSC usually converted
+    requires_plugin: "sparse_csc_constructor"
+---
+operation: "SparseCsrTensor"
+description: "Constructs a sparse tensor in CSR (Compressed Sparse Row) format."
+op_type: "function"
+std_args:
+  - name: "crow_indices"
+    type: "Tensor"
+  - name: "col_indices"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+  - name: "size"
+    type: "Optional[List[int]]"
+    default: null
+variants:
+  torch:
+    api: "torch.sparse_csr_tensor"
+  jax:
+    api: "jax.experimental.sparse.BCSR"
+    # Mapping args to JAX specific constructor not trivial 1:1 without from_dense logic or plugin
+    requires_plugin: "sparse_csr_constructor"
+---
+operation: "Split"
+description: "Splits a tensor into chunks. Torch uses `split_size`, Numpy uses `indices_or_sections`."
+op_type: "function"
+std_args:
+  - name: "tensor"
+    type: "Tensor"
+  - name: "split_size_or_sections"
+    type: "Union[int, List[int]]"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.split"
+  jax:
+    # Requires plugin to handle semantic diff: size vs sections
+    requires_plugin: "torch_split_converter"
+  numpy:
+    requires_plugin: "torch_split_converter"
+  tensorflow:
+    api: "tf.split"
+    args:
+      tensor: "value"
+      split_size_or_sections: "num_or_size_splits"
+      dim: "axis"
+  keras:
+    api: "keras.ops.split"
+    args:
+      tensor: "x"
+      split_size_or_sections: "num_or_size_splits"
+      dim: "axis"
+---
+operation: "SplitCopy"
+description: "Splits the tensor into chunks (Copy)."
+op_type: "function"
+std_args:
+  - name: "tensor"
+    type: "Tensor"
+  - name: "split_size_or_sections"
+    type: "Union[int, List[int]]"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.split_copy"
+  jax:
+    # JAX is always copy (immutable), map to same split handling
+    requires_plugin: "torch_split_converter"
+---
+operation: "SplitWithSizes"
+description: "Splits the tensor into chunks chunks with specified sizes."
+op_type: "function"
+std_args:
+  - name: "tensor"
+    type: "Tensor"
+  - name: "split_sizes"
+    type: "List[int]"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.split_with_sizes"
+  jax:
+    requires_plugin: "torch_split_with_sizes_converter"
+  tensorflow:
+    api: "tf.split"
+    args:
+      tensor: "value"
+      split_sizes: "num_or_size_splits"
+      dim: "axis"
+---
+operation: "Spmm"
+description: "Sparse matrix multiplication."
+op_type: "function"
+std_args:
+  - name: "mat1"
+    type: "Tensor"
+  - name: "mat2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.spmm"
+  jax:
+    api: "jax.experimental.sparse.spmatmul"
+  tensorflow:
+    api: "tf.sparse.sparse_dense_matmul"
+    args:
+      mat1: "sp_a"
+      mat2: "b"
+---
+operation: "Sqrt"
+description: "Computes the square root element-wise."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.sqrt"
+  jax:
+    api: "jax.numpy.sqrt"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.sqrt"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.sqrt"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.sqrt"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.sqrt"
+    args:
+      input: "a"
+---
+operation: "Sqrt_"
+description: "In-place square root."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.sqrt_"
+  jax:
+    # Mapped to functional equivalent via automation, or macro
+    macro_template: "jax.numpy.sqrt({input})" 
+---
+operation: "Square"
+description: "Computes the square element-wise."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.square"
+  jax:
+    api: "jax.numpy.square"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.square"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.square"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.square"
+    args:
+      input: "x"
+  mlx:
+    api: "mlx.core.square"
+    args:
+      input: "a"
+---
+operation: "Square_"
+description: "In-place square."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.square_"
+  jax:
+    macro_template: "jax.numpy.square({input})" 
+---
+operation: "Squeeze"
+description: "Returns a tensor with all the dimensions of input of size 1 removed."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "Optional[Union[int, List[int]]]"
+    default: null
+variants:
+  torch:
+    api: "torch.squeeze"
+  jax:
+    api: "jax.numpy.squeeze"
+    args:
+      input: "a"
+      dim: "axis"
+  numpy:
+    api: "numpy.squeeze"
+    args:
+      input: "a"
+      dim: "axis"
+  tensorflow:
+    api: "tf.squeeze"
+    args:
+      input: "input"
+      dim: "axis"
+  keras:
+    api: "keras.ops.squeeze"
+    args:
+      input: "x"
+      dim: "axis"
+  mlx:
+    api: "mlx.core.squeeze"
+    args:
+      input: "a"
+      dim: "axis"
+---
+operation: "SqueezeCopy"
+description: "Squeeze variant ensuring copy."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "Optional[Union[int, List[int]]]"
+    default: null
+variants:
+  torch:
+    api: "torch.squeeze_copy"
+  jax:
+    api: "jax.numpy.squeeze"
+    args:
+      input: "a"
+      dim: "axis"
+---
+operation: "Sspaddmm"
+description: "Sparse matrix multiply and add: t + beta * m1 @ m2"
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+    doc: "Sparse matrix to add"
+  - name: "mat1"
+    type: "Tensor"
+    doc: "Sparse matrix 1"
+  - name: "mat2"
+    type: "Tensor"
+    doc: "Dense matrix 2"
+  - name: "beta"
+    type: "float"
+    default: 1.0
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.sspaddmm"
+  jax:
+    macro_template: "{beta} * {input} + {alpha} * jax.experimental.sparse.spmatmul({mat1}, {mat2})" 
+---
+operation: "Stack"
+description: "Concatenates a sequence of tensors along a new dimension."
+op_type: "function"
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.stack"
+  jax:
+    api: "jax.numpy.stack"
+    args:
+      tensors: "arrays"
+      dim: "axis"
+  numpy:
+    api: "numpy.stack"
+    args:
+      tensors: "arrays"
+      dim: "axis"
+  tensorflow:
+    api: "tf.stack"
+    args:
+      tensors: "values"
+      dim: "axis"
+  keras:
+    api: "keras.ops.stack"
+    args:
+      tensors: "x"
+      dim: "axis"
+  mlx:
+    api: "mlx.core.stack"
+    args:
+      tensors: "arrays"
+      dim: "axis"
+---
+operation: "Std"
+description: "Calculates the standard deviation."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "Optional[Union[int, List[int]]]"
+    default: null
+  - name: "correction"
+    type: "int"
+    default: 1
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.std"
+  jax:
+    api: "jax.numpy.std"
+    args:
+      input: "a"
+      dim: "axis"
+      correction: "ddof"
+      keepdim: "keepdims"
+  numpy:
+    api: "numpy.std"
+    args:
+      input: "a"
+      dim: "axis"
+      correction: "ddof"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_std"
+    args:
+      input: "input_tensor"
+      dim: "axis"
+      keepdim: "keepdims"
+    # TF reduce_std does not support ddof/correction directly
+  keras:
+    api: "keras.ops.std"
+    args:
+      input: "x"
+      dim: "axis"
+      keepdim: "keepdims"
+---
+operation: "StdMean"
+description: "Calculates the standard deviation and mean."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "Optional[Union[int, List[int]]]"
+    default: null
+  - name: "correction"
+    type: "int"
+    default: 1
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.std_mean"
+  jax:
+    macro_template: "(jax.numpy.std({input}, axis={dim}, ddof={correction}, keepdims={keepdim}), jax.numpy.mean({input}, axis={dim}, keepdims={keepdim}))" 
+---
+operation: "Stft"
+description: "Short-time Fourier transform."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "n_fft"
+    type: "int"
+  - name: "hop_length"
+    type: "Optional[int]"
+    default: null
+  - name: "win_length"
+    type: "Optional[int]"
+    default: null
+  - name: "window"
+    type: "Optional[Tensor]"
+    default: null
+  - name: "center"
+    type: "bool"
+    default: true
+  - name: "normalized"
+    type: "bool"
+    default: false
+  - name: "onesided"
+    type: "bool"
+    default: true
+  - name: "return_complex"
+    type: "bool"
+    default: null
+variants:
+  torch:
+    api: "torch.stft"
+  jax:
+    api: "jax.scipy.signal.stft"
+    requires_plugin: "stft_adapter" 
+  tensorflow:
+    api: "tf.signal.stft"
+    requires_plugin: "stft_adapter"
+---
+operation: "Strided"
+description: "Directs layout to strided (Standard)."
+# Likely used as an Enum or constant in context
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.strided"
+  jax:
+    # JAX doesn't strictly expose layout enum in same way for public API use
+    api: null
+---
+operation: "Sub"
+description: "Subtracts other from input."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.sub"
+  jax:
+    macro_template: "jax.numpy.subtract({input}, {other} * {alpha})" 
+  numpy:
+    macro_template: "numpy.subtract({input}, {other} * {alpha})" 
+  keras:
+    macro_template: "keras.ops.subtract({input}, {other} * {alpha})" 
+  tensorflow:
+    macro_template: "tf.math.subtract({input}, {other} * {alpha})" 
+  mlx:
+    macro_template: "mlx.core.subtract({input}, {other} * {alpha})" 
+---
+operation: "Subtract"
+description: "Alias for Sub."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.subtract"
+  jax:
+    macro_template: "jax.numpy.subtract({input}, {other} * {alpha})" 
+---
+operation: "Sum"
+description: "Returns the sum of all elements in the input tensor."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "Optional[Union[int, List[int]]]"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+  - name: "dtype"
+    type: "Optional[Any]"
+    default: null
+variants:
+  torch:
+    api: "torch.sum"
+  jax:
+    api: "jax.numpy.sum"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+      dtype: "dtype"
+  numpy:
+    api: "numpy.sum"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+      dtype: "dtype"
+  tensorflow:
+    api: "tf.math.reduce_sum"
+    args:
+      input: "input_tensor"
+      dim: "axis"
+      keepdim: "keepdims"
+      # TF reduce_sum doesn't take dtype arg for result cast directly usually
+  keras:
+    api: "keras.ops.sum"
+    args:
+      input: "x"
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mlx.core.sum"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+---
+operation: "Svd"
+description: "Computes the singular value decomposition."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "some"
+    type: "bool"
+    default: true
+  - name: "compute_uv"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.svd"
+  jax:
+    api: "jax.numpy.linalg.svd"
+    args:
+      input: "a"
+      some: "full_matrices"
+      compute_uv: "compute_uv"
+    arg_values:
+      some:
+        true: "False"  # torch.some=True means full_matrices=False (reduced) 
+        false: "True" 
+  numpy:
+    api: "numpy.linalg.svd"
+    args:
+      input: "a"
+      some: "full_matrices"
+      compute_uv: "compute_uv"
+    arg_values:
+      some:
+        true: "False"
+        false: "True"
+---
+operation: "SparseBsr"
+description: "Layout constant for BSR."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.sparse_bsr"
+  jax:
+    # Null mapping for layout flags unless plugin maps to internal constants
+    api: null
+---
+operation: "SparseCompressed"
+description: "Layout constant"
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.sparse_compressed"
+  jax:
+    api: null
+---
+operation: "SparseCoo"
+description: "Layout constant for COO."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.sparse_coo"
+  jax:
+    api: null
+---
+operation: "SparseCsc"
+description: "Layout constant for CSC."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.sparse_csc"
+  jax:
+    api: null
+---
+operation: "SparseCsr"
+description: "Layout constant for CSR."
+op_type: "attribute"
+variants:
+  torch:
+    api: "torch.sparse_csr"
+  jax:
+    api: null

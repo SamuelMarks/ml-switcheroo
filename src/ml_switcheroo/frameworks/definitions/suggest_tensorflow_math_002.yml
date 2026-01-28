@@ -1,0 +1,789 @@
+operation: "LogCumSumExp"
+description: "Compute the cumulative log-sum-exp of the tensor `x` along the `axis`."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.math.cumulative_logsumexp"
+  torch:
+    api: "torch.logcumsumexp"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.logaddexp.accumulate"
+    args:
+      x: "x"
+      axis: "axis"
+  flax_nnx:
+    api: "jax.numpy.logaddexp.accumulate"
+  paxml:
+    api: "jax.numpy.logaddexp.accumulate"
+  keras:
+    api: "keras.ops.logcumsumexp"
+    min_version: "3.0"
+  mlx:
+    macro_template: "mx.log(mx.cumsum(mx.exp({x}), axis={axis}))"
+---
+operation: "Digamma"
+description: "Computes Psi, the derivative of Lgamma (the log of the absolute value of Gamma(x)), element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.digamma"
+  torch:
+    api: "torch.digamma"
+    args:
+      x: "input"
+  jax:
+    api: "jax.scipy.special.digamma"
+  flax_nnx:
+    api: "jax.scipy.special.digamma"
+  paxml:
+    api: "jax.scipy.special.digamma"
+  keras:
+    api: "keras.ops.digamma"
+  numpy:
+    api: "scipy.special.digamma"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp"
+---
+operation: "Divide"
+description: "Computes division of `x` by `y`."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.divide"
+  torch:
+    api: "torch.div"
+    args:
+      x: "input"
+      y: "other"
+  jax:
+    api: "jax.numpy.divide"
+  flax_nnx:
+    api: "jax.numpy.divide"
+  paxml:
+    api: "jax.numpy.divide"
+  keras:
+    api: "keras.ops.divide"
+  numpy:
+    api: "numpy.divide"
+  mlx:
+    api: "mlx.core.divide"
+---
+operation: "DivideNoNan"
+description: "Computes a safe divide which returns 0 if `y` (denominator) is zero."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.divide_no_nan"
+  torch:
+    macro_template: "torch.where({y} == 0, torch.zeros_like({x}), {x} / {y})"
+  jax:
+    macro_template: "jnp.where({y} == 0, 0, {x} / {y})"
+  flax_nnx:
+    macro_template: "jnp.where({y} == 0, 0, {x} / {y})"
+  paxml:
+    macro_template: "jnp.where({y} == 0, 0, {x} / {y})"
+  keras:
+    macro_template: "keras.ops.where({y} == 0, 0, {x} / {y})"
+  mlx:
+    macro_template: "mx.where({y} == 0, 0, {x} / {y})"
+---
+operation: "Equal"
+description: "Returns the truth value of (x == y) element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.equal"
+  torch:
+    api: "torch.eq"
+    args:
+      x: "input"
+      y: "other"
+  jax:
+    api: "jax.numpy.equal"
+  flax_nnx:
+    api: "jax.numpy.equal"
+  paxml:
+    api: "jax.numpy.equal"
+  keras:
+    api: "keras.ops.equal"
+  numpy:
+    api: "numpy.equal"
+  mlx:
+    api: "mlx.core.equal"
+---
+operation: "Erf"
+description: "Computes the Gauss error function of `x` element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.erf"
+  torch:
+    api: "torch.erf"
+    args:
+      x: "input"
+  jax:
+    api: "jax.scipy.special.erf"
+  flax_nnx:
+    api: "jax.scipy.special.erf"
+  paxml:
+    api: "jax.scipy.special.erf"
+  keras:
+    api: "keras.ops.erf"
+  numpy:
+    api: "scipy.special.erf"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp"
+  mlx:
+    api: "mlx.core.erf"
+---
+operation: "Erfc"
+description: "Computes the complementary error function of `x` element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.erfc"
+  torch:
+    api: "torch.erfc"
+    args:
+      x: "input"
+  jax:
+    api: "jax.scipy.special.erfc"
+  flax_nnx:
+    api: "jax.scipy.special.erfc"
+  paxml:
+    api: "jax.scipy.special.erfc"
+  keras:
+    api: "keras.ops.erfc"
+  numpy:
+    api: "scipy.special.erfc"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp"
+---
+operation: "ErfcInv"
+description: "Computes the inverse of complementary error function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.erfcinv"
+  torch:
+    api: "torch.erfcinv"
+    args:
+      x: "input"
+  jax:
+    api: "jax.scipy.special.erfc_inv"
+  flax_nnx:
+    api: "jax.scipy.special.erfc_inv"
+  paxml:
+    api: "jax.scipy.special.erfc_inv"
+  keras:
+    api: "keras.ops.erfcinv"
+  numpy:
+    api: "scipy.special.erfcinv"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp"
+  mlx:
+    api: "mlx.core.erfcinv"
+---
+operation: "ErfInv"
+description: "Compute inverse error function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.erfinv"
+  torch:
+    api: "torch.erfinv"
+    args:
+      x: "input"
+  jax:
+    api: "jax.scipy.special.erf_inv"
+  flax_nnx:
+    api: "jax.scipy.special.erf_inv"
+  paxml:
+    api: "jax.scipy.special.erf_inv"
+  keras:
+    api: "keras.ops.erfinv"
+  numpy:
+    api: "scipy.special.erfinv"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp"
+  mlx:
+    api: "mlx.core.erfinv"
+---
+operation: "Exp"
+description: "Computes exponential of x element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.exp"
+  torch:
+    api: "torch.exp"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.exp"
+  flax_nnx:
+    api: "jax.numpy.exp"
+  paxml:
+    api: "jax.numpy.exp"
+  keras:
+    api: "keras.ops.exp"
+  numpy:
+    api: "numpy.exp"
+  mlx:
+    api: "mlx.core.exp"
+---
+operation: "Expm1"
+description: "Computes `exp(x) - 1` element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.expm1"
+  torch:
+    api: "torch.expm1"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.expm1"
+  flax_nnx:
+    api: "jax.numpy.expm1"
+  paxml:
+    api: "jax.numpy.expm1"
+  keras:
+    api: "keras.ops.expm1"
+  numpy:
+    api: "numpy.expm1"
+  mlx:
+    api: "mlx.core.expm1"
+---
+operation: "Floor"
+description: "Returns element-wise largest integer not greater than x."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.floor"
+  torch:
+    api: "torch.floor"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.floor"
+  flax_nnx:
+    api: "jax.numpy.floor"
+  paxml:
+    api: "jax.numpy.floor"
+  keras:
+    api: "keras.ops.floor"
+  numpy:
+    api: "numpy.floor"
+  mlx:
+    api: "mlx.core.floor"
+---
+operation: "FloorDivide"
+description: "Divides `x / y` elementwise, rounding toward the most negative integer."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.floordiv"
+  torch:
+    api: "torch.div"
+    args:
+      x: "input"
+      y: "other"
+    kwargs_map:
+      rounding_mode: "'floor'"
+  jax:
+    api: "jax.numpy.floor_divide"
+  flax_nnx:
+    api: "jax.numpy.floor_divide"
+  paxml:
+    api: "jax.numpy.floor_divide"
+  keras:
+    api: "keras.ops.floor_divide"
+  numpy:
+    api: "numpy.floor_divide"
+  mlx:
+    api: "mlx.core.floor_divide"
+---
+operation: "FloorMod"
+description: "Returns element-wise remainder of division."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.floormod"
+  torch:
+    api: "torch.remainder"
+    args:
+      x: "input"
+      y: "other"
+  jax:
+    api: "jax.numpy.remainder"
+  flax_nnx:
+    api: "jax.numpy.remainder"
+  paxml:
+    api: "jax.numpy.remainder"
+  keras:
+    macro_template: "{x} % {y}"
+  numpy:
+    api: "numpy.remainder"
+  mlx:
+    api: "mlx.core.remainder"
+---
+operation: "Greater"
+description: "Returns the truth value of (x > y) element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.greater"
+  torch:
+    api: "torch.gt"
+    args:
+      x: "input"
+      y: "other"
+  jax:
+    api: "jax.numpy.greater"
+  flax_nnx:
+    api: "jax.numpy.greater"
+  paxml:
+    api: "jax.numpy.greater"
+  keras:
+    api: "keras.ops.greater"
+  numpy:
+    api: "numpy.greater"
+  mlx:
+    api: "mlx.core.greater"
+---
+operation: "GreaterEqual"
+description: "Returns the truth value of (x >= y) element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.greater_equal"
+  torch:
+    api: "torch.ge"
+    args:
+      x: "input"
+      y: "other"
+  jax:
+    api: "jax.numpy.greater_equal"
+  flax_nnx:
+    api: "jax.numpy.greater_equal"
+  paxml:
+    api: "jax.numpy.greater_equal"
+  keras:
+    api: "keras.ops.greater_equal"
+  numpy:
+    api: "numpy.greater_equal"
+  mlx:
+    api: "mlx.core.greater_equal"
+---
+operation: "Igamma"
+description: "Compute the lower regularized incomplete Gamma function."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.igamma"
+  torch:
+    api: "torch.igamma"
+    args:
+      a: "input"
+      x: "other"
+  jax:
+    api: "jax.scipy.special.gammainc"
+  flax_nnx:
+    api: "jax.scipy.special.gammainc"
+  paxml:
+    api: "jax.scipy.special.gammainc"
+  keras:
+    api: "keras.ops.igamma"
+  numpy:
+    api: "scipy.special.gammainc"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp"
+---
+operation: "Igammac"
+description: "Compute the upper regularized incomplete Gamma function."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.igammac"
+  torch:
+    api: "torch.igammac"
+    args:
+      a: "input"
+      x: "other"
+  jax:
+    api: "jax.scipy.special.gammaincc"
+  flax_nnx:
+    api: "jax.scipy.special.gammaincc"
+  paxml:
+    api: "jax.scipy.special.gammaincc"
+  keras:
+    api: "keras.ops.igammac"
+  numpy:
+    api: "scipy.special.gammaincc"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp"
+---
+operation: "Imag"
+description: "Returns the imaginary part of a complex (or real) tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.imag"
+  torch:
+    api: "torch.imag"
+  jax:
+    api: "jax.numpy.imag"
+  flax_nnx:
+    api: "jax.numpy.imag"
+  paxml:
+    api: "jax.numpy.imag"
+  keras:
+    api: "keras.ops.imag"
+  numpy:
+    api: "numpy.imag"
+  mlx:
+    macro_template: "mx.zeros_like({input})"
+    description: "MLX has limited complex support; returns zero for real inputs."
+---
+operation: "InTopK"
+description: "Outputs whether the targets are in the top `K` predictions."
+std_args:
+  - name: "targets"
+    type: "Tensor"
+  - name: "predictions"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+variants:
+  tensorflow:
+    api: "tf.math.in_top_k"
+  keras:
+    api: "keras.ops.in_top_k"
+  torch:
+    requires_plugin: "in_top_k_plugin"
+  jax:
+    requires_plugin: "in_top_k_plugin"
+  flax_nnx:
+    requires_plugin: "in_top_k_plugin"
+  paxml:
+    requires_plugin: "in_top_k_plugin"
+scaffold_plugins:
+  - name: "in_top_k_plugin"
+    type: "call_transform"
+    doc: "Generic plugin for `in_top_k`. Checks if target indices are present in `top_k(predictions)`."
+---
+operation: "InvertPermutation"
+description: "Computes the inverse permutation of a tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.invert_permutation"
+  torch:
+    api: "torch.argsort"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.argsort"
+  flax_nnx:
+    api: "jax.numpy.argsort"
+  paxml:
+    api: "jax.numpy.argsort"
+  keras:
+    api: "keras.ops.argsort"
+  numpy:
+    api: "numpy.argsort"
+  mlx:
+    api: "mlx.core.argsort"
+---
+operation: "IsFinite"
+description: "Returns which elements of x are finite."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.is_finite"
+  torch:
+    api: "torch.isfinite"
+  jax:
+    api: "jax.numpy.isfinite"
+  flax_nnx:
+    api: "jax.numpy.isfinite"
+  paxml:
+    api: "jax.numpy.isfinite"
+  keras:
+    api: "keras.ops.isfinite"
+  numpy:
+    api: "numpy.isfinite"
+  mlx:
+    macro_template: "mx.logical_not(mx.logical_or(mx.isnan({x}), mx.isinf({x})))"
+---
+operation: "IsInf"
+description: "Returns which elements of x are Inf."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.is_inf"
+  torch:
+    api: "torch.isinf"
+  jax:
+    api: "jax.numpy.isinf"
+  flax_nnx:
+    api: "jax.numpy.isinf"
+  paxml:
+    api: "jax.numpy.isinf"
+  keras:
+    api: "keras.ops.isinf"
+  numpy:
+    api: "numpy.isinf"
+  mlx:
+    api: "mlx.core.isinf"
+---
+operation: "IsNan"
+description: "Returns which elements of x are NaN."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.is_nan"
+  torch:
+    api: "torch.isnan"
+  jax:
+    api: "jax.numpy.isnan"
+  flax_nnx:
+    api: "jax.numpy.isnan"
+  paxml:
+    api: "jax.numpy.isnan"
+  keras:
+    api: "keras.ops.isnan"
+  numpy:
+    api: "numpy.isnan"
+  mlx:
+    api: "mlx.core.isnan"
+---
+operation: "IsNonDecreasing"
+description: "Returns `True` if `x` is non-decreasing."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.is_non_decreasing"
+  torch:
+    macro_template: "torch.all({x}[1:] >= {x}[:-1])"
+  jax:
+    macro_template: "jnp.all({x}[1:] >= {x}[:-1])"
+  flax_nnx:
+    macro_template: "jnp.all({x}[1:] >= {x}[:-1])"
+  paxml:
+    macro_template: "jnp.all({x}[1:] >= {x}[:-1])"
+  keras:
+    macro_template: "keras.ops.all({x}[1:] >= {x}[:-1])"
+  mlx:
+    macro_template: "mx.all({x}[1:] >= {x}[:-1])"
+---
+operation: "IsStrictlyIncreasing"
+description: "Returns `True` if `x` is strictly increasing."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.is_strictly_increasing"
+  torch:
+    macro_template: "torch.all({x}[1:] > {x}[:-1])"
+  jax:
+    macro_template: "jnp.all({x}[1:] > {x}[:-1])"
+  paxml:
+    macro_template: "jnp.all({x}[1:] > {x}[:-1])"
+  flax_nnx:
+    macro_template: "jnp.all({x}[1:] > {x}[:-1])"
+  keras:
+    macro_template: "keras.ops.all({x}[1:] > {x}[:-1])"
+  mlx:
+    macro_template: "mx.all({x}[1:] > {x}[:-1])"
+---
+operation: "L2Normalize"
+description: "Normalizes along dimension `axis` using an L2 norm."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "epsilon"
+    type: "float"
+    default: 1e-12
+variants:
+  tensorflow:
+    api: "tf.math.l2_normalize"
+  torch:
+    api: "torch.nn.functional.normalize"
+    args:
+      x: "input"
+      axis: "dim"
+      epsilon: "eps"
+  keras:
+    api: "keras.utils.normalize"
+    args:
+      x: "x"
+      axis: "axis"
+      epsilon: null
+  jax:
+    macro_template: "{x} / jnp.sqrt(jnp.maximum(jnp.sum({x}**2, axis={axis}, keepdims=True), {epsilon}))"
+  flax_nnx:
+    macro_template: "{x} / jnp.sqrt(jnp.maximum(jnp.sum({x}**2, axis={axis}, keepdims=True), {epsilon}))"
+  paxml:
+    macro_template: "{x} / jnp.sqrt(jnp.maximum(jnp.sum({x}**2, axis={axis}, keepdims=True), {epsilon}))"
+  mlx:
+    macro_template: "{x} / mx.sqrt(mx.maximum(mx.sum({x}**2, axis={axis}, keepdims=True), {epsilon}))"
+---
+operation: "LBeta"
+description: "Computes ln(|Beta(x)|), reducing along the last dimension."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.lbeta"
+  jax:
+    macro_template: "jax.scipy.special.gammaln({x}).sum(-1) - jax.scipy.special.gammaln({x}.sum(-1))"
+  flax_nnx:
+    macro_template: "jax.scipy.special.gammaln({x}).sum(-1) - jax.scipy.special.gammaln({x}.sum(-1))"
+  paxml:
+    macro_template: "jax.scipy.special.gammaln({x}).sum(-1) - jax.scipy.special.gammaln({x}.sum(-1))"
+  torch:
+    api: "torch.lbeta"
+    missing_message: "Direct API torch.lbeta does not exist. Use macro for lgamma(x).sum(-1) - lgamma(x.sum(-1))"
+  keras:
+    macro_template: "keras.ops.sum(keras.ops.log_gamma({x}), axis=-1) - keras.ops.log_gamma(keras.ops.sum({x}, axis=-1))"
+---
+operation: "Less"
+description: "Returns the truth value of (x < y) element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.less"
+  torch:
+    api: "torch.lt"
+    args:
+      x: "input"
+      y: "other"
+  jax:
+    api: "jax.numpy.less"
+  flax_nnx:
+    api: "jax.numpy.less"
+  paxml:
+    api: "jax.numpy.less"
+  keras:
+    api: "keras.ops.less"
+  numpy:
+    api: "numpy.less"
+  mlx:
+    api: "mlx.core.less"
+---
+operation: "LessEqual"
+description: "Returns the truth value of (x <= y) element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.less_equal"
+  torch:
+    api: "torch.le"
+    args:
+      x: "input"
+      y: "other"
+  jax:
+    api: "jax.numpy.less_equal"
+  flax_nnx:
+    api: "jax.numpy.less_equal"
+  paxml:
+    api: "jax.numpy.less_equal"
+  keras:
+    api: "keras.ops.less_equal"
+  numpy:
+    api: "numpy.less_equal"
+  mlx:
+    api: "mlx.core.less_equal"

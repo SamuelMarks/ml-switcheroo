@@ -1,0 +1,755 @@
+operation: "BartlettWindow" 
+description: "Computes the Bartlett window function." 
+std_args: 
+  - name: "window_length" 
+    type: "int" 
+  - name: "periodic" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.bartlett_window" 
+  jax: 
+    api: "jnp.bartlett" 
+    args: 
+      window_length: "M" 
+      periodic: null # JAX bartlett doesn't support periodic flag directly in same API
+  numpy: 
+    api: "np.bartlett" 
+    args: 
+      window_length: "M" 
+      periodic: null
+  tensorflow: 
+    api: "tf.signal.bartlett_window" 
+  mlx: 
+    api: null # Not in MLX core
+  keras: 
+    api: null
+  flax_nnx: 
+    api: "jnp.bartlett" 
+  paxml: 
+    api: "jnp.bartlett" 
+---
+operation: "BatchNorm" 
+description: "Applies Batch Normalization to the input." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "running_mean" 
+    type: "Tensor" 
+  - name: "running_var" 
+    type: "Tensor" 
+  - name: "weight" 
+    type: "Tensor" 
+  - name: "bias" 
+    type: "Tensor" 
+  - name: "training" 
+    type: "bool" 
+    default: false
+  - name: "momentum" 
+    type: "float" 
+    default: 0.1
+  - name: "eps" 
+    type: "float" 
+    default: 1e-5
+variants: 
+  torch: 
+    api: "torch.batch_norm" 
+  keras: 
+    api: "keras.ops.batch_normalization" 
+    args: 
+      input: "x" 
+      running_mean: "mean" 
+      running_var: "variance" 
+      weight: "offset" 
+      bias: "scale" 
+      eps: "epsilon" 
+  tensorflow: 
+    api: "tf.nn.batch_normalization" 
+    args: 
+      input: "x" 
+      running_mean: "mean" 
+      running_var: "variance" 
+      weight: "offset" 
+      bias: "scale" 
+      eps: "variance_epsilon" 
+      training: null # TF NN ops usually stateless
+      momentum: null
+  jax: 
+    api: null # JAX typically separates this into primitives
+  flax_nnx: 
+    api: null # Handled via Module usually
+  paxml: 
+    api: null
+  mlx: 
+    api: null
+  numpy: 
+    api: null
+---
+operation: "BatchNormBackwardElemt" 
+description: "Internal operation for BatchNorm backward elementwise steps." 
+std_args: [ "grad_out", "input", "mean", "invstd", "weight", "sum_dy", "sum_dy_x_mu" ] 
+variants: 
+  torch: 
+    api: "torch.batch_norm_backward_elemt" 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "BatchNormBackwardReduce" 
+description: "Internal operation for BatchNorm backward reduction steps." 
+std_args: [ "grad_out", "input", "mean", "invstd", "weight", "input_g_qs", "weight_g_qs" ] 
+variants: 
+  torch: 
+    api: "torch.batch_norm_backward_reduce" 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "BatchNormElemt" 
+description: "Internal operation for BatchNorm forward elementwise steps." 
+std_args: [ "input", "weight", "bias", "mean", "invstd", "eps" ] 
+variants: 
+  torch: 
+    api: "torch.batch_norm_elemt" 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "BatchNormGatherStats" 
+description: "Internal operation for BatchNorm statistics gathering." 
+std_args: [ "input", "mean", "invstd", "running_mean", "running_var", "momentum", "eps", "count" ] 
+variants: 
+  torch: 
+    api: "torch.batch_norm_gather_stats" 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "BatchNormGatherStatsWithCounts" 
+description: "Internal operation for BatchNorm statistics gathering with counts." 
+std_args: [ "input", "mean", "invstd", "running_mean", "running_var", "momentum", "eps", "counts" ] 
+variants: 
+  torch: 
+    api: "torch.batch_norm_gather_stats_with_counts" 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "BatchNormStats" 
+description: "Internal operation for BatchNorm statistics calculation." 
+std_args: [ "input", "eps" ] 
+variants: 
+  torch: 
+    api: "torch.batch_norm_stats" 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "BatchNormUpdateStats" 
+description: "Internal operation for BatchNorm statistics update." 
+std_args: [ "input", "running_mean", "running_var", "momentum" ] 
+variants: 
+  torch: 
+    api: "torch.batch_norm_update_stats" 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "Bernoulli" 
+description: "Draws binary random numbers (0 or 1) from a Bernoulli distribution." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "generator" 
+    type: "Optional[Generator]" 
+    default: null
+variants: 
+  torch: 
+    api: "torch.bernoulli" 
+  jax: 
+    api: "jax.random.bernoulli" 
+    args: 
+      input: "p" 
+    requires_plugin: "inject_prng" 
+  mlx: 
+    api: "mlx.core.random.bernoulli" 
+    args: 
+      input: "p" 
+  tensorflow: 
+    api: "tf.random.categorical" # Approx mapping require transforms usually
+  keras: 
+    api: null
+  numpy: 
+    api: "np.random.binomial" 
+    args: 
+      input: "p" 
+    inject_args: { "n": 1 } 
+  flax_nnx: 
+    api: "jax.random.bernoulli" 
+    requires_plugin: "inject_prng" 
+  paxml: 
+    api: "jax.random.bernoulli" 
+    requires_plugin: "inject_prng" 
+---
+operation: "CastBFloat16" 
+description: "Casts input to bfloat16." 
+std_args: [ "x" ] 
+variants: 
+  torch: 
+    api: "torch.bfloat16" 
+    transformation_type: "infix" # Treated as cast usually
+  jax: 
+    api: "jnp.bfloat16" 
+    transformation_type: "cast" # Custom logic
+  mlx: 
+    api: "mlx.core.bfloat16" 
+  tensorflow: 
+    api: "tf.bfloat16" 
+  keras: 
+    api: null
+  numpy: 
+    api: null
+  flax_nnx: 
+    api: "jnp.bfloat16" 
+  paxml: 
+    api: "jnp.bfloat16" 
+---
+operation: "Bilinear" 
+description: "Applies a bilinear transformation to the incoming data." 
+std_args: [ "input1", "input2", "weight", "bias" ] 
+variants: 
+  torch: 
+    api: "torch.bilinear" 
+  jax: 
+    # x1 @ W @ x2 + b
+    macro_template: "{input1} @ {weight} @ {input2} + {bias}" 
+  numpy: 
+    macro_template: "{input1} @ {weight} @ {input2} + {bias}" 
+  mlx: 
+    macro_template: "{input1} @ {weight} @ {input2} + {bias}" 
+  tensorflow: 
+    api: null
+  keras: 
+    api: null # No direct equivalent in ops
+  flax_nnx: 
+    macro_template: "{input1} @ {weight} @ {input2} + {bias}" 
+  paxml: 
+    macro_template: "{input1} @ {weight} @ {input2} + {bias}" 
+---
+operation: "BinaryCrossEntropyWithLogits" 
+description: "Computes Binary Cross Entropy with Logits." 
+std_args: [ "input", "target", "weight", "pos_weight", "reduction" ] 
+variants: 
+  torch: 
+    api: "torch.binary_cross_entropy_with_logits" 
+  jax: 
+    api: "optax.sigmoid_binary_cross_entropy" 
+    args: 
+      input: "logits" 
+      target: "labels" 
+      reduction: null # Optax returns vector, plugin handles reduction
+    requires_plugin: "loss_reduction" 
+  tensorflow: 
+    api: "tf.nn.sigmoid_cross_entropy_with_logits" 
+    args: 
+      input: "logits" 
+      target: "labels" 
+      reduction: null
+  keras: 
+    api: "keras.losses.binary_crossentropy" 
+    args: 
+      input: "y_pred" 
+      target: "y_true" 
+    inject_args: { "from_logits": true } 
+  mlx: 
+    api: "mlx.nn.losses.binary_cross_entropy" 
+    args: 
+      input: "logits" 
+      target: "targets" 
+    inject_args: { "with_logits": true } 
+  numpy: 
+    api: null
+  flax_nnx: 
+    api: "optax.sigmoid_binary_cross_entropy" 
+    requires_plugin: "loss_reduction" 
+  paxml: 
+    api: "optax.sigmoid_binary_cross_entropy" 
+    requires_plugin: "loss_reduction" 
+---
+operation: "Bincount" 
+description: "Count the frequency of each value in an array of non-negative ints." 
+std_args: [ "input", "weights", "minlength" ] 
+variants: 
+  torch: 
+    api: "torch.bincount" 
+  jax: 
+    api: "jnp.bincount" 
+    args: 
+      input: "x" 
+      minlength: "length" 
+  numpy: 
+    api: "np.bincount" 
+    args: 
+      input: "x" 
+      minlength: "minlength" 
+  tensorflow: 
+    api: "tf.math.bincount" 
+    args: 
+      input: "arr" 
+      minlength: "minlength" 
+  keras: 
+    api: "keras.ops.bincount" 
+    args: 
+      input: "x" 
+      minlength: "minlength" 
+  mlx: 
+    api: null # Not standard in MLX core
+  flax_nnx: 
+    api: "jnp.bincount" 
+  paxml: 
+    api: "jnp.bincount" 
+---
+operation: "Binomial" 
+description: "Draws samples from a binomial distribution." 
+std_args: [ "count", "prob", "generator" ] 
+variants: 
+  torch: 
+    api: "torch.binomial" 
+  jax: 
+    api: "jax.random.binomial" 
+    args: 
+      count: "n" 
+      prob: "p" 
+    requires_plugin: "inject_prng" 
+  numpy: 
+    api: "np.random.binomial" 
+    args: 
+      count: "n" 
+      prob: "p" 
+  tensorflow: 
+    api: "tf.random.stateless_binomial" 
+    args: 
+      count: "counts" 
+      prob: "probs" 
+  mlx: 
+    api: null
+  keras: 
+    api: null
+  flax_nnx: 
+    api: "jax.random.binomial" 
+    requires_plugin: "inject_prng" 
+  paxml: 
+    api: "jax.random.binomial" 
+    requires_plugin: "inject_prng" 
+---
+operation: "Bit" 
+description: "Internal bit casting/representation." 
+std_args: [ "x" ] 
+variants: 
+  torch: { api: "torch.bit" } 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "Bits16" 
+description: "Internal bit casting." 
+std_args: [ "x" ] 
+variants: 
+  torch: { api: "torch.bits16" } 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "Bits1x8" 
+description: "Internal bit packing." 
+std_args: [ "x" ] 
+variants: 
+  torch: { api: "torch.bits1x8" } 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "Bits2x4" 
+description: "Internal bit packing." 
+std_args: [ "x" ] 
+variants: 
+  torch: { api: "torch.bits2x4" } 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "Bits4x2" 
+description: "Internal bit packing." 
+std_args: [ "x" ] 
+variants: 
+  torch: { api: "torch.bits4x2" } 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "Bits8" 
+description: "Internal bit packing." 
+std_args: [ "x" ] 
+variants: 
+  torch: { api: "torch.bits8" } 
+  jax: { api: null } 
+  numpy: { api: null } 
+  tensorflow: { api: null } 
+  keras: { api: null } 
+  mlx: { api: null } 
+  flax_nnx: { api: null } 
+  paxml: { api: null } 
+---
+operation: "BitwiseAnd" 
+description: "Computes the bitwise specified AND of input and other." 
+std_args: [ "input", "other" ] 
+variants: 
+  torch: 
+    api: "torch.bitwise_and" 
+  jax: 
+    api: "jnp.bitwise_and" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  numpy: 
+    api: "np.bitwise_and" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  tensorflow: 
+    api: "tf.bitwise.bitwise_and" 
+    args: 
+      input: "x" 
+      other: "y" 
+  keras: 
+    api: "keras.ops.bitwise_and" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  mlx: 
+    api: "mlx.core.bitwise_and" # Recent versions
+  flax_nnx: 
+    api: "jnp.bitwise_and" 
+  paxml: 
+    api: "jnp.bitwise_and" 
+---
+operation: "BitwiseLeftShift" 
+description: "Computes the left arithmetic shift of input by other bits." 
+std_args: [ "input", "other" ] 
+variants: 
+  torch: 
+    api: "torch.bitwise_left_shift" 
+  jax: 
+    api: "jnp.left_shift" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  numpy: 
+    api: "np.left_shift" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  tensorflow: 
+    api: "tf.bitwise.left_shift" 
+    args: 
+      input: "x" 
+      other: "y" 
+  keras: 
+    api: "keras.ops.left_shift" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  mlx: 
+    api: "mlx.core.left_shift" 
+  flax_nnx: 
+    api: "jnp.left_shift" 
+  paxml: 
+    api: "jnp.left_shift" 
+---
+operation: "BitwiseNot" 
+description: "Computes the bitwise NOT of the given input tensor." 
+std_args: [ "input" ] 
+variants: 
+  torch: 
+    api: "torch.bitwise_not" 
+  jax: 
+    api: "jnp.invert" 
+    args: 
+      input: "x" 
+  numpy: 
+    api: "np.invert" 
+    args: 
+      input: "x" 
+  tensorflow: 
+    api: "tf.bitwise.invert" 
+    args: 
+      input: "x" 
+  keras: 
+    api: "keras.ops.invert" 
+    args: 
+      input: "x" 
+  mlx: 
+    api: null # No direct bitwise_not in older versions, maybe invert? 
+  flax_nnx: 
+    api: "jnp.invert" 
+  paxml: 
+    api: "jnp.invert" 
+---
+operation: "BitwiseOr" 
+description: "Computes the bitwise OR of input and other." 
+std_args: [ "input", "other" ] 
+variants: 
+  torch: 
+    api: "torch.bitwise_or" 
+  jax: 
+    api: "jnp.bitwise_or" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  numpy: 
+    api: "np.bitwise_or" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  tensorflow: 
+    api: "tf.bitwise.bitwise_or" 
+    args: 
+      input: "x" 
+      other: "y" 
+  keras: 
+    api: "keras.ops.bitwise_or" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  mlx: 
+    api: "mlx.core.bitwise_or" 
+  flax_nnx: 
+    api: "jnp.bitwise_or" 
+  paxml: 
+    api: "jnp.bitwise_or" 
+---
+operation: "BitwiseRightShift" 
+description: "Computes the right arithmetic shift of input by other bits." 
+std_args: [ "input", "other" ] 
+variants: 
+  torch: 
+    api: "torch.bitwise_right_shift" 
+  jax: 
+    api: "jnp.right_shift" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  numpy: 
+    api: "np.right_shift" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  tensorflow: 
+    api: "tf.bitwise.right_shift" 
+    args: 
+      input: "x" 
+      other: "y" 
+  keras: 
+    api: "keras.ops.right_shift" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  mlx: 
+    api: "mlx.core.right_shift" 
+  flax_nnx: 
+    api: "jnp.right_shift" 
+  paxml: 
+    api: "jnp.right_shift" 
+---
+operation: "BitwiseXor" 
+description: "Computes the bitwise XOR of input and other." 
+std_args: [ "input", "other" ] 
+variants: 
+  torch: 
+    api: "torch.bitwise_xor" 
+  jax: 
+    api: "jnp.bitwise_xor" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  numpy: 
+    api: "np.bitwise_xor" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  tensorflow: 
+    api: "tf.bitwise.bitwise_xor" 
+    args: 
+      input: "x" 
+      other: "y" 
+  keras: 
+    api: "keras.ops.bitwise_xor" 
+    args: 
+      input: "x1" 
+      other: "x2" 
+  mlx: 
+    api: "mlx.core.bitwise_xor" 
+  flax_nnx: 
+    api: "jnp.bitwise_xor" 
+  paxml: 
+    api: "jnp.bitwise_xor" 
+---
+operation: "BlackmanWindow" 
+description: "Blackman window function." 
+std_args: 
+  - name: "window_length" 
+    type: "int" 
+  - name: "periodic" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.blackman_window" 
+  jax: 
+    api: "jnp.blackman" 
+    args: 
+      window_length: "M" 
+      periodic: null
+  numpy: 
+    api: "np.blackman" 
+    args: 
+      window_length: "M" 
+      periodic: null
+  tensorflow: 
+    api: "tf.signal.blackman_window" 
+    args: 
+      window_length: "window_length" 
+      periodic: "periodic" 
+  keras: 
+    api: null
+  mlx: 
+    api: null
+  flax_nnx: 
+    api: "jnp.blackman" 
+  paxml: 
+    api: "jnp.blackman" 
+---
+operation: "BlockDiag" 
+description: "Create a block diagonal matrix from provided tensors." 
+std_args: [ "tensors" ] 
+variants: 
+  torch: 
+    api: "torch.block_diag" 
+  jax: 
+    api: "jax.scipy.linalg.block_diag" 
+    pack_to_tuple: "tensors" # Vargs to tuple
+    pack_as: "Tuple" # JAX usually accepts *args or list? 
+    # jax.scipy.linalg.block_diag(*arrs) 
+    # So we need argument unpacking if source was list, or packing if source signature was varargs? 
+    # Torch block_diag is *tensors. JAX is *arrs. 
+    # So direct mapping works if we preserve varargs style? 
+    # ODL Pack_to_tuple collects varargs into a container argument explicitly. 
+    # If JAX takes varargs, we don't pack. 
+    # But if Adapter doesn't support varargs, we might need a macro. 
+    # Wait, jax.scipy.linalg.block_diag expects (A, B, C) as args. 
+    args: 
+      tensors: null # Pass through? No, torch.block_diag(*tensors). 
+      # JAX block_diag expects *arrs. 
+      # So we can map directly if engine supports *args via std_args. 
+  numpy: 
+    api: "scipy.linalg.block_diag" 
+    required_imports: 
+      - module: "scipy.linalg" 
+  tensorflow: 
+    api: "tf.linalg.LinearOperatorBlockDiag" 
+    args: 
+       tensors: "operators" 
+    # TF requires wrapping in LinearOperators, messy. 
+  keras: 
+    api: null
+  mlx: 
+    api: null
+  flax_nnx: 
+    api: "jax.scipy.linalg.block_diag" 
+  paxml: 
+    api: "jax.scipy.linalg.block_diag" 
+---
+operation: "Bmm" 
+description: "Performs a batch matrix-matrix product." 
+std_args: [ "input", "mat2" ] 
+variants: 
+  torch: 
+    api: "torch.bmm" 
+  jax: 
+    api: "jnp.matmul" 
+    args: 
+      input: "a" 
+      mat2: "b" 
+  numpy: 
+    api: "np.matmul" 
+    args: 
+      input: "x1" 
+      mat2: "x2" 
+  tensorflow: 
+    api: "tf.linalg.matmul" 
+    args: 
+      input: "a" 
+      mat2: "b" 
+  keras: 
+    api: "keras.ops.matmul" 
+    args: 
+      input: "x1" 
+      mat2: "x2" 
+  mlx: 
+    api: "mlx.core.matmul" 
+    args: 
+      input: "a" 
+      mat2: "b" 
+  flax_nnx: 
+    api: "jnp.matmul" 
+  paxml: 
+    api: "jnp.matmul"

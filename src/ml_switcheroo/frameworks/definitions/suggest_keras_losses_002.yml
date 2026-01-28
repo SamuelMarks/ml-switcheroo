@@ -1,0 +1,513 @@
+operation: "CosineSimilarityLoss"
+description: "Computes the cosine similarity between labels and predictions. Note: Keras defaults to negative similarity (loss)."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  keras:
+    api: "keras.losses.cosine_similarity"
+  tensorflow:
+    api: "tf.keras.losses.cosine_similarity"
+  torch:
+    api: "torch.nn.functional.cosine_similarity"
+    args:
+      y_pred: "x1"
+      y_true: "x2"
+      axis: "dim"
+    macro_template: "-torch.nn.functional.cosine_similarity({y_pred}, {y_true}, dim={axis})"
+  jax:
+    api: "optax.cosine_similarity"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+    macro_template: "-optax.cosine_similarity({y_pred}, {y_true})"
+  flax_nnx:
+    api: "optax.cosine_similarity"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+    macro_template: "-optax.cosine_similarity({y_pred}, {y_true})"
+  paxml:
+    api: "optax.cosine_similarity"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+    macro_template: "-optax.cosine_similarity({y_pred}, {y_true})"
+  mlx:
+    api: "mlx.nn.losses.cosine_similarity"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+    macro_template: "mlx.nn.losses.cosine_similarity({y_pred}, {y_true}, axis={axis})"
+
+---
+operation: "CTCLoss"
+description: "CTC (Connectionist Temporal Classification) loss."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.ctc"
+  tensorflow:
+    api: "tf.keras.losses.ctc"
+  torch:
+    api: "torch.nn.functional.ctc_loss"
+    description: "Requires inputs lengths and target lengths which are implicit in Keras."
+  jax:
+    api: "optax.ctc_loss"
+    args:
+      y_pred: "logits"
+      y_true: "labels"
+  flax_nnx:
+    api: "optax.ctc_loss"
+  paxml:
+    api: "optax.ctc_loss"
+
+---
+operation: "DeserializeLoss"
+description: "Deserializes a serialized loss class/function instance."
+op_type: "function"
+std_args:
+  - name: "name"
+    type: "str"
+  - name: "custom_objects"
+    type: "dict"
+    default: null
+variants:
+  keras:
+    api: "keras.losses.deserialize"
+  tensorflow:
+    api: "tf.keras.losses.deserialize"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "DiceLoss"
+description: "Computes the Dice loss value between y_true and y_pred."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.losses.dice"
+  tensorflow:
+    api: "tf.keras.losses.dice"
+  torch:
+    macro_template: "1 - (2 * ({y_true} * {y_pred}).sum(dim={axis})) / ({y_true}.sum(dim={axis}) + {y_pred}.sum(dim={axis}))"
+  jax:
+    macro_template: "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))"
+  flax_nnx:
+    macro_template: "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))"
+  paxml:
+    macro_template: "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))"
+
+---
+operation: "GetLoss"
+description: "Retrieves a Keras loss as a function/Loss class instance."
+op_type: "function"
+std_args:
+  - name: "identifier"
+    type: "Union[str, dict]"
+variants:
+  keras:
+    api: "keras.losses.get"
+  tensorflow:
+    api: "tf.keras.losses.get"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "HingeLoss"
+description: "Computes the hinge loss between y_true & y_pred."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.hinge"
+  tensorflow:
+    api: "tf.keras.losses.hinge"
+  torch:
+    api: "torch.nn.functional.hinge_embedding_loss"
+    args:
+      y_pred: "input"
+      y_true: "target"
+  jax:
+    api: "optax.hinge_loss"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+  flax_nnx:
+    api: "optax.hinge_loss"
+  paxml:
+    api: "optax.hinge_loss"
+  mlx:
+    api: "mlx.nn.losses.hinge_loss"
+
+---
+operation: "HuberLoss"
+description: "Computes Huber loss value."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+  - name: "delta"
+    type: "float"
+    default: 1.0
+variants:
+  keras:
+    api: "keras.losses.huber"
+  tensorflow:
+    api: "tf.keras.losses.huber"
+  torch:
+    api: "torch.nn.functional.huber_loss"
+    args:
+      y_pred: "input"
+      y_true: "target"
+  jax:
+    api: "optax.huber_loss"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+  flax_nnx:
+    api: "optax.huber_loss"
+  paxml:
+    api: "optax.huber_loss"
+  mlx:
+    api: "mlx.nn.losses.huber_loss"
+
+---
+operation: "KLDivergence"
+description: "Computes Kullback-Leibler divergence loss between y_true & y_pred."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.kl_divergence"
+  tensorflow:
+    api: "tf.keras.losses.kl_divergence"
+  torch:
+    api: "torch.nn.functional.kl_div"
+    args:
+      y_pred: "input"
+      y_true: "target"
+    macro_template: "torch.nn.functional.kl_div(({y_pred}).log(), {y_true}, reduction='none').sum(dim=-1)"
+  jax:
+    api: "optax.kl_divergence"
+    macro_template: "optax.kl_divergence(optax.log_softmax({y_pred}), {y_true})"
+  flax_nnx:
+    api: "optax.kl_divergence"
+  paxml:
+    api: "optax.kl_divergence"
+  mlx:
+    api: "mlx.nn.losses.kl_div_loss"
+
+---
+operation: "LogCoshLoss"
+description: "Logarithm of the hyperbolic cosine of the prediction error."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.log_cosh"
+  tensorflow:
+    api: "tf.keras.losses.log_cosh"
+  torch:
+    macro_template: "torch.log(torch.cosh({y_pred} - {y_true}))"
+  jax:
+    api: "optax.log_cosh"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+  flax_nnx:
+    api: "optax.log_cosh"
+  paxml:
+    api: "optax.log_cosh"
+  mlx:
+    api: "mlx.nn.losses.log_cosh_loss"
+
+---
+operation: "MeanAbsoluteError"
+description: "Computes the mean absolute error between labels and predictions."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.mean_absolute_error"
+  tensorflow:
+    api: "tf.keras.losses.mean_absolute_error"
+  torch:
+    api: "torch.nn.functional.l1_loss"
+    args:
+      y_pred: "input"
+      y_true: "target"
+    kwargs_map:
+      reduction: 'none'
+  jax:
+    api: "optax.l1_loss"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+  flax_nnx:
+    api: "optax.l1_loss"
+  paxml:
+    api: "optax.l1_loss"
+  mlx:
+    api: "mlx.nn.losses.l1_loss"
+
+---
+operation: "MeanAbsolutePercentageError"
+description: "Computes the mean absolute percentage error between y_true & y_pred."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.mean_absolute_percentage_error"
+  tensorflow:
+    api: "tf.keras.losses.mean_absolute_percentage_error"
+  torch:
+    macro_template: "torch.mean(torch.abs(({y_true} - {y_pred}) / torch.clamp({y_true}.abs(), min=1e-7))) * 100"
+  jax:
+    api: "optax.mape_loss"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+  flax_nnx:
+    api: "optax.mape_loss"
+  paxml:
+    api: "optax.mape_loss"
+
+---
+operation: "MeanSquaredError"
+description: "Computes the mean squared error between labels and predictions."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.mean_squared_error"
+  tensorflow:
+    api: "tf.keras.losses.mean_squared_error"
+  torch:
+    api: "torch.nn.functional.mse_loss"
+    args:
+      y_pred: "input"
+      y_true: "target"
+    kwargs_map:
+      reduction: 'none'
+  jax:
+    api: "optax.squared_error"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+  flax_nnx:
+    api: "optax.squared_error"
+  paxml:
+    api: "optax.squared_error"
+  mlx:
+    api: "mlx.nn.losses.mse_loss"
+
+---
+operation: "MeanSquaredLogarithmicError"
+description: "Computes the mean squared logarithmic error between y_true & y_pred."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.mean_squared_logarithmic_error"
+  tensorflow:
+    api: "tf.keras.losses.mean_squared_logarithmic_error"
+  torch:
+    macro_template: "torch.nn.functional.mse_loss(torch.log1p({y_true}), torch.log1p({y_pred}), reduction='none')"
+  jax:
+    macro_template: "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))"
+  flax_nnx:
+    macro_template: "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))"
+  paxml:
+    macro_template: "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))"
+
+---
+operation: "PoissonLoss"
+description: "Computes the Poisson loss between y_true and y_pred."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.poisson"
+  tensorflow:
+    api: "tf.keras.losses.poisson"
+  torch:
+    api: "torch.nn.functional.poisson_nll_loss"
+    args:
+      y_pred: "input"
+      y_true: "target"
+    kwargs_map:
+      log_input: "False"
+      full: "True"
+  jax:
+    api: "optax.poisson_loss"
+    args:
+      y_pred: "predictions"
+      y_true: "targets"
+  flax_nnx:
+    api: "optax.poisson_loss"
+  paxml:
+    api: "optax.poisson_loss"
+
+---
+operation: "SerializeLoss"
+description: "Serializes loss function or Loss instance."
+op_type: "function"
+std_args:
+  - name: "loss"
+    type: "Any"
+variants:
+  keras:
+    api: "keras.losses.serialize"
+  tensorflow:
+    api: "tf.keras.losses.serialize"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "SparseCategoricalCrossentropy"
+description: "Computes the sparse categorical crossentropy loss."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+  - name: "from_logits"
+    type: "bool"
+    default: false
+  - name: "ignore_class"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.losses.sparse_categorical_crossentropy"
+  tensorflow:
+    api: "tf.keras.losses.sparse_categorical_crossentropy"
+  torch:
+    api: "torch.nn.functional.cross_entropy"
+    args:
+      y_true: "target"
+      y_pred: "input"
+      ignore_class: "ignore_index"
+  jax:
+    api: "optax.softmax_cross_entropy_with_integer_labels"
+    args:
+      y_pred: "logits"
+      y_true: "labels"
+  flax_nnx:
+    api: "optax.softmax_cross_entropy_with_integer_labels"
+  paxml:
+    api: "optax.softmax_cross_entropy_with_integer_labels"
+  mlx:
+    api: "mlx.nn.losses.cross_entropy"
+    args:
+      y_pred: "logits"
+      y_true: "targets"
+
+---
+operation: "SquaredHingeLoss"
+description: "Computes the squared hinge loss between y_true & y_pred."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+variants:
+  keras:
+    api: "keras.losses.squared_hinge"
+  tensorflow:
+    api: "tf.keras.losses.squared_hinge"
+  torch:
+    macro_template: "torch.mean(torch.clamp(1 - {y_true} * {y_pred}, min=0) ** 2, dim=-1)"
+  jax:
+    macro_template: "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)"
+  flax_nnx:
+    macro_template: "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)"
+  paxml:
+    macro_template: "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)"
+
+---
+operation: "TverskyLoss"
+description: "Computes the Tversky loss value between y_true and y_pred."
+op_type: "function"
+std_args:
+  - name: "y_true"
+    type: "Tensor"
+  - name: "y_pred"
+    type: "Tensor"
+  - name: "alpha"
+    type: "float"
+    default: 0.5
+  - name: "beta"
+    type: "float"
+    default: 0.5
+variants:
+  keras:
+    api: "keras.losses.tversky"
+  tensorflow:
+    api: "tf.keras.losses.tversky"
+  torch:
+    api: null
+  jax:
+    api: null

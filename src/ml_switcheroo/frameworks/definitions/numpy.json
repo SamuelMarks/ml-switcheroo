@@ -12,6 +12,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Absolute": {
+    "api": "numpy.absolute",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AccumulateN": {
+    "dispatch_rules": [],
+    "macro_template": "sum({inputs})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Acos": {
     "api": "numpy.arccos",
     "dispatch_rules": [],
@@ -27,6 +39,12 @@
   "Add": {
     "api": "numpy.add",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AddN": {
+    "dispatch_rules": [],
+    "macro_template": "sum({inputs})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -82,6 +100,48 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Arccos": {
+    "api": "numpy.arccos",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arccosh": {
+    "api": "numpy.arccosh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arcsin": {
+    "api": "numpy.arcsin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arcsinh": {
+    "api": "numpy.arcsinh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctan": {
+    "api": "numpy.arctan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctan2": {
+    "api": "numpy.arctan2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctanh": {
+    "api": "numpy.arctanh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ArgMax": {
     "api": "numpy.argmax",
     "args": {
@@ -124,6 +184,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Argmax": {
+    "api": "numpy.argmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Argmin": {
+    "api": "numpy.argmin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Argsort": {
+    "api": "numpy.argsort",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Array": {
     "api": "numpy.array",
     "args": {
@@ -161,8 +239,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AsAnyArray": {
+    "api": "numpy.asanyarray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AsArray": {
     "api": "numpy.asarray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsContiguousArray": {
+    "api": "numpy.ascontiguousarray",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -285,6 +375,56 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "BesselI0": {
+    "api": "scipy.special.i0",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "scipy.special"
+      }
+    ]
+  },
+  "BesselI0e": {
+    "api": "scipy.special.i0e",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "scipy.special"
+      }
+    ]
+  },
+  "BesselI1": {
+    "api": "scipy.special.i1",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "scipy.special"
+      }
+    ]
+  },
+  "BesselI1e": {
+    "api": "scipy.special.i1e",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "scipy.special"
+      }
+    ]
+  },
+  "Betainc": {
+    "api": "scipy.special.betainc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "scipy.special"
+      }
+    ]
   },
   "Bincount": {
     "api": "numpy.bincount",
@@ -496,6 +636,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Complex": {
+    "api": "numpy.complex_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Complex128": {
     "api": "numpy.complex128",
     "dispatch_rules": [],
@@ -542,6 +688,20 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "ConfusionMatrix": {
+    "api": "sklearn.metrics.confusion_matrix",
+    "args": {
+      "labels": "y_true",
+      "predictions": "y_pred"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "sklearn.metrics"
+      }
+    ]
   },
   "Conj": {
     "api": "numpy.conj",
@@ -680,6 +840,31 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DSplit": {
+    "api": "numpy.dsplit",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DStack": {
+    "api": "numpy.dstack",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Data": {
+    "api": "numpy.f2py.symbolic.Expr.data",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Deg2Rad": {
+    "api": "numpy.deg2rad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Deg2rad": {
     "api": "numpy.deg2rad",
     "dispatch_rules": [],
@@ -748,6 +933,17 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Digamma": {
+    "api": "scipy.special.digamma",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "alias": "sp",
+        "module": "scipy.special"
+      }
+    ]
   },
   "Digitize": {
     "api": "numpy.digitize",
@@ -897,6 +1093,34 @@
       }
     ]
   },
+  "Erfc": {
+    "api": "scipy.special.erfc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "alias": "sp",
+        "module": "scipy.special"
+      }
+    ]
+  },
+  "ErfcInv": {
+    "api": "scipy.special.erfcinv",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "alias": "sp",
+        "module": "scipy.special"
+      }
+    ]
+  },
+  "EuclideanNorm": {
+    "api": "np.linalg.norm",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "EulerGamma": {
     "api": "numpy.euler_gamma",
     "dispatch_rules": [],
@@ -917,6 +1141,11 @@
   },
   "ExpandDims": {
     "api": "numpy.expand_dims",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ExperimentalEnableNumpyBehavior": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -982,7 +1211,7 @@
     "required_imports": []
   },
   "Flatten": {
-    "api": "numpy.matrixlib.defmatrix.matrix.flatten",
+    "api": "numpy.flatten",
     "args": {
       "order": "order",
       "self": "self"
@@ -1059,6 +1288,12 @@
   },
   "FloorDivide": {
     "api": "numpy.floor_divide",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FloorMod": {
+    "api": "numpy.remainder",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1186,6 +1421,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "HSplit": {
+    "api": "numpy.hsplit",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HStack": {
+    "api": "numpy.hstack",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Hamming": {
     "api": "numpy.hamming",
     "dispatch_rules": [],
@@ -1271,6 +1518,28 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Igamma": {
+    "api": "scipy.special.gammainc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "alias": "sp",
+        "module": "scipy.special"
+      }
+    ]
+  },
+  "Igammac": {
+    "api": "scipy.special.gammaincc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "alias": "sp",
+        "module": "scipy.special"
+      }
+    ]
+  },
   "Imag": {
     "api": "numpy.imag",
     "dispatch_rules": [],
@@ -1331,6 +1600,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Int_": {
+    "api": "numpy.int64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Integer": {
     "api": "numpy.integer",
     "dispatch_rules": [],
@@ -1351,6 +1626,12 @@
   },
   "Invert": {
     "api": "numpy.invert",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "InvertPermutation": {
+    "api": "numpy.argsort",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1525,8 +1806,27 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Lgamma": {
+    "api": "scipy.special.gammaln",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "scipy.special"
+      }
+    ]
+  },
   "Linspace": {
     "api": "numpy.linspace",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ListConcatenate": {
+    "api": "np.concatenate",
+    "args": {
+      "inputs": "arrays"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1567,12 +1867,34 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LogAddExp2": {
+    "api": "numpy.logaddexp2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "LogCumSumExp": {
     "api": "numpy.logaddexp.accumulate",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
     "transformation_type": "method_call"
+  },
+  "LogSigmoid": {
+    "dispatch_rules": [],
+    "macro_template": "-np.logaddexp(0, -{x})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSoftmax": {
+    "api": "scipy.special.log_softmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "scipy.special"
+      }
+    ]
   },
   "LogSumExp": {
     "api": "numpy.logaddexp.reduce",
@@ -1806,6 +2128,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MultiplyNoNan": {
+    "dispatch_rules": [],
+    "macro_template": "np.where({y} == 0, 0.0, {x} * {y})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "NONE": {
     "api": "numpy.f2py.symbolic.Precedence.NONE",
     "args": {},
@@ -1892,8 +2220,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Ndtri": {
+    "api": "scipy.special.ndtri",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "scipy.special"
+      }
+    ]
+  },
   "Negative": {
     "api": "numpy.negative",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NextAfter": {
+    "api": "np.nextafter",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2004,6 +2348,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Polygamma": {
+    "api": "scipy.special.polygamma",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "module": "scipy.special"
+      }
+    ]
+  },
   "Polyint": {
     "api": "numpy.polyint",
     "dispatch_rules": [],
@@ -2024,6 +2378,13 @@
   },
   "Polyval": {
     "api": "numpy.polyval",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pool": {
+    "api": "numpy.random.bit_generator.SeedSequence.pool",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2139,6 +2500,42 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ReciprocalNoNan": {
+    "dispatch_rules": [],
+    "macro_template": "np.where({x} == 0, 0.0, 1.0 / {x})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceMin": {
+    "api": "numpy.min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceProd": {
+    "api": "numpy.prod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceStd": {
+    "api": "numpy.std",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceSum": {
+    "api": "numpy.sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceVariance": {
+    "api": "numpy.var",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Remainder": {
     "api": "numpy.remainder",
     "dispatch_rules": [],
@@ -2217,6 +2614,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Rsqrt": {
+    "dispatch_rules": [],
+    "macro_template": "1.0 / numpy.sqrt({x})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "STRING": {
     "api": "numpy.f2py.symbolic.Op.STRING",
     "args": {},
@@ -2233,6 +2636,12 @@
   "Savez": {
     "api": "numpy.savez",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScalarMul": {
+    "dispatch_rules": [],
+    "macro_template": "{x} * {scalar}",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -2344,6 +2753,18 @@
     "required_imports": [],
     "requires_plugin": "softmax_shim"
   },
+  "Softplus": {
+    "dispatch_rules": [],
+    "macro_template": "numpy.log1p(numpy.exp({x}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softsign": {
+    "dispatch_rules": [],
+    "macro_template": "{x} / (numpy.abs({x}) + 1)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sort": {
     "api": "numpy.sort",
     "dispatch_rules": [],
@@ -2380,6 +2801,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SquaredDifference": {
+    "dispatch_rules": [],
+    "macro_template": "numpy.square({x} - {y})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Squeeze": {
     "api": "numpy.squeeze",
     "dispatch_rules": [],
@@ -2395,8 +2822,21 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "State": {
+    "api": "numpy.random.bit_generator.SeedSequence.state",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Std": {
     "api": "numpy.std",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "String": {
+    "api": "numpy.bytes_",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2580,6 +3020,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "TrueDiv": {
+    "api": "numpy.divide",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "TrueDivide": {
     "api": "numpy.true_divide",
     "dispatch_rules": [],
@@ -2657,6 +3103,12 @@
     "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "unflatten_manual"
+  },
+  "Unicode": {
+    "api": "numpy.unicode_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Union1d": {
     "api": "numpy.union1d",
@@ -2749,6 +3201,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Variance": {
+    "api": "numpy.var",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Vdot": {
     "api": "numpy.vdot",
     "dispatch_rules": [],
@@ -2800,6 +3258,30 @@
   "Where": {
     "api": "numpy.where",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Xdivy": {
+    "dispatch_rules": [],
+    "macro_template": "np.where({x} == 0, 0, {x} / {y})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Xlog1py": {
+    "dispatch_rules": [],
+    "macro_template": "np.where({x} == 0, 0, {x} * np.log1p({y}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Xlogy": {
+    "dispatch_rules": [],
+    "macro_template": "np.where({x} == 0, 0, {x} * np.log({y}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ZeroFraction": {
+    "dispatch_rules": [],
+    "macro_template": "np.mean({value} == 0)",
     "pack_as": "Tuple",
     "required_imports": []
   },

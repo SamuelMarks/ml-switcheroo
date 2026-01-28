@@ -1,0 +1,629 @@
+operation: "FeedForward"
+description: "Feedforward layer with activation (usually Linear -> Act -> Linear)."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "hidden_dims"
+    type: "int"
+    default: null
+  - name: "activation"
+    type: "str"
+    default: "relu"
+variants:
+  paxml:
+    api: "paxml.layers.FeedForward"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+      activation: null # Typically passed via tpl
+  torch:
+    api: null # No direct equivalent class in torch.nn, usually composed
+    missing_message: "PyTorch has no single FeedForward module; use nn.Sequential(Linear, Activation, Linear)."
+  flax_nnx:
+    api: null # Flax usually composes this
+  keras:
+    api: null
+
+---
+operation: "FullSoftmax"
+description: "Applies Softmax function to an n-dimensional input Tensor, optionally computing CrossEntropy."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+    default: -1
+variants:
+  paxml:
+    api: "paxml.layers.FullSoftmax"
+    args:
+      dim: null # Pax logic handles dims internally via batch configuration usually
+  torch:
+    api: "torch.nn.Softmax"
+    args:
+      dim: "dim"
+  flax_nnx:
+    api: "flax.nnx.softmax" # Functional
+    op_type: "function"
+  keras:
+    api: "keras.layers.Softmax"
+    args:
+      dim: "axis"
+  mlx:
+    api: "mlx.nn.Softmax"
+  tensorflow:
+    api: "tf.keras.layers.Softmax"
+
+---
+operation: "GELU"
+description: "Applies the Gaussian Error Linear Units function."
+op_type: "class"
+std_args:
+  - name: "approximate"
+    type: "str"
+    default: "none"
+variants:
+  paxml:
+    api: "paxml.layers.GELU"
+    args:
+      approximate: "approximate"
+    arg_values:
+      approximate:
+        "none": "False"
+        "tanh": "True"
+  torch:
+    api: "torch.nn.GELU"
+    args:
+      approximate: "approximate"
+  flax_nnx:
+    api: "flax.nnx.gelu" # Functional
+    op_type: "function"
+  keras:
+    api: "keras.layers.Activation"
+    inject_args: { "activation": "gelu" }
+  mlx:
+    api: "mlx.nn.GELU"
+  tensorflow:
+    api: "tf.keras.layers.GELU"
+
+---
+operation: "GShardSharedEmbeddingSoftmax"
+description: "Softmax layer with embedding lookup and Gaussian init used in GShard."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "num_classes"
+    type: "int"
+variants:
+  paxml:
+    api: "paxml.layers.GShardSharedEmbeddingSoftmax"
+    args:
+      in_features: "input_dims"
+      num_classes: "num_classes"
+  torch:
+    api: null # GShard specific logic
+  flax_nnx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "GlobalPooling"
+description: "Performs global pooling over the input."
+op_type: "class"
+std_args:
+  - name: "pooling_type"
+    type: "str"
+    default: "AVG"
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  paxml:
+    api: "paxml.layers.GlobalPooling"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool2d"
+    dispatch_rules:
+      - if_arg: "pooling_type"
+        op: "eq"
+        val: "MAX"
+        use_api: "torch.nn.AdaptiveMaxPool2d"
+    inject_args: { "output_size": 1 }
+  keras:
+    api: "keras.layers.GlobalAveragePooling2D"
+    dispatch_rules:
+      - if_arg: "pooling_type"
+        op: "eq"
+        val: "MAX"
+        use_api: "keras.layers.GlobalMaxPooling2D"
+    args:
+      keepdims: "keepdims"
+  tensorflow:
+    api: "tf.keras.layers.GlobalAveragePooling2D"
+
+---
+operation: "GroupNorm"
+description: "Applies Group Normalization over a mini-batch of inputs."
+op_type: "class"
+std_args:
+  - name: "num_groups"
+    type: "int"
+  - name: "num_channels"
+    type: "int"
+  - name: "eps"
+    type: "float"
+    default: 1e-5
+variants:
+  paxml:
+    api: "paxml.layers.GroupNorm"
+    args:
+      num_groups: "num_groups"
+      num_channels: null # Pax infers
+      eps: "epsilon"
+  torch:
+    api: "torch.nn.GroupNorm"
+    args:
+      num_groups: "num_groups"
+      num_channels: "num_channels"
+      eps: "eps"
+  flax_nnx:
+    api: "flax.nnx.GroupNorm"
+    args:
+      num_groups: "num_groups"
+      num_channels: "num_features"
+      eps: "epsilon"
+  keras:
+    api: "keras.layers.GroupNormalization"
+    args:
+      num_groups: "groups"
+      num_channels: null
+      eps: "epsilon"
+  mlx:
+    api: "mlx.nn.GroupNorm"
+  tensorflow:
+    api: "tf.keras.layers.GroupNormalization"
+
+---
+operation: "GroupedQueryAttention"
+description: "Dot-product attention sharing keys and values across heads."
+op_type: "class"
+std_args:
+  - name: "embed_dim"
+    type: "int"
+  - name: "num_heads"
+    type: "int"
+  - name: "num_kv_heads"
+    type: "int"
+variants:
+  paxml:
+    api: "paxml.layers.GroupedQueryAttention"
+    args:
+      embed_dim: "input_dim"
+      num_heads: "num_heads"
+      num_kv_heads: "num_kv_heads"
+  torch:
+    api: null # Generic GQA often handled by functional scaled_dot_product_attention or custom modules
+  flax_nnx:
+    api: "flax.nnx.MultiHeadAttention" # Supports GQA via num_query_heads != num_key_value_heads configuration
+    args:
+      embed_dim: null
+      num_heads: "num_heads"
+  keras:
+    api: "keras.layers.MultiHeadAttention"
+
+---
+operation: "Identity"
+description: "A placeholder identity operator."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.Identity"
+  torch:
+    api: "torch.nn.Identity"
+  flax_nnx:
+    api: null
+  keras:
+    api: "keras.layers.Identity"
+  mlx:
+    api: "mlx.nn.Identity"
+  tensorflow:
+    api: "tf.identity"
+    op_type: "function"
+
+---
+operation: "IdentityNorm"
+description: "Return the input as-is with BaseNormalization-compatible HParams."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.IdentityNorm"
+  torch:
+    api: "torch.nn.Identity"
+
+---
+operation: "LanguageModel"
+description: "Language Model base task."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.LanguageModel"
+  torch:
+    api: null
+  flax_nnx:
+    api: null
+
+---
+operation: "LanguageModelContinuousBatching"
+description: "Language model that uses continuous batching."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.LanguageModelContinuousBatching"
+  torch:
+    api: null
+
+---
+operation: "LanguageModelDPO"
+description: "Contains a pair of TransformerLM for direct preference optimization."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.LanguageModelDPO"
+
+---
+operation: "LanguageModelType"
+description: "Enumerator for Language Model Types."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.LanguageModelType"
+
+---
+operation: "LayerNorm"
+description: "Applies Layer Normalization over a mini-batch of inputs."
+op_type: "class"
+std_args:
+  - name: "normalized_shape"
+    type: "Union[int, List[int]]"
+  - name: "eps"
+    type: "float"
+    default: 1e-5
+  - name: "elementwise_affine"
+    type: "bool"
+    default: true
+variants:
+  paxml:
+    api: "paxml.layers.LayerNorm"
+    args:
+      normalized_shape: "dim"
+      eps: "epsilon"
+      elementwise_affine: "use_scale"
+  torch:
+    api: "torch.nn.LayerNorm"
+    args:
+      normalized_shape: "normalized_shape"
+      eps: "eps"
+      elementwise_affine: "elementwise_affine"
+  flax_nnx:
+    api: "flax.nnx.LayerNorm"
+    args:
+      normalized_shape: "num_features"
+      eps: "epsilon"
+  keras:
+    api: "keras.layers.LayerNormalization"
+    args:
+      eps: "epsilon"
+  mlx:
+    api: "mlx.nn.LayerNorm"
+    args:
+      normalized_shape: "dims"
+  tensorflow:
+    api: "tf.keras.layers.LayerNormalization"
+
+---
+operation: "LayerNormalizedLstmCellSimple"
+description: "LSTM cell with Layer Normalization."
+op_type: "class"
+std_args:
+  - name: "input_size"
+    type: "int"
+  - name: "hidden_size"
+    type: "int"
+variants:
+  paxml:
+    api: "paxml.layers.LayerNormalizedLstmCellSimple"
+    args:
+      input_size: "num_input_nodes"
+      hidden_size: "num_hidden_nodes"
+  torch:
+    api: null # No direct LayerNormLSTM cell in PyTorch core
+
+---
+operation: "LayerwiseShardablePipelined"
+description: "A layer that implements pipelining across stages."
+op_type: "class"
+std_args:
+  - name: "num_stages"
+    type: "int"
+variants:
+  paxml:
+    api: "paxml.layers.LayerwiseShardablePipelined"
+
+---
+operation: "LeakyReLU"
+description: "Applies the LeakyReLU activation function."
+op_type: "class"
+std_args:
+  - name: "negative_slope"
+    type: "float"
+    default: 0.01
+variants:
+  paxml:
+    api: "paxml.layers.LeakyReLU"
+    args:
+      negative_slope: "negative_slope"
+  torch:
+    api: "torch.nn.LeakyReLU"
+    args:
+      negative_slope: "negative_slope"
+  flax_nnx:
+    api: "flax.nnx.leaky_relu"
+    args:
+      negative_slope: "negative_slope"
+    op_type: "function"
+  keras:
+    api: "keras.layers.LeakyReLU"
+    args:
+      negative_slope: "negative_slope"
+  mlx:
+    api: "mlx.nn.LeakyReLU"
+  tensorflow:
+    api: "tf.keras.layers.LeakyReLU"
+
+---
+operation: "LightConv1D"
+description: "Lightweight 1D convolution layer."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "kernel_size"
+    type: "int"
+variants:
+  paxml:
+    api: "paxml.layers.LightConv1D"
+    args:
+      in_channels: "input_dims"
+      kernel_size: "kernel_size"
+
+---
+operation: "Linear"
+description: "Applies a linear transformation to the incoming data."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+    rank: 0
+  - name: "out_features"
+    type: "int"
+    rank: 0
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  paxml:
+    api: "paxml.layers.Linear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+      bias: null # Has implicit bias handling via has_bias usually but Signature provided says implicit. 
+  torch:
+    api: "torch.nn.Linear"
+    args:
+      in_features: "in_features"
+      out_features: "out_features"
+      bias: "bias"
+  flax_nnx:
+    api: "flax.nnx.Linear"
+    args:
+      in_features: "in_features"
+      out_features: "out_features"
+      bias: "use_bias"
+  keras:
+    api: "keras.layers.Dense"
+    args:
+      in_features: null
+      out_features: "units"
+      bias: "use_bias"
+  mlx:
+    api: "mlx.nn.Linear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+      bias: "bias"
+  tensorflow:
+    api: "tf.keras.layers.Dense"
+    args:
+      in_features: null
+      out_features: "units"
+      bias: "use_bias"
+
+---
+operation: "LocalSelfAttention"
+description: "Local Attention with given left and right context."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+  - name: "num_heads"
+    type: "int"
+  - name: "window_size"
+    type: "int"
+variants:
+  paxml:
+    api: "paxml.layers.LocalSelfAttention"
+    args:
+      dim: "input_dim"
+      num_heads: "num_heads"
+      window_size: "block_size" # Approximate mapping
+
+---
+operation: "LocalSelfAttentionAlibi"
+description: "Local version of non-trainable relative bias position encoding (ALiBi)."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.LocalSelfAttentionAlibi"
+
+---
+operation: "LocalSelfAttentionRelativeBias"
+description: "Local version of trainable relative bias position encoding."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.LocalSelfAttentionRelativeBias"
+
+---
+operation: "LocalSelfAttentionXL"
+description: "Local version of transformer-xl self attention."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.LocalSelfAttentionXL"
+
+---
+operation: "LstmCellSimple"
+description: "A long short-term memory (LSTM) cell."
+op_type: "class"
+std_args:
+  - name: "input_size"
+    type: "int"
+  - name: "hidden_size"
+    type: "int"
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  paxml:
+    api: "paxml.layers.LstmCellSimple"
+    args:
+      input_size: "num_input_nodes"
+      hidden_size: "num_hidden_nodes"
+  torch:
+    api: "torch.nn.LSTMCell"
+    args:
+      input_size: "input_size"
+      hidden_size: "hidden_size"
+      bias: "bias"
+  flax_nnx:
+    api: "flax.nnx.LSTMCell"
+    args:
+      input_size: "features" # Flax infers input unless specified
+      hidden_size: "features"
+  keras:
+    api: "keras.layers.LSTMCell"
+    args:
+      input_size: null
+      hidden_size: "units"
+  mlx:
+    api: "mlx.nn.LSTM" # MLX has LSTM, not exposed cell directly in top namespace commonly
+  tensorflow:
+    api: "tf.keras.layers.LSTMCell"
+
+---
+operation: "LstmFrnn"
+description: "A FRNN for LSTMCellSimple cell."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.LstmFrnn"
+
+---
+operation: "MLPBlock"
+description: "Multilayer perceptron block composed of multiple FeedForward layers."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "hidden_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+variants:
+  paxml:
+    api: "paxml.layers.MLPBlock"
+    args:
+      hidden_features: "hidden_dims"
+  torch:
+    # No direct block, usually torchvision.ops.MLP
+    api: "torchvision.ops.MLP" 
+    args:
+      in_features: "in_channels"
+      hidden_features: "hidden_channels"
+  keras:
+    api: "keras.Sequential" # Generic mapper
+    requires_plugin: "keras_sequential_pack"
+
+---
+operation: "MaskedLmDataAugmenter"
+description: "Performs data augmentation according to the BERT paper."
+op_type: "class"
+std_args:
+  - name: "vocab_size"
+    type: "int"
+  - name: "mask_prob"
+    type: "float"
+variants:
+  paxml:
+    api: "paxml.layers.MaskedLmDataAugmenter"
+    args:
+      vocab_size: "vocab_size"
+      mask_prob: "mask_prob"
+
+---
+operation: "MultitaskResidualAdapter"
+description: "A multitask residual adapter layer."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.MultitaskResidualAdapter"
+
+---
+operation: "Ngrammer"
+description: "Implements a generic N-grammer layer which looks up latent bi-gram id."
+op_type: "class"
+std_args: []
+variants:
+  paxml:
+    api: "paxml.layers.Ngrammer"
+
+---
+operation: "PerDimScale"
+description: "A layer to scale individual dims of the input."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  paxml:
+    api: "paxml.layers.PerDimScale"
+    args:
+      dim: "dim"
+  torch:
+    # Often implemented as simple multiplication by learnable parameter
+    api: null

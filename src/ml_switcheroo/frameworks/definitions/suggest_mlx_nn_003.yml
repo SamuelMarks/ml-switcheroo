@@ -1,0 +1,600 @@
+operation: "Softplus" 
+description: "Applies the Softplus function." 
+op_type: "class" 
+std_args: 
+  - name: "beta" 
+    type: "float" 
+    default: 1.0
+  - name: "threshold" 
+    type: "float" 
+    default: 20.0
+variants: 
+  mlx: 
+    api: "mlx.nn.Softplus" 
+    # MLX Softplus() takes no args in the source doc given? 
+    # "Signature: Softplus()" implies it matches default. 
+    # Functional equivalent softplus might take args, but class signatures vary. 
+  torch: 
+    api: "torch.nn.Softplus" 
+  keras: 
+    api: "keras.layers.Softplus" 
+    # Keras 3 often uses 'keras.layers.Activation' or specific layers if available
+---
+operation: "Softshrink" 
+description: "Applies the Softshrink function." 
+op_type: "class" 
+std_args: 
+  - name: "lambd" 
+    type: "float" 
+    default: 0.5
+variants: 
+  mlx: 
+    api: "mlx.nn.Softshrink" 
+  torch: 
+    api: "torch.nn.Softshrink" 
+---
+operation: "Softsign" 
+description: "Applies the Softsign function." 
+op_type: "class" 
+std_args: [] 
+variants: 
+  mlx: 
+    api: "mlx.nn.Softsign" 
+  torch: 
+    api: "torch.nn.Softsign" 
+  keras: 
+    api: "keras.layers.Softsign" 
+---
+operation: "Step" 
+description: "Applies the Step Activation Function (Heaviside)." 
+op_type: "class" 
+std_args: 
+  - name: "threshold" 
+    type: "float" 
+    default: 0.0
+variants: 
+  mlx: 
+    api: "mlx.nn.Step" 
+  # Torch doesn't have a direct "Step" module, usually part of Threshold or functional Heaviside
+  torch: 
+    # Partial mapping via macro for class instantiation is hard, explicitly unsupported or plugin
+    requires_plugin: "torch_step_layer" 
+---
+operation: "Tanh" 
+description: "Applies the hyperbolic tangent function." 
+op_type: "class" 
+std_args: [] 
+variants: 
+  mlx: 
+    api: "mlx.nn.Tanh" 
+  torch: 
+    api: "torch.nn.Tanh" 
+  keras: 
+    api: "keras.layers.Activation" 
+    inject_args: 
+      activation: "tanh" 
+---
+operation: "Transformer" 
+description: "Implements a standard Transformer model." 
+op_type: "class" 
+std_args: 
+  - name: "d_model" 
+    type: "int" 
+    default: 512
+  - name: "nhead" 
+    type: "int" 
+    default: 8
+  - name: "num_encoder_layers" 
+    type: "int" 
+    default: 6
+  - name: "num_decoder_layers" 
+    type: "int" 
+    default: 6
+  - name: "dim_feedforward" 
+    type: "int" 
+    default: 2048
+  - name: "dropout" 
+    type: "float" 
+    default: 0.1
+  - name: "norm_first" 
+    type: "bool" 
+    default: false
+variants: 
+  mlx: 
+    api: "mlx.nn.Transformer" 
+    args: 
+      d_model: "dims" 
+      nhead: "num_heads" 
+      num_encoder_layers: "num_encoder_layers" 
+      num_decoder_layers: "num_decoder_layers" 
+      dim_feedforward: "mlp_dims" 
+      dropout: "dropout" 
+      norm_first: "norm_first" 
+  torch: 
+    api: "torch.nn.Transformer" 
+    args: 
+      d_model: "d_model" 
+      nhead: "nhead" 
+      num_encoder_layers: "num_encoder_layers" 
+      num_decoder_layers: "num_decoder_layers" 
+      dim_feedforward: "dim_feedforward" 
+      dropout: "dropout" 
+      norm_first: "norm_first" 
+---
+operation: "Upsample" 
+description: "Upsample the input signal spatially." 
+op_type: "class" 
+std_args: 
+  - name: "scale_factor" 
+    type: "float | Tuple" 
+  - name: "mode" 
+    type: "str" 
+    default: "nearest" 
+    options: ["nearest", "linear", "cubic", "bilinear", "bicubic"] 
+  - name: "align_corners" 
+    type: "bool" 
+    default: false
+variants: 
+  mlx: 
+    api: "mlx.nn.Upsample" 
+  torch: 
+    api: "torch.nn.Upsample" 
+  keras: 
+    api: "keras.layers.UpSampling2D" 
+    # Keras uses 'size' for scale_factor and 'interpolation' for mode
+    args: 
+      scale_factor: "size" 
+      mode: "interpolation" 
+    arg_values: 
+      mode: 
+        linear: "bilinear" 
+        cubic: "bicubic" 
+---
+operation: "AverageGradients" 
+description: "Average the gradients across distributed processes." 
+op_type: "function" 
+std_args: 
+  - name: "gradients" 
+    type: "Any" 
+variants: 
+  mlx: 
+    api: "mlx.nn.average_gradients" 
+  # This is a highly specific distributed op. 
+  torch: 
+    # No direct 1:1, usually handled by DDP or all_reduce manually
+    api: null
+---
+operation: "Celu" 
+description: "Applies the Continuously Differentiable Exponential Linear Unit." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "alpha" 
+    type: "float" 
+    default: 1.0
+variants: 
+  mlx: 
+    api: "mlx.nn.celu" 
+  torch: 
+    api: "torch.nn.functional.celu" 
+  jax: 
+    api: "jax.nn.celu" 
+  keras: 
+    api: "keras.activations.celu" # if avail, else custom
+---
+operation: "Elu" 
+description: "Applies the Exponential Linear Unit." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "alpha" 
+    type: "float" 
+    default: 1.0
+variants: 
+  mlx: 
+    api: "mlx.nn.elu" 
+  torch: 
+    api: "torch.nn.functional.elu" 
+  jax: 
+    api: "jax.nn.elu" 
+  keras: 
+    api: "keras.activations.elu" 
+  tensorflow: 
+    api: "tf.nn.elu" 
+---
+operation: "Gelu" 
+description: "Applies the Gaussian Error Linear Units function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "approximate" 
+    type: "str" 
+    default: "none" 
+    options: ["none", "tanh"] 
+variants: 
+  mlx: 
+    api: "mlx.nn.gelu" 
+    # MLX has separate functions for approx. Dispatch rule needed if approximate='tanh' 
+    dispatch_rules: 
+      - if_arg: "approximate" 
+        op: "eq" 
+        val: "tanh" 
+        use_api: "mlx.nn.gelu_approx" 
+  torch: 
+    api: "torch.nn.functional.gelu" 
+    args: 
+      approximate: "approximate" 
+  jax: 
+    api: "jax.nn.gelu" 
+    args: 
+      approximate: "approximate" 
+  keras: 
+    api: "keras.activations.gelu" 
+    args: 
+      approximate: "approximate" 
+---
+operation: "GeluApprox" 
+description: "An approximation to Gaussian Error Linear Unit (Tanh based)." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.gelu_approx" 
+  torch: 
+    api: "torch.nn.functional.gelu" 
+    inject_args: 
+      approximate: "tanh" 
+  jax: 
+    api: "jax.nn.gelu" 
+    inject_args: 
+      approximate: True
+---
+operation: "GeluFastApprox" 
+description: "A fast approximation to GELU (Sigmoid based)." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.gelu_fast_approx" 
+  # Custom macro for other/standard frameworks if not supported
+  torch: 
+    macro_template: "{x} * torch.sigmoid(1.702 * {x})" 
+---
+operation: "Glu" 
+description: "Applies the gated linear unit function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "dim" 
+    type: "int" 
+    default: -1
+variants: 
+  mlx: 
+    api: "mlx.nn.glu" 
+    args: 
+      dim: "axis" 
+  torch: 
+    api: "torch.nn.functional.glu" 
+    args: 
+      dim: "dim" 
+  jax: 
+    api: "jax.nn.glu" 
+    args: 
+      dim: "axis" 
+  keras: 
+    api: "keras.activations.glu" 
+    args: 
+      dim: "axis" 
+---
+operation: "HardShrink" 
+description: "Applies the HardShrink activation function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "lambd" 
+    type: "float" 
+    default: 0.5
+variants: 
+  mlx: 
+    api: "mlx.nn.hard_shrink" 
+  torch: 
+    api: "torch.nn.functional.hardshrink" 
+---
+operation: "HardTanh" 
+description: "Applies the HardTanh function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "min_val" 
+    type: "float" 
+    default: -1.0
+  - name: "max_val" 
+    type: "float" 
+    default: 1.0
+variants: 
+  mlx: 
+    api: "mlx.nn.hard_tanh" 
+  torch: 
+    api: "torch.nn.functional.hardtanh" 
+  jax: 
+    api: "jax.nn.hard_tanh" 
+---
+operation: "HardSwish" 
+description: "Applies the hardswish function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.hardswish" 
+  torch: 
+    api: "torch.nn.functional.hardswish" 
+  jax: 
+    api: "jax.nn.hard_swish" 
+  keras: 
+    api: "keras.activations.hard_swish" 
+---
+operation: "LeakyRelu" 
+description: "Applies the Leaky Rectified Linear Unit." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "negative_slope" 
+    type: "float" 
+    default: 0.01
+variants: 
+  mlx: 
+    api: "mlx.nn.leaky_relu" 
+  torch: 
+    api: "torch.nn.functional.leaky_relu" 
+  jax: 
+    api: "jax.nn.leaky_relu" 
+  keras: 
+    api: "keras.activations.leaky_relu" # or layers.LeakyReLU
+    # Keras functional often uses 'alpha' for negative_slope
+    args: 
+      negative_slope: "alpha" 
+---
+operation: "LogSigmoid" 
+description: "Applies the Log Sigmoid function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.log_sigmoid" 
+  torch: 
+    api: "torch.nn.functional.logsigmoid" 
+  jax: 
+    api: "jax.nn.log_sigmoid" 
+---
+operation: "LogSoftmax" 
+description: "Applies the Log Softmax function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "dim" 
+    type: "int" 
+    default: -1
+variants: 
+  mlx: 
+    api: "mlx.nn.log_softmax" 
+    args: 
+      dim: "axis" 
+  torch: 
+    api: "torch.nn.functional.log_softmax" 
+    args: 
+      dim: "dim" 
+  jax: 
+    api: "jax.nn.log_softmax" 
+    args: 
+      dim: "axis" 
+  keras: 
+    api: "keras.activations.log_softmax" 
+    args: 
+      dim: "axis" 
+---
+operation: "Mish" 
+description: "Applies the Mish function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.mish" 
+  torch: 
+    api: "torch.nn.functional.mish" 
+  jax: 
+    api: "jax.nn.mish" 
+  keras: 
+    api: "keras.activations.mish" 
+---
+operation: "Prelu" 
+description: "Applies the element-wise parametric ReLU." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "weight" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.prelu" 
+    args: 
+      weight: "alpha" 
+  torch: 
+    api: "torch.nn.functional.prelu" 
+    args: 
+      weight: "weight" 
+---
+operation: "Quantize" 
+description: "Quantize the sub-modules of a module according to a predicate." 
+op_type: "function" 
+std_args: 
+  - name: "model" 
+    type: "Module" 
+  - name: "group_size" 
+    type: "int" 
+    default: 64
+  - name: "bits" 
+    type: "int" 
+    default: 4
+variants: 
+  mlx: 
+    api: "mlx.nn.quantize" 
+  # Quantization is framework specific
+  torch: 
+    api: "torch.ao.quantization.quantize_dynamic" 
+    # Mappings are loose
+---
+operation: "Relu" 
+description: "Applies the Rectified Linear Unit." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.relu" 
+  torch: 
+    api: "torch.nn.functional.relu" 
+  jax: 
+    api: "jax.nn.relu" 
+  keras: 
+    api: "keras.activations.relu" 
+  numpy: 
+    macro_template: "np.maximum({x}, 0)" 
+  tensorflow: 
+    api: "tf.nn.relu" 
+---
+operation: "Relu2" 
+description: "Applies the ReLU² activation function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.relu2" 
+  torch: 
+    macro_template: "torch.nn.functional.relu({x}) ** 2" 
+---
+operation: "Relu6" 
+description: "Applies the Rectified Linear Unit 6." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.relu6" 
+  torch: 
+    api: "torch.nn.functional.relu6" 
+  jax: 
+    api: "jax.nn.relu6" 
+  keras: 
+    api: "keras.activations.relu6" 
+  tensorflow: 
+    api: "tf.nn.relu6" 
+---
+operation: "SeLU" 
+description: "Applies the Scaled Exponential Linear Unit." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.selu" 
+  torch: 
+    api: "torch.nn.functional.selu" 
+  jax: 
+    api: "jax.nn.selu" 
+  keras: 
+    api: "keras.activations.selu" 
+  tensorflow: 
+    api: "tf.nn.selu" 
+---
+operation: "Silu" 
+description: "Applies the Sigmoid Linear Unit (SiLU) function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.silu" 
+  torch: 
+    api: "torch.nn.functional.silu" 
+  jax: 
+    api: "jax.nn.silu" 
+  keras: 
+    api: "keras.activations.silu" 
+  tensorflow: 
+    api: "tf.nn.silu" 
+---
+operation: "Sigmoid" 
+description: "Applies the Sigmoid function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  mlx: 
+    api: "mlx.nn.sigmoid" 
+  torch: 
+    api: "torch.sigmoid" 
+  jax: 
+    api: "jax.nn.sigmoid" 
+  keras: 
+    api: "keras.activations.sigmoid" 
+  numpy: 
+    macro_template: "1 / (1 + np.exp(-{x}))" 
+  tensorflow: 
+    api: "tf.math.sigmoid" 
+---
+operation: "Softmax" 
+description: "Applies the Softmax function." 
+op_type: "function" 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "dim" 
+    type: "int" 
+    default: -1
+variants: 
+  mlx: 
+    api: "mlx.nn.softmax" 
+    args: 
+      dim: "axis" 
+  torch: 
+    api: "torch.nn.functional.softmax" 
+    args: 
+      dim: "dim" 
+  jax: 
+    api: "jax.nn.softmax" 
+    args: 
+      dim: "axis" 
+  keras: 
+    api: "keras.activations.softmax" 
+    args: 
+      dim: "axis" 
+  tensorflow: 
+    api: "tf.nn.softmax" 
+    args: 
+      dim: "axis"

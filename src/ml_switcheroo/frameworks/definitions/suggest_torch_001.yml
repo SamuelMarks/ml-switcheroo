@@ -1,0 +1,394 @@
+operation: "Avg"
+description: "Aggregation constant for Average."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.AVG"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "AcceleratorError"
+description: "Exception raised while executing on device."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.AcceleratorError"
+  jax:
+    api: "RuntimeError"
+  flax_nnx:
+    api: "RuntimeError"
+  paxml:
+    api: "RuntimeError"
+  keras:
+    api: "RuntimeError"
+  tensorflow:
+    api: "tf.errors.OpError"
+    required_imports:
+      - "import tensorflow as tf"
+  mlx:
+    api: "RuntimeError"
+
+---
+operation: "AggregationType"
+description: "Enum for aggregation types (SUM, AVG)."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.AggregationType"
+
+---
+operation: "AliasDb"
+description: "JIT Alias Database."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.AliasDb"
+
+---
+operation: "AnyType"
+description: "JIT Any Type."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.AnyType"
+
+---
+operation: "Argument"
+description: "JIT Argument specification."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Argument"
+
+---
+operation: "ArgumentSpec"
+description: "JIT Argument Specification."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.ArgumentSpec"
+
+---
+operation: "AwaitType"
+description: "JIT Await Type."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.AwaitType"
+
+---
+operation: "BFloat16Storage"
+description: "Storage for BFloat16 data."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.BFloat16Storage"
+
+---
+operation: "BFloat16Tensor"
+description: "Constructs a Tensor with bfloat16 data type."
+std_args:
+  - name: "data"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.BFloat16Tensor"
+  jax:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "jax.numpy.bfloat16"
+  flax_nnx:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "jax.numpy.bfloat16"
+  paxml:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "jax.numpy.bfloat16"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    inject_args:
+      dtype: "'bfloat16'"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    inject_args:
+      dtype: "tf.bfloat16"
+  mlx:
+    api: "mlx.core.array"
+    inject_args:
+      dtype: "mlx.core.bfloat16"
+
+---
+operation: "BenchmarkConfig"
+description: "Configuration for benchmarks."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.BenchmarkConfig"
+
+---
+operation: "BenchmarkExecutionStats"
+description: "Execution statistics for benchmarks."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.BenchmarkExecutionStats"
+
+---
+operation: "Block"
+description: "JIT Block."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Block"
+
+---
+operation: "BoolStorage"
+description: "Storage for Boolean data."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.BoolStorage"
+
+---
+operation: "BoolTensor"
+description: "Constructs a Tensor with boolean data type."
+std_args:
+  - name: "data"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.BoolTensor"
+  jax:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "bool"
+  flax_nnx:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "bool"
+  paxml:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "bool"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    inject_args:
+      dtype: "'bool'"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    inject_args:
+      dtype: "tf.bool"
+  mlx:
+    api: "mlx.core.array"
+    inject_args:
+      dtype: "bool"
+
+---
+operation: "BoolType"
+description: "JIT Bool Type."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.BoolType"
+
+---
+operation: "BufferDict"
+description: "Dictionary of buffers."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.BufferDict"
+
+---
+operation: "ByteStorage"
+description: "Storage for Byte (UInt8) data."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.ByteStorage"
+
+---
+operation: "ByteTensor"
+description: "Constructs a Tensor with uint8 data type (Byte)."
+std_args:
+  - name: "data"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.ByteTensor"
+  jax:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "jax.numpy.uint8"
+  flax_nnx:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "jax.numpy.uint8"
+  paxml:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "jax.numpy.uint8"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    inject_args:
+      dtype: "'uint8'"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    inject_args:
+      dtype: "tf.uint8"
+  mlx:
+    api: "mlx.core.array"
+    inject_args:
+      dtype: "mlx.core.uint8"
+
+---
+operation: "CallStack"
+description: "JIT Call Stack."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.CallStack"
+
+---
+operation: "Capsule"
+description: "JIT Capsule."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Capsule"
+
+---
+operation: "CharStorage"
+description: "Storage for Char (Int8) data."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.CharStorage"
+
+---
+operation: "CharTensor"
+description: "Constructs a Tensor with int8 data type (Char)."
+std_args:
+  - name: "data"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.CharTensor"
+  jax:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "jax.numpy.int8"
+  flax_nnx:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "jax.numpy.int8"
+  paxml:
+    api: "jax.numpy.array"
+    inject_args:
+      dtype: "jax.numpy.int8"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    inject_args:
+      dtype: "'int8'"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    inject_args:
+      dtype: "tf.int8"
+  mlx:
+    api: "mlx.core.array"
+    inject_args:
+      dtype: "mlx.core.int8"
+
+---
+operation: "ClassType"
+description: "JIT Class Type."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.ClassType"
+
+---
+operation: "Code"
+description: "JIT Code object."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Code"
+
+---
+operation: "CompilationUnit"
+description: "JIT Compilation Unit."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.CompilationUnit"
+
+---
+operation: "CompleteArgumentSpec"
+description: "JIT Complete Argument Specification."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.CompleteArgumentSpec"
+
+---
+operation: "ComplexDoubleStorage"
+description: "Storage for Complex Double (complex128) data."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.ComplexDoubleStorage"
+
+---
+operation: "ComplexFloatStorage"
+description: "Storage for Complex Float (complex64) data."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.ComplexFloatStorage"
+
+---
+operation: "ComplexType"
+description: "JIT Complex Type."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.ComplexType"

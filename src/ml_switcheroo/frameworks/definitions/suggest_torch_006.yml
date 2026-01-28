@@ -1,0 +1,1047 @@
+operation: "Addcmul"
+description: "Performs the element-wise multiplication of tensor1 by tensor2, multiplies the result by the scalar value and adds it to input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "tensor1"
+    type: "Tensor"
+  - name: "tensor2"
+    type: "Tensor"
+  - name: "value"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.addcmul"
+  jax:
+    macro_template: "jnp.add({input}, {value} * jnp.multiply({tensor1}, {tensor2}))"
+    required_imports:
+      - "import jax.numpy as jnp"
+  flax_nnx:
+    macro_template: "jnp.add({input}, {value} * jnp.multiply({tensor1}, {tensor2}))"
+    required_imports:
+      - "import jax.numpy as jnp"
+  paxml:
+    macro_template: "jnp.add({input}, {value} * jnp.multiply({tensor1}, {tensor2}))"
+    required_imports:
+      - "import jax.numpy as jnp"
+  keras:
+    macro_template: "keras.ops.add({input}, keras.ops.multiply({tensor1}, {tensor2}) * {value})"
+    required_imports:
+      - "import keras"
+  tensorflow:
+    macro_template: "tf.math.add({input}, tf.math.multiply({tensor1}, {tensor2}) * {value})"
+    required_imports:
+      - "import tensorflow as tf"
+  mlx:
+    macro_template: "mx.add({input}, mx.multiply({tensor1}, {tensor2}) * {value})"
+    required_imports:
+      - "import mlx.core as mx"
+  numpy:
+    macro_template: "{input} + {value} * {tensor1} * {tensor2}"
+
+---
+
+operation: "Addmm"
+description: "Performs a matrix multiplication of the matrices mat1 and mat2. The matrix input is added to the final result."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mat1"
+    type: "Tensor"
+  - name: "mat2"
+    type: "Tensor"
+  - name: "beta"
+    type: "float"
+    default: 1.0
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.addmm"
+  jax:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat1}, {mat2}))"
+    required_imports:
+      - "import jax.numpy as jnp"
+  flax_nnx:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat1}, {mat2}))"
+    required_imports:
+      - "import jax.numpy as jnp"
+  paxml:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat1}, {mat2}))"
+    required_imports:
+      - "import jax.numpy as jnp"
+  keras:
+    macro_template: "keras.ops.add({beta} * {input}, {alpha} * keras.ops.matmul({mat1}, {mat2}))"
+    required_imports:
+      - "import keras"
+  tensorflow:
+    macro_template: "tf.math.add({beta} * {input}, {alpha} * tf.linalg.matmul({mat1}, {mat2}))"
+    required_imports:
+      - "import tensorflow as tf"
+  mlx:
+    macro_template: "mx.add({beta} * {input}, {alpha} * mx.matmul({mat1}, {mat2}))"
+    required_imports:
+      - "import mlx.core as mx"
+  numpy:
+    macro_template: "{beta} * {input} + {alpha} * np.matmul({mat1}, {mat2})"
+    required_imports:
+      - "import numpy as np"
+
+---
+
+operation: "Addmv"
+description: "Performs a matrix-vector product of the matrix mat and the vector vec. The vector input is added to the final result."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mat"
+    type: "Tensor"
+  - name: "vec"
+    type: "Tensor"
+  - name: "beta"
+    type: "float"
+    default: 1.0
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.addmv"
+  jax:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))"
+    required_imports:
+      - "import jax.numpy as jnp"
+  flax_nnx:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))"
+  paxml:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))"
+  keras:
+    macro_template: "keras.ops.add({beta} * {input}, {alpha} * keras.ops.matmul({mat}, {vec}))"
+    required_imports:
+      - "import keras"
+  tensorflow:
+    macro_template: "tf.math.add({beta} * {input}, {alpha} * tf.linalg.matvec({mat}, {vec}))"
+    required_imports:
+      - "import tensorflow as tf"
+  mlx:
+    macro_template: "mx.add({beta} * {input}, {alpha} * mx.matmul({mat}, {vec}))"
+    required_imports:
+      - "import mlx.core as mx"
+  numpy:
+    macro_template: "{beta} * {input} + {alpha} * np.matmul({mat}, {vec})"
+    required_imports:
+      - "import numpy as np"
+
+---
+
+operation: "Addmv_"
+description: "In-place version of Addmv."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mat"
+    type: "Tensor"
+  - name: "vec"
+    type: "Tensor"
+  - name: "beta"
+    type: "float"
+    default: 1.0
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.addmv_"
+  # Functional frameworks map to the non-inplace version
+  jax:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))"
+    required_imports: ["import jax.numpy as jnp"]
+  flax_nnx:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))"
+  paxml:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))"
+  keras:
+    macro_template: "keras.ops.add({beta} * {input}, {alpha} * keras.ops.matmul({mat}, {vec}))"
+  tensorflow:
+    macro_template: "tf.math.add({beta} * {input}, {alpha} * tf.linalg.matvec({mat}, {vec}))"
+  mlx:
+    macro_template: "mx.add({beta} * {input}, {alpha} * mx.matmul({mat}, {vec}))"
+  numpy:
+    macro_template: "{beta} * {input} + {alpha} * np.matmul({mat}, {vec})"
+
+---
+
+operation: "Addr"
+description: "Performs the outer-product of vectors vec1 and vec2 and adds it to the matrix input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "vec1"
+    type: "Tensor"
+  - name: "vec2"
+    type: "Tensor"
+  - name: "beta"
+    type: "float"
+    default: 1.0
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.addr"
+  jax:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.outer({vec1}, {vec2}))"
+    required_imports:
+      - "import jax.numpy as jnp"
+  flax_nnx:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.outer({vec1}, {vec2}))"
+  paxml:
+    macro_template: "jnp.add({beta} * {input}, {alpha} * jnp.outer({vec1}, {vec2}))"
+  keras:
+    macro_template: "keras.ops.add({beta} * {input}, {alpha} * keras.ops.outer({vec1}, {vec2}))"
+  tensorflow:
+    macro_template: "tf.math.add({beta} * {input}, {alpha} * tf.tensordot({vec1}, {vec2}, axes=0))"
+  mlx:
+    macro_template: "mx.add({beta} * {input}, {alpha} * mx.outer({vec1}, {vec2}))"
+    required_imports:
+      - "import mlx.core as mx"
+  numpy:
+    macro_template: "{beta} * {input} + {alpha} * np.outer({vec1}, {vec2})"
+
+---
+
+operation: "Adjoint"
+description: "Returns a view of the tensor conjugated and with the last two dimensions transposed."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.adjoint"
+  jax:
+    macro_template: "jnp.conjugate(jnp.swapaxes({input}, -1, -2))"
+    required_imports:
+      - "import jax.numpy as jnp"
+  flax_nnx:
+    macro_template: "jnp.conjugate(jnp.swapaxes({input}, -1, -2))"
+  paxml:
+    macro_template: "jnp.conjugate(jnp.swapaxes({input}, -1, -2))"
+  keras:
+    macro_template: "keras.ops.conj(keras.ops.swapaxes({input}, -1, -2))"
+    required_imports:
+      - "import keras"
+  tensorflow:
+    macro_template: "tf.math.conj(tf.linalg.adjoint({input}))"
+  mlx:
+    macro_template: "mx.conjugate(mx.swapaxes({input}, -1, -2))"
+    required_imports:
+      - "import mlx.core as mx"
+  numpy:
+    macro_template: "np.conjugate(np.swapaxes({input}, -1, -2))"
+
+---
+
+operation: "AffineGridGenerator"
+description: "Generates a 2D or 3D flow field (sampling grid), given a batch of affine matrices."
+deprecated: true
+replaced_by: "AffineGrid"
+std_args:
+  - name: "theta"
+    type: "Tensor"
+  - name: "size"
+    type: "List[int]"
+  - name: "align_corners"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.affine_grid_generator"
+  jax:
+    # No direct equivalent in core JAX
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.raw_ops.AffineGrid" 
+    # Partial support via raw ops, arguments may differ significantly
+  mlx:
+    api: null
+
+---
+
+operation: "AliasCopy"
+description: "Returns a copy of the input tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.alias_copy"
+  jax:
+    api: "jnp.array"
+    macro_template: "jnp.array({input}, copy=True)"
+    required_imports:
+      - "import jax.numpy as jnp"
+  flax_nnx:
+    macro_template: "jnp.array({input}, copy=True)"
+  paxml:
+    macro_template: "jnp.array({input}, copy=True)"
+  keras:
+    api: "keras.ops.copy"
+  tensorflow:
+    api: "tf.identity"
+  mlx:
+    macro_template: "mx.array({input})"
+    required_imports:
+      - "import mlx.core as mx"
+  numpy:
+    api: "np.copy"
+
+---
+
+operation: "AlignTensors"
+description: "Reshapes tensors to match the broadcast shape of the inputs."
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.align_tensors"
+    pack_to_tuple: "tensors"
+  jax:
+    api: "jnp.broadcast_arrays"
+    pack_to_tuple: "args"
+    required_imports:
+      - "import jax.numpy as jnp"
+  flax_nnx:
+    api: "jnp.broadcast_arrays"
+    pack_to_tuple: "args"
+  paxml:
+    api: "jnp.broadcast_arrays"
+    pack_to_tuple: "args"
+  keras:
+    api: "keras.ops.broadcast_tensors"
+    pack_to_tuple: "args"
+  tensorflow:
+    api: null
+  mlx:
+    api: "mx.broadcast_arrays"
+    pack_to_tuple: "args"
+    required_imports:
+      - "import mlx.core as mx"
+  numpy:
+    api: "np.broadcast_arrays"
+    pack_to_tuple: "args"
+
+---
+
+operation: "All"
+description: "Tests if all elements in input evaluate to True."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.all"
+  jax:
+    api: "jnp.all"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+    required_imports:
+      - "import jax.numpy as jnp"
+  flax_nnx:
+    api: "jnp.all"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  paxml:
+    api: "jnp.all"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.all"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_all"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mx.all"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+    required_imports:
+      - "import mlx.core as mx"
+  numpy:
+    api: "np.all"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+
+operation: "Allclose"
+description: "Checks if all elements in input and other are approximately unequal."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+  - name: "rtol"
+    type: "float"
+    default: 1e-05
+  - name: "atol"
+    type: "float"
+    default: 1e-08
+  - name: "equal_nan"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.allclose"
+  jax:
+    api: "jnp.allclose"
+  flax_nnx:
+    api: "jnp.allclose"
+  paxml:
+    api: "jnp.allclose"
+  keras:
+    api: "keras.ops.allclose"
+  tensorflow:
+    api: "tf.experimental.numpy.allclose"
+  mlx:
+    api: "mx.allclose"
+  numpy:
+    api: "np.allclose"
+
+---
+
+operation: "AlphaDropout"
+description: "Applies Alpha Dropout to the input."
+op_type: "class"
+std_args:
+  - name: "p"
+    type: "float"
+    default: 0.5
+variants:
+  torch:
+    api: "torch.nn.AlphaDropout"
+  jax:
+    api: "flax.linen.AlphaDropout"
+    args:
+      p: "rate"
+  flax_nnx:
+    api: "flax.linen.AlphaDropout"
+    args:
+      p: "rate"
+  paxml:
+    api: "praxis.layers.AlphaDropout"
+    args:
+      p: "keep_prob" # Pax often uses keep_prob = 1 - p
+    macro_template: "praxis.layers.AlphaDropout(keep_prob=1.0-{p})"
+  keras:
+    api: "keras.layers.AlphaDropout"
+    args:
+      p: "rate"
+  tensorflow:
+    api: "keras.layers.AlphaDropout"
+    args:
+      p: "rate"
+  mlx:
+    api: "mx.nn.AlphaDropout"
+    args:
+      p: "p"
+
+---
+
+operation: "AlphaDropout_"
+description: "In-place version of AlphaDropout."
+is_inplace: true
+op_type: "class" # Usually method but defined as op here
+std_args:
+  - name: "p"
+    type: "float"
+    default: 0.5
+variants:
+  torch:
+    api: "torch.nn.AlphaDropout" # Inplace usually handled by functional arg or method
+  jax:
+    # Functional fallbacks
+    api: "flax.linen.AlphaDropout"
+    args:
+      p: "rate"
+  flax_nnx:
+    api: "flax.linen.AlphaDropout"
+    args:
+      p: "rate"
+  keras:
+    api: "keras.layers.AlphaDropout"
+    args:
+      p: "rate"
+  mlx:
+    api: "mx.nn.AlphaDropout"
+
+---
+
+operation: "Amax"
+description: "Returns the maximum value of each slice of the input tensor in the given dimension(s)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.amax"
+  jax:
+    api: "jnp.max"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  flax_nnx:
+    api: "jnp.max"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  paxml:
+    api: "jnp.max"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.max"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_max"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mx.max"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "np.amax"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+
+operation: "Amin"
+description: "Returns the minimum value of each slice of the input tensor in the given dimension(s)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.amin"
+  jax:
+    api: "jnp.min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  flax_nnx:
+    api: "jnp.min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  paxml:
+    api: "jnp.min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mx.min"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "np.amin"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+
+operation: "Aminmax"
+description: "Computes the minimum and maximum values of the input tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.aminmax"
+  jax:
+    macro_template: "(jnp.min({input}, axis={dim}, keepdims={keepdim}), jnp.max({input}, axis={dim}, keepdims={keepdim}))"
+  flax_nnx:
+    macro_template: "(jnp.min({input}, axis={dim}, keepdims={keepdim}), jnp.max({input}, axis={dim}, keepdims={keepdim}))"
+  paxml:
+    macro_template: "(jnp.min({input}, axis={dim}, keepdims={keepdim}), jnp.max({input}, axis={dim}, keepdims={keepdim}))"
+  keras:
+    macro_template: "(keras.ops.min({input}, axis={dim}, keepdims={keepdim}), keras.ops.max({input}, axis={dim}, keepdims={keepdim}))"
+  tensorflow:
+    macro_template: "(tf.math.reduce_min({input}, axis={dim}, keepdims={keepdim}), tf.math.reduce_max({input}, axis={dim}, keepdims={keepdim}))"
+  mlx:
+    macro_template: "(mx.min({input}, axis={dim}, keepdims={keepdim}), mx.max({input}, axis={dim}, keepdims={keepdim}))"
+  numpy:
+    macro_template: "(np.amin({input}, axis={dim}, keepdims={keepdim}), np.amax({input}, axis={dim}, keepdims={keepdim}))"
+
+---
+
+operation: "Angle"
+description: "Computes the element-wise angle (in radians) of the given input tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.angle"
+  jax:
+    api: "jnp.angle"
+  flax_nnx:
+    api: "jnp.angle"
+  paxml:
+    api: "jnp.angle"
+  keras:
+    # Not in keras.ops standard yet, fallback to numpy
+    api: "numpy.angle" 
+  tensorflow:
+    api: "tf.math.angle"
+  mlx:
+    # MLX lacks direct angle for complex currently, usually composite 
+    api: null 
+  numpy:
+    api: "np.angle"
+
+---
+
+operation: "Any"
+description: "Tests if any element in input evaluates to True."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.any"
+  jax:
+    api: "jnp.any"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  flax_nnx:
+    api: "jnp.any"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  paxml:
+    api: "jnp.any"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.any"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.math.reduce_any"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mx.any"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "np.any"
+    args:
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+
+operation: "Arange"
+description: "Returns a 1-D tensor of values from the interval [start, end) taken with common difference step."
+std_args:
+  - name: "start"
+    type: "float"
+    default: 0
+  - name: "end"
+    type: "float"
+  - name: "step"
+    type: "float"
+    default: 1
+variants:
+  torch:
+    api: "torch.arange"
+  jax:
+    api: "jnp.arange"
+    args:
+      end: "stop"
+  flax_nnx:
+    api: "jnp.arange"
+    args:
+      end: "stop"
+  paxml:
+    api: "jnp.arange"
+    args:
+      end: "stop"
+  keras:
+    api: "keras.ops.arange"
+    args:
+      end: "stop"
+  tensorflow:
+    api: "tf.range"
+    args:
+      end: "limit"
+      step: "delta"
+  mlx:
+    api: "mx.arange"
+    args:
+      end: "stop"
+  numpy:
+    api: "np.arange"
+    args:
+      end: "stop"
+
+---
+
+operation: "Arccos"
+description: "Computes the inverse cosine (arccos) of each element."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arccos"
+  jax:
+    api: "jnp.arccos"
+  flax_nnx:
+    api: "jnp.arccos"
+  paxml:
+    api: "jnp.arccos"
+  keras:
+    api: "keras.ops.arccos"
+  tensorflow:
+    api: "tf.math.acos"
+  mlx:
+    api: "mx.arccos"
+  numpy:
+    api: "np.arccos"
+
+---
+
+operation: "Arccos_"
+description: "In-place version of Arccos."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arccos_"
+  jax:
+    api: "jnp.arccos"
+  flax_nnx:
+    api: "jnp.arccos"
+  keras:
+    api: "keras.ops.arccos"
+  tensorflow:
+    api: "tf.math.acos"
+  mlx:
+    api: "mx.arccos"
+  numpy:
+    api: "np.arccos"
+
+---
+
+operation: "Arccosh"
+description: "Computes the inverse hyperbolic cosine (arccosh) of each element."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arccosh"
+  jax:
+    api: "jnp.arccosh"
+  flax_nnx:
+    api: "jnp.arccosh"
+  paxml:
+    api: "jnp.arccosh"
+  keras:
+    api: "keras.ops.arccosh"
+  tensorflow:
+    api: "tf.math.acosh"
+  mlx:
+    api: "mx.arccosh"
+  numpy:
+    api: "np.arccosh"
+
+---
+
+operation: "Arccosh_"
+description: "In-place version of Arccosh."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arccosh_"
+  jax:
+    api: "jnp.arccosh"
+  flax_nnx:
+    api: "jnp.arccosh"
+  keras:
+    api: "keras.ops.arccosh"
+  tensorflow:
+    api: "tf.math.acosh"
+  mlx:
+    api: "mx.arccosh"
+  numpy:
+    api: "np.arccosh"
+
+---
+
+operation: "Arcsin"
+description: "Computes the inverse sine (arcsin) of each element."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arcsin"
+  jax:
+    api: "jnp.arcsin"
+  flax_nnx:
+    api: "jnp.arcsin"
+  paxml:
+    api: "jnp.arcsin"
+  keras:
+    api: "keras.ops.arcsin"
+  tensorflow:
+    api: "tf.math.asin"
+  mlx:
+    api: "mx.arcsin"
+  numpy:
+    api: "np.arcsin"
+
+---
+
+operation: "Arcsin_"
+description: "In-place version of Arcsin."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arcsin_"
+  jax:
+    api: "jnp.arcsin"
+  flax_nnx:
+    api: "jnp.arcsin"
+  keras:
+    api: "keras.ops.arcsin"
+  tensorflow:
+    api: "tf.math.asin"
+  mlx:
+    api: "mx.arcsin"
+  numpy:
+    api: "np.arcsin"
+
+---
+
+operation: "Arcsinh"
+description: "Computes the inverse hyperbolic sine (arcsinh) of each element."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arcsinh"
+  jax:
+    api: "jnp.arcsinh"
+  flax_nnx:
+    api: "jnp.arcsinh"
+  paxml:
+    api: "jnp.arcsinh"
+  keras:
+    api: "keras.ops.arcsinh"
+  tensorflow:
+    api: "tf.math.asinh"
+  mlx:
+    api: "mx.arcsinh"
+  numpy:
+    api: "np.arcsinh"
+
+---
+
+operation: "Arcsinh_"
+description: "In-place version of Arcsinh."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arcsinh_"
+  jax:
+    api: "jnp.arcsinh"
+  flax_nnx:
+    api: "jnp.arcsinh"
+  keras:
+    api: "keras.ops.arcsinh"
+  tensorflow:
+    api: "tf.math.asinh"
+  mlx:
+    api: "mx.arcsinh"
+  numpy:
+    api: "np.arcsinh"
+
+---
+
+operation: "Arctan"
+description: "Computes the inverse tangent (arctan) of each element."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arctan"
+  jax:
+    api: "jnp.arctan"
+  flax_nnx:
+    api: "jnp.arctan"
+  paxml:
+    api: "jnp.arctan"
+  keras:
+    api: "keras.ops.arctan"
+  tensorflow:
+    api: "tf.math.atan"
+  mlx:
+    api: "mx.arctan"
+  numpy:
+    api: "np.arctan"
+
+---
+
+operation: "Arctan2"
+description: "Computes the element-wise arc tangent of input / other."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arctan2"
+  jax:
+    api: "jnp.arctan2"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jnp.arctan2"
+    args:
+      input: "x1"
+      other: "x2"
+  paxml:
+    api: "jnp.arctan2"
+    args:
+      input: "x1"
+      other: "x2"
+  keras:
+    api: "keras.ops.arctan2"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.atan2"
+    args:
+      input: "y"
+      other: "x"
+  mlx:
+    api: "mx.arctan2"
+  numpy:
+    api: "np.arctan2"
+    args:
+      input: "x1"
+      other: "x2"
+
+---
+
+operation: "Arctan_"
+description: "In-place version of Arctan."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.arctan_"
+  jax:
+    api: "jnp.arctan"
+  flax_nnx:
+    api: "jnp.arctan"
+  keras:
+    api: "keras.ops.arctan"
+  tensorflow:
+    api: "tf.math.atan"
+  mlx:
+    api: "mx.arctan"
+  numpy:
+    api: "np.arctan"

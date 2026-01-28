@@ -1,0 +1,463 @@
+operation: "IndexExp"
+description: "A nicer way to build up index tuples for arrays."
+op_type: "attribute"
+variants:
+  numpy:
+    api: "numpy.index_exp"
+  jax:
+    api: "jax.numpy.index_exp"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Indices"
+description: "Return an array representing the indices of a grid."
+std_args:
+  - name: "dimensions"
+    type: "Tuple[int]"
+  - name: "dtype"
+    type: "DType"
+    default: "int"
+  - name: "sparse"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.indices"
+  jax:
+    api: "jax.numpy.indices"
+  torch:
+    api: null # Requires meshgrid + stack manual logic
+    missing_message: "torch.indices not implemented directly. Use meshgrid + stack."
+  tensorflow:
+    api: "tf.meshgrid" # Inexact, returns tuple not stacked array usually
+    requires_plugin: "indices_shim"
+  mlx:
+    api: null
+
+---
+operation: "Inexact"
+description: "Abstract base class of all numeric scalar types with a (potentially) inexact representation."
+op_type: "class"
+variants:
+  numpy:
+    api: "numpy.inexact"
+  jax:
+    api: "jax.numpy.inexact"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+
+---
+operation: "Inf"
+description: "IEEE 754 floating point representation of (positive) infinity."
+op_type: "attribute"
+variants:
+  numpy:
+    api: "numpy.inf"
+  torch:
+    api: "torch.inf"
+  jax:
+    api: "jax.numpy.inf"
+  tensorflow:
+    api: "tf.inf" # or float('inf')
+    macro_template: "float('inf')"
+  mlx:
+    api: "float('inf')"
+    macro_template: "float('inf')"
+
+---
+operation: "Info"
+description: "Get help information for an array, function, class, or module. Interactive use only."
+op_type: "function"
+std_args: ["object", "maxwidth", "output", "toplevel"]
+variants:
+  numpy:
+    api: "numpy.info"
+  torch:
+    api: null
+  jax:
+    api: null
+
+---
+operation: "Inner"
+description: "Inner product of two arrays."
+std_args: ["a", "b"]
+variants:
+  numpy:
+    api: "numpy.inner"
+  torch:
+    api: "torch.inner"
+    args:
+      a: "input"
+      b: "other"
+  jax:
+    api: "jax.numpy.inner"
+  tensorflow:
+    api: "tf.linalg.inner_product" # or tf.tensordot
+  mlx:
+    api: "mlx.core.inner"
+  keras:
+    api: "keras.ops.inner"
+
+---
+operation: "Insert"
+description: "Insert values along the given axis before the given indices."
+std_args: ["arr", "obj", "values", "axis"]
+variants:
+  numpy:
+    api: "numpy.insert"
+  jax:
+    api: "jax.numpy.insert"
+  torch:
+    api: null # No direct equivalent, usually cat(slice1, val, slice2)
+  tensorflow:
+    api: null
+
+---
+operation: "Int16"
+description: "Signed 16-bit integer type."
+op_type: "attribute"
+variants:
+  numpy:
+    api: "numpy.int16"
+  torch:
+    api: "torch.int16"
+  jax:
+    api: "jax.numpy.int16"
+  tensorflow:
+    api: "tf.int16"
+  mlx:
+    api: "mlx.core.int16"
+  keras:
+    api: "('int16')"
+    macro_template: "'int16'"
+
+---
+operation: "Int32"
+description: "Signed 32-bit integer type."
+op_type: "attribute"
+variants:
+  numpy:
+    api: "numpy.int32"
+  torch:
+    api: "torch.int32"
+  jax:
+    api: "jax.numpy.int32"
+  tensorflow:
+    api: "tf.int32"
+  mlx:
+    api: "mlx.core.int32"
+  keras:
+    api: "('int32')"
+    macro_template: "'int32'"
+
+---
+operation: "Int64"
+description: "Signed 64-bit integer type."
+op_type: "attribute"
+variants:
+  numpy:
+    api: "numpy.int64"
+  torch:
+    api: "torch.int64"
+  jax:
+    api: "jax.numpy.int64"
+  tensorflow:
+    api: "tf.int64"
+  mlx:
+    api: "mlx.core.int64" # MLX often defaults to int32/64 based on arch but supports explicit
+  keras:
+    api: "('int64')"
+    macro_template: "'int64'"
+
+---
+operation: "Int8"
+description: "Signed 8-bit integer type."
+op_type: "attribute"
+variants:
+  numpy:
+    api: "numpy.int8"
+  torch:
+    api: "torch.int8"
+  jax:
+    api: "jax.numpy.int8"
+  tensorflow:
+    api: "tf.int8"
+  mlx:
+    api: "mlx.core.int8"
+  keras:
+    api: "('int8')"
+    macro_template: "'int8'"
+
+---
+operation: "Int_"
+description: "Default signed integer type (compatible with C long)."
+op_type: "attribute"
+variants:
+  numpy:
+    api: "numpy.int_"
+  jax:
+    api: "jax.numpy.int_"
+  torch:
+    api: "torch.long" # Usually maps to int64
+
+---
+operation: "Intc"
+description: "Signed integer type compatible with C int."
+op_type: "attribute"
+variants:
+  numpy:
+    api: "numpy.intc"
+  jax:
+    api: "jax.numpy.intc"
+  torch:
+    api: "torch.int32"
+
+---
+operation: "Integer"
+description: "Abstract base class of all integer scalar types."
+op_type: "class"
+variants:
+  numpy:
+    api: "numpy.integer"
+  jax:
+    api: "jax.numpy.integer"
+  torch:
+    api: null
+
+---
+operation: "Interp"
+description: "One-dimensional linear interpolation."
+std_args: ["x", "xp", "fp", "left", "right", "period"]
+variants:
+  numpy:
+    api: "numpy.interp"
+  jax:
+    api: "jax.numpy.interp"
+  torch:
+    api: null # No direct equivalent with sorted xp assumption, only lerp/interpolate
+  tensorflow:
+    api: "tfp.math.interp"
+    requires_plugin: "tf_probability_shim"
+
+---
+operation: "Intersect1d"
+description: "Find the intersection of two arrays."
+std_args: ["ar1", "ar2", "assume_unique", "return_indices"]
+variants:
+  numpy:
+    api: "numpy.intersect1d"
+  jax:
+    api: "jax.numpy.intersect1d"
+  torch:
+    api: null # Requires plugin using unique/cat/sort
+
+---
+operation: "Intp"
+description: "Integer used for indexing (pointer size)."
+op_type: "attribute"
+variants:
+  numpy:
+    api: "numpy.intp"
+  jax:
+    api: "jax.numpy.intp"
+  torch:
+    api: "torch.int64" # Usually 64-bit on modern systems
+
+---
+operation: "Invert"
+description: "Compute bit-wise inversion, or bit-wise NOT, element-wise."
+std_args: ["x"]
+variants:
+  numpy:
+    api: "numpy.invert"
+  jax:
+    api: "jax.numpy.invert"
+  torch:
+    api: "torch.bitwise_not"
+  tensorflow:
+    api: "tf.bitwise.invert"
+  keras:
+    api: "keras.ops.invert"
+  mlx:
+    macro_template: "~{x}"
+
+---
+operation: "IsBusDay"
+description: "Calculates which of the given dates are valid days."
+std_args: ["dates", "weekmask", "holidays", "busdaycal", "out"]
+variants:
+  numpy:
+    api: "numpy.is_busday"
+  jax:
+    api: null
+  torch:
+    api: null
+
+---
+operation: "IsClose"
+description: "Returns a boolean array where two arrays are element-wise equal within a tolerance."
+std_args: ["a", "b", "rtol", "atol", "equal_nan"]
+variants:
+  numpy:
+    api: "numpy.isclose"
+  jax:
+    api: "jax.numpy.isclose"
+  torch:
+    api: "torch.isclose"
+    args:
+      a: "input"
+      b: "other"
+  tensorflow:
+    api: "tf.experimental.numpy.isclose"
+  mlx:
+    api: "mlx.core.isclose"
+
+---
+operation: "IsComplex"
+description: "Returns a bool array, where True if input element is complex."
+std_args: ["x"]
+variants:
+  numpy:
+    api: "numpy.iscomplex"
+  jax:
+    api: "jax.numpy.iscomplex"
+  torch:
+    api: "torch.is_complex"
+  tensorflow:
+    api: null
+
+---
+operation: "IsComplexObj"
+description: "Check for a complex type or an array of complex numbers."
+std_args: ["x"]
+variants:
+  numpy:
+    api: "numpy.iscomplexobj"
+  jax:
+    api: "jax.numpy.iscomplexobj"
+  torch:
+    api: "torch.is_complex"
+
+---
+operation: "IsDType"
+description: "Determine if a provided dtype is of a specified data type kind."
+std_args: ["dtype", "kind"]
+variants:
+  numpy:
+    api: "numpy.isdtype"
+  jax:
+    api: null # Not implemented strictly
+  torch:
+    api: null
+
+---
+operation: "IsFinite"
+description: "Test element-wise for finiteness (not infinity and not Not a Number)."
+std_args: ["x"]
+variants:
+  numpy:
+    api: "numpy.isfinite"
+  jax:
+    api: "jax.numpy.isfinite"
+  torch:
+    api: "torch.isfinite"
+  tensorflow:
+    api: "tf.math.is_finite"
+  mlx:
+    macro_template: "mx.logical_not(mx.isinf({x})) & mx.logical_not(mx.isnan({x}))"
+    # MLX has no direct isfinite yet? verify current API. 
+    # Use macro to be safe. 
+
+---
+operation: "IsFortran"
+description: "Check if the array is Fortran contiguous but not C contiguous."
+std_args: ["a"]
+variants:
+  numpy:
+    api: "numpy.isfortran"
+  jax:
+    api: "jax.numpy.isfortran" # Often returns False as JAX is usually C-contiguous
+  torch:
+    macro_template: "{a}.is_contiguous(memory_format=torch.channels_last) if hasattr({a}, 'is_contiguous') else False" # Approx
+  tensorflow:
+    api: null
+
+---
+operation: "IsIn"
+description: "Calculates element in test_elements, broadcasting over element only."
+std_args: ["element", "test_elements", "assume_unique", "invert"]
+variants:
+  numpy:
+    api: "numpy.isin"
+  jax:
+    api: "jax.numpy.isin"
+  torch:
+    api: "torch.isin"
+    args:
+      element: "elements"
+      test_elements: "test_elements"
+
+---
+operation: "IsInf"
+description: "Test element-wise for positive or negative infinity."
+std_args: ["x"]
+variants:
+  numpy:
+    api: "numpy.isinf"
+  jax:
+    api: "jax.numpy.isinf"
+  torch:
+    api: "torch.isinf"
+  tensorflow:
+    api: "tf.math.is_inf"
+  mlx:
+    api: "mlx.core.isinf"
+
+---
+operation: "IsNaN"
+description: "Test element-wise for NaN and return result as a boolean array."
+std_args: ["x"]
+variants:
+  numpy:
+    api: "numpy.isnan"
+  jax:
+    api: "jax.numpy.isnan"
+  torch:
+    api: "torch.isnan"
+  tensorflow:
+    api: "tf.math.is_nan"
+  mlx:
+    api: "mlx.core.isnan"
+
+---
+operation: "IsNaT"
+description: "Test element-wise for NaT (not a time)."
+std_args: ["x"]
+variants:
+  numpy:
+    api: "numpy.isnat"
+  jax:
+    api: "jax.numpy.isnat"
+  torch:
+    api: null # Torch doesn't support NaT natively
+
+---
+operation: "IsNegInf"
+description: "Test element-wise for negative infinity."
+std_args: ["x"]
+variants:
+  numpy:
+    api: "numpy.isneginf"
+  jax:
+    api: "jax.numpy.isneginf"
+  torch:
+    api: "torch.isneginf"
+  tensorflow:
+    api: null

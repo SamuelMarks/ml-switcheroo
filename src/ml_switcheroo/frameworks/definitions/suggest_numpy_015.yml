@@ -1,0 +1,903 @@
+operation: "Take"
+description: "Take elements from an array along an axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tensor"
+    dtype: "int32"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "mode"
+    type: "str"
+    default: "raise"
+variants:
+  numpy:
+    api: "numpy.take"
+  torch:
+    api: "torch.take"
+    args:
+      a: "input"
+      indices: "index"
+    dispatch_rules:
+      - if_arg: "axis"
+        op: "neq"
+        val: null
+        use_api: "torch.index_select"
+  jax:
+    api: "jax.numpy.take"
+    args:
+      a: "a"
+      indices: "indices"
+      axis: "axis"
+      mode: "mode"
+  flax_nnx:
+    api: "jax.numpy.take"
+  paxml:
+    api: "jax.numpy.take"
+  tensorflow:
+    api: "tf.gather"
+    args:
+      a: "params"
+      indices: "indices"
+      axis: "axis"
+  keras:
+    api: "keras.ops.take"
+  mlx:
+    api: "mlx.core.take"
+
+---
+operation: "TakeAlongAxis"
+description: "Take values from the input array by matching 1d index and data slices."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tensor"
+    dtype: "int64"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  numpy:
+    api: "numpy.take_along_axis"
+  torch:
+    api: "torch.take_along_dim"
+    args:
+      arr: "input"
+      indices: "indices"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.take_along_axis"
+  flax_nnx:
+    api: "jax.numpy.take_along_axis"
+  paxml:
+    api: "jax.numpy.take_along_axis"
+  tensorflow:
+    api: "tf.experimental.numpy.take_along_axis"
+  keras:
+    api: "keras.ops.take_along_axis"
+  mlx:
+    api: "mlx.core.take_along_axis"
+
+---
+operation: "Tan"
+description: "Compute tangent element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.tan"
+  torch:
+    api: "torch.tan"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.tan"
+  flax_nnx:
+    api: "jax.numpy.tan"
+  paxml:
+    api: "jax.numpy.tan"
+  tensorflow:
+    api: "tf.math.tan"
+  keras:
+    api: "keras.ops.tan"
+  mlx:
+    api: "mlx.core.tan"
+
+---
+operation: "Tanh"
+description: "Compute hyperbolic tangent element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.tanh"
+  torch:
+    api: "torch.tanh"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.tanh"
+  flax_nnx:
+    api: "jax.numpy.tanh"
+  paxml:
+    api: "jax.numpy.tanh"
+  tensorflow:
+    api: "tf.math.tanh"
+  keras:
+    api: "keras.ops.tanh"
+  mlx:
+    api: "mlx.core.tanh"
+
+---
+operation: "Tensordot"
+description: "Compute tensor dot product along specified axes."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "axes"
+    type: "Any"
+    default: 2
+variants:
+  numpy:
+    api: "numpy.tensordot"
+  torch:
+    api: "torch.tensordot"
+    args:
+      axes: "dims"
+  jax:
+    api: "jax.numpy.tensordot"
+  flax_nnx:
+    api: "jax.numpy.tensordot"
+  paxml:
+    api: "jax.numpy.tensordot"
+  tensorflow:
+    api: "tf.tensordot"
+  keras:
+    api: "keras.ops.tensordot"
+  mlx:
+    api: "mlx.core.tensordot"
+
+---
+operation: "Test"
+description: "Pytest test runner."
+std_args:
+  - name: "label"
+    type: "str"
+    default: "fast"
+variants:
+  numpy:
+    api: "numpy.test"
+  torch:
+    api: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Tile"
+description: "Construct an array by repeating A the number of times given by reps."
+std_args:
+  - name: "A"
+    type: "Tensor"
+  - name: "reps"
+    type: "List[int]"
+variants:
+  numpy:
+    api: "numpy.tile"
+  torch:
+    api: "torch.tile"
+    args:
+      A: "input"
+      reps: "dims"
+  jax:
+    api: "jax.numpy.tile"
+  flax_nnx:
+    api: "jax.numpy.tile"
+  paxml:
+    api: "jax.numpy.tile"
+  tensorflow:
+    api: "tf.tile"
+    args:
+      A: "input"
+      reps: "multiples"
+  keras:
+    api: "keras.ops.tile"
+    args:
+      A: "x"
+      reps: "repeats"
+  mlx:
+    # Deprecated in favor of repeat? No, typically represented via broadcast or repeat logic manually if tile missing.
+    # MLX has no direct tile, requires plugin
+    requires_plugin: "mlx_tile_shim"
+
+---
+operation: "Timedelta64"
+description: "A timedelta stored as a 64-bit integer."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.timedelta64"
+  torch:
+    api: null
+  jax:
+    api: "jax.numpy.timedelta64"
+  flax_nnx:
+    api: "jax.numpy.timedelta64"
+  paxml:
+    api: "jax.numpy.timedelta64"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Trace"
+description: "Return the sum along diagonals of the array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "offset"
+    type: "int"
+    default: 0
+  - name: "axis1"
+    type: "int"
+    default: 0
+  - name: "axis2"
+    type: "int"
+    default: 1
+variants:
+  numpy:
+    api: "numpy.trace"
+  torch:
+    # Torch trace only supports 2D. n-dim trace not direct.
+    requires_plugin: "torch_trace_ndim"
+  jax:
+    api: "jax.numpy.trace"
+  flax_nnx:
+    api: "jax.numpy.trace"
+  paxml:
+    api: "jax.numpy.trace"
+  tensorflow:
+    api: "tf.linalg.trace"
+    # TF trace is only last two dims, does not accept axis args. Plugin needed for generic axes.
+    requires_plugin: "tf_trace_axes"
+  keras:
+    # No direct trace in keras ops
+    api: null
+  mlx:
+    # No direct trace
+    requires_plugin: "mlx_trace_shim"
+
+---
+operation: "Transpose"
+description: "Returns an array with axes transposed."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axes"
+    type: "List[int]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.transpose"
+  torch:
+    api: "torch.permute"
+    args:
+      a: "input"
+      axes: "dims"
+    dispatch_rules:
+      - if_arg: "axes"
+        op: "eq"
+        val: null
+        use_api: "torch.transpose" # Note: torch.transpose requires dim0, dim1, not generic permute without args.
+                                  # Handled via plugin or macro if arg is None.
+  jax:
+    api: "jax.numpy.transpose"
+  flax_nnx:
+    api: "jax.numpy.transpose"
+  paxml:
+    api: "jax.numpy.transpose"
+  tensorflow:
+    api: "tf.transpose"
+    args:
+      axes: "perm"
+  keras:
+    api: "keras.ops.transpose"
+  mlx:
+    api: "mlx.core.transpose"
+
+---
+operation: "Trapezoid"
+description: "Integrate along the given axis using the composite trapezoidal rule."
+std_args:
+  - name: "y"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+    default: null
+  - name: "dx"
+    type: "float"
+    default: 1.0
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  numpy:
+    api: "numpy.trapezoid"
+  torch:
+    api: "torch.trapezoid"
+  jax:
+    api: "jax.numpy.trapezoid"
+  flax_nnx:
+    api: "jax.numpy.trapezoid"
+  paxml:
+    api: "jax.numpy.trapezoid"
+  tensorflow:
+    api: "tf.math.reduce_trapezoid" # Hypothetical / Not standard
+    requires_plugin: "tf_trapezoid_shim"
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Tri"
+description: "An array with ones at and below the given diagonal and zeros elsewhere."
+std_args:
+  - name: "N"
+    type: "int"
+  - name: "M"
+    type: "int"
+    default: null
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.tri"
+  torch:
+    # Torch lacks direct 'tri' constructor, uses tril(ones)
+    requires_plugin: "torch_tri_shim"
+  jax:
+    api: "jax.numpy.tri"
+  flax_nnx:
+    api: "jax.numpy.tri"
+  paxml:
+    api: "jax.numpy.tri"
+  tensorflow:
+    # No direct tri, uses linear_band_part
+    requires_plugin: "tf_tri_shim"
+  keras:
+    api: null
+  mlx:
+    requires_plugin: "mlx_tri_shim"
+
+---
+operation: "Tril"
+description: "Lower triangle of an array."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.tril"
+  torch:
+    api: "torch.tril"
+    args:
+      m: "input"
+      k: "diagonal"
+  jax:
+    api: "jax.numpy.tril"
+  flax_nnx:
+    api: "jax.numpy.tril"
+  paxml:
+    api: "jax.numpy.tril"
+  tensorflow:
+    api: "tf.linalg.band_part"
+    requires_plugin: "tf_tril_wrapper" # Band part args differ significantly
+  keras:
+    api: "keras.ops.tril"
+    args:
+      m: "x"
+      k: "k"
+  mlx:
+    api: "mlx.core.tril" # As of recent, or create mask
+    requires_plugin: "mlx_tril_shim"
+
+---
+operation: "TrilIndices"
+description: "Return the indices for the lower-triangle of an (n, m) array."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "m"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.tril_indices"
+  torch:
+    api: "torch.tril_indices"
+    args:
+      n: "row"
+      m: "col"
+      k: "offset"
+  jax:
+    api: "jax.numpy.tril_indices"
+  flax_nnx:
+    api: "jax.numpy.tril_indices"
+  paxml:
+    api: "jax.numpy.tril_indices"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "TrilIndicesFrom"
+description: "Return the indices for the lower-triangle of arr."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.tril_indices_from"
+  torch:
+    # No direct 'from', use macro
+    macro_template: "torch.tril_indices({arr}.size(0), {arr}.size(1), offset={k})"
+  jax:
+    api: "jax.numpy.tril_indices_from"
+  flax_nnx:
+    api: "jax.numpy.tril_indices_from"
+  paxml:
+    api: "jax.numpy.tril_indices_from"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "TrimZeros"
+description: "Remove values along a dimension which are zero along all other."
+std_args:
+  - name: "filt"
+    type: "Tensor"
+  - name: "trim"
+    type: "str"
+    default: "fb"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.trim_zeros"
+  torch:
+    # Torch has no direct equivalent
+    api: null
+  jax:
+    api: "jax.numpy.trim_zeros"
+  flax_nnx:
+    api: "jax.numpy.trim_zeros"
+  paxml:
+    api: "jax.numpy.trim_zeros"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Triu"
+description: "Upper triangle of an array."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.triu"
+  torch:
+    api: "torch.triu"
+    args:
+      m: "input"
+      k: "diagonal"
+  jax:
+    api: "jax.numpy.triu"
+  flax_nnx:
+    api: "jax.numpy.triu"
+  paxml:
+    api: "jax.numpy.triu"
+  tensorflow:
+    api: "tf.linalg.band_part"
+    requires_plugin: "tf_triu_wrapper"
+  keras:
+    api: "keras.ops.triu"
+    args:
+      m: "x"
+      k: "k"
+  mlx:
+    requires_plugin: "mlx_triu_shim"
+
+---
+operation: "TriuIndices"
+description: "Return the indices for the upper-triangle of an (n, m) array."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "m"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.triu_indices"
+  torch:
+    api: "torch.triu_indices"
+    args:
+      n: "row"
+      m: "col"
+      k: "offset"
+  jax:
+    api: "jax.numpy.triu_indices"
+  flax_nnx:
+    api: "jax.numpy.triu_indices"
+  paxml:
+    api: "jax.numpy.triu_indices"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "TriuIndicesFrom"
+description: "Return the indices for the upper-triangle of arr."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.triu_indices_from"
+  torch:
+    macro_template: "torch.triu_indices({arr}.size(0), {arr}.size(1), offset={k})"
+  jax:
+    api: "jax.numpy.triu_indices_from"
+  flax_nnx:
+    api: "jax.numpy.triu_indices_from"
+  paxml:
+    api: "jax.numpy.triu_indices_from"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "TrueDivide"
+description: "Divide arguments element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.true_divide"
+  torch:
+    api: "torch.true_divide"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.true_divide"
+  flax_nnx:
+    api: "jax.numpy.true_divide"
+  paxml:
+    api: "jax.numpy.true_divide"
+  tensorflow:
+    api: "tf.math.truediv"
+    args:
+      x1: "x"
+      x2: "y"
+  keras:
+    api: "keras.ops.divide"
+  mlx:
+    api: "mlx.core.divide" # Implicit division
+
+---
+operation: "Trunc"
+description: "Return the truncated value of the input, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.trunc"
+  torch:
+    api: "torch.trunc"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.trunc"
+  flax_nnx:
+    api: "jax.numpy.trunc"
+  paxml:
+    api: "jax.numpy.trunc"
+  tensorflow:
+    api: "tf.math.trunc"
+  keras:
+    api: "keras.ops.trunc"
+  mlx:
+    api: "mlx.core.trunc" # Not direct? Check, floor/ceil present.
+    macro_template: "mx.floor(mx.abs({x})) * mx.sign({x})"
+
+---
+operation: "Typecodes"
+description: "Dictionary defining character codes for types."
+std_args: []
+variants:
+  numpy:
+    api: "numpy.typecodes"
+  torch:
+    api: null
+  jax:
+    api: "jax.numpy.typecodes"
+  flax_nnx:
+    api: "jax.numpy.typecodes"
+  paxml:
+    api: "jax.numpy.typecodes"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Typename"
+description: "Return a description for the given data type code."
+std_args:
+  - name: "char"
+    type: "str"
+variants:
+  numpy:
+    api: "numpy.typename"
+  torch:
+    api: null
+  jax:
+    api: "jax.numpy.typename"
+  flax_nnx:
+    api: "jax.numpy.typename"
+  paxml:
+    api: "jax.numpy.typename"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "UByte"
+description: "Unsigned integer type, compatible with C unsigned char."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.ubyte"
+  torch:
+    api: "torch.uint8"
+    requires_plugin: "type_cast_shim" # Torch usage usually dtype, not constructor
+  jax:
+    api: "jax.numpy.uint8"
+  flax_nnx:
+    api: "jax.numpy.uint8"
+  paxml:
+    api: "jax.numpy.uint8"
+  tensorflow:
+    api: "tf.uint8"
+  keras:
+    api: null
+  mlx:
+    api: "mlx.core.uint8"
+
+---
+operation: "UFunc"
+description: "Functions that operate element by element on whole arrays."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.ufunc"
+  torch:
+    api: null
+  jax:
+    api: "jax.numpy.ufunc"
+  flax_nnx:
+    api: "jax.numpy.ufunc"
+  paxml:
+    api: "jax.numpy.ufunc"
+  tensorflow:
+    api: null
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "UInt"
+description: "Unsigned signed integer type, 64bit on 64bit system."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.uint"
+  torch:
+    api: "torch.int64" # Torch lacks generic uint size matching system word
+  jax:
+    api: "jax.numpy.uint" # Maps to uint64/32
+  flax_nnx:
+    api: "jax.numpy.uint"
+  paxml:
+    api: "jax.numpy.uint"
+  tensorflow:
+    api: "tf.uint64"
+  keras:
+    api: null
+  mlx:
+    api: "mlx.core.uint64"
+
+---
+operation: "UInt16"
+description: "Unsigned integer type, compatible with C unsigned short."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.uint16"
+  torch:
+    api: null # No uint16 in standard torch
+  jax:
+    api: "jax.numpy.uint16"
+  flax_nnx:
+    api: "jax.numpy.uint16"
+  paxml:
+    api: "jax.numpy.uint16"
+  tensorflow:
+    api: "tf.uint16"
+  keras:
+    api: null
+  mlx:
+    api: "mlx.core.uint16" # Check support
+
+---
+operation: "UInt32"
+description: "Unsigned integer type, compatible with C unsigned int."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.uint32"
+  torch:
+    api: null # No uint32
+  jax:
+    api: "jax.numpy.uint32"
+  flax_nnx:
+    api: "jax.numpy.uint32"
+  paxml:
+    api: "jax.numpy.uint32"
+  tensorflow:
+    api: "tf.uint32"
+  keras:
+    api: null
+  mlx:
+    api: "mlx.core.uint32"
+
+---
+operation: "UInt64"
+description: "Unsigned signed integer type, 64bit."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.uint64"
+  torch:
+    api: null # No uint64, only int64
+  jax:
+    api: "jax.numpy.uint64"
+  flax_nnx:
+    api: "jax.numpy.uint64"
+  paxml:
+    api: "jax.numpy.uint64"
+  tensorflow:
+    api: "tf.uint64"
+  keras:
+    api: null
+  mlx:
+    api: "mlx.core.uint64"
+
+---
+operation: "UInt8"
+description: "Unsigned integer type, compatible with C unsigned char."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.uint8"
+  torch:
+    api: "torch.uint8"
+  jax:
+    api: "jax.numpy.uint8"
+  flax_nnx:
+    api: "jax.numpy.uint8"
+  paxml:
+    api: "jax.numpy.uint8"
+  tensorflow:
+    api: "tf.uint8"
+  keras:
+    api: null
+  mlx:
+    api: "mlx.core.uint8"

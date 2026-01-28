@@ -1,0 +1,719 @@
+operation: "ConcreteModuleType"
+description: "Internal PyTorch type representing a concrete module type for JIT."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.ConcreteModuleType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "ConcreteModuleTypeBuilder"
+description: "Builder class for ConcreteModuleType."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.ConcreteModuleTypeBuilder"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "DeepCopyMemoTable"
+description: "Internal helper for deepcopy operations in PyTorch."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.DeepCopyMemoTable"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "DeserializationStorageContext"
+description: "Context manager/helper for deserialization storage resolution."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.DeserializationStorageContext"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "DeviceObjType"
+description: "Internal type definition for Device objects."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.DeviceObjType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "DictType"
+description: "Type representation for Dictionaries in TorchScript."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.DictType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "DisableTorchFunction"
+description: "Context manager that disables __torch_function__ handling."
+op_type: "context"
+variants:
+  torch:
+    api: "torch.DisableTorchFunction"
+  jax:
+    api: "contextlib.nullcontext"
+  flax_nnx:
+    api: "contextlib.nullcontext"
+  paxml:
+    api: "contextlib.nullcontext"
+  keras:
+    api: "contextlib.nullcontext"
+  tensorflow:
+    api: "contextlib.nullcontext"
+  mlx:
+    api: "contextlib.nullcontext"
+  numpy:
+    api: "contextlib.nullcontext"
+required_imports:
+  - "import contextlib"
+
+---
+operation: "DisableTorchFunctionSubclass"
+description: "Context manager that disables __torch_function__ for subclasses."
+op_type: "context"
+variants:
+  torch:
+    api: "torch.DisableTorchFunctionSubclass"
+  jax:
+    api: "contextlib.nullcontext"
+  flax_nnx:
+    api: "contextlib.nullcontext"
+  paxml:
+    api: "contextlib.nullcontext"
+  keras:
+    api: "contextlib.nullcontext"
+  tensorflow:
+    api: "contextlib.nullcontext"
+  mlx:
+    api: "contextlib.nullcontext"
+  numpy:
+    api: "contextlib.nullcontext"
+required_imports:
+  - "import contextlib"
+
+---
+operation: "DispatchKey"
+description: "Enumeration of Dispatch Keys for the PyTorch dispatcher."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.DispatchKey"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "DispatchKeySet"
+description: "Container for a set of DispatchKeys."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.DispatchKeySet"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "DoubleStorage"
+description: "Storage class for float64 data."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.DoubleStorage"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "DoubleTensor"
+description: "Legacy constructor for float64 tensors."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.DoubleTensor"
+  jax:
+    api: "jnp.array"
+    arg_values:
+      dtype: "jnp.float64"
+  flax_nnx:
+    api: "jnp.array"
+    arg_values:
+      dtype: "jnp.float64"
+  paxml:
+    api: "jnp.array"
+    arg_values:
+      dtype: "jnp.float64"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    arg_values:
+      dtype: "'float64'"
+  tensorflow:
+    api: "tf.constant"
+    arg_values:
+      dtype: "tf.float64"
+  mlx:
+    api: "mx.array"
+    arg_values:
+      dtype: "mx.float64"
+  numpy:
+    api: "np.array"
+    arg_values:
+      dtype: "np.float64"
+
+---
+operation: "EnumType"
+description: "Internal type definition for Enums in TorchScript."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.EnumType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "ErrorReport"
+description: "Internal wrapper for error reporting."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.ErrorReport"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Event"
+description: "CUDA event wrapper for synchronization and timing."
+op_type: "class"
+std_args:
+  - name: "enable_timing"
+    type: "bool"
+    default: false
+  - name: "blocking"
+    type: "bool"
+    default: false
+  - name: "interprocess"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.Event"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: "mlx.core.Event"
+  numpy:
+    api: null
+
+---
+operation: "ExcludeDispatchKeyGuard"
+description: "Guard disabling specific dispatch keys."
+op_type: "context"
+variants:
+  torch:
+    api: "torch.ExcludeDispatchKeyGuard"
+  jax:
+    api: "contextlib.nullcontext"
+  flax_nnx:
+    api: "contextlib.nullcontext"
+  paxml:
+    api: "contextlib.nullcontext"
+  keras:
+    api: "contextlib.nullcontext"
+  tensorflow:
+    api: "contextlib.nullcontext"
+  mlx:
+    api: "contextlib.nullcontext"
+  numpy:
+    api: "contextlib.nullcontext"
+required_imports:
+  - "import contextlib"
+
+---
+operation: "ExecutionPlan"
+description: "Internal representation of an execution plan."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.ExecutionPlan"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "FatalError"
+description: "Exception class for fatal errors."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.FatalError"
+  jax:
+    api: "RuntimeError"
+  flax_nnx:
+    api: "RuntimeError"
+  paxml:
+    api: "RuntimeError"
+  keras:
+    api: "RuntimeError"
+  tensorflow:
+    api: "tf.errors.InternalError"
+  mlx:
+    api: "RuntimeError"
+  numpy:
+    api: "RuntimeError"
+
+---
+operation: "FileCheck"
+description: "Testing utility for verifying file contents."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.FileCheck"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "FloatStorage"
+description: "Storage class for float32 data."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.FloatStorage"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "FloatTensor"
+description: "Legacy constructor for float32 tensors."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.FloatTensor"
+  jax:
+    api: "jnp.array"
+    arg_values:
+      dtype: "jnp.float32"
+  flax_nnx:
+    api: "jnp.array"
+    arg_values:
+      dtype: "jnp.float32"
+  paxml:
+    api: "jnp.array"
+    arg_values:
+      dtype: "jnp.float32"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    arg_values:
+      dtype: "'float32'"
+  tensorflow:
+    api: "tf.constant"
+    arg_values:
+      dtype: "tf.float32"
+  mlx:
+    api: "mx.array"
+    arg_values:
+      dtype: "mx.float32"
+  numpy:
+    api: "np.array"
+    arg_values:
+      dtype: "np.float32"
+
+---
+operation: "FloatType"
+description: "Internal type definition for floats."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.FloatType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "FunctionSchema"
+description: "Internal schema representation for functions."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.FunctionSchema"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Future"
+description: "Wrapper for future results (JIT/Async)."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.Future"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "FutureType"
+description: "Internal type definiton for Futures."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.FutureType"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Generator"
+description: "Pseudo-random number generator state."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.Generator"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.random.Generator"
+  mlx:
+    api: null
+  numpy:
+    api: "np.random.Generator"
+
+---
+operation: "GradScaler"
+description: "Utility for gradient scaling in mixed precision training."
+op_type: "class"
+std_args:
+  - name: "init_scale"
+    type: "float"
+    default: 65536.0
+  - name: "growth_factor"
+    type: "float"
+    default: 2.0
+  - name: "backoff_factor"
+    type: "float"
+    default: 0.5
+  - name: "growth_interval"
+    type: "int"
+    default: 2000
+  - name: "enabled"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.cuda.amp.GradScaler"
+  jax:
+    api: "optax.amp.GradScaler"
+    description: "Matches Optax logic if available."
+  flax_nnx:
+    api: "optax.amp.GradScaler"
+  paxml:
+    api: "praxis.optimizers.ShardedAdafactor"
+  keras:
+    api: "keras.mixed_precision.LossScaleOptimizer"
+  tensorflow:
+    api: "tf.keras.mixed_precision.LossScaleOptimizer"
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Gradient"
+description: "Gradient calculation or representation class."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.Gradient"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Graph"
+description: "Internal representation of a TorchScript graph."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.Graph"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.Graph"
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "GraphExecutorState"
+description: "Internal state of the graph executor."
+op_type: "class"
+variants:
+  torch:
+    api: "torch.GraphExecutorState"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null

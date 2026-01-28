@@ -1,0 +1,1064 @@
+operation: "ActivationLayer"
+description: "Applies an activation function to an output."
+op_type: "class"
+std_args:
+  - name: "activation"
+    type: "str"
+    doc: "Name of activation function or callable."
+variants:
+  keras:
+    api: "keras.layers.Activation"
+  tensorflow:
+    api: "tf.keras.layers.Activation"
+  torch:
+    api: null # PyTorch does not have a generic Activation wrapper layer class.
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "ActivityRegularization"
+description: "Layer that applies an update to the cost function based input activity."
+op_type: "class"
+std_args:
+  - name: "l1"
+    type: "float"
+    default: 0.0
+  - name: "l2"
+    type: "float"
+    default: 0.0
+variants:
+  keras:
+    api: "keras.layers.ActivityRegularization"
+  tensorflow:
+    api: "tf.keras.layers.ActivityRegularization"
+  torch:
+    api: null # Activity regularization in Torch is separate from Layer definition
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AdaptiveAveragePooling1D"
+description: "Adaptive average pooling operation for 1D temporal or spatial data."
+op_type: "class"
+std_args:
+  - name: "output_size"
+    type: "Union[int, Tuple[int]]"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AdaptiveAveragePooling1D"
+  tensorflow:
+    api: "tf.keras.layers.AdaptiveAveragePooling1D"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool1d"
+    args:
+      output_size: "output_size"
+      data_format: null # Torch assumes NCW (channels_first) or NWC (channels_last) based on context/input
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AdaptiveAveragePooling2D"
+description: "Adaptive average pooling operation for 2D spatial data."
+op_type: "class"
+std_args:
+  - name: "output_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AdaptiveAveragePooling2D"
+  tensorflow:
+    api: "tf.keras.layers.AdaptiveAveragePooling2D"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool2d"
+    args:
+      output_size: "output_size"
+      data_format: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AdaptiveAveragePooling3D"
+description: "Adaptive average pooling operation for 3D volumetric data."
+op_type: "class"
+std_args:
+  - name: "output_size"
+    type: "Union[int, Tuple[int, int, int]]"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AdaptiveAveragePooling3D"
+  tensorflow:
+    api: "tf.keras.layers.AdaptiveAveragePooling3D"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool3d"
+    args:
+      output_size: "output_size"
+      data_format: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AdaptiveMaxPooling1D"
+description: "Adaptive max pooling operation for 1D temporal or spatial data."
+op_type: "class"
+std_args:
+  - name: "output_size"
+    type: "Union[int, Tuple[int]]"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AdaptiveMaxPooling1D"
+  tensorflow:
+    api: "tf.keras.layers.AdaptiveMaxPooling1D"
+  torch:
+    api: "torch.nn.AdaptiveMaxPool1d"
+    args:
+      output_size: "output_size"
+      data_format: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AdaptiveMaxPooling2D"
+description: "Adaptive max pooling operation for 2D spatial data."
+op_type: "class"
+std_args:
+  - name: "output_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AdaptiveMaxPooling2D"
+  tensorflow:
+    api: "tf.keras.layers.AdaptiveMaxPooling2D"
+  torch:
+    api: "torch.nn.AdaptiveMaxPool2d"
+    args:
+      output_size: "output_size"
+      data_format: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AdaptiveMaxPooling3D"
+description: "Adaptive max pooling operation for 3D volumetric data."
+op_type: "class"
+std_args:
+  - name: "output_size"
+    type: "Union[int, Tuple[int, int, int]]"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AdaptiveMaxPooling3D"
+  tensorflow:
+    api: "tf.keras.layers.AdaptiveMaxPooling3D"
+  torch:
+    api: "torch.nn.AdaptiveMaxPool3d"
+    args:
+      output_size: "output_size"
+      data_format: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AddLayer"
+description: "Layer that adds a list of inputs."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.layers.Add"
+  tensorflow:
+    api: "tf.keras.layers.Add"
+  torch:
+    api: null # No standard nn.Module for Add, typically functional
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AdditiveAttention"
+description: "Additive attention layer, a.k.a. Bahdanau-style attention."
+op_type: "class"
+std_args:
+  - name: "use_scale"
+    type: "bool"
+    default: true
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+variants:
+  keras:
+    api: "keras.layers.AdditiveAttention"
+  tensorflow:
+    api: "tf.keras.layers.AdditiveAttention"
+  torch:
+    api: null # Requires custom implementation or composition for Bahdanau style
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.linen.attention.dot_product_attention" # Mismatch: Flax is dot product usually. Keras Additive is Bahdanau.
+    missing_message: "Flax does not provide a built-in Additive/Bahdanau Layer."
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AlphaDropout"
+description: "Applies Alpha Dropout to the input."
+op_type: "class"
+std_args:
+  - name: "rate"
+    type: "float"
+  - name: "noise_shape"
+    type: "Any"
+    default: null
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AlphaDropout"
+    args:
+      rate: "rate"
+      noise_shape: "noise_shape"
+      seed: "seed"
+  tensorflow:
+    api: "tf.keras.layers.AlphaDropout"
+    args:
+      rate: "rate"
+      noise_shape: "noise_shape"
+      seed: "seed"
+  torch:
+    api: "torch.nn.AlphaDropout"
+    args:
+      rate: "p"
+      noise_shape: null # Not supported in constructor
+      seed: null
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.Dropout" # Alpha dropout is not standard in NNX yet
+    missing_message: "NNX standard Dropout is not AlphaDropout."
+  paxml:
+    api: null
+  mlx:
+    api: "mlx.nn.Dropout" # Close proxy, but specific alpha math differing
+---
+operation: "AttentionLayer"
+description: "Dot-product attention layer, a.k.a. Luong-style attention."
+op_type: "class"
+std_args:
+  - name: "use_scale"
+    type: "bool"
+    default: false
+  - name: "score_mode"
+    type: "str"
+    default: "dot"
+    options: ["dot", "concat"]
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.Attention"
+  tensorflow:
+    api: "tf.keras.layers.Attention"
+  torch:
+    api: "torch.nn.MultiheadAttention" # Architectural mismatch: Keras Attention is weightless (unless scale). Torch MHA has weights.
+    missing_message: "Structure Mismatch: PyTorch MultiheadAttention includes projection weights; Keras Attention is raw dot-product."
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.linen.attention.dot_product_attention" # Functional call
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AugMix"
+description: "Performs the AugMix data augmentation technique."
+op_type: "class"
+std_args:
+  - name: "value_range"
+    type: "Tuple[int, int]"
+    default: [0, 255]
+  - name: "num_chains"
+    type: "int"
+    default: 3
+  - name: "chain_depth"
+    type: "int"
+    default: 3
+  - name: "factor"
+    type: "float"
+    default: 0.3
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+  - name: "all_ops"
+    type: "bool"
+    default: true
+  - name: "interpolation"
+    type: "str"
+    default: "bilinear"
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AugMix"
+  tensorflow:
+    api: "tf.keras.layers.AugMix"
+  torch:
+    api: "torchvision.transforms.AugMix"
+    args:
+      value_range: null # Implicit/Different
+      num_chains: "mixture_width"
+      chain_depth: "chain_depth"
+      factor: "severity"
+      alpha: "alpha"
+      all_ops: "all_ops"
+      interpolation: "interpolation"
+      seed: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AutoContrast"
+description: "Performs the auto-contrast operation on an image."
+op_type: "class"
+std_args:
+  - name: "value_range"
+    type: "Tuple[int, int]"
+    default: [0, 255]
+variants:
+  keras:
+    api: "keras.layers.AutoContrast"
+  tensorflow:
+    api: "tf.keras.layers.AutoContrast"
+  torch:
+    api: "torchvision.transforms.AutoContrast"
+    args:
+      value_range: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AverageLayer"
+description: "Averages a list of inputs element-wise."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.layers.Average"
+  tensorflow:
+    api: "tf.keras.layers.Average"
+  torch:
+    api: null
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AveragePooling1D"
+description: "Average pooling for temporal data."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "int"
+  - name: "strides"
+    type: "int"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AveragePooling1D"
+  tensorflow:
+    api: "tf.keras.layers.AveragePooling1D"
+  torch:
+    api: "torch.nn.AvgPool1d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      data_format: null
+    arg_values:
+      padding:
+        valid: 0
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+    args:
+      pool_size: "window_shape"
+      strides: "strides"
+      padding: "padding"
+      data_format: null
+  paxml:
+    api: null
+  mlx:
+    api: null # MLX has logical AvgPool but often exposed as functional
+---
+operation: "AveragePooling2D"
+description: "Average pooling operation for 2D spatial data."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int, int]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AveragePooling2D"
+  tensorflow:
+    api: "tf.keras.layers.AveragePooling2D"
+  torch:
+    api: "torch.nn.AvgPool2d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      data_format: null
+    arg_values:
+      padding:
+        valid: 0
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+    args:
+      pool_size: "window_shape"
+      strides: "strides"
+      padding: "padding"
+      data_format: null
+  paxml:
+    api: "praxis.layers.AvgPooling" # Praxis naming convention
+  mlx:
+    api: "mlx.nn.AvgPool2d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      data_format: null
+---
+operation: "AveragePooling3D"
+description: "Average pooling operation for 3D volumetric data."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "Union[int, Tuple[int, int, int]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AveragePooling3D"
+  tensorflow:
+    api: "tf.keras.layers.AveragePooling3D"
+  torch:
+    api: "torch.nn.AvgPool3d"
+    args:
+      pool_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      data_format: null
+    arg_values:
+      padding:
+        valid: 0
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+  paxml:
+    api: null
+  mlx:
+    api: null # MLX lacks 3D AvgPool
+---
+operation: "AvgPool1D"
+description: "Alias for AveragePooling1D."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "int"
+  - name: "strides"
+    type: "int"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AvgPool1D"
+  tensorflow:
+    api: "tf.keras.layers.AvgPool1D"
+  torch:
+    api: "torch.nn.AvgPool1d"
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "AvgPool2D"
+description: "Alias for AveragePooling2D."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int, int]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AvgPool2D"
+  tensorflow:
+    api: "tf.keras.layers.AvgPool2D"
+  torch:
+    api: "torch.nn.AvgPool2d"
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+  paxml:
+    api: "praxis.layers.AvgPooling"
+  mlx:
+    api: "mlx.nn.AvgPool2d"
+---
+operation: "AvgPool3D"
+description: "Alias for AveragePooling3D."
+op_type: "class"
+std_args:
+  - name: "pool_size"
+    type: "Union[int, Tuple[int, int, int]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: null
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.AvgPool3D"
+  tensorflow:
+    api: "tf.keras.layers.AvgPool3D"
+  torch:
+    api: "torch.nn.AvgPool3d"
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "BatchNormalization"
+description: "Layer that normalizes its inputs."
+op_type: "class"
+std_args:
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "momentum"
+    type: "float"
+    default: 0.99
+  - name: "epsilon"
+    type: "float"
+    default: 0.001
+  - name: "center"
+    type: "bool"
+    default: true
+  - name: "scale"
+    type: "bool"
+    default: true
+variants:
+  keras:
+    api: "keras.layers.BatchNormalization"
+  tensorflow:
+    api: "tf.keras.layers.BatchNormalization"
+  torch:
+    api: "torch.nn.BatchNorm2d" # Dimensionality ambiguity: Keras is generic. Torch needs 1d/2d/3d. 
+    args:
+      axis: null
+      momentum: "momentum"
+      epsilon: "eps"
+      center: "affine"
+      scale: "affine" # Torch fuses center/scale control into affine
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.BatchNorm"
+    args:
+      axis: "param_dtype" # Logic mismatch
+      momentum: "momentum"
+      epsilon: "epsilon"
+      center: "use_bias"
+      scale: "use_scale"
+  paxml:
+    api: "praxis.layers.BatchNorm"
+  mlx:
+    api: "mlx.nn.BatchNorm"
+    args:
+      axis: null
+      momentum: "momentum"
+      epsilon: "eps"
+      center: "affine"
+      scale: "affine"
+---
+operation: "Bidirectional"
+description: "Bidirectional wrapper for RNNs."
+op_type: "class"
+std_args:
+  - name: "layer"
+    type: "Any"
+  - name: "merge_mode"
+    type: "str"
+    default: "concat"
+variants:
+  keras:
+    api: "keras.layers.Bidirectional"
+  tensorflow:
+    api: "tf.keras.layers.Bidirectional"
+  torch:
+    api: null # Torch integrates bidirectional as a boolean flag in RNN constructors (e.g. LSTM(bidirectional=True))
+    missing_message: "PyTorch specifies bidirectionality inside the RNN constructor, not as a wrapper."
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.Bidirectional"
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "CategoryEncoding"
+description: "A preprocessing layer which encodes integer features."
+op_type: "class"
+std_args:
+  - name: "num_tokens"
+    type: "int"
+    default: null
+  - name: "output_mode"
+    type: "str"
+    default: "multi_hot"
+  - name: "sparse"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.CategoryEncoding"
+  tensorflow:
+    api: "tf.keras.layers.CategoryEncoding"
+  torch:
+    api: "torch.nn.functional.one_hot" # Only handles one_hot output mode logic partially
+  jax:
+    api: "jax.nn.one_hot"
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "CenterCrop"
+description: "A preprocessing layer which crops images."
+op_type: "class"
+std_args:
+  - name: "height"
+    type: "int"
+  - name: "width"
+    type: "int"
+variants:
+  keras:
+    api: "keras.layers.CenterCrop"
+  tensorflow:
+    api: "tf.keras.layers.CenterCrop"
+  torch:
+    api: "torchvision.transforms.CenterCrop"
+    args:
+      height: "size" 
+      width: null # Torch expects single int or tuple for size
+    pack_to_tuple: "size" # Logic to pack h/w
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "ConcatenateLayer"
+description: "Concatenates a list of inputs."
+op_type: "class"
+std_args:
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  keras:
+    api: "keras.layers.Concatenate"
+  tensorflow:
+    api: "tf.keras.layers.Concatenate"
+  torch:
+    api: null # No standard nn.Module, uses torch.cat functional
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  mlx:
+    api: null
+---
+operation: "Conv1D"
+description: "1D convolution layer (e.g. temporal convolution)."
+op_type: "class"
+std_args:
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int]]"
+  - name: "strides"
+    type: "int"
+    default: 1
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "dilation_rate"
+    type: "int"
+    default: 1
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "use_bias"
+    type: "bool"
+    default: true
+variants:
+  keras:
+    api: "keras.layers.Conv1D"
+  tensorflow:
+    api: "tf.keras.layers.Conv1D"
+  torch:
+    api: "torch.nn.Conv1d"
+    args:
+      filters: "out_channels"
+      # Input channels is missing in Keras (inferred), required in Torch. 
+      # This mapping is partial/requires context.
+      kernel_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      dilation_rate: "dilation"
+      groups: "groups"
+      use_bias: "bias"
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.Conv"
+    args:
+      filters: "features"
+      kernel_size: "kernel_size"
+      strides: "strides"
+      padding: "padding"
+      dilation_rate: "kernel_dilation"
+      groups: "feature_group_count"
+      use_bias: "use_bias"
+  paxml:
+    api: "praxis.layers.Conv1D"
+    args:
+      filters: "filter_dims"
+      kernel_size: "filter_shape"
+  mlx:
+    api: "mlx.nn.Conv1d"
+    args:
+      filters: "out_channels"
+      kernel_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      dilation_rate: null # Not supported in constructor signature directly sometimes
+      groups: null
+      use_bias: "bias"
+---
+operation: "Conv1DTranspose"
+description: "1D transposed convolution layer."
+op_type: "class"
+std_args:
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int]]"
+  - name: "strides"
+    type: "int"
+    default: 1
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "dilation_rate"
+    type: "int"
+    default: 1
+  - name: "use_bias"
+    type: "bool"
+    default: true
+variants:
+  keras:
+    api: "keras.layers.Conv1DTranspose"
+  tensorflow:
+    api: "tf.keras.layers.Conv1DTranspose"
+  torch:
+    api: "torch.nn.ConvTranspose1d"
+    args:
+      filters: "out_channels"
+      kernel_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      dilation_rate: "dilation"
+      use_bias: "bias"
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.ConvTranspose"
+    args:
+      filters: "features"
+      kernel_size: "kernel_size"
+      strides: "strides"
+      padding: "padding"
+      dilation_rate: "kernel_dilation"
+      use_bias: "use_bias"
+  paxml:
+    api: null
+  mlx:
+    api: null # MLX lacks ConvTranspose1d
+---
+operation: "Conv2D"
+description: "2D convolution layer."
+op_type: "class"
+std_args:
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int, int]]"
+    default: [1, 1]
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "dilation_rate"
+    type: "Union[int, Tuple[int, int]]"
+    default: [1, 1]
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "use_bias"
+    type: "bool"
+    default: true
+variants:
+  keras:
+    api: "keras.layers.Conv2D"
+  tensorflow:
+    api: "tf.keras.layers.Conv2D"
+  torch:
+    api: "torch.nn.Conv2d"
+    args:
+      filters: "out_channels"
+      kernel_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      dilation_rate: "dilation"
+      groups: "groups"
+      use_bias: "bias"
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.Conv"
+    args:
+      filters: "features"
+      kernel_size: "kernel_size"
+      strides: "strides"
+      padding: "padding"
+      dilation_rate: "kernel_dilation"
+      groups: "feature_group_count"
+      use_bias: "use_bias"
+  paxml:
+    api: "praxis.layers.Conv2D"
+    args:
+      filters: "filter_dims"
+      kernel_size: "filter_shape"
+  mlx:
+    api: "mlx.nn.Conv2d"
+    args:
+      filters: "out_channels"
+      kernel_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      dilation_rate: null
+      groups: null
+      use_bias: "bias"
+---
+operation: "Conv2DTranspose"
+description: "2D transposed convolution layer."
+op_type: "class"
+std_args:
+  - name: "filters"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "strides"
+    type: "Union[int, Tuple[int, int]]"
+    default: [1, 1]
+  - name: "padding"
+    type: "str"
+    default: "valid"
+  - name: "dilation_rate"
+    type: "Union[int, Tuple[int, int]]"
+    default: [1, 1]
+  - name: "use_bias"
+    type: "bool"
+    default: true
+variants:
+  keras:
+    api: "keras.layers.Conv2DTranspose"
+  tensorflow:
+    api: "tf.keras.layers.Conv2DTranspose"
+  torch:
+    api: "torch.nn.ConvTranspose2d"
+    args:
+      filters: "out_channels"
+      kernel_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      dilation_rate: "dilation"
+      use_bias: "bias"
+  jax:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.ConvTranspose"
+    args:
+      filters: "features"
+      kernel_size: "kernel_size"
+      strides: "strides"
+      padding: "padding"
+      dilation_rate: "kernel_dilation"
+      use_bias: "use_bias"
+  paxml:
+    api: "praxis.layers.Conv2DTranspose"
+    args:
+      filters: "filter_dims"
+      kernel_size: "filter_shape"
+  mlx:
+    api: "mlx.nn.ConvTranspose2d"
+    args:
+      filters: "out_channels"
+      kernel_size: "kernel_size"
+      strides: "stride"
+      padding: "padding"
+      dilation_rate: null
+      use_bias: "bias"

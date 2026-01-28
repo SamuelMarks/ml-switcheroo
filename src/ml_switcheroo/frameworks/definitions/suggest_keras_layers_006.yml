@@ -1,0 +1,456 @@
+operation: "StringLookup"
+description: "A preprocessing layer that maps strings to (possibly encoded) indices."
+op_type: "class"
+std_args:
+  - name: "max_tokens"
+    type: "int"
+    default: null
+  - name: "num_oov_indices"
+    type: "int"
+    default: 1
+  - name: "mask_token"
+    type: "str"
+    default: null
+  - name: "oov_token"
+    type: "str"
+    default: "[UNK]"
+  - name: "vocabulary"
+    type: "List[str]"
+    default: null
+  - name: "invert"
+    type: "bool"
+    default: false
+  - name: "output_mode"
+    type: "str"
+    default: "int"
+    options: ["int", "one_hot", "multi_hot", "count", "tf_idf"]
+  - name: "pad_to_max_tokens"
+    type: "bool"
+    default: false
+  - name: "sparse"
+    type: "bool"
+    default: false
+  - name: "encoding"
+    type: "str"
+    default: "utf-8"
+variants:
+  keras:
+    api: "keras.layers.StringLookup"
+  tensorflow:
+    api: "tf.keras.layers.StringLookup"
+  torch:
+    requires_plugin: "string_lookup_shim"
+  jax:
+    requires_plugin: "string_lookup_shim"
+  flax_nnx:
+    requires_plugin: "string_lookup_shim"
+---
+operation: "SubtractLayer"
+description: "Layer that performs elementwise subtraction on a list of two inputs."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.layers.Subtract"
+  tensorflow:
+    api: "tf.keras.layers.Subtract"
+  torch:
+    requires_plugin: "layer_subtract_shim"
+  jax:
+    # stateless logic via plugin
+    requires_plugin: "layer_subtract_shim"
+---
+operation: "TFSMLayer"
+description: "Reload a Keras model/layer that was saved via SavedModel / ExportArchive."
+op_type: "class"
+std_args:
+  - name: "filepath"
+    type: "str"
+  - name: "call_endpoint"
+    type: "str"
+    default: "serve"
+variants:
+  keras:
+    api: "keras.layers.TFSMLayer"
+  tensorflow:
+    api: "tf.keras.layers.TFSMLayer"
+---
+operation: "TextVectorization"
+description: "A preprocessing layer which maps text features to integer sequences."
+op_type: "class"
+std_args:
+  - name: "max_tokens"
+    type: "int"
+    default: null
+  - name: "standardize"
+    type: "str"
+    default: "lower_and_strip_punctuation"
+  - name: "split"
+    type: "str"
+    default: "whitespace"
+  - name: "ngrams"
+    type: "int"
+    default: null
+  - name: "output_mode"
+    type: "str"
+    default: "int"
+  - name: "output_sequence_length"
+    type: "int"
+    default: null
+  - name: "pad_to_max_tokens"
+    type: "bool"
+    default: false
+  - name: "vocabulary"
+    type: "List[str]"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.TextVectorization"
+  tensorflow:
+    api: "tf.keras.layers.TextVectorization"
+  torch:
+    requires_plugin: "text_vectorization_shim"
+---
+operation: "TimeDistributed"
+description: "This wrapper allows to apply a layer to every temporal slice of an input."
+op_type: "class"
+std_args:
+  - name: "layer"
+    type: "Any"
+variants:
+  keras:
+    api: "keras.layers.TimeDistributed"
+  tensorflow:
+    api: "tf.keras.layers.TimeDistributed"
+  torch:
+    requires_plugin: "time_distributed_shim"
+  flax_nnx:
+    api: "nnx.Scan"
+    args:
+      layer: "target"
+---
+operation: "TorchModuleWrapper"
+description: "Torch module wrapper layer for Keras."
+op_type: "class"
+std_args:
+  - name: "module"
+    type: "Any"
+  - name: "name"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.TorchModuleWrapper"
+---
+operation: "UnitNormalization"
+description: "Normalize a batch of inputs so that each input in the batch has a L2 norm equal to 1."
+op_type: "class"
+std_args:
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  keras:
+    api: "keras.layers.UnitNormalization"
+  tensorflow:
+    api: "tf.keras.layers.UnitNormalization"
+  torch:
+    # No direct layer, but close to LayerNorm without centering. Usually implemented as funcional call in forward.
+    requires_plugin: "unit_norm_layer"
+  flax_nnx:
+    requires_plugin: "unit_norm_layer"
+---
+operation: "UpSampling1d"
+description: "Upsampling layer for 1D inputs."
+op_type: "class"
+std_args:
+  - name: "size"
+    type: "int"
+    default: 2
+variants:
+  keras:
+    api: "keras.layers.UpSampling1D"
+  tensorflow:
+    api: "tf.keras.layers.UpSampling1D"
+  torch:
+    api: "torch.nn.Upsample"
+    args:
+      size: "scale_factor"
+    inject_args:
+      mode: "nearest"
+  flax_nnx:
+    api: "flax.linen.Upsampling" # Does not exist in core linen, typically functional
+    requires_plugin: "upsampling_layer"
+---
+operation: "UpSampling2d"
+description: "Upsampling layer for 2D inputs."
+op_type: "class"
+std_args:
+  - name: "size"
+    type: "Tuple[int, int]"
+    default: [2, 2]
+  - name: "data_format"
+    type: "str"
+    default: null
+  - name: "interpolation"
+    type: "str"
+    default: "nearest"
+variants:
+  keras:
+    api: "keras.layers.UpSampling2D"
+  tensorflow:
+    api: "tf.keras.layers.UpSampling2D"
+  torch:
+    api: "torch.nn.Upsample"
+    args:
+      size: "scale_factor"
+      interpolation: "mode"
+    # Torch Upsample handles nD
+  flax_nnx:
+    requires_plugin: "upsampling_layer"
+---
+operation: "UpSampling3d"
+description: "Upsampling layer for 3D inputs."
+op_type: "class"
+std_args:
+  - name: "size"
+    type: "Tuple[int, int, int]"
+    default: [2, 2, 2]
+  - name: "data_format"
+    type: "str"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.UpSampling3D"
+  tensorflow:
+    api: "tf.keras.layers.UpSampling3D"
+  torch:
+    api: "torch.nn.Upsample"
+    args:
+      size: "scale_factor"
+    inject_args:
+      mode: "nearest"
+---
+operation: "LayerWrapper"
+description: "Abstract wrapper base class."
+op_type: "class"
+std_args:
+  - name: "layer"
+    type: "Any"
+variants:
+  keras:
+    api: "keras.layers.Wrapper"
+  tensorflow:
+    api: "tf.keras.layers.Wrapper"
+---
+operation: "ZeroPadding1d"
+description: "Zero-padding layer for 1D input."
+op_type: "class"
+std_args:
+  - name: "padding"
+    type: "int"
+    default: 1
+variants:
+  keras:
+    api: "keras.layers.ZeroPadding1D"
+  tensorflow:
+    api: "tf.keras.layers.ZeroPadding1D"
+  torch:
+    api: "torch.nn.ConstantPad1d"
+    inject_args:
+      value: 0
+  flax_nnx:
+    requires_plugin: "padding_layer"
+---
+operation: "ZeroPadding2d"
+description: "Zero-padding layer for 2D input."
+op_type: "class"
+std_args:
+  - name: "padding"
+    type: "Tuple[int, int]"
+    default: [1, 1]
+variants:
+  keras:
+    api: "keras.layers.ZeroPadding2D"
+  tensorflow:
+    api: "tf.keras.layers.ZeroPadding2D"
+  torch:
+    api: "torch.nn.ZeroPad2d"
+  flax_nnx:
+    requires_plugin: "padding_layer"
+---
+operation: "ZeroPadding3d"
+description: "Zero-padding layer for 3D data."
+op_type: "class"
+std_args:
+  - name: "padding"
+    type: "Tuple[int, int, int]"
+    default: [1, 1, 1]
+variants:
+  keras:
+    api: "keras.layers.ZeroPadding3D"
+  tensorflow:
+    api: "tf.keras.layers.ZeroPadding3D"
+  torch:
+    api: "torch.nn.ConstantPad3d"
+    inject_args:
+      value: 0
+---
+operation: "ListAdd"
+description: "Functional interface to the Add layer (elementwise sum). Takes a list of tensors."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+variants:
+  keras:
+    api: "keras.layers.add"
+  tensorflow:
+    api: "tf.add_n"
+  torch:
+    requires_plugin: "reduce_sum_list" # Custom reduction necessary as torch.add takes 2 args
+  jax:
+    api: "sum" # Approximation, usually implies stack then sum?
+    requires_plugin: "reduce_sum_list"
+---
+operation: "ListAverage"
+description: "Functional interface to the Average layer. Takes a list of tensors."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+variants:
+  keras:
+    api: "keras.layers.average"
+  tensorflow:
+    api: "tf.keras.layers.average" # or manual reduce_mean
+  torch:
+    requires_plugin: "reduce_mean_list"
+---
+operation: "ListConcatenate"
+description: "Functional interface to the Concatenate layer."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  keras:
+    api: "keras.layers.concatenate"
+  tensorflow:
+    api: "tf.concat"
+    args:
+      inputs: "values"
+  torch:
+    api: "torch.cat"
+    args:
+      inputs: "tensors"
+      axis: "dim"
+  jax:
+    api: "jnp.concatenate"
+    args:
+      inputs: "arrays"
+  flax_nnx:
+    api: "jnp.concatenate"
+  numpy:
+    api: "np.concatenate"
+    args:
+      inputs: "arrays"
+  mlx:
+    api: "mlx.core.concatenate"
+    args:
+      inputs: "arrays"
+---
+operation: "DeserializeLayer"
+description: "Returns a Keras layer object via its configuration."
+op_type: "function"
+std_args:
+  - name: "config"
+    type: "dict"
+  - name: "custom_objects"
+    type: "dict"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.deserialize"
+---
+operation: "DotList"
+description: "Functional interface to the Dot layer."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+  - name: "axes"
+    type: "Union[int, Tuple[int, int]]"
+    default: -1
+  - name: "normalize"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.dot"
+  tensorflow:
+    api: "tf.keras.layers.dot"
+---
+operation: "ListMaximum"
+description: "Functional interface to the Maximum layer."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+variants:
+  keras:
+    api: "keras.layers.maximum"
+  tensorflow:
+    api: "tf.math.reduce_max" # Approximation if stacked
+    requires_plugin: "reduce_max_list"
+  torch:
+    requires_plugin: "reduce_max_list" # torch.max over stack
+---
+operation: "ListMinimum"
+description: "Functional interface to the Minimum layer."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+variants:
+  keras:
+    api: "keras.layers.minimum"
+  torch:
+    requires_plugin: "reduce_min_list"
+---
+operation: "ListMultiply"
+description: "Functional interface to the Multiply layer."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+variants:
+  keras:
+    api: "keras.layers.multiply"
+  torch:
+    requires_plugin: "reduce_prod_list"
+---
+operation: "SerializeLayer"
+description: "Returns the layer configuration as a Python dict."
+op_type: "function"
+std_args:
+  - name: "layer"
+    type: "Any"
+variants:
+  keras:
+    api: "keras.layers.serialize"
+---
+operation: "ListSubtract"
+description: "Functional interface to the Subtract layer."
+op_type: "function"
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+variants:
+  keras:
+    api: "keras.layers.subtract"
+  torch:
+    requires_plugin: "list_subtract" # torch.sub takes 2 args, list subtract assumes 2 args in list

@@ -1,0 +1,801 @@
+operation: "ConvTranspose3d"
+description: "Applies a 3D transposed convolution operator over an input image."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+    rank: 5
+  - name: "weight"
+    type: "Tensor"
+    rank: 5
+  - name: "bias"
+    type: "Tensor"
+    default: null
+  - name: "stride"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: 1
+  - name: "padding"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: 0
+  - name: "output_padding"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: 0
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "dilation"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: 1
+variants: 
+  torch: 
+    api: "torch.nn.functional.conv_transpose3d"
+  keras: 
+    api: "keras.ops.conv_transpose"
+    args: 
+      input: "x"
+      weight: "kernel"
+      stride: "strides"
+      dilation: "dilation_rate"
+    layout_map: 
+      input: "NCDHW->NDHWC"
+      weight: "CDHWG->DHWC"
+  # JAX/Lax is complex for 3D transpose, generally provided by Neural Libraries (Flax) as Layers, not pure ops easily mapped without plugins.
+  jax: 
+    api: null
+    missing_message: "3D Transposed Convolution requires framework-specific layer abstractions (e.g. Flax Linen) or complex lax.conv_general_dilated usage."
+
+---
+operation: "Convolution"
+description: "Generic convolution operator."
+std_args: 
+  - "input"
+  - "weight"
+  - "bias"
+  - "stride"
+  - "padding"
+  - "dilation"
+  - "groups"
+variants: 
+  torch: 
+    api: "torch.convolution"
+  # Often internal or legacy, no direct mapping in high-levels
+
+---
+operation: "Copysign"
+description: "Create a new floating-point tensor with the magnitude of input and the sign of other."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants: 
+  torch: 
+    api: "torch.copysign"
+  jax: 
+    api: "jax.numpy.copysign"
+    args: 
+      input: "x1"
+      other: "x2"
+  flax_nnx: 
+    api: "jax.numpy.copysign"
+    args: 
+      input: "x1"
+      other: "x2"
+  paxml: 
+    api: "jax.numpy.copysign"
+    args: 
+      input: "x1"
+      other: "x2"
+  numpy: 
+    api: "numpy.copysign"
+    args: 
+      input: "x1"
+      other: "x2"
+  tensorflow: 
+    api: "tf.math.multiply"
+    macro_template: "tf.math.multiply(tf.math.abs({input}), tf.math.sign({other}))"
+  keras: 
+    api: "keras.ops.multiply"
+    macro_template: "keras.ops.multiply(keras.ops.abs({input}), keras.ops.sign({other}))"
+  mlx: 
+    api: "mlx.core.multiply"
+    macro_template: "mlx.core.abs({input}) * mlx.core.sign({other})"
+
+---
+operation: "Corrcoef"
+description: "Estimates the Pearson product-moment correlation coefficient matrix."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+variants: 
+  torch: 
+    api: "torch.corrcoef"
+  jax: 
+    api: "jax.numpy.corrcoef"
+    args: 
+      input: "x"
+  flax_nnx: 
+    api: "jax.numpy.corrcoef"
+    args: 
+      input: "x"
+  paxml: 
+    api: "jax.numpy.corrcoef"
+    args: 
+      input: "x"
+  numpy: 
+    api: "numpy.corrcoef"
+    args: 
+      input: "x"
+
+---
+operation: "Cos"
+description: "Returns a new tensor with the cosine of the elements of input."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+variants: 
+  torch: 
+    api: "torch.cos"
+  jax: 
+    api: "jax.numpy.cos"
+    args: 
+      input: "x"
+  flax_nnx: 
+    api: "jax.numpy.cos"
+    args: 
+      input: "x"
+  paxml: 
+    api: "jax.numpy.cos"
+    args: 
+      input: "x"
+  keras: 
+    api: "keras.ops.cos"
+    args: 
+      input: "x"
+  tensorflow: 
+    api: "tf.math.cos"
+    args: 
+      input: "x"
+  numpy: 
+    api: "numpy.cos"
+    args: 
+      input: "x"
+  mlx: 
+    api: "mlx.core.cos"
+    args: 
+      input: "x"
+
+---
+operation: "Cos_"
+description: "In-place cosine operation."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+is_inplace: true
+variants: 
+  torch: 
+    api: "torch.cos_"
+  jax: 
+    api: "jax.numpy.cos"
+    args: 
+      input: "x"
+    requires_plugin: "unroll_inplace_ops"
+  flax_nnx: 
+    api: "jax.numpy.cos"
+    args: 
+      input: "x"
+    requires_plugin: "unroll_inplace_ops"
+  paxml: 
+    api: "jax.numpy.cos"
+    args: 
+      input: "x"
+    requires_plugin: "unroll_inplace_ops"
+  numpy: 
+    api: "numpy.cos"
+    args: 
+      input: "x"
+    requires_plugin: "unroll_inplace_ops"
+
+---
+operation: "Cosh"
+description: "Returns a new tensor with the hyperbolic cosine of the elements."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+variants: 
+  torch: 
+    api: "torch.cosh"
+  jax: 
+    api: "jax.numpy.cosh"
+    args: 
+      input: "x"
+  flax_nnx: 
+    api: "jax.numpy.cosh"
+    args: 
+      input: "x"
+  paxml: 
+    api: "jax.numpy.cosh"
+    args: 
+      input: "x"
+  keras: 
+    api: "keras.ops.cosh"
+    args: 
+      input: "x"
+  tensorflow: 
+    api: "tf.math.cosh"
+    args: 
+      input: "x"
+  numpy: 
+    api: "numpy.cosh"
+    args: 
+      input: "x"
+  mlx: 
+    api: "mlx.core.cosh"
+    args: 
+      input: "x"
+
+---
+operation: "Cosh_"
+description: "In-place hyperbolic cosine."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+is_inplace: true
+variants: 
+  torch: 
+    api: "torch.cosh_"
+  jax: 
+    api: "jax.numpy.cosh"
+    args: 
+      input: "x"
+    requires_plugin: "unroll_inplace_ops"
+  flax_nnx: 
+    api: "jax.numpy.cosh"
+    args: 
+      input: "x"
+    requires_plugin: "unroll_inplace_ops"
+  paxml: 
+    api: "jax.numpy.cosh"
+    args: 
+      input: "x"
+    requires_plugin: "unroll_inplace_ops"
+
+---
+operation: "CosineEmbeddingLoss"
+description: "Creates a criterion that measures the loss given input tensors x1, x2 and a Tensor label y."
+std_args: 
+  - name: "input1"
+    type: "Tensor"
+  - name: "input2"
+    type: "Tensor"
+  - name: "target"
+    type: "Tensor"
+  - name: "margin"
+    type: "float"
+    default: 0.0
+  - name: "reduction"
+    type: "str"
+    default: "mean"
+variants: 
+  torch: 
+    api: "torch.nn.functional.cosine_embedding_loss"
+  jax: 
+    api: "optax.cosine_similarity_loss"
+    requires_plugin: "loss_wrapper" 
+    # Partial semantic mismatch: Optax distance/similarity vs Embedding loss structure
+
+---
+operation: "CosineSimilarity"
+description: "Returns cosine similarity between x1 and x2, computed along dim."
+std_args: 
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: 1
+  - name: "eps"
+    type: "float"
+    default: 1e-8
+variants: 
+  torch: 
+    api: "torch.nn.functional.cosine_similarity"
+  jax: 
+    api: "optax.cosine_similarity"
+    args: 
+      x1: "predictions"
+      x2: "targets"
+  keras: 
+    # Keras ops usually just has cosine similarity in losses or manual
+    api: "keras.losses.cosine_similarity"
+    args: 
+      x1: "y_true"
+      x2: "y_pred"
+      dim: "axis"
+  tensorflow: 
+    api: "tf.keras.losses.cosine_similarity"
+    args: 
+      x1: "y_true"
+      x2: "y_pred"
+      dim: "axis"
+
+---
+operation: "CountNonzero"
+description: "Counts the number of non-zero values in the tensor input along the given dim."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "Union[int, Tuple[int]]"
+    default: null
+variants: 
+  torch: 
+    api: "torch.count_nonzero"
+  jax: 
+    api: "jax.numpy.count_nonzero"
+    args: 
+      input: "a"
+      dim: "axis"
+  flax_nnx: 
+    api: "jax.numpy.count_nonzero"
+    args: 
+      input: "a"
+      dim: "axis"
+  paxml: 
+    api: "jax.numpy.count_nonzero"
+    args: 
+      input: "a"
+      dim: "axis"
+  numpy: 
+    api: "numpy.count_nonzero"
+    args: 
+      input: "a"
+      dim: "axis"
+  tensorflow: 
+    api: "tf.math.count_nonzero"
+    args: 
+      dim: "axis"
+
+---
+operation: "Cov"
+description: "Estimates the covariance matrix of the variables given by the input matrix."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+  - name: "correction"
+    type: "int"
+    default: 1
+variants: 
+  torch: 
+    api: "torch.cov"
+  jax: 
+    api: "jax.numpy.cov"
+    args: 
+      input: "m"
+      correction: "ddof"
+  flax_nnx: 
+    api: "jax.numpy.cov"
+    args: 
+      input: "m"
+      correction: "ddof"
+  paxml: 
+    api: "jax.numpy.cov"
+    args: 
+      input: "m"
+      correction: "ddof"
+  numpy: 
+    api: "numpy.cov"
+    args: 
+      input: "m"
+      correction: "ddof"
+
+---
+operation: "Cross"
+description: "Returns the cross product of vectors in dimension dim of input and other."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+variants: 
+  torch: 
+    api: "torch.cross"
+  jax: 
+    api: "jax.numpy.cross"
+    args: 
+      input: "a"
+      other: "b"
+      dim: "axis"
+  flax_nnx: 
+    api: "jax.numpy.cross"
+    args: 
+      input: "a"
+      other: "b"
+      dim: "axis"
+  paxml: 
+    api: "jax.numpy.cross"
+    args: 
+      input: "a"
+      other: "b"
+      dim: "axis"
+  numpy: 
+    api: "numpy.cross"
+    args: 
+      input: "a"
+      other: "b"
+      dim: "axis"
+  keras: 
+    api: "keras.ops.cross"
+    args: 
+      input: "x1"
+      other: "x2"
+      dim: "axis"
+  tensorflow: 
+    api: "tf.linalg.cross"
+    args: 
+      input: "a"
+      other: "b"
+      dim: null # TF cross implies last dim
+
+---
+operation: "CrowIndicesCopy"
+description: "Copies the crow indices of a sparse tensor."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+variants: 
+  torch: 
+    api: "torch.crow_indices_copy"
+  # Sparse operations are generally framework specific and lack standard array equivalents. 
+
+---
+operation: "CtcLoss"
+description: "Connectionist Temporal Classification loss."
+std_args: 
+  - name: "log_probs"
+  - "targets"
+  - "input_lengths"
+  - "target_lengths"
+variants: 
+  torch: 
+    api: "torch.nn.functional.ctc_loss"
+  jax: 
+    api: "optax.ctc_loss"
+  keras: 
+    api: "keras.ops.ctc_loss"
+  tensorflow: 
+    api: "tf.nn.ctc_loss"
+
+---
+operation: "CudnnAffineGridGenerator"
+description: "CuDNN Affine Grid Generator."
+std_args: 
+  - "theta"
+  - "N"
+  - "C"
+  - "H"
+  - "W"
+variants: 
+  torch: 
+    api: "torch.cudnn_affine_grid_generator"
+  # Backend specific
+
+---
+operation: "CudnnBatchNorm"
+description: "CuDNN Batch Normalization."
+std_args: 
+  - "input"
+  - "weight"
+  - "bias"
+  - "running_mean"
+  - "running_var"
+variants: 
+  torch: 
+    api: "torch.cudnn_batch_norm"
+  # Backend specific
+
+---
+operation: "CudnnConvolution"
+description: "CuDNN Convolution."
+std_args: 
+  - "input"
+  - "weight"
+variants: 
+  torch: 
+    api: "torch.cudnn_convolution"
+  # Backend specific
+
+---
+operation: "CudnnConvolutionAddRelu"
+description: "CuDNN Fused Convolution Add ReLU."
+std_args: 
+  - "input"
+  - "weight"
+  - "z"
+  - "bias"
+variants: 
+  torch: 
+    api: "torch.cudnn_convolution_add_relu"
+  # Backend specific
+
+---
+operation: "CudnnConvolutionRelu"
+description: "CuDNN Fused Convolution ReLU."
+std_args: 
+  - "input"
+  - "weight"
+  - "bias"
+variants: 
+  torch: 
+    api: "torch.cudnn_convolution_relu"
+  # Backend specific
+
+---
+operation: "CudnnConvolutionTranspose"
+description: "CuDNN Transposed Convolution."
+std_args: 
+  - "input"
+  - "weight"
+variants: 
+  torch: 
+    api: "torch.cudnn_convolution_transpose"
+  # Backend specific
+
+---
+operation: "CudnnGridSampler"
+description: "CuDNN Grid Sampler."
+std_args: 
+  - "input"
+  - "grid"
+variants: 
+  torch: 
+    api: "torch.cudnn_grid_sampler"
+  # Backend specific
+
+---
+operation: "CudnnIsAcceptable"
+description: "Check if tensor is acceptable for CuDNN."
+std_args: 
+  - "tensor"
+variants: 
+  torch: 
+    api: "torch.cudnn_is_acceptable"
+  # Backend specific
+
+---
+operation: "Cummax"
+description: "Returns a tuple (values, indices) where values is the cumulative maximum."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+variants: 
+  torch: 
+    api: "torch.cummax"
+  jax: 
+    api: "jax.numpy.maximum.accumulate"
+    args: 
+      input: "array"
+      dim: "axis"
+    # JAX returns only values, not indices. This variant is partial. 
+    # Use output_select_index only if wrapping a tuple return, but here targets return singleton. 
+  flax_nnx: 
+    api: "jax.numpy.maximum.accumulate"
+    args: 
+      input: "array"
+      dim: "axis"
+  paxml: 
+    api: "jax.numpy.maximum.accumulate"
+    args: 
+      input: "array"
+      dim: "axis"
+  numpy: 
+    api: "numpy.maximum.accumulate"
+    args: 
+      input: "array"
+      dim: "axis"
+
+---
+operation: "Cummin"
+description: "Returns a tuple (values, indices) where values is the cumulative minimum."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+variants: 
+  torch: 
+    api: "torch.cummin"
+  jax: 
+    api: "jax.numpy.minimum.accumulate"
+    args: 
+      input: "array"
+      dim: "axis"
+  flax_nnx: 
+    api: "jax.numpy.minimum.accumulate"
+    args: 
+      input: "array"
+      dim: "axis"
+  paxml: 
+    api: "jax.numpy.minimum.accumulate"
+    args: 
+      input: "array"
+      dim: "axis"
+  numpy: 
+    api: "numpy.minimum.accumulate"
+    args: 
+      input: "array"
+      dim: "axis"
+
+---
+operation: "Cumprod"
+description: "Returns the cumulative product."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants: 
+  torch: 
+    api: "torch.cumprod"
+  jax: 
+    api: "jax.numpy.cumprod"
+    args: 
+      dim: "axis"
+  flax_nnx: 
+    api: "jax.numpy.cumprod"
+    args: 
+      dim: "axis"
+  paxml: 
+    api: "jax.numpy.cumprod"
+    args: 
+      dim: "axis"
+  keras: 
+    api: "keras.ops.cumprod"
+    args: 
+      dim: "axis"
+  tensorflow: 
+    api: "tf.math.cumprod"
+    args: 
+      dim: "axis"
+  numpy: 
+    api: "numpy.cumprod"
+    args: 
+      dim: "axis"
+  mlx: 
+    api: "mlx.core.cumprod"
+    args: 
+      dim: "axis"
+
+---
+operation: "Cumsum"
+description: "Returns the cumulative sum."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants: 
+  torch: 
+    api: "torch.cumsum"
+  jax: 
+    api: "jax.numpy.cumsum"
+    args: 
+      dim: "axis"
+  flax_nnx: 
+    api: "jax.numpy.cumsum"
+    args: 
+      dim: "axis"
+  paxml: 
+    api: "jax.numpy.cumsum"
+    args: 
+      dim: "axis"
+  keras: 
+    api: "keras.ops.cumsum"
+    args: 
+      dim: "axis"
+  tensorflow: 
+    api: "tf.math.cumsum"
+    args: 
+      dim: "axis"
+  numpy: 
+    api: "numpy.cumsum"
+    args: 
+      dim: "axis"
+  mlx: 
+    api: "mlx.core.cumsum"
+    args: 
+      dim: "axis"
+
+---
+operation: "CumulativeTrapezoid"
+description: "Cumulatively computes the trapezoidal rule."
+std_args: 
+  - name: "y"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+    default: null
+  - name: "dx"
+    type: "float"
+    default: null
+  - name: "dim"
+    type: "int"
+    default: -1
+variants: 
+  torch: 
+    api: "torch.cumulative_trapezoid"
+  jax: 
+    api: "jax.scipy.integrate.cumulative_trapezoid"
+    args: 
+      dim: "axis"
+  flax_nnx: 
+    api: "jax.scipy.integrate.cumulative_trapezoid"
+    args: 
+      dim: "axis"
+  paxml: 
+    api: "jax.scipy.integrate.cumulative_trapezoid"
+    args: 
+      dim: "axis"
+  numpy: 
+    api: "scipy.integrate.cumulative_trapezoid"
+    args: 
+      dim: "axis"
+    required_imports: 
+      - module: "scipy.integrate"
+  tensorflow: 
+    api: "tfp.math.trapz"
+    required_imports: 
+      - module: "tensorflow_probability"
+        alias: "tfp"
+
+---
+operation: "DefaultGenerator"
+description: "Returns the default random number generator."
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.default_generator"
+  # No equivalent in functional frameworks
+
+---
+operation: "Deg2rad"
+description: "Returns a new tensor with each of the elements of input converted from angles in degrees to radians."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+variants: 
+  torch: 
+    api: "torch.deg2rad"
+  jax: 
+    api: "jax.numpy.deg2rad"
+    args: 
+      input: "x"
+  flax_nnx: 
+    api: "jax.numpy.deg2rad"
+    args: 
+      input: "x"
+  paxml: 
+    api: "jax.numpy.deg2rad"
+    args: 
+      input: "x"
+  numpy: 
+    api: "numpy.deg2rad"
+    args: 
+      input: "x"
+  tensorflow: 
+    api: "tf.math.multiply"
+    macro_template: "{input} * (3.141592653589793 / 180.0)" 
+  mlx: 
+    api: "mlx.core.multiply" 
+    macro_template: "{input} * (3.141592653589793 / 180.0)"

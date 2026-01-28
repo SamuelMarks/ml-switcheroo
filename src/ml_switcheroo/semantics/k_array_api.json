@@ -28,11 +28,6 @@
       ]
     ]
   },
-  "absolute": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "acos": {
     "description": "Calculates an implementation-dependent approximation of the principal value of the inverse cosine for each element ``x_i`` of the input array ``x``.",
     "from": "_2024_12/elementwise_functions.py",
@@ -106,11 +101,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "attribute"
-  },
-  "addressable_data": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "align_corners": {
     "description": "Auto-generated from mlx_code_defs",
@@ -229,41 +219,6 @@
       ]
     ]
   },
-  "arccos": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "arccosh": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "arcsin": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "arcsinh": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "arctan": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "arctan2": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "arctanh": {
-    "description": "Auto-generated from keras_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "argmax": {
     "description": "Returns the indices of the maximum values along a specified axis.",
     "from": "_2024_12/searching_functions.py",
@@ -334,11 +289,6 @@
     "variants": {}
   },
   "array_equal": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "array_equiv": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "function"
@@ -551,6 +501,11 @@
     "std_args": [],
     "type": "function"
   },
+  "binary_crossentropy": {
+    "description": "Auto-generated from jax_code_defs",
+    "std_args": [],
+    "type": "function"
+  },
   "binomial": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -720,7 +675,7 @@
     "type": "function"
   },
   "categorical_crossentropy": {
-    "description": "Auto-generated from keras_code_defs",
+    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "function"
   },
@@ -840,11 +795,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "attribute"
-  },
-  "complex_": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "class"
   },
   "compute_mask": {
     "description": "Auto-generated from keras_code_defs",
@@ -969,11 +919,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "attribute"
-  },
-  "copy_to_host_async": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "copysign": {
     "description": "Composes a floating-point value with the magnitude of ``x1_i`` and the sign of ``x2_i`` for each element of the input array ``x1``.",
@@ -1102,6 +1047,7 @@
   },
   "cumulative_prod": {
     "description": "Calculates the cumulative product of elements in the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
     "std_args": [
       [
         "x",
@@ -1119,11 +1065,11 @@
         "include_initial",
         "bool"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "cumulative_sum": {
     "description": "Calculates the cumulative sum of elements in the input array ``x``.",
+    "from": "_2024_12/statistical_functions.py",
     "std_args": [
       [
         "x",
@@ -1141,8 +1087,7 @@
         "include_initial",
         "bool"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "custom_gradient": {
     "description": "Auto-generated from keras_code_defs",
@@ -1214,16 +1159,6 @@
     "from": "_2024_12/info.py",
     "std_args": []
   },
-  "diag_indices": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "diag_indices_from": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "diagonal": {
     "description": "Returns the specified diagonals of a matrix (or a stack of matrices) ``x``.",
     "from": "_2024_12/linalg.py",
@@ -1263,11 +1198,6 @@
         "Optional[array]"
       ]
     ]
-  },
-  "digamma": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "attribute"
   },
   "dilation": {
     "description": "Auto-generated from mlx_code_defs",
@@ -1468,11 +1398,6 @@
       ]
     ]
   },
-  "erfc": {
-    "description": "Auto-generated from mlx_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "erfcx": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
@@ -1666,11 +1591,6 @@
         "Optional[Union[int, Sequence[int]]]"
       ]
     ],
-    "type": "function"
-  },
-  "fill_diagonal": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
     "type": "function"
   },
   "filters": {
@@ -1873,11 +1793,6 @@
     "std_args": [],
     "type": "function"
   },
-  "get_printoptions": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "glorot_normal": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -2009,11 +1924,6 @@
     "type": "attribute"
   },
   "hinge_loss": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "histogram_bin_edges": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "function"
@@ -2195,21 +2105,6 @@
   },
   "int": {
     "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "int2": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
-  "int4": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
-  "int_": {
-    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "attribute"
   },
@@ -2745,11 +2640,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "mask_indices": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "mask_mod": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -3105,11 +2995,6 @@
     "std_args": [],
     "type": "class"
   },
-  "ndim": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "negative": {
     "description": "Computes the numerical negative of each element ``x_i`` (i.e., ``y_i = -x_i``) of the input array ``x``.",
     "from": "_2024_12/elementwise_functions.py",
@@ -3127,11 +3012,13 @@
   },
   "newaxis": {
     "description": "An alias for ``None`` which is useful for indexing arrays.",
+    "from": "_2024_12/constants.py",
     "std_args": [],
-    "type": "attribute"
+    "variants": {}
   },
   "nextafter": {
     "description": "Returns the next representable floating-point value for each element ``x1_i`` of the input array ``x1`` in the direction of the respective element ``x2_i`` of the input array ``x2``.",
+    "from": "_2024_12/elementwise_functions.py",
     "std_args": [
       [
         "x1",
@@ -3141,8 +3028,7 @@
         "x2",
         "Union[array, int, float]"
       ]
-    ],
-    "type": "attribute"
+    ]
   },
   "nll_loss": {
     "description": "Auto-generated from mlx_code_defs",
@@ -3404,29 +3290,31 @@
     "type": "function"
   },
   "permute_dims": {
-    "description": "Permutes the axes (dimensions) of an array ``x``.",
+    "description": "Definition for permute_dims",
+    "operation": "permute_dims",
     "std_args": [
-      [
-        "x",
-        "array"
-      ],
-      [
-        "axes",
-        "Tuple[int, Ellipsis]"
-      ]
+      "x",
+      {
+        "is_variadic": true,
+        "name": "axes"
+      }
     ],
-    "type": "function"
+    "variants": {
+      "jax": {
+        "api": "jnp.transpose",
+        "pack_to_tuple": "axes"
+      },
+      "numpy": {
+        "api": "numpy.transpose",
+        "pack_to_tuple": "axes"
+      }
+    }
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
     "from": "_2024_12/constants.py",
     "std_args": [],
     "variants": {}
-  },
-  "piecewise": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "piecewise_constant_schedule": {
     "description": "Auto-generated from jax_code_defs",
@@ -3451,16 +3339,6 @@
       ]
     ],
     "type": "function"
-  },
-  "place": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "poisson": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "attribute"
   },
   "polar": {
     "description": "Auto-generated from keras_code_defs",
@@ -3533,11 +3411,6 @@
       ]
     ]
   },
-  "promote_types": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "psi": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -3574,11 +3447,6 @@
   },
   "rank": {
     "description": "Auto-generated from mlx_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "ravel_multi_index": {
-    "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "function"
   },
@@ -3694,8 +3562,8 @@
   },
   "result_type": {
     "description": "Returns the dtype that results from applying type promotion rules (see :ref:`type-promotion`) to the arguments.",
-    "std_args": [],
-    "type": "function"
+    "from": "_2024_12/data_type_functions.py",
+    "std_args": []
   },
   "rfft": {
     "description": "Computes the one-dimensional discrete Fourier transform for real-valued input.",
@@ -3912,11 +3780,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "type": "attribute"
-  },
-  "set_printoptions": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "sgdr_schedule": {
     "description": "Auto-generated from jax_code_defs",
@@ -4407,11 +4270,6 @@
     "std_args": [],
     "type": "function"
   },
-  "to_device": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "tolist": {
     "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
@@ -4499,21 +4357,6 @@
       ]
     ]
   },
-  "tril_indices": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "tril_indices_from": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "trim_zeros": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "triu": {
     "description": "Returns the upper triangular part of a matrix (or a stack of matrices) ``x``.",
     "from": "_2024_12/creation_functions.py",
@@ -4527,16 +4370,6 @@
         "int"
       ]
     ]
-  },
-  "triu_indices": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "triu_indices_from": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "true_divide": {
     "description": "Auto-generated from keras_code_defs",
@@ -4580,43 +4413,43 @@
   },
   "unique_all": {
     "description": "Returns the unique elements of an input array ``x``, the first occurring indices for each unique element in ``x``, the indices from the set of unique elements that reconstruct ``x``, and the corresponding counts for each unique element in ``x``.",
+    "from": "_2024_12/set_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "unique_counts": {
     "description": "Returns the unique elements of an input array ``x`` and the corresponding counts for each unique element in ``x``.",
+    "from": "_2024_12/set_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "unique_inverse": {
     "description": "Returns the unique elements of an input array ``x`` and the indices from the set of unique elements that reconstruct ``x``.",
+    "from": "_2024_12/set_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "unique_values": {
     "description": "Returns the unique elements of an input array ``x``.",
+    "from": "_2024_12/set_functions.py",
     "std_args": [
       [
         "x",
         "array"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "unravel_index": {
     "description": "Auto-generated from jax_code_defs",
@@ -4844,11 +4677,6 @@
   },
   "xavier_uniform": {
     "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "xlog1py": {
-    "description": "Auto-generated from mlx_code_defs",
     "std_args": [],
     "type": "attribute"
   },

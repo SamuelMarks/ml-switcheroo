@@ -1,0 +1,818 @@
+operation: "Fabs"
+description: "Compute the absolute values element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.fabs"
+  torch:
+    api: "torch.abs"
+  jax:
+    api: "jax.numpy.fabs"
+  flax_nnx:
+    api: "jax.numpy.fabs"
+  paxml:
+    api: "jax.numpy.fabs"
+  keras:
+    api: "keras.ops.abs"
+  tensorflow:
+    api: "tf.math.abs"
+  mlx:
+    api: "mlx.core.abs"
+
+---
+operation: "FillDiagonal"
+description: "Fill the main diagonal of the given array of any dimensionality."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "val"
+    type: "Any"
+  - name: "wrap"
+    type: "bool"
+    default: false
+is_inplace: true
+variants:
+  numpy:
+    api: "numpy.fill_diagonal"
+  torch:
+    api: "torch.Tensor.fill_diagonal_"
+    args:
+      a: null # Method receiver
+      val: "fill_value"
+      wrap: "wrap"
+  jax: null # Immutable arrays
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow:
+    api: "tf.linalg.set_diag"
+    args:
+      a: "input"
+      val: "diagonal"
+      wrap: null
+  mlx: null
+
+---
+operation: "Finfo"
+description: "Machine limits for floating point types."
+std_args:
+  - name: "dtype"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.finfo"
+  torch:
+    api: "torch.finfo"
+  jax:
+    api: "jax.numpy.finfo"
+  flax_nnx:
+    api: "jax.numpy.finfo"
+  paxml:
+    api: "jax.numpy.finfo"
+  keras: null
+  tensorflow:
+    api: "tf.experimental.numpy.finfo"
+  mlx: null
+
+---
+operation: "Fix"
+description: "Round to nearest integer towards zero."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.fix"
+  torch:
+    api: "torch.fix"
+  jax:
+    api: "jax.numpy.fix"
+  flax_nnx:
+    api: "jax.numpy.fix"
+  paxml:
+    api: "jax.numpy.fix"
+  keras: null
+  tensorflow:
+    api: "tf.math.truncate" # Equivalent semantics
+  mlx: null
+
+---
+operation: "Flatnonzero"
+description: "Return indices that are non-zero in the flattened version of a."
+std_args:
+  - name: "a"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.flatnonzero"
+  torch:
+    macro_template: "torch.nonzero({a}.flatten(), as_tuple=True)[0]"
+  jax:
+    api: "jax.numpy.flatnonzero"
+  flax_nnx:
+    api: "jax.numpy.flatnonzero"
+  paxml:
+    api: "jax.numpy.flatnonzero"
+  keras: null
+  tensorflow: null
+  mlx: null
+
+---
+operation: "Flip"
+description: "Reverse the order of elements in an array along the given axis."
+std_args:
+  - name: "m"
+    type: "Array"
+  - name: "axis"
+    type: "int | Tuple[int] | None"
+    default: null
+variants:
+  numpy:
+    api: "numpy.flip"
+  torch:
+    api: "torch.flip"
+    args:
+      m: "input"
+      axis: "dims"
+  jax:
+    api: "jax.numpy.flip"
+  flax_nnx:
+    api: "jax.numpy.flip"
+  paxml:
+    api: "jax.numpy.flip"
+  keras:
+    api: "keras.ops.flip"
+  tensorflow:
+    api: "tf.reverse"
+    args:
+      m: "tensor"
+      axis: "axis"
+  mlx: null
+
+---
+operation: "Fliplr"
+description: "Reverse the order of elements along axis 1 (left/right)."
+std_args:
+  - name: "m"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.fliplr"
+  torch:
+    api: "torch.fliplr"
+    args:
+      m: "input"
+  jax:
+    api: "jax.numpy.fliplr"
+  flax_nnx:
+    api: "jax.numpy.fliplr"
+  paxml:
+    api: "jax.numpy.fliplr"
+  keras: null
+  tensorflow:
+    macro_template: "tf.reverse({m}, axis=[1])"
+  mlx: null
+
+---
+operation: "Flipud"
+description: "Reverse the order of elements along axis 0 (up/down)."
+std_args:
+  - name: "m"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.flipud"
+  torch:
+    api: "torch.flipud"
+    args:
+      m: "input"
+  jax:
+    api: "jax.numpy.flipud"
+  flax_nnx:
+    api: "jax.numpy.flipud"
+  paxml:
+    api: "jax.numpy.flipud"
+  keras: null
+  tensorflow:
+    macro_template: "tf.reverse({m}, axis=[0])"
+  mlx: null
+
+---
+operation: "FloatPower"
+description: "First array elements raised to powers from second array, element-wise."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.float_power"
+  torch:
+    api: "torch.pow"
+    args:
+      x1: "input"
+      x2: "exponent"
+  jax:
+    api: "jax.numpy.float_power"
+  flax_nnx:
+    api: "jax.numpy.float_power"
+  paxml:
+    api: "jax.numpy.float_power"
+  keras:
+    api: "keras.ops.power"
+  tensorflow:
+    api: "tf.math.pow"
+  mlx:
+    api: "mlx.core.power"
+
+---
+operation: "Floor"
+description: "Return the floor of the input, element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.floor"
+  torch:
+    api: "torch.floor"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.floor"
+  flax_nnx:
+    api: "jax.numpy.floor"
+  paxml:
+    api: "jax.numpy.floor"
+  keras:
+    api: "keras.ops.floor"
+  tensorflow:
+    api: "tf.math.floor"
+  mlx:
+    api: "mlx.core.floor"
+
+---
+operation: "FloorDivide"
+description: "Return the largest integer smaller or equal to the division of the inputs."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.floor_divide"
+  torch:
+    api: "torch.floor_divide"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.floor_divide"
+  flax_nnx:
+    api: "jax.numpy.floor_divide"
+  paxml:
+    api: "jax.numpy.floor_divide"
+  keras:
+    api: "keras.ops.floor_divide"
+  tensorflow:
+    api: "tf.math.floordiv"
+  mlx:
+    api: "mlx.core.floor_divide"
+
+---
+operation: "Fmax"
+description: "Element-wise maximum of array elements."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.fmax"
+  torch:
+    api: "torch.fmax"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.fmax"
+  flax_nnx:
+    api: "jax.numpy.fmax"
+  paxml:
+    api: "jax.numpy.fmax"
+  keras:
+    api: "keras.ops.maximum"
+  tensorflow:
+    api: "tf.math.maximum"
+  mlx:
+    api: "mlx.core.maximum"
+
+---
+operation: "Fmin"
+description: "Element-wise minimum of array elements."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.fmin"
+  torch:
+    api: "torch.fmin"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.fmin"
+  flax_nnx:
+    api: "jax.numpy.fmin"
+  paxml:
+    api: "jax.numpy.fmin"
+  keras:
+    api: "keras.ops.minimum"
+  tensorflow:
+    api: "tf.math.minimum"
+  mlx:
+    api: "mlx.core.minimum"
+
+---
+operation: "Fmod"
+description: "Returns the element-wise remainder of division."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.fmod"
+  torch:
+    api: "torch.fmod"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.fmod"
+  flax_nnx:
+    api: "jax.numpy.fmod"
+  paxml:
+    api: "jax.numpy.fmod"
+  keras:
+    api: "keras.ops.mod" # Usually implements remainder, verify semantics
+  tensorflow:
+    api: "tf.math.floormod"
+  mlx:
+    api: "mlx.core.remainder"
+
+---
+operation: "Frexp"
+description: "Decompose the elements of x into mantissa and twos exponent."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.frexp"
+  torch:
+    api: "torch.frexp"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.frexp"
+  flax_nnx:
+    api: "jax.numpy.frexp"
+  paxml:
+    api: "jax.numpy.frexp"
+  keras: null
+  tensorflow: null
+  mlx: null
+
+---
+operation: "FromDlpack"
+description: "Create a NumPy array from an object implementing the __dlpack__ protocol."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.from_dlpack"
+  torch:
+    api: "torch.from_dlpack"
+    args:
+      x: "obj"
+  jax:
+    api: "jax.dlpack.from_dlpack"
+  flax_nnx:
+    api: "jax.dlpack.from_dlpack"
+  paxml:
+    api: "jax.dlpack.from_dlpack"
+  keras: null
+  tensorflow:
+    api: "tf.experimental.dlpack.from_dlpack"
+  mlx: null
+
+---
+operation: "FromBuffer"
+description: "Interpret a buffer as a 1-dimensional array."
+std_args:
+  - name: "buffer"
+    type: "Any"
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "count"
+    type: "int"
+    default: -1
+  - name: "offset"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.frombuffer"
+  torch:
+    api: "torch.frombuffer"
+    args:
+      buffer: "view"
+      dtype: "dtype"
+      count: "count"
+      offset: "offset"
+  jax:
+    api: "jax.numpy.frombuffer"
+  flax_nnx:
+    api: "jax.numpy.frombuffer"
+  paxml:
+    api: "jax.numpy.frombuffer"
+  keras: null
+  tensorflow: null
+  mlx: null
+
+---
+operation: "FromFile"
+description: "Construct an array from data in a text or binary file."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "count"
+    type: "int"
+    default: -1
+  - name: "sep"
+    type: "str"
+    default: ""
+  - name: "offset"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.fromfile"
+  torch:
+    api: "torch.from_file" # Limited signature: filename, shared, size, dtype
+    # Torch doesn't support sep/offset in same way
+    requires_plugin: null
+  jax:
+    api: "jax.numpy.fromfile"
+  flax_nnx:
+    api: "jax.numpy.fromfile"
+  paxml:
+    api: "jax.numpy.fromfile"
+  keras: null
+  tensorflow: null
+  mlx: null
+
+---
+operation: "FromFunction"
+description: "Construct an array by executing a function over each coordinate."
+std_args:
+  - name: "function"
+    type: "Callable"
+  - name: "shape"
+    type: "Tuple[int]"
+  - name: "dtype"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.fromfunction"
+  torch: null
+  jax:
+    api: "jax.numpy.fromfunction"
+  flax_nnx:
+    api: "jax.numpy.fromfunction"
+  paxml:
+    api: "jax.numpy.fromfunction"
+  keras: null
+  tensorflow: null
+  mlx: null
+
+---
+operation: "ConstructFloat32"
+description: "Constructor/Cast for Float32."
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.float32"
+  torch:
+    api: "torch.tensor" # Maps to tensor(val, dtype=float32)
+    inject_args: { "dtype": "torch.float32" }
+  jax:
+    api: "jax.numpy.float32"
+  flax_nnx:
+    api: "jax.numpy.float32"
+  paxml:
+    api: "jax.numpy.float32"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    inject_args: { "dtype": "float32" }
+  tensorflow:
+    api: "tf.constant"
+    inject_args: { "dtype": "tf.float32" }
+  mlx:
+    api: "mlx.core.array"
+    inject_args: { "dtype": "mlx.core.float32" }
+
+---
+operation: "ConstructFloat64"
+description: "Constructor/Cast for Float64."
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.float64"
+  torch:
+    api: "torch.tensor"
+    inject_args: { "dtype": "torch.float64" }
+  jax:
+    api: "jax.numpy.float64"
+  flax_nnx:
+    api: "jax.numpy.float64"
+  paxml:
+    api: "jax.numpy.float64"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    inject_args: { "dtype": "float64" }
+  tensorflow:
+    api: "tf.constant"
+    inject_args: { "dtype": "tf.float64" }
+  mlx: null 
+
+---
+operation: "ConstructFloat16"
+description: "Constructor/Cast for Float16."
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.float16"
+  torch:
+    api: "torch.tensor"
+    inject_args: { "dtype": "torch.float16" }
+  jax:
+    api: "jax.numpy.float16"
+  flax_nnx:
+    api: "jax.numpy.float16"
+  paxml:
+    api: "jax.numpy.float16"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    inject_args: { "dtype": "float16" }
+  tensorflow:
+    api: "tf.constant"
+    inject_args: { "dtype": "tf.float16" }
+  mlx:
+    api: "mlx.core.array"
+    inject_args: { "dtype": "mlx.core.float16" }
+
+---
+operation: "FormatFloatPositional"
+description: "Format a floating-point scalar as a decimal string in positional notation."
+std_args:
+  - name: "x"
+    type: "float"
+  - name: "precision"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.format_float_positional"
+  torch: null
+  jax:
+    api: "jax.numpy.format_float_positional"
+  flax_nnx:
+    api: "jax.numpy.format_float_positional"
+  paxml:
+    api: "jax.numpy.format_float_positional"
+  keras: null
+  tensorflow: null
+  mlx: null
+
+---
+operation: "FormatFloatScientific"
+description: "Format a floating-point scalar as a decimal string in scientific notation."
+std_args:
+  - name: "x"
+    type: "float"
+  - name: "precision"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.format_float_scientific"
+  torch: null
+  jax:
+    api: "jax.numpy.format_float_scientific"
+  flax_nnx:
+    api: "jax.numpy.format_float_scientific"
+  paxml:
+    api: "jax.numpy.format_float_scientific"
+  keras: null
+  tensorflow: null
+  mlx: null
+
+---
+operation: "FromIter"
+description: "Create a new 1-dimensional array from an iterable object."
+std_args:
+  - name: "iter"
+    type: "Iterable"
+  - name: "dtype"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.fromiter"
+  torch:
+    macro_template: "torch.tensor(list({iter}))"
+  jax:
+    api: "jax.numpy.fromiter"
+  flax_nnx:
+    api: "jax.numpy.fromiter"
+  paxml:
+    api: "jax.numpy.fromiter"
+  keras:
+    macro_template: "keras.ops.convert_to_tensor(list({iter}))"
+  tensorflow:
+    api: "tf.constant"
+  mlx:
+    api: "mlx.core.array"
+
+---
+operation: "FromRegex"
+description: "Construct an array from a text file, using regular expression parsing."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "regexp"
+    type: "str"
+  - name: "dtype"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.fromregex"
+  torch: null
+  jax: null
+  flax_nnx: null
+  paxml: null
+  keras: null
+  tensorflow: null
+  mlx: null
+
+---
+operation: "FullLike"
+description: "Return a new array with the same shape and type as a given array, filled with fill_value."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "fill_value"
+    type: "Any"
+  - name: "dtype"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.full_like"
+  torch:
+    api: "torch.full_like"
+    args:
+      a: "input"
+      fill_value: "fill_value"
+  jax:
+    api: "jax.numpy.full_like"
+  flax_nnx:
+    api: "jax.numpy.full_like"
+  paxml:
+    api: "jax.numpy.full_like"
+  keras:
+    api: "keras.ops.full_like"
+    args:
+      a: "x"
+      fill_value: "fill_value"
+  tensorflow:
+    api: "tf.fill" # Slightly different signature (dims, value)
+    macro_template: "tf.fill(tf.shape({a}), {fill_value})"
+  mlx:
+    api: "mlx.core.full" # MLX full takes (shape, val)
+    macro_template: "mlx.core.full(mlx.core.shape({a}), {fill_value})"
+
+---
+operation: "Zeros"
+description: "Return a new array of given shape and type, filled with zeros."
+std_args:
+  - name: "shape"
+    type: "Tuple[int]"
+  - name: "dtype"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.zeros"
+  torch:
+    api: "torch.zeros"
+  jax:
+    api: "jax.numpy.zeros"
+  flax_nnx:
+    api: "jax.numpy.zeros"
+  paxml:
+    api: "jax.numpy.zeros"
+  keras:
+    api: "keras.ops.zeros"
+  tensorflow:
+    api: "tf.zeros"
+  mlx:
+    api: "mlx.core.zeros"
+
+---
+operation: "Ones"
+description: "Return a new array of given shape and type, filled with ones."
+std_args:
+  - name: "shape"
+    type: "Tuple[int]"
+  - name: "dtype"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.ones"
+  torch:
+    api: "torch.ones"
+  jax:
+    api: "jax.numpy.ones"
+  flax_nnx:
+    api: "jax.numpy.ones"
+  paxml:
+    api: "jax.numpy.ones"
+  keras:
+    api: "keras.ops.ones"
+  tensorflow:
+    api: "tf.ones"
+  mlx:
+    api: "mlx.core.ones"
+
+---
+operation: "ExpandDims"
+description: "Expand the shape of an array."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+variants:
+  numpy:
+    api: "numpy.expand_dims"
+  torch:
+    api: "torch.unsqueeze"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.expand_dims"
+  flax_nnx:
+    api: "jax.numpy.expand_dims"
+  paxml:
+    api: "jax.numpy.expand_dims"
+  keras:
+    api: "keras.ops.expand_dims"
+    args:
+      a: "x"
+      axis: "axis"
+  tensorflow:
+    api: "tf.expand_dims"
+    args:
+      a: "input"
+      axis: "axis"
+  mlx:
+    api: "mlx.core.expand_dims"
+    args:
+      a: "a"
+      axis: "axis"

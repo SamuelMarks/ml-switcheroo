@@ -1,0 +1,660 @@
+operation: "GaussianNoise"
+description: "Apply additive zero-centered Gaussian noise."
+op_type: "class"
+std_args:
+  - name: "stddev"
+    type: "float"
+  - name: "seed"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.GaussianNoise"
+  tensorflow:
+    api: "tf.keras.layers.GaussianNoise"
+  torch:
+    # PyTorch usually handles noise functionally during forward, not as a layer
+    api: null
+    macro_template: "torch.nn.Dropout(p={stddev})" # Semantic approximation
+  flax_nnx:
+    api: "flax.nnx.Dropout" # Semantic approximation
+  mlx:
+    api: null
+
+---
+operation: "GlobalAveragePooling1D"
+description: "Global average pooling operation for temporal data."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+    default: null
+    options: ["channels_last", "channels_first"]
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.GlobalAveragePooling1D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalAveragePooling1D"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool1d"
+    inject_args:
+      output_size: 1
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+    args:
+      data_format: null
+  mlx:
+    api: null
+
+---
+operation: "GlobalAveragePooling2D"
+description: "Global average pooling operation for 2D data."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.GlobalAveragePooling2D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalAveragePooling2D"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool2d"
+    inject_args:
+      output_size: [1, 1]
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+  mlx:
+    api: "mlx.nn.AvgPool2d"
+
+---
+operation: "GlobalAveragePooling3D"
+description: "Global average pooling operation for 3D data."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.GlobalAveragePooling3D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalAveragePooling3D"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool3d"
+    inject_args:
+      output_size: [1, 1, 1]
+
+---
+operation: "GlobalAvgPool1D"
+description: "Alias for GlobalAveragePooling1D."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+  - name: "keepdims"
+    type: "bool"
+variants:
+  keras:
+    api: "keras.layers.GlobalAvgPool1D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalAvgPool1D"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool1d"
+    inject_args:
+      output_size: 1
+
+---
+operation: "GlobalAvgPool2D"
+description: "Alias for GlobalAveragePooling2D."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+  - name: "keepdims"
+    type: "bool"
+variants:
+  keras:
+    api: "keras.layers.GlobalAvgPool2D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalAvgPool2D"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool2d"
+    inject_args:
+      output_size: [1, 1]
+
+---
+operation: "GlobalAvgPool3D"
+description: "Alias for GlobalAveragePooling3D."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+  - name: "keepdims"
+    type: "bool"
+variants:
+  keras:
+    api: "keras.layers.GlobalAvgPool3D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalAvgPool3D"
+  torch:
+    api: "torch.nn.AdaptiveAvgPool3d"
+    inject_args:
+      output_size: [1, 1, 1]
+
+---
+operation: "GlobalMaxPool1D"
+description: "Global max pooling operation for temporal data."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.GlobalMaxPool1D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalMaxPool1D"
+  torch:
+    api: "torch.nn.AdaptiveMaxPool1d"
+    inject_args:
+      output_size: 1
+  flax_nnx:
+    api: "flax.nnx.MaxPool"
+  mlx:
+    api: "mlx.nn.MaxPool1d" # requires kernel/stride logic
+
+---
+operation: "GlobalMaxPool2D"
+description: "Global max pooling operation for 2D data."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.GlobalMaxPool2D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalMaxPool2D"
+  torch:
+    api: "torch.nn.AdaptiveMaxPool2d"
+    inject_args:
+      output_size: [1, 1]
+  flax_nnx:
+    api: "flax.nnx.MaxPool"
+  mlx:
+    api: "mlx.nn.MaxPool2d"
+
+---
+operation: "GlobalMaxPool3D"
+description: "Global max pooling operation for 3D data."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.GlobalMaxPool3D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalMaxPool3D"
+  torch:
+    api: "torch.nn.AdaptiveMaxPool3d"
+    inject_args:
+      output_size: [1, 1, 1]
+
+---
+operation: "GlobalMaxPooling1D"
+description: "Alias for GlobalMaxPool1D."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+  - name: "keepdims"
+    type: "bool"
+variants:
+  keras:
+    api: "keras.layers.GlobalMaxPooling1D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalMaxPooling1D"
+  torch:
+    api: "torch.nn.AdaptiveMaxPool1d"
+    inject_args:
+      output_size: 1
+
+---
+operation: "GlobalMaxPooling2D"
+description: "Alias for GlobalMaxPool2D."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+  - name: "keepdims"
+    type: "bool"
+variants:
+  keras:
+    api: "keras.layers.GlobalMaxPooling2D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalMaxPooling2D"
+  torch:
+    api: "torch.nn.AdaptiveMaxPool2d"
+    inject_args:
+      output_size: [1, 1]
+
+---
+operation: "GlobalMaxPooling3D"
+description: "Alias for GlobalMaxPool3D."
+op_type: "class"
+std_args:
+  - name: "data_format"
+    type: "str"
+  - name: "keepdims"
+    type: "bool"
+variants:
+  keras:
+    api: "keras.layers.GlobalMaxPooling3D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalMaxPooling3D"
+  torch:
+    api: "torch.nn.AdaptiveMaxPool3d"
+    inject_args:
+      output_size: [1, 1, 1]
+
+---
+operation: "GroupNormalization"
+description: "Group normalization layer."
+op_type: "class"
+std_args:
+  - name: "groups"
+    type: "int"
+    default: 32
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "epsilon"
+    type: "float"
+    default: 0.001
+  - name: "center"
+    type: "bool"
+    default: true
+  - name: "scale"
+    type: "bool"
+    default: true
+variants:
+  keras:
+    api: "keras.layers.GroupNormalization"
+  tensorflow:
+    api: "tf.keras.layers.GroupNormalization"
+  torch:
+    api: "torch.nn.GroupNorm"
+    args:
+      groups: "num_groups"
+      axis: "num_channels" # Needs partial application
+      epsilon: "eps"
+      scale: "affine"
+      center: "affine"
+  flax_nnx:
+    api: "flax.nnx.GroupNorm"
+    args:
+      groups: "num_groups"
+      epsilon: "epsilon"
+      scale: "use_scale"
+      center: "use_bias"
+  mlx:
+    api: "mlx.nn.GroupNorm"
+    args:
+      groups: "num_groups"
+      epsilon: "eps"
+      scale: "affine"
+      center: "affine"
+
+---
+operation: "GroupQueryAttention"
+description: "Grouped Query Attention layer."
+op_type: "class"
+std_args:
+  - name: "head_dim"
+    type: "int"
+  - name: "num_query_heads"
+    type: "int"
+  - name: "num_key_value_heads"
+    type: "int"
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+variants:
+  keras:
+    api: "keras.layers.GroupQueryAttention"
+  tensorflow:
+    api: "tf.keras.layers.GroupQueryAttention"
+  # Torch and Flax GQA are typically configured via MultiheadAttention parameters, not a dedicated class
+  torch: null
+  flax_nnx:
+    api: "flax.nnx.MultiHeadAttention"
+    args:
+      num_query_heads: "num_heads"
+  mlx: null
+
+---
+operation: "HashedCrossing"
+description: "A preprocessing layer which crosses features using the hashing trick."
+op_type: "class"
+std_args:
+  - name: "num_bins"
+    type: "int"
+  - name: "output_mode"
+    type: "str"
+    default: "int"
+variants:
+  keras:
+    api: "keras.layers.HashedCrossing"
+  tensorflow:
+    api: "tf.keras.layers.HashedCrossing"
+  torch: null # No direct equivalent
+
+---
+operation: "Hashing"
+description: "A preprocessing layer which hashes and bins categorical features."
+op_type: "class"
+std_args:
+  - name: "num_bins"
+    type: "int"
+  - name: "mask_value"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.Hashing"
+  tensorflow:
+    api: "tf.keras.layers.Hashing"
+  torch: null
+
+---
+operation: "Identity"
+description: "Identity layer. Returns inputs as output."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.layers.Identity"
+  tensorflow:
+    api: "tf.keras.layers.Identity"
+  torch:
+    api: "torch.nn.Identity"
+  flax_nnx:
+    api: "flax.nnx.Identity" # Placeholder, typically lambda x: x
+    macro_template: "lambda x: x"
+  mlx:
+    api: "mlx.nn.Identity"
+
+---
+operation: "Input"
+description: "Used to instantiate a Keras tensor."
+op_type: "function"
+std_args:
+  - name: "shape"
+    type: "tuple"
+    default: null
+  - name: "batch_size"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.Input"
+  tensorflow:
+    api: "tf.keras.layers.Input"
+  torch: null # Symbolic inputs are Keras specific
+
+---
+operation: "InputLayer"
+description: "Layer to be used as an entry point into a Network."
+op_type: "class"
+std_args:
+  - name: "input_shape"
+    type: "tuple"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.InputLayer"
+  tensorflow:
+    api: "tf.keras.layers.InputLayer"
+  torch: null
+
+---
+operation: "InputSpec"
+description: "Specifies the rank, dtype and shape of every input to a layer."
+op_type: "class"
+std_args:
+  - name: "dtype"
+    type: "str"
+    default: null
+  - name: "shape"
+    type: "tuple"
+    default: null
+  - name: "ndim"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.InputSpec"
+  tensorflow:
+    api: "tf.keras.layers.InputSpec"
+  torch: null
+
+---
+operation: "IntegerLookup"
+description: "A preprocessing layer that maps integers to (possibly encoded) indices."
+op_type: "class"
+std_args:
+  - name: "max_tokens"
+    type: "int"
+    default: null
+  - name: "mask_token"
+    type: "int"
+    default: null
+variants:
+  keras:
+    api: "keras.layers.IntegerLookup"
+  tensorflow:
+    api: "tf.keras.layers.IntegerLookup"
+  torch:
+    api: "torch.nn.Embedding" # Weak mapping
+    requires_plugin: "vocab_lookup"
+
+---
+operation: "JaxLayer"
+description: "Keras Layer that wraps a JAX model."
+op_type: "class"
+std_args:
+  - name: "call_fn"
+    type: "callable"
+variants:
+  keras:
+    api: "keras.layers.JaxLayer"
+  # This is usually a bridge from Keras TO Jax, not relevant for other targets
+  torch: null
+
+---
+operation: "LSTM"
+description: "Long Short-Term Memory layer."
+op_type: "class"
+std_args:
+  - name: "units"
+    type: "int"
+  - name: "return_sequences"
+    type: "bool"
+    default: false
+  - name: "return_state"
+    type: "bool"
+    default: false
+variants:
+  keras:
+    api: "keras.layers.LSTM"
+  tensorflow:
+    api: "tf.keras.layers.LSTM"
+  torch:
+    api: "torch.nn.LSTM"
+    args:
+      units: "hidden_size"
+      return_sequences: null # Torch returns seq, state always
+      return_state: null
+    output_select_index: 0
+  flax_nnx:
+    api: "flax.nnx.LSTM"
+    args:
+      units: "features"
+  mlx:
+    api: "mlx.nn.LSTM"
+    args:
+      units: "hidden_size"
+
+---
+operation: "LSTMCell"
+description: "Cell class for the LSTM layer."
+op_type: "class"
+std_args:
+  - name: "units"
+    type: "int"
+variants:
+  keras:
+    api: "keras.layers.LSTMCell"
+  tensorflow:
+    api: "tf.keras.layers.LSTMCell"
+  torch:
+    api: "torch.nn.LSTMCell"
+    args:
+      units: "hidden_size"
+  flax_nnx:
+    api: "flax.nnx.LSTMCell"
+    args:
+      units: "features"
+
+---
+operation: "Lambda"
+description: "Wraps arbitrary expressions as a Layer object."
+op_type: "class"
+std_args:
+  - name: "function"
+    type: "callable"
+variants:
+  keras:
+    api: "keras.layers.Lambda"
+  tensorflow:
+    api: "tf.keras.layers.Lambda"
+  torch: null # Usually nn.Sequential or custom module
+
+---
+operation: "Layer"
+description: "Base class for all layers."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.layers.Layer"
+  tensorflow:
+    api: "tf.keras.layers.Layer"
+  torch:
+    api: "torch.nn.Module"
+  flax_nnx:
+    api: "flax.nnx.Module"
+  mlx:
+    api: "mlx.nn.Module"
+  paxml:
+    api: "praxis.base_layer.BaseLayer"
+
+---
+operation: "LayerNormalization"
+description: "Layer normalization layer."
+op_type: "class"
+std_args:
+  - name: "axis"
+    default: -1
+  - name: "epsilon"
+    type: "float"
+    default: 0.001
+  - name: "center"
+    type: "bool"
+    default: true
+  - name: "scale"
+    type: "bool"
+    default: true
+variants:
+  keras:
+    api: "keras.layers.LayerNormalization"
+  tensorflow:
+    api: "tf.keras.layers.LayerNormalization"
+  torch:
+    api: "torch.nn.LayerNorm"
+    args:
+      axis: "normalized_shape"
+      epsilon: "eps"
+      scale: "elementwise_affine"
+      center: "elementwise_affine"
+  flax_nnx:
+    api: "flax.nnx.LayerNorm"
+    args:
+      axis: "reduction_axes"
+      epsilon: "epsilon"
+      scale: "use_scale"
+      center: "use_bias"
+  mlx:
+    api: "mlx.nn.LayerNorm"
+    args:
+      axis: "dims"
+      epsilon: "eps"
+      scale: "affine"
+      center: "affine"
+
+---
+operation: "LeakyReLU"
+description: "Leaky version of a Rectified Linear Unit."
+op_type: "class"
+std_args:
+  - name: "negative_slope"
+    type: "float"
+    default: 0.3
+variants:
+  keras:
+    api: "keras.layers.LeakyReLU"
+  tensorflow:
+    api: "tf.keras.layers.LeakyReLU"
+  torch:
+    api: "torch.nn.LeakyReLU"
+  flax_nnx:
+    api: "flax.nnx.LeakyRelu"
+  mlx:
+    api: "mlx.nn.LeakyReLU"
+
+---
+operation: "Masking"
+description: "Masks a sequence by using a mask value to skip timesteps."
+op_type: "class"
+std_args:
+  - name: "mask_value"
+    type: "float"
+    default: 0.0
+variants:
+  keras:
+    api: "keras.layers.Masking"
+  tensorflow:
+    api: "tf.keras.layers.Masking"
+  torch: null # Explicit masking logic required

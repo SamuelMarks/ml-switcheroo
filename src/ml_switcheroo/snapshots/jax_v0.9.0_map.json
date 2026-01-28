@@ -4,11 +4,25 @@
     "Abs": {
       "api": "jnp.abs"
     },
+    "Absolute": {
+      "api": "jax.numpy.absolute",
+      "required_imports": []
+    },
+    "AccumulateN": {
+      "macro_template": "sum({inputs})",
+      "required_imports": []
+    },
     "Acos": {
       "api": "jax.numpy.acos"
     },
     "Acosh": {
       "api": "jax.numpy.acosh"
+    },
+    "ActivationLayer": {
+      "required_imports": []
+    },
+    "ActivityRegularization": {
+      "required_imports": []
     },
     "Adadelta": {
       "api": "optax.adadelta"
@@ -23,15 +37,43 @@
       "api": "optax.adam",
       "requires_plugin": "optimizer_constructor"
     },
+    "AdamW": {
+      "api": "optax.adamw",
+      "args": {
+        "beta_1": "b1",
+        "beta_2": "b2",
+        "epsilon": "eps"
+      },
+      "required_imports": []
+    },
     "Adamax": {
       "api": "optax.adamax"
     },
     "Adamw": {
-      "api": "optax.adamw"
+      "api": "optax.adamw",
+      "required_imports": []
+    },
+    "AdaptiveAveragePooling1D": {
+      "required_imports": []
+    },
+    "AdaptiveAveragePooling2D": {
+      "required_imports": []
+    },
+    "AdaptiveAveragePooling3D": {
+      "required_imports": []
     },
     "AdaptiveGradClipState": {
       "api": "optax.AdaptiveGradClipState",
       "args": {}
+    },
+    "AdaptiveMaxPooling1D": {
+      "required_imports": []
+    },
+    "AdaptiveMaxPooling2D": {
+      "required_imports": []
+    },
+    "AdaptiveMaxPooling3D": {
+      "required_imports": []
     },
     "Add": {
       "api": "optax.tree.add",
@@ -41,41 +83,42 @@
       "api": "optax.AddDecayedWeightsState",
       "args": {}
     },
+    "AddLayer": {
+      "required_imports": []
+    },
+    "AddN": {
+      "macro_template": "sum({inputs})",
+      "required_imports": []
+    },
     "AddNoiseState": {
       "api": "optax.AddNoiseState",
       "args": {}
+    },
+    "AdditiveAttention": {
+      "required_imports": []
     },
     "Addmm": {
       "macro_template": "{alpha} * jax.numpy.dot({mat1}, {mat2}) + {beta} * {input}",
       "required_imports": []
     },
     "All": {
-      "api": "jax.numpy.ndarray.all",
-      "args": {
-        "axis": "axis",
-        "keepdims": "keepdims",
-        "out": "out",
-        "self": "self",
-        "where": "where"
-      }
+      "api": "jnp.all",
+      "required_imports": []
     },
     "AllClose": {
       "api": "optax.tree.allclose",
       "args": {}
+    },
+    "AlphaDropout": {
+      "required_imports": []
     },
     "Angle": {
       "api": "jax.numpy.angle",
       "required_imports": []
     },
     "Any": {
-      "api": "jax.numpy.ndarray.any",
-      "args": {
-        "axis": "axis",
-        "keepdims": "keepdims",
-        "out": "out",
-        "self": "self",
-        "where": "where"
-      }
+      "api": "jnp.any",
+      "required_imports": []
     },
     "Append": {
       "api": "jax.numpy.append",
@@ -89,73 +132,85 @@
       "api": "optax.ApplyIfFiniteState",
       "args": {}
     },
+    "ApproxMaxK": {
+      "api": "jax.lax.approx_max_k",
+      "required_imports": []
+    },
+    "ApproxMinK": {
+      "api": "jax.lax.approx_min_k",
+      "required_imports": []
+    },
     "Arange": {
       "api": "jax.numpy.arange",
-      "args": {
-        "device": "device",
-        "dtype": "dtype",
-        "out_sharding": "out_sharding",
-        "start": "start",
-        "step": "step",
-        "stop": "stop"
-      }
+      "required_imports": []
+    },
+    "Arccos": {
+      "api": "jax.numpy.arccos",
+      "required_imports": []
+    },
+    "Arccosh": {
+      "api": "jax.numpy.arccosh",
+      "required_imports": []
+    },
+    "Arcsin": {
+      "api": "jax.numpy.arcsin",
+      "required_imports": []
+    },
+    "Arcsinh": {
+      "api": "jax.numpy.arcsinh",
+      "required_imports": []
+    },
+    "Arctan": {
+      "api": "jax.numpy.arctan",
+      "required_imports": []
+    },
+    "Arctan2": {
+      "api": "jax.numpy.arctan2",
+      "required_imports": []
+    },
+    "Arctanh": {
+      "api": "jax.numpy.arctanh",
+      "required_imports": []
     },
     "ArgMax": {
-      "api": "jax.numpy.ndarray.argmax",
-      "args": {
-        "axis": "axis",
-        "keepdims": "keepdims",
-        "out": "out",
-        "self": "self"
-      }
+      "api": "jax.numpy.argmax"
     },
     "ArgMin": {
-      "api": "jax.numpy.ndarray.argmin",
-      "args": {
-        "axis": "axis",
-        "keepdims": "keepdims",
-        "out": "out",
-        "self": "self"
-      }
+      "api": "jax.numpy.argmin"
     },
     "ArgPartition": {
-      "api": "jax.numpy.ndarray.argpartition",
+      "api": "jax.numpy.argpartition",
       "args": {
-        "axis": "axis",
-        "kth": "kth",
-        "self": "self"
-      }
+        "x": "a"
+      },
+      "required_imports": []
     },
     "ArgSort": {
-      "api": "jax.numpy.ndarray.argsort",
+      "api": "jax.numpy.argsort",
       "args": {
-        "axis": "axis",
-        "descending": "descending",
-        "kind": "kind",
-        "order": "order",
-        "self": "self",
-        "stable": "stable"
-      }
+        "x": "a"
+      },
+      "required_imports": []
     },
     "ArgWhere": {
       "api": "jax.numpy.argwhere",
-      "args": {
-        "a": "a",
-        "fill_value": "fill_value",
-        "size": "size"
-      }
+      "required_imports": []
+    },
+    "Argmax": {
+      "api": "jax.numpy.argmax",
+      "required_imports": []
+    },
+    "Argmin": {
+      "api": "jax.numpy.argmin",
+      "required_imports": []
+    },
+    "Argsort": {
+      "api": "jax.numpy.argsort",
+      "required_imports": []
     },
     "Array": {
       "api": "jax.numpy.array",
-      "args": {
-        "copy": "copy",
-        "device": "device",
-        "dtype": "dtype",
-        "ndmin": "ndmin",
-        "object": "object",
-        "order": "order",
-        "out_sharding": "out_sharding"
-      }
+      "required_imports": []
     },
     "ArrayAt": {
       "api": "x.at",
@@ -164,10 +219,6 @@
     },
     "ArrayEqual": {
       "api": "jax.numpy.array_equal",
-      "args": {
-        "x": "a1",
-        "y": "a2"
-      },
       "required_imports": []
     },
     "ArrayEquiv": {
@@ -182,16 +233,17 @@
       "api": "jax.numpy.array_split",
       "required_imports": []
     },
+    "AsAnyArray": {
+      "api": "jax.numpy.asanyarray",
+      "required_imports": []
+    },
     "AsArray": {
       "api": "jax.numpy.asarray",
-      "args": {
-        "a": "a",
-        "copy": "copy",
-        "device": "device",
-        "dtype": "dtype",
-        "order": "order",
-        "out_sharding": "out_sharding"
-      }
+      "required_imports": []
+    },
+    "AsContiguousArray": {
+      "api": "jax.numpy.ascontiguousarray",
+      "required_imports": []
     },
     "AsStrided": {
       "missing_message": "JAX does not support arbitrary strided views.",
@@ -213,13 +265,8 @@
       ]
     },
     "Astype": {
-      "api": "jax.numpy.ndarray.astype",
-      "args": {
-        "copy": "copy",
-        "device": "device",
-        "dtype": "dtype",
-        "self": "self"
-      }
+      "api": "jax.numpy.astype",
+      "required_imports": []
     },
     "AsyncEval": {
       "macro_template": "[t.block_until_ready() for t in {tensors}]",
@@ -244,8 +291,8 @@
     "Atan2": {
       "api": "jax.numpy.arctan2",
       "args": {
-        "x": "x2",
-        "y": "x1"
+        "x": "x1",
+        "y": "x2"
       },
       "required_imports": []
     },
@@ -264,40 +311,86 @@
       "api": "jax.numpy.atleast_3d",
       "required_imports": []
     },
+    "AttentionLayer": {
+      "required_imports": []
+    },
+    "AugMix": {
+      "required_imports": []
+    },
+    "AutoContrast": {
+      "required_imports": []
+    },
     "Average": {
       "api": "jax.numpy.average",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "keepdims": "keepdims",
-        "returned": "returned",
-        "weights": "weights"
-      }
+      "required_imports": []
+    },
+    "AverageLayer": {
+      "required_imports": []
+    },
+    "AveragePooling1D": {
+      "required_imports": []
+    },
+    "AveragePooling2D": {
+      "required_imports": []
+    },
+    "AveragePooling3D": {
+      "required_imports": []
+    },
+    "AvgPool1D": {
+      "required_imports": []
+    },
+    "AvgPool2D": {
+      "required_imports": []
+    },
+    "AvgPool3D": {
+      "required_imports": []
     },
     "BFloat16": {
       "api": "jax.numpy.bfloat16",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Bartlett": {
       "api": "jax.numpy.bartlett",
-      "args": {
-        "M": "M"
-      }
+      "required_imports": []
+    },
+    "BatchNormalization": {
+      "required_imports": []
+    },
+    "BesselI0": {
+      "api": "jax.scipy.special.i0",
+      "required_imports": []
+    },
+    "BesselI0e": {
+      "api": "jax.scipy.special.i0e",
+      "required_imports": []
+    },
+    "BesselI1": {
+      "api": "jax.scipy.special.i1",
+      "required_imports": []
+    },
+    "BesselI1e": {
+      "api": "jax.scipy.special.i1e",
+      "required_imports": []
+    },
+    "Betainc": {
+      "api": "jax.scipy.special.betainc",
+      "required_imports": []
     },
     "Bfloat16": {
       "api": "jax.numpy.bfloat16",
       "required_imports": []
     },
+    "Bidirectional": {
+      "required_imports": []
+    },
     "Bincount": {
       "api": "jax.numpy.bincount",
       "args": {
-        "length": "length",
+        "arr": "x",
         "minlength": "minlength",
-        "weights": "weights",
-        "x": "x"
-      }
+        "weights": "weights"
+      },
+      "required_imports": []
     },
     "BitCast": {
       "api": "jax.lax.bitcast_convert_type",
@@ -341,19 +434,15 @@
     },
     "Blackman": {
       "api": "jax.numpy.blackman",
-      "args": {
-        "M": "M"
-      }
+      "required_imports": []
     },
     "Block": {
       "api": "jax.numpy.block",
       "required_imports": []
     },
     "Bool": {
-      "api": "jax.numpy.bool",
-      "args": {
-        "x": "x"
-      }
+      "api": "jax.numpy.bool_",
+      "required_imports": []
     },
     "BroadcastArrays": {
       "api": "jax.numpy.broadcast_arrays",
@@ -365,6 +454,14 @@
     },
     "BroadcastTo": {
       "api": "jax.numpy.broadcast_to",
+      "required_imports": []
+    },
+    "CTCLoss": {
+      "api": "optax.ctc_loss",
+      "args": {
+        "y_pred": "logits",
+        "y_true": "labels"
+      },
       "required_imports": []
     },
     "CachedPartial": {
@@ -427,6 +524,10 @@
       "required_imports": [],
       "requires_plugin": "type_methods"
     },
+    "CategoryEncoding": {
+      "api": "jax.nn.one_hot",
+      "required_imports": []
+    },
     "Cbrt": {
       "api": "jax.numpy.cbrt",
       "required_imports": []
@@ -436,6 +537,9 @@
     },
     "Celu": {
       "api": "jax.nn.celu",
+      "required_imports": []
+    },
+    "CenterCrop": {
       "required_imports": []
     },
     "Checkify": {
@@ -448,13 +552,8 @@
       "transformation_type": "decorator"
     },
     "Choose": {
-      "api": "jax.numpy.ndarray.choose",
-      "args": {
-        "choices": "choices",
-        "mode": "mode",
-        "out": "out",
-        "self": "self"
-      }
+      "api": "jax.numpy.choose",
+      "required_imports": []
     },
     "Clamp": {
       "api": "jax.numpy.clip",
@@ -506,17 +605,17 @@
       "api": "jax.jit",
       "required_imports": []
     },
+    "Complex": {
+      "api": "jax.numpy.complex_",
+      "required_imports": []
+    },
     "Complex128": {
       "api": "jax.numpy.complex128",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Complex64": {
       "api": "jax.numpy.complex64",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "ComplexFloating": {
       "api": "jax.numpy.complexfloating"
@@ -525,34 +624,26 @@
       "api": "jax.numpy.ComplexWarning"
     },
     "Compress": {
-      "api": "jax.numpy.ndarray.compress",
-      "args": {
-        "axis": "axis",
-        "condition": "condition",
-        "fill_value": "fill_value",
-        "out": "out",
-        "self": "self",
-        "size": "size"
-      }
+      "api": "jax.numpy.compress"
     },
     "ComputeCv": {
       "api": "optax.monte_carlo.control_variates.ComputeCv",
       "args": {}
     },
     "Concat": {
-      "api": "jax.numpy.concat",
+      "api": "jax.numpy.concatenate",
       "args": {
-        "arrays": "arrays",
-        "axis": "axis"
-      }
+        "dim": "axis",
+        "tensors": "arrays"
+      },
+      "required_imports": []
     },
     "Concatenate": {
       "api": "jax.numpy.concatenate",
-      "args": {
-        "arrays": "arrays",
-        "axis": "axis",
-        "dtype": "dtype"
-      }
+      "required_imports": []
+    },
+    "ConcatenateLayer": {
+      "required_imports": []
     },
     "Cond": {
       "api": "jax.lax.cond",
@@ -566,15 +657,17 @@
       "api": "optax.ConditionallyTransformState",
       "args": {}
     },
+    "ConfusionMatrix": {
+      "required_imports": [],
+      "requires_plugin": "jax_confusion_matrix_impl"
+    },
     "Conj": {
       "api": "optax.tree.conj",
       "args": {}
     },
     "Conjugate": {
-      "api": "jax.numpy.ndarray.conjugate",
-      "args": {
-        "self": "self"
-      }
+      "api": "jax.numpy.conjugate",
+      "required_imports": []
     },
     "Contiguous": {
       "api": "jax.numpy.ascontiguousarray",
@@ -591,9 +684,21 @@
       "api": "optax.monte_carlo.control_variates.ControlVariate",
       "args": {}
     },
+    "Conv1D": {
+      "required_imports": []
+    },
+    "Conv1DTranspose": {
+      "required_imports": []
+    },
     "Conv1d": {
       "api": "jax.lax.conv_general_dilated",
       "missing_message": "JAX Core conv1d requires explicit dimension strings.",
+      "required_imports": []
+    },
+    "Conv2D": {
+      "required_imports": []
+    },
+    "Conv2DTranspose": {
       "required_imports": []
     },
     "Conv2d": {
@@ -624,10 +729,8 @@
       "required_imports": []
     },
     "Copy": {
-      "api": "jax.numpy.ndarray.copy",
-      "args": {
-        "self": "self"
-      }
+      "api": "jax.numpy.copy",
+      "required_imports": []
     },
     "Copysign": {
       "api": "jax.numpy.copysign",
@@ -651,6 +754,15 @@
       "api": "optax.cosine_decay_schedule",
       "required_imports": [],
       "requires_plugin": "scheduler_rewire"
+    },
+    "CosineSimilarityLoss": {
+      "api": "optax.cosine_similarity",
+      "args": {
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
+      "macro_template": "-optax.cosine_similarity({y_pred}, {y_true})",
+      "required_imports": []
     },
     "CountNonzero": {
       "api": "jax.numpy.count_nonzero",
@@ -679,9 +791,7 @@
     },
     "Csingle": {
       "api": "jax.numpy.csingle",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "CudaAvailable": {
       "api": "jax.devices",
@@ -702,22 +812,18 @@
       "requires_plugin": "jax_cummin_adapter"
     },
     "Cumprod": {
-      "api": "jax.numpy.ndarray.cumprod",
+      "api": "jax.numpy.cumprod",
       "args": {
-        "axis": "axis",
-        "dtype": "dtype",
-        "out": "out",
-        "self": "self"
-      }
+        "axis": "axis"
+      },
+      "required_imports": []
     },
     "Cumsum": {
-      "api": "jax.numpy.ndarray.cumsum",
+      "api": "jax.numpy.cumsum",
       "args": {
-        "axis": "axis",
-        "dtype": "dtype",
-        "out": "out",
-        "self": "self"
-      }
+        "axis": "axis"
+      },
+      "required_imports": []
     },
     "CumulativeProd": {
       "api": "jax.numpy.cumulative_prod",
@@ -746,6 +852,14 @@
       "api": "optax.monte_carlo.control_variates.CvState",
       "args": {}
     },
+    "DSplit": {
+      "api": "jax.numpy.dsplit",
+      "required_imports": []
+    },
+    "DStack": {
+      "api": "jax.numpy.dstack",
+      "required_imports": []
+    },
     "Data": {
       "required_imports": []
     },
@@ -760,6 +874,10 @@
         "import flax.struct"
       ]
     },
+    "Deg2Rad": {
+      "api": "jax.numpy.deg2rad",
+      "required_imports": []
+    },
     "Deg2rad": {
       "api": "jax.numpy.deg2rad",
       "required_imports": []
@@ -767,17 +885,16 @@
     "Degrees": {
       "api": "jax.numpy.degrees",
       "args": {
-        "x": "x"
-      }
+        "a": "x"
+      },
+      "required_imports": []
     },
     "Delete": {
       "api": "jax.numpy.delete",
-      "args": {
-        "arr": "arr",
-        "assume_unique_indices": "assume_unique_indices",
-        "axis": "axis",
-        "obj": "obj"
-      }
+      "required_imports": []
+    },
+    "DeserializeLoss": {
+      "required_imports": []
     },
     "Det": {
       "api": "jax.numpy.linalg.det"
@@ -789,10 +906,7 @@
     },
     "Diag": {
       "api": "jax.numpy.diag",
-      "args": {
-        "k": "k",
-        "v": "v"
-      }
+      "required_imports": []
     },
     "DiagIndices": {
       "api": "jax.numpy.diag_indices",
@@ -804,22 +918,25 @@
     },
     "Diagflat": {
       "api": "jax.numpy.diagflat",
-      "args": {
-        "k": "k",
-        "v": "v"
-      }
+      "required_imports": []
     },
     "Diagonal": {
-      "api": "jax.numpy.ndarray.diagonal",
+      "api": "jax.numpy.linalg.diagonal",
       "args": {
-        "axis1": "axis1",
-        "axis2": "axis2",
         "offset": "offset",
-        "self": "self"
+        "x": "x"
       }
+    },
+    "DiceLoss": {
+      "macro_template": "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))",
+      "required_imports": []
     },
     "Diff": {
       "api": "jax.numpy.diff",
+      "required_imports": []
+    },
+    "Digamma": {
+      "api": "jax.scipy.special.digamma",
       "required_imports": []
     },
     "Digitize": {
@@ -840,31 +957,23 @@
     },
     "DivMod": {
       "api": "jax.numpy.divmod",
-      "args": {
-        "a": "x1",
-        "b": "x2"
-      },
       "required_imports": []
     },
     "Divide": {
       "api": "jax.numpy.divide",
-      "args": {
-        "x1": "x1",
-        "x2": "x2"
-      }
+      "required_imports": []
+    },
+    "DivideNoNan": {
+      "macro_template": "jnp.where({y} == 0, 0, {x} / {y})",
+      "required_imports": []
     },
     "Divmod": {
       "api": "jax.numpy.divmod",
       "required_imports": []
     },
     "Dot": {
-      "api": "jax.numpy.ndarray.dot",
-      "args": {
-        "b": "b",
-        "precision": "precision",
-        "preferred_element_type": "preferred_element_type",
-        "self": "self"
-      }
+      "api": "jax.numpy.dot",
+      "required_imports": []
     },
     "DotProductAttention": {
       "api": "jax.nn.dot_product_attention",
@@ -875,23 +984,15 @@
     },
     "Double": {
       "api": "jax.numpy.double",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Dsplit": {
       "api": "jax.numpy.dsplit",
-      "args": {
-        "ary": "ary",
-        "indices_or_sections": "indices_or_sections"
-      }
+      "required_imports": []
     },
     "Dstack": {
       "api": "jax.numpy.dstack",
-      "args": {
-        "dtype": "dtype",
-        "tup": "tup"
-      }
+      "required_imports": []
     },
     "Dtype": {
       "api": "optax.tree.dtype",
@@ -899,7 +1000,7 @@
     },
     "E": {
       "api": "jax.numpy.e",
-      "args": {}
+      "required_imports": []
     },
     "Ediff1d": {
       "api": "jax.numpy.ediff1d",
@@ -923,12 +1024,7 @@
     },
     "Empty": {
       "api": "jax.numpy.empty",
-      "args": {
-        "device": "device",
-        "dtype": "dtype",
-        "out_sharding": "out_sharding",
-        "shape": "shape"
-      }
+      "required_imports": []
     },
     "EmptyLike": {
       "api": "jax.numpy.empty_like",
@@ -939,16 +1035,22 @@
     },
     "Erf": {
       "api": "jax.scipy.special.erf",
-      "args": {
-        "a": "x"
-      },
       "required_imports": []
     },
     "ErfInv": {
-      "api": "jax.scipy.special.erfinv",
-      "args": {
-        "a": "x"
-      },
+      "api": "jax.scipy.special.erf_inv",
+      "required_imports": []
+    },
+    "Erfc": {
+      "api": "jax.scipy.special.erfc",
+      "required_imports": []
+    },
+    "ErfcInv": {
+      "api": "jax.scipy.special.erfc_inv",
+      "required_imports": []
+    },
+    "EuclideanNorm": {
+      "api": "jnp.linalg.norm",
       "required_imports": []
     },
     "EulerGamma": {
@@ -978,6 +1080,9 @@
       "api": "jax.numpy.expand_dims",
       "required_imports": []
     },
+    "ExperimentalEnableNumpyBehavior": {
+      "required_imports": []
+    },
     "Expm1": {
       "api": "jax.numpy.expm1",
       "required_imports": []
@@ -988,26 +1093,14 @@
     },
     "Extract": {
       "api": "jax.numpy.extract",
-      "args": {
-        "arr": "arr",
-        "condition": "condition",
-        "fill_value": "fill_value",
-        "size": "size"
-      }
+      "required_imports": []
     },
     "Eye": {
       "api": "jax.numpy.eye",
-      "args": {
-        "M": "M",
-        "N": "N",
-        "device": "device",
-        "dtype": "dtype",
-        "k": "k"
-      }
+      "required_imports": []
     },
     "FInfo": {
-      "api": "jax.numpy.finfo",
-      "required_imports": []
+      "api": "jax.numpy.finfo"
     },
     "Fabs": {
       "api": "jax.numpy.fabs",
@@ -1025,11 +1118,12 @@
       "required_imports": []
     },
     "Finfo": {
-      "api": "jax.numpy.finfo"
+      "api": "jax.numpy.finfo",
+      "required_imports": []
     },
     "Fix": {
       "api": "jax.numpy.fix",
-      "required_imports": []
+      "args": {}
     },
     "Flatnonsense": {
       "api": "jax.numpy.flatnonzero",
@@ -1037,11 +1131,7 @@
     },
     "Flatnonzero": {
       "api": "jax.numpy.flatnonzero",
-      "args": {
-        "a": "a",
-        "fill_value": "fill_value",
-        "size": "size"
-      }
+      "required_imports": []
     },
     "Flatten": {
       "api": "optax.flatten",
@@ -1053,93 +1143,65 @@
     "Flip": {
       "api": "jax.numpy.flip",
       "args": {
-        "axis": "axis",
-        "m": "m"
-      }
+        "m": "a"
+      },
+      "required_imports": []
     },
     "Fliplr": {
       "api": "jax.numpy.fliplr",
-      "args": {
-        "m": "m"
-      }
+      "required_imports": []
     },
     "Flipud": {
       "api": "jax.numpy.flipud",
-      "args": {
-        "m": "m"
-      }
+      "required_imports": []
     },
     "Float16": {
       "api": "jax.numpy.float16",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float32": {
       "api": "jax.numpy.float32",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float4_e2m1fn": {
       "api": "jax.numpy.float4_e2m1fn",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float64": {
       "api": "jax.numpy.float64",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float8_e3m4": {
       "api": "jax.numpy.float8_e3m4",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float8_e4m3": {
       "api": "jax.numpy.float8_e4m3",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float8_e4m3b11fnuz": {
       "api": "jax.numpy.float8_e4m3b11fnuz",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float8_e4m3fn": {
       "api": "jax.numpy.float8_e4m3fn",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float8_e4m3fnuz": {
       "api": "jax.numpy.float8_e4m3fnuz",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float8_e5m2": {
       "api": "jax.numpy.float8_e5m2",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float8_e5m2fnuz": {
       "api": "jax.numpy.float8_e5m2fnuz",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Float8_e8m0fnu": {
       "api": "jax.numpy.float8_e8m0fnu",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "FloatPower": {
       "api": "jax.numpy.float_power",
@@ -1147,9 +1209,7 @@
     },
     "Float_": {
       "api": "jax.numpy.float_",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Floating": {
       "api": "jax.numpy.floating"
@@ -1159,6 +1219,10 @@
     },
     "FloorDivide": {
       "api": "jax.numpy.floor_divide",
+      "required_imports": []
+    },
+    "FloorMod": {
+      "api": "jax.numpy.remainder",
       "required_imports": []
     },
     "Fmax": {
@@ -1187,23 +1251,14 @@
     },
     "FromBuffer": {
       "api": "jax.numpy.frombuffer",
-      "args": {
-        "buffer": "buffer",
-        "count": "count",
-        "dtype": "dtype",
-        "offset": "offset"
-      }
+      "required_imports": []
     },
     "FromDlpack": {
       "api": "jax.numpy.from_dlpack",
       "required_imports": []
     },
     "FromFile": {
-      "api": "jax.numpy.fromfile",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "jax.numpy.fromfile"
     },
     "FromFlatState": {
       "api": "flax.serialization.from_state_dict",
@@ -1211,37 +1266,19 @@
     },
     "FromFunction": {
       "api": "jax.numpy.fromfunction",
-      "args": {
-        "dtype": "dtype",
-        "function": "function",
-        "kwargs": "kwargs",
-        "shape": "shape"
-      }
+      "required_imports": []
     },
     "FromIter": {
       "api": "jax.numpy.fromiter",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "required_imports": []
     },
     "FromPyFunc": {
       "api": "jax.numpy.frompyfunc",
-      "args": {
-        "func": "func",
-        "identity": "identity",
-        "nin": "nin",
-        "nout": "nout"
-      }
+      "required_imports": []
     },
     "FromString": {
       "api": "jax.numpy.fromstring",
-      "args": {
-        "count": "count",
-        "dtype": "dtype",
-        "sep": "sep",
-        "string": "string"
-      }
+      "required_imports": []
     },
     "FromTree": {
       "api": "jax.tree_util.tree_unflatten",
@@ -1249,18 +1286,10 @@
     },
     "Full": {
       "api": "jax.numpy.full",
-      "args": {
-        "device": "device",
-        "dtype": "dtype",
-        "fill_value": "fill_value",
-        "shape": "shape"
-      }
+      "required_imports": []
     },
     "FullLike": {
       "api": "jax.numpy.full_like",
-      "args": {
-        "x": "a"
-      },
       "required_imports": []
     },
     "GELU": {
@@ -1303,20 +1332,16 @@
     },
     "Geomspace": {
       "api": "jax.numpy.geomspace",
-      "args": {
-        "axis": "axis",
-        "dtype": "dtype",
-        "endpoint": "endpoint",
-        "num": "num",
-        "start": "start",
-        "stop": "stop"
-      }
+      "required_imports": []
     },
     "GetAbstractModel": {
       "required_imports": []
     },
     "GetDefaultDevice": {
       "api": "jax.default_backend",
+      "required_imports": []
+    },
+    "GetLoss": {
       "required_imports": []
     },
     "GetNamedSharding": {
@@ -1353,17 +1378,21 @@
       "api": "jax.numpy.greater_equal",
       "required_imports": []
     },
+    "HSplit": {
+      "api": "jax.numpy.hsplit",
+      "required_imports": []
+    },
+    "HStack": {
+      "api": "jax.numpy.hstack",
+      "required_imports": []
+    },
     "Hamming": {
       "api": "jax.numpy.hamming",
-      "args": {
-        "M": "M"
-      }
+      "required_imports": []
     },
     "Hanning": {
       "api": "jax.numpy.hanning",
-      "args": {
-        "M": "M"
-      }
+      "required_imports": []
     },
     "HardSigmoid": {
       "api": "jax.nn.hard_sigmoid",
@@ -1386,26 +1415,21 @@
       "api": "jax.numpy.heaviside",
       "required_imports": []
     },
+    "HingeLoss": {
+      "api": "optax.hinge_loss",
+      "args": {
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
+      "required_imports": []
+    },
     "Histogram": {
       "api": "jax.numpy.histogram",
-      "args": {
-        "a": "a",
-        "bins": "bins",
-        "density": "density",
-        "range": "range",
-        "weights": "weights"
-      }
+      "required_imports": []
     },
     "Histogram2d": {
       "api": "jax.numpy.histogram2d",
-      "args": {
-        "bins": "bins",
-        "density": "density",
-        "range": "range",
-        "weights": "weights",
-        "x": "x",
-        "y": "y"
-      }
+      "required_imports": []
     },
     "HistogramBinEdges": {
       "api": "jax.numpy.histogram_bin_edges",
@@ -1413,27 +1437,23 @@
     },
     "Histogramdd": {
       "api": "jax.numpy.histogramdd",
-      "args": {
-        "bins": "bins",
-        "density": "density",
-        "range": "range",
-        "sample": "sample",
-        "weights": "weights"
-      }
+      "required_imports": []
     },
     "Hsplit": {
       "api": "jax.numpy.hsplit",
-      "args": {
-        "ary": "ary",
-        "indices_or_sections": "indices_or_sections"
-      }
+      "required_imports": []
     },
     "Hstack": {
       "api": "jax.numpy.hstack",
+      "required_imports": []
+    },
+    "HuberLoss": {
+      "api": "optax.huber_loss",
       "args": {
-        "dtype": "dtype",
-        "tup": "tup"
-      }
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
+      "required_imports": []
     },
     "Hypot": {
       "api": "jax.numpy.hypot",
@@ -1450,11 +1470,15 @@
       "api": "jax.numpy.integer"
     },
     "Identity": {
-      "api": "jax.numpy.identity",
-      "args": {
-        "dtype": "dtype",
-        "n": "n"
-      }
+      "api": "jax.numpy.identity"
+    },
+    "Igamma": {
+      "api": "jax.scipy.special.gammainc",
+      "required_imports": []
+    },
+    "Igammac": {
+      "api": "jax.scipy.special.gammaincc",
+      "required_imports": []
     },
     "Imag": {
       "api": "jax.numpy.imag",
@@ -1463,20 +1487,20 @@
     "ImportFunction": {
       "required_imports": []
     },
+    "InTopK": {
+      "required_imports": [],
+      "requires_plugin": "in_top_k_plugin"
+    },
     "Indices": {
       "api": "jax.numpy.indices",
-      "args": {
-        "dimensions": "dimensions",
-        "dtype": "dtype",
-        "sparse": "sparse"
-      }
+      "required_imports": []
     },
     "Inexact": {
       "api": "jax.numpy.inexact"
     },
     "Inf": {
       "api": "jax.numpy.inf",
-      "args": {}
+      "required_imports": []
     },
     "InjectHyperparamsState": {
       "api": "optax.schedules.inject.InjectHyperparamsState",
@@ -1492,65 +1516,45 @@
     },
     "Insert": {
       "api": "jax.numpy.insert",
-      "args": {
-        "arr": "arr",
-        "axis": "axis",
-        "obj": "obj",
-        "values": "values"
-      }
+      "required_imports": []
     },
     "Int16": {
       "api": "jax.numpy.int16",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Int32": {
       "api": "jax.numpy.int32",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Int64": {
       "api": "jax.numpy.int64",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Int8": {
       "api": "jax.numpy.int8",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
+    },
+    "Int_": {
+      "api": "jax.numpy.int64",
+      "required_imports": []
     },
     "Integer": {
-      "api": "jax.numpy.integer",
-      "required_imports": []
+      "api": "jax.numpy.integer"
     },
     "Interp": {
       "api": "jax.numpy.interp",
-      "args": {
-        "fp": "fp",
-        "left": "left",
-        "period": "period",
-        "right": "right",
-        "x": "x",
-        "xp": "xp"
-      }
+      "required_imports": []
     },
     "Intersect1d": {
       "api": "jax.numpy.intersect1d",
-      "args": {
-        "ar1": "ar1",
-        "ar2": "ar2",
-        "assume_unique": "assume_unique",
-        "fill_value": "fill_value",
-        "return_indices": "return_indices",
-        "size": "size"
-      }
+      "required_imports": []
     },
     "Invert": {
       "api": "jax.numpy.invert",
+      "required_imports": []
+    },
+    "InvertPermutation": {
+      "api": "jax.numpy.argsort",
       "required_imports": []
     },
     "IsAvailable": {
@@ -1567,9 +1571,7 @@
     },
     "IsComplexObj": {
       "api": "jax.numpy.iscomplexobj",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "IsData": {
       "macro_template": "isinstance({value}, (jax.Array, jax.numpy.ndarray))",
@@ -1577,10 +1579,7 @@
     },
     "IsDtype": {
       "api": "jax.numpy.isdtype",
-      "args": {
-        "dtype": "dtype",
-        "kind": "kind"
-      }
+      "required_imports": []
     },
     "IsFinite": {
       "api": "jax.numpy.isfinite",
@@ -1588,13 +1587,7 @@
     },
     "IsIn": {
       "api": "jax.numpy.isin",
-      "args": {
-        "assume_unique": "assume_unique",
-        "element": "element",
-        "invert": "invert",
-        "method": "method",
-        "test_elements": "test_elements"
-      }
+      "required_imports": []
     },
     "IsInf": {
       "api": "jax.numpy.isinf",
@@ -1609,17 +1602,15 @@
     },
     "IsNegInf": {
       "api": "jax.numpy.isneginf",
-      "args": {
-        "out": "out",
-        "x": "x"
-      }
+      "required_imports": []
+    },
+    "IsNonDecreasing": {
+      "macro_template": "jnp.all({x}[1:] >= {x}[:-1])",
+      "required_imports": []
     },
     "IsPosInf": {
       "api": "jax.numpy.isposinf",
-      "args": {
-        "out": "out",
-        "x": "x"
-      }
+      "required_imports": []
     },
     "IsReal": {
       "api": "jax.numpy.isreal",
@@ -1627,22 +1618,19 @@
     },
     "IsRealObj": {
       "api": "jax.numpy.isrealobj",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "IsScalar": {
       "api": "jax.numpy.isscalar",
-      "args": {
-        "element": "element"
-      }
+      "required_imports": []
+    },
+    "IsStrictlyIncreasing": {
+      "macro_template": "jnp.all({x}[1:] > {x}[:-1])",
+      "required_imports": []
     },
     "IsSubDtype": {
       "api": "jax.numpy.issubdtype",
-      "args": {
-        "arg1": "arg1",
-        "arg2": "arg2"
-      }
+      "required_imports": []
     },
     "Isclose": {
       "api": "jax.numpy.isclose",
@@ -1658,9 +1646,7 @@
     },
     "Ix_": {
       "api": "jax.numpy.ix_",
-      "args": {
-        "args": "args"
-      }
+      "required_imports": []
     },
     "JVP": {
       "api": "jax.jvp",
@@ -1673,15 +1659,34 @@
       "api": "jax.jit",
       "required_imports": []
     },
+    "KLDivergence": {
+      "api": "optax.kl_divergence",
+      "macro_template": "optax.kl_divergence(optax.log_softmax({y_pred}), {y_true})",
+      "required_imports": []
+    },
     "Kaiser": {
       "api": "jax.numpy.kaiser",
-      "args": {
-        "M": "M",
-        "beta": "beta"
-      }
+      "required_imports": []
     },
     "Kron": {
       "api": "jax.numpy.kron",
+      "required_imports": []
+    },
+    "L2Normalize": {
+      "macro_template": "{x} / jnp.sqrt(jnp.maximum(jnp.sum({x}**2, axis={axis}, keepdims=True), {epsilon}))",
+      "required_imports": []
+    },
+    "LBeta": {
+      "macro_template": "jax.scipy.special.gammaln({x}).sum(-1) - jax.scipy.special.gammaln({x}.sum(-1))",
+      "required_imports": []
+    },
+    "Lamb": {
+      "api": "optax.lamb",
+      "args": {
+        "beta_1": "b1",
+        "beta_2": "b2",
+        "epsilon": "eps"
+      },
       "required_imports": []
     },
     "Lcm": {
@@ -1711,29 +1716,31 @@
       "api": "jax.numpy.lexsort",
       "required_imports": []
     },
+    "Lgamma": {
+      "api": "jax.lax.lgamma",
+      "required_imports": []
+    },
     "Linspace": {
       "api": "jax.numpy.linspace",
-      "args": {
-        "axis": "axis",
-        "device": "device",
-        "dtype": "dtype",
-        "endpoint": "endpoint",
-        "num": "num",
-        "retstep": "retstep",
-        "start": "start",
-        "stop": "stop"
-      }
+      "required_imports": []
     },
     "Lion": {
       "api": "optax.lion"
     },
-    "Load": {
-      "api": "jax.numpy.load",
+    "ListAdd": {
+      "api": "sum",
+      "required_imports": [],
+      "requires_plugin": "reduce_sum_list"
+    },
+    "ListConcatenate": {
+      "api": "jnp.concatenate",
       "args": {
-        "args": "args",
-        "file": "file",
-        "kwargs": "kwargs"
-      }
+        "inputs": "arrays"
+      },
+      "required_imports": []
+    },
+    "Load": {
+      "api": "jax.numpy.load"
     },
     "LoadStateDict": {
       "api": "KeyMapper.from_torch",
@@ -1748,7 +1755,7 @@
       "required_imports": []
     },
     "Log1p": {
-      "api": "jax.numpy.log1p",
+      "api": "jnp.log1p",
       "required_imports": []
     },
     "Log2": {
@@ -1756,13 +1763,26 @@
       "required_imports": []
     },
     "LogAddExp": {
-      "api": "jax.numpy.logaddexp",
+      "api": "jax.numpy.logaddexp"
+    },
+    "LogAddExp2": {
+      "api": "jax.numpy.logaddexp2"
+    },
+    "LogCoshLoss": {
+      "api": "optax.log_cosh",
+      "args": {
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
       "required_imports": []
     },
     "LogCumSumExp": {
       "api": "jax.numpy.logaddexp.accumulate",
-      "required_imports": [],
-      "requires_plugin": "ufunc_methods"
+      "args": {
+        "axis": "axis",
+        "x": "x"
+      },
+      "required_imports": []
     },
     "LogSigmoid": {
       "api": "jax.nn.log_sigmoid",
@@ -1774,9 +1794,6 @@
     },
     "LogSumExp": {
       "api": "jax.scipy.special.logsumexp",
-      "args": {
-        "x": "a"
-      },
       "required_imports": []
     },
     "Logaddexp": {
@@ -1786,7 +1803,7 @@
       "api": "jax.numpy.logaddexp2"
     },
     "LogicalAnd": {
-      "api": "jax.numpy.logical_and",
+      "api": "jnp.logical_and",
       "required_imports": []
     },
     "LogicalAxisRules": {
@@ -1795,30 +1812,20 @@
       "requires_plugin": "sharding_rules_shim"
     },
     "LogicalNot": {
-      "api": "jax.numpy.logical_not",
+      "api": "jnp.logical_not",
       "required_imports": []
     },
     "LogicalOr": {
-      "api": "jax.numpy.logical_or",
+      "api": "jnp.logical_or",
       "required_imports": []
     },
     "LogicalXor": {
-      "api": "jax.numpy.logical_xor",
-      "operator": "^",
-      "required_imports": [],
-      "transformation_type": "infix"
+      "api": "jnp.logical_xor",
+      "required_imports": []
     },
     "Logspace": {
       "api": "jax.numpy.logspace",
-      "args": {
-        "axis": "axis",
-        "base": "base",
-        "dtype": "dtype",
-        "endpoint": "endpoint",
-        "num": "num",
-        "start": "start",
-        "stop": "stop"
-      }
+      "required_imports": []
     },
     "MSELoss": {
       "api": "optax.l2_loss",
@@ -1846,6 +1853,9 @@
       "args": {}
     },
     "MatMul": {
+      "api": "jax.numpy.matmul"
+    },
+    "Matmul": {
       "api": "jax.numpy.linalg.matmul",
       "args": {
         "precision": "precision",
@@ -1853,12 +1863,6 @@
         "x1": "x1",
         "x2": "x2"
       }
-    },
-    "Matmul": {
-      "api": "jax.numpy.matmul",
-      "operator": "@",
-      "required_imports": [],
-      "transformation_type": "infix"
     },
     "MatrixTranspose": {
       "api": "jax.numpy.matrix_transpose",
@@ -1881,15 +1885,35 @@
       "api": "jax.numpy.maximum"
     },
     "Mean": {
-      "api": "jax.numpy.ndarray.mean",
+      "api": "jax.numpy.mean"
+    },
+    "MeanAbsoluteError": {
+      "api": "optax.l1_loss",
       "args": {
-        "axis": "axis",
-        "dtype": "dtype",
-        "keepdims": "keepdims",
-        "out": "out",
-        "self": "self",
-        "where": "where"
-      }
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
+      "required_imports": []
+    },
+    "MeanAbsolutePercentageError": {
+      "api": "optax.mape_loss",
+      "args": {
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
+      "required_imports": []
+    },
+    "MeanSquaredError": {
+      "api": "optax.squared_error",
+      "args": {
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
+      "required_imports": []
+    },
+    "MeanSquaredLogarithmicError": {
+      "macro_template": "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))",
+      "required_imports": []
     },
     "Median": {
       "api": "jax.numpy.median",
@@ -1903,13 +1927,7 @@
       "required_imports": []
     },
     "Meshgrid": {
-      "api": "jax.numpy.meshgrid",
-      "args": {
-        "copy": "copy",
-        "indexing": "indexing",
-        "sparse": "sparse",
-        "xi": "xi"
-      }
+      "api": "jax.numpy.meshgrid"
     },
     "Mgrid": {
       "api": "jax.numpy.mgrid",
@@ -1923,11 +1941,8 @@
       "api": "jax.numpy.minimum"
     },
     "Mod": {
-      "api": "jax.numpy.mod",
-      "args": {
-        "x1": "x1",
-        "x2": "x2"
-      }
+      "api": "jnp.mod",
+      "required_imports": []
     },
     "Modf": {
       "api": "jax.numpy.modf",
@@ -1939,10 +1954,9 @@
     "MoveAxis": {
       "api": "jax.numpy.moveaxis",
       "args": {
-        "a": "a",
-        "destination": "destination",
-        "source": "source"
-      }
+        "x": "a"
+      },
+      "required_imports": []
     },
     "Moveaxis": {
       "api": "jax.numpy.moveaxis",
@@ -1967,27 +1981,30 @@
     "Multiply": {
       "api": "jax.numpy.multiply"
     },
+    "MultiplyNoNan": {
+      "macro_template": "jnp.where({y} == 0, 0.0, {x} * {y})",
+      "required_imports": []
+    },
+    "Nadam": {
+      "api": "optax.nadam",
+      "args": {
+        "beta_1": "b1",
+        "beta_2": "b2",
+        "epsilon": "eps"
+      },
+      "required_imports": []
+    },
     "Nan": {
       "api": "jax.numpy.nan",
-      "args": {}
+      "required_imports": []
     },
     "NanArgMax": {
       "api": "jax.numpy.nanargmax",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "keepdims": "keepdims",
-        "out": "out"
-      }
+      "required_imports": []
     },
     "NanArgMin": {
       "api": "jax.numpy.nanargmin",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "keepdims": "keepdims",
-        "out": "out"
-      }
+      "required_imports": []
     },
     "NanCumprod": {
       "api": "jax.numpy.nancumprod",
@@ -2025,23 +2042,26 @@
       "api": "jax.numpy.nan_to_num",
       "required_imports": []
     },
+    "Ndtri": {
+      "api": "jax.scipy.special.ndtri",
+      "required_imports": []
+    },
     "Negative": {
       "api": "jax.numpy.negative"
+    },
+    "NextAfter": {
+      "api": "jnp.nextafter",
+      "required_imports": []
     },
     "NonNegativeParamsState": {
       "api": "optax.NonNegativeParamsState",
       "args": {}
     },
     "NonZero": {
-      "api": "jax.numpy.nonzero",
-      "args": {
-        "a": "a",
-        "fill_value": "fill_value",
-        "size": "size"
-      }
+      "api": "jax.numpy.nonzero"
     },
     "NotEqual": {
-      "api": "jax.numpy.not_equal",
+      "api": "jnp.not_equal",
       "required_imports": []
     },
     "OneHot": {
@@ -2050,12 +2070,7 @@
     },
     "Ones": {
       "api": "jax.numpy.ones",
-      "args": {
-        "device": "device",
-        "dtype": "dtype",
-        "out_sharding": "out_sharding",
-        "shape": "shape"
-      }
+      "required_imports": []
     },
     "OnesLike": {
       "api": "jax.numpy.ones_like",
@@ -2081,11 +2096,10 @@
     "Pad": {
       "api": "jax.numpy.pad",
       "args": {
-        "array": "array",
-        "kwargs": "kwargs",
-        "mode": "mode",
-        "pad_width": "pad_width"
-      }
+        "value": "constant_values",
+        "x": "array"
+      },
+      "required_imports": []
     },
     "Partition": {
       "api": "optax.partition",
@@ -2104,14 +2118,26 @@
     },
     "Pi": {
       "api": "jax.numpy.pi",
-      "args": {}
+      "required_imports": []
     },
     "Pmap": {
       "api": "jax.pmap",
       "required_imports": []
     },
+    "PoissonLoss": {
+      "api": "optax.poisson_loss",
+      "args": {
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
+      "required_imports": []
+    },
     "Poly": {
       "api": "jax.numpy.poly",
+      "required_imports": []
+    },
+    "Polygamma": {
+      "api": "jax.scipy.special.polygamma",
       "required_imports": []
     },
     "Polyint": {
@@ -2120,18 +2146,17 @@
     },
     "Polymul": {
       "api": "jax.numpy.polymul",
-      "args": {
-        "a1": "a1",
-        "a2": "a2",
-        "trim_leading_zeros": "trim_leading_zeros"
-      }
+      "required_imports": []
     },
     "Polysub": {
       "api": "jax.numpy.polysub",
       "required_imports": []
     },
     "Polyval": {
-      "api": "jax.numpy.polyval",
+      "api": "jnp.polyval",
+      "args": {
+        "coeffs": "p"
+      },
       "required_imports": []
     },
     "Pool": {
@@ -2143,38 +2168,28 @@
       "required_imports": []
     },
     "Pow": {
-      "api": "jax.numpy.pow",
-      "args": {
-        "x1": "x1",
-        "x2": "x2"
-      }
+      "api": "jax.numpy.pow"
     },
     "Power": {
       "api": "jax.numpy.power",
       "args": {
-        "x1": "x1",
-        "x2": "x2"
-      }
+        "a": "x1",
+        "b": "x2"
+      },
+      "required_imports": []
     },
     "Printoptions": {
       "api": "jax.numpy.printoptions",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "required_imports": []
     },
     "Prod": {
       "api": "jax.numpy.prod",
       "args": {
         "a": "a",
         "axis": "axis",
-        "dtype": "dtype",
-        "initial": "initial",
-        "keepdims": "keepdims",
-        "out": "out",
-        "promote_integers": "promote_integers",
-        "where": "where"
-      }
+        "keepdims": "keepdims"
+      },
+      "required_imports": []
     },
     "PromoteTypes": {
       "api": "jax.numpy.promote_types",
@@ -2182,22 +2197,14 @@
     },
     "Ptp": {
       "api": "jax.numpy.ptp",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "keepdims": "keepdims",
-        "out": "out"
-      }
+      "required_imports": []
     },
     "Put": {
       "api": "jax.numpy.put",
-      "args": {
-        "a": "a",
-        "ind": "ind",
-        "inplace": "inplace",
-        "mode": "mode",
-        "v": "v"
-      }
+      "inject_args": {
+        "inplace": false
+      },
+      "required_imports": []
     },
     "PutAlongAxis": {
       "api": "jax.numpy.put_along_axis",
@@ -2227,8 +2234,11 @@
     },
     "RMSprop": {
       "api": "optax.rmsprop",
-      "required_imports": [],
-      "requires_plugin": "optimizer_constructor"
+      "args": {
+        "epsilon": "eps",
+        "rho": "decay"
+      },
+      "required_imports": []
     },
     "R_": {
       "api": "jax.numpy.r_",
@@ -2241,8 +2251,9 @@
     "Radians": {
       "api": "jax.numpy.radians",
       "args": {
-        "x": "x"
-      }
+        "a": "x"
+      },
+      "required_imports": []
     },
     "RandInt": {
       "api": "jax.random.randint",
@@ -2254,12 +2265,8 @@
       "requires_plugin": "inject_prng"
     },
     "Ravel": {
-      "api": "jax.numpy.ndarray.ravel",
-      "args": {
-        "order": "order",
-        "out_sharding": "out_sharding",
-        "self": "self"
-      }
+      "api": "jax.numpy.ravel",
+      "required_imports": []
     },
     "RavelMultiIndex": {
       "api": "jax.numpy.ravel_multi_index",
@@ -2279,6 +2286,30 @@
     },
     "Reciprocal": {
       "api": "jax.numpy.reciprocal"
+    },
+    "ReciprocalNoNan": {
+      "macro_template": "jnp.where({x} == 0, 0.0, 1.0 / {x})",
+      "required_imports": []
+    },
+    "ReduceMin": {
+      "api": "jnp.min",
+      "required_imports": []
+    },
+    "ReduceProd": {
+      "api": "jnp.prod",
+      "required_imports": []
+    },
+    "ReduceStd": {
+      "api": "jnp.std",
+      "required_imports": []
+    },
+    "ReduceSum": {
+      "api": "jnp.sum",
+      "required_imports": []
+    },
+    "ReduceVariance": {
+      "api": "jnp.var",
+      "required_imports": []
     },
     "RegisterDataType": {
       "api": "jax.tree_util.register_pytree_node",
@@ -2304,24 +2335,15 @@
       "api": "jax.numpy.repeat",
       "args": {
         "a": "a",
-        "axis": "axis",
-        "out_sharding": "out_sharding",
-        "repeats": "repeats",
-        "total_repeat_length": "total_repeat_length"
-      }
+        "axis": "axis"
+      },
+      "required_imports": []
     },
     "ResetPeakMemory": {
       "required_imports": []
     },
     "Reshape": {
-      "api": "jax.numpy.reshape",
-      "args": {
-        "a": "a",
-        "copy": "copy",
-        "order": "order",
-        "out_sharding": "out_sharding",
-        "shape": "shape"
-      }
+      "api": "jax.numpy.reshape"
     },
     "Resize": {
       "api": "jax.numpy.resize",
@@ -2340,16 +2362,12 @@
       "required_imports": []
     },
     "Rint": {
-      "api": "jax.numpy.rint",
+      "api": "jnp.rint",
       "required_imports": []
     },
     "Roll": {
       "api": "jax.numpy.roll",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "shift": "shift"
-      }
+      "required_imports": []
     },
     "Rollaxis": {
       "api": "jax.numpy.rollaxis",
@@ -2357,34 +2375,22 @@
     },
     "Roots": {
       "api": "jax.numpy.roots",
-      "args": {
-        "p": "p",
-        "strip_zeros": "strip_zeros"
-      }
+      "required_imports": []
     },
     "Rot90": {
       "api": "jax.numpy.rot90",
       "required_imports": []
     },
     "Round": {
-      "api": "jax.numpy.ndarray.round",
-      "args": {
-        "decimals": "decimals",
-        "out": "out",
-        "self": "self"
-      }
+      "api": "jax.numpy.round"
     },
     "Rsqrt": {
       "api": "jax.lax.rsqrt",
-      "args": {
-        "a": "x"
-      },
       "required_imports": []
     },
     "SGD": {
       "api": "optax.sgd",
-      "required_imports": [],
-      "requires_plugin": "optimizer_constructor"
+      "required_imports": []
     },
     "Save": {
       "api": "jax.numpy.save",
@@ -2411,6 +2417,10 @@
       "api": "jax.numpy.savez_compressed",
       "required_imports": []
     },
+    "ScalarMul": {
+      "macro_template": "{x} * {scalar}",
+      "required_imports": []
+    },
     "ScaleByTrustRatioState": {
       "api": "optax.ScaleByTrustRatioState",
       "args": {}
@@ -2429,14 +2439,28 @@
       "requires_plugin": "scatter_indexer"
     },
     "SearchSorted": {
-      "api": "jax.numpy.ndarray.searchsorted",
-      "args": {
-        "method": "method",
-        "self": "self",
-        "side": "side",
-        "sorter": "sorter",
-        "v": "v"
-      }
+      "api": "jax.numpy.searchsorted",
+      "required_imports": []
+    },
+    "SegmentMax": {
+      "api": "jax.ops.segment_max",
+      "required_imports": []
+    },
+    "SegmentMean": {
+      "api": "jax.ops.segment_mean",
+      "required_imports": []
+    },
+    "SegmentMin": {
+      "api": "jax.ops.segment_min",
+      "required_imports": []
+    },
+    "SegmentProd": {
+      "api": "jax.ops.segment_prod",
+      "required_imports": []
+    },
+    "SegmentSum": {
+      "api": "jax.ops.segment_sum",
+      "required_imports": []
     },
     "SegmentedMm": {
       "required_imports": [],
@@ -2444,14 +2468,13 @@
     },
     "Select": {
       "api": "jax.numpy.select",
-      "args": {
-        "choicelist": "choicelist",
-        "condlist": "condlist",
-        "default": "default"
-      }
+      "required_imports": []
     },
     "Selu": {
       "api": "jax.nn.selu",
+      "required_imports": []
+    },
+    "SerializeLoss": {
       "required_imports": []
     },
     "SetCacheLimit": {
@@ -2466,13 +2489,7 @@
     },
     "SetDiff1d": {
       "api": "jax.numpy.setdiff1d",
-      "args": {
-        "ar1": "ar1",
-        "ar2": "ar2",
-        "assume_unique": "assume_unique",
-        "fill_value": "fill_value",
-        "size": "size"
-      }
+      "required_imports": []
     },
     "SetMemoryLimit": {
       "required_imports": []
@@ -2486,19 +2503,11 @@
     },
     "SetXor1d": {
       "api": "jax.numpy.setxor1d",
-      "args": {
-        "ar1": "ar1",
-        "ar2": "ar2",
-        "assume_unique": "assume_unique",
-        "fill_value": "fill_value",
-        "size": "size"
-      }
+      "required_imports": []
     },
     "Shape": {
       "api": "jax.numpy.shape",
-      "args": {
-        "a": "a"
-      }
+      "required_imports": []
     },
     "ShardMap": {
       "api": "jax.experimental.shard_map.shard_map",
@@ -2514,9 +2523,6 @@
     },
     "Sigmoid": {
       "api": "jax.nn.sigmoid",
-      "args": {
-        "a": "x"
-      },
       "required_imports": []
     },
     "Sign": {
@@ -2542,9 +2548,7 @@
     },
     "Single": {
       "api": "jax.numpy.single",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Sinh": {
       "api": "jax.numpy.sinh"
@@ -2573,22 +2577,22 @@
     },
     "Softmax": {
       "api": "jax.nn.softmax",
+      "args": {
+        "logits": "x"
+      },
       "required_imports": []
     },
     "Softplus": {
       "api": "jax.nn.softplus",
       "required_imports": []
     },
+    "Softsign": {
+      "api": "jax.nn.softsign",
+      "required_imports": []
+    },
     "Sort": {
-      "api": "jax.numpy.ndarray.sort",
-      "args": {
-        "axis": "axis",
-        "descending": "descending",
-        "kind": "kind",
-        "order": "order",
-        "self": "self",
-        "stable": "stable"
-      }
+      "api": "jax.numpy.sort",
+      "required_imports": []
     },
     "SortComplex": {
       "api": "jax.numpy.sort_complex",
@@ -2598,13 +2602,17 @@
       "api": "jax.numpy.spacing",
       "required_imports": []
     },
+    "SparseCategoricalCrossentropy": {
+      "api": "optax.softmax_cross_entropy_with_integer_labels",
+      "args": {
+        "y_pred": "logits",
+        "y_true": "labels"
+      },
+      "required_imports": []
+    },
     "Split": {
       "api": "jax.numpy.split",
-      "args": {
-        "ary": "ary",
-        "axis": "axis",
-        "indices_or_sections": "indices_or_sections"
-      }
+      "required_imports": []
     },
     "SplitRngs": {
       "api": "jax.random.split",
@@ -2617,24 +2625,23 @@
       "api": "jax.numpy.sqrt"
     },
     "Square": {
-      "api": "jax.numpy.square",
+      "api": "jnp.square",
+      "required_imports": []
+    },
+    "SquaredDifference": {
+      "macro_template": "jnp.square({x} - {y})",
+      "required_imports": []
+    },
+    "SquaredHingeLoss": {
+      "macro_template": "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)",
       "required_imports": []
     },
     "Squeeze": {
-      "api": "jax.numpy.squeeze",
-      "args": {
-        "a": "a",
-        "axis": "axis"
-      }
+      "api": "jax.numpy.squeeze"
     },
     "Stack": {
       "api": "jax.numpy.stack",
-      "args": {
-        "arrays": "arrays",
-        "axis": "axis",
-        "dtype": "dtype",
-        "out": "out"
-      }
+      "required_imports": []
     },
     "Standardize": {
       "api": "jax.nn.standardize",
@@ -2642,17 +2649,7 @@
     },
     "Std": {
       "api": "jax.numpy.std",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "correction": "correction",
-        "ddof": "ddof",
-        "dtype": "dtype",
-        "keepdims": "keepdims",
-        "mean": "mean",
-        "out": "out",
-        "where": "where"
-      }
+      "required_imports": []
     },
     "StepLR": {
       "api": "optax.exponential_decay",
@@ -2663,6 +2660,13 @@
       "api": "jax.lax.stop_gradient",
       "required_imports": []
     },
+    "String": {
+      "required_imports": []
+    },
+    "StringLookup": {
+      "required_imports": [],
+      "requires_plugin": "string_lookup_shim"
+    },
     "Sub": {
       "api": "optax.tree.sub",
       "args": {}
@@ -2670,17 +2674,17 @@
     "Subtract": {
       "api": "jax.numpy.subtract"
     },
+    "SubtractLayer": {
+      "required_imports": [],
+      "requires_plugin": "layer_subtract_shim"
+    },
     "Sum": {
       "api": "optax.tree.sum",
       "args": {}
     },
     "SwapAxes": {
-      "api": "jax.numpy.ndarray.swapaxes",
-      "args": {
-        "axis1": "axis1",
-        "axis2": "axis2",
-        "self": "self"
-      }
+      "api": "jax.numpy.swapaxes",
+      "required_imports": []
     },
     "Swapaxes": {
       "api": "jax.numpy.swapaxes",
@@ -2700,16 +2704,7 @@
     },
     "Take": {
       "api": "jax.numpy.take",
-      "args": {
-        "a": "a",
-        "axis": "axis",
-        "fill_value": "fill_value",
-        "indices": "indices",
-        "indices_are_sorted": "indices_are_sorted",
-        "mode": "mode",
-        "out": "out",
-        "unique_indices": "unique_indices"
-      }
+      "required_imports": []
     },
     "TakeAlongAxis": {
       "api": "jax.numpy.take_along_axis",
@@ -2726,27 +2721,25 @@
       "required_imports": []
     },
     "Tensordot": {
-      "api": "jax.numpy.tensordot",
+      "api": "jax.numpy.linalg.tensordot",
       "args": {
-        "a": "a",
         "axes": "axes",
-        "b": "b",
         "out_sharding": "out_sharding",
         "precision": "precision",
-        "preferred_element_type": "preferred_element_type"
+        "preferred_element_type": "preferred_element_type",
+        "x1": "x1",
+        "x2": "x2"
       }
     },
     "Tile": {
-      "api": "jax.numpy.tile",
-      "args": {
-        "A": "A",
-        "reps": "reps"
-      }
+      "api": "jax.numpy.tile"
     },
     "TopK": {
       "api": "jax.lax.top_k",
-      "required_imports": [],
-      "requires_plugin": "topk_adapter"
+      "args": {
+        "input": "operand"
+      },
+      "required_imports": []
     },
     "TopKValues": {
       "api": "jax.lax.top_k",
@@ -2778,11 +2771,7 @@
       "required_imports": []
     },
     "Transpose": {
-      "api": "jax.numpy.transpose",
-      "args": {
-        "a": "a",
-        "axes": "axes"
-      }
+      "api": "jax.numpy.transpose"
     },
     "Trapezoid": {
       "api": "jax.numpy.trapezoid",
@@ -2790,12 +2779,7 @@
     },
     "Tri": {
       "api": "jax.numpy.tri",
-      "args": {
-        "M": "M",
-        "N": "N",
-        "dtype": "dtype",
-        "k": "k"
-      }
+      "required_imports": []
     },
     "Tril": {
       "api": "jax.numpy.tril",
@@ -2815,9 +2799,6 @@
     },
     "Triu": {
       "api": "jax.numpy.triu",
-      "args": {
-        "x": "m"
-      },
       "required_imports": []
     },
     "TriuIndices": {
@@ -2828,12 +2809,19 @@
       "api": "jax.numpy.triu_indices_from",
       "required_imports": []
     },
+    "TrueDiv": {
+      "api": "jnp.divide",
+      "required_imports": []
+    },
     "TrueDivide": {
-      "api": "jax.numpy.true_divide",
+      "api": "jax.numpy.divide",
       "required_imports": []
     },
     "Trunc": {
       "api": "jax.numpy.trunc",
+      "required_imports": []
+    },
+    "TverskyLoss": {
       "required_imports": []
     },
     "UInt16": {
@@ -2842,55 +2830,30 @@
     },
     "UInt32": {
       "api": "jax.numpy.uint32",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "UInt64": {
       "api": "jax.numpy.uint64",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "UInt8": {
       "api": "jax.numpy.uint8",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Ufunc": {
-      "api": "jax.numpy.ufunc",
-      "args": {
-        "accumulate": "accumulate",
-        "at": "at",
-        "call": "call",
-        "func": "func",
-        "identity": "identity",
-        "name": "name",
-        "nargs": "nargs",
-        "nin": "nin",
-        "nout": "nout",
-        "reduce": "reduce",
-        "reduceat": "reduceat"
-      }
+      "api": "jax.numpy.ufunc"
     },
     "Uint": {
       "api": "jax.numpy.uint",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Uint16": {
       "api": "jax.numpy.uint16",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Uint2": {
       "api": "jax.numpy.uint2",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Uint32": {
       "api": "jax.numpy.uint32",
@@ -2898,9 +2861,7 @@
     },
     "Uint4": {
       "api": "jax.numpy.uint4",
-      "args": {
-        "x": "x"
-      }
+      "required_imports": []
     },
     "Uint64": {
       "api": "jax.numpy.uint64",
@@ -2914,28 +2875,15 @@
       "required_imports": [],
       "requires_plugin": "unflatten_manual"
     },
+    "Unicode": {
+      "required_imports": []
+    },
     "Union1d": {
       "api": "jax.numpy.union1d",
-      "args": {
-        "ar1": "ar1",
-        "ar2": "ar2",
-        "fill_value": "fill_value",
-        "size": "size"
-      }
+      "required_imports": []
     },
     "Unique": {
-      "api": "jax.numpy.unique",
-      "args": {
-        "ar": "ar",
-        "axis": "axis",
-        "equal_nan": "equal_nan",
-        "fill_value": "fill_value",
-        "return_counts": "return_counts",
-        "return_index": "return_index",
-        "return_inverse": "return_inverse",
-        "size": "size",
-        "sorted": "sorted"
-      }
+      "api": "jax.numpy.unique"
     },
     "UniqueAll": {
       "api": "jax.numpy.unique_all",
@@ -2963,6 +2911,42 @@
     },
     "UnsignedInteger": {
       "api": "jax.numpy.unsignedinteger"
+    },
+    "UnsortedSegmentMax": {
+      "api": "jax.ops.segment_max",
+      "args": {
+        "data": "data",
+        "num_segments": "num_segments",
+        "segment_ids": "segment_ids"
+      },
+      "required_imports": []
+    },
+    "UnsortedSegmentMin": {
+      "api": "jax.ops.segment_min",
+      "args": {
+        "data": "data",
+        "num_segments": "num_segments",
+        "segment_ids": "segment_ids"
+      },
+      "required_imports": []
+    },
+    "UnsortedSegmentProd": {
+      "api": "jax.ops.segment_prod",
+      "args": {
+        "data": "data",
+        "num_segments": "num_segments",
+        "segment_ids": "segment_ids"
+      },
+      "required_imports": []
+    },
+    "UnsortedSegmentSum": {
+      "api": "jax.ops.segment_sum",
+      "args": {
+        "data": "data",
+        "num_segments": "num_segments",
+        "segment_ids": "segment_ids"
+      },
+      "required_imports": []
     },
     "Unsqueeze": {
       "api": "jax.numpy.expand_dims",
@@ -3007,23 +2991,20 @@
     "Var": {
       "api": "jax.numpy.var",
       "args": {
-        "a": "a",
-        "axis": "axis",
-        "correction": "correction",
-        "ddof": "ddof",
-        "dtype": "dtype",
-        "keepdims": "keepdims",
-        "mean": "mean",
-        "out": "out",
-        "where": "where"
-      }
+        "x": "a"
+      },
+      "required_imports": []
+    },
+    "Variance": {
+      "api": "jax.numpy.var",
+      "required_imports": []
     },
     "Vdot": {
       "api": "optax.tree.vdot",
       "args": {}
     },
     "Vecdot": {
-      "api": "jax.numpy.vecdot",
+      "api": "jax.numpy.linalg.vecdot",
       "args": {
         "axis": "axis",
         "precision": "precision",
@@ -3038,19 +3019,17 @@
     },
     "Vectorize": {
       "api": "jax.numpy.vectorize",
-      "args": {
-        "excluded": "excluded",
-        "pyfunc": "pyfunc",
-        "signature": "signature"
-      }
+      "required_imports": []
     },
     "View": {
-      "api": "jax.numpy.ndarray.view",
+      "api": "jax.numpy.reshape",
       "args": {
         "dtype": "dtype",
         "self": "self",
         "type": "type"
-      }
+      },
+      "required_imports": [],
+      "requires_plugin": "view_semantics"
     },
     "Vjp": {
       "macro_template": "lambda f, p, c: (lambda out, vjp_fn: (out, vjp_fn(c)))(*jax.vjp(f, *p))",
@@ -3062,17 +3041,11 @@
     },
     "Vsplit": {
       "api": "jax.numpy.vsplit",
-      "args": {
-        "ary": "ary",
-        "indices_or_sections": "indices_or_sections"
-      }
+      "required_imports": []
     },
     "Vstack": {
       "api": "jax.numpy.vstack",
-      "args": {
-        "dtype": "dtype",
-        "tup": "tup"
-      }
+      "required_imports": []
     },
     "Where": {
       "api": "optax.tree.where",
@@ -3090,24 +3063,36 @@
       "api": "optax.WrappedSchedule",
       "args": {}
     },
+    "Xdivy": {
+      "api": "jax.scipy.special.xdivy",
+      "required_imports": []
+    },
+    "Xlog1py": {
+      "api": "jax.scipy.special.xlog1py",
+      "required_imports": []
+    },
+    "Xlogy": {
+      "api": "jax.scipy.special.xlogy",
+      "required_imports": []
+    },
+    "ZeroFraction": {
+      "macro_template": "jnp.mean({value} == 0)",
+      "required_imports": []
+    },
     "ZeroNansState": {
       "api": "optax.ZeroNansState",
       "args": {}
     },
     "Zeros": {
       "api": "jax.numpy.zeros",
-      "args": {
-        "device": "device",
-        "dtype": "dtype",
-        "out_sharding": "out_sharding",
-        "shape": "shape"
-      }
+      "required_imports": []
     },
     "ZerosLike": {
       "api": "jax.numpy.zeros_like",
-      "args": {
-        "x": "a"
-      },
+      "required_imports": []
+    },
+    "Zeta": {
+      "api": "jax.scipy.special.zeta",
       "required_imports": []
     },
     "__array_namespace_info__": {
@@ -3146,7 +3131,8 @@
       "args": {
         "index": "index",
         "self": "self"
-      }
+      },
+      "required_imports": []
     },
     "all": {
       "api": "jax.numpy.all"
@@ -3165,7 +3151,8 @@
         "keepdims": "keepdims",
         "out": "out",
         "where": "where"
-      }
+      },
+      "required_imports": []
     },
     "amin": {
       "api": "jax.numpy.amin",
@@ -3176,7 +3163,8 @@
         "keepdims": "keepdims",
         "out": "out",
         "where": "where"
-      }
+      },
+      "required_imports": []
     },
     "any": {
       "api": "jax.numpy.any"
@@ -3186,14 +3174,7 @@
       "required_imports": []
     },
     "apply_along_axis": {
-      "api": "jax.numpy.apply_along_axis",
-      "args": {
-        "args": "args",
-        "arr": "arr",
-        "axis": "axis",
-        "func1d": "func1d",
-        "kwargs": "kwargs"
-      }
+      "api": "jax.numpy.apply_along_axis"
     },
     "apply_if_finite": {
       "api": "optax.apply_if_finite",
@@ -3205,7 +3186,8 @@
         "a": "a",
         "axes": "axes",
         "func": "func"
-      }
+      },
+      "required_imports": []
     },
     "argmax": {
       "api": "jax.numpy.argmax"
@@ -3249,14 +3231,16 @@
         "a1": "a1",
         "a2": "a2",
         "equal_nan": "equal_nan"
-      }
+      },
+      "required_imports": []
     },
     "array_equiv": {
       "api": "jax.numpy.array_equiv",
       "args": {
         "a1": "a1",
         "a2": "a2"
-      }
+      },
+      "required_imports": []
     },
     "array_split": {
       "api": "jax.numpy.array_split",
@@ -3264,7 +3248,8 @@
         "ary": "ary",
         "axis": "axis",
         "indices_or_sections": "indices_or_sections"
-      }
+      },
+      "required_imports": []
     },
     "asarray": {
       "api": "jax.numpy.asarray",
@@ -3345,6 +3330,10 @@
       "api": "optax.tree.bias_correction",
       "args": {}
     },
+    "binary_crossentropy": {
+      "api": "optax.sigmoid_binary_cross_entropy",
+      "required_imports": []
+    },
     "bincount": {
       "api": "jax.numpy.bincount",
       "args": {
@@ -3388,27 +3377,17 @@
       "api": "jax.numpy.bool_",
       "args": {
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "broadcast_arrays": {
-      "api": "jax.numpy.broadcast_arrays",
-      "args": {
-        "args": "args"
-      }
+      "api": "jax.numpy.broadcast_arrays"
     },
     "broadcast_shapes": {
-      "api": "jax.numpy.broadcast_shapes",
-      "args": {
-        "shapes": "shapes"
-      }
+      "api": "jax.numpy.broadcast_shapes"
     },
     "broadcast_to": {
-      "api": "jax.numpy.broadcast_to",
-      "args": {
-        "array": "array",
-        "out_sharding": "out_sharding",
-        "shape": "shape"
-      }
+      "api": "jax.numpy.broadcast_to"
     },
     "can_cast": {
       "api": "jax.numpy.can_cast"
@@ -3417,11 +3396,20 @@
       "api": "optax.tree.cast_like",
       "args": {}
     },
+    "categorical_crossentropy": {
+      "api": "optax.softmax_cross_entropy",
+      "args": {
+        "y_pred": "logits",
+        "y_true": "labels"
+      },
+      "required_imports": []
+    },
     "cdouble": {
       "api": "jax.numpy.cdouble",
       "args": {
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "ceil": {
       "api": "jax.numpy.ceil"
@@ -3458,7 +3446,8 @@
       "api": "jax.numpy.column_stack",
       "args": {
         "tup": "tup"
-      }
+      },
+      "required_imports": []
     },
     "complex128": {
       "api": "jax.numpy.complex128",
@@ -3478,7 +3467,8 @@
       "api": "jax.numpy.complex_",
       "args": {
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "complexfloating": {
       "api": "jax.numpy.complexfloating",
@@ -3542,7 +3532,8 @@
       "api": "jax.numpy.ndarray.copy_to_host_async",
       "args": {
         "self": "self"
-      }
+      },
+      "required_imports": []
     },
     "copysign": {
       "api": "jax.numpy.copysign"
@@ -3615,7 +3606,8 @@
         "dtype": "dtype",
         "include_initial": "include_initial",
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "cumulative_sum": {
       "api": "jax.numpy.cumulative_sum",
@@ -3624,7 +3616,8 @@
         "dtype": "dtype",
         "include_initial": "include_initial",
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "data_ptr": {
       "api": "data",
@@ -3663,13 +3656,15 @@
       "args": {
         "n": "n",
         "ndim": "ndim"
-      }
+      },
+      "required_imports": []
     },
     "diag_indices_from": {
       "api": "jax.numpy.diag_indices_from",
       "args": {
         "arr": "arr"
-      }
+      },
+      "required_imports": []
     },
     "diagflat": {
       "api": "jax.numpy.diagflat",
@@ -3757,12 +3752,7 @@
       "api": "jax.numpy.linalg.eigvalsh"
     },
     "einsum_path": {
-      "api": "jax.numpy.einsum_path",
-      "args": {
-        "operands": "operands",
-        "optimize": "optimize",
-        "subscripts": "subscripts"
-      }
+      "api": "jax.numpy.einsum_path"
     },
     "ema": {
       "api": "optax.ema",
@@ -3779,13 +3769,7 @@
       "required_imports": []
     },
     "empty_like": {
-      "api": "jax.numpy.empty_like",
-      "args": {
-        "device": "device",
-        "dtype": "dtype",
-        "prototype": "prototype",
-        "shape": "shape"
-      }
+      "api": "jax.numpy.empty_like"
     },
     "enable_grad": {
       "api": "contextlib.nullcontext",
@@ -3811,17 +3795,14 @@
     },
     "euler_gamma": {
       "api": "jax.numpy.euler_gamma",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "exp": {
       "api": "jax.numpy.exp"
     },
     "expand_dims": {
-      "api": "jax.numpy.expand_dims",
-      "args": {
-        "a": "a",
-        "axis": "axis"
-      }
+      "api": "jax.numpy.expand_dims"
     },
     "expm1": {
       "api": "jax.numpy.expm1"
@@ -3901,7 +3882,8 @@
         "inplace": "inplace",
         "val": "val",
         "wrap": "wrap"
-      }
+      },
+      "required_imports": []
     },
     "finfo": {
       "api": "jax.numpy.finfo"
@@ -4026,7 +4008,8 @@
         "copy": "copy",
         "device": "device",
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "frombuffer": {
       "api": "jax.numpy.frombuffer",
@@ -4124,7 +4107,8 @@
     },
     "get_printoptions": {
       "api": "jax.numpy.get_printoptions",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "grad": {
       "api": "jax.grad",
@@ -4196,7 +4180,8 @@
         "bins": "bins",
         "range": "range",
         "weights": "weights"
-      }
+      },
+      "required_imports": []
     },
     "histogramdd": {
       "api": "jax.numpy.histogramdd",
@@ -4325,13 +4310,15 @@
       "api": "jax.numpy.int2",
       "args": {
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "int4": {
       "api": "jax.numpy.int4",
       "args": {
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "int8": {
       "api": "jax.numpy.int8",
@@ -4344,7 +4331,8 @@
       "api": "jax.numpy.int_",
       "args": {
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "integer": {
       "api": "jax.numpy.integer",
@@ -4489,7 +4477,8 @@
       "args": {
         "args": "args",
         "self": "self"
-      }
+      },
+      "required_imports": []
     },
     "ix_": {
       "api": "jax.numpy.ix_",
@@ -4626,7 +4615,8 @@
         "mask_func": "mask_func",
         "n": "n",
         "size": "size"
-      }
+      },
+      "required_imports": []
     },
     "masked": {
       "api": "optax.masked",
@@ -4650,7 +4640,7 @@
       "api": "jax.numpy.linalg.matrix_rank"
     },
     "matrix_transpose": {
-      "api": "jax.numpy.matrix_transpose",
+      "api": "jax.numpy.linalg.matrix_transpose",
       "args": {
         "x": "x"
       }
@@ -4783,14 +4773,14 @@
       "required_imports": []
     },
     "ndarray": {
-      "api": "jax.numpy.ndarray",
-      "args": {}
+      "api": "jax.numpy.ndarray"
     },
     "ndim": {
       "api": "jax.numpy.ndim",
       "args": {
         "a": "a"
-      }
+      },
+      "required_imports": []
     },
     "negative": {
       "api": "jax.numpy.negative"
@@ -4893,7 +4883,8 @@
         "funclist": "funclist",
         "kw": "kw",
         "x": "x"
-      }
+      },
+      "required_imports": []
     },
     "piecewise_constant_schedule": {
       "api": "optax.piecewise_constant_schedule",
@@ -4919,7 +4910,8 @@
         "inplace": "inplace",
         "mask": "mask",
         "vals": "vals"
-      }
+      },
+      "required_imports": []
     },
     "polydiv": {
       "api": "jax.numpy.polydiv",
@@ -4927,7 +4919,8 @@
         "trim_leading_zeros": "trim_leading_zeros",
         "u": "u",
         "v": "v"
-      }
+      },
+      "required_imports": []
     },
     "polymul": {
       "api": "jax.numpy.polymul",
@@ -4972,7 +4965,8 @@
       "args": {
         "a": "a",
         "b": "b"
-      }
+      },
+      "required_imports": []
     },
     "psi": {
       "api": "jax.numpy.pi",
@@ -5039,7 +5033,8 @@
         "mode": "mode",
         "multi_index": "multi_index",
         "order": "order"
-      }
+      },
+      "required_imports": []
     },
     "real": {
       "api": "jax.numpy.real"
@@ -5071,10 +5066,7 @@
       "required_imports": []
     },
     "result_type": {
-      "api": "jax.numpy.result_type",
-      "args": {
-        "args": "args"
-      }
+      "api": "jax.numpy.result_type"
     },
     "rfft": {
       "api": "jax.numpy.fft.rfft",
@@ -5181,7 +5173,8 @@
       "args": {
         "args": "args",
         "kwargs": "kwargs"
-      }
+      },
+      "required_imports": []
     },
     "setdiff1d": {
       "api": "jax.numpy.setdiff1d",
@@ -5385,7 +5378,8 @@
         "device": "device",
         "self": "self",
         "stream": "stream"
-      }
+      },
+      "required_imports": []
     },
     "trace": {
       "api": "jax.numpy.trace"
@@ -5437,14 +5431,16 @@
         "k": "k",
         "m": "m",
         "n": "n"
-      }
+      },
+      "required_imports": []
     },
     "tril_indices_from": {
       "api": "jax.numpy.tril_indices_from",
       "args": {
         "arr": "arr",
         "k": "k"
-      }
+      },
+      "required_imports": []
     },
     "trim_zeros": {
       "api": "jax.numpy.trim_zeros",
@@ -5452,7 +5448,8 @@
         "axis": "axis",
         "filt": "filt",
         "trim": "trim"
-      }
+      },
+      "required_imports": []
     },
     "triu": {
       "api": "jax.numpy.triu"
@@ -5463,14 +5460,16 @@
         "k": "k",
         "m": "m",
         "n": "n"
-      }
+      },
+      "required_imports": []
     },
     "triu_indices_from": {
       "api": "jax.numpy.triu_indices_from",
       "args": {
         "arr": "arr",
         "k": "k"
-      }
+      },
+      "required_imports": []
     },
     "trunc": {
       "api": "jax.numpy.trunc"
@@ -5545,43 +5544,24 @@
       "required_imports": []
     },
     "unique_all": {
-      "api": "jax.numpy.unique_all",
-      "args": {
-        "fill_value": "fill_value",
-        "size": "size",
-        "x": "x"
-      }
+      "api": "jax.numpy.unique_all"
     },
     "unique_counts": {
-      "api": "jax.numpy.unique_counts",
-      "args": {
-        "fill_value": "fill_value",
-        "size": "size",
-        "x": "x"
-      }
+      "api": "jax.numpy.unique_counts"
     },
     "unique_inverse": {
-      "api": "jax.numpy.unique_inverse",
-      "args": {
-        "fill_value": "fill_value",
-        "size": "size",
-        "x": "x"
-      }
+      "api": "jax.numpy.unique_inverse"
     },
     "unique_values": {
-      "api": "jax.numpy.unique_values",
-      "args": {
-        "fill_value": "fill_value",
-        "size": "size",
-        "x": "x"
-      }
+      "api": "jax.numpy.unique_values"
     },
     "unravel_index": {
       "api": "jax.numpy.unravel_index",
       "args": {
         "indices": "indices",
         "shape": "shape"
-      }
+      },
+      "required_imports": []
     },
     "unsignedinteger": {
       "api": "jax.numpy.unsignedinteger",

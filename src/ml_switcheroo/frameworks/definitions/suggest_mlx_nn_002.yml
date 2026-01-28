@@ -1,0 +1,668 @@
+operation: "LeakyReLU"
+description: "Applies the Leaky Rectified Linear Unit function element-wise."
+op_type: "class"
+std_args:
+  - name: "negative_slope"
+    type: "float"
+    default: 0.01
+variants:
+  mlx:
+    api: "mlx.nn.LeakyReLU"
+  torch:
+    api: "torch.nn.LeakyReLU"
+  keras:
+    api: "keras.layers.LeakyReLU"
+  tensorflow:
+    api: "tf.keras.layers.LeakyReLU"
+  flax_nnx:
+    api: "flax.nnx.LeakyRelu"
+  paxml:
+    api: "praxis.layers.LeakyReLU"
+
+---
+operation: "Linear"
+description: "Applies a linear transformation to the incoming data."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.nn.Linear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+  torch:
+    api: "torch.nn.Linear"
+  keras:
+    api: "keras.layers.Dense"
+    args:
+      out_features: "units"
+      bias: "use_bias"
+      in_features: null # Keras infers input shape
+  tensorflow:
+    api: "tf.keras.layers.Dense"
+    args:
+      out_features: "units"
+      bias: "use_bias"
+      in_features: null
+  flax_nnx:
+    api: "flax.nnx.Linear"
+    args:
+      bias: "use_bias"
+  paxml:
+    api: "praxis.layers.Linear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+
+---
+operation: "LogSigmoid"
+description: "Applies the element-wise LogSigmoid activation."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.LogSigmoid"
+  torch:
+    api: "torch.nn.LogSigmoid"
+  flax_nnx:
+    api: "flax.nnx.LogSigmoid"
+  keras:
+    api: null
+  tensorflow:
+    api: null
+
+---
+operation: "LogSoftmax"
+description: "Applies the element-wise LogSoftmax activation."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+    default: -1
+variants:
+  mlx:
+    api: "mlx.nn.LogSoftmax"
+    args:
+      dim: "axis"
+  torch:
+    api: "torch.nn.LogSoftmax"
+  keras:
+    api: "keras.layers.LogSoftmax"
+    args:
+      dim: "axis"
+  tensorflow:
+    api: "tf.keras.layers.LogSoftmax"
+    args:
+      dim: "axis"
+  flax_nnx:
+    api: "flax.nnx.LogSoftmax"
+    args:
+      dim: "axis"
+
+---
+operation: "MaxPool1d"
+description: "Applies a 1D max pooling over an input signal composed of several input planes."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "int"
+  - name: "stride"
+    type: "int"
+    default: null
+  - name: "padding"
+    type: "Any" # int for MLX/Torch, str for Keras
+    default: 0
+variants:
+  mlx:
+    api: "mlx.nn.MaxPool1d"
+  torch:
+    api: "torch.nn.MaxPool1d"
+  keras:
+    api: "keras.layers.MaxPooling1D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+  tensorflow:
+    api: "tf.keras.layers.MaxPooling1D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+  flax_nnx:
+    api: "flax.nnx.MaxPool"
+    args:
+      kernel_size: "window_shape"
+      stride: "strides"
+
+---
+operation: "MaxPool2d"
+description: "Applies a 2D max pooling over an input signal."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "stride"
+    type: "Union[int, Tuple[int, int]]"
+    default: null
+  - name: "padding"
+    type: "Any"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.nn.MaxPool2d"
+  torch:
+    api: "torch.nn.MaxPool2d"
+  keras:
+    api: "keras.layers.MaxPooling2D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+  tensorflow:
+    api: "tf.keras.layers.MaxPooling2D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+  flax_nnx:
+    api: "flax.nnx.MaxPool"
+    args:
+      kernel_size: "window_shape"
+      stride: "strides"
+
+---
+operation: "MaxPool3d"
+description: "Applies a 3D max pooling over an input signal."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int, int, int]]"
+  - name: "stride"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: null
+  - name: "padding"
+    type: "Any"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.nn.MaxPool3d"
+  torch:
+    api: "torch.nn.MaxPool3d"
+  keras:
+    api: "keras.layers.MaxPooling3D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+  tensorflow:
+    api: "tf.keras.layers.MaxPooling3D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+  flax_nnx:
+    api: "flax.nnx.MaxPool"
+    args:
+      kernel_size: "window_shape"
+      stride: "strides"
+
+---
+operation: "Mish"
+description: "Applies the Mish activation function."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.Mish"
+  torch:
+    api: "torch.nn.Mish"
+  keras:
+    api: "keras.layers.Mish"
+  tensorflow:
+    api: "tf.keras.layers.Mish"
+  flax_nnx:
+    api: "flax.nnx.Mish"
+
+---
+operation: "Module"
+description: "Base class for Neural Network modules."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.Module"
+  torch:
+    api: "torch.nn.Module"
+  keras:
+    api: "keras.Layer"
+  tensorflow:
+    api: "tf.keras.Layer"
+  flax_nnx:
+    api: "flax.nnx.Module"
+  paxml:
+    api: "praxis.base_layer.BaseLayer"
+
+---
+operation: "MultiHeadAttention"
+description: "Computes Multi-Head Attention."
+op_type: "class"
+std_args:
+  - name: "embed_dim"
+    type: "int"
+  - name: "num_heads"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.nn.MultiHeadAttention"
+    args:
+      embed_dim: "dims"
+  torch:
+    api: "torch.nn.MultiheadAttention"
+  keras:
+    api: "keras.layers.MultiHeadAttention"
+    args:
+      num_heads: "num_heads"
+      embed_dim: "key_dim" # Keras uses key_dim per head roughly mapping
+  tensorflow:
+    api: "tf.keras.layers.MultiHeadAttention"
+    args:
+      embed_dim: "key_dim"
+  flax_nnx:
+    api: "flax.nnx.MultiHeadAttention"
+    args:
+      embed_dim: "in_features"
+
+---
+operation: "PReLU"
+description: "Applies the element-wise Parametric ReLU."
+op_type: "class"
+std_args:
+  - name: "num_parameters"
+    type: "int"
+    default: 1
+  - name: "init"
+    type: "float"
+    default: 0.25
+variants:
+  mlx:
+    api: "mlx.nn.PReLU"
+  torch:
+    api: "torch.nn.PReLU"
+  keras:
+    api: "keras.layers.PReLU"
+    args:
+      num_parameters: null # Keras infers shape
+      init: null # requires initializer object
+  tensorflow:
+    api: "tf.keras.layers.PReLU"
+  flax_nnx:
+    api: "flax.nnx.PReLU"
+
+---
+operation: "QQLinear"
+description: "Quantized Linear layer (Quantized input + weights)."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "bits"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.nn.QQLinear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+  torch:
+    api: null 
+
+---
+operation: "QuantizedAllToShardedLinear"
+description: "Quantized distributed linear layer."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.nn.QuantizedAllToShardedLinear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+  torch:
+    api: null
+
+---
+operation: "QuantizedEmbedding"
+description: "Embedding layer with quantized weights."
+op_type: "class"
+std_args:
+  - name: "num_embeddings"
+    type: "int"
+  - name: "embedding_dim"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.nn.QuantizedEmbedding"
+    args:
+      embedding_dim: "dims"
+  torch:
+    api: null
+
+---
+operation: "QuantizedLinear"
+description: "Applies a linear transformation with quantized weights."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "bits"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.nn.QuantizedLinear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+  torch:
+    api: null
+
+---
+operation: "QuantizedShardedToAllLinear"
+description: "Quantized distributed linear layer (gather)."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.nn.QuantizedShardedToAllLinear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+  torch:
+    api: null
+
+---
+operation: "RMSNorm"
+description: "Applies Root Mean Square Normalization."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+  - name: "eps"
+    type: "float"
+    default: 1e-5
+variants:
+  mlx:
+    api: "mlx.nn.RMSNorm"
+    args:
+      dim: "dims"
+  torch:
+    api: "torch.nn.RMSNorm"
+    args:
+      dim: "normalized_shape"
+  flax_nnx:
+    api: "flax.nnx.RMSNorm"
+  paxml:
+    api: "praxis.layers.RMSNorm"
+
+---
+operation: "RNN"
+description: "Elman recurrent layer."
+op_type: "class"
+std_args:
+  - name: "input_size"
+    type: "int"
+  - name: "hidden_size"
+    type: "int"
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.nn.RNN"
+  torch:
+    api: "torch.nn.RNN"
+    args:
+      bias: "bias"
+  keras:
+    api: "keras.layers.SimpleRNN"
+    args:
+      input_size: null
+      hidden_size: "units"
+      bias: "use_bias"
+  tensorflow:
+    api: "tf.keras.layers.SimpleRNN"
+    args:
+      input_size: null
+      hidden_size: "units"
+      bias: "use_bias"
+
+---
+operation: "ReLU"
+description: "Applies the Rectified Linear Unit activation."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.ReLU"
+  torch:
+    api: "torch.nn.ReLU"
+  keras:
+    api: "keras.layers.ReLU"
+  tensorflow:
+    api: "tf.keras.layers.ReLU"
+  flax_nnx:
+    api: "flax.nnx.relu"
+  paxml:
+    api: "praxis.layers.ReLU"
+
+---
+operation: "ReLU2"
+description: "Applies the ReLU activation capped at 2, or squared ReLU depending on framework interpretation."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.ReLU2"
+  torch:
+    api: null # No direct equivalent in torch.nn
+
+---
+operation: "ReLU6"
+description: "Applies the ReLU activation capped at 6."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.ReLU6"
+  torch:
+    api: "torch.nn.ReLU6"
+  keras:
+    api: "keras.layers.ReLU"
+    args:
+      max_value: 6.0
+  tensorflow:
+    api: "tf.keras.layers.ReLU"
+    args:
+      max_value: 6.0
+  flax_nnx:
+    api: "flax.nnx.relu6"
+
+---
+operation: "RoPE"
+description: "Rotary Positional Embeddings."
+op_type: "class"
+std_args:
+  - name: "dims"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.nn.RoPE"
+  torch:
+    api: null # Often handled functional via custom ops or torchtune
+
+---
+operation: "SELU"
+description: "Applies the Scaled Exponential Linear Unit."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.SELU"
+  torch:
+    api: "torch.nn.SELU"
+  keras:
+    api: "keras.layers.Activation"
+    arg_values:
+      activation: "selu"
+  flax_nnx:
+    api: "flax.nnx.selu"
+
+---
+operation: "Sequential"
+description: "A sequential container."
+op_type: "class"
+std_args:
+  - name: "layers"
+    is_variadic: true
+variants:
+  mlx:
+    api: "mlx.nn.Sequential"
+  torch:
+    api: "torch.nn.Sequential"
+  keras:
+    api: "keras.Sequential"
+    pack_to_tuple: "layers"
+    pack_as: "List"
+  tensorflow:
+    api: "tf.keras.Sequential"
+    pack_to_tuple: "layers"
+    pack_as: "List"
+  flax_nnx:
+    api: "flax.nnx.Sequential"
+
+---
+operation: "ShardedToAllLinear"
+description: "Distributed linear layer."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.nn.ShardedToAllLinear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+  torch:
+    api: null
+
+---
+operation: "SiLU"
+description: "Applies the Sigmoid Linear Unit (Swish)."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.SiLU"
+  torch:
+    api: "torch.nn.SiLU"
+  keras:
+    api: "keras.layers.Activation"
+    arg_values:
+      activation: "silu"
+  tensorflow:
+    api: "tf.keras.layers.Activation"
+    arg_values:
+      activation: "silu"
+  flax_nnx:
+    api: "flax.nnx.silu"
+
+---
+operation: "Sigmoid"
+description: "Applies the Sigmoid activation."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.Sigmoid"
+  torch:
+    api: "torch.nn.Sigmoid"
+  keras:
+    api: "keras.layers.Activation"
+    arg_values:
+      activation: "sigmoid"
+  tensorflow:
+    api: "tf.keras.layers.Activation"
+    arg_values:
+      activation: "sigmoid"
+  flax_nnx:
+    api: "flax.nnx.sigmoid"
+
+---
+operation: "SinusoidalPositionalEncoding"
+description: "Injects sinusoidal positional encodings."
+op_type: "class"
+std_args:
+  - name: "dims"
+    type: "int"
+  - name: "min_freq"
+    type: "float"
+    default: 0.0001
+variants:
+  mlx:
+    api: "mlx.nn.SinusoidalPositionalEncoding"
+  torch:
+    api: null
+
+---
+operation: "Softmax"
+description: "Applies the Softmax function."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+    default: -1
+variants:
+  mlx:
+    api: "mlx.nn.Softmax"
+    args:
+      dim: null # mlx Softmax default class usually over last dim or configurable? Docs say Softmax() 
+  torch:
+    api: "torch.nn.Softmax"
+  keras:
+    api: "keras.layers.Softmax"
+    args:
+      dim: "axis"
+  flax_nnx:
+    api: "flax.nnx.Softmax"
+
+---
+operation: "Softmin"
+description: "Applies the Softmin function."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+    default: -1
+variants:
+  mlx:
+    api: "mlx.nn.Softmin"
+  torch:
+    api: "torch.nn.Softmin"
+  flax_nnx:
+    api: "flax.nnx.Softmin"

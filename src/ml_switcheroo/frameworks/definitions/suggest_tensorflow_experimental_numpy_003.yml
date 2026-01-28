@@ -1,0 +1,708 @@
+operation: "Diff"
+description: "Calculate the n-th discrete difference along the given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "n"
+    type: "int"
+    default: 1
+    min: 1
+  - name: "axis"
+    type: "int"
+    default: -1
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.diff"
+  torch:
+    api: "torch.diff"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.diff"
+  numpy:
+    api: "numpy.diff"
+  keras:
+    # Keras ops doesn't have diff, typically requires slicing
+    api: null
+  mlx:
+    # MLX doesn't have diff, requires manual slicing macro
+    api: null
+---
+operation: "Divide"
+description: "Divides arguments element-wise (x1 / x2)."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.divide"
+  torch:
+    api: "torch.div"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.divide"
+  keras:
+    api: "keras.ops.divide"
+  numpy:
+    api: "numpy.divide"
+  mlx:
+    api: "mlx.core.divide"
+---
+operation: "DivMod"
+description: "Return element-wise quotient and remainder simultaneously."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.divmod"
+  torch:
+    api: null  # torch.divmod exists in newest versions, ensuring compatibility implies careful check
+    macro_template: "(torch.div({x1}, {x2}, rounding_mode='floor'), torch.remainder({x1}, {x2}))"
+  jax:
+    api: "jax.numpy.divmod"
+  keras:
+    api: null
+    macro_template: "(keras.ops.floor_divide({x1}, {x2}), keras.ops.mod({x1}, {x2}))"
+  numpy:
+    api: "numpy.divmod"
+  mlx:
+    api: "mlx.core.divmod"
+---
+operation: "Dot"
+description: "Dot product of two arrays. Specifically 1D vectors."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.dot"
+  torch:
+    api: "torch.dot"
+  jax:
+    api: "jax.numpy.dot"
+  keras:
+    api: "keras.ops.dot"
+  numpy:
+    api: "numpy.dot"
+  mlx:
+    api: "mlx.core.dot"  # Note: mlx dot behavior differs for >1D, stick to 1D constraint
+    dispatch_rules:
+      - if_arg: "a"
+        op: "is_type"
+        val: "Tensor"
+        use_api: "mlx.core.matmul" # Fallback if dims > 1 often implied
+---
+operation: "DSplit"
+description: "Split array into multiple sub-arrays along the 3rd axis (depth)."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+    rank: 3
+  - name: "indices_or_sections"
+    type: "int"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.dsplit"
+  torch:
+    api: "torch.dsplit"
+    args:
+      ary: "input"
+      indices_or_sections: "sections"
+  jax:
+    api: "jax.numpy.dsplit"
+  numpy:
+    api: "numpy.dsplit"
+  keras:
+    api: null
+  mlx:
+    api: null
+---
+operation: "DStack"
+description: "Stack arrays in sequence depth wise (along third axis)."
+std_args:
+  - name: "tup"
+    type: "List[Tensor]" # Sequence of tensors
+    is_variadic: false
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.dstack"
+  torch:
+    api: "torch.dstack"
+  jax:
+    api: "jax.numpy.dstack"
+  keras:
+    api: "keras.ops.dstack"
+  numpy:
+    api: "numpy.dstack"
+  mlx:
+    # MLX dstack not direct, use stack/concat/pad logic or skip
+    api: null
+---
+operation: "E"
+description: "Euler's constant, base of natural logarithms."
+op_type: "attribute"
+std_args: []
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.e"
+  torch:
+    api: "numpy.e" # fallback to numpy or math
+    required_imports:
+      - "import numpy"
+  jax:
+    api: "jax.numpy.e"
+  keras:
+    api: "numpy.e"
+    required_imports:
+      - "import numpy"
+  numpy:
+    api: "numpy.e"
+  mlx:
+    api: "math.e"
+    required_imports:
+      - "import math"
+---
+operation: "Einsum"
+description: "Evaluates the Einstein summation convention on the operands."
+std_args:
+  - name: "equation"
+    type: "str"
+  - name: "operands"
+    type: "Tensor"
+    is_variadic: true
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.einsum"
+  torch:
+    api: "torch.einsum"
+    requires_plugin: "einsum_normalizer"
+  jax:
+    api: "jax.numpy.einsum"
+  keras:
+    api: "keras.ops.einsum"
+    pack_to_tuple: "operands"
+    pack_as: "List"
+  numpy:
+    api: "numpy.einsum"
+  mlx:
+    api: null  # MLX lacks einsum in core as of v0.0.10, might change
+---
+operation: "Empty"
+description: "Return a new array of given shape and type, without initializing entries."
+std_args:
+  - name: "shape"
+    type: "List[int]"
+  - name: "dtype"
+    type: "str"
+    default: "float32"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.empty"
+  torch:
+    api: "torch.empty"
+    args:
+      shape: "size"
+  jax:
+    api: "jax.numpy.empty"
+  keras:
+    api: "keras.ops.empty"
+  numpy:
+    api: "numpy.empty"
+  mlx:
+    api: null # MLX initializes lazily, no dirty malloc
+    macro_template: "mlx.core.zeros({shape}, dtype={dtype})"
+---
+operation: "EmptyLike"
+description: "Return a new array with the same shape and type as a given array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "dtype"
+    type: "str"
+    default: null
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.empty_like"
+    args:
+      a: "prototype"
+  torch:
+    api: "torch.empty_like"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.empty_like"
+  keras:
+    api: "keras.ops.empty_like"
+    args:
+      a: "x" # keras uses x
+  numpy:
+    api: "numpy.empty_like"
+    args:
+      a: "prototype"
+  mlx:
+    api: null
+    macro_template: "mlx.core.zeros_like({a}, dtype={dtype})"
+---
+operation: "Equal"
+description: "Return (x1 == x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.equal"
+  torch:
+    api: "torch.eq"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.equal"
+  keras:
+    api: "keras.ops.equal"
+  numpy:
+    api: "numpy.equal"
+  mlx:
+    api: "mlx.core.equal"
+---
+operation: "Exp"
+description: "Calculate the exponential of all elements in the input array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.exp"
+  torch:
+    api: "torch.exp"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.exp"
+  keras:
+    api: "keras.ops.exp"
+  numpy:
+    api: "numpy.exp"
+  mlx:
+    api: "mlx.core.exp"
+---
+operation: "Exp2"
+description: "Calculate 2**p for all p in the input array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.exp2"
+  torch:
+    api: "torch.exp2"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.exp2"
+  keras:
+    api: null
+    macro_template: "keras.ops.power(2, {x})"
+  numpy:
+    api: "numpy.exp2"
+  mlx:
+    api: null
+    macro_template: "mlx.core.power(2, {x})"
+---
+operation: "ExpandDims"
+description: "Expand the shape of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.expand_dims"
+  torch:
+    api: "torch.unsqueeze"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.expand_dims"
+  keras:
+    api: "keras.ops.expand_dims"
+    args:
+      a: "x"
+  numpy:
+    api: "numpy.expand_dims"
+  mlx:
+    api: "mlx.core.expand_dims"
+---
+operation: "ExperimentalEnableNumpyBehavior"
+description: "Enables NumPy behavior on Tensors (TensorFlow specific)."
+op_type: "function"
+std_args: []
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.experimental_enable_numpy_behavior"
+  torch:
+    api: null
+  jax:
+    api: null
+  keras:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+---
+operation: "Expm1"
+description: "Calculate exp(x) - 1 for all elements in the array."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.expm1"
+  torch:
+    api: "torch.expm1"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.expm1"
+  keras:
+    api: "keras.ops.expm1"
+  numpy:
+    api: "numpy.expm1"
+  mlx:
+    api: null 
+    macro_template: "(mlx.core.exp({x}) - 1)"
+---
+operation: "Eye"
+description: "Return a 2-D array with ones on the diagonal and zeros elsewhere."
+std_args:
+  - name: "N"
+    type: "int"
+  - name: "M"
+    type: "int"
+    default: null
+  - name: "k"
+    type: "int"
+    default: 0
+  - name: "dtype"
+    type: "str"
+    default: null
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.eye"
+  torch:
+    api: "torch.eye"
+    args:
+      N: "n"
+      M: "m"
+  jax:
+    api: "jax.numpy.eye"
+  keras:
+    api: "keras.ops.eye"
+  numpy:
+    api: "numpy.eye"
+  mlx:
+    api: "mlx.core.eye"
+    args:
+      N: "n"
+      M: "m"
+---
+operation: "Fabs"
+description: "Compute the absolute values element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.fabs"
+  torch:
+    api: "torch.abs"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.fabs"
+  keras:
+    api: "keras.ops.absolute"
+  numpy:
+    api: "numpy.fabs"
+  mlx:
+    api: "mlx.core.abs"
+---
+operation: "Finfo"
+description: "Machine limits for floating point types."
+std_args:
+  - name: "dtype"
+    type: "str"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.finfo"
+  torch:
+    api: "torch.finfo"
+  jax:
+    api: "jax.numpy.finfo"
+  keras:
+    api: "numpy.finfo"
+    required_imports:
+      - "import numpy"
+  numpy:
+    api: "numpy.finfo"
+  mlx:
+    api: "numpy.finfo" # MLX delegates to numpy for info
+    required_imports:
+      - "import numpy"
+---
+operation: "Fix"
+description: "Round to nearest integer towards zero."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.fix"
+  torch:
+    api: "torch.fix"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.fix"
+  keras:
+    # No direct fix, implement as trunc
+    api: "keras.ops.trunc"
+  numpy:
+    api: "numpy.fix"
+  mlx:
+    # No fix, trunc is equiv
+    api: "mlx.core.trunc"
+---
+operation: "Flatten"
+description: "Return a copy of the array collapsed into one dimension."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.flatten"
+  torch:
+    api: "torch.flatten"
+    args:
+      a: "input"
+    macro_template: "torch.flatten({a}, start_dim=0, end_dim=-1)"
+  jax:
+    api: "jax.numpy.ravel"
+  keras:
+    api: "keras.ops.ravel"
+    args:
+      a: "x"
+  numpy:
+    api: "numpy.flatten" # flatten is usually a method on ndarray, but numpy.ravel exists as function
+  mlx:
+    api: "mlx.core.flatten"
+---
+operation: "Flip"
+description: "Reverse the order of elements in an array along the given axis."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.flip"
+  torch:
+    api: "torch.flip"
+    args:
+      m: "input"
+      axis: "dims"
+    pack_to_tuple: "dims"
+  jax:
+    api: "jax.numpy.flip"
+    args:
+      m: "a"
+  keras:
+    api: "keras.ops.flip"
+    args:
+      m: "x"
+  numpy:
+    api: "numpy.flip"
+  mlx:
+    api: null # MLX core has no flip in 0.0.10, slicing with step -1 via macro? 
+---
+operation: "Fliplr"
+description: "Flip array in the left/right direction."
+std_args:
+  - name: "m"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.fliplr"
+  torch:
+    api: "torch.fliplr"
+    args:
+      m: "input"
+  jax:
+    api: "jax.numpy.fliplr"
+  keras:
+    api: null
+    macro_template: "keras.ops.flip({m}, axis=1)"
+  numpy:
+    api: "numpy.fliplr"
+  mlx:
+    api: null
+---
+operation: "Flipud"
+description: "Flip array in the up/down direction."
+std_args:
+  - name: "m"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.flipud"
+  torch:
+    api: "torch.flipud"
+    args:
+      m: "input"
+  jax:
+    api: "jax.numpy.flipud"
+  keras:
+    api: null
+    macro_template: "keras.ops.flip({m}, axis=0)"
+  numpy:
+    api: "numpy.flipud"
+  mlx:
+    api: null
+---
+operation: "Float16"
+description: "Half-precision floating-point number type."
+op_type: "attribute"
+std_args: []
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.float16"
+  torch:
+    api: "torch.float16"
+  jax:
+    api: "jax.numpy.float16"
+  keras:
+    api: "keras.float16" # Not standard, usually string "float16" 
+    macro_template: "'float16'"
+  numpy:
+    api: "numpy.float16"
+  mlx:
+    api: "mlx.core.float16"
+---
+operation: "Float32"
+description: "Single-precision floating-point number type."
+op_type: "attribute"
+std_args: []
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.float32"
+  torch:
+    api: "torch.float32"
+  jax:
+    api: "jax.numpy.float32"
+  keras:
+    api: null
+    macro_template: "'float32'"
+  numpy:
+    api: "numpy.float32"
+  mlx:
+    api: "mlx.core.float32"
+---
+operation: "Float64"
+description: "Double-precision floating-point number type."
+op_type: "attribute"
+std_args: []
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.float64"
+  torch:
+    api: "torch.float64"
+  jax:
+    api: "jax.numpy.float64"
+  keras:
+    api: null
+    macro_template: "'float64'"
+  numpy:
+    api: "numpy.float64"
+  mlx:
+    api: null # No float64 in MLX? Check docs. Usually absent on Apple Silicon HW accel? 
+---
+operation: "Float_"
+description: "Alias for float64."
+op_type: "attribute"
+std_args: []
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.float_"
+  torch:
+    api: "torch.float64"
+  jax:
+    api: "jax.numpy.float_"
+  keras:
+    api: null
+    macro_template: "'float64'"
+  numpy:
+    api: "numpy.float_"
+  mlx:
+    api: null
+---
+operation: "FloatPower"
+description: "First array elements raised to powers from second array, element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.float_power"
+  torch:
+    api: "torch.float_power"
+    args:
+      x1: "input"
+      x2: "exponent"
+  jax:
+    api: "jax.numpy.float_power"
+  keras:
+    api: "keras.ops.power" # Implicitly float usually
+  numpy:
+    api: "numpy.float_power"
+  mlx:
+    api: "mlx.core.power"
+---
+operation: "Floor"
+description: "Return the floor of the input, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.experimental.numpy.floor"
+  torch:
+    api: "torch.floor"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.floor"
+  keras:
+    api: "keras.ops.floor"
+  numpy:
+    api: "numpy.floor"
+  mlx:
+    api: "mlx.core.floor"

@@ -1,0 +1,789 @@
+operation: "BitwiseInvert"
+description: "Compute bit-wise inversion, or bit-wise NOT, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.invert"
+  torch:
+    api: "torch.bitwise_not"
+  jax:
+    api: "jax.numpy.invert"
+  flax_nnx:
+    api: "jax.numpy.invert"
+  paxml:
+    api: "jax.numpy.invert"
+  tensorflow:
+    api: "tf.bitwise.invert"
+  mlx:
+    api: "mlx.core.bitwise_not" # MLX doesn't use invert name
+  keras:
+    api: "keras.ops.invert"
+
+---
+operation: "BitwiseLeftShift"
+description: "Shift the bits of an integer to the left."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.left_shift"
+  torch:
+    api: "torch.bitwise_left_shift"
+  jax:
+    api: "jax.numpy.left_shift"
+  flax_nnx:
+    api: "jax.numpy.left_shift"
+  paxml:
+    api: "jax.numpy.left_shift"
+  tensorflow:
+    api: "tf.bitwise.left_shift"
+  mlx:
+    # MLX lacks explicit shift functions, fallback to operator pending update
+    transformation_type: "infix"
+    operator: "<<"
+  keras:
+    api: null # Keras ops lacks explicit shift currently
+
+---
+operation: "BitwiseNot"
+description: "Bit-wise inversion (Alias for Invert)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.bitwise_not"
+  torch:
+    api: "torch.bitwise_not"
+  jax:
+    api: "jax.numpy.bitwise_not"
+  flax_nnx:
+    api: "jax.numpy.bitwise_not"
+  paxml:
+    api: "jax.numpy.bitwise_not"
+  tensorflow:
+    api: "tf.bitwise.invert"
+  mlx:
+    api: "mlx.core.bitwise_not"
+  keras:
+    api: "keras.ops.invert"
+
+---
+operation: "BitwiseOr"
+description: "Compute the bit-wise OR of two arrays element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.bitwise_or"
+  torch:
+    api: "torch.bitwise_or"
+  jax:
+    api: "jax.numpy.bitwise_or"
+  flax_nnx:
+    api: "jax.numpy.bitwise_or"
+  paxml:
+    api: "jax.numpy.bitwise_or"
+  tensorflow:
+    api: "tf.bitwise.bitwise_or"
+  mlx:
+    api: "mlx.core.bit_or"
+  keras:
+    api: "keras.ops.bitwise_or"
+
+---
+operation: "BitwiseRightShift"
+description: "Shift the bits of an integer to the right."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.right_shift"
+  torch:
+    api: "torch.bitwise_right_shift"
+  jax:
+    api: "jax.numpy.right_shift"
+  flax_nnx:
+    api: "jax.numpy.right_shift"
+  paxml:
+    api: "jax.numpy.right_shift"
+  tensorflow:
+    api: "tf.bitwise.right_shift"
+  mlx:
+    transformation_type: "infix"
+    operator: ">>"
+  keras:
+    api: null
+
+---
+operation: "BitwiseXor"
+description: "Compute the bit-wise XOR of two arrays element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.bitwise_xor"
+  torch:
+    api: "torch.bitwise_xor"
+  jax:
+    api: "jax.numpy.bitwise_xor"
+  flax_nnx:
+    api: "jax.numpy.bitwise_xor"
+  paxml:
+    api: "jax.numpy.bitwise_xor"
+  tensorflow:
+    api: "tf.bitwise.bitwise_xor"
+  mlx:
+    api: "mlx.core.bit_xor"
+  keras:
+    api: "keras.ops.bitwise_xor"
+
+---
+operation: "BlackmanWindow"
+description: "Return the Blackman window."
+std_args:
+  - name: "M"
+    type: "int"
+variants:
+  numpy:
+    api: "numpy.blackman"
+  torch:
+    api: "torch.blackman_window"
+  jax:
+    api: "jax.numpy.blackman"
+  flax_nnx:
+    api: "jax.numpy.blackman"
+  paxml:
+    api: "jax.numpy.blackman"
+  tensorflow:
+    api: "tf.signal.blackman_window"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "Block"
+description: "Assemble an nd-array from nested lists of blocks."
+std_args:
+  - name: "arrays"
+    type: "List"
+variants:
+  numpy:
+    api: "numpy.block"
+  torch:
+    api: null # Requires custom logic to handle nested list recursion + cat
+  jax:
+    api: "jax.numpy.block"
+  flax_nnx:
+    api: "jax.numpy.block"
+  paxml:
+    api: "jax.numpy.block"
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "BuildMatrix"
+description: "Build a matrix object from a string, nested sequence, or array."
+std_args:
+  - name: "obj"
+    type: "Any"
+  - name: "ldict"
+    type: "dict"
+    default: null
+  - name: "gdict"
+    type: "dict"
+    default: null
+variants:
+  numpy:
+    api: "numpy.bmat"
+  torch:
+    api: null
+  jax:
+    api: "jax.numpy.bmat"
+  flax_nnx:
+    api: "jax.numpy.bmat"
+  paxml:
+    api: "jax.numpy.bmat"
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "BoolType"
+description: "Boolean type identifier."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.bool_"
+  torch:
+    api: "torch.bool"
+  jax:
+    api: "jax.numpy.bool_"
+  flax_nnx:
+    api: "jax.numpy.bool_"
+  paxml:
+    api: "jax.numpy.bool_"
+  tensorflow:
+    api: "tf.bool"
+  mlx:
+    api: "bool"
+  keras:
+    api: null
+
+---
+operation: "BoolScalar"
+description: "Explicit Boolean scalar constructor."
+op_type: "function"
+std_args:
+  - name: "value"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.bool_"
+  torch:
+    api: "torch.tensor" 
+    arg_values:
+      dtype: "torch.bool"
+    inject_args:
+      dtype: "torch.bool"
+  jax:
+    api: "jax.numpy.bool_"
+  flax_nnx:
+    api: "jax.numpy.bool_"
+  paxml:
+    api: "jax.numpy.bool_"
+  tensorflow:
+    api: "tf.constant"
+    inject_args:
+      dtype: "tf.bool"
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "BroadcastLike"
+description: "Produce an object that mimics broadcasting."
+op_type: "class"
+std_args:
+  - name: "arrays"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.broadcast"
+  jax:
+    api: "jax.numpy.broadcast"
+  flax_nnx:
+    api: "jax.numpy.broadcast"
+  paxml:
+    api: "jax.numpy.broadcast"
+  torch:
+    api: null # Only has broadcast_tensors function
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "BroadcastArrays"
+description: "Broadcast any number of arrays against each other."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.broadcast_arrays"
+  torch:
+    api: "torch.broadcast_tensors"
+    pack_to_tuple: "tensors"
+    pack_as: "List"
+  jax:
+    api: "jax.numpy.broadcast_arrays"
+  flax_nnx:
+    api: "jax.numpy.broadcast_arrays"
+  paxml:
+    api: "jax.numpy.broadcast_arrays"
+  tensorflow:
+    api: null
+  mlx:
+    api: "mlx.core.broadcast_arrays"
+    pack_to_tuple: "arrays" 
+    pack_as: "List"
+  keras:
+    api: null
+
+---
+operation: "BroadcastShapes"
+description: "Broadcast the input shapes into a single shape."
+std_args:
+  - name: "args"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.broadcast_shapes"
+  jax:
+    api: "jax.numpy.broadcast_shapes"
+  flax_nnx:
+    api: "jax.numpy.broadcast_shapes"
+  paxml:
+    api: "jax.numpy.broadcast_shapes"
+  torch:
+    api: "torch.broadcast_shapes"
+  tensorflow:
+    api: "tf.broadcast_static_shape" # Limited to 2 inputs usually, need helper for variadic
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "BroadcastTo"
+description: "Broadcast an array to a new shape."
+std_args:
+  - name: "array"
+    type: "Tensor"
+  - name: "shape"
+    type: "Tuple[int]"
+variants:
+  numpy:
+    api: "numpy.broadcast_to"
+  torch:
+    api: "torch.broadcast_to"
+  jax:
+    api: "jax.numpy.broadcast_to"
+  flax_nnx:
+    api: "jax.numpy.broadcast_to"
+  paxml:
+    api: "jax.numpy.broadcast_to"
+  tensorflow:
+    api: "tf.broadcast_to"
+  mlx:
+    api: "mlx.core.broadcast_to"
+  keras:
+    api: "keras.ops.broadcast_to"
+
+---
+operation: "BusDayCount"
+description: "Counts the number of valid days between begindates and enddates."
+std_args:
+  - name: "begindates"
+  - name: "enddates"
+  - name: "weekmask"
+    default: "1111100"
+  - name: "holidays"
+    default: []
+variants:
+  numpy:
+    api: "numpy.busday_count"
+  jax:
+    api: "jax.numpy.busday_count" 
+  flax_nnx:
+    api: "jax.numpy.busday_count"
+  paxml:
+    api: "jax.numpy.busday_count"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "BusDayOffset"
+description: "Applies an offset counted in valid days."
+std_args:
+  - name: "dates"
+  - name: "offsets"
+  - name: "roll"
+    default: "raise"
+variants:
+  numpy:
+    api: "numpy.busday_offset"
+  jax:
+    api: "jax.numpy.busday_offset"
+  flax_nnx:
+    api: "jax.numpy.busday_offset"
+  paxml:
+    api: "jax.numpy.busday_offset"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "BusDayCalendar"
+description: "A business day calendar object."
+op_type: "class"
+std_args:
+  - name: "weekmask"
+    default: "1111100"
+  - name: "holidays"
+    default: null
+variants:
+  numpy:
+    api: "numpy.busdaycalendar"
+  jax:
+    api: "jax.numpy.busdaycalendar"
+  flax_nnx:
+    api: "jax.numpy.busdaycalendar"
+  paxml:
+    api: "jax.numpy.busdaycalendar"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "ByteType"
+description: "Signed integer type, compatible with C char (Alias for int8 usually)."
+op_type: "attribute"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.byte"
+  torch:
+    api: "torch.int8"
+  jax:
+    api: "jax.numpy.int8"
+  flax_nnx:
+    api: "jax.numpy.int8"
+  paxml:
+    api: "jax.numpy.int8"
+  tensorflow:
+    api: "tf.int8"
+  mlx:
+    api: "mlx.core.int8"
+  keras:
+    api: null
+
+---
+operation: "BytesType"
+description: "Byte string type."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.bytes_"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  torch:
+    api: null
+  tensorflow:
+    api: "tf.string" # Closest approximation
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "ColumnConcatenation"
+description: "Translates slice objects to concatenation along the second axis (np.c_)."
+std_args:
+  - name: "arrays"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.c_"
+    # Since np.c_ is an indexer, this mapping might require a specific plugin if arguments are not slices
+    requires_plugin: "numpy_c_indexer"
+  jax:
+    api: "jax.numpy.c_"
+  flax_nnx:
+    api: "jax.numpy.c_"
+  paxml:
+    api: "jax.numpy.c_"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "CanCast"
+description: "Returns True if cast between data types can occur."
+std_args:
+  - name: "from_"
+  - name: "to"
+  - name: "casting"
+    default: "safe"
+variants:
+  numpy:
+    api: "numpy.can_cast"
+  jax:
+    api: "jax.numpy.can_cast"
+  flax_nnx:
+    api: "jax.numpy.can_cast"
+  paxml:
+    api: "jax.numpy.can_cast"
+  torch:
+    api: "torch.can_cast"
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "CubeRoot"
+description: "Return the cube-root of an array, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.cbrt"
+  jax:
+    api: "jax.numpy.cbrt"
+  flax_nnx:
+    api: "jax.numpy.cbrt"
+  paxml:
+    api: "jax.numpy.cbrt"
+  torch:
+    api: null
+    macro_template: "torch.pow({x}, 1/3)"
+  tensorflow:
+    api: "tf.math.pow"
+    arg_values: 
+      y: "1.0/3.0"
+    inject_args: { y: "1.0/3.0" }
+  mlx:
+    api: null 
+    macro_template: "mlx.core.power({x}, 1/3)"
+  keras:
+    api: null
+
+---
+operation: "ComplexDouble"
+description: "Complex number type composed of two double-precision floating-point numbers."
+op_type: "attribute"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.cdouble"
+  jax:
+    api: "jax.numpy.complex128"
+  flax_nnx:
+    api: "jax.numpy.complex128"
+  paxml:
+    api: "jax.numpy.complex128"
+  torch:
+    api: "torch.complex128"
+  tensorflow:
+    api: "tf.complex128"
+  mlx:
+    api: "mlx.core.complex128" # MLX might not support complex types fully on all backends yet
+  keras:
+    api: null
+
+---
+operation: "Ceil"
+description: "Return the ceiling of the input, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.ceil"
+  jax:
+    api: "jax.numpy.ceil"
+  flax_nnx:
+    api: "jax.numpy.ceil"
+  paxml:
+    api: "jax.numpy.ceil"
+  torch:
+    api: "torch.ceil"
+  tensorflow:
+    api: "tf.math.ceil"
+  mlx:
+    api: "mlx.core.ceil"
+  keras:
+    api: "keras.ops.ceil"
+
+---
+operation: "CharacterType"
+description: "Abstract base class of all character string scalar types."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.character"
+  jax:
+    api: "jax.numpy.character"
+  flax_nnx:
+    api: "jax.numpy.character"
+  paxml:
+    api: "jax.numpy.character"
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "Choose"
+description: "Construct an array from an index array and a list of arrays to choose from."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "choices"
+    type: "List[Tensor]"
+variants:
+  numpy:
+    api: "numpy.choose"
+  jax:
+    api: "jax.numpy.choose"
+  flax_nnx:
+    api: "jax.numpy.choose"
+  paxml:
+    api: "jax.numpy.choose"
+  torch:
+    api: "torch.choose" # Note: Torch choose often acts differently or doesn't exist directly. Usually take/gather.
+    requires_plugin: "torch_choose_emulation"
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "Clip"
+description: "Clip (limit) the values in an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "a_min"
+    type: "float"
+    default: null
+  - name: "a_max"
+    type: "float"
+    default: null
+variants:
+  numpy:
+    api: "numpy.clip"
+  jax:
+    api: "jax.numpy.clip"
+  flax_nnx:
+    api: "jax.numpy.clip"
+  paxml:
+    api: "jax.numpy.clip"
+  torch:
+    api: "torch.clamp"
+    args: 
+      a_min: "min"
+      a_max: "max"
+  tensorflow:
+    api: "tf.clip_by_value"
+    args:
+      a: "t"
+      a_min: "clip_value_min"
+      a_max: "clip_value_max"
+  mlx:
+    api: null # MLX has no direct clip in core yet, often done via maximum(minimum(...))
+    macro_template: "mlx.core.minimum(mlx.core.maximum({a}, {a_min}), {a_max})"
+  keras:
+    api: "keras.ops.clip"
+    args:
+      a: "x"
+      a_min: "min_value"
+      a_max: "max_value"
+
+---
+operation: "ComplexLongDouble"
+description: "Complex number type composed of two extended-precision floating-point numbers."
+op_type: "attribute"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.clongdouble"
+  jax:
+    api: null # JAX avoids float128
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  torch:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  keras:
+    api: null
+
+---
+operation: "ColumnStack"
+description: "Stack 1-D arrays as columns into a 2-D array."
+std_args:
+  - name: "tup"
+    type: "List[Tensor]"
+variants:
+  numpy:
+    api: "numpy.column_stack"
+  jax:
+    api: "jax.numpy.column_stack"
+  flax_nnx:
+    api: "jax.numpy.column_stack"
+  paxml:
+    api: "jax.numpy.column_stack"
+  torch:
+    api: "torch.column_stack"
+  tensorflow:
+    api: null 
+    # TF usually uses stack(axis=1) logic
+    macro_template: "tf.stack({tup}, axis=1)"
+  mlx:
+    api: null # use stack/concatenate
+    macro_template: "mlx.core.stack({tup}, axis=1)"
+  keras:
+    api: "keras.ops.stack"
+    args: 
+      tup: "x"
+    inject_args:
+      axis: 1

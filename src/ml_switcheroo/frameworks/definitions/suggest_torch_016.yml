@@ -1,0 +1,793 @@
+operation: "GetFilePath"
+description: "Returns the path to a file embedded in the binary."
+op_type: "function"
+std_args:
+  - name: "path"
+    type: "str"
+variants:
+  torch:
+    api: "torch.get_file_path"
+  jax:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+---
+operation: "GetFloat32MatmulPrecision"
+description: "Returns the current value of float32 matrix multiplication precision."
+op_type: "function"
+std_args: []
+return_type: "str"
+variants:
+  torch:
+    api: "torch.get_float32_matmul_precision"
+  jax:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+---
+operation: "GetNumInteropThreads"
+description: "Returns the number of threads used for inter-op parallelism on CPU."
+op_type: "function"
+std_args: []
+return_type: "int"
+variants:
+  torch:
+    api: "torch.get_num_interop_threads"
+  jax:
+    api: null
+  tensorflow:
+    api: "tf.config.threading.get_inter_op_parallelism_threads"
+  mlx:
+    api: null
+  numpy:
+    api: null
+---
+operation: "GetNumThreads"
+description: "Returns the number of threads used for parallelizing CPU operations."
+op_type: "function"
+std_args: []
+return_type: "int"
+variants:
+  torch:
+    api: "torch.get_num_threads"
+  jax:
+    api: null
+  tensorflow:
+    api: "tf.config.threading.get_intra_op_parallelism_threads"
+  mlx:
+    api: null
+  numpy:
+    api: null
+---
+operation: "GetRngState"
+description: "Returns the random number generator state."
+op_type: "function"
+std_args: []
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.get_rng_state"
+  jax:
+    api: null
+    missing_message: "JAX uses stateless PRNG keys, not global RNG state."
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.random.get_state"
+    output_select_index: null
+---
+operation: "Gradient"
+description: "Estimates the gradient of a function in one or more dimensions."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "spacing"
+    type: "Union[int, List[float]]"
+    default: 1
+  - name: "dim"
+    type: "Optional[int]"
+    default: null
+  - name: "edge_order"
+    type: "int"
+    default: 1
+variants:
+  torch:
+    api: "torch.gradient"
+  jax:
+    api: "jax.numpy.gradient"
+    args:
+      input: "f"
+      spacing: "varargs"
+      dim: "axis"
+      edge_order: "edge_order"
+  numpy:
+    api: "numpy.gradient"
+    args:
+      input: "f"
+      spacing: "varargs"
+      dim: "axis"
+      edge_order: "edge_order"
+  tensorflow:
+    api: "numpy.gradient"
+    required_imports: ["import numpy"]
+    missing_message: "TensorFlow uses numpy.gradient via interop for this specific API."
+  mlx:
+    api: null
+---
+operation: "Greater"
+description: "Computes input > other element-wise."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.greater"
+    args:
+      input: "input"
+      other: "other"
+  jax:
+    api: "jax.numpy.greater"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.greater"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.greater"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.greater"
+  numpy:
+    api: "numpy.greater"
+    args:
+      input: "x1"
+      other: "x2"
+---
+operation: "GreaterEqual"
+description: "Computes input >= other element-wise."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.greater_equal"
+    args:
+      input: "input"
+      other: "other"
+  jax:
+    api: "jax.numpy.greater_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.greater_equal"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.greater_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.greater_equal"
+  numpy:
+    api: "numpy.greater_equal"
+    args:
+      input: "x1"
+      other: "x2"
+---
+operation: "GridSampler"
+description: "Performs grid sampling for 2D or 3D inputs."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "grid"
+    type: "Tensor"
+  - name: "interpolation_mode"
+    type: "int"
+    default: 0
+  - name: "padding_mode"
+    type: "int"
+    default: 0
+  - name: "align_corners"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.grid_sampler"
+  jax:
+    api: "jax.scipy.ndimage.map_coordinates"
+    requires_plugin: "grid_sample_adapter"
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+---
+operation: "GridSampler2d"
+description: "Performs 2D grid sampling."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "grid"
+    type: "Tensor"
+  - name: "interpolation_mode"
+    type: "int"
+    default: 0
+  - name: "padding_mode"
+    type: "int"
+    default: 0
+  - name: "align_corners"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.grid_sampler_2d"
+  jax:
+    api: "jax.scipy.ndimage.map_coordinates"
+    requires_plugin: "grid_sample_adapter"
+  tensorflow:
+    api: null
+---
+operation: "GridSampler3d"
+description: "Performs 3D grid sampling."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "grid"
+    type: "Tensor"
+  - name: "interpolation_mode"
+    type: "int"
+    default: 0
+  - name: "padding_mode"
+    type: "int"
+    default: 0
+  - name: "align_corners"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.grid_sampler_3d"
+  jax:
+    api: null
+  tensorflow:
+    api: null
+---
+operation: "GroupNorm"
+description: "Applies Group Normalization."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "num_groups"
+    type: "int"
+  - name: "weight"
+    type: "Optional[Tensor]"
+    default: null
+  - name: "bias"
+    type: "Optional[Tensor]"
+    default: null
+  - name: "eps"
+    type: "float"
+    default: 1e-05
+variants:
+  torch:
+    api: "torch.group_norm"
+  jax:
+    api: "flax.linen.GroupNorm"
+    requires_plugin: "functional_layer_wrapper"
+  keras:
+    api: "keras.layers.GroupNormalization"
+  tensorflow:
+    api: "tf.nn.group_norm"
+    args:
+      input: "input"
+    missing_message: "TF group_norm signature differs significantly requiring reshape."
+  mlx:
+    api: "mlx.nn.GroupNorm"
+    requires_plugin: "mlx_layer_wrapper"
+---
+operation: "Gru"
+description: "Applies a multi-layer gated recurrent unit (GRU) RNN to an input sequence."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "params"
+    type: "List[Tensor]"
+  - name: "has_biases"
+    type: "bool"
+    default: true
+  - name: "num_layers"
+    type: "int"
+    default: 1
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+  - name: "train"
+    type: "bool"
+    default: true
+  - name: "bidirectional"
+    type: "bool"
+    default: false
+  - name: "batch_first"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.gru"
+  jax:
+    api: "flax.linen.GRU"
+    requires_plugin: "rnn_layer_wrapper"
+  keras:
+    api: "keras.layers.GRU"
+  tensorflow:
+    api: "tf.keras.layers.GRU"
+  mlx:
+    api: "mlx.nn.GRU"
+---
+operation: "GruCell"
+description: "A gated recurrent unit (GRU) cell."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "hx"
+    type: "Tensor"
+  - name: "w_ih"
+    type: "Tensor"
+  - name: "w_hh"
+    type: "Tensor"
+  - name: "b_ih"
+    type: "Optional[Tensor]"
+    default: null
+  - name: "b_hh"
+    type: "Optional[Tensor]"
+    default: null
+variants:
+  torch:
+    api: "torch.gru_cell"
+  jax:
+    api: "flax.linen.GRUCell"
+    requires_plugin: "rnn_cell_wrapper"
+  keras:
+    api: "keras.layers.GRUCell"
+  tensorflow:
+    api: "tf.keras.layers.GRUCell"
+---
+operation: "Gt"
+description: "Computes input > other element-wise."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.gt"
+  jax:
+    api: "jax.numpy.greater"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.greater"
+    args:
+      input: "x"
+      other: "y"
+  keras:
+    api: "keras.ops.greater"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mlx.core.greater"
+  numpy:
+    api: "numpy.greater"
+    args:
+      input: "x1"
+      other: "x2"
+---
+operation: "Half"
+description: "Casts the input tensor to 16-bit floating point."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+is_inplace: false
+variants:
+  torch:
+    api: "torch.half"
+    requires_plugin: "type_methods"
+  jax:
+    api: "jax.numpy.float16"
+    transformation_type: "inline_lambda"
+    macro_template: "{input}.astype(jax.numpy.float16)"
+  tensorflow:
+    api: "tf.cast"
+    macro_template: "tf.cast({input}, tf.float16)"
+  keras:
+    api: "keras.ops.cast"
+    macro_template: "keras.ops.cast({input}, 'float16')"
+  mlx:
+    api: "mlx.core.astype"
+    macro_template: "{input}.astype(mlx.core.float16)"
+  numpy:
+    api: "numpy.astype"
+    macro_template: "{input}.astype(numpy.float16)"
+---
+operation: "HammingWindow"
+description: "Computes the Hamming window."
+op_type: "function"
+std_args:
+  - name: "window_length"
+    type: "int"
+  - name: "periodic"
+    type: "bool"
+    default: true
+  - name: "alpha"
+    type: "float"
+    default: 0.54
+  - name: "beta"
+    type: "float"
+    default: 0.46
+  - name: "dtype"
+    type: "str"
+    default: null
+variants:
+  torch:
+    api: "torch.hamming_window"
+  jax:
+    api: "jax.numpy.hamming"
+    args:
+      window_length: "M"
+      periodic: null
+      alpha: null
+      beta: null
+      dtype: null
+  numpy:
+    api: "numpy.hamming"
+    args:
+      window_length: "M"
+      periodic: null
+      alpha: null
+      beta: null
+  tensorflow:
+    api: "tf.signal.hamming_window"
+    args:
+      window_length: "window_length"
+      periodic: "periodic"
+      alpha: "alpha"
+      beta: "beta"
+      dtype: "dtype"
+---
+operation: "HannWindow"
+description: "Computes the Hann window."
+op_type: "function"
+std_args:
+  - name: "window_length"
+    type: "int"
+  - name: "periodic"
+    type: "bool"
+    default: true
+  - name: "dtype"
+    type: "str"
+    default: null
+variants:
+  torch:
+    api: "torch.hann_window"
+  jax:
+    api: "jax.numpy.hanning"
+    args:
+      window_length: "M"
+      periodic: null
+  numpy:
+    api: "numpy.hanning"
+    args:
+      window_length: "M"
+      periodic: null
+  tensorflow:
+    api: "tf.signal.hann_window"
+    args:
+      window_length: "window_length"
+      periodic: "periodic"
+      dtype: "dtype"
+---
+operation: "Hardshrink"
+description: "Applies the hard shrinkage function element-wise."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "lambd"
+    type: "float"
+    default: 0.5
+variants:
+  torch:
+    api: "torch.hardshrink"
+  jax:
+    api: "jax.nn.hard_tanh"
+    missing_message: "HardShrink not direct in JAX NN. Use macro."
+    transformation_type: "inline_lambda"
+    macro_template: "jax.numpy.where(jax.numpy.abs({input}) > {lambd}, {input}, 0)" 
+  keras:
+    api: "keras.activations.hard_sigmoid"
+    missing_message: "HardShrink distinct from HardSigmoid."
+---
+operation: "HasLapack"
+description: "Checks if LAPACK is available."
+op_type: "function"
+std_args: []
+return_type: "bool"
+variants:
+  torch:
+    api: "torch.has_lapack"
+  jax:
+    api: null
+  numpy:
+    api: null
+---
+operation: "HasMkl"
+description: "Checks if MKL is available."
+op_type: "function"
+std_args: []
+return_type: "bool"
+variants:
+  torch:
+    api: "torch.has_mkl"
+  jax:
+    api: null
+  numpy:
+    api: null
+---
+operation: "HasOpenmp"
+description: "Checks if OpenMP is available."
+op_type: "function"
+std_args: []
+return_type: "bool"
+variants:
+  torch:
+    api: "torch.has_openmp"
+  jax:
+    api: null
+  numpy:
+    api: null
+---
+operation: "HasSpectral"
+description: "Checks if spectral ops are available."
+op_type: "function"
+std_args: []
+return_type: "bool"
+variants:
+  torch:
+    api: "torch.has_spectral"
+  jax:
+    api: null
+  numpy:
+    api: null
+---
+operation: "HashTensor"
+description: "Computes a hash of the tensor."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mode"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.hash_tensor"
+  jax:
+    api: null
+  tensorflow:
+    api: null
+---
+operation: "Heaviside"
+description: "Computes the Heaviside step function."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "values"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.heaviside"
+  jax:
+    api: "jax.numpy.heaviside"
+    args:
+      input: "x1"
+      values: "x2"
+  numpy:
+    api: "numpy.heaviside"
+    args:
+      input: "x1"
+      values: "x2"
+  tensorflow:
+    api: "tf.math.heaviside"
+    args:
+      input: "x"
+      values: "values"
+  mlx:
+    api: null
+---
+operation: "HingeEmbeddingLoss"
+description: "Measures the loss given an input tensor and a labels tensor (-1 or 1)."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "target"
+    type: "Tensor"
+  - name: "margin"
+    type: "float"
+    default: 1.0
+  - name: "reduction"
+    type: "str"
+    default: "mean"
+variants:
+  torch:
+    api: "torch.hinge_embedding_loss"
+  jax:
+    api: "optax.hinge_embedding_loss"
+    requires_plugin: "loss_reduction"
+  keras:
+    api: "keras.losses.Hinge"
+    missing_message: "Keras Hinge expects 0/1 labels or -1/1 depending on config."
+  tensorflow:
+    api: "tf.keras.losses.Hinge"
+---
+operation: "Histc"
+description: "Computes the histogram of a tensor."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "bins"
+    type: "int"
+    default: 100
+  - name: "min"
+    type: "float"
+    default: 0
+  - name: "max"
+    type: "float"
+    default: 0
+variants:
+  torch:
+    api: "torch.histc"
+  jax:
+    api: "jax.numpy.histogram"
+    missing_message: "JAX histogram logic differs for implicit min/max 0 behavior."
+  numpy:
+    api: "numpy.histogram"
+---
+operation: "Histogram"
+description: "Computes a histogram of the values in a tensor."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "bins"
+    type: "Union[int, Tensor]"
+    default: 100
+  - name: "range"
+    type: "Optional[Tuple[float, float]]"
+    default: null
+  - name: "weight"
+    type: "Optional[Tensor]"
+    default: null
+  - name: "density"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.histogram"
+  jax:
+    api: "jax.numpy.histogram"
+    args:
+      input: "a"
+      bins: "bins"
+      range: "range"
+      weight: "weights"
+      density: "density"
+  numpy:
+    api: "numpy.histogram"
+    args:
+      input: "a"
+      bins: "bins"
+      range: "range"
+      weight: "weights"
+      density: "density"
+  tensorflow:
+    api: "tf.histogram_fixed_width"
+    args:
+      input: "values"
+      range: "value_range"
+  mlx:
+    api: null
+---
+operation: "Histogramdd"
+description: "Computes a multi-dimensional histogram of the values in a tensor."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "bins"
+    type: "Union[int, List[int], List[Tensor]]"
+  - name: "range"
+    type: "Optional[List[float]]"
+    default: null
+  - name: "weight"
+    type: "Optional[Tensor]"
+    default: null
+  - name: "density"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.histogramdd"
+  jax:
+    api: "jax.numpy.histogramdd"
+    args:
+      input: "sample"
+      bins: "bins"
+      range: "range"
+      weight: "weights"
+      density: "density"
+  numpy:
+    api: "numpy.histogramdd"
+    args:
+      input: "sample"
+      bins: "bins"
+      range: "range"
+      weight: "weights"
+      density: "density"
+  tensorflow:
+    api: null
+---
+operation: "Hsmm"
+description: "Hidden Semi-Markov Model (likely specialized/internal)."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.hsmm"
+  jax:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null

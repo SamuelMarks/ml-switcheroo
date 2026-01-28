@@ -1,0 +1,733 @@
+operation: "FbgemmPackGemmMatrixFp16"
+description: "Packs a GEMM matrix in FP16 for FBGEMM."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "K"
+    type: "int"
+  - name: "N"
+    type: "int"
+variants:
+  torch:
+    api: "torch.fbgemm_pack_gemm_matrix_fp16"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+skip_fuzzing: true
+
+---
+operation: "FbgemmPackQuantizedMatrix"
+description: "Packs a quantized matrix for FBGEMM."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "K"
+    type: "int"
+  - name: "N"
+    type: "int"
+variants:
+  torch:
+    api: "torch.fbgemm_pack_quantized_matrix"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+skip_fuzzing: true
+
+---
+operation: "FeatureAlphaDropout"
+description: "Randomly masks out entire channels (a channel is a feature map) given a batch of multi-channel input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+    default: 0.5
+  - name: "training"
+    type: "bool"
+    default: false
+  - name: "inplace"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.feature_alpha_dropout"
+  jax:
+    # JAX handles dropout via random keys usually, specialized feature alpha needed
+    api: null 
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    # Keras AlphaDropout acts on features, but 1D/2D variants are explicit
+    api: "keras.layers.AlphaDropout" 
+    op_type: "class"
+    args:
+      p: "rate"
+  tensorflow:
+    api: null
+  mlx:
+    api: "mlx.nn.AlphaDropout"
+    op_type: "class"
+    args:
+      p: "p"
+  numpy:
+    api: null
+
+---
+operation: "FeatureAlphaDropout_"
+description: "In-place version of FeatureAlphaDropout."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+    default: 0.5
+  - name: "training"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.feature_alpha_dropout_"
+  jax:
+    # In-place not supported in JAX
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "FeatureDropout"
+description: "Randomly masks out entire channels (spatial dropout)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+    default: 0.5
+  - name: "training"
+    type: "bool"
+    default: false
+  - name: "inplace"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.feature_dropout"
+  jax:
+    requires_plugin: "inject_prng"
+  flax_nnx:
+    api: "flax.linen.Dropout"
+    op_type: "class"
+    args:
+      p: "rate"
+  keras:
+    api: "keras.layers.SpatialDropout2D"
+    op_type: "class"
+    args:
+      p: "rate"
+  mlx:
+    api: "mlx.nn.Dropout2d"
+    op_type: "class"
+    args:
+      p: "p"
+
+---
+operation: "FeatureDropout_"
+description: "In-place version of FeatureDropout."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "p"
+    type: "float"
+    default: 0.5
+  - name: "training"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.feature_dropout_"
+  jax:
+    api: null
+
+---
+operation: "Fill"
+description: "Creates a tensor filled with a scalar value."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "value"
+    type: "float"
+variants:
+  torch:
+    api: "torch.fill"
+  jax:
+    api: "jnp.full_like"
+    args:
+      input: "a"
+      value: "fill_value"
+  flax_nnx:
+    api: "jnp.full_like"
+    args:
+      input: "a"
+      value: "fill_value"
+  keras:
+    api: "keras.ops.full_like"
+    args:
+      input: "x"
+      value: "fill_value"
+  tensorflow:
+    api: "tf.fill"
+    output_shape_calc: "lambda input, value: input.shape"
+    args:
+      input: "dims" # TF fill takes dims, not tensor. Mismatch.
+    # TF fill(dims, value) requires shape. 
+    # Use generic helper:
+    macro_template: "tf.fill(tf.shape({input}), {value})"
+  mlx:
+    api: "mlx.core.full"
+    args:
+      input: "shape"
+      value: "vals"
+    macro_template: "mx.full({input}.shape, {value}, dtype={input}.dtype)"
+  numpy:
+    api: "numpy.full_like"
+    args:
+      input: "a"
+      value: "fill_value"
+
+---
+operation: "Fill_"
+description: "In-place fill."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "value"
+    type: "float"
+variants:
+  torch:
+    api: "torch.fill_"
+  jax:
+    api: null # Immutable
+    requires_plugin: "unroll_inplace_ops"
+
+---
+operation: "Finfo"
+description: "Machine limits for floating point types."
+op_type: "class"
+std_args:
+  - name: "dtype"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.finfo"
+  jax:
+    api: "jax.numpy.finfo"
+  flax_nnx:
+    api: "jax.numpy.finfo"
+  keras:
+    api: "numpy.finfo" # Keras ops usually return values directly, but numpy.finfo is standard in python ecosystem
+  min_version: ""
+  numpy:
+    api: "numpy.finfo"
+  mlx:
+    api: "numpy.finfo" # MLX relies on numpy for type info
+
+---
+operation: "Fix"
+description: "Rounds the input towards zero. Alias for trunc."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.fix"
+  jax:
+    api: "jax.numpy.fix"
+  flax_nnx:
+    api: "jax.numpy.fix"
+  paxml:
+    api: "jax.numpy.fix"
+  keras:
+    api: "keras.ops.trunc"
+  tensorflow:
+    api: "tf.math.truncate_div" # Not exact match? tf.fix doesn't exist? tf.trunc? 
+    api: "tf.math.round" # Fix behavior is 'trunc' 
+    api: "tf.trunc" # Exists?
+    api: "tf.raw_ops.Truncate" # Safe
+    macro_template: "tf.cast(tf.cast({input}, tf.int32), {input}.dtype)"
+  mlx:
+    api: "mlx.core.trunc" # Valid logic match
+  numpy:
+    api: "numpy.fix"
+
+---
+operation: "Fix_"
+description: "In-place version of fix."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.fix_"
+  jax:
+    api: null
+    requires_plugin: "unroll_inplace_ops"
+
+---
+operation: "Flatten"
+description: "Flattens a contiguous range of dims."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 2
+  - name: "start_dim"
+    type: "int"
+    default: 0
+  - name: "end_dim"
+    type: "int"
+    default: -1
+variants:
+  torch:
+    api: "torch.flatten"
+  jax:
+    # JAX needs reshape for partial flatten
+    requires_plugin: "flatten_range"
+  flax_nnx:
+    requires_plugin: "flatten_range"
+  paxml:
+    requires_plugin: "flatten_range"
+  keras:
+    api: "keras.ops.reshape" 
+    # Partial flatten logic handled via reshape macro
+    macro_template: "{input}.reshape((-1,))" # Only for full flatten
+    requires_plugin: "flatten_range" # Use plugin for correctness
+  tensorflow:
+    api: "tf.reshape"
+    requires_plugin: "flatten_range"
+  mlx:
+    api: "mlx.core.flatten"
+    args:
+      start_dim: "start_axis"
+      end_dim: "end_axis"
+  numpy:
+    requires_plugin: "flatten_range"
+
+---
+operation: "Flip"
+description: "Reverse the order of an n-D tensor along given axis in dims."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dims"
+    type: "List[int]"
+variants:
+  torch:
+    api: "torch.flip"
+  jax:
+    api: "jax.numpy.flip"
+    args:
+      dims: "axis"
+  flax_nnx:
+    api: "jax.numpy.flip"
+    args:
+      dims: "axis"
+  paxml:
+    api: "jax.numpy.flip"
+    args:
+      dims: "axis"
+  keras:
+    api: "keras.ops.flip"
+    args:
+      dims: "axis"
+  tensorflow:
+    api: "tf.reverse" # Logic match
+    args:
+      dims: "axis"
+  mlx:
+    # MLX has slice-based reverse. No direct multi-dim flip api? 
+    # Use python slice [::-1] 
+    requires_plugin: "slice_reverse"
+  numpy:
+    api: "numpy.flip"
+    args:
+      dims: "axis"
+
+---
+operation: "Fliplr"
+description: "Flip tensor in the left/right direction."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.fliplr"
+  jax:
+    api: "jax.numpy.fliplr"
+  flax_nnx:
+    api: "jax.numpy.fliplr"
+  keras:
+    # Keras ops usually general flip. 
+    api: "keras.ops.flip"
+    args: 
+      # fliplr usually means axis 1 for 2D+
+      input: "x"
+    inject_args:
+      axis: 1
+  numpy:
+    api: "numpy.fliplr"
+  mlx:
+    # MLX doesn't have fliplr helper
+    macro_template: "{input}[:, ::-1]"
+
+---
+operation: "Flipud"
+description: "Flip tensor in the up/down direction."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.flipud"
+  jax:
+    api: "jax.numpy.flipud"
+  flax_nnx:
+    api: "jax.numpy.flipud"
+  keras:
+    api: "keras.ops.flip"
+    inject_args:
+      axis: 0
+  numpy:
+    api: "numpy.flipud"
+  mlx:
+    macro_template: "{input}[::-1]"
+
+---
+operation: "Float"
+description: "Single precision float type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float"
+  jax:
+    api: "jnp.float32"
+  flax_nnx:
+    api: "jnp.float32"
+  paxml:
+    api: "jnp.float32"
+  keras:
+    api: "float" # Python builtin or numpy
+  tensorflow:
+    api: "tf.float32"
+  mlx:
+    api: "mx.float32"
+  numpy:
+    api: "np.float32"
+
+---
+operation: "Float16"
+description: "Half precision float type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float16"
+  jax:
+    api: "jnp.float16"
+  flax_nnx:
+    api: "jnp.float16"
+  paxml:
+    api: "jnp.float16"
+  tensorflow:
+    api: "tf.float16"
+  mlx:
+    api: "mx.float16"
+  numpy:
+    api: "np.float16"
+
+---
+operation: "Float32"
+description: "Single precision float type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float32"
+  jax:
+    api: "jnp.float32"
+  flax_nnx:
+    api: "jnp.float32"
+  paxml:
+    api: "jnp.float32"
+  tensorflow:
+    api: "tf.float32"
+  mlx:
+    api: "mx.float32"
+  numpy:
+    api: "np.float32"
+
+---
+operation: "Float4E2m1fnX2"
+description: "FP4 type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float4_e2m1fn_x2"
+  jax:
+    api: null
+  numpy:
+    api: null
+skip_fuzzing: true
+
+---
+operation: "Float64"
+description: "Double precision float type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float64"
+  jax:
+    api: "jnp.float64"
+  flax_nnx:
+    api: "jnp.float64"
+  paxml:
+    api: "jnp.float64"
+  tensorflow:
+    api: "tf.float64"
+  mlx:
+    api: null # MLX focuses on 16/32 typically on silicon? Need to check. 
+    # Spec update: MLX has no float64 sometimes depending on build? 
+    # Safe to assume null for now or 'mx.float32' with warning.
+  numpy:
+    api: "np.float64"
+
+---
+operation: "Float8E4m3fn"
+description: "FP8 type E4M3FN."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float8_e4m3fn"
+  jax:
+    api: "jnp.float8_e4m3fn"
+  flax_nnx:
+    api: "jnp.float8_e4m3fn"
+  tensorflow:
+    api: "tf.types.float8_e4m3fn"
+  numpy:
+    api: null
+skip_fuzzing: true
+
+---
+operation: "Float8E4m3fnuz"
+description: "FP8 type E4M3FNUZ."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float8_e4m3fnuz"
+  jax:
+    api: "jnp.float8_e4m3fnuz"
+  flax_nnx:
+    api: "jnp.float8_e4m3fnuz"
+  numpy:
+    api: null
+skip_fuzzing: true
+
+---
+operation: "Float8E5m2"
+description: "FP8 type E5M2."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float8_e5m2"
+  jax:
+    api: "jnp.float8_e5m2"
+  flax_nnx:
+    api: "jnp.float8_e5m2"
+  tensorflow:
+    api: "tf.types.float8_e5m2"
+  numpy:
+    api: null
+skip_fuzzing: true
+
+---
+operation: "Float8E5m2fnuz"
+description: "FP8 type E5M2FNUZ."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float8_e5m2fnuz"
+  jax:
+    api: "jnp.float8_e5m2fnuz"
+  flax_nnx:
+    api: "jnp.float8_e5m2fnuz"
+  numpy:
+    api: null
+skip_fuzzing: true
+
+---
+operation: "Float8E8m0fnu"
+description: "FP8 type E8M0FNU."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.float8_e8m0fnu"
+  jax:
+    api: null
+  numpy:
+    api: null
+skip_fuzzing: true
+
+---
+operation: "FloatPower"
+description: "Raises input to the power of exponent, elementwise, in double precision."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "exponent"
+    type: "float"
+variants:
+  torch:
+    api: "torch.float_power"
+  jax:
+    api: "jnp.float_power"
+  flax_nnx:
+    api: "jnp.float_power"
+  paxml:
+    api: "jnp.float_power"
+  keras:
+    api: "keras.ops.power" # No float_power? 
+    output_cast: "float64"
+  tensorflow:
+    api: "tf.math.pow"
+    output_cast: "tf.float64"
+  mlx:
+    api: "mlx.core.power"
+  numpy:
+    api: "numpy.float_power"
+
+---
+operation: "Floor"
+description: "Floor of the elements."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.floor"
+  jax:
+    api: "jax.numpy.floor"
+  flax_nnx:
+    api: "jax.numpy.floor"
+  paxml:
+    api: "jax.numpy.floor"
+  keras:
+    api: "keras.ops.floor"
+  tensorflow:
+    api: "tf.math.floor" # Usually returns float
+  mlx:
+    api: "mlx.core.floor"
+  numpy:
+    api: "numpy.floor"
+
+---
+operation: "Floor_"
+description: "In-place floor."
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.floor_"
+  jax:
+    api: null
+    requires_plugin: "unroll_inplace_ops"
+
+---
+operation: "FloorDivide"
+description: "Computes input divided by other, elementwise, and floors the result."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.floor_divide"
+  jax:
+    api: "jax.numpy.floor_divide"
+  flax_nnx:
+    api: "jax.numpy.floor_divide"
+  paxml:
+    api: "jax.numpy.floor_divide"
+  keras:
+    api: "keras.ops.floor_divide"
+  tensorflow:
+    api: "tf.math.floordiv"
+  mlx:
+    api: "mlx.core.floor_divide"
+  numpy:
+    api: "numpy.floor_divide"
+
+---
+operation: "Fmax"
+description: "Element-wise maximum of input and other, ignoring NaNs."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.fmax"
+  jax:
+    api: "jax.numpy.fmax"
+  flax_nnx:
+    api: "jax.numpy.fmax"
+  paxml:
+    api: "jax.numpy.fmax"
+  keras:
+    # No direct fmax in standard ops usually, only max
+    # Fallback plugin? Or custom macro
+    macro_template: "{input}.where(isnan({input}), {other}, {input}).maximum({other})" # Complex implementation... 
+    api: null
+  tensorflow:
+    api: null # tf has no fmax
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.fmax"

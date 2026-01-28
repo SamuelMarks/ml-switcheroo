@@ -1,0 +1,234 @@
+operation: "UnsortedSegmentMax"
+description: "Computes the maximum along segments of a tensor."
+std_args:
+  - name: "data"
+    type: "Tensor"
+  - name: "segment_ids"
+    type: "Tensor"
+  - name: "num_segments"
+    type: "int"
+variants:
+  tensorflow:
+    api: "tf.math.unsorted_segment_max"
+  jax:
+    api: "jax.ops.segment_max"
+    args:
+      data: "data"
+      segment_ids: "segment_ids"
+      num_segments: "num_segments"
+  flax_nnx:
+    api: "jax.ops.segment_max"
+  paxml:
+    api: "jax.ops.segment_max"
+---
+operation: "UnsortedSegmentMean"
+description: "Computes the mean along segments of a tensor."
+std_args:
+  - name: "data"
+    type: "Tensor"
+  - name: "segment_ids"
+    type: "Tensor"
+  - name: "num_segments"
+    type: "int"
+variants:
+  tensorflow:
+    api: "tf.math.unsorted_segment_mean"
+---
+operation: "UnsortedSegmentMin"
+description: "Computes the minimum along segments of a tensor."
+std_args:
+  - name: "data"
+    type: "Tensor"
+  - name: "segment_ids"
+    type: "Tensor"
+  - name: "num_segments"
+    type: "int"
+variants:
+  tensorflow:
+    api: "tf.math.unsorted_segment_min"
+  jax:
+    api: "jax.ops.segment_min"
+    args:
+      data: "data"
+      segment_ids: "segment_ids"
+      num_segments: "num_segments"
+  flax_nnx:
+    api: "jax.ops.segment_min"
+  paxml:
+    api: "jax.ops.segment_min"
+---
+operation: "UnsortedSegmentProd"
+description: "Computes the product along segments of a tensor."
+std_args:
+  - name: "data"
+    type: "Tensor"
+  - name: "segment_ids"
+    type: "Tensor"
+  - name: "num_segments"
+    type: "int"
+variants:
+  tensorflow:
+    api: "tf.math.unsorted_segment_prod"
+  jax:
+    api: "jax.ops.segment_prod"
+    args:
+      data: "data"
+      segment_ids: "segment_ids"
+      num_segments: "num_segments"
+  flax_nnx:
+    api: "jax.ops.segment_prod"
+  paxml:
+    api: "jax.ops.segment_prod"
+---
+operation: "UnsortedSegmentSqrtN"
+description: "Computes the sum along segments of a tensor divided by the sqrt(N)."
+std_args:
+  - name: "data"
+    type: "Tensor"
+  - name: "segment_ids"
+    type: "Tensor"
+  - name: "num_segments"
+    type: "int"
+variants:
+  tensorflow:
+    api: "tf.math.unsorted_segment_sqrt_n"
+---
+operation: "UnsortedSegmentSum"
+description: "Computes the sum along segments of a tensor."
+std_args:
+  - name: "data"
+    type: "Tensor"
+  - name: "segment_ids"
+    type: "Tensor"
+  - name: "num_segments"
+    type: "int"
+variants:
+  tensorflow:
+    api: "tf.math.unsorted_segment_sum"
+  jax:
+    api: "jax.ops.segment_sum"
+    args:
+      data: "data"
+      segment_ids: "segment_ids"
+      num_segments: "num_segments"
+  flax_nnx:
+    api: "jax.ops.segment_sum"
+  paxml:
+    api: "jax.ops.segment_sum"
+---
+operation: "Xdivy"
+description: "Computes x / y. Returns zero when x = 0."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.xdivy"
+  jax:
+    api: "jax.scipy.special.xdivy"
+  flax_nnx:
+    api: "jax.scipy.special.xdivy"
+  paxml:
+    api: "jax.scipy.special.xdivy"
+  numpy:
+    macro_template: "np.where({x} == 0, 0, {x} / {y})"
+---
+operation: "Xlog1py"
+description: "Compute x * log1p(y). Returns zero when x = 0."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.xlog1py"
+  jax:
+    api: "jax.scipy.special.xlog1py"
+  flax_nnx:
+    api: "jax.scipy.special.xlog1py"
+  paxml:
+    api: "jax.scipy.special.xlog1py"
+  torch:
+    api: "torch.special.xlog1py"
+    args:
+      x: "input"
+      y: "other"
+  numpy:
+    macro_template: "np.where({x} == 0, 0, {x} * np.log1p({y}))"
+---
+operation: "Xlogy"
+description: "Returns 0 if x == 0, and x * log(y) otherwise, elementwise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.xlogy"
+  jax:
+    api: "jax.scipy.special.xlogy"
+  flax_nnx:
+    api: "jax.scipy.special.xlogy"
+  paxml:
+    api: "jax.scipy.special.xlogy"
+  torch:
+    api: "torch.special.xlogy"
+    args:
+      x: "input"
+      y: "other"
+  numpy:
+    macro_template: "np.where({x} == 0, 0, {x} * np.log({y}))"
+---
+operation: "ZeroFraction"
+description: "Returns the fraction of zeros in value."
+std_args:
+  - name: "value"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.zero_fraction"
+  torch:
+    macro_template: "torch.mean(({value} == 0).float())"
+  jax:
+    macro_template: "jnp.mean({value} == 0)"
+  flax_nnx:
+    macro_template: "jnp.mean({value} == 0)"
+  paxml:
+    macro_template: "jnp.mean({value} == 0)"
+  numpy:
+    macro_template: "np.mean({value} == 0)"
+  mlx:
+    macro_template: "mx.mean({value} == 0)"
+---
+operation: "Zeta"
+description: "Compute the Hurwitz zeta function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "q"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.zeta"
+  jax:
+    api: "jax.scipy.special.zeta"
+  flax_nnx:
+    api: "jax.scipy.special.zeta"
+  paxml:
+    api: "jax.scipy.special.zeta"
+  torch:
+    # torch.special.zeta(input, other) 
+    # computes \sum (other + k)^{-input}
+    # TF docs: \sum (q + n)^{-x} -> TF(x, q) maps to Torch(x, q) 
+    api: "torch.special.zeta"
+    args:
+      x: "input"
+      q: "other"
+  keras:
+    api: "keras.ops.zeta"
+    # Keras ops usually follow TF signature if inspired by it, assuming standard order
+    # x, q order

@@ -1,0 +1,662 @@
+operation: "Abs"
+description: "Computes the absolute value element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.abs"
+  keras:
+    api: "keras.ops.abs"
+  torch:
+    api: "torch.abs"
+  jax:
+    api: "jax.numpy.abs"
+  mlx:
+    api: "mlx.core.abs"
+  numpy:
+    api: "numpy.abs"
+---
+operation: "AccumulateN"
+description: "Returns the element-wise sum of a list of tensors. (Deprecated -> AddN)"
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+variants:
+  tensorflow:
+    api: "tf.math.accumulate_n"
+  keras:
+    # Keras ops doesn't typically expose add_n, use sum
+    macro_template: "sum({inputs})"
+  torch:
+    macro_template: "sum({inputs})"
+  jax:
+    macro_template: "sum({inputs})"
+  numpy:
+    macro_template: "sum({inputs})"
+---
+operation: "Acos"
+description: "Computes the inverse cosine element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.acos"
+  keras:
+    api: "keras.ops.arccos"
+  torch:
+    api: "torch.acos"
+  jax:
+    api: "jax.numpy.arccos"
+  mlx:
+    api: "mlx.core.arccos"
+  numpy:
+    api: "numpy.arccos"
+---
+operation: "Acosh"
+description: "Computes the inverse hyperbolic cosine element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.acosh"
+  keras:
+    api: "keras.ops.arccosh"
+  torch:
+    api: "torch.acosh"
+  jax:
+    api: "jax.numpy.arccosh"
+  mlx:
+    api: "mlx.core.arccosh"
+  numpy:
+    api: "numpy.arccosh"
+---
+operation: "Add"
+description: "Returns x + y element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "y"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.add"
+  keras:
+    api: "keras.ops.add"
+  torch:
+    api: "torch.add"
+  jax:
+    api: "jax.numpy.add"
+  mlx:
+    api: "mlx.core.add"
+  numpy:
+    api: "numpy.add"
+---
+operation: "AddN"
+description: "Returns the element-wise sum of a list of tensors."
+std_args:
+  - name: "inputs"
+    type: "List[Tensor]"
+variants:
+  tensorflow:
+    api: "tf.math.add_n"
+  keras:
+    macro_template: "sum({inputs})"
+  torch:
+    macro_template: "sum({inputs})"
+  jax:
+    macro_template: "sum({inputs})"
+  numpy:
+    macro_template: "sum({inputs})"
+---
+operation: "Angle"
+description: "Returns the element-wise argument (angle) of a complex tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.angle"
+    args:
+      input: "input"
+  keras:
+    # Keras ops doesn't expose angle standardly in v3.0 core, using numpy fallback match
+    api: "numpy.angle"
+    required_imports: ["import numpy"]
+  torch:
+    api: "torch.angle"
+  jax:
+    api: "jax.numpy.angle"
+  numpy:
+    api: "numpy.angle"
+---
+operation: "ApproxMaxK"
+description: "Returns max k values and their indices using approximate search (TPU optimized)."
+std_args:
+  - name: "operand"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+  - name: "reduction_dimension"
+    type: "int"
+    default: -1
+variants:
+  tensorflow:
+    api: "tf.math.approx_max_k"
+  jax:
+    api: "jax.lax.approx_max_k"
+  torch:
+    # Fallback to exact topk
+    api: "torch.topk"
+    args:
+      operand: "input"
+      k: "k"
+      reduction_dimension: "dim"
+  mlx:
+    # Fallback to topk
+    api: "mlx.core.topk"
+    args:
+      operand: "a"
+      k: "k"
+      reduction_dimension: "axis"
+---
+operation: "ApproxMinK"
+description: "Returns min k values and their indices using approximate search."
+std_args:
+  - name: "operand"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+  - name: "reduction_dimension"
+    type: "int"
+    default: -1
+variants:
+  tensorflow:
+    api: "tf.math.approx_min_k"
+  jax:
+    api: "jax.lax.approx_min_k"
+  torch:
+    # Fallback to exact topk descending logic
+    api: "torch.topk"
+    args:
+      operand: "input"
+      k: "k"
+      reduction_dimension: "dim"
+    inject_args:
+      largest: False
+  mlx:
+    # MLX topk does not support 'largest=False' directly in some versions, requires neg
+    requires_plugin: "mlx_approx_min_k_fallback"
+---
+operation: "ArgMax"
+description: "Returns the index with the largest value across axes of a tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.math.argmax"
+  keras:
+    api: "keras.ops.argmax"
+  torch:
+    api: "torch.argmax"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.argmax"
+  mlx:
+    api: "mlx.core.argmax"
+  numpy:
+    api: "numpy.argmax"
+---
+operation: "ArgMin"
+description: "Returns the index with the smallest value across axes of a tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.math.argmin"
+  keras:
+    api: "keras.ops.argmin"
+  torch:
+    api: "torch.argmin"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.argmin"
+  mlx:
+    api: "mlx.core.argmin"
+  numpy:
+    api: "numpy.argmin"
+---
+operation: "Asin"
+description: "Computes the trignometric inverse sine element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.asin"
+  keras:
+    api: "keras.ops.arcsin"
+  torch:
+    api: "torch.asin"
+  jax:
+    api: "jax.numpy.arcsin"
+  mlx:
+    api: "mlx.core.arcsin"
+  numpy:
+    api: "numpy.arcsin"
+---
+operation: "Asinh"
+description: "Computes the inverse hyperbolic sine element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.asinh"
+  keras:
+    api: "keras.ops.arcsinh"
+  torch:
+    api: "torch.asinh"
+  jax:
+    api: "jax.numpy.arcsinh"
+  mlx:
+    api: "mlx.core.arcsinh"
+  numpy:
+    api: "numpy.arcsinh"
+---
+operation: "Atan"
+description: "Computes the trignometric inverse tangent element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.atan"
+  keras:
+    api: "keras.ops.arctan"
+  torch:
+    api: "torch.atan"
+  jax:
+    api: "jax.numpy.arctan"
+  mlx:
+    api: "mlx.core.arctan"
+  numpy:
+    api: "numpy.arctan"
+---
+operation: "Atan2"
+description: "Computes arctangent of y/x respecting signs."
+std_args:
+  - name: "y"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.atan2"
+  keras:
+    api: "keras.ops.arctan2"
+    args:
+      x: "x1"
+      y: "x2"
+  torch:
+    api: "torch.atan2"
+  jax:
+    api: "jax.numpy.arctan2"
+    args:
+      x: "x1"
+      y: "x2"
+  numpy:
+    api: "numpy.arctan2"
+    args:
+      x: "x2" # numpy atan2(y, x) -> x1=y, x2=x
+      y: "x1"
+---
+operation: "Atanh"
+description: "Computes inverse hyperbolic tangent element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.atanh"
+  keras:
+    api: "keras.ops.arctanh"
+  torch:
+    api: "torch.atanh"
+  jax:
+    api: "jax.numpy.arctanh"
+  mlx:
+    api: "mlx.core.arctanh"
+  numpy:
+    api: "numpy.arctanh"
+---
+operation: "BesselI0"
+description: "Modified Bessel function of order 0."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.bessel_i0"
+  torch:
+    api: "torch.special.i0"
+  jax:
+    api: "jax.scipy.special.i0"
+  numpy:
+    api: "scipy.special.i0"
+    required_imports:
+      - module: "scipy.special"
+---
+operation: "BesselI0e"
+description: "Exponentially scaled modified Bessel function of order 0."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.bessel_i0e"
+  torch:
+    api: "torch.special.i0e"
+  jax:
+    api: "jax.scipy.special.i0e"
+  numpy:
+    api: "scipy.special.i0e"
+    required_imports:
+      - module: "scipy.special"
+---
+operation: "BesselI1"
+description: "Modified Bessel function of order 1."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.bessel_i1"
+  torch:
+    api: "torch.special.i1"
+  jax:
+    api: "jax.scipy.special.i1"
+  numpy:
+    api: "scipy.special.i1"
+    required_imports:
+      - module: "scipy.special"
+---
+operation: "BesselI1e"
+description: "Exponentially scaled modified Bessel function of order 1."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.bessel_i1e"
+  torch:
+    api: "torch.special.i1e"
+  jax:
+    api: "jax.scipy.special.i1e"
+  numpy:
+    api: "scipy.special.i1e"
+    required_imports:
+      - module: "scipy.special"
+---
+operation: "Betainc"
+description: "Compute the regularized incomplete beta integral."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.betainc"
+  torch:
+    # torch.special.betainc available in recent versions
+    api: "torch.special.betainc"
+  jax:
+    api: "jax.scipy.special.betainc"
+  numpy:
+    api: "scipy.special.betainc"
+    required_imports:
+      - module: "scipy.special"
+---
+operation: "Bincount"
+description: "Counts the number of occurrences of each value in an integer array."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "weights"
+    type: "Tensor"
+    default: null
+  - name: "minlength"
+    type: "int"
+    default: 0
+variants:
+  tensorflow:
+    api: "tf.math.bincount"
+  torch:
+    api: "torch.bincount"
+    args:
+      arr: "input"
+      weights: "weights"
+      minlength: "minlength"
+  jax:
+    api: "jax.numpy.bincount"
+    args:
+      arr: "x"
+      weights: "weights"
+      minlength: "minlength"
+  numpy:
+    api: "numpy.bincount"
+    args:
+      arr: "x"
+      weights: "weights"
+      minlength: "minlength"
+---
+operation: "Ceil"
+description: "Return the ceiling of the input element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.ceil"
+  keras:
+    api: "keras.ops.ceil"
+  torch:
+    api: "torch.ceil"
+  jax:
+    api: "jax.numpy.ceil"
+  mlx:
+    api: "mlx.core.ceil"
+  numpy:
+    api: "numpy.ceil"
+---
+operation: "ConfusionMatrix"
+description: "Computes the confusion matrix from predictions and labels."
+std_args:
+  - name: "labels"
+    type: "Tensor"
+  - name: "predictions"
+    type: "Tensor"
+  - name: "num_classes"
+    type: "int"
+    default: null
+variants:
+  tensorflow:
+    api: "tf.math.confusion_matrix"
+  torch:
+    # Usually requires torchmetrics, mapped via plugin/manual call
+    api: "torch.func.confusion_matrix" # Placeholder: Torch has no direct atomic op
+    requires_plugin: "torch_confusion_matrix_impl"
+  jax:
+    requires_plugin: "jax_confusion_matrix_impl"
+  numpy:
+    # Often sklearn
+    api: "sklearn.metrics.confusion_matrix"
+    required_imports:
+      - module: "sklearn.metrics"
+    args:
+      labels: "y_true"
+      predictions: "y_pred"
+---
+operation: "Conj"
+description: "Returns the complex conjugate of a complex number."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.conj"
+  keras:
+    api: "keras.ops.conj"
+  torch:
+    api: "torch.conj"
+  jax:
+    api: "jax.numpy.conj"
+  # numpy
+  numpy:
+    api: "numpy.conj"
+---
+operation: "Cos"
+description: "Computes cosine of x element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.cos"
+  keras:
+    api: "keras.ops.cos"
+  torch:
+    api: "torch.cos"
+  jax:
+    api: "jax.numpy.cos"
+  mlx:
+    api: "mlx.core.cos"
+  numpy:
+    api: "numpy.cos"
+---
+operation: "Cosh"
+description: "Computes hyperbolic cosine element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  tensorflow:
+    api: "tf.math.cosh"
+  keras:
+    api: "keras.ops.cosh"
+  torch:
+    api: "torch.cosh"
+  jax:
+    api: "jax.numpy.cosh"
+  mlx:
+    api: "mlx.core.cosh"
+  numpy:
+    api: "numpy.cosh"
+---
+operation: "CountNonzero"
+description: "Computes number of nonzero elements across dimensions."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: False
+variants:
+  tensorflow:
+    api: "tf.math.count_nonzero"
+  torch:
+    api: "torch.count_nonzero"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.count_nonzero"
+  numpy:
+    api: "numpy.count_nonzero"
+---
+operation: "Cumprod"
+description: "Compute the cumulative product of the tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: 0
+  - name: "exclusive"
+    type: "bool"
+    default: False
+  - name: "reverse"
+    type: "bool"
+    default: False
+variants:
+  tensorflow:
+    api: "tf.math.cumprod"
+  keras:
+    # Keras cumprod doesn't support exclusive/reverse args widely
+    api: "keras.ops.cumprod"
+    args:
+      axis: "axis"
+  torch:
+    api: "torch.cumprod"
+    args:
+      axis: "dim"
+    # Torch doesn't support exclusive/reverse directly in cumprod arg
+  jax:
+    api: "jax.numpy.cumprod"
+    args:
+      axis: "axis"
+  numpy:
+    api: "numpy.cumprod"
+    args:
+      axis: "axis"
+---
+operation: "Cumsum"
+description: "Compute the cumulative sum of the tensor."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: 0
+  - name: "exclusive"
+    type: "bool"
+    default: False
+  - name: "reverse"
+    type: "bool"
+    default: False
+variants:
+  tensorflow:
+    api: "tf.math.cumsum"
+  keras:
+    api: "keras.ops.cumsum"
+    args:
+      axis: "axis"
+  torch:
+    api: "torch.cumsum"
+    args:
+      axis: "dim"
+  jax:
+    api: "jax.numpy.cumsum"
+    args:
+      axis: "axis"
+  numpy:
+    api: "numpy.cumsum"
+    args:
+      axis: "axis"

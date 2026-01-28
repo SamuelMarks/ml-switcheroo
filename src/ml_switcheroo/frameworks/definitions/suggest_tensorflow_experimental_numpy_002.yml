@@ -1,0 +1,908 @@
+operation: "Average"
+description: "Compute the weighted average along the specified axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "weights"
+    type: "Tensor"
+    default: null
+  - name: "returned"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.average"
+  tensorflow:
+    api: "tf.math.reduce_mean"
+    args:
+      axis: "axis"
+    # Note: tf.math.reduce_mean does not support weights directly in the same signature.
+    # This mapping covers the unweighted case.
+  torch:
+    api: "torch.mean"
+    args:
+      axis: "dim"
+    # Note: torch.mean does not support weights.
+  jax:
+    api: "jax.numpy.average"
+  flax_nnx:
+    api: "jax.numpy.average"
+  paxml:
+    api: "jax.numpy.average"
+  keras:
+    api: "keras.ops.average"
+    # Keras ops usually follow numpy closely or offer reduce_mean
+  mlx:
+    api: "mlx.core.mean"
+    args:
+      axis: "axis"
+
+---
+operation: "BitwiseAnd"
+description: "Compute the bit-wise AND of two arrays element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.bitwise_and"
+  tensorflow:
+    api: "tf.bitwise.bitwise_and"
+  torch:
+    api: "torch.bitwise_and"
+  jax:
+    api: "jax.numpy.bitwise_and"
+  flax_nnx:
+    api: "jax.numpy.bitwise_and"
+  paxml:
+    api: "jax.numpy.bitwise_and"
+  keras:
+    api: "keras.ops.bitwise_and"
+  mlx:
+    api: "mlx.core.bitwise_and"
+
+---
+operation: "BitwiseNot"
+description: "Compute bit-wise inversion, or bit-wise NOT, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.bitwise_not"
+  tensorflow:
+    api: "tf.bitwise.invert"
+  torch:
+    api: "torch.bitwise_not"
+  jax:
+    api: "jax.numpy.bitwise_not"
+  flax_nnx:
+    api: "jax.numpy.bitwise_not"
+  paxml:
+    api: "jax.numpy.bitwise_not"
+  keras:
+    api: "keras.ops.invert"
+  mlx:
+    api: "mlx.core.bitwise_not"
+
+---
+operation: "BitwiseOr"
+description: "Compute the bit-wise OR of two arrays element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.bitwise_or"
+  tensorflow:
+    api: "tf.bitwise.bitwise_or"
+  torch:
+    api: "torch.bitwise_or"
+  jax:
+    api: "jax.numpy.bitwise_or"
+  flax_nnx:
+    api: "jax.numpy.bitwise_or"
+  paxml:
+    api: "jax.numpy.bitwise_or"
+  keras:
+    api: "keras.ops.bitwise_or"
+  mlx:
+    api: "mlx.core.bitwise_or"
+
+---
+operation: "BitwiseXor"
+description: "Compute the bit-wise XOR of two arrays element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.bitwise_xor"
+  tensorflow:
+    api: "tf.bitwise.bitwise_xor"
+  torch:
+    api: "torch.bitwise_xor"
+  jax:
+    api: "jax.numpy.bitwise_xor"
+  flax_nnx:
+    api: "jax.numpy.bitwise_xor"
+  paxml:
+    api: "jax.numpy.bitwise_xor"
+  keras:
+    api: "keras.ops.bitwise_xor"
+  mlx:
+    api: "mlx.core.bitwise_xor"
+
+---
+operation: "Bool"
+description: "Boolean type."
+op_type: "class"
+std_args:
+  - name: "x"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.bool_"
+  tensorflow:
+    api: "tf.bool"
+  torch:
+    api: "torch.bool"
+  jax:
+    api: "jax.numpy.bool_"
+  flax_nnx:
+    api: "jax.numpy.bool_"
+  paxml:
+    api: "jax.numpy.bool_"
+  keras:
+    api: "bool"
+  mlx:
+    api: "bool"
+
+---
+operation: "BroadcastArrays"
+description: "Broadcast any number of arrays against each other."
+std_args:
+  - name: "arrays"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.broadcast_arrays"
+  tensorflow:
+    api: "tf.broadcast_to" # Approximate, usually handled differently in TF graph
+  torch:
+    api: "torch.broadcast_tensors"
+    pack_to_tuple: "tensors"
+  jax:
+    api: "jax.numpy.broadcast_arrays"
+  flax_nnx:
+    api: "jax.numpy.broadcast_arrays"
+  paxml:
+    api: "jax.numpy.broadcast_arrays"
+  keras:
+    api: "keras.ops.broadcast_to" # Keras usually provides explicit broadcast_to
+  mlx:
+    api: "mlx.core.broadcast_arrays" # Not standard in MLX core, likely missing
+
+---
+operation: "BroadcastTo"
+description: "Broadcast an array to a new shape."
+std_args:
+  - name: "array"
+    type: "Tensor"
+  - name: "shape"
+    type: "Tuple[int]"
+variants:
+  numpy:
+    api: "numpy.broadcast_to"
+  tensorflow:
+    api: "tf.broadcast_to"
+    args:
+      array: "input"
+      shape: "shape"
+  torch:
+    api: "torch.broadcast_to"
+    args:
+      array: "input"
+      shape: "size"
+  jax:
+    api: "jax.numpy.broadcast_to"
+  flax_nnx:
+    api: "jax.numpy.broadcast_to"
+  paxml:
+    api: "jax.numpy.broadcast_to"
+  keras:
+    api: "keras.ops.broadcast_to"
+    args:
+      array: "x"
+      shape: "shape"
+  mlx:
+    api: "mlx.core.broadcast_to"
+    args:
+      array: "a"
+      shape: "shape"
+
+---
+operation: "Cbrt"
+description: "Return the cube-root of an array, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.cbrt"
+  tensorflow:
+    api: "tf.math.pow"
+    macro_template: "tf.math.pow({x}, 1/3)"
+  torch:
+    api: "torch.pow"
+    macro_template: "torch.pow({x}, 1.0/3.0)"
+  jax:
+    api: "jax.numpy.cbrt"
+  flax_nnx:
+    api: "jax.numpy.cbrt"
+  paxml:
+    api: "jax.numpy.cbrt"
+  keras:
+    api: "keras.ops.power"
+    macro_template: "keras.ops.power({x}, 1/3)"
+  mlx:
+    api: "mlx.core.power"
+    macro_template: "mlx.core.power({x}, 1/3)"
+
+---
+operation: "Ceil"
+description: "Return the ceiling of the input, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.ceil"
+  tensorflow:
+    api: "tf.math.ceil"
+  torch:
+    api: "torch.ceil"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.ceil"
+  flax_nnx:
+    api: "jax.numpy.ceil"
+  paxml:
+    api: "jax.numpy.ceil"
+  keras:
+    api: "keras.ops.ceil"
+  mlx:
+    api: "mlx.core.ceil"
+
+---
+operation: "Clip"
+description: "Clip (limit) the values in an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "a_min"
+    type: "float"
+  - name: "a_max"
+    type: "float"
+variants:
+  numpy:
+    api: "numpy.clip"
+  tensorflow:
+    api: "tf.clip_by_value"
+    args:
+      a: "t"
+      a_min: "clip_value_min"
+      a_max: "clip_value_max"
+  torch:
+    api: "torch.clamp"
+    args:
+      a: "input"
+      a_min: "min"
+      a_max: "max"
+  jax:
+    api: "jax.numpy.clip"
+  flax_nnx:
+    api: "jax.numpy.clip"
+  paxml:
+    api: "jax.numpy.clip"
+  keras:
+    api: "keras.ops.clip"
+    args:
+      a: "x"
+      a_min: "min_value"
+      a_max: "max_value"
+  mlx:
+    api: "mlx.core.clip" # Not standard MLX. Usually macro.
+    macro_template: "mlx.core.maximum(mlx.core.minimum({a}, {a_max}), {a_min})"
+    # Note: MLX doesn't expose a single 'clip' function in core as of standard versions.
+
+---
+operation: "Complex128"
+description: "128-bit complex floating-point number."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.complex128"
+  tensorflow:
+    api: "tf.complex128"
+  torch:
+    api: "torch.complex128"
+  jax:
+    api: "jax.numpy.complex128"
+  flax_nnx:
+    api: "jax.numpy.complex128"
+  paxml:
+    api: "jax.numpy.complex128"
+  keras:
+    api: "float" # Fallback or None if complex not supported
+  mlx:
+    api: "complex" # Or None
+
+---
+operation: "Complex64"
+description: "64-bit complex floating-point number."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.complex64"
+  tensorflow:
+    api: "tf.complex64"
+  torch:
+    api: "torch.complex64"
+  jax:
+    api: "jax.numpy.complex64"
+  flax_nnx:
+    api: "jax.numpy.complex64"
+  paxml:
+    api: "jax.numpy.complex64"
+  keras:
+    api: "float"
+  mlx:
+    api: "complex"
+
+---
+operation: "Complex"
+description: "Complex floating-point number type."
+op_type: "class"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.complex_"
+  tensorflow:
+    api: "tf.complex128"
+  torch:
+    api: "torch.complex128"
+  jax:
+    api: "jax.numpy.complex_"
+  flax_nnx:
+    api: "jax.numpy.complex_"
+  paxml:
+    api: "jax.numpy.complex_"
+  keras:
+    api: "complex"
+  mlx:
+    api: "complex"
+
+---
+operation: "Compress"
+description: "Return selected slices of an array along given axis."
+std_args:
+  - name: "condition"
+    type: "Tensor"
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.compress"
+  tensorflow:
+    api: "tf.boolean_mask"
+    args:
+      condition: "mask"
+      a: "tensor"
+      axis: "axis"
+  torch:
+    api: "torch.masked_select"
+    # masked_select flattens. compress along axis requires index_select in torch or manual loop.
+  jax:
+    api: "jax.numpy.compress"
+  flax_nnx:
+    api: "jax.numpy.compress"
+  paxml:
+    api: "jax.numpy.compress"
+  keras:
+    api: "keras.ops.compress" # Might not exist.
+  mlx:
+    api: "mlx.core.take" # Using indices?
+    # No direct mapping.
+
+---
+operation: "Concatenate"
+description: "Join a sequence of arrays along an existing axis."
+std_args:
+  - name: "arys"
+    type: "List[Tensor]"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.concatenate"
+  tensorflow:
+    api: "tf.concat"
+    args:
+      arys: "values"
+      axis: "axis"
+  torch:
+    api: "torch.cat"
+    args:
+      arys: "tensors"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.concatenate"
+  flax_nnx:
+    api: "jax.numpy.concatenate"
+  paxml:
+    api: "jax.numpy.concatenate"
+  keras:
+    api: "keras.ops.concatenate"
+    args:
+      arys: "inputs"
+      axis: "axis"
+  mlx:
+    api: "mlx.core.concatenate"
+    args:
+      arys: "arrays"
+      axis: "axis"
+
+---
+operation: "Conj"
+description: "Return the complex conjugate, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.conj"
+  tensorflow:
+    api: "tf.math.conj"
+  torch:
+    api: "torch.conj"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.conj"
+  flax_nnx:
+    api: "jax.numpy.conj"
+  paxml:
+    api: "jax.numpy.conj"
+  keras:
+    api: "keras.ops.conj"
+  mlx:
+    api: "mlx.core.conjugate" # Or generic conj if available
+
+---
+operation: "Conjugate"
+description: "Return the complex conjugate, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.conjugate"
+  tensorflow:
+    api: "tf.math.conj"
+  torch:
+    api: "torch.conj"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.conjugate"
+  flax_nnx:
+    api: "jax.numpy.conjugate"
+  paxml:
+    api: "jax.numpy.conjugate"
+  keras:
+    api: "keras.ops.conj"
+  mlx:
+    api: "mlx.core.conjugate"
+
+---
+operation: "Copy"
+description: "Return an array copy of the given object."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.copy"
+  tensorflow:
+    api: "tf.identity"
+  torch:
+    api: "torch.clone"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.copy"
+  flax_nnx:
+    api: "jax.numpy.copy"
+  paxml:
+    api: "jax.numpy.copy"
+  keras:
+    api: "keras.ops.copy"
+  mlx:
+    api: "mlx.core.array" # Re-casting usually copies in MLX context if needed
+
+---
+operation: "Cos"
+description: "Cosine element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.cos"
+  tensorflow:
+    api: "tf.math.cos"
+  torch:
+    api: "torch.cos"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.cos"
+  flax_nnx:
+    api: "jax.numpy.cos"
+  paxml:
+    api: "jax.numpy.cos"
+  keras:
+    api: "keras.ops.cos"
+  mlx:
+    api: "mlx.core.cos"
+
+---
+operation: "Cosh"
+description: "Hyperbolic cosine element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.cosh"
+  tensorflow:
+    api: "tf.math.cosh"
+  torch:
+    api: "torch.cosh"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.cosh"
+  flax_nnx:
+    api: "jax.numpy.cosh"
+  paxml:
+    api: "jax.numpy.cosh"
+  keras:
+    api: "keras.ops.cosh"
+  mlx:
+    api: "mlx.core.cosh"
+
+---
+operation: "CountNonzero"
+description: "Counts the number of non-zero values in the array a."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.count_nonzero"
+  tensorflow:
+    api: "tf.math.count_nonzero"
+    args:
+      a: "input"
+      axis: "axis"
+  torch:
+    api: "torch.count_nonzero"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.count_nonzero"
+  flax_nnx:
+    api: "jax.numpy.count_nonzero"
+  paxml:
+    api: "jax.numpy.count_nonzero"
+  keras:
+    api: "keras.ops.count_nonzero"
+  mlx:
+    api: "mlx.core.count_nonzero" # Not standard.
+    macro_template: "mlx.core.sum({a} != 0, axis={axis})"
+
+---
+operation: "Cross"
+description: "Return the cross product of two (arrays of) vectors."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.cross"
+  tensorflow:
+    api: "tf.linalg.cross"
+  torch:
+    api: "torch.linalg.cross"
+    args:
+      a: "input"
+      b: "other"
+  jax:
+    api: "jax.numpy.cross"
+  flax_nnx:
+    api: "jax.numpy.cross"
+  paxml:
+    api: "jax.numpy.cross"
+  keras:
+    api: "keras.ops.cross"
+  mlx:
+    api: "mlx.core.cross" # If available, otherwise logic via manual calculation.
+    missing_message: "Cross product not implemented in MLX."
+
+---
+operation: "Cumprod"
+description: "Return the cumulative product of elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  numpy:
+    api: "numpy.cumprod"
+  tensorflow:
+    api: "tf.math.cumprod"
+    args:
+      a: "x"
+      axis: "axis"
+  torch:
+    api: "torch.cumprod"
+    args:
+      a: "input"
+      axis: "dim"
+      dtype: "dtype"
+  jax:
+    api: "jax.numpy.cumprod"
+  flax_nnx:
+    api: "jax.numpy.cumprod"
+  paxml:
+    api: "jax.numpy.cumprod"
+  keras:
+    api: "keras.ops.cumprod"
+  mlx:
+    api: "mlx.core.cumprod"
+
+---
+operation: "Cumsum"
+description: "Return the cumulative sum of the elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "Dtype"
+    default: null
+variants:
+  numpy:
+    api: "numpy.cumsum"
+  tensorflow:
+    api: "tf.math.cumsum"
+    args:
+      a: "x"
+      axis: "axis"
+  torch:
+    api: "torch.cumsum"
+    args:
+      a: "input"
+      axis: "dim"
+      dtype: "dtype"
+  jax:
+    api: "jax.numpy.cumsum"
+  flax_nnx:
+    api: "jax.numpy.cumsum"
+  paxml:
+    api: "jax.numpy.cumsum"
+  keras:
+    api: "keras.ops.cumsum"
+  mlx:
+    api: "mlx.core.cumsum"
+
+---
+operation: "Deg2Rad"
+description: "Convert angles from degrees to radians."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  numpy:
+    api: "numpy.deg2rad"
+  tensorflow:
+    api: "tf.math.multiply"
+    macro_template: "{x} * (3.141592653589793 / 180.0)"
+  torch:
+    api: "torch.deg2rad"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.deg2rad"
+  flax_nnx:
+    api: "jax.numpy.deg2rad"
+  paxml:
+    api: "jax.numpy.deg2rad"
+  keras:
+    api: "keras.ops.deg2rad" # Likely via macro if missing
+    macro_template: "keras.ops.multiply({x}, 0.01745329251)"
+  mlx:
+    api: "mlx.core.multiply"
+    macro_template: "{x} * (3.141592653589793 / 180.0)"
+
+---
+operation: "Diag"
+description: "Extract a diagonal or construct a diagonal array."
+std_args:
+  - name: "v"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.diag"
+  tensorflow:
+    api: "tf.linalg.diag" # Note: tf.linalg.diag constructs, tf.linalg.diag_part extracts. Ambiguous.
+    # We assume 'diag' matches NumPy's conditional behavior in TF where possible, or specific ops.
+    dispatch_rules:
+      - if_arg: "v"
+        op: "is_type"
+        val: "Tensor"
+        use_api: "tf.linalg.diag"
+  torch:
+    api: "torch.diag"
+    args:
+      v: "input"
+      k: "diagonal"
+  jax:
+    api: "jax.numpy.diag"
+  flax_nnx:
+    api: "jax.numpy.diag"
+  paxml:
+    api: "jax.numpy.diag"
+  keras:
+    api: "keras.ops.diag"
+  mlx:
+    api: "mlx.core.diag"
+
+---
+operation: "DiagIndices"
+description: "Return the indices to access the main diagonal of an array."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "ndim"
+    type: "int"
+    default: 2
+variants:
+  numpy:
+    api: "numpy.diag_indices"
+  tensorflow:
+    # Manual implementation usually.
+    api: null
+  torch:
+    api: null
+    macro_template: "(torch.arange({n}),) * {ndim}"
+  jax:
+    api: "jax.numpy.diag_indices"
+  flax_nnx:
+    api: "jax.numpy.diag_indices"
+  paxml:
+    api: "jax.numpy.diag_indices"
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Diagflat"
+description: "Create a two-dimensional array with the flattened input as a diagonal."
+std_args:
+  - name: "v"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.diagflat"
+  tensorflow:
+    api: "tf.linalg.diag" # With flatten logic?
+    macro_template: "tf.linalg.diag(tf.reshape({v}, [-1]), k={k})"
+  torch:
+    api: "torch.diagflat"
+    args:
+      v: "input"
+      k: "offset"
+  jax:
+    api: "jax.numpy.diagflat"
+  flax_nnx:
+    api: "jax.numpy.diagflat"
+  paxml:
+    api: "jax.numpy.diagflat"
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Diagonal"
+description: "Return specified diagonals."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "offset"
+    type: "int"
+    default: 0
+  - name: "axis1"
+    type: "int"
+    default: 0
+  - name: "axis2"
+    type: "int"
+    default: 1
+variants:
+  numpy:
+    api: "numpy.diagonal"
+  tensorflow:
+    api: "tf.linalg.diag_part"
+    # Arguments differ significantly (name, k, padding_value). 
+  torch:
+    api: "torch.diagonal"
+    args:
+      a: "input"
+      offset: "offset"
+      axis1: "dim1"
+      axis2: "dim2"
+  jax:
+    api: "jax.numpy.diagonal"
+  flax_nnx:
+    api: "jax.numpy.diagonal"
+  paxml:
+    api: "jax.numpy.diagonal"
+  keras:
+    api: "keras.ops.diagonal"
+    args:
+      a: "x"
+      offset: "offset"
+      axis1: "axis1"
+      axis2: "axis2"
+  mlx:
+    api: "mlx.core.diagonal"

@@ -1,0 +1,520 @@
+operation: "UIntC" 
+description: "Unsigned integer type, compatible with C ``unsigned int``." 
+std_args: 
+  - name: "value" 
+    type: "int" 
+    default: 0
+variants: 
+  numpy: 
+    api: "numpy.uintc" 
+  jax: 
+    api: "jnp.uint32" # Approximation for 32-bit systems
+  torch: 
+    api: "torch.int32" # Torch lacks explicit uint32 support in older versions
+  tensorflow: 
+    api: "tf.int32" 
+---
+operation: "UIntP" 
+description: "Unsigned integer large enough to fit pointer." 
+std_args: 
+  - name: "value" 
+    type: "int" 
+    default: 0
+variants: 
+  numpy: 
+    api: "numpy.uintp" 
+  jax: 
+    api: "jnp.uint64" # On 64-bit systems
+  torch: 
+    api: "torch.int64" 
+  tensorflow: 
+    api: "tf.uint64" 
+  mlx: 
+    api: "mx.uint64" 
+---
+operation: "ULong" 
+description: "Unsigned long integer type." 
+std_args: 
+  - name: "value" 
+    type: "int" 
+    default: 0
+variants: 
+  numpy: 
+    api: "numpy.ulong" 
+  jax: 
+    api: "jnp.uint64" 
+  torch: 
+    api: "torch.int64" 
+---
+operation: "ULongLong" 
+description: "Unsigned long long integer type." 
+std_args: 
+  - name: "value" 
+    type: "int" 
+    default: 0
+variants: 
+  numpy: 
+    api: "numpy.ulonglong" 
+  jax: 
+    api: "jnp.uint64" 
+  torch: 
+    api: "torch.int64" 
+---
+operation: "Union1d" 
+description: "Find the union of two arrays." 
+std_args: 
+  - name: "ar1" 
+    type: "Array" 
+  - name: "ar2" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.union1d" 
+  jax: 
+    api: "jnp.union1d" 
+  torch: 
+    # Torch lacks a direct union1d function, logic would require unique(cat(a,b)) 
+    api: null
+    missing_message: "torch.union1d does not exist. Use torch.cat and torch.unique." 
+---
+operation: "Unique" 
+description: "Find the unique elements of an array." 
+std_args: 
+  - name: "ar" 
+    type: "Array" 
+  - name: "return_index" 
+    type: "bool" 
+    default: false
+  - name: "return_inverse" 
+    type: "bool" 
+    default: false
+  - name: "return_counts" 
+    type: "bool" 
+    default: false
+  - name: "axis" 
+    type: "int" 
+    default: null
+variants: 
+  numpy: 
+    api: "numpy.unique" 
+  jax: 
+    api: "jnp.unique" 
+  torch: 
+    api: "torch.unique" 
+    args: 
+      ar: "input" 
+      axis: "dim" 
+      return_index: null # Torch unique does not support return_index
+  tensorflow: 
+    api: "tf.unique" 
+    # TF unique logic differs significantly in return signature
+    missing_message: "TF unique behavior requires structural rewrite." 
+---
+operation: "UniqueAll" 
+description: "Find the unique elements of an array, and counts, inverse, and indices." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.unique_all" 
+  jax: 
+    # Recent JAX versions support Array API 
+    api: "jnp.unique_all" 
+---
+operation: "UniqueCounts" 
+description: "Find the unique elements and counts of an input array." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.unique_counts" 
+  jax: 
+    api: "jnp.unique_counts" 
+---
+operation: "UniqueInverse" 
+description: "Find the unique elements of x and indices to reconstruct x." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.unique_inverse" 
+  jax: 
+    api: "jnp.unique_inverse" 
+---
+operation: "UniqueValues" 
+description: "Returns the unique elements of an input array." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.unique_values" 
+  jax: 
+    api: "jnp.unique_values" 
+---
+operation: "UnpackBits" 
+description: "Unpacks elements of a uint8 array into a binary-valued output array." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+    dtype: "uint8" 
+  - name: "axis" 
+    type: "int" 
+    default: null
+  - name: "count" 
+    type: "int" 
+    default: null
+  - name: "bitorder" 
+    type: "str" 
+    default: "big" 
+variants: 
+  numpy: 
+    api: "numpy.unpackbits" 
+  jax: 
+    api: "jnp.unpackbits" 
+---
+operation: "UnravelIndex" 
+description: "Converts a flat index or array of flat indices into a tuple of coordinate arrays." 
+std_args: 
+  - name: "indices" 
+    type: "Array" 
+  - name: "shape" 
+    type: "Tuple[int, ...]" 
+  - name: "order" 
+    type: "str" 
+    default: "C" 
+variants: 
+  numpy: 
+    api: "numpy.unravel_index" 
+  jax: 
+    api: "jnp.unravel_index" 
+  torch: 
+    api: "torch.unravel_index" # Available in recent versions
+---
+operation: "UnsignedInteger" 
+description: "Abstract base class of all unsigned integer scalar types." 
+std_args: [] 
+variants: 
+  numpy: 
+    api: "numpy.unsignedinteger" 
+---
+operation: "Unstack" 
+description: "Split an array into a sequence of arrays along the given axis." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+  - name: "axis" 
+    type: "int" 
+    default: 0
+variants: 
+  numpy: 
+    api: "numpy.unstack" 
+  torch: 
+    api: "torch.unbind" 
+    args: 
+      x: "input" 
+      axis: "dim" 
+  tensorflow: 
+    api: "tf.unstack" 
+    args: 
+      x: "value" 
+      axis: "axis" 
+---
+operation: "Unwrap" 
+description: "Unwrap by taking the complement of large deltas with respect to the period." 
+std_args: 
+  - name: "p" 
+    type: "Array" 
+  - name: "discont" 
+    type: "float" 
+    default: null
+  - name: "axis" 
+    type: "int" 
+    default: -1
+  - name: "period" 
+    type: "float" 
+    default: 6.283185307179586
+variants: 
+  numpy: 
+    api: "numpy.unwrap" 
+  jax: 
+    api: "jnp.unwrap" 
+---
+operation: "UShort" 
+description: "Unsigned integer type, compatible with C ``unsigned short``." 
+std_args: 
+  - name: "value" 
+    type: "int" 
+    default: 0
+variants: 
+  numpy: 
+    api: "numpy.ushort" 
+  jax: 
+    api: "jnp.uint16" 
+  torch: 
+    api: "torch.int16" # Closest approximate in older torch
+---
+operation: "Vander" 
+description: "Generate a Vandermonde matrix." 
+std_args: 
+  - name: "x" 
+    type: "Array" 
+  - name: "N" 
+    type: "int" 
+    default: null
+  - name: "increasing" 
+    type: "bool" 
+    default: false
+variants: 
+  numpy: 
+    api: "numpy.vander" 
+  jax: 
+    api: "jnp.vander" 
+  torch: 
+    api: "torch.vander" 
+    args: 
+      x: "input" 
+---
+operation: "Var" 
+description: "Compute the variance along the specified axis." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "axis" 
+    type: "int | Tuple[int, ...]" 
+    default: null
+  - name: "dtype" 
+    default: null
+  - name: "out" 
+    default: null
+  - name: "ddof" 
+    type: "int" 
+    default: 0
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+  - name: "correction" 
+    type: "int | float" 
+    default: null
+variants: 
+  numpy: 
+    api: "numpy.var" 
+  jax: 
+    api: "jnp.var" 
+  torch: 
+    api: "torch.var" 
+    args: 
+      a: "input" 
+      axis: "dim" 
+      keepdims: "keepdim" 
+      ddof: "correction" 
+  tensorflow: 
+    api: "tf.math.reduce_variance" 
+    args: 
+      a: "input_tensor" 
+      axis: "axis" 
+      keepdims: "keepdims" 
+      ddof: null # Not directly supported in simple mapping
+  mlx: 
+    api: "mx.var" 
+    args: 
+      a: "a" 
+      axis: "axis" 
+      ddof: "ddof" 
+      keepdims: "keepdims" 
+---
+operation: "Vdot" 
+description: "Return the dot product of two vectors." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "b" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.vdot" 
+  jax: 
+    api: "jnp.vdot" 
+  torch: 
+    api: "torch.vdot" 
+    args: 
+      a: "input" 
+      b: "other" 
+---
+operation: "Vecdot" 
+description: "Vector dot product of two arrays." 
+std_args: 
+  - name: "x1" 
+    type: "Array" 
+  - name: "x2" 
+    type: "Array" 
+  - name: "axis" 
+    type: "int" 
+    default: null
+variants: 
+  numpy: 
+    api: "numpy.vecdot" 
+  torch: 
+    api: "torch.linalg.vecdot" 
+    args: 
+      x1: "x" 
+      x2: "y" 
+      axis: "dim" 
+---
+operation: "Vecmat" 
+description: "Vector-matrix dot product of two arrays." 
+std_args: 
+  - name: "x1" 
+    type: "Array" 
+  - name: "x2" 
+    type: "Array" 
+variants: 
+  numpy: 
+    api: "numpy.vecmat" 
+---
+operation: "Vectorize" 
+description: "Returns an object that acts like pyfunc, but takes arrays as input." 
+std_args: 
+  - name: "pyfunc" 
+    type: "Callable" 
+variants: 
+  numpy: 
+    api: "numpy.vectorize" 
+  jax: 
+    api: "jnp.vectorize" 
+---
+operation: "Void" 
+description: "Create a new structured or unstructured void scalar." 
+std_args: 
+  - name: "length_or_data" 
+variants: 
+  numpy: 
+    api: "numpy.void" 
+---
+operation: "Vsplit" 
+description: "Split an array into multiple sub-arrays vertically (row-wise)." 
+std_args: 
+  - name: "ary" 
+    type: "Array" 
+  - name: "indices_or_sections" 
+    type: "int | Array" 
+variants: 
+  numpy: 
+    api: "numpy.vsplit" 
+  jax: 
+    api: "jnp.vsplit" 
+  torch: 
+    api: "torch.vsplit" 
+    args: 
+      ary: "input" 
+      indices_or_sections: "indices" 
+---
+operation: "Vstack" 
+description: "Stack arrays in sequence vertically (row wise)." 
+std_args: 
+  - name: "tup" 
+    type: "List[Array] | Tuple[Array, ...]" 
+variants: 
+  numpy: 
+    api: "numpy.vstack" 
+  jax: 
+    api: "jnp.vstack" 
+  torch: 
+    api: "torch.vstack" 
+---
+operation: "Where" 
+description: "Return elements chosen from x or y depending on condition." 
+std_args: 
+  - name: "condition" 
+    type: "Array | bool" 
+  - name: "x" 
+    type: "Array" 
+    default: null
+  - name: "y" 
+    type: "Array" 
+    default: null
+variants: 
+  numpy: 
+    api: "numpy.where" 
+  jax: 
+    api: "jnp.where" 
+  torch: 
+    api: "torch.where" 
+  tensorflow: 
+    api: "tf.where" 
+  mlx: 
+    api: "mx.where" 
+  keras: 
+    api: "keras.ops.where" 
+---
+operation: "Zeros" 
+description: "Return a new array of given shape and type, filled with zeros." 
+std_args: 
+  - name: "shape" 
+    type: "int | Tuple[int, ...]" 
+  - name: "dtype" 
+    default: null
+  - name: "order" 
+    default: "C" 
+  - name: "device" 
+    default: null
+variants: 
+  numpy: 
+    api: "numpy.zeros" 
+  jax: 
+    api: "jnp.zeros" 
+  torch: 
+    api: "torch.zeros" 
+    args: 
+      shape: "size" 
+      dtype: "dtype" 
+      device: "device" 
+      order: null # Dropped
+    arg_values: 
+      shape: 
+         # Handle int -> tuple conversion if needed by usage context via plugin, or assume torch.zeros supports scalar size
+         pass: null
+  tensorflow: 
+    api: "tf.zeros" 
+  mlx: 
+    api: "mx.zeros" 
+  keras: 
+    api: "keras.ops.zeros" 
+---
+operation: "ZerosLike" 
+description: "Return an array of zeros with the same shape and type as a given array." 
+std_args: 
+  - name: "a" 
+    type: "Array" 
+  - name: "dtype" 
+    default: null
+  - name: "order" 
+    default: null
+  - name: "shape" 
+    default: null
+  - name: "device" 
+    default: null
+variants: 
+  numpy: 
+    api: "numpy.zeros_like" 
+  jax: 
+    api: "jnp.zeros_like" 
+  torch: 
+    api: "torch.zeros_like" 
+    args: 
+      a: "input" 
+  tensorflow: 
+    api: "tf.zeros_like" 
+    args: 
+      a: "input" 
+  mlx: 
+    api: "mx.zeros_like" 
+    args: 
+      a: "a" 
+  keras: 
+    api: "keras.ops.zeros_like" 
+    args: 
+      a: "x"

@@ -1,0 +1,642 @@
+operation: "ClampMin" 
+description: "Clamps all elements in input into the range [min, infinity]." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "min" 
+    type: "float" 
+variants: 
+  torch: 
+    api: "torch.clamp_min" 
+  jax: 
+    api: "jnp.maximum" 
+    args: 
+      input: "x1" 
+      min: "x2" 
+  flax_nnx: 
+    api: "jnp.maximum" 
+  paxml: 
+    api: "jnp.maximum" 
+  keras: 
+    api: "keras.ops.maximum" 
+    args: 
+      input: "x1" 
+      min: "x2" 
+  tensorflow: 
+    api: "tf.math.maximum" 
+    args: 
+      input: "x" 
+      min: "y" 
+  numpy: 
+    api: "np.maximum" 
+    args: 
+      input: "x1" 
+      min: "x2" 
+  mlx: 
+    api: "mlx.core.maximum" 
+---
+operation: "ClampMin_" 
+description: "In-place version of ClampMin." 
+is_inplace: true
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "min" 
+    type: "float" 
+variants: 
+  torch: 
+    api: "torch.clamp_min_" 
+---
+operation: "ClassProperty" 
+description: "Decorator that converts a method into a read-only class property." 
+op_type: "decorator" 
+std_args: 
+  - name: "func" 
+    type: "Callable" 
+variants: 
+  torch: 
+    api: "torch.classproperty" 
+---
+operation: "ClearAutocastCache" 
+description: "Clears the cache used by autocast." 
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.clear_autocast_cache" 
+---
+operation: "Clip" 
+description: "Alias for Clamp. Clamps elements to range [min, max]." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "min" 
+    type: "float" 
+    default: null
+  - name: "max" 
+    type: "float" 
+    default: null
+variants: 
+  torch: 
+    api: "torch.clip" 
+  jax: 
+    api: "jnp.clip" 
+    args: 
+      input: "a" 
+      min: "a_min" 
+      max: "a_max" 
+  keras: 
+    api: "keras.ops.clip" 
+    args: 
+      input: "x" 
+      min: "min_value" 
+      max: "max_value" 
+  tensorflow: 
+    api: "tf.clip_by_value" 
+    args: 
+      input: "t" 
+      min: "clip_value_min" 
+      max: "clip_value_max" 
+  numpy: 
+    api: "np.clip" 
+    args: 
+      input: "a" 
+      min: "a_min" 
+      max: "a_max" 
+  mlx: 
+    api: "mlx.core.clip" 
+    args: 
+      input: "a" 
+      min: "a_min" 
+      max: "a_max" 
+---
+operation: "Clip_" 
+description: "In-place version of Clip." 
+is_inplace: true
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "min" 
+    type: "float" 
+    default: null
+  - name: "max" 
+    type: "float" 
+    default: null
+variants: 
+  torch: 
+    api: "torch.clip_" 
+  jax: 
+    api: "jnp.clip" # JAX has no in-place, fall back to functional
+---
+operation: "Clone" 
+description: "Returns a copy of the input tensor." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.clone" 
+  jax: 
+    api: "jnp.copy" 
+    args: 
+      input: "a" 
+  keras: 
+    api: "keras.ops.copy" 
+    args: 
+      input: "x" 
+  tensorflow: 
+    api: "tf.identity" 
+  numpy: 
+    api: "np.copy" 
+    args: 
+      input: "a" 
+  mlx: 
+    api: "mlx.core.array" # Re-constructor semantics
+---
+operation: "ColIndicesCopy" 
+description: "Returns column indices of sparse tensor (copy)." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.col_indices_copy" 
+---
+operation: "ColumnStack" 
+description: "Stack 1-D arrays as columns into a 2-D array." 
+std_args: 
+  - name: "tensors" 
+    type: "List[Tensor]" 
+variants: 
+  torch: 
+    api: "torch.column_stack" 
+  jax: 
+    api: "jnp.column_stack" 
+    args: 
+      tensors: "tup" 
+  numpy: 
+    api: "np.column_stack" 
+    args: 
+      tensors: "tup" 
+  tensorflow: 
+    # TF stack defaults to axis 0, requires modification for col stack behavior
+    api: "tf.stack" 
+    args: 
+      tensors: "values" 
+    inject_args: 
+      axis: 1
+---
+operation: "Combinations" 
+description: "Compute combinations of length r of the given tensor." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "r" 
+    type: "int" 
+    default: 2
+  - name: "with_replacement" 
+    type: "bool" 
+    default: false
+variants: 
+  torch: 
+    api: "torch.combinations" 
+---
+operation: "Compile" 
+description: "Optimizes the given model/function." 
+op_type: "decorator" 
+std_args: 
+  - name: "model" 
+    type: "Callable" 
+  - name: "fullgraph" 
+    type: "bool" 
+    default: false
+variants: 
+  torch: 
+    api: "torch.compile" 
+  jax: 
+    api: "jax.jit" 
+    # JAX JIT arguments differ significantly (static_argnums) 
+  mlx: 
+    api: "mlx.core.compile" 
+  tensorflow: 
+    api: "tf.function" 
+---
+operation: "CompiledWithCxx11Abi" 
+description: "Returns whether PyTorch was built with _GLIBCXX_USE_CXX11_ABI=1." 
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.compiled_with_cxx11_abi" 
+---
+operation: "Complex" 
+description: "Constructs a complex tensor from real and imaginary parts." 
+std_args: 
+  - name: "real" 
+    type: "Tensor" 
+  - name: "imag" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.complex" 
+  jax: 
+    macro_template: "{real} + 1j * {imag}" 
+  numpy: 
+    macro_template: "{real} + 1j * {imag}" 
+  tensorflow: 
+    api: "tf.complex" 
+  keras: 
+    # Simple addition logic usually works for complex construction in backend agnostic code
+    macro_template: "keras.ops.add({real}, keras.ops.multiply(1j, {imag}))" 
+---
+operation: "Complex128" 
+description: "Complex 128-bit dtype." 
+op_type: "attribute" 
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.complex128" 
+  jax: 
+    api: "jnp.complex128" 
+  numpy: 
+    api: "np.complex128" 
+  tensorflow: 
+    api: "tf.complex128" 
+---
+operation: "Complex32" 
+description: "Complex 32-bit dtype (half precision complex)." 
+op_type: "attribute" 
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.complex32" 
+  # Limited support in other frameworks
+---
+operation: "Complex64" 
+description: "Complex 64-bit dtype." 
+op_type: "attribute" 
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.complex64" 
+  jax: 
+    api: "jnp.complex64" 
+  numpy: 
+    api: "np.complex64" 
+  tensorflow: 
+    api: "tf.complex64" 
+---
+operation: "Concat" 
+description: "Alias of Cat. Concatenates tensors along a dimension." 
+std_args: 
+  - name: "tensors" 
+    type: "List[Tensor]" 
+    is_variadic: false
+  - name: "dim" 
+    type: "int" 
+    default: 0
+variants: 
+  torch: 
+    api: "torch.concat" 
+  jax: 
+    api: "jnp.concatenate" 
+    args: 
+      tensors: "arrays" 
+      dim: "axis" 
+  keras: 
+    api: "keras.ops.concatenate" 
+    args: 
+      tensors: "inputs" 
+      dim: "axis" 
+  tensorflow: 
+    api: "tf.concat" 
+    args: 
+      tensors: "values" 
+      dim: "axis" 
+  numpy: 
+    api: "np.concatenate" 
+    args: 
+      tensors: "arrays" 
+      dim: "axis" 
+  mlx: 
+    api: "mlx.core.concatenate" 
+    args: 
+      tensors: "arrays" 
+      dim: "axis" 
+---
+operation: "Concatenate" 
+description: "Alias of Cat. Concatenates tensors along a dimension." 
+std_args: 
+  - name: "tensors" 
+    type: "List[Tensor]" 
+  - name: "dim" 
+    type: "int" 
+    default: 0
+variants: 
+  torch: 
+    api: "torch.concatenate" 
+  jax: 
+    api: "jnp.concatenate" 
+    args: 
+      tensors: "arrays" 
+      dim: "axis" 
+---
+operation: "Cond" 
+description: "Conditional execution (structured control flow)." 
+std_args: 
+  - name: "pred" 
+    type: "Tensor" 
+  - name: "true_fn" 
+    type: "Callable" 
+  - name: "false_fn" 
+    type: "Callable" 
+  - name: "operands" 
+    type: "List[Any]" 
+    default: [] 
+variants: 
+  torch: 
+    api: "torch.cond" 
+  jax: 
+    api: "jax.lax.cond" 
+    args: 
+       # JAX params: (pred, true_fun, false_fun, *operands) 
+       # Needs arg spreading logic which is complex for direct mapping
+       pred: "pred" 
+       true_fn: "true_fun" 
+       false_fn: "false_fun" 
+       operands: "operand" 
+  tensorflow: 
+    api: "tf.cond" 
+    args: 
+      pred: "pred" 
+      # TF cond signatures vary by version, usually (pred, true_fn, false_fn) 
+      true_fn: "true_fn" 
+      false_fn: "false_fn" 
+---
+operation: "Conj" 
+description: "Returns a view of input with a flipped conjugate bit." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.conj" 
+  jax: 
+    api: "jnp.conj" 
+    args: 
+      input: "x" 
+  keras: 
+    api: "keras.ops.conj" 
+    args: 
+      input: "x" 
+  tensorflow: 
+    api: "tf.math.conj" 
+    args: 
+      input: "x" 
+  numpy: 
+    api: "np.conj" 
+    args: 
+      input: "x" 
+---
+operation: "ConjPhysical" 
+description: "Computes the element-wise conjugate of the given input tensor." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.conj_physical" 
+  jax: 
+    api: "jnp.conj" # JAX conj is physical by default unlike Torch view
+    args: 
+      input: "x" 
+---
+operation: "ConjPhysical_" 
+description: "In-place version of ConjPhysical." 
+is_inplace: true
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+variants: 
+  torch: 
+    api: "torch.conj_physical_" 
+---
+operation: "ConstantPadNd" 
+description: "Pads a tensor with a constant value." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "pad" 
+    type: "List[int]" 
+  - name: "value" 
+    type: "float" 
+    default: 0.0
+variants: 
+  torch: 
+    api: "torch.constant_pad_nd" 
+  # Note: JAX/NumPy 'pad' requires complex tuple-of-tuples for 'pad_width' 
+  # Does not map cleanly 1:1 without a plugin. 
+  jax: 
+    requires_plugin: "padding_converter" 
+  numpy: 
+    requires_plugin: "padding_converter" 
+---
+operation: "ContiguousFormat" 
+description: "Memory format constant." 
+op_type: "attribute" 
+std_args: [] 
+variants: 
+  torch: 
+    api: "torch.contiguous_format" 
+---
+operation: "Conv1d" 
+description: "Applies a 1D convolution over an input signal." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+    rank: 3
+    shape_spec: "[B, C_in, L]" 
+  - name: "weight" 
+    type: "Tensor" 
+    rank: 3
+  - name: "bias" 
+    type: "Tensor" 
+    default: null
+  - name: "stride" 
+    type: "int" 
+    default: 1
+  - name: "padding" 
+    type: "int" 
+    default: 0
+  - name: "dilation" 
+    type: "int" 
+    default: 1
+  - name: "groups" 
+    type: "int" 
+    default: 1
+variants: 
+  torch: 
+    api: "torch.nn.functional.conv1d" 
+  jax: 
+    api: "jax.lax.conv_general_dilated" 
+    # JAX Conv requires explicit dimension strings and tuple args. 
+    # Usually requires a functional wrapper/plugin for 1:1 mapping from Torch params. 
+  keras: 
+    api: "keras.ops.conv" 
+    args: 
+       input: "inputs" 
+       weight: "kernel" 
+       # Keras conv op signature handles multi-dim, but weight layout differs
+  mlx: 
+    api: "mlx.core.conv1d" 
+    args: 
+      input: "input" 
+      weight: "weight" 
+      stride: "stride" 
+      padding: "padding" 
+      dilation: "dilation" 
+      groups: "groups" 
+    layout_map: 
+      input: "NCW->NWC" # MLX expects NLC (channel last) typically for neural layers, but core might vary
+      weight: "OIW->OWI" 
+---
+operation: "Conv2d" 
+description: "Applies a 2D convolution." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+    rank: 4
+    shape_spec: "[B, C_in, H, W]" 
+  - name: "weight" 
+    type: "Tensor" 
+    rank: 4
+  - name: "bias" 
+    type: "Tensor" 
+    default: null
+  - name: "stride" 
+    type: "int" 
+    default: 1
+  - name: "padding" 
+    type: "int" 
+    default: 0
+  - name: "dilation" 
+    type: "int" 
+    default: 1
+  - name: "groups" 
+    type: "int" 
+    default: 1
+variants: 
+  torch: 
+    api: "torch.nn.functional.conv2d" 
+  mlx: 
+    api: "mlx.core.conv2d" 
+    layout_map: 
+       input: "NCHW->NHWC" 
+       weight: "OIHW->OHWI" 
+---
+operation: "Conv3d" 
+description: "Applies a 3D convolution." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+    rank: 5
+  - name: "weight" 
+    type: "Tensor" 
+  - name: "bias" 
+    type: "Tensor" 
+    default: null
+  - name: "stride" 
+    type: "int" 
+    default: 1
+  - name: "padding" 
+    type: "int" 
+    default: 0
+  - name: "dilation" 
+    type: "int" 
+    default: 1
+  - name: "groups" 
+    type: "int" 
+    default: 1
+variants: 
+  torch: 
+    api: "torch.nn.functional.conv3d" 
+  mlx: 
+    api: "mlx.core.conv3d" 
+    layout_map: 
+      input: "NCDHW->NDHWC" 
+---
+operation: "ConvTbc" 
+description: "Applies a 1D convolution over input (Time, Batch, Channels)." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+    shape_spec: "[T, B, C]" 
+  - name: "weight" 
+    type: "Tensor" 
+  - name: "bias" 
+    type: "Tensor" 
+  - name: "pad" 
+    type: "int" 
+    default: 0
+variants: 
+  torch: 
+    api: "torch.conv_tbc" 
+---
+operation: "ConvTranspose1d" 
+description: "Applies a 1D transposed convolution operator." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "weight" 
+    type: "Tensor" 
+  - name: "bias" 
+    type: "Tensor" 
+    default: null
+  - name: "stride" 
+    type: "int" 
+    default: 1
+  - name: "padding" 
+    type: "int" 
+    default: 0
+  - name: "output_padding" 
+    type: "int" 
+    default: 0
+  - name: "groups" 
+    type: "int" 
+    default: 1
+  - name: "dilation" 
+    type: "int" 
+    default: 1
+variants: 
+  torch: 
+    api: "torch.nn.functional.conv_transpose1d" 
+---
+operation: "ConvTranspose2d" 
+description: "Applies a 2D transposed convolution operator." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "weight" 
+    type: "Tensor" 
+  - name: "bias" 
+    type: "Tensor" 
+    default: null
+  - name: "stride" 
+    type: "int" 
+    default: 1
+  - name: "padding" 
+    type: "int" 
+    default: 0
+  - name: "output_padding" 
+    type: "int" 
+    default: 0
+  - name: "groups" 
+    type: "int" 
+    default: 1
+  - name: "dilation" 
+    type: "int" 
+    default: 1
+variants: 
+  torch: 
+    api: "torch.nn.functional.conv_transpose2d" 
+  mlx: 
+    # MLX does not expose a direct functional conv_transpose2d yet (usually layer based) 
+    api: null

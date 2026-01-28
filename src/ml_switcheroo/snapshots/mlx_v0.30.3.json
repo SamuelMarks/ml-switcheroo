@@ -1,5 +1,5 @@
 {
-  "version": "0.30.1",
+  "version": "0.30.3",
   "categories": {
     "loss": [
       {
@@ -1900,6 +1900,45 @@
         "has_varargs": false
       },
       {
+        "name": "QQLinear",
+        "api_path": "mlx.nn.QQLinear",
+        "kind": "class",
+        "params": [
+          {
+            "name": "input_dims",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": null,
+            "annotation": "int"
+          },
+          {
+            "name": "output_dims",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": null,
+            "annotation": "int"
+          },
+          {
+            "name": "group_size",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "int"
+          },
+          {
+            "name": "bits",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "None",
+            "annotation": "int"
+          },
+          {
+            "name": "mode",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "default": "nvfp4",
+            "annotation": "str"
+          }
+        ],
+        "docstring": "Quantizes the input and applies an affine transformation using quantized weights.\n\nTwo use cases are supported:\n\n1) **Eval**:  The weights are frozen and stored in quantized form together with\n   their scales (``self.weight`` is quantized and ``self.scales`` is provided).\n2) **Train**: The weights are stored in higher precision and are quantized on\n     the fly during computation so that gradients with respect to the weights\n     can be computed.\n\nTo switch between the two cases, use ``layer.eval()`` and ``layer.train()`` respectively.\n\nCompared to the :class:`mlx.nn.QuantizedLinear` layer, this layer\nquantizes the input as well and includes weights in gradient computations.\n\n:obj:`QQLinear` also provides:\n -  the class method :meth:`from_linear` to convert :class:`mlx.nn.Linear`\n layers to :obj:`QQLinear` layers.\n\nNote: This layer does not support a bias term yet.\n\nArgs:\n    input_dims (int): The dimensionality of the input features.\n    output_dims (int): The dimensionality of the output features.\n    group_size (Optional[int]): The group size to use for the quantized weight.\n        See :func:`~mlx.core.quantize`. Default: ``None``.\n    bits (Optional[int]): The bit width to use for the quantized weight.\n        See :func:`~mlx.core.quantize`. Default: ``None``.\n    mode (Optional[str]): The quantization method to use (see\n        :func:`mlx.core.quantize`). Currently, only ``\"nvfp4\"`` and ``\"mxfp8\"``\n        are supported. Default: ``\"nvfp4\"``.",
+        "has_varargs": false
+      },
+      {
         "name": "QuantizedAllToShardedLinear",
         "api_path": "mlx.nn.QuantizedAllToShardedLinear",
         "kind": "class",
@@ -1964,13 +2003,13 @@
           {
             "name": "group_size",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "64",
+            "default": "None",
             "annotation": "int"
           },
           {
             "name": "bits",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "4",
+            "default": "None",
             "annotation": "int"
           },
           {
@@ -1980,7 +2019,7 @@
             "annotation": "str"
           }
         ],
-        "docstring": "The same as :obj:`Embedding` but with a  quantized weight matrix.\n\n:obj:`QuantizedEmbedding` also provides a :meth:`from_embedding`\nclassmethod to convert embedding layers to :obj:`QuantizedEmbedding`\nlayers.\n\nArgs:\n    num_embeddings (int): How many possible discrete tokens can we embed.\n       Usually called the vocabulary size.\n    dims (int): The dimensionality of the embeddings.\n    group_size (int, optional): The group size to use for the quantized\n        weight. See :func:`~mlx.core.quantize`. Default: ``64``.\n    bits (int, optional): The bit width to use for the quantized weight.\n        See :func:`~mlx.core.quantize`. Default: ``4``.\n    mode (str): The quantization method to use (see\n       :func:`mlx.core.quantize`). Default: ``\"affine\"``.",
+        "docstring": "The same as :obj:`Embedding` but with a  quantized weight matrix.\n\n:obj:`QuantizedEmbedding` also provides a :meth:`from_embedding`\nclassmethod to convert embedding layers to :obj:`QuantizedEmbedding`\nlayers.\n\nArgs:\n    num_embeddings (int): How many possible discrete tokens can we embed.\n       Usually called the vocabulary size.\n    dims (int): The dimensionality of the embeddings.\n    group_size (Optional[int]): The group size to use for the quantized\n        weight. See :func:`~mlx.core.quantize`. Default: ``None``.\n    bits (Optional[int]): The bit width to use for the quantized weight.\n        See :func:`~mlx.core.quantize`. Default: ``None``.\n    mode (str): The quantization method to use (see\n       :func:`mlx.core.quantize`). Default: ``\"affine\"``.",
         "has_varargs": false
       },
       {
@@ -2009,13 +2048,13 @@
           {
             "name": "group_size",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "64",
+            "default": "None",
             "annotation": "int"
           },
           {
             "name": "bits",
             "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "4",
+            "default": "None",
             "annotation": "int"
           },
           {
@@ -2025,7 +2064,7 @@
             "annotation": "str"
           }
         ],
-        "docstring": "Applies an affine transformation to the input using a quantized weight matrix.\n\nIt is the quantized equivalent of :class:`mlx.nn.Linear`. For now its\nparameters are frozen and will not be included in any gradient computation\nbut this will probably change in the future.\n\n:obj:`QuantizedLinear` also provides a classmethod :meth:`from_linear` to\nconvert linear layers to :obj:`QuantizedLinear` layers.\n\nArgs:\n    input_dims (int): The dimensionality of the input features.\n    output_dims (int): The dimensionality of the output features.\n    bias (bool, optional): If set to ``False`` then the layer will not use\n        a bias. Default: ``True``.\n    group_size (int, optional): The group size to use for the quantized\n        weight. See :func:`~mlx.core.quantize`. Default: ``64``.\n    bits (int, optional): The bit width to use for the quantized weight.\n        See :func:`~mlx.core.quantize`. Default: ``4``.\n    mode (str): The quantization method to use (see\n       :func:`mlx.core.quantize`). Default: ``\"affine\"``.",
+        "docstring": "Applies an affine transformation to the input using a quantized weight matrix.\n\nIt is the quantized equivalent of :class:`mlx.nn.Linear`. For now its\nparameters are frozen and will not be included in any gradient computation\nbut this will probably change in the future.\n\n:obj:`QuantizedLinear` also provides a classmethod :meth:`from_linear` to\nconvert linear layers to :obj:`QuantizedLinear` layers.\n\nArgs:\n    input_dims (int): The dimensionality of the input features.\n    output_dims (int): The dimensionality of the output features.\n    bias (bool, optional): If set to ``False`` then the layer will not use\n        a bias. Default: ``True``.\n    group_size (Optional[int]): The group size to use for the quantized\n        weight. See :func:`~mlx.core.quantize`. Default: ``None``.\n    bits (Optional[int]): The bit width to use for the quantized weight.\n        See :func:`~mlx.core.quantize`. Default: ``None``.\n    mode (str): The quantization method to use (see\n       :func:`mlx.core.quantize`). Default: ``\"affine\"``.",
         "has_varargs": false
       },
       {

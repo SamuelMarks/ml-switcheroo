@@ -1,0 +1,842 @@
+operation: "RavelMultiIndex"
+description: "Converts a tuple of index arrays into an array of flat indices, applying boundary modes to the multi-index."
+std_args:
+  - name: "multi_index"
+    type: "Tuple[Array]"
+  - name: "dims"
+    type: "Tuple[int]"
+  - name: "mode"
+    type: "str"
+    default: "raise"
+    options: ["raise", "wrap", "clip"]
+  - name: "order"
+    type: "str"
+    default: "C"
+    options: ["C", "F"]
+variants:
+  numpy:
+    api: "numpy.ravel_multi_index"
+  jax:
+    api: "jax.numpy.ravel_multi_index"
+  flax_nnx:
+    api: "jax.numpy.ravel_multi_index"
+  paxml:
+    api: "jax.numpy.ravel_multi_index"
+  torch:
+    requires_plugin: "ravel_multi_index_plugin"
+  tensorflow:
+    api: "tf.ravel_multi_index"
+  keras: null
+  mlx: null
+
+---
+operation: "Real"
+description: "Return the real part of the complex argument."
+std_args:
+  - name: "val"
+    type: "Array"
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.real"
+  torch:
+    api: "torch.real"
+    args:
+      val: "input"
+  jax:
+    api: "jax.numpy.real"
+  flax_nnx:
+    api: "jax.numpy.real"
+  paxml:
+    api: "jax.numpy.real"
+  tensorflow:
+    api: "tf.math.real"
+    args:
+      val: "input"
+  keras:
+    api: "keras.ops.real"
+    args:
+      val: "x"
+  mlx:
+    api: "mlx.core.real" # Assuming complex support or stub
+    missing_message: "MLX support for complex number operations varies."
+
+---
+operation: "RealIfClose"
+description: "If input is complex with all imaginary parts close to zero, return real parts."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "tol"
+    type: "float"
+    default: "100"
+variants:
+  numpy:
+    api: "numpy.real_if_close"
+  jax:
+    api: "jax.numpy.real_if_close"
+  flax_nnx:
+    api: "jax.numpy.real_if_close"
+  paxml:
+    api: "jax.numpy.real_if_close"
+  torch: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "RecArray"
+description: "Construct an ndarray that allows field access using attributes."
+op_type: "class"
+std_args:
+  - name: "shape"
+    type: "Tuple[int]"
+  - name: "dtype"
+    type: "Any"
+  - name: "buf"
+    type: "Any"
+    default: null
+variants:
+  numpy:
+    api: "numpy.recarray"
+  torch: null
+  jax: null
+  flax_nnx: null
+  paxml: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "Reciprocal"
+description: "Return the reciprocal of the argument, element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.reciprocal"
+  torch:
+    api: "torch.reciprocal"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.reciprocal"
+  flax_nnx:
+    api: "jax.numpy.reciprocal"
+  paxml:
+    api: "jax.numpy.reciprocal"
+  tensorflow:
+    api: "tf.math.reciprocal"
+  keras:
+    api: "keras.ops.reciprocal"
+  mlx:
+    api: "mlx.core.reciprocal"
+    # Fallback to macro if API missing
+    macro_template: "1 / {x}"
+
+---
+operation: "Record"
+description: "A data-type scalar that allows field access as attribute lookup."
+op_type: "class"
+std_args:
+  - name: "length_or_data"
+  - name: "dtype"
+    default: null
+variants:
+  numpy:
+    api: "numpy.record"
+  torch: null
+  jax: null
+  flax_nnx: null
+  paxml: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "Remainder"
+description: "Returns the element-wise remainder of division."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.remainder"
+  torch:
+    api: "torch.remainder"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.remainder"
+  flax_nnx:
+    api: "jax.numpy.remainder"
+  paxml:
+    api: "jax.numpy.remainder"
+  tensorflow:
+    api: "tf.math.floormod" # Closest semantics to numpy.remainder
+  keras:
+    api: "keras.ops.mod"
+  mlx:
+    api: "mlx.core.remainder"
+
+---
+operation: "Repeat"
+description: "Repeat each element of an array after themselves."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "repeats"
+    type: "int"
+  - name: "axis"
+    type: "int"
+    default: null
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.repeat"
+  torch:
+    api: "torch.repeat_interleave"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.repeat"
+  flax_nnx:
+    api: "jax.numpy.repeat"
+  paxml:
+    api: "jax.numpy.repeat"
+  tensorflow:
+    api: "tf.repeat"
+    args:
+      a: "input"
+  keras:
+    api: "keras.ops.repeat"
+    args:
+      a: "x"
+  mlx:
+    # MLX does not have a direct repeat/interleave op in core currently
+    requires_plugin: "mlx_repeat_interleave"
+
+---
+operation: "Require"
+description: "Return an ndarray of the provided type that satisfies requirements (flags)."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "requirements"
+    type: "List[str]"
+    default: null
+variants:
+  numpy:
+    api: "numpy.require"
+  torch: null # Torch handles contiguity via contiguous() usually
+  jax: null
+  flax_nnx: null
+  paxml: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "Reshape"
+description: "Gives a new shape to an array without changing its data."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "shape"
+    type: "Tuple[int]"
+  - name: "order"
+    type: "str"
+    default: "C"
+return_type: "Array"
+output_shape_calc: "lambda a, shape, order='C': shape"
+variants:
+  numpy:
+    api: "numpy.reshape"
+  torch:
+    api: "torch.reshape"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.reshape"
+  flax_nnx:
+    api: "jax.numpy.reshape"
+  paxml:
+    api: "jax.numpy.reshape"
+  tensorflow:
+    api: "tf.reshape"
+    args:
+      a: "tensor"
+  keras:
+    api: "keras.ops.reshape"
+    args:
+      a: "x"
+      shape: "new_shape"
+  mlx:
+    api: "mlx.core.reshape"
+
+---
+operation: "Resize"
+description: "Return a new array with the specified shape (may repeat data)."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "new_shape"
+    type: "Tuple[int]"
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.resize"
+  jax:
+    api: "jax.numpy.resize"
+  flax_nnx:
+    api: "jax.numpy.resize"
+  paxml:
+    api: "jax.numpy.resize"
+  torch: null # torch.resize_ is in-place and deprecated logic differs
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "ResultType"
+description: "Returns the type that results from applying the NumPy type promotion rules to the arguments."
+std_args:
+  - name: "arrays_and_dtypes"
+    type: "List[Any]"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.result_type"
+  torch:
+    api: "torch.result_type"
+    args:
+      arrays_and_dtypes: "tensor" # Torch result_type takes (tensor, other) usually
+    pack_as: "Tuple"
+  jax:
+    api: "jax.numpy.result_type"
+  flax_nnx:
+    api: "jax.numpy.result_type"
+  paxml:
+    api: "jax.numpy.result_type"
+  tensorflow:
+    api: "tf.experimental.numpy.result_type"
+  keras: null
+  mlx: null
+
+---
+operation: "RightShift"
+description: "Shift the bits of an integer to the right."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.right_shift"
+  torch:
+    api: "torch.bitwise_right_shift"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.right_shift"
+  flax_nnx:
+    api: "jax.numpy.right_shift"
+  paxml:
+    api: "jax.numpy.right_shift"
+  tensorflow:
+    api: "tf.bitwise.right_shift"
+    args:
+      x1: "x"
+      x2: "y"
+  keras: null
+  mlx:
+    transformation_type: "infix"
+    operator: ">>"
+
+---
+operation: "Rint"
+description: "Round elements of the array to the nearest integer."
+std_args:
+  - name: "x"
+    type: "Array"
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.rint"
+  torch:
+    api: "torch.round" # 'round' in torch implements 'rint' logic (nearest even)
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.rint"
+  flax_nnx:
+    api: "jax.numpy.rint"
+  paxml:
+    api: "jax.numpy.rint"
+  tensorflow:
+    api: "tf.math.rint"
+  keras:
+    api: "keras.ops.round" # Often closest equivalent
+  mlx: null # Use round or plugin
+
+---
+operation: "Roll"
+description: "Roll array elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "shift"
+    type: "Union[int, Tuple[int]]"
+  - name: "axis"
+    type: "Union[int, Tuple[int]]"
+    default: null
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.roll"
+  torch:
+    api: "torch.roll"
+    args:
+      a: "input"
+      shift: "shifts"
+      axis: "dims"
+  jax:
+    api: "jax.numpy.roll"
+  flax_nnx:
+    api: "jax.numpy.roll"
+  paxml:
+    api: "jax.numpy.roll"
+  tensorflow:
+    api: "tf.roll"
+    args:
+      a: "input"
+  keras:
+    api: "keras.ops.roll"
+    args:
+      a: "x"
+  mlx: null # mlx.core.roll exists in some versions but sparse documentation
+
+---
+operation: "RollAxis"
+description: "Roll the specified axis backwards, until it lies in a given position."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+  - name: "start"
+    type: "int"
+    default: 0
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.rollaxis"
+  torch:
+    requires_plugin: "rollaxis_to_moveaxis" # Torch prefers movedim/moveaxis
+  jax:
+    api: "jax.numpy.rollaxis"
+  flax_nnx:
+    api: "jax.numpy.rollaxis"
+  paxml:
+    api: "jax.numpy.rollaxis"
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "Roots"
+description: "Return the roots of a polynomial with coefficients given in p."
+std_args:
+  - name: "p"
+    type: "Array"
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.roots"
+  torch: null
+  jax:
+    api: "jax.numpy.roots"
+  flax_nnx:
+    api: "jax.numpy.roots"
+  paxml:
+    api: "jax.numpy.roots"
+  tensorflow:
+    api: "tf.signal.roots" # Signal processing module
+  keras: null
+  mlx: null
+
+---
+operation: "Rot90"
+description: "Rotate an array by 90 degrees in the plane specified by axes."
+std_args:
+  - name: "m"
+    type: "Array"
+  - name: "k"
+    type: "int"
+    default: 1
+  - name: "axes"
+    type: "Tuple[int]"
+    default: "(0, 1)"
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.rot90"
+  torch:
+    api: "torch.rot90"
+    args:
+      m: "input"
+      axes: "dims"
+  jax:
+    api: "jax.numpy.rot90"
+  flax_nnx:
+    api: "jax.numpy.rot90"
+  paxml:
+    api: "jax.numpy.rot90"
+  tensorflow:
+    api: "tf.image.rot90"
+    args:
+      m: "image"
+      axes: null # tf.image.rot90 assumes spatial dims, argument structure differs
+  keras: null
+  mlx: null
+
+---
+operation: "Round"
+description: "Evenly round to the given number of decimals."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "decimals"
+    type: "int"
+    default: 0
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.round"
+  torch:
+    api: "torch.round"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.round"
+  flax_nnx:
+    api: "jax.numpy.round"
+  paxml:
+    api: "jax.numpy.round"
+  tensorflow:
+    api: "tf.math.round"
+    args:
+      a: "x"
+      decimals: null # tf.math.round does not take decimals (always 0)
+  keras:
+    api: "keras.ops.round"
+    args:
+      a: "x"
+      decimals: null
+  mlx:
+    api: "mlx.core.round"
+    args:
+      decimals: null
+
+---
+operation: "RowStack"
+description: "Stack arrays in sequence vertically (row wise)."
+std_args:
+  - name: "tup"
+    type: "List[Array]"
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.row_stack"
+  torch:
+    api: "torch.vstack"
+  jax:
+    api: "jax.numpy.row_stack"
+  flax_nnx:
+    api: "jax.numpy.row_stack"
+  paxml:
+    api: "jax.numpy.row_stack"
+  tensorflow:
+    api: "tf.experimental.numpy.vstack"
+  keras:
+    api: "keras.ops.vstack"
+    args:
+      tup: "x"
+  mlx:
+    requires_plugin: "mlx_vstack"
+
+---
+operation: "IndexExpression"
+description: "A nicer way to build up index tuples for arrays (s_)."
+op_type: "attribute"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.s_"
+  torch: null
+  jax:
+    api: "jax.numpy.s_"
+  flax_nnx:
+    api: "jax.numpy.s_"
+  paxml:
+    api: "jax.numpy.s_"
+  tensorflow:
+    api: "tf.experimental.numpy.s_"
+  keras: null
+  mlx: null
+
+---
+operation: "Save"
+description: "Save an array to a binary file."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "arr"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.save"
+  torch:
+    api: "torch.save"
+    args:
+      arr: "obj"
+      file: "f"
+  jax:
+    api: "jax.numpy.save"
+  flax_nnx:
+    api: "jax.numpy.save"
+  paxml:
+    api: "jax.numpy.save"
+  tensorflow:
+    requires_plugin: "io_handler"
+  keras:
+    requires_plugin: "io_handler"
+  mlx:
+    api: "mlx.core.save"
+    args:
+      arr: "a"
+
+---
+operation: "SaveTxt"
+description: "Save an array to a text file."
+std_args:
+  - name: "fname"
+    type: "str"
+  - name: "X"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.savetxt"
+  jax:
+    api: "jax.numpy.savetxt"
+  flax_nnx:
+    api: "jax.numpy.savetxt"
+  paxml:
+    api: "jax.numpy.savetxt"
+  torch: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "SaveZ"
+description: "Save several arrays into a single file in uncompressed .npz format."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "args"
+    type: "Any"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.savez"
+  jax:
+    api: "jax.numpy.savez"
+  flax_nnx:
+    api: "jax.numpy.savez"
+  paxml:
+    api: "jax.numpy.savez"
+  torch: null
+  tensorflow: null
+  keras: null
+  mlx:
+    api: "mlx.core.savez"
+    args:
+      args: "args"
+
+---
+operation: "SaveZCompressed"
+description: "Save several arrays into a single file in compressed .npz format."
+std_args:
+  - name: "file"
+    type: "str"
+  - name: "args"
+    type: "Any"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.savez_compressed"
+  jax:
+    api: "jax.numpy.savez_compressed"
+  flax_nnx:
+    api: "jax.numpy.savez_compressed"
+  paxml:
+    api: "jax.numpy.savez_compressed"
+  torch: null
+  tensorflow: null
+  keras: null
+  mlx:
+    api: "mlx.core.savez_compressed"
+    args:
+      args: "args"
+
+---
+operation: "SctypeDict"
+description: "Dictionary of scalar types."
+op_type: "attribute"
+std_args: []
+variants:
+  numpy:
+    api: "numpy.sctypeDict"
+  torch: null
+  jax: null
+  flax_nnx: null
+  paxml: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "SearchSorted"
+description: "Find indices where elements should be inserted to maintain order."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "v"
+    type: "Array"
+  - name: "side"
+    type: "str"
+    default: "left"
+    options: ["left", "right"]
+  - name: "sorter"
+    type: "Array"
+    default: null
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.searchsorted"
+  torch:
+    api: "torch.searchsorted"
+    args:
+      a: "sorted_sequence"
+      v: "values"
+      side: "side"
+      sorter: "sorter"
+  jax:
+    api: "jax.numpy.searchsorted"
+  flax_nnx:
+    api: "jax.numpy.searchsorted"
+  paxml:
+    api: "jax.numpy.searchsorted"
+  tensorflow:
+    api: "tf.searchsorted"
+    args:
+      a: "sorted_sequence"
+      v: "values"
+      side: "side"
+      sorter: null
+  keras: null
+  mlx: null
+
+---
+operation: "Select"
+description: "Return an array drawn from elements in choicelist, depending on conditions."
+std_args:
+  - name: "condlist"
+    type: "List[Array]"
+  - name: "choicelist"
+    type: "List[Array]"
+  - name: "default"
+    type: "Any"
+    default: 0
+return_type: "Array"
+variants:
+  numpy:
+    api: "numpy.select"
+  jax:
+    api: "jax.numpy.select"
+  flax_nnx:
+    api: "jax.numpy.select"
+  paxml:
+    api: "jax.numpy.select"
+  torch: null
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "SetPrintOptions"
+description: "Set printing options."
+std_args:
+  - name: "precision"
+    type: "int"
+    default: null
+  - name: "threshold"
+    type: "int"
+    default: null
+  - name: "edgeitems"
+    type: "int"
+    default: null
+  - name: "linewidth"
+    type: "int"
+    default: null
+  - name: "suppress"
+    type: "bool"
+    default: null
+  - name: "nanstr"
+    type: "str"
+    default: null
+variants:
+  numpy:
+    api: "numpy.set_printoptions"
+  torch:
+    api: "torch.set_printoptions"
+  jax:
+    api: "jax.numpy.set_printoptions"
+  flax_nnx:
+    api: "jax.numpy.set_printoptions"
+  paxml:
+    api: "jax.numpy.set_printoptions"
+  tensorflow: null
+  keras: null
+  mlx: null
+
+---
+operation: "SetBufSize"
+description: "Set the size of the buffer used in ufuncs."
+std_args:
+  - name: "size"
+    type: "int"
+variants:
+  numpy:
+    api: "numpy.setbufsize"
+  torch: null
+  jax: null
+  flax_nnx: null
+  paxml: null
+  tensorflow: null
+  keras: null
+  mlx: null

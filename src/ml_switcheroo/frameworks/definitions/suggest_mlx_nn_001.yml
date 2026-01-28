@@ -1,0 +1,904 @@
+operation: "ALiBi"
+description: "Attention with Linear Biases (ALiBi) layer."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.ALiBi"
+  torch:
+    api: null
+  keras:
+    api: null
+  flax_nnx:
+    api: "flax.nnx.ALiBi"
+    missing_message: "Flax NNX ALiBi support requires explicit extension."
+
+---
+operation: "AllToShardedLinear"
+description: "Distributed linear layer where result is sharded across the group."
+op_type: "class"
+std_args:
+  - name: "in_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "bias"
+    type: "bool"
+    default: true
+  - name: "group"
+    type: "Any"
+    default: null
+variants:
+  mlx:
+    api: "mlx.nn.AllToShardedLinear"
+    args:
+      in_features: "input_dims"
+      out_features: "output_dims"
+  torch:
+    api: null # Specific to MLX distributed
+  flax_nnx:
+    api: null
+
+---
+operation: "AvgPool1d"
+description: "Applies 1D average pooling."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int]]"
+  - name: "stride"
+    type: "Union[int, Tuple[int]]"
+    default: null
+  - name: "padding"
+    type: "Union[int, Tuple[int]]"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.nn.AvgPool1d"
+  torch:
+    api: "torch.nn.AvgPool1d"
+  keras:
+    api: "keras.layers.AveragePooling1D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+      padding: null # Keras uses string 'valid'/'same', mismatch
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+    args:
+      kernel_size: "window_shape"
+      stride: "strides"
+
+---
+operation: "AvgPool2d"
+description: "Applies 2D average pooling."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int, int]]"
+  - name: "stride"
+    type: "Union[int, Tuple[int, int]]"
+    default: null
+  - name: "padding"
+    type: "Union[int, Tuple[int, int]]"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.nn.AvgPool2d"
+  torch:
+    api: "torch.nn.AvgPool2d"
+  keras:
+    api: "keras.layers.AveragePooling2D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+      padding: null
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+    args:
+      kernel_size: "window_shape"
+      stride: "strides"
+  paxml:
+    api: "praxis.layers.AvgPooling"
+
+---
+operation: "AvgPool3d"
+description: "Applies 3D average pooling."
+op_type: "class"
+std_args:
+  - name: "kernel_size"
+    type: "Union[int, Tuple[int, int, int]]"
+  - name: "stride"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: null
+  - name: "padding"
+    type: "Union[int, Tuple[int, int, int]]"
+    default: 0
+variants:
+  mlx:
+    api: "mlx.nn.AvgPool3d"
+  torch:
+    api: "torch.nn.AvgPool3d"
+  keras:
+    api: "keras.layers.AveragePooling3D"
+    args:
+      kernel_size: "pool_size"
+      stride: "strides"
+      padding: null
+  flax_nnx:
+    api: "flax.nnx.AvgPool"
+    args:
+      kernel_size: "window_shape"
+      stride: "strides"
+
+---
+operation: "BatchNorm"
+description: "Applies Batch Normalization."
+op_type: "class"
+std_args:
+  - name: "num_features"
+    type: "int"
+  - name: "eps"
+    type: "float"
+    default: 1e-5
+  - name: "momentum"
+    type: "float"
+    default: 0.1
+  - name: "affine"
+    type: "bool"
+    default: true
+  - name: "track_running_stats"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.nn.BatchNorm"
+  torch:
+    api: "torch.nn.BatchNorm2d" # Defaulting to 2D for generic mapping, or use specialized logic
+    dispatch_rules:
+      - if_arg: "num_features" # Heuristic dispatch usually based on input rank at runtime
+        op: "gt"
+        val: 0
+        use_api: "torch.nn.BatchNorm2d"
+  keras:
+    api: "keras.layers.BatchNormalization"
+    args:
+      num_features: null # Inferred
+      eps: "epsilon"
+      track_running_stats: null
+      affine: "center" # Partial mapping
+  flax_nnx:
+    api: "flax.nnx.BatchNorm"
+    args:
+      num_features: "num_features"
+      eps: "epsilon"
+      affine: "use_scale"
+  paxml:
+    api: "praxis.layers.BatchNorm"
+
+---
+operation: "Bilinear"
+description: "Applies a bilinear transformation to the incoming data."
+op_type: "class"
+std_args:
+  - name: "in1_features"
+    type: "int"
+  - name: "in2_features"
+    type: "int"
+  - name: "out_features"
+    type: "int"
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.nn.Bilinear"
+    args:
+      in1_features: "input1_dims"
+      in2_features: "input2_dims"
+      out_features: "output_dims"
+  torch:
+    api: "torch.nn.Bilinear"
+
+---
+operation: "CELU"
+description: "Applies the CELU activation function."
+op_type: "class"
+std_args:
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  mlx:
+    api: "mlx.nn.CELU"
+  torch:
+    api: "torch.nn.CELU"
+  flax_nnx:
+    api: "flax.nnx.CELU"
+  keras:
+    api: "keras.layers.ELU" # CELU not standard in Keras layers, ELU is close approximation
+
+---
+operation: "Conv1d"
+description: "Applies a 1D convolution."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "out_channels"
+    type: "int"
+  - name: "kernel_size"
+    type: "int"
+  - name: "stride"
+    type: "int"
+    default: 1
+  - name: "padding"
+    type: "Union[int, str]"
+    default: 0
+  - name: "dilation"
+    type: "int"
+    default: 1
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.nn.Conv1d"
+  torch:
+    api: "torch.nn.Conv1d"
+  keras:
+    api: "keras.layers.Conv1D"
+    args:
+      in_channels: null # Inferred
+      out_channels: "filters"
+      stride: "strides"
+      dilation: "dilation_rate"
+      bias: "use_bias"
+  flax_nnx:
+    api: "flax.nnx.Conv"
+    args:
+      in_channels: "in_features"
+      out_channels: "out_features"
+      dilation: "kernel_dilation" # Flax dilation tuple
+      bias: "use_bias"
+
+---
+operation: "Conv2d"
+description: "Applies a 2D convolution."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "out_channels"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple]"
+  - name: "stride"
+    type: "Union[int, Tuple]"
+    default: 1
+  - name: "padding"
+    type: "Union[int, str]"
+    default: 0
+  - name: "dilation"
+    type: "Union[int, Tuple]"
+    default: 1
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.nn.Conv2d"
+  torch:
+    api: "torch.nn.Conv2d"
+  keras:
+    api: "keras.layers.Conv2D"
+    args:
+      in_channels: null
+      out_channels: "filters"
+      stride: "strides"
+      dilation: "dilation_rate"
+      bias: "use_bias"
+  flax_nnx:
+    api: "flax.nnx.Conv"
+    args:
+      in_channels: "in_features"
+      out_channels: "out_features"
+      bias: "use_bias"
+      dilation: "kernel_dilation"
+  paxml:
+    api: "praxis.layers.Conv2D"
+    args:
+      out_channels: "filter_shape"
+      kernel_size: "filter_shape"
+
+---
+operation: "Conv3d"
+description: "Applies a 3D convolution."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "out_channels"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple]"
+  - name: "stride"
+    type: "Union[int, Tuple]"
+    default: 1
+  - name: "padding"
+    type: "Union[int, str]"
+    default: 0
+  - name: "dilation"
+    type: "Union[int, Tuple]"
+    default: 1
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "bias"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.nn.Conv3d"
+  torch:
+    api: "torch.nn.Conv3d"
+  keras:
+    api: "keras.layers.Conv3D"
+    args:
+      in_channels: null
+      out_channels: "filters"
+      stride: "strides"
+      dilation: "dilation_rate"
+      bias: "use_bias"
+  flax_nnx:
+    api: "flax.nnx.Conv" # Generic Conv supports ND
+
+---
+operation: "ConvTranspose1d"
+description: "Applies a 1D transposed convolution operator."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "out_channels"
+    type: "int"
+  - name: "kernel_size"
+    type: "int"
+  - name: "stride"
+    type: "int"
+    default: 1
+  - name: "padding"
+    type: "Union[int, str]"
+    default: 0
+  - name: "output_padding"
+    type: "int"
+    default: 0
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "bias"
+    type: "bool"
+    default: true
+  - name: "dilation"
+    type: "int"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.nn.ConvTranspose1d"
+  torch:
+    api: "torch.nn.ConvTranspose1d"
+  keras:
+    api: "keras.layers.Conv1DTranspose"
+    args:
+      in_channels: null
+      out_channels: "filters"
+      stride: "strides"
+      bias: "use_bias"
+      output_padding: null # Not same semantics
+  flax_nnx:
+    api: "flax.nnx.ConvTranspose"
+
+---
+operation: "ConvTranspose2d"
+description: "Applies a 2D transposed convolution operator."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "out_channels"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple]"
+  - name: "stride"
+    type: "Union[int, Tuple]"
+    default: 1
+  - name: "padding"
+    type: "Union[int, str]"
+    default: 0
+  - name: "output_padding"
+    type: "Union[int, Tuple]"
+    default: 0
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "bias"
+    type: "bool"
+    default: true
+  - name: "dilation"
+    type: "Union[int, Tuple]"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.nn.ConvTranspose2d"
+  torch:
+    api: "torch.nn.ConvTranspose2d"
+  keras:
+    api: "keras.layers.Conv2DTranspose"
+    args:
+      in_channels: null
+      out_channels: "filters"
+      stride: "strides"
+      bias: "use_bias"
+  flax_nnx:
+    api: "flax.nnx.ConvTranspose"
+
+---
+operation: "ConvTranspose3d"
+description: "Applies a 3D transposed convolution operator."
+op_type: "class"
+std_args:
+  - name: "in_channels"
+    type: "int"
+  - name: "out_channels"
+    type: "int"
+  - name: "kernel_size"
+    type: "Union[int, Tuple]"
+  - name: "stride"
+    type: "Union[int, Tuple]"
+    default: 1
+  - name: "padding"
+    type: "Union[int, str]"
+    default: 0
+  - name: "output_padding"
+    type: "Union[int, Tuple]"
+    default: 0
+  - name: "groups"
+    type: "int"
+    default: 1
+  - name: "bias"
+    type: "bool"
+    default: true
+  - name: "dilation"
+    type: "Union[int, Tuple]"
+    default: 1
+variants:
+  mlx:
+    api: "mlx.nn.ConvTranspose3d"
+  torch:
+    api: "torch.nn.ConvTranspose3d"
+  keras:
+    api: "keras.layers.Conv3DTranspose"
+    args:
+      in_channels: null
+      out_channels: "filters"
+      stride: "strides"
+      bias: "use_bias"
+  flax_nnx:
+    api: "flax.nnx.ConvTranspose"
+
+---
+operation: "Dropout"
+description: "Applies Dropout to the input."
+op_type: "class"
+std_args:
+  - name: "p"
+    type: "float"
+    default: 0.5
+variants:
+  mlx:
+    api: "mlx.nn.Dropout"
+  torch:
+    api: "torch.nn.Dropout"
+  keras:
+    api: "keras.layers.Dropout"
+    args:
+      p: "rate"
+  flax_nnx:
+    api: "flax.nnx.Dropout"
+    args:
+      p: "rate"
+  paxml:
+    api: "praxis.layers.Dropout"
+    args:
+      p: "keep_prob"
+    arg_values:
+      p: "1.0 - {p}"
+
+---
+operation: "Dropout2d"
+description: "Applies 2D Dropout (channel-wise) to the input."
+op_type: "class"
+std_args:
+  - name: "p"
+    type: "float"
+    default: 0.5
+variants:
+  mlx:
+    api: "mlx.nn.Dropout2d"
+  torch:
+    api: "torch.nn.Dropout2d"
+  keras:
+    api: "keras.layers.SpatialDropout2D"
+    args:
+      p: "rate"
+  flax_nnx:
+    api: "flax.nnx.Dropout" # Generic dropout handles broadcasting if args correct
+
+---
+operation: "Dropout3d"
+description: "Applies 3D Dropout (channel-wise) to the input."
+op_type: "class"
+std_args:
+  - name: "p"
+    type: "float"
+    default: 0.5
+variants:
+  mlx:
+    api: "mlx.nn.Dropout3d"
+  torch:
+    api: "torch.nn.Dropout3d"
+  keras:
+    api: "keras.layers.SpatialDropout3D"
+    args:
+      p: "rate"
+  flax_nnx:
+    api: "flax.nnx.Dropout"
+
+---
+operation: "ELU"
+description: "Applies the ELU activation function."
+op_type: "class"
+std_args:
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  mlx:
+    api: "mlx.nn.ELU"
+  torch:
+    api: "torch.nn.ELU"
+  keras:
+    api: "keras.layers.ELU"
+  flax_nnx:
+    api: "flax.nnx.ELU"
+
+---
+operation: "Embedding"
+description: "A simple lookup table that stores embeddings of a fixed dictionary and size."
+op_type: "class"
+std_args:
+  - name: "num_embeddings"
+    type: "int"
+  - name: "embedding_dim"
+    type: "int"
+variants:
+  mlx:
+    api: "mlx.nn.Embedding"
+    args:
+      embedding_dim: "dims"
+  torch:
+    api: "torch.nn.Embedding"
+  keras:
+    api: "keras.layers.Embedding"
+    args:
+      num_embeddings: "input_dim"
+      embedding_dim: "output_dim"
+  flax_nnx:
+    api: "flax.nnx.Embed"
+    args:
+      num_embeddings: "num_embeddings"
+      embedding_dim: "features"
+  paxml:
+    api: "praxis.layers.Embedding"
+
+---
+operation: "GELU"
+description: "Applies the GELU activation function."
+op_type: "class"
+std_args:
+  - name: "approximate"
+    type: "str"
+    default: "none"
+variants:
+  mlx:
+    api: "mlx.nn.GELU"
+    args:
+      approximate: "approx"
+  torch:
+    api: "torch.nn.GELU"
+    args:
+      approximate: "approximate"
+  flax_nnx:
+    api: "flax.nnx.GELU"
+    args:
+      approximate: "approximate"
+  keras:
+    api: "keras.layers.Activation"
+    arg_values:
+      approximate: { "none": "\"gelu\"" }
+
+---
+operation: "GLU"
+description: "Applies the Gated Linear Unit function."
+op_type: "class"
+std_args:
+  - name: "dim"
+    type: "int"
+    default: -1
+variants:
+  mlx:
+    api: "mlx.nn.GLU"
+    args:
+      dim: "axis"
+  torch:
+    api: "torch.nn.GLU"
+  flax_nnx:
+    api: "flax.nnx.GLU"
+    args:
+      dim: "axis"
+
+---
+operation: "GRU"
+description: "Applies a multi-layer gated recurrent unit (GRU) RNN to an input sequence."
+op_type: "class"
+std_args:
+  - name: "input_size"
+    type: "int"
+  - name: "hidden_size"
+    type: "int"
+  - name: "num_layers"
+    type: "int"
+    default: 1
+  - name: "bias"
+    type: "bool"
+    default: true
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+  - name: "bidirectional"
+    type: "bool"
+    default: false
+variants:
+  mlx:
+    api: "mlx.nn.GRU"
+    args:
+      num_layers: null # MLX GRU is single layer
+      dropout: null
+      bidirectional: null
+  torch:
+    api: "torch.nn.GRU"
+  keras:
+    api: "keras.layers.GRU"
+    args:
+      input_size: null
+      hidden_size: "units"
+      bias: "use_bias"
+      num_layers: null
+      bidirectional: null
+  flax_nnx:
+    api: "flax.nnx.GRUCell" # Represents cell, usually wrapped in Scan
+
+---
+operation: "GroupNorm"
+description: "Applies Group Normalization."
+op_type: "class"
+std_args:
+  - name: "num_groups"
+    type: "int"
+  - name: "num_channels"
+    type: "int"
+  - name: "eps"
+    type: "float"
+    default: 1e-05
+  - name: "affine"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.nn.GroupNorm"
+    args:
+      num_channels: "dims"
+  torch:
+    api: "torch.nn.GroupNorm"
+  keras:
+    api: "keras.layers.GroupNormalization"
+    args:
+      num_groups: "groups"
+      num_channels: null # Inferred
+      eps: "epsilon"
+      affine: "center"
+  flax_nnx:
+    api: "flax.nnx.GroupNorm"
+    args:
+      num_channels: "num_channels" # Sometimes omitted/inferred
+      eps: "epsilon"
+      affine: "use_scale"
+  paxml:
+    api: "praxis.layers.GroupNorm"
+
+---
+operation: "HardShrink"
+description: "Applies the HardShrink function."
+op_type: "class"
+std_args:
+  - name: "lambd"
+    type: "float"
+    default: 0.5
+variants:
+  mlx:
+    api: "mlx.nn.HardShrink"
+  torch:
+    api: "torch.nn.Hardshrink"
+  flax_nnx:
+    api: "flax.nnx.HardShrink"
+
+---
+operation: "HardTanh"
+description: "Applies the HardTanh function."
+op_type: "class"
+std_args:
+  - name: "min_val"
+    type: "float"
+    default: -1.0
+  - name: "max_val"
+    type: "float"
+    default: 1.0
+variants:
+  mlx:
+    api: "mlx.nn.HardTanh"
+  torch:
+    api: "torch.nn.Hardtanh"
+  flax_nnx:
+    api: "flax.nnx.HardTanh"
+
+---
+operation: "Hardswish"
+description: "Applies the Hardswish function."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.Hardswish"
+  torch:
+    api: "torch.nn.Hardswish"
+  flax_nnx:
+    api: "flax.nnx.HardSwish"
+
+---
+operation: "Identity"
+description: "A placeholder identity operator."
+op_type: "class"
+std_args: []
+variants:
+  mlx:
+    api: "mlx.nn.Identity"
+  torch:
+    api: "torch.nn.Identity"
+  keras:
+    api: "keras.layers.Identity"
+  flax_nnx:
+    api: null # Flax usually uses lambda x: x
+
+---
+operation: "InstanceNorm"
+description: "Applies Instance Normalization."
+op_type: "class"
+std_args:
+  - name: "num_features"
+    type: "int"
+  - name: "eps"
+    type: "float"
+    default: 1e-05
+  - name: "affine"
+    type: "bool"
+    default: false
+variants:
+  mlx:
+    api: "mlx.nn.InstanceNorm"
+    args:
+      num_features: "dims"
+  torch:
+    api: "torch.nn.InstanceNorm2d"
+  flax_nnx:
+    api: "flax.nnx.InstanceNorm"
+    args:
+      eps: "epsilon"
+      affine: "use_scale"
+
+---
+operation: "LSTM"
+description: "Applies a multi-layer Long Short-Term Memory (LSTM) RNN."
+op_type: "class"
+std_args:
+  - name: "input_size"
+    type: "int"
+  - name: "hidden_size"
+    type: "int"
+  - name: "num_layers"
+    type: "int"
+    default: 1
+  - name: "bias"
+    type: "bool"
+    default: true
+  - name: "dropout"
+    type: "float"
+    default: 0.0
+  - name: "bidirectional"
+    type: "bool"
+    default: false
+variants:
+  mlx:
+    api: "mlx.nn.LSTM"
+    args:
+      num_layers: null
+      dropout: null
+      bidirectional: null
+  torch:
+    api: "torch.nn.LSTM"
+  keras:
+    api: "keras.layers.LSTM"
+    args:
+      input_size: null
+      hidden_size: "units"
+      bias: "use_bias"
+      num_layers: null
+      bidirectional: "go_backwards" # Semantic mismatch (bidirectional is wrapper)
+  flax_nnx:
+    api: "flax.nnx.LSTMCell"
+  paxml:
+    api: "praxis.layers.LSTM"
+
+---
+operation: "LayerNorm"
+description: "Applies Layer Normalization."
+op_type: "class"
+std_args:
+  - name: "normalized_shape"
+    type: "Union[int, List[int]]"
+  - name: "eps"
+    type: "float"
+    default: 1e-05
+  - name: "elementwise_affine"
+    type: "bool"
+    default: true
+variants:
+  mlx:
+    api: "mlx.nn.LayerNorm"
+    args:
+      normalized_shape: "dims"
+      elementwise_affine: "affine"
+  torch:
+    api: "torch.nn.LayerNorm"
+    args:
+      eps: "eps"
+      elementwise_affine: "elementwise_affine"
+  keras:
+    api: "keras.layers.LayerNormalization"
+    args:
+      normalized_shape: null
+      eps: "epsilon"
+      elementwise_affine: "center"
+  flax_nnx:
+    api: "flax.nnx.LayerNorm"
+    args:
+      normalized_shape: null # Inferred
+      eps: "epsilon"
+      elementwise_affine: "use_scale"
+  paxml:
+    api: "praxis.layers.LayerNorm"

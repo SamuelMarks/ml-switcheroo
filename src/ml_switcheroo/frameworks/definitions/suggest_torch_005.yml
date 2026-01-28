@@ -1,0 +1,549 @@
+operation: "SymFloat"
+description: "Symbolic Float type for shape analysis. Maps to standard float or None in static graph contexts."
+op_type: "class"
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.SymFloat"
+  jax:
+    api: null # Internal Torch concept
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: "float" # Fallback
+---
+operation: "SymInt"
+description: "Symbolic Integer type for shape analysis."
+op_type: "class"
+std_args:
+  - name: "node"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.SymInt"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: "int"
+---
+operation: "SymIntType"
+description: "Meta-type for Symbolic Integers."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.SymIntType"
+---
+operation: "TYPE_CHECKING"
+description: "Boolean constant used for static analysis guards."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.TYPE_CHECKING"
+  jax:
+    api: "typing.TYPE_CHECKING"
+    required_imports: ["import typing"]
+  flax_nnx:
+    api: "typing.TYPE_CHECKING"
+  paxml:
+    api: "typing.TYPE_CHECKING"
+  keras:
+    api: "typing.TYPE_CHECKING"
+  tensorflow:
+    api: "typing.TYPE_CHECKING"
+  mlx:
+    api: "typing.TYPE_CHECKING"
+  numpy:
+    api: "typing.TYPE_CHECKING"
+---
+operation: "Tag"
+description: "PyTorch internal tags for compiler/dispatcher."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Tag"
+---
+operation: "Tensor"
+description: "The fundamental multidimensional array object."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Tensor"
+  jax:
+    api: "jax.Array"
+  flax_nnx:
+    api: "jax.Array"
+  paxml:
+    api: "jax.Array"
+  keras:
+    api: "keras.KerasTensor" # or Generic
+  tensorflow:
+    api: "tf.Tensor"
+  mlx:
+    api: "mlx.core.array"
+  numpy:
+    api: "numpy.ndarray"
+---
+operation: "TensorType"
+description: "Type representation of a Tensor."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.TensorType"
+---
+operation: "ThroughputBenchmark"
+description: "PyTorch internal benchmarking utility."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.ThroughputBenchmark"
+---
+operation: "TracingState"
+description: "Internal JIT tracing state container."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.TracingState"
+---
+operation: "TupleType"
+description: "Type representation of a tuple."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.TupleType"
+---
+operation: "Type"
+description: "Top-level Type class."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Type"
+---
+operation: "TypedStorage"
+description: "Legacy storage class for typed data."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.TypedStorage"
+---
+operation: "UseGlobalDeps"
+description: "Configuration flag for global dependencies."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.USE_GLOBAL_DEPS"
+---
+operation: "UseRtldGlobal"
+description: "Configuration flag for RTLD_GLOBAL usage."
+op_type: "function"
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.USE_RTLD_GLOBAL_WITH_LIBTORCH"
+---
+operation: "UnionType"
+description: "Type representation for unions."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.UnionType"
+---
+operation: "UntypedStorage"
+description: "Legacy storage class for untyped data."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.UntypedStorage"
+---
+operation: "Use"
+description: "Internal Use class."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Use"
+---
+operation: "Value"
+description: "Internal Value class for IR."
+op_type: "class"
+std_args: []
+variants:
+  torch:
+    api: "torch.Value"
+---
+operation: "Abs"
+description: "Computes the absolute value element-wise."
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.abs"
+  jax:
+    api: "jax.numpy.abs"
+  flax_nnx:
+    api: "jax.numpy.abs"
+  paxml:
+    api: "jax.numpy.abs"
+  keras:
+    api: "keras.ops.abs"
+  tensorflow:
+    api: "tf.abs"
+  mlx:
+    api: "mlx.core.abs"
+  numpy:
+    api: "numpy.abs"
+---
+operation: "Abs_"
+description: "Computes the absolute value element-wise (In-place)."
+is_inplace: true
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.abs_"
+  jax:
+    # JAX is functional, maps to standard abs via inplace_unroll plugin
+    api: "jax.numpy.abs"
+  flax_nnx:
+    api: "jax.numpy.abs"
+  paxml:
+    api: "jax.numpy.abs"
+  keras:
+    api: "keras.ops.abs"
+  tensorflow:
+    api: "tf.abs"
+  mlx:
+    api: "mlx.core.abs"
+  numpy:
+    api: "numpy.abs"
+---
+operation: "Absolute"
+description: "Alias for Abs."
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.absolute"
+  jax:
+    api: "jax.numpy.absolute"
+  flax_nnx:
+    api: "jax.numpy.absolute"
+  paxml:
+    api: "jax.numpy.absolute"
+  keras:
+    api: "keras.ops.absolute"
+  tensorflow:
+    api: "tf.math.abs"
+  mlx:
+    api: "mlx.core.abs"
+  numpy:
+    api: "numpy.absolute"
+---
+operation: "Acos"
+description: "Computes the inverse cosine (arccosine)."
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.acos"
+  jax:
+    api: "jax.numpy.arccos"
+  flax_nnx:
+    api: "jax.numpy.arccos"
+  paxml:
+    api: "jax.numpy.arccos"
+  keras:
+    api: "keras.ops.arccos"
+  tensorflow:
+    api: "tf.math.acos"
+  mlx:
+    api: "mlx.core.arccos"
+  numpy:
+    api: "numpy.arccos"
+---
+operation: "Acos_"
+description: "Computes the inverse cosine (arccosine) in-place."
+is_inplace: true
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.acos_"
+  jax:
+    api: "jax.numpy.arccos"
+  flax_nnx:
+    api: "jax.numpy.arccos"
+  paxml:
+    api: "jax.numpy.arccos"
+  keras:
+    api: "keras.ops.arccos"
+  tensorflow:
+    api: "tf.math.acos"
+  mlx:
+    api: "mlx.core.arccos"
+  numpy:
+    api: "numpy.arccos"
+---
+operation: "Acosh"
+description: "Computes the inverse hyperbolic cosine."
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.acosh"
+  jax:
+    api: "jax.numpy.arccosh"
+  flax_nnx:
+    api: "jax.numpy.arccosh"
+  paxml:
+    api: "jax.numpy.arccosh"
+  keras:
+    api: "keras.ops.arccosh"
+  tensorflow:
+    api: "tf.math.acosh"
+  mlx:
+    api: "mlx.core.arccosh"
+  numpy:
+    api: "numpy.arccosh"
+---
+operation: "Acosh_"
+description: "Computes the inverse hyperbolic cosine in-place."
+is_inplace: true
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.acosh_"
+  jax:
+    api: "jax.numpy.arccosh"
+  flax_nnx:
+    api: "jax.numpy.arccosh"
+  paxml:
+    api: "jax.numpy.arccosh"
+  keras:
+    api: "keras.ops.arccosh"
+  tensorflow:
+    api: "tf.math.acosh"
+  mlx:
+    api: "mlx.core.arccosh"
+  numpy:
+    api: "numpy.arccosh"
+---
+operation: "AdaptiveAvgPool1d"
+description: "Applies a 1D adaptive average pooling over an input signal."
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 3
+  - name: "output_size"
+    type: "int"
+variants:
+  torch:
+    api: "torch.adaptive_avg_pool1d"
+  jax:
+    # JAX uses resize for adaptive pooling usually
+    api: "jax.image.resize"
+    macro_template: "jax.image.resize({input}, shape=(*{input}.shape[:-1], {output_size}), method='linear')"
+  flax_nnx:
+    api: "nnx.avg_pool" # Requires fixed kernel usually, using resize fallback
+    macro_template: "jax.image.resize({input}, shape=(*{input}.shape[:-1], {output_size}), method='linear')"
+  keras:
+    # Global pooling if output_size is 1, else difficult map
+    api: "keras.layers.GlobalAveragePooling1D"
+    dispatch_rules:
+      - if_arg: "output_size"
+        op: "eq"
+        val: 1
+        use_api: "keras.layers.GlobalAveragePooling1D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalAveragePooling1D" # Approximation
+  mlx:
+    api: null # No direct adaptive pool
+---
+operation: "AdaptiveMaxPool1d"
+description: "Applies a 1D adaptive max pooling over an input signal."
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 3
+  - name: "output_size"
+    type: "int"
+variants:
+  torch:
+    api: "torch.adaptive_max_pool1d"
+  jax:
+    api: "jax.image.resize"
+    macro_template: "jax.image.resize({input}, shape=(*{input}.shape[:-1], {output_size}), method='nearest')"
+  keras:
+    # Global pooling if output_size is 1
+    api: "keras.layers.GlobalMaxPooling1D"
+    dispatch_rules:
+      - if_arg: "output_size"
+        op: "eq"
+        val: 1
+        use_api: "keras.layers.GlobalMaxPooling1D"
+  tensorflow:
+    api: "tf.keras.layers.GlobalMaxPooling1D"
+  mlx:
+    api: null
+---
+operation: "Add"
+description: "Adds other to input, scaled by alpha."
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+  - name: "alpha"
+    type: "float"
+    default: 1
+variants:
+  torch:
+    api: "torch.add"
+  jax:
+    api: "jax.numpy.add"
+    macro_template: "jax.numpy.add({input}, {other} * {alpha})"
+  flax_nnx:
+    api: "jax.numpy.add"
+    macro_template: "jax.numpy.add({input}, {other} * {alpha})"
+  paxml:
+    api: "jax.numpy.add"
+    macro_template: "jax.numpy.add({input}, {other} * {alpha})"
+  keras:
+    api: "keras.ops.add"
+    macro_template: "keras.ops.add({input}, {other} * {alpha})"
+  tensorflow:
+    api: "tf.math.add"
+    macro_template: "tf.math.add({input}, {other} * {alpha})"
+  mlx:
+    api: "mlx.core.add"
+    macro_template: "mlx.core.add({input}, {other} * {alpha})"
+  numpy:
+    api: "numpy.add"
+    macro_template: "numpy.add({input}, {other} * {alpha})"
+---
+operation: "Addbmm"
+description: "Performs batch matrix-matrix product of matrices with reduced add step."
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "batch1"
+    type: "Tensor"
+  - name: "batch2"
+    type: "Tensor"
+  - name: "beta"
+    type: "float"
+    default: 1.0
+  - name: "alpha"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.addbmm"
+  jax:
+    api: "jax.numpy.sum"
+    macro_template: "{beta} * {input} + {alpha} * jax.numpy.sum(jax.numpy.matmul({batch1}, {batch2}), axis=0)"
+  flax_nnx:
+    api: "jax.numpy.sum"
+    macro_template: "{beta} * {input} + {alpha} * jax.numpy.sum(jax.numpy.matmul({batch1}, {batch2}), axis=0)"
+  keras:
+    api: "keras.ops.sum"
+    macro_template: "{beta} * {input} + {alpha} * keras.ops.sum(keras.ops.matmul({batch1}, {batch2}), axis=0)"
+  tensorflow:
+    api: "tf.linalg.matmul"
+    macro_template: "{beta} * {input} + {alpha} * tf.reduce_sum(tf.linalg.matmul({batch1}, {batch2}), axis=0)"
+  mlx:
+    api: "mlx.core.matmul"
+    macro_template: "{beta} * {input} + {alpha} * mlx.core.sum(mlx.core.matmul({batch1}, {batch2}), axis=0)"
+  numpy:
+    api: "numpy.matmul"
+    macro_template: "{beta} * {input} + {alpha} * numpy.sum(numpy.matmul({batch1}, {batch2}), axis=0)"
+---
+operation: "Addcdiv"
+description: "Performs element-wise division of tensor1 by tensor2, multiplies by value, adds to input."
+return_type: "Tensor"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "tensor1"
+    type: "Tensor"
+  - name: "tensor2"
+    type: "Tensor"
+  - name: "value"
+    type: "float"
+    default: 1.0
+variants:
+  torch:
+    api: "torch.addcdiv"
+  jax:
+    api: "jax.numpy.add"
+    macro_template: "{input} + {value} * ({tensor1} / {tensor2})"
+  flax_nnx:
+    api: "jax.numpy.add"
+    macro_template: "{input} + {value} * ({tensor1} / {tensor2})"
+  keras:
+    api: "keras.ops.add"
+    macro_template: "{input} + {value} * ({tensor1} / {tensor2})"
+  tensorflow:
+    api: "tf.math.add"
+    macro_template: "{input} + {value} * ({tensor1} / {tensor2})"
+  mlx:
+    api: "mlx.core.add"
+    macro_template: "{input} + {value} * ({tensor1} / {tensor2})"
+  numpy:
+    api: "numpy.add"
+    macro_template: "{input} + {value} * ({tensor1} / {tensor2})"

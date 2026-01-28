@@ -1,0 +1,901 @@
+operation: "ResultType"
+description: "Returns the type that results from applying the NumPy type promotion rules to the arguments."
+std_args:
+  - name: "arrays_and_dtypes"
+    type: "List[Union[Array, str, dtype]]"
+    is_variadic: true
+variants:
+  torch:
+    api: "torch.result_type"
+  jax:
+    api: "jax.numpy.result_type"
+  flax_nnx:
+    api: "jax.numpy.result_type"
+  paxml:
+    api: "jax.numpy.result_type"
+  tensorflow:
+    api: "tf.experimental.numpy.result_type"
+  numpy:
+    api: "numpy.result_type"
+  mlx:
+    api: null # Not directly supported
+
+---
+operation: "Roll"
+description: "Roll array elements along a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "shift"
+    type: "Union[int, List[int]]"
+  - name: "axis"
+    type: "Union[int, List[int]]"
+    default: null
+variants:
+  torch:
+    api: "torch.roll"
+    args:
+      a: "input"
+      shift: "shifts"
+      axis: "dims"
+  jax:
+    api: "jax.numpy.roll"
+  flax_nnx:
+    api: "jax.numpy.roll"
+  paxml:
+    api: "jax.numpy.roll"
+  keras:
+    api: "keras.ops.roll"
+  tensorflow:
+    api: "tf.roll"
+  numpy:
+    api: "numpy.roll"
+  mlx:
+    api: "mlx.core.roll"
+
+---
+operation: "Rot90"
+description: "Rotate an array by 90 degrees in the plane specified by axes."
+std_args:
+  - name: "m"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+    default: 1
+  - name: "axes"
+    type: "Tuple[int, int]"
+    default: [0, 1]
+variants:
+  torch:
+    api: "torch.rot90"
+    args:
+      m: "input"
+      axes: "dims"
+  jax:
+    api: "jax.numpy.rot90"
+  flax_nnx:
+    api: "jax.numpy.rot90"
+  paxml:
+    api: "jax.numpy.rot90"
+  tensorflow:
+    api: "tf.image.rot90"
+    args:
+      m: "image"
+      axes: null # tf.image.rot90 implies spatial dims in HWC/NHWC usually, handling generic axes is complex
+  numpy:
+    api: "numpy.rot90"
+  mlx:
+    api: null
+
+---
+operation: "Round"
+description: "Round an array to the given number of decimals."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "decimals"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.round"
+    args:
+      a: "input"
+  jax:
+    api: "jax.numpy.round"
+  flax_nnx:
+    api: "jax.numpy.round"
+  paxml:
+    api: "jax.numpy.round"
+  keras:
+    api: "keras.ops.round"
+  tensorflow:
+    api: "tf.round" # Integer rounding
+  numpy:
+    api: "numpy.round"
+  mlx:
+    api: "mlx.core.round"
+
+---
+operation: "Select"
+description: "Return elements from choices, depending on conditions."
+std_args:
+  - name: "condlist"
+    type: "List[Tensor]"
+  - name: "choicelist"
+    type: "List[Tensor]"
+  - name: "default"
+    type: "Any"
+    default: 0
+variants:
+  torch:
+    api: null # No direct equivalent to select(condlist...)
+  jax:
+    api: "jax.numpy.select"
+  flax_nnx:
+    api: "jax.numpy.select"
+  paxml:
+    api: "jax.numpy.select"
+  tensorflow:
+    api: "tf.experimental.numpy.select"
+  numpy:
+    api: "numpy.select"
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Shape"
+description: "Return the shape of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+variants:
+  torch:
+    api: "numpy.shape" 
+    # Fallback to numpy shim for shape query on tensors if not method
+  jax:
+    api: "jax.numpy.shape"
+  flax_nnx:
+    api: "jax.numpy.shape"
+  paxml:
+    api: "jax.numpy.shape"
+  keras:
+    api: "keras.ops.shape"
+  tensorflow:
+    api: "tf.shape"
+    args:
+      a: "input"
+  numpy:
+    api: "numpy.shape"
+  mlx:
+    macro_template: "{a}.shape"
+
+---
+operation: "Sign"
+description: "Returns an element-wise indication of the sign of a number."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.sign"
+  jax:
+    api: "jax.numpy.sign"
+  flax_nnx:
+    api: "jax.numpy.sign"
+  paxml:
+    api: "jax.numpy.sign"
+  keras:
+    api: "keras.ops.sign"
+  tensorflow:
+    api: "tf.math.sign"
+  numpy:
+    api: "numpy.sign"
+  mlx:
+    # Macro for sign: (x > 0) - (x < 0) or similar, but standard ops exist in new versions
+    api: null 
+
+---
+operation: "Signbit"
+description: "Returns element-wise True where signbit is set (less than zero)."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.signbit"
+  jax:
+    api: "jax.numpy.signbit"
+  flax_nnx:
+    api: "jax.numpy.signbit"
+  paxml:
+    api: "jax.numpy.signbit"
+  tensorflow:
+    api: "tf.math.signbit"
+  numpy:
+    api: "numpy.signbit"
+  keras:
+    api: null
+  mlx:
+    macro_template: "{x} < 0"
+
+---
+operation: "Sin"
+description: "Trigonometric sine, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.sin"
+  jax:
+    api: "jax.numpy.sin"
+  flax_nnx:
+    api: "jax.numpy.sin"
+  paxml:
+    api: "jax.numpy.sin"
+  keras:
+    api: "keras.ops.sin"
+  tensorflow:
+    api: "tf.math.sin"
+  numpy:
+    api: "numpy.sin"
+  mlx:
+    api: "mlx.core.sin"
+
+---
+operation: "Sinc"
+description: "Return the sinc function."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.sinc"
+  jax:
+    api: "jax.numpy.sinc"
+  flax_nnx:
+    api: "jax.numpy.sinc"
+  paxml:
+    api: "jax.numpy.sinc"
+  tensorflow:
+    api: "tf.experimental.numpy.sinc"
+  numpy:
+    api: "numpy.sinc"
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Sinh"
+description: "Hyperbolic sine, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.sinh"
+  jax:
+    api: "jax.numpy.sinh"
+  flax_nnx:
+    api: "jax.numpy.sinh"
+  paxml:
+    api: "jax.numpy.sinh"
+  keras:
+    api: "keras.ops.sinh"
+  tensorflow:
+    api: "tf.math.sinh"
+  numpy:
+    api: "numpy.sinh"
+  mlx:
+    api: "mlx.core.sinh"
+
+---
+operation: "Size"
+description: "Return the number of elements along a given axis."
+std_args:
+  - name: "x"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "numpy.size" # Fallback wrapper
+  jax:
+    api: "jax.numpy.size"
+  flax_nnx:
+    api: "jax.numpy.size"
+  paxml:
+    api: "jax.numpy.size"
+  keras:
+    api: "keras.ops.size"
+  tensorflow:
+    api: "tf.size"
+    args:
+      x: "input"
+      axis: null # Tf.size is total elements
+  numpy:
+    api: "numpy.size"
+    args:
+      x: "a"
+  mlx:
+    macro_template: "{x}.size"
+
+---
+operation: "Sort"
+description: "Return a sorted copy of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: -1
+  - name: "kind"
+    type: "str"
+    default: "quicksort"
+  - name: "order"
+    type: "Any"
+    default: null
+variants:
+  torch:
+    api: "torch.sort"
+    args:
+      a: "input"
+      axis: "dim"
+      kind: null
+      order: null
+    output_select_index: 0
+  jax:
+    api: "jax.numpy.sort"
+  flax_nnx:
+    api: "jax.numpy.sort"
+  paxml:
+    api: "jax.numpy.sort"
+  keras:
+    api: "keras.ops.sort"
+  tensorflow:
+    api: "tf.sort"
+    args:
+      a: "values"
+      axis: "axis"
+      kind: null
+      order: null
+  numpy:
+    api: "numpy.sort"
+  mlx:
+    api: "mlx.core.sort"
+
+---
+operation: "Split"
+description: "Split an array into multiple sub-arrays."
+std_args:
+  - name: "ary"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "Union[int, List[int]]"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.tensor_split"
+    args:
+      ary: "input"
+      indices_or_sections: "indices"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.split"
+  flax_nnx:
+    api: "jax.numpy.split"
+  paxml:
+    api: "jax.numpy.split"
+  keras:
+    api: "keras.ops.split"
+  tensorflow:
+    api: "tf.split"
+    args:
+      ary: "value"
+      indices_or_sections: "num_or_size_splits"
+      axis: "axis"
+  numpy:
+    api: "numpy.split"
+  mlx:
+    api: "mlx.core.split"
+
+---
+operation: "Sqrt"
+description: "Return the non-negative square-root of an array, element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.sqrt"
+  jax:
+    api: "jax.numpy.sqrt"
+  flax_nnx:
+    api: "jax.numpy.sqrt"
+  paxml:
+    api: "jax.numpy.sqrt"
+  keras:
+    api: "keras.ops.sqrt"
+  tensorflow:
+    api: "tf.math.sqrt"
+  numpy:
+    api: "numpy.sqrt"
+  mlx:
+    api: "mlx.core.sqrt"
+
+---
+operation: "Square"
+description: "Return the element-wise square of the input."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.square"
+  jax:
+    api: "jax.numpy.square"
+  flax_nnx:
+    api: "jax.numpy.square"
+  paxml:
+    api: "jax.numpy.square"
+  keras:
+    api: "keras.ops.square"
+  tensorflow:
+    api: "tf.math.square"
+  numpy:
+    api: "numpy.square"
+  mlx:
+    api: "mlx.core.square"
+
+---
+operation: "Squeeze"
+description: "Remove axes of length one from a."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "Union[int, List[int]]"
+    default: null
+variants:
+  torch:
+    api: "torch.squeeze"
+    args:
+      a: "input"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.squeeze"
+  flax_nnx:
+    api: "jax.numpy.squeeze"
+  paxml:
+    api: "jax.numpy.squeeze"
+  keras:
+    api: "keras.ops.squeeze"
+  tensorflow:
+    api: "tf.squeeze"
+    args:
+      a: "input"
+      axis: "axis"
+  numpy:
+    api: "numpy.squeeze"
+  mlx:
+    api: "mlx.core.squeeze"
+
+---
+operation: "Stack"
+description: "Join a sequence of arrays along a new axis."
+std_args:
+  - name: "arrays"
+    type: "List[Tensor]"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.stack"
+    args:
+      arrays: "tensors"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.stack"
+  flax_nnx:
+    api: "jax.numpy.stack"
+  paxml:
+    api: "jax.numpy.stack"
+  keras:
+    api: "keras.ops.stack"
+  tensorflow:
+    api: "tf.stack"
+    args:
+      arrays: "values"
+      axis: "axis"
+  numpy:
+    api: "numpy.stack"
+  mlx:
+    api: "mlx.core.stack"
+
+---
+operation: "Std"
+description: "Compute the standard deviation along the specified axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "Union[int, List[int]]"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.std"
+    args:
+      a: "input"
+      axis: "dim"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.std"
+  flax_nnx:
+    api: "jax.numpy.std"
+  paxml:
+    api: "jax.numpy.std"
+  keras:
+    api: "keras.ops.std"
+  tensorflow:
+    api: "tf.math.reduce_std"
+    args:
+      a: "input_tensor"
+      axis: "axis"
+      keepdims: "keepdims"
+  numpy:
+    api: "numpy.std"
+  mlx:
+    # MLX core doesn't have explicit std, uses mean/var + sqrt?
+    # Actually modern MLX has var/std
+    api: null
+
+---
+operation: "String"
+description: "NumPy string_ type constructor."
+op_type: "class"
+std_args:
+  - name: "value"
+    type: "str"
+    default: ""
+variants:
+  torch:
+    api: null
+  jax:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.string_"
+  numpy:
+    api: "numpy.bytes_"
+  keras:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Subtract"
+description: "Subtract arguments, element-wise."
+std_args:
+  - name: "x1"
+    type: "Tensor"
+  - name: "x2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.sub"
+  jax:
+    api: "jax.numpy.subtract"
+  flax_nnx:
+    api: "jax.numpy.subtract"
+  paxml:
+    api: "jax.numpy.subtract"
+  keras:
+    api: "keras.ops.subtract"
+  tensorflow:
+    api: "tf.math.subtract"
+  numpy:
+    api: "numpy.subtract"
+  mlx:
+    api: "mlx.core.subtract"
+
+---
+operation: "Sum"
+description: "Sum of array elements over a given axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis"
+    type: "Union[int, List[int]]"
+    default: null
+  - name: "dtype"
+    type: "Any"
+    default: null
+  - name: "keepdims"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.sum"
+    args:
+      a: "input"
+      axis: "dim"
+      dtype: "dtype"
+      keepdims: "keepdim"
+  jax:
+    api: "jax.numpy.sum"
+  flax_nnx:
+    api: "jax.numpy.sum"
+  paxml:
+    api: "jax.numpy.sum"
+  keras:
+    api: "keras.ops.sum"
+  tensorflow:
+    api: "tf.math.reduce_sum"
+    args:
+      a: "input_tensor"
+      axis: "axis"
+      keepdims: "keepdims"
+      dtype: null
+  numpy:
+    api: "numpy.sum"
+  mlx:
+    api: "mlx.core.sum"
+
+---
+operation: "Swapaxes"
+description: "Interchange two axes of an array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "axis1"
+    type: "int"
+  - name: "axis2"
+    type: "int"
+variants:
+  torch:
+    api: "torch.swapaxes"
+    args:
+      a: "input"
+      axis1: "axis0"
+      axis2: "axis1"
+  jax:
+    api: "jax.numpy.swapaxes"
+  flax_nnx:
+    api: "jax.numpy.swapaxes"
+  paxml:
+    api: "jax.numpy.swapaxes"
+  keras:
+    api: null # Use transpose
+  tensorflow:
+    api: "tf.experimental.numpy.swapaxes"
+  numpy:
+    api: "numpy.swapaxes"
+  mlx:
+    api: "mlx.core.swapaxes"
+
+---
+operation: "Take"
+description: "Take elements from an array along an axis."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+    default: null
+variants:
+  torch:
+    api: "torch.take"
+    args:
+      a: "input"
+      indices: "index"
+      axis: null # torch.take is flattened only
+  jax:
+    api: "jax.numpy.take"
+  flax_nnx:
+    api: "jax.numpy.take"
+  paxml:
+    api: "jax.numpy.take"
+  keras:
+    api: "keras.ops.take"
+  tensorflow:
+    api: "tf.gather" # tf.gather mimics axis take
+    args:
+      a: "params"
+      indices: "indices"
+      axis: "axis"
+  numpy:
+    api: "numpy.take"
+  mlx:
+    api: "mlx.core.take"
+
+---
+operation: "TakeAlongAxis"
+description: "Take values from the input array by matching 1d index and data slices."
+std_args:
+  - name: "arr"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tensor"
+  - name: "axis"
+    type: "int"
+variants:
+  torch:
+    api: "torch.gather"
+    args:
+      arr: "input"
+      indices: "index"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.take_along_axis"
+  flax_nnx:
+    api: "jax.numpy.take_along_axis"
+  paxml:
+    api: "jax.numpy.take_along_axis"
+  keras:
+    api: "keras.ops.take_along_axis"
+  tensorflow:
+    api: "tf.experimental.numpy.take_along_axis"
+  numpy:
+    api: "numpy.take_along_axis"
+  mlx:
+    api: "mlx.core.take_along_axis"
+
+---
+operation: "Tan"
+description: "Compute tangent element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.tan"
+  jax:
+    api: "jax.numpy.tan"
+  flax_nnx:
+    api: "jax.numpy.tan"
+  paxml:
+    api: "jax.numpy.tan"
+  keras:
+    api: "keras.ops.tan"
+  tensorflow:
+    api: "tf.math.tan"
+  numpy:
+    api: "numpy.tan"
+  mlx:
+    api: "mlx.core.tan"
+
+---
+operation: "Tanh"
+description: "Compute hyperbolic tangent element-wise."
+std_args:
+  - name: "x"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.tanh"
+  jax:
+    api: "jax.numpy.tanh"
+  flax_nnx:
+    api: "jax.numpy.tanh"
+  paxml:
+    api: "jax.numpy.tanh"
+  keras:
+    api: "keras.ops.tanh"
+  tensorflow:
+    api: "tf.math.tanh"
+  numpy:
+    api: "numpy.tanh"
+  mlx:
+    api: "mlx.core.tanh"
+
+---
+operation: "Tensordot"
+description: "Compute tensor dot product along specified axes."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "b"
+    type: "Tensor"
+  - name: "axes"
+    type: "Union[int, Tuple]"
+    default: 2
+variants:
+  torch:
+    api: "torch.tensordot"
+    args:
+      a: "a"
+      b: "b"
+      axes: "dims"
+  jax:
+    api: "jax.numpy.tensordot"
+  flax_nnx:
+    api: "jax.numpy.tensordot"
+  paxml:
+    api: "jax.numpy.tensordot"
+  keras:
+    api: "keras.ops.tensordot"
+  tensorflow:
+    api: "tf.tensordot"
+  numpy:
+    api: "numpy.tensordot"
+  mlx:
+    api: "mlx.core.tensordot"
+
+---
+operation: "Tile"
+description: "Construct an array by repeating A the number of times given by reps."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "reps"
+    type: "Tuple[int, ...]"
+variants:
+  torch:
+    api: "torch.tile"
+    args:
+      a: "input"
+      reps: "dims"
+  jax:
+    api: "jax.numpy.tile"
+  flax_nnx:
+    api: "jax.numpy.tile"
+  paxml:
+    api: "jax.numpy.tile"
+  keras:
+    api: "keras.ops.tile"
+  tensorflow:
+    api: "tf.tile"
+    args:
+      a: "input"
+      reps: "multiples"
+  numpy:
+    api: "numpy.tile"
+  mlx:
+    # Requires plugin or macro usually
+    api: null 
+
+---
+operation: "Trace"
+description: "Return the sum along diagonals of the array."
+std_args:
+  - name: "a"
+    type: "Tensor"
+  - name: "offset"
+    type: "int"
+    default: 0
+  - name: "axis1"
+    type: "int"
+    default: 0
+  - name: "axis2"
+    type: "int"
+    default: 1
+variants:
+  torch:
+    api: "torch.diagonal" 
+    macro_template: "torch.sum(torch.diagonal({a}, {offset}, {axis1}, {axis2}))"
+  jax:
+    api: "jax.numpy.trace"
+  flax_nnx:
+    api: "jax.numpy.trace"
+  paxml:
+    api: "jax.numpy.trace"
+  tensorflow:
+    api: "tf.linalg.trace"
+  numpy:
+    api: "numpy.trace"
+  keras:
+    api: null
+  mlx:
+    api: null

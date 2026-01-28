@@ -1,0 +1,793 @@
+operation: "FloorDivide"
+description: "Return the largest integer smaller or equal to the division of the inputs."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.floor_divide"
+  jax:
+    api: "jax.numpy.floor_divide"
+  flax_nnx:
+    api: "jax.numpy.floor_divide"
+  paxml:
+    api: "jax.numpy.floor_divide"
+  keras:
+    api: "keras.ops.floor_divide"
+  tensorflow:
+    api: "tf.math.floordiv"
+  numpy:
+    api: "numpy.floor_divide"
+  mlx:
+    api: "mlx.core.floor_divide"
+---
+operation: "Full"
+description: "Return a new array of given shape and type, filled with `fill_value`."
+std_args:
+  - name: "shape"
+    type: "List[int]"
+  - name: "fill_value"
+    type: "float"
+  - name: "dtype"
+    type: "Optional[str]"
+    default: null
+variants:
+  torch:
+    api: "torch.full"
+    args:
+      shape: "size"
+  jax:
+    api: "jax.numpy.full"
+  flax_nnx:
+    api: "jax.numpy.full"
+  paxml:
+    api: "jax.numpy.full"
+  keras:
+    api: "keras.ops.full"
+  tensorflow:
+    api: "tf.fill"
+    args:
+      shape: "dims"
+      fill_value: "value"
+    # TF fill does not accept dtype arg directly in older versions, usually infers
+    kwargs_map:
+      dtype: null
+  numpy:
+    api: "numpy.full"
+  mlx:
+    api: "mlx.core.full"
+    # MLX args: (shape, vals, dtype=None) matches
+---
+operation: "FullLike"
+description: "Return a full array with the same shape and type as a given array."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "fill_value"
+    type: "float"
+  - name: "dtype"
+    type: "Optional[str]"
+    default: null
+  - name: "shape"
+    type: "Optional[List[int]]"
+    default: null
+variants:
+  torch:
+    api: "torch.full_like"
+    args:
+      a: "input"
+    kwargs_map:
+      shape: null # torch.full_like doesn't support shape override directly usually
+  jax:
+    api: "jax.numpy.full_like"
+  flax_nnx:
+    api: "jax.numpy.full_like"
+  paxml:
+    api: "jax.numpy.full_like"
+  keras:
+    api: "keras.ops.full_like"
+    args:
+       a: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.full_like"
+  numpy:
+    api: "numpy.full_like"
+  mlx:
+    api: "mlx.core.full_like"
+---
+operation: "Gcd"
+description: "Returns the greatest common divisor of |x1| and |x2|."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.gcd"
+  jax:
+    api: "jax.numpy.gcd"
+  flax_nnx:
+    api: "jax.numpy.gcd"
+  paxml:
+    api: "jax.numpy.gcd"
+  keras:
+    # Keras ops currently lacks gcd
+    api: null
+  tensorflow:
+    api: "tf.math.gcd"
+  numpy:
+    api: "numpy.gcd"
+  mlx:
+    # MLX lacks gcd
+    api: null
+---
+operation: "Geomspace"
+description: "Return numbers spaced evenly on a log scale (a geometric progression)."
+std_args:
+  - name: "start"
+    type: "float"
+  - name: "stop"
+    type: "float"
+  - name: "num"
+    type: "int"
+    default: 50
+  - name: "endpoint"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    # Torch logspace takes exponents. Mapping: start=log10(start)
+    macro_template: "torch.logspace(torch.log10(torch.tensor({start})), torch.log10(torch.tensor({stop})), {num}, steps={num})"
+  jax:
+    api: "jax.numpy.geomspace"
+  flax_nnx:
+    api: "jax.numpy.geomspace"
+  paxml:
+    api: "jax.numpy.geomspace"
+  keras:
+    api: "keras.ops.geomspace"
+  tensorflow:
+    api: "tf.experimental.numpy.geomspace"
+  numpy:
+    api: "numpy.geomspace"
+  mlx:
+    # No direct geomspace?
+    api: null
+---
+operation: "Greater"
+description: "Return the truth value of (x1 > x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.greater"
+  jax:
+    api: "jax.numpy.greater"
+  flax_nnx:
+    api: "jax.numpy.greater"
+  paxml:
+    api: "jax.numpy.greater"
+  keras:
+    api: "keras.ops.greater"
+  tensorflow:
+    api: "tf.math.greater"
+  numpy:
+    api: "numpy.greater"
+  mlx:
+    api: "mlx.core.greater"
+---
+operation: "GreaterEqual"
+description: "Return the truth value of (x1 >= x2) element-wise."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.greater_equal"
+  jax:
+    api: "jax.numpy.greater_equal"
+  flax_nnx:
+    api: "jax.numpy.greater_equal"
+  paxml:
+    api: "jax.numpy.greater_equal"
+  keras:
+    api: "keras.ops.greater_equal"
+  tensorflow:
+    api: "tf.math.greater_equal"
+  numpy:
+    api: "numpy.greater_equal"
+  mlx:
+    api: "mlx.core.greater_equal"
+---
+operation: "Heaviside"
+description: "Compute the Heaviside step function."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+    doc: "Values to use where x1 is zero."
+variants:
+  torch:
+    api: "torch.heaviside"
+    args:
+       x1: "input"
+       x2: "values"
+  jax:
+    api: "jax.numpy.heaviside"
+  flax_nnx:
+    api: "jax.numpy.heaviside"
+  paxml:
+    api: "jax.numpy.heaviside"
+  keras:
+    # No direct ops.heaviside in Keras 3 yet
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.heaviside"
+  numpy:
+    api: "numpy.heaviside"
+  mlx:
+    # No direct heaviside
+    api: null
+---
+operation: "HSplit"
+description: "Split an array into multiple sub-arrays horizontally (column-wise)."
+std_args:
+  - name: "ary"
+    type: "Array"
+  - name: "indices_or_sections"
+    type: "Union[int, List[int]]"
+variants:
+  torch:
+    api: "torch.hsplit"
+    args:
+      ary: "input"
+  jax:
+    api: "jax.numpy.hsplit"
+  flax_nnx:
+    api: "jax.numpy.hsplit"
+  paxml:
+    api: "jax.numpy.hsplit"
+  keras:
+    api: "keras.ops.hsplit"
+  tensorflow:
+    api: "tf.experimental.numpy.hsplit"
+  numpy:
+    api: "numpy.hsplit"
+  mlx:
+    # MLX has split, but hsplit convenience missing
+    api: null
+---
+operation: "HStack"
+description: "Stack arrays in sequence horizontally (column wise)."
+std_args:
+  - name: "tup"
+    type: "List[Array]"
+variants:
+  torch:
+    api: "torch.hstack"
+  jax:
+    api: "jax.numpy.hstack"
+  flax_nnx:
+    api: "jax.numpy.hstack"
+  paxml:
+    api: "jax.numpy.hstack"
+  keras:
+    api: "keras.ops.hstack"
+    args:
+      tup: "values"
+  tensorflow:
+    api: "tf.experimental.numpy.hstack"
+  numpy:
+    api: "numpy.hstack"
+  mlx:
+    macro_template: "mlx.core.concatenate({tup}, axis=1)"
+---
+operation: "Hypot"
+description: "Given the 'legs' of a right triangle, return its hypotenuse."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.hypot"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.hypot"
+  flax_nnx:
+    api: "jax.numpy.hypot"
+  paxml:
+    api: "jax.numpy.hypot"
+  keras:
+    macro_template: "keras.ops.sqrt(keras.ops.square({x1}) + keras.ops.square({x2}))"
+  tensorflow:
+    api: "tf.math.reduce_euclidean_norm"
+    # reduce_euclidean_norm expects stacked tensor or similar. 
+    # Use explicit sqrt/square macro or tf.math.hypot if available (added recently)
+    macro_template: "tf.math.sqrt(tf.math.square({x1}) + tf.math.square({x2}))" 
+  numpy:
+    api: "numpy.hypot"
+  mlx:
+    macro_template: "mlx.core.sqrt(mlx.core.square({x1}) + mlx.core.square({x2}))"
+---
+operation: "Identity"
+description: "Return the identity array."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "dtype"
+    type: "Optional[str]"
+    default: null
+variants:
+  torch:
+    api: "torch.eye"
+  jax:
+    api: "jax.numpy.identity"
+  flax_nnx:
+    api: "jax.numpy.identity"
+  paxml:
+    api: "jax.numpy.identity"
+  keras:
+    api: "keras.ops.eye"
+  tensorflow:
+    api: "tf.eye"
+    args:
+      n: "num_rows"
+  numpy:
+    api: "numpy.identity"
+  mlx:
+    api: "mlx.core.eye"
+---
+operation: "IInfo"
+description: "Machine limits for integer types."
+std_args:
+  - name: "int_type"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.iinfo"
+    args:
+      int_type: "dtype"
+  jax:
+    api: "jax.numpy.iinfo"
+  flax_nnx:
+    api: "jax.numpy.iinfo"
+  paxml:
+    api: "jax.numpy.iinfo"
+  keras:
+    # Not standard in Keras ops
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.iinfo"
+  numpy:
+    api: "numpy.iinfo"
+  mlx:
+    # Not standard in MLX
+    api: null
+---
+operation: "Imag"
+description: "Return the imaginary part of the complex argument."
+std_args:
+  - name: "val"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.imag"
+    args:
+      val: "input"
+  jax:
+    api: "jax.numpy.imag"
+  flax_nnx:
+    api: "jax.numpy.imag"
+  paxml:
+    api: "jax.numpy.imag"
+  keras:
+    api: "keras.ops.imag"
+    args:
+       val: "x"
+  tensorflow:
+    api: "tf.math.imag"
+    args:
+      val: "input"
+  numpy:
+    api: "numpy.imag"
+  mlx:
+    api: "mlx.core.imag"
+    args:
+      val: "a"
+---
+operation: "Inexact"
+description: "Abstract base class for inexact types (floating point)."
+op_type: "class"
+std_args: [] 
+variants:
+  numpy:
+    api: "numpy.inexact"
+  tensorflow:
+    api: "tf.experimental.numpy.inexact"
+---
+operation: "Inf"
+description: "Infinity constant."
+op_type: "attribute"
+std_args: [] 
+variants:
+  torch:
+    api: "torch.inf"
+  jax:
+    api: "jax.numpy.inf"
+  flax_nnx:
+    api: "jax.numpy.inf"
+  paxml:
+    api: "jax.numpy.inf"
+  keras:
+    macro_template: "float('inf')"
+  tensorflow:
+    api: "tf.experimental.numpy.inf"
+  numpy:
+    api: "numpy.inf"
+  mlx:
+    macro_template: "float('inf')"
+---
+operation: "Inner"
+description: "Inner product of two arrays."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "b"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.inner"
+    args:
+      a: "input"
+      b: "other"
+  jax:
+    api: "jax.numpy.inner"
+  flax_nnx:
+    api: "jax.numpy.inner"
+  paxml:
+    api: "jax.numpy.inner"
+  keras:
+    api: "keras.ops.inner"
+    args:
+       a: "x1"
+       b: "x2"
+  tensorflow:
+    api: "tf.linalg.inner_product" # Or tf.tensordot logic, exp.numpy.inner preferred
+    # Using experimental numpy behavior for fidelity
+    api: "tf.experimental.numpy.inner"
+  numpy:
+    api: "numpy.inner"
+  mlx:
+    api: "mlx.core.inner"
+---
+operation: "Int16"
+description: "16-bit signed integer type."
+op_type: "attribute"
+std_args: [] 
+variants:
+  torch:
+    api: "torch.int16"
+  jax:
+    api: "jax.numpy.int16"
+  flax_nnx:
+    api: "jax.numpy.int16"
+  paxml:
+    api: "jax.numpy.int16"
+  keras:
+    macro_template: "'int16'"
+  tensorflow:
+    api: "tf.int16"
+  numpy:
+    api: "numpy.int16"
+  mlx:
+    api: "mlx.core.int16"
+---
+operation: "Int32"
+description: "32-bit signed integer type."
+op_type: "attribute"
+std_args: [] 
+variants:
+  torch:
+    api: "torch.int32"
+  jax:
+    api: "jax.numpy.int32"
+  flax_nnx:
+    api: "jax.numpy.int32"
+  paxml:
+    api: "jax.numpy.int32"
+  keras:
+    macro_template: "'int32'"
+  tensorflow:
+    api: "tf.int32"
+  numpy:
+    api: "numpy.int32"
+  mlx:
+    api: "mlx.core.int32"
+---
+operation: "Int64"
+description: "64-bit signed integer type."
+op_type: "attribute"
+std_args: [] 
+variants:
+  torch:
+    api: "torch.int64"
+  jax:
+    api: "jax.numpy.int64"
+  flax_nnx:
+    api: "jax.numpy.int64"
+  paxml:
+    api: "jax.numpy.int64"
+  keras:
+    macro_template: "'int64'"
+  tensorflow:
+    api: "tf.int64"
+  numpy:
+    api: "numpy.int64"
+  mlx:
+    api: "mlx.core.int64"
+---
+operation: "Int8"
+description: "8-bit signed integer type."
+op_type: "attribute"
+std_args: [] 
+variants:
+  torch:
+    api: "torch.int8"
+  jax:
+    api: "jax.numpy.int8"
+  flax_nnx:
+    api: "jax.numpy.int8"
+  paxml:
+    api: "jax.numpy.int8"
+  keras:
+    macro_template: "'int8'"
+  tensorflow:
+    api: "tf.int8"
+  numpy:
+    api: "numpy.int8"
+  mlx:
+    api: "mlx.core.int8"
+---
+operation: "Int_"
+description: "Default integer type (maps to Int64 typically)."
+op_type: "attribute"
+std_args: [] 
+variants:
+  torch:
+    api: "torch.int64"
+  jax:
+    api: "jax.numpy.int64"
+  flax_nnx:
+    api: "jax.numpy.int64"
+  paxml:
+    api: "jax.numpy.int64"
+  keras:
+    macro_template: "'int64'"
+  tensorflow:
+    api: "tf.int64"
+  numpy:
+    api: "numpy.int64"
+  mlx:
+    api: "mlx.core.int64"
+---
+operation: "IsClose"
+description: "Returns a boolean array where two arrays are element-wise equal within a tolerance."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "b"
+    type: "Array"
+  - name: "rtol"
+    type: "float"
+    default: 1e-05
+  - name: "atol"
+    type: "float"
+    default: 1e-08
+  - name: "equal_nan"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.isclose"
+    args:
+      a: "input"
+      b: "other"
+  jax:
+    api: "jax.numpy.isclose"
+  flax_nnx:
+    api: "jax.numpy.isclose"
+  paxml:
+    api: "jax.numpy.isclose"
+  keras:
+    api: "keras.ops.isclose"
+    args:
+        a: "x1"
+        b: "x2"
+  tensorflow:
+    api: "tf.experimental.numpy.isclose"
+  numpy:
+    api: "numpy.isclose"
+  mlx:
+    api: "mlx.core.isclose"
+---
+operation: "IsComplex"
+description: "Returns a bool array, where True if input element is complex."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.is_complex"
+  jax:
+    api: "jax.numpy.iscomplex"
+  flax_nnx:
+    api: "jax.numpy.iscomplex"
+  paxml:
+    api: "jax.numpy.iscomplex"
+  keras:
+    # No direct ops.iscomplex
+    api: null
+  tensorflow:
+    api: "tf.math.is_complex"
+    # Note: tf.math.is_complex vs numpy.iscomplex (which returns array or scalar?) 
+    # Matches elementwise behavior
+  numpy:
+    api: "numpy.iscomplex"
+  mlx:
+    # Not available as func
+    api: null
+---
+operation: "IsComplexObj"
+description: "Check for a complex type or an array of complex numbers (scalar result)."
+std_args:
+  - name: "x"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.is_complex"
+    # Torch returns array if input is array, but numpy iscomplexobj returns scalar
+    # requires helper to reduce
+    macro_template: "torch.is_complex({x}).all().item()"
+  jax:
+    api: "jax.numpy.iscomplexobj"
+  flax_nnx:
+    api: "jax.numpy.iscomplexobj"
+  paxml:
+    api: "jax.numpy.iscomplexobj"
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.experimental.numpy.iscomplexobj"
+  numpy:
+    api: "numpy.iscomplexobj"
+  mlx:
+    api: null
+---
+operation: "IsFinite"
+description: "Test element-wise for finiteness (not infinity and not Not a Number)."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.isfinite"
+  jax:
+    api: "jax.numpy.isfinite"
+  flax_nnx:
+    api: "jax.numpy.isfinite"
+  paxml:
+    api: "jax.numpy.isfinite"
+  keras:
+    api: "keras.ops.isfinite"
+  tensorflow:
+    api: "tf.math.is_finite"
+  numpy:
+    api: "numpy.isfinite"
+  mlx:
+    # Not available directly in core? 
+    macro_template: "mlx.core.logical_not(mlx.core.isinf({x}) | mlx.core.isnan({x}))"
+---
+operation: "IsInf"
+description: "Test element-wise for positive or negative infinity."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.isinf"
+  jax:
+    api: "jax.numpy.isinf"
+  flax_nnx:
+    api: "jax.numpy.isinf"
+  paxml:
+    api: "jax.numpy.isinf"
+  keras:
+    api: "keras.ops.isinf"
+  tensorflow:
+    api: "tf.math.is_inf"
+  numpy:
+    api: "numpy.isinf"
+  mlx:
+    api: "mlx.core.isinf"
+---
+operation: "IsNan"
+description: "Test element-wise for NaN and return result as a boolean array."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.isnan"
+  jax:
+    api: "jax.numpy.isnan"
+  flax_nnx:
+    api: "jax.numpy.isnan"
+  paxml:
+    api: "jax.numpy.isnan"
+  keras:
+    api: "keras.ops.isnan"
+  tensorflow:
+    api: "tf.math.is_nan"
+  numpy:
+    api: "numpy.isnan"
+  mlx:
+    api: "mlx.core.isnan"
+---
+operation: "IsNegInf"
+description: "Test element-wise for negative infinity."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.isneginf"
+  jax:
+    api: "jax.numpy.isneginf"
+  flax_nnx:
+    api: "jax.numpy.isneginf"
+  paxml:
+    api: "jax.numpy.isneginf"
+  keras:
+    macro_template: "{x} == -float('inf')"
+  tensorflow:
+    api: "tf.experimental.numpy.isneginf"
+  numpy:
+    api: "numpy.isneginf"
+  mlx:
+    macro_template: "{x} == -float('inf')"
+---
+operation: "IsPosInf"
+description: "Test element-wise for positive infinity."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  torch:
+    api: "torch.isposinf"
+  jax:
+    api: "jax.numpy.isposinf"
+  flax_nnx:
+    api: "jax.numpy.isposinf"
+  paxml:
+    api: "jax.numpy.isposinf"
+  keras:
+    macro_template: "{x} == float('inf')"
+  tensorflow:
+    api: "tf.experimental.numpy.isposinf"
+  numpy:
+    api: "numpy.isposinf"
+  mlx:
+    macro_template: "{x} == float('inf')"

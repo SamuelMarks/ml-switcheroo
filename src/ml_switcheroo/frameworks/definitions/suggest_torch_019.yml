@@ -1,0 +1,1145 @@
+operation: "IsTensor"
+description: "Returns True if obj is a PyTorch tensor."
+std_args:
+  - name: "obj"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.is_tensor"
+  jax:
+    macro_template: "isinstance({obj}, (jax.Array, jax.numpy.ndarray))"
+    required_imports: ["import jax", "import jax.numpy as jnp"]
+  flax_nnx:
+    macro_template: "isinstance({obj}, (jax.Array, jax.numpy.ndarray))"
+  paxml:
+    macro_template: "isinstance({obj}, (jax.Array, jax.numpy.ndarray))"
+  keras:
+    api: "keras.ops.is_tensor"
+  tensorflow:
+    api: "tf.is_tensor"
+  numpy:
+    macro_template: "isinstance({obj}, np.ndarray)"
+    required_imports: ["import numpy as np"]
+  mlx:
+    macro_template: "isinstance({obj}, mx.array)"
+    required_imports: ["import mlx.core as mx"]
+
+---
+operation: "IsVulkanAvailable"
+description: "Returns True if the backend is available."
+return_type: "bool"
+variants:
+  torch:
+    api: "torch.is_vulkan_available"
+  jax:
+    macro_template: "False"
+  flax_nnx:
+    macro_template: "False"
+  paxml:
+    macro_template: "False"
+  keras:
+    macro_template: "False"
+  tensorflow:
+    macro_template: "False"
+  numpy:
+    macro_template: "False"
+  mlx:
+    macro_template: "False"
+
+---
+operation: "IsWarnAlwaysEnabled"
+description: "Returns True if the global warn_always flag is turned on."
+return_type: "bool"
+variants:
+  torch:
+    api: "torch.is_warn_always_enabled"
+  jax:
+    macro_template: "True"
+  flax_nnx:
+    macro_template: "True"
+  paxml:
+    macro_template: "True"
+  keras:
+    macro_template: "True"
+  tensorflow:
+    macro_template: "True"
+  numpy:
+    macro_template: "True"
+  mlx:
+    macro_template: "True"
+
+---
+operation: "IsClose"
+description: "Returns a new tensor with boolean elements representing if each element of input is close to other."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+  - name: "rtol"
+    type: "float"
+    default: 1e-05
+  - name: "atol"
+    type: "float"
+    default: 1e-08
+  - name: "equal_nan"
+    type: "bool"
+    default: false
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.isclose"
+  jax:
+    api: "jnp.isclose"
+    args:
+      input: "a"
+      other: "b"
+  flax_nnx:
+    api: "jnp.isclose"
+    args:
+      input: "a"
+      other: "b"
+  paxml:
+    api: "jnp.isclose"
+    args:
+      input: "a"
+      other: "b"
+  keras:
+    api: "keras.ops.isclose"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.experimental.numpy.isclose"
+    args:
+      input: "a"
+      other: "b"
+  numpy:
+    api: "np.isclose"
+    args:
+      input: "a"
+      other: "b"
+  mlx:
+    api: "mx.isclose"
+    args:
+      input: "a"
+      other: "b"
+
+---
+operation: "IsFinite"
+description: "Returns a new tensor with boolean elements representing if each element is finite."
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.isfinite"
+  jax:
+    api: "jnp.isfinite"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jnp.isfinite"
+    args:
+      input: "x"
+  paxml:
+    api: "jnp.isfinite"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.isfinite"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.is_finite"
+    args:
+      input: "x"
+  numpy:
+    api: "np.isfinite"
+    args:
+      input: "x"
+  mlx:
+    macro_template: "(~mx.isinf({input}) & ~mx.isnan({input}))"
+    required_imports: ["import mlx.core as mx"]
+
+---
+operation: "IsIn"
+description: "Tests if each element of elements is in test_elements."
+std_args:
+  - name: "elements"
+    type: "Tensor"
+  - name: "test_elements"
+    type: "Tensor"
+  - name: "assume_unique"
+    type: "bool"
+    default: false
+  - name: "invert"
+    type: "bool"
+    default: false
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.isin"
+  jax:
+    api: "jnp.isin"
+    args:
+      elements: "element"
+      test_elements: "test_elements"
+  flax_nnx:
+    api: "jnp.isin"
+    args:
+      elements: "element"
+      test_elements: "test_elements"
+  paxml:
+    api: "jnp.isin"
+    args:
+      elements: "element"
+      test_elements: "test_elements"
+  keras:
+    macro_template: "keras.ops.convert_to_tensor(np.isin({elements}, {test_elements}, assume_unique={assume_unique}, invert={invert}))"
+    required_imports:
+      - "import numpy as np"
+  tensorflow:
+    api: "tf.experimental.numpy.isin"
+    args:
+      elements: "element"
+      test_elements: "test_elements"
+  numpy:
+    api: "np.isin"
+    args:
+      elements: "element"
+      test_elements: "test_elements"
+  mlx:
+    # Not natively supported
+    api: null
+
+---
+operation: "IsInf"
+description: "Tests if each element of input is infinite."
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.isinf"
+  jax:
+    api: "jnp.isinf"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jnp.isinf"
+    args:
+      input: "x"
+  paxml:
+    api: "jnp.isinf"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.isinf"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.is_inf"
+    args:
+      input: "x"
+  numpy:
+    api: "np.isinf"
+    args:
+      input: "x"
+  mlx:
+    api: "mx.isinf"
+    args:
+      input: "x"
+
+---
+operation: "IsNaN"
+description: "Returns a new tensor with boolean elements representing if each element is NaN."
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.isnan"
+  jax:
+    api: "jnp.isnan"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jnp.isnan"
+    args:
+      input: "x"
+  paxml:
+    api: "jnp.isnan"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.isnan"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.is_nan"
+    args:
+      input: "x"
+  numpy:
+    api: "np.isnan"
+    args:
+      input: "x"
+  mlx:
+    api: "mx.isnan"
+    args:
+      input: "x"
+
+---
+operation: "IsNegInf"
+description: "Tests if each element of input is negative infinity."
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.isneginf"
+  jax:
+    api: "jnp.isneginf"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jnp.isneginf"
+    args:
+      input: "x"
+  paxml:
+    api: "jnp.isneginf"
+    args:
+      input: "x"
+  keras:
+    macro_template: "keras.ops.equal({input}, float('-inf'))"
+  tensorflow:
+    macro_template: "tf.equal({input}, float('-inf'))"
+  numpy:
+    api: "np.isneginf"
+    args:
+      input: "x"
+  mlx:
+    macro_template: "mx.equal({input}, float('-inf'))"
+
+---
+operation: "IsPosInf"
+description: "Tests if each element of input is positive infinity."
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.isposinf"
+  jax:
+    api: "jnp.isposinf"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jnp.isposinf"
+    args:
+      input: "x"
+  paxml:
+    api: "jnp.isposinf"
+    args:
+      input: "x"
+  keras:
+    macro_template: "keras.ops.equal({input}, float('inf'))"
+  tensorflow:
+    macro_template: "tf.equal({input}, float('inf'))"
+  numpy:
+    api: "np.isposinf"
+    args:
+      input: "x"
+  mlx:
+    macro_template: "mx.equal({input}, float('inf'))"
+
+---
+operation: "IsReal"
+description: "Returns a new tensor with boolean elements representing if each element is real-valued."
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.isreal"
+  jax:
+    api: "jnp.isreal"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jnp.isreal"
+    args:
+      input: "x"
+  paxml:
+    api: "jnp.isreal"
+    args:
+      input: "x"
+  keras:
+    api: "keras.ops.isreal"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.is_real"
+    args:
+      input: "x"
+  numpy:
+    api: "np.isreal"
+    args:
+      input: "x"
+  mlx:
+    macro_template: "mx.equal(mx.imag({input}), 0)"
+
+---
+operation: "InverseShortTimeFourierTransform"
+description: "Inverse short time Fourier Transform."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 3
+  - name: "n_fft"
+    type: "int"
+  - name: "hop_length"
+    type: "int"
+    default: null
+  - name: "win_length"
+    type: "int"
+    default: null
+  - name: "window"
+    type: "Tensor"
+    default: null
+  - name: "center"
+    type: "bool"
+    default: true
+  - name: "normalized"
+    type: "bool"
+    default: false
+  - name: "onesided"
+    type: "bool"
+    default: null
+  - name: "length"
+    type: "int"
+    default: null
+  - name: "return_complex"
+    type: "bool"
+    default: false
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.istft"
+  jax:
+    api: "jax.scipy.signal.istft"
+    args:
+      input: "Zxx"
+      n_fft: "nperseg"
+      hop_length: "noverlap"
+      window: "window"
+      # Mapping differences: JAX uses 'noverlap' (stride size diff) vs Torch 'hop_length'. Requires logic or wrapper.
+  flax_nnx:
+    api: "jax.scipy.signal.istft"
+    args:
+      input: "Zxx"
+      n_fft: "nperseg"
+      hop_length: "noverlap"
+      window: "window"
+  paxml:
+    api: "jax.scipy.signal.istft"
+    args:
+      input: "Zxx"
+      n_fft: "nperseg"
+      hop_length: "noverlap"
+      window: "window"
+  keras:
+    api: "keras.ops.istft"
+    args:
+      input: "x"
+      hop_length: "frame_step"
+      n_fft: "fft_length"
+  tensorflow:
+    api: "tf.signal.inverse_stft"
+    args:
+      input: "stfts"
+      hop_length: "frame_step"
+      n_fft: "fft_length"
+      window: "window_fn"
+  numpy:
+    api: "scipy.signal.istft"
+    required_imports: ["import scipy.signal"]
+  mlx:
+    # Not available
+    api: null
+
+---
+operation: "Jagged"
+description: "Creates a jagged tensor."
+std_args: []
+variants:
+  torch:
+    api: "torch.jagged"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.ragged.constant"
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "KaiserWindow"
+description: "Computes the Kaiser window."
+std_args:
+  - name: "window_length"
+    type: "int"
+  - name: "periodic"
+    type: "bool"
+    default: true
+  - name: "beta"
+    type: "float"
+    default: 12.0
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.kaiser_window"
+  jax:
+    api: "jnp.kaiser"
+    args:
+      window_length: "M"
+      beta: "beta"
+      periodic: null # JAX/NumPy kaiser return symmetric window by default
+  flax_nnx:
+    api: "jnp.kaiser"
+    args:
+      window_length: "M"
+      beta: "beta"
+      periodic: null
+  paxml:
+    api: "jnp.kaiser"
+    args:
+      window_length: "M"
+      beta: "beta"
+      periodic: null
+  keras:
+    # No direct op, fallback to numpy
+    macro_template: "keras.ops.convert_to_tensor(np.kaiser(M={window_length}, beta={beta}))"
+    required_imports:
+      - "import numpy as np"
+  tensorflow:
+    api: "tf.signal.kaiser_window"
+    args:
+      window_length: "length"
+      beta: "beta"
+  numpy:
+    api: "np.kaiser"
+    args:
+      window_length: "M"
+      beta: "beta"
+  mlx:
+    api: null
+
+---
+operation: "KlDiv"
+description: "The Kullback-Leibler divergence Loss."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "target"
+    type: "Tensor"
+  - name: "reduction"
+    type: "str"
+    default: "mean"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.kl_div"
+  jax:
+    api: "optax.kl_divergence"
+    args:
+      input: "p"
+      target: "q"
+      reduction: null
+    requires_plugin: "loss_reduction"
+  flax_nnx:
+    api: "optax.kl_divergence"
+    requires_plugin: "loss_reduction"
+  paxml:
+    api: "optax.kl_divergence"
+    requires_plugin: "loss_reduction"
+  keras:
+    api: "keras.losses.kl_divergence"
+    args:
+      input: "y_pred"
+      target: "y_true"
+  tensorflow:
+    api: "tf.keras.losses.kl_divergence"
+    args:
+      input: "y_pred"
+      target: "y_true"
+  numpy:
+    api: null
+  mlx:
+    api: "mx.nn.losses.kl_div"
+    args:
+      input: "inputs"
+      target: "targets"
+    requires_plugin: "loss_reduction"
+
+---
+operation: "Kron"
+description: "Computes the Kronecker product."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.kron"
+  jax:
+    api: "jnp.kron"
+    args:
+      input: "a"
+      other: "b"
+  flax_nnx:
+    api: "jnp.kron"
+    args:
+      input: "a"
+      other: "b"
+  paxml:
+    api: "jnp.kron"
+    args:
+      input: "a"
+      other: "b"
+  keras:
+    # Manual implementation or numpy fallback
+    macro_template: "keras.ops.convert_to_tensor(np.kron({input}, {other}))"
+  tensorflow:
+    api: "tf.experimental.numpy.kron"
+    args:
+      input: "a"
+      other: "b"
+  numpy:
+    api: "np.kron"
+    args:
+      input: "a"
+      other: "b"
+  mlx:
+    api: null
+
+---
+operation: "KthValue"
+description: "Returns the k-th smallest element."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+  - name: "dim"
+    type: "int"
+    default: -1
+  - name: "keepdim"
+    type: "bool"
+    default: false
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.kthvalue"
+  jax:
+    macro_template: "jnp.sort({input}, axis={dim})[..., {k}-1]"
+  flax_nnx:
+    macro_template: "jnp.sort({input}, axis={dim})[..., {k}-1]"
+  paxml:
+    macro_template: "jnp.sort({input}, axis={dim})[..., {k}-1]"
+  keras:
+    macro_template: "keras.ops.sort({input}, axis={dim})[..., {k}-1]"
+  tensorflow:
+    macro_template: "tf.sort({input}, axis={dim})[..., {k}-1]"
+  numpy:
+    macro_template: "np.sort({input}, axis={dim})[..., {k}-1]"
+  mlx:
+    macro_template: "mx.sort({input}, axis={dim})[..., {k}-1]"
+
+---
+operation: "LayerNorm"
+description: "Applies Layer Normalization."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "normalized_shape"
+    type: "List[int]"
+  - name: "weight"
+    type: "Tensor"
+    default: null
+  - name: "bias"
+    type: "Tensor"
+    default: null
+  - name: "eps"
+    type: "float"
+    default: 1e-05
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.nn.functional.layer_norm"
+  jax:
+    # JAX core doesn't have a functional layernorm that accepts weights directly in one call
+    api: null
+  flax_nnx:
+    macro_template: "nnx.LayerNorm(num_features={normalized_shape}, epsilon={eps}).call({input})"
+  paxml:
+    # Praxis is stateful
+    api: null
+  keras:
+    macro_template: "keras.layers.LayerNormalization(epsilon={eps})({input})"
+  tensorflow:
+    api: "tf.keras.layers.LayerNormalization"
+    macro_template: "tf.keras.layers.LayerNormalization(epsilon={eps})({input})"
+  numpy:
+    api: null
+  mlx:
+    macro_template: "mx.fast.layer_norm({input}, {weight}, {bias}, {eps})"
+
+---
+operation: "Layout"
+description: "Layout type constant."
+std_args: []
+variants:
+  torch:
+    api: "torch.layout"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Lcm"
+description: "Computes the element-wise least common multiple."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.lcm"
+  jax:
+    api: "jnp.lcm"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jnp.lcm"
+    args:
+      input: "x1"
+      other: "x2"
+  paxml:
+    api: "jnp.lcm"
+    args:
+      input: "x1"
+      other: "x2"
+  keras:
+    # Keras ops fallback required as lcm not standard in backend agnostic ops
+    macro_template: "keras.ops.convert_to_tensor(np.lcm({input}, {other}))"
+  tensorflow:
+    api: "tf.experimental.numpy.lcm"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "np.lcm"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: null
+
+---
+operation: "Lcm_"
+description: "In-place LCM."
+std_args:
+  - name: "input"
+  - name: "other"
+is_inplace: true
+variants:
+  torch:
+    api: "torch.lcm_"
+  jax:
+    api: "jnp.lcm"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jnp.lcm"
+    args:
+      input: "x1"
+      other: "x2"
+  paxml:
+    api: "jnp.lcm"
+    args:
+      input: "x1"
+      other: "x2"
+  keras:
+    macro_template: "keras.ops.convert_to_tensor(np.lcm({input}, {other}))"
+  tensorflow:
+    api: "tf.experimental.numpy.lcm"
+  numpy:
+    api: "np.lcm"
+
+---
+operation: "Ldexp"
+description: "Multiplies input by 2 ** other."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.ldexp"
+  jax:
+    api: "jnp.ldexp"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jnp.ldexp"
+    args:
+      input: "x1"
+      other: "x2"
+  paxml:
+    api: "jnp.ldexp"
+    args:
+      input: "x1"
+      other: "x2"
+  keras:
+    macro_template: "keras.ops.convert_to_tensor(np.ldexp({input}, {other}))"
+  tensorflow:
+    api: "tf.experimental.numpy.ldexp"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "np.ldexp"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: null
+
+---
+operation: "Ldexp_"
+description: "In-place ldexp."
+std_args:
+  - name: "input"
+  - name: "other"
+is_inplace: true
+variants:
+  torch:
+    api: "torch.ldexp_"
+  jax:
+    api: "jnp.ldexp"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jnp.ldexp"
+  numpy:
+    api: "np.ldexp"
+
+---
+operation: "Le"
+description: "Computes input <= other element-wise."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.le"
+  jax:
+    api: "jnp.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jnp.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  paxml:
+    api: "jnp.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  keras:
+    api: "keras.ops.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.less_equal"
+    args:
+      input: "x"
+      other: "y"
+  numpy:
+    api: "np.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mx.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+
+---
+operation: "LegacyContiguousFormat"
+description: "Memory format constant."
+std_args: []
+variants:
+  torch:
+    api: "torch.legacy_contiguous_format"
+  jax: null
+  tensorflow: null
+  mlx: null
+
+---
+operation: "Lerp"
+description: "Linear interpolation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "end"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.lerp"
+  jax:
+    macro_template: "{input} + {weight} * ({end} - {input})"
+  flax_nnx:
+    macro_template: "{input} + {weight} * ({end} - {input})"
+  paxml:
+    macro_template: "{input} + {weight} * ({end} - {input})"
+  keras:
+    macro_template: "{input} + {weight} * ({end} - {input})"
+  tensorflow:
+    macro_template: "{input} + {weight} * ({end} - {input})"
+  numpy:
+    macro_template: "{input} + {weight} * ({end} - {input})"
+  mlx:
+    macro_template: "mx.add({input}, mx.multiply({weight}, mx.subtract({end}, {input})))"
+
+---
+operation: "Less"
+description: "Computes input < other element-wise."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.less"
+  jax:
+    api: "jnp.less"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jnp.less"
+    args:
+      input: "x1"
+      other: "x2"
+  paxml:
+    api: "jnp.less"
+    args:
+      input: "x1"
+      other: "x2"
+  keras:
+    api: "keras.ops.less"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.less"
+    args:
+      input: "x"
+      other: "y"
+  numpy:
+    api: "np.less"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mx.less"
+    args:
+      input: "x1"
+      other: "x2"
+
+---
+operation: "LessEqual"
+description: "Alias for Le."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.less_equal"
+  jax:
+    api: "jnp.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  flax_nnx:
+    api: "jnp.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  paxml:
+    api: "jnp.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  keras:
+    api: "keras.ops.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  tensorflow:
+    api: "tf.math.less_equal"
+    args:
+      input: "x"
+      other: "y"
+  numpy:
+    api: "np.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+  mlx:
+    api: "mx.less_equal"
+    args:
+      input: "x1"
+      other: "x2"
+
+---
+operation: "Lgamma"
+description: "Computes natural logarithm of gamma function."
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.lgamma"
+  jax:
+    api: "jax.scipy.special.gammaln"
+    args:
+      input: "a"
+  flax_nnx:
+    api: "jax.scipy.special.gammaln"
+    args:
+      input: "a"
+  paxml:
+    api: "jax.scipy.special.gammaln"
+    args:
+      input: "a"
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.math.lgamma"
+    args:
+      input: "x"
+  numpy:
+    api: "scipy.special.gammaln"
+    required_imports: ["import scipy.special"]
+  mlx:
+    api: null
+
+---
+operation: "Linspace"
+description: "Creates start-to-end evenly spaced steps."
+std_args:
+  - name: "start"
+    type: "float"
+  - name: "end"
+    type: "float"
+  - name: "steps"
+    type: "int"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.linspace"
+  jax:
+    api: "jnp.linspace"
+    args:
+      start: "start"
+      end: "stop"
+      steps: "num"
+  flax_nnx:
+    api: "jnp.linspace"
+    args:
+      start: "start"
+      end: "stop"
+      steps: "num"
+  paxml:
+    api: "jnp.linspace"
+    args:
+      start: "start"
+      end: "stop"
+      steps: "num"
+  keras:
+    api: "keras.ops.linspace"
+    args:
+      start: "start"
+      end: "stop"
+      steps: "num"
+  tensorflow:
+    api: "tf.linspace"
+    args:
+      start: "start"
+      end: "stop"
+      steps: "num"
+  numpy:
+    api: "np.linspace"
+    args:
+      start: "start"
+      end: "stop"
+      steps: "num"
+  mlx:
+    api: "mx.linspace"
+    args:
+      start: "start"
+      end: "stop"
+      steps: "num"

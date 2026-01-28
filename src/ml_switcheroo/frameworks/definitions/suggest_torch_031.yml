@@ -1,0 +1,674 @@
+operation: "TopK"
+description: "Returns the k largest elements of the given input tensor along a given dimension."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "k"
+    type: "int"
+  - name: "dim"
+    type: "int"
+    default: -1
+  - name: "largest"
+    type: "bool"
+    default: true
+  - name: "sorted"
+    type: "bool"
+    default: true
+return_type: "Tuple[Tensor, Tensor]"
+output_shape_calc: "lambda input, k, dim: (input.shape[:dim] + (k,) + input.shape[dim+1:], input.shape[:dim] + (k,) + input.shape[dim+1:])"
+variants:
+  torch:
+    api: "torch.topk"
+  jax:
+    api: "jax.lax.top_k"
+    requires_plugin: "topk_adapter"
+  mlx:
+    api: "mlx.core.topk"
+    args:
+      dim: "axis"
+  tensorflow:
+    api: "tf.math.top_k"
+    # TF top_k returns (values, indices)
+    # Does not support 'dim', always last dim. Need transpose/permute if dim != -1.
+    requires_plugin: "tf_topk_adapter"
+  keras:
+    api: "keras.ops.top_k"
+    # Keras defaults to last axis usually, similar to TF.
+    args:
+      dim: null # Drop dim if relying on default or use plugin logic
+
+---
+operation: "Trace"
+description: "Returns the sum of the elements of the diagonal of the input 2-D matrix."
+std_args:
+  - name: "input"
+    type: "Tensor"
+    rank: 2
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.trace"
+  jax:
+    api: "jnp.trace"
+  numpy:
+    api: "np.trace"
+  tensorflow:
+    api: "tf.linalg.trace"
+  mlx:
+    # MLX trace logic: sum of diagonal
+    macro_template: "mlx.core.sum(mlx.core.diagonal({input}))"
+  keras:
+    macro_template: "keras.ops.sum(keras.ops.diag({input}))"
+
+---
+operation: "Transpose"
+description: "Returns a tensor that is a transposed version of input. Swaps dimensions dim0 and dim1."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim0"
+    type: "int"
+  - name: "dim1"
+    type: "int"
+variants:
+  torch:
+    api: "torch.transpose"
+  jax:
+    api: "jnp.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+  numpy:
+    api: "np.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+  mlx:
+    api: "mlx.core.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+  keras:
+    api: "keras.ops.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+  tensorflow:
+    api: "tf.experimental.numpy.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+
+---
+operation: "TransposeCopy"
+description: "Alias for Transpose. Returns a fresh copy of transposed tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim0"
+    type: "int"
+  - name: "dim1"
+    type: "int"
+variants:
+  torch:
+    api: "torch.transpose_copy"
+  jax:
+    api: "jnp.swapaxes" # JAX is always copy (functional)
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+  numpy:
+    api: "np.swapaxes"
+    args:
+      dim0: "axis1"
+      dim1: "axis2"
+    macro_template: "np.swapaxes({input}, {dim0}, {dim1}).copy()"
+
+---
+operation: "Trapezoid"
+description: "Computes the trapezoidal rule along dim."
+std_args:
+  - name: "y"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+    default: null
+  - name: "dx"
+    type: "float"
+    default: null
+  - name: "dim"
+    type: "int"
+    default: -1
+variants:
+  torch:
+    api: "torch.trapezoid"
+  jax:
+    api: "jnp.trapz"
+    args:
+      dim: "axis"
+  numpy:
+    api: "np.trapz"
+    args:
+      dim: "axis"
+
+---
+operation: "Trapz"
+description: "Alias for Trapezoid."
+std_args:
+  - name: "y"
+    type: "Tensor"
+  - name: "x"
+    type: "Tensor"
+    default: null
+  - name: "dx"
+    type: "float"
+    default: null
+  - name: "dim"
+    type: "int"
+    default: -1
+variants:
+  torch:
+    api: "torch.trapz"
+    deprecated: true
+    replaced_by: "trapezoid"
+  jax:
+    api: "jnp.trapz"
+    args:
+      dim: "axis"
+  numpy:
+    api: "np.trapz"
+    args:
+      dim: "axis"
+
+---
+operation: "TriangularSolve"
+description: "Solves a system of equations with a triangular coefficient matrix."
+std_args:
+  - name: "b"
+    type: "Tensor"
+  - name: "A"
+    type: "Tensor"
+  - name: "upper"
+    type: "bool"
+    default: true
+  - name: "transpose"
+    type: "bool"
+    default: false
+  - name: "unitriangular"
+    type: "bool"
+    default: false
+return_type: "Tuple[Tensor, Tensor]"
+variants:
+  torch:
+    api: "torch.triangular_solve"
+  jax:
+    api: "jax.scipy.linalg.solve_triangular"
+    # JAX returns 'x' only, Torch returns (x, A). We adapt output to match tuple structure if needed or select 0.
+    # Note: Torch's triangular_solve is deprecated for linalg.solve_triangular.
+    args:
+      A: "a"
+      upper: "lower" # Logic inversion needed? Jax has 'lower' arg. If upper=True -> lower=False.
+    arg_values:
+      upper:
+        True: "False"
+        False: "True"
+    output_select_index: null # Logic mismatch: returns tuple vs single tensor.
+    # Recommended: Use linalg.solve_triangular pivot instead
+  tensorflow:
+    api: "tf.linalg.triangular_solve"
+    args:
+      A: "matrix"
+      b: "rhs"
+      upper: "lower"
+    arg_values:
+      upper:
+        True: "False" # TF uses 'lower' boolean
+        False: "True"
+
+---
+operation: "Tril"
+description: "Returns the lower triangular part of the matrix or batch of matrices."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "diagonal"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.tril"
+  jax:
+    api: "jnp.tril"
+    args:
+      diagonal: "k"
+  numpy:
+    api: "np.tril"
+    args:
+      diagonal: "k"
+  mlx:
+    api: "mlx.core.tril"
+    args:
+      diagonal: "k"
+  tensorflow:
+    api: "tf.experimental.numpy.tril"
+    args:
+      diagonal: "k"
+  keras:
+    api: "keras.ops.tril"
+    args:
+      diagonal: "k"
+
+---
+operation: "TrilIndices"
+description: "Returns the indices of the lower triangular part of a row-by-col matrix."
+std_args:
+  - name: "row"
+    type: "int"
+  - name: "col"
+    type: "int"
+  - name: "offset"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.tril_indices"
+  jax:
+    api: "jnp.tril_indices"
+    args:
+      row: "n"
+      col: "m"
+      offset: "k"
+  numpy:
+    api: "np.tril_indices"
+    args:
+      row: "n"
+      col: "m"
+      offset: "k"
+
+---
+operation: "TripletMarginLoss"
+description: "Creates a criterion that measures the triplet loss."
+std_args:
+  - name: "anchor"
+    type: "Tensor"
+  - name: "positive"
+    type: "Tensor"
+  - name: "negative"
+    type: "Tensor"
+  - name: "margin"
+    type: "float"
+    default: 1.0
+  - name: "p"
+    type: "float"
+    default: 2.0
+  - name: "eps"
+    type: "float"
+    default: 1e-06
+  - name: "swap"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.nn.functional.triplet_margin_loss"
+  jax:
+    # Requires custom implementation or Optax
+    requires_plugin: "triplet_loss_impl"
+  tensorflow:
+    api: "tf.keras.losses.triplet_semihard_loss" 
+    # Mismatch: TF generic triplet loss implies mining. Manual calc preferred.
+    macro_template: "tf.maximum(tf.norm({anchor}-{positive}, ord={p}) - tf.norm({anchor}-{negative}, ord={p}) + {margin}, 0)"
+
+---
+operation: "Triu"
+description: "Returns the upper triangular part of a matrix."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "diagonal"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.triu"
+  jax:
+    api: "jnp.triu"
+    args:
+      diagonal: "k"
+  numpy:
+    api: "np.triu"
+    args:
+      diagonal: "k"
+  mlx:
+    api: "mlx.core.triu"
+    args:
+      diagonal: "k"
+  tensorflow:
+    api: "tf.experimental.numpy.triu"
+    args:
+      diagonal: "k"
+  keras:
+    api: "keras.ops.triu"
+    args:
+      diagonal: "k"
+
+---
+operation: "TriuIndices"
+description: "Returns the indices of the upper triangular part of a row-by-col matrix."
+std_args:
+  - name: "row"
+    type: "int"
+  - name: "col"
+    type: "int"
+  - name: "offset"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.triu_indices"
+  jax:
+    api: "jnp.triu_indices"
+    args:
+      row: "n"
+      col: "m"
+      offset: "k"
+  numpy:
+    api: "np.triu_indices"
+    args:
+      row: "n"
+      col: "m"
+      offset: "k"
+
+---
+operation: "TrueDivide"
+description: "Alias for division with float promotion."
+std_args:
+  - name: "dividend"
+    type: "Tensor"
+  - name: "divisor"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.true_divide"
+  jax:
+    api: "jnp.divide"
+  numpy:
+    api: "np.true_divide"
+  mlx:
+    api: "mlx.core.divide"
+  keras:
+    api: "keras.ops.divide"
+  tensorflow:
+    api: "tf.math.divide"
+
+---
+operation: "Trunc"
+description: "Returns a new tensor with the truncated integer values of the elements of input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.trunc"
+  jax:
+    api: "jnp.trunc"
+  numpy:
+    api: "np.trunc"
+  mlx:
+    # MLX trunc does not exist directly? Uses astype(int)? 
+    # Fallback: cast to int then back to float? Or floor if positive. 
+    # MLX has no direct 'trunc'.
+    macro_template: "mlx.core.array(np.trunc(np.array({input})))" 
+    # Using numpy fallback for MLX gap
+  keras:
+    api: "keras.ops.trunc"
+  tensorflow:
+    api: "tf.math.trunc"
+
+---
+operation: "TruncInplace"
+description: "In-place version of trunc."
+std_args:
+  - name: "input"
+    type: "Tensor"
+is_inplace: true
+variants:
+  torch:
+    api: "torch.trunc_"
+  jax:
+    # Functional fallback
+    api: "jnp.trunc"
+  numpy:
+    api: "np.trunc"
+    # Note: numpy ufuncs can specific 'out=input'
+
+---
+operation: "Typename"
+description: "String representation of the type of an object."
+std_args:
+  - name: "obj"
+    type: "Any"
+variants:
+  torch:
+    api: "torch.typename"
+  # Utilities mapping
+  jax:
+    macro_template: "str(type({obj}))"
+  numpy:
+    macro_template: "str(type({obj}))"
+  python:
+    macro_template: "str(type({obj}))"
+
+---
+operation: "Uint1"
+description: "1-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint1"
+  jax:
+    # JAX doesn't support uint1 explicitly, fallback to uint8
+    api: "jnp.uint8"
+  numpy:
+    api: "np.uint8"
+
+---
+operation: "Uint16"
+description: "16-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint16"
+  jax:
+    api: "jnp.uint16"
+  numpy:
+    api: "np.uint16"
+  mlx:
+    api: "mlx.core.uint16"
+  tensorflow:
+    api: "tf.uint16"
+  keras:
+    api: "" # Keras uses string "uint16" usually
+
+---
+operation: "Uint2"
+description: "2-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint2"
+  jax:
+    api: "jnp.uint8"
+
+---
+operation: "Uint3"
+description: "3-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint3"
+  jax:
+    api: "jnp.uint8"
+
+---
+operation: "Uint32"
+description: "32-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint32"
+  jax:
+    api: "jnp.uint32"
+  numpy:
+    api: "np.uint32"
+  mlx:
+    api: "mlx.core.uint32"
+  tensorflow:
+    api: "tf.uint32"
+
+---
+operation: "Uint4"
+description: "4-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint4"
+  jax:
+    api: "jnp.uint4" # Newer JAX supports int4
+  mlx:
+    api: "mlx.core.uint4"
+
+---
+operation: "Uint5"
+description: "5-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint5"
+  jax:
+    api: "jnp.uint8"
+
+---
+operation: "Uint6"
+description: "6-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint6"
+  jax:
+    api: "jnp.uint8"
+
+---
+operation: "Uint64"
+description: "64-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint64"
+  jax:
+    api: "jnp.uint64"
+  numpy:
+    api: "np.uint64"
+  mlx:
+    api: "mlx.core.uint64"
+  tensorflow:
+    api: "tf.uint64"
+
+---
+operation: "Uint7"
+description: "7-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint7"
+  jax:
+    api: "jnp.uint8"
+
+---
+operation: "Uint8"
+description: "8-bit unsigned integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.uint8"
+  jax:
+    api: "jnp.uint8"
+  numpy:
+    api: "np.uint8"
+  mlx:
+    api: "mlx.core.uint8"
+  tensorflow:
+    api: "tf.uint8"
+
+---
+operation: "Unbind"
+description: "Removes a tensor dimension. Returns a tuple of all slices along a given dimension."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.unbind"
+  jax:
+    # Approx via list-comprehension iteration over axis? 
+    # Or unstack if available (TF style). JAX has no direct unbind. 
+    macro_template: "[jnp.squeeze(x, axis={dim}) for x in jnp.split({input}, {input}.shape[{dim}], axis={dim})]"
+  tensorflow:
+    api: "tf.unstack"
+    args:
+      dim: "axis"
+  keras:
+    api: "keras.ops.unstack"
+    args:
+      dim: "axis"
+
+---
+operation: "UnbindCopy"
+description: "Alias for Unbind. Returns fresh copies."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: 0
+variants:
+  torch:
+    api: "torch.unbind_copy"
+  tensorflow:
+    api: "tf.unstack"
+    args: 
+      dim: "axis"
+
+---
+operation: "Unflatten"
+description: "Expands a dimension of the input tensor over multiple dimensions."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "sizes"
+    type: "Tuple[int]"
+variants:
+  torch:
+    api: "torch.unflatten"
+  jax:
+    # Requires shape calculation logic (complex macro or plugin)
+    # Reshape is the general tool. 
+    requires_plugin: "unflatten_logic"
+  keras:
+    # Keras doesn't have unflatten per se, uses reshape. 
+    requires_plugin: "unflatten_logic"

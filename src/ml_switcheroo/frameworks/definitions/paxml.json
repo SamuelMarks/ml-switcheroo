@@ -5,6 +5,22 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Absolute": {
+    "api": "jax.numpy.absolute",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ActivationLayer": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ActivityRegularization": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Adam": {
     "api": "optax.adam",
     "dispatch_rules": [],
@@ -12,19 +28,354 @@
     "required_imports": [],
     "requires_plugin": "optimizer_constructor"
   },
+  "AdaptiveAveragePooling1D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AdaptiveAveragePooling2D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AdaptiveAveragePooling3D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AdaptiveMaxPooling1D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AdaptiveMaxPooling2D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AdaptiveMaxPooling3D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Add": {
     "api": "jax.numpy.add",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AddLayer": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AdditiveAttention": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "All": {
+    "api": "jnp.all",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AllClose": {
+    "api": "jax.numpy.allclose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AlphaDropout": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Angle": {
+    "api": "jax.numpy.angle",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Any": {
+    "api": "jnp.any",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Append": {
+    "api": "jax.numpy.append",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arange": {
+    "api": "jax.numpy.arange",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arccos": {
+    "api": "jax.numpy.arccos",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arccosh": {
+    "api": "jax.numpy.arccosh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arcsin": {
+    "api": "jax.numpy.arcsin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arcsinh": {
+    "api": "jax.numpy.arcsinh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctan": {
+    "api": "jax.numpy.arctan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctan2": {
+    "api": "jax.numpy.arctan2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctanh": {
+    "api": "jax.numpy.arctanh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Argmax": {
+    "api": "jax.numpy.argmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Argmin": {
+    "api": "jax.numpy.argmin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Argsort": {
+    "api": "jax.numpy.argsort",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Array": {
+    "api": "jax.numpy.array",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ArrayEqual": {
+    "api": "jax.numpy.array_equal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsAnyArray": {
+    "api": "jax.numpy.asanyarray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsArray": {
+    "api": "jax.numpy.asarray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AsContiguousArray": {
+    "api": "jax.numpy.ascontiguousarray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Atleast1d": {
+    "api": "jax.numpy.atleast_1d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Atleast2d": {
+    "api": "jax.numpy.atleast_2d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Atleast3d": {
+    "api": "jax.numpy.atleast_3d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AttentionLayer": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AugMix": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AutoContrast": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Average": {
+    "api": "jax.numpy.average",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AverageLayer": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AveragePooling1D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AveragePooling2D": {
+    "api": "praxis.layers.AvgPooling",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AveragePooling3D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool1D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool2D": {
+    "api": "praxis.layers.AvgPooling",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool2d": {
+    "api": "praxis.layers.AvgPooling",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AvgPool3D": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "BatchNorm": {
     "api": "praxis.layers.BatchNorm",
-    "args": {
-      "epsilon": "epsilon",
-      "momentum": "decay",
-      "num_features": "dim"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchNormalization": {
+    "api": "praxis.layers.BatchNorm",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bidirectional": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BinaryCrossentropy": {
+    "api": "optax.sigmoid_binary_cross_entropy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BitwiseAnd": {
+    "api": "jax.numpy.bitwise_and",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BitwiseNot": {
+    "api": "jax.numpy.bitwise_not",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BitwiseOr": {
+    "api": "jax.numpy.bitwise_or",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BitwiseXor": {
+    "api": "jax.numpy.bitwise_xor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bool": {
+    "api": "jax.numpy.bool_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BroadcastArrays": {
+    "api": "jax.numpy.broadcast_arrays",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BroadcastTo": {
+    "api": "jax.numpy.broadcast_to",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CTCLoss": {
+    "api": "optax.ctc_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CategoryEncoding": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cbrt": {
+    "api": "jax.numpy.cbrt",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ceil": {
+    "api": "jax.numpy.ceil",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CenterCrop": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -35,14 +386,67 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Clip": {
+    "api": "jax.numpy.clip",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "CombineMasks": {
     "api": "praxis.layers.combine_masks",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Complex": {
+    "api": "jax.numpy.complex_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Complex128": {
+    "api": "jax.numpy.complex128",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Complex64": {
+    "api": "jax.numpy.complex64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Compress": {
+    "api": "jax.numpy.compress",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Concatenate": {
+    "api": "jax.numpy.concatenate",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConcatenateLayer": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Cond": {
     "api": "jax.lax.cond",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conj": {
+    "api": "jax.numpy.conj",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conjugate": {
+    "api": "jax.numpy.conjugate",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -62,8 +466,114 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Conv1D": {
+    "api": "praxis.layers.Conv1D",
+    "args": {
+      "filters": "filter_dims",
+      "kernel_size": "filter_shape"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv1DTranspose": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv1d": {
+    "api": "praxis.layers.Conv1D",
+    "args": {
+      "bias": "use_bias",
+      "in_channels": "input_dims",
+      "out_channels": "output_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv2D": {
+    "api": "praxis.layers.Conv2D",
+    "args": {
+      "filters": "filter_dims",
+      "kernel_size": "filter_shape"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv2DTranspose": {
+    "api": "praxis.layers.Conv2DTranspose",
+    "args": {
+      "filters": "filter_dims",
+      "kernel_size": "filter_shape"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv2d": {
+    "api": "praxis.layers.Conv2D",
+    "args": {
+      "kernel_size": "filter_shape",
+      "out_channels": "filter_shape"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv3d": {
+    "api": "praxis.layers.Conv3D",
+    "args": {
+      "bias": "use_bias",
+      "in_channels": "input_dims",
+      "out_channels": "output_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose1d": {
+    "api": "praxis.layers.Conv1DTranspose",
+    "args": {
+      "bias": "use_bias",
+      "in_channels": "input_dims",
+      "out_channels": "output_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose2d": {
+    "api": "praxis.layers.Conv2DTranspose",
+    "args": {
+      "bias": "use_bias",
+      "in_channels": "input_dims",
+      "out_channels": "output_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConvTranspose3d": {
+    "api": "praxis.layers.Conv3DTranspose",
+    "args": {
+      "bias": "use_bias",
+      "in_channels": "input_dims",
+      "out_channels": "output_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Convolve": {
     "api": "jax.numpy.convolve",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Copy": {
+    "api": "jax.numpy.copy",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -82,6 +592,29 @@
     "args": {
       "a": "x"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CosineSimilarityLoss": {
+    "api": "optax.cosine_similarity",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
+    "dispatch_rules": [],
+    "macro_template": "-optax.cosine_similarity({y_pred}, {y_true})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CountNonzero": {
+    "api": "jax.numpy.count_nonzero",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cross": {
+    "api": "jax.numpy.cross",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -141,10 +674,26 @@
       "import dataclasses"
     ]
   },
+  "Deg2Rad": {
+    "api": "jax.numpy.deg2rad",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Degrees": {
     "api": "jax.numpy.degrees",
     "args": {
       "a": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DepthwiseConv2d": {
+    "api": "praxis.layers.DepthwiseConv2D",
+    "args": {
+      "bias": "use_bias",
+      "depth_multiplier": "channel_multiplier"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -159,11 +708,35 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DiagIndices": {
+    "api": "jax.numpy.diag_indices",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Diagflat": {
+    "api": "jax.numpy.diagflat",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Diagonal": {
     "api": "jax.numpy.diagonal",
     "args": {
       "a": "a"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DiceLoss": {
+    "dispatch_rules": [],
+    "macro_template": "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Digamma": {
+    "api": "jax.scipy.special.digamma",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -194,12 +767,26 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DivideNoNan": {
+    "dispatch_rules": [],
+    "macro_template": "jnp.where({y} == 0, 0, {x} / {y})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Dropout": {
     "api": "praxis.layers.Dropout",
-    "args": {
-      "deterministic": null,
-      "rate": "keep_prob"
+    "arg_values": {
+      "p": "1.0 - {p}"
     },
+    "args": {
+      "p": "keep_prob"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DtypeObject": {
+    "api": "jax.numpy.object_",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -230,9 +817,6 @@
   },
   "Embedding": {
     "api": "praxis.layers.Embedding",
-    "args": {
-      "features": "embedding_dims"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -265,14 +849,101 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Erfc": {
+    "api": "jax.scipy.special.erfc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ErfcInv": {
+    "api": "jax.scipy.special.erfc_inv",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EuclideanNorm": {
+    "api": "jnp.linalg.norm",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Exp": {
     "api": "jax.numpy.exp",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Expm1": {
+    "api": "jax.numpy.expm1",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Flatten": {
+    "api": "praxis.layers.Flatten",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Floor": {
+    "api": "jax.numpy.floor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FloorDivide": {
+    "api": "jax.numpy.floor_divide",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FloorMod": {
+    "api": "jax.numpy.remainder",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ForiLoop": {
     "api": "jax.lax.fori_loop",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Full": {
+    "api": "jax.numpy.full",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FullLike": {
+    "api": "jax.numpy.full_like",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GRU": {
+    "api": "praxis.layers.GRU",
+    "args": {
+      "hidden_size": "hidden_dims",
+      "input_size": "input_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GRUCell": {
+    "api": "praxis.layers.GRUCell",
+    "args": {
+      "bias": null,
+      "hidden_size": "hidden_dims",
+      "input_size": "input_dims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Gcd": {
+    "api": "jax.numpy.gcd",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -289,6 +960,12 @@
     "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "jax_conv_general_adapter"
+  },
+  "Geomspace": {
+    "api": "jax.numpy.geomspace",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "GetDefaultDevice": {
     "api": "jax.default_backend",
@@ -308,11 +985,32 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Greater": {
+    "api": "jax.numpy.greater",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GreaterEqual": {
+    "api": "jax.numpy.greater_equal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "GroupNorm": {
     "api": "praxis.layers.GroupNorm",
-    "args": {
-      "num_features": "dim"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HSplit": {
+    "api": "jax.numpy.hsplit",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HStack": {
+    "api": "jax.numpy.hstack",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -335,8 +1033,50 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Heaviside": {
+    "api": "jax.numpy.heaviside",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HingeLoss": {
+    "api": "optax.hinge_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HuberLoss": {
+    "api": "optax.huber_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hypot": {
+    "api": "jax.numpy.hypot",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "IInfo": {
     "api": "jax.numpy.iinfo",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Identity": {
+    "api": "jax.numpy.identity",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Igamma": {
+    "api": "jax.scipy.special.gammainc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Igammac": {
+    "api": "jax.scipy.special.gammaincc",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -347,8 +1087,26 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "InTopK": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "in_top_k_plugin"
+  },
+  "Inf": {
+    "api": "jax.numpy.inf",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Initializer": {
     "api": "praxis.base_layer.Initializer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Inner": {
+    "api": "jax.numpy.inner",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -358,6 +1116,162 @@
     "args": {
       "num_features": "dim"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Int16": {
+    "api": "jax.numpy.int16",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Int32": {
+    "api": "jax.numpy.int32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Int64": {
+    "api": "jax.numpy.int64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Int8": {
+    "api": "jax.numpy.int8",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Int_": {
+    "api": "jax.numpy.int64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "InvertPermutation": {
+    "api": "jax.numpy.argsort",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsClose": {
+    "api": "jax.numpy.isclose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsComplex": {
+    "api": "jax.numpy.iscomplex",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsComplexObj": {
+    "api": "jax.numpy.iscomplexobj",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsFinite": {
+    "api": "jax.numpy.isfinite",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsInf": {
+    "api": "jax.numpy.isinf",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsNan": {
+    "api": "jax.numpy.isnan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsNegInf": {
+    "api": "jax.numpy.isneginf",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsNonDecreasing": {
+    "dispatch_rules": [],
+    "macro_template": "jnp.all({x}[1:] >= {x}[:-1])",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsPosInf": {
+    "api": "jax.numpy.isposinf",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsReal": {
+    "api": "jax.numpy.isreal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsRealObj": {
+    "api": "jax.numpy.isrealobj",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsScalar": {
+    "api": "jax.numpy.isscalar",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsStrictlyIncreasing": {
+    "dispatch_rules": [],
+    "macro_template": "jnp.all({x}[1:] > {x}[:-1])",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsSubDtype": {
+    "api": "jax.numpy.issubdtype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ix_": {
+    "api": "jax.numpy.ix_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "KLDivergence": {
+    "api": "optax.kl_divergence",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Kron": {
+    "api": "jax.numpy.kron",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "L2Normalize": {
+    "dispatch_rules": [],
+    "macro_template": "{x} / jnp.sqrt(jnp.maximum(jnp.sum({x}**2, axis={axis}, keepdims=True), {epsilon}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LBeta": {
+    "dispatch_rules": [],
+    "macro_template": "jax.scipy.special.gammaln({x}).sum(-1) - jax.scipy.special.gammaln({x}.sum(-1))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LSTM": {
+    "api": "praxis.layers.LSTM",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -372,11 +1286,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Layer": {
+    "api": "praxis.base_layer.BaseLayer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "LayerNorm": {
     "api": "praxis.layers.LayerNorm",
-    "args": {
-      "normalized_shape": "dim"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Lcm": {
+    "api": "jax.numpy.lcm",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -387,9 +1310,28 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Less": {
+    "api": "jax.numpy.less",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LessEqual": {
+    "api": "jax.numpy.less_equal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Lgamma": {
+    "api": "jax.lax.lgamma",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Linear": {
     "api": "praxis.layers.Linear",
     "args": {
+      "bias": "use_bias",
       "in_features": "input_dims",
       "out_features": "output_dims"
     },
@@ -399,6 +1341,12 @@
   },
   "LinearGeneral": {
     "api": "praxis.layers.Linear",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Linspace": {
+    "api": "jax.numpy.linspace",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -430,8 +1378,151 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Log1p": {
+    "api": "jnp.log1p",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Log2": {
+    "api": "jax.numpy.log2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogAddExp": {
+    "api": "jax.numpy.logaddexp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogAddExp2": {
+    "api": "jax.numpy.logaddexp2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogCoshLoss": {
+    "api": "optax.log_cosh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogCumSumExp": {
+    "api": "jax.numpy.logaddexp.accumulate",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSigmoid": {
+    "api": "jax.nn.log_sigmoid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSoftmax": {
+    "api": "jax.nn.log_softmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSumExp": {
+    "api": "jax.scipy.special.logsumexp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogicalAnd": {
+    "api": "jnp.logical_and",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogicalNot": {
+    "api": "jnp.logical_not",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogicalOr": {
+    "api": "jnp.logical_or",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogicalXor": {
+    "api": "jnp.logical_xor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Logspace": {
+    "api": "jax.numpy.logspace",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "MatMul": {
     "api": "jax.numpy.matmul",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Matmul": {
+    "api": "jax.numpy.matmul",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Max": {
+    "api": "jnp.max",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxNumBoundingBoxes": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool1d": {
+    "api": "praxis.layers.MaxPool1d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool2d": {
+    "api": "praxis.layers.MaxPool2d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPool3d": {
+    "api": "praxis.layers.MaxPool3d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPooling1d": {
+    "api": "praxis.layers.MaxPool1d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPooling2d": {
+    "api": "praxis.layers.MaxPool2d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaxPooling3d": {
+    "api": "praxis.layers.MaxPool3d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Maximum": {
+    "api": "jnp.maximum",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -442,13 +1533,71 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MeanAbsoluteError": {
+    "api": "optax.l1_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MeanAbsolutePercentageError": {
+    "api": "optax.mape_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MeanSquaredError": {
+    "api": "optax.squared_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MeanSquaredLogarithmicError": {
+    "dispatch_rules": [],
+    "macro_template": "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MelSpectrogram": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "MergeContext": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Meshgrid": {
+    "api": "jax.numpy.meshgrid",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Metric": {
     "api": "praxis.metric_utils.Metric",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Min": {
+    "api": "jax.numpy.min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Minimum": {
+    "api": "jnp.minimum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MixUp": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Mod": {
+    "api": "jnp.mod",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -460,6 +1609,12 @@
   },
   "Module": {
     "api": "praxis.base_layer.BaseLayer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Moveaxis": {
+    "api": "jax.numpy.moveaxis",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -476,7 +1631,61 @@
     "required_imports": []
   },
   "Multiply": {
-    "api": "jax.numpy.multiply",
+    "api": "jnp.multiply",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MultiplyNoNan": {
+    "dispatch_rules": [],
+    "macro_template": "jnp.where({y} == 0, 0.0, {x} * {y})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanMean": {
+    "api": "jax.numpy.nanmean",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanProd": {
+    "api": "jax.numpy.nanprod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanSum": {
+    "api": "jax.numpy.nansum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ndim": {
+    "api": "jax.numpy.ndim",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ndtri": {
+    "api": "jax.scipy.special.ndtri",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Negative": {
+    "api": "jnp.negative",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NewAxis": {
+    "api": "jax.numpy.newaxis",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NextAfter": {
+    "api": "jnp.nextafter",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -486,7 +1695,25 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "NonZero": {
+    "api": "jax.numpy.nonzero",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Normalization": {
+    "api": "praxis.layers.LayerNorm",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Not": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NotEqual": {
+    "api": "jnp.not_equal",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -503,6 +1730,18 @@
     "required_imports": []
   },
   "OfType": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ones": {
+    "api": "jax.numpy.ones",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OnesLike": {
+    "api": "jax.numpy.ones_like",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -533,8 +1772,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Outer": {
+    "api": "jax.numpy.outer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "PReLU": {
     "api": "praxis.layers.PReLU",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pad": {
+    "api": "jax.numpy.pad",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -556,7 +1807,59 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Permute": {
+    "api": "jnp.transpose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Perturbation": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pi": {
+    "api": "jax.numpy.pi",
+    "dispatch_rules": [],
+    "macro_template": "jax.numpy.pi",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pipeline": {
+    "api": "praxis.layers.Sequential",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PoissonLoss": {
+    "api": "optax.poisson_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Polygamma": {
+    "api": "jax.scipy.special.polygamma",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Polyval": {
+    "api": "jnp.polyval",
+    "args": {
+      "coeffs": "p"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Positive": {
+    "api": "jax.numpy.positive",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pow": {
+    "api": "jnp.power",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -573,6 +1876,18 @@
   },
   "Prod": {
     "api": "jax.numpy.prod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PromoteTypes": {
+    "api": "jax.numpy.promote_types",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ptp": {
+    "api": "jax.numpy.ptp",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -622,6 +1937,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "RMSNormalization": {
+    "api": "praxis.layers.RMSNorm",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "RNN": {
     "api": "praxis.layers.RNN",
     "dispatch_rules": [],
@@ -630,6 +1951,12 @@
   },
   "RNNCellBase": {
     "api": "praxis.layers.RNNCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rad2Deg": {
+    "api": "jax.numpy.rad2deg",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -643,6 +1970,73 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "RandAugment": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomBrightness": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomColorDegeneration": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomColorJitter": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomContrast": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomCrop": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomElasticTransform": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomErasing": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomFlip": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomGaussianBlur": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandomGrayscale": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ravel": {
+    "api": "jax.numpy.ravel",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReLU": {
+    "api": "praxis.layers.ReLU",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Real": {
     "api": "jax.numpy.real",
     "dispatch_rules": [],
@@ -651,6 +2045,42 @@
   },
   "Reciprocal": {
     "api": "jax.numpy.reciprocal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReciprocalNoNan": {
+    "dispatch_rules": [],
+    "macro_template": "jnp.where({x} == 0, 0.0, 1.0 / {x})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceMin": {
+    "api": "jnp.min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceProd": {
+    "api": "jnp.prod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceStd": {
+    "api": "jnp.std",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceSum": {
+    "api": "jnp.sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReduceVariance": {
+    "api": "jnp.var",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -684,14 +2114,32 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ResultType": {
+    "api": "jax.numpy.result_type",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "RightShift": {
     "api": "jax.numpy.right_shift",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Rint": {
+    "api": "jnp.rint",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Roll": {
     "api": "jax.numpy.roll",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rot90": {
+    "api": "jax.numpy.rot90",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -740,11 +2188,53 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ScalarMul": {
+    "dispatch_rules": [],
+    "macro_template": "{x} * {scalar}",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentMax": {
+    "api": "jax.ops.segment_max",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentMean": {
+    "api": "jax.ops.segment_mean",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentMin": {
+    "api": "jax.ops.segment_min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentProd": {
+    "api": "jax.ops.segment_prod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SegmentSum": {
+    "api": "jax.ops.segment_sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "SegmentedMm": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "segmented_ops"
+  },
+  "Select": {
+    "api": "jax.numpy.select",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Selu": {
     "api": "jax.nn.selu",
@@ -784,6 +2274,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Shape": {
+    "api": "jax.numpy.shape",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sigmoid": {
     "api": "jax.nn.sigmoid",
     "dispatch_rules": [],
@@ -792,6 +2288,12 @@
   },
   "Sign": {
     "api": "jax.numpy.sign",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Signbit": {
+    "api": "jax.numpy.signbit",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -808,8 +2310,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Sinc": {
+    "api": "jax.numpy.sinc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sinh": {
     "api": "jax.numpy.sinh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Size": {
+    "api": "jax.numpy.size",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -832,8 +2346,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Softsign": {
+    "api": "jax.nn.softsign",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sort": {
     "api": "jax.numpy.sort",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SparseCategoricalCrossentropy": {
+    "api": "optax.softmax_cross_entropy_with_integer_labels",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -853,6 +2379,18 @@
   "Square": {
     "api": "jax.numpy.square",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SquaredDifference": {
+    "dispatch_rules": [],
+    "macro_template": "jnp.square({x} - {y})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SquaredHingeLoss": {
+    "dispatch_rules": [],
+    "macro_template": "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -901,6 +2439,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Swapaxes": {
+    "api": "jax.numpy.swapaxes",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Take": {
     "api": "jax.numpy.take",
     "dispatch_rules": [],
@@ -937,6 +2481,15 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "TopK": {
+    "api": "jax.lax.top_k",
+    "args": {
+      "input": "operand"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Trace": {
     "api": "jax.numpy.trace",
     "dispatch_rules": [],
@@ -961,8 +2514,157 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Triu": {
+    "api": "jax.numpy.triu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrueDiv": {
+    "api": "jnp.divide",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrueDivide": {
+    "api": "jax.numpy.divide",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "TypeVarM": {
     "api": "typing.TypeVar",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt16": {
+    "api": "jax.numpy.uint16",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt32": {
+    "api": "jax.numpy.uint32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt64": {
+    "api": "jax.numpy.uint64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt8": {
+    "api": "jax.numpy.uint8",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Unicode": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentMax": {
+    "api": "jax.ops.segment_max",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentMin": {
+    "api": "jax.ops.segment_min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentProd": {
+    "api": "jax.ops.segment_prod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsortedSegmentSum": {
+    "api": "jax.ops.segment_sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Vander": {
+    "api": "jax.numpy.vander",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Variance": {
+    "api": "jax.numpy.var",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Vdot": {
+    "api": "jax.numpy.vdot",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Vsplit": {
+    "api": "jax.numpy.vsplit",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Vstack": {
+    "api": "jax.numpy.vstack",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Where": {
+    "api": "jax.numpy.where",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Xdivy": {
+    "api": "jax.scipy.special.xdivy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Xlog1py": {
+    "api": "jax.scipy.special.xlog1py",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Xlogy": {
+    "api": "jax.scipy.special.xlogy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ZeroFraction": {
+    "dispatch_rules": [],
+    "macro_template": "jnp.mean({value} == 0)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Zeros": {
+    "api": "jax.numpy.zeros",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ZerosLike": {
+    "api": "jax.numpy.zeros_like",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Zeta": {
+    "api": "jax.scipy.special.zeta",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

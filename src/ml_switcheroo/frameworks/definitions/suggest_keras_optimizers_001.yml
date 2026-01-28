@@ -1,0 +1,589 @@
+operation: "Adadelta"
+description: "Optimizer that implements the Adadelta algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "rho"
+    type: "float"
+    default: 0.95
+  - name: "epsilon"
+    type: "float"
+    default: 1e-07
+  - name: "weight_decay"
+    type: "float"
+variants:
+  keras:
+    api: "keras.optimizers.Adadelta"
+  torch:
+    api: "torch.optim.Adadelta"
+    args:
+      learning_rate: "lr"
+      epsilon: "eps"
+  jax:
+    api: "optax.adadelta"
+    args:
+      epsilon: "eps"
+  flax_nnx:
+    api: "optax.adadelta"
+    args:
+      epsilon: "eps"
+  mlx:
+    api: "mlx.optimizers.Adadelta"
+    args:
+      epsilon: "eps"
+  tensorflow:
+    api: "tf.keras.optimizers.Adadelta"
+
+---
+operation: "Adafactor"
+description: "Optimizer that implements the Adafactor algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "beta_2_decay"
+    type: "float"
+    default: -0.8
+  - name: "epsilon_1"
+    type: "float"
+    default: 1e-30
+  - name: "epsilon_2"
+    type: "float"
+    default: 0.001
+  - name: "clip_threshold"
+    type: "float"
+    default: 1.0
+  - name: "relative_step"
+    type: "boolean"
+    default: true
+variants:
+  keras:
+    api: "keras.optimizers.Adafactor"
+  jax:
+    api: "optax.adafactor"
+    args:
+      beta_2_decay: "decay_rate"
+      clip_threshold: "clipping_threshold"
+  flax_nnx:
+    api: "optax.adafactor"
+  mlx:
+    api: "mlx.optimizers.Adafactor"
+  tensorflow:
+    api: "tf.keras.optimizers.Adafactor"
+
+---
+operation: "Adagrad"
+description: "Optimizer that implements the Adagrad algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "initial_accumulator_value"
+    type: "float"
+    default: 0.1
+  - name: "epsilon"
+    type: "float"
+    default: 1e-07
+  - name: "weight_decay"
+    type: "float"
+variants:
+  keras:
+    api: "keras.optimizers.Adagrad"
+  torch:
+    api: "torch.optim.Adagrad"
+    args:
+      learning_rate: "lr"
+      epsilon: "eps"
+  jax:
+    api: "optax.adagrad"
+    args:
+      epsilon: "eps"
+  flax_nnx:
+    api: "optax.adagrad"
+    args:
+      epsilon: "eps"
+  mlx:
+    api: "mlx.optimizers.Adagrad"
+    args:
+      epsilon: "eps"
+  tensorflow:
+    api: "tf.keras.optimizers.Adagrad"
+
+---
+operation: "Adam"
+description: "Optimizer that implements the Adam algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "beta_1"
+    type: "float"
+    default: 0.9
+  - name: "beta_2"
+    type: "float"
+    default: 0.999
+  - name: "epsilon"
+    type: "float"
+    default: 1e-07
+  - name: "amsgrad"
+    type: "boolean"
+    default: false
+  - name: "weight_decay"
+    type: "float"
+variants:
+  keras:
+    api: "keras.optimizers.Adam"
+  torch:
+    api: "torch.optim.Adam"
+    args:
+      learning_rate: "lr"
+      epsilon: "eps"
+      beta_1: null # Torch packs betas=(b1, b2)
+      beta_2: null
+  jax:
+    api: "optax.adam"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+      amsgrad: null # Optax uses optax.adamw or distinct setup
+  flax_nnx:
+    api: "optax.adam"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+  mlx:
+    api: "mlx.optimizers.Adam"
+    args:
+      epsilon: "eps"
+      amsgrad: null
+  tensorflow:
+    api: "tf.keras.optimizers.Adam"
+
+---
+operation: "AdamW"
+description: "Optimizer that implements the AdamW algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "weight_decay"
+    type: "float"
+    default: 0.004
+  - name: "beta_1"
+    type: "float"
+    default: 0.9
+  - name: "beta_2"
+    type: "float"
+    default: 0.999
+  - name: "epsilon"
+    type: "float"
+    default: 1e-07
+  - name: "amsgrad"
+    type: "boolean"
+    default: false
+variants:
+  keras:
+    api: "keras.optimizers.AdamW"
+  torch:
+    api: "torch.optim.AdamW"
+    args:
+      learning_rate: "lr"
+      epsilon: "eps"
+      beta_1: null
+      beta_2: null
+  jax:
+    api: "optax.adamw"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+  flax_nnx:
+    api: "optax.adamw"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+  mlx:
+    api: "mlx.optimizers.AdamW"
+    args:
+      epsilon: "eps"
+      amsgrad: null
+  tensorflow:
+    api: "tf.keras.optimizers.AdamW"
+
+---
+operation: "Adamax"
+description: "Optimizer that implements the Adamax algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "beta_1"
+    type: "float"
+    default: 0.9
+  - name: "beta_2"
+    type: "float"
+    default: 0.999
+  - name: "epsilon"
+    type: "float"
+    default: 1e-07
+  - name: "weight_decay"
+    type: "float"
+variants:
+  keras:
+    api: "keras.optimizers.Adamax"
+  torch:
+    api: "torch.optim.Adamax"
+    args:
+      learning_rate: "lr"
+      epsilon: "eps"
+      beta_1: null
+      beta_2: null
+  jax:
+    api: "optax.adamax"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+  flax_nnx:
+    api: "optax.adamax"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+  mlx:
+    api: "mlx.optimizers.Adamax"
+    args:
+      epsilon: "eps"
+  tensorflow:
+    api: "tf.keras.optimizers.Adamax"
+
+---
+operation: "Ftrl"
+description: "Optimizer that implements the FTRL algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "learning_rate_power"
+    type: "float"
+    default: -0.5
+  - name: "initial_accumulator_value"
+    type: "float"
+    default: 0.1
+  - name: "l1_regularization_strength"
+    type: "float"
+    default: 0.0
+  - name: "l2_regularization_strength"
+    type: "float"
+    default: 0.0
+variants:
+  keras:
+    api: "keras.optimizers.Ftrl"
+  tensorflow:
+    api: "tf.keras.optimizers.Ftrl"
+
+---
+operation: "Lamb"
+description: "Optimizer that implements the Lamb algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "beta_1"
+    type: "float"
+    default: 0.9
+  - name: "beta_2"
+    type: "float"
+    default: 0.999
+  - name: "epsilon"
+    type: "float"
+    default: 1e-07
+  - name: "weight_decay"
+    type: "float"
+variants:
+  keras:
+    api: "keras.optimizers.Lamb"
+  jax:
+    api: "optax.lamb"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+  flax_nnx:
+    api: "optax.lamb"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+  mlx:
+    api: "mlx.optimizers.Lamb"
+    args:
+      epsilon: "eps"
+  tensorflow:
+    api: "tf.keras.optimizers.Lamb"
+
+---
+operation: "Lion"
+description: "Optimizer that implements the Lion algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "beta_1"
+    type: "float"
+    default: 0.9
+  - name: "beta_2"
+    type: "float"
+    default: 0.99
+  - name: "weight_decay"
+    type: "float"
+variants:
+  keras:
+    api: "keras.optimizers.Lion"
+  jax:
+    api: "optax.lion"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+  flax_nnx:
+    api: "optax.lion"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+  mlx:
+    api: "mlx.optimizers.Lion"
+  tensorflow:
+    api: "tf.keras.optimizers.Lion"
+
+---
+operation: "LossScaleOptimizer"
+description: "An optimizer that dynamically scales the loss to prevent underflow."
+op_type: "class"
+std_args:
+  - name: "inner_optimizer"
+    type: "Any"
+  - name: "initial_scale"
+    type: "float"
+    default: 32768.0
+  - name: "dynamic_growth_steps"
+    type: "int"
+    default: 2000
+variants:
+  keras:
+    api: "keras.optimizers.LossScaleOptimizer"
+  tensorflow:
+    api: "tf.keras.mixed_precision.LossScaleOptimizer"
+
+---
+operation: "Muon"
+description: "Optimizer that implements the Muon algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "momentum"
+    type: "float"
+    default: 0.95
+  - name: "nesterov"
+    type: "boolean"
+    default: true
+variants:
+  keras:
+    api: "keras.optimizers.Muon"
+
+---
+operation: "Nadam"
+description: "Optimizer that implements the Nadam algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "beta_1"
+    type: "float"
+    default: 0.9
+  - name: "beta_2"
+    type: "float"
+    default: 0.999
+  - name: "epsilon"
+    type: "float"
+    default: 1e-07
+variants:
+  keras:
+    api: "keras.optimizers.Nadam"
+  torch:
+    api: "torch.optim.Nadam"
+    args:
+      learning_rate: "lr"
+      epsilon: "eps"
+      beta_1: null
+      beta_2: null
+  jax:
+    api: "optax.nadam"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+  flax_nnx:
+    api: "optax.nadam"
+    args:
+      beta_1: "b1"
+      beta_2: "b2"
+      epsilon: "eps"
+  mlx:
+    api: "mlx.optimizers.Nadam"
+    args:
+      epsilon: "eps"
+  tensorflow:
+    api: "tf.keras.optimizers.Nadam"
+
+---
+operation: "Optimizer"
+description: "Abstract optimizer base class."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.optimizers.Optimizer"
+  torch:
+    api: "torch.optim.Optimizer"
+  mlx:
+    api: "mlx.optimizers.Optimizer"
+  tensorflow:
+    api: "tf.keras.optimizers.Optimizer"
+
+---
+operation: "RMSprop"
+description: "Optimizer that implements the RMSprop algorithm."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.001
+  - name: "rho"
+    type: "float"
+    default: 0.9
+  - name: "momentum"
+    type: "float"
+    default: 0.0
+  - name: "epsilon"
+    type: "float"
+    default: 1e-07
+  - name: "centered"
+    type: "boolean"
+    default: false
+  - name: "weight_decay"
+    type: "float"
+variants:
+  keras:
+    api: "keras.optimizers.RMSprop"
+  torch:
+    api: "torch.optim.RMSprop"
+    args:
+      learning_rate: "lr"
+      rho: "alpha"
+      epsilon: "eps"
+  jax:
+    api: "optax.rmsprop"
+    args:
+      rho: "decay"
+      epsilon: "eps"
+  flax_nnx:
+    api: "optax.rmsprop"
+    args:
+      rho: "decay"
+      epsilon: "eps"
+  mlx:
+    api: "mlx.optimizers.RMSprop"
+    args:
+      epsilon: "eps"
+  tensorflow:
+    api: "tf.keras.optimizers.RMSprop"
+
+---
+operation: "SGD"
+description: "Gradient descent (with momentum) optimizer."
+op_type: "class"
+std_args:
+  - name: "learning_rate"
+    type: "float"
+    default: 0.01
+  - name: "momentum"
+    type: "float"
+    default: 0.0
+  - name: "nesterov"
+    type: "boolean"
+    default: false
+  - name: "weight_decay"
+    type: "float"
+variants:
+  keras:
+    api: "keras.optimizers.SGD"
+  torch:
+    api: "torch.optim.SGD"
+    args:
+      learning_rate: "lr"
+  jax:
+    api: "optax.sgd"
+  flax_nnx:
+    api: "optax.sgd"
+  mlx:
+    api: "mlx.optimizers.SGD"
+  tensorflow:
+    api: "tf.keras.optimizers.SGD"
+
+---
+operation: "DeserializeOptimizer"
+description: "Returns a Keras optimizer object via its configuration."
+op_type: "function"
+std_args:
+  - name: "config"
+    type: "Dict"
+  - name: "custom_objects"
+    type: "Dict"
+    default: null
+variants:
+  keras:
+    api: "keras.optimizers.deserialize"
+  tensorflow:
+    api: "tf.keras.optimizers.deserialize"
+
+---
+operation: "GetOptimizer"
+description: "Retrieves a Keras Optimizer instance."
+op_type: "function"
+std_args:
+  - name: "identifier"
+    type: "Union[str, Dict]"
+variants:
+  keras:
+    api: "keras.optimizers.get"
+  tensorflow:
+    api: "tf.keras.optimizers.get"
+
+---
+operation: "SerializeOptimizer"
+description: "Returns the optimizer configuration as a Python dict."
+op_type: "function"
+std_args:
+  - name: "optimizer"
+    type: "Any"
+variants:
+  keras:
+    api: "keras.optimizers.serialize"
+  tensorflow:
+    api: "tf.keras.optimizers.serialize"

@@ -1,0 +1,785 @@
+operation: "ReduceMin" 
+description: "Computes the minimum of elements across dimensions of a tensor." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int | List[int]" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_min" 
+    args: 
+      input: "input_tensor" 
+  torch: 
+    api: "torch.amin" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jnp.min" 
+  flax_nnx: 
+    api: "jnp.min" 
+  paxml: 
+    api: "jnp.min" 
+  keras: 
+    api: "keras.ops.min" 
+  mlx: 
+    api: "mlx.core.min" 
+  numpy: 
+    api: "numpy.min" 
+---
+operation: "ReduceProd" 
+description: "Computes the product of elements across dimensions of a tensor." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int | List[int]" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_prod" 
+    args: 
+      input: "input_tensor" 
+  torch: 
+    api: "torch.prod" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jnp.prod" 
+  flax_nnx: 
+    api: "jnp.prod" 
+  paxml: 
+    api: "jnp.prod" 
+  keras: 
+    api: "keras.ops.prod" 
+  mlx: 
+    api: "mlx.core.prod" 
+  numpy: 
+    api: "numpy.prod" 
+---
+operation: "ReduceStd" 
+description: "Computes the standard deviation of elements across dimensions of a tensor." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int | List[int]" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_std" 
+    args: 
+      input: "input_tensor" 
+  torch: 
+    api: "torch.std" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jnp.std" 
+  flax_nnx: 
+    api: "jnp.std" 
+  paxml: 
+    api: "jnp.std" 
+  keras: 
+    api: "keras.ops.std" 
+  mlx: 
+    macro_template: "mlx.core.sqrt(mlx.core.var({input}, {axis}, {keepdims}))" 
+  numpy: 
+    api: "numpy.std" 
+---
+operation: "ReduceSum" 
+description: "Computes the sum of elements across dimensions of a tensor." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int | List[int]" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_sum" 
+    args: 
+      input: "input_tensor" 
+  torch: 
+    api: "torch.sum" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jnp.sum" 
+  flax_nnx: 
+    api: "jnp.sum" 
+  paxml: 
+    api: "jnp.sum" 
+  keras: 
+    api: "keras.ops.sum" 
+  mlx: 
+    api: "mlx.core.sum" 
+  numpy: 
+    api: "numpy.sum" 
+---
+operation: "ReduceVariance" 
+description: "Computes the variance of elements across dimensions of a tensor." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int | List[int]" 
+    default: null
+  - name: "keepdims" 
+    type: "bool" 
+    default: false
+variants: 
+  tensorflow: 
+    api: "tf.math.reduce_variance" 
+    args: 
+      input: "input_tensor" 
+  torch: 
+    api: "torch.var" 
+    args: 
+      axis: "dim" 
+      keepdims: "keepdim" 
+  jax: 
+    api: "jnp.var" 
+  flax_nnx: 
+    api: "jnp.var" 
+  paxml: 
+    api: "jnp.var" 
+  keras: 
+    api: "keras.ops.var" 
+  mlx: 
+    api: "mlx.core.var" 
+  numpy: 
+    api: "numpy.var" 
+---
+operation: "Rint" 
+description: "Returns element-wise integer closest to x." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.rint" 
+  torch: 
+    api: "torch.round" # Torch 'round' implements rint behavior (nearest even) 
+  jax: 
+    api: "jnp.rint" 
+  flax_nnx: 
+    api: "jnp.rint" 
+  paxml: 
+    api: "jnp.rint" 
+  keras: 
+    api: "keras.ops.round" 
+  mlx: 
+    api: "mlx.core.round" # MLX round is also rint
+  numpy: 
+    api: "numpy.rint" 
+---
+operation: "Round" 
+description: "Rounds the values of a tensor to the nearest integer, element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.round" 
+  torch: 
+    api: "torch.round" 
+  jax: 
+    api: "jnp.round" 
+  flax_nnx: 
+    api: "jnp.round" 
+  paxml: 
+    api: "jnp.round" 
+  keras: 
+    api: "keras.ops.round" 
+  mlx: 
+    api: "mlx.core.round" 
+  numpy: 
+    api: "numpy.round" 
+---
+operation: "Rsqrt" 
+description: "Computes reciprocal of square root of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.rsqrt" 
+  torch: 
+    api: "torch.rsqrt" 
+  jax: 
+    api: "jax.lax.rsqrt" 
+  flax_nnx: 
+    api: "jax.lax.rsqrt" 
+  paxml: 
+    api: "jax.lax.rsqrt" 
+  keras: 
+    api: "keras.ops.rsqrt" 
+  mlx: 
+    api: "mlx.core.rsqrt" 
+  numpy: 
+    macro_template: "1.0 / numpy.sqrt({x})" 
+---
+operation: "ScalarMul" 
+description: "Multiplies a scalar times a Tensor." 
+std_args: 
+  - name: "scalar" 
+    type: "float" 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.scalar_mul" 
+  torch: 
+    api: "torch.mul" 
+    args: 
+      scalar: "other" # torch.mul(input, other) 
+      x: "input" 
+  jax: 
+    macro_template: "{x} * {scalar}" 
+  flax_nnx: 
+    macro_template: "{x} * {scalar}" 
+  paxml: 
+    macro_template: "{x} * {scalar}" 
+  keras: 
+    macro_template: "{x} * {scalar}" 
+  mlx: 
+    macro_template: "{x} * {scalar}" 
+  numpy: 
+    macro_template: "{x} * {scalar}" 
+---
+operation: "SegmentMax" 
+description: "Computes the maximum along segments of a tensor." 
+std_args: 
+  - name: "data" 
+    type: "Tensor" 
+  - name: "segment_ids" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.segment_max" 
+  jax: 
+    api: "jax.ops.segment_max" 
+  flax_nnx: 
+    api: "jax.ops.segment_max" 
+  paxml: 
+    api: "jax.ops.segment_max" 
+  keras: 
+    api: "keras.ops.segment_max" 
+  # Torch/MLX usually require scatter-reduce logic or dedicated libraries
+---
+operation: "SegmentMean" 
+description: "Computes the mean along segments of a tensor." 
+std_args: 
+  - name: "data" 
+    type: "Tensor" 
+  - name: "segment_ids" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.segment_mean" 
+  jax: 
+    api: "jax.ops.segment_mean" # Requires sorted ids usually, TF also prefers it
+  flax_nnx: 
+    api: "jax.ops.segment_mean" 
+  paxml: 
+    api: "jax.ops.segment_mean" 
+  keras: 
+    # Keras ops usually include segment_sum, check docs if mean is core. 
+    # Fallback to sum/count if needed, but assuming core support in v3
+    api: "keras.ops.segment_max" 
+---
+operation: "SegmentMin" 
+description: "Computes the minimum along segments of a tensor." 
+std_args: 
+  - name: "data" 
+    type: "Tensor" 
+  - name: "segment_ids" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.segment_min" 
+  jax: 
+    api: "jax.ops.segment_min" 
+  flax_nnx: 
+    api: "jax.ops.segment_min" 
+  paxml: 
+    api: "jax.ops.segment_min" 
+---
+operation: "SegmentProd" 
+description: "Computes the product along segments of a tensor." 
+std_args: 
+  - name: "data" 
+    type: "Tensor" 
+  - name: "segment_ids" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.segment_prod" 
+  jax: 
+    api: "jax.ops.segment_prod" 
+  flax_nnx: 
+    api: "jax.ops.segment_prod" 
+  paxml: 
+    api: "jax.ops.segment_prod" 
+---
+operation: "SegmentSum" 
+description: "Computes the sum along segments of a tensor." 
+std_args: 
+  - name: "data" 
+    type: "Tensor" 
+  - name: "segment_ids" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.segment_sum" 
+  jax: 
+    api: "jax.ops.segment_sum" 
+  flax_nnx: 
+    api: "jax.ops.segment_sum" 
+  paxml: 
+    api: "jax.ops.segment_sum" 
+  keras: 
+    api: "keras.ops.segment_sum" 
+---
+operation: "Sigmoid" 
+description: "Computes sigmoid of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.sigmoid" 
+  torch: 
+    api: "torch.sigmoid" 
+  jax: 
+    api: "jax.nn.sigmoid" 
+  flax_nnx: 
+    api: "jax.nn.sigmoid" 
+  paxml: 
+    api: "jax.nn.sigmoid" 
+  keras: 
+    api: "keras.ops.sigmoid" 
+  mlx: 
+    api: "mlx.core.sigmoid" 
+  numpy: 
+    macro_template: "1 / (1 + numpy.exp(-{x}))" 
+---
+operation: "Sign" 
+description: "Returns an element-wise indication of the sign of a number." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.sign" 
+  torch: 
+    api: "torch.sign" 
+  jax: 
+    api: "jnp.sign" 
+  flax_nnx: 
+    api: "jnp.sign" 
+  paxml: 
+    api: "jnp.sign" 
+  keras: 
+    api: "keras.ops.sign" 
+  mlx: 
+    api: "mlx.core.sign" 
+  numpy: 
+    api: "numpy.sign" 
+---
+operation: "Sin" 
+description: "Computes sine of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.sin" 
+  torch: 
+    api: "torch.sin" 
+  jax: 
+    api: "jnp.sin" 
+  flax_nnx: 
+    api: "jnp.sin" 
+  paxml: 
+    api: "jnp.sin" 
+  keras: 
+    api: "keras.ops.sin" 
+  mlx: 
+    api: "mlx.core.sin" 
+  numpy: 
+    api: "numpy.sin" 
+---
+operation: "Sinh" 
+description: "Computes hyperbolic sine of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.sinh" 
+  torch: 
+    api: "torch.sinh" 
+  jax: 
+    api: "jnp.sinh" 
+  flax_nnx: 
+    api: "jnp.sinh" 
+  paxml: 
+    api: "jnp.sinh" 
+  keras: 
+    api: "keras.ops.sinh" 
+  mlx: 
+    api: "mlx.core.sinh" 
+  numpy: 
+    api: "numpy.sinh" 
+---
+operation: "SobolSample" 
+description: "Generates points from the Sobol sequence." 
+std_args: 
+  - name: "dim" 
+    type: "int" 
+  - name: "num_results" 
+    type: "int" 
+  - name: "skip" 
+    type: "int" 
+    default: 0
+variants: 
+  tensorflow: 
+    api: "tf.math.sobol_sample" 
+  torch: 
+    # Torch uses a Class engine, requires distinct handling or macro
+    macro_template: "torch.quasirandom.SobolEngine(dimension={dim}).draw({num_results}).add({skip})" # Approximate/Wrong API pattern for skip
+    # This requires stateful engine, safer to omit or use Plugin
+    api: null
+  # Other frameworks lack built-in Sobol
+---
+operation: "Softmax" 
+description: "Computes softmax activations." 
+std_args: 
+  - name: "logits" 
+    type: "Tensor" 
+  - name: "axis" 
+    type: "int" 
+    default: -1
+variants: 
+  tensorflow: 
+    api: "tf.math.softmax" 
+  torch: 
+    api: "torch.nn.functional.softmax" 
+    args: 
+       logits: "input" 
+       axis: "dim" 
+  jax: 
+    api: "jax.nn.softmax" 
+    args: 
+       logits: "x" 
+  flax_nnx: 
+    api: "jax.nn.softmax" 
+    args: 
+      logits: "x" 
+  paxml: 
+    api: "jax.nn.softmax" 
+    args: 
+      logits: "x" 
+  keras: 
+    api: "keras.ops.softmax" 
+    args: 
+      logits: "x" 
+  mlx: 
+    api: "mlx.core.softmax" 
+    args: 
+      logits: "a" 
+  numpy: 
+    macro_template: "numpy.exp({logits}) / numpy.sum(numpy.exp({logits}), axis={axis}, keepdims=True)" 
+---
+operation: "Softplus" 
+description: "Computes elementwise softplus: log(exp(x) + 1)." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.softplus" 
+    args: 
+      x: "features" 
+  torch: 
+    api: "torch.nn.functional.softplus" 
+    args: 
+      x: "input" 
+  jax: 
+    api: "jax.nn.softplus" 
+  flax_nnx: 
+    api: "jax.nn.softplus" 
+  paxml: 
+    api: "jax.nn.softplus" 
+  keras: 
+    api: "keras.ops.softplus" 
+  mlx: 
+    api: "mlx.core.softplus" 
+  numpy: 
+    macro_template: "numpy.log1p(numpy.exp({x}))" 
+---
+operation: "Softsign" 
+description: "Computes softsign: x / (abs(x) + 1)." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.softsign" 
+    args: 
+      x: "features" 
+  torch: 
+    api: "torch.nn.functional.softsign" 
+    args: 
+      x: "input" 
+  jax: 
+    api: "jax.nn.softsign" 
+  flax_nnx: 
+    api: "jax.nn.softsign" 
+  paxml: 
+    api: "jax.nn.softsign" 
+  keras: 
+    api: "keras.ops.softsign" 
+  mlx: 
+    api: "mlx.core.softsign" 
+  numpy: 
+    macro_template: "{x} / (numpy.abs({x}) + 1)" 
+---
+operation: "Sqrt" 
+description: "Computes element-wise square root of the input tensor." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.sqrt" 
+  torch: 
+    api: "torch.sqrt" 
+    args: 
+      x: "input" 
+  jax: 
+    api: "jnp.sqrt" 
+  flax_nnx: 
+    api: "jnp.sqrt" 
+  paxml: 
+    api: "jnp.sqrt" 
+  keras: 
+    api: "keras.ops.sqrt" 
+  mlx: 
+    api: "mlx.core.sqrt" 
+  numpy: 
+    api: "numpy.sqrt" 
+---
+operation: "Square" 
+description: "Computes square of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.square" 
+  torch: 
+    api: "torch.square" 
+    args: 
+      x: "input" 
+  jax: 
+    api: "jnp.square" 
+  flax_nnx: 
+    api: "jnp.square" 
+  paxml: 
+    api: "jnp.square" 
+  keras: 
+    api: "keras.ops.square" 
+  mlx: 
+    api: "mlx.core.square" 
+  numpy: 
+    api: "numpy.square" 
+---
+operation: "SquaredDifference" 
+description: "Returns (x - y)(x - y) element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.squared_difference" 
+  torch: 
+    macro_template: "torch.square({x} - {y})" 
+  jax: 
+    macro_template: "jnp.square({x} - {y})" 
+  flax_nnx: 
+    macro_template: "jnp.square({x} - {y})" 
+  paxml: 
+    macro_template: "jnp.square({x} - {y})" 
+  keras: 
+    macro_template: "keras.ops.square({x} - {y})" 
+  mlx: 
+    macro_template: "mlx.core.square({x} - {y})" 
+  numpy: 
+    macro_template: "numpy.square({x} - {y})" 
+---
+operation: "Subtract" 
+description: "Returns x - y element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.subtract" 
+  torch: 
+    api: "torch.sub" 
+    args: 
+      x: "input" 
+      y: "other" 
+  jax: 
+    api: "jnp.subtract" 
+  flax_nnx: 
+    api: "jnp.subtract" 
+  paxml: 
+    api: "jnp.subtract" 
+  keras: 
+    api: "keras.ops.subtract" 
+  mlx: 
+    api: "mlx.core.subtract" 
+  numpy: 
+    api: "numpy.subtract" 
+---
+operation: "Tan" 
+description: "Computes tan of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.tan" 
+  torch: 
+    api: "torch.tan" 
+    args: 
+      x: "input" 
+  jax: 
+    api: "jnp.tan" 
+  flax_nnx: 
+    api: "jnp.tan" 
+  paxml: 
+    api: "jnp.tan" 
+  keras: 
+    api: "keras.ops.tan" 
+  mlx: 
+    api: "mlx.core.tan" 
+  numpy: 
+    api: "numpy.tan" 
+---
+operation: "Tanh" 
+description: "Computes hyperbolic tangent of x element-wise." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.tanh" 
+  torch: 
+    api: "torch.tanh" 
+    args: 
+      x: "input" 
+  jax: 
+    api: "jnp.tanh" 
+  flax_nnx: 
+    api: "jnp.tanh" 
+  paxml: 
+    api: "jnp.tanh" 
+  keras: 
+    api: "keras.ops.tanh" 
+  mlx: 
+    api: "mlx.core.tanh" 
+  numpy: 
+    api: "numpy.tanh" 
+---
+operation: "TopK" 
+description: "Finds values and indices of the k largest entries for the last dimension." 
+std_args: 
+  - name: "input" 
+    type: "Tensor" 
+  - name: "k" 
+    type: "int" 
+    default: 1
+variants: 
+  tensorflow: 
+    api: "tf.math.top_k" 
+  torch: 
+    api: "torch.topk" 
+  jax: 
+    api: "jax.lax.top_k" 
+    args: 
+        input: "operand" 
+  flax_nnx: 
+    api: "jax.lax.top_k" 
+    args: 
+        input: "operand" 
+  paxml: 
+    api: "jax.lax.top_k" 
+    args: 
+        input: "operand" 
+  keras: 
+    api: "keras.ops.top_k" 
+    args: 
+      input: "x" 
+  mlx: 
+    # MLX topk returns ONLY values usually in simple mode? 
+    # Docs say: Returns the top k elements. 
+    # Check signature for indices. 
+    # Assuming plugin or macro needed if indices required. 
+    # For now, mapping best effort. 
+    api: "mlx.core.topk" 
+    args: 
+      input: "a" 
+---
+operation: "TrueDiv" 
+description: "Divides x / y elementwise (floating point)." 
+std_args: 
+  - name: "x" 
+    type: "Tensor" 
+  - name: "y" 
+    type: "Tensor" 
+variants: 
+  tensorflow: 
+    api: "tf.math.truediv" 
+  torch: 
+    api: "torch.div" 
+    args: 
+      x: "input" 
+      y: "other" 
+  jax: 
+    api: "jnp.divide" 
+  flax_nnx: 
+    api: "jnp.divide" 
+  paxml: 
+    api: "jnp.divide" 
+  keras: 
+    api: "keras.ops.divide" 
+  mlx: 
+    api: "mlx.core.divide" 
+  numpy: 
+    api: "numpy.divide"

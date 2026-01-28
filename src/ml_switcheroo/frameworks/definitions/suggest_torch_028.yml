@@ -1,0 +1,973 @@
+operation: "SetFlushDenormal"
+description: "Disables denormal floating numbers on CPU."
+op_type: "function"
+std_args:
+  - name: "mode"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.set_flush_denormal"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SetGradEnabled"
+description: "Context-manager that sets gradient calculation on or off."
+op_type: "class"
+std_args:
+  - name: "mode"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.set_grad_enabled"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SetNumInteropThreads"
+description: "Sets the number of threads used for interop parallelism."
+op_type: "function"
+std_args:
+  - name: "int"
+    type: "int"
+variants:
+  torch:
+    api: "torch.set_num_interop_threads"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.config.threading.set_inter_op_parallelism_threads"
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SetNumThreads"
+description: "Sets the number of threads used for intraop parallelism."
+op_type: "function"
+std_args:
+  - name: "int"
+    type: "int"
+variants:
+  torch:
+    api: "torch.set_num_threads"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.config.threading.set_intra_op_parallelism_threads"
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SetPrintOptions"
+description: "Set options for printing."
+op_type: "function"
+std_args:
+  - name: "precision"
+    type: "int"
+    default: 4
+  - name: "threshold"
+    type: "int"
+    default: 1000
+  - name: "edgeitems"
+    type: "int"
+    default: 3
+  - name: "linewidth"
+    type: "int"
+    default: 80
+  - name: "profile"
+    type: "str"
+    default: null
+  - name: "sci_mode"
+    type: "bool"
+    default: null
+variants:
+  torch:
+    api: "torch.set_printoptions"
+  jax:
+    api: "jax.numpy.set_printoptions"
+    args:
+      sci_mode: "suppress"
+    arg_values:
+      sci_mode:
+        False: "True"
+        True: "False"
+  flax_nnx:
+    api: "jax.numpy.set_printoptions"
+  paxml:
+    api: "jax.numpy.set_printoptions"
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: "numpy.set_printoptions"
+    args:
+      sci_mode: "suppress"
+    arg_values:
+      sci_mode:
+        False: "True"
+        True: "False"
+  mlx:
+    api: null
+
+---
+operation: "SetRngState"
+description: "Sets the random number generator state."
+op_type: "function"
+std_args:
+  - name: "new_state"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.set_rng_state"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SetVital"
+description: "Undocumented utility."
+op_type: "function"
+std_args:
+  - name: "arg0"
+  - name: "arg1"
+  - name: "arg2"
+variants:
+  torch:
+    api: "torch.set_vital"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SetWarnAlways"
+description: "Forces warnings to always emit."
+op_type: "function"
+std_args:
+  - name: "b"
+    type: "bool"
+variants:
+  torch:
+    api: "torch.set_warn_always"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Sgn"
+description: "Computes the sign of the input tensor, supporting complex numbers."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sgn"
+  jax:
+    api: "jax.numpy.sign"
+  flax_nnx:
+    api: "jax.numpy.sign"
+  paxml:
+    api: "jax.numpy.sign"
+  keras:
+    api: "keras.ops.sign"
+  tensorflow:
+    api: "tf.math.sign"
+  numpy:
+    api: "numpy.sign"
+  mlx:
+    api: "mlx.core.sign" # Often implicit, check compatibility
+
+---
+operation: "Short"
+description: "Casts the input tensor to int16 (short)."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.short"
+  jax:
+    api: "jax.numpy.astype"
+    transformation_type: "macro"
+    macro_template: "{input}.astype(jnp.int16)"
+    required_imports: ["import jax.numpy as jnp"]
+  flax_nnx:
+    api: "jax.numpy.astype"
+    transformation_type: "macro"
+    macro_template: "{input}.astype(jnp.int16)"
+    required_imports: ["import jax.numpy as jnp"]
+  paxml:
+    api: "jax.numpy.astype"
+    transformation_type: "macro"
+    macro_template: "{input}.astype(jnp.int16)"
+  keras:
+    api: "keras.ops.cast"
+    transformation_type: "macro"
+    macro_template: "keras.ops.cast({input}, 'int16')"
+    required_imports: ["import keras"]
+  tensorflow:
+    api: "tf.cast"
+    transformation_type: "macro"
+    macro_template: "tf.cast({input}, tf.int16)"
+  numpy:
+    api: "numpy.astype"
+    transformation_type: "macro"
+    macro_template: "{input}.astype(np.int16)"
+  mlx:
+    api: "mlx.core.astype"
+    transformation_type: "macro"
+    macro_template: "{input}.astype(mx.int16)"
+    required_imports: ["import mlx.core as mx"]
+
+---
+operation: "Sigmoid"
+description: "Computes the element-wise sigmoid of the input."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sigmoid"
+  jax:
+    api: "jax.nn.sigmoid"
+  flax_nnx:
+    api: "jax.nn.sigmoid"
+  paxml:
+    api: "jax.nn.sigmoid"
+  keras:
+    api: "keras.ops.sigmoid"
+  tensorflow:
+    api: "tf.math.sigmoid"
+  numpy:
+    # Numpy has no sigmoid directly, usually expit
+    api: "scipy.special.expit"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp_special"
+    macro_template: "sp_special.expit({input})"
+    transformation_type: "macro"
+  mlx:
+    api: "mlx.core.sigmoid"
+
+---
+operation: "Sigmoid_"
+description: "In-place sigmoid."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sigmoid_"
+  jax:
+    api: "jax.nn.sigmoid"
+    transformation_type: "macro"
+    # Functional update simulation
+    macro_template: "{input} = jax.nn.sigmoid({input})"
+  flax_nnx:
+    api: "jax.nn.sigmoid"
+    transformation_type: "macro"
+    macro_template: "{input} = jax.nn.sigmoid({input})"
+  paxml:
+    api: "jax.nn.sigmoid"
+    transformation_type: "macro"
+    macro_template: "{input} = jax.nn.sigmoid({input})"
+  keras:
+    api: "keras.ops.sigmoid"
+    transformation_type: "macro"
+    macro_template: "{input} = keras.ops.sigmoid({input})"
+  tensorflow:
+    api: "tf.math.sigmoid"
+    transformation_type: "macro"
+    macro_template: "{input} = tf.math.sigmoid({input})"
+  numpy:
+    api: "scipy.special.expit"
+    transformation_type: "macro"
+    macro_template: "{input} = sp_special.expit({input})"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp_special"
+  mlx:
+    api: "mlx.core.sigmoid"
+    transformation_type: "macro"
+    macro_template: "{input} = mx.sigmoid({input})"
+
+---
+operation: "Sign"
+description: "Returns a new tensor with the signs of the elements."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sign"
+  jax:
+    api: "jax.numpy.sign"
+  flax_nnx:
+    api: "jax.numpy.sign"
+  paxml:
+    api: "jax.numpy.sign"
+  keras:
+    api: "keras.ops.sign"
+  tensorflow:
+    api: "tf.math.sign"
+  numpy:
+    api: "numpy.sign"
+  mlx:
+    api: "mlx.core.sign"
+
+---
+operation: "Signbit"
+description: "Tests if each element has its sign bit set."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.signbit"
+  jax:
+    api: "jax.numpy.signbit"
+  flax_nnx:
+    api: "jax.numpy.signbit"
+  paxml:
+    api: "jax.numpy.signbit"
+  keras:
+    # Not standard in Keras ops, using logic
+    api: "keras.ops.less"
+    transformation_type: "macro"
+    macro_template: "keras.ops.less({input}, 0)"
+  tensorflow:
+    api: "tf.math.sign"
+    transformation_type: "macro"
+    macro_template: "tf.math.less({input}, 0)"
+  numpy:
+    api: "numpy.signbit"
+  mlx:
+    # MLX lacks explicit signbit, logical check
+    api: "mlx.core.less"
+    transformation_type: "macro"
+    macro_template: "{input} < 0"
+
+---
+operation: "Sin"
+description: "Computes the element-wise sine."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sin"
+  jax:
+    api: "jax.numpy.sin"
+  flax_nnx:
+    api: "jax.numpy.sin"
+  paxml:
+    api: "jax.numpy.sin"
+  keras:
+    api: "keras.ops.sin"
+  tensorflow:
+    api: "tf.math.sin"
+  numpy:
+    api: "numpy.sin"
+  mlx:
+    api: "mlx.core.sin"
+
+---
+operation: "Sin_"
+description: "In-place sine."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sin_"
+  jax:
+    api: "jax.numpy.sin"
+    transformation_type: "macro"
+    macro_template: "{input} = jnp.sin({input})"
+  flax_nnx:
+    api: "jax.numpy.sin"
+    transformation_type: "macro"
+    macro_template: "{input} = jnp.sin({input})"
+  paxml:
+    api: "jax.numpy.sin"
+    transformation_type: "macro"
+    macro_template: "{input} = jnp.sin({input})"
+  keras:
+    api: "keras.ops.sin"
+    transformation_type: "macro"
+    macro_template: "{input} = keras.ops.sin({input})"
+  tensorflow:
+    api: "tf.math.sin"
+    transformation_type: "macro"
+    macro_template: "{input} = tf.math.sin({input})"
+  numpy:
+    api: "numpy.sin"
+    transformation_type: "macro"
+    macro_template: "{input} = np.sin({input})"
+  mlx:
+    api: "mlx.core.sin"
+    transformation_type: "macro"
+    macro_template: "{input} = mx.sin({input})"
+
+---
+operation: "Sinc"
+description: "Computes the normalized sinc function."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sinc"
+  jax:
+    api: "jax.numpy.sinc"
+  flax_nnx:
+    api: "jax.numpy.sinc"
+  paxml:
+    api: "jax.numpy.sinc"
+  keras:
+    # Not in core ops generally
+    api: null
+  tensorflow:
+    # tf.math.special.sinc not standard, commonly implemented manually
+    api: null
+  numpy:
+    api: "numpy.sinc"
+  mlx:
+    # Not standard in MLX core
+    api: null
+
+---
+operation: "Sinc_"
+description: "In-place sinc."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sinc_"
+  jax:
+    api: "jax.numpy.sinc"
+    transformation_type: "macro"
+    macro_template: "{input} = jnp.sinc({input})"
+  flax_nnx:
+    api: "jax.numpy.sinc"
+    transformation_type: "macro"
+    macro_template: "{input} = jnp.sinc({input})"
+  paxml:
+    api: "jax.numpy.sinc"
+    transformation_type: "macro"
+    macro_template: "{input} = jnp.sinc({input})"
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: "numpy.sinc"
+    transformation_type: "macro"
+    macro_template: "{input} = np.sinc({input})"
+  mlx:
+    api: null
+
+---
+operation: "Sinh"
+description: "Computes the hyperbolic sine."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sinh"
+  jax:
+    api: "jax.numpy.sinh"
+  flax_nnx:
+    api: "jax.numpy.sinh"
+  paxml:
+    api: "jax.numpy.sinh"
+  keras:
+    api: "keras.ops.sinh"
+  tensorflow:
+    api: "tf.math.sinh"
+  numpy:
+    api: "numpy.sinh"
+  mlx:
+    api: "mlx.core.sinh"
+
+---
+operation: "Sinh_"
+description: "In-place hyperbolic sine."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.sinh_"
+  jax:
+    api: "jax.numpy.sinh"
+    transformation_type: "macro"
+    macro_template: "{input} = jnp.sinh({input})"
+  flax_nnx:
+    api: "jax.numpy.sinh"
+    transformation_type: "macro"
+    macro_template: "{input} = jnp.sinh({input})"
+  paxml:
+    api: "jax.numpy.sinh"
+    transformation_type: "macro"
+    macro_template: "{input} = jnp.sinh({input})"
+  keras:
+    api: "keras.ops.sinh"
+    transformation_type: "macro"
+    macro_template: "{input} = keras.ops.sinh({input})"
+  tensorflow:
+    api: "tf.math.sinh"
+    transformation_type: "macro"
+    macro_template: "{input} = tf.math.sinh({input})"
+  numpy:
+    api: "numpy.sinh"
+    transformation_type: "macro"
+    macro_template: "{input} = np.sinh({input})"
+  mlx:
+    api: "mlx.core.sinh"
+    transformation_type: "macro"
+    macro_template: "{input} = mx.sinh({input})"
+
+---
+operation: "SliceCopy"
+description: "Performs slicing, returning a copy."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+    # Args omitted as standard Python slicing is preferred syntax usually
+variants:
+  torch:
+    api: "torch.slice_copy"
+  jax:
+    # JAX slices are views/functional, so copy is implicit semantics of new array
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SliceInverse"
+description: "Undocumented/Internal."
+op_type: "function"
+std_args:
+  - name: "input"
+variants:
+  torch:
+    api: "torch.slice_inverse"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SliceScatter"
+description: "Embeds values into the tensor at a given dimension slice."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "src"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: 0
+  - name: "start"
+    type: "int"
+    default: null
+  - name: "end"
+    type: "int"
+    default: null
+  - name: "step"
+    type: "int"
+    default: 1
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.slice_scatter"
+  jax:
+    api: "jax.lax.dynamic_update_slice"
+    requires_plugin: "slice_scatter_plugin" # Needs logic to map dim/start/end to slice coordinates
+  flax_nnx:
+    api: "jax.lax.dynamic_update_slice"
+    requires_plugin: "slice_scatter_plugin"
+  paxml:
+    api: "jax.lax.dynamic_update_slice"
+    requires_plugin: "slice_scatter_plugin"
+  keras:
+    # Keras ops.slice_update?
+    api: "keras.ops.slice_update"
+    requires_plugin: "slice_scatter_plugin"
+  tensorflow:
+    api: "tf.tensor_scatter_nd_update"
+    requires_plugin: "slice_scatter_plugin"
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Slogdet"
+description: "Computes the sign and log value of the determinant."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+return_type: "Tuple[Tensor, Tensor]"
+variants:
+  torch:
+    api: "torch.slogdet"
+  jax:
+    api: "jax.numpy.linalg.slogdet"
+  flax_nnx:
+    api: "jax.numpy.linalg.slogdet"
+  paxml:
+    api: "jax.numpy.linalg.slogdet"
+  keras:
+    # Keras usually returns logdet only, check docs
+    api: "keras.ops.linalg.slogdet"
+  tensorflow:
+    api: "tf.linalg.slogdet"
+  numpy:
+    api: "numpy.linalg.slogdet"
+  mlx:
+    # MLX linalg often matches numpy
+    api: null
+
+---
+operation: "Smm"
+description: "Performs sparse matrix multiplication."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "mat"
+    type: "Tensor"
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.smm"
+  jax:
+    api: "jax.experimental.sparse.spmatmul" # Experimental/Different API
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: "tf.sparse.sparse_dense_matmul"
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "Softmax"
+description: "Applies the Softmax function."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: null
+  - name: "dtype"
+    type: "str"
+    default: null
+return_type: "Tensor"
+variants:
+  torch:
+    api: "torch.softmax"
+  jax:
+    api: "jax.nn.softmax"
+    args:
+      dim: "axis"
+  flax_nnx:
+    api: "jax.nn.softmax"
+    args:
+      dim: "axis"
+  paxml:
+    api: "jax.nn.softmax"
+    args:
+      dim: "axis"
+  keras:
+    api: "keras.ops.softmax"
+    args:
+      dim: "axis"
+  tensorflow:
+    api: "tf.nn.softmax"
+    args:
+      dim: "axis"
+  numpy:
+    api: "scipy.special.softmax"
+    required_imports:
+      - module: "scipy.special"
+        alias: "sp_special"
+    args:
+      dim: "axis"
+    # Usually requires plugin if using scipy directly inside numpy flow
+  mlx:
+    api: "mlx.core.softmax"
+    args:
+      dim: "axis"
+
+---
+operation: "Solve"
+description: "Solves a system of linear equations."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "A"
+    type: "Tensor"
+return_type: "Tuple[Tensor, Tensor]"
+variants:
+  torch:
+    api: "torch.solve"
+  jax:
+    api: "jax.numpy.linalg.solve"
+    # JAX returns just solution x, Torch returns (solution, LU). 
+    requires_plugin: "solve_adapter"
+  flax_nnx:
+    api: "jax.numpy.linalg.solve"
+    requires_plugin: "solve_adapter"
+  paxml:
+    api: "jax.numpy.linalg.solve"
+    requires_plugin: "solve_adapter"
+  keras:
+    api: "keras.ops.linalg.solve"
+  tensorflow:
+    api: "tf.linalg.solve"
+  numpy:
+    api: "numpy.linalg.solve"
+  mlx:
+    api: "mlx.core.linalg.solve"
+
+---
+operation: "Sort"
+description: "Sorts the elements of the input tensor."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+    default: -1
+  - name: "descending"
+    type: "bool"
+    default: false
+  - name: "stable"
+    type: "bool"
+    default: false
+return_type: "Tuple[Tensor, Tensor]"
+variants:
+  torch:
+    api: "torch.sort"
+  jax:
+    # JAX sort sorts values. Argsort sorts indices. Torch returns both.
+    api: "jax.numpy.sort"
+    requires_plugin: "sort_tuple_wrapper"
+  flax_nnx:
+    api: "jax.numpy.sort"
+    requires_plugin: "sort_tuple_wrapper"
+  paxml:
+    api: "jax.numpy.sort"
+    requires_plugin: "sort_tuple_wrapper"
+  keras:
+    api: "keras.ops.sort" # Returns values only? Check.
+    requires_plugin: "sort_tuple_wrapper"
+  tensorflow:
+    api: "tf.sort"
+    requires_plugin: "sort_tuple_wrapper"
+  numpy:
+    api: "numpy.sort"
+    requires_plugin: "sort_tuple_wrapper"
+  mlx:
+    api: "mlx.core.sort" # MLX sort returns values.
+    requires_plugin: "sort_tuple_wrapper"
+
+---
+operation: "SparseBsc"
+description: "Logic for Sparse Block Compressed Column format."
+op_type: "function"
+std_args:
+  # Undocumented/Internal
+  - name: "arg0"
+variants:
+  torch:
+    api: "torch.sparse_bsc"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null
+
+---
+operation: "SparseBscTensor"
+description: "Constructs a sparse tensor in BSC format."
+op_type: "function"
+std_args:
+  - name: "ccol_indices"
+    type: "Array"
+  - name: "row_indices"
+    type: "Array"
+  - name: "values"
+    type: "Array"
+  - name: "size"
+    type: "Optional[Tuple]"
+    default: null
+  - name: "dtype"
+    type: "Optional[str]"
+    default: null
+  - name: "device"
+    type: "Optional[str]"
+    default: null
+variants:
+  torch:
+    api: "torch.sparse_bsc_tensor"
+  jax:
+    api: "jax.experimental.sparse.BCOO" # Closest approx, though format differs
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  numpy:
+    api: null
+  mlx:
+    api: null

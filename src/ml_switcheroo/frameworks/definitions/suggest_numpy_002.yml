@@ -1,0 +1,589 @@
+operation: "Round"
+description: "Round an array to the given number of decimals."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "decimals"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.around"
+  torch:
+    api: "torch.round"
+  jax:
+    api: "jax.numpy.around"
+  tensorflow:
+    api: "tf.math.round" # Doesn't strict support decimals, usually 0
+  mlx:
+    api: "mlx.core.round" # Supports integer rounding
+  keras:
+    api: "keras.ops.round"
+
+---
+operation: "Array"
+description: "Create an array."
+std_args:
+  - name: "object"
+    type: "Any"
+  - name: "dtype"
+    type: "dtype"
+    default: null
+variants:
+  numpy:
+    api: "numpy.array"
+  torch:
+    api: "torch.tensor"
+    args:
+      object: "data"
+  jax:
+    api: "jax.numpy.array"
+    args:
+      object: "object"
+  mlx:
+    api: "mlx.core.array"
+    args:
+      object: "a"
+  tensorflow:
+    api: "tf.constant"
+    args:
+      object: "value"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    args:
+      object: "x"
+
+---
+operation: "Array2String"
+description: "Return a string representation of an array."
+std_args:
+  - name: "a"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.array2string"
+  jax:
+    api: "jax.numpy.array2string"
+
+---
+operation: "ArrayEqual"
+description: "True if two arrays have the same shape and elements, False otherwise."
+std_args:
+  - name: "a1"
+    type: "Array"
+  - name: "a2"
+    type: "Array"
+  - name: "equal_nan"
+    type: "bool"
+    default: false
+variants:
+  numpy:
+    api: "numpy.array_equal"
+  torch:
+    api: "torch.equal" # Note: equal_nan not directly supported in older torch versions
+  jax:
+    api: "jax.numpy.array_equal"
+  mlx:
+    api: "mlx.core.array_equal"
+  tensorflow:
+    api: "tf.experimental.numpy.array_equal"
+  keras:
+    api: "keras.ops.equal" # Element-wise, requires reduction for array_equal
+
+---
+operation: "ArrayEquiv"
+description: "Returns True if input arrays are shape consistent and all elements equal."
+std_args:
+  - name: "a1"
+    type: "Array"
+  - name: "a2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.array_equiv"
+  jax:
+    api: "jax.numpy.array_equiv"
+
+---
+operation: "ArrayRepr"
+description: "Return the string representation of an array."
+std_args:
+  - name: "arr"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.array_repr"
+  jax:
+    api: "jax.numpy.array_repr"
+
+---
+operation: "ArraySplit"
+description: "Split an array into multiple sub-arrays."
+std_args:
+  - name: "ary"
+    type: "Array"
+  - name: "indices_or_sections"
+    type: "Union[int, List[int]]"
+  - name: "axis"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.array_split"
+  torch:
+    api: "torch.tensor_split"
+    args:
+      ary: "input"
+      indices_or_sections: "indices"
+      axis: "dim"
+  jax:
+    api: "jax.numpy.array_split"
+  mlx:
+    api: "mlx.core.split"
+    args:
+      ary: "a"
+      indices_or_sections: "indices_or_sections"
+      axis: "axis"
+
+---
+operation: "ArrayStr"
+description: "Return a string representation of the data in an array."
+std_args:
+  - name: "a"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.array_str"
+  jax:
+    api: "jax.numpy.array_str"
+
+---
+operation: "AsAnyArray"
+description: "Convert the input to an ndarray, but pass ndarray subclasses through."
+std_args:
+  - name: "a"
+    type: "Any"
+  - name: "dtype"
+    type: "dtype"
+    default: null
+variants:
+  numpy:
+    api: "numpy.asanyarray"
+  jax:
+    api: "jax.numpy.asarray" # JAX treats this synonymsly often
+  torch:
+    api: "torch.as_tensor"
+    args:
+      a: "data"
+
+---
+operation: "AsArray"
+description: "Convert the input to an array."
+std_args:
+  - name: "a"
+    type: "Any"
+  - name: "dtype"
+    type: "dtype"
+    default: null
+variants:
+  numpy:
+    api: "numpy.asarray"
+  torch:
+    api: "torch.as_tensor"
+    args:
+      a: "data"
+  jax:
+    api: "jax.numpy.asarray"
+  mlx:
+    api: "mlx.core.array"
+  tensorflow:
+    api: "tf.convert_to_tensor"
+    args:
+      a: "value"
+  keras:
+    api: "keras.ops.convert_to_tensor"
+    args:
+      a: "x"
+
+---
+operation: "AsArrayChkFinite"
+description: "Convert the input to an array, checking for NaNs or Infs."
+std_args:
+  - name: "a"
+    type: "Any"
+  - name: "dtype"
+    type: "dtype"
+    default: null
+variants:
+  numpy:
+    api: "numpy.asarray_chkfinite"
+  jax:
+    api: "jax.numpy.asarray_chkfinite"
+
+---
+operation: "AsContiguousArray"
+description: "Return a contiguous array (ndim >= 1) in memory (C order)."
+std_args:
+  - name: "a"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.ascontiguousarray"
+  torch:
+    api: "torch.as_tensor" # Torch handles contiguity via .contiguous() usually
+    requires_plugin: "to_contiguous" # Placeholder logic
+  jax:
+    api: "jax.numpy.ascontiguousarray"
+
+---
+operation: "AsFortranArray"
+description: "Return an array (ndim >= 1) laid out in Fortran order in memory."
+std_args:
+  - name: "a"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.asfortranarray"
+  jax:
+    api: "jax.numpy.asfortranarray"
+
+---
+operation: "Asin"
+description: "Inverse sine, element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.asin"
+  torch:
+    api: "torch.asin"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.arcsin"
+  mlx:
+    api: "mlx.core.arcsin"
+  tensorflow:
+    api: "tf.math.asin"
+  keras:
+    api: "keras.ops.arcsin"
+
+---
+operation: "Asinh"
+description: "Inverse hyperbolic sine element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.asinh"
+  torch:
+    api: "torch.asinh"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.arcsinh"
+  mlx:
+    api: "mlx.core.arcsinh"
+  tensorflow:
+    api: "tf.math.asinh"
+  keras:
+    api: "keras.ops.arcsinh"
+
+---
+operation: "AsMatrix"
+description: "Interpret the input as a matrix."
+std_args:
+  - name: "data"
+    type: "Any"
+variants:
+  numpy:
+    api: "numpy.asmatrix"
+  jax:
+    api: "jax.numpy.asmatrix"
+
+---
+operation: "Astype"
+description: "Copies an array to a specified data type."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "dtype"
+    type: "dtype"
+variants:
+  numpy:
+    api: "numpy.astype"
+  jax:
+    api: "jax.numpy.astype"
+  torch:
+    requires_plugin: "type_methods" # x.to(dtype)
+  # mlx, keras, etc. typically handled by plugins for .astype method calls on tensor objects
+  # or specific cast ops:
+  mlx:
+    api: "mlx.core.astype"
+  tensorflow:
+    api: "tf.cast"
+    args:
+      x: "x"
+      dtype: "dtype"
+  keras:
+    api: "keras.ops.cast"
+
+---
+operation: "Atan"
+description: "Trigonometric inverse tangent, element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.atan"
+  torch:
+    api: "torch.atan"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.arctan"
+  mlx:
+    api: "mlx.core.arctan"
+  tensorflow:
+    api: "tf.math.atan"
+  keras:
+    api: "keras.ops.arctan"
+
+---
+operation: "Atan2"
+description: "Element-wise arc tangent of x1/x2 choosing the quadrant correctly."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.atan2"
+  torch:
+    api: "torch.atan2"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.arctan2"
+  mlx:
+    api: "mlx.core.arctan2"
+  tensorflow:
+    api: "tf.math.atan2"
+    args:
+      x1: "y"
+      x2: "x"
+  keras:
+    api: "keras.ops.arctan2"
+
+---
+operation: "Atanh"
+description: "Inverse hyperbolic tangent element-wise."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.atanh"
+  torch:
+    api: "torch.atanh"
+    args:
+      x: "input"
+  jax:
+    api: "jax.numpy.arctanh"
+  mlx:
+    api: "mlx.core.arctanh"
+  tensorflow:
+    api: "tf.math.atanh"
+  keras:
+    api: "keras.ops.arctanh"
+
+---
+operation: "Atleast1d"
+description: "Convert inputs to arrays with at least one dimension."
+std_args:
+  - name: "arys"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.atleast_1d"
+    pack_as: "List"
+  torch:
+    api: "torch.atleast_1d"
+    pack_as: "List"
+  jax:
+    api: "jax.numpy.atleast_1d"
+    pack_as: "List"
+
+---
+operation: "Atleast2d"
+description: "View inputs as arrays with at least two dimensions."
+std_args:
+  - name: "arys"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.atleast_2d"
+    pack_as: "List"
+  torch:
+    api: "torch.atleast_2d"
+    pack_as: "List"
+  jax:
+    api: "jax.numpy.atleast_2d"
+    pack_as: "List"
+
+---
+operation: "Atleast3d"
+description: "View inputs as arrays with at least three dimensions."
+std_args:
+  - name: "arys"
+    is_variadic: true
+variants:
+  numpy:
+    api: "numpy.atleast_3d"
+    pack_as: "List"
+  torch:
+    api: "torch.atleast_3d"
+    pack_as: "List"
+  jax:
+    api: "jax.numpy.atleast_3d"
+    pack_as: "List"
+
+---
+operation: "Average"
+description: "Compute the weighted average along the specified axis."
+std_args:
+  - name: "a"
+    type: "Array"
+  - name: "axis"
+    type: "int"
+    default: null
+  - name: "weights"
+    type: "Array"
+    default: null
+variants:
+  numpy:
+    api: "numpy.average"
+  jax:
+    api: "jax.numpy.average"
+  torch:
+    # Torch doesn't have a direct weighted average op, usually implemented via sum(a*w)/sum(w)
+    # or specific average pool layers.
+    api: null
+    missing_message: "Torch does not have a direct weighted `average` op. Use manual calculation."
+
+---
+operation: "Bartlett"
+description: "Return the Bartlett window."
+std_args:
+  - name: "M"
+    type: "int"
+variants:
+  numpy:
+    api: "numpy.bartlett"
+  torch:
+    api: "torch.bartlett_window"
+    args:
+      M: "window_length"
+  jax:
+    api: "jax.numpy.bartlett"
+
+---
+operation: "BaseRepr"
+description: "Return a string representation of a number in the given base system."
+std_args:
+  - name: "number"
+    type: "int"
+  - name: "base"
+    type: "int"
+    default: 2
+variants:
+  numpy:
+    api: "numpy.base_repr"
+
+---
+operation: "BinaryRepr"
+description: "Return the binary representation of the input number as a string."
+std_args:
+  - name: "num"
+    type: "int"
+  - name: "width"
+    type: "int"
+    default: null
+variants:
+  numpy:
+    api: "numpy.binary_repr"
+
+---
+operation: "Bincount"
+description: "Count number of occurrences of each value in array of non-negative ints."
+std_args:
+  - name: "x"
+    type: "Array"
+  - name: "weights"
+    type: "Array"
+    default: null
+  - name: "minlength"
+    type: "int"
+    default: 0
+variants:
+  numpy:
+    api: "numpy.bincount"
+  torch:
+    api: "torch.bincount"
+    args:
+      x: "input"
+      weights: "weights"
+      minlength: "minlength"
+  jax:
+    api: "jax.numpy.bincount"
+  tensorflow:
+    api: "tf.math.bincount"
+    args:
+      x: "arr"
+      weights: "weights"
+      minlength: "minlength" # TF also supports maxlength
+
+---
+operation: "BitwiseAnd"
+description: "Compute the bit-wise AND of two arrays element-wise."
+std_args:
+  - name: "x1"
+    type: "Array"
+  - name: "x2"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.bitwise_and"
+  torch:
+    api: "torch.bitwise_and"
+    args:
+      x1: "input"
+      x2: "other"
+  jax:
+    api: "jax.numpy.bitwise_and"
+  mlx:
+    api: "mlx.core.bitwise_and"
+  tensorflow:
+    api: "tf.bitwise.bitwise_and"
+  keras:
+    api: "keras.ops.bitwise_and"
+
+---
+operation: "BitwiseCount"
+description: "Computes the number of 1-bits in the absolute value of x."
+std_args:
+  - name: "x"
+    type: "Array"
+variants:
+  numpy:
+    api: "numpy.bitwise_count"
+  jax:
+    api: "jax.numpy.bitwise_count"
+  torch:
+    # Requires method call usually: x.bit_count() or special handling
+    requires_plugin: "type_methods" # placeholder, or custom plugin

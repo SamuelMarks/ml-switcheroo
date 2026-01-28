@@ -1,0 +1,985 @@
+operation: "PerChannelSymmetric"
+description: "Quantization utility for per-channel symmetric schemes."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.per_channel_symmetric"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "PerTensorAffine"
+description: "Quantization utility for per-tensor affine schemes."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.per_tensor_affine"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "PerTensorSymmetric"
+description: "Quantization utility for per-tensor symmetric schemes."
+std_args: 
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.per_tensor_symmetric"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Permute"
+description: "Returns a view of the original tensor input with its dimensions permuted."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dims"
+    type: "List[int]"
+variants:
+  torch:
+    api: "torch.permute"
+  jax:
+    api: "jax.numpy.transpose"
+    args:
+      dims: "axes"
+  flax_nnx:
+    api: "jax.numpy.transpose"
+    args:
+      dims: "axes"
+  paxml:
+    api: "jax.numpy.transpose"
+    args:
+      dims: "axes"
+  keras:
+    api: "keras.ops.transpose"
+    args:
+      dims: "axes"
+  tensorflow:
+    api: "tf.transpose"
+    args:
+      dims: "perm"
+  mlx:
+    api: "mlx.core.transpose"
+    args:
+      dims: "axes"
+  numpy:
+    api: "numpy.transpose"
+    args:
+      dims: "axes"
+
+---
+operation: "PermuteCopy"
+description: "Performs the same operation as permute, but output is freshly created."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dims"
+    type: "List[int]"
+variants:
+  torch:
+    api: "torch.permute_copy"
+  jax:
+    api: "jax.numpy.transpose"
+    args:
+      dims: "axes"
+    description: "JAX arrays are immutable, so transpose effectively creates a new view/copy logic."
+  flax_nnx:
+    api: "jax.numpy.transpose"
+    args:
+      dims: "axes"
+  paxml:
+    api: "jax.numpy.transpose"
+    args:
+      dims: "axes"
+  keras:
+    api: "keras.ops.transpose"
+    args:
+      dims: "axes"
+  tensorflow:
+    api: "tf.transpose"
+    args:
+      dims: "perm"
+  mlx:
+    api: "mlx.core.transpose"
+    args:
+      dims: "axes"
+  numpy:
+    api: "numpy.transpose"
+    args:
+      dims: "axes"
+
+---
+operation: "Pi"
+description: "The mathematical constant Pi."
+op_type: attribute
+std_args: []
+variants:
+  torch:
+    api: "torch.pi"
+  jax:
+    api: "jax.numpy.pi"
+  flax_nnx:
+    api: "jax.numpy.pi"
+  paxml:
+    api: "jax.numpy.pi"
+  keras:
+    api: "numpy.pi"
+  tensorflow:
+    api: "numpy.pi"
+  mlx:
+    api: "numpy.pi"
+  numpy:
+    api: "numpy.pi"
+
+---
+operation: "Pinverse"
+description: "Computes the pseudoinverse (Moore-Penrose inverse) of a matrix."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "rcond"
+    type: "float"
+    default: 1e-15
+variants:
+  torch:
+    api: "torch.pinverse"
+  jax:
+    api: "jax.numpy.linalg.pinv"
+    args:
+      input: "a"
+  flax_nnx:
+    api: "jax.numpy.linalg.pinv"
+    args:
+      input: "a"
+  paxml:
+    api: "jax.numpy.linalg.pinv"
+    args:
+      input: "a"
+  keras:
+    api: "keras.ops.linalg.pinv"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.linalg.pinv"
+    args:
+      input: "a"
+  mlx:
+    api: "mlx.core.linalg.pinv"
+    args:
+      input: "a"
+  numpy:
+    api: "numpy.linalg.pinv"
+    args:
+      input: "a"
+
+---
+operation: "PixelShuffle"
+description: "Rearranges elements in a tensor of shape (*, C x r^2, H, W) to (*, C, H x r, W x r)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "upscale_factor"
+    type: "int"
+variants:
+  torch:
+    api: "torch.pixel_shuffle"
+  jax:
+    api: "jax.nn.pixel_shuffle"
+    min_version: "0.4.0"
+  flax_nnx:
+    api: "jax.nn.pixel_shuffle"
+  paxml:
+    api: "jax.nn.pixel_shuffle"
+  keras:
+    api: "tf.nn.depth_to_space"
+    args:
+      upscale_factor: "block_size"
+    layout_map:
+      input: "NCHW->NHWC"
+      return: "NHWC->NCHW"
+  tensorflow:
+    api: "tf.nn.depth_to_space"
+    args:
+      upscale_factor: "block_size"
+    layout_map:
+      input: "NCHW->NHWC"
+      return: "NHWC->NCHW"
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "PixelUnshuffle"
+description: "Reverses the PixelShuffle operation."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "downscale_factor"
+    type: "int"
+variants:
+  torch:
+    api: "torch.pixel_unshuffle"
+  jax:
+    api: "jax.nn.pixel_unshuffle"
+  flax_nnx:
+    api: "jax.nn.pixel_unshuffle"
+  paxml:
+    api: "jax.nn.pixel_unshuffle"
+  keras:
+    api: "tf.nn.space_to_depth"
+    args:
+      downscale_factor: "block_size"
+    layout_map:
+      input: "NCHW->NHWC"
+      return: "NHWC->NCHW"
+  tensorflow:
+    api: "tf.nn.space_to_depth"
+    args:
+      downscale_factor: "block_size"
+    layout_map:
+      input: "NCHW->NHWC"
+      return: "NHWC->NCHW"
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Poisson"
+description: "Returns a tensor of the same size as input with each element sampled from a Poisson distribution."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "generator"
+    type: "Optional[Generator]"
+    default: null
+variants:
+  torch:
+    api: "torch.poisson"
+  jax:
+    api: "jax.random.poisson"
+    requires_plugin: "inject_prng"
+    args:
+      input: "lam"
+  flax_nnx:
+    api: "jax.random.poisson"
+    requires_plugin: "inject_prng"
+    args:
+      input: "lam"
+  paxml:
+    api: "jax.random.poisson"
+    requires_plugin: "inject_prng"
+    args:
+      input: "lam"
+  keras:
+    api: "keras.random.poisson"
+    args:
+      input: "lam"
+  tensorflow:
+    api: "tf.random.poisson"
+    args:
+      input: "lam"
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.random.poisson"
+    args:
+      input: "lam"
+
+---
+operation: "PoissonNllLoss"
+description: "Poisson Negative Log Likelihood Loss."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "target"
+    type: "Tensor"
+  - name: "log_input"
+    type: "bool"
+    default: true
+  - name: "full"
+    type: "bool"
+    default: false
+  - name: "eps"
+    type: "float"
+    default: 1e-08
+  - name: "reduction"
+    type: "str"
+    default: "mean"
+variants:
+  torch:
+    api: "torch.poisson_nll_loss"
+  jax:
+    api: "optax.poisson_nll_loss"
+    description: "Optax does not support 'full' or 'reduction' directly matching Torch."
+    requires_plugin: "loss_reduction"
+  flax_nnx:
+    api: "optax.poisson_nll_loss"
+    requires_plugin: "loss_reduction"
+  paxml:
+    api: "optax.poisson_nll_loss"
+    requires_plugin: "loss_reduction"
+  keras:
+    api: "keras.losses.poisson"
+  tensorflow:
+    api: "tf.nn.log_poisson_loss"
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Polar"
+description: "Constructs a complex tensor from polar coordinates."
+std_args:
+  - name: "abs"
+    type: "Tensor"
+  - name: "angle"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.polar"
+  jax:
+    macro_template: "{abs} * jax.numpy.exp(1j * {angle})"
+  flax_nnx:
+    macro_template: "{abs} * jax.numpy.exp(1j * {angle})"
+  paxml:
+    macro_template: "{abs} * jax.numpy.exp(1j * {angle})"
+  keras:
+    api: "keras.ops.polar" 
+  tensorflow:
+    api: "tf.complex" 
+    macro_template: "tf.complex({abs} * tf.math.cos({angle}), {abs} * tf.math.sin({angle}))"
+  mlx:
+    macro_template: "{abs} * mlx.core.exp(1j * {angle})"
+  numpy:
+    macro_template: "{abs} * numpy.exp(1j * {angle})"
+
+---
+operation: "Polygamma"
+description: "Computes the polygamma function psi^(n)(x)."
+std_args:
+  - name: "n"
+    type: "int"
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.polygamma"
+  jax:
+    api: "jax.scipy.special.polygamma"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.scipy.special.polygamma"
+    args:
+      input: "x"
+  paxml:
+    api: "jax.scipy.special.polygamma"
+    args:
+      input: "x"
+  keras:
+    api: "tf.math.polygamma"
+    args:
+      n: "a"
+      input: "x"
+  tensorflow:
+    api: "tf.math.polygamma"
+    args:
+      n: "a"
+      input: "x"
+  mlx:
+    api: null
+  numpy:
+    api: "scipy.special.polygamma"
+    args:
+      input: "x"
+    required_imports: ["import scipy.special"]
+
+---
+operation: "Positive"
+description: "Returns input. Equivalent to +input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.positive"
+  jax:
+    api: "jax.numpy.positive"
+    args:
+      input: "x"
+  flax_nnx:
+    api: "jax.numpy.positive"
+    args:
+      input: "x"
+  paxml:
+    api: "jax.numpy.positive"
+    args:
+      input: "x"
+  keras:
+    transformation_type: "infix"
+    operator: "+"
+  tensorflow:
+    transformation_type: "infix"
+    operator: "+"
+  mlx:
+    transformation_type: "infix"
+    operator: "+"
+  numpy:
+    api: "numpy.positive"
+    args:
+      input: "x"
+
+---
+operation: "Pow"
+description: "Takes the power of each element in input with exponent."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "exponent"
+    type: "Union[Tensor, float]"
+variants:
+  torch:
+    api: "torch.pow"
+  jax:
+    api: "jax.numpy.power"
+    args:
+      input: "x1"
+      exponent: "x2"
+  flax_nnx:
+    api: "jax.numpy.power"
+    args:
+      input: "x1"
+      exponent: "x2"
+  paxml:
+    api: "jax.numpy.power"
+    args:
+      input: "x1"
+      exponent: "x2"
+  keras:
+    api: "keras.ops.power"
+    args:
+      input: "x1"
+      exponent: "x2"
+  tensorflow:
+    api: "tf.math.pow"
+    args:
+      input: "x"
+      exponent: "y"
+  mlx:
+    api: "mlx.core.power"
+    args:
+      input: "a"
+      exponent: "b"
+  numpy:
+    api: "numpy.power"
+    args:
+      input: "x1"
+      exponent: "x2"
+
+---
+operation: "Prelu"
+description: "Applies element-wise PReLU function: max(0,x) + weight * min(0,x)."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.prelu" # Standard top-level alias for functional
+  jax:
+    # No direct top-level functional in JAX core, usually handled by custom logic or Flax/Haiku layers
+    api: null
+  flax_nnx:
+    api: "flax.linen.activation.PReLU"
+    op_type: class
+    description: "Flax PReLU is a Module, not functional."
+  paxml:
+    api: null
+  keras:
+    # functional PReLU not exposed in ops, mostly layer
+    api: null
+  tensorflow:
+    api: "tf.nn.leaky_relu" # Approx fallback if alpha constant, but real PReLU uses weight tensor
+    description: "TensorFlow lacks a direct functional 'prelu' taking weight tensor."
+  mlx:
+    api: "mlx.nn.prelu" # Note: This is functional in MLX
+    args:
+      weight: "alpha"
+  numpy:
+    macro_template: "numpy.maximum(0, {input}) + {weight} * numpy.minimum(0, {input})"
+
+---
+operation: "PrepareMultiprocessingEnvironment"
+description: "PyTorch specific utility for multiprocessing setup."
+std_args:
+  - name: "path"
+    type: "str"
+variants:
+  torch:
+    api: "torch.prepare_multiprocessing_environment"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "PreserveFormat"
+description: "Preservation logic, likely profiling or internal. No standard equivalent."
+std_args: []
+variants:
+  torch:
+    api: "torch.preserve_format"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "Prod"
+description: "Returns the product of all elements in the input tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "Optional[int]"
+    default: null
+  - name: "keepdim"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.prod"
+  jax:
+    api: "jax.numpy.prod"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+  flax_nnx:
+    api: "jax.numpy.prod"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+  paxml:
+    api: "jax.numpy.prod"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+  keras:
+    api: "keras.ops.prod"
+    args:
+      input: "x"
+      dim: "axis"
+      keepdim: "keepdims"
+  tensorflow:
+    api: "tf.reduce_prod"
+    args:
+      input: "input_tensor"
+      dim: "axis"
+      keepdim: "keepdims"
+  mlx:
+    api: "mlx.core.prod"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+  numpy:
+    api: "numpy.prod"
+    args:
+      input: "a"
+      dim: "axis"
+      keepdim: "keepdims"
+
+---
+operation: "ProfilerAllowCudagraphCuptiLazyReinitCuda12"
+description: "PyTorch internal profiler configuration."
+std_args: []
+variants:
+  torch:
+    api: "torch.profiler_allow_cudagraph_cupti_lazy_reinit_cuda12"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "PromoteTypes"
+description: "Returns the dtype with the smallest size and scalar kind that is not smaller than either type1 or type2."
+std_args:
+  - name: "type1"
+    type: "DType"
+  - name: "type2"
+    type: "DType"
+variants:
+  torch:
+    api: "torch.promote_types"
+  jax:
+    api: "jax.numpy.promote_types"
+  flax_nnx:
+    api: "jax.numpy.promote_types"
+  paxml:
+    api: "jax.numpy.promote_types"
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.promote_types"
+
+---
+operation: "Put"
+description: "Copies value into input at indices."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "index"
+    type: "Tensor"
+  - name: "source"
+    type: "Tensor"
+  - name: "accumulate"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.put"
+  jax:
+    api: "jax.numpy.put"
+    args:
+      input: "a"
+      index: "ind"
+      source: "v" 
+      # JAX put/place returns None (in-place on numpy, immutable on jax.numpy usually maps to .at[].set?)
+      # jax.numpy.put is equivalent to a.put(ind, v, mode) in numpy. 
+      # True equivalent is .at[].set. 
+    requires_plugin: "scatter_indexer"
+  flax_nnx:
+    api: "jax.numpy.put"
+  paxml:
+    api: "jax.numpy.put"
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: "numpy.put"
+    args:
+      input: "a"
+      index: "ind"
+      source: "v"
+
+---
+operation: "QPerChannelAxis"
+description: "Quantization utility for accessing per-channel axis."
+std_args: []
+variants:
+  torch:
+    api: "torch.q_per_channel_axis"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "QPerChannelScales"
+description: "Quantization utility for accessing per-channel scales."
+std_args: []
+variants:
+  torch:
+    api: "torch.q_per_channel_scales"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "QPerChannelZeroPoints"
+description: "Quantization utility for accessing per-channel zero points."
+std_args: []
+variants:
+  torch:
+    api: "torch.q_per_channel_zero_points"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "QScale"
+description: "Quantization utility: returns scale of a quantized tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.q_scale"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "QZeroPoint"
+description: "Quantization utility: returns zero_point of a quantized tensor."
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.q_zero_point"
+  jax:
+    api: null
+  flax_nnx:
+    api: null
+  paxml:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+  mlx:
+    api: null
+  numpy:
+    api: null
+
+---
+operation: "QInt32"
+description: "Quantized Int32 Dtype."
+op_type: attribute
+std_args: []
+variants:
+  torch:
+    api: "torch.qint32"
+  jax:
+    api: "jax.numpy.int32"
+  flax_nnx:
+    api: "jax.numpy.int32"
+  paxml:
+    api: "jax.numpy.int32"
+  keras:
+    api: "numpy.int32"
+  tensorflow:
+    api: "tf.qint32"
+  mlx:
+    api: "mlx.core.int32"
+  numpy:
+    api: "numpy.int32"
+
+---
+operation: "QInt8"
+description: "Quantized Int8 Dtype."
+op_type: attribute
+std_args: []
+variants:
+  torch:
+    api: "torch.qint8"
+  jax:
+    api: "jax.numpy.int8"
+  flax_nnx:
+    api: "jax.numpy.int8"
+  paxml:
+    api: "jax.numpy.int8"
+  keras:
+    api: "numpy.int8"
+  tensorflow:
+    api: "tf.qint8"
+  mlx:
+    api: "mlx.core.int8"
+  numpy:
+    api: "numpy.int8"
+
+---
+operation: "Qr"
+description: "Computes the QR decomposition of input."
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "some"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.qr"
+    arg_values:
+      some:
+        true: "True"
+        false: "False"
+  jax:
+    api: "jax.numpy.linalg.qr"
+    args:
+      input: "a"
+    arg_values:
+      some:
+        true: "'reduced'"
+        false: "'complete'"
+  flax_nnx:
+    api: "jax.numpy.linalg.qr"
+    args:
+      input: "a"
+    arg_values:
+      some:
+        true: "'reduced'"
+        false: "'complete'"
+  paxml:
+    api: "jax.numpy.linalg.qr"
+    args:
+      input: "a"
+    arg_values:
+      some:
+        true: "'reduced'"
+        false: "'complete'"
+  keras:
+    api: "keras.ops.linalg.qr"
+    args:
+       input: "x"
+    arg_values:
+      some:
+        true: "'reduced'"
+        false: "'complete'"
+  tensorflow:
+    api: "tf.linalg.qr"
+    args:
+       input: "input"
+    # TF takes 'full_matrices' (bool) 
+    # some=True -> reduced -> full_matrices=False
+    # some=False -> complete -> full_matrices=True
+    kwargs_map:
+      some: "full_matrices"
+    arg_values:
+      some:
+        true: "False"
+        false: "True"
+  mlx:
+    api: "mlx.core.linalg.qr"
+    args:
+       input: "a"
+    # MLX QR support matches NumPy approximately (reduced/complete)
+  numpy:
+    api: "numpy.linalg.qr"
+    args:
+      input: "a"
+    arg_values:
+      some:
+        true: "'reduced'"
+        false: "'complete'"

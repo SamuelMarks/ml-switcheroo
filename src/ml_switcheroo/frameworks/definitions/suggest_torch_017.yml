@@ -1,0 +1,687 @@
+operation: "Hsplit"
+description: "Splits a tensor horizontally into multiple tensors."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "indices_or_sections"
+    type: "Union[int, List[int]]"
+variants:
+  torch:
+    api: "torch.hsplit"
+  jax:
+    api: "jax.numpy.hsplit"
+    args:
+      input: "ary"
+  numpy:
+    api: "numpy.hsplit"
+    args:
+      input: "ary"
+  keras:
+    api: "keras.ops.hsplit"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.hsplit"
+    args:
+      input: "ary"
+---
+operation: "Hspmm"
+description: "Performs sparse matrix multiplication."
+op_type: "function"
+std_args:
+  - name: "mat1"
+    type: "Tensor"
+  - name: "mat2"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.hspmm"
+  jax:
+    api: null
+    missing_message: "Sparse hybrid multiplication not directly supported in JAX core."
+  numpy:
+    api: null
+  keras:
+    api: null
+  tensorflow:
+    api: null
+---
+operation: "Hstack"
+description: "Stacks tensors in sequence horizontally (column wise)."
+op_type: "function"
+std_args:
+  - name: "tensors"
+    type: "List[Tensor]"
+variants:
+  torch:
+    api: "torch.hstack"
+  jax:
+    api: "jax.numpy.hstack"
+    args:
+      tensors: "tup"
+  numpy:
+    api: "numpy.hstack"
+    args:
+      tensors: "tup"
+  keras:
+    api: "keras.ops.hstack"
+    args:
+      tensors: "x"
+  tensorflow:
+    api: "tf.experimental.numpy.hstack"
+    args:
+      tensors: "tup"
+  mlx:
+    api: "mlx.core.concatenate"
+    args:
+      tensors: "arrays"
+    inject_args:
+      axis: 1
+---
+operation: "Hypot"
+description: "Given the legs of a right triangle, return its hypotenuse."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.hypot"
+  jax:
+    api: "jax.numpy.hypot"
+    args:
+      input: "x1"
+      other: "x2"
+  numpy:
+    api: "numpy.hypot"
+    args:
+      input: "x1"
+      other: "x2"
+  keras:
+    api: "keras.ops.sqrt"
+    macro_template: "keras.ops.sqrt(keras.ops.square({input}) + keras.ops.square({other}))"
+  tensorflow:
+    api: "tf.math.hypot"
+    args:
+      input: "x"
+      other: "y"
+---
+operation: "I0"
+description: "Computes the modified Bessel function of the first kind of order 0."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.i0"
+  jax:
+    api: "jax.scipy.special.i0"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.i0"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.bessel_i0"
+    args:
+      input: "x"
+  keras:
+    api: "tf.math.bessel_i0"
+    missing_message: "Requires TensorFlow backend."
+---
+operation: "I0_"
+description: "In-place version of I0."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.i0_"
+  jax:
+    api: "jax.scipy.special.i0"
+    args:
+      input: "x"
+    requires_plugin: "unroll_inplace_ops"
+---
+operation: "Igamma"
+description: "Calculates the lower regularized incomplete gamma function."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+    doc: "a parameter"
+  - name: "other"
+    type: "Tensor"
+    doc: "x parameter"
+variants:
+  torch:
+    api: "torch.igamma"
+  jax:
+    api: "jax.scipy.special.gammainc"
+    args:
+      input: "a"
+      other: "x"
+  numpy:
+    required_imports:
+      - "import scipy.special"
+    api: "scipy.special.gammainc"
+    args:
+      input: "a"
+      other: "x"
+  tensorflow:
+    api: "tf.math.igamma"
+    args:
+      input: "a"
+      other: "x"
+---
+operation: "Igammac"
+description: "Calculates the upper regularized incomplete gamma function."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+    doc: "a parameter"
+  - name: "other"
+    type: "Tensor"
+    doc: "x parameter"
+variants:
+  torch:
+    api: "torch.igammac"
+  jax:
+    api: "jax.scipy.special.gammaincc"
+    args:
+      input: "a"
+      other: "x"
+  numpy:
+    required_imports:
+      - "import scipy.special"
+    api: "scipy.special.gammaincc"
+    args:
+      input: "a"
+      other: "x"
+  tensorflow:
+    api: "tf.math.igammac"
+    args:
+      input: "a"
+      other: "x"
+---
+operation: "Iinfo"
+description: "Machine limits for integer types."
+op_type: "function"
+std_args:
+  - name: "type"
+    type: "Union[str, dtype]"
+variants:
+  torch:
+    api: "torch.iinfo"
+  jax:
+    api: "jax.numpy.iinfo"
+  numpy:
+    api: "numpy.iinfo"
+  tensorflow:
+    api: "tf.experimental.numpy.iinfo"
+---
+operation: "Imag"
+description: "Returns a new tensor containing imaginary values of the self tensor."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.imag"
+  jax:
+    api: "jax.numpy.imag"
+    args:
+      input: "val"
+  numpy:
+    api: "numpy.imag"
+    args:
+      input: "val"
+  keras:
+    api: "keras.ops.imag"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.math.imag"
+  mlx:
+    api: "mlx.core.imag"
+    args:
+      input: "a"
+---
+operation: "ImportIrModule"
+description: "Imports a TorchScript IR module. Not supported in functional frameworks."
+op_type: "function"
+std_args:
+  - name: "cu"
+    type: "Any"
+  - name: "filename"
+    type: "str"
+variants:
+  torch:
+    api: "torch.import_ir_module"
+  jax:
+    api: null
+  numpy:
+    api: null
+---
+operation: "IndexAdd"
+description: "Accumulate values into tensor at indices."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "Tensor"
+  - name: "source"
+    type: "Tensor"
+  - name: "alpha"
+    type: "number"
+    default: 1
+variants:
+  torch:
+    api: "torch.index_add"
+  jax:
+    api: "jax.numpy.ndarray.at"
+    description: "Requires advanced scatter logic typically handled via plugin"
+    requires_plugin: "scatter_indexer"
+  keras:
+    api: "keras.ops.scatter_add"
+    args:
+      index: "indices"
+      source: "updates"
+      input: null
+      dim: null
+      alpha: null
+    missing_message: "Direct axis support in keras.ops.scatter_add varies. Check docs."
+---
+operation: "IndexCopy"
+description: "Copies elements from source into input at indices."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "Tensor"
+  - name: "source"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.index_copy"
+  jax:
+    requires_plugin: "scatter_indexer"
+---
+operation: "IndexFill"
+description: "Fills elements at indices with value."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "Tensor"
+  - name: "value"
+    type: "number"
+variants:
+  torch:
+    api: "torch.index_fill"
+  jax:
+    requires_plugin: "scatter_indexer"
+  mlx:
+    api: null
+---
+operation: "IndexPut"
+description: "Puts values into tensor at indices (tuple)."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tuple[Tensor]"
+  - name: "values"
+    type: "Tensor"
+  - name: "accumulate"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.index_put"
+  jax:
+    requires_plugin: "scatter_indexer"
+---
+operation: "IndexPut_"
+description: "In-place version of IndexPut."
+op_type: "function"
+is_inplace: true
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "indices"
+    type: "Tuple[Tensor]"
+  - name: "values"
+    type: "Tensor"
+  - name: "accumulate"
+    type: "bool"
+    default: false
+variants:
+  torch:
+    api: "torch.index_put_"
+  jax:
+    requires_plugin: "unroll_inplace_ops"
+---
+operation: "IndexReduce"
+description: "Reduce values into tensor (e.g. mean, max)."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "Tensor"
+  - name: "source"
+    type: "Tensor"
+  - name: "reduce"
+    type: "str"
+variants:
+  torch:
+    api: "torch.index_reduce"
+  jax:
+    api: null
+    missing_message: "Complex index reduction requires .at[].reduce() mapping via plugin."
+---
+operation: "IndexSelect"
+description: "Returns a new tensor which indexes the input tensor along dimension dim using the entries in index."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "dim"
+    type: "int"
+  - name: "index"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.index_select"
+  jax:
+    api: "jax.numpy.take"
+    args:
+      input: "a"
+      dim: "axis"
+      index: "indices"
+  numpy:
+    api: "numpy.take"
+    args:
+      input: "a"
+      dim: "axis"
+      index: "indices"
+  keras:
+    api: "keras.ops.take"
+    args:
+      input: "x"
+      dim: "axis"
+      index: "indices"
+  tensorflow:
+    api: "tf.gather"
+    args:
+      input: "params"
+      dim: "axis"
+      index: "indices"
+  mlx:
+    api: "mlx.core.take"
+    args:
+      input: "a"
+      dim: "axis"
+      index: "indices"
+---
+operation: "Infinite"
+description: "Floating point positive infinity value."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.inf"
+  jax:
+    api: "jax.numpy.inf"
+  numpy:
+    api: "numpy.inf"
+  keras:
+    macro_template: "float('inf')"
+  mlx:
+    macro_template: "float('inf')"
+  tensorflow:
+    api: "numpy.inf"
+---
+operation: "InferenceMode"
+description: "Context manager that enables or disables inference mode (gradient isolation)."
+op_type: "context"
+std_args:
+  - name: "mode"
+    type: "bool"
+    default: true
+variants:
+  torch:
+    api: "torch.inference_mode"
+  jax:
+    api: "contextlib.nullcontext"
+    requires_plugin: "context_to_function_wrap"
+  numpy:
+    api: "contextlib.nullcontext"
+    requires_plugin: "context_to_function_wrap"
+  keras:
+    api: "contextlib.nullcontext"
+    requires_plugin: "context_to_function_wrap"
+---
+operation: "InitNumThreads"
+description: "Initializes the number of parallel threads used on the current thread."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.init_num_threads"
+  jax:
+    api: null
+  numpy:
+    api: null
+---
+operation: "InitialSeed"
+description: "Returns the initial seed for generating random numbers."
+op_type: "function"
+std_args: []
+variants:
+  torch:
+    api: "torch.initial_seed"
+  jax:
+    api: null
+    missing_message: "JAX uses explicit PRNG keys, no global seed state."
+  numpy:
+    api: null
+---
+operation: "Inner"
+description: "Computes the dot product for 1D tensors. For higher dimensions, sums product of elements along last dim."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "other"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.inner"
+  jax:
+    api: "jax.numpy.inner"
+    args:
+      input: "a"
+      other: "b"
+  numpy:
+    api: "numpy.inner"
+    args:
+      input: "a"
+      other: "b"
+  keras:
+    api: "keras.ops.matmul"
+    missing_message: "Keras inner product maps usually to matmul or tensordot."
+  mlx:
+    api: "mlx.core.inner"
+    args:
+      input: "a"
+      other: "b"
+  tensorflow:
+    api: "tf.experimental.numpy.inner"
+    args:
+      input: "a"
+      other: "b"
+---
+operation: "InstanceNorm"
+description: "Applies Instance Normalization."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+  - name: "weight"
+    type: "Tensor"
+    default: null
+  - name: "bias"
+    type: "Tensor"
+    default: null
+  - name: "running_mean"
+    type: "Tensor"
+    default: null
+  - name: "running_var"
+    type: "Tensor"
+    default: null
+  - name: "use_input_stats"
+    type: "bool"
+    default: true
+  - name: "momentum"
+    type: "float"
+    default: 0.1
+  - name: "eps"
+    type: "float"
+    default: 1e-05
+variants:
+  torch:
+    api: "torch.instance_norm"
+  jax:
+    api: null
+    missing_message: "JAX core has no functional instance_norm. Use Flax Linen GroupNorm/LayerNorm."
+  keras:
+    api: "keras.ops.moments"
+    missing_message: "Use keras.layers.InstanceNormalization class."
+---
+operation: "Int"
+description: "32-bit integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.int"
+  jax:
+    api: "jax.numpy.int32"
+  numpy:
+    api: "numpy.int32"
+  keras:
+    api: "numpy.int32"
+  mlx:
+    api: "mlx.core.int32"
+  tensorflow:
+    api: "tf.int32"
+---
+operation: "Int16"
+description: "16-bit integer type."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.int16"
+  jax:
+    api: "jax.numpy.int16"
+  numpy:
+    api: "numpy.int16"
+  mlx:
+    api: "mlx.core.int16"
+  tensorflow:
+    api: "tf.int16"
+---
+operation: "Int64"
+description: "64-bit integer type (Long)."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.int64"
+  jax:
+    api: "jax.numpy.int64"
+  numpy:
+    api: "numpy.int64"
+  mlx:
+    api: "mlx.core.int64"
+  tensorflow:
+    api: "tf.int64"
+---
+operation: "Int8"
+description: "8-bit integer type (Byte/Char)."
+op_type: "attribute"
+std_args: []
+variants:
+  torch:
+    api: "torch.int8"
+  jax:
+    api: "jax.numpy.int8"
+  numpy:
+    api: "numpy.int8"
+  mlx:
+    api: "mlx.core.int8"
+  tensorflow:
+    api: "tf.int8"
+---
+operation: "IsComplex"
+description: "Returns True if the tensor data type is a complex floating point type."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+    doc: "The tensor to check."
+variants:
+  torch:
+    api: "torch.is_complex"
+  jax:
+    api: "jax.numpy.iscomplexobj"
+    args:
+      input: "x"
+  numpy:
+    api: "numpy.iscomplexobj"
+    args:
+      input: "x"
+  tensorflow:
+    api: "tf.is_complex"
+    args:
+      input: "x"
+---
+operation: "IsFloatingPoint"
+description: "Returns True if the tensor data type is a floating point type."
+op_type: "function"
+std_args:
+  - name: "input"
+    type: "Tensor"
+variants:
+  torch:
+    api: "torch.is_floating_point"
+  jax:
+    api: "jax.numpy.issubdtype"
+    macro_template: "jax.numpy.issubdtype({input}.dtype, jax.numpy.floating)"
+  numpy:
+    api: "numpy.issubdtype"
+    macro_template: "numpy.issubdtype({input}.dtype, numpy.floating)"

@@ -1,0 +1,988 @@
+operation: "Conv3d" 
+description: "3D convolution layer (e.g. spatial-temporal convolution)." 
+op_type: "class" 
+std_args: 
+  - name: "in_channels" 
+    type: "int" 
+  - name: "out_channels" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int, int, int]" 
+  - name: "stride" 
+    type: "int | Tuple[int, int, int]" 
+    default: 1
+  - name: "padding" 
+    type: "int | str | Tuple[int, ...]" 
+    default: 0
+  - name: "dilation" 
+    type: "int | Tuple[int, int, int]" 
+    default: 1
+  - name: "groups" 
+    type: "int" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.nn.Conv3d" 
+  keras: 
+    api: "keras.layers.Conv3D" 
+    args: 
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+      in_channels: null # Infer from input_shape or build
+  tensorflow: 
+    api: "tf.keras.layers.Conv3D" 
+    args: 
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+      in_channels: null
+  flax_nnx: 
+    api: "flax.nnx.Conv" 
+    args: 
+      out_channels: "features" 
+      bias: "use_bias" 
+  mlx: 
+    api: "mlx.nn.Conv3d" 
+  paxml: 
+    api: "praxis.layers.Conv3D" 
+    args: 
+      in_channels: "input_dims" 
+      out_channels: "output_dims" 
+      bias: "use_bias" 
+---
+operation: "ConvTranspose3d" 
+description: "3D transposed convolution layer." 
+op_type: "class" 
+std_args: 
+  - name: "in_channels" 
+    type: "int" 
+  - name: "out_channels" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int, int, int]" 
+  - name: "stride" 
+    type: "int | Tuple[int, int, int]" 
+    default: 1
+  - name: "padding" 
+    type: "int | str | Tuple[int, ...]" 
+    default: 0
+  - name: "output_padding" 
+    type: "int | Tuple[int, ...]" 
+    default: 0
+  - name: "dilation" 
+    type: "int | Tuple[int, int, int]" 
+    default: 1
+  - name: "groups" 
+    type: "int" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.nn.ConvTranspose3d" 
+  keras: 
+    api: "keras.layers.Conv3DTranspose" 
+    args: 
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+      in_channels: null
+  tensorflow: 
+    api: "tf.keras.layers.Conv3DTranspose" 
+    args: 
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+      in_channels: null
+  flax_nnx: 
+    api: "flax.nnx.ConvTranspose" 
+    args: 
+      out_channels: "features" 
+      bias: "use_bias" 
+  mlx: 
+    api: "mlx.nn.ConvTranspose3d" 
+  paxml: 
+    api: "praxis.layers.Conv3DTranspose" 
+    args: 
+      in_channels: "input_dims" 
+      out_channels: "output_dims" 
+      bias: "use_bias" 
+---
+operation: "ConvLSTM1d" 
+description: "1D Convolutional LSTM." 
+op_type: "class" 
+std_args: 
+  - name: "input_size" 
+    type: "int" 
+  - name: "hidden_size" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int]" 
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  keras: 
+    api: "keras.layers.ConvLSTM1D" 
+    args: 
+      input_size: null
+      hidden_size: "filters" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.ConvLSTM1D" 
+    args: 
+      input_size: null
+      hidden_size: "filters" 
+      bias: "use_bias" 
+  torch: 
+    api: null
+    missing_message: "PyTorch does not have a native ConvLSTM1d layer." 
+---
+operation: "ConvLSTM2d" 
+description: "2D Convolutional LSTM." 
+op_type: "class" 
+std_args: 
+  - name: "input_size" 
+    type: "int" 
+  - name: "hidden_size" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int, int]" 
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  keras: 
+    api: "keras.layers.ConvLSTM2D" 
+    args: 
+      input_size: null
+      hidden_size: "filters" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.ConvLSTM2D" 
+    args: 
+      input_size: null
+      hidden_size: "filters" 
+      bias: "use_bias" 
+  torch: 
+    api: null
+    missing_message: "PyTorch does not have a native ConvLSTM2d layer." 
+---
+operation: "ConvLSTM3d" 
+description: "3D Convolutional LSTM." 
+op_type: "class" 
+std_args: 
+  - name: "input_size" 
+    type: "int" 
+  - name: "hidden_size" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int, int, int]" 
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  keras: 
+    api: "keras.layers.ConvLSTM3D" 
+    args: 
+      input_size: null
+      hidden_size: "filters" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.ConvLSTM3D" 
+    args: 
+      input_size: null
+      hidden_size: "filters" 
+      bias: "use_bias" 
+  torch: 
+    api: null
+    missing_message: "PyTorch does not have a native ConvLSTM3d layer." 
+---
+operation: "Conv1d" 
+description: "1D convolution layer (e.g. temporal convolution)." 
+op_type: "class" 
+std_args: 
+  - name: "in_channels" 
+    type: "int" 
+  - name: "out_channels" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int]" 
+  - name: "stride" 
+    type: "int | Tuple[int]" 
+    default: 1
+  - name: "padding" 
+    type: "int | str | Tuple[int, ...]" 
+    default: 0
+  - name: "dilation" 
+    type: "int | Tuple[int]" 
+    default: 1
+  - name: "groups" 
+    type: "int" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.nn.Conv1d" 
+  keras: 
+    api: "keras.layers.Convolution1D" 
+    args: 
+      in_channels: null
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.Convolution1D" 
+    args: 
+      in_channels: null
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+  flax_nnx: 
+    api: "flax.nnx.Conv" 
+    args: 
+      out_channels: "features" 
+      bias: "use_bias" 
+  mlx: 
+    api: "mlx.nn.Conv1d" 
+  paxml: 
+    api: "praxis.layers.Conv1D" 
+    args: 
+      in_channels: "input_dims" 
+      out_channels: "output_dims" 
+      bias: "use_bias" 
+---
+operation: "ConvTranspose1d" 
+description: "1D transposed convolution layer." 
+op_type: "class" 
+std_args: 
+  - name: "in_channels" 
+    type: "int" 
+  - name: "out_channels" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int]" 
+  - name: "stride" 
+    type: "int | Tuple[int]" 
+    default: 1
+  - name: "padding" 
+    type: "int | str | Tuple[int, ...]" 
+    default: 0
+  - name: "output_padding" 
+    type: "int | Tuple[int]" 
+    default: 0
+  - name: "dilation" 
+    type: "int | Tuple[int]" 
+    default: 1
+  - name: "groups" 
+    type: "int" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.nn.ConvTranspose1d" 
+  keras: 
+    api: "keras.layers.Convolution1DTranspose" 
+    args: 
+      in_channels: null
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.Convolution1DTranspose" 
+    args: 
+      in_channels: null
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+  flax_nnx: 
+    api: "flax.nnx.ConvTranspose" 
+    args: 
+      out_channels: "features" 
+      bias: "use_bias" 
+  mlx: 
+    api: "mlx.nn.ConvTranspose1d" 
+  paxml: 
+    api: "praxis.layers.Conv1DTranspose" 
+    args: 
+      in_channels: "input_dims" 
+      out_channels: "output_dims" 
+      bias: "use_bias" 
+---
+operation: "Conv2d" 
+description: "2D convolution layer." 
+op_type: "class" 
+std_args: 
+  - name: "in_channels" 
+    type: "int" 
+  - name: "out_channels" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int, int]" 
+  - name: "stride" 
+    type: "int | Tuple[int, int]" 
+    default: 1
+  - name: "padding" 
+    type: "int | str | Tuple[int, ...]" 
+    default: 0
+  - name: "dilation" 
+    type: "int | Tuple[int, int]" 
+    default: 1
+  - name: "groups" 
+    type: "int" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.nn.Conv2d" 
+  keras: 
+    api: "keras.layers.Convolution2D" 
+    args: 
+      in_channels: null
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.Convolution2D" 
+    args: 
+      in_channels: null
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+  flax_nnx: 
+    api: "flax.nnx.Conv" 
+    args: 
+      out_channels: "features" 
+      bias: "use_bias" 
+  mlx: 
+    api: "mlx.nn.Conv2d" 
+  paxml: 
+    api: "praxis.layers.Conv2D" 
+    args: 
+      in_channels: "input_dims" 
+      out_channels: "output_dims" 
+      bias: "use_bias" 
+---
+operation: "ConvTranspose2d" 
+description: "2D transposed convolution layer." 
+op_type: "class" 
+std_args: 
+  - name: "in_channels" 
+    type: "int" 
+  - name: "out_channels" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int, int]" 
+  - name: "stride" 
+    type: "int | Tuple[int, int]" 
+    default: 1
+  - name: "padding" 
+    type: "int | str | Tuple[int, ...]" 
+    default: 0
+  - name: "output_padding" 
+    type: "int | Tuple[int, int]" 
+    default: 0
+  - name: "dilation" 
+    type: "int | Tuple[int, int]" 
+    default: 1
+  - name: "groups" 
+    type: "int" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.nn.ConvTranspose2d" 
+  keras: 
+    api: "keras.layers.Convolution2DTranspose" 
+    args: 
+      in_channels: null
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.Convolution2DTranspose" 
+    args: 
+      in_channels: null
+      out_channels: "filters" 
+      stride: "strides" 
+      dilation: "dilation_rate" 
+      bias: "use_bias" 
+  flax_nnx: 
+    api: "flax.nnx.ConvTranspose" 
+    args: 
+      out_channels: "features" 
+      bias: "use_bias" 
+  mlx: 
+    api: "mlx.nn.ConvTranspose2d" 
+  paxml: 
+    api: "praxis.layers.Conv2DTranspose" 
+    args: 
+      in_channels: "input_dims" 
+      out_channels: "output_dims" 
+      bias: "use_bias" 
+---
+operation: "Convolution3d" 
+description: "3D convolution layer (Verbose Alias)." 
+op_type: "class" 
+std_args: 
+  - name: "in_channels" 
+    type: "int" 
+  - name: "out_channels" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int, int, int]" 
+  - name: "stride" 
+    type: "int | Tuple[int, int, int]" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  keras: 
+    api: "keras.layers.Convolution3D" 
+    args: 
+      out_channels: "filters" 
+      stride: "strides" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.Convolution3D" 
+  torch: 
+    api: "torch.nn.Conv3d" # Map to standard
+---
+operation: "Convolution3dTranspose" 
+description: "3D transposed convolution layer (Verbose Alias)." 
+op_type: "class" 
+std_args: 
+  - name: "in_channels" 
+    type: "int" 
+  - name: "out_channels" 
+    type: "int" 
+  - name: "kernel_size" 
+    type: "int | Tuple[int, int, int]" 
+  - name: "stride" 
+    type: "int | Tuple[int, int, int]" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  keras: 
+    api: "keras.layers.Convolution3DTranspose" 
+    args: 
+      out_channels: "filters" 
+      stride: "strides" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.Convolution3DTranspose" 
+  torch: 
+    api: "torch.nn.ConvTranspose3d" 
+---
+operation: "Cropping1d" 
+description: "Cropping layer for 1D input." 
+op_type: "class" 
+std_args: 
+  - name: "cropping" 
+    type: "int | Tuple[int, int]" 
+    default: 0
+variants: 
+  keras: 
+    api: "keras.layers.Cropping1D" 
+  tensorflow: 
+    api: "tf.keras.layers.Cropping1D" 
+  torch: 
+    api: null
+---
+operation: "Cropping2d" 
+description: "Cropping layer for 2D input." 
+op_type: "class" 
+std_args: 
+  - name: "cropping" 
+    type: "int | Tuple[int, int] | Tuple[Tuple[int, int], Tuple[int, int]]" 
+    default: 0
+variants: 
+  keras: 
+    api: "keras.layers.Cropping2D" 
+  tensorflow: 
+    api: "tf.keras.layers.Cropping2D" 
+  torch: 
+    api: "torchvision.transforms.CenterCrop" 
+---
+operation: "Cropping3d" 
+description: "Cropping layer for 3D data." 
+op_type: "class" 
+std_args: 
+  - name: "cropping" 
+    type: "int | Tuple[int, int, int] | Tuple[Tuple[int, int], ...]" 
+    default: 0
+variants: 
+  keras: 
+    api: "keras.layers.Cropping3D" 
+  tensorflow: 
+    api: "tf.keras.layers.Cropping3D" 
+  torch: 
+    api: null
+---
+operation: "CutMix" 
+description: "CutMix data augmentation." 
+op_type: "class" 
+std_args: 
+  - name: "factor" 
+    type: "float | Tuple[float, float]" 
+    default: 1.0
+  - name: "seed" 
+    type: "int" 
+    default: null
+variants: 
+  keras: 
+    api: "keras.layers.CutMix" 
+  tensorflow: 
+    api: "tf.keras.layers.CutMix" 
+  torch: 
+    api: "torchvision.transforms.v2.CutMix" 
+    args: 
+      factor: "alpha" 
+      seed: null
+---
+operation: "Linear" 
+description: "Linear transformation layer." 
+op_type: "class" 
+std_args: 
+  - name: "in_features" 
+    type: "int" 
+  - name: "out_features" 
+    type: "int" 
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.nn.Linear" 
+  keras: 
+    api: "keras.layers.Dense" 
+    args: 
+      in_features: null
+      out_features: "units" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.Dense" 
+    args: 
+      in_features: null
+      out_features: "units" 
+      bias: "use_bias" 
+  flax_nnx: 
+    api: "flax.nnx.Linear" 
+    args: 
+      bias: "use_bias" 
+  mlx: 
+    api: "mlx.nn.Linear" 
+    args: 
+      in_features: "input_dims" 
+      out_features: "output_dims" 
+  paxml: 
+    api: "praxis.layers.Linear" 
+    args: 
+      in_features: "input_dims" 
+      out_features: "output_dims" 
+      bias: "use_bias" 
+---
+operation: "DepthwiseConv1d" 
+description: "1D depthwise convolution layer." 
+op_type: "class" 
+std_args: 
+  - name: "kernel_size" 
+    type: "int | Tuple[int]" 
+  - name: "stride" 
+    type: "int | Tuple[int]" 
+    default: 1
+  - name: "depth_multiplier" 
+    type: "int" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  keras: 
+    api: "keras.layers.DepthwiseConv1D" 
+    args: 
+      stride: "strides" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.DepthwiseConv1D" 
+    args: 
+      stride: "strides" 
+      bias: "use_bias" 
+  torch: 
+    api: "torch.nn.Conv1d" 
+    requires_plugin: "depthwise_conv_adapter" 
+---
+operation: "DepthwiseConv2d" 
+description: "2D depthwise convolution layer." 
+op_type: "class" 
+std_args: 
+  - name: "kernel_size" 
+    type: "int | Tuple[int, int]" 
+  - name: "stride" 
+    type: "int | Tuple[int, int]" 
+    default: 1
+  - name: "depth_multiplier" 
+    type: "int" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  keras: 
+    api: "keras.layers.DepthwiseConv2D" 
+    args: 
+      stride: "strides" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.DepthwiseConv2D" 
+    args: 
+      stride: "strides" 
+      bias: "use_bias" 
+  torch: 
+    api: "torch.nn.Conv2d" 
+    requires_plugin: "depthwise_conv_adapter" 
+  paxml: 
+    api: "praxis.layers.DepthwiseConv2D" 
+    args: 
+      depth_multiplier: "channel_multiplier" 
+      bias: "use_bias" 
+---
+operation: "Discretization" 
+description: "Buckets continuous features by ranges." 
+op_type: "class" 
+std_args: 
+  - name: "bin_boundaries" 
+    type: "List[float]" 
+    default: null
+  - name: "num_bins" 
+    type: "int" 
+    default: null
+  - name: "epsilon" 
+    type: "float" 
+    default: 0.01
+variants: 
+  keras: 
+    api: "keras.layers.Discretization" 
+  tensorflow: 
+    api: "tf.keras.layers.Discretization" 
+  torch: 
+    api: "torch.bucketize" 
+    requires_plugin: "discretization_adapter" 
+---
+operation: "Dot" 
+description: "Computes element-wise dot product." 
+op_type: "class" 
+std_args: 
+  - name: "axes" 
+    type: "int | Tuple[int, int]" 
+  - name: "normalize" 
+    type: "bool" 
+    default: false
+variants: 
+  keras: 
+    api: "keras.layers.Dot" 
+  tensorflow: 
+    api: "tf.keras.layers.Dot" 
+  torch: 
+    api: "torch.matmul" 
+    requires_plugin: "dot_adapter" 
+---
+operation: "Dropout" 
+description: "Applies dropout to the input." 
+op_type: "class" 
+std_args: 
+  - name: "p" 
+    type: "float" 
+  - name: "seed" 
+    type: "int" 
+    default: null
+variants: 
+  torch: 
+    api: "torch.nn.Dropout" 
+  keras: 
+    api: "keras.layers.Dropout" 
+    args: 
+      p: "rate" 
+  tensorflow: 
+    api: "tf.keras.layers.Dropout" 
+    args: 
+      p: "rate" 
+  flax_nnx: 
+    api: "flax.nnx.Dropout" 
+    args: 
+      p: "rate" 
+      seed: null
+  mlx: 
+    api: "mlx.nn.Dropout" 
+  paxml: 
+    api: "praxis.layers.Dropout" 
+    args: 
+      p: "keep_prob" 
+      seed: null
+    arg_values: 
+      p: "1.0 - {p}" 
+---
+operation: "ELU" 
+description: "Applies an Exponential Linear Unit function." 
+op_type: "class" 
+std_args: 
+  - name: "alpha" 
+    type: "float" 
+    default: 1.0
+variants: 
+  torch: 
+    api: "torch.nn.ELU" 
+  keras: 
+    api: "keras.layers.ELU" 
+  tensorflow: 
+    api: "tf.keras.layers.ELU" 
+  flax_nnx: 
+    api: "flax.nnx.Elu" 
+  mlx: 
+    api: "mlx.nn.ELU" 
+---
+operation: "EinsumDense" 
+description: "Layer that uses einsum." 
+op_type: "class" 
+std_args: 
+  - name: "equation" 
+    type: "str" 
+  - name: "output_shape" 
+    type: "int | Tuple[int, ...]" 
+  - name: "bias_axes" 
+    type: "str" 
+    default: null
+variants: 
+  keras: 
+    api: "keras.layers.EinsumDense" 
+  tensorflow: 
+    api: "tf.keras.layers.EinsumDense" 
+  torch: 
+    api: null
+---
+operation: "Embedding" 
+description: "Dense vector lookup." 
+op_type: "class" 
+std_args: 
+  - name: "num_embeddings" 
+    type: "int" 
+  - name: "embedding_dim" 
+    type: "int" 
+variants: 
+  torch: 
+    api: "torch.nn.Embedding" 
+  keras: 
+    api: "keras.layers.Embedding" 
+    args: 
+      num_embeddings: "input_dim" 
+      embedding_dim: "output_dim" 
+  tensorflow: 
+    api: "tf.keras.layers.Embedding" 
+    args: 
+      num_embeddings: "input_dim" 
+      embedding_dim: "output_dim" 
+  flax_nnx: 
+    api: "flax.nnx.Embed" 
+    args: 
+      embedding_dim: "features" 
+  mlx: 
+    api: "mlx.nn.Embedding" 
+    args: 
+      embedding_dim: "dims" 
+  paxml: 
+    api: "praxis.layers.Embedding" 
+    args: 
+      embedding_dim: "embedding_dims" 
+---
+operation: "Equalization" 
+description: "Histogram equalization." 
+op_type: "class" 
+std_args: 
+  - name: "value_range" 
+    type: "Tuple[float, float]" 
+    default: [0, 255] 
+  - name: "bins" 
+    type: "int" 
+    default: 256
+variants: 
+  keras: 
+    api: "keras.layers.Equalization" 
+  tensorflow: 
+    api: "tf.keras.layers.Equalization" 
+  torch: 
+    api: "torchvision.transforms.RandomEqualize" 
+---
+operation: "Flatten" 
+description: "Flattens the input." 
+op_type: "class" 
+std_args: 
+  - name: "start_dim" 
+    type: "int" 
+    default: 1
+  - name: "end_dim" 
+    type: "int" 
+    default: -1
+variants: 
+  torch: 
+    api: "torch.nn.Flatten" 
+  keras: 
+    api: "keras.layers.Flatten" 
+    args: 
+      start_dim: null
+      end_dim: null
+  tensorflow: 
+    api: "tf.keras.layers.Flatten" 
+    args: 
+      start_dim: null
+      end_dim: null
+  paxml: 
+    api: "praxis.layers.Flatten" 
+---
+operation: "FlaxLayer" 
+description: "Keras Layer wrapping Flax." 
+op_type: "class" 
+std_args: 
+  - name: "module" 
+    type: "Any" 
+variants: 
+  keras: 
+    api: "keras.layers.FlaxLayer" 
+---
+operation: "GRU" 
+description: "Gated Recurrent Unit." 
+op_type: "class" 
+std_args: 
+  - name: "input_size" 
+    type: "int" 
+  - name: "hidden_size" 
+    type: "int" 
+  - name: "num_layers" 
+    type: "int" 
+    default: 1
+  - name: "bias" 
+    type: "bool" 
+    default: true
+  - name: "batch_first" 
+    type: "bool" 
+    default: false
+  - name: "bidirectional" 
+    type: "bool" 
+    default: false
+variants: 
+  torch: 
+    api: "torch.nn.GRU" 
+  keras: 
+    api: "keras.layers.GRU" 
+    args: 
+      input_size: null
+      hidden_size: "units" 
+      bias: "use_bias" 
+      batch_first: null
+      num_layers: null
+      bidirectional: "go_backwards" 
+  tensorflow: 
+    api: "tf.keras.layers.GRU" 
+    args: 
+      input_size: null
+      hidden_size: "units" 
+      bias: "use_bias" 
+  flax_nnx: 
+    api: "flax.nnx.GRU" 
+    args: 
+      input_size: "features" 
+      hidden_size: "hidden_features" 
+  mlx: 
+    api: "mlx.nn.GRU" 
+    args: 
+      input_size: "input_dims" 
+      hidden_size: "hidden_dims" 
+      num_layers: null
+      batch_first: null
+  paxml: 
+    api: "praxis.layers.GRU" 
+    args: 
+      input_size: "input_dims" 
+      hidden_size: "hidden_dims" 
+---
+operation: "GRUCell" 
+description: "Cell class for the GRU layer." 
+op_type: "class" 
+std_args: 
+  - name: "input_size" 
+    type: "int" 
+  - name: "hidden_size" 
+    type: "int" 
+  - name: "bias" 
+    type: "bool" 
+    default: true
+variants: 
+  torch: 
+    api: "torch.nn.GRUCell" 
+  keras: 
+    api: "keras.layers.GRUCell" 
+    args: 
+      input_size: null
+      hidden_size: "units" 
+      bias: "use_bias" 
+  tensorflow: 
+    api: "tf.keras.layers.GRUCell" 
+    args: 
+      input_size: null
+      hidden_size: "units" 
+      bias: "use_bias" 
+  flax_nnx: 
+    api: "flax.nnx.GRUCell" 
+    args: 
+      input_size: "features" 
+      hidden_size: "hidden_features" 
+  paxml: 
+    api: "praxis.layers.GRUCell" 
+    args: 
+      input_size: "input_dims" 
+      hidden_size: "hidden_dims" 
+      bias: null
+---
+operation: "GaussianDropout" 
+description: "Apply multiplicative 1-centered Gaussian noise." 
+op_type: "class" 
+std_args: 
+  - name: "rate" 
+    type: "float" 
+  - name: "seed" 
+    type: "int" 
+    default: null
+variants: 
+  keras: 
+    api: "keras.layers.GaussianDropout" 
+  tensorflow: 
+    api: "tf.keras.layers.GaussianDropout" 
+  torch: 
+    api: "torch.nn.Dropout" 
+    # Approximation warning
