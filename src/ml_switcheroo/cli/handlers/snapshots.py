@@ -12,9 +12,9 @@ templates. This ensures ``gen-tests`` has the necessary metadata.
 
 import json
 import importlib.metadata
-import logging
+from operator import attrgetter
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 from ml_switcheroo.discovery.syncer import FrameworkSyncer
@@ -266,6 +266,7 @@ def _capture_framework(fw_name: str) -> Dict[str, Any]:
       refs = adapter.collect_api(category)
 
       if refs:
+        refs.sort(key=attrgetter("name"))
         found_any = True
         snapshot_data["categories"][category.value] = [ref.model_dump(exclude_unset=True) for ref in refs]
         print(f"  - Found {len(refs)} {category.value} definitions.")
@@ -300,6 +301,6 @@ def _save_snapshot(fw_name: str, data: Dict[str, Any], target_dir: Path) -> None
   target_dir.mkdir(parents=True, exist_ok=True)
 
   with open(out_path, "w", encoding="utf_8") as f:
-    json.dump(data, f, indent=2)
+    json.dump(data, f, indent=2, sort_keys=True)
 
   log_success(f"Saved snapshot: [path]{out_path}[/path]")

@@ -1,480 +1,480 @@
 {
-  "version": "2.20.0",
   "categories": {
-    "layer": [
-      {
-        "name": "FlaxLayer",
-        "api_path": "tf.keras.layers.FlaxLayer",
-        "kind": "class",
-        "params": [
-          {
-            "name": "module",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": null
-          },
-          {
-            "name": "method",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "variables",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "kwargs",
-            "kind": "VAR_KEYWORD",
-            "default": null,
-            "annotation": null
-          }
-        ],
-        "docstring": "Keras Layer that wraps a [Flax](https://flax.readthedocs.io) module.\n\nThis layer enables the use of Flax components in the form of\n[`flax.linen.Module`](\n    https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html)\ninstances within Keras when using JAX as the backend for Keras.\n\nThe module method to use for the forward pass can be specified via the\n`method` argument and is `__call__` by default. This method must take the\nfollowing arguments with these exact names:\n\n- `self` if the method is bound to the module, which is the case for the\n    default of `__call__`, and `module` otherwise to pass the module.\n- `inputs`: the inputs to the model, a JAX array or a `PyTree` of arrays.\n- `training` *(optional)*: an argument specifying if we're in training mode\n    or inference mode, `True` is passed in training mode.\n\n`FlaxLayer` handles the non-trainable state of your model and required RNGs\nautomatically. Note that the `mutable` parameter of\n[`flax.linen.Module.apply()`](\n    https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html#flax.linen.apply)\nis set to `DenyList([\"params\"])`, therefore making the assumption that all\nthe variables outside of the \"params\" collection are non-trainable weights.\n\nThis example shows how to create a `FlaxLayer` from a Flax `Module` with\nthe default `__call__` method and no training argument:\n\n```python\nclass MyFlaxModule(flax.linen.Module):\n    @flax.linen.compact\n    def __call__(self, inputs):\n        x = inputs\n        x = flax.linen.Conv(features=32, kernel_size=(3, 3))(x)\n        x = flax.linen.relu(x)\n        x = flax.linen.avg_pool(x, window_shape=(2, 2), strides=(2, 2))\n        x = x.reshape((x.shape[0], -1))  # flatten\n        x = flax.linen.Dense(features=200)(x)\n        x = flax.linen.relu(x)\n        x = flax.linen.Dense(features=10)(x)\n        x = flax.linen.softmax(x)\n        return x\n\nflax_module = MyFlaxModule()\nkeras_layer = FlaxLayer(flax_module)\n```\n\nThis example shows how to wrap the module method to conform to the required\nsignature. This allows having multiple input arguments and a training\nargument that has a different name and values. This additionally shows how\nto use a function that is not bound to the module.\n\n```python\nclass MyFlaxModule(flax.linen.Module):\n    @flax.linen.compact\n    def forward(self, input1, input2, deterministic):\n        ...\n        return outputs\n\ndef my_flax_module_wrapper(module, inputs, training):\n    input1, input2 = inputs\n    return module.forward(input1, input2, not training)\n\nflax_module = MyFlaxModule()\nkeras_layer = FlaxLayer(\n    module=flax_module,\n    method=my_flax_module_wrapper,\n)\n```\n\nArgs:\n    module: An instance of `flax.linen.Module` or subclass.\n    method: The method to call the model. This is generally a method in the\n        `Module`. If not provided, the `__call__` method is used. `method`\n        can also be a function not defined in the `Module`, in which case it\n        must take the `Module` as the first argument. It is used for both\n        `Module.init` and `Module.apply`. Details are documented in the\n        `method` argument of [`flax.linen.Module.apply()`](\n          https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html#flax.linen.apply).\n    variables: A `dict` containing all the variables of the module in the\n        same format as what is returned by [`flax.linen.Module.init()`](\n          https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html#flax.linen.init).\n        It should contain a \"params\" key and, if applicable, other keys for\n        collections of variables for non-trainable state. This allows\n        passing trained parameters and learned non-trainable state or\n        controlling the initialization. If `None` is passed, the module's\n        `init` function is called at build time to initialize the variables\n        of the model.",
-        "has_varargs": false
-      },
-      {
-        "name": "InputLayer",
-        "api_path": "tf.keras.layers.InputLayer",
-        "kind": "class",
-        "params": [
-          {
-            "name": "shape",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "batch_size",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "dtype",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "sparse",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "ragged",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "batch_shape",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "input_tensor",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "optional",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "False",
-            "annotation": null
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "kwargs",
-            "kind": "VAR_KEYWORD",
-            "default": null,
-            "annotation": null
-          }
-        ],
-        "docstring": "This is the class from which all layers inherit.\n\nA layer is a callable object that takes as input one or more tensors and\nthat outputs one or more tensors. It involves *computation*, defined\nin the `call()` method, and a *state* (weight variables). State can be\ncreated:\n\n* in `__init__()`, for instance via `self.add_weight()`;\n* in the optional `build()` method, which is invoked by the first\n  `__call__()` to the layer, and supplies the shape(s) of the input(s),\n  which may not have been known at initialization time.\n\nLayers are recursively composable: If you assign a Layer instance as an\nattribute of another Layer, the outer layer will start tracking the weights\ncreated by the inner layer. Nested layers should be instantiated in the\n`__init__()` method or `build()` method.\n\nUsers will just instantiate a layer and then treat it as a callable.\n\nArgs:\n    trainable: Boolean, whether the layer's variables should be trainable.\n    name: String name of the layer.\n    dtype: The dtype of the layer's computations and weights. Can also be a\n        `keras.DTypePolicy`, which allows the computation and weight dtype\n        to differ. Defaults to `None`. `None` means to use\n        `keras.config.dtype_policy()`, which is a `float32` policy unless\n        set to different value (via `keras.config.set_dtype_policy()`).\n\nAttributes:\n    name: The name of the layer (string).\n    dtype: Dtype of the layer's weights. Alias of `layer.variable_dtype`.\n    variable_dtype: Dtype of the layer's weights.\n    compute_dtype: The dtype of the layer's computations.\n        Layers automatically cast inputs to this dtype, which causes\n        the computations and output to also be in this dtype.\n        When mixed precision is used with a\n        `keras.DTypePolicy`, this will be different\n        than `variable_dtype`.\n    trainable_weights: List of variables to be included in backprop.\n    non_trainable_weights: List of variables that should not be\n        included in backprop.\n    weights: The concatenation of the lists trainable_weights and\n        non_trainable_weights (in this order).\n    trainable: Whether the layer should be trained (boolean), i.e.\n        whether its potentially-trainable weights should be returned\n        as part of `layer.trainable_weights`.\n    input_spec: Optional (list of) `InputSpec` object(s) specifying the\n        constraints on inputs that can be accepted by the layer.\n\nWe recommend that descendants of `Layer` implement the following methods:\n\n* `__init__()`: Defines custom layer attributes, and creates layer weights\n    that do not depend on input shapes, using `add_weight()`,\n    or other state.\n* `build(self, input_shape)`: This method can be used to create weights that\n    depend on the shape(s) of the input(s), using `add_weight()`, or other\n    state. `__call__()` will automatically build the layer\n    (if it has not been built yet) by calling `build()`.\n* `call(self, *args, **kwargs)`: Called in `__call__` after making\n    sure `build()` has been called. `call()` performs the logic of applying\n    the layer to the input arguments.\n    Two reserved keyword arguments you can optionally use in `call()` are:\n        1. `training` (boolean, whether the call is in inference mode or\n            training mode).\n        2. `mask` (boolean tensor encoding masked timesteps in the input,\n            used e.g. in RNN layers).\n    A typical signature for this method is `call(self, inputs)`, and user\n    could optionally add `training` and `mask` if the layer need them.\n* `get_config(self)`: Returns a dictionary containing the configuration\n    used to initialize this layer. If the keys differ from the arguments\n    in `__init__()`, then override `from_config(self)` as well.\n    This method is used when saving\n    the layer or a model that contains this layer.\n\nExamples:\n\nHere's a basic example: a layer with two variables, `w` and `b`,\nthat returns `y = w . x + b`.\nIt shows how to implement `build()` and `call()`.\nVariables set as attributes of a layer are tracked as weights\nof the layers (in `layer.weights`).\n\n```python\nclass SimpleDense(Layer):\n    def __init__(self, units=32):\n        super().__init__()\n        self.units = units\n\n    # Create the state of the layer (weights)\n    def build(self, input_shape):\n        self.kernel = self.add_weight(\n            shape=(input_shape[-1], self.units),\n            initializer=\"glorot_uniform\",\n            trainable=True,\n            name=\"kernel\",\n        )\n        self.bias = self.add_weight(\n            shape=(self.units,),\n            initializer=\"zeros\",\n            trainable=True,\n            name=\"bias\",\n        )\n\n    # Defines the computation\n    def call(self, inputs):\n        return ops.matmul(inputs, self.kernel) + self.bias\n\n# Instantiates the layer.\nlinear_layer = SimpleDense(4)\n\n# This will also call `build(input_shape)` and create the weights.\ny = linear_layer(ops.ones((2, 2)))\nassert len(linear_layer.weights) == 2\n\n# These weights are trainable, so they're listed in `trainable_weights`:\nassert len(linear_layer.trainable_weights) == 2\n```\n\nBesides trainable weights, updated via backpropagation during training,\nlayers can also have non-trainable weights. These weights are meant to\nbe updated manually during `call()`. Here's a example layer that computes\nthe running sum of its inputs:\n\n```python\nclass ComputeSum(Layer):\n\n  def __init__(self, input_dim):\n      super(ComputeSum, self).__init__()\n      # Create a non-trainable weight.\n      self.total = self.add_weight(\n        shape=(),\n        initializer=\"zeros\",\n        trainable=False,\n        name=\"total\",\n      )\n\n  def call(self, inputs):\n      self.total.assign(self.total + ops.sum(inputs))\n      return self.total\n\nmy_sum = ComputeSum(2)\nx = ops.ones((2, 2))\ny = my_sum(x)\n\nassert my_sum.weights == [my_sum.total]\nassert my_sum.non_trainable_weights == [my_sum.total]\nassert my_sum.trainable_weights == []\n```",
-        "has_varargs": false
-      },
-      {
-        "name": "JaxLayer",
-        "api_path": "tf.keras.layers.JaxLayer",
-        "kind": "class",
-        "params": [
-          {
-            "name": "call_fn",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": null
-          },
-          {
-            "name": "init_fn",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "params",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "state",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "seed",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "kwargs",
-            "kind": "VAR_KEYWORD",
-            "default": null,
-            "annotation": null
-          }
-        ],
-        "docstring": "Keras Layer that wraps a JAX model.\n\nThis layer enables the use of JAX components within Keras when using JAX as\nthe backend for Keras.\n\n## Model function\n\nThis layer accepts JAX models in the form of a function, `call_fn`, which\nmust take the following arguments with these exact names:\n\n- `params`: trainable parameters of the model.\n- `state` (*optional*): non-trainable state of the model. Can be omitted if\n    the model has no non-trainable state.\n- `rng` (*optional*): a `jax.random.PRNGKey` instance. Can be omitted if the\n    model does not need RNGs, neither during training nor during inference.\n- `inputs`: inputs to the model, a JAX array or a `PyTree` of arrays.\n- `training` (*optional*): an argument specifying if we're in training mode\n    or inference mode, `True` is passed in training mode. Can be omitted if\n    the model behaves the same in training mode and inference mode.\n\nThe `inputs` argument is mandatory. Inputs to the model must be provided via\na single argument. If the JAX model takes multiple inputs as separate\narguments, they must be combined into a single structure, for instance in a\n`tuple` or a `dict`.\n\n## Model weights initialization\n\nThe initialization of the `params` and `state` of the model can be handled\nby this layer, in which case the `init_fn` argument must be provided. This\nallows the model to be initialized dynamically with the right shape.\nAlternatively, and if the shape is known, the `params` argument and\noptionally the `state` argument can be used to create an already initialized\nmodel.\n\nThe `init_fn` function, if provided, must take the following arguments with\nthese exact names:\n\n- `rng`: a `jax.random.PRNGKey` instance.\n- `inputs`: a JAX array or a `PyTree` of arrays with placeholder values to\n    provide the shape of the inputs.\n- `training` (*optional*): an argument specifying if we're in training mode\n    or inference mode. `True` is always passed to `init_fn`. Can be omitted\n    regardless of whether `call_fn` has a `training` argument.\n\n## Models with non-trainable state\n\nFor JAX models that have non-trainable state:\n\n- `call_fn` must have a `state` argument\n- `call_fn` must return a `tuple` containing the outputs of the model and\n    the new non-trainable state of the model\n- `init_fn` must return a `tuple` containing the initial trainable params of\n    the model and the initial non-trainable state of the model.\n\nThis code shows a possible combination of `call_fn` and `init_fn` signatures\nfor a model with non-trainable state. In this example, the model has a\n`training` argument and an `rng` argument in `call_fn`.\n\n```python\ndef stateful_call(params, state, rng, inputs, training):\n    outputs = ...\n    new_state = ...\n    return outputs, new_state\n\ndef stateful_init(rng, inputs):\n    initial_params = ...\n    initial_state = ...\n    return initial_params, initial_state\n```\n\n## Models without non-trainable state\n\nFor JAX models with no non-trainable state:\n\n- `call_fn` must not have a `state` argument\n- `call_fn` must return only the outputs of the model\n- `init_fn` must return only the initial trainable params of the model.\n\nThis code shows a possible combination of `call_fn` and `init_fn` signatures\nfor a model without non-trainable state. In this example, the model does not\nhave a `training` argument and does not have an `rng` argument in `call_fn`.\n\n```python\ndef stateless_call(params, inputs):\n    outputs = ...\n    return outputs\n\ndef stateless_init(rng, inputs):\n    initial_params = ...\n    return initial_params\n```\n\n## Conforming to the required signature\n\nIf a model has a different signature than the one required by `JaxLayer`,\none can easily write a wrapper method to adapt the arguments. This example\nshows a model that has multiple inputs as separate arguments, expects\nmultiple RNGs in a `dict`, and has a `deterministic` argument with the\nopposite meaning of `training`. To conform, the inputs are combined in a\nsingle structure using a `tuple`, the RNG is split and used the populate the\nexpected `dict`, and the Boolean flag is negated:\n\n```python\ndef my_model_fn(params, rngs, input1, input2, deterministic):\n    ...\n    if not deterministic:\n        dropout_rng = rngs[\"dropout\"]\n        keep = jax.random.bernoulli(dropout_rng, dropout_rate, x.shape)\n        x = jax.numpy.where(keep, x / dropout_rate, 0)\n        ...\n    ...\n    return outputs\n\ndef my_model_wrapper_fn(params, rng, inputs, training):\n    input1, input2 = inputs\n    rng1, rng2 = jax.random.split(rng)\n    rngs = {\"dropout\": rng1, \"preprocessing\": rng2}\n    deterministic = not training\n    return my_model_fn(params, rngs, input1, input2, deterministic)\n\nkeras_layer = JaxLayer(my_model_wrapper_fn, params=initial_params)\n```\n\n## Usage with Haiku modules\n\n`JaxLayer` enables the use of [Haiku](https://dm-haiku.readthedocs.io)\ncomponents in the form of\n[`haiku.Module`](https://dm-haiku.readthedocs.io/en/latest/api.html#module).\nThis is achieved by transforming the module per the Haiku pattern and then\npassing `module.apply` in the `call_fn` parameter and `module.init` in the\n`init_fn` parameter if needed.\n\nIf the model has non-trainable state, it should be transformed with\n[`haiku.transform_with_state`](\n  https://dm-haiku.readthedocs.io/en/latest/api.html#haiku.transform_with_state).\nIf the model has no non-trainable state, it should be transformed with\n[`haiku.transform`](\n  https://dm-haiku.readthedocs.io/en/latest/api.html#haiku.transform).\nAdditionally, and optionally, if the module does not use RNGs in \"apply\", it\ncan be transformed with\n[`haiku.without_apply_rng`](\n  https://dm-haiku.readthedocs.io/en/latest/api.html#without-apply-rng).\n\nThe following example shows how to create a `JaxLayer` from a Haiku module\nthat uses random number generators via `hk.next_rng_key()` and takes a\ntraining positional argument:\n\n```python\nclass MyHaikuModule(hk.Module):\n    def __call__(self, x, training):\n        x = hk.Conv2D(32, (3, 3))(x)\n        x = jax.nn.relu(x)\n        x = hk.AvgPool((1, 2, 2, 1), (1, 2, 2, 1), \"VALID\")(x)\n        x = hk.Flatten()(x)\n        x = hk.Linear(200)(x)\n        if training:\n            x = hk.dropout(rng=hk.next_rng_key(), rate=0.3, x=x)\n        x = jax.nn.relu(x)\n        x = hk.Linear(10)(x)\n        x = jax.nn.softmax(x)\n        return x\n\ndef my_haiku_module_fn(inputs, training):\n    module = MyHaikuModule()\n    return module(inputs, training)\n\ntransformed_module = hk.transform(my_haiku_module_fn)\n\nkeras_layer = JaxLayer(\n    call_fn=transformed_module.apply,\n    init_fn=transformed_module.init,\n)\n```\n\nArgs:\n    call_fn: The function to call the model. See description above for the\n        list of arguments it takes and the outputs it returns.\n    init_fn: the function to call to initialize the model. See description\n        above for the list of arguments it takes and the outputs it returns.\n        If `None`, then `params` and/or `state` must be provided.\n  params: A `PyTree` containing all the model trainable parameters. This\n        allows passing trained parameters or controlling the initialization.\n        If both `params` and `state` are `None`, `init_fn` is called at\n        build time to initialize the trainable parameters of the model.\n  state: A `PyTree` containing all the model non-trainable state. This\n        allows passing learned state or controlling the initialization. If\n        both `params` and `state` are `None`, and `call_fn` takes a `state`\n        argument, then `init_fn` is called at build time to initialize the\n        non-trainable state of the model.\n  seed: Seed for random number generator. Optional.\n  dtype: The dtype of the layer's computations and weights. Can also be a\n        `keras.DTypePolicy`. Optional. Defaults to the default policy.",
-        "has_varargs": false
-      },
-      {
-        "name": "Layer",
-        "api_path": "tf.keras.layers.Layer",
-        "kind": "class",
-        "params": [
-          {
-            "name": "activity_regularizer",
-            "kind": "KEYWORD_ONLY",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "trainable",
-            "kind": "KEYWORD_ONLY",
-            "default": "True",
-            "annotation": null
-          },
-          {
-            "name": "dtype",
-            "kind": "KEYWORD_ONLY",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "autocast",
-            "kind": "KEYWORD_ONLY",
-            "default": "True",
-            "annotation": null
-          },
-          {
-            "name": "name",
-            "kind": "KEYWORD_ONLY",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "kwargs",
-            "kind": "VAR_KEYWORD",
-            "default": null,
-            "annotation": null
-          }
-        ],
-        "docstring": "This is the class from which all layers inherit.\n\nA layer is a callable object that takes as input one or more tensors and\nthat outputs one or more tensors. It involves *computation*, defined\nin the `call()` method, and a *state* (weight variables). State can be\ncreated:\n\n* in `__init__()`, for instance via `self.add_weight()`;\n* in the optional `build()` method, which is invoked by the first\n  `__call__()` to the layer, and supplies the shape(s) of the input(s),\n  which may not have been known at initialization time.\n\nLayers are recursively composable: If you assign a Layer instance as an\nattribute of another Layer, the outer layer will start tracking the weights\ncreated by the inner layer. Nested layers should be instantiated in the\n`__init__()` method or `build()` method.\n\nUsers will just instantiate a layer and then treat it as a callable.\n\nArgs:\n    trainable: Boolean, whether the layer's variables should be trainable.\n    name: String name of the layer.\n    dtype: The dtype of the layer's computations and weights. Can also be a\n        `keras.DTypePolicy`, which allows the computation and weight dtype\n        to differ. Defaults to `None`. `None` means to use\n        `keras.config.dtype_policy()`, which is a `float32` policy unless\n        set to different value (via `keras.config.set_dtype_policy()`).\n\nAttributes:\n    name: The name of the layer (string).\n    dtype: Dtype of the layer's weights. Alias of `layer.variable_dtype`.\n    variable_dtype: Dtype of the layer's weights.\n    compute_dtype: The dtype of the layer's computations.\n        Layers automatically cast inputs to this dtype, which causes\n        the computations and output to also be in this dtype.\n        When mixed precision is used with a\n        `keras.DTypePolicy`, this will be different\n        than `variable_dtype`.\n    trainable_weights: List of variables to be included in backprop.\n    non_trainable_weights: List of variables that should not be\n        included in backprop.\n    weights: The concatenation of the lists trainable_weights and\n        non_trainable_weights (in this order).\n    trainable: Whether the layer should be trained (boolean), i.e.\n        whether its potentially-trainable weights should be returned\n        as part of `layer.trainable_weights`.\n    input_spec: Optional (list of) `InputSpec` object(s) specifying the\n        constraints on inputs that can be accepted by the layer.\n\nWe recommend that descendants of `Layer` implement the following methods:\n\n* `__init__()`: Defines custom layer attributes, and creates layer weights\n    that do not depend on input shapes, using `add_weight()`,\n    or other state.\n* `build(self, input_shape)`: This method can be used to create weights that\n    depend on the shape(s) of the input(s), using `add_weight()`, or other\n    state. `__call__()` will automatically build the layer\n    (if it has not been built yet) by calling `build()`.\n* `call(self, *args, **kwargs)`: Called in `__call__` after making\n    sure `build()` has been called. `call()` performs the logic of applying\n    the layer to the input arguments.\n    Two reserved keyword arguments you can optionally use in `call()` are:\n        1. `training` (boolean, whether the call is in inference mode or\n            training mode).\n        2. `mask` (boolean tensor encoding masked timesteps in the input,\n            used e.g. in RNN layers).\n    A typical signature for this method is `call(self, inputs)`, and user\n    could optionally add `training` and `mask` if the layer need them.\n* `get_config(self)`: Returns a dictionary containing the configuration\n    used to initialize this layer. If the keys differ from the arguments\n    in `__init__()`, then override `from_config(self)` as well.\n    This method is used when saving\n    the layer or a model that contains this layer.\n\nExamples:\n\nHere's a basic example: a layer with two variables, `w` and `b`,\nthat returns `y = w . x + b`.\nIt shows how to implement `build()` and `call()`.\nVariables set as attributes of a layer are tracked as weights\nof the layers (in `layer.weights`).\n\n```python\nclass SimpleDense(Layer):\n    def __init__(self, units=32):\n        super().__init__()\n        self.units = units\n\n    # Create the state of the layer (weights)\n    def build(self, input_shape):\n        self.kernel = self.add_weight(\n            shape=(input_shape[-1], self.units),\n            initializer=\"glorot_uniform\",\n            trainable=True,\n            name=\"kernel\",\n        )\n        self.bias = self.add_weight(\n            shape=(self.units,),\n            initializer=\"zeros\",\n            trainable=True,\n            name=\"bias\",\n        )\n\n    # Defines the computation\n    def call(self, inputs):\n        return ops.matmul(inputs, self.kernel) + self.bias\n\n# Instantiates the layer.\nlinear_layer = SimpleDense(4)\n\n# This will also call `build(input_shape)` and create the weights.\ny = linear_layer(ops.ones((2, 2)))\nassert len(linear_layer.weights) == 2\n\n# These weights are trainable, so they're listed in `trainable_weights`:\nassert len(linear_layer.trainable_weights) == 2\n```\n\nBesides trainable weights, updated via backpropagation during training,\nlayers can also have non-trainable weights. These weights are meant to\nbe updated manually during `call()`. Here's a example layer that computes\nthe running sum of its inputs:\n\n```python\nclass ComputeSum(Layer):\n\n  def __init__(self, input_dim):\n      super(ComputeSum, self).__init__()\n      # Create a non-trainable weight.\n      self.total = self.add_weight(\n        shape=(),\n        initializer=\"zeros\",\n        trainable=False,\n        name=\"total\",\n      )\n\n  def call(self, inputs):\n      self.total.assign(self.total + ops.sum(inputs))\n      return self.total\n\nmy_sum = ComputeSum(2)\nx = ops.ones((2, 2))\ny = my_sum(x)\n\nassert my_sum.weights == [my_sum.total]\nassert my_sum.non_trainable_weights == [my_sum.total]\nassert my_sum.trainable_weights == []\n```",
-        "has_varargs": false
-      },
-      {
-        "name": "LayerNormalization",
-        "api_path": "tf.keras.layers.LayerNormalization",
-        "kind": "class",
-        "params": [
-          {
-            "name": "axis",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "-1",
-            "annotation": null
-          },
-          {
-            "name": "epsilon",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "0.001",
-            "annotation": null
-          },
-          {
-            "name": "center",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "True",
-            "annotation": null
-          },
-          {
-            "name": "scale",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "True",
-            "annotation": null
-          },
-          {
-            "name": "beta_initializer",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "zeros",
-            "annotation": null
-          },
-          {
-            "name": "gamma_initializer",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "ones",
-            "annotation": null
-          },
-          {
-            "name": "beta_regularizer",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "gamma_regularizer",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "beta_constraint",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "gamma_constraint",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "kwargs",
-            "kind": "VAR_KEYWORD",
-            "default": null,
-            "annotation": null
-          }
-        ],
-        "docstring": "Layer normalization layer (Ba et al., 2016).\n\nNormalize the activations of the previous layer for each given example in a\nbatch independently, rather than across a batch like Batch Normalization.\ni.e. applies a transformation that maintains the mean activation within each\nexample close to 0 and the activation standard deviation close to 1.\n\nIf `scale` or `center` are enabled, the layer will scale the normalized\noutputs by broadcasting them with a trainable variable `gamma`, and center\nthe outputs by broadcasting with a trainable variable `beta`. `gamma` will\ndefault to a ones tensor and `beta` will default to a zeros tensor, so that\ncentering and scaling are no-ops before training has begun.\n\nSo, with scaling and centering enabled the normalization equations\nare as follows:\n\nLet the intermediate activations for a mini-batch to be the `inputs`.\n\nFor each sample `x_i` in `inputs` with `k` features, we compute the mean and\nvariance of the sample:\n\n```python\nmean_i = sum(x_i[j] for j in range(k)) / k\nvar_i = sum((x_i[j] - mean_i) ** 2 for j in range(k)) / k\n```\n\nand then compute a normalized `x_i_normalized`, including a small factor\n`epsilon` for numerical stability.\n\n```python\nx_i_normalized = (x_i - mean_i) / sqrt(var_i + epsilon)\n```\n\nAnd finally `x_i_normalized ` is linearly transformed by `gamma` and `beta`,\nwhich are learned parameters:\n\n```python\noutput_i = x_i_normalized * gamma + beta\n```\n\n`gamma` and `beta` will span the axes of `inputs` specified in `axis`, and\nthis part of the inputs' shape must be fully defined.\n\nFor example:\n\n>>> layer = keras.layers.LayerNormalization(axis=[1, 2, 3])\n>>> layer.build([5, 20, 30, 40])\n>>> print(layer.beta.shape)\n(20, 30, 40)\n>>> print(layer.gamma.shape)\n(20, 30, 40)\n\nNote that other implementations of layer normalization may choose to define\n`gamma` and `beta` over a separate set of axes from the axes being\nnormalized across. For example, Group Normalization\n([Wu et al. 2018](https://arxiv.org/abs/1803.08494)) with group size of 1\ncorresponds to a Layer Normalization that normalizes across height, width,\nand channel and has `gamma` and `beta` span only the channel dimension.\nSo, this Layer Normalization implementation will not match a Group\nNormalization layer with group size set to 1.\n\nArgs:\n    axis: Integer or List/Tuple. The axis or axes to normalize across.\n        Typically, this is the features axis/axes. The left-out axes are\n        typically the batch axis/axes. `-1` is the last dimension in the\n        input. Defaults to `-1`.\n    epsilon: Small float added to variance to avoid dividing by zero.\n        Defaults to 1e-3.\n    center: If True, add offset of `beta` to normalized tensor. If False,\n        `beta` is ignored. Defaults to `True`.\n    scale: If True, multiply by `gamma`. If False, `gamma` is not used.\n        When the next layer is linear (also e.g. `nn.relu`), this can be\n        disabled since the scaling will be done by the next layer.\n        Defaults to `True`.\n    beta_initializer: Initializer for the beta weight. Defaults to zeros.\n    gamma_initializer: Initializer for the gamma weight. Defaults to ones.\n    beta_regularizer: Optional regularizer for the beta weight.\n        None by default.\n    gamma_regularizer: Optional regularizer for the gamma weight.\n        None by default.\n    beta_constraint: Optional constraint for the beta weight.\n        None by default.\n    gamma_constraint: Optional constraint for the gamma weight.\n        None by default.\n    **kwargs: Base layer keyword arguments (e.g. `name` and `dtype`).\n\n\nReference:\n\n- [Lei Ba et al., 2016](https://arxiv.org/abs/1607.06450).",
-        "has_varargs": false
-      },
-      {
-        "name": "TFSMLayer",
-        "api_path": "tf.keras.layers.TFSMLayer",
-        "kind": "class",
-        "params": [
-          {
-            "name": "filepath",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": null
-          },
-          {
-            "name": "call_endpoint",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "serve",
-            "annotation": null
-          },
-          {
-            "name": "call_training_endpoint",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "trainable",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "True",
-            "annotation": null
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          },
-          {
-            "name": "dtype",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
-        "docstring": "Reload a Keras model/layer that was saved via SavedModel / ExportArchive.\n\nArguments:\n    filepath: `str` or `pathlib.Path` object. The path to the SavedModel.\n    call_endpoint: Name of the endpoint to use as the `call()` method\n        of the reloaded layer. If the SavedModel was created\n        via `model.export()`,\n        then the default endpoint name is `'serve'`. In other cases\n        it may be named `'serving_default'`.\n\nExample:\n\n```python\nmodel.export(\"path/to/artifact\")\nreloaded_layer = TFSMLayer(\"path/to/artifact\")\noutputs = reloaded_layer(inputs)\n```\n\nThe reloaded object can be used like a regular Keras layer, and supports\ntraining/fine-tuning of its trainable weights. Note that the reloaded\nobject retains none of the internal structure or custom methods of the\noriginal object -- it's a brand new layer created around the saved\nfunction.\n\n**Limitations:**\n\n* Only call endpoints with a single `inputs` tensor argument\n(which may optionally be a dict/tuple/list of tensors) are supported.\nFor endpoints with multiple separate input tensor arguments, consider\nsubclassing `TFSMLayer` and implementing a `call()` method with a\ncustom signature.\n* If you need training-time behavior to differ from inference-time behavior\n(i.e. if you need the reloaded object to support a `training=True` argument\nin `__call__()`), make sure that the training-time call function is\nsaved as a standalone endpoint in the artifact, and provide its name\nto the `TFSMLayer` via the `call_training_endpoint` argument.",
-        "has_varargs": false
-      }
-    ],
     "activation": [
       {
-        "name": "sigmoid",
-        "api_path": "tf.nn.sigmoid",
-        "kind": "function",
-        "params": [
-          {
-            "name": "x",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": null
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
-        "docstring": "Computes sigmoid of `x` element-wise.\n\nFormula for calculating $\\mathrm{sigmoid}(x) = y = 1 / (1 + \\exp(-x))$.\n\nFor $x \\in (-\\infty, \\infty)$, $\\mathrm{sigmoid}(x) \\in (0, 1)$.\n\nExample Usage:\n\nIf a positive number is large, then its sigmoid will approach to 1 since the\nformula will be `y = <large_num> / (1 + <large_num>)`\n\n>>> x = tf.constant([0.0, 1.0, 50.0, 100.0])\n>>> tf.math.sigmoid(x)\n<tf.Tensor: shape=(4,), dtype=float32,\nnumpy=array([0.5, 0.7310586, 1.0, 1.0], dtype=float32)>\n\nIf a negative number is large, its sigmoid will approach to 0 since the\nformula will be `y = 1 / (1 + <large_num>)`\n\n>>> x = tf.constant([-100.0, -50.0, -1.0, 0.0])\n>>> tf.math.sigmoid(x)\n<tf.Tensor: shape=(4,), dtype=float32, numpy=\narray([0.0000000e+00, 1.9287499e-22, 2.6894143e-01, 0.5],\n      dtype=float32)>\n\nArgs:\n  x: A Tensor with type `float16`, `float32`, `float64`, `complex64`, or\n    `complex128`.\n  name: A name for the operation (optional).\n\nReturns:\n  A Tensor with the same type as `x`.\n\nUsage Example:\n\n>>> x = tf.constant([-128.0, 0.0, 128.0], dtype=tf.float32)\n>>> tf.sigmoid(x)\n<tf.Tensor: shape=(3,), dtype=float32,\nnumpy=array([0. , 0.5, 1. ], dtype=float32)>\n\n@compatibility(scipy)\nEquivalent to scipy.special.expit\n@end_compatibility",
-        "has_varargs": false
-      },
-      {
-        "name": "selu",
-        "api_path": "tf.nn.selu",
-        "kind": "function",
-        "params": [
-          {
-            "name": "features",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": "Annotated"
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
-        "docstring": "Computes scaled exponential linear: `scale * alpha * (exp(features) - 1)`\n\nif < 0, `scale * features` otherwise.\n\nTo be used together with\n`initializer = tf.variance_scaling_initializer(factor=1.0, mode='FAN_IN')`.\nFor correct dropout, use `tf.contrib.nn.alpha_dropout`.\n\nSee [Self-Normalizing Neural Networks](https://arxiv.org/abs/1706.02515)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `half`, `bfloat16`, `float32`, `float64`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
-        "has_varargs": false
-      },
-      {
-        "name": "relu",
-        "api_path": "tf.nn.relu",
-        "kind": "function",
-        "params": [
-          {
-            "name": "features",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": "Annotated"
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
-        "docstring": "Computes rectified linear: `max(features, 0)`.\n\nSee: https://en.wikipedia.org/wiki/Rectifier_(neural_networks)\nExample usage:\n>>> tf.nn.relu([-2., 0., 3.]).numpy()\narray([0., 0., 3.], dtype=float32)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `int64`, `bfloat16`, `uint16`, `half`, `uint32`, `uint64`, `qint8`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
-        "has_varargs": false
-      },
-      {
-        "name": "leaky_relu",
-        "api_path": "tf.nn.leaky_relu",
-        "kind": "function",
-        "params": [
-          {
-            "name": "features",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": null
-          },
-          {
-            "name": "alpha",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "0.2",
-            "annotation": null
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
-        "docstring": "Compute the Leaky ReLU activation function.\n\nSource: [Rectifier Nonlinearities Improve Neural Network Acoustic Models.\nAL Maas, AY Hannun, AY Ng - Proc. ICML, 2013]\n(https://ai.stanford.edu/~amaas/papers/relu_hybrid_icml2013_final.pdf).\n\nArgs:\n  features: A `Tensor` representing preactivation values. Must be one of\n    the following types: `float16`, `float32`, `float64`, `int32`, `int64`.\n  alpha: Slope of the activation function at x < 0.\n  name: A name for the operation (optional).\n\nReturns:\n  The activation value.\n\nReferences:\n  Rectifier Nonlinearities Improve Neural Network Acoustic Models:\n    [Maas et al., 2013]\n    (http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.693.1422)\n    ([pdf]\n    (http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.693.1422&rep=rep1&type=pdf))",
-        "has_varargs": false
-      },
-      {
-        "name": "elu",
         "api_path": "tf.nn.elu",
-        "kind": "function",
-        "params": [
-          {
-            "name": "features",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": null,
-            "annotation": "Annotated"
-          },
-          {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
-            "default": "None",
-            "annotation": null
-          }
-        ],
         "docstring": "Computes the exponential linear function.\n\nThe ELU function is defined as:\n\n * $ e ^ x - 1 $ if $ x < 0 $\n * $ x $ if $ x >= 0 $\n\nExamples:\n\n>>> tf.nn.elu(1.0)\n<tf.Tensor: shape=(), dtype=float32, numpy=1.0>\n>>> tf.nn.elu(0.0)\n<tf.Tensor: shape=(), dtype=float32, numpy=0.0>\n>>> tf.nn.elu(-1000.0)\n<tf.Tensor: shape=(), dtype=float32, numpy=-1.0>\n\nSee [Fast and Accurate Deep Network Learning by Exponential Linear Units (ELUs)\n](http://arxiv.org/abs/1511.07289)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `half`, `bfloat16`, `float32`, `float64`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
-        "has_varargs": false
-      },
-      {
-        "name": "tanh",
-        "api_path": "tf.nn.tanh",
+        "has_varargs": false,
         "kind": "function",
+        "name": "elu",
         "params": [
           {
-            "name": "x",
-            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "Annotated",
             "default": null,
-            "annotation": "Annotated"
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "features"
           },
           {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": null,
             "default": "None",
-            "annotation": null
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "name"
           }
-        ],
-        "docstring": "Computes hyperbolic tangent of `x` element-wise.\n\n  Given an input tensor, this function computes hyperbolic tangent of every\n  element in the tensor. Input range is `[-inf, inf]` and\n  output range is `[-1,1]`.\n\n  >>> x = tf.constant([-float(\"inf\"), -5, -0.5, 1, 1.2, 2, 3, float(\"inf\")])\n  >>> tf.math.tanh(x)\n  <tf.Tensor: shape=(8,), dtype=float32, numpy=\n  array([-1.0, -0.99990916, -0.46211717,  0.7615942 ,  0.8336547 ,\n          0.9640276 ,  0.9950547 ,  1.0], dtype=float32)>\n\nArgs:\n  x: A `Tensor`. Must be one of the following types: `bfloat16`, `half`, `float32`, `float64`, `complex64`, `complex128`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `x`.\n\n  If `x` is a `SparseTensor`, returns\n  `SparseTensor(x.indices, tf.math.tanh(x.values, ...), x.dense_shape)`",
-        "has_varargs": false
+        ]
       },
       {
-        "name": "softmax_v2",
+        "api_path": "tf.nn.leaky_relu",
+        "docstring": "Compute the Leaky ReLU activation function.\n\nSource: [Rectifier Nonlinearities Improve Neural Network Acoustic Models.\nAL Maas, AY Hannun, AY Ng - Proc. ICML, 2013]\n(https://ai.stanford.edu/~amaas/papers/relu_hybrid_icml2013_final.pdf).\n\nArgs:\n  features: A `Tensor` representing preactivation values. Must be one of\n    the following types: `float16`, `float32`, `float64`, `int32`, `int64`.\n  alpha: Slope of the activation function at x < 0.\n  name: A name for the operation (optional).\n\nReturns:\n  The activation value.\n\nReferences:\n  Rectifier Nonlinearities Improve Neural Network Acoustic Models:\n    [Maas et al., 2013]\n    (http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.693.1422)\n    ([pdf]\n    (http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.693.1422&rep=rep1&type=pdf))",
+        "has_varargs": false,
+        "kind": "function",
+        "name": "leaky_relu",
+        "params": [
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "features"
+          },
+          {
+            "annotation": null,
+            "default": "0.2",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "alpha"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "name"
+          }
+        ]
+      },
+      {
+        "api_path": "tf.nn.relu",
+        "docstring": "Computes rectified linear: `max(features, 0)`.\n\nSee: https://en.wikipedia.org/wiki/Rectifier_(neural_networks)\nExample usage:\n>>> tf.nn.relu([-2., 0., 3.]).numpy()\narray([0., 0., 3.], dtype=float32)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `float32`, `float64`, `int32`, `uint8`, `int16`, `int8`, `int64`, `bfloat16`, `uint16`, `half`, `uint32`, `uint64`, `qint8`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
+        "has_varargs": false,
+        "kind": "function",
+        "name": "relu",
+        "params": [
+          {
+            "annotation": "Annotated",
+            "default": null,
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "features"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "name"
+          }
+        ]
+      },
+      {
+        "api_path": "tf.nn.selu",
+        "docstring": "Computes scaled exponential linear: `scale * alpha * (exp(features) - 1)`\n\nif < 0, `scale * features` otherwise.\n\nTo be used together with\n`initializer = tf.variance_scaling_initializer(factor=1.0, mode='FAN_IN')`.\nFor correct dropout, use `tf.contrib.nn.alpha_dropout`.\n\nSee [Self-Normalizing Neural Networks](https://arxiv.org/abs/1706.02515)\n\nArgs:\n  features: A `Tensor`. Must be one of the following types: `half`, `bfloat16`, `float32`, `float64`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `features`.",
+        "has_varargs": false,
+        "kind": "function",
+        "name": "selu",
+        "params": [
+          {
+            "annotation": "Annotated",
+            "default": null,
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "features"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "name"
+          }
+        ]
+      },
+      {
+        "api_path": "tf.nn.sigmoid",
+        "docstring": "Computes sigmoid of `x` element-wise.\n\nFormula for calculating $\\mathrm{sigmoid}(x) = y = 1 / (1 + \\exp(-x))$.\n\nFor $x \\in (-\\infty, \\infty)$, $\\mathrm{sigmoid}(x) \\in (0, 1)$.\n\nExample Usage:\n\nIf a positive number is large, then its sigmoid will approach to 1 since the\nformula will be `y = <large_num> / (1 + <large_num>)`\n\n>>> x = tf.constant([0.0, 1.0, 50.0, 100.0])\n>>> tf.math.sigmoid(x)\n<tf.Tensor: shape=(4,), dtype=float32,\nnumpy=array([0.5, 0.7310586, 1.0, 1.0], dtype=float32)>\n\nIf a negative number is large, its sigmoid will approach to 0 since the\nformula will be `y = 1 / (1 + <large_num>)`\n\n>>> x = tf.constant([-100.0, -50.0, -1.0, 0.0])\n>>> tf.math.sigmoid(x)\n<tf.Tensor: shape=(4,), dtype=float32, numpy=\narray([0.0000000e+00, 1.9287499e-22, 2.6894143e-01, 0.5],\n      dtype=float32)>\n\nArgs:\n  x: A Tensor with type `float16`, `float32`, `float64`, `complex64`, or\n    `complex128`.\n  name: A name for the operation (optional).\n\nReturns:\n  A Tensor with the same type as `x`.\n\nUsage Example:\n\n>>> x = tf.constant([-128.0, 0.0, 128.0], dtype=tf.float32)\n>>> tf.sigmoid(x)\n<tf.Tensor: shape=(3,), dtype=float32,\nnumpy=array([0. , 0.5, 1. ], dtype=float32)>\n\n@compatibility(scipy)\nEquivalent to scipy.special.expit\n@end_compatibility",
+        "has_varargs": false,
+        "kind": "function",
+        "name": "sigmoid",
+        "params": [
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "x"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "name"
+          }
+        ]
+      },
+      {
         "api_path": "tf.nn.softmax",
+        "docstring": "Computes softmax activations.\n\nUsed for multi-class predictions. The sum of all outputs generated by softmax\nis 1.\n\nThis function performs the equivalent of\n\n```python\nsoftmax = tf.exp(logits) / tf.reduce_sum(tf.exp(logits), axis, keepdims=True)\n```\nExample usage:\n\n>>> softmax = tf.nn.softmax([-1, 0., 1.])\n>>> softmax\n<tf.Tensor: shape=(3,), dtype=float32,\nnumpy=array([0.09003057, 0.24472848, 0.66524094], dtype=float32)>\n>>> sum(softmax)\n<tf.Tensor: shape=(), dtype=float32, numpy=1.0>\n\nArgs:\n  logits: A non-empty `Tensor`. Must be one of the following types: `half`,\n    `float32`, `float64`.\n  axis: The dimension softmax would be performed on. The default is -1 which\n    indicates the last dimension.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type and shape as `logits`.\n\nRaises:\n  InvalidArgumentError: if `logits` is empty or `axis` is beyond the last\n    dimension of `logits`.",
+        "has_varargs": false,
         "kind": "function",
+        "name": "softmax_v2",
         "params": [
           {
-            "name": "logits",
-            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": null,
             "default": null,
-            "annotation": null
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "logits"
           },
           {
-            "name": "axis",
-            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": null,
             "default": "None",
-            "annotation": null
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "axis"
           },
           {
-            "name": "name",
-            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": null,
             "default": "None",
-            "annotation": null
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "name"
           }
-        ],
-        "docstring": "Computes softmax activations.\n\nUsed for multi-class predictions. The sum of all outputs generated by softmax\nis 1.\n\nThis function performs the equivalent of\n\n```python\nsoftmax = tf.exp(logits) / tf.reduce_sum(tf.exp(logits), axis, keepdims=True)\n```\nExample usage:\n\n>>> softmax = tf.nn.softmax([-1, 0., 1.])\n>>> softmax\n<tf.Tensor: shape=(3,), dtype=float32,\nnumpy=array([0.09003057, 0.24472848, 0.66524094], dtype=float32)>\n>>> sum(softmax)\n<tf.Tensor: shape=(), dtype=float32, numpy=1.0>\n\nArgs:\n  logits: A non-empty `Tensor`. Must be one of the following types: `half`,\n    `float32`, `float64`.\n  axis: The dimension softmax would be performed on. The default is -1 which\n    indicates the last dimension.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type and shape as `logits`.\n\nRaises:\n  InvalidArgumentError: if `logits` is empty or `axis` is beyond the last\n    dimension of `logits`.",
-        "has_varargs": false
+        ]
+      },
+      {
+        "api_path": "tf.nn.tanh",
+        "docstring": "Computes hyperbolic tangent of `x` element-wise.\n\n  Given an input tensor, this function computes hyperbolic tangent of every\n  element in the tensor. Input range is `[-inf, inf]` and\n  output range is `[-1,1]`.\n\n  >>> x = tf.constant([-float(\"inf\"), -5, -0.5, 1, 1.2, 2, 3, float(\"inf\")])\n  >>> tf.math.tanh(x)\n  <tf.Tensor: shape=(8,), dtype=float32, numpy=\n  array([-1.0, -0.99990916, -0.46211717,  0.7615942 ,  0.8336547 ,\n          0.9640276 ,  0.9950547 ,  1.0], dtype=float32)>\n\nArgs:\n  x: A `Tensor`. Must be one of the following types: `bfloat16`, `half`, `float32`, `float64`, `complex64`, `complex128`.\n  name: A name for the operation (optional).\n\nReturns:\n  A `Tensor`. Has the same type as `x`.\n\n  If `x` is a `SparseTensor`, returns\n  `SparseTensor(x.indices, tf.math.tanh(x.values, ...), x.dense_shape)`",
+        "has_varargs": false,
+        "kind": "function",
+        "name": "tanh",
+        "params": [
+          {
+            "annotation": "Annotated",
+            "default": null,
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "x"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "name"
+          }
+        ]
+      }
+    ],
+    "layer": [
+      {
+        "api_path": "tf.keras.layers.FlaxLayer",
+        "docstring": "Keras Layer that wraps a [Flax](https://flax.readthedocs.io) module.\n\nThis layer enables the use of Flax components in the form of\n[`flax.linen.Module`](\n    https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html)\ninstances within Keras when using JAX as the backend for Keras.\n\nThe module method to use for the forward pass can be specified via the\n`method` argument and is `__call__` by default. This method must take the\nfollowing arguments with these exact names:\n\n- `self` if the method is bound to the module, which is the case for the\n    default of `__call__`, and `module` otherwise to pass the module.\n- `inputs`: the inputs to the model, a JAX array or a `PyTree` of arrays.\n- `training` *(optional)*: an argument specifying if we're in training mode\n    or inference mode, `True` is passed in training mode.\n\n`FlaxLayer` handles the non-trainable state of your model and required RNGs\nautomatically. Note that the `mutable` parameter of\n[`flax.linen.Module.apply()`](\n    https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html#flax.linen.apply)\nis set to `DenyList([\"params\"])`, therefore making the assumption that all\nthe variables outside of the \"params\" collection are non-trainable weights.\n\nThis example shows how to create a `FlaxLayer` from a Flax `Module` with\nthe default `__call__` method and no training argument:\n\n```python\nclass MyFlaxModule(flax.linen.Module):\n    @flax.linen.compact\n    def __call__(self, inputs):\n        x = inputs\n        x = flax.linen.Conv(features=32, kernel_size=(3, 3))(x)\n        x = flax.linen.relu(x)\n        x = flax.linen.avg_pool(x, window_shape=(2, 2), strides=(2, 2))\n        x = x.reshape((x.shape[0], -1))  # flatten\n        x = flax.linen.Dense(features=200)(x)\n        x = flax.linen.relu(x)\n        x = flax.linen.Dense(features=10)(x)\n        x = flax.linen.softmax(x)\n        return x\n\nflax_module = MyFlaxModule()\nkeras_layer = FlaxLayer(flax_module)\n```\n\nThis example shows how to wrap the module method to conform to the required\nsignature. This allows having multiple input arguments and a training\nargument that has a different name and values. This additionally shows how\nto use a function that is not bound to the module.\n\n```python\nclass MyFlaxModule(flax.linen.Module):\n    @flax.linen.compact\n    def forward(self, input1, input2, deterministic):\n        ...\n        return outputs\n\ndef my_flax_module_wrapper(module, inputs, training):\n    input1, input2 = inputs\n    return module.forward(input1, input2, not training)\n\nflax_module = MyFlaxModule()\nkeras_layer = FlaxLayer(\n    module=flax_module,\n    method=my_flax_module_wrapper,\n)\n```\n\nArgs:\n    module: An instance of `flax.linen.Module` or subclass.\n    method: The method to call the model. This is generally a method in the\n        `Module`. If not provided, the `__call__` method is used. `method`\n        can also be a function not defined in the `Module`, in which case it\n        must take the `Module` as the first argument. It is used for both\n        `Module.init` and `Module.apply`. Details are documented in the\n        `method` argument of [`flax.linen.Module.apply()`](\n          https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html#flax.linen.apply).\n    variables: A `dict` containing all the variables of the module in the\n        same format as what is returned by [`flax.linen.Module.init()`](\n          https://flax.readthedocs.io/en/latest/api_reference/flax.linen/module.html#flax.linen.init).\n        It should contain a \"params\" key and, if applicable, other keys for\n        collections of variables for non-trainable state. This allows\n        passing trained parameters and learned non-trainable state or\n        controlling the initialization. If `None` is passed, the module's\n        `init` function is called at build time to initialize the variables\n        of the model.",
+        "has_varargs": false,
+        "kind": "class",
+        "name": "FlaxLayer",
+        "params": [
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "module"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "method"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "variables"
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "VAR_KEYWORD",
+            "name": "kwargs"
+          }
+        ]
+      },
+      {
+        "api_path": "tf.keras.layers.InputLayer",
+        "docstring": "This is the class from which all layers inherit.\n\nA layer is a callable object that takes as input one or more tensors and\nthat outputs one or more tensors. It involves *computation*, defined\nin the `call()` method, and a *state* (weight variables). State can be\ncreated:\n\n* in `__init__()`, for instance via `self.add_weight()`;\n* in the optional `build()` method, which is invoked by the first\n  `__call__()` to the layer, and supplies the shape(s) of the input(s),\n  which may not have been known at initialization time.\n\nLayers are recursively composable: If you assign a Layer instance as an\nattribute of another Layer, the outer layer will start tracking the weights\ncreated by the inner layer. Nested layers should be instantiated in the\n`__init__()` method or `build()` method.\n\nUsers will just instantiate a layer and then treat it as a callable.\n\nArgs:\n    trainable: Boolean, whether the layer's variables should be trainable.\n    name: String name of the layer.\n    dtype: The dtype of the layer's computations and weights. Can also be a\n        `keras.DTypePolicy`, which allows the computation and weight dtype\n        to differ. Defaults to `None`. `None` means to use\n        `keras.config.dtype_policy()`, which is a `float32` policy unless\n        set to different value (via `keras.config.set_dtype_policy()`).\n\nAttributes:\n    name: The name of the layer (string).\n    dtype: Dtype of the layer's weights. Alias of `layer.variable_dtype`.\n    variable_dtype: Dtype of the layer's weights.\n    compute_dtype: The dtype of the layer's computations.\n        Layers automatically cast inputs to this dtype, which causes\n        the computations and output to also be in this dtype.\n        When mixed precision is used with a\n        `keras.DTypePolicy`, this will be different\n        than `variable_dtype`.\n    trainable_weights: List of variables to be included in backprop.\n    non_trainable_weights: List of variables that should not be\n        included in backprop.\n    weights: The concatenation of the lists trainable_weights and\n        non_trainable_weights (in this order).\n    trainable: Whether the layer should be trained (boolean), i.e.\n        whether its potentially-trainable weights should be returned\n        as part of `layer.trainable_weights`.\n    input_spec: Optional (list of) `InputSpec` object(s) specifying the\n        constraints on inputs that can be accepted by the layer.\n\nWe recommend that descendants of `Layer` implement the following methods:\n\n* `__init__()`: Defines custom layer attributes, and creates layer weights\n    that do not depend on input shapes, using `add_weight()`,\n    or other state.\n* `build(self, input_shape)`: This method can be used to create weights that\n    depend on the shape(s) of the input(s), using `add_weight()`, or other\n    state. `__call__()` will automatically build the layer\n    (if it has not been built yet) by calling `build()`.\n* `call(self, *args, **kwargs)`: Called in `__call__` after making\n    sure `build()` has been called. `call()` performs the logic of applying\n    the layer to the input arguments.\n    Two reserved keyword arguments you can optionally use in `call()` are:\n        1. `training` (boolean, whether the call is in inference mode or\n            training mode).\n        2. `mask` (boolean tensor encoding masked timesteps in the input,\n            used e.g. in RNN layers).\n    A typical signature for this method is `call(self, inputs)`, and user\n    could optionally add `training` and `mask` if the layer need them.\n* `get_config(self)`: Returns a dictionary containing the configuration\n    used to initialize this layer. If the keys differ from the arguments\n    in `__init__()`, then override `from_config(self)` as well.\n    This method is used when saving\n    the layer or a model that contains this layer.\n\nExamples:\n\nHere's a basic example: a layer with two variables, `w` and `b`,\nthat returns `y = w . x + b`.\nIt shows how to implement `build()` and `call()`.\nVariables set as attributes of a layer are tracked as weights\nof the layers (in `layer.weights`).\n\n```python\nclass SimpleDense(Layer):\n    def __init__(self, units=32):\n        super().__init__()\n        self.units = units\n\n    # Create the state of the layer (weights)\n    def build(self, input_shape):\n        self.kernel = self.add_weight(\n            shape=(input_shape[-1], self.units),\n            initializer=\"glorot_uniform\",\n            trainable=True,\n            name=\"kernel\",\n        )\n        self.bias = self.add_weight(\n            shape=(self.units,),\n            initializer=\"zeros\",\n            trainable=True,\n            name=\"bias\",\n        )\n\n    # Defines the computation\n    def call(self, inputs):\n        return ops.matmul(inputs, self.kernel) + self.bias\n\n# Instantiates the layer.\nlinear_layer = SimpleDense(4)\n\n# This will also call `build(input_shape)` and create the weights.\ny = linear_layer(ops.ones((2, 2)))\nassert len(linear_layer.weights) == 2\n\n# These weights are trainable, so they're listed in `trainable_weights`:\nassert len(linear_layer.trainable_weights) == 2\n```\n\nBesides trainable weights, updated via backpropagation during training,\nlayers can also have non-trainable weights. These weights are meant to\nbe updated manually during `call()`. Here's a example layer that computes\nthe running sum of its inputs:\n\n```python\nclass ComputeSum(Layer):\n\n  def __init__(self, input_dim):\n      super(ComputeSum, self).__init__()\n      # Create a non-trainable weight.\n      self.total = self.add_weight(\n        shape=(),\n        initializer=\"zeros\",\n        trainable=False,\n        name=\"total\",\n      )\n\n  def call(self, inputs):\n      self.total.assign(self.total + ops.sum(inputs))\n      return self.total\n\nmy_sum = ComputeSum(2)\nx = ops.ones((2, 2))\ny = my_sum(x)\n\nassert my_sum.weights == [my_sum.total]\nassert my_sum.non_trainable_weights == [my_sum.total]\nassert my_sum.trainable_weights == []\n```",
+        "has_varargs": false,
+        "kind": "class",
+        "name": "InputLayer",
+        "params": [
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "shape"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "batch_size"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "dtype"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "sparse"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "ragged"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "batch_shape"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "input_tensor"
+          },
+          {
+            "annotation": null,
+            "default": "False",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "optional"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "name"
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "VAR_KEYWORD",
+            "name": "kwargs"
+          }
+        ]
+      },
+      {
+        "api_path": "tf.keras.layers.JaxLayer",
+        "docstring": "Keras Layer that wraps a JAX model.\n\nThis layer enables the use of JAX components within Keras when using JAX as\nthe backend for Keras.\n\n## Model function\n\nThis layer accepts JAX models in the form of a function, `call_fn`, which\nmust take the following arguments with these exact names:\n\n- `params`: trainable parameters of the model.\n- `state` (*optional*): non-trainable state of the model. Can be omitted if\n    the model has no non-trainable state.\n- `rng` (*optional*): a `jax.random.PRNGKey` instance. Can be omitted if the\n    model does not need RNGs, neither during training nor during inference.\n- `inputs`: inputs to the model, a JAX array or a `PyTree` of arrays.\n- `training` (*optional*): an argument specifying if we're in training mode\n    or inference mode, `True` is passed in training mode. Can be omitted if\n    the model behaves the same in training mode and inference mode.\n\nThe `inputs` argument is mandatory. Inputs to the model must be provided via\na single argument. If the JAX model takes multiple inputs as separate\narguments, they must be combined into a single structure, for instance in a\n`tuple` or a `dict`.\n\n## Model weights initialization\n\nThe initialization of the `params` and `state` of the model can be handled\nby this layer, in which case the `init_fn` argument must be provided. This\nallows the model to be initialized dynamically with the right shape.\nAlternatively, and if the shape is known, the `params` argument and\noptionally the `state` argument can be used to create an already initialized\nmodel.\n\nThe `init_fn` function, if provided, must take the following arguments with\nthese exact names:\n\n- `rng`: a `jax.random.PRNGKey` instance.\n- `inputs`: a JAX array or a `PyTree` of arrays with placeholder values to\n    provide the shape of the inputs.\n- `training` (*optional*): an argument specifying if we're in training mode\n    or inference mode. `True` is always passed to `init_fn`. Can be omitted\n    regardless of whether `call_fn` has a `training` argument.\n\n## Models with non-trainable state\n\nFor JAX models that have non-trainable state:\n\n- `call_fn` must have a `state` argument\n- `call_fn` must return a `tuple` containing the outputs of the model and\n    the new non-trainable state of the model\n- `init_fn` must return a `tuple` containing the initial trainable params of\n    the model and the initial non-trainable state of the model.\n\nThis code shows a possible combination of `call_fn` and `init_fn` signatures\nfor a model with non-trainable state. In this example, the model has a\n`training` argument and an `rng` argument in `call_fn`.\n\n```python\ndef stateful_call(params, state, rng, inputs, training):\n    outputs = ...\n    new_state = ...\n    return outputs, new_state\n\ndef stateful_init(rng, inputs):\n    initial_params = ...\n    initial_state = ...\n    return initial_params, initial_state\n```\n\n## Models without non-trainable state\n\nFor JAX models with no non-trainable state:\n\n- `call_fn` must not have a `state` argument\n- `call_fn` must return only the outputs of the model\n- `init_fn` must return only the initial trainable params of the model.\n\nThis code shows a possible combination of `call_fn` and `init_fn` signatures\nfor a model without non-trainable state. In this example, the model does not\nhave a `training` argument and does not have an `rng` argument in `call_fn`.\n\n```python\ndef stateless_call(params, inputs):\n    outputs = ...\n    return outputs\n\ndef stateless_init(rng, inputs):\n    initial_params = ...\n    return initial_params\n```\n\n## Conforming to the required signature\n\nIf a model has a different signature than the one required by `JaxLayer`,\none can easily write a wrapper method to adapt the arguments. This example\nshows a model that has multiple inputs as separate arguments, expects\nmultiple RNGs in a `dict`, and has a `deterministic` argument with the\nopposite meaning of `training`. To conform, the inputs are combined in a\nsingle structure using a `tuple`, the RNG is split and used the populate the\nexpected `dict`, and the Boolean flag is negated:\n\n```python\ndef my_model_fn(params, rngs, input1, input2, deterministic):\n    ...\n    if not deterministic:\n        dropout_rng = rngs[\"dropout\"]\n        keep = jax.random.bernoulli(dropout_rng, dropout_rate, x.shape)\n        x = jax.numpy.where(keep, x / dropout_rate, 0)\n        ...\n    ...\n    return outputs\n\ndef my_model_wrapper_fn(params, rng, inputs, training):\n    input1, input2 = inputs\n    rng1, rng2 = jax.random.split(rng)\n    rngs = {\"dropout\": rng1, \"preprocessing\": rng2}\n    deterministic = not training\n    return my_model_fn(params, rngs, input1, input2, deterministic)\n\nkeras_layer = JaxLayer(my_model_wrapper_fn, params=initial_params)\n```\n\n## Usage with Haiku modules\n\n`JaxLayer` enables the use of [Haiku](https://dm-haiku.readthedocs.io)\ncomponents in the form of\n[`haiku.Module`](https://dm-haiku.readthedocs.io/en/latest/api.html#module).\nThis is achieved by transforming the module per the Haiku pattern and then\npassing `module.apply` in the `call_fn` parameter and `module.init` in the\n`init_fn` parameter if needed.\n\nIf the model has non-trainable state, it should be transformed with\n[`haiku.transform_with_state`](\n  https://dm-haiku.readthedocs.io/en/latest/api.html#haiku.transform_with_state).\nIf the model has no non-trainable state, it should be transformed with\n[`haiku.transform`](\n  https://dm-haiku.readthedocs.io/en/latest/api.html#haiku.transform).\nAdditionally, and optionally, if the module does not use RNGs in \"apply\", it\ncan be transformed with\n[`haiku.without_apply_rng`](\n  https://dm-haiku.readthedocs.io/en/latest/api.html#without-apply-rng).\n\nThe following example shows how to create a `JaxLayer` from a Haiku module\nthat uses random number generators via `hk.next_rng_key()` and takes a\ntraining positional argument:\n\n```python\nclass MyHaikuModule(hk.Module):\n    def __call__(self, x, training):\n        x = hk.Conv2D(32, (3, 3))(x)\n        x = jax.nn.relu(x)\n        x = hk.AvgPool((1, 2, 2, 1), (1, 2, 2, 1), \"VALID\")(x)\n        x = hk.Flatten()(x)\n        x = hk.Linear(200)(x)\n        if training:\n            x = hk.dropout(rng=hk.next_rng_key(), rate=0.3, x=x)\n        x = jax.nn.relu(x)\n        x = hk.Linear(10)(x)\n        x = jax.nn.softmax(x)\n        return x\n\ndef my_haiku_module_fn(inputs, training):\n    module = MyHaikuModule()\n    return module(inputs, training)\n\ntransformed_module = hk.transform(my_haiku_module_fn)\n\nkeras_layer = JaxLayer(\n    call_fn=transformed_module.apply,\n    init_fn=transformed_module.init,\n)\n```\n\nArgs:\n    call_fn: The function to call the model. See description above for the\n        list of arguments it takes and the outputs it returns.\n    init_fn: the function to call to initialize the model. See description\n        above for the list of arguments it takes and the outputs it returns.\n        If `None`, then `params` and/or `state` must be provided.\n  params: A `PyTree` containing all the model trainable parameters. This\n        allows passing trained parameters or controlling the initialization.\n        If both `params` and `state` are `None`, `init_fn` is called at\n        build time to initialize the trainable parameters of the model.\n  state: A `PyTree` containing all the model non-trainable state. This\n        allows passing learned state or controlling the initialization. If\n        both `params` and `state` are `None`, and `call_fn` takes a `state`\n        argument, then `init_fn` is called at build time to initialize the\n        non-trainable state of the model.\n  seed: Seed for random number generator. Optional.\n  dtype: The dtype of the layer's computations and weights. Can also be a\n        `keras.DTypePolicy`. Optional. Defaults to the default policy.",
+        "has_varargs": false,
+        "kind": "class",
+        "name": "JaxLayer",
+        "params": [
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "call_fn"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "init_fn"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "params"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "state"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "seed"
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "VAR_KEYWORD",
+            "name": "kwargs"
+          }
+        ]
+      },
+      {
+        "api_path": "tf.keras.layers.Layer",
+        "docstring": "This is the class from which all layers inherit.\n\nA layer is a callable object that takes as input one or more tensors and\nthat outputs one or more tensors. It involves *computation*, defined\nin the `call()` method, and a *state* (weight variables). State can be\ncreated:\n\n* in `__init__()`, for instance via `self.add_weight()`;\n* in the optional `build()` method, which is invoked by the first\n  `__call__()` to the layer, and supplies the shape(s) of the input(s),\n  which may not have been known at initialization time.\n\nLayers are recursively composable: If you assign a Layer instance as an\nattribute of another Layer, the outer layer will start tracking the weights\ncreated by the inner layer. Nested layers should be instantiated in the\n`__init__()` method or `build()` method.\n\nUsers will just instantiate a layer and then treat it as a callable.\n\nArgs:\n    trainable: Boolean, whether the layer's variables should be trainable.\n    name: String name of the layer.\n    dtype: The dtype of the layer's computations and weights. Can also be a\n        `keras.DTypePolicy`, which allows the computation and weight dtype\n        to differ. Defaults to `None`. `None` means to use\n        `keras.config.dtype_policy()`, which is a `float32` policy unless\n        set to different value (via `keras.config.set_dtype_policy()`).\n\nAttributes:\n    name: The name of the layer (string).\n    dtype: Dtype of the layer's weights. Alias of `layer.variable_dtype`.\n    variable_dtype: Dtype of the layer's weights.\n    compute_dtype: The dtype of the layer's computations.\n        Layers automatically cast inputs to this dtype, which causes\n        the computations and output to also be in this dtype.\n        When mixed precision is used with a\n        `keras.DTypePolicy`, this will be different\n        than `variable_dtype`.\n    trainable_weights: List of variables to be included in backprop.\n    non_trainable_weights: List of variables that should not be\n        included in backprop.\n    weights: The concatenation of the lists trainable_weights and\n        non_trainable_weights (in this order).\n    trainable: Whether the layer should be trained (boolean), i.e.\n        whether its potentially-trainable weights should be returned\n        as part of `layer.trainable_weights`.\n    input_spec: Optional (list of) `InputSpec` object(s) specifying the\n        constraints on inputs that can be accepted by the layer.\n\nWe recommend that descendants of `Layer` implement the following methods:\n\n* `__init__()`: Defines custom layer attributes, and creates layer weights\n    that do not depend on input shapes, using `add_weight()`,\n    or other state.\n* `build(self, input_shape)`: This method can be used to create weights that\n    depend on the shape(s) of the input(s), using `add_weight()`, or other\n    state. `__call__()` will automatically build the layer\n    (if it has not been built yet) by calling `build()`.\n* `call(self, *args, **kwargs)`: Called in `__call__` after making\n    sure `build()` has been called. `call()` performs the logic of applying\n    the layer to the input arguments.\n    Two reserved keyword arguments you can optionally use in `call()` are:\n        1. `training` (boolean, whether the call is in inference mode or\n            training mode).\n        2. `mask` (boolean tensor encoding masked timesteps in the input,\n            used e.g. in RNN layers).\n    A typical signature for this method is `call(self, inputs)`, and user\n    could optionally add `training` and `mask` if the layer need them.\n* `get_config(self)`: Returns a dictionary containing the configuration\n    used to initialize this layer. If the keys differ from the arguments\n    in `__init__()`, then override `from_config(self)` as well.\n    This method is used when saving\n    the layer or a model that contains this layer.\n\nExamples:\n\nHere's a basic example: a layer with two variables, `w` and `b`,\nthat returns `y = w . x + b`.\nIt shows how to implement `build()` and `call()`.\nVariables set as attributes of a layer are tracked as weights\nof the layers (in `layer.weights`).\n\n```python\nclass SimpleDense(Layer):\n    def __init__(self, units=32):\n        super().__init__()\n        self.units = units\n\n    # Create the state of the layer (weights)\n    def build(self, input_shape):\n        self.kernel = self.add_weight(\n            shape=(input_shape[-1], self.units),\n            initializer=\"glorot_uniform\",\n            trainable=True,\n            name=\"kernel\",\n        )\n        self.bias = self.add_weight(\n            shape=(self.units,),\n            initializer=\"zeros\",\n            trainable=True,\n            name=\"bias\",\n        )\n\n    # Defines the computation\n    def call(self, inputs):\n        return ops.matmul(inputs, self.kernel) + self.bias\n\n# Instantiates the layer.\nlinear_layer = SimpleDense(4)\n\n# This will also call `build(input_shape)` and create the weights.\ny = linear_layer(ops.ones((2, 2)))\nassert len(linear_layer.weights) == 2\n\n# These weights are trainable, so they're listed in `trainable_weights`:\nassert len(linear_layer.trainable_weights) == 2\n```\n\nBesides trainable weights, updated via backpropagation during training,\nlayers can also have non-trainable weights. These weights are meant to\nbe updated manually during `call()`. Here's a example layer that computes\nthe running sum of its inputs:\n\n```python\nclass ComputeSum(Layer):\n\n  def __init__(self, input_dim):\n      super(ComputeSum, self).__init__()\n      # Create a non-trainable weight.\n      self.total = self.add_weight(\n        shape=(),\n        initializer=\"zeros\",\n        trainable=False,\n        name=\"total\",\n      )\n\n  def call(self, inputs):\n      self.total.assign(self.total + ops.sum(inputs))\n      return self.total\n\nmy_sum = ComputeSum(2)\nx = ops.ones((2, 2))\ny = my_sum(x)\n\nassert my_sum.weights == [my_sum.total]\nassert my_sum.non_trainable_weights == [my_sum.total]\nassert my_sum.trainable_weights == []\n```",
+        "has_varargs": false,
+        "kind": "class",
+        "name": "Layer",
+        "params": [
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "KEYWORD_ONLY",
+            "name": "activity_regularizer"
+          },
+          {
+            "annotation": null,
+            "default": "True",
+            "kind": "KEYWORD_ONLY",
+            "name": "trainable"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "KEYWORD_ONLY",
+            "name": "dtype"
+          },
+          {
+            "annotation": null,
+            "default": "True",
+            "kind": "KEYWORD_ONLY",
+            "name": "autocast"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "KEYWORD_ONLY",
+            "name": "name"
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "VAR_KEYWORD",
+            "name": "kwargs"
+          }
+        ]
+      },
+      {
+        "api_path": "tf.keras.layers.LayerNormalization",
+        "docstring": "Layer normalization layer (Ba et al., 2016).\n\nNormalize the activations of the previous layer for each given example in a\nbatch independently, rather than across a batch like Batch Normalization.\ni.e. applies a transformation that maintains the mean activation within each\nexample close to 0 and the activation standard deviation close to 1.\n\nIf `scale` or `center` are enabled, the layer will scale the normalized\noutputs by broadcasting them with a trainable variable `gamma`, and center\nthe outputs by broadcasting with a trainable variable `beta`. `gamma` will\ndefault to a ones tensor and `beta` will default to a zeros tensor, so that\ncentering and scaling are no-ops before training has begun.\n\nSo, with scaling and centering enabled the normalization equations\nare as follows:\n\nLet the intermediate activations for a mini-batch to be the `inputs`.\n\nFor each sample `x_i` in `inputs` with `k` features, we compute the mean and\nvariance of the sample:\n\n```python\nmean_i = sum(x_i[j] for j in range(k)) / k\nvar_i = sum((x_i[j] - mean_i) ** 2 for j in range(k)) / k\n```\n\nand then compute a normalized `x_i_normalized`, including a small factor\n`epsilon` for numerical stability.\n\n```python\nx_i_normalized = (x_i - mean_i) / sqrt(var_i + epsilon)\n```\n\nAnd finally `x_i_normalized ` is linearly transformed by `gamma` and `beta`,\nwhich are learned parameters:\n\n```python\noutput_i = x_i_normalized * gamma + beta\n```\n\n`gamma` and `beta` will span the axes of `inputs` specified in `axis`, and\nthis part of the inputs' shape must be fully defined.\n\nFor example:\n\n>>> layer = keras.layers.LayerNormalization(axis=[1, 2, 3])\n>>> layer.build([5, 20, 30, 40])\n>>> print(layer.beta.shape)\n(20, 30, 40)\n>>> print(layer.gamma.shape)\n(20, 30, 40)\n\nNote that other implementations of layer normalization may choose to define\n`gamma` and `beta` over a separate set of axes from the axes being\nnormalized across. For example, Group Normalization\n([Wu et al. 2018](https://arxiv.org/abs/1803.08494)) with group size of 1\ncorresponds to a Layer Normalization that normalizes across height, width,\nand channel and has `gamma` and `beta` span only the channel dimension.\nSo, this Layer Normalization implementation will not match a Group\nNormalization layer with group size set to 1.\n\nArgs:\n    axis: Integer or List/Tuple. The axis or axes to normalize across.\n        Typically, this is the features axis/axes. The left-out axes are\n        typically the batch axis/axes. `-1` is the last dimension in the\n        input. Defaults to `-1`.\n    epsilon: Small float added to variance to avoid dividing by zero.\n        Defaults to 1e-3.\n    center: If True, add offset of `beta` to normalized tensor. If False,\n        `beta` is ignored. Defaults to `True`.\n    scale: If True, multiply by `gamma`. If False, `gamma` is not used.\n        When the next layer is linear (also e.g. `nn.relu`), this can be\n        disabled since the scaling will be done by the next layer.\n        Defaults to `True`.\n    beta_initializer: Initializer for the beta weight. Defaults to zeros.\n    gamma_initializer: Initializer for the gamma weight. Defaults to ones.\n    beta_regularizer: Optional regularizer for the beta weight.\n        None by default.\n    gamma_regularizer: Optional regularizer for the gamma weight.\n        None by default.\n    beta_constraint: Optional constraint for the beta weight.\n        None by default.\n    gamma_constraint: Optional constraint for the gamma weight.\n        None by default.\n    **kwargs: Base layer keyword arguments (e.g. `name` and `dtype`).\n\n\nReference:\n\n- [Lei Ba et al., 2016](https://arxiv.org/abs/1607.06450).",
+        "has_varargs": false,
+        "kind": "class",
+        "name": "LayerNormalization",
+        "params": [
+          {
+            "annotation": null,
+            "default": "-1",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "axis"
+          },
+          {
+            "annotation": null,
+            "default": "0.001",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "epsilon"
+          },
+          {
+            "annotation": null,
+            "default": "True",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "center"
+          },
+          {
+            "annotation": null,
+            "default": "True",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "scale"
+          },
+          {
+            "annotation": null,
+            "default": "zeros",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "beta_initializer"
+          },
+          {
+            "annotation": null,
+            "default": "ones",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "gamma_initializer"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "beta_regularizer"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "gamma_regularizer"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "beta_constraint"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "gamma_constraint"
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "VAR_KEYWORD",
+            "name": "kwargs"
+          }
+        ]
+      },
+      {
+        "api_path": "tf.keras.layers.TFSMLayer",
+        "docstring": "Reload a Keras model/layer that was saved via SavedModel / ExportArchive.\n\nArguments:\n    filepath: `str` or `pathlib.Path` object. The path to the SavedModel.\n    call_endpoint: Name of the endpoint to use as the `call()` method\n        of the reloaded layer. If the SavedModel was created\n        via `model.export()`,\n        then the default endpoint name is `'serve'`. In other cases\n        it may be named `'serving_default'`.\n\nExample:\n\n```python\nmodel.export(\"path/to/artifact\")\nreloaded_layer = TFSMLayer(\"path/to/artifact\")\noutputs = reloaded_layer(inputs)\n```\n\nThe reloaded object can be used like a regular Keras layer, and supports\ntraining/fine-tuning of its trainable weights. Note that the reloaded\nobject retains none of the internal structure or custom methods of the\noriginal object -- it's a brand new layer created around the saved\nfunction.\n\n**Limitations:**\n\n* Only call endpoints with a single `inputs` tensor argument\n(which may optionally be a dict/tuple/list of tensors) are supported.\nFor endpoints with multiple separate input tensor arguments, consider\nsubclassing `TFSMLayer` and implementing a `call()` method with a\ncustom signature.\n* If you need training-time behavior to differ from inference-time behavior\n(i.e. if you need the reloaded object to support a `training=True` argument\nin `__call__()`), make sure that the training-time call function is\nsaved as a standalone endpoint in the artifact, and provide its name\nto the `TFSMLayer` via the `call_training_endpoint` argument.",
+        "has_varargs": false,
+        "kind": "class",
+        "name": "TFSMLayer",
+        "params": [
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "filepath"
+          },
+          {
+            "annotation": null,
+            "default": "serve",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "call_endpoint"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "call_training_endpoint"
+          },
+          {
+            "annotation": null,
+            "default": "True",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "trainable"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "name"
+          },
+          {
+            "annotation": null,
+            "default": "None",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "name": "dtype"
+          }
+        ]
       }
     ]
-  }
+  },
+  "version": "2.20.0"
 }

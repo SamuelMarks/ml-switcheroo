@@ -7,19 +7,43 @@
         "self": "self"
       }
     },
+    "AMax": {
+      "api": "mlx.core.max",
+      "required_imports": []
+    },
+    "AMin": {
+      "api": "mlx.core.min",
+      "required_imports": []
+    },
     "Abs": {
       "api": "mlx.core.array.abs",
       "args": {}
     },
+    "Abs_": {
+      "api": "mlx.core.abs",
+      "required_imports": []
+    },
     "Absolute": {
       "api": "mlx.core.abs",
+      "required_imports": []
+    },
+    "AcceleratorError": {
+      "api": "RuntimeError",
       "required_imports": []
     },
     "Acos": {
       "api": "mlx.core.arccos",
       "required_imports": []
     },
+    "Acos_": {
+      "api": "mlx.core.arccos",
+      "required_imports": []
+    },
     "Acosh": {
+      "api": "mlx.core.arccosh",
+      "required_imports": []
+    },
+    "Acosh_": {
       "api": "mlx.core.arccosh",
       "required_imports": []
     },
@@ -112,6 +136,12 @@
     "AdaptiveAveragePooling3D": {
       "required_imports": []
     },
+    "AdaptiveAvgPool1d": {
+      "required_imports": []
+    },
+    "AdaptiveMaxPool1d": {
+      "required_imports": []
+    },
     "AdaptiveMaxPooling1D": {
       "required_imports": []
     },
@@ -131,6 +161,22 @@
     "AddLayer": {
       "required_imports": []
     },
+    "Addbmm": {
+      "api": "mlx.core.matmul",
+      "macro_template": "{beta} * {input} + {alpha} * mlx.core.sum(mlx.core.matmul({batch1}, {batch2}), axis=0)",
+      "required_imports": []
+    },
+    "Addcdiv": {
+      "api": "mlx.core.add",
+      "macro_template": "{input} + {value} * ({tensor1} / {tensor2})",
+      "required_imports": []
+    },
+    "Addcmul": {
+      "macro_template": "mx.add({input}, mx.multiply({tensor1}, {tensor2}) * {value})",
+      "required_imports": [
+        "import mlx.core as mx"
+      ]
+    },
     "AdditiveAttention": {
       "required_imports": []
     },
@@ -141,16 +187,50 @@
         "kwargs": "kwargs"
       }
     },
+    "Addmv": {
+      "macro_template": "mx.add({beta} * {input}, {alpha} * mx.matmul({mat}, {vec}))",
+      "required_imports": [
+        "import mlx.core as mx"
+      ]
+    },
+    "Addmv_": {
+      "macro_template": "mx.add({beta} * {input}, {alpha} * mx.matmul({mat}, {vec}))",
+      "required_imports": []
+    },
+    "Addr": {
+      "macro_template": "mx.add({beta} * {input}, {alpha} * mx.outer({vec1}, {vec2}))",
+      "required_imports": [
+        "import mlx.core as mx"
+      ]
+    },
+    "Adjoint": {
+      "macro_template": "mx.conjugate(mx.swapaxes({input}, -1, -2))",
+      "required_imports": [
+        "import mlx.core as mx"
+      ]
+    },
+    "AffineGridGenerator": {
+      "required_imports": []
+    },
+    "AliasCopy": {
+      "macro_template": "mx.array({input})",
+      "required_imports": [
+        "import mlx.core as mx"
+      ]
+    },
+    "AlignTensors": {
+      "api": "mx.broadcast_arrays",
+      "pack_to_tuple": "args",
+      "required_imports": [
+        "import mlx.core as mx"
+      ]
+    },
     "All": {
       "api": "mlx.core.array.all",
       "args": {}
     },
     "AllClose": {
-      "api": "mlx.core.allclose",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.allclose"
     },
     "AllToShardedLinear": {
       "api": "mlx.nn.layers.distributed.AllToShardedLinear",
@@ -162,13 +242,65 @@
         "self": "self"
       }
     },
+    "Allclose": {
+      "api": "mlx.core.allclose",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
+    },
     "AlphaDropout": {
-      "api": "mlx.nn.Dropout",
+      "api": "mx.nn.AlphaDropout",
+      "args": {
+        "p": "p"
+      },
+      "required_imports": []
+    },
+    "AlphaDropout_": {
+      "api": "mx.nn.AlphaDropout",
+      "required_imports": []
+    },
+    "Amax": {
+      "api": "mx.max",
+      "args": {
+        "dim": "axis",
+        "keepdim": "keepdims"
+      },
+      "required_imports": []
+    },
+    "Amin": {
+      "api": "mx.min",
+      "args": {
+        "dim": "axis",
+        "keepdim": "keepdims"
+      },
+      "required_imports": []
+    },
+    "Aminmax": {
+      "macro_template": "(mx.min({input}, axis={dim}, keepdims={keepdim}), mx.max({input}, axis={dim}, keepdims={keepdim}))",
+      "required_imports": []
+    },
+    "Angle": {
       "required_imports": []
     },
     "Any": {
       "api": "mlx.core.array.any",
       "args": {}
+    },
+    "Append": {
+      "api": "mlx.core.concatenate",
+      "args": {
+        "axis": "axis"
+      },
+      "pack_to_tuple": "arrays",
+      "required_imports": [],
+      "requires_plugin": "append_shim"
+    },
+    "ApplyAlongAxis": {
+      "required_imports": []
+    },
+    "ApplyOverAxes": {
+      "required_imports": []
     },
     "ApproxMaxK": {
       "api": "mlx.core.topk",
@@ -197,12 +329,20 @@
         "kwargs": "kwargs"
       }
     },
+    "Arccos_": {
+      "api": "mx.arccos",
+      "required_imports": []
+    },
     "Arccosh": {
       "api": "mlx.core.arccosh",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "Arccosh_": {
+      "api": "mx.arccosh",
+      "required_imports": []
     },
     "Arcsin": {
       "api": "mlx.core.arcsin",
@@ -211,12 +351,20 @@
         "kwargs": "kwargs"
       }
     },
+    "Arcsin_": {
+      "api": "mx.arcsin",
+      "required_imports": []
+    },
     "Arcsinh": {
       "api": "mlx.core.arcsinh",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "Arcsinh_": {
+      "api": "mx.arcsinh",
+      "required_imports": []
     },
     "Arctan": {
       "api": "mlx.core.arctan",
@@ -232,6 +380,10 @@
         "kwargs": "kwargs"
       }
     },
+    "Arctan_": {
+      "api": "mx.arctan",
+      "required_imports": []
+    },
     "Arctanh": {
       "api": "mlx.core.arctanh",
       "args": {
@@ -240,10 +392,12 @@
       }
     },
     "ArgMax": {
-      "api": "mlx.core.argmax"
+      "api": "mlx.core.array.argmax",
+      "args": {}
     },
     "ArgMin": {
-      "api": "mlx.core.argmin"
+      "api": "mlx.core.array.argmin",
+      "args": {}
     },
     "ArgPartition": {
       "api": "mlx.core.argpartition",
@@ -255,24 +409,32 @@
     "ArgSort": {
       "api": "mlx.core.argsort",
       "args": {
-        "x": "a"
-      },
-      "required_imports": []
-    },
-    "Argmax": {
-      "api": "mlx.core.array.argmax",
-      "args": {}
-    },
-    "Argmin": {
-      "api": "mlx.core.array.argmin",
-      "args": {}
-    },
-    "Argsort": {
-      "api": "mlx.core.argsort",
-      "args": {
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "ArgWhere": {
+      "api": "mlx.core.argwhere",
+      "required_imports": [],
+      "requires_plugin": "argwhere_shim"
+    },
+    "Argmax": {
+      "api": "mlx.core.argmax",
+      "args": {
+        "dim": "axis",
+        "keepdim": "keepdims"
+      },
+      "required_imports": []
+    },
+    "Argmin": {
+      "api": "mlx.core.argmin"
+    },
+    "Argsort": {
+      "api": "mlx.core.argsort"
+    },
+    "Argwhere": {
+      "api": "mlx.core.argwhere",
+      "required_imports": []
     },
     "Array": {
       "api": "mlx.core.array",
@@ -302,6 +464,15 @@
       "api": "mlx.core.ArrayLike",
       "args": {}
     },
+    "ArraySplit": {
+      "api": "mlx.core.split",
+      "args": {
+        "ary": "a",
+        "axis": "axis",
+        "indices_or_sections": "indices_or_sections"
+      },
+      "required_imports": []
+    },
     "AsArray": {
       "api": "mlx.core.asarray",
       "args": {
@@ -313,6 +484,13 @@
       "api": "mlx.core.as_strided",
       "args": {
         "input": "a"
+      },
+      "required_imports": []
+    },
+    "AsTensor": {
+      "api": "mlx.core.array",
+      "args": {
+        "data": "object"
       },
       "required_imports": []
     },
@@ -354,10 +532,6 @@
     },
     "Atan2": {
       "api": "mlx.core.arctan2",
-      "args": {
-        "x": "b",
-        "y": "a"
-      },
       "required_imports": []
     },
     "Atanh": {
@@ -384,6 +558,10 @@
       },
       "required_imports": []
     },
+    "AverageGradients": {
+      "api": "mlx.nn.average_gradients",
+      "required_imports": []
+    },
     "AverageLayer": {
       "required_imports": []
     },
@@ -401,6 +579,9 @@
       "required_imports": []
     },
     "AveragePooling3D": {
+      "required_imports": []
+    },
+    "Avg": {
       "required_imports": []
     },
     "AvgPool1D": {
@@ -457,12 +638,28 @@
       "api": "mlx.core.bfloat16",
       "required_imports": []
     },
+    "BFloat16Tensor": {
+      "api": "mlx.core.array",
+      "inject_args": {
+        "dtype": "mlx.core.bfloat16"
+      },
+      "required_imports": []
+    },
     "BLOCK_M": {
       "api": "mlx.core.block_masked_mm",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
       },
+      "required_imports": []
+    },
+    "Baddbmm": {
+      "macro_template": "{beta} * {input} + {alpha} * mlx.core.matmul({batch1}, {batch2})",
+      "required_imports": [
+        "import mlx.core"
+      ]
+    },
+    "BartlettWindow": {
       "required_imports": []
     },
     "BatchNorm": {
@@ -475,6 +672,27 @@
         "self": "self",
         "track_running_stats": "track_running_stats"
       }
+    },
+    "BatchNormBackwardElemt": {
+      "required_imports": []
+    },
+    "BatchNormBackwardReduce": {
+      "required_imports": []
+    },
+    "BatchNormElemt": {
+      "required_imports": []
+    },
+    "BatchNormGatherStats": {
+      "required_imports": []
+    },
+    "BatchNormGatherStatsWithCounts": {
+      "required_imports": []
+    },
+    "BatchNormStats": {
+      "required_imports": []
+    },
+    "BatchNormUpdateStats": {
+      "required_imports": []
     },
     "BatchNormalization": {
       "api": "mlx.nn.BatchNorm",
@@ -500,6 +718,10 @@
       "api": "mlx.core.bfloat16",
       "args": {}
     },
+    "Bias": {
+      "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.bias",
+      "args": {}
+    },
     "Bidirectional": {
       "required_imports": []
     },
@@ -513,6 +735,17 @@
         "self": "self"
       }
     },
+    "BinaryCrossEntropyWithLogits": {
+      "api": "mlx.nn.losses.binary_cross_entropy",
+      "args": {
+        "input": "logits",
+        "target": "targets"
+      },
+      "inject_args": {
+        "with_logits": true
+      },
+      "required_imports": []
+    },
     "BinaryCrossentropy": {
       "api": "mlx.nn.losses.BinaryCrossEntropy",
       "args": {
@@ -523,6 +756,15 @@
     "BinaryFocalCrossentropy": {
       "required_imports": []
     },
+    "Bincount": {
+      "required_imports": []
+    },
+    "Binomial": {
+      "required_imports": []
+    },
+    "Bit": {
+      "required_imports": []
+    },
     "BitCast": {
       "api": "mlx.core.view",
       "args": {
@@ -530,20 +772,34 @@
       },
       "required_imports": []
     },
+    "Bits16": {
+      "required_imports": []
+    },
+    "Bits1x8": {
+      "required_imports": []
+    },
+    "Bits2x4": {
+      "required_imports": []
+    },
+    "Bits4x2": {
+      "required_imports": []
+    },
+    "Bits8": {
+      "required_imports": []
+    },
     "BitwiseAnd": {
       "api": "mlx.core.bitwise_and",
       "required_imports": []
     },
     "BitwiseInvert": {
-      "api": "mlx.core.bitwise_invert",
+      "api": "mlx.core.bitwise_not",
       "required_imports": []
     },
     "BitwiseLeftShift": {
-      "api": "mlx.core.bitwise_left_shift",
+      "api": "mlx.core.left_shift",
       "required_imports": []
     },
     "BitwiseNot": {
-      "api": "mlx.core.bitwise_not",
       "required_imports": []
     },
     "BitwiseOr": {
@@ -551,18 +807,49 @@
       "required_imports": []
     },
     "BitwiseRightShift": {
-      "api": "mlx.core.bitwise_right_shift",
+      "api": "mlx.core.right_shift",
       "required_imports": []
     },
     "BitwiseXor": {
       "api": "mlx.core.bitwise_xor",
       "required_imports": []
     },
+    "BlackmanWindow": {
+      "required_imports": []
+    },
+    "Block": {
+      "required_imports": []
+    },
+    "BlockDiag": {
+      "required_imports": []
+    },
     "BlockMaskedMM": {
       "api": "mlx.core.block_masked_mm",
       "required_imports": []
     },
+    "Bmm": {
+      "api": "mlx.core.matmul",
+      "args": {
+        "input": "a",
+        "mat2": "b"
+      },
+      "required_imports": []
+    },
     "Bool": {
+      "api": "bool",
+      "required_imports": []
+    },
+    "BoolScalar": {
+      "required_imports": []
+    },
+    "BoolTensor": {
+      "api": "mlx.core.array",
+      "inject_args": {
+        "dtype": "bool"
+      },
+      "required_imports": []
+    },
+    "BoolType": {
       "api": "bool",
       "required_imports": []
     },
@@ -570,19 +857,60 @@
       "api": "mlx.core.broadcast_arrays",
       "required_imports": []
     },
+    "BroadcastLike": {
+      "required_imports": []
+    },
     "BroadcastShapes": {
-      "api": "mlx.core.broadcast_shapes",
       "required_imports": []
     },
     "BroadcastTo": {
       "api": "mlx.core.broadcast_to",
       "args": {
-        "array": "a",
-        "shape": "shape"
+        "input": "a"
       },
       "required_imports": []
     },
+    "BuildMatrix": {
+      "required_imports": []
+    },
+    "BusDayCalendar": {
+      "required_imports": []
+    },
+    "BusDayCount": {
+      "required_imports": []
+    },
+    "BusDayOffset": {
+      "required_imports": []
+    },
+    "ByteTensor": {
+      "api": "mlx.core.array",
+      "inject_args": {
+        "dtype": "mlx.core.uint8"
+      },
+      "required_imports": []
+    },
+    "ByteType": {
+      "api": "mlx.core.int8",
+      "required_imports": []
+    },
+    "BytesType": {
+      "required_imports": []
+    },
+    "CELU": {
+      "api": "mlx.nn.layers.activations.CELU",
+      "args": {
+        "alpha": "alpha",
+        "self": "self"
+      }
+    },
     "CTCLoss": {
+      "required_imports": []
+    },
+    "CanCast": {
+      "required_imports": []
+    },
+    "CastBFloat16": {
+      "api": "mlx.core.bfloat16",
       "required_imports": []
     },
     "CastBool": {
@@ -647,14 +975,28 @@
         "kwargs": "kwargs"
       }
     },
+    "CeilInplace": {
+      "api": "mlx.core.ceil",
+      "required_imports": []
+    },
     "Celu": {
-      "api": "mlx.nn.layers.activations.CELU",
+      "api": "mlx.nn.layers.activations.celu",
       "args": {
         "alpha": "alpha",
-        "self": "self"
+        "x": "x"
       }
     },
     "CenterCrop": {
+      "required_imports": []
+    },
+    "CharTensor": {
+      "api": "mlx.core.array",
+      "inject_args": {
+        "dtype": "mlx.core.int8"
+      },
+      "required_imports": []
+    },
+    "CharacterType": {
       "required_imports": []
     },
     "Checkify": {
@@ -663,6 +1005,47 @@
     "Checkpoint": {
       "api": "mlx.nn.layers.transformer.TransformerDecoder.checkpoint",
       "args": {}
+    },
+    "Cholesky": {
+      "api": "mlx.core.linalg.cholesky",
+      "args": {
+        "a": "a",
+        "stream": "stream",
+        "upper": "upper"
+      }
+    },
+    "Choose": {
+      "required_imports": []
+    },
+    "Chunk": {
+      "api": "mlx.core.split",
+      "args": {
+        "chunks": "indices_or_sections",
+        "dim": "axis",
+        "input": "a"
+      },
+      "required_imports": []
+    },
+    "Clamp": {
+      "api": "mlx.core.clip",
+      "args": {
+        "input": "a",
+        "max": "a_max",
+        "min": "a_min"
+      },
+      "required_imports": []
+    },
+    "ClampMax": {
+      "api": "mlx.core.minimum",
+      "args": {
+        "input": "a",
+        "max": "b"
+      },
+      "required_imports": []
+    },
+    "ClampMin": {
+      "api": "mlx.core.maximum",
+      "required_imports": []
     },
     "ClearCache": {
       "api": "mlx.core.clear_cache",
@@ -676,10 +1059,15 @@
       }
     },
     "Clone": {
-      "api": "copy.deepcopy",
-      "required_imports": [
-        "import copy"
-      ]
+      "api": "mlx.core.array",
+      "required_imports": []
+    },
+    "ColumnConcatenation": {
+      "required_imports": []
+    },
+    "ColumnStack": {
+      "macro_template": "mlx.core.stack({tup}, axis=1)",
+      "required_imports": []
     },
     "CombineMasks": {
       "required_imports": [],
@@ -704,9 +1092,16 @@
       "api": "mlx.core.complex64",
       "args": {}
     },
+    "ComplexDouble": {
+      "api": "mlx.core.complex128",
+      "required_imports": []
+    },
     "ComplexFloating": {
       "api": "mlx.core.complexfloating",
       "args": {}
+    },
+    "ComplexLongDouble": {
+      "required_imports": []
     },
     "Compress": {
       "api": "mlx.core.take",
@@ -727,6 +1122,12 @@
       }
     },
     "ConcatenateLayer": {
+      "required_imports": []
+    },
+    "ConcreteModuleType": {
+      "required_imports": []
+    },
+    "ConcreteModuleTypeBuilder": {
       "required_imports": []
     },
     "Cond": {
@@ -753,6 +1154,20 @@
         "dtype": "dtype",
         "value": "value"
       }
+    },
+    "ConstructFloat16": {
+      "api": "mlx.core.array",
+      "inject_args": {
+        "dtype": "mlx.core.float16"
+      },
+      "required_imports": []
+    },
+    "ConstructFloat32": {
+      "api": "mlx.core.array",
+      "inject_args": {
+        "dtype": "mlx.core.float32"
+      },
+      "required_imports": []
     },
     "Contiguous": {
       "api": "mlx.core.contiguous",
@@ -898,6 +1313,11 @@
       "api": "mlx.core.array",
       "required_imports": []
     },
+    "Copysign": {
+      "api": "mlx.core.multiply",
+      "macro_template": "mlx.core.abs({input}) * mlx.core.sign({other})",
+      "required_imports": []
+    },
     "Cos": {
       "api": "mlx.core.cos",
       "args": {
@@ -943,8 +1363,16 @@
         "stream": "stream"
       }
     },
+    "CubeRoot": {
+      "macro_template": "mlx.core.power({x}, 1/3)",
+      "required_imports": []
+    },
     "CumSum": {
-      "api": "mlx.core.cumsum"
+      "api": "mlx.core.cumsum",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
     },
     "Cummax": {
       "api": "mlx.core.cummax",
@@ -968,11 +1396,7 @@
       }
     },
     "Cumsum": {
-      "api": "mlx.core.cumsum",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.cumsum"
     },
     "CustomAutograd": {
       "api": "mlx.core.custom_function",
@@ -990,13 +1414,21 @@
         "import dataclasses"
       ]
     },
+    "DeepCopyMemoTable": {
+      "required_imports": []
+    },
     "Deg2Rad": {
       "api": "mlx.core.multiply",
       "macro_template": "{x} * (3.141592653589793 / 180.0)",
       "required_imports": []
     },
-    "Deg2rad": {
+    "Deg2Rad_": {
       "api": "mlx.core.radians",
+      "required_imports": []
+    },
+    "Deg2rad": {
+      "api": "mlx.core.multiply",
+      "macro_template": "{input} * (3.141592653589793 / 180.0)",
       "required_imports": []
     },
     "Degrees": {
@@ -1012,12 +1444,34 @@
         "self": "self"
       }
     },
+    "DeserializationStorageContext": {
+      "required_imports": []
+    },
+    "Det": {
+      "api": "mlx.core.linalg.det",
+      "required_imports": []
+    },
+    "Detach": {
+      "api": "mlx.core.stop_gradient",
+      "required_imports": []
+    },
+    "DetachCopy": {
+      "api": "mlx.core.array",
+      "required_imports": []
+    },
+    "Detach_": {
+      "api": "mlx.core.stop_gradient",
+      "required_imports": []
+    },
     "Device": {
       "api": "mlx.core.Stream.device",
       "args": {}
     },
     "DeviceCpu": {
       "api": "mlx.core.cpu",
+      "required_imports": []
+    },
+    "DeviceObjType": {
       "required_imports": []
     },
     "DeviceType": {
@@ -1044,6 +1498,19 @@
         "kwargs": "kwargs"
       }
     },
+    "DiagonalCopy": {
+      "api": "mlx.core.diagonal",
+      "args": {
+        "dim1": "axis1",
+        "dim2": "axis2",
+        "input": "a",
+        "offset": "offset"
+      },
+      "required_imports": []
+    },
+    "DictType": {
+      "required_imports": []
+    },
     "Diff": {
       "required_imports": []
     },
@@ -1055,8 +1522,35 @@
       "api": "mlx.core.disable_compile",
       "required_imports": []
     },
+    "DisableTorchFunction": {
+      "api": "contextlib.nullcontext",
+      "required_imports": []
+    },
+    "DisableTorchFunctionSubclass": {
+      "api": "contextlib.nullcontext",
+      "required_imports": []
+    },
+    "DispatchKey": {
+      "required_imports": []
+    },
+    "DispatchKeySet": {
+      "required_imports": []
+    },
+    "Dist": {
+      "api": "mlx.core.linalg.norm",
+      "macro_template": "mlx.core.linalg.norm({input} - {other}, ord={p})",
+      "required_imports": []
+    },
+    "DistributedSum": {
+      "macro_template": "'sum'",
+      "required_imports": []
+    },
     "Div": {
-      "api": "mx.divide",
+      "api": "mlx.core.divide",
+      "args": {
+        "input": "a",
+        "other": "b"
+      },
       "required_imports": []
     },
     "DivMod": {
@@ -1081,11 +1575,29 @@
       "api": "mlx.core.divmod"
     },
     "Dot": {
-      "api": "mlx.core.dot",
+      "api": "mlx.core.matmul",
+      "args": {
+        "input": "a",
+        "tensor": "b"
+      },
       "required_imports": []
     },
     "DotProductAttention": {
       "api": "mlx.core.fast.scaled_dot_product_attention",
+      "required_imports": []
+    },
+    "Double": {
+      "required_imports": [],
+      "requires_plugin": "type_methods"
+    },
+    "DoubleStorage": {
+      "required_imports": []
+    },
+    "DoubleTensor": {
+      "api": "mx.array",
+      "arg_values": {
+        "dtype": "mx.float64"
+      },
       "required_imports": []
     },
     "Dropout": {
@@ -1131,6 +1643,13 @@
         "self": "self"
       }
     },
+    "Eig": {
+      "api": "mlx.core.linalg.eig",
+      "args": {
+        "a": "a",
+        "stream": "stream"
+      }
+    },
     "Einsum": {
       "api": "mlx.core.einsum",
       "args": {
@@ -1143,11 +1662,7 @@
       "required_imports": []
     },
     "Elu": {
-      "api": "mlx.nn.layers.activations.elu",
-      "args": {
-        "alpha": "alpha",
-        "x": "x"
-      }
+      "api": "mlx.nn.ELU"
     },
     "Embedding": {
       "api": "mlx.nn.layers.embedding.Embedding",
@@ -1157,16 +1672,33 @@
         "self": "self"
       }
     },
+    "EmbeddingBag": {
+      "required_imports": [],
+      "requires_plugin": "embedding_bag_mlx"
+    },
     "Empty": {
-      "macro_template": "mlx.core.zeros({shape}, dtype={dtype})",
+      "api": "mlx.core.zeros",
+      "args": {
+        "device": null,
+        "requires_grad": null,
+        "size": "shape"
+      },
       "required_imports": []
     },
     "EmptyLike": {
-      "macro_template": "mlx.core.zeros_like({a}, dtype={dtype})",
+      "api": "mlx.core.zeros_like",
+      "args": {
+        "device": null,
+        "input": "a",
+        "requires_grad": null
+      },
       "required_imports": []
     },
     "EnableCompile": {
       "api": "mlx.core.enable_compile",
+      "required_imports": []
+    },
+    "EnumType": {
       "required_imports": []
     },
     "Equal": {
@@ -1175,6 +1707,22 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "EqualAggregate": {
+      "api": "mlx.core.array_equal",
+      "args": {
+        "input": "a",
+        "other": "b"
+      },
+      "required_imports": []
+    },
+    "EqualElementwise": {
+      "api": "mlx.core.equal",
+      "args": {
+        "input": "a",
+        "other": "b"
+      },
+      "required_imports": []
     },
     "Erf": {
       "api": "mlx.core.erf",
@@ -1194,6 +1742,12 @@
       "api": "mlx.core.erfcinv",
       "required_imports": []
     },
+    "Erfinv": {
+      "api": "mlx.core.erfinv"
+    },
+    "ErrorReport": {
+      "required_imports": []
+    },
     "EuclideanNorm": {
       "required_imports": []
     },
@@ -1207,6 +1761,17 @@
         "self": "self"
       }
     },
+    "Event": {
+      "api": "mlx.core.Event",
+      "required_imports": []
+    },
+    "ExcludeDispatchKeyGuard": {
+      "api": "contextlib.nullcontext",
+      "required_imports": []
+    },
+    "ExecutionPlan": {
+      "required_imports": []
+    },
     "Exp": {
       "api": "mlx.core.exp",
       "args": {
@@ -1215,7 +1780,15 @@
       }
     },
     "Exp2": {
-      "macro_template": "mlx.core.power(2, {x})",
+      "macro_template": "mlx.core.power(2, {input})",
+      "required_imports": []
+    },
+    "ExpandCopy": {
+      "api": "mlx.core.broadcast_to",
+      "args": {
+        "input": "a",
+        "size": "shape"
+      },
       "required_imports": []
     },
     "ExpandDims": {
@@ -1262,6 +1835,13 @@
       "api": "mlx.core.abs",
       "required_imports": []
     },
+    "FatalError": {
+      "api": "RuntimeError",
+      "required_imports": []
+    },
+    "FileCheck": {
+      "required_imports": []
+    },
     "Finfo": {
       "api": "numpy.finfo",
       "required_imports": [
@@ -1304,6 +1884,19 @@
       "api": "mlx.core.power",
       "required_imports": []
     },
+    "FloatStorage": {
+      "required_imports": []
+    },
+    "FloatTensor": {
+      "api": "mx.array",
+      "arg_values": {
+        "dtype": "mx.float32"
+      },
+      "required_imports": []
+    },
+    "FloatType": {
+      "required_imports": []
+    },
     "Float_": {
       "required_imports": []
     },
@@ -1326,6 +1919,25 @@
       "api": "mlx.core.remainder",
       "required_imports": []
     },
+    "Fmax": {
+      "api": "mlx.core.maximum",
+      "required_imports": []
+    },
+    "Fmin": {
+      "api": "mlx.core.minimum",
+      "required_imports": []
+    },
+    "Fmod": {
+      "api": "mlx.core.remainder",
+      "required_imports": []
+    },
+    "FromIter": {
+      "api": "mlx.core.array",
+      "required_imports": []
+    },
+    "FromString": {
+      "required_imports": []
+    },
     "Full": {
       "api": "mlx.core.full",
       "args": {
@@ -1337,6 +1949,10 @@
       "api": "mlx.core.full_like",
       "required_imports": []
     },
+    "FullSoftmax": {
+      "api": "mlx.nn.Softmax",
+      "required_imports": []
+    },
     "FunctionExporter": {
       "api": "mlx.core.FunctionExporter",
       "args": {
@@ -1345,10 +1961,26 @@
         "self": "self"
       }
     },
+    "FunctionSchema": {
+      "required_imports": []
+    },
+    "Future": {
+      "required_imports": []
+    },
+    "FutureType": {
+      "required_imports": []
+    },
     "GELU": {
       "api": "mlx.nn.layers.activations.GELU",
       "args": {
         "approx": "approx",
+        "self": "self"
+      }
+    },
+    "GLU": {
+      "api": "mlx.nn.layers.activations.GLU",
+      "args": {
+        "axis": "axis",
         "self": "self"
       }
     },
@@ -1385,10 +2017,24 @@
       "required_imports": []
     },
     "Gelu": {
-      "api": "mlx.nn.GELU"
+      "api": "mlx.nn.layers.activations.gelu",
+      "args": {
+        "x": "x"
+      }
+    },
+    "GeluApprox": {
+      "api": "mlx.nn.gelu_approx",
+      "required_imports": []
+    },
+    "GeluFastApprox": {
+      "api": "mlx.nn.gelu_fast_approx",
+      "required_imports": []
     },
     "GeneralConv": {
       "api": "mlx.core.conv_general",
+      "required_imports": []
+    },
+    "Generator": {
       "required_imports": []
     },
     "Generic": {
@@ -1434,11 +2080,11 @@
       "required_imports": []
     },
     "Glu": {
-      "api": "mlx.nn.layers.activations.GLU",
+      "api": "mlx.nn.glu",
       "args": {
-        "axis": "axis",
-        "self": "self"
-      }
+        "dim": "axis"
+      },
+      "required_imports": []
     },
     "Gpu": {
       "api": "mlx.core.gpu",
@@ -1450,6 +2096,18 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "GradScaler": {
+      "required_imports": []
+    },
+    "Gradient": {
+      "required_imports": []
+    },
+    "Graph": {
+      "required_imports": []
+    },
+    "GraphExecutorState": {
+      "required_imports": []
     },
     "Greater": {
       "api": "mlx.core.greater",
@@ -1510,6 +2168,16 @@
       "api": "mlx.core.hadamard_transform",
       "required_imports": []
     },
+    "Half": {
+      "api": "mlx.core.float16",
+      "required_imports": []
+    },
+    "HardShrink": {
+      "api": "mlx.nn.layers.activations.HardShrink",
+      "args": {
+        "self": "self"
+      }
+    },
     "HardSigmoid": {
       "api": "mlx.core.hard_sigmoid",
       "required_imports": []
@@ -1519,10 +2187,8 @@
       "required_imports": []
     },
     "HardSwish": {
-      "api": "mlx.nn.layers.activations.hardswish",
-      "args": {
-        "x": "x"
-      }
+      "api": "mlx.nn.hardswish",
+      "required_imports": []
     },
     "HardTanh": {
       "api": "mlx.nn.layers.activations.HardTanh",
@@ -1534,7 +2200,8 @@
       "api": "mlx.nn.layers.activations.HardShrink",
       "args": {
         "self": "self"
-      }
+      },
+      "required_imports": []
     },
     "Hardswish": {
       "api": "mlx.nn.layers.activations.Hardswish",
@@ -1570,7 +2237,8 @@
     },
     "INTEGER": {
       "api": "mlx.core.integer",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "Identity": {
       "api": "mlx.nn.layers.linear.Identity",
@@ -1589,6 +2257,12 @@
     },
     "ImportFunction": {
       "api": "mlx.core.import_function",
+      "required_imports": []
+    },
+    "IndexExp": {
+      "required_imports": []
+    },
+    "Indices": {
       "required_imports": []
     },
     "Inexact": {
@@ -1629,6 +2303,12 @@
       "api": "mlx.core.int16",
       "args": {}
     },
+    "Int16Tensor": {
+      "macro_template": "mx.array({data}, dtype=mx.int16)",
+      "required_imports": [
+        "import mlx.core as mx"
+      ]
+    },
     "Int32": {
       "api": "mlx.core.int32",
       "args": {}
@@ -1647,10 +2327,10 @@
     },
     "Integer": {
       "api": "mlx.core.integer",
-      "required_imports": []
+      "args": {}
     },
     "Invert": {
-      "api": "mlx.core.bitwise_invert",
+      "macro_template": "~{x}",
       "required_imports": []
     },
     "InvertPermutation": {
@@ -1662,7 +2342,11 @@
       "required_imports": []
     },
     "IsClose": {
-      "api": "mlx.core.isclose"
+      "api": "mlx.core.isclose",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
     },
     "IsComplex": {
       "required_imports": []
@@ -1692,7 +2376,8 @@
       }
     },
     "IsNan": {
-      "api": "mlx.core.isnan"
+      "api": "mlx.core.isnan",
+      "required_imports": []
     },
     "IsNegInf": {
       "api": "mlx.core.isneginf",
@@ -1727,11 +2412,7 @@
       }
     },
     "Isclose": {
-      "api": "mlx.core.isclose",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.isclose"
     },
     "JVP": {
       "api": "mlx.core.jvp",
@@ -1841,6 +2522,10 @@
       },
       "required_imports": []
     },
+    "LdExp": {
+      "macro_template": "{x1} * mx.power(2.0, {x2})",
+      "required_imports": []
+    },
     "LeakyReLU": {
       "api": "mlx.nn.layers.activations.LeakyReLU",
       "args": {
@@ -1852,12 +2537,9 @@
       "api": "mlx.nn.LeakyReLU"
     },
     "LeftShift": {
-      "api": "mlx.core.left_shift",
-      "args": {
-        "input": "a",
-        "other": "b"
-      },
-      "required_imports": []
+      "operator": "<<",
+      "required_imports": [],
+      "transformation_type": "infix"
     },
     "Less": {
       "api": "mlx.core.less",
@@ -1872,6 +2554,13 @@
     },
     "Lgamma": {
       "required_imports": []
+    },
+    "LinSpace": {
+      "api": "mlx.core.linspace",
+      "args": {
+        "args": "args",
+        "kwargs": "kwargs"
+      }
     },
     "Linear": {
       "api": "mlx.nn.layers.linear.Linear",
@@ -1888,11 +2577,7 @@
       "required_imports": []
     },
     "Linspace": {
-      "api": "mlx.core.linspace",
-      "args": {
-        "args": "args",
-        "kwargs": "kwargs"
-      }
+      "api": "mlx.core.linspace"
     },
     "Lion": {
       "api": "mlx.optimizers.optimizers.Lion",
@@ -2036,6 +2721,18 @@
       },
       "required_imports": []
     },
+    "LongLong": {
+      "api": "mlx.core.int64",
+      "required_imports": []
+    },
+    "LstmCellSimple": {
+      "api": "mlx.nn.LSTM",
+      "required_imports": []
+    },
+    "MGrid": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
     "MarginRankingLoss": {
       "api": "mlx.nn.losses.margin_ranking_loss",
       "args": {
@@ -2055,15 +2752,37 @@
       },
       "required_imports": []
     },
+    "MaskIndices": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
     "MatMul": {
+      "api": "mlx.core.matmul"
+    },
+    "Matmul": {
       "api": "mlx.core.matmul",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
       }
     },
-    "Matmul": {
-      "api": "mlx.core.matmul"
+    "Matrix": {
+      "api": "mlx.core.array",
+      "required_imports": []
+    },
+    "MatrixTranspose": {
+      "api": "mlx.core.transpose",
+      "args": {
+        "x": "a"
+      },
+      "kwargs_map": {
+        "axes": null
+      },
+      "required_imports": []
+    },
+    "Matvec": {
+      "api": "mlx.core.matmul",
+      "required_imports": []
     },
     "Max": {
       "api": "mlx.core.max",
@@ -2172,6 +2891,10 @@
       },
       "required_imports": []
     },
+    "MayShareMemory": {
+      "macro_template": "False",
+      "required_imports": []
+    },
     "Mean": {
       "api": "mlx.core.mean",
       "args": {
@@ -2197,6 +2920,10 @@
     "MelSpectrogram": {
       "required_imports": []
     },
+    "Memmap": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
     "MergeContext": {
       "required_imports": []
     },
@@ -2216,6 +2943,14 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "MinScalarType": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
+    "MinTypeCode": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
     },
     "Minimum": {
       "api": "mlx.core.minimum",
@@ -2240,6 +2975,10 @@
     "ModelAndOptimizer": {
       "required_imports": []
     },
+    "Modf": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
     "Module": {
       "api": "mlx.nn.layers.base.Module",
       "args": {
@@ -2247,6 +2986,7 @@
       }
     },
     "ModuleDict": {
+      "missing_message": "Use native Python dict.",
       "required_imports": []
     },
     "ModuleList": {
@@ -2299,17 +3039,10 @@
       }
     },
     "MultiheadAttention": {
-      "api": "mlx.nn.layers.transformer.MultiHeadAttention",
+      "api": "mlx.nn.MultiHeadAttention",
       "args": {
-        "bias": "bias",
-        "dims": "dims",
-        "key_input_dims": "key_input_dims",
-        "num_heads": "num_heads",
-        "query_input_dims": "query_input_dims",
-        "self": "self",
-        "value_dims": "value_dims",
-        "value_input_dims": "value_input_dims",
-        "value_output_dims": "value_output_dims"
+        "embed_dim": "dims",
+        "num_heads": "num_heads"
       },
       "required_imports": []
     },
@@ -2346,20 +3079,66 @@
       "api": "mlx.core.nan",
       "args": {}
     },
+    "NanArgMax": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
+    "NanArgMin": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
+    "NanCumProd": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
+    "NanCumSum": {
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
+    "NanMax": {
+      "required_imports": []
+    },
     "NanMean": {
       "required_imports": []
     },
+    "NanMedian": {
+      "required_imports": []
+    },
+    "NanMin": {
+      "required_imports": []
+    },
+    "NanPercentile": {
+      "required_imports": []
+    },
     "NanProd": {
+      "required_imports": []
+    },
+    "NanQuantile": {
+      "required_imports": []
+    },
+    "NanStd": {
       "required_imports": []
     },
     "NanSum": {
       "required_imports": []
     },
     "NanToNum": {
-      "api": "mlx.core.nan_to_num",
-      "args": {
-        "x": "a"
-      },
+      "required_imports": [],
+      "requires_plugin": "numpy_fallback"
+    },
+    "NanVar": {
+      "required_imports": []
+    },
+    "NdArray": {
+      "required_imports": []
+    },
+    "NdEnumerate": {
+      "required_imports": []
+    },
+    "NdIndex": {
+      "required_imports": []
+    },
+    "NdIter": {
       "required_imports": []
     },
     "Ndim": {
@@ -2375,6 +3154,9 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "NestedIters": {
+      "required_imports": []
     },
     "NewAxis": {
       "api": "mlx.core.newaxis",
@@ -2409,8 +3191,18 @@
     "Nothing": {
       "required_imports": []
     },
+    "Number": {
+      "api": "mlx.core.number",
+      "args": {}
+    },
+    "OGrid": {
+      "required_imports": []
+    },
     "Object": {
       "api": "object",
+      "required_imports": []
+    },
+    "Object_": {
       "required_imports": []
     },
     "OfType": {
@@ -2472,6 +3264,9 @@
     "PRelu": {
       "api": "mlx.nn.PReLU"
     },
+    "PackBits": {
+      "required_imports": []
+    },
     "Pad": {
       "api": "mlx.core.pad",
       "args": {
@@ -2481,6 +3276,10 @@
     },
     "Param": {
       "api": "mlx.core.array",
+      "required_imports": []
+    },
+    "ParameterDict": {
+      "missing_message": "Use native Python dict.",
       "required_imports": []
     },
     "Partition": {
@@ -2497,14 +3296,21 @@
     "PathContains": {
       "required_imports": []
     },
+    "Percentile": {
+      "api": "mlx.core.quantile",
+      "args": {
+        "q": "q"
+      },
+      "required_imports": []
+    },
     "Permute": {
       "api": "mlx.core.transpose",
       "required_imports": []
     },
     "PermuteDims": {
-      "api": "mlx.core.permute_dims",
+      "api": "mlx.core.transpose",
       "args": {
-        "x": "a"
+        "axes": "axes"
       },
       "required_imports": []
     },
@@ -2515,8 +3321,47 @@
       "api": "mlx.core.pi",
       "args": {}
     },
+    "Piecewise": {
+      "required_imports": []
+    },
     "Pipeline": {
       "api": "mlx.nn.Sequential",
+      "required_imports": []
+    },
+    "PipelinedTransformer": {
+      "required_imports": []
+    },
+    "Place": {
+      "required_imports": []
+    },
+    "Poly": {
+      "required_imports": []
+    },
+    "Poly1d": {
+      "required_imports": []
+    },
+    "PolyAdd": {
+      "required_imports": []
+    },
+    "PolyDer": {
+      "required_imports": []
+    },
+    "PolyDiv": {
+      "required_imports": []
+    },
+    "PolyFit": {
+      "required_imports": []
+    },
+    "PolyInt": {
+      "required_imports": []
+    },
+    "PolyMul": {
+      "required_imports": []
+    },
+    "PolySub": {
+      "required_imports": []
+    },
+    "PolyVal": {
       "required_imports": []
     },
     "Polygamma": {
@@ -2541,6 +3386,16 @@
         "kwargs": "kwargs"
       }
     },
+    "Prelu": {
+      "api": "mlx.nn.prelu",
+      "args": {
+        "weight": "alpha"
+      },
+      "required_imports": []
+    },
+    "PrintOptions": {
+      "required_imports": []
+    },
     "Prod": {
       "api": "mlx.core.prod",
       "args": {
@@ -2558,8 +3413,13 @@
       "api": "tuple",
       "required_imports": []
     },
+    "Put": {
+      "required_imports": []
+    },
     "PutAlongAxis": {
-      "api": "mlx.core.put_along_axis",
+      "required_imports": []
+    },
+    "PutMask": {
       "required_imports": []
     },
     "Pytree": {
@@ -2576,6 +3436,15 @@
         "self": "self"
       }
     },
+    "QUInt2x4Storage": {
+      "required_imports": []
+    },
+    "QUInt4x2Storage": {
+      "required_imports": []
+    },
+    "QUInt8Storage": {
+      "required_imports": []
+    },
     "Qqmm": {
       "api": "mlx.core.qqmm",
       "args": {
@@ -2585,26 +3454,11 @@
     },
     "Quantile": {
       "api": "mlx.core.quantile",
-      "args": {
-        "a": "a"
-      },
       "required_imports": []
     },
     "Quantize": {
       "api": "mlx.nn.layers.quantized.QQLinear.quantize",
       "args": {
-        "self": "self"
-      }
-    },
-    "QuantizeLinear": {
-      "api": "mlx.nn.layers.quantized.QuantizedLinear",
-      "args": {
-        "bias": "bias",
-        "bits": "bits",
-        "group_size": "group_size",
-        "input_dims": "input_dims",
-        "mode": "mode",
-        "output_dims": "output_dims",
         "self": "self"
       }
     },
@@ -2628,6 +3482,18 @@
         "group_size": "group_size",
         "mode": "mode",
         "num_embeddings": "num_embeddings",
+        "self": "self"
+      }
+    },
+    "QuantizedLinear": {
+      "api": "mlx.nn.layers.quantized.QuantizedLinear",
+      "args": {
+        "bias": "bias",
+        "bits": "bits",
+        "group_size": "group_size",
+        "input_dims": "input_dims",
+        "mode": "mode",
+        "output_dims": "output_dims",
         "self": "self"
       }
     },
@@ -2688,6 +3554,12 @@
     "RPC_AVAILABLE": {
       "api": "mlx.core.cuda.is_available",
       "args": {},
+      "required_imports": []
+    },
+    "RRefType": {
+      "required_imports": []
+    },
+    "R_": {
       "required_imports": []
     },
     "Rad2Deg": {
@@ -2819,16 +3691,15 @@
       "args": {}
     },
     "Relu": {
-      "api": "mlx.nn.layers.activations.relu",
-      "args": {
-        "x": "x"
-      }
+      "api": "mlx.nn.relu",
+      "required_imports": []
+    },
+    "Relu2": {
+      "api": "mlx.nn.relu2",
+      "required_imports": []
     },
     "Relu6": {
-      "api": "mlx.nn.layers.activations.ReLU6",
-      "args": {
-        "self": "self"
-      },
+      "api": "mlx.nn.relu6",
       "required_imports": []
     },
     "Remainder": {
@@ -2864,11 +3735,20 @@
       "required_imports": []
     },
     "RightShift": {
-      "api": "mlx.core.right_shift",
-      "required_imports": []
+      "operator": ">>",
+      "required_imports": [],
+      "transformation_type": "infix"
     },
     "Rint": {
       "api": "mlx.core.round",
+      "required_imports": []
+    },
+    "RmsNorm": {
+      "api": "mlx.nn.RMSNorm",
+      "args": {
+        "dim": "dims",
+        "epsilon": "eps"
+      },
       "required_imports": []
     },
     "Rmsnorm": {
@@ -2907,11 +3787,21 @@
         "kwargs": "kwargs"
       }
     },
+    "RowStack": {
+      "required_imports": [],
+      "requires_plugin": "mlx_vstack"
+    },
     "Rsqrt": {
       "api": "mlx.core.rsqrt",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
+      }
+    },
+    "SELU": {
+      "api": "mlx.nn.layers.activations.SELU",
+      "args": {
+        "self": "self"
       }
     },
     "SGD": {
@@ -2940,6 +3830,20 @@
       "api": "mlx.core.save_safetensors",
       "required_imports": []
     },
+    "SaveZ": {
+      "api": "mlx.core.savez",
+      "args": {
+        "args": "args"
+      },
+      "required_imports": []
+    },
+    "SaveZCompressed": {
+      "api": "mlx.core.savez_compressed",
+      "args": {
+        "args": "args"
+      },
+      "required_imports": []
+    },
     "Savez": {
       "api": "mlx.core.savez",
       "args": {
@@ -2955,6 +3859,51 @@
       "macro_template": "{x} * {scalar}",
       "required_imports": []
     },
+    "ScriptClass": {
+      "required_imports": []
+    },
+    "ScriptClassFunction": {
+      "required_imports": []
+    },
+    "ScriptDict": {
+      "required_imports": []
+    },
+    "ScriptDictIterator": {
+      "required_imports": []
+    },
+    "ScriptDictKeyIterator": {
+      "required_imports": []
+    },
+    "ScriptFunction": {
+      "required_imports": []
+    },
+    "ScriptList": {
+      "required_imports": []
+    },
+    "ScriptListIterator": {
+      "required_imports": []
+    },
+    "ScriptMethod": {
+      "required_imports": []
+    },
+    "ScriptModule": {
+      "required_imports": []
+    },
+    "ScriptModuleSerializer": {
+      "required_imports": []
+    },
+    "ScriptObject": {
+      "required_imports": []
+    },
+    "ScriptObjectProperty": {
+      "required_imports": []
+    },
+    "SeLU": {
+      "api": "mlx.nn.layers.activations.selu",
+      "args": {
+        "x": "x"
+      }
+    },
     "SegmentedMm": {
       "api": "mlx.core.segmented_mm",
       "required_imports": []
@@ -2963,10 +3912,7 @@
       "required_imports": []
     },
     "Selu": {
-      "api": "mlx.nn.layers.activations.SELU",
-      "args": {
-        "self": "self"
-      }
+      "api": "mlx.nn.SELU"
     },
     "Sequential": {
       "api": "mlx.nn.layers.containers.Sequential",
@@ -2974,6 +3920,9 @@
         "modules": "modules",
         "self": "self"
       }
+    },
+    "SerializationStorageContext": {
+      "required_imports": []
     },
     "SetCacheLimit": {
       "api": "mlx.core.set_cache_limit",
@@ -2987,12 +3936,24 @@
       "api": "mlx.core.set_default_stream",
       "required_imports": []
     },
+    "SetDiff1d": {
+      "required_imports": []
+    },
+    "SetErr": {
+      "required_imports": []
+    },
+    "SetErrCall": {
+      "required_imports": []
+    },
     "SetMemoryLimit": {
       "api": "mlx.core.set_memory_limit",
       "required_imports": []
     },
     "SetWiredLimit": {
       "api": "mlx.core.set_wired_limit",
+      "required_imports": []
+    },
+    "SetXor1d": {
       "required_imports": []
     },
     "Shape": {
@@ -3008,6 +3969,16 @@
         "output_dims": "output_dims",
         "self": "self"
       }
+    },
+    "Short": {
+      "api": "mlx.core.array",
+      "inject_args": {
+        "dtype": "mlx.core.int16"
+      },
+      "required_imports": []
+    },
+    "ShortStorage": {
+      "required_imports": []
     },
     "SiLU": {
       "api": "mlx.nn.layers.activations.SiLU",
@@ -3048,6 +4019,13 @@
       }
     },
     "Sinc": {
+      "required_imports": []
+    },
+    "Single": {
+      "api": "mlx.core.array",
+      "inject_args": {
+        "dtype": "mlx.core.float32"
+      },
       "required_imports": []
     },
     "Sinh": {
@@ -3093,6 +4071,12 @@
         "reduction": "reduction"
       },
       "required_imports": []
+    },
+    "SoftSign": {
+      "api": "mlx.nn.layers.activations.softsign",
+      "args": {
+        "x": "x"
+      }
     },
     "Softmax": {
       "api": "mlx.nn.layers.activations.Softmax",
@@ -3194,6 +4178,9 @@
       "api": "mlx.optimizers.optimizers.MultiOptimizer.state",
       "args": {}
     },
+    "StaticModule": {
+      "required_imports": []
+    },
     "Std": {
       "api": "mlx.core.std",
       "args": {
@@ -3201,8 +4188,22 @@
         "kwargs": "kwargs"
       }
     },
+    "Step": {
+      "api": "mlx.optimizers.optimizers.Optimizer.step",
+      "args": {}
+    },
+    "StepActivation": {
+      "api": "mlx.nn.step",
+      "required_imports": []
+    },
     "StopGradient": {
       "api": "mlx.core.stop_gradient",
+      "required_imports": []
+    },
+    "Storage": {
+      "required_imports": []
+    },
+    "StorageBase": {
       "required_imports": []
     },
     "Stream": {
@@ -3216,7 +4217,13 @@
       "api": "mlx.core.StreamContext",
       "args": {}
     },
+    "StreamObjType": {
+      "required_imports": []
+    },
     "String": {
+      "required_imports": []
+    },
+    "StringType": {
       "required_imports": []
     },
     "Sub": {
@@ -3249,7 +4256,19 @@
       }
     },
     "Swish": {
-      "api": "mlx.nn.swish",
+      "api": "mlx.nn.SiLU",
+      "required_imports": []
+    },
+    "SymBool": {
+      "required_imports": []
+    },
+    "SymBoolType": {
+      "required_imports": []
+    },
+    "SymFloat": {
+      "required_imports": []
+    },
+    "SymInt": {
       "required_imports": []
     },
     "Synchronize": {
@@ -3265,6 +4284,10 @@
     },
     "TUPLE": {
       "api": "mlx.optimizers.Tuple"
+    },
+    "TYPE_CHECKING": {
+      "api": "typing.TYPE_CHECKING",
+      "required_imports": []
     },
     "Take": {
       "api": "mlx.core.take",
@@ -3298,6 +4321,10 @@
       },
       "required_imports": []
     },
+    "Tensor": {
+      "api": "mlx.core.array",
+      "required_imports": []
+    },
     "TensorType": {
       "api": "mlx.core.array",
       "required_imports": []
@@ -3309,6 +4336,9 @@
         "kwargs": "kwargs"
       }
     },
+    "Test": {
+      "required_imports": []
+    },
     "Threshold": {
       "api": "mlx.nn.layers.activations.Step.threshold",
       "args": {}
@@ -3319,6 +4349,9 @@
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "Timedelta64": {
+      "required_imports": []
     },
     "TopK": {
       "api": "mlx.core.topk",
@@ -3417,6 +4450,9 @@
         "kwargs": "kwargs"
       }
     },
+    "Trapezoid": {
+      "required_imports": []
+    },
     "Tri": {
       "api": "mlx.core.tri",
       "args": {
@@ -3431,12 +4467,27 @@
         "kwargs": "kwargs"
       }
     },
+    "TrilIndices": {
+      "required_imports": []
+    },
+    "TrilIndicesFrom": {
+      "required_imports": []
+    },
+    "TrimZeros": {
+      "required_imports": []
+    },
     "Triu": {
       "api": "mlx.core.triu",
       "args": {
         "args": "args",
         "kwargs": "kwargs"
       }
+    },
+    "TriuIndices": {
+      "required_imports": []
+    },
+    "TriuIndicesFrom": {
+      "required_imports": []
     },
     "TrueDiv": {
       "api": "mlx.core.divide",
@@ -3446,8 +4497,34 @@
       "api": "mlx.core.divide",
       "required_imports": []
     },
+    "Trunc": {
+      "api": "mlx.core.trunc",
+      "macro_template": "mx.floor(mx.abs({x})) * mx.sign({x})",
+      "required_imports": []
+    },
+    "Type": {
+      "api": "mlx.core.Device.type",
+      "args": {}
+    },
     "TypeVarM": {
       "api": "typing.TypeVar",
+      "required_imports": []
+    },
+    "Typecodes": {
+      "required_imports": []
+    },
+    "Typename": {
+      "required_imports": []
+    },
+    "UByte": {
+      "api": "mlx.core.uint8",
+      "required_imports": []
+    },
+    "UFunc": {
+      "required_imports": []
+    },
+    "UInt": {
+      "api": "mlx.core.uint64",
       "required_imports": []
     },
     "UInt16": {
@@ -3460,13 +4537,15 @@
       "args": {}
     },
     "UInt64": {
-      "api": "mlx.core.array",
-      "macro_template": "mlx.core.array({value}, dtype=mlx.core.uint64)",
-      "required_imports": []
+      "api": "mlx.core.uint64",
+      "args": {}
     },
     "UInt8": {
-      "api": "mlx.core.array",
-      "macro_template": "mlx.core.array({value}, dtype=mlx.core.uint8)",
+      "api": "mlx.core.uint8",
+      "args": {}
+    },
+    "UIntP": {
+      "api": "mx.uint64",
       "required_imports": []
     },
     "Uint16": {
@@ -3480,11 +4559,13 @@
     },
     "Uint64": {
       "api": "mlx.core.uint64",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "Uint8": {
       "api": "mlx.core.uint8",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "Unflatten": {
       "api": "mlx.core.unflatten",
@@ -3520,8 +4601,11 @@
         "self": "self"
       }
     },
+    "VMap": {
+      "api": "mlx.core.vmap"
+    },
     "ValueAndGrad": {
-      "api": "mlx.core.value_and_grad",
+      "api": "mlx.nn.value_and_grad",
       "required_imports": []
     },
     "Vander": {
@@ -3898,7 +4982,8 @@
     },
     "bias": {
       "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.bias",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "bias_correction": {
       "api": "mlx.optimizers.optimizers.Adam.bias_correction",
@@ -4049,12 +5134,7 @@
       }
     },
     "cholesky": {
-      "api": "mlx.core.linalg.cholesky",
-      "args": {
-        "a": "a",
-        "stream": "stream",
-        "upper": "upper"
-      }
+      "api": "mlx.core.linalg.cholesky"
     },
     "cholesky_inv": {
       "api": "mlx.core.linalg.cholesky_inv",
@@ -4463,7 +5543,8 @@
       "args": {
         "a": "a",
         "stream": "stream"
-      }
+      },
+      "required_imports": []
     },
     "eigh": {
       "api": "mlx.core.linalg.eigh",
@@ -5566,7 +6647,8 @@
     },
     "number": {
       "api": "mlx.core.number",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "ones": {
       "api": "mlx.core.ones"
@@ -5798,12 +6880,6 @@
       "api": "mlx.nn.relu",
       "required_imports": []
     },
-    "relu2": {
-      "api": "mlx.nn.layers.activations.relu2",
-      "args": {
-        "x": "x"
-      }
-    },
     "remainder": {
       "api": "mlx.core.remainder"
     },
@@ -5877,19 +6953,6 @@
     },
     "roll": {
       "api": "mlx.core.roll"
-    },
-    "rope": {
-      "api": "mlx.core.fast.rope",
-      "args": {
-        "a": "a",
-        "base": "base",
-        "dims": "dims",
-        "freqs": "freqs",
-        "offset": "offset",
-        "scale": "scale",
-        "stream": "stream",
-        "traditional": "traditional"
-      }
     },
     "round": {
       "api": "mlx.core.round"
@@ -6177,8 +7240,10 @@
       "api": "mlx.core.std"
     },
     "step": {
-      "api": "mlx.optimizers.optimizers.Optimizer.step",
-      "args": {}
+      "api": "optimizer_step",
+      "args": {},
+      "required_imports": [],
+      "requires_plugin": "mlx_optimizer_step"
     },
     "step_decay": {
       "api": "mlx.optimizers.schedulers.step_decay",
@@ -6387,7 +7452,8 @@
     },
     "type": {
       "api": "mlx.core.Device.type",
-      "args": {}
+      "args": {},
+      "required_imports": []
     },
     "uint16": {
       "api": "mlx.core.uint16",

@@ -130,16 +130,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "amax": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "amin": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
   "any": {
     "description": "Tests whether any input array element evaluates to ``True`` along a specified axis.",
     "from": "_2024_12/utility_functions.py",
@@ -466,11 +456,6 @@
     "std_args": [],
     "type": "function"
   },
-  "bias": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "bias_correction": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -503,11 +488,6 @@
   },
   "binary_crossentropy": {
     "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
-  },
-  "binomial": {
-    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "type": "function"
   },
@@ -731,6 +711,7 @@
   },
   "cholesky": {
     "description": "Returns the lower (upper) Cholesky decomposition of a complex Hermitian or real symmetric positive-definite matrix ``x``.",
+    "from": "_2024_12/linalg.py",
     "std_args": [
       [
         "x",
@@ -740,8 +721,7 @@
         "upper",
         "bool"
       ]
-    ],
-    "type": "function"
+    ]
   },
   "cholesky_inverse": {
     "description": "Auto-generated from keras_code_defs",
@@ -1287,11 +1267,6 @@
     "from": "_2024_12/constants.py",
     "std_args": [],
     "variants": {}
-  },
-  "eig": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "function"
   },
   "eigh": {
     "description": "Returns an eigenvalue decomposition of a complex Hermitian or real symmetric matrix (or a stack of matrices) ``x``.",
@@ -1845,11 +1820,6 @@
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "type": "function"
-  },
-  "half": {
-    "description": "Auto-generated from numpy_code_defs",
-    "std_args": [],
-    "type": "attribute"
   },
   "hard_shrink": {
     "description": "Auto-generated from keras_code_defs",
@@ -2990,11 +2960,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "ndarray": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "class"
-  },
   "negative": {
     "description": "Computes the numerical negative of each element ``x_i`` (i.e., ``y_i = -x_i``) of the input array ``x``.",
     "from": "_2024_12/elementwise_functions.py",
@@ -3128,16 +3093,6 @@
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "type": "attribute"
-  },
-  "number": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "object_": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "class"
   },
   "one_hot": {
     "description": "Auto-generated from keras_code_defs",
@@ -3290,25 +3245,18 @@
     "type": "function"
   },
   "permute_dims": {
-    "description": "Definition for permute_dims",
-    "operation": "permute_dims",
+    "description": "Permutes the axes (dimensions) of an array ``x``.",
     "std_args": [
-      "x",
-      {
-        "is_variadic": true,
-        "name": "axes"
-      }
+      [
+        "x",
+        "array"
+      ],
+      [
+        "axes",
+        "Tuple[int, Ellipsis]"
+      ]
     ],
-    "variants": {
-      "jax": {
-        "api": "jnp.transpose",
-        "pack_to_tuple": "axes"
-      },
-      "numpy": {
-        "api": "numpy.transpose",
-        "pack_to_tuple": "axes"
-      }
-    }
+    "type": "function"
   },
   "pi": {
     "description": "IEEE 754 floating-point representation of the mathematical constant ``\u03c0``.",
@@ -3344,11 +3292,6 @@
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
     "type": "function"
-  },
-  "polydiv": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
   },
   "polynomial_schedule": {
     "description": "Auto-generated from jax_code_defs",
@@ -3786,11 +3729,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "short": {
-    "description": "Auto-generated from numpy_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "shuffle": {
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
@@ -4066,11 +4004,6 @@
         "bool"
       ]
     ]
-  },
-  "step": {
-    "description": "Auto-generated from jax_code_defs",
-    "std_args": [],
-    "type": "attribute"
   },
   "stop_gradient": {
     "description": "Auto-generated from keras_code_defs",
@@ -4396,11 +4329,6 @@
     "std_args": [],
     "type": "function"
   },
-  "type": {
-    "description": "Auto-generated from flax_nnx_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
   "unflattened_size": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -4512,11 +4440,6 @@
   },
   "upscale_factor": {
     "description": "Auto-generated from mlx_code_defs",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "value": {
-    "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
     "type": "attribute"
   },

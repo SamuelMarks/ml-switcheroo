@@ -251,7 +251,6 @@ variants:
     api: "jax.numpy.finfo"
   keras:
     api: "numpy.finfo" # Keras ops usually return values directly, but numpy.finfo is standard in python ecosystem
-  min_version: ""
   numpy:
     api: "numpy.finfo"
   mlx:

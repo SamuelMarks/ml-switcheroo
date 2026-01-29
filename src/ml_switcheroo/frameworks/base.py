@@ -47,7 +47,7 @@ class StandardMap(BaseModel):
   """Defines how a Framework implements a Middle Layer standard."""
 
   api: Optional[str] = Field(default=None)
-  args: Optional[Dict[str, Optional[str]]] = Field(default=None)
+  args: Optional[Dict[str, Optional[Union[str, float, int]]]] = Field(default=None)
   inject_args: Optional[Dict[str, Any]] = Field(default=None)
   requires_plugin: Optional[str] = Field(default=None)
   transformation_type: Optional[str] = Field(default=None)

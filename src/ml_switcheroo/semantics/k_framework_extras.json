@@ -141,15 +141,6 @@
     ],
     "type": "class"
   },
-  "ArrayRepr": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "shape",
-      "dtype"
-    ],
-    "type": "class"
-  },
   "AttrPriority": {
     "description": "The class representing a Python class.",
     "std_args": [],
@@ -693,13 +684,6 @@
   "GetVariable": {
     "description": "The class representing a Python class.",
     "std_args": [],
-    "type": "class"
-  },
-  "Glu": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": [
-      "dim"
-    ],
     "type": "class"
   },
   "GradFn": {
@@ -1613,11 +1597,6 @@
     ],
     "type": "class"
   },
-  "Node": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "NodeAttr": {
     "description": "The class representing a Python class.",
     "std_args": [
@@ -2323,11 +2302,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "StringDType": {
-    "description": "The class representing a Python class.",
-    "std_args": [],
-    "type": "class"
   },
   "SubArray": {
     "description": "The class representing a Python class.",
@@ -5740,14 +5714,6 @@
     ],
     "variants": {}
   },
-  "asmatrix": {
-    "description": "Interpret the input as a matrix.",
-    "std_args": [
-      "data",
-      "dtype"
-    ],
-    "type": "function"
-  },
   "assert_all": {
     "description": "The class representing a Python function.",
     "std_args": [
@@ -6613,15 +6579,6 @@
     ],
     "type": "function"
   },
-  "busdaycalendar": {
-    "description": "The class representing a Python class.",
-    "std_args": [
-      "self",
-      "weekmask",
-      "holidays"
-    ],
-    "type": "class"
-  },
   "bwd": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -6765,11 +6722,6 @@
       }
     ],
     "variants": {}
-  },
-  "capsule": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
   },
   "cast_like": {
     "description": "Auto-generated from jax_code_defs",
@@ -7524,11 +7476,6 @@
       "a"
     ],
     "type": "function"
-  },
-  "code": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
   },
   "code_template": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -8450,11 +8397,6 @@
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
-  },
-  "datetime64": {
-    "description": "The class representing a Python class.",
-    "std_args": [],
-    "type": "class"
   },
   "ddtype": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -12527,11 +12469,6 @@
     "std_args": [],
     "variants": {}
   },
-  "info": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "init": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -12668,11 +12605,6 @@
     ],
     "type": "function"
   },
-  "intc": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "integer": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -12717,11 +12649,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "intp": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
   },
   "intrinsicpattern": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -13437,11 +13364,6 @@
       }
     ],
     "variants": {}
-  },
-  "isnat": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
   },
   "isnative": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -14765,11 +14687,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "longlong": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "lower": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
@@ -15213,11 +15130,6 @@
     ],
     "variants": {}
   },
-  "matrix": {
-    "description": "matrix(data, dtype=None, copy=True)",
-    "std_args": [],
-    "type": "class"
-  },
   "matrix_exp": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -15427,11 +15339,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "memmap": {
-    "description": "The class representing a Python class.",
-    "std_args": [],
-    "type": "class"
   },
   "memory_analysis": {
     "description": "A summary of estimated memory requirements.",
@@ -15931,23 +15838,10 @@
     "std_args": [],
     "variants": {}
   },
-  "ndenumerate": {
-    "description": "Multidimensional index iterator.",
-    "std_args": [
-      "a",
-      "compressed"
-    ],
-    "type": "function"
-  },
   "ndim": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "nditer": {
-    "description": "The class representing a Python class.",
-    "std_args": [],
-    "type": "class"
   },
   "ndtr": {
     "description": "The class representing a Python module/class/instance attribute.",
@@ -16978,17 +16872,7 @@
     "std_args": [],
     "type": "attribute"
   },
-  "polyadd": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "polycompanion": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "polyder": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
@@ -16999,11 +16883,6 @@
     "variants": {}
   },
   "polydomain": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "polyfit": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
     "type": "attribute"
@@ -17362,15 +17241,6 @@
     "std_args": [
       "args",
       "kwargs"
-    ],
-    "type": "function"
-  },
-  "putmask": {
-    "description": "Changes elements of an array based on conditional and input values.",
-    "std_args": [
-      "a",
-      "mask",
-      "values"
     ],
     "type": "function"
   },
@@ -18292,20 +18162,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "rope": {
-    "description": "Apply rotary positional encoding to the input.",
-    "std_args": [
-      "a",
-      "dims",
-      "traditional",
-      "base",
-      "scale",
-      "offset",
-      "freqs",
-      "stream"
-    ],
-    "type": "function"
   },
   "rot90": {
     "description": "Auto-generated from jax_code_defs",
@@ -19649,11 +19505,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "str_": {
-    "description": "The class representing a Python class.",
-    "std_args": [],
-    "type": "class"
-  },
   "str_short": {
     "description": "The class representing a Python function.",
     "std_args": [
@@ -19869,11 +19720,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "tag": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "tags": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -19996,11 +19842,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "test": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
   },
   "test_0D_3D": {
     "description": "The class representing a Python function.",
@@ -38527,11 +38368,6 @@
     ],
     "variants": {}
   },
-  "timedelta64": {
-    "description": "The class representing a Python class.",
-    "std_args": [],
-    "type": "class"
-  },
   "tmp_static_cache": {
     "description": "The class representing a Python module/class/instance attribute.",
     "std_args": [],
@@ -39072,11 +38908,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "ubyte": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "ufunc": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
@@ -39128,26 +38959,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "uintc": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "uintp": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "ulong": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
-  "ulonglong": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
   },
   "unbound": {
     "description": "The class representing a Python function.",
@@ -39563,11 +39374,6 @@
     "std_args": [],
     "type": "attribute"
   },
-  "ushort": {
-    "description": "The class representing a Python module/class/instance attribute.",
-    "std_args": [],
-    "type": "attribute"
-  },
   "using_eager_sharding": {
     "description": "Returns whether Variables are using eager sharding by default.",
     "std_args": [],
@@ -39870,11 +39676,6 @@
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
     "variants": {}
-  },
-  "void": {
-    "description": "The class representing a Python class.",
-    "std_args": [],
-    "type": "class"
   },
   "vonmises": {
     "description": "The class representing a Python module/class/instance attribute.",

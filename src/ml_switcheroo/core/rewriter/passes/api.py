@@ -901,6 +901,8 @@ class ApiTransformer(cst.CSTTransformer):
           continue
 
         tg_alias = target_arg_map.get(std_name, std_name)
+        raw_alias = target_arg_map.get(std_name, std_name)
+        tg_alias = str(raw_alias) if raw_alias is not None else None
         if tg_alias is None:
           continue
 

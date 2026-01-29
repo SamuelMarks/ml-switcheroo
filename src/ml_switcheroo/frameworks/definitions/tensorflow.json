@@ -1,5 +1,31 @@
 {
+  "AMax": {
+    "api": "tf.math.reduce_max",
+    "args": {
+      "axis": "axis",
+      "keepdims": "keepdims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AMin": {
+    "api": "tf.math.reduce_min",
+    "args": {
+      "axis": "axis",
+      "keepdims": "keepdims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Abs": {
+    "api": "tf.abs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Abs_": {
     "api": "tf.abs",
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -10,6 +36,14 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "AcceleratorError": {
+    "api": "tf.errors.OpError",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import tensorflow as tf"
+    ]
   },
   "AccumulateN": {
     "api": "tf.math.accumulate_n",
@@ -23,7 +57,19 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Acos_": {
+    "api": "tf.math.acos",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Acosh": {
+    "api": "tf.math.acosh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Acosh_": {
     "api": "tf.math.acosh",
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -95,6 +141,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AdaptiveAvgPool1d": {
+    "api": "tf.keras.layers.GlobalAveragePooling1D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AdaptiveMaxPool1d": {
+    "api": "tf.keras.layers.GlobalMaxPooling1D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AdaptiveMaxPooling1D": {
     "api": "tf.keras.layers.AdaptiveMaxPooling1D",
     "dispatch_rules": [],
@@ -116,6 +174,7 @@
   "Add": {
     "api": "tf.math.add",
     "dispatch_rules": [],
+    "macro_template": "tf.math.add({input}, {other} * {alpha})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -131,14 +190,91 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Addbmm": {
+    "api": "tf.linalg.matmul",
+    "dispatch_rules": [],
+    "macro_template": "{beta} * {input} + {alpha} * tf.reduce_sum(tf.linalg.matmul({batch1}, {batch2}), axis=0)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Addcdiv": {
+    "api": "tf.math.add",
+    "dispatch_rules": [],
+    "macro_template": "{input} + {value} * ({tensor1} / {tensor2})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Addcmul": {
+    "dispatch_rules": [],
+    "macro_template": "tf.math.add({input}, tf.math.multiply({tensor1}, {tensor2}) * {value})",
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import tensorflow as tf"
+    ]
+  },
   "AdditiveAttention": {
     "api": "tf.keras.layers.AdditiveAttention",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Addmm": {
+    "dispatch_rules": [],
+    "macro_template": "tf.math.add({beta} * {input}, {alpha} * tf.linalg.matmul({mat1}, {mat2}))",
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import tensorflow as tf"
+    ]
+  },
+  "Addmv": {
+    "dispatch_rules": [],
+    "macro_template": "tf.math.add({beta} * {input}, {alpha} * tf.linalg.matvec({mat}, {vec}))",
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import tensorflow as tf"
+    ]
+  },
+  "Addmv_": {
+    "dispatch_rules": [],
+    "macro_template": "tf.math.add({beta} * {input}, {alpha} * tf.linalg.matvec({mat}, {vec}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Addr": {
+    "dispatch_rules": [],
+    "macro_template": "tf.math.add({beta} * {input}, {alpha} * tf.tensordot({vec1}, {vec2}, axes=0))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Adjoint": {
+    "dispatch_rules": [],
+    "macro_template": "tf.math.conj(tf.linalg.adjoint({input}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AffineGridGenerator": {
+    "api": "tf.raw_ops.AffineGrid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AliasCopy": {
+    "api": "tf.identity",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "AlignTensors": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "All": {
-    "api": "tf.reduce_all",
+    "api": "tf.math.reduce_all",
+    "args": {
+      "dim": "axis",
+      "keepdim": "keepdims"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -149,12 +285,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Allclose": {
+    "api": "tf.experimental.numpy.allclose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AlphaDropout": {
-    "api": "tf.keras.layers.AlphaDropout",
+    "api": "keras.layers.AlphaDropout",
     "args": {
-      "noise_shape": "noise_shape",
-      "rate": "rate",
-      "seed": "seed"
+      "p": "rate"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -166,19 +306,43 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Angle": {
-    "api": "tf.math.angle",
+  "Amax": {
+    "api": "tf.math.reduce_max",
     "args": {
-      "z": "input"
+      "dim": "axis",
+      "keepdim": "keepdims"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Any": {
-    "api": "tf.reduce_any",
+  "Amin": {
+    "api": "tf.math.reduce_min",
     "args": {
-      "keepdims": "keep_dims"
+      "dim": "axis",
+      "keepdim": "keepdims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Aminmax": {
+    "dispatch_rules": [],
+    "macro_template": "(tf.math.reduce_min({input}, axis={dim}, keepdims={keepdim}), tf.math.reduce_max({input}, axis={dim}, keepdims={keepdim}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Angle": {
+    "api": "tf.math.angle",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Any": {
+    "api": "tf.math.reduce_any",
+    "args": {
+      "dim": "axis",
+      "keepdim": "keepdims"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -186,6 +350,17 @@
   },
   "Append": {
     "api": "tf.experimental.numpy.append",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ApplyAlongAxis": {
+    "api": "numpy.apply_along_axis",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ApplyOverAxes": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -205,8 +380,8 @@
   "Arange": {
     "api": "tf.range",
     "args": {
-      "step": "delta",
-      "stop": "limit"
+      "end": "limit",
+      "step": "delta"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -218,7 +393,19 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Arccos_": {
+    "api": "tf.math.acos",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Arccosh": {
+    "api": "tf.math.acosh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arccosh_": {
     "api": "tf.math.acosh",
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -230,7 +417,19 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Arcsin_": {
+    "api": "tf.math.asin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Arcsinh": {
+    "api": "tf.math.asinh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arcsinh_": {
     "api": "tf.math.asinh",
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -244,6 +443,16 @@
   },
   "Arctan2": {
     "api": "tf.math.atan2",
+    "args": {
+      "input": "y",
+      "other": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Arctan_": {
+    "api": "tf.math.atan",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -256,18 +465,17 @@
   },
   "ArgMax": {
     "api": "tf.math.argmax",
-    "args": {
-      "keepdims": null
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ArgMin": {
     "api": "tf.math.argmin",
-    "args": {
-      "keepdims": null
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ArgPartition": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -287,7 +495,7 @@
   "Argmax": {
     "api": "tf.math.argmax",
     "args": {
-      "a": "input"
+      "dim": "axis"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -296,7 +504,7 @@
   "Argmin": {
     "api": "tf.math.argmin",
     "args": {
-      "a": "input"
+      "dim": "axis"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -311,10 +519,19 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Array": {
-    "api": "tf.constant",
+  "Argwhere": {
+    "api": "tf.where",
     "args": {
-      "data": "value"
+      "x": "condition"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Array": {
+    "api": "tf.convert_to_tensor",
+    "args": {
+      "object": "value"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -347,6 +564,15 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "AsTensor": {
+    "api": "tf.convert_to_tensor",
+    "args": {
+      "data": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Asin": {
     "api": "tf.math.asin",
     "dispatch_rules": [],
@@ -371,6 +597,10 @@
   },
   "Astype": {
     "api": "tf.cast",
+    "args": {
+      "dtype": "dtype",
+      "x": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -453,6 +683,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Autocast": {
+    "dispatch_rules": [],
+    "macro_template": "tf.keras.mixed_precision.Policy('mixed_float16')",
+    "missing_message": "TensorFlow uses global policies for mixed precision.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Average": {
     "api": "tf.math.reduce_mean",
     "args": {
@@ -486,6 +723,11 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Avg": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AvgPool": {
     "api": "tf.nn.avg_pool",
     "args": {
@@ -503,7 +745,11 @@
     "required_imports": []
   },
   "AvgPool1d": {
-    "api": "keras.layers.AvgPool1D",
+    "api": "tf.nn.avg_pool1d",
+    "args": {
+      "kernel_size": "ksize",
+      "stride": "strides"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -538,8 +784,80 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "BFloat16Tensor": {
+    "api": "tf.convert_to_tensor",
+    "dispatch_rules": [],
+    "inject_args": {
+      "dtype": "tf.bfloat16"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BartlettWindow": {
+    "api": "tf.signal.bartlett_window",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchNorm": {
+    "api": "tf.nn.batch_normalization",
+    "args": {
+      "bias": "scale",
+      "eps": "variance_epsilon",
+      "input": "x",
+      "momentum": null,
+      "running_mean": "mean",
+      "running_var": "variance",
+      "training": null,
+      "weight": "offset"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchNormBackwardElemt": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchNormBackwardReduce": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchNormElemt": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchNormGatherStats": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchNormGatherStatsWithCounts": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchNormStats": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BatchNormUpdateStats": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "BatchNormalization": {
     "api": "tf.keras.layers.BatchNormalization",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bernoulli": {
+    "api": "tf.random.categorical",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -580,6 +898,22 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Bilinear": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BinaryCrossEntropyWithLogits": {
+    "api": "tf.nn.sigmoid_cross_entropy_with_logits",
+    "args": {
+      "input": "logits",
+      "reduction": null,
+      "target": "labels"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "BinaryCrossentropy": {
     "api": "tf.keras.losses.BinaryCrossentropy",
     "dispatch_rules": [],
@@ -595,14 +929,59 @@
   "Bincount": {
     "api": "tf.math.bincount",
     "args": {
-      "x": "arr"
+      "input": "arr",
+      "minlength": "minlength"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Binomial": {
+    "api": "tf.random.stateless_binomial",
+    "args": {
+      "count": "counts",
+      "prob": "probs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bit": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bits16": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bits1x8": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bits2x4": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bits4x2": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bits8": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "BitwiseAnd": {
     "api": "tf.bitwise.bitwise_and",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -621,35 +1000,112 @@
   },
   "BitwiseLeftShift": {
     "api": "tf.bitwise.left_shift",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "BitwiseNot": {
     "api": "tf.bitwise.invert",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "BitwiseOr": {
     "api": "tf.bitwise.bitwise_or",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "BitwiseRightShift": {
     "api": "tf.bitwise.right_shift",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "BitwiseXor": {
     "api": "tf.bitwise.bitwise_xor",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BlackmanWindow": {
+    "api": "tf.signal.blackman_window",
+    "args": {
+      "periodic": "periodic",
+      "window_length": "window_length"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Block": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BlockDiag": {
+    "api": "tf.linalg.LinearOperatorBlockDiag",
+    "args": {
+      "tensors": "operators"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bmm": {
+    "api": "tf.linalg.matmul",
+    "args": {
+      "input": "a",
+      "mat2": "b"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Bool": {
+    "api": "tf.bool",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BoolScalar": {
+    "api": "tf.constant",
+    "dispatch_rules": [],
+    "inject_args": {
+      "dtype": "tf.bool"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BoolTensor": {
+    "api": "tf.convert_to_tensor",
+    "dispatch_rules": [],
+    "inject_args": {
+      "dtype": "tf.bool"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BoolType": {
     "api": "tf.bool",
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -661,17 +1117,101 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "BroadcastLike": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BroadcastShapes": {
+    "api": "tf.broadcast_static_shape",
+    "dispatch_rules": [],
+    "missing_message": "TF broadcast_static_shape only supports 2 args.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BroadcastTensors": {
+    "dispatch_rules": [],
+    "missing_message": "No direct equivalent in TF for N tensors. Use tf.broadcast_to per tensor.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "BroadcastTo": {
     "api": "tf.broadcast_to",
-    "args": {
-      "array": "input"
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bucketize": {
+    "api": "tf.searchsorted",
+    "arg_values": {
+      "right": {
+        "false": "'left'",
+        "true": "'right'"
+      }
     },
+    "args": {
+      "boundaries": "sorted_sequence",
+      "input": "values",
+      "right": "side"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BuildMatrix": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BusDayCalendar": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BusDayCount": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BusDayOffset": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ByteTensor": {
+    "api": "tf.convert_to_tensor",
+    "dispatch_rules": [],
+    "inject_args": {
+      "dtype": "tf.uint8"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ByteType": {
+    "api": "tf.int8",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BytesType": {
+    "api": "tf.string",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "CTCLoss": {
     "api": "tf.keras.losses.ctc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CanCast": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CastBFloat16": {
+    "api": "tf.bfloat16",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -730,6 +1270,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "CastInt64": {
+    "dispatch_rules": [],
+    "macro_template": "tf.cast({input}, tf.int64)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "CastLong": {
     "api": "tf.cast",
     "dispatch_rules": [],
@@ -781,12 +1327,24 @@
   },
   "Ceil": {
     "api": "tf.math.ceil",
+    "args": {
+      "input": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CeilInplace": {
+    "api": "tf.math.ceil",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Celu": {
-    "api": "tf.keras.activations.celu",
+    "api": "keras.activations.celu",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -797,8 +1355,57 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "CharTensor": {
+    "api": "tf.convert_to_tensor",
+    "dispatch_rules": [],
+    "inject_args": {
+      "dtype": "tf.int8"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CharacterType": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Checkify": {
     "api": "tf.debugging.check_numerics",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cholesky": {
+    "api": "tf.linalg.cholesky",
+    "args": {
+      "input": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CholeskySolve": {
+    "api": "tf.linalg.cholesky_solve",
+    "args": {
+      "input": "rhs",
+      "input2": "chol"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Choose": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Chunk": {
+    "api": "tf.split",
+    "args": {
+      "chunks": "num_or_size_splits",
+      "dim": "axis",
+      "input": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -809,12 +1416,43 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Clamp": {
+    "api": "tf.clip_by_value",
+    "args": {
+      "input": "t",
+      "max": "clip_value_max",
+      "min": "clip_value_min"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ClampMax": {
+    "api": "tf.math.minimum",
+    "args": {
+      "input": "x",
+      "max": "y"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ClampMin": {
+    "api": "tf.math.maximum",
+    "args": {
+      "input": "x",
+      "min": "y"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Clip": {
     "api": "tf.clip_by_value",
     "args": {
+      "input": "t",
       "max": "clip_value_max",
-      "min": "clip_value_min",
-      "x": "t"
+      "min": "clip_value_min"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -826,17 +1464,31 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ColumnConcatenation": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ColumnStack": {
+    "api": "tf.stack",
+    "args": {
+      "tensors": "values"
+    },
+    "dispatch_rules": [],
+    "inject_args": {
+      "axis": 1
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Compile": {
     "api": "tf.function",
-    "args": {
-      "fun": "func"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Complex": {
-    "api": "tf.complex128",
+    "api": "tf.complex",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -849,6 +1501,17 @@
   },
   "Complex64": {
     "api": "tf.complex64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ComplexDouble": {
+    "api": "tf.complex128",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ComplexLongDouble": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -877,7 +1540,8 @@
   "Concatenate": {
     "api": "tf.concat",
     "args": {
-      "arrays": "values"
+      "arys": "values",
+      "axis": "axis"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -889,8 +1553,23 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ConcreteModuleType": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConcreteModuleTypeBuilder": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Cond": {
     "api": "tf.cond",
+    "args": {
+      "false_fn": "false_fn",
+      "pred": "pred",
+      "true_fn": "true_fn"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -913,6 +1592,33 @@
   "Conjugate": {
     "api": "tf.math.conj",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConstructFloat16": {
+    "api": "tf.constant",
+    "dispatch_rules": [],
+    "inject_args": {
+      "dtype": "tf.float16"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConstructFloat32": {
+    "api": "tf.constant",
+    "dispatch_rules": [],
+    "inject_args": {
+      "dtype": "tf.float32"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ConstructFloat64": {
+    "api": "tf.constant",
+    "dispatch_rules": [],
+    "inject_args": {
+      "dtype": "tf.float64"
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -966,13 +1672,9 @@
     "required_imports": []
   },
   "Conv2d": {
-    "api": "tf.keras.layers.Convolution2D",
+    "api": "tf.keras.layers.Conv2D",
     "args": {
-      "bias": "use_bias",
-      "dilation": "dilation_rate",
-      "in_channels": null,
-      "out_channels": "filters",
-      "stride": "strides"
+      "out_channels": "filters"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1135,19 +1837,29 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Convolve": {
+    "api": "tf.experimental.numpy.convolve",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Copy": {
     "api": "tf.identity",
-    "args": {
-      "a": "input"
-    },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Copysign": {
+    "api": "tf.math.multiply",
+    "dispatch_rules": [],
+    "macro_template": "tf.math.multiply(tf.math.abs({input}), tf.math.sign({other}))",
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Cos": {
     "api": "tf.math.cos",
     "args": {
-      "a": "x"
+      "input": "x"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1156,7 +1868,18 @@
   "Cosh": {
     "api": "tf.math.cosh",
     "args": {
-      "a": "x"
+      "input": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CosineSimilarity": {
+    "api": "tf.keras.losses.cosine_similarity",
+    "args": {
+      "dim": "axis",
+      "x1": "y_true",
+      "x2": "y_pred"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1171,8 +1894,7 @@
   "CountNonzero": {
     "api": "tf.math.count_nonzero",
     "args": {
-      "a": "input_tensor",
-      "keepdims": "keep_dims"
+      "dim": "axis"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1223,9 +1945,29 @@
   "Cross": {
     "api": "tf.linalg.cross",
     "args": {
-      "axis": "axis"
+      "dim": null,
+      "input": "a",
+      "other": "b"
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CtcLoss": {
+    "api": "tf.nn.ctc_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "CubeRoot": {
+    "api": "tf.math.pow",
+    "arg_values": {
+      "y": "1.0/3.0"
+    },
+    "dispatch_rules": [],
+    "inject_args": {
+      "y": "1.0/3.0"
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1244,17 +1986,8 @@
   },
   "Cumprod": {
     "api": "tf.math.cumprod",
-    "arg_values": {
-      "inclusive": {
-        "False": "True",
-        "True": "False"
-      }
-    },
     "args": {
-      "a": "x",
-      "axis": "axis",
-      "inclusive": "exclusive",
-      "reverse": "reverse"
+      "dim": "axis"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1263,13 +1996,22 @@
   "Cumsum": {
     "api": "tf.math.cumsum",
     "args": {
-      "a": "x",
-      "axis": "axis",
-      "reverse": "reverse"
+      "dim": "axis"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "CumulativeTrapezoid": {
+    "api": "tfp.math.trapz",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "alias": "tfp",
+        "module": "tensorflow_probability"
+      }
+    ]
   },
   "CustomVjp": {
     "api": "tf.custom_gradient",
@@ -1310,6 +2052,11 @@
       "import dataclasses"
     ]
   },
+  "DeepCopyMemoTable": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Deg2Rad": {
     "api": "tf.math.multiply",
     "dispatch_rules": [],
@@ -1317,18 +2064,27 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Deg2Rad_": {
+    "dispatch_rules": [],
+    "macro_template": "{input} * (3.141592653589793 / 180.0)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Deg2rad": {
     "api": "tf.math.multiply",
     "dispatch_rules": [],
-    "macro_template": "{x} * (3.141592653589793 / 180.0)",
+    "macro_template": "{input} * (3.141592653589793 / 180.0)",
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Degrees": {
-    "api": "tf.math.degrees",
-    "args": {
-      "a": "x"
-    },
+    "api": "tf.experimental.numpy.degrees",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Delete": {
+    "api": "tf.experimental.numpy.delete",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1371,6 +2127,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Dequantize": {
+    "api": "tf.quantization.dequantize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DeserializationStorageContext": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "DeserializeLoss": {
     "api": "tf.keras.losses.deserialize",
     "dispatch_rules": [],
@@ -1389,17 +2156,58 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Detach": {
+    "api": "tf.stop_gradient",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DetachCopy": {
+    "api": "tf.identity",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Detach_": {
+    "api": "tf.stop_gradient",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Device": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "device_allocator"
+  },
   "DeviceCpu": {
     "dispatch_rules": [],
     "macro_template": "'/CPU:0'",
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DeviceObjType": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Diag": {
     "api": "tf.linalg.diag",
+    "dispatch_rules": [
+      {
+        "if_arg": "input",
+        "is_val": "Tensor",
+        "op": "is_type",
+        "use_api": "tf.linalg.diag_part"
+      }
+    ],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DiagEmbed": {
+    "api": "tf.linalg.diag",
     "args": {
-      "a": "diagonal",
-      "k": "k"
+      "offset": "k"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1419,6 +2227,26 @@
   },
   "Diagonal": {
     "api": "tf.linalg.diag_part",
+    "args": {
+      "input": "input",
+      "offset": "k"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DiagonalCopy": {
+    "api": "tf.linalg.diag_part",
+    "args": {
+      "input": "input",
+      "offset": "k"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DiagonalScatter": {
+    "api": "tf.linalg.set_diag",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1429,14 +2257,45 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DictType": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Diff": {
     "api": "tf.experimental.numpy.diff",
+    "args": {
+      "dim": "axis",
+      "input": "a",
+      "n": "n"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Digamma": {
     "api": "tf.math.digamma",
+    "args": {
+      "input": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Digitize": {
+    "api": "tf.experimental.numpy.digitize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DisableTorchFunction": {
+    "api": "contextlib.nullcontext",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DisableTorchFunctionSubclass": {
+    "api": "contextlib.nullcontext",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1447,8 +2306,35 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "DispatchKey": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DispatchKeySet": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dist": {
+    "api": "tf.norm",
+    "dispatch_rules": [],
+    "macro_template": "tf.norm({input} - {other}, ord={p})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DistributedSum": {
+    "dispatch_rules": [],
+    "macro_template": "'sum'",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Div": {
     "api": "tf.math.divide",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1462,8 +2348,8 @@
   "Divide": {
     "api": "tf.math.divide",
     "args": {
-      "a": "x",
-      "b": "y"
+      "input": "x",
+      "other": "y"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1476,8 +2362,15 @@
     "required_imports": []
   },
   "Dot": {
-    "api": "tf.keras.layers.Dot",
+    "api": "tf.tensordot",
+    "args": {
+      "input": "a",
+      "tensor": "b"
+    },
     "dispatch_rules": [],
+    "inject_args": {
+      "axes": 1
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1487,17 +2380,72 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Double": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "type_methods"
+  },
+  "DoubleStorage": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DoubleTensor": {
+    "api": "tf.constant",
+    "arg_values": {
+      "dtype": "tf.float64"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Dropout": {
-    "api": "tf.keras.layers.Dropout",
+    "api": "tf.nn.dropout",
     "args": {
+      "input": "x",
       "p": "rate"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Dropout_": {
+    "api": "tf.nn.dropout",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dsmm": {
+    "api": "tf.sparse.sparse_dense_matmul",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dsplit": {
+    "api": "tf.split",
+    "args": {
+      "indices_or_sections": "num_or_size_splits",
+      "input": "value"
+    },
+    "dispatch_rules": [],
+    "inject_args": {
+      "axis": 2
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Dstack": {
+    "api": "tf.experimental.numpy.dstack",
+    "args": {
+      "tensors": "tup"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Dtype": {
-    "api": "tf.DType",
+    "api": "tf.dtypes.DType",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1508,7 +2456,7 @@
     "required_imports": []
   },
   "E": {
-    "api": "tf.experimental.numpy.e",
+    "api": "numpy.e",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1519,14 +2467,27 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Einsum": {
-    "api": "tf.einsum",
+  "Ediff1d": {
+    "api": "tf.experimental.numpy.ediff1d",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Eig": {
+    "api": "tf.linalg.eig",
     "args": {
-      "subscripts": "equation"
+      "input": "tensor"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Einsum": {
+    "api": "tf.einsum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "einsum_normalizer"
   },
   "EinsumDense": {
     "api": "tf.keras.layers.EinsumDense",
@@ -1536,25 +2497,34 @@
   },
   "Elu": {
     "api": "tf.nn.elu",
-    "args": {
-      "alpha": null
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Embedding": {
-    "api": "tf.keras.layers.Embedding",
+    "api": "tf.nn.embedding_lookup",
     "args": {
-      "embedding_dim": "output_dim",
-      "num_embeddings": "input_dim"
+      "input": "ids",
+      "weight": "params"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "EmbeddingBag": {
+    "api": "tf.nn.embedding_lookup_sparse",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "embedding_bag_tf"
+  },
   "Empty": {
     "api": "tf.experimental.numpy.empty",
+    "args": {
+      "device": null,
+      "requires_grad": null,
+      "size": "shape"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1562,17 +2532,49 @@
   "EmptyLike": {
     "api": "tf.experimental.numpy.empty_like",
     "args": {
-      "a": "prototype"
+      "device": null,
+      "input": "a",
+      "requires_grad": null
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EnableGrad": {
+    "api": "tf.GradientTape",
+    "dispatch_rules": [],
+    "inject_args": {
+      "persistent": true
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EnumType": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Equal": {
     "api": "tf.math.equal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EqualAggregate": {
+    "api": "tf.experimental.numpy.array_equal",
     "args": {
-      "a": "x",
-      "b": "y"
+      "input": "a1",
+      "other": "a2"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "EqualElementwise": {
+    "api": "tf.math.equal",
+    "args": {
+      "input": "x",
+      "other": "y"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1587,7 +2589,7 @@
   "Erf": {
     "api": "tf.math.erf",
     "args": {
-      "a": "x"
+      "input": "x"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1595,8 +2597,14 @@
   },
   "ErfInv": {
     "api": "tf.math.erfinv",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Erf_": {
+    "api": "tf.math.erf",
     "args": {
-      "a": "x"
+      "input": "x"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1604,12 +2612,29 @@
   },
   "Erfc": {
     "api": "tf.math.erfc",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ErfcInv": {
     "api": "tf.math.erfcinv",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Erfinv": {
+    "api": "tf.math.erfinv",
+    "args": {
+      "input": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ErrorReport": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1628,21 +2653,53 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Event": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ExcludeDispatchKeyGuard": {
+    "api": "contextlib.nullcontext",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ExecutionPlan": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Exp": {
     "api": "tf.math.exp",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Exp2": {
-    "api": "tf.math.pow",
+    "api": "tf.experimental.numpy.exp2",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
-    "macro_template": "tf.math.pow(2.0, {x})",
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ExpandCopy": {
+    "api": "tf.broadcast_to",
+    "args": {
+      "input": "input",
+      "size": "shape"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "pack_to_tuple": "shape",
+    "required_imports": []
+  },
   "ExpandDims": {
-    "api": "tf.expand_dims",
+    "api": "tf.experimental.numpy.expand_dims",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1655,6 +2712,9 @@
   },
   "Expm1": {
     "api": "tf.math.expm1",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1665,18 +2725,83 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Extract": {
+    "api": "tf.boolean_mask",
+    "args": {
+      "arr": "tensor",
+      "condition": "mask"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Eye": {
     "api": "tf.eye",
     "args": {
-      "M": "num_columns",
-      "N": "num_rows"
+      "dtype": "dtype",
+      "m": "num_columns",
+      "n": "num_rows"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Fabs": {
-    "api": "tf.math.abs",
+    "api": "tf.experimental.numpy.fabs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FakeQuantizePerChannelAffine": {
+    "api": "tf.quantization.fake_quant_with_min_max_vars_per_channel",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "fake_quant_adapter"
+  },
+  "FatalError": {
+    "api": "tf.errors.InternalError",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FbgemmPackGemmMatrixFp16": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FbgemmPackQuantizedMatrix": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FeatureAlphaDropout": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FileCheck": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Fill": {
+    "api": "tf.fill",
+    "args": {
+      "input": "dims"
+    },
+    "dispatch_rules": [],
+    "macro_template": "tf.fill(tf.shape({input}), {value})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FillDiagonal": {
+    "api": "tf.linalg.set_diag",
+    "args": {
+      "a": "input",
+      "val": "diagonal",
+      "wrap": null
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1688,20 +2813,18 @@
     "required_imports": []
   },
   "Fix": {
-    "api": "tf.experimental.numpy.fix",
+    "api": "tf.raw_ops.Truncate",
     "dispatch_rules": [],
+    "macro_template": "tf.cast(tf.cast({input}, tf.int32), {input}.dtype)",
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Flatten": {
-    "api": "tf.keras.layers.Flatten",
-    "args": {
-      "end_dim": null,
-      "start_dim": null
-    },
+    "api": "tf.reshape",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "requires_plugin": "flatten_range"
   },
   "FlaxLayer": {
     "api": "keras.layers.FlaxLayer",
@@ -1712,8 +2835,7 @@
   "Flip": {
     "api": "tf.reverse",
     "args": {
-      "axis": "axis",
-      "m": "tensor"
+      "dims": "axis"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1727,6 +2849,12 @@
   },
   "Flipud": {
     "api": "tf.experimental.numpy.flipud",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Float": {
+    "api": "tf.float32",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1749,12 +2877,40 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Float8E4m3fn": {
+    "api": "tf.types.float8_e4m3fn",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Float8E5m2": {
+    "api": "tf.types.float8_e5m2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "FloatPower": {
     "api": "tf.math.pow",
-    "args": {
-      "x": "x",
-      "y": "y"
+    "dispatch_rules": [],
+    "output_cast": "tf.float64",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FloatStorage": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FloatTensor": {
+    "api": "tf.constant",
+    "arg_values": {
+      "dtype": "tf.float32"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FloatType": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1783,20 +2939,85 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Fmax": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Fmin": {
+    "api": "tf.math.minimum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Fmod": {
+    "api": "tf.math.mod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ForiLoop": {
     "api": "tf.while_loop",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "FromDlpack": {
-    "api": "tf.experimental.dlpack.from_dlpack",
-    "args": {
-      "x": "dlcapsule"
-    },
+  "Frac": {
+    "dispatch_rules": [],
+    "macro_template": "{input} - tf.math.trunc({input})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Frac_": {
+    "dispatch_rules": [],
+    "macro_template": "{input} - tf.math.trunc({input})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Frexp": {
+    "api": "tf.math.frexp",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "FrobeniusNorm": {
+    "api": "tf.norm",
+    "args": {
+      "dim": "axis"
+    },
+    "dispatch_rules": [],
+    "inject_args": {
+      "ord": "'fro'"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FromDlpack": {
+    "api": "tf.experimental.dlpack.from_dlpack",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FromIter": {
+    "api": "tf.constant",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FromNumpy": {
+    "api": "tf.convert_to_tensor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FromString": {
+    "api": "tf.io.decode_csv",
+    "dispatch_rules": [],
+    "missing_message": "TensorFlow uses tf.io.decode_raw/csv for string parsing, exact match varying.",
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import tensorflow as tf"
+    ]
   },
   "Ftrl": {
     "api": "tf.keras.optimizers.Ftrl",
@@ -1808,21 +3029,41 @@
     "api": "tf.fill",
     "args": {
       "fill_value": "value",
-      "shape": "dims"
+      "size": "dims"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "FullLike": {
-    "api": "tf.fill",
+    "api": "tf.experimental.numpy.full_like",
     "dispatch_rules": [],
-    "macro_template": "tf.fill(tf.shape({x}), {fill_value})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FullSoftmax": {
+    "api": "tf.keras.layers.Softmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FunctionSchema": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Future": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FutureType": {
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GELU": {
-    "api": "keras.ops.gelu",
+    "api": "tf.keras.layers.GELU",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1851,7 +3092,12 @@
   },
   "Gather": {
     "api": "tf.gather",
+    "args": {
+      "dim": "axis",
+      "index": "indices"
+    },
     "dispatch_rules": [],
+    "macro_template": "tf.gather({input}, {index}, batch_dims={dim})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1873,8 +3119,40 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Gcd_": {
+    "api": "tf.math.gcd",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ge": {
+    "api": "tf.math.greater_equal",
+    "dispatch_rules": [],
+    "operator": ">=",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "infix"
+  },
   "Gelu": {
     "api": "tf.nn.gelu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GenFromTxt": {
+    "dispatch_rules": [],
+    "missing_message": "Use tf.data.TextLineDataset or tf.io.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Generator": {
+    "api": "tf.random.Generator",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GeomSpace": {
+    "api": "tf.experimental.numpy.geomspace",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1885,14 +3163,59 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Ger": {
+    "api": "tf.tensordot",
+    "dispatch_rules": [],
+    "macro_template": "tf.tensordot({input}, {vec2}, axes=0)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetDefaultDtype": {
+    "api": "tf.keras.backend.floatx",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetFilePath": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetFloat32MatmulPrecision": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "GetLoss": {
     "api": "tf.keras.losses.get",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "GetNumInteropThreads": {
+    "api": "tf.config.threading.get_inter_op_parallelism_threads",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetNumThreads": {
+    "api": "tf.config.threading.get_intra_op_parallelism_threads",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "GetOptimizer": {
     "api": "tf.keras.optimizers.get",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetPrintOptions": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GetRngState": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1969,6 +3292,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "GlobalPooling": {
+    "api": "tf.keras.layers.GlobalAveragePooling2D",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Glu": {
     "api": "tf.nn.glu",
     "dispatch_rules": [],
@@ -1981,14 +3310,63 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "GradScaler": {
+    "api": "tf.keras.mixed_precision.LossScaleOptimizer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Gradient": {
+    "api": "numpy.gradient",
+    "dispatch_rules": [],
+    "missing_message": "TensorFlow uses numpy.gradient via interop for this specific API.",
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import numpy"
+    ]
+  },
+  "Graph": {
+    "api": "tf.Graph",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GraphExecutorState": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Greater": {
     "api": "tf.math.greater",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GreaterEqual": {
     "api": "tf.math.greater_equal",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GridSampler": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GridSampler2d": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GridSampler3d": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1996,6 +3374,16 @@
   "Group": {
     "api": "tf.group",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GroupNorm": {
+    "api": "tf.nn.group_norm",
+    "args": {
+      "input": "input"
+    },
+    "dispatch_rules": [],
+    "missing_message": "TF group_norm signature differs significantly requiring reshape.",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -2011,8 +3399,30 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Gru": {
+    "api": "tf.keras.layers.GRU",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GruCell": {
+    "api": "tf.keras.layers.GRUCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Grucell": {
     "api": "keras.layers.GRUCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Gt": {
+    "api": "tf.math.greater",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2025,6 +3435,37 @@
   },
   "HStack": {
     "api": "tf.experimental.numpy.hstack",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Half": {
+    "api": "tf.cast",
+    "dispatch_rules": [],
+    "macro_template": "tf.cast({input}, tf.float16)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HammingWindow": {
+    "api": "tf.signal.hamming_window",
+    "args": {
+      "alpha": "alpha",
+      "beta": "beta",
+      "dtype": "dtype",
+      "periodic": "periodic",
+      "window_length": "window_length"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HannWindow": {
+    "api": "tf.signal.hann_window",
+    "args": {
+      "dtype": "dtype",
+      "periodic": "periodic",
+      "window_length": "window_length"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2054,6 +3495,11 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "HashTensor": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "HashedCrossing": {
     "api": "tf.keras.layers.HashedCrossing",
     "dispatch_rules": [],
@@ -2067,7 +3513,17 @@
     "required_imports": []
   },
   "Heaviside": {
-    "api": "tf.experimental.numpy.heaviside",
+    "api": "tf.math.heaviside",
+    "args": {
+      "input": "x",
+      "values": "values"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "HingeEmbeddingLoss": {
+    "api": "tf.keras.losses.Hinge",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2080,6 +3536,48 @@
   },
   "Histogram": {
     "api": "tf.histogram_fixed_width",
+    "args": {
+      "input": "values",
+      "range": "value_range"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Histogram2d": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Histogramdd": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hsmm": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hsplit": {
+    "api": "tf.experimental.numpy.hsplit",
+    "args": {
+      "input": "ary"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hspmm": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Hstack": {
+    "api": "tf.experimental.numpy.hstack",
+    "args": {
+      "tensors": "tup"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2091,14 +3589,20 @@
     "required_imports": []
   },
   "Hypot": {
-    "api": "tf.math.reduce_euclidean_norm",
+    "api": "tf.math.hypot",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
-    "macro_template": "tf.math.sqrt(tf.math.square({x1}) + tf.math.square({x2}))",
     "pack_as": "Tuple",
     "required_imports": []
   },
   "I0": {
     "api": "tf.math.bessel_i0",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2111,18 +3615,35 @@
   },
   "Identity": {
     "api": "tf.eye",
+    "args": {
+      "n": "num_rows"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Igamma": {
     "api": "tf.math.igamma",
+    "args": {
+      "input": "a",
+      "other": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Igammac": {
     "api": "tf.math.igammac",
+    "args": {
+      "input": "a",
+      "other": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Iinfo": {
+    "api": "tf.experimental.numpy.iinfo",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2148,6 +3669,35 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IndexExp": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IndexExpression": {
+    "api": "tf.experimental.numpy.s_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IndexSelect": {
+    "api": "tf.gather",
+    "args": {
+      "dim": "axis",
+      "index": "indices",
+      "input": "params"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Indices": {
+    "api": "tf.meshgrid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "indices_shim"
+  },
   "Inexact": {
     "api": "tf.experimental.numpy.inexact",
     "dispatch_rules": [],
@@ -2155,14 +3705,23 @@
     "required_imports": []
   },
   "Inf": {
-    "api": "tf.constant",
+    "api": "tf.experimental.numpy.inf",
     "dispatch_rules": [],
-    "macro_template": "tf.constant(float('inf'))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Infinite": {
+    "api": "numpy.inf",
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Inner": {
     "api": "tf.experimental.numpy.inner",
+    "args": {
+      "input": "a",
+      "other": "b"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2185,14 +3744,38 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Insert": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Int": {
+    "api": "tf.int32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Int16": {
     "api": "tf.int16",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Int16Tensor": {
+    "dispatch_rules": [],
+    "macro_template": "tf.cast({data}, tf.int16)",
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import tensorflow as tf"
+    ]
+  },
   "Int32": {
     "api": "tf.int32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Int4": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2221,6 +3804,34 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Interp": {
+    "api": "tfp.math.interp",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "tf_probability_shim"
+  },
+  "Inverse": {
+    "api": "tf.linalg.inv",
+    "args": {
+      "input": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "InverseShortTimeFourierTransform": {
+    "api": "tf.signal.inverse_stft",
+    "args": {
+      "hop_length": "frame_step",
+      "input": "stfts",
+      "n_fft": "fft_length",
+      "window": "window_fn"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Invert": {
     "api": "tf.bitwise.invert",
     "dispatch_rules": [],
@@ -2233,6 +3844,48 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IsAnomalyCheckNanEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsAnomalyEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsAutocastCacheEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsAutocastCpuEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsAutocastEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsAutocastIpuEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsAutocastXlaEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "IsAvailable": {
     "dispatch_rules": [],
     "macro_template": "len(tf.config.list_physical_devices('GPU')) > 0",
@@ -2241,15 +3894,21 @@
   },
   "IsClose": {
     "api": "tf.experimental.numpy.isclose",
+    "args": {
+      "input": "a",
+      "other": "b"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "IsComplex": {
-    "api": "tf.math.is_complex",
+    "api": "tf.is_complex",
     "dispatch_rules": [],
+    "macro_template": "{input}.dtype.is_complex",
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "transformation_type": "inline_lambda"
   },
   "IsComplexObj": {
     "api": "tf.experimental.numpy.iscomplexobj",
@@ -2257,10 +3916,55 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IsConj": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsDeterministicAlgorithmsWarnOnlyEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsDistributed": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "IsFinite": {
     "api": "tf.math.is_finite",
     "args": {
       "input": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsFloatingPoint": {
+    "dispatch_rules": [],
+    "macro_template": "{input}.dtype.is_floating",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsFortran": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsGradEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "tf.executing_eagerly()",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsIn": {
+    "api": "tf.experimental.numpy.isin",
+    "args": {
+      "elements": "element",
+      "test_elements": "test_elements"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2275,17 +3979,35 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IsInference": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsInferenceModeEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "IsNaN": {
-    "api": "keras.ops.isnan",
+    "api": "tf.math.is_nan",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "IsNan": {
     "api": "tf.math.is_nan",
-    "args": {
-      "input": "x"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsNeg": {
+    "api": "tf.math.is_negative",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2302,6 +4024,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IsNonZero": {
+    "dispatch_rules": [],
+    "macro_template": "tf.size({input}) == 1 and tf.get_static_value({input}) != 0",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "IsPosInf": {
     "dispatch_rules": [],
     "macro_template": "tf.equal({input}, float('inf'))",
@@ -2310,6 +4038,9 @@
   },
   "IsReal": {
     "api": "tf.math.is_real",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2320,9 +4051,27 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IsSameSize": {
+    "dispatch_rules": [],
+    "macro_template": "{input}.shape == {other}.shape",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "IsScalar": {
     "api": "tf.experimental.numpy.isscalar",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsSigned": {
+    "dispatch_rules": [],
+    "macro_template": "{input}.dtype.is_signed",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsStorage": {
+    "dispatch_rules": [],
+    "macro_template": "False",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -2338,8 +4087,32 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IsTensor": {
+    "api": "tf.is_tensor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsVulkanAvailable": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "IsWarnAlwaysEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "True",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Ix_": {
     "api": "tf.experimental.numpy.ix_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Jagged": {
+    "api": "tf.ragged.constant",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2368,9 +4141,49 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Kaiser": {
+    "api": "tf.signal.kaiser_window",
+    "args": {
+      "M": "window_length",
+      "beta": "beta"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "KaiserWindow": {
+    "api": "tf.signal.kaiser_window",
+    "args": {
+      "beta": "beta",
+      "window_length": "length"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "KlDiv": {
+    "api": "tf.keras.losses.kl_divergence",
+    "args": {
+      "input": "y_pred",
+      "target": "y_true"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Kron": {
     "api": "tf.experimental.numpy.kron",
+    "args": {
+      "input": "a",
+      "other": "b"
+    },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "KthValue": {
+    "dispatch_rules": [],
+    "macro_template": "tf.sort({input}, axis={dim})[..., {k}-1]",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -2398,6 +4211,15 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LU": {
+    "api": "tf.linalg.lu",
+    "args": {
+      "A": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Lamb": {
     "api": "tf.keras.optimizers.Lamb",
     "dispatch_rules": [],
@@ -2416,6 +4238,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LayerNorm": {
+    "api": "tf.keras.layers.LayerNormalization",
+    "dispatch_rules": [],
+    "macro_template": "tf.keras.layers.LayerNormalization(epsilon={eps})({input})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "LayerNormalization": {
     "api": "tf.keras.layers.LayerNormalization",
     "dispatch_rules": [],
@@ -2428,8 +4257,49 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Layout": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Lcm": {
     "api": "tf.experimental.numpy.lcm",
+    "args": {
+      "input": "x1",
+      "other": "x2"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Lcm_": {
+    "api": "tf.experimental.numpy.lcm",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LdExp": {
+    "dispatch_rules": [],
+    "macro_template": "{x1} * tf.math.pow(2.0, {x2})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Ldexp": {
+    "api": "tf.experimental.numpy.ldexp",
+    "args": {
+      "input": "x1",
+      "other": "x2"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Le": {
+    "api": "tf.math.less_equal",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2448,11 +4318,13 @@
   },
   "LeftShift": {
     "api": "tf.bitwise.left_shift",
-    "args": {
-      "input": "x",
-      "other": "y"
-    },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Lerp": {
+    "dispatch_rules": [],
+    "macro_template": "{input} + {weight} * ({end} - {input})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -2478,6 +4350,15 @@
   },
   "Lgamma": {
     "api": "tf.math.lgamma",
+    "args": {
+      "input": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LinSpace": {
+    "api": "tf.linspace",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2496,7 +4377,9 @@
   "Linspace": {
     "api": "tf.linspace",
     "args": {
-      "num": "num"
+      "end": "stop",
+      "start": "start",
+      "steps": "num"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2553,12 +4436,9 @@
     "required_imports": []
   },
   "Load": {
-    "api": "load",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [
-      "import tensorflow as tf"
-    ],
+    "required_imports": [],
     "requires_plugin": "io_handler"
   },
   "Log": {
@@ -2571,6 +4451,15 @@
     "required_imports": []
   },
   "Log10": {
+    "api": "tf.experimental.numpy.log10",
+    "args": {
+      "input": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Log10_": {
     "api": "tf.experimental.numpy.log10",
     "args": {
       "input": "x"
@@ -2598,9 +4487,8 @@
     "required_imports": []
   },
   "LogAddExp": {
-    "api": "tf.math.reduce_logsumexp",
     "dispatch_rules": [],
-    "macro_template": "tf.math.reduce_logsumexp(tf.stack([{x1}, {x2}]), axis=0)",
+    "macro_template": "tf.math.log(tf.math.add(tf.math.exp({input}), tf.math.exp({other})))",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -2618,6 +4506,16 @@
   },
   "LogCumSumExp": {
     "api": "tf.math.cumulative_logsumexp",
+    "args": {
+      "dim": "axis",
+      "input": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogDet": {
+    "api": "tf.linalg.logdet",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2630,6 +4528,22 @@
   },
   "LogSoftmax": {
     "api": "tf.nn.log_softmax",
+    "args": {
+      "dim": "axis",
+      "input": "logits"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LogSpace": {
+    "api": "tf.experimental.numpy.logspace",
+    "args": {
+      "base": "base",
+      "end": "stop",
+      "start": "start",
+      "steps": "num"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2637,7 +4551,18 @@
   "LogSumExp": {
     "api": "tf.math.reduce_logsumexp",
     "args": {
-      "x": "input_tensor"
+      "dim": "axis",
+      "input": "input_tensor",
+      "keepdim": "keepdims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Log_": {
+    "api": "tf.math.log",
+    "args": {
+      "input": "x"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2651,18 +4576,29 @@
   },
   "LogicalAnd": {
     "api": "tf.math.logical_and",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "LogicalNot": {
     "api": "tf.math.logical_not",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "LogicalOr": {
     "api": "tf.math.logical_or",
+    "args": {
+      "input": "x",
+      "other": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2670,15 +4606,28 @@
   "LogicalXor": {
     "api": "tf.math.logical_xor",
     "args": {
-      "x1": "x",
-      "x2": "y"
+      "input": "x",
+      "other": "y"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Logit": {
+    "api": "tf.math.atanh",
+    "dispatch_rules": [],
+    "macro_template": "tf.math.atanh(2 * {input} - 1)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Logspace": {
     "api": "tf.experimental.numpy.logspace",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LongLong": {
+    "api": "tf.int64",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2695,8 +4644,77 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LstSq": {
+    "api": "tf.linalg.lstsq",
+    "args": {
+      "A": "rhs",
+      "input": "matrix"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LstmCellSimple": {
+    "api": "tf.keras.layers.LSTMCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Lstmcell": {
     "api": "keras.layers.LSTMCell",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Lt": {
+    "api": "tf.math.less",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "LuUnpack": {
+    "api": "tf.linalg.lu_reconstruct",
+    "dispatch_rules": [],
+    "missing_message": "Direct LU unpack not fully supported in TF, closest is lu_reconstruct.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MGrid": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
+  },
+  "ManualSeed": {
+    "api": "tf.random.set_seed",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MarginRankingLoss": {
+    "api": "tf.keras.losses.margin_ranking_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaskIndices": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
+  },
+  "MaskedFill": {
+    "api": "tf.where",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MaskedSelect": {
+    "api": "tf.boolean_mask",
+    "args": {
+      "input": "tensor",
+      "mask": "mask"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2708,17 +4726,39 @@
     "required_imports": []
   },
   "MatMul": {
-    "api": "tf.linalg.matmul",
+    "api": "tf.matmul",
     "args": {
-      "x1": "a",
-      "x2": "b"
+      "input": "a",
+      "other": "b"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Matmul": {
-    "api": "tf.linalg.matmul",
+    "api": "tf.matmul",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Matrix": {
+    "api": "tf.convert_to_tensor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MatrixExp": {
+    "api": "tf.linalg.expm",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MatrixPower": {
+    "api": "tf.linalg.matrix_power",
+    "args": {
+      "input": "input",
+      "n": "n"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2736,9 +4776,10 @@
     "required_imports": []
   },
   "Max": {
-    "api": "tf.math.reduce_max",
+    "api": "tf.reduce_max",
     "args": {
-      "x": "input_tensor"
+      "dim": "axis",
+      "keepdim": "keepdims"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2752,19 +4793,31 @@
     "requires_plugin": "tf_bbox_ops"
   },
   "MaxPool1d": {
-    "api": "tf.keras.layers.MaxPool1D",
+    "api": "tf.keras.layers.MaxPooling1D",
+    "args": {
+      "kernel_size": "pool_size",
+      "stride": "strides"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "MaxPool2d": {
-    "api": "tf.keras.layers.MaxPool2D",
+    "api": "tf.keras.layers.MaxPooling2D",
+    "args": {
+      "kernel_size": "pool_size",
+      "stride": "strides"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "MaxPool3d": {
-    "api": "tf.keras.layers.MaxPool3D",
+    "api": "tf.keras.layers.MaxPooling3D",
+    "args": {
+      "kernel_size": "pool_size",
+      "stride": "strides"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2806,19 +4859,27 @@
     "required_imports": []
   },
   "Maximum": {
-    "api": "tf.math.maximum",
+    "api": "tf.maximum",
     "args": {
-      "x1": "x",
-      "x2": "y"
+      "input": "x",
+      "other": "y"
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MayShareMemory": {
+    "dispatch_rules": [],
+    "macro_template": "False",
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Mean": {
     "api": "tf.math.reduce_mean",
     "args": {
-      "x": "input_tensor"
+      "dim": "axis",
+      "input": "input_tensor",
+      "keepdim": "keepdims"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2849,16 +4910,22 @@
     "required_imports": []
   },
   "Median": {
+    "api": "tf.math.reduce_median",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "tf_probability_median"
+    "required_imports": []
   },
   "MelSpectrogram": {
     "api": "tf.keras.layers.MelSpectrogram",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Memmap": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
   },
   "MergeContext": {
     "dispatch_rules": [],
@@ -2869,7 +4936,6 @@
     "api": "tf.meshgrid",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "pack_to_tuple": "args",
     "required_imports": []
   },
   "Metric": {
@@ -2881,18 +4947,38 @@
   "Min": {
     "api": "tf.math.reduce_min",
     "args": {
-      "x": "input_tensor"
+      "dim": "axis",
+      "input": "input_tensor",
+      "keepdim": "keepdims"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "MinScalarType": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
+  },
+  "MinTypeCode": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
+  },
   "Minimum": {
-    "api": "tf.math.minimum",
+    "api": "tf.minimum",
     "args": {
-      "x1": "x",
-      "x2": "y"
+      "input": "x",
+      "other": "y"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Mish": {
+    "api": "tf.keras.layers.Mish",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2906,36 +4992,43 @@
   "Mod": {
     "api": "tf.math.mod",
     "dispatch_rules": [],
-    "operator": "%",
     "pack_as": "Tuple",
-    "required_imports": [],
-    "transformation_type": "infix"
+    "required_imports": []
   },
   "ModelAndOptimizer": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Modf": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
+  },
   "Module": {
-    "api": "tf.Module",
+    "api": "tf.keras.Layer",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ModuleDict": {
+    "dispatch_rules": [],
+    "missing_message": "Use native Python dict.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "MoveAxis": {
-    "api": "tf.experimental.numpy.moveaxis",
+    "api": "tf.moveaxis",
     "args": {
-      "x": "a"
+      "a": "input"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Moveaxis": {
-    "api": "tf.moveaxis",
-    "args": {
-      "a": "input"
-    },
+    "api": "tf.experimental.numpy.moveaxis",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2948,6 +5041,9 @@
   },
   "MultiHeadAttention": {
     "api": "tf.keras.layers.MultiHeadAttention",
+    "args": {
+      "embed_dim": "key_dim"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2965,10 +5061,6 @@
   },
   "Multiply": {
     "api": "tf.math.multiply",
-    "args": {
-      "x1": "x",
-      "x2": "y"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2979,8 +5071,55 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Mvlgamma": {
+    "api": "tf.math.mvlgamma",
+    "args": {
+      "input": "x"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Nadam": {
     "api": "tf.keras.optimizers.Nadam",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Nan": {
+    "api": "float('nan')",
+    "dispatch_rules": [],
+    "macro_template": "float('nan')",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "inline_lambda"
+  },
+  "NanArgMax": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
+  },
+  "NanArgMin": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
+  },
+  "NanCumProd": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
+  },
+  "NanCumSum": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "numpy_fallback"
+  },
+  "NanMax": {
+    "api": "tf.experimental.numpy.nanmax",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2991,8 +5130,38 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "NanMedian": {
+    "api": "tf.experimental.numpy.nanmedian",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanMin": {
+    "api": "tf.experimental.numpy.nanmin",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanPercentile": {
+    "api": "tf.experimental.numpy.nanpercentile",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "NanProd": {
     "api": "tf.experimental.numpy.nanprod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanQuantile": {
+    "api": "tf.experimental.numpy.nanquantile",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NanStd": {
+    "api": "tf.experimental.numpy.nanstd",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3004,11 +5173,44 @@
     "required_imports": []
   },
   "NanToNum": {
-    "api": "tf.math.xdivy",
+    "api": "numpy.nan_to_num",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
-    "requires_plugin": "nan_to_num_shim"
+    "requires_plugin": "numpy_fallback"
+  },
+  "NanVar": {
+    "api": "tf.experimental.numpy.nanvar",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NativeNorm": {
+    "api": "tf.norm",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NdArray": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NdEnumerate": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NdIndex": {
+    "api": "tf.experimental.numpy.ndindex",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NdIter": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Ndim": {
     "api": "tf.rank",
@@ -3029,6 +5231,29 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "NegativeAlias": {
+    "api": "tf.math.negative",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NegativeAlias_": {
+    "api": "tf.math.negative",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Negative_": {
+    "api": "tf.math.negative",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NestedIters": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "NewAxis": {
     "api": "tf.newaxis",
     "dispatch_rules": [],
@@ -3037,13 +5262,16 @@
   },
   "NextAfter": {
     "api": "tf.math.nextafter",
-    "args": {
-      "other": "x2",
-      "x": "x1"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "NoGrad": {
+    "api": "tf.stop_gradient",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "strip_context"
   },
   "NodeStates": {
     "dispatch_rules": [],
@@ -3051,7 +5279,24 @@
     "required_imports": []
   },
   "NonZero": {
-    "api": "tf.experimental.numpy.nonzero",
+    "api": "tf.where",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Norm": {
+    "api": "tf.norm",
+    "args": {
+      "dim": "axis",
+      "keepdim": "keepdims",
+      "p": "ord"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Normal": {
+    "api": "tf.random.normal",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3074,11 +5319,13 @@
     "required_imports": []
   },
   "NotEqual": {
-    "api": "tf.math.not_equal",
-    "args": {
-      "x1": "x",
-      "x2": "y"
-    },
+    "api": "tf.not_equal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "NotEqualAlias": {
+    "api": "tf.not_equal",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3088,8 +5335,30 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Number": {
+    "api": "tf.experimental.numpy.number",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Numel": {
+    "api": "tf.size",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "OGrid": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Object": {
     "api": "object",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Object_": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3113,13 +5382,11 @@
     "api": "tf.ones",
     "dispatch_rules": [],
     "pack_as": "Tuple",
+    "pack_to_tuple": "shape",
     "required_imports": []
   },
   "OnesLike": {
     "api": "tf.ones_like",
-    "args": {
-      "x": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3151,10 +5418,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "OutOfMemoryError": {
+    "api": "tf.errors.ResourceExhaustedError",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Outer": {
     "api": "tf.tensordot",
+    "arg_values": {
+      "axes": 0
+    },
     "dispatch_rules": [],
-    "macro_template": "tf.tensordot({x1}, {x2}, axes=0)",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3170,12 +5445,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "PackBits": {
+    "api": "tf.experimental.numpy.packbits",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Pad": {
     "api": "tf.pad",
     "args": {
-      "pad_width": "paddings",
-      "value": "constant_values",
-      "x": "tensor"
+      "array": "tensor",
+      "pad_width": "paddings"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3187,12 +5467,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ParameterDict": {
+    "dispatch_rules": [],
+    "missing_message": "Use native Python dict.",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Partition": {
-    "api": "tf.math.top_k",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "partition_shim"
+    "required_imports": []
   },
   "PartitionName": {
     "api": "str",
@@ -3205,8 +5489,43 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "PerChannelSymmetric": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PerTensorAffine": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PerTensorSymmetric": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Percentile": {
+    "api": "tfp.stats.percentile",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import tensorflow_probability as tfp"
+    ]
+  },
   "Permute": {
-    "api": "tf.keras.layers.Permute",
+    "api": "tf.transpose",
+    "args": {
+      "dims": "perm"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PermuteCopy": {
+    "api": "tf.transpose",
+    "args": {
+      "dims": "perm"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3214,8 +5533,7 @@
   "PermuteDims": {
     "api": "tf.transpose",
     "args": {
-      "axes": "perm",
-      "x": "a"
+      "axes": "perm"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3227,9 +5545,23 @@
     "required_imports": []
   },
   "Pi": {
-    "api": "tf.constant",
+    "api": "numpy.pi",
     "dispatch_rules": [],
-    "macro_template": "3.1415926535",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Piecewise": {
+    "api": "tf.case",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Pinverse": {
+    "api": "tf.linalg.pinv",
+    "args": {
+      "input": "a"
+    },
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3239,8 +5571,42 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "PixelShuffle": {
+    "api": "tf.nn.depth_to_space",
+    "args": {
+      "upscale_factor": "block_size"
+    },
+    "dispatch_rules": [],
+    "layout_map": {
+      "input": "NCHW->NHWC",
+      "return": "NHWC->NCHW"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PixelUnshuffle": {
+    "api": "tf.nn.space_to_depth",
+    "args": {
+      "downscale_factor": "block_size"
+    },
+    "dispatch_rules": [],
+    "layout_map": {
+      "input": "NCHW->NHWC",
+      "return": "NHWC->NCHW"
+    },
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Place": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Poisson": {
-    "api": "tf.keras.losses.Poisson",
+    "api": "tf.random.poisson",
+    "args": {
+      "input": "lam"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3251,9 +5617,73 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "PoissonNllLoss": {
+    "api": "tf.nn.log_poisson_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Polar": {
+    "api": "tf.complex",
+    "dispatch_rules": [],
+    "macro_template": "tf.complex({abs} * tf.math.cos({angle}), {abs} * tf.math.sin({angle}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Poly": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Poly1d": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PolyAdd": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PolyDer": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PolyDiv": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PolyFit": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PolyInt": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PolyMul": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PolySub": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PolyVal": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Polygamma": {
     "api": "tf.math.polygamma",
     "args": {
+      "input": "x",
       "n": "a"
     },
     "dispatch_rules": [],
@@ -3262,22 +5692,28 @@
   },
   "Polyval": {
     "api": "tf.math.polyval",
-    "args": {
-      "p": "coeffs",
-      "x": "x"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Positive": {
-    "api": "tf.debugging.check_numerics",
     "dispatch_rules": [],
-    "macro_template": "{x}",
+    "operator": "+",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "infix"
+  },
+  "Pow": {
+    "api": "tf.math.pow",
+    "args": {
+      "exponent": "y",
+      "input": "x"
+    },
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Pow": {
+  "Power": {
     "api": "tf.math.pow",
     "args": {
       "x1": "x",
@@ -3287,29 +5723,44 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Power": {
-    "api": "tf.math.pow",
-    "args": {
-      "a": "x",
-      "b": "y"
-    },
+  "Prelu": {
+    "api": "tf.nn.leaky_relu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PrepareMultiprocessingEnvironment": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PreserveFormat": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PrintOptions": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Prod": {
-    "api": "tf.math.reduce_prod",
+    "api": "tf.reduce_prod",
     "args": {
-      "a": "input_tensor",
-      "axis": "axis",
-      "keepdims": "keepdims"
+      "dim": "axis",
+      "input": "input_tensor",
+      "keepdim": "keepdims"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ProfilerAllowCudagraphCuptiLazyReinitCuda12": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "PromoteTypes": {
-    "api": "tf.experimental.numpy.promote_types",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3327,22 +5778,79 @@
     "required_imports": []
   },
   "Put": {
-    "api": "tf.compat.v1.scatter_update",
     "dispatch_rules": [],
-    "missing_message": "Direct 'put' equivalent in TF requires scatter_nd logic.",
     "pack_as": "Tuple",
     "required_imports": []
   },
   "PutAlongAxis": {
     "api": "tf.experimental.numpy.put_along_axis",
-    "args": {
-      "a": "arr"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "PutMask": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Pytree": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QInt32": {
+    "api": "tf.qint32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QInt8": {
+    "api": "tf.qint8",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QPerChannelAxis": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QPerChannelScales": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QPerChannelZeroPoints": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QScale": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QScheme": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QUInt2x4Storage": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QUInt4x2Storage": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QUInt8Storage": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QZeroPoint": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3353,12 +5861,35 @@
     "required_imports": [],
     "requires_plugin": "quantized_matmul"
   },
-  "Quantile": {
-    "api": "tfp.stats.percentile",
+  "Qr": {
+    "api": "tf.linalg.qr",
+    "arg_values": {
+      "some": {
+        "false": "True",
+        "true": "False"
+      }
+    },
+    "args": {
+      "input": "input"
+    },
     "dispatch_rules": [],
-    "missing_message": "Quantile in TF requires tensorflow_probability.",
+    "kwargs_map": {
+      "some": "full_matrices"
+    },
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Quantile": {
+    "api": "tfp.stats.quantiles",
+    "dispatch_rules": [],
+    "macro_template": "tfp.stats.quantiles({input}, {q} * 100, axis={dim}, interpolation={interpolation})",
+    "pack_as": "Tuple",
+    "required_imports": [
+      {
+        "alias": "tfp",
+        "module": "tensorflow_probability"
+      }
+    ]
   },
   "Quantize": {
     "dispatch_rules": [],
@@ -3366,11 +5897,94 @@
     "required_imports": [],
     "requires_plugin": "quantization"
   },
+  "QuantizePerChannel": {
+    "api": "tf.quantization.quantize_and_dequantize_v2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizePerTensor": {
+    "api": "tf.quantization.quantize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizePerTensorDynamic": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizedBatchNorm": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizedGru": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizedGruCell": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizedLstm": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizedLstmCell": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "QuantizedMatmul": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "quantized_matmul"
+  },
+  "QuantizedMaxPool1d": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizedMaxPool2d": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizedMaxPool3d": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizedRnnReluCell": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "QuantizedRnnTanhCell": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Quint2x4": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Quint4x2": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Quint8": {
+    "api": "tf.quint8",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "RMSNorm": {
     "api": "tf.keras.layers.RMSNormalization",
@@ -3395,7 +6009,12 @@
     "required_imports": []
   },
   "RNN": {
-    "api": "tf.keras.layers.RNN",
+    "api": "tf.keras.layers.SimpleRNN",
+    "args": {
+      "bias": "use_bias",
+      "hidden_size": "units",
+      "input_size": null
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3406,9 +6025,26 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "RRefType": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "R_": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Rad2Deg": {
     "api": "tf.experimental.numpy.rad2deg",
     "dispatch_rules": [],
+    "macro_template": "{input} * 180.0 / 3.141592653589793",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rad2Deg_": {
+    "dispatch_rules": [],
+    "macro_template": "{input} * 180.0 / 3.141592653589793",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3420,8 +6056,18 @@
   },
   "Radians": {
     "dispatch_rules": [],
-    "macro_template": "{a} * 3.141592653589793 / 180.0",
+    "macro_template": "{x} * 3.1415926535 / 180.0",
     "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rand": {
+    "api": "tf.random.uniform",
+    "args": {
+      "size": "shape"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "pack_to_tuple": "shape",
     "required_imports": []
   },
   "RandAugment": {
@@ -3432,14 +6078,47 @@
   },
   "RandInt": {
     "api": "tf.random.uniform",
+    "dispatch_rules": [],
+    "macro_template": "tf.random.uniform(shape={size}, minval={low}, maxval={high}, dtype=tf.int64)",
+    "pack_as": "Tuple",
+    "pack_to_tuple": "size",
+    "required_imports": []
+  },
+  "RandIntLike": {
+    "api": "tf.random.uniform",
+    "dispatch_rules": [],
+    "macro_template": "tf.random.uniform({input}.shape, minval={low}, maxval={high}, dtype=tf.int64)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandLike": {
+    "api": "tf.random.uniform",
+    "dispatch_rules": [],
+    "macro_template": "tf.random.uniform({input}.shape, dtype={dtype})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RandPerm": {
+    "api": "tf.random.shuffle",
+    "dispatch_rules": [],
+    "macro_template": "tf.random.shuffle(tf.range({n}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Randn": {
+    "api": "tf.random.normal",
     "args": {
-      "high": "maxval",
-      "low": "minval"
+      "size": "shape"
     },
     "dispatch_rules": [],
-    "inject_args": {
-      "dtype": "tf.int32"
-    },
+    "pack_as": "Tuple",
+    "pack_to_tuple": "shape",
+    "required_imports": []
+  },
+  "RandnLike": {
+    "api": "tf.random.normal",
+    "dispatch_rules": [],
+    "macro_template": "tf.random.normal({input}.shape)",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3563,10 +6242,23 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Range": {
+    "api": "tf.range",
+    "dispatch_rules": [],
+    "macro_template": "tf.range({start}, {end} + {step}, {step})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Ravel": {
     "api": "tf.reshape",
     "dispatch_rules": [],
-    "macro_template": "tf.reshape({a}, [-1])",
+    "macro_template": "tf.reshape({input}, [-1])",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RavelMultiIndex": {
+    "api": "tf.ravel_multi_index",
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3577,25 +6269,27 @@
     "required_imports": []
   },
   "ReLU6": {
-    "api": "tf.nn.relu6",
+    "api": "tf.keras.layers.ReLU",
+    "args": {
+      "max_value": 6.0
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ReadVitals": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Real": {
     "api": "tf.math.real",
-    "args": {
-      "a": "input"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Reciprocal": {
     "api": "tf.math.reciprocal",
-    "args": {
-      "a": "x"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3657,12 +6351,14 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Relu6": {
+    "api": "tf.nn.relu6",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Remainder": {
     "api": "tf.math.floormod",
-    "args": {
-      "a": "x",
-      "b": "y"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3671,7 +6367,17 @@
     "api": "tf.repeat",
     "args": {
       "a": "input",
-      "axis": "axis"
+      "axis": "axis",
+      "repeats": "repeats"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "RepeatInterleave": {
+    "api": "tf.repeat",
+    "args": {
+      "dim": "axis"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3702,16 +6408,24 @@
   },
   "Reshape": {
     "api": "tf.reshape",
-    "args": {
-      "a": "tensor",
-      "shape": "shape"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Resizing": {
     "api": "tf.keras.layers.Resizing",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ResolveConj": {
+    "api": "tf.math.conj",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ResolveNeg": {
+    "api": "tf.math.negative",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3731,8 +6445,8 @@
   "RightShift": {
     "api": "tf.bitwise.right_shift",
     "args": {
-      "a": "x",
-      "b": "y"
+      "x1": "x",
+      "x2": "y"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3747,37 +6461,47 @@
   "Roll": {
     "api": "tf.roll",
     "args": {
-      "a": "input",
-      "axis": "axis",
-      "shift": "shift"
+      "dims": "axis",
+      "shifts": "shift"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Roots": {
+    "api": "tf.signal.roots",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Rot90": {
     "api": "tf.image.rot90",
-    "args": {
-      "axes": null,
-      "m": "image"
-    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "unsupported_nd_rot90"
+  },
+  "Round": {
+    "api": "tf.math.round",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Round": {
-    "api": "tf.round",
+  "RowStack": {
+    "api": "tf.experimental.numpy.vstack",
     "dispatch_rules": [],
-    "macro_template": "tf.round({a} * (10**{decimals})) / (10**{decimals})",
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Rsqrt": {
     "api": "tf.math.rsqrt",
-    "args": {
-      "a": "x"
-    },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Rsub": {
+    "dispatch_rules": [],
+    "macro_template": "tf.math.subtract({other}, {input} * {alpha})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3799,11 +6523,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Save": {
+  "Saddmm": {
     "dispatch_rules": [],
-    "macro_template": "tf.io.write_file({file}, tf.io.serialize_tensor({arr}))",
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Save": {
+    "api": "tf.io.write_file",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "io_handler"
   },
   "SaveGguf": {
     "dispatch_rules": [],
@@ -3835,8 +6565,114 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ScalarTensor": {
+    "api": "tf.convert_to_tensor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Scan": {
     "api": "tf.scan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Scatter": {
+    "api": "tf.tensor_scatter_nd_update",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScatterAdd": {
+    "api": "tf.tensor_scatter_nd_add",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScatterReduce": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptClass": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptClassFunction": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptDict": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptDictIterator": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptDictKeyIterator": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptFunction": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptList": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptListIterator": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptMethod": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptModule": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptModuleSerializer": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptObject": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ScriptObjectProperty": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SeLU": {
+    "api": "tf.nn.selu",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SearchSorted": {
+    "api": "tf.searchsorted",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Seed": {
+    "api": "tf.random.set_seed",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3865,6 +6701,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SegmentReduce": {
+    "api": "tf.math.segment_sum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "SegmentSum": {
     "api": "tf.math.segment_sum",
     "dispatch_rules": [],
@@ -3879,7 +6721,7 @@
     "requires_plugin": "segmented_ops"
   },
   "Select": {
-    "api": "tf.experimental.numpy.select",
+    "api": "tf.gather",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3918,6 +6760,12 @@
     "api": "tf.keras.Sequential",
     "dispatch_rules": [],
     "pack_as": "List",
+    "pack_to_tuple": "layers",
+    "required_imports": []
+  },
+  "SerializationStorageContext": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "SerializeLoss": {
@@ -3928,6 +6776,12 @@
   },
   "SerializeOptimizer": {
     "api": "tf.keras.optimizers.serialize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetAnomalyEnabled": {
+    "api": "tf.debugging.enable_check_numerics",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3950,6 +6804,38 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SetDeterministicDebugMode": {
+    "api": "tf.config.experimental.enable_op_determinism",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetDiff1d": {
+    "api": "tf.sets.difference",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetErr": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetErrCall": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetFlushDenormal": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetGradEnabled": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "SetMemoryLimit": {
     "api": "tf.config.set_logical_device_configuration",
     "dispatch_rules": [],
@@ -3957,46 +6843,108 @@
     "required_imports": [],
     "requires_plugin": "resource_limit_adapter"
   },
+  "SetNumInteropThreads": {
+    "api": "tf.config.threading.set_inter_op_parallelism_threads",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetNumThreads": {
+    "api": "tf.config.threading.set_intra_op_parallelism_threads",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetPrintOptions": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetRngState": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetVital": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SetWarnAlways": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "SetWiredLimit": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SetXor1d": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sgn": {
+    "api": "tf.math.sign",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Shape": {
-    "api": "tf.shape",
-    "args": {
-      "a": "input"
-    },
+    "dispatch_rules": [],
+    "macro_template": "tuple({iterable})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Short": {
+    "api": "tf.cast",
+    "dispatch_rules": [],
+    "macro_template": "tf.cast({input}, tf.int16)",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "macro"
+  },
+  "ShortStorage": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SiLU": {
-    "api": "tensorflow.nn.silu",
+    "api": "tf.nn.silu",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Sigmoid": {
     "api": "tf.math.sigmoid",
-    "args": {
-      "a": "x"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Sigmoid_": {
+    "api": "tf.math.sigmoid",
+    "dispatch_rules": [],
+    "macro_template": "{input} = tf.math.sigmoid({input})",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "macro"
+  },
   "Sign": {
     "api": "tf.math.sign",
-    "args": {
-      "a": "x"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Signbit": {
-    "api": "tf.math.signbit",
+    "api": "tf.math.sign",
+    "dispatch_rules": [],
+    "macro_template": "tf.math.less({input}, 0)",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "macro"
+  },
+  "SignedInteger": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4035,9 +6983,30 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Sinc": {
-    "api": "tf.experimental.numpy.sinc",
+  "Sin_": {
+    "api": "tf.math.sin",
     "dispatch_rules": [],
+    "macro_template": "{input} = tf.math.sin({input})",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "macro"
+  },
+  "Sinc": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sinc_": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Single": {
+    "api": "tf.cast",
+    "dispatch_rules": [],
+    "inject_args": {
+      "dtype": "tf.float32"
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -4047,12 +7016,49 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Sinh_": {
+    "api": "tf.math.sinh",
+    "dispatch_rules": [],
+    "macro_template": "{input} = tf.math.sinh({input})",
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "transformation_type": "macro"
+  },
   "Size": {
     "api": "tf.size",
     "args": {
       "axis": null,
       "x": "input"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SliceCopy": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SliceInverse": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SliceScatter": {
+    "api": "tf.tensor_scatter_nd_update",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "slice_scatter_plugin"
+  },
+  "Slogdet": {
+    "api": "tf.linalg.slogdet",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Smm": {
+    "api": "tf.sparse.sparse_dense_matmul",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4071,13 +7077,31 @@
   },
   "Softmax": {
     "api": "tf.nn.softmax",
+    "args": {
+      "dim": "axis"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softmin": {
+    "api": "tf.nn.softmin",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Softplus": {
     "api": "tf.math.softplus",
+    "args": {
+      "x": "features"
+    },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Softshrink": {
+    "dispatch_rules": [],
+    "macro_template": "tf.math.sign({x}) * tf.math.maximum(tf.math.abs({x}) - {lambd}, 0)",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -4096,14 +7120,47 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Solve": {
+    "api": "tf.linalg.solve",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Sort": {
     "api": "tf.sort",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "sort_tuple_wrapper"
+  },
+  "SparseBsc": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SparseBscTensor": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SparseBsrTensor": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SparseCategoricalCrossentropy": {
     "api": "tf.keras.losses.sparse_categorical_crossentropy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SparseCooTensor": {
+    "api": "tf.sparse.SparseTensor",
+    "args": {
+      "indices": "indices",
+      "size": "dense_shape",
+      "values": "values"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4151,7 +7208,30 @@
   "Split": {
     "api": "tf.split",
     "args": {
-      "indices_or_sections": "num_or_size_splits"
+      "dim": "axis",
+      "split_size_or_sections": "num_or_size_splits",
+      "tensor": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SplitWithSizes": {
+    "api": "tf.split",
+    "args": {
+      "dim": "axis",
+      "split_sizes": "num_or_size_splits",
+      "tensor": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Spmm": {
+    "api": "tf.sparse.sparse_dense_matmul",
+    "args": {
+      "mat1": "sp_a",
+      "mat2": "b"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -4159,12 +7239,18 @@
   },
   "Sqrt": {
     "api": "tf.math.sqrt",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Square": {
     "api": "tf.math.square",
+    "args": {
+      "input": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4189,6 +7275,10 @@
   },
   "Squeeze": {
     "api": "tf.squeeze",
+    "args": {
+      "dim": "axis",
+      "input": "input"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4196,6 +7286,7 @@
   "Stack": {
     "api": "tf.stack",
     "args": {
+      "dim": "axis",
       "tensors": "values"
     },
     "dispatch_rules": [],
@@ -4208,14 +7299,58 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Std": {
-    "api": "tf.math.reduce_std",
+  "StaticModule": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Std": {
+    "api": "tf.math.reduce_std",
+    "args": {
+      "dim": "axis",
+      "input": "input_tensor",
+      "keepdim": "keepdims"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "StepActivation": {
+    "dispatch_rules": [],
+    "macro_template": "tf.cast({x} >= {threshold}, dtype=tf.float32)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Stft": {
+    "api": "tf.signal.stft",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "stft_adapter"
+  },
   "StopGradient": {
     "api": "tf.stop_gradient",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Storage": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "StorageBase": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Stream": {
+    "api": "tf.device",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "StreamObjType": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4232,9 +7367,14 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Sub": {
-    "api": "tf.math.subtract",
+  "StringType": {
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Sub": {
+    "dispatch_rules": [],
+    "macro_template": "tf.math.subtract({input}, {other} * {alpha})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -4252,12 +7392,39 @@
   },
   "Sum": {
     "api": "tf.math.reduce_sum",
+    "args": {
+      "dim": "axis",
+      "input": "input_tensor",
+      "keepdim": "keepdims"
+    },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SvdLowrank": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SwapAxes": {
+    "api": "tf.experimental.numpy.swapaxes",
+    "dispatch_rules": [],
+    "macro_template": "tf.transpose({a}, perm=...)",
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Swapaxes": {
     "api": "tf.experimental.numpy.swapaxes",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Swapdims": {
+    "api": "tf.experimental.numpy.swapaxes",
+    "args": {
+      "dim0": "axis1",
+      "dim1": "axis2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4274,8 +7441,34 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "SymBool": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SymBoolType": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SymFloat": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SymInt": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "TFSMLayer": {
     "api": "tf.keras.layers.TFSMLayer",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TYPE_CHECKING": {
+    "api": "typing.TYPE_CHECKING",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4283,6 +7476,7 @@
   "Take": {
     "api": "tf.gather",
     "dispatch_rules": [],
+    "macro_template": "tf.gather(tf.reshape({input}, [-1]), {index})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -4292,7 +7486,22 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "TakeAlongDim": {
+    "api": "tf.experimental.numpy.take_along_axis",
+    "args": {
+      "dim": "axis"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Tan": {
+    "api": "tf.math.tan",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tan_": {
     "api": "tf.math.tan",
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -4304,9 +7513,27 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Tensor": {
-    "api": "tf.Tensor",
+  "Tanh_": {
+    "api": "tf.math.tanh",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tensor": {
+    "api": "tf.convert_to_tensor",
+    "args": {
+      "data": "value",
+      "device": null,
+      "requires_grad": null
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TensorSplit": {
+    "api": "tf.split",
+    "dispatch_rules": [],
+    "missing_message": "tf.split signature differs from tensor_split. Use plugin.",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -4318,6 +7545,14 @@
   },
   "Tensordot": {
     "api": "tf.tensordot",
+    "args": {
+      "dims": "axes"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Test": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4328,10 +7563,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Threshold": {
+    "dispatch_rules": [],
+    "macro_template": "tf.where({input} > {threshold}, {input}, {value})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Tile": {
     "api": "tf.tile",
     "args": {
-      "reps": "multiples"
+      "dims": "multiples"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -4343,11 +7584,23 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Timedelta64": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ToDlpack": {
+    "api": "tf.experimental.dlpack.to_dlpack",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "TopK": {
     "api": "tf.math.top_k",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": []
+    "required_imports": [],
+    "requires_plugin": "tf_topk_adapter"
   },
   "TopKValues": {
     "api": "tf.math.top_k",
@@ -4374,13 +7627,27 @@
     "required_imports": []
   },
   "Transpose": {
-    "api": "tf.transpose",
+    "api": "tf.experimental.numpy.swapaxes",
     "args": {
-      "axes": "perm"
+      "dim0": "axis1",
+      "dim1": "axis2"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "Transpose2D": {
+    "api": "tf.transpose",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Trapezoid": {
+    "api": "tf.math.reduce_trapezoid",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "tf_trapezoid_shim"
   },
   "Tri": {
     "api": "tf.experimental.numpy.tri",
@@ -4388,15 +7655,69 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Tril": {
-    "api": "tf.linalg.band_part",
+  "TriangularSolve": {
+    "api": "tf.linalg.triangular_solve",
+    "arg_values": {
+      "upper": {
+        "false": "True",
+        "true": "False"
+      }
+    },
+    "args": {
+      "A": "matrix",
+      "b": "rhs",
+      "upper": "lower"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "tf_tril_macro"
+    "required_imports": []
+  },
+  "Tril": {
+    "api": "tf.experimental.numpy.tril",
+    "args": {
+      "diagonal": "k"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrilIndices": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrilIndicesFrom": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TrimZeros": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TripletMarginLoss": {
+    "api": "tf.keras.losses.triplet_semihard_loss",
+    "dispatch_rules": [],
+    "macro_template": "tf.maximum(tf.norm({anchor}-{positive}, ord={p}) - tf.norm({anchor}-{negative}, ord={p}) + {margin}, 0)",
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Triu": {
     "api": "tf.experimental.numpy.triu",
+    "args": {
+      "diagonal": "k"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TriuIndices": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TriuIndicesFrom": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4413,6 +7734,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Trunc": {
+    "api": "tf.math.trunc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "TverskyLoss": {
     "api": "tf.keras.losses.tversky",
     "dispatch_rules": [],
@@ -4425,26 +7752,111 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "UInt16": {
-    "api": "tf.uint16",
+  "Typecodes": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "UInt32": {
-    "api": "tf.uint32",
+  "Typename": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "UInt64": {
+  "UByte": {
+    "api": "tf.uint8",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UFunc": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt": {
     "api": "tf.uint64",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "UInt16": {
+    "api": "tf.cast",
+    "dispatch_rules": [],
+    "macro_template": "tf.cast({value}, tf.uint16)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt32": {
+    "api": "tf.cast",
+    "dispatch_rules": [],
+    "macro_template": "tf.cast({value}, tf.uint32)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UInt64": {
+    "api": "tf.cast",
+    "dispatch_rules": [],
+    "macro_template": "tf.cast({value}, tf.uint64)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "UInt8": {
+    "api": "tf.cast",
+    "dispatch_rules": [],
+    "macro_template": "tf.cast({value}, tf.uint8)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UIntC": {
+    "api": "tf.int32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UIntP": {
+    "api": "tf.uint64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint16": {
+    "api": "tf.uint16",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint32": {
+    "api": "tf.uint32",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint64": {
+    "api": "tf.uint64",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Uint8": {
     "api": "tf.uint8",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Unbind": {
+    "api": "tf.unstack",
+    "args": {
+      "dim": "axis"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnbindCopy": {
+    "api": "tf.unstack",
+    "args": {
+      "dim": "axis"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4462,7 +7874,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "UnfoldCopy": {
+    "api": "tf.image.extract_patches",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Unicode": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnifyTypeList": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4473,8 +7896,45 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "UniqueConsecutive": {
+    "api": "tf.unique_with_counts",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "UnitNormalization": {
     "api": "tf.keras.layers.UnitNormalization",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnravelIndex": {
+    "api": "tf.unravel_index",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsafeChunk": {
+    "api": "tf.split",
+    "args": {
+      "chunks": "num_or_size_splits"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsafeSplit": {
+    "api": "tf.split",
+    "args": {
+      "split_size_or_sections": "num_or_size_splits",
+      "tensor": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsafeSplitWithSizes": {
+    "api": "tf.split",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4515,8 +7975,27 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Unsqueeze": {
+    "api": "tf.expand_dims",
+    "args": {
+      "x": "input"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UnsqueezeCopy": {
+    "api": "tf.expand_dims",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Unstack": {
     "api": "tf.unstack",
+    "args": {
+      "axis": "axis",
+      "x": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4557,6 +8036,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "UseDeterministicAlgorithms": {
+    "api": "tf.config.experimental.enable_op_determinism",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "VMap": {
     "api": "tf.vectorized_map",
     "dispatch_rules": [],
@@ -4568,7 +8053,12 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
-    "requires_plugin": "gradient_tape_accumulate"
+    "requires_plugin": "tf_grad_tape"
+  },
+  "ValuesCopy": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Vander": {
     "api": "tf.experimental.numpy.vander",
@@ -4585,8 +8075,14 @@
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "tf_variance_ddof"
+    "required_imports": []
+  },
+  "VarMean": {
+    "api": "tf.nn.moments",
+    "dispatch_rules": [],
+    "macro_template": "(tf.math.reduce_variance({x}, axis={axis}, keepdims={keepdims}), tf.math.reduce_mean({x}, axis={axis}, keepdims={keepdims}))",
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "Variable": {
     "api": "tf.Variable",
@@ -4607,7 +8103,7 @@
     "required_imports": []
   },
   "Vdot": {
-    "api": "tf.experimental.numpy.vdot",
+    "api": "tf.tensordot",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4618,26 +8114,67 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ViewAsComplex": {
+    "api": "tf.complex",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ViewAsComplexCopy": {
+    "api": "tf.complex",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ViewAsReal": {
+    "api": "tf.math.real",
+    "dispatch_rules": [],
+    "macro_template": "tf.stack([tf.math.real({x}), tf.math.imag({x})], axis=-1)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ViewAsRealCopy": {
+    "dispatch_rules": [],
+    "macro_template": "tf.stack([tf.math.real({x}), tf.math.imag({x})], axis=-1)",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ViewCopy": {
+    "api": "tf.reshape",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "pack_to_tuple": "shape",
+    "required_imports": []
+  },
+  "VitalsEnabled": {
+    "dispatch_rules": [],
+    "macro_template": "False",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Vmap": {
     "api": "tf.vectorized_map",
-    "args": {
-      "fun": "fn",
-      "in_axes": null,
-      "out_axes": null
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Vsplit": {
-    "api": "tf.experimental.numpy.vsplit",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Vstack": {
     "api": "tf.experimental.numpy.vstack",
+    "args": {
+      "tensors": "tup"
+    },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Wait": {
+    "dispatch_rules": [],
+    "macro_template": "None",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -4659,8 +8196,8 @@
   "WhileLoop": {
     "api": "tf.while_loop",
     "args": {
-      "body_fun": "body",
-      "cond_fun": "cond",
+      "body_fn": "body",
+      "cond_fn": "cond",
       "init_val": "loop_vars"
     },
     "dispatch_rules": [],
@@ -4686,6 +8223,12 @@
     "required_imports": []
   },
   "Xlogy": {
+    "api": "tf.math.xlogy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Xlogy_": {
     "api": "tf.math.xlogy",
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -4733,16 +8276,31 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
-  "Zeros": {
-    "api": "tf.zeros",
+  "Zero_": {
+    "api": "tf.zeros_like",
     "dispatch_rules": [],
     "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Zeros": {
+    "api": "tf.zeros",
+    "args": {
+      "device": null,
+      "requires_grad": null,
+      "size": null
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "pack_to_tuple": "shape",
     "required_imports": []
   },
   "ZerosLike": {
     "api": "tf.zeros_like",
     "args": {
-      "x": "input"
+      "device": null,
+      "layout": null,
+      "memory_format": null,
+      "requires_grad": null
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
