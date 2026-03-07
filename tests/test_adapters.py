@@ -86,15 +86,19 @@ def test_custom_adapter_properties():
 
   @register_framework("fastai")
   class FastAIAdapter:
+    """Class docstring."""
+
     display_name = "FastAI"
     inherits_from = "torch"
     search_modules = ["fastai.vision"]
 
     @property
     def import_alias(self):
+      """Function docstring."""
       return ("fastai", "fastai")
 
     def convert(self, x):
+      """Function docstring."""
       return x
 
   adapter = get_adapter("fastai")
@@ -107,6 +111,7 @@ def test_custom_adapter_properties():
 
 
 def test_registry_defaults():
+  """Function docstring."""
   assert "torch" in _ADAPTER_REGISTRY
   assert "jax" in _ADAPTER_REGISTRY
   assert "numpy" in _ADAPTER_REGISTRY
@@ -115,10 +120,12 @@ def test_registry_defaults():
 
 
 def test_missing_adapter_returns_none():
+  """Function docstring."""
   assert get_adapter("unknown_fw") is None
 
 
 def test_torch_converter_simulation():
+  """Function docstring."""
   # Simulate libraries presence via mocking sys.modules used in convert logic
   mock_torch = MagicMock()
   mock_torch.from_numpy.side_effect = lambda x: f"Torch({x})"
@@ -153,10 +160,15 @@ def test_paxml_converter_installed():
 
 
 def test_fuzzer_delegates_to_adapter():
+  """Function docstring."""
+
   class MockAdapter:
+    """Class docstring."""
+
     display_name = "Mock"
 
     def convert(self, _data):
+      """Function docstring."""
       return "converted"
 
   register_framework("mock_fw")(MockAdapter)

@@ -167,6 +167,7 @@ std_args:
     default: null
 variants: 
   torch: 
+    api: "torch.device"
     requires_plugin: "device_allocator" 
   jax: 
     requires_plugin: "device_allocator" 
@@ -784,7 +785,7 @@ variants:
     metadata: 
       target_type: "Float64" 
 ---
-operation: "Dropout" 
+operation: "dropout" 
 description: "Applies random dropout." 
 std_args: 
   - name: "input" 

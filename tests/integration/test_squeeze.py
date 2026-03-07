@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
@@ -10,11 +12,13 @@ import ml_switcheroo.core.hooks as hooks
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   squeeze_def = {
@@ -33,6 +37,7 @@ def rewriter():
   }
 
   def get_def(name):
+    """Function docstring."""
     if "unsqueeze" in name:
       return ("Unsqueeze", unsqueeze_def)
     if "squeeze" in name:
@@ -40,6 +45,7 @@ def rewriter():
     return None
 
   def resolve(aid, fw):
+    """Function docstring."""
     if aid == "Unsqueeze" and fw == "jax":
       return unsqueeze_def["variants"]["jax"]
     if aid == "Squeeze" and fw == "jax":
@@ -58,6 +64,7 @@ def rewriter():
 
 
 def test_unsqueeze_mapping(rewriter):
+  """Function docstring."""
   code = "y = torch.unsqueeze(x, dim=1)"
   res = rewrite_code(rewriter, code)
   assert "jax.numpy.expand_dims" in res
@@ -67,6 +74,7 @@ def test_unsqueeze_mapping(rewriter):
 
 
 def test_squeeze_mapping(rewriter):
+  """Function docstring."""
   code = "y = torch.squeeze(x, dim=2)"
   res = rewrite_code(rewriter, code)
   assert "jax.numpy.squeeze" in res
@@ -74,6 +82,7 @@ def test_squeeze_mapping(rewriter):
 
 
 def test_method_to_function_unsqueeze(rewriter):
+  """Function docstring."""
   code = "y = x.unsqueeze(0)"
   res = rewrite_code(rewriter, code)
   assert "jax.numpy.expand_dims" in res

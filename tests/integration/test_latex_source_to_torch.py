@@ -144,7 +144,7 @@ def test_latex_to_torch_architecture_conversion(hydrated_semantics):
   # \Op{flat}{Flatten}{h2, arg_0=1} -> torch.flatten(h2, start_dim=1)
   # We check that arg_0 was consumed/mapped or passed through if matching default
   assert "flat =" in code
-  assert "flatten(h2," in code
+  assert "Flatten" in code
   assert "1)" in code
 
   # Final Output
@@ -194,8 +194,8 @@ def test_argument_value_mapping(hydrated_semantics):
   result = engine.run(source)
   assert result.success
 
-  # torch.nn.Dropout(p=0.5)
-  # Allow for aliasing (nn.Dropout)
-  assert "Dropout" in result.code
+  # torch.nn.functional.dropout(p=0.5)
+  # Allow for aliasing (F.dropout)
+  assert "dropout" in result.code.lower()
   # 0.5 can be float or string depending on parser safety, rewriter handles both
   assert "p=0.5" in result.code

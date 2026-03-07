@@ -24,6 +24,7 @@ def get_model():
 
 @pytest.fixture
 def keras_semantics():
+  """Function docstring."""
   _HOOKS["keras_sequential_pack"] = transform_keras_sequential
 
   mgr = MagicMock(spec=SemanticsManager)
@@ -49,6 +50,7 @@ def keras_semantics():
   }
 
   def get_def(name):
+    """Function docstring."""
     if "Sequential" in name:
       return ("Sequential", mappings["Sequential"])
     if "Linear" in name:
@@ -58,6 +60,7 @@ def keras_semantics():
     return ("Generic", {"variants": {}})
 
   def resolve(aid, fw):
+    """Function docstring."""
     if aid in mappings and fw == "keras":
       return mappings[aid]["variants"]["keras"]
     return None
@@ -72,6 +75,7 @@ def keras_semantics():
 
 
 def test_sequential_packing(keras_semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="keras")
   engine = ASTEngine(semantics=keras_semantics, config=config)
 

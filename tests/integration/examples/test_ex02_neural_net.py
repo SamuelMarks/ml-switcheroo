@@ -29,6 +29,7 @@ SOURCE_TORCH = textwrap.dedent("""
 
 @pytest.fixture(scope="module")
 def semantics():
+  """Function docstring."""
   # Inject the Linear definition manually to ensure test isolation
   # and guarantee RNG injection trigger.
   mgr = SemanticsManager()

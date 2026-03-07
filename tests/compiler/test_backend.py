@@ -19,6 +19,7 @@ class NoOpBackend(CompilerBackend):
   """
 
   def compile(self, graph: LogicalGraph) -> Any:
+    """Function docstring."""
     return f"Compiled {len(graph.nodes)} nodes."
 
 

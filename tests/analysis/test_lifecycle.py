@@ -7,6 +7,7 @@ from ml_switcheroo.analysis.lifecycle import InitializationTracker
 
 
 def scan_code(code: str) -> list[str]:
+  """Function docstring."""
   wrapper = cst.parse_module(code)
   tracker = InitializationTracker()
   wrapper.visit(tracker)
@@ -14,6 +15,7 @@ def scan_code(code: str) -> list[str]:
 
 
 def test_valid_init_usage():
+  """Function docstring."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -26,6 +28,7 @@ class Model:
 
 
 def test_missing_init():
+  """Function docstring."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -40,6 +43,7 @@ class Model:
 
 
 def test_call_alias():
+  """Function docstring."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -53,6 +57,7 @@ class Model:
 
 
 def test_multiple_missing():
+  """Function docstring."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -67,6 +72,7 @@ class Model:
 
 
 def test_annotated_assignment():
+  """Function docstring."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -79,6 +85,7 @@ class Model:
 
 
 def test_tuple_unpacking_assignment():
+  """Function docstring."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -91,6 +98,7 @@ class Model:
 
 
 def test_nested_classes():
+  """Function docstring."""
   code = """ 
 class Outer: 
     def __init__(self): 

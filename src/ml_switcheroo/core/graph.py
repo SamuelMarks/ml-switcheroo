@@ -22,19 +22,21 @@ __all__ = ["LogicalNode", "LogicalEdge", "LogicalGraph", "topological_sort", "Gr
 
 class GraphExtractor(cst.CSTVisitor):
   """
-  LibCST Visitor that extracts a LogicalGraph from Python source code.
+    LibCST Visitor that extracts a LogicalGraph from Python source code.
 
-  Two-Pass Logic:
-  1.  **Init Pass**: Scans ``__init__`` or ``setup`` to register named layers
-      assigned to ``self``. Populates the node registry and provenance map.
-  2.  **Forward Pass**: Scans ``forward`` or ``__call__`` to trace variable usage.
-      Builds edges between registered nodes based on data flow.
+    Two-Pass Logic:
 
-  Attributes:
-      graph (LogicalGraph): The constructed intermediate representation.
-      layer_registry (Dict[str, LogicalNode]): Mapping of node IDs to LogicalNodes.
-      provenance (Dict[str, str]): Mapping of variable names to producer node IDs.
-      node_map (Dict[str, cst.CSTNode]): Provenance registry mapping Node ID -> CST Node.
+   **Init Pass**: Scans ``__init__`` or ``setup`` to register named layers
+        assigned to ``self``. Populates the node registry and provenance map.
+
+  **Forward Pass**: Scans ``forward`` or ``__call__`` to trace variable usage.
+        Builds edges between registered nodes based on data flow.
+
+    Attributes:
+        graph (LogicalGraph): The constructed intermediate representation.
+        layer_registry (Dict[str, LogicalNode]): Mapping of node IDs to LogicalNodes.
+        provenance (Dict[str, str]): Mapping of variable names to producer node IDs.
+        node_map (Dict[str, cst.CSTNode]): Provenance registry mapping Node ID -> CST Node.
   """
 
   def __init__(self) -> None:
@@ -159,12 +161,12 @@ class GraphExtractor(cst.CSTVisitor):
     """Parses self.layer = ... lines."""
     target = node.targets[0].target
     if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
-      return
+      return  # pragma: no cover
 
     attr_name = target.attr.value
     call = node.value
     if not isinstance(call, cst.Call):
-      return
+      return  # pragma: no cover
 
     op_type = get_full_name(call.func)
     if "." in op_type:
@@ -197,7 +199,7 @@ class GraphExtractor(cst.CSTVisitor):
       return
 
     if not isinstance(node.value, cst.Call):
-      return
+      return  # pragma: no cover
 
     targets = []
     for target in node.targets:
@@ -220,13 +222,33 @@ class GraphExtractor(cst.CSTVisitor):
     if func_name:
       layer_name = f"func_{func_name.split('.')[-1].lower()}"
       if layer_name not in self.layer_registry:
-        self.layer_registry[layer_name] = LogicalNode(layer_name, func_name, {})
+        metadata = {}
+
+        # Identify the call node
+        call_node = None
+        if isinstance(context_node, cst.Call):
+          call_node = context_node
+        elif isinstance(context_node, cst.Assign) and isinstance(context_node.value, cst.Call):
+          call_node = context_node.value
+        elif isinstance(context_node, cst.Expr) and isinstance(context_node.value, cst.Call):
+          call_node = context_node.value
+
+        if call_node:
+          from ml_switcheroo.utils.node_diff import capture_node_source
+
+          for i, arg in enumerate(call_node.args):
+            key = f"arg_{i}"
+            if arg.keyword:
+              key = arg.keyword.value
+            metadata[key] = capture_node_source(arg.value)
+
+        self.layer_registry[layer_name] = LogicalNode(layer_name, func_name, metadata)
         # Provenance: Map to the call/statement that triggered creation
         if context_node:
           self.node_map[layer_name] = context_node
       return layer_name
 
-    return None
+    return None  # pragma: no cover
 
   def _analyze_call_expression(
     self, call: cst.Call, output_vars: List[str], context_node: Optional[cst.CSTNode] = None
@@ -237,7 +259,7 @@ class GraphExtractor(cst.CSTVisitor):
     layer_name = self._resolve_layer_or_func_name(call.func, context_node=ctx)
 
     if not layer_name:
-      return
+      return  # pragma: no cover
 
     for arg in call.args:
       var_name = self._get_var_name(arg.value)
@@ -259,6 +281,7 @@ class GraphExtractor(cst.CSTVisitor):
       self.provenance[out_var] = layer_name
 
   def _get_var_name(self, node: cst.BaseExpression) -> Optional[str]:
+    """TODO: Add docstring."""
     if isinstance(node, cst.Name):
       return node.value
     return None

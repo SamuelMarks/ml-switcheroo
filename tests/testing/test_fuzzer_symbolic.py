@@ -22,6 +22,7 @@ from ml_switcheroo.frameworks import register_framework, get_adapter
 
 @pytest.fixture
 def fuzzer():
+  """Function docstring."""
   # Fix seed for predictable generation
   random.seed(42)
   np.random.seed(42)
@@ -285,7 +286,10 @@ def test_adapt_to_framework_delegation(fuzzer):
   # Register a dummy adapter
   @register_framework("mock_fw")
   class MockAdapter:
+    """Class docstring."""
+
     def convert(self, x):
+      """Function docstring."""
       return "converted"
 
   raw = {"x": 1}

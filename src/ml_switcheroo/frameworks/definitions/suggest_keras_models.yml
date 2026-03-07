@@ -1,0 +1,39 @@
+operation: "Model"
+description: "Base class for Neural Network Models."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.Model"
+  tensorflow:
+    api: "tf.keras.Model"
+  torch:
+    api: "torch.nn.Module"
+  mlx:
+    api: "mlx.nn.Module"
+  flax_nnx:
+    api: "flax.nnx.Module"
+  paxml:
+    api: "praxis.base_layer.BaseLayer"
+  numpy:
+    api: null
+---
+operation: "Tensor"
+description: "Core multi-dimensional array type."
+op_type: "class"
+std_args: []
+variants:
+  keras:
+    api: "keras.KerasTensor" # Or just Any/np.ndarray depending on context
+  tensorflow:
+    api: "tf.Tensor"
+  torch:
+    api: "torch.Tensor"
+  mlx:
+    api: "mlx.core.array"
+  flax_nnx:
+    api: "jnp.ndarray"
+  paxml:
+    api: "jnp.ndarray"
+  numpy:
+    api: "np.ndarray"

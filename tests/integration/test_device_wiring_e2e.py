@@ -24,10 +24,12 @@ def ensure_device_plugin():
 
 @pytest.fixture(scope="module")
 def semantics():
+  """Function docstring."""
   return SemanticsManager()
 
 
 def test_device_cuda_to_jax(semantics):
+  """Function docstring."""
   code = "d = torch.device('cuda')"
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
@@ -39,6 +41,7 @@ def test_device_cuda_to_jax(semantics):
 
 
 def test_device_cpu_to_jax(semantics):
+  """Function docstring."""
   code = "d = torch.device('cpu')"
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)

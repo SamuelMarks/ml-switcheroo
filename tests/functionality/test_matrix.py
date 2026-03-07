@@ -23,6 +23,7 @@ class MockMatrixSemantics(SemanticsManager):
   """
 
   def __init__(self) -> None:
+    """Function docstring."""
     # Skip super init
     self.data = {
       "Abs": {
@@ -47,16 +48,19 @@ class MockMatrixSemantics(SemanticsManager):
     self._key_origins = {"Abs": "array", "ComplexOp": "neural", "MissingOp": "extras"}
 
   def get_known_apis(self) -> dict:
+    """Function docstring."""
     return self.data
 
 
 @pytest.fixture
 def semantics() -> SemanticsManager:
+  """Function docstring."""
   return MockMatrixSemantics()
 
 
 @pytest.fixture
 def matrix(semantics) -> CompatibilityMatrix:
+  """Function docstring."""
   mat = CompatibilityMatrix(semantics)
   # Use capture console
   mat.console = Console(file=None, force_terminal=True, width=200, record=True)
@@ -93,6 +97,7 @@ def test_dynamic_column_sorting(mock_get_adapter, mock_avail, matrix):
   adapter_gamma = MagicMock(ui_priority=5, inherits_from=None)
 
   def get_adp(name):
+    """Function docstring."""
     if name == "alpha":
       return adapter_alpha
     if name == "beta":

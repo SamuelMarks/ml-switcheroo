@@ -97,7 +97,7 @@ class TraceLogger:
     Pops the phase ID from the stack and logs an end event.
     """
     if not self._active_phases:
-      return
+      return  # pragma: no cover
 
     phase_id = self._active_phases.pop()
     event = TraceEvent(

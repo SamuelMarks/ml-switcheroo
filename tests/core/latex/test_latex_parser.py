@@ -15,6 +15,7 @@ from ml_switcheroo.core.latex.parser import LatexParser
 
 @pytest.fixture
 def basic_latex():
+  """Function docstring."""
   return r"""
 \documentclass{standalone}
 \begin{document}

@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 from ml_switcheroo.compiler.frontends.rdna.tokens import RdnaLexer, TokenType
 from ml_switcheroo.compiler.frontends.rdna.parser import RdnaParser
@@ -17,6 +19,7 @@ from ml_switcheroo.compiler.frontends.rdna.nodes import (
 
 
 def test_lexer_simple_instruction() -> None:
+  """Function docstring."""
   code = "v_add_f32 v0, v1, v2"
   lexer = RdnaLexer()
   tokens = list(lexer.tokenize(code))
@@ -58,6 +61,7 @@ def test_lexer_range_syntax() -> None:
 
 
 def test_lexer_comment() -> None:
+  """Function docstring."""
   code = "s_mov_b32 s0, 1 ; set s0"
   lexer = RdnaLexer()
   tokens = list(lexer.tokenize(code))
@@ -67,6 +71,7 @@ def test_lexer_comment() -> None:
 
 
 def test_lexer_immediate_hex() -> None:
+  """Function docstring."""
   code = "0xFF"
   lexer = RdnaLexer()
   tokens = list(lexer.tokenize(code))

@@ -16,6 +16,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_
 
 
 def test_generation_and_execution_flow(tmp_path):
+  """Function docstring."""
   sem_dir = tmp_path / "semantics"
   snap_dir = tmp_path / "snapshots"
   sem_dir.mkdir(parents=True)

@@ -18,6 +18,7 @@ def visitor_factory():
   """Factory to create visitor with custom std_args."""
 
   def create(std_args):
+    """Function docstring."""
     return TargetCallVisitor("target.api", {}, std_args)
 
   return create

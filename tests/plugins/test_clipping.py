@@ -22,6 +22,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["grad_clipper"] = transform_grad_clipping
   hooks._PLUGINS_LOADED = True
 
@@ -76,6 +77,7 @@ def test_clip_with_variable_args(rewriter):
 
 
 def test_ignores_if_traits_missing(rewriter):
+  """Function docstring."""
   # Disable traits
   rewriter.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_functional_state=False)}
 

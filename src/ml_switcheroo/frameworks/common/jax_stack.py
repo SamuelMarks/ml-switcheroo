@@ -126,7 +126,7 @@ class JAXStackMixin:
       return f"orbax.checkpoint.PyTreeCheckpointer().save(directory={file_arg}, item={object_arg})"
     elif op == "load":
       return f"orbax.checkpoint.PyTreeCheckpointer().restore({file_arg})"
-    return ""
+    return ""  # pragma: no cover
 
   # --- Weight Migration (Adapter) ---
 
@@ -143,7 +143,7 @@ class JAXStackMixin:
     Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
     The `raw_state` is a flat dictionary where keys are dot-separated strings (e.g. 'layer.weight').
     """
-    return textwrap.dedent(
+    return textwrap.dedent(  # pragma: no cover
       f"""
             # Load with Orbax and Flatten
             checkpointer = orbax.checkpoint.PyTreeCheckpointer()
@@ -164,7 +164,7 @@ class JAXStackMixin:
     """
     Returns a python expression string that converts `tensor_var` from JAX array to numpy array.
     """
-    return f"np.array({tensor_var})"
+    return f"np.array({tensor_var})"  # pragma: no cover
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """

@@ -23,6 +23,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["scheduler_rewire"] = transform_scheduler_init
   hooks._HOOKS["scheduler_step_noop"] = transform_scheduler_step
   hooks._PLUGINS_LOADED = True
@@ -51,15 +52,17 @@ def rewriter():
 
   # Helper for definition lookup
   def get_def(name):
+    """Function docstring."""
     if "StepLR" in name:
       return "StepLR", step_def
     return None
 
   mgr.get_definition.side_effect = get_def
-  mgr.get_definition_by_id.side_effect = lambda aid: (step_def if aid == "StepLR" else None)
+  mgr.get_definition_by_id.side_effect = lambda aid: step_def if aid == "StepLR" else None
 
   # Helper for variant resolution
   def resolve(aid, fw):
+    """Function docstring."""
     if aid == "StepLR" and fw in step_def["variants"]:
       return step_def["variants"][fw]
     return None

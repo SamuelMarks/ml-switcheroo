@@ -52,15 +52,18 @@ def manager():
 
 @pytest.fixture
 def rewriter(manager):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(manager, config)
 
 
 def rewrite(rewriter, code):
+  """Function docstring."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 def test_inject_default_float(rewriter):
+  """Function docstring."""
   code = "import torch\ny = torch.nn.LayerNorm(x)"
   res = rewrite(rewriter, code)
   # Check for valid float repr
@@ -68,6 +71,7 @@ def test_inject_default_float(rewriter):
 
 
 def test_preserve_explicit_eps(rewriter):
+  """Function docstring."""
   code = "import torch\ny = torch.nn.LayerNorm(x, eps=0.1)"
   res = rewrite(rewriter, code)
   assert "epsilon=0.1" in res
@@ -75,6 +79,7 @@ def test_preserve_explicit_eps(rewriter):
 
 
 def test_inject_default_dropout(rewriter):
+  """Function docstring."""
   code = "import torch\ny = torch.dropout(x)"
   res = rewrite(rewriter, code)
   assert "p=0.5" in res

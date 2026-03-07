@@ -45,6 +45,7 @@ def mock_semantics():
 
 @pytest.fixture
 def validator(mock_semantics):
+  """Function docstring."""
   return BatchValidator(mock_semantics)
 
 
@@ -55,6 +56,7 @@ def test_batch_execution_flow(validator):
 
   # Mock Runner behavior
   def mock_verify(variants, params, hints=None, constraints=None, shape_calc=None):
+    """Function docstring."""
     # Handle case where variants is empty (manual_op in this fixture)
     if not variants:
       return True, "Skipped"
@@ -112,11 +114,13 @@ def test_extraction_of_shape_calc(validator):
 
 
 def test_manual_override_priority(validator, tmp_path):
+  """Function docstring."""
   test_dir = tmp_path / "tests"
   test_dir.mkdir()
   (test_dir / "test_manual.py").write_text("def test_manual_op(): pass")
 
   def mock_verify(*args, **kwargs):
+    """Function docstring."""
     return True, "OK"
 
   with patch.object(validator.runner, "verify", side_effect=mock_verify) as mock_run:
@@ -126,6 +130,7 @@ def test_manual_override_priority(validator, tmp_path):
 
 
 def test_ignore_generated_tests(validator, tmp_path):
+  """Function docstring."""
   gen_dir = tmp_path / "generated"
   gen_dir.mkdir()
   (gen_dir / "test_gen_auto_op.py").write_text("def test_gen_auto_op(): pass")
@@ -135,6 +140,7 @@ def test_ignore_generated_tests(validator, tmp_path):
 
 
 def test_unpack_args_logic(validator):
+  """Function docstring."""
   raw = [("x", "Array"), "axis", ("dims", "Tuple[int]")]
   params, hints, constraints = validator._unpack_args(raw)
   assert params == ["x", "axis", "dims"]

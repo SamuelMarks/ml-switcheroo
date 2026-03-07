@@ -100,6 +100,7 @@ class MockArgSemantics(SemanticsManager):
     )
 
   def _inject_op(self, op_name, std_args, variants):
+    """Function docstring."""
     self.data[op_name] = {"std_args": std_args, "variants": variants}
     for _, details in variants.items():
       if "api" in details:
@@ -132,30 +133,35 @@ def test_keyword_translation(engine: TestRewriter) -> None:
 
 
 def test_positional_passthrough(engine: TestRewriter) -> None:
+  """Function docstring."""
   code = "res = torch.div(val_1, val_2)"
   result = rewrite_code(engine, code)
   assert "res = jax.numpy.divide(val_1, val_2)" in result
 
 
 def test_mixed_args_normalization(engine: TestRewriter) -> None:
+  """Function docstring."""
   code = "res = torch.sum(my_tensor, dim=2)"
   result = rewrite_code(engine, code)
   assert "res = jax.numpy.sum(my_tensor, axis=2)" in result
 
 
 def test_unknown_keyword_passthrough(engine: TestRewriter) -> None:
+  """Function docstring."""
   code = "res = torch.sum(x, keepdims=True)"
   result = rewrite_code(engine, code)
   assert "res = jax.numpy.sum(x, keepdims=True)" in result
 
 
 def test_typed_arguments_handling(engine: TestRewriter) -> None:
+  """Function docstring."""
   code = "r = torch.randint(low=0, high=10)"
   result = rewrite_code(engine, code)
   assert "r = jax.random.randint(low=0, high=10)" in result
 
 
 def test_argument_injection(engine: TestRewriter) -> None:
+  """Function docstring."""
   code = "y = torch.normalize(data)"
   result = rewrite_code(engine, code)
 
@@ -165,6 +171,7 @@ def test_argument_injection(engine: TestRewriter) -> None:
 
 
 def test_argument_value_mapping_strings(engine: TestRewriter) -> None:
+  """Function docstring."""
   code = "y = torch.reduce(x, reduction='mean')"
   result = rewrite_code(engine, code)
 

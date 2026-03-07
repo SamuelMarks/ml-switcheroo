@@ -24,11 +24,15 @@ def rewrite_code(rewriter, code: str) -> str:
 
 @register_framework("custom_fw")
 class CustomAdapter:
+  """Class docstring."""
+
   @property
   def harness_imports(self):
+    """Function docstring."""
     return []
 
   def get_harness_init_code(self):
+    """Function docstring."""
     return ""
 
   def get_to_numpy_code(self) -> str:
@@ -37,11 +41,13 @@ class CustomAdapter:
 
   @property
   def declared_magic_args(self):
+    """Function docstring."""
     return []
 
 
 @pytest.fixture
 def rewriter_factory():
+  """Function docstring."""
   hooks._HOOKS["pack_shape_args"] = transform_shape_packing
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -60,6 +66,7 @@ def rewriter_factory():
   mgr.get_known_apis.return_value = {"Reshape": def_map}
 
   def resolve(aid, fw):
+    """Function docstring."""
     if aid == "Reshape":
       return def_map["variants"].get(fw)
     return None
@@ -69,6 +76,7 @@ def rewriter_factory():
   mgr.get_framework_config.return_value = {}
 
   def create(target):
+    """Function docstring."""
     cfg = RuntimeConfig(source_framework="torch", target_framework=target)
     return PivotRewriter(mgr, cfg)
 
@@ -76,6 +84,7 @@ def rewriter_factory():
 
 
 def test_packing_jax(rewriter_factory):
+  """Function docstring."""
   rw = rewriter_factory("jax")
   code = "y = x.view(1, 2)"
   res = rewrite_code(rw, code)
@@ -84,6 +93,7 @@ def test_packing_jax(rewriter_factory):
 
 
 def test_packing_custom_fw(rewriter_factory):
+  """Function docstring."""
   rw = rewriter_factory("custom_fw")
   code = "y = x.view(1, 2)"
   res = rewrite_code(rw, code)
@@ -92,6 +102,7 @@ def test_packing_custom_fw(rewriter_factory):
 
 
 def test_packing_missing_passthrough(rewriter_factory):
+  """Function docstring."""
   rw = rewriter_factory("numpy")
   code = "y = x.view(1, 2)"
   res = rewrite_code(rw, code)

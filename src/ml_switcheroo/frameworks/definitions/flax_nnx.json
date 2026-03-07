@@ -577,6 +577,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ArrayRepr": {
+    "api": "nnx.summary.ArrayRepr",
+    "args": {
+      "dtype": "dtype",
+      "self": "self",
+      "shape": "shape"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "AsAnyArray": {
     "api": "jax.numpy.asanyarray",
     "dispatch_rules": [],
@@ -936,6 +947,13 @@
     "args": {
       "x": "x"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Bias": {
+    "api": "nnx.nn.normalization.InstanceNorm.bias",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2207,11 +2225,13 @@
     "required_imports": []
   },
   "Dropout": {
-    "api": "flax.linen.dropout",
+    "api": "flax.nnx.Dropout",
+    "args": {
+      "p": "rate"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "inject_prng"
+    "required_imports": []
   },
   "Dropout2d": {
     "api": "flax.nnx.Dropout",
@@ -2695,13 +2715,10 @@
     "required_imports": []
   },
   "Flatten": {
-    "api": "jax.lax.collapse",
+    "api": "flax.nnx.flatten",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [
-      "import jax"
-    ],
-    "requires_plugin": "flatten_range"
+    "required_imports": []
   },
   "Flexible": {
     "api": "jax.numpy.flexible",
@@ -5129,6 +5146,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Model": {
+    "api": "flax.nnx.Module",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ModelAndOptimizer": {
     "api": "flax.nnx.ModelAndOptimizer",
     "dispatch_rules": [],
@@ -5369,6 +5392,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "NdArray": {
+    "api": "jax.numpy.ndarray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Ndim": {
     "api": "jax.numpy.ndim",
     "dispatch_rules": [],
@@ -5422,6 +5451,13 @@
     "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "context_to_function_wrap"
+  },
+  "Node": {
+    "api": "nnx.graph.Node",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "NodeStates": {
     "api": "flax.nnx.NodeStates",
@@ -5499,6 +5535,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Number": {
+    "api": "jax.numpy.number",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Numel": {
     "api": "jax.numpy.size",
     "dispatch_rules": [],
@@ -5507,6 +5549,12 @@
   },
   "Object": {
     "api": "flax.nnx.Object",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Object_": {
+    "api": "jax.numpy.object_",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7453,6 +7501,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Step": {
+    "api": "nnx.training.optimizer.Optimizer.step",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "StepActivation": {
     "dispatch_rules": [],
     "macro_template": "jnp.where({x} >= {threshold}, 1.0, 0.0)",
@@ -7590,6 +7645,13 @@
   },
   "Tabulate": {
     "api": "flax.nnx.tabulate",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Tag": {
+    "api": "nnx.filterlib.WithTag.tag",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7805,6 +7867,13 @@
   },
   "Trunc": {
     "api": "jax.numpy.trunc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Type": {
+    "api": "nnx.filterlib.OfType.type",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8145,6 +8214,13 @@
   },
   "VMap": {
     "api": "flax.nnx.vmap",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Value": {
+    "api": "nnx.transforms.transforms.ValueMetadata.value",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9345,6 +9421,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "cosinesimilarityloss": {
+    "api": "optax.cosine_similarity",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
+    "dispatch_rules": [],
+    "macro_template": "-optax.cosine_similarity({y_pred}, {y_true})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "count": {
     "api": "nnx.training.metrics.Welford.count",
     "args": {},
@@ -9408,6 +9495,12 @@
   "ctc_loss_with_forward_probs": {
     "api": "optax.ctc_loss_with_forward_probs",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ctcloss": {
+    "api": "optax.ctc_loss",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9541,6 +9634,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "diceloss": {
+    "dispatch_rules": [],
+    "macro_template": "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "diff": {
     "api": "nnx.statelib.diff",
     "args": {
@@ -9630,6 +9729,13 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "dropout": {
+    "api": "flax.linen.dropout",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "inject_prng"
   },
   "dsplit": {
     "api": "jax.numpy.dsplit",
@@ -9947,6 +10053,15 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "flatten": {
+    "api": "jax.lax.collapse",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import jax"
+    ],
+    "requires_plugin": "flatten_range"
   },
   "flatten_parameters": {
     "api": "nnx.graph.SplitContext.flatten",
@@ -10459,6 +10574,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "hingeloss": {
+    "api": "optax.hinge_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "histogram": {
     "api": "jax.numpy.histogram",
     "args": {
@@ -10538,8 +10659,21 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "huberloss": {
+    "api": "optax.huber_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "hypot": {
     "api": "jax.numpy.hypot",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "id": {
+    "api": "nnx.ids.UUID.id",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -11064,6 +11198,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "kldivergence": {
+    "api": "optax.kl_divergence",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "kron": {
     "api": "jax.numpy.kron",
     "dispatch_rules": [],
@@ -11197,6 +11337,12 @@
   },
   "logaddexp2": {
     "api": "jax.numpy.logaddexp2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logcoshloss": {
+    "api": "optax.log_cosh",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -11381,6 +11527,30 @@
   "mean": {
     "api": "jax.numpy.mean",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meanabsoluteerror": {
+    "api": "optax.l1_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meanabsolutepercentageerror": {
+    "api": "optax.mape_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meansquarederror": {
+    "api": "optax.squared_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meansquaredlogarithmicerror": {
+    "dispatch_rules": [],
+    "macro_template": "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -11831,6 +12001,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "paths": {
+    "api": "nnx.filterlib.PathIn.paths",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "pathwise_jacobians": {
     "api": "optax.monte_carlo.stochastic_gradient_estimators.pathwise_jacobians",
     "args": {
@@ -11933,6 +12110,12 @@
   "poisson": {
     "api": "nnx.rnglib.Rngs.poisson",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "poissonloss": {
+    "api": "optax.poisson_loss",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -12557,6 +12740,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "sparsecategoricalcrossentropy": {
+    "api": "optax.softmax_cross_entropy_with_integer_labels",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "split_key_like": {
     "api": "optax.tree.split_key_like",
     "args": {},
@@ -12580,6 +12769,12 @@
     "api": "optax.squared_error",
     "args": {},
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "squaredhingeloss": {
+    "dispatch_rules": [],
+    "macro_template": "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -13194,6 +13389,13 @@
   },
   "var": {
     "api": "nnx.nn.normalization.BatchNorm.var",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "variables": {
+    "api": "nnx.bridge.module.Module.variables",
     "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",

@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 from ml_switcheroo.discovery.inspector import ApiInspector
 
 

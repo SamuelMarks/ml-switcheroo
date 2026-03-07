@@ -33,6 +33,7 @@ def target_json(tmp_path):
 
 @pytest.fixture
 def sample_variant():
+  """Function docstring."""
   return FrameworkVariant(
     api="torch.nn.functional.log_softmax",
     args={"dim": "dim"},

@@ -17,6 +17,7 @@ from ml_switcheroo.core.ghost import GhostRef, GhostParam
 
 @pytest.fixture
 def engine():
+  """Function docstring."""
   return ConsensusEngine()
 
 

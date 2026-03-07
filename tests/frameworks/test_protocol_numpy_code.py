@@ -17,6 +17,7 @@ import ml_switcheroo.frameworks.mlx
 
 
 def test_torch_implementation():
+  """Function docstring."""
   adapter = ml_switcheroo.frameworks.torch.TorchAdapter()
   code = adapter.get_to_numpy_code()
   assert "detach" in code
@@ -24,6 +25,7 @@ def test_torch_implementation():
 
 
 def test_jax_implementation():
+  """Function docstring."""
   adapter = ml_switcheroo.frameworks.jax.JaxCoreAdapter()
   code = adapter.get_to_numpy_code()
   assert "__array__" in code
@@ -31,6 +33,7 @@ def test_jax_implementation():
 
 
 def test_tensorflow_implementation():
+  """Function docstring."""
   adapter = ml_switcheroo.frameworks.tensorflow.TensorFlowAdapter()
   code = adapter.get_to_numpy_code()
   assert "numpy()" in code
@@ -38,18 +41,21 @@ def test_tensorflow_implementation():
 
 
 def test_keras_implementation():
+  """Function docstring."""
   adapter = ml_switcheroo.frameworks.keras.KerasAdapter()
   code = adapter.get_to_numpy_code()
   assert "numpy()" in code
 
 
 def test_numpy_implementation():
+  """Function docstring."""
   adapter = ml_switcheroo.frameworks.numpy.NumpyAdapter()
   code = adapter.get_to_numpy_code()
   assert "isinstance(obj, np.ndarray)" in code
 
 
 def test_mlx_implementation():
+  """Function docstring."""
   adapter = ml_switcheroo.frameworks.mlx.MLXAdapter()
   code = adapter.get_to_numpy_code()
   # MLX uses tolist fallback or array conversion

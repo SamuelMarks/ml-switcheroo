@@ -10,6 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator(tmp_path):
+  """Function docstring."""
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_test_template.return_value = {
     "torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"}
@@ -19,6 +20,7 @@ def generator(tmp_path):
 
 
 def test_emit_approx_default(generator, tmp_path):
+  """Function docstring."""
   semantics = {
     "op": {
       "std_args": ["x"],
@@ -33,6 +35,7 @@ def test_emit_approx_default(generator, tmp_path):
 
 
 def test_emit_exact_mode(generator, tmp_path):
+  """Function docstring."""
   semantics = {
     "op": {
       "std_args": ["x"],
@@ -48,6 +51,7 @@ def test_emit_exact_mode(generator, tmp_path):
 
 
 def test_emit_custom_tolerances(generator, tmp_path):
+  """Function docstring."""
   semantics = {
     "op": {
       "std_args": ["x"],

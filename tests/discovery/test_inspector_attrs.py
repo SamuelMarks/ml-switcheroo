@@ -22,6 +22,7 @@ class MockGriffeObject:
   """
 
   def __init__(self, name, kind, path, doc=None, members=None, params=None):
+    """Function docstring."""
     self.name = name
     self.path = path
     self.kind = kind  # "function", "attribute", "class"

@@ -60,6 +60,7 @@ def test_protocol_implementation_coverage(mock_all_imports):
 
 
 def test_jax_implementation_content():
+  """Function docstring."""
   adapter = ml_switcheroo.frameworks.jax.JaxCoreAdapter()
 
   # Imports
@@ -72,6 +73,7 @@ def test_jax_implementation_content():
 
 
 def test_flax_implementation_content():
+  """Function docstring."""
   # Mock flax import check inside init
   with patch.dict(sys.modules, {"flax.nnx": MagicMock()}):
     adapter = ml_switcheroo.frameworks.flax_nnx.FlaxNNXAdapter()
@@ -86,6 +88,7 @@ def test_flax_implementation_content():
 
 
 def test_torch_no_op_implementation():
+  """Function docstring."""
   with patch.dict(sys.modules, {"torch": MagicMock()}):
     adapter = ml_switcheroo.frameworks.torch.TorchAdapter()
 

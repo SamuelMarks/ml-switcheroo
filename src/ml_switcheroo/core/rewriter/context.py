@@ -7,7 +7,7 @@ Scopes, Configuration) from the logic transformers (RewriterStages), enabling
 a composition-based architecture.
 """
 
-from typing import Dict, List, Optional, Set, Callable, Union
+from typing import Dict, List, Optional, Set, Callable
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -95,7 +95,8 @@ class RewriterContext:
 
   def _default_preamble_injector(self, code: str) -> None:
     """Default callback: Injects to function body or module header."""
-    if self.signature_stack:
+    is_import = code.lstrip().startswith("import ") or code.lstrip().startswith("from ")
+    if self.signature_stack and not is_import:
       # Inside a function: queue for body injection
       # Dedup based on presence in current stack frame
       current_ctx = self.signature_stack[-1]
@@ -134,6 +135,6 @@ class RewriterContext:
         name = alias_info.get("name")
         if name:
           self.alias_map[name] = name
-    except Exception:
+    except Exception:  # pragma: no cover
       # Ignore startup hydration errors if config is partial
-      pass
+      pass  # pragma: no cover

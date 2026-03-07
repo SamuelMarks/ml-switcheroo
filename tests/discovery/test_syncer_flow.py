@@ -51,6 +51,7 @@ def test_linking_via_adapter_registry(syncer):
 
   # 3. Mock Modules
   def c_abs(_x):
+    """Function docstring."""
     pass
 
   mock_mod_math = mock_module("custom_fw.math", {"abs": c_abs})
@@ -60,6 +61,7 @@ def test_linking_via_adapter_registry(syncer):
     with patch("importlib.import_module") as mock_import:
       # Setup import logic
       def import_side_effect(name):
+        """Function docstring."""
         if name == "custom_fw.math":
           return mock_mod_math
         if name == "custom_fw":
@@ -88,6 +90,7 @@ def test_fallback_no_adapter(syncer):
   semantics = {"relu": {"std_args": ["x"], "variants": {}}}
 
   def l_relu(_x):
+    """Function docstring."""
     pass
 
   mock_lib = mock_module("legacy_lib", {"relu": l_relu})
@@ -128,6 +131,7 @@ def test_sync_skips_incompatible_signatures(syncer):
 
   # Incompatible: matmul taking only 1 arg vs standard 2
   def bad_matmul(_x):
+    """Function docstring."""
     pass
 
   mock_mod = mock_module("my_lib", {"matmul": bad_matmul})
@@ -171,6 +175,7 @@ def test_sync_preserves_existing_mappings(syncer):
 
   # Even if we provide a "real" scan result
   def real_abs(_x):
+    """Function docstring."""
     pass
 
   mock_torch = mock_module("torch", {"abs": real_abs})

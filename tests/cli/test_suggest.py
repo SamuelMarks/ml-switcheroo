@@ -63,6 +63,8 @@ def test_inspect_valid_function(mock_module):
 
 
 def test_extract_metadata_class():
+  """Function docstring."""
+
   class C:
     """Class Doc."""
 

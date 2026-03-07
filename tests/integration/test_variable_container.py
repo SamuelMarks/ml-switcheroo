@@ -26,11 +26,13 @@ SOURCE_FLAX_VARIABLE = textwrap.dedent("""
 
 @pytest.fixture(autouse=True)
 def register_hooks():
+  """Function docstring."""
   _HOOKS["nnx_param_to_torch"] = transform_nnx_param
 
 
 @pytest.fixture
 def semantics():
+  """Function docstring."""
   mgr = SemanticsManager()
 
   # Inject definitions manually to ensure test isolation from files
@@ -40,6 +42,7 @@ def semantics():
 
   # Helper
   def add(name, std_args, variants):
+    """Function docstring."""
     mgr.data[name] = {"std_args": std_args, "variants": variants}
     for fw, v in variants.items():
       mgr._reverse_index[v["api"]] = (name, mgr.data[name])
@@ -94,6 +97,7 @@ def semantics():
 
 
 def test_flax_variable_to_torch(semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="flax_nnx", target_framework="torch", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
 

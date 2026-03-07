@@ -22,7 +22,10 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockInspector:
+  """Class docstring."""
+
   def inspect(self, _pkg, **kwargs):
+    """Function docstring."""
     return {
       "torch.full_op": {
         "name": "full_op",
@@ -34,6 +37,7 @@ class MockInspector:
 
 @pytest.fixture
 def wizard(tmp_path):
+  """Function docstring."""
   # Patch file resolution to use tmp_path
   sem_dir = tmp_path / "semantics"
   snap_dir = tmp_path / "snapshots"

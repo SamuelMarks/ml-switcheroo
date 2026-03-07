@@ -21,7 +21,10 @@ from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 # We reuse a SemanticsManager pointing to mocks to simulate the fix
 # without relying on the file system state purely.
 class FixedSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     # We purposefully do not call super().__init__() to avoid loading disk state
     # that might contain conflicting 'fabs' definitions.
     # Instead we initialize manually like a Mock.
@@ -91,6 +94,7 @@ class FixedSemantics(SemanticsManager):
 
 
 def test_specific_abs_conversion():
+  """Function docstring."""
   input_torch = """
 import torch
 import torch.nn as nn

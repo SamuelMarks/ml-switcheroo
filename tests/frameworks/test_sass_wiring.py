@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 from unittest.mock import MagicMock
 from ml_switcheroo.compiler.backends.sass.synthesizer import SassSynthesizer
 from ml_switcheroo.compiler.backends.sass import SassBackend

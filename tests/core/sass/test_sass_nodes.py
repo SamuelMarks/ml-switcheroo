@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 from ml_switcheroo.compiler.frontends.sass.nodes import (
   Comment,
   Directive,
@@ -11,6 +13,7 @@ from ml_switcheroo.compiler.frontends.sass.nodes import (
 
 
 def test_register_formatting():
+  """Function docstring."""
   r0 = Register(name="R0")
   assert str(r0) == "R0"
 
@@ -25,6 +28,7 @@ def test_register_formatting():
 
 
 def test_predicate_formatting():
+  """Function docstring."""
   p0 = Predicate(name="P0")
   assert str(p0) == "P0"
 
@@ -33,6 +37,7 @@ def test_predicate_formatting():
 
 
 def test_immediate_formatting():
+  """Function docstring."""
   i1 = Immediate(value=1)
   assert str(i1) == "1"
 
@@ -44,6 +49,7 @@ def test_immediate_formatting():
 
 
 def test_memory_formatting():
+  """Function docstring."""
   const_mem = Memory(base="c[0x0]", offset=0x4)
   assert str(const_mem) == "c[0x0][0x4]"
 
@@ -56,26 +62,31 @@ def test_memory_formatting():
 
 
 def test_instruction_formatting_basic():
+  """Function docstring."""
   inst = Instruction(opcode="FADD", operands=[Register("R0"), Register("R1"), Register("R2")])
   assert str(inst) == "FADD R0, R1, R2;"
 
 
 def test_instruction_with_predicate():
+  """Function docstring."""
   pred = Predicate(name="P0", negated=True)
   inst = Instruction(opcode="MOV", operands=[Register("R0"), Register("RZ")], predicate=pred)
   assert str(inst) == "@!P0 MOV R0, RZ;"
 
 
 def test_label_formatting():
+  """Function docstring."""
   lbl = Label(name="L_EXIT")
   assert str(lbl) == "L_EXIT:"
 
 
 def test_directive_formatting():
+  """Function docstring."""
   d = Directive(name="headerflags", params=["@0x100"])
   assert str(d) == r".headerflags @0x100"
 
 
 def test_comment_formatting():
+  """Function docstring."""
   c = Comment(text="This is a loop")
   assert str(c) == "// This is a loop"

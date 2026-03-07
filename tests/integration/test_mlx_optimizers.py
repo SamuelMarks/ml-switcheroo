@@ -39,6 +39,8 @@ def functional_framework_setup():
 
   @register_framework("functional_fw")
   class FunctionalAdapter:
+    """Class docstring."""
+
     pass
 
   return "functional_fw"
@@ -96,6 +98,7 @@ def mlx_semantics(functional_framework_setup):
 
   # 3. Configure Mock Lookups
   def get_def(name):
+    """Function docstring."""
     if "Adam" in name:
       return ("Adam", mappings["Adam"])
     if "step" in name:
@@ -107,6 +110,7 @@ def mlx_semantics(functional_framework_setup):
     return ("Generic", {"variants": {}})
 
   def resolve(aid, fw):
+    """Function docstring."""
     if aid in mappings and fw == fw_key:
       return mappings[aid]["variants"][fw_key]
     return None
@@ -162,6 +166,7 @@ def test_init_transform(mlx_semantics, functional_framework_setup):
 
 
 def test_step_transform():
+  """Function docstring."""
   code = "opt.step()"
   node = cst.parse_expression(code)
   # Direct hook call returns EscapeHatch Sentinel or Node
@@ -188,6 +193,7 @@ def test_step_transform():
 
 
 def test_zero_grad_transform():
+  """Function docstring."""
   code = "opt.zero_grad()"
   node = cst.parse_expression(code)
   res = transform_mlx_zero_grad(node, MagicMock())

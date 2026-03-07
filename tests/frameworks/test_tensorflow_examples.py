@@ -12,6 +12,7 @@ from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
 
 @pytest.fixture
 def adapter():
+  """Function docstring."""
   return TensorFlowAdapter()
 
 

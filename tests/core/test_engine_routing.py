@@ -12,6 +12,7 @@ from ml_switcheroo.compiler.ir import LogicalGraph
 
 @pytest.fixture
 def mock_managers():
+  """Function docstring."""
   sem = MagicMock(spec=SemanticsManager)
   sem.get_framework_config.return_value = {}
   return sem

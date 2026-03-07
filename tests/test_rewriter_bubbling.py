@@ -14,6 +14,7 @@ class MockSemantics(SemanticsManager):
   """Mock semantics with working and broken operations."""
 
   def __init__(self):
+    """Function docstring."""
     self.data = {
       "bad": {"variants": {"jax": None}},
       "good": {"variants": {"jax": {"api": "j.good"}}},

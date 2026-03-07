@@ -26,9 +26,11 @@ class DynKerasAdapter:
   harness_imports = []
 
   def get_harness_init_code(self):
+    """Function docstring."""
     return ""
 
   def convert(self, data):
+    """Function docstring."""
     return "KerasMock(" + str(data) + ")"
 
 

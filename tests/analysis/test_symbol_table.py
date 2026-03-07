@@ -11,11 +11,13 @@ from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer, ModuleType,
 
 @pytest.fixture
 def analyzer():
+  """Function docstring."""
   # Mock Semantics
   semantics = MagicMock()
 
   # Mock definition that returns a Tensor return type
   def get_def(name):
+    """Function docstring."""
     if "randn" in name or "add" in name or "abs" in name:
       return ("op", {"return_type": "Tensor"})
     return None
@@ -25,6 +27,7 @@ def analyzer():
 
 
 def analyze(code, analyzer):
+  """Function docstring."""
   tree = cst.parse_module(code)
   # Run visitor
   tree.visit(analyzer)
@@ -32,6 +35,7 @@ def analyze(code, analyzer):
 
 
 def test_import_tracking(analyzer):
+  """Function docstring."""
   code = "import torch.nn as nn"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("nn")
@@ -40,6 +44,7 @@ def test_import_tracking(analyzer):
 
 
 def test_assignment_tracking(analyzer):
+  """Function docstring."""
   code = """ 
 import torch
 x = torch.randn(1) 

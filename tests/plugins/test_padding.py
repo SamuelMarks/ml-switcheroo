@@ -16,11 +16,13 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["padding_converter"] = transform_padding
   hooks._PLUGINS_LOADED = True
 
@@ -33,9 +35,10 @@ def rewriter():
     }
   }
 
-  mgr.get_definition.side_effect = lambda n: (("Pad", pad_def) if "pad" in n else None)
+  mgr.get_definition.side_effect = lambda n: ("Pad", pad_def) if "pad" in n else None
 
   def resolve(aid, fw):
+    """Function docstring."""
     if aid == "Pad" and fw == "jax":
       return pad_def["variants"]["jax"]
     return None
@@ -46,6 +49,7 @@ def rewriter():
 
   # Enable Traits
   def get_config(fw):
+    """Function docstring."""
     if fw == "jax":
       return {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}
     return {}
@@ -57,6 +61,7 @@ def rewriter():
 
 
 def test_padding_2d_nchw(rewriter):
+  """Function docstring."""
   code = "y = F.pad(x, (1, 2, 3, 4))"
   res = rewrite_code(rewriter, code)
   assert "jnp.pad" in res
@@ -64,6 +69,7 @@ def test_padding_2d_nchw(rewriter):
 
 
 def test_padding_passthrough_missing(rewriter):
+  """Function docstring."""
   # Change target to one without definitions but keep rewriter valid config
   rewriter.context.config.target_framework = "unknown"
   rewriter.context.hook_context.target_fw = "unknown"

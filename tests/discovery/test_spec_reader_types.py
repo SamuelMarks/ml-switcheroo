@@ -16,6 +16,7 @@ from ml_switcheroo.importers.array_api_reader import ArrayApiSpecImporter
 
 @pytest.fixture
 def importer():
+  """Function docstring."""
   return ArrayApiSpecImporter()
 
 

@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import sys
 import pytest
 import warnings
@@ -46,6 +48,7 @@ class TestRewriter:
   __test__ = False
 
   def __init__(self, semantics, config, symbol_table=None):
+    """Function docstring."""
     self.context = RewriterContext(semantics, config, symbol_table)
     self.pipeline = RewriterPipeline([StructuralPass(), ApiPass(), AuxiliaryPass()])
 
@@ -72,6 +75,7 @@ class SnapshotAssert:
   """
 
   def __init__(self, request: pytest.FixtureRequest):
+    """Function docstring."""
     self.request = request
     self.test_name = request.node.name
     self.module_path = Path(request.node.fspath).parent

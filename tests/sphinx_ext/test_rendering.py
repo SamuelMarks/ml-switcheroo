@@ -17,6 +17,7 @@ from ml_switcheroo.sphinx_ext.rendering import render_demo_html, _render_primary
 
 @pytest.fixture
 def mock_registry_data():
+  """Function docstring."""
   hierarchy = {"torch": [], "jax": [{"key": "flax_nnx", "label": "Flax"}]}
   examples = '{"key":"val"}'
   meta = '{"torch": ["neural"]}'

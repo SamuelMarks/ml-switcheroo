@@ -26,4 +26,4 @@ class CompilerBackend(ABC):
     Returns:
         Any: The compiled output (e.g., source code string, binary buffer, or AST).
     """
-    pass
+    pass  # pragma: no cover

@@ -15,6 +15,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator():
+  """Function docstring."""
   mgr = MagicMock(spec=SemanticsManager)
 
   # FIX: Ensure Templates are returned so generator produces code

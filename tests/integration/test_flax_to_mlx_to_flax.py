@@ -28,6 +28,7 @@ class Net(nnx.Module):
 
 @pytest.fixture
 def semantics():
+  """Function docstring."""
   mgr = SemanticsManager()
 
   # 1. Define Ops
@@ -83,12 +84,14 @@ def semantics():
 
 
 def normalize_ws(s):
+  """Function docstring."""
   s = s.strip()
   s = re.sub(r"\n+", "\n", s)
   return s
 
 
 def test_flax_to_mlx_roundtrip(semantics):
+  """Function docstring."""
   # --- Step 1: Flax -> MLX ---
   config_f2m = RuntimeConfig(source_framework="flax_nnx", target_framework="mlx", strict_mode=True)
   engine_f2m = ASTEngine(semantics=semantics, config=config_f2m)

@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import json
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.discovery.scaffolder import Scaffolder
@@ -5,7 +7,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector:
+  """Class docstring."""
+
   def inspect(self, fw, **kwargs):
+    """Function docstring."""
     # Updated to handle search_modules iteration (e.g. 'jax.numpy')
     if "torch" in fw:
       return {"torch.abs": {"name": "abs", "type": "function", "params": ["x"]}}
@@ -15,6 +20,7 @@ class MockInspector:
 
 
 def test_scaffolder_logic(tmp_path):
+  """Function docstring."""
   clean_semantics = SemanticsManager()
   clean_semantics.data = {}
   clean_semantics._key_origins = {}

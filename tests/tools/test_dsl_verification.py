@@ -8,16 +8,19 @@ from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
 
 
 def test_verification_mode_default():
+  """Function docstring."""
   op = OperationDef(operation="Add", description="Addition", std_args=[], variants={})
   assert op.verification_mode == "approx"
 
 
 def test_verification_mode_exact():
+  """Function docstring."""
   op = OperationDef(operation="IsNan", description="Check nan", std_args=[], variants={}, verification_mode="exact")
   assert op.verification_mode == "exact"
 
 
 def test_verification_mode_invalid():
+  """Function docstring."""
   with pytest.raises(ValidationError):
     OperationDef(
       operation="Bad",

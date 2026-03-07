@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import torch
 
 

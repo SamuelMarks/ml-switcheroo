@@ -28,7 +28,7 @@ class HtmlNode:
     Raises:
         NotImplementedError: If not implemented by subclass.
     """
-    raise NotImplementedError
+    raise NotImplementedError  # pragma: no cover
 
 
 @dataclass

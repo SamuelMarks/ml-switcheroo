@@ -17,6 +17,7 @@ from ml_switcheroo.tools.injector_spec import StandardsInjector
 
 @pytest.fixture
 def sample_op():
+  """Function docstring."""
   return OperationDef(
     operation="LogSoftmax", description="Log Softmax.", op_type=OpType.FUNCTION, std_args=["x", "dim"], variants={}
   )
@@ -27,6 +28,7 @@ def test_injector_finds_correct_file(sample_op):
 
   # helper to check target path
   def check_tier(tier, expected_file, op_override=None):
+    """Function docstring."""
     # Use overridden op if provided to bypass heuristics
     target_op = op_override if op_override else sample_op
 

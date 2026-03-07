@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
@@ -17,6 +19,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["method_to_property"] = transform_method_to_property
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -28,6 +31,7 @@ def rewriter():
   all_defs = {"size": size_def, "data_ptr": data_ptr_def}
 
   def get_def_side_effect(name):
+    """Function docstring."""
     if name == "size" or name.endswith(".size"):
       return ("size", size_def)
     return None
@@ -39,6 +43,7 @@ def rewriter():
 
   # Helper for resolving variants
   def resolve_variant_side_effect(aid, fw):
+    """Function docstring."""
     if aid in all_defs:
       return all_defs[aid]["variants"].get(fw)
     return None
@@ -54,20 +59,24 @@ def rewriter():
 
 
 def test_simple_size_conversion(rewriter):
+  """Function docstring."""
   # This tests the rewriter flow calling the plugin
   assert "x.shape" in rewrite_code(rewriter, "s = x.size()")
 
 
 def test_indexed_size_conversion(rewriter):
+  """Function docstring."""
   assert "x.shape[0]" in rewrite_code(rewriter, "d = x.size(0)").replace(" ", "")
 
 
 def test_ignore_other_methods(rewriter):
+  """Function docstring."""
   # 'other' is not in all_defs, so plugin returns original node
   assert "x.other()" in rewrite_code(rewriter, "x.other()")
 
 
 def test_data_ptr_mapping(rewriter):
+  """Function docstring."""
   # Direct hook invoke test verifying data-driven logic
   node = cst.Call(func=cst.Attribute(value=cst.Name("x"), attr=cst.Name("data_ptr")))
 

@@ -15,6 +15,7 @@ from ml_switcheroo.core.hooks import _HOOKS
 
 @pytest.fixture
 def mock_specs(tmp_path):
+  """Function docstring."""
   # Specs
   spec = {
     "CustomLoader": {"std_args": []},
@@ -52,6 +53,7 @@ def mock_specs(tmp_path):
 
 @pytest.fixture
 def isolated_manager(mock_specs):
+  """Function docstring."""
   sem = mock_specs / "semantics"
   snap = mock_specs / "snapshots"
 
@@ -64,6 +66,7 @@ def isolated_manager(mock_specs):
 
 
 def test_load_structure_from_extras(isolated_manager):
+  """Function docstring."""
   # Check reverse lookup logic
   api = "torch.utils.data.DataLoader"
 
@@ -74,6 +77,7 @@ def test_load_structure_from_extras(isolated_manager):
 
 
 def test_rewriter_integration_null_variant(isolated_manager):
+  """Function docstring."""
   # CustomLoader maps JAX to None -> Escape Hatch
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw = PivotRewriter(isolated_manager, cfg)
@@ -91,6 +95,7 @@ def test_rewriter_integration_null_variant(isolated_manager):
 
 
 def test_rewriter_integration_plugin_only(isolated_manager):
+  """Function docstring."""
   cfg = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   rw = PivotRewriter(isolated_manager, cfg)
 
@@ -100,6 +105,7 @@ def test_rewriter_integration_plugin_only(isolated_manager):
 
 
 def test_rewriter_integration_dataloader_shim(isolated_manager):
+  """Function docstring."""
   # Must register hook for this test
   _HOOKS["convert_dataloader"] = transform_dataloader
 

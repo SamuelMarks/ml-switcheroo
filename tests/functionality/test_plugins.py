@@ -21,6 +21,7 @@ from ml_switcheroo.frameworks.base import register_framework, get_adapter
 
 # Reused helper to clean lists
 def cleanup_args(args_list):
+  """Function docstring."""
   if args_list:
     args_list[-1] = args_list[-1].with_changes(comma=cst.MaybeSentinel.DEFAULT)
   return args_list
@@ -63,20 +64,25 @@ class MockSemantics(SemanticsManager):
     self._reverse_index["torch.add"] = ("add", add_def)
 
   def get_all_rng_methods(self) -> Set[str]:
+    """Function docstring."""
     return self._known_rng_methods
 
   def get_definition(self, name):
+    """Function docstring."""
     return self._reverse_index.get(name)
 
   def resolve_variant(self, abstract_id, target_fw):
+    """Function docstring."""
     if abstract_id in self.data:
       return self.data[abstract_id]["variants"].get(target_fw)
     return None
 
   def is_verified(self, _id):
+    """Function docstring."""
     return True
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    """Function docstring."""
     return {}
 
 
@@ -95,6 +101,7 @@ def mock_plugin_logic(node, _ctx):
 
 @pytest.fixture(autouse=True)
 def cleanup():
+  """Function docstring."""
   # Ensure hooks are cleared to avoid pollution from other tests
   yield
   clear_hooks()
@@ -130,6 +137,8 @@ def test_custom_framework_plugin_registration():
 
   @register_framework("plugin_test_fw")
   class PluginTestAdapter:
+    """Class docstring."""
+
     pass
 
   adapter = get_adapter("plugin_test_fw")

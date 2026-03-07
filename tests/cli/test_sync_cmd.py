@@ -37,6 +37,7 @@ def mock_syncer():
     instance = mock.return_value
 
     def side_effect(tier_data, fw):
+      """Function docstring."""
       # Simulate finding "Abs" and "Add"
       if "Abs" in tier_data:
         if "variants" not in tier_data["Abs"]:

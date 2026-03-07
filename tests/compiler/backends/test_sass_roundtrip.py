@@ -23,6 +23,7 @@ def semantics_mgr():
 
   # Mock 'Add' -> 'FADD' resolution
   def get_def(kind):
+    """Function docstring."""
     if kind == "Add":
       return ("Add", {})
     if "Conv2d" in kind:
@@ -30,6 +31,7 @@ def semantics_mgr():
     return None
 
   def resolve_var(aid, fw):
+    """Function docstring."""
     if fw == "sass" and aid == "Add":
       return {"api": "FADD"}
     return None

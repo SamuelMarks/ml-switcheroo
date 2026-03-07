@@ -59,13 +59,17 @@ def test_provenance_functional_call():
   """
   code = """
 def forward(self, x):
-    return F.relu(x)
+    return F.relu(x, inplace=True)
 """
   ex = extract(code)
   assert "func_relu" in ex.node_map
   node = ex.node_map["func_relu"]
   assert isinstance(node, cst.Call)
   assert node.func.attr.value == "relu"
+
+  # Also verify metadata extraction for keyword args
+  logical_node = ex.layer_registry["func_relu"]
+  assert logical_node.metadata.get("inplace") == "True"
 
 
 def test_provenance_script_constant():

@@ -1,6 +1,8 @@
 Maintenance
 ===========
 
+![Coverage Status](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
+
 **ml-switcheroo** is a data-driven transpiler. Its intelligence relies on a distributed **Knowledge Base** separating
 *Abstract Specifications* (The Hub) from *Framework Implementations* (The Spokes).
 
@@ -227,6 +229,10 @@ ml_switcheroo ci --update-readme
 ## 📚 Documentation & Web Demo
 
 The project documentation (Sphinx) includes a client-side WebAssembly (WASM) demo powered by Pyodide.
+
+### Time-Travel Interactive UI
+
+The demo includes a "Time-Travel" stepping interface implemented via WASM. This allows users to inspect exactly how the AST evolves pass-by-pass during the translation of their ML code, offering complete transparency into the translation pipeline without spinning up an environment.
 
 ### Building Docs & Wheel
 

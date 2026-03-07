@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import jax.numpy as jnp
 from jax import random
 
@@ -13,10 +15,12 @@ def sample_latent(mean, logvar, key):
 
 
 def binary_cross_entropy(logits, x):
+  """Function docstring."""
   # Element-wise binary cross entropy
   return -jnp.sum(x * jnp.log(logits) + (1 - x) * jnp.log(1 - logits))
 
 
 def gaussian_kl(mean, logvar):
+  """Function docstring."""
   # KL divergence between Gaussian and standard normal
   return -0.5 * jnp.sum(1 + logvar - jnp.square(mean) - jnp.exp(logvar))

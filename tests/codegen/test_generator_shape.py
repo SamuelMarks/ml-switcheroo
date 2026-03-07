@@ -17,7 +17,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockShapeSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     # Bypass init
     self.data = {}
     self._reverse_index = {}
@@ -54,20 +57,24 @@ class MockShapeSemantics(SemanticsManager):
     )
 
   def get_definition(self, name):
+    """Function docstring."""
     # Return empty dict for intermediate modules to pass attribute check
     if name in self._reverse_index:
       return self._reverse_index[name]
     return None
 
   def get_framework_config(self, fw):
+    """Function docstring."""
     return {}
 
 
 @pytest.fixture
 def rewriter_factory():
+  """Function docstring."""
   semantics = MockShapeSemantics()
 
   def create(strict=False):
+    """Function docstring."""
     config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=strict)
     return PivotRewriter(semantics, config)
 
@@ -75,6 +82,7 @@ def rewriter_factory():
 
 
 def rewrite(rewriter, code):
+  """Function docstring."""
   tree = cst.parse_module(code)
   # Use pipeline conversion
   new_tree = rewriter.convert(tree)

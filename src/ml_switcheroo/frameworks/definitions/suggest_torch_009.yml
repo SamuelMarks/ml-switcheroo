@@ -13,7 +13,7 @@ variants:
   mlx:
     api: "bool"
   keras:
-    api: "'bool'"
+    api: "bool"
   flax_nnx:
     api: "jax.numpy.bool_"
   paxml:

@@ -22,6 +22,7 @@ def simple_func(x, y=10):
 
 
 def typed_func(x: int, opt: Optional[str] = None):
+  """Function docstring."""
   pass
 
 
@@ -29,6 +30,7 @@ class SimpleClass:
   """A standard class."""
 
   def __init__(self, output_dim, activation="relu"):
+    """Function docstring."""
     self.out = output_dim
 
 
@@ -112,6 +114,7 @@ def test_inspect_failure_handling(monkeypatch):
 
   # We patch signature to raise ValueError mimics C-ext failure
   def mock_sig(obj):
+    """Function docstring."""
     raise ValueError("no signature found")
 
   monkeypatch.setattr("inspect.signature", mock_sig)

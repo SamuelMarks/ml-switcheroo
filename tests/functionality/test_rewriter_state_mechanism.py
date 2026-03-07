@@ -16,6 +16,7 @@ class MockStateSemantics(SemanticsManager):
   """
 
   def __init__(self) -> None:
+    """Function docstring."""
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
@@ -50,6 +51,7 @@ class MockStateSemantics(SemanticsManager):
 
   # --- FIX: Added method ---
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def _inject(
@@ -61,6 +63,7 @@ class MockStateSemantics(SemanticsManager):
     t_fw: str,
     t_api: str,
   ) -> None:
+    """Function docstring."""
     variants = {s_fw: {"api": s_api}, t_fw: {"api": t_api}}
     self.data[name] = {"variants": variants, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
@@ -86,6 +89,7 @@ def rewrite_code(rewriter: TestRewriter, code: str) -> str:
 
 
 def test_signature_injection_missing_arg(rewriter: TestRewriter) -> None:
+  """Function docstring."""
   code = """
 class Net:
     def __init__(self):
@@ -99,6 +103,7 @@ class Net:
 
 
 def test_signature_no_injection_if_present(rewriter: TestRewriter) -> None:
+  """Function docstring."""
   code = """
 class Net:
     def __init__(self):
@@ -113,6 +118,7 @@ class Net:
 
 
 def test_custom_trait_injection() -> None:
+  """Function docstring."""
   semantics = MockStateSemantics()
   config = RuntimeConfig(target_framework="mlx", strict_mode=False)
   # Using TestRewriter shim

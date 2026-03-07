@@ -9,10 +9,12 @@ from ml_switcheroo.frameworks.keras import KerasAdapter
 
 @pytest.fixture
 def adapter():
+  """Function docstring."""
   return KerasAdapter()
 
 
 def test_keras_examples_structure(adapter):
+  """Function docstring."""
   examples = adapter.get_tiered_examples()
   assert isinstance(examples, dict)
   assert "tier1_math" in examples
@@ -21,6 +23,7 @@ def test_keras_examples_structure(adapter):
 
 
 def test_tier1_math_validity(adapter):
+  """Function docstring."""
   code = adapter.get_tiered_examples()["tier1_math"]
   ast.parse(code)
   assert "from keras import ops" in code
@@ -28,6 +31,7 @@ def test_tier1_math_validity(adapter):
 
 
 def test_tier2_neural_validity(adapter):
+  """Function docstring."""
   code = adapter.get_tiered_examples()["tier2_neural"]
   ast.parse(code)
   assert "keras.Input" in code
@@ -38,6 +42,7 @@ def test_tier2_neural_validity(adapter):
 
 
 def test_tier3_extras_validity(adapter):
+  """Function docstring."""
   code = adapter.get_tiered_examples()["tier3_extras"]
   ast.parse(code)
   assert "random.SeedGenerator" in code

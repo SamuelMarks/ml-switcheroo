@@ -19,7 +19,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 # --- Mock Semantic Environment ---
 # We inject the state that the scripts above would produce
 class FunctionalSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self.framework_configs = {}
     self._reverse_index = {}
@@ -54,20 +57,25 @@ class FunctionalSemantics(SemanticsManager):
     self._reverse_index["jax.grad"] = ("grad", self.data["grad"])
 
   def get_all_rng_methods(self):
+    """Function docstring."""
     return set()
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    """Function docstring."""
     return {}
 
   def get_framework_config(self, framework: str) -> Dict[str, Any]:
+    """Function docstring."""
     return {}
 
 
 @pytest.fixture
 def engine_factory():
+  """Function docstring."""
   semantics = FunctionalSemantics()
 
   def create(source, target):
+    """Function docstring."""
     cfg = RuntimeConfig(source_framework=source, target_framework=target)
     return ASTEngine(semantics=semantics, config=cfg)
 

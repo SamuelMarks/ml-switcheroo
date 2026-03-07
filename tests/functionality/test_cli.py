@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 from ml_switcheroo.cli.__main__ import main
 
 
@@ -19,3 +21,21 @@ def test_cli_convert_file(tmp_path, capsys):
 
   # Expect passthrough because 'unknown_func' is not in our clean JSONs
   assert "torch.unknown_func(x)" in content
+
+
+def test_cli_convert_file_with_sharding(tmp_path, capsys):
+  """Test full file conversion flow with sharding enabled."""
+  from ml_switcheroo.cli.__main__ import main
+
+  infile = tmp_path / "model.py"
+  infile.write_text("y = torch.unknown_func(x)")  # Use unknown to ensure pass-through
+  outfile = tmp_path / "converted_sharded.py"
+
+  args = ["convert", str(infile), "--out", str(outfile), "--source", "torch", "--target", "jax", "--sharding"]
+
+  try:
+    main(args)
+  except SystemExit:
+    pass
+
+  assert outfile.exists()

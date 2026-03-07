@@ -12,7 +12,10 @@ from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 class MockSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self.framework_configs = {}
     self.import_data = {}
@@ -43,26 +46,32 @@ class MockSemantics(SemanticsManager):
     self.framework_configs["jax"] = {"alias": {"module": "jax.numpy", "name": "jnp"}}
 
   def _inject(self, name, args, variants):
+    """Function docstring."""
     self.data[name] = {"std_args": args, "variants": variants}
     for _, v in variants.items():
       if "api" in v:
         self._reverse_index[v["api"]] = (name, self.data[name])
 
   def get_definition(self, name):
+    """Function docstring."""
     return self._reverse_index.get(name)
 
   def resolve_variant(self, aid, fw):
+    """Function docstring."""
     return self.data.get(aid, {}).get("variants", {}).get(fw)
 
   def is_verified(self, _id):
+    """Function docstring."""
     return True
 
   def get_framework_config(self, fw):
+    """Function docstring."""
     return self.framework_configs.get(fw, {})
 
 
 @pytest.fixture
 def run_pass():
+  """Function docstring."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
 
@@ -72,6 +81,7 @@ def run_pass():
   rewriter = TestRewriter(semantics, config)
 
   def _transform(code):
+    """Function docstring."""
     tree = cst.parse_module(code)
     return rewriter.convert(tree).code
 

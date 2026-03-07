@@ -21,12 +21,14 @@ class MockInfixSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     super().__init__()
     self.data = {}
     self._reverse_index = {}
 
     # Define helper to inject ops
     def inject(name, s_api, op, arity=2):
+      """Function docstring."""
       args = ["x", "y"] if arity == 2 else ["x"]
       variants = {
         "torch": {"api": s_api},
@@ -61,6 +63,7 @@ class MockInfixSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine():
+  """Function docstring."""
   return ASTEngine(semantics=MockInfixSemantics(), source="torch", target="jax", strict_mode=True)
 
 

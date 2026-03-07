@@ -16,11 +16,13 @@ from ml_switcheroo.frameworks.base import register_framework
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["nnx_param_to_torch"] = transform_nnx_param
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -46,6 +48,8 @@ def rewriter():
   # --- FIX: Register dummy framework 'custom_fw' ---
   @register_framework("custom_fw")
   class CustomFW:
+    """Class docstring."""
+
     pass
 
   cfg = RuntimeConfig(source_framework="jax", target_framework="custom_fw")

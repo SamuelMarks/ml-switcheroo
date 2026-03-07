@@ -24,6 +24,7 @@ from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
 
 
 def gen_code(node: ModuleNode) -> str:
+  """Function docstring."""
   gen = MlirToPythonGenerator()
   cst_mod = gen.generate(node)
   return cst_mod.code

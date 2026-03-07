@@ -20,6 +20,7 @@ import ml_switcheroo.semantics.paths
 
 @pytest.fixture(autouse=True)
 def clean_env():
+  """Function docstring."""
   clear_hooks()
   yield
   clear_hooks()
@@ -50,6 +51,7 @@ def test_auto_wired_plugin_flow(tmp_path):
     },
   )
   def magic_plugin(node: cst.Call, ctx: HookContext) -> cst.Call:
+    """Function docstring."""
     # Simple renaming logic
     # Valid CST construction for dotted name string 'jax.numpy.magic_swapped'
     # We use a helper function pattern usually, but manual here for verification

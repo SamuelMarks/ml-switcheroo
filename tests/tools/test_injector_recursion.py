@@ -14,6 +14,7 @@ def render_node(node: cst.CSTNode) -> str:
 
 
 def test_primitive_recursion():
+  """Function docstring."""
   # Int/Float/Bool/Str/None
   assert render_node(convert_to_cst_literal(1)) == "1"
   assert render_node(convert_to_cst_literal(1.5)) == "1.5"
@@ -23,6 +24,7 @@ def test_primitive_recursion():
 
 
 def test_list_recursion():
+  """Function docstring."""
   # Simple list
   val = [1, 2, "a"]
   node = convert_to_cst_literal(val)
@@ -31,6 +33,7 @@ def test_list_recursion():
 
 
 def test_tuple_recursion():
+  """Function docstring."""
   # Nested tuple
   val = (1, (2, 3))
   node = convert_to_cst_literal(val)
@@ -42,6 +45,7 @@ def test_tuple_recursion():
 
 
 def test_dict_recursion():
+  """Function docstring."""
   # Dictionary with mixed types
   val = {"alpha": 0.5, "dims": (1, 2), "flag": True}
   node = convert_to_cst_literal(val)
@@ -54,6 +58,7 @@ def test_dict_recursion():
 
 
 def test_deep_nesting():
+  """Function docstring."""
   # Test depth
   val = [{"a": [1, 2]}, (None,)]
   node = convert_to_cst_literal(val)

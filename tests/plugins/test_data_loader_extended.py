@@ -29,6 +29,7 @@ def rewrite_code(rewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   # Register hook manually
   hooks._HOOKS["convert_dataloader"] = transform_dataloader
   hooks._PLUGINS_LOADED = True

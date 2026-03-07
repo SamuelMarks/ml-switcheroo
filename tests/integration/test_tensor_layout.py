@@ -34,7 +34,10 @@ def process_image(x):
 
 
 class LayoutSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     # New attributes
     self._providers = {}
@@ -73,10 +76,12 @@ class LayoutSemantics(SemanticsManager):
     }
 
   def get_all_rng_methods(self):
+    """Function docstring."""
     return set()
 
 
 def test_layout_permutation_injection():
+  """Function docstring."""
   semantics = LayoutSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)

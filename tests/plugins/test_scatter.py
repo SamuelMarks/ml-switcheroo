@@ -15,11 +15,13 @@ from ml_switcheroo.plugins.scatter import transform_scatter
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["scatter_indexer"] = transform_scatter
   hooks._PLUGINS_LOADED = True
 
@@ -35,6 +37,7 @@ def rewriter():
 
   # Mock Lookups
   def get_def(name):
+    """Function docstring."""
     if "scatter" in name:
       return ("Scatter", scatter_def)
     return None

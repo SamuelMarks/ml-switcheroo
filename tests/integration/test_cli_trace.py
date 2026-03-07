@@ -18,6 +18,7 @@ class MockTraceSemantics(SemanticsManager):
   """Mock semantics to ensure torch.abs is rewritten."""
 
   def __init__(self):
+    """Function docstring."""
     # Skip file loading
     self.data = {}
     # New attributes
@@ -38,6 +39,7 @@ class MockTraceSemantics(SemanticsManager):
     self._reverse_index["torch.abs"] = ("abs", self.data["abs"])
 
   def get_all_rng_methods(self) -> Set[str]:
+    """Function docstring."""
     return self._known_rng_methods
 
 

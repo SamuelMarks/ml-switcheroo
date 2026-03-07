@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 from unittest.mock import MagicMock
 import libcst as cst
@@ -65,14 +67,17 @@ def test_allocator_temps() -> None:
 
 @pytest.fixture
 def mock_semantics() -> MagicMock:
+  """Function docstring."""
   mgr = MagicMock(spec=SemanticsManager)
 
   def get_def(kind):
+    """Function docstring."""
     if kind == "Add":
       return ("Add", {})
     return None
 
   def resolve(aid, fw):
+    """Function docstring."""
     if fw == "rdna" and aid == "Add":
       return {"api": "v_add_f32"}
     return None

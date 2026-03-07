@@ -28,7 +28,10 @@ class ConvNet(nn.Module):
 
 
 class MockConvNetSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     # ... Init logic to map torch -> flax_nnx ...
     self.data = {}
     # New attributes
@@ -65,15 +68,19 @@ class MockConvNetSemantics(SemanticsManager):
     self._add("Module", "torch.nn.Module", "flax.nnx.Module", [])
 
   def get_all_rng_methods(self):
+    """Function docstring."""
     return set()
 
   def get_framework_config(self, framework):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def get_import_map(self, target_fw):
+    """Function docstring."""
     return {}
 
   def _add(self, name, s_api, t_api, args):
+    """Function docstring."""
     variants = {"torch": {"api": s_api}, "flax_nnx": {"api": t_api}}
     self.data[name] = {"std_args": args, "variants": variants}
     self._reverse_index[s_api] = (name, self.data[name])
@@ -82,6 +89,7 @@ class MockConvNetSemantics(SemanticsManager):
 
 
 def test_clean_mlir_generation():
+  """Function docstring."""
   semantics = MockConvNetSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
 

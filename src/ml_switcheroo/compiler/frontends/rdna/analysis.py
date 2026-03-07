@@ -20,13 +20,13 @@ class RdnaAnalyzer:
   """
 
   @staticmethod
-  def analyze_block(kind: str, instructions: List[Instruction]) -> Dict[str, Any]:
+  def analyze_block(kind: str, instructions: List["Instruction"]) -> Dict[str, Any]:
     """
     Extracts metadata from a block of instructions based on the operation kind.
 
     Args:
         kind (str): The operation type (e.g. "Conv2d", "Linear").
-        instructions (List[Instruction]): The assembly lines inside the block.
+        instructions (list): The assembly lines inside the block.
 
     Returns:
         Dict[str, Any]: Extracted parameters (e.g., {"k": 3}).
@@ -40,7 +40,7 @@ class RdnaAnalyzer:
             loop_limits.append(op.value)
 
     if not loop_limits:
-      return metadata
+      return metadata  # pragma: no cover
 
     if kind == "Conv2d":
       k_size = max(loop_limits)

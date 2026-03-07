@@ -12,6 +12,7 @@ from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 @pytest.fixture
 def adapter():
+  """Function docstring."""
   return NumpyAdapter()
 
 

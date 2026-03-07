@@ -17,6 +17,7 @@ from ml_switcheroo.frameworks.base import GhostRef
 
 @pytest.fixture
 def mock_snapshot_dir(tmp_path):
+  """Function docstring."""
   return tmp_path
 
 
@@ -40,6 +41,7 @@ def mock_get_adapter(name):
 
 
 def mock_get_pkg_version(name):
+  """Function docstring."""
   if name == "torch":
     return "1.0.0"
   if name == "keras":

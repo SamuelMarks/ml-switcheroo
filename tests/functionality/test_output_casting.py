@@ -20,6 +20,7 @@ class MockCastSemantics(SemanticsManager):
   """Mock Manager with Output Cast mappings."""
 
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self.import_data = {}
     self.framework_configs = {}
@@ -35,12 +36,15 @@ class MockCastSemantics(SemanticsManager):
     self._inject("Normalize", "torch.simple_op", "jax.op", output_cast="jnp.float32")
 
   def get_all_rng_methods(self):
+    """Function docstring."""
     return set()
 
   def get_framework_config(self, framework):
+    """Function docstring."""
     return {}
 
   def _inject(self, name, s_api, t_api, output_cast=None):
+    """Function docstring."""
     t_def = {"api": t_api}
     if output_cast:
       t_def["output_cast"] = output_cast
@@ -52,12 +56,14 @@ class MockCastSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   semantics = MockCastSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   return PivotRewriter(semantics, config)
 
 
 def rewrite(rewriter, code):
+  """Function docstring."""
   tree = cst.parse_module(code)
   # Fix: Use pipeline conversion
   new_tree = rewriter.convert(tree)

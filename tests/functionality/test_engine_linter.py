@@ -17,16 +17,22 @@ import libcst as cst
 
 # Define a concrete mock class to satisfy LibCST's visitor requirements
 class MockUsageScanner(cst.CSTVisitor):
+  """Class docstring."""
+
   def __init__(self, *args, **kwargs):
+    """Function docstring."""
     pass
 
   def get_result(self):
+    """Function docstring."""
     return True
 
   def on_visit(self, node):
+    """Function docstring."""
     return False
 
   def on_leave(self, node):
+    """Function docstring."""
     pass
 
 
@@ -34,6 +40,7 @@ class MockSemantics(SemanticsManager):
   """Minimal semantics to handle basic ops."""
 
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self.framework_configs = {}
     self.import_data = {}
@@ -46,20 +53,25 @@ class MockSemantics(SemanticsManager):
     self._source_registry = {}
 
   def get_import_map(self, target_fw):
+    """Function docstring."""
     return {}
 
   def get_framework_aliases(self):
+    """Function docstring."""
     return {}
 
   def get_all_rng_methods(self):
+    """Function docstring."""
     return set()
 
   def get_framework_config(self, fw):
+    """Function docstring."""
     return {}
 
 
 @pytest.fixture
 def engine():
+  """Function docstring."""
   mgr = MockSemantics()
   # FIX: Enable strict_mode so linter runs for all tests using this fixture
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
@@ -78,6 +90,7 @@ def engine():
   del mock_jax.create_parser
 
   def get_adapter_side_effect(name):
+    """Function docstring."""
     if name == "torch":
       return mock_torch
     if name == "jax":

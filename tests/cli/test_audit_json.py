@@ -25,10 +25,12 @@ class MockAuditSemantics(SemanticsManager):
   """
 
   def __init__(self, known_apis: dict):
+    """Function docstring."""
     # Bypass super init to avoid file I/O
     self.known = known_apis
 
   def get_definition(self, api_name: str):
+    """Function docstring."""
     if api_name in self.known:
       fw_key = self.known[api_name]
       return "op_id", {"variants": {fw_key: {"api": api_name}}}

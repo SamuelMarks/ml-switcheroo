@@ -16,12 +16,14 @@ class MockAdapter(JAXStackMixin):
   """
 
   def apply_wiring(self, snapshot):
+    """Function docstring."""
     # Delegate to the mixin
     self._apply_stack_wiring(snapshot)
 
 
 @pytest.fixture
 def adapter():
+  """Function docstring."""
   return MockAdapter()
 
 

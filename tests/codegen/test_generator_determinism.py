@@ -10,6 +10,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator():
+  """Function docstring."""
   mgr = MagicMock(spec=SemanticsManager)
   templates = {"torch": {"import": "import torch"}}
   mgr.get_test_template.side_effect = lambda fw: templates.get(fw)

@@ -27,11 +27,15 @@ def rewrite_code(rewriter, code):
 
 @register_framework("custom_fw")
 class CustomAdapter:
+  """Class docstring."""
+
   @property
   def harness_imports(self):
+    """Function docstring."""
     return []
 
   def get_harness_init_code(self):
+    """Function docstring."""
     return ""
 
   def get_to_numpy_code(self) -> str:
@@ -40,11 +44,13 @@ class CustomAdapter:
 
   @property
   def declared_magic_args(self):
+    """Function docstring."""
     return []
 
 
 @pytest.fixture
 def rewriter_factory():
+  """Function docstring."""
   hooks._HOOKS["gather_adapter"] = transform_gather
   hooks._PLUGINS_LOADED = True
 
@@ -64,6 +70,7 @@ def rewriter_factory():
 
   # Mock Lookups
   def get_def(name):
+    """Function docstring."""
     if "gather" in name:
       return ("Gather", gather_def)
     return None
@@ -72,6 +79,7 @@ def rewriter_factory():
 
   # Wiring Logic
   def resolve(aid, fw):
+    """Function docstring."""
     if aid == "Gather" and fw in gather_def["variants"]:
       return gather_def["variants"][fw]
     return None
@@ -84,6 +92,7 @@ def rewriter_factory():
   mgr.framework_configs = {"torch": {}, "jax": {}, "custom_fw": {}}
 
   def create(target):
+    """Function docstring."""
     cfg = RuntimeConfig(source_framework="torch", target_framework=target)
     return PivotRewriter(mgr, cfg)
 

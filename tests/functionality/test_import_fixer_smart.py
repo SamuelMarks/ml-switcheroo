@@ -15,6 +15,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def solve_and_fix(code, target_fw="jax", alias_map=None):
+  """Function docstring."""
   # Mock Semantics
   mgr = MagicMock(spec=SemanticsManager)
   mgr.get_framework_aliases.return_value = alias_map or {

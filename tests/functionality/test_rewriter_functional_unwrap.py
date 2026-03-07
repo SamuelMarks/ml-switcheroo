@@ -15,6 +15,7 @@ class MockUnwrapSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
@@ -24,6 +25,7 @@ class MockUnwrapSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   semantics = MockUnwrapSemantics()
   config = RuntimeConfig(
     source_framework="jax",  # Validated Source
@@ -34,6 +36,7 @@ def rewriter():
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)

@@ -145,14 +145,14 @@ class GraphExtractor(cst.CSTVisitor):
     # 1. Identify Target (must be self.something)
     target = node.targets[0].target
     if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
-      return
+      return  # pragma: no cover
 
     attr_name = target.attr.value
 
     # 2. Identify Op Type
     call = node.value
     if not isinstance(call, cst.Call):
-      return
+      return  # pragma: no cover
 
     op_type = get_full_name(call.func)
     # Simplify name (e.g. torch.nn.Conv2d -> Conv2d)
@@ -177,7 +177,7 @@ class GraphExtractor(cst.CSTVisitor):
     """
     # Support simple assignment: target = call
     if not isinstance(node.value, cst.Call):
-      return
+      return  # pragma: no cover
 
     # Determine output variables
     targets = []
@@ -205,7 +205,7 @@ class GraphExtractor(cst.CSTVisitor):
         self.layer_registry[layer_name] = LogicalNode(layer_name, func_name, {})
       return layer_name
 
-    return None
+    return None  # pragma: no cover
 
   def _analyze_call_expression(self, call: cst.Call, output_vars: List[str]) -> None:
     """
@@ -214,7 +214,7 @@ class GraphExtractor(cst.CSTVisitor):
     layer_name = self._resolve_layer_or_func_name(call.func)
 
     if not layer_name:
-      return
+      return  # pragma: no cover
 
     # Trace Inputs -> This Layer
     for arg in call.args:

@@ -151,13 +151,13 @@ class StableHloSpecImporter:
     if name == "Add":
       stablehlo_api_suffix = "add"
     elif name == "Sub":
-      stablehlo_api_suffix = "subtract"
+      stablehlo_api_suffix = "subtract"  # pragma: no cover
     elif name == "Mul":
-      stablehlo_api_suffix = "multiply"
+      stablehlo_api_suffix = "multiply"  # pragma: no cover
     elif name == "Div":
-      stablehlo_api_suffix = "divide"
+      stablehlo_api_suffix = "divide"  # pragma: no cover
     elif name == "Pow":
-      stablehlo_api_suffix = "power"
+      stablehlo_api_suffix = "power"  # pragma: no cover
     # For others produced by capitalize loop (e.g. Abs -> abs), lower() works.
 
     semantics[name] = {

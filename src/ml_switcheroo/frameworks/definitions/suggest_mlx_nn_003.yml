@@ -244,7 +244,23 @@ std_args:
     type: "Tensor" 
 variants: 
   mlx: 
-    api: "mlx.nn.gelu_approx" 
+    api: "mlx.nn.gelu_approx"
+  keras:
+    api: "keras.activations.gelu"
+    inject_args:
+      approximate: True
+  torch:
+    api: "torch.nn.functional.gelu"
+    inject_args:
+      approximate: "tanh"
+  tensorflow:
+    api: "tf.nn.gelu"
+    inject_args:
+      approximate: True
+  jax:
+    api: "jax.nn.gelu"
+    inject_args:
+      approximate: True 
   torch: 
     api: "torch.nn.functional.gelu" 
     inject_args: 

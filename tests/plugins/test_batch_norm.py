@@ -16,11 +16,13 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["batch_norm_unwrap"] = transform_batch_norm
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -35,10 +37,12 @@ def rewriter():
   }
 
   def get_def(name):
+    """Function docstring."""
     return ("BatchNorm", bn_def) if "BatchNorm" in name or "bn" in name else None
 
   # Implement trait retrieval logic
   def get_fw_config(fw):
+    """Function docstring."""
     if fw == "jax":
       return {"plugin_traits": PluginTraits(requires_functional_state=True)}
     return {}
@@ -47,6 +51,7 @@ def rewriter():
   mgr.get_framework_config.side_effect = get_fw_config
 
   def resolve(aid, fw):
+    """Function docstring."""
     return bn_def["variants"]["jax"] if fw == "jax" and aid == "BatchNorm" else None
 
   mgr.resolve_variant.side_effect = resolve
@@ -85,6 +90,7 @@ def test_bn_nested_expression(rewriter):
 
 
 def test_bn_preserve_existing_args(rewriter):
+  """Function docstring."""
   code = "y = self.bn(x, other=1)"
   res = rewrite_code(rewriter, code)
 

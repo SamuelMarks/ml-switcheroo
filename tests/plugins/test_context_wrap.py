@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 from unittest.mock import MagicMock
 import libcst as cst
@@ -23,6 +25,7 @@ def rewrite_code(rewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["context_to_function_wrap"] = transform_context_manager
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -44,6 +47,7 @@ def rewriter():
 
   # Resolve Logic
   def resolve(aid, fw):
+    """Function docstring."""
     if aid == "no_grad_op" and fw == "jax":
       return no_grad_def["variants"]["jax"]
     return None
@@ -57,6 +61,7 @@ def rewriter():
 
 
 def test_no_grad_transformation(rewriter):
+  """Function docstring."""
   code = """
 import torch
 def f():
@@ -69,6 +74,7 @@ def f():
 
 
 def test_no_grad_as_decorator(rewriter):
+  """Function docstring."""
   code = """
 import torch
 @torch.no_grad()
@@ -80,6 +86,7 @@ def eval_step(x):
 
 
 def test_argument_cleaning(rewriter):
+  """Function docstring."""
   code = """
 import torch
 def forward(x):
@@ -92,6 +99,7 @@ def forward(x):
 
 
 def test_plugin_not_triggered_for_others(rewriter):
+  """Function docstring."""
   code = "def f(x): return torch.other_op(x)"
   result = rewrite_code(rewriter, code)
   assert "torch.other_op" in result

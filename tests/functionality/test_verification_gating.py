@@ -24,6 +24,7 @@ class MockSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self._validation_status = {}
     self.framework_configs = {}
@@ -41,16 +42,20 @@ class MockSemantics(SemanticsManager):
     self._inject("bad_op", "torch.bad", "jax.bad")
 
   def get_all_rng_methods(self) -> Set[str]:
+    """Function docstring."""
     return self._known_rng_methods
 
   def _inject(self, name, s_api, t_api):
+    """Function docstring."""
     self.data[name] = {"variants": {"torch": {"api": s_api}, "jax": {"api": t_api}}, "std_args": ["x"]}
     self._reverse_index[s_api] = (name, self.data[name])
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    """Function docstring."""
     return {}
 
   def get_framework_config(self, framework: str) -> Dict[str, Any]:
+    """Function docstring."""
     return {}
 
 

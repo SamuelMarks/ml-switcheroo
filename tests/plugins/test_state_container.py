@@ -37,6 +37,7 @@ def rewrite_code(rewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   # Explicitly register hooks to bypass dynamic loading issues in test env
   hooks._HOOKS["torch_register_buffer_to_nnx"] = convert_register_buffer
   hooks._HOOKS["torch_register_parameter_to_nnx"] = convert_register_parameter
@@ -50,6 +51,7 @@ def rewriter():
   # Define mock responses for get_definition
   # This allows the Rewriter to find the Hook trigger
   def get_definition_side_effect(name):
+    """Function docstring."""
     # Precise matching logic to prevent greedy substring overlaps
     # e.g. "load_state_dict" would match "state_dict" in a naive lookup
 
@@ -84,6 +86,7 @@ def rewriter():
   # Define mock responses for resolve_variant
   # This allows the Rewriter API confirmation logic to pass
   def resolve_variant_side_effect(aid, fw):
+    """Function docstring."""
     if fw != "jax":
       return None
     # Return generic match
@@ -107,6 +110,7 @@ def configure_context(rewriter, mapping):
   """Updates the rewriter context lookup behavior."""
 
   def lookup(name):
+    """Function docstring."""
     return mapping.get(name)
 
   rewriter.ctx.lookup_api = MagicMock(side_effect=lookup)
@@ -116,6 +120,7 @@ def configure_context(rewriter, mapping):
 
 
 def test_register_buffer_success(rewriter):
+  """Function docstring."""
   configure_context(rewriter, {"BatchStat": "flax.nnx.BatchStat"})
   code = "self.register_buffer('running_mean', torch.zeros(10))"
   res = rewrite_code(rewriter, code)
@@ -123,6 +128,7 @@ def test_register_buffer_success(rewriter):
 
 
 def test_register_parameter_success(rewriter):
+  """Function docstring."""
   configure_context(rewriter, {"Param": "custom.Parameter"})
   code = "self.register_parameter('weight', w)"
   res = rewrite_code(rewriter, code)
@@ -130,6 +136,7 @@ def test_register_parameter_success(rewriter):
 
 
 def test_state_dict_success(rewriter):
+  """Function docstring."""
   configure_context(rewriter, {"ModuleState": "flax.nnx.state"})
   code = "sd = model.state_dict()"
   res = rewrite_code(rewriter, code)
@@ -137,6 +144,7 @@ def test_state_dict_success(rewriter):
 
 
 def test_load_state_dict_success(rewriter):
+  """Function docstring."""
   configure_context(rewriter, {"UpdateState": "flax.nnx.update"})
   code = "model.load_state_dict(sd)"
   res = rewrite_code(rewriter, code)
@@ -144,6 +152,7 @@ def test_load_state_dict_success(rewriter):
 
 
 def test_parameters_success(rewriter):
+  """Function docstring."""
   configure_context(rewriter, {"ModuleState": "state", "Param": "Param"})
   code = "p = model.parameters()"
   res = rewrite_code(rewriter, code)

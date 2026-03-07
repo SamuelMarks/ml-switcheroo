@@ -38,7 +38,7 @@ def transform_grad_clipping(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   args = list(node.args)
   if len(args) < 2:
-    return node
+    return node  # pragma: no cover
 
   # Torch Signature: (parameters, max_norm, norm_type=2)
   # Arg 0: Gradients (parameters in Torch, but grads in JAX training loop)

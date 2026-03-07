@@ -14,12 +14,14 @@ import ml_switcheroo.core.hooks as hooks
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   # Fix: Pipeline conversion
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   clamp_def = {
@@ -33,8 +35,8 @@ def rewriter():
     },
   }
   mgr.get_definition.side_effect = lambda n: ("Clamp", clamp_def) if "clamp" in n or "clip" in n else None
-  mgr.resolve_variant.side_effect = (
-    lambda aid, fw: clamp_def["variants"]["jax"] if aid == "Clamp" and fw == "jax" else None
+  mgr.resolve_variant.side_effect = lambda aid, fw: (
+    clamp_def["variants"]["jax"] if aid == "Clamp" and fw == "jax" else None
   )
   mgr.is_verified.return_value = True
   mgr.get_known_apis.return_value = {"Clamp": clamp_def}
@@ -43,6 +45,7 @@ def rewriter():
 
 
 def test_clamp_keyword_rename(rewriter):
+  """Function docstring."""
   code = "y = torch.clamp(x, min=0.0, max=1.0)"
   res = rewrite_code(rewriter, code)
   assert "jax.numpy.clip" in res
@@ -53,12 +56,14 @@ def test_clamp_keyword_rename(rewriter):
 
 
 def test_clip_alias(rewriter):
+  """Function docstring."""
   code = "y = torch.clip(x, 0, 1)"
   res = rewrite_code(rewriter, code)
   assert "jax.numpy.clip" in res
 
 
 def test_method_clamp(rewriter):
+  """Function docstring."""
   code = "y = x.clamp(min=0)"
   res = rewrite_code(rewriter, code)
   assert "jax.numpy.clip" in res

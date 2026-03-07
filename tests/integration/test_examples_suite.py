@@ -36,6 +36,7 @@ class MockBidirectionalSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     # Bypass filesystem load
     self.data = {}
     self.import_data = {}
@@ -167,9 +168,11 @@ class MockBidirectionalSemantics(SemanticsManager):
     self._alias("ops.square", "square")
 
   def get_all_rng_methods(self) -> Set[str]:
+    """Function docstring."""
     return self._known_rng_methods
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def _add_op(self, name, args, **variants):

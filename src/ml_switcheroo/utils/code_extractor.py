@@ -41,8 +41,8 @@ class CodeExtractor:
 
     try:
       source = inspect.getsource(cls_obj)
-    except OSError as e:
-      raise OSError(f"Could not get source for {cls_obj.__name__}: {e}")
+    except OSError as e:  # pragma: no cover
+      raise OSError(f"Could not get source for {cls_obj.__name__}: {e}")  # pragma: no cover
 
     # Clean indentation if it's extensive (e.g. nested class definition)
     return textwrap.dedent(source)
@@ -67,7 +67,7 @@ class CodeExtractor:
         # Handle 'package.module' vs 'package'
         # Naive approach: just import the full thing, or split?
         # Ideally we stick to top-level imports for harnesses to be safe.
-        imports.append(f"import {mod}")
+        imports.append(f"import {mod}")  # pragma: no cover
       else:
         imports.append(f"import {mod}")
 

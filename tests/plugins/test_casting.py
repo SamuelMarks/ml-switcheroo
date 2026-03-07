@@ -26,6 +26,7 @@ def rewrite_call(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   # Register hook manually
   hooks._HOOKS["type_methods"] = transform_casting
   hooks._PLUGINS_LOADED = True
@@ -63,6 +64,7 @@ def rewriter():
 
   # Mock Lookup Logic
   def get_def(name):
+    """Function docstring."""
     if "float" in name:
       return ("CastFloat", cast_float_def)
     if "long" in name:
@@ -70,9 +72,11 @@ def rewriter():
     return None
 
   def get_def_by_id(op_id):
+    """Function docstring."""
     return all_defs.get(op_id)
 
   def resolve(aid, fw):
+    """Function docstring."""
     defn = all_defs.get(aid)
     if defn and fw in defn["variants"]:
       return defn["variants"][fw]

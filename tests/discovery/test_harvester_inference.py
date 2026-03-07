@@ -17,6 +17,7 @@ class MockInferenceSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     # Override to provide deterministic data
     self.data = {
       "sum": {
@@ -40,14 +41,17 @@ class MockInferenceSemantics(SemanticsManager):
     }
 
   def get_definition_by_id(self, op_id):
+    """Function docstring."""
     return self.data.get(op_id)
 
   def update_definition(self, op_id, data):
+    """Function docstring."""
     self.data[op_id] = data
 
 
 @pytest.fixture
 def harvester():
+  """Function docstring."""
   mgr = MockInferenceSemantics()
   return SemanticHarvester(mgr, target_fw="jax")
 

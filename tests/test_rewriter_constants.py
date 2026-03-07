@@ -20,6 +20,7 @@ class MockSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     # Skip init to avoid file load
     self.data = {}
     self._reverse_index = {}
@@ -42,6 +43,7 @@ class MockSemantics(SemanticsManager):
     return self.framework_configs.get(framework, {})
 
   def _inject_const(self, name, mapping):
+    """Function docstring."""
     # Constants have no std_args
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
@@ -49,6 +51,7 @@ class MockSemantics(SemanticsManager):
       self._reverse_index[api] = (name, self.data[name])
 
   def _inject_func(self, name, mapping):
+    """Function docstring."""
     # Functions have std_args
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():

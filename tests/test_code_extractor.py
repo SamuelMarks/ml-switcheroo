@@ -14,6 +14,7 @@ class MockClass:
   """A sample class to extract."""
 
   def hello(self):
+    """Function docstring."""
     return "world"
 
 
@@ -32,7 +33,10 @@ def test_indentation_dedent():
 
   # Nested definition
   class Nested:
+    """Class docstring."""
+
     def inner(self):
+      """Function docstring."""
       pass
 
   extracted = CodeExtractor.extract_class(Nested)

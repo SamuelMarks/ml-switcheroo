@@ -9,6 +9,7 @@ from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
 
 
 def test_paxml_alias_loaded_from_adapter():
+  """Function docstring."""
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   aliases = mgr.get_framework_aliases()
@@ -20,6 +21,7 @@ def test_paxml_alias_loaded_from_adapter():
 
 
 def test_import_fixer_injects_pl_alias():
+  """Function docstring."""
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   resolver = ImportResolver(mgr)

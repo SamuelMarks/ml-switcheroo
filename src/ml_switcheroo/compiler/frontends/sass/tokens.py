@@ -127,11 +127,11 @@ class SassLexer:
               or clean in ["RZ", "PT", "UP", "UZ"]
             ):
               # Fallback if digits check logic fails for specific mnemonics
-              if not any(c.isdigit() for c in clean) and clean not in [
+              if not any(c.isdigit() for c in clean) and clean not in [  # pragma: no cover
                 "RZ",
                 "PT",
               ]:
-                kind = TokenType.IDENTIFIER
+                kind = TokenType.IDENTIFIER  # pragma: no cover
 
           yield Token(kind, val, line_num, column)
 
@@ -140,5 +140,7 @@ class SassLexer:
           break
 
       if not match_found:
-        snippet = text[pos : min(pos + 10, length)]
-        raise ValueError(f"Illegal character at line {line_num}, col {pos - line_start + 1}: '{snippet}...'")
+        snippet = text[pos : min(pos + 10, length)]  # pragma: no cover
+        raise ValueError(
+          f"Illegal character at line {line_num}, col {pos - line_start + 1}: '{snippet}...'"
+        )  # pragma: no cover

@@ -9,6 +9,7 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 
 def test_propose_fix_relaxes_tolerances():
+  """Function docstring."""
   # Mock Runner
   runner = MagicMock(spec=EquivalenceRunner)
 
@@ -33,6 +34,7 @@ def test_propose_fix_relaxes_tolerances():
 
 
 def test_propose_fix_returns_none_if_no_relaxation_helps():
+  """Function docstring."""
   # Mock Runner that always fails
   runner = MagicMock(spec=EquivalenceRunner)
   runner.verify.return_value = (False, "Fail")

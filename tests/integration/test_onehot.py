@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
@@ -10,11 +12,13 @@ import ml_switcheroo.core.hooks as hooks
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
   onehot_def = {
@@ -43,6 +47,7 @@ def rewriter():
 
 
 def test_onehot_positional(rewriter):
+  """Function docstring."""
   code = "import torch.nn.functional as F\ny = F.one_hot(x, 10)"
   res = rewrite_code(rewriter, code)
 
@@ -52,6 +57,7 @@ def test_onehot_positional(rewriter):
 
 
 def test_onehot_kwargs(rewriter):
+  """Function docstring."""
   code = "import torch.nn.functional as F\ny = F.one_hot(tensor=x, num_classes=5)"
   res = rewrite_code(rewriter, code)
   assert "jax.nn.one_hot" in res

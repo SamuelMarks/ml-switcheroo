@@ -299,7 +299,7 @@ variants:
     requires_plugin: "unroll_inplace_ops"
 
 ---
-operation: "Flatten"
+operation: "flatten"
 description: "Flattens a contiguous range of dims."
 std_args:
   - name: "input"

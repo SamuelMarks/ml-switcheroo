@@ -30,6 +30,7 @@ def math_ops(x, y):
 
 @pytest.fixture(scope="module")
 def semantics():
+  """Function docstring."""
   mgr = SemanticsManager()
   # Ensure JAX Alias
   mgr.framework_configs["jax"] = {"alias": {"module": "jax.numpy", "name": "jnp"}}

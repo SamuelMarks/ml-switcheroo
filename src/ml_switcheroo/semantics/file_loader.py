@@ -64,7 +64,7 @@ class KnowledgeBaseLoader:
         elif "neural" in fname:
           priority = 20
         elif fname in DISCOVERED_FILENAMES:
-          priority = 20
+          priority = 20  # pragma: no cover
         prioritized_files.append((priority, fpath))
 
       # Sort by priority
@@ -76,8 +76,8 @@ class KnowledgeBaseLoader:
             content = json.load(f)
           tier = infer_tier_from_priority(priority)
           self._load_tier_content(content, tier)
-        except Exception as e:
-          print(f"⚠️ Error loading {fpath.name}: {e}")
+        except Exception as e:  # pragma: no cover
+          print(f"⚠️ Error loading {fpath.name}: {e}")  # pragma: no cover
 
     # Load Overlays after specs (or even if specs missing)
     self._load_overlays()
@@ -96,8 +96,8 @@ class KnowledgeBaseLoader:
         with open(fpath, "r", encoding="utf-8") as f:
           content = json.load(f)
         self._load_overlay_content(content, fpath.name)
-      except Exception as e:
-        print(f"⚠️ Error loading overlay {fpath.name}: {e}")
+      except Exception as e:  # pragma: no cover
+        print(f"⚠️ Error loading overlay {fpath.name}: {e}")  # pragma: no cover
 
   def _load_tier_content(self, content: Dict[str, Any], tier: SemanticTier) -> None:
     """

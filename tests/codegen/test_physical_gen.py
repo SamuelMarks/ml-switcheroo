@@ -25,6 +25,7 @@ class MockSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     # Templates for JAX (with JIT) and Torch (Standard)
     # Updated: Explicit JIT Template required for JAX in decoupled architecture
@@ -42,14 +43,17 @@ class MockSemantics(SemanticsManager):
     self.framework_configs = {"jax": {"traits": {"jit_static_args": ["axis", "keepdims"]}}}
 
   def get_test_template(self, fw):
+    """Function docstring."""
     return self.test_templates.get(fw)
 
   def get_framework_config(self, fw):
+    """Function docstring."""
     return self.framework_configs.get(fw, {})
 
 
 @pytest.fixture
 def generator():
+  """Function docstring."""
   mgr = MockSemantics()
   return TestCaseGenerator(semantics_mgr=mgr)
 

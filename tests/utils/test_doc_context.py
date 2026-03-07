@@ -110,6 +110,7 @@ def test_full_build_flow_with_adapter_logic(builder):
   # Plugins don't usually get doc URLs in the logic
 
   def get_adapter_side_effect(name):
+    """Function docstring."""
     if name == "torch":
       return mock_torch
     if name == "jax":

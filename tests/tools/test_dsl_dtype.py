@@ -61,6 +61,7 @@ def test_param_dtype_and_rank():
 
 @pytest.fixture
 def fuzzer():
+  """Function docstring."""
   return InputFuzzer()
 
 

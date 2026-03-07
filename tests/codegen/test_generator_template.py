@@ -16,6 +16,7 @@ class MockTemplateSemantics(SemanticsManager):
   """Mocks SemanticsManager with custom templates provided at init."""
 
   def __init__(self, templates=None):
+    """Function docstring."""
     # We purposely skip the real init to avoid loading files or registry defaults
     # for controlled unit testing.
     self.test_templates = templates or {}
@@ -24,9 +25,11 @@ class MockTemplateSemantics(SemanticsManager):
     self.framework_configs = {}
 
   def get_test_template(self, framework):
+    """Function docstring."""
     return self.test_templates.get(framework)
 
   def get_framework_config(self, framework):
+    """Function docstring."""
     return {}
 
 

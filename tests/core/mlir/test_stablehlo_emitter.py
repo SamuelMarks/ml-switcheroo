@@ -19,6 +19,7 @@ class MockSemantics(SemanticsManager):
   """Mock semantics manager to provide stablehlo mappings."""
 
   def __init__(self):
+    """Function docstring."""
     # Skip super init
     self.data = {}
     self._reverse_index = {}
@@ -42,9 +43,11 @@ class MockSemantics(SemanticsManager):
     self._inject("Add", "torch.add", add_def)
 
   def _inject(self, name, api, defn):
+    """Function docstring."""
     self._reverse_index[api] = (name, defn)
 
   def get_definition(self, name):
+    """Function docstring."""
     return self._reverse_index.get(name)
 
 

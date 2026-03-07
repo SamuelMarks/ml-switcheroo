@@ -140,7 +140,7 @@ def transform_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
     new_args.append(node.args[0])
     remaining_args = node.args[1:]
   else:
-    remaining_args = list(node.args)
+    remaining_args = list(node.args)  # pragma: no cover
 
   # 2b. Pass through Keywords
   # The Shim supports these standard keywords explicitly or via **kwargs.

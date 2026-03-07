@@ -51,7 +51,7 @@ variants:
   pax:
     api: "jax.numpy.uint16"
   keras:
-    api: "'uint16'" # String representation
+    api: "uint16" # String representation
   tensorflow:
     api: "tf.uint16"
   numpy:
@@ -73,7 +73,7 @@ variants:
   pax:
     api: "jax.numpy.uint32"
   keras:
-    api: "'uint32'"
+    api: "uint32"
   tensorflow:
     api: "tf.uint32"
   numpy:
@@ -95,7 +95,7 @@ variants:
   pax:
     api: "jax.numpy.uint64"
   keras:
-    api: "'uint64'"
+    api: "uint64"
   tensorflow:
     api: "tf.uint64"
   numpy:
@@ -117,7 +117,7 @@ variants:
   pax:
     api: "jax.numpy.uint8"
   keras:
-    api: "'uint8'"
+    api: "uint8"
   tensorflow:
     api: "tf.uint8"
   numpy:

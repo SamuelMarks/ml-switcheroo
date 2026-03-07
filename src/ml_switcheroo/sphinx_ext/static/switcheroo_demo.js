@@ -68,6 +68,7 @@ try:
     # Read optional flags (default False/True as set in JS)
     opt_graph = js_enable_graph_opt if 'js_enable_graph_opt' in globals() else False
     opt_imports = js_enable_import_fixer if 'js_enable_import_fixer' in globals() else True
+    opt_sharding = js_enable_sharding if 'js_enable_sharding' in globals() else False
 
     config = RuntimeConfig(
         source_framework=js_src_fw,
@@ -76,7 +77,8 @@ try:
         target_flavour=tgt_flavour,
         strict_mode=js_strict_mode,
         enable_graph_optimization=opt_graph,
-        enable_import_fixer=opt_imports
+        enable_import_fixer=opt_imports,
+        enable_sharding=opt_sharding
     )
     
     # 1. Run Transpilation
@@ -211,7 +213,8 @@ importlib.util.find_spec("ml_switcheroo") is not None
             }
 
             statusEl.innerText = "Installing Engine...";
-            await micropip.install(`_static/${wheelName}`);
+            const wheelUrl = new URL(`_static/${wheelName}`, window.location.href).href;
+            await micropip.install(wheelUrl);
         }
 
         // 4. UI Transition
@@ -394,6 +397,16 @@ function swapContext() {
     s.dispatchEvent(new Event("change"));
     t.dispatchEvent(new Event("change"));
 
+    const sf = document.getElementById("src-flavour");
+    const tf = document.getElementById("tgt-flavour");
+    if (sf && tf) {
+        const temp = sf.value;
+        sf.value = tf.value;
+        tf.value = temp;
+        sf.dispatchEvent(new Event("change"));
+        tf.dispatchEvent(new Event("change"));
+    }
+
     const tmp = srcEditor.getValue();
     srcEditor.setValue(tgtEditor.getValue());
     tgtEditor.setValue(tmp);
@@ -519,6 +532,7 @@ async function runTranspilation() {
 
     // Gather Pipeline Options
     const optStrictMode = !!document.getElementById("chk-strict-mode").checked;
+    const optSharding = !!document.getElementById("chk-enable-sharding").checked;
     const optGraph = !!document.getElementById("chk-opt-graph").checked;
     const optImports = !!document.getElementById("chk-opt-imports").checked;
 
@@ -529,6 +543,7 @@ async function runTranspilation() {
         pyodide.globals.set("js_src_flavour", srcFlav);
         pyodide.globals.set("js_tgt_flavour", tgtFlav);
         pyodide.globals.set("js_strict_mode", optStrictMode);
+    pyodide.globals.set("js_enable_sharding", optSharding);
         
         // Pass pipeline flags
         pyodide.globals.set("js_enable_graph_opt", optGraph);

@@ -16,6 +16,7 @@ from ml_switcheroo.core.tikz.analyser import GraphExtractor
 
 @pytest.fixture
 def backend():
+  """Function docstring."""
   return LatexBackend()
 
 

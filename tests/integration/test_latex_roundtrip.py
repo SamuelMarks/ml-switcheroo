@@ -32,12 +32,14 @@ class ConvNet(nn.Module):
 
 @pytest.fixture(scope="module")
 def semantics():
+  """Function docstring."""
   mgr = SemanticsManager()
   RegistryLoader(mgr).hydrate()
   return mgr
 
 
 def test_torch_to_latex_generation(semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="latex_dsl", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
   result = engine.run(SOURCE_TORCH)
@@ -69,7 +71,7 @@ def test_torch_to_latex_generation(semantics):
   # 2. Compute Op for F.relu
   # Emitter capitalizes 'Relu', GraphExtrator creates ID 'op_func_relu' or similar
   # Note: graph extractor heuristic for F.relu -> func_relu. op ID in latex -> op_func_relu
-  assert r"\Op{op_func_relu}{Relu}{op_conv}{[_]}" in latex_code
+  assert r"\Op{op_func_relu}{Relu}{op_conv, x}{[_]}" in latex_code
 
   # 3. StateOp for self.fc taking relu output
   assert r"\StateOp{op_fc}{fc}{op_func_relu}{[_]}" in latex_code
@@ -83,6 +85,7 @@ def test_torch_to_latex_generation(semantics):
 
 
 def test_latex_to_flax_generation(semantics):
+  """Function docstring."""
   latex_source = r"""
 \documentclass[tikz]{standalone} 
 \begin{DefModel}{ConvNet} 
@@ -112,6 +115,7 @@ def test_latex_to_flax_generation(semantics):
 
 
 def test_latex_roundtrip_complex_args(semantics):
+  """Function docstring."""
   source_code = """ 
 import torch.nn as nn
 import torch.nn.functional as F

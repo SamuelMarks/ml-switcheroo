@@ -10,6 +10,7 @@ from ml_switcheroo.core.dsl import PatternDef
 
 @pytest.fixture
 def patterns():
+  """Function docstring."""
   return [
     PatternDef(name="CBR", sequence=["Conv2d", "BatchNorm", "ReLU"], replace_with="FusedCBR"),
     PatternDef(name="NormAct", sequence=["LayerNorm", "ReLU"], replace_with="FusedNormAct"),
@@ -18,6 +19,7 @@ def patterns():
 
 @pytest.fixture
 def graph():
+  """Function docstring."""
   g = LogicalGraph()
   # input -> conv1 -> bn1 -> relu1 -> ln1 -> relu2 -> output
   g.nodes = [
@@ -41,6 +43,7 @@ def graph():
 
 
 def test_pattern_match_and_replace(graph, patterns):
+  """Function docstring."""
   optimizer = GraphOptimizer(patterns)
   new_graph = optimizer.optimize(graph)
 
@@ -71,6 +74,7 @@ def test_pattern_match_and_replace(graph, patterns):
 
 
 def test_no_match(graph):
+  """Function docstring."""
   # Empty patterns
   opt = GraphOptimizer([])
   res = opt.optimize(graph)
@@ -78,6 +82,7 @@ def test_no_match(graph):
 
 
 def test_partial_sequence_no_match():
+  """Function docstring."""
   # Sequence [Conv, BN] but graph missing BN
   pat = [PatternDef(name="CB", sequence=["Conv2d", "BatchNorm"], replace_with="Fused")]
 

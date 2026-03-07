@@ -23,6 +23,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["inject_prng"] = inject_prng_threading
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -45,6 +46,7 @@ def rewriter():
 
 
 def test_rng_basic_injection(rewriter):
+  """Function docstring."""
   code = "def f(x):\n  return torch.dropout(x)"
   res = rewrite_code(rewriter, code)
 
@@ -60,6 +62,7 @@ def test_rng_basic_injection(rewriter):
 
 
 def test_rng_custom_configuration(rewriter):
+  """Function docstring."""
   # Override settings on the Config object directly
   # Note: rewriter.ctx.config is a reference to the RuntimeConfig
   rewriter.context.config.plugin_settings = {
@@ -81,6 +84,7 @@ def test_rng_custom_configuration(rewriter):
 
 
 def test_no_injection_if_traits_disabled(rewriter):
+  """Function docstring."""
   # Disable the trait
   rewriter.semantics.get_framework_config.return_value = {"plugin_traits": PluginTraits(requires_explicit_rng=False)}
 
@@ -93,6 +97,7 @@ def test_no_injection_if_traits_disabled(rewriter):
 
 
 def test_rng_deduplication(rewriter):
+  """Function docstring."""
   # This tests the preamble deduplication in Context
   code = "def f(x):\n  torch.dropout(x)\n  torch.dropout(x)"
   res = rewrite_code(rewriter, code)
@@ -101,6 +106,7 @@ def test_rng_deduplication(rewriter):
 
 
 def test_remove_generator_arg(rewriter):
+  """Function docstring."""
   code = "def f(x):\n  torch.dropout(x, generator=g)"
   res = rewrite_code(rewriter, code)
   assert "generator" not in res

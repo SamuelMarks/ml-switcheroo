@@ -16,6 +16,7 @@ class MockTraitSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     # Bypass super().__init__ which loads files
     self.data = {}
     self._reverse_index = {}
@@ -45,14 +46,20 @@ class MockTraitSemantics(SemanticsManager):
     }
 
   def get_framework_config(self, framework: str) -> dict:
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
 
 @pytest.fixture
 def rewriter_factory():
+  """Function docstring."""
+
   # Register dummy adapter for 'custom_nn' so RuntimeConfig validation passes during the test
   class CustomNNAdapter:
+    """Class docstring."""
+
     def convert(self, x):
+      """Function docstring."""
       return x
 
   register_framework("custom_nn")(CustomNNAdapter)
@@ -62,6 +69,7 @@ def rewriter_factory():
   semantics = MockTraitSemantics()
 
   def create(target_fw):
+    """Function docstring."""
     config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=False)
     return PivotRewriter(semantics, config)
 
@@ -69,12 +77,14 @@ def rewriter_factory():
 
 
 def rewrite_code(rewriter, code: str) -> str:
+  """Function docstring."""
   tree = cst.parse_module(code)
   new_tree = rewriter.convert(tree)
   return new_tree.code
 
 
 def test_trait_module_inheritance_rewrite(rewriter_factory):
+  """Function docstring."""
   rewriter = rewriter_factory("custom_nn")
   code = "class Model(torch.nn.Module): pass"
   result = rewrite_code(rewriter, code)
@@ -102,6 +112,7 @@ class MyGhost(ghost.Network):
 
 
 def test_trait_method_renaming(rewriter_factory):
+  """Function docstring."""
   rewriter = rewriter_factory("custom_nn")
   code = """
 class Model(torch.nn.Module):
@@ -114,6 +125,7 @@ class Model(torch.nn.Module):
 
 
 def test_trait_argument_injection(rewriter_factory):
+  """Function docstring."""
   rewriter = rewriter_factory("custom_nn")
   code = "class Model(torch.nn.Module): \n    def __init__(self): pass"
   result = rewrite_code(rewriter, code)
@@ -121,6 +133,7 @@ def test_trait_argument_injection(rewriter_factory):
 
 
 def test_trait_super_init_requirement(rewriter_factory):
+  """Function docstring."""
   rewriter = rewriter_factory("custom_nn")
   code = """
 class Model(torch.nn.Module):
@@ -132,6 +145,7 @@ class Model(torch.nn.Module):
 
 
 def test_trait_arg_stripping(rewriter_factory):
+  """Function docstring."""
   rewriter = rewriter_factory("custom_nn")
   code = """
 class Model(torch.nn.Module):

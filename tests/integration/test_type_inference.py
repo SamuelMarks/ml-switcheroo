@@ -35,6 +35,7 @@ def reload_required_plugins():
 
 @pytest.fixture
 def semantics():
+  """Function docstring."""
   mgr = SemanticsManager()
   # Ensure definitions loaded
   # torch.randn -> returns Tensor
@@ -43,6 +44,7 @@ def semantics():
 
 
 def test_inferred_view_rewrite(semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(semantics=semantics, config=config)
 

@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import keras
 from keras import layers, ops
 
@@ -17,5 +19,6 @@ def build_model(input_shape, num_classes):
 
 
 def custom_loss(y_true, y_pred):
+  """Function docstring."""
   # Using backend-agnostic ops
   return ops.mean(ops.square(y_true - y_pred))

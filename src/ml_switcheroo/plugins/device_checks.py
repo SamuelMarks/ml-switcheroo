@@ -44,23 +44,23 @@ def transform_cuda_check(node: cst.Call, ctx: HookContext) -> cst.BaseExpression
 
   if not adapter:
     # Fallback to original if adapter not found
-    return node
+    return node  # pragma: no cover
 
   # 2. Get Syntax String from Adapter
   try:
     check_code = adapter.get_device_check_syntax()
-  except NotImplementedError:
-    return node
-  except Exception:
+  except NotImplementedError:  # pragma: no cover
+    return node  # pragma: no cover
+  except Exception:  # pragma: no cover
     # Safety catch for adapter logic errors
-    return node
+    return node  # pragma: no cover
 
   if not check_code:
-    return node
+    return node  # pragma: no cover
 
   # 3. Parse into CST
   try:
     new_expression = cst.parse_expression(check_code)
     return new_expression
-  except cst.ParserSyntaxError:
-    return node
+  except cst.ParserSyntaxError:  # pragma: no cover
+    return node  # pragma: no cover

@@ -15,11 +15,13 @@ from ml_switcheroo.plugins.topk import transform_topk
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["topk_adapter"] = transform_topk
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -45,6 +47,7 @@ def rewriter():
 
 
 def test_topk_rewrapping(rewriter):
+  """Function docstring."""
   code = "res = torch.topk(x, 5)"
   res = rewrite_code(rewriter, code)
   assert "collections.namedtuple" in res
@@ -54,6 +57,7 @@ def test_topk_rewrapping(rewriter):
 
 
 def test_topk_strip_unsupported(rewriter):
+  """Function docstring."""
   code = "res = torch.topk(x, 5, sorted=True)"
   res = rewrite_code(rewriter, code)
   assert "sorted" not in res
@@ -62,6 +66,7 @@ def test_topk_strip_unsupported(rewriter):
 
 
 def test_topk_functional_call(rewriter):
+  """Function docstring."""
   code = "res = torch.topk(t, k)"
   res = rewrite_code(rewriter, code)
   assert "jax.lax.top_k(t, k)" in res

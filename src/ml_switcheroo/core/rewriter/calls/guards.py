@@ -21,7 +21,18 @@ def apply_strict_guards(
   details: Dict[str, Any],
   target_impl: Dict[str, Any],
 ) -> List[cst.Arg]:
-  """Wraps args with rank assertions."""
+  """
+  Wraps arguments with rank assertion helper calls if required by strict mode.
+
+  Args:
+      rewriter (Any): The CST rewriter instance containing context.
+      norm_args (List[cst.Arg]): The normalized list of arguments.
+      details (Dict[str, Any]): Details of the standard API.
+      target_impl (Dict[str, Any]): The target framework's implementation details.
+
+  Returns:
+      List[cst.Arg]: A new list of arguments, potentially wrapped in assertion logic.
+  """
   std_args = details.get("std_args", [])
   target_arg_map = target_impl.get("args", {})
 
@@ -37,7 +48,7 @@ def apply_strict_guards(
     return norm_args
 
   new_args = []
-  guards_applied = False
+  guards_applied = False  # pragma: no cover
 
   for arg in norm_args:
     arg_key = arg.keyword.value if arg.keyword else None

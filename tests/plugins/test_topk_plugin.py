@@ -13,6 +13,7 @@ from ml_switcheroo.plugins.topk import transform_topk
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   tree = cst.parse_module(code)
   # Use pipeline conversion
   new_tree = rewriter.convert(tree)
@@ -21,6 +22,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter_factory():
+  """Function docstring."""
   hooks._HOOKS["topk_adapter"] = transform_topk
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -40,10 +42,11 @@ def rewriter_factory():
     }
   }
 
-  mgr.get_definition.side_effect = lambda n: (("TopK", topk_def) if "topk" in n else None)
+  mgr.get_definition.side_effect = lambda n: ("TopK", topk_def) if "topk" in n else None
 
   # Dynamic resolver
   def resolve(aid, fw):
+    """Function docstring."""
     if aid == "TopK" and fw in topk_def["variants"]:
       return topk_def["variants"][fw]
     return None
@@ -53,6 +56,7 @@ def rewriter_factory():
   mgr.is_verified.return_value = True
 
   def create(target):
+    """Function docstring."""
     cfg = RuntimeConfig(source_framework="torch", target_framework=target)
     return PivotRewriter(mgr, cfg)
 

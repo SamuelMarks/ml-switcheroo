@@ -19,19 +19,23 @@ class MockEmitter(PythonSnippetEmitter):
   """Deterministically mocks code generation."""
 
   def emit_init(self, node):
+    """Function docstring."""
     return cst.parse_statement(f"self.{node.id} = {node.kind}()")
 
   def emit_call(self, node, inputs, output):
+    """Function docstring."""
     args = ", ".join(inputs)
     return cst.parse_statement(f"{output} = self.{node.id}({args})")
 
   def emit_expression(self, node, inputs):
+    """Function docstring."""
     args = ", ".join(inputs)
     return cst.parse_expression(f"self.{node.id}({args})")
 
 
 @pytest.fixture
 def emitter():
+  """Function docstring."""
   return MockEmitter()
 
 

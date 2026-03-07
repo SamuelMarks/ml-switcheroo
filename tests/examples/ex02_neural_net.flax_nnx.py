@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 from flax import nnx
 
 
@@ -11,7 +13,9 @@ class SimplePerceptron(nnx.Module):
   """
 
   def __init__(self, in_features, out_features, rngs: nnx.Rngs):
+    """Function docstring."""
     self.layer = nnx.Linear(in_features, out_features, rngs=rngs)
 
   def __call__(self, x):
+    """Function docstring."""
     return self.layer(x)

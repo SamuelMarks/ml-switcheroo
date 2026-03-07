@@ -17,6 +17,7 @@ from ml_switcheroo.frameworks.base import register_framework
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["mlx_compiler"] = transform_compiler
   hooks._HOOKS["mlx_synchronize"] = transform_synchronize
   hooks._PLUGINS_LOADED = True
@@ -29,6 +30,7 @@ def rewriter():
   sync_def = {"variants": {"custom_fw": {"requires_plugin": "mlx_synchronize"}}}
 
   def get_def(name):
+    """Function docstring."""
     if "compile" in name:
       return "Compile", comp_def
     if "synchronize" in name:
@@ -38,6 +40,7 @@ def rewriter():
   mgr.get_definition.side_effect = get_def
 
   def resolve(aid, fw):
+    """Function docstring."""
     if aid == "Compile":
       return comp_def["variants"].get(fw)
     if aid == "Synchronize":
@@ -50,6 +53,8 @@ def rewriter():
   # --- FIX: Register dummy framework ---
   @register_framework("custom_fw")
   class CustomFW:
+    """Class docstring."""
+
     pass
 
   cfg = RuntimeConfig(source_framework="torch", target_framework="custom_fw")
@@ -57,6 +62,7 @@ def rewriter():
 
 
 def rewrite(rewriter, code):
+  """Function docstring."""
   mod = cst.parse_module(code)
   # Fix: Pipeline execution
   return rewriter.convert(mod).code

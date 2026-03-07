@@ -19,6 +19,7 @@ from ml_switcheroo.core.ghost import GhostRef
 
 @pytest.fixture
 def persister():
+  """Function docstring."""
   return SemanticPersister()
 
 

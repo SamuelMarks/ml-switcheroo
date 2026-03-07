@@ -12,6 +12,7 @@ from ml_switcheroo.core.mlir.parser import MlirParser, Tokenizer
 
 
 def test_tokenizer_simple():
+  """Function docstring."""
   text = '%0 = "sw.op"() : i32'
   tok = Tokenizer(text)
   tokens = list(tok.tokenize())

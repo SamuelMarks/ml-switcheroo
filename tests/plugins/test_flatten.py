@@ -22,6 +22,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["flatten_range"] = transform_flatten
   hooks._PLUGINS_LOADED = True
 
@@ -42,6 +43,7 @@ def rewriter():
 
   # Mock lookup_api context helper
   def resolve_variant(aid, fw):
+    """Function docstring."""
     # Plugin looks up these IDs
     if fw == "jax":
       if aid == "flatten_range":
@@ -56,6 +58,7 @@ def rewriter():
   mgr.is_verified.return_value = True
 
   def get_config(fw):
+    """Function docstring."""
     if fw == "jax":
       return {"plugin_traits": PluginTraits(has_numpy_compatible_arrays=True)}
     return {}
@@ -66,6 +69,7 @@ def rewriter():
 
 
 def test_flatten_batch_preserve(rewriter):
+  """Function docstring."""
   code = "y = torch.flatten(x, 1)"
   res = rewrite_code(rewriter, code)
   assert "jnp.reshape" in res
@@ -73,6 +77,7 @@ def test_flatten_batch_preserve(rewriter):
 
 
 def test_flatten_passthrough_missing_def(rewriter):
+  """Function docstring."""
   # Switch target to one without definitions (e.g. numpy)
   # Update configuration on shared context
   rewriter.context.config.target_framework = "numpy"

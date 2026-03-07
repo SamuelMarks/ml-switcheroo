@@ -18,6 +18,7 @@ class MockSemantics(SemanticsManager):
   """Mock manager returning deterministic API data."""
 
   def get_known_apis(self) -> dict:
+    """Function docstring."""
     return {
       "abs": {"variants": {"torch": {"api": "t.abs"}, "jax": {"api": "j.abs"}}},
       "complex_layer": {"variants": {"torch": {"api": "t.nn.C"}, "jax": {"requires_plugin": "p"}}},

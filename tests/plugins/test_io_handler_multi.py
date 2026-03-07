@@ -24,6 +24,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def base_semantics():
+  """Function docstring."""
   hooks._HOOKS["io_handler"] = transform_io_calls
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -43,12 +44,14 @@ def base_semantics():
 
 # Factory for rewriter with patched adapter
 def get_rw(mgr, target):
+  """Function docstring."""
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   return PivotRewriter(mgr, cfg)
 
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_numpy_save(mock_get, base_semantics):
+  """Function docstring."""
   mock_get.side_effect = lambda n: NumpyAdapter() if n == "numpy" else None
 
   rw = get_rw(base_semantics, "numpy")
@@ -60,6 +63,7 @@ def test_numpy_save(mock_get, base_semantics):
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_numpy_load(mock_get, base_semantics):
+  """Function docstring."""
   mock_get.side_effect = lambda n: NumpyAdapter() if n == "numpy" else None
 
   rw = get_rw(base_semantics, "numpy")
@@ -70,6 +74,7 @@ def test_numpy_load(mock_get, base_semantics):
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_tensorflow_save(mock_get, base_semantics):
+  """Function docstring."""
   # Fix import scope for mock
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
 
@@ -82,6 +87,7 @@ def test_tensorflow_save(mock_get, base_semantics):
 
 @patch("ml_switcheroo.plugins.io_handler.get_adapter")
 def test_tensorflow_load(mock_get, base_semantics):
+  """Function docstring."""
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
 
   rw = get_rw(base_semantics, "tensorflow")

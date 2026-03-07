@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
@@ -10,6 +12,7 @@ from ml_switcheroo.compiler.backends.sass.macros import expand_conv2d, expand_li
 
 
 def test_allocator_sequential():
+  """Function docstring."""
   alloc = RegisterAllocator()
   r1 = alloc.get_register("x")
   r2 = alloc.get_register("y")
@@ -18,6 +21,7 @@ def test_allocator_sequential():
 
 
 def test_allocator_reuse():
+  """Function docstring."""
   alloc = RegisterAllocator()
   r1 = alloc.get_register("x")
   r2 = alloc.get_register("x")
@@ -26,6 +30,7 @@ def test_allocator_reuse():
 
 
 def test_allocator_overflow():
+  """Function docstring."""
   alloc = RegisterAllocator()
   alloc._next_idx = MAX_REGISTERS + 1
   with pytest.raises(ValueError, match="Register overflow"):
@@ -33,6 +38,7 @@ def test_allocator_overflow():
 
 
 def test_allocator_temp():
+  """Function docstring."""
   alloc = RegisterAllocator()
   t1 = alloc.allocate_temp()
   t2 = alloc.allocate_temp()
@@ -42,6 +48,7 @@ def test_allocator_temp():
 
 
 def test_allocator_reset():
+  """Function docstring."""
   alloc = RegisterAllocator()
   alloc.get_register("x")
   assert alloc._next_idx == 1
@@ -52,9 +59,11 @@ def test_allocator_reset():
 
 @pytest.fixture
 def mock_semantics():
+  """Function docstring."""
   mgr = MagicMock(spec=SemanticsManager)
 
   def resolve(kind, target):
+    """Function docstring."""
     if target != "sass":
       return None
     if kind == "Add":
@@ -66,6 +75,7 @@ def mock_semantics():
   mgr.resolve_variant.side_effect = resolve
 
   def get_def(kind):
+    """Function docstring."""
     if "Conv2d" in kind:
       return ("Conv2d", {})
     if "Linear" in kind:
@@ -77,6 +87,7 @@ def mock_semantics():
 
 
 def test_graph_to_sass_linear_flow(mock_semantics):
+  """Function docstring."""
   synth = SassSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [
@@ -102,6 +113,7 @@ def test_graph_to_sass_linear_flow(mock_semantics):
 
 
 def test_graph_to_sass_unmapped_op(mock_semantics):
+  """Function docstring."""
   synth = SassSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [LogicalNode("n1", "UnknownOp", {})]
@@ -112,6 +124,7 @@ def test_graph_to_sass_unmapped_op(mock_semantics):
 
 
 def test_graph_to_sass_macro_expansion(mock_semantics):
+  """Function docstring."""
   synth = SassSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [LogicalNode("conv1", "Conv2d", {"k": 3})]
@@ -127,6 +140,7 @@ def test_graph_to_sass_macro_expansion(mock_semantics):
 
 
 def test_graph_to_sass_output_node(mock_semantics):
+  """Function docstring."""
   synth = SassSynthesizer(mock_semantics)
   g = LogicalGraph()
   g.nodes = [LogicalNode("in1", "Input", {}), LogicalNode("out1", "Output", {})]
@@ -137,6 +151,7 @@ def test_graph_to_sass_output_node(mock_semantics):
 
 
 def test_sass_to_python_instruction():
+  """Function docstring."""
   synth = SassSynthesizer(MagicMock())
   inst = Instruction("FADD", [Register("R0"), Register("R1"), Register("R2")])
   mod = synth.to_python([inst])
@@ -145,6 +160,7 @@ def test_sass_to_python_instruction():
 
 
 def test_sass_to_python_immediates():
+  """Function docstring."""
   synth = SassSynthesizer(MagicMock())
   inst = Instruction("MOV", [Register("R0"), Immediate(16, is_hex=True)])
   mod = synth.to_python([inst])
@@ -153,10 +169,14 @@ def test_sass_to_python_immediates():
 
 
 def test_sass_to_python_no_dest():
+  """Function docstring."""
   synth = SassSynthesizer(MagicMock())
 
   class LabelRef:
+    """Class docstring."""
+
     def __str__(self):
+      """Function docstring."""
       return "L_TARGET"
 
   inst = Instruction("BRA", [LabelRef()])
@@ -167,10 +187,14 @@ def test_sass_to_python_no_dest():
 
 
 def test_sass_to_python_complex_operand():
+  """Function docstring."""
   synth = SassSynthesizer(MagicMock())
 
   class ComplexMem:
+    """Class docstring."""
+
     def __str__(self):
+      """Function docstring."""
       return "[R1 + 0x4]"
 
   inst = Instruction("LD", [Register("R0"), ComplexMem()])

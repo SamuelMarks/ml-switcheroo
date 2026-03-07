@@ -14,6 +14,7 @@ from ml_switcheroo.enums import SemanticTier
 # Ensure plugins are loaded
 @pytest.fixture(autouse=True)
 def reload_plugins():
+  """Function docstring."""
   from ml_switcheroo.core import hooks
   import ml_switcheroo.plugins.casting
 
@@ -23,6 +24,7 @@ def reload_plugins():
 
 
 def run_transpile(code: str, target: str) -> str:
+  """Function docstring."""
   mgr = SemanticsManager()
 
   # Manual Injection for testing

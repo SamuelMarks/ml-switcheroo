@@ -1,9 +1,12 @@
+"""Module docstring."""
+
 from typing import List
 from ml_switcheroo.compiler.frontends.sass.analysis import SassAnalyzer
 from ml_switcheroo.compiler.frontends.sass.nodes import Instruction, Register, Immediate, Predicate
 
 
 def make_inst(opcode, *operands):
+  """Function docstring."""
   # Helper to build instruction
   return Instruction(opcode, list(operands))
 

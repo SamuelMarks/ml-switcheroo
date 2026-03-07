@@ -21,6 +21,7 @@ from ml_switcheroo.compiler.registry import get_backend_class, is_isa_target
 
 @pytest.fixture
 def mock_semantics_patch():
+  """Function docstring."""
   # FIX: Patch the definition of SemanticsManager instead of the import,
   # as local imports inside methods cannot be patched via module attribute access.
   with patch("ml_switcheroo.semantics.manager.SemanticsManager") as MockMgr:
@@ -32,6 +33,7 @@ def mock_semantics_patch():
 
     # Helper logic for get_definition from name
     def get_def(name):
+      """Function docstring."""
       if name == "torch.abs":
         return ("Abs", mgr.data["Abs"])
       return None

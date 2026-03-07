@@ -33,6 +33,7 @@ def test_inspector_skips_blacklisted_module():
   with patch("inspect.getmembers") as mock_members:
     # Return members dict
     def get_members(obj):
+      """Function docstring."""
       if obj == mod:
         return [("dangerous", trap), ("safe_func", mod.safe_func)]
       return []

@@ -33,6 +33,7 @@ class MockAdapter:
   """
 
   def __init__(self):
+    """Function docstring."""
     self._mode = InitMode.LIVE
     self._snapshot_data = {}
 
@@ -42,6 +43,7 @@ class MockAdapter:
       self._snapshot_data = load_snapshot_for_adapter("mockfw")
 
   def collect_api(self, category: StandardCategory) -> list[GhostRef]:
+    """Function docstring."""
     if self._mode == InitMode.GHOST:
       # Ghost Implementation: specific logic to read from loaded dict
       if not self._snapshot_data:

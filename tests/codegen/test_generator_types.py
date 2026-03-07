@@ -17,6 +17,7 @@ def gen(tmp_path):
 
   # Mock templates for both torch and jax to allow multi-backend generation tests
   def mock_get_template(fw):
+    """Function docstring."""
     if fw == "torch":
       return {
         "import": "import torch",

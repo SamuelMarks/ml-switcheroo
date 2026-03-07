@@ -15,6 +15,7 @@ from unittest.mock import patch, MagicMock
 
 @pytest.fixture
 def linter():
+  """Function docstring."""
   # Ban 'torch' and 'flax'
   return StructuralLinter(forbidden_roots={"torch", "flax"})
 

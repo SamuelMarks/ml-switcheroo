@@ -34,6 +34,7 @@ L_GEMM_fc:
 
 @pytest.fixture
 def lifting_engine() -> ASTEngine:
+  """Function docstring."""
   # Ensure registration
   register_framework("sass")(SassAdapter)
   register_framework("torch")(TorchAdapter)

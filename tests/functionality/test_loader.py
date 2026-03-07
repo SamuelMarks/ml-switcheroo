@@ -1,9 +1,12 @@
+"""Module docstring."""
+
 import pytest
 from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 @pytest.fixture
 def manager():
+  """Function docstring."""
   return SemanticsManager()
 
 
@@ -39,5 +42,6 @@ def test_resolve_torch_sum(manager):
 
 
 def test_unknown_api_returns_none(manager):
+  """Function docstring."""
   result = manager.get_definition("torch.non_existent_function")
   assert result is None

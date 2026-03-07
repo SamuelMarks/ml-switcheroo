@@ -22,6 +22,7 @@ class MockAliasSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     # Skip init to avoid file loading
     self.data = {}
     self._reverse_index = {}
@@ -43,6 +44,7 @@ class MockAliasSemantics(SemanticsManager):
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name, s_api, t_api):
+    """Function docstring."""
     self.data[name] = {
       "variants": {"torch": {"api": s_api}, "jax": {"api": t_api}},
       "std_args": ["x"],

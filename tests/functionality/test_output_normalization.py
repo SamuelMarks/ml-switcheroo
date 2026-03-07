@@ -19,6 +19,7 @@ class MockOutputSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
@@ -34,6 +35,7 @@ class MockOutputSemantics(SemanticsManager):
     )
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def _inject(
@@ -43,6 +45,7 @@ class MockOutputSemantics(SemanticsManager):
     t_api,
     select_index=None,
   ):
+    """Function docstring."""
     variants = {"torch": {"api": s_api}, "jax": {"api": t_api}}
 
     target_var = variants["jax"]

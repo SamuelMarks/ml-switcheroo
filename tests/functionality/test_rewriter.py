@@ -23,6 +23,7 @@ class MockSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     # Skip super() init to avoid loading real files
     self.data = {}
     self.import_data = {}
@@ -45,9 +46,11 @@ class MockSemantics(SemanticsManager):
     self._inject("add", ["x", "y"], "torch.add", "jax.numpy.add")
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name, std_args, s_api, t_api, s_args=None, t_args=None):
+    """Function docstring."""
     s_def = {"api": s_api}
     if s_args:
       s_def["args"] = s_args
@@ -62,6 +65,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
   return TestRewriter(semantics, config)

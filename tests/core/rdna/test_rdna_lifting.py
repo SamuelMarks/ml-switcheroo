@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 from typing import List
 
 from ml_switcheroo.compiler.ir import LogicalGraph

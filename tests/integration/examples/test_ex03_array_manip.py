@@ -18,6 +18,7 @@ def transpose_matrices(batch):
 
 @pytest.fixture(scope="module")
 def semantics():
+  """Function docstring."""
   mgr = SemanticsManager()
 
   # Register NumPy provider for imports
@@ -56,6 +57,7 @@ def semantics():
   ],
 )
 def test_ex03_permute_plugin(semantics, target_fw, structural_check):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework=target_fw, strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)
   result = engine.run(SOURCE_TORCH)

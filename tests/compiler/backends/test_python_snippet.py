@@ -16,11 +16,13 @@ from ml_switcheroo.compiler.ir import LogicalNode
 
 @pytest.fixture
 def emitter_torch():
+  """Function docstring."""
   return PythonSnippetEmitter("torch")
 
 
 @pytest.fixture
 def emitter_flax():
+  """Function docstring."""
   return PythonSnippetEmitter("flax_nnx")
 
 

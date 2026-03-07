@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
@@ -10,6 +12,7 @@ import ml_switcheroo.core.hooks as hooks
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
+  """Function docstring."""
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
@@ -41,6 +44,7 @@ def get_rewriter_for_target(target_fw, pack_kw, pack_as=None):
 
   # Mock lookup
   def get_def_side_effect(name):
+    """Function docstring."""
     if name == "torch.permute":
       return "permute_dims", permute_def
     return None
@@ -52,6 +56,7 @@ def get_rewriter_for_target(target_fw, pack_kw, pack_as=None):
 
   # Mock resolution
   def resolve_variant(abstract_id, framework):
+    """Function docstring."""
     if abstract_id == "permute_dims" and framework == target_fw:
       return permute_def["variants"][target_fw]
     return None

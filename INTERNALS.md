@@ -24,6 +24,13 @@ code (ASTs) versus linear instruction streams (Graphs/ASM).
 The `ASTEngine` (`src/ml_switcheroo/core/engine.py`) is the central orchestration unit. Upon receiving source code, it
 classifies the Input/Output languages to route execution through one of two isomorphic pipelines.
 
+### 2.0. Route Selection Logic
+
+The Engine dynamically decides between the **Rewriter Pipeline** (Path A) and the **Compiler Pipeline** (Path B) based on:
+1. **Source Nature**: Code that is primarily linear instructions (e.g. SASS) gets parsed directly into the graph. Structured code (Python AST) defaults to the Rewriter Pipeline.
+2. **Target Nature**: If the target requires holistic layout logic (e.g. HTML, TikZ, Assembly), the code is explicitly diverted into Path B.
+3. **Graph-Guided Rewriting (The Loopback Bridge)**: For high-level architectural optimizations across Python dialects (e.g. fusing a Conv2d and a BatchNorm2d natively in JAX), the Rewriter Pipeline can perform a loopback. It lifts a snippet of the AST into a `LogicalGraph`, runs optimizer passes (fusion, parameter folding), and synthesizes it back into AST nodes. This loopback acts as a bridge, bringing Compiler-tier reasoning into the preservation-focused Rewriter Path.
+
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': { 'fontFamily': 'Google Sans', 'fontSize': '14px', 'lineColor': '#20344b'}}}%%
 graph TD
@@ -217,13 +224,23 @@ Uses `Hypothesis` strategies derived from ODL type hints.
 
 ---
 
-## 8. Glossary of Components
+## 8. Weight Migration Support
+
+Code semantics are only half of the ML model translation problem; migrating the physical weights safely and deterministically completes the pipeline.
+
+The translation engine implements dynamic, cross-format weight loading to map trained configurations across frameworks:
+* **HDF5 (`.h5` / `.keras`) & Safetensors**: Deep integration with structured file formats. Weights are matched to their re-written Python layer targets.
+* **Shape & Order Mismatches**: When swapping from e.g., PyTorch to JAX (Flax), memory layouts often require transposition (`OIHW` $\to$ `HWIO`). The weight migration routine dynamically transposes dimensions on load based on ODL layout mappings.
+
+---
+
+## 9. Glossary of Components
 
 | Component            | Responsibility                                                   |
 |:---------------------|:-----------------------------------------------------------------|
 | **ASTEngine**        | Orchestrator. Routes code to Rewriter or Compiler pipeline.      |
 | **SemanticsManager** | Database. Loads JSON specs/snapshots and manages lookup indexes. |
-| **PivotRewriter**    | Legacy shim wrapping the Rewriter Pipeline for testing.          |
+| **RewriterPipeline**    | Legacy shim wrapping the Rewriter Pipeline for testing.          |
 | **ApiPass**          | Transformer. Swaps function calls based on Hub definitions.      |
 | **ImportFixer**      | Refiner. Manages `import` statements and aliasing.               |
 | **Lifter**           | Frontend. Converts Assembly/Text to `LogicalGraph`.              |

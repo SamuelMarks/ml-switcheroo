@@ -567,7 +567,7 @@ variants:
     args:
         x: "a"
 ---
-operation: "Conv1d"
+operation: "conv1d"
 description: "1D convolution over input."
 std_args:
   - name: "input"
@@ -598,7 +598,7 @@ variants:
   keras:
     api: "keras.ops.conv"
 ---
-operation: "Conv2d"
+operation: "conv2d"
 description: "2D convolution over input."
 std_args:
   - name: "input"
@@ -628,7 +628,7 @@ variants:
   keras:
     api: "keras.ops.conv"
 ---
-operation: "Conv3d"
+operation: "conv3d"
 description: "3D convolution over input."
 std_args:
   - name: "input"

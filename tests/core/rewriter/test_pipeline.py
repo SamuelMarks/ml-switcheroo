@@ -15,6 +15,7 @@ class MockPass(RewriterPass):
   """Simple pass that injects a comment to verify execution."""
 
   def __init__(self, label: str) -> None:
+    """Function docstring."""
     self.label = label
 
   def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
@@ -74,6 +75,8 @@ def test_interface_enforcement() -> None:
   with pytest.raises(TypeError):
     # Should fail if transform not implemented
     class InvalidPass(RewriterPass):
+      """Class docstring."""
+
       pass
 
     InvalidPass()

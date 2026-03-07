@@ -14,11 +14,13 @@ from ml_switcheroo.utils.doc_renderer import OpPageRenderer
 
 @pytest.fixture
 def renderer():
+  """Function docstring."""
   return OpPageRenderer()
 
 
 @pytest.fixture
 def sample_context():
+  """Function docstring."""
   return {
     "name": "Linear",
     "description": "Linear transformation.",

@@ -16,6 +16,7 @@ import ml_switcheroo.plugins.device_checks
 
 @pytest.fixture
 def semantics():
+  """Function docstring."""
   # FIX: Previous tests might have cleared the global _HOOKS registry.
   # Since Python caches modules, re-running 'load_plugins' won't re-execute decorators
   # if module is already imported. We must force reload the plugin module containing
@@ -30,6 +31,7 @@ def semantics():
 
 
 def test_cuda_check_to_jax(semantics):
+  """Function docstring."""
   # Logic:
   # 1. Source: "if torch.cuda.is_available(): run_gpu()"
   # 2. Pivot: Rewriter identifies `torch.cuda.is_available` maps to `CudaAvailable`.

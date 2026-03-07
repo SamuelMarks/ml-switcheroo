@@ -1073,7 +1073,7 @@
     "required_imports": []
   },
   "Bool": {
-    "api": "'bool'",
+    "api": "bool",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1168,7 +1168,7 @@
     "required_imports": []
   },
   "CTCLoss": {
-    "api": "keras.losses.ctc",
+    "api": "keras.losses.CTC",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1628,10 +1628,13 @@
     "required_imports": []
   },
   "Conv1d": {
-    "api": "keras.ops.conv",
+    "api": "keras.layers.Conv1D",
     "args": {
-      "input": "inputs",
-      "weight": "kernel"
+      "bias": "use_bias",
+      "dilation": "dilation_rate",
+      "in_channels": null,
+      "out_channels": "filters",
+      "stride": "strides"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2134,7 +2137,7 @@
     "required_imports": []
   },
   "CosineSimilarityLoss": {
-    "api": "keras.losses.cosine_similarity",
+    "api": "keras.losses.CosineSimilarity",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2521,7 +2524,7 @@
     "required_imports": []
   },
   "DiceLoss": {
-    "api": "keras.losses.dice",
+    "api": "keras.losses.Dice",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2682,11 +2685,9 @@
     "required_imports": []
   },
   "Dropout": {
-    "api": "keras.random.dropout",
+    "api": "keras.layers.Dropout",
     "args": {
-      "input": "inputs",
-      "p": "rate",
-      "training": "training"
+      "p": "rate"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -3085,12 +3086,14 @@
     "required_imports": []
   },
   "Flatten": {
-    "api": "keras.ops.reshape",
+    "api": "keras.layers.Flatten",
+    "args": {
+      "end_dim": null,
+      "start_dim": null
+    },
     "dispatch_rules": [],
-    "macro_template": "{input}.reshape((-1,))",
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "flatten_range"
+    "required_imports": []
   },
   "FlaxLayer": {
     "api": "keras.layers.FlaxLayer",
@@ -3404,6 +3407,15 @@
       "approximate": "approximate"
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GeluApprox": {
+    "api": "keras.activations.gelu",
+    "dispatch_rules": [],
+    "inject_args": {
+      "approximate": true
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3776,7 +3788,7 @@
     "required_imports": []
   },
   "HingeLoss": {
-    "api": "keras.losses.hinge",
+    "api": "keras.losses.Hinge",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3816,7 +3828,7 @@
     "required_imports": []
   },
   "HuberLoss": {
-    "api": "keras.losses.huber",
+    "api": "keras.losses.Huber",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4466,6 +4478,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "LdExp": {
+    "api": "keras.ops.numpy.ldexp",
+    "args": {
+      "x1": "x1",
+      "x2": "x2"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Ldexp": {
     "dispatch_rules": [],
     "macro_template": "keras.ops.convert_to_tensor(np.ldexp({input}, {other}))",
@@ -4688,7 +4710,7 @@
     "required_imports": []
   },
   "LogCoshLoss": {
-    "api": "keras.losses.log_cosh",
+    "api": "keras.losses.LogCosh",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5096,25 +5118,25 @@
     "required_imports": []
   },
   "MeanAbsoluteError": {
-    "api": "keras.losses.mean_absolute_error",
+    "api": "keras.losses.MeanAbsoluteError",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "MeanAbsolutePercentageError": {
-    "api": "keras.losses.mean_absolute_percentage_error",
+    "api": "keras.losses.MeanAbsolutePercentageError",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "MeanSquaredError": {
-    "api": "keras.losses.mean_squared_error",
+    "api": "keras.losses.MeanSquaredError",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "MeanSquaredLogarithmicError": {
-    "api": "keras.losses.mean_squared_logarithmic_error",
+    "api": "keras.losses.MeanSquaredLogarithmicError",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5230,6 +5252,12 @@
   },
   "Mod": {
     "api": "keras.ops.mod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Model": {
+    "api": "keras.Model",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7479,7 +7507,7 @@
     "required_imports": []
   },
   "SparseCategoricalCrossentropy": {
-    "api": "keras.losses.sparse_categorical_crossentropy",
+    "api": "keras.losses.SparseCategoricalCrossentropy",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7839,12 +7867,7 @@
     "required_imports": []
   },
   "Tensor": {
-    "api": "keras.ops.convert_to_tensor",
-    "args": {
-      "data": "x",
-      "device": null,
-      "requires_grad": null
-    },
+    "api": "keras.KerasTensor",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8030,7 +8053,7 @@
     "required_imports": []
   },
   "TverskyLoss": {
-    "api": "keras.losses.tversky",
+    "api": "keras.losses.Tversky",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8973,6 +8996,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "build": {
+    "api": "keras.layers.ZeroPadding3D.build",
+    "args": {
+      "input_shape": "input_shape",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "categorical": {
     "api": "keras.random.categorical",
     "args": {
@@ -9097,32 +9130,23 @@
     "required_imports": []
   },
   "conv1d": {
-    "api": "keras.layers.Conv1D",
+    "api": "keras.ops.conv",
+    "args": {
+      "input": "inputs",
+      "weight": "kernel"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv2d": {
+    "api": "keras.ops.conv",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "conv3d": {
-    "api": "keras.layers.Conv3D",
-    "args": {
-      "activation": "activation",
-      "activity_regularizer": "activity_regularizer",
-      "bias_constraint": "bias_constraint",
-      "bias_initializer": "bias_initializer",
-      "bias_regularizer": "bias_regularizer",
-      "data_format": "data_format",
-      "dilation_rate": "dilation_rate",
-      "filters": "filters",
-      "groups": "groups",
-      "kernel_constraint": "kernel_constraint",
-      "kernel_initializer": "kernel_initializer",
-      "kernel_regularizer": "kernel_regularizer",
-      "kernel_size": "kernel_size",
-      "kwargs": "kwargs",
-      "padding": "padding",
-      "strides": "strides",
-      "use_bias": "use_bias"
-    },
+    "api": "keras.ops.conv",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9204,6 +9228,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "cosinesimilarityloss": {
+    "api": "keras.losses.cosine_similarity",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "count_nonzero": {
     "api": "keras.ops.numpy.count_nonzero",
     "args": {
@@ -9252,6 +9282,12 @@
       "target": "target",
       "target_length": "target_length"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ctcloss": {
+    "api": "keras.losses.ctc",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9309,6 +9345,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "deserializeloss": {
+    "api": "keras.losses.deserialize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "det": {
     "api": "keras.ops.det",
     "dispatch_rules": [],
@@ -9359,6 +9401,12 @@
       "offset": "offset",
       "x": "x"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "diceloss": {
+    "api": "keras.losses.dice",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9427,6 +9475,17 @@
       "query": "query",
       "scale": "scale",
       "value": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout": {
+    "api": "keras.random.dropout",
+    "args": {
+      "input": "inputs",
+      "p": "rate",
+      "training": "training"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -9588,6 +9647,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "flatten": {
+    "api": "keras.layers.Flatten",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "flip": {
     "api": "keras.ops.numpy.flip",
     "args": {
@@ -9696,6 +9761,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "getloss": {
+    "api": "keras.losses.get",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "greater": {
     "api": "keras.ops.greater",
     "dispatch_rules": [],
@@ -9786,6 +9857,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "hingeloss": {
+    "api": "keras.losses.hinge",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "histogram": {
     "api": "keras.ops.numpy.histogram",
     "args": {
@@ -9802,6 +9879,12 @@
     "args": {
       "xs": "xs"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "huberloss": {
+    "api": "keras.losses.huber",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -10012,6 +10095,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "kldivergence": {
+    "api": "keras.losses.kl_divergence",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "kron": {
     "api": "keras.ops.numpy.kron",
     "args": {
@@ -10187,6 +10276,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "logcoshloss": {
+    "api": "keras.losses.log_cosh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "logdet": {
     "api": "keras.ops.logdet",
     "args": {
@@ -10331,6 +10426,30 @@
   },
   "mean": {
     "api": "keras.ops.mean",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meanabsoluteerror": {
+    "api": "keras.losses.mean_absolute_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meanabsolutepercentageerror": {
+    "api": "keras.losses.mean_absolute_percentage_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meansquarederror": {
+    "api": "keras.losses.mean_squared_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meansquaredlogarithmicerror": {
+    "api": "keras.losses.mean_squared_logarithmic_error",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -10534,6 +10653,12 @@
       "recurse": "recurse",
       "self": "self"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "poissonloss": {
+    "api": "keras.losses.poisson",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -10852,6 +10977,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "serializeloss": {
+    "api": "keras.losses.serialize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "shuffle": {
     "api": "keras.random.shuffle",
     "args": {
@@ -10991,6 +11122,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "sparsecategoricalcrossentropy": {
+    "api": "keras.losses.sparse_categorical_crossentropy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "sqrt": {
     "api": "keras.ops.sqrt",
     "dispatch_rules": [],
@@ -11002,6 +11139,12 @@
     "args": {
       "x": "x"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "squaredhingeloss": {
+    "api": "keras.losses.squared_hinge",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -11138,6 +11281,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "tensor": {
+    "api": "keras.ops.convert_to_tensor",
+    "args": {
+      "data": "x",
+      "device": null,
+      "requires_grad": null
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "tensordot": {
     "api": "keras.ops.tensordot",
     "args": {
@@ -11259,6 +11413,12 @@
       "shape": "shape",
       "stddev": "stddev"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tverskyloss": {
+    "api": "keras.losses.tversky",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

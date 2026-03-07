@@ -14,7 +14,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self._reverse_index = {}
     self.framework_configs = {}
@@ -41,16 +44,20 @@ class MockSemantics(SemanticsManager):
     }
 
   def get_all_rng_methods(self) -> Set[str]:
+    """Function docstring."""
     return self._known_rng_methods
 
   def get_framework_config(self, framework: str) -> Dict[str, Any]:
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    """Function docstring."""
     return {}
 
 
 def test_conversion_trace_contains_diffs():
+  """Function docstring."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(semantics=semantics, config=config)
@@ -73,6 +80,7 @@ def test_conversion_trace_contains_diffs():
 
 
 def test_lifecycle_strip_trace():
+  """Function docstring."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   engine = ASTEngine(semantics=semantics, config=config)

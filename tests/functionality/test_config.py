@@ -23,6 +23,7 @@ def test_config_flags():
   c = RuntimeConfig()
   # Default False
   assert c.enable_graph_optimization is False
+  assert c.enable_sharding is False
   # Default True
   assert c.enable_import_fixer is True
 

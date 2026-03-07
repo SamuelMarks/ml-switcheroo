@@ -447,7 +447,7 @@ variants:
   torch: 
     api: "torch.contiguous_format" 
 ---
-operation: "Conv1d" 
+operation: "conv1d" 
 description: "Applies a 1D convolution over an input signal." 
 std_args: 
   - name: "input" 
@@ -498,7 +498,7 @@ variants:
       input: "NCW->NWC" # MLX expects NLC (channel last) typically for neural layers, but core might vary
       weight: "OIW->OWI" 
 ---
-operation: "Conv2d" 
+operation: "conv2d" 
 description: "Applies a 2D convolution." 
 std_args: 
   - name: "input" 
@@ -532,7 +532,7 @@ variants:
        input: "NCHW->NHWC" 
        weight: "OIHW->OHWI" 
 ---
-operation: "Conv3d" 
+operation: "conv3d" 
 description: "Applies a 3D convolution." 
 std_args: 
   - name: "input" 
@@ -563,7 +563,7 @@ variants:
     layout_map: 
       input: "NCDHW->NDHWC" 
 ---
-operation: "ConvTbc" 
+operation: "conv_tbc" 
 description: "Applies a 1D convolution over input (Time, Batch, Channels)." 
 std_args: 
   - name: "input" 
@@ -580,7 +580,7 @@ variants:
   torch: 
     api: "torch.conv_tbc" 
 ---
-operation: "ConvTranspose1d" 
+operation: "conv_transpose1d" 
 description: "Applies a 1D transposed convolution operator." 
 std_args: 
   - name: "input" 
@@ -609,7 +609,7 @@ variants:
   torch: 
     api: "torch.nn.functional.conv_transpose1d" 
 ---
-operation: "ConvTranspose2d" 
+operation: "conv_transpose2d" 
 description: "Applies a 2D transposed convolution operator." 
 std_args: 
   - name: "input" 

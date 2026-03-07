@@ -1,4 +1,4 @@
-operation: "Flatten"
+operation: "flatten"
 description: "Flattens input by reshaping a range of dimensions into a single dimension."
 # Explicitly marking as Array API ensures finding it via function calls like torch.flatten takes priority
 op_type: "function"
@@ -34,3 +34,12 @@ variants:
   numpy:
     api: "numpy.reshape"
     requires_plugin: "flatten_range"
+
+  keras:
+    api: "keras.layers.Flatten"
+    op_type: "class"
+  tensorflow:
+    api: "tf.keras.layers.Flatten"
+    op_type: "class"
+  mlx:
+    api: "mlx.core.flatten"

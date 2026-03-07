@@ -1047,6 +1047,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Capsule": {
+    "api": "numpy.random.bit_generator.BitGenerator.capsule",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "CartesianProd": {
     "api": "numpy.meshgrid",
     "dispatch_rules": [],
@@ -1232,6 +1239,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Code": {
+    "api": "numpy.f2py.tests.test_crackfortran.TestDimSpec.code",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ColumnConcatenation": {
     "api": "numpy.c_",
     "dispatch_rules": [],
@@ -1396,6 +1410,15 @@
     "api": "numpy.ascontiguousarray",
     "args": {
       "x": "a"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Conv": {
+    "api": "numpy.distutils.from_template.conv",
+    "args": {
+      "astr": "astr"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2262,7 +2285,11 @@
     "required_imports": []
   },
   "Flatten": {
-    "api": "numpy.reshape",
+    "api": "numpy.matrixlib.defmatrix.matrix.flatten",
+    "args": {
+      "order": "order",
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
@@ -4188,6 +4215,11 @@
       "import scipy.stats"
     ]
   },
+  "Model": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Modf": {
     "api": "numpy.modf",
     "dispatch_rules": [],
@@ -5347,6 +5379,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Round_": {
+    "api": "numpy.ma.core.round_",
+    "args": {
+      "a": "a",
+      "decimals": "decimals",
+      "out": "out"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "RowStack": {
     "api": "numpy.vstack",
     "dispatch_rules": [],
@@ -6215,11 +6258,7 @@
     "required_imports": []
   },
   "Tensor": {
-    "api": "numpy.array",
-    "args": {
-      "device": null,
-      "requires_grad": null
-    },
+    "api": "numpy.ndarray",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6443,6 +6482,13 @@
   },
   "TruncInplace": {
     "api": "np.trunc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Type": {
+    "api": "numpy.f2py.tests.test_array_from_pyobj.Array.type",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6701,6 +6747,13 @@
       "x": "x",
       "y": "y"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Value": {
+    "api": "numpy.lib.tests.test_mixins.ArrayLike.value",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7412,6 +7465,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "build": {
+    "api": "numpy.distutils.command.build.build",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "byte": {
     "api": "numpy.byte",
     "args": {},
@@ -7633,6 +7693,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "cpu": {
+    "api": "numpy.distutils.cpuinfo.cpu",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "cross": {
     "api": "numpy.cross",
     "dispatch_rules": [],
@@ -7669,6 +7736,13 @@
   },
   "degrees": {
     "api": "numpy.degrees",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "depends": {
+    "api": "numpy.distutils.extension.Extension.depends",
     "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -7851,6 +7925,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "euler_gamma": {
+    "api": "numpy.euler_gamma",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "exp": {
     "api": "np.exp",
     "dispatch_rules": [],
@@ -7913,6 +7994,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "fftfreq": {
+    "api": "numpy.fft.helper.fftfreq",
+    "args": {
+      "d": "d",
+      "device": "device",
+      "n": "n"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "fftn": {
     "api": "numpy.fft.fftn",
     "dispatch_rules": [],
@@ -7921,6 +8013,10 @@
   },
   "fftshift": {
     "api": "numpy.fft.fftshift",
+    "args": {
+      "axes": "axes",
+      "x": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7942,6 +8038,13 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "flatten": {
+    "api": "numpy.reshape",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "flatten_range"
   },
   "flexible": {
     "api": "numpy.flexible",
@@ -8093,6 +8196,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "get": {
+    "api": "numpy.distutils.fcompiler.environment.EnvironmentConfig.get",
+    "args": {
+      "default": "default",
+      "name": "name",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "get_parameter": {
     "api": "numpy.f2py.crackfortran.get_parameters",
     "args": {
@@ -8206,6 +8320,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "id": {
+    "api": "numpy.ma.timer_comparison.ModuleTester.id",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "ifft": {
     "api": "numpy.fft.ifft",
     "dispatch_rules": [],
@@ -8220,6 +8341,10 @@
   },
   "ifftshift": {
     "api": "numpy.fft.ifftshift",
+    "args": {
+      "axes": "axes",
+      "x": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8889,6 +9014,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "paths": {
+    "api": "numpy.distutils.misc_util.Configuration.paths",
+    "args": {
+      "kws": "kws",
+      "paths": "paths",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "permutation": {
     "api": "numpy.random.mtrand.permutation",
     "args": {},
@@ -9130,6 +9266,17 @@
   },
   "rfft": {
     "api": "numpy.fft.rfft",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rfftfreq": {
+    "api": "numpy.fft.helper.rfftfreq",
+    "args": {
+      "d": "d",
+      "device": "device",
+      "n": "n"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9429,6 +9576,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "tensor": {
+    "api": "numpy.array",
+    "args": {
+      "device": null,
+      "requires_grad": null
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "tensordot": {
     "api": "numpy.tensordot",
     "dispatch_rules": [],
@@ -9661,6 +9818,15 @@
       "ddof": "ddof",
       "dtype": "dtype",
       "out": "out",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "variables": {
+    "api": "numpy.distutils.npy_pkg_config.VariableSet.variables",
+    "args": {
       "self": "self"
     },
     "dispatch_rules": [],

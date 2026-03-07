@@ -46,6 +46,7 @@ def parse_call_node(code):
 
 
 def to_code(node):
+  """Function docstring."""
   return cst.Module(body=[cst.SimpleStatementLine([cst.Expr(node)])]).code
 
 
@@ -153,3 +154,92 @@ def test_flax_strategy_forward(mock_ctx):
 
   assert "mask=m" in res_code
   assert "key_padding_mask" not in res_code
+
+
+# --- Torch Strategy Tests ---
+from ml_switcheroo.plugins.attention_packing import repack_attn_torch
+
+
+def test_torch_strategy_constructor_happy_path(mock_ctx):
+  """Function docstring."""
+  mock_ctx.lookup_api.return_value = "torch.nn.MultiheadAttention"
+
+  code = "m = keras.layers.MultiHeadAttention(key_dim=256, in_features=128, dropout_rate=0.1, other_arg=1)"
+  call_node = parse_call_node(code)
+
+  res = repack_attn_torch(call_node, mock_ctx)
+  res_code = to_code(res).replace(" ", "")
+
+  assert "torch.nn.MultiheadAttention" in res_code
+  assert "embed_dim=256" in res_code
+  assert "embed_dim=128" in res_code
+  assert "dropout=0.1" in res_code
+  assert "other_arg=1" in res_code
+  assert "batch_first=True" in res_code
+
+
+def test_torch_strategy_constructor_with_batch_first(mock_ctx):
+  """Function docstring."""
+  mock_ctx.lookup_api.return_value = "torch.nn.MultiheadAttention"
+
+  code = "m = Attention(key_dim=256, batch_first=False)"
+  call_node = parse_call_node(code)
+
+  res = repack_attn_torch(call_node, mock_ctx)
+  res_code = to_code(res).replace(" ", "")
+
+  assert "batch_first=False" in res_code
+
+
+def test_torch_strategy_constructor_missing_api(mock_ctx):
+  """Function docstring."""
+  mock_ctx.lookup_api.return_value = None
+
+  code = "m = keras.layers.MultiHeadAttention(key_dim=256)"
+  call_node = parse_call_node(code)
+
+  res = repack_attn_torch(call_node, mock_ctx)
+  assert res is call_node
+
+
+def test_torch_strategy_forward(mock_ctx):
+  """Function docstring."""
+  code = "y = self.attn(q, k, v, mask=m1, attention_mask=m2, other_arg=2)"
+  call_node = parse_call_node(code)
+
+  res = repack_attn_torch(call_node, mock_ctx)
+  res_code = to_code(res).replace(" ", "")
+
+  assert "(q,k,v" in res_code
+  assert "attn_mask=m1" in res_code
+  assert "attn_mask=m2" in res_code
+  assert "other_arg=2" in res_code
+
+
+def test_torch_strategy_forward_keras_style(mock_ctx):
+  """Function docstring."""
+  code2 = "y = self.attn(q, key=k, v=v, attention_mask=m)"
+  call_node2 = parse_call_node(code2)
+  res2 = repack_attn_torch(call_node2, mock_ctx)
+  res_code2 = to_code(res2).replace(" ", "")
+
+  assert "(q,k,v=v" in res_code2
+  assert "attn_mask=m" in res_code2
+
+
+def test_torch_strategy_forward_too_few_args(mock_ctx):
+  """Function docstring."""
+  code = "y = self.attn(q, k)"
+  call_node = parse_call_node(code)
+  res = repack_attn_torch(call_node, mock_ctx)
+  assert res is call_node
+
+
+def test_torch_constructor_fallback(mock_ctx):
+  """Function docstring."""
+  mock_ctx.lookup_api.return_value = "torch.nn.MultiheadAttention"
+  code = "m = Attention(256, 8)"
+  call_node = parse_call_node(code)
+  res = repack_attn_torch(call_node, mock_ctx)
+  res_code = to_code(res).replace(" ", "")
+  assert "torch.nn.MultiheadAttention(256,8,batch_first=True)" in res_code

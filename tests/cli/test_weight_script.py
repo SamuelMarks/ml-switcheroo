@@ -84,6 +84,7 @@ def mock_semantics() -> MagicMock:
 
   # Hook up lookup
   def get_def(name: str):
+    """Function docstring."""
     if "Conv2d" in name:
       return conv_def
     if "Linear" in name:

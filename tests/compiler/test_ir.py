@@ -66,3 +66,45 @@ def test_topological_sort_cycle_resilience():
   # Should fall back to definition order or partial sort
   sorted_nodes = topological_sort(g)
   assert len(sorted_nodes) == 2
+
+
+def test_logical_axis():
+  """Verify LogicalAxis properties."""
+  from ml_switcheroo.compiler.ir import LogicalAxis
+
+  axis = LogicalAxis(name="embed", size=1024)
+  assert axis.name == "embed"
+  assert axis.size == 1024
+
+
+def test_partition_spec():
+  """Verify PartitionSpec properties."""
+  from ml_switcheroo.compiler.ir import PartitionSpec
+
+  spec = PartitionSpec(axes=("data", None, ("model", "tensor")))
+  assert len(spec.axes) == 3
+  assert spec.axes[0] == "data"
+  assert spec.axes[1] is None
+  assert spec.axes[2] == ("model", "tensor")
+
+
+def test_logical_mesh():
+  """Verify LogicalMesh properties."""
+  from ml_switcheroo.compiler.ir import LogicalMesh
+
+  mesh = LogicalMesh(shape={"data": 2, "model": 4})
+  assert mesh.shape["data"] == 2
+  assert mesh.shape["model"] == 4
+
+
+def test_graph_sharding_attributes():
+  """Verify sharding and mesh attributes on nodes and graph."""
+  from ml_switcheroo.compiler.ir import LogicalMesh, PartitionSpec, LogicalGraph, LogicalNode
+
+  mesh = LogicalMesh(shape={"data": 8})
+  spec = PartitionSpec(axes=("data", None))
+  node = LogicalNode(id="sharded_node", kind="Op", sharding=spec)
+  graph = LogicalGraph(nodes=[node], mesh=mesh)
+
+  assert graph.mesh.shape["data"] == 8
+  assert graph.nodes[0].sharding.axes == ("data", None)

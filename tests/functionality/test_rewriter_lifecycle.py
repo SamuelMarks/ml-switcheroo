@@ -15,6 +15,7 @@ class MockSemantics(SemanticsManager):
   """Minimal semantics manager with Trait Support."""
 
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self._reverse_index = {}
     self._key_origins = {}
@@ -50,12 +51,15 @@ class MockSemantics(SemanticsManager):
     }
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def is_verified(self, _id):
+    """Function docstring."""
     return True
 
   def _inject(self, name, s_api, t_api, min_v=None, max_v=None, deprecated=False, replaced_by=None):
+    """Function docstring."""
     tgt_var = {"api": t_api}
     if min_v:
       tgt_var["min_version"] = min_v
@@ -74,6 +78,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   return TestRewriter(semantics, config)

@@ -13,7 +13,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspectorExtras:
+  """Class docstring."""
+
   def inspect(self, fw, **kwargs):
+    """Function docstring."""
     if "torch" in fw:
       return {
         # Should go to Extras (via dynamic regex)

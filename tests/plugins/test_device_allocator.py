@@ -35,6 +35,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   # 1. Register Hook
   hooks._HOOKS["device_allocator"] = transform_device_allocator
   hooks._PLUGINS_LOADED = True
@@ -59,6 +60,7 @@ def rewriter():
 
   # Resolution Logic
   def resolve_variant(aid, fw):
+    """Function docstring."""
     # Return valid dict if variant exists
     if aid == "device" and fw in device_def["variants"]:
       return device_def["variants"][fw]
@@ -73,6 +75,7 @@ def rewriter():
   with patch("ml_switcheroo.plugins.device_allocator.get_adapter") as mock_get_adapter:
 
     def adapter_side_effect(name):
+      """Function docstring."""
       if name == "jax":
         return JaxCoreAdapter()
       if name == "numpy":
@@ -85,42 +88,49 @@ def rewriter():
 
 
 def test_cuda_mapping_default_index(rewriter):
+  """Function docstring."""
   code = "d = torch.device('cuda')"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[0]" in result
 
 
 def test_cuda_mapping_explicit_colon_index(rewriter):
+  """Function docstring."""
   code = "d = torch.device('cuda:1')"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[1]" in result
 
 
 def test_cpu_mapping(rewriter):
+  """Function docstring."""
   code = "d = torch.device('cpu')"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('cpu')[0]" in result
 
 
 def test_variable_passthrough(rewriter):
+  """Function docstring."""
   code = "d = torch.device(my_backend)"
   result = rewrite_code(rewriter, code)
   assert "jax.devices(my_backend)[0]" in result
 
 
 def test_second_arg_index(rewriter):
+  """Function docstring."""
   code = "d = torch.device('cuda', 2)"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[2]" in result
 
 
 def test_mps_mapping(rewriter):
+  """Function docstring."""
   code = "d = torch.device('mps')"
   result = rewrite_code(rewriter, code)
   assert "jax.devices('gpu')[0]" in result
 
 
 def test_ignore_wrong_fw(rewriter):
+  """Function docstring."""
   # Reconfigure context to generic numpy
   # Note: Must use config setter to update PivotRewriter's property source
   rewriter.context.config.target_framework = "numpy"

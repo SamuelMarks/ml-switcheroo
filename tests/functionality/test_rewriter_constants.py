@@ -10,7 +10,10 @@ from ml_switcheroo.config import RuntimeConfig
 
 
 class MockSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     # Skip init to avoid file load
     self.data = {}
     self._reverse_index = {}
@@ -24,9 +27,11 @@ class MockSemantics(SemanticsManager):
     self._inject_func("abs", {"torch": "torch.abs", "jax": "jax.numpy.abs"})
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def _inject_const(self, name, mapping):
+    """Function docstring."""
     # Constants have no std_args
     self.data[name] = {"variants": {}}
     for fw, api in mapping.items():
@@ -34,6 +39,7 @@ class MockSemantics(SemanticsManager):
       self._reverse_index[api] = (name, self.data[name])
 
   def _inject_func(self, name, mapping):
+    """Function docstring."""
     # Functions have std_args
     self.data[name] = {"variants": {}, "std_args": ["x"]}
     for fw, api in mapping.items():
@@ -43,11 +49,13 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(MockSemantics(), config)
 
 
 def rewrite(rewriter, code):
+  """Function docstring."""
   tree = cst.parse_module(code)
   return rewriter.convert(tree).code
 

@@ -17,30 +17,41 @@ class MockKerasObject:
   """Mock base class to satisfy is_keras_object check."""
 
   def get_config(self):
+    """Function docstring."""
     return {}
 
   def from_config(self):
+    """Function docstring."""
     return {}
 
 
 # Concrete Mocks
 class MeanSquaredError(MockKerasObject):
+  """Class docstring."""
+
   pass
 
 
 class Adam(MockKerasObject):
+  """Class docstring."""
+
   pass
 
 
 class Optimizer(MockKerasObject):
+  """Class docstring."""
+
   pass
 
 
 class Loss(MockKerasObject):
+  """Class docstring."""
+
   pass
 
 
 def mock_relu(x):
+  """Function docstring."""
   pass
 
 
@@ -113,6 +124,7 @@ def mock_keras_env():
     with patch("inspect.getmembers") as mock_members:
 
       def get_members(obj):
+        """Function docstring."""
         # Identify modules by object identity
         return module_content_map.get(id(obj), [])
 

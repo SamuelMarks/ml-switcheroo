@@ -12,6 +12,7 @@ from ml_switcheroo.frameworks.mlx import MLXAdapter
 
 @pytest.fixture
 def adapter():
+  """Function docstring."""
   return MLXAdapter()
 
 

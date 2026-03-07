@@ -100,8 +100,9 @@ locally.
 
 ## ⚡ 2. The Transpilation Engine
 
-The `ASTEngine` orchestrates the conversion pipeline. It handles parsing, deep analysis, optimization, and
-transformation. 
+The `ASTEngine` orchestrates the conversion pipeline. It handles parsing, deep analysis, optimization, and transformation by performing **Route Selection**:
+* **Rewriter Pipeline:** Used when both source and target are high-level frameworks (e.g., PyTorch to JAX).
+* **Compiler Pipeline:** Used when the source or target involves an ISA (e.g., SASS/RDNA) or visual documentation targets. 
 
 ```mermaid
 graph TD
@@ -216,7 +217,7 @@ Adapters define `PluginTraits` to toggle logic blocks used by generic plugins:
 The system favors declarative logic in the ODL (Operation Definition Language) over python code, but falls back to
 Python Hooks for complex structural changes. 
 
-### Core DSL Logic (In `PivotRewriter` via Passes) 
+### Core DSL Logic (In `RewriterPipeline` via Passes) 
 
 Common patterns are handled directly by the engine using the ODL schema: 
 

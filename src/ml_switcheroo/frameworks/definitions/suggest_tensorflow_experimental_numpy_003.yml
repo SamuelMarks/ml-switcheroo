@@ -488,7 +488,7 @@ variants:
     # No fix, trunc is equiv
     api: "mlx.core.trunc"
 ---
-operation: "Flatten"
+operation: "flatten"
 description: "Return a copy of the array collapsed into one dimension."
 std_args:
   - name: "a"

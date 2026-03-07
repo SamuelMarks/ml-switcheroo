@@ -15,6 +15,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def generator(tmp_path):
+  """Function docstring."""
   mgr = MagicMock(spec=SemanticsManager)
   # Return dummy template to ensure generation loop runs
   templates = {"torch": {"import": "import torch", "convert_input": "{np_var}", "to_numpy": "{res_var}"}}

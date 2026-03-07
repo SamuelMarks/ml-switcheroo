@@ -11,6 +11,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture(scope="module")
 def mgr():
+  """Function docstring."""
   return SemanticsManager()
 
 

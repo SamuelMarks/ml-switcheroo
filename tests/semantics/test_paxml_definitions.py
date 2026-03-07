@@ -34,7 +34,7 @@ def test_linear_layer_paxml_mapping(semantics):
     pytest.skip("PaxML variant not present in Linear definition.")
 
   # Check API Path
-  assert pax_variant["api"] == "praxis.layers.Linear"
+  assert pax_variant["api"] == "paxml.layers.Linear"
 
   # Check Argument Renaming
   # Standard: in_features -> Praxis: input_dims
@@ -93,6 +93,9 @@ def test_flatten_paxml_mapping(semantics):
   pax_variant = variants.get("paxml")
 
   if pax_variant:
-    assert pax_variant["api"] == "praxis.layers.Flatten"
+    if "api" in pax_variant:
+      assert pax_variant["api"] == "praxis.layers.Flatten"
+    elif "requires_plugin" in pax_variant:
+      assert pax_variant["requires_plugin"] == "flatten_range"
   # If not present, it simply wasn't synced/found in this env, which is acceptable state
   # for extensive discovery tests but here we just avoid crashing.

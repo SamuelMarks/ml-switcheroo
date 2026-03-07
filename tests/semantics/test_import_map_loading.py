@@ -12,7 +12,10 @@ from ml_switcheroo.enums import SemanticTier
 
 
 class MockSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self._providers = {}
     self._source_registry = {}
     self.data = {}

@@ -28,6 +28,7 @@ class MockSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self._reverse_index = {}
     self.import_data = {}  # Required by ASTEngine
@@ -40,9 +41,11 @@ class MockSemantics(SemanticsManager):
     self._inject("bad_op", "torch.bad", None)
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name, s_api, t_api):
+    """Function docstring."""
     variants = {"torch": {"api": s_api}}
     if t_api:
       variants["jax"] = {"api": t_api}
@@ -55,6 +58,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   return PivotRewriter(semantics, config)

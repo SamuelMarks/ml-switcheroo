@@ -1939,7 +1939,6 @@
     "required_imports": []
   },
   "Conv1d": {
-    "api": "jax.lax.conv_general_dilated",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1955,7 +1954,6 @@
     "required_imports": []
   },
   "Conv2d": {
-    "api": "jax.lax.conv_general_dilated",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3132,13 +3130,10 @@
     "required_imports": []
   },
   "Flatten": {
-    "api": "jax.lax.collapse",
+    "api": "jax.tree_util.tree_flatten",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [
-      "import jax"
-    ],
-    "requires_plugin": "flatten_range"
+    "required_imports": []
   },
   "Flexible": {
     "api": "jax.numpy.flexible",
@@ -8412,11 +8407,7 @@
     "required_imports": []
   },
   "Tensor": {
-    "api": "jax.numpy.array",
-    "args": {
-      "device": null,
-      "requires_grad": null
-    },
+    "api": "jax.Array",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -10001,6 +9992,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "conv1d": {
+    "api": "jax.lax.conv_general_dilated",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv2d": {
+    "api": "jax.lax.conv_general_dilated",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv3d": {
+    "api": "jax.lax.conv_general_dilated",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "convex_kl_divergence": {
     "api": "optax.convex_kl_divergence",
     "args": {},
@@ -10078,6 +10087,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "cosinesimilarityloss": {
+    "api": "optax.cosine_similarity",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
+    "dispatch_rules": [],
+    "macro_template": "-optax.cosine_similarity({y_pred}, {y_true})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "count_nonzero": {
     "api": "jax.numpy.count_nonzero",
     "dispatch_rules": [],
@@ -10120,6 +10140,16 @@
   "ctc_loss_with_forward_probs": {
     "api": "optax.ctc_loss_with_forward_probs",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ctcloss": {
+    "api": "optax.ctc_loss",
+    "args": {
+      "y_pred": "logits",
+      "y_true": "labels"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -10188,6 +10218,11 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "deserializeloss": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "det": {
     "api": "jax.numpy.linalg.det",
     "dispatch_rules": [],
@@ -10245,6 +10280,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "diceloss": {
+    "dispatch_rules": [],
+    "macro_template": "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "diff": {
     "api": "jax.numpy.diff",
     "dispatch_rules": [],
@@ -10294,6 +10335,13 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "dropout": {
+    "api": "jax_dropout_proxy",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "inject_prng"
   },
   "dsplit": {
     "api": "jax.numpy.dsplit",
@@ -10575,6 +10623,15 @@
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
+  },
+  "flatten": {
+    "api": "jax.lax.collapse",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [
+      "import jax"
+    ],
+    "requires_plugin": "flatten_range"
   },
   "flexible": {
     "api": "jax.numpy.flexible",
@@ -10864,6 +10921,11 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "getloss": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "grad": {
     "api": "jax.grad",
     "args": {
@@ -10918,6 +10980,16 @@
   "hinge_loss": {
     "api": "optax.hinge_loss",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "hingeloss": {
+    "api": "optax.hinge_loss",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -10997,6 +11069,16 @@
   "huber_loss": {
     "api": "optax.huber_loss",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "huberloss": {
+    "api": "optax.huber_loss",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -11420,6 +11502,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "kldivergence": {
+    "api": "optax.kl_divergence",
+    "dispatch_rules": [],
+    "macro_template": "optax.kl_divergence(optax.log_softmax({y_pred}), {y_true})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "kron": {
     "api": "jax.numpy.kron",
     "dispatch_rules": [],
@@ -11526,6 +11615,16 @@
   },
   "logaddexp2": {
     "api": "jax.numpy.logaddexp2",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logcoshloss": {
+    "api": "optax.log_cosh",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -11674,6 +11773,42 @@
   "mean": {
     "api": "jax.numpy.mean",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meanabsoluteerror": {
+    "api": "optax.l1_loss",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meanabsolutepercentageerror": {
+    "api": "optax.mape_loss",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meansquarederror": {
+    "api": "optax.squared_error",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meansquaredlogarithmicerror": {
+    "dispatch_rules": [],
+    "macro_template": "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -12062,6 +12197,16 @@
       "inplace": "inplace",
       "mask": "mask",
       "vals": "vals"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "poissonloss": {
+    "api": "optax.poisson_loss",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -12460,6 +12605,11 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "serializeloss": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "set": {
     "api": "optax.tree.set",
     "args": {},
@@ -12644,6 +12794,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "sparsecategoricalcrossentropy": {
+    "api": "optax.softmax_cross_entropy_with_integer_labels",
+    "args": {
+      "y_pred": "logits",
+      "y_true": "labels"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "split_key_like": {
     "api": "optax.tree.split_key_like",
     "args": {},
@@ -12667,6 +12827,12 @@
     "api": "optax.squared_error",
     "args": {},
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "squaredhingeloss": {
+    "dispatch_rules": [],
+    "macro_template": "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -12780,6 +12946,16 @@
   },
   "tanh": {
     "api": "jax.numpy.tanh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tensor": {
+    "api": "jax.numpy.array",
+    "args": {
+      "device": null,
+      "requires_grad": null
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -12979,6 +13155,11 @@
   },
   "trunc": {
     "api": "jax.numpy.trunc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tverskyloss": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

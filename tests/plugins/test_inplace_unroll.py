@@ -31,6 +31,7 @@ def rewrite_code(rewriter: PivotRewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   # 1. Register Hook
   hooks._HOOKS["unroll_inplace_ops"] = unroll_inplace_ops
   hooks._PLUGINS_LOADED = True
@@ -39,6 +40,7 @@ def rewriter():
   mgr = MagicMock()
 
   def get_def(name):
+    """Function docstring."""
     if "add_" in name or "sub_" in name:
       base = name.split(".")[-1]
       return (

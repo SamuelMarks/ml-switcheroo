@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
@@ -17,6 +19,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["cuda_is_available"] = transform_cuda_check
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -32,12 +35,14 @@ def rewriter():
 
 
 def test_is_available_transform(rewriter):
+  """Function docstring."""
   code = "if torch.cuda.is_available(): pass"
   res = rewrite_code(rewriter, code)
   assert "len(jax.devices('gpu')) > 0" in res
 
 
 def test_assignment_transform(rewriter):
+  """Function docstring."""
   code = "x = torch.cuda.is_available()"
   res = rewrite_code(rewriter, code)
   assert "len(jax.devices('gpu')) > 0" in res

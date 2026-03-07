@@ -80,8 +80,8 @@ def test_harvest_variable_naming_convention(harvester, tmp_path):
       - `axis=np_axis`: target='axis', value='np_axis' -> std='axis'. Map: 'axis' -> 'axis'.
   """
   # Setup mock for 'sum'
-  harvester.semantics.get_definition_by_id.side_effect = (
-    lambda op: {"variants": {"jax": {"api": "jax.numpy.sum", "args": {}}}} if op == "sum" else None
+  harvester.semantics.get_definition_by_id.side_effect = lambda op: (
+    {"variants": {"jax": {"api": "jax.numpy.sum", "args": {}}}} if op == "sum" else None
   )
 
   test_code = """
@@ -118,6 +118,7 @@ def test_harvest_ignores_irrelevant_functions(harvester, tmp_path):
 
   # Semantics returns define for 'other' but points to 'jax.numpy.other'
   def side_effect(op):
+    """Function docstring."""
     if op == "other":
       return {"variants": {"jax": {"api": "jax.numpy.other"}}}
     return None
@@ -156,6 +157,7 @@ def test_sub():
 
   # Mock return for both ops
   def side_effect(op_id):
+    """Function docstring."""
     if op_id == "add":
       return {"variants": {"jax": {"api": "jax.numpy.add", "args": {}}}}
     if op_id == "sub":

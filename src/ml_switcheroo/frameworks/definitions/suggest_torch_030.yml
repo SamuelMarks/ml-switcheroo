@@ -449,7 +449,7 @@ variants:
   mlx:
     api: "mlx.core.tanh"
 ---
-operation: "Tensor"
+operation: "tensor"
 description: "Constructs a tensor from data."
 std_args:
   - name: "data"

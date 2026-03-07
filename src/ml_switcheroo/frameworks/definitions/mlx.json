@@ -915,6 +915,13 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Bias": {
+    "api": "mlx.nn.layers.convolution_transpose.ConvTranspose3d.bias",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Bidirectional": {
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -1591,20 +1598,8 @@
     "required_imports": []
   },
   "Conv1d": {
-    "api": "mlx.core.conv1d",
-    "args": {
-      "dilation": "dilation",
-      "groups": "groups",
-      "input": "input",
-      "padding": "padding",
-      "stride": "stride",
-      "weight": "weight"
-    },
+    "api": "mlx.nn.Conv1d",
     "dispatch_rules": [],
-    "layout_map": {
-      "input": "NCW->NWC",
-      "weight": "OIW->OWI"
-    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1638,21 +1633,20 @@
     "required_imports": []
   },
   "Conv2d": {
-    "api": "mlx.core.conv2d",
-    "dispatch_rules": [],
-    "layout_map": {
-      "input": "NCHW->NHWC",
-      "weight": "OIHW->OHWI"
+    "api": "mlx.nn.Conv2d",
+    "args": {
+      "in_channels": "in_channels",
+      "kernel_size": "kernel_size",
+      "out_channels": "out_channels",
+      "stride": "stride"
     },
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Conv3d": {
-    "api": "mlx.core.conv3d",
+    "api": "mlx.nn.Conv3d",
     "dispatch_rules": [],
-    "layout_map": {
-      "input": "NCDHW->NDHWC"
-    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1674,6 +1668,7 @@
     "required_imports": []
   },
   "ConvTranspose2d": {
+    "api": "mlx.nn.ConvTranspose2d",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1722,13 +1717,8 @@
     "required_imports": []
   },
   "CosineSimilarityLoss": {
-    "api": "mlx.nn.losses.cosine_similarity",
-    "args": {
-      "y_pred": "predictions",
-      "y_true": "targets"
-    },
+    "api": "mlx.nn.losses.CosineSimilarityLoss",
     "dispatch_rules": [],
-    "macro_template": "mlx.nn.losses.cosine_similarity({y_pred}, {y_true}, axis={axis})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -2095,6 +2085,9 @@
   },
   "Dropout": {
     "api": "mlx.nn.Dropout",
+    "args": {
+      "p": "p"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2138,6 +2131,16 @@
     "api": "mlx.nn.ELU",
     "args": {
       "alpha": "alpha"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Eig": {
+    "api": "mlx.core.linalg.eig",
+    "args": {
+      "a": "a",
+      "stream": "stream"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -2461,6 +2464,7 @@
       "start_dim": "start_axis"
     },
     "dispatch_rules": [],
+    "missing_message": "Use reshape",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3104,7 +3108,7 @@
     "required_imports": []
   },
   "HuberLoss": {
-    "api": "mlx.nn.losses.huber_loss",
+    "api": "mlx.nn.losses.HuberLoss",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3928,7 +3932,7 @@
     "required_imports": []
   },
   "LogCoshLoss": {
-    "api": "mlx.nn.losses.log_cosh_loss",
+    "api": "mlx.nn.losses.LogCoshLoss",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4296,13 +4300,13 @@
     "required_imports": []
   },
   "MeanAbsoluteError": {
-    "api": "mlx.nn.losses.l1_loss",
+    "api": "mlx.nn.losses.L1Loss",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "MeanSquaredError": {
-    "api": "mlx.nn.losses.mse_loss",
+    "api": "mlx.nn.losses.MSELoss",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4414,6 +4418,12 @@
   },
   "Mod": {
     "api": "mx.remainder",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Model": {
+    "api": "mlx.nn.Module",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6435,10 +6445,9 @@
     "required_imports": []
   },
   "SparseCategoricalCrossentropy": {
-    "api": "mlx.nn.losses.cross_entropy",
+    "api": "mlx.nn.losses.CrossEntropy",
     "args": {
-      "y_pred": "logits",
-      "y_true": "targets"
+      "from_logits": "with_logits"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -6742,10 +6751,6 @@
   },
   "Tensor": {
     "api": "mlx.core.array",
-    "args": {
-      "device": null,
-      "requires_grad": null
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6996,6 +7001,13 @@
   "Trunc": {
     "dispatch_rules": [],
     "macro_template": "mlx.core.array(np.trunc(np.array({input})))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Type": {
+    "api": "mlx.core.Device.type",
+    "args": {},
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -7968,10 +7980,18 @@
   "conv1d": {
     "api": "mlx.core.conv1d",
     "args": {
-      "args": "args",
-      "kwargs": "kwargs"
+      "dilation": "dilation",
+      "groups": "groups",
+      "input": "input",
+      "padding": "padding",
+      "stride": "stride",
+      "weight": "weight"
     },
     "dispatch_rules": [],
+    "layout_map": {
+      "input": "NCW->NWC",
+      "weight": "OIW->OWI"
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -7992,6 +8012,16 @@
       "kwargs": "kwargs"
     },
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "conv2d": {
+    "api": "mlx.core.conv2d",
+    "dispatch_rules": [],
+    "layout_map": {
+      "input": "NCHW->NHWC",
+      "weight": "OIHW->OHWI"
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -8017,11 +8047,10 @@
   },
   "conv3d": {
     "api": "mlx.core.conv3d",
-    "args": {
-      "args": "args",
-      "kwargs": "kwargs"
-    },
     "dispatch_rules": [],
+    "layout_map": {
+      "input": "NCDHW->NDHWC"
+    },
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -8056,11 +8085,6 @@
     "required_imports": []
   },
   "conv_transpose2d": {
-    "api": "mlx.core.conv_transpose2d",
-    "args": {
-      "args": "args",
-      "kwargs": "kwargs"
-    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8094,6 +8118,17 @@
   "cosh": {
     "api": "mlx.core.cosh",
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "cosinesimilarityloss": {
+    "api": "mlx.nn.losses.cosine_similarity",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
+    "dispatch_rules": [],
+    "macro_template": "mlx.nn.losses.cosine_similarity({y_pred}, {y_true}, axis={axis})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -8149,6 +8184,16 @@
   },
   "degrees": {
     "api": "mlx.core.degrees",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "depends": {
+    "api": "mlx.core.depends",
     "args": {
       "args": "args",
       "kwargs": "kwargs"
@@ -8249,6 +8294,12 @@
   "downscale_factor": {
     "api": "mlx.nn.layers.upsample.Upsample.scale_factor",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout": {
+    "api": "mlx.nn.Dropout",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8549,6 +8600,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "flatten": {
+    "api": "mlx.core.flatten",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "flatten_parameters": {
     "api": "mlx.core.flatten",
     "args": {
@@ -8759,6 +8816,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "hingeloss": {
+    "api": "mlx.nn.losses.hinge_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "huber_loss": {
     "api": "mlx.nn.losses.huber_loss",
     "args": {
@@ -8767,6 +8830,12 @@
       "reduction": "reduction",
       "targets": "targets"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "huberloss": {
+    "api": "mlx.nn.losses.huber_loss",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9067,6 +9136,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "kldivergence": {
+    "api": "mlx.nn.losses.kl_div_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "kron": {
     "api": "mlx.core.kron",
     "args": {
@@ -9282,6 +9357,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "logcoshloss": {
+    "api": "mlx.nn.losses.log_cosh_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "logger": {
     "api": "mlx.core.array.log",
     "args": {},
@@ -9400,6 +9481,18 @@
   },
   "mean": {
     "api": "mlx.core.mean",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meanabsoluteerror": {
+    "api": "mlx.nn.losses.l1_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meansquarederror": {
+    "api": "mlx.nn.losses.mse_loss",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -10218,6 +10311,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "sparsecategoricalcrossentropy": {
+    "api": "mlx.nn.losses.cross_entropy",
+    "args": {
+      "y_pred": "logits",
+      "y_true": "targets"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "sqrt": {
     "api": "mlx.core.sqrt",
     "dispatch_rules": [],
@@ -10364,6 +10467,16 @@
   },
   "tanh": {
     "api": "mlx.core.tanh",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "tensor": {
+    "api": "mlx.core.array",
+    "args": {
+      "device": null,
+      "requires_grad": null
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

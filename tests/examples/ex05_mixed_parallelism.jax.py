@@ -1,8 +1,11 @@
+"""Module docstring."""
+
 import jax
 import jax.numpy as jnp
 
 
 def parallel_step(x):
+  """Function docstring."""
   # This standard op SHOULD be converted to Torch
   val = jnp.abs(x)
 

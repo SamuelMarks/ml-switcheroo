@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 from unittest.mock import MagicMock
 
@@ -9,14 +11,17 @@ class MockAllocator:
   """Mock implementation of RegisterAllocatorProtocol."""
 
   def __init__(self) -> None:
+    """Function docstring."""
     self.counter = 10
 
   def get_register(self, var_name: str) -> Register:
+    """Function docstring."""
     if var_name == "output":
       return Register("R0")
     return Register("R_VAR")
 
   def allocate_temp(self) -> Register:
+    """Function docstring."""
     name = f"R{self.counter}"
     self.counter += 1
     return Register(name)
@@ -71,6 +76,7 @@ def test_expand_linear_structure() -> None:
 
 
 def test_expand_linear_no_bias() -> None:
+  """Function docstring."""
   alloc = MockAllocator()
   nodes = expand_linear(alloc, "fc1", {"in_features": 128})
   opcodes = [n.opcode for n in nodes if isinstance(n, Instruction)]
@@ -79,6 +85,7 @@ def test_expand_linear_no_bias() -> None:
 
 
 def test_comment_generation() -> None:
+  """Function docstring."""
   alloc = MockAllocator()
   nodes = expand_conv2d(alloc, "layer1", {})
   text = [n.text for n in nodes if isinstance(n, Comment)]

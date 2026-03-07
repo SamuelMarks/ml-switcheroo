@@ -90,6 +90,13 @@ ml_switcheroo suggest torch.nn.functional.grid_sample > prompt.txt
 # Copy prompt.txt to ChatGPT / Claude / Local LLM to get valid YAML.
 ```
 
+**Automated Loop:** You can use the `scripts/suggest_gen_llm_loop.sh` script to automate building context for the LLM. It batches missing operations and copies a massive prompt into your clipboard (using `code2prompt` and `pbcopy`), which includes everything the LLM needs to write the ODL files.
+
+```bash
+# Prepare the prompt for batch N (e.g., 1) in your clipboard
+./scripts/suggest_gen_llm_loop.sh 1
+```
+
 ### 3. Validate Safety (`dry-run`)
 
 LLMs can hallucinate. Always preview the changes before injecting code.

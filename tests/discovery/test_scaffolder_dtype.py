@@ -9,13 +9,17 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockAttributeInspector:
+  """Class docstring."""
+
   def inspect(self, fw, **kwargs):
+    """Function docstring."""
     if "torch" in fw:
       return {"torch.float32": {"name": "float32", "type": "attribute", "params": []}}
     return {}
 
 
 def test_scaffolder_propagates_type_field(tmp_path):
+  """Function docstring."""
   clean_semantics = SemanticsManager()
   clean_semantics.data = {}
   # Fix: Initialize missing attributes

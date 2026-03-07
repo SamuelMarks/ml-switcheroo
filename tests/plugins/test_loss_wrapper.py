@@ -68,10 +68,12 @@ def rewriter_factory():
   all_defs = {"CrossEntropyLoss": ce_def, "Mean": mean_def, "Sum": sum_def}
 
   def get_def(name):
+    """Function docstring."""
     return ("CrossEntropyLoss", ce_def) if "cross_entropy" in name else None
 
   # Mock Resolve Logic
   def resolve_variant(aid, fw):
+    """Function docstring."""
     if aid in all_defs and fw in all_defs[aid]["variants"]:
       return all_defs[aid]["variants"][fw]
     return None
@@ -83,6 +85,7 @@ def rewriter_factory():
   mgr.get_framework_config.return_value = {}
 
   def create(target_fw):
+    """Function docstring."""
     cfg = RuntimeConfig(source_framework="torch", target_framework=target_fw)
     rw = PivotRewriter(mgr, cfg)
     # Inject Op ID for context lookup

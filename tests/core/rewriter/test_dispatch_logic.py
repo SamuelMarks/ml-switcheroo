@@ -21,7 +21,10 @@ from ml_switcheroo.core.dsl import Rule, LogicOp
 
 
 class MockDispatchSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     # Skip super
     self.data = {}
     self._reverse_index = {}
@@ -106,6 +109,7 @@ class MockDispatchSemantics(SemanticsManager):
     self._reverse_index["torch.process"] = ("process", process_def)
 
   def get_definition(self, name):
+    """Function docstring."""
     # Heuristic lookup to handle method calls like "x.clamp"
     if name.endswith("resize"):
       return ("resize", self.data["resize"])
@@ -116,17 +120,20 @@ class MockDispatchSemantics(SemanticsManager):
     return self._reverse_index.get(name)
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   semantics = MockDispatchSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)
 
 
 def rewrite(rewriter, code):
+  """Function docstring."""
   tree = cst.parse_module(code)
   # Use pipeline conversion via convert method
   return rewriter.convert(tree).code

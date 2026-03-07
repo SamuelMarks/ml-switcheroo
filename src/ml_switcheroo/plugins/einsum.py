@@ -71,7 +71,7 @@ def normalize_einsum(node: cst.Call, ctx: HookContext) -> cst.Call:
   # 2. Argument Analysis
   if not node.args:
     # No arguments to normalize, just rename
-    return node.with_changes(func=new_func)
+    return node.with_changes(func=new_func)  # pragma: no cover
 
   args: List[cst.Arg] = list(node.args)
 

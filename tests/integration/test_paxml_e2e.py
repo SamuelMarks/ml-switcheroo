@@ -16,6 +16,7 @@ EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
 
 
 def _read_code(filename: str) -> str:
+  """Function docstring."""
   path = EXAMPLES_DIR / filename
   return path.read_text(encoding="utf-8")
 
@@ -26,6 +27,7 @@ class PaxE2ESemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     # New attributes
     self._providers = {}
@@ -89,12 +91,15 @@ class PaxE2ESemantics(SemanticsManager):
 
   # Fix: Implement required method for PurityScanner
   def get_all_rng_methods(self):
+    """Function docstring."""
     return self._known_rng_methods
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def _add_op(self, name, args, torch, pax, tier=None):
+    """Function docstring."""
     self.data[name] = {
       "std_args": args,
       "variants": {"torch": {"api": torch}, "paxml": {"api": pax}},
@@ -110,12 +115,14 @@ class PaxE2ESemantics(SemanticsManager):
       self._key_origins[name] = SemanticTier.ARRAY_API.value
 
   def _alias(self, api_str, abstract_name):
+    """Function docstring."""
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
 
 
 @pytest.fixture
 def pax_engine():
+  """Function docstring."""
   semantics = PaxE2ESemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="paxml", strict_mode=False)
   return ASTEngine(semantics=semantics, config=config)

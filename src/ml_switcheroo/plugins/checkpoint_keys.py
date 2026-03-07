@@ -93,7 +93,7 @@ def transform_checkpoint_keys(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   # 1. Identify 'state_dict' argument (usually arg 0)
   args = list(node.args)
   if not args:
-    return node
+    return node  # pragma: no cover
 
   state_arg = args[0]  # Assume pos arg 0 is state_dict
 

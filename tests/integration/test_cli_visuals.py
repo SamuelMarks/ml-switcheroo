@@ -12,7 +12,10 @@ from rich.console import Console
 
 # Use a mock Semantics Manager to ensure snapshot stability.
 class StableMockSemantics(SemanticsManager):
+  """Class docstring."""
+
   def get_known_apis(self):
+    """Function docstring."""
     return {
       "abs": {"std_args": ["x"], "variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}},
       "magic_op": {
@@ -29,13 +32,17 @@ class StableMockSemantics(SemanticsManager):
     }
 
   def get_definition(self, api_name):
+    """Function docstring."""
     if api_name == "torch.abs":
       return "abs", {}
     return None
 
 
 class MockInspector:
+  """Class docstring."""
+
   def inspect(self, _pkg):
+    """Function docstring."""
     return {
       "torch.abs": {"name": "abs", "params": ["x"], "docstring_summary": "Calculates abs."},
       "torch.new_thing": {"name": "new_thing", "params": ["a", "b"], "docstring_summary": "Brand new feature."},
@@ -84,6 +91,7 @@ def test_matrix_visual_snapshot(snapshot, tmp_path):
   output = console.export_text()
 
   def header_insensitive(text: str) -> str:
+    """Function docstring."""
     lines = text.splitlines()
     if not lines:
       return text

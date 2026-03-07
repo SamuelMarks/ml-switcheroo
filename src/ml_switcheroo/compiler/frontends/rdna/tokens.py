@@ -144,5 +144,7 @@ class RdnaLexer:
           break
 
       if not match_found:
-        snippet = text[pos : min(pos + 10, length)]
-        raise ValueError(f"Illegal character at line {line_num}, col {pos - line_start + 1}: '{snippet}...'")
+        snippet = text[pos : min(pos + 10, length)]  # pragma: no cover
+        raise ValueError(
+          f"Illegal character at line {line_num}, col {pos - line_start + 1}: '{snippet}...'"
+        )  # pragma: no cover

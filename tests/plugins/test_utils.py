@@ -17,12 +17,14 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_create_dotted_name_simple():
+  """Function docstring."""
   node = create_dotted_name("numpy")
   assert isinstance(node, cst.Name)
   assert node.value == "numpy"
 
 
 def test_create_dotted_name_chained():
+  """Function docstring."""
   node = create_dotted_name("jax.numpy.add")
   # Structure: Attribute(value=Attribute(value=Name(jax), attr=numpy), attr=add)
   assert isinstance(node, cst.Attribute)
@@ -33,6 +35,7 @@ def test_create_dotted_name_chained():
 
 @pytest.fixture
 def mock_ctx():
+  """Function docstring."""
   semantics = MagicMock(spec=SemanticsManager)
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
 

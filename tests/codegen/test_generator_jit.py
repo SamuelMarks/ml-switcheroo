@@ -18,11 +18,13 @@ class MockTraitSemantics(SemanticsManager):
   """Ensures get_framework_config returns static args."""
 
   def __init__(self, templates=None):
+    """Function docstring."""
     self.custom_templates = templates or {}
     # Ensure test_templates exists for runtime generator iteration
     self.test_templates = self.custom_templates
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     if framework == "jax":
       return {"traits": {"jit_static_args": ["axis", "keepdims"]}}
     if framework == "tinygrad":
@@ -31,6 +33,7 @@ class MockTraitSemantics(SemanticsManager):
     return {}
 
   def get_test_template(self, fw):
+    """Function docstring."""
     if fw in self.custom_templates:
       return self.custom_templates[fw]
 

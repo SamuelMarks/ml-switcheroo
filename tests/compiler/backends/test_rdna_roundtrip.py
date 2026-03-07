@@ -15,9 +15,11 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 @pytest.fixture
 def semantics_mgr():
+  """Function docstring."""
   mgr = MagicMock(spec=SemanticsManager)
 
   def get_def(kind):
+    """Function docstring."""
     if kind == "Add":
       return ("Add", {})
     if "Conv2d" in kind:
@@ -25,6 +27,7 @@ def semantics_mgr():
     return None
 
   def resolve_var(aid, fw):
+    """Function docstring."""
     if fw == "rdna" and aid == "Add":
       return {"api": "v_add_f32"}
     return None

@@ -20,6 +20,7 @@ class MockSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     # Initialize empty
     self.data = {}
     self._reverse_index = {}
@@ -68,18 +69,22 @@ class MockSemantics(SemanticsManager):
     )
 
   def _inject(self, name, tier, variants, std_args):
+    """Function docstring."""
     self.data[name] = {"variants": variants, "std_args": std_args}
     self._key_origins[name] = tier
 
   def get_known_apis(self):
+    """Function docstring."""
     return self.data
 
   def get_definition_by_id(self, op_name):
+    """Function docstring."""
     return self.data.get(op_name)
 
 
 @pytest.fixture
 def generator():
+  """Function docstring."""
   semantics = MockSemantics()
   return MigrationGuideGenerator(semantics)
 

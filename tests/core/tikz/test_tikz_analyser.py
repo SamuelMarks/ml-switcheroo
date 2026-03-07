@@ -14,6 +14,7 @@ from ml_switcheroo.core.tikz.analyser import GraphExtractor, LogicalNode, Logica
 
 
 def parse_and_extract(code: str) -> "LogicalGraph":
+  """Function docstring."""
   module = cst.parse_module(code)
   extractor = GraphExtractor()
   module.visit(extractor)

@@ -22,6 +22,7 @@ LEGACY_MATH_JSON = {
 
 @pytest.fixture
 def legacy_env(tmp_path):
+  """Function docstring."""
   root = tmp_path / "src"
   sem_dir = root / "semantics"
   snap_dir = root / "snapshots"

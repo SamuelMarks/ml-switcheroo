@@ -17,6 +17,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 # Use MagicMock instead of partial class mock to ensure attributes exist
 @pytest.fixture
 def mock_semantics():
+  """Function docstring."""
   mgr = MagicMock(spec=SemanticsManager)
 
   # Data definitions
@@ -34,6 +35,7 @@ def mock_semantics():
 
   # Wire methods
   def resolve(aid, fw):
+    """Function docstring."""
     if aid in data and fw in data[aid]["variants"]:
       return data[aid]["variants"][fw]
     return None

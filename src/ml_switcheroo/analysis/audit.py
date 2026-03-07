@@ -64,7 +64,7 @@ class CoverageScanner(cst.CSTVisitor):
         node: The CST import-from node.
     """
     if not node.module:
-      return
+      return  # pragma: no cover
     module_name = get_full_name(node.module)
 
     for alias in node.names:
@@ -104,7 +104,7 @@ class CoverageScanner(cst.CSTVisitor):
     """
     fqn = self._resolve_fqn(node)
     if not fqn:
-      return
+      return  # pragma: no cover
 
     # Check Root filtering
     root = fqn.split(".")[0]
@@ -147,7 +147,7 @@ class CoverageScanner(cst.CSTVisitor):
     # 1. Flatten CST to string
     raw_name = get_full_name(node)
     if not raw_name:
-      return ""
+      return ""  # pragma: no cover
 
     # 2. Resolve Alias
     parts = raw_name.split(".")

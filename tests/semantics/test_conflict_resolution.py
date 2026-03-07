@@ -20,6 +20,7 @@ class MockConflictSemantics(SemanticsManager):
   """Subclass to intercept loading logic for testing."""
 
   def __init__(self):
+    """Function docstring."""
     # We manually init structures to skip real file loading
     self.data = {}
     self._reverse_index = {}

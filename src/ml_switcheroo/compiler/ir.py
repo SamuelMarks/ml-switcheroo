@@ -9,8 +9,46 @@ It acts as the contract between the Frontend (Ingestion) and the Backend (Synthe
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional, Union, Tuple
 from collections import defaultdict, deque
+
+
+@dataclass
+class LogicalAxis:
+  """
+  Represents a named dimension for tensor sizes and sharding (e.g., 'batch', 'embed', 'heads').
+  """
+
+  name: str
+  """Name of the logical axis."""
+
+  size: Optional[int] = None
+  """Optional fixed size of the axis."""
+
+
+@dataclass
+class PartitionSpec:
+  """
+  Describes how a tensor's dimensions are mapped to a logical mesh.
+
+  Each element in `axes` corresponds to a tensor dimension. An element can be:
+  - A string representing the mesh axis name (e.g., 'data').
+  - A tuple of strings for multi-axis sharding (e.g., ('data', 'model')).
+  - None for a replicated/unsharded dimension.
+  """
+
+  axes: Tuple[Optional[Union[str, Tuple[str, ...]]], ...]
+  """Tuple mapping tensor dimensions to mesh axes."""
+
+
+@dataclass
+class LogicalMesh:
+  """
+  Represents a multi-dimensional grid of devices for distributed execution.
+  """
+
+  shape: Dict[str, int]
+  """Mapping of mesh axis names to their sizes (e.g., {'data': 4, 'model': 2})."""
 
 
 @dataclass
@@ -23,10 +61,13 @@ class LogicalNode:
   """Unique identifier (e.g. 'conv1')."""
 
   kind: str
-  """Operation type (e.g. 'Conv2d', 'Input', 'Output')."""
+  """Operation type. Standard types include 'Conv2d', 'Linear', 'Input', 'Output', as well as advanced primitives like 'SwiGLU', 'RoPE', 'RMSNorm', and 'VisionPatchEmbedding')."""
 
   metadata: Dict[str, str] = field(default_factory=dict)
   """Dictionary of configuration parameters (e.g. ``kernel_size=3``)."""
+
+  sharding: Optional[PartitionSpec] = None
+  """Optional layout specification for distributed placement of this node's output."""
 
 
 @dataclass
@@ -56,6 +97,9 @@ class LogicalGraph:
 
   edges: List[LogicalEdge] = field(default_factory=list)
   """List of directed edges between nodes."""
+
+  mesh: Optional[LogicalMesh] = None
+  """Optional logical device mesh for distributed training/inference."""
 
 
 def topological_sort(graph: LogicalGraph) -> List[LogicalNode]:

@@ -25,7 +25,6 @@ extensions = [
   "sphinx.ext.napoleon",
   "sphinx.ext.linkcode",  # Using linkcode for GitHub source linking
   "sphinx.ext.intersphinx",
-  "autoapi.extension",
   "sphinxcontrib.autodoc_pydantic",
   "myst_parser",
   "sphinxcontrib.mermaid",
@@ -33,6 +32,9 @@ extensions = [
   "sphinx_material",
   "ml_switcheroo.sphinx_ext",
 ]
+
+if os.environ.get("HOMEPAGE_ONLY") != "1":
+  extensions.append("autoapi.extension")
 
 # -- Warning Suppression -----------------------------------------------------
 # Silence autoapi import resolution warnings (static analysis noise)
@@ -48,7 +50,6 @@ autoapi_options = [
   "show-inheritance",
   "show-module-summary",
   "special-members",
-  "imported-members",
 ]
 # Strict ignore patterns
 autoapi_ignore = ["*migrations*", "*/tests/*", "*test_*.py", "*/sphinx_ext/*"]
@@ -162,3 +163,8 @@ def linkcode_resolve(domain, info):
   # Construct GitHub URL (assuming master branch)
   blob_url = f"https://github.com/SamuelMarks/ml-switcheroo/blob/master/{rel_path}#L{lineno}-L{end_lineno}"
   return blob_url
+
+
+napoleon_use_ivar = True
+napoleon_use_rtype = False
+suppress_warnings = ["config.cache"]

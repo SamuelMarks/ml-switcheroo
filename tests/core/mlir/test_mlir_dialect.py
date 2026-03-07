@@ -14,11 +14,13 @@ from ml_switcheroo.core.mlir.dialect import DialectRegistry
 
 
 def test_valid_module():
+  """Function docstring."""
   op = OperationNode(name="sw.module", attributes=[AttributeNode("sym_name", '"MyMod"')], regions=[RegionNode()])
   assert DialectRegistry.validate_op(op) is True
 
 
 def test_invalid_module_no_name():
+  """Function docstring."""
   op = OperationNode(
     name="sw.module",
     attributes=[],  # Missing sym_name
@@ -28,11 +30,13 @@ def test_invalid_module_no_name():
 
 
 def test_valid_func():
+  """Function docstring."""
   op = OperationNode(name="sw.func", attributes=[AttributeNode("sym_name", '"f"')], regions=[RegionNode()])
   assert DialectRegistry.validate_op(op) is True
 
 
 def test_invalid_func_no_region():
+  """Function docstring."""
   op = OperationNode(
     name="sw.func",
     attributes=[AttributeNode("sym_name", '"f"')],
@@ -42,26 +46,31 @@ def test_invalid_func_no_region():
 
 
 def test_valid_op_instantiation():
+  """Function docstring."""
   op = OperationNode(name="sw.op", results=[ValueNode("%0")], attributes=[AttributeNode("type", '"Linear"')])
   assert DialectRegistry.validate_op(op) is True
 
 
 def test_invalid_op_no_result():
+  """Function docstring."""
   # sw.op implies creating something (e.g. a layer instance)
   op = OperationNode(name="sw.op", results=[], attributes=[AttributeNode("type", '"Linear"')])
   assert DialectRegistry.validate_op(op) is False
 
 
 def test_unknown_sw_op():
+  """Function docstring."""
   op = OperationNode(name="sw.magic")
   assert DialectRegistry.validate_op(op) is False
 
 
 def test_external_dialect_allowed():
+  """Function docstring."""
   # 'std.add' is not in our registry, but doesn't start with sw., so we pass it
   op = OperationNode(name="std.add")
   assert DialectRegistry.validate_op(op) is True
 
 
 def test_abstract_mapping():
+  """Function docstring."""
   assert DialectRegistry.get_abstract_op("Linear") == "sw.op"

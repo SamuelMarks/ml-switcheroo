@@ -32,6 +32,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   # Register hook under the generic system trigger "transform_for_loop"
   # This overrides the default safety-warning plugin
   hooks._HOOKS["transform_for_loop"] = unroll_static_loops

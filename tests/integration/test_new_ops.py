@@ -75,6 +75,7 @@ class TransformerBlock(nn.Module):
 
 @pytest.fixture(scope="module")
 def semantics():
+  """Function docstring."""
   mgr = SemanticsManager()
 
   # 1. Embed
@@ -115,6 +116,7 @@ def semantics():
   }
 
   def inject(name, defn):
+    """Function docstring."""
     mgr.data[name] = defn
     for fw, v in defn["variants"].items():
       mgr._reverse_index[v["api"]] = (name, defn)
@@ -164,6 +166,7 @@ def semantics():
 
 
 def test_torch_to_flax_nnx_advanced_layers(semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
   result = engine.run(SOURCE_TORCH_NN)
@@ -177,6 +180,7 @@ def test_torch_to_flax_nnx_advanced_layers(semantics):
 
 
 def test_torch_to_mlx_advanced_layers(semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="mlx", strict_mode=False)
   engine = ASTEngine(semantics=semantics, config=config)
   result = engine.run(SOURCE_TORCH_NN)

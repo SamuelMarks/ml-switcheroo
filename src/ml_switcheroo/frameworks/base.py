@@ -72,93 +72,162 @@ class FrameworkAdapter(Protocol):
   _mode: InitMode = InitMode.LIVE
   _snapshot_data: Dict[str, Any] = {}
 
-  def __init__(self) -> None: ...
+  def __init__(self) -> None:
+    """TODO: Add docstring."""
+    ...
 
-  def convert(self, data: Any) -> Any: ...
-
-  @property
-  def test_config(self) -> Dict[str, str]: ...
-
-  @property
-  def harness_imports(self) -> List[str]: ...
-
-  def get_harness_init_code(self) -> str: ...
-
-  def get_to_numpy_code(self) -> str: ...
+  def convert(self, data: Any) -> Any:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def search_modules(self) -> List[str]: ...
+  def test_config(self) -> Dict[str, str]:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def display_name(self) -> str: ...
+  def harness_imports(self) -> List[str]:
+    """TODO: Add docstring."""
+    ...
+
+  def get_harness_init_code(self) -> str:
+    """TODO: Add docstring."""
+    ...
+
+  def get_to_numpy_code(self) -> str:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def ui_priority(self) -> int: ...
+  def search_modules(self) -> List[str]:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]: ...
+  def display_name(self) -> str:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def supported_tiers(self) -> List[SemanticTier]: ...
+  def ui_priority(self) -> int:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def import_alias(self) -> Tuple[str, str]: ...
+  def discovery_heuristics(self) -> Dict[str, List[str]]:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def inherits_from(self) -> Optional[str]: ...
+  def supported_tiers(self) -> List[SemanticTier]:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def structural_traits(self) -> StructuralTraits: ...
+  def import_alias(self) -> Tuple[str, str]:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def plugin_traits(self) -> PluginTraits: ...
+  def inherits_from(self) -> Optional[str]:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def rng_seed_methods(self) -> List[str]: ...
+  def structural_traits(self) -> StructuralTraits:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def declared_magic_args(self) -> List[str]: ...
+  def plugin_traits(self) -> PluginTraits:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def unsafe_submodules(self) -> Set[str]: ...
-
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str: ...
-
-  def get_device_check_syntax(self) -> str: ...
-
-  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str: ...
-
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str: ...
-
-  def get_serialization_imports(self) -> List[str]: ...
-
-  def get_weight_conversion_imports(self) -> List[str]: ...
-
-  def get_weight_load_code(self, path_var: str) -> str: ...
-
-  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str: ...
-
-  def get_weight_save_code(self, state_var: str, path_var: str) -> str: ...
-
-  def get_doc_url(self, api_name: str) -> Optional[str]: ...
-
-  def get_tiered_examples(self) -> Dict[str, str]: ...
+  def rng_seed_methods(self) -> List[str]:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def definitions(self) -> Dict[str, StandardMap]: ...
+  def declared_magic_args(self) -> List[str]:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def specifications(self) -> Dict[str, OperationDef]: ...
+  def unsafe_submodules(self) -> Set[str]:
+    """TODO: Add docstring."""
+    ...
+
+  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
+    """TODO: Add docstring."""
+    ...
+
+  def get_device_check_syntax(self) -> str:
+    """TODO: Add docstring."""
+    ...
+
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
+    """TODO: Add docstring."""
+    ...
+
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
+    """TODO: Add docstring."""
+    ...
+
+  def get_serialization_imports(self) -> List[str]:
+    """TODO: Add docstring."""
+    ...
+
+  def get_weight_conversion_imports(self) -> List[str]:
+    """TODO: Add docstring."""
+    ...
+
+  def get_weight_load_code(self, path_var: str) -> str:
+    """TODO: Add docstring."""
+    ...
+
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
+    """TODO: Add docstring."""
+    ...
+
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
+    """TODO: Add docstring."""
+    ...
+
+  def get_doc_url(self, api_name: str) -> Optional[str]:
+    """TODO: Add docstring."""
+    ...
+
+  def get_tiered_examples(self) -> Dict[str, str]:
+    """TODO: Add docstring."""
+    ...
 
   @property
-  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]: ...
+  def definitions(self) -> Dict[str, StandardMap]:
+    """TODO: Add docstring."""
+    ...
 
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]: ...
+  @property
+  def specifications(self) -> Dict[str, OperationDef]:
+    """TODO: Add docstring."""
+    ...
 
-  def apply_wiring(self, snapshot: Dict[str, Any]) -> None: ...
+  @property
+  def import_namespaces(self) -> Dict[str, Union[Dict[str, str], ImportConfig]]:
+    """TODO: Add docstring."""
+    ...
+
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    """TODO: Add docstring."""
+    ...
+
+  def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
+    """TODO: Add docstring."""
+    ...
 
 
 def load_snapshot_for_adapter(fw_key: str) -> Dict[str, Any]:
+  """TODO: Add docstring."""
   if not SNAPSHOT_DIR.exists():
     return {}
   candidates = sorted(list(SNAPSHOT_DIR.glob(f"{fw_key}_v*.json")))
@@ -177,7 +246,10 @@ _ADAPTER_REGISTRY: Dict[str, Type[FrameworkAdapter]] = {}
 
 
 def register_framework(name: str):
+  """TODO: Add docstring."""
+
   def wrapper(cls):
+    """TODO: Add docstring."""
     _ADAPTER_REGISTRY[name] = cls
     return cls
 
@@ -185,10 +257,12 @@ def register_framework(name: str):
 
 
 def available_frameworks() -> List[str]:
+  """TODO: Add docstring."""
   return list(_ADAPTER_REGISTRY.keys())
 
 
 def get_adapter(name: str) -> Optional[FrameworkAdapter]:
+  """TODO: Add docstring."""
   cls = _ADAPTER_REGISTRY.get(name)
   if cls:
     return cls()

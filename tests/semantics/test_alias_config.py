@@ -13,6 +13,7 @@ from ml_switcheroo.frameworks import register_framework
 
 
 def test_manager_uses_registry_defaults():
+  """Function docstring."""
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   aliases = mgr.get_framework_aliases()
@@ -21,10 +22,15 @@ def test_manager_uses_registry_defaults():
 
 
 def test_manager_picks_up_new_framework():
+  """Function docstring."""
+
   class FastAIAdapter:
+    """Class docstring."""
+
     import_alias = ("fastai.vision", "fv")
 
     def convert(self, x):
+      """Function docstring."""
       return x
 
   register_framework("fastai_test")(FastAIAdapter)
@@ -35,6 +41,7 @@ def test_manager_picks_up_new_framework():
 
 
 def test_manager_parses_json_alias_override():
+  """Function docstring."""
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   if not hasattr(mgr, "import_data"):
@@ -59,6 +66,7 @@ def test_manager_parses_json_alias_override():
 
 
 def test_import_fixer_uses_injected_aliases():
+  """Function docstring."""
   alias_map = {"jax": ("jaxoid", "jXd")}
 
   mgr = MagicMock(spec=SemanticsManager)

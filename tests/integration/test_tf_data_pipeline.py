@@ -23,6 +23,7 @@ def create_pipeline(x, y):
 
 @pytest.fixture
 def tf_semantics():
+  """Function docstring."""
   _HOOKS["tf_data_loader"] = transform_tf_dataloader
   mgr = SemanticsManager()
 
@@ -36,6 +37,7 @@ def tf_semantics():
 
 
 def test_tf_data_pipeline_conversion(tf_semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow", strict_mode=False)
   engine = ASTEngine(semantics=tf_semantics, config=config)
   result = engine.run(SOURCE)
@@ -53,6 +55,7 @@ def test_tf_data_pipeline_conversion(tf_semantics):
 
 
 def test_tf_data_pipeline_inline_construction(tf_semantics):
+  """Function docstring."""
   src_inline = "loader = DataLoader(TensorDataset(a, b), batch_size=32)"
   config = RuntimeConfig(source_framework="torch", target_framework="tensorflow")
   engine = ASTEngine(semantics=tf_semantics, config=config)

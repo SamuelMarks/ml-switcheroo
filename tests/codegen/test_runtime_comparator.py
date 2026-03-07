@@ -15,6 +15,7 @@ from ml_switcheroo.generated_tests.runtime import verify_results
 
 
 def test_compare_simple_arrays():
+  """Function docstring."""
   a = np.array([1.0, 2.0])
   b = np.array([1.000001, 2.0])  # Close enough
   assert verify_results(a, b)
@@ -24,12 +25,14 @@ def test_compare_simple_arrays():
 
 
 def test_compare_shapes_mismatch():
+  """Function docstring."""
   a = np.ones((2, 2))
   b = np.ones((2, 3))
   assert not verify_results(a, b)
 
 
 def test_compare_list_of_tensors():
+  """Function docstring."""
   # Scenario: split() output
   a = [np.zeros(2), np.ones(2)]
   b = [np.zeros(2), np.ones(2)]
@@ -40,6 +43,7 @@ def test_compare_list_of_tensors():
 
 
 def test_compare_tuple_structure():
+  """Function docstring."""
   a = (np.array(1), {"key": np.array(2)})
   b = (np.array(1), {"key": np.array(2)})
   assert verify_results(a, b)
@@ -54,6 +58,7 @@ def test_compare_tuple_structure():
 
 
 def test_compare_dict_mismatch():
+  """Function docstring."""
   a = {"x": 1}
   b = {"y": 1}
   assert not verify_results(a, b)
@@ -63,6 +68,7 @@ def test_compare_dict_mismatch():
 
 
 def test_compare_boolean_exact():
+  """Function docstring."""
   a = np.array([True, False])
   b = np.array([True, True])
   # Should perform exact match, not float epsilon
@@ -73,6 +79,7 @@ def test_compare_boolean_exact():
 
 
 def test_compare_nan_handling():
+  """Function docstring."""
   a = np.array([np.nan, 1.0])
   b = np.array([np.nan, 1.0])
   assert verify_results(a, b)
@@ -82,6 +89,7 @@ def test_compare_nan_handling():
 
 
 def test_compare_strings():
+  """Function docstring."""
   # Just in case some API returns metadata
   a = "same"
   b = "same"
@@ -90,6 +98,7 @@ def test_compare_strings():
 
 
 def test_compare_none():
+  """Function docstring."""
   assert verify_results(None, None)
   assert not verify_results(None, 1)
 

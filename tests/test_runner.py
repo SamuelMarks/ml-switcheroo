@@ -24,6 +24,7 @@ def mock_frameworks():
   """
 
   def create_safe_mock(name, ret_val=5.0):
+    """Function docstring."""
     # Create a mock that behaves like a module
     m = MagicMock(name=name)
     # Prevent iteration to differentiate from lists/iterables during inspection

@@ -36,7 +36,10 @@ class ConvNet(nn.Module):
 
 
 class MockFlaxSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self.import_data = {}
     self.framework_configs = {}
@@ -78,18 +81,22 @@ class MockFlaxSemantics(SemanticsManager):
     self._providers["flax_nnx"] = {SemanticTier.NEURAL: {"root": "flax", "sub": "nnx", "alias": "nnx"}}
 
   def get_all_rng_methods(self):
+    """Function docstring."""
     return set()
 
   def get_import_map(self, target_fw):
+    """Function docstring."""
     if target_fw == "flax_nnx":
       # Mock the map response which normally comes from get_import_map logic using providers
       return {"torch.nn": ("flax", "nnx", "nnx")}
     return {}
 
   def get_framework_config(self, framework):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def _add_op(self, name, args, s_api, t_api):
+    """Function docstring."""
     variants = {"torch": {"api": s_api}, "flax_nnx": {"api": t_api}}
     self.data[name] = {"std_args": args, "variants": variants}
     self._reverse_index[s_api] = (name, self.data[name])
@@ -98,6 +105,7 @@ class MockFlaxSemantics(SemanticsManager):
 
 @pytest.fixture
 def engine_mlir():
+  """Function docstring."""
   # Use 'mlir' as source to trigger Ingestion path
   config = RuntimeConfig(source_framework="mlir", target_framework="jax", strict_mode=False)
   with patch("ml_switcheroo.semantics.manager.SemanticsManager") as mock_mgr:
@@ -107,6 +115,7 @@ def engine_mlir():
 
 
 def test_mlir_bridge_activation(engine_mlir):
+  """Function docstring."""
   # Pass dummy MLIR content
   result = engine_mlir.run('%0 = "sw.noop"()')
   assert result.success
@@ -117,6 +126,7 @@ def test_mlir_bridge_activation(engine_mlir):
 
 
 def test_convnet_full_flow_mlir():
+  """Function docstring."""
   semantics = MockFlaxSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
 

@@ -8,11 +8,13 @@ from ml_switcheroo.generated_tests.runtime import verify_results
 
 
 def test_exact_mode_passes_identical():
+  """Function docstring."""
   a = np.array([1.0, 2.0])
   assert verify_results(a, a, exact=True)
 
 
 def test_exact_mode_fails_approx():
+  """Function docstring."""
   a = np.array([1.0])
   b = np.array([1.000000001])
   # Fuzzy match passes
@@ -22,6 +24,7 @@ def test_exact_mode_fails_approx():
 
 
 def test_exact_mode_bools():
+  """Function docstring."""
   a = np.array([True, False])
   b = np.array([True, True])
   assert not verify_results(a, b, exact=True)
@@ -29,6 +32,7 @@ def test_exact_mode_bools():
 
 
 def test_exact_mode_recursion():
+  """Function docstring."""
   a = [np.array([1.0]), {"k": np.array([2.0])}]
   b = [np.array([1.000001]), {"k": np.array([2.0])}]
 

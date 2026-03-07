@@ -10,7 +10,10 @@ from ml_switcheroo.enums import SemanticTier
 
 
 class MockSequentialSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     super().__init__()
 
     # Configure Traits & Alias for Flax
@@ -35,6 +38,7 @@ class MockSequentialSemantics(SemanticsManager):
     self._inject_op("ReLU", [], "torch.nn.ReLU", "flax.nnx.relu", SemanticTier.NEURAL)
 
   def _inject_op(self, name, std_args, s_api, t_api, tier):
+    """Function docstring."""
     if name not in self.data:
       self.data[name] = {"std_args": std_args, "variants": {}}
     self.data[name]["variants"]["torch"] = {"api": s_api}
@@ -45,10 +49,12 @@ class MockSequentialSemantics(SemanticsManager):
     self._source_registry[s_api] = ("torch", tier)
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   # Must override import map to use provider logic
   def get_import_map(self, target_fw: str):
+    """Function docstring."""
     result = {}
     target_providers = self._providers.get(target_fw, {})
     for src_path, (src_fw, tier) in self._source_registry.items():
@@ -60,10 +66,12 @@ class MockSequentialSemantics(SemanticsManager):
 
 @pytest.fixture
 def semantics_manager():
+  """Function docstring."""
   return MockSequentialSemantics()
 
 
 def test_sequential_container_transpilation(semantics_manager):
+  """Function docstring."""
   source_code = """ 
 import torch
 import torch.nn as nn

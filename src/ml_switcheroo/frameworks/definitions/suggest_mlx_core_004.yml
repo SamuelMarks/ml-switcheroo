@@ -193,7 +193,7 @@ variants:
     api: "numpy.finfo"
 
 ---
-operation: "Flatten"
+operation: "flatten"
 description: "Flatten an array between start and end axes."
 std_args:
   - name: "x"

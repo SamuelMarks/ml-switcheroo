@@ -63,13 +63,13 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   if "torch" in available_roots:
     def_source = "torch"
   else:
-    def_source = priority_order[0] if priority_order else "source_placeholder"
+    def_source = priority_order[0] if priority_order else "source_placeholder"  # pragma: no cover
 
   if "jax" in available_roots and def_source != "jax":
     def_target = "jax"
   else:
-    candidates = [fw for fw in priority_order if fw != def_source]
-    def_target = candidates[0] if candidates else def_source
+    candidates = [fw for fw in priority_order if fw != def_source]  # pragma: no cover
+    def_target = candidates[0] if candidates else def_source  # pragma: no cover
 
   # 3. Generate HTML Blocks
   primary_opts = _render_primary_options(hierarchy)
@@ -148,6 +148,14 @@ class Model(nn.Module):
                 <div class="controls-bar">
                     <button type="button" id="btn-retro" class="icon-btn" title="Matrix Mode">🕶️</button>
 
+                    <label class="md-switch" title="Enable automatic distributed sharding annotations and optimizations (e.g. QKV fusions, jax.sharding)">
+                        <input type="checkbox" id="chk-enable-sharding">
+                        <div class="md-switch-track">
+                            <div class="md-switch-thumb"></div>
+                        </div>
+                        <span class="md-switch-text">Sharding</span>
+                    </label>
+
                     <button id="btn-convert" class="md-btn md-btn-accent" disabled>Run Translation</button>
                 </div>
 
@@ -203,7 +211,7 @@ class Model(nn.Module):
                     </div>
                     <!-- Content: Mermaid -->
                     <div class="tab-panel" id="panel-mermaid">
-                        <div id="ast-mermaid-target" class="mermaid" style="text-align:center; overflow-x:auto;">
+                        <div id="ast-mermaid-target" style="text-align:center; overflow-x:auto;">
                             <em style="color:#999">Run a translation to generate the AST graph.</em>
                         </div>
                     </div>
@@ -249,7 +257,7 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
 
     members = grouped[group_name]
     if not members:
-      continue
+      continue  # pragma: no cover
 
     html_parts.append(f'<optgroup label="{group_name}">')
     for root in members:

@@ -10,10 +10,12 @@ from ml_switcheroo.frameworks.torch import TorchAdapter
 
 @pytest.fixture
 def adapter():
+  """Function docstring."""
   return TorchAdapter()
 
 
 def test_tiered_examples_structure(adapter):
+  """Function docstring."""
   examples = adapter.get_tiered_examples()
   assert isinstance(examples, dict)
   assert "tier1_math" in examples
@@ -23,6 +25,7 @@ def test_tiered_examples_structure(adapter):
 
 
 def test_tier1_math_validity(adapter):
+  """Function docstring."""
   code = adapter.get_tiered_examples()["tier1_math"]
   # Check Syntax
   ast.parse(code)
@@ -33,6 +36,7 @@ def test_tier1_math_validity(adapter):
 
 
 def test_tier2_neural_simple_validity(adapter):
+  """Function docstring."""
   code = adapter.get_tiered_examples()["tier2_neural_simple"]
   ast.parse(code)
   # Check it matches the verbatim expectation from integration tests
@@ -42,6 +46,7 @@ def test_tier2_neural_simple_validity(adapter):
 
 
 def test_tier2_neural_cnn_validity(adapter):
+  """Function docstring."""
   # This is the new expanded example
   code = adapter.get_tiered_examples()["tier2_neural_cnn"]
   ast.parse(code)
@@ -51,6 +56,7 @@ def test_tier2_neural_cnn_validity(adapter):
 
 
 def test_tier3_extras_dataloader_validity(adapter):
+  """Function docstring."""
   code = adapter.get_tiered_examples()["tier3_extras_dataloader"]
   ast.parse(code)
   assert "DataLoader" in code

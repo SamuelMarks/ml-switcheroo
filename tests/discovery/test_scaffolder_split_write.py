@@ -11,7 +11,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector:
+  """Class docstring."""
+
   def inspect(self, fw, **kwargs):
+    """Function docstring."""
     # Robust return for any submodule calls
     return {
       "torch.abs": {"name": "abs", "params": ["x"], "docstring_summary": "Abs"},
@@ -21,6 +24,7 @@ class MockInspector:
 
 @pytest.fixture
 def env_paths(tmp_path):
+  """Function docstring."""
   sem_dir = tmp_path / "semantics"
   snap_dir = tmp_path / "snapshots"
   sem_dir.mkdir()
@@ -29,6 +33,7 @@ def env_paths(tmp_path):
 
 
 def test_scaffold_splits_data(env_paths, tmp_path):
+  """Function docstring."""
   sem_dir, snap_dir = env_paths
 
   # Prevent file loading during init for speed and isolation
@@ -87,6 +92,7 @@ def test_scaffold_splits_data(env_paths, tmp_path):
 
 
 def test_scaffolder_caches_existing_specs(env_paths, tmp_path):
+  """Function docstring."""
   sem_dir, snap_dir = env_paths
 
   existing_spec = {"abs": {"description": "Manual", "std_args": ["x"]}}

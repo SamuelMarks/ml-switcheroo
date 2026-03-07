@@ -19,6 +19,7 @@ from ml_switcheroo.compiler.backends.python import PythonBackend
 
 @pytest.fixture
 def synthesizer() -> PythonBackend:
+  """Function docstring."""
   return PythonBackend()
 
 

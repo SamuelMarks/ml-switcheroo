@@ -10,7 +10,10 @@ from ml_switcheroo.enums import SemanticTier
 
 
 class MockInspector:
+  """Class docstring."""
+
   def inspect(self, fw, **kwargs):
+    """Function docstring."""
     # Handle modules
     return {
       "torch.nn.ReLU": {"name": "ReLU", "type": "class", "params": []},
@@ -19,12 +22,16 @@ class MockInspector:
 
 
 class MockSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self.data = {"Relu": {"std_args": ["x"]}}
     self._key_origins = {"Relu": SemanticTier.NEURAL.value}
 
 
 def test_spec_driven_categorization(tmp_path):
+  """Function docstring."""
   scaffolder = Scaffolder(semantics=MockSemantics())
   scaffolder.inspector = MockInspector()
 
@@ -52,6 +59,7 @@ def test_spec_driven_categorization(tmp_path):
 
 
 def test_heuristic_fallback_dynamic(tmp_path):
+  """Function docstring."""
   semantics = SemanticsManager()
   semantics.data = {}
   scaffolder = Scaffolder(semantics=semantics)

@@ -44,6 +44,7 @@ def rewriter_factory():
 
   # Mock Framework Configs
   def get_config(fw):
+    """Function docstring."""
     if fw == "torch":
       return {"plugin_traits": PluginTraits(requires_functional_control_flow=False)}
     if fw == "jax":
@@ -53,6 +54,7 @@ def rewriter_factory():
   mgr.get_framework_config.side_effect = get_config
 
   def create(target):
+    """Function docstring."""
     cfg = RuntimeConfig(source_framework="torch", target_framework=target, strict_mode=False)
     return PivotRewriter(mgr, cfg)
 

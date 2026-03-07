@@ -19,6 +19,7 @@ class MockSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     # We assume a clean state
     self.data = {}
     self._reverse_index = {}
@@ -46,17 +47,21 @@ class MockSemantics(SemanticsManager):
     self._reverse_index["torch.abs"] = ("abs", self.data["abs"])
 
   def get_definition(self, api_name):
+    """Function docstring."""
     return self._reverse_index.get(api_name)
 
   def resolve_variant(self, abstract_id, target_fw):
+    """Function docstring."""
     if abstract_id in self.data:
       return self.data[abstract_id]["variants"].get(target_fw)
     return None
 
   def is_verified(self, _id):
+    """Function docstring."""
     return True
 
   def get_framework_aliases(self):
+    """Function docstring."""
     # Explicit mock for alias map
     return {"jax": ("jax.numpy", "jnp"), "torch": ("torch", "torch")}
 

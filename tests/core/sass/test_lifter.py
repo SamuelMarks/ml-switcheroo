@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 from typing import List
 
 from ml_switcheroo.compiler.frontends.sass.lifter import SassLifter
@@ -65,6 +67,7 @@ def test_lift_complex_snippet() -> None:
 
 
 def test_lift_duplicate_markers_ignored() -> None:
+  """Function docstring."""
   nodes: List[SassNode] = [
     Comment("BEGIN Layer (l1)"),
     Comment("END Layer (l1)"),

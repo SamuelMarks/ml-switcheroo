@@ -19,6 +19,7 @@ class MockSemantics(SemanticsManager):
   """Mock semantics with predefined import mappings."""
 
   def __init__(self):
+    """Function docstring."""
     self.import_data = {
       # Known mappings
       "numpy": {},  # Basic root
@@ -29,6 +30,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def scanner():
+  """Function docstring."""
   semantics = MockSemantics()
   # Source framework is "torch", targeting something else
   return DependencyScanner(semantics, source_fw="torch")

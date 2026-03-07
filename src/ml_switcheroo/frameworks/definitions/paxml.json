@@ -1762,6 +1762,7 @@
   "Dropout": {
     "api": "praxis.layers.Dropout",
     "dispatch_rules": [],
+    "macro_template": "praxis.layers.Dropout(keep_prob=1.0-{p})",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -2063,10 +2064,10 @@
     "required_imports": []
   },
   "Flatten": {
+    "api": "praxis.layers.Flatten",
     "dispatch_rules": [],
     "pack_as": "Tuple",
-    "required_imports": [],
-    "requires_plugin": "flatten_range"
+    "required_imports": []
   },
   "Flip": {
     "api": "jax.numpy.flip",
@@ -3759,6 +3760,12 @@
   },
   "Mod": {
     "api": "jnp.mod",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Model": {
+    "api": "praxis.base_layer.BaseLayer",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6300,6 +6307,23 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "cosinesimilarityloss": {
+    "api": "optax.cosine_similarity",
+    "args": {
+      "y_pred": "predictions",
+      "y_true": "targets"
+    },
+    "dispatch_rules": [],
+    "macro_template": "-optax.cosine_similarity({y_pred}, {y_true})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ctcloss": {
+    "api": "optax.ctc_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "data_ptr": {
     "api": "data",
     "dispatch_rules": [],
@@ -6307,9 +6331,51 @@
     "required_imports": [],
     "requires_plugin": "method_to_property"
   },
+  "diceloss": {
+    "dispatch_rules": [],
+    "macro_template": "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "div_value": {
     "api": "optax.tree.div",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dropout": {
+    "api": "praxis.layers.Dropout",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "flatten": {
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": [],
+    "requires_plugin": "flatten_range"
+  },
+  "hingeloss": {
+    "api": "optax.hinge_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "huberloss": {
+    "api": "optax.huber_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "kldivergence": {
+    "api": "optax.kl_divergence",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "logcoshloss": {
+    "api": "optax.log_cosh",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6346,6 +6412,30 @@
     "api": "optax.tree.max",
     "args": {},
     "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meanabsoluteerror": {
+    "api": "optax.l1_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meanabsolutepercentageerror": {
+    "api": "optax.mape_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meansquarederror": {
+    "api": "optax.squared_error",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "meansquaredlogarithmicerror": {
+    "dispatch_rules": [],
+    "macro_template": "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))",
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -6391,6 +6481,12 @@
     "pack_to_tuple": "axes",
     "required_imports": []
   },
+  "poissonloss": {
+    "api": "optax.poisson_loss",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "scale_grad_by_freq": {
     "api": "optax.tree.scale",
     "args": {},
@@ -6404,6 +6500,18 @@
     "pack_as": "Tuple",
     "required_imports": [],
     "requires_plugin": "method_to_property"
+  },
+  "sparsecategoricalcrossentropy": {
+    "api": "optax.softmax_cross_entropy_with_integer_labels",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "squaredhingeloss": {
+    "dispatch_rules": [],
+    "macro_template": "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)",
+    "pack_as": "Tuple",
+    "required_imports": []
   },
   "step": {
     "dispatch_rules": [],

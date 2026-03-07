@@ -14,6 +14,7 @@ EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
 
 
 def _read_code(filename: str) -> str:
+  """Function docstring."""
   path = EXAMPLES_DIR / filename
   if not path.is_file():
     pytest.fail(f"Example file not found: {path}")
@@ -21,7 +22,10 @@ def _read_code(filename: str) -> str:
 
 
 class E2ESemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self._providers = {}
     self._source_registry = {}
@@ -110,12 +114,15 @@ class E2ESemantics(SemanticsManager):
     # ... more aliases omitted for brevity
 
   def get_all_rng_methods(self) -> Set[str]:
+    """Function docstring."""
     return self._known_rng_methods
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def get_framework_aliases(self) -> Dict[str, Tuple[str, str]]:
+    """Function docstring."""
     # Mock the alias getter to return what we populated in framework_configs
     aliases = {}
     for fw, cfg in self.framework_configs.items():
@@ -124,6 +131,7 @@ class E2ESemantics(SemanticsManager):
     return aliases
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    """Function docstring."""
     result = {}
     target_providers = self._providers.get(target_fw, {})
     for src_path, (src_fw, tier) in self._source_registry.items():
@@ -133,6 +141,7 @@ class E2ESemantics(SemanticsManager):
     return result
 
   def _add_op(self, name, args, tier=None, **variants):
+    """Function docstring."""
     variant_data = {}
     # 1. Update self.data first so _alias can reference it
     self.data[name] = {"std_args": args, "variants": variant_data}
@@ -151,15 +160,18 @@ class E2ESemantics(SemanticsManager):
       self._key_origins[name] = SemanticTier.ARRAY_API.value
 
   def _alias(self, api_str, abstract_name):
+    """Function docstring."""
     if abstract_name in self.data:
       self._reverse_index[api_str] = (abstract_name, self.data[abstract_name])
 
 
 @pytest.fixture
 def engine_factory():
+  """Function docstring."""
   semantics = E2ESemantics()
 
   def _create(source, target, strict=False):
+    """Function docstring."""
     # Fix: Ensure source_flavour is handled if relevant, but basic tests use root
     cfg = RuntimeConfig(source_framework=source, target_framework=target, strict_mode=strict)
     return ASTEngine(semantics=semantics, config=cfg)
@@ -168,6 +180,7 @@ def engine_factory():
 
 
 def test_ex01_math_ops_torch_to_jax(engine_factory):
+  """Function docstring."""
   code = _read_code("ex01_math_ops.torch.py")
   engine = engine_factory("torch", "jax")
   result = engine.run(code)
@@ -177,6 +190,7 @@ def test_ex01_math_ops_torch_to_jax(engine_factory):
 
 
 def test_ex01_math_ops_jax_to_torch(engine_factory):
+  """Function docstring."""
   code = _read_code("ex01_math_ops.jax.py")
   engine = engine_factory("jax", "torch")
   result = engine.run(code)
@@ -186,6 +200,7 @@ def test_ex01_math_ops_jax_to_torch(engine_factory):
 
 
 def test_ex02_neural_net_torch_to_jax(engine_factory):
+  """Function docstring."""
   code = _read_code("ex02_neural_net.torch.py")
   engine = engine_factory("torch", "flax_nnx")
   result = engine.run(code)
@@ -195,6 +210,7 @@ def test_ex02_neural_net_torch_to_jax(engine_factory):
 
 
 def test_ex02_neural_net_jax_to_torch(engine_factory):
+  """Function docstring."""
   code = _read_code("ex02_neural_net.flax_nnx.py")
   engine = engine_factory("flax_nnx", "torch")
   result = engine.run(code)

@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
@@ -17,6 +19,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["einsum_normalizer"] = normalize_einsum
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -39,28 +42,33 @@ def rewriter():
 
 
 def test_standard_order_unchanged(rewriter):
+  """Function docstring."""
   res = rewrite_code(rewriter, 'y = torch.einsum("ii", x)')
   assert "jax.numpy.einsum" in res
   assert '("ii", x)' in res
 
 
 def test_swap_operand_and_equation(rewriter):
+  """Function docstring."""
   res = rewrite_code(rewriter, 'y = torch.einsum(x, "ii")')
   assert "jax.numpy.einsum" in res
   assert '("ii", x)' in res
 
 
 def test_multiple_operands_swap(rewriter):
+  """Function docstring."""
   res = rewrite_code(rewriter, 'y = torch.einsum(a, b, "i,j->ij")')
   assert '("i,j->ij", a, b)' in res
 
 
 def test_interleaved_operands_unsupported_heuristic(rewriter):
+  """Function docstring."""
   res = rewrite_code(rewriter, "torch.einsum(a, [0], b, [0])")
   assert "jax.numpy.einsum" in res
   assert "(a, [0], b, [0])" in res
 
 
 def test_variable_equation_ignored(rewriter):
+  """Function docstring."""
   res = rewrite_code(rewriter, "torch.einsum(x, eq)")
   assert "(x, eq)" in res

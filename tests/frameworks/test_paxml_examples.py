@@ -12,6 +12,7 @@ from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 
 @pytest.fixture
 def adapter():
+  """Function docstring."""
   return PaxmlAdapter()
 
 

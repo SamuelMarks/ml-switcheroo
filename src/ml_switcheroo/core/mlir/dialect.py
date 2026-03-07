@@ -40,7 +40,7 @@ class OpSchema:
     Checks if the CST node conforms to the dialect schema.
     """
     if node.name != self.name:
-      return False
+      return False  # pragma: no cover
 
     if len(node.regions) != self.num_regions:
       return False

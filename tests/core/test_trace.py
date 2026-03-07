@@ -8,6 +8,7 @@ import libcst as cst
 
 
 def test_phase_nesting():
+  """Function docstring."""
   logger = TraceLogger()
 
   p1 = logger.start_phase("Parent")

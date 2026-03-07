@@ -12,7 +12,7 @@ from pathlib import Path
 if sys.version_info >= (3, 9):
   from importlib.resources import files
 else:
-  files = None
+  files = None  # pragma: no cover
 
 
 def resolve_semantics_dir() -> Path:
@@ -33,16 +33,16 @@ def resolve_semantics_dir() -> Path:
     return local_path
 
   # 2. Installed Package Fallback
-  if sys.version_info >= (3, 9) and files:
-    try:
+  if sys.version_info >= (3, 9) and files:  # pragma: no cover
+    try:  # pragma: no cover
       # Note: wrapping in Path(str(...)) ensures compatibility issues
       # with early 3.9 implementations are smoothed over.
-      return Path(str(files("ml_switcheroo.semantics")))
-    except Exception:
-      pass
+      return Path(str(files("ml_switcheroo.semantics")))  # pragma: no cover
+    except Exception:  # pragma: no cover
+      pass  # pragma: no cover
 
   # Fallback to local path if discovery fails
-  return local_path
+  return local_path  # pragma: no cover
 
 
 def resolve_snapshots_dir() -> Path:

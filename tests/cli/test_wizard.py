@@ -11,7 +11,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector:
+  """Class docstring."""
+
   def inspect(self, _pkg, **kwargs):
+    """Function docstring."""
     return {
       "pkg.new_math_op": {"params": ["x"]},
       "pkg.nn.Layer": {"params": ["x"]},
@@ -21,6 +24,7 @@ class MockInspector:
 
 @pytest.fixture
 def wizard(tmp_path):
+  """Function docstring."""
   # Patch file resolution to use tmp_path
   sem_dir = tmp_path / "semantics"
   snap_dir = tmp_path / "snapshots"
@@ -38,6 +42,7 @@ def wizard(tmp_path):
 
 
 def test_wizard_save_logic(wizard, tmp_path):
+  """Function docstring."""
   api_path = "pkg.new_math_op"
   details = {"doc_summary": "Docs", "detected_sig": ["a"]}
 
@@ -109,12 +114,14 @@ def test_wizard_full_flow(wizard, tmp_path):
 
 
 def test_resolve_target_file(wizard):
+  """Function docstring."""
   assert wizard._resolve_target_file("math") == "k_array_api.json"
   assert wizard._resolve_target_file("neural") == "k_neural_net.json"
   assert wizard._resolve_target_file("extras") == "k_framework_extras.json"
 
 
 def test_empty_scan_exits_gracefully(wizard):
+  """Function docstring."""
   mock_inspector = MagicMock()
   mock_inspector.inspect.return_value = {}
   with patch("ml_switcheroo.cli.wizard.ApiInspector", return_value=mock_inspector):

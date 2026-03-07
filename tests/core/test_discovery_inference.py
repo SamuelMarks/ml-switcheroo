@@ -47,6 +47,7 @@ def test_exact_match():
   mod_nn = mock_module_with_members("mock_fw.nn", ["LogSoftmax", "ReLU"])
 
   def import_side_effect(name):
+    """Function docstring."""
     if name == "mock_fw":
       return mod_root
     if name == "mock_fw.nn":
@@ -72,6 +73,7 @@ def test_normalized_match():
   mod_root = mock_module_with_members("mock_fw", [])
 
   def side_effect(name):
+    """Function docstring."""
     if name == "mock_fw.nn":
       return mod_nn
     if name == "mock_fw":
@@ -149,6 +151,7 @@ def test_import_error_handled_gracefully():
   mod_good = mock_module_with_members("good_mod", ["Target"])
 
   def side_effect(name):
+    """Function docstring."""
     if name == "bad_mod":
       raise ImportError("Broken")
     if name == "good_mod":

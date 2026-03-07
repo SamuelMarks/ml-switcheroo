@@ -1,0 +1,4502 @@
+{
+  "__framework__": "paxml",
+  "mappings": {
+    "AMax": {
+      "api": "jax.numpy.amax",
+      "required_imports": []
+    },
+    "AMin": {
+      "api": "jax.numpy.amin",
+      "required_imports": []
+    },
+    "Abs": {
+      "api": "jnp.abs"
+    },
+    "Abs_": {
+      "api": "jax.numpy.abs",
+      "required_imports": []
+    },
+    "Absolute": {
+      "api": "jax.numpy.absolute",
+      "required_imports": []
+    },
+    "AcceleratorError": {
+      "api": "RuntimeError",
+      "required_imports": []
+    },
+    "Acos": {
+      "api": "jax.numpy.arccos",
+      "required_imports": []
+    },
+    "Acos_": {
+      "api": "jax.numpy.arccos",
+      "required_imports": []
+    },
+    "Acosh": {
+      "api": "jax.numpy.arccosh",
+      "required_imports": []
+    },
+    "Acosh_": {
+      "api": "jax.numpy.arccosh",
+      "required_imports": []
+    },
+    "ActivationLayer": {
+      "required_imports": []
+    },
+    "ActivityRegularization": {
+      "required_imports": []
+    },
+    "Adam": {
+      "api": "optax.adam",
+      "requires_plugin": "optimizer_constructor"
+    },
+    "AdaptedTransformerFeedForward": {
+      "api": "praxis.layers.AdaptedTransformerFeedForward",
+      "args": {
+        "dropout_prob": "residual_dropout_prob",
+        "hidden_dims": "hidden_dims",
+        "input_dims": "input_dims"
+      },
+      "required_imports": []
+    },
+    "AdaptiveAveragePooling1D": {
+      "required_imports": []
+    },
+    "AdaptiveAveragePooling2D": {
+      "required_imports": []
+    },
+    "AdaptiveAveragePooling3D": {
+      "required_imports": []
+    },
+    "AdaptiveMaxPooling1D": {
+      "required_imports": []
+    },
+    "AdaptiveMaxPooling2D": {
+      "required_imports": []
+    },
+    "AdaptiveMaxPooling3D": {
+      "required_imports": []
+    },
+    "Add": {
+      "api": "jax.numpy.add",
+      "macro_template": "jax.numpy.add({input}, {other} * {alpha})",
+      "required_imports": []
+    },
+    "AddLayer": {
+      "required_imports": []
+    },
+    "Addcmul": {
+      "macro_template": "jnp.add({input}, {value} * jnp.multiply({tensor1}, {tensor2}))",
+      "required_imports": [
+        "import jax.numpy as jnp"
+      ]
+    },
+    "AdditiveAttention": {
+      "required_imports": []
+    },
+    "Addmm": {
+      "macro_template": "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat1}, {mat2}))",
+      "required_imports": [
+        "import jax.numpy as jnp"
+      ]
+    },
+    "Addmv": {
+      "macro_template": "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))",
+      "required_imports": []
+    },
+    "Addmv_": {
+      "macro_template": "jnp.add({beta} * {input}, {alpha} * jnp.matmul({mat}, {vec}))",
+      "required_imports": []
+    },
+    "Addr": {
+      "macro_template": "jnp.add({beta} * {input}, {alpha} * jnp.outer({vec1}, {vec2}))",
+      "required_imports": []
+    },
+    "Adjoint": {
+      "macro_template": "jnp.conjugate(jnp.swapaxes({input}, -1, -2))",
+      "required_imports": []
+    },
+    "AliasCopy": {
+      "macro_template": "jnp.array({input}, copy=True)",
+      "required_imports": []
+    },
+    "AlignTensors": {
+      "api": "jnp.broadcast_arrays",
+      "pack_to_tuple": "args",
+      "required_imports": []
+    },
+    "All": {
+      "api": "jnp.all",
+      "args": {
+        "dim": "axis",
+        "keepdim": "keepdims"
+      },
+      "required_imports": []
+    },
+    "AllClose": {
+      "api": "jax.numpy.allclose",
+      "required_imports": []
+    },
+    "Allclose": {
+      "api": "jnp.allclose",
+      "required_imports": []
+    },
+    "AlphaDropout": {
+      "api": "praxis.layers.AlphaDropout",
+      "args": {
+        "p": "keep_prob"
+      },
+      "macro_template": "praxis.layers.AlphaDropout(keep_prob=1.0-{p})",
+      "required_imports": []
+    },
+    "Amax": {
+      "api": "jnp.max",
+      "args": {
+        "dim": "axis",
+        "keepdim": "keepdims"
+      },
+      "required_imports": []
+    },
+    "Amin": {
+      "api": "jnp.min",
+      "args": {
+        "dim": "axis",
+        "keepdim": "keepdims"
+      },
+      "required_imports": []
+    },
+    "Aminmax": {
+      "macro_template": "(jnp.min({input}, axis={dim}, keepdims={keepdim}), jnp.max({input}, axis={dim}, keepdims={keepdim}))",
+      "required_imports": []
+    },
+    "Angle": {
+      "api": "jnp.angle",
+      "required_imports": []
+    },
+    "Any": {
+      "api": "jnp.any",
+      "args": {
+        "dim": "axis",
+        "keepdim": "keepdims"
+      },
+      "required_imports": []
+    },
+    "Append": {
+      "api": "jax.numpy.append",
+      "required_imports": []
+    },
+    "ApplyAlongAxis": {
+      "api": "jax.numpy.apply_along_axis",
+      "required_imports": []
+    },
+    "ApplyOverAxes": {
+      "api": "jax.numpy.apply_over_axes",
+      "required_imports": []
+    },
+    "Arange": {
+      "api": "jnp.arange",
+      "args": {
+        "end": "stop"
+      },
+      "required_imports": []
+    },
+    "Arccos": {
+      "api": "jnp.arccos",
+      "required_imports": []
+    },
+    "Arccosh": {
+      "api": "jnp.arccosh",
+      "required_imports": []
+    },
+    "Arcsin": {
+      "api": "jnp.arcsin",
+      "required_imports": []
+    },
+    "Arcsinh": {
+      "api": "jnp.arcsinh",
+      "required_imports": []
+    },
+    "Arctan": {
+      "api": "jnp.arctan",
+      "required_imports": []
+    },
+    "Arctan2": {
+      "api": "jnp.arctan2",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "Arctanh": {
+      "api": "jax.numpy.arctanh",
+      "required_imports": []
+    },
+    "ArgPartition": {
+      "api": "jax.numpy.argpartition",
+      "required_imports": []
+    },
+    "ArgSort": {
+      "api": "jax.numpy.argsort",
+      "required_imports": []
+    },
+    "ArgWhere": {
+      "api": "jax.numpy.argwhere",
+      "required_imports": []
+    },
+    "Argmax": {
+      "api": "jax.numpy.argmax",
+      "required_imports": []
+    },
+    "Argmin": {
+      "api": "jax.numpy.argmin",
+      "required_imports": []
+    },
+    "Argsort": {
+      "api": "jax.numpy.argsort",
+      "required_imports": []
+    },
+    "Array": {
+      "api": "jax.numpy.array",
+      "required_imports": []
+    },
+    "ArrayEqual": {
+      "api": "jax.numpy.array_equal",
+      "required_imports": []
+    },
+    "AsAnyArray": {
+      "api": "jax.numpy.asanyarray",
+      "required_imports": []
+    },
+    "AsArray": {
+      "api": "jax.numpy.asarray",
+      "required_imports": []
+    },
+    "AsContiguousArray": {
+      "api": "jax.numpy.ascontiguousarray",
+      "required_imports": []
+    },
+    "Atleast1d": {
+      "api": "jax.numpy.atleast_1d",
+      "required_imports": []
+    },
+    "Atleast2d": {
+      "api": "jax.numpy.atleast_2d",
+      "required_imports": []
+    },
+    "Atleast3d": {
+      "api": "jax.numpy.atleast_3d",
+      "required_imports": []
+    },
+    "AttentionLayer": {
+      "required_imports": []
+    },
+    "AttentionProjection": {
+      "api": "praxis.layers.AttentionProjection",
+      "args": {
+        "dim_per_head": "dim_per_head",
+        "input_dim": "input_dim",
+        "is_output": "is_output_projection",
+        "num_heads": "num_heads"
+      },
+      "required_imports": []
+    },
+    "AugMix": {
+      "required_imports": []
+    },
+    "AutoContrast": {
+      "required_imports": []
+    },
+    "AutodiffCheckpointType": {
+      "api": "praxis.layers.AutodiffCheckpointType",
+      "required_imports": []
+    },
+    "Average": {
+      "api": "jax.numpy.average",
+      "required_imports": []
+    },
+    "AverageLayer": {
+      "required_imports": []
+    },
+    "AveragePooling1D": {
+      "required_imports": []
+    },
+    "AveragePooling2D": {
+      "api": "praxis.layers.AvgPooling",
+      "required_imports": []
+    },
+    "AveragePooling3D": {
+      "required_imports": []
+    },
+    "Avg": {
+      "required_imports": []
+    },
+    "AvgPool1D": {
+      "required_imports": []
+    },
+    "AvgPool2D": {
+      "api": "praxis.layers.AvgPooling",
+      "required_imports": []
+    },
+    "AvgPool2d": {
+      "api": "praxis.layers.AvgPooling",
+      "required_imports": []
+    },
+    "AvgPool3D": {
+      "required_imports": []
+    },
+    "BFloat16Tensor": {
+      "api": "jax.numpy.array",
+      "inject_args": {
+        "dtype": "jax.numpy.bfloat16"
+      },
+      "required_imports": []
+    },
+    "BartlettWindow": {
+      "api": "jnp.bartlett",
+      "required_imports": []
+    },
+    "BaseActivation": {
+      "api": "praxis.layers.BaseActivation",
+      "required_imports": []
+    },
+    "BaseNormalization": {
+      "api": "praxis.layers.BaseNormalization",
+      "args": {
+        "input_dim": "dim"
+      },
+      "required_imports": []
+    },
+    "BatchNorm": {
+      "required_imports": []
+    },
+    "BatchNormBackwardElemt": {
+      "required_imports": []
+    },
+    "BatchNormBackwardReduce": {
+      "required_imports": []
+    },
+    "BatchNormElemt": {
+      "required_imports": []
+    },
+    "BatchNormGatherStats": {
+      "required_imports": []
+    },
+    "BatchNormGatherStatsWithCounts": {
+      "required_imports": []
+    },
+    "BatchNormStats": {
+      "required_imports": []
+    },
+    "BatchNormUpdateStats": {
+      "required_imports": []
+    },
+    "BatchNormalization": {
+      "api": "praxis.layers.BatchNorm",
+      "required_imports": []
+    },
+    "Bernoulli": {
+      "api": "jax.random.bernoulli",
+      "required_imports": [],
+      "requires_plugin": "inject_prng"
+    },
+    "BertModel": {
+      "api": "praxis.layers.BertModel",
+      "required_imports": []
+    },
+    "BiTemperedLoss": {
+      "api": "praxis.layers.BiTemperedLoss",
+      "required_imports": []
+    },
+    "Bias": {
+      "api": "praxis.layers.Bias",
+      "args": {
+        "dims": "dims"
+      },
+      "required_imports": []
+    },
+    "Bidirectional": {
+      "required_imports": []
+    },
+    "Bilinear": {
+      "macro_template": "{input1} @ {weight} @ {input2} + {bias}",
+      "required_imports": []
+    },
+    "BinaryCrossEntropyWithLogits": {
+      "api": "optax.sigmoid_binary_cross_entropy",
+      "required_imports": [],
+      "requires_plugin": "loss_reduction"
+    },
+    "BinaryCrossentropy": {
+      "api": "optax.sigmoid_binary_cross_entropy",
+      "required_imports": []
+    },
+    "Bincount": {
+      "api": "jnp.bincount",
+      "required_imports": []
+    },
+    "Binomial": {
+      "api": "jax.random.binomial",
+      "required_imports": [],
+      "requires_plugin": "inject_prng"
+    },
+    "Bit": {
+      "required_imports": []
+    },
+    "Bits16": {
+      "required_imports": []
+    },
+    "Bits1x8": {
+      "required_imports": []
+    },
+    "Bits2x4": {
+      "required_imports": []
+    },
+    "Bits4x2": {
+      "required_imports": []
+    },
+    "Bits8": {
+      "required_imports": []
+    },
+    "BitwiseAnd": {
+      "api": "jnp.bitwise_and",
+      "required_imports": []
+    },
+    "BitwiseInvert": {
+      "api": "jax.numpy.invert",
+      "required_imports": []
+    },
+    "BitwiseLeftShift": {
+      "api": "jnp.left_shift",
+      "required_imports": []
+    },
+    "BitwiseNot": {
+      "api": "jnp.invert",
+      "required_imports": []
+    },
+    "BitwiseOr": {
+      "api": "jnp.bitwise_or",
+      "required_imports": []
+    },
+    "BitwiseRightShift": {
+      "api": "jnp.right_shift",
+      "required_imports": []
+    },
+    "BitwiseXor": {
+      "api": "jnp.bitwise_xor",
+      "required_imports": []
+    },
+    "BlackmanWindow": {
+      "api": "jnp.blackman",
+      "required_imports": []
+    },
+    "Block": {
+      "api": "jax.numpy.block",
+      "required_imports": []
+    },
+    "BlockDiag": {
+      "api": "jax.scipy.linalg.block_diag",
+      "required_imports": []
+    },
+    "Bmm": {
+      "api": "jnp.matmul",
+      "required_imports": []
+    },
+    "Bool": {
+      "api": "jax.numpy.bool_",
+      "required_imports": []
+    },
+    "BoolScalar": {
+      "api": "jax.numpy.bool_",
+      "required_imports": []
+    },
+    "BoolTensor": {
+      "api": "jax.numpy.array",
+      "inject_args": {
+        "dtype": "bool"
+      },
+      "required_imports": []
+    },
+    "BoolType": {
+      "api": "jax.numpy.bool_",
+      "required_imports": []
+    },
+    "BregmanPCA": {
+      "api": "praxis.layers.BregmanPCA",
+      "required_imports": []
+    },
+    "BroadcastArrays": {
+      "api": "jax.numpy.broadcast_arrays",
+      "required_imports": []
+    },
+    "BroadcastLike": {
+      "api": "jax.numpy.broadcast",
+      "required_imports": []
+    },
+    "BroadcastShapes": {
+      "api": "jax.numpy.broadcast_shapes",
+      "required_imports": []
+    },
+    "BroadcastTo": {
+      "api": "jax.numpy.broadcast_to",
+      "required_imports": []
+    },
+    "BuildMatrix": {
+      "api": "jax.numpy.bmat",
+      "required_imports": []
+    },
+    "BusDayCalendar": {
+      "api": "jax.numpy.busdaycalendar",
+      "required_imports": []
+    },
+    "BusDayCount": {
+      "api": "jax.numpy.busday_count",
+      "required_imports": []
+    },
+    "BusDayOffset": {
+      "api": "jax.numpy.busday_offset",
+      "required_imports": []
+    },
+    "ByteTensor": {
+      "api": "jax.numpy.array",
+      "inject_args": {
+        "dtype": "jax.numpy.uint8"
+      },
+      "required_imports": []
+    },
+    "ByteType": {
+      "api": "jax.numpy.int8",
+      "required_imports": []
+    },
+    "BytesType": {
+      "required_imports": []
+    },
+    "CTCLoss": {
+      "api": "optax.ctc_loss",
+      "required_imports": []
+    },
+    "CanCast": {
+      "api": "jax.numpy.can_cast",
+      "required_imports": []
+    },
+    "CastBFloat16": {
+      "api": "jnp.bfloat16",
+      "required_imports": []
+    },
+    "CastInt64": {
+      "macro_template": "{input}.astype(jax.numpy.int64)",
+      "required_imports": []
+    },
+    "CategoryEncoding": {
+      "required_imports": []
+    },
+    "CausalDepthwiseConv1D": {
+      "api": "praxis.layers.CausalDepthwiseConv1D",
+      "required_imports": []
+    },
+    "CausalMask": {
+      "api": "praxis.layers.causal_mask",
+      "required_imports": []
+    },
+    "CausalSegmentMask": {
+      "api": "praxis.layers.causal_segment_mask",
+      "required_imports": []
+    },
+    "Cbrt": {
+      "api": "jax.numpy.cbrt",
+      "required_imports": []
+    },
+    "Ceil": {
+      "api": "jax.numpy.ceil",
+      "required_imports": []
+    },
+    "CenterCrop": {
+      "required_imports": []
+    },
+    "CharTensor": {
+      "api": "jax.numpy.array",
+      "inject_args": {
+        "dtype": "jax.numpy.int8"
+      },
+      "required_imports": []
+    },
+    "CharacterType": {
+      "api": "jax.numpy.character",
+      "required_imports": []
+    },
+    "Checkify": {
+      "api": "jax.experimental.checkify.checkify",
+      "required_imports": []
+    },
+    "Choose": {
+      "api": "jax.numpy.choose",
+      "required_imports": []
+    },
+    "CifgLstmCellSimple": {
+      "api": "praxis.layers.CifgLstmCellSimple",
+      "args": {
+        "hidden_size": "num_hidden_nodes",
+        "input_size": "num_input_nodes"
+      },
+      "required_imports": []
+    },
+    "ClampMin": {
+      "api": "jnp.maximum",
+      "required_imports": []
+    },
+    "ClassificationMLPModel": {
+      "api": "praxis.layers.ClassificationMLPModel",
+      "required_imports": []
+    },
+    "ClassificationModel": {
+      "api": "praxis.layers.ClassificationModel",
+      "required_imports": []
+    },
+    "Clip": {
+      "api": "jax.numpy.clip",
+      "required_imports": []
+    },
+    "ColumnConcatenation": {
+      "api": "jax.numpy.c_",
+      "required_imports": []
+    },
+    "ColumnStack": {
+      "api": "jax.numpy.column_stack",
+      "required_imports": []
+    },
+    "CombineMasks": {
+      "api": "praxis.layers.combine_masks",
+      "required_imports": []
+    },
+    "Complex": {
+      "api": "jax.numpy.complex_",
+      "required_imports": []
+    },
+    "Complex128": {
+      "api": "jax.numpy.complex128",
+      "required_imports": []
+    },
+    "Complex64": {
+      "api": "jax.numpy.complex64",
+      "required_imports": []
+    },
+    "ComplexDouble": {
+      "api": "jax.numpy.complex128",
+      "required_imports": []
+    },
+    "ComplexLongDouble": {
+      "required_imports": []
+    },
+    "Compress": {
+      "api": "jax.numpy.compress",
+      "required_imports": []
+    },
+    "ComputeAttentionMasksForExtendStep": {
+      "api": "praxis.layers.compute_attention_masks_for_extend_step",
+      "required_imports": []
+    },
+    "ComputeAttentionMasksForFprop": {
+      "api": "praxis.layers.compute_attention_masks_for_fprop",
+      "required_imports": []
+    },
+    "ComputeMoments": {
+      "api": "praxis.layers.compute_moments",
+      "required_imports": []
+    },
+    "Concatenate": {
+      "api": "jax.numpy.concatenate",
+      "required_imports": []
+    },
+    "ConcatenateLayer": {
+      "required_imports": []
+    },
+    "ConcreteModuleType": {
+      "required_imports": []
+    },
+    "ConcreteModuleTypeBuilder": {
+      "required_imports": []
+    },
+    "Cond": {
+      "api": "jax.lax.cond",
+      "required_imports": []
+    },
+    "Conformer": {
+      "api": "praxis.layers.Conformer",
+      "required_imports": []
+    },
+    "Conj": {
+      "api": "jax.numpy.conj",
+      "required_imports": []
+    },
+    "Conjugate": {
+      "api": "jax.numpy.conjugate",
+      "required_imports": []
+    },
+    "ConstructFloat16": {
+      "api": "jax.numpy.float16",
+      "required_imports": []
+    },
+    "ConstructFloat32": {
+      "api": "jax.numpy.float32",
+      "required_imports": []
+    },
+    "ConstructFloat64": {
+      "api": "jax.numpy.float64",
+      "required_imports": []
+    },
+    "ControlDependency": {
+      "required_imports": [],
+      "requires_plugin": "jax_control_dependencies"
+    },
+    "Conv": {
+      "api": "praxis.layers.Conv2D",
+      "args": {
+        "out_features": "filter_shape"
+      },
+      "required_imports": []
+    },
+    "Conv1D": {
+      "api": "praxis.layers.Conv1D",
+      "args": {
+        "filters": "filter_dims",
+        "kernel_size": "filter_shape"
+      },
+      "required_imports": []
+    },
+    "Conv1DTranspose": {
+      "required_imports": []
+    },
+    "Conv1d": {
+      "api": "praxis.layers.Conv1D",
+      "args": {
+        "bias": "use_bias",
+        "in_channels": "input_dims",
+        "out_channels": "output_dims"
+      },
+      "required_imports": []
+    },
+    "Conv2D": {
+      "api": "praxis.layers.Conv2D",
+      "args": {
+        "filters": "filter_dims",
+        "kernel_size": "filter_shape"
+      },
+      "required_imports": []
+    },
+    "Conv2DTranspose": {
+      "api": "praxis.layers.Conv2DTranspose",
+      "args": {
+        "filters": "filter_dims",
+        "kernel_size": "filter_shape"
+      },
+      "required_imports": []
+    },
+    "Conv2d": {
+      "api": "praxis.layers.Conv2D",
+      "args": {
+        "in_channels": null,
+        "kernel_size": null,
+        "out_channels": null,
+        "padding": "padding",
+        "stride": "filter_stride"
+      },
+      "required_imports": []
+    },
+    "Conv3d": {
+      "api": "praxis.layers.Conv3D",
+      "args": {
+        "bias": "use_bias",
+        "in_channels": "input_dims",
+        "out_channels": "output_dims"
+      },
+      "required_imports": []
+    },
+    "ConvBNAct": {
+      "api": "praxis.layers.ConvBNAct",
+      "required_imports": []
+    },
+    "ConvBNActWithPadding": {
+      "api": "praxis.layers.ConvBNActWithPadding",
+      "required_imports": []
+    },
+    "ConvTranspose1d": {
+      "api": "praxis.layers.Conv1DTranspose",
+      "args": {
+        "bias": "use_bias",
+        "in_channels": "input_dims",
+        "out_channels": "output_dims"
+      },
+      "required_imports": []
+    },
+    "ConvTranspose2d": {
+      "api": "praxis.layers.Conv2DTranspose",
+      "args": {
+        "bias": "use_bias",
+        "in_channels": "input_dims",
+        "out_channels": "output_dims"
+      },
+      "required_imports": []
+    },
+    "ConvTranspose3d": {
+      "api": "praxis.layers.Conv3DTranspose",
+      "args": {
+        "bias": "use_bias",
+        "in_channels": "input_dims",
+        "out_channels": "output_dims"
+      },
+      "required_imports": []
+    },
+    "ConvertPaddingsToMask": {
+      "api": "praxis.layers.convert_paddings_to_mask",
+      "required_imports": []
+    },
+    "Convolve": {
+      "api": "jax.numpy.convolve",
+      "required_imports": []
+    },
+    "Copy": {
+      "api": "jax.numpy.copy",
+      "required_imports": []
+    },
+    "Copysign": {
+      "api": "jax.numpy.copysign",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "Corrcoef": {
+      "api": "jax.numpy.corrcoef",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Cos": {
+      "api": "jax.numpy.cos",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Cos_": {
+      "api": "jax.numpy.cos",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": [],
+      "requires_plugin": "unroll_inplace_ops"
+    },
+    "Cosh": {
+      "api": "jax.numpy.cosh",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Cosh_": {
+      "api": "jax.numpy.cosh",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": [],
+      "requires_plugin": "unroll_inplace_ops"
+    },
+    "CosineSimilarityLoss": {
+      "api": "optax.cosine_similarity",
+      "args": {
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
+      "macro_template": "-optax.cosine_similarity({y_pred}, {y_true})",
+      "required_imports": []
+    },
+    "CountNonzero": {
+      "api": "jax.numpy.count_nonzero",
+      "args": {
+        "dim": "axis",
+        "input": "a"
+      },
+      "required_imports": []
+    },
+    "Cov": {
+      "api": "jax.numpy.cov",
+      "args": {
+        "correction": "ddof",
+        "input": "m"
+      },
+      "required_imports": []
+    },
+    "Cross": {
+      "api": "jax.numpy.cross",
+      "args": {
+        "dim": "axis",
+        "input": "a",
+        "other": "b"
+      },
+      "required_imports": []
+    },
+    "CubeRoot": {
+      "api": "jax.numpy.cbrt",
+      "required_imports": []
+    },
+    "CubedReLU": {
+      "api": "praxis.layers.CubedReLU",
+      "required_imports": []
+    },
+    "Cummax": {
+      "api": "jax.numpy.maximum.accumulate",
+      "args": {
+        "dim": "axis",
+        "input": "array"
+      },
+      "required_imports": []
+    },
+    "Cummin": {
+      "api": "jax.numpy.minimum.accumulate",
+      "args": {
+        "dim": "axis",
+        "input": "array"
+      },
+      "required_imports": []
+    },
+    "Cumprod": {
+      "api": "jax.numpy.cumprod",
+      "args": {
+        "dim": "axis"
+      },
+      "required_imports": []
+    },
+    "Cumsum": {
+      "api": "jax.numpy.cumsum",
+      "args": {
+        "dim": "axis"
+      },
+      "required_imports": []
+    },
+    "CumulativeTrapezoid": {
+      "api": "jax.scipy.integrate.cumulative_trapezoid",
+      "args": {
+        "dim": "axis"
+      },
+      "required_imports": []
+    },
+    "CustomAutograd": {
+      "api": "jax.custom_vjp",
+      "required_imports": []
+    },
+    "CustomVjp": {
+      "api": "jax.custom_vjp",
+      "required_imports": []
+    },
+    "Dataclass": {
+      "api": "dataclasses.dataclass",
+      "missing_message": "PaxML uses standard dataclasses or specific base layers; direct mapping to Pytree registry varies.",
+      "required_imports": [
+        "import dataclasses"
+      ]
+    },
+    "DeepCopyMemoTable": {
+      "required_imports": []
+    },
+    "Deg2Rad": {
+      "api": "jax.numpy.deg2rad",
+      "required_imports": []
+    },
+    "Deg2Rad_": {
+      "api": "jax.numpy.deg2rad",
+      "required_imports": []
+    },
+    "Deg2rad": {
+      "api": "jax.numpy.deg2rad",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Degrees": {
+      "api": "jax.numpy.degrees",
+      "args": {
+        "a": "x"
+      },
+      "required_imports": []
+    },
+    "DepthwiseConv1d": {
+      "api": "praxis.layers.DepthwiseConv1D",
+      "required_imports": []
+    },
+    "DepthwiseConv2d": {
+      "api": "praxis.layers.DepthwiseConv2D",
+      "args": {
+        "bias": "use_bias",
+        "depth_multiplier": "channel_multiplier"
+      },
+      "required_imports": []
+    },
+    "DeserializationStorageContext": {
+      "required_imports": []
+    },
+    "Det": {
+      "api": "jax.numpy.linalg.det",
+      "required_imports": []
+    },
+    "Detach": {
+      "api": "jax.lax.stop_gradient",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "DetachCopy": {
+      "api": "jax.lax.stop_gradient",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Detach_": {
+      "api": "jax.lax.stop_gradient",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Device": {
+      "required_imports": [],
+      "requires_plugin": "device_allocator"
+    },
+    "DeviceObjType": {
+      "required_imports": []
+    },
+    "Diag": {
+      "api": "jax.numpy.diag",
+      "args": {
+        "diagonal": "k"
+      },
+      "required_imports": []
+    },
+    "DiagIndices": {
+      "api": "jax.numpy.diag_indices",
+      "required_imports": []
+    },
+    "DiagIndicesFrom": {
+      "api": "jax.numpy.diag_indices_from",
+      "required_imports": []
+    },
+    "Diagflat": {
+      "api": "jax.numpy.diagflat",
+      "args": {
+        "offset": "k"
+      },
+      "required_imports": []
+    },
+    "Diagonal": {
+      "api": "jax.numpy.diagonal",
+      "args": {
+        "dim1": "axis1",
+        "dim2": "axis2",
+        "input": "a",
+        "offset": "offset"
+      },
+      "required_imports": []
+    },
+    "DiagonalCopy": {
+      "api": "jax.numpy.diagonal",
+      "args": {
+        "dim1": "axis1",
+        "dim2": "axis2",
+        "input": "a",
+        "offset": "offset"
+      },
+      "required_imports": []
+    },
+    "DiagonalScatter": {
+      "required_imports": [],
+      "requires_plugin": "scatter_indexer"
+    },
+    "DiceLoss": {
+      "macro_template": "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))",
+      "required_imports": []
+    },
+    "DictType": {
+      "required_imports": []
+    },
+    "Diff": {
+      "api": "jax.numpy.diff",
+      "args": {
+        "append": "append",
+        "dim": "axis",
+        "input": "a",
+        "n": "n",
+        "prepend": "prepend"
+      },
+      "required_imports": []
+    },
+    "Digamma": {
+      "api": "jax.scipy.special.digamma",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Digitize": {
+      "api": "jax.numpy.digitize",
+      "required_imports": []
+    },
+    "DisableCompile": {
+      "api": "jax.disable_jit",
+      "required_imports": []
+    },
+    "DisableTorchFunction": {
+      "api": "contextlib.nullcontext",
+      "required_imports": []
+    },
+    "DisableTorchFunctionSubclass": {
+      "api": "contextlib.nullcontext",
+      "required_imports": []
+    },
+    "DispatchKey": {
+      "required_imports": []
+    },
+    "DispatchKeySet": {
+      "required_imports": []
+    },
+    "Dist": {
+      "api": "jax.numpy.linalg.norm",
+      "macro_template": "jax.numpy.linalg.norm({input} - {other}, ord={p})",
+      "required_imports": []
+    },
+    "DistributedSum": {
+      "macro_template": "'sum'",
+      "required_imports": []
+    },
+    "Div": {
+      "api": "jax.numpy.divide",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "DivMod": {
+      "api": "jax.numpy.divmod",
+      "args": {
+        "a": "x1",
+        "b": "x2"
+      },
+      "required_imports": []
+    },
+    "Divide": {
+      "api": "jax.numpy.divide",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "DivideNoNan": {
+      "macro_template": "jnp.where({y} == 0, 0, {x} / {y})",
+      "required_imports": []
+    },
+    "Divmod": {
+      "api": "jax.numpy.divmod",
+      "required_imports": []
+    },
+    "Dot": {
+      "api": "jax.numpy.dot",
+      "args": {
+        "input": "a",
+        "tensor": "b"
+      },
+      "required_imports": []
+    },
+    "DotProductAttentionWithContext": {
+      "api": "praxis.layers.DotProductAttentionWithContext",
+      "required_imports": []
+    },
+    "DotProductAttentionWithContextXL": {
+      "api": "praxis.layers.DotProductAttentionWithContextXL",
+      "required_imports": []
+    },
+    "DotProductAttentionXL": {
+      "api": "praxis.layers.DotProductAttentionXL",
+      "required_imports": []
+    },
+    "Double": {
+      "required_imports": [],
+      "requires_plugin": "type_methods"
+    },
+    "DoubleStorage": {
+      "required_imports": []
+    },
+    "DoubleTensor": {
+      "api": "jnp.array",
+      "arg_values": {
+        "dtype": "jnp.float64"
+      },
+      "required_imports": []
+    },
+    "Dropout": {
+      "api": "praxis.layers.Dropout",
+      "macro_template": "praxis.layers.Dropout(keep_prob=1.0-{p})",
+      "required_imports": []
+    },
+    "Dsmm": {
+      "api": "jax.experimental.sparse.bcoo_spdot_general",
+      "required_imports": []
+    },
+    "Dsplit": {
+      "api": "jax.numpy.dsplit",
+      "args": {
+        "indices_or_sections": "indices_or_sections",
+        "input": "ary"
+      },
+      "required_imports": []
+    },
+    "Dstack": {
+      "api": "jax.numpy.dstack",
+      "args": {
+        "tensors": "tup"
+      },
+      "required_imports": []
+    },
+    "Dtype": {
+      "api": "jax.numpy.dtype",
+      "required_imports": []
+    },
+    "DtypeObject": {
+      "api": "jax.numpy.object_",
+      "required_imports": []
+    },
+    "E": {
+      "api": "jax.numpy.e",
+      "required_imports": []
+    },
+    "ELU": {
+      "api": "praxis.layers.ELU",
+      "required_imports": []
+    },
+    "Ediff1d": {
+      "api": "jax.numpy.ediff1d",
+      "required_imports": []
+    },
+    "Eig": {
+      "api": "jax.numpy.linalg.eig",
+      "args": {
+        "input": "a"
+      },
+      "required_imports": []
+    },
+    "Einsum": {
+      "api": "jnp.einsum",
+      "requires_plugin": "einsum_normalizer"
+    },
+    "EinsumLayer": {
+      "api": "praxis.layers.Einsum",
+      "args": {
+        "equation": "eqn"
+      },
+      "required_imports": []
+    },
+    "EinsumOp": {
+      "api": "praxis.layers.EinsumOp",
+      "required_imports": []
+    },
+    "EinsumPath": {
+      "api": "jax.numpy.einsum_path",
+      "required_imports": []
+    },
+    "Elu": {
+      "api": "jax.nn.elu",
+      "required_imports": []
+    },
+    "Embedding": {
+      "api": "jax.numpy.take",
+      "args": {
+        "input": "indices",
+        "weight": "a"
+      },
+      "inject_args": {
+        "axis": 0
+      },
+      "required_imports": []
+    },
+    "Empty": {
+      "api": "jax.numpy.empty",
+      "required_imports": []
+    },
+    "EmptyLike": {
+      "api": "jax.numpy.empty_like",
+      "required_imports": []
+    },
+    "EnumType": {
+      "required_imports": []
+    },
+    "Equal": {
+      "api": "jax.numpy.equal",
+      "required_imports": []
+    },
+    "Erf": {
+      "api": "jax.scipy.special.erf",
+      "required_imports": []
+    },
+    "ErfInv": {
+      "api": "jax.scipy.special.erf_inv",
+      "required_imports": []
+    },
+    "Erfc": {
+      "api": "jax.scipy.special.erfc",
+      "required_imports": []
+    },
+    "ErfcInv": {
+      "api": "jax.scipy.special.erfc_inv",
+      "required_imports": []
+    },
+    "ErrorReport": {
+      "required_imports": []
+    },
+    "EuclideanNorm": {
+      "api": "jnp.linalg.norm",
+      "required_imports": []
+    },
+    "EulerGamma": {
+      "api": "jax.numpy.euler_gamma",
+      "required_imports": []
+    },
+    "Event": {
+      "required_imports": []
+    },
+    "ExcludeDispatchKeyGuard": {
+      "api": "contextlib.nullcontext",
+      "required_imports": []
+    },
+    "ExecutionPlan": {
+      "required_imports": []
+    },
+    "Exp": {
+      "api": "jax.numpy.exp",
+      "required_imports": []
+    },
+    "Exp2": {
+      "api": "jax.numpy.exp2",
+      "required_imports": []
+    },
+    "ExpandDims": {
+      "api": "jax.numpy.expand_dims",
+      "required_imports": []
+    },
+    "Expm1": {
+      "api": "jax.numpy.expm1",
+      "required_imports": []
+    },
+    "Extract": {
+      "api": "jax.numpy.extract",
+      "required_imports": []
+    },
+    "Eye": {
+      "api": "jax.numpy.eye",
+      "required_imports": []
+    },
+    "FRnn": {
+      "api": "praxis.layers.FRnn",
+      "args": {
+        "cell": "cell_tpl"
+      },
+      "required_imports": []
+    },
+    "Fabs": {
+      "api": "jax.numpy.fabs",
+      "required_imports": []
+    },
+    "FatalError": {
+      "api": "RuntimeError",
+      "required_imports": []
+    },
+    "FbgemmPackGemmMatrixFp16": {
+      "required_imports": []
+    },
+    "FbgemmPackQuantizedMatrix": {
+      "required_imports": []
+    },
+    "FeatureAlphaDropout": {
+      "required_imports": []
+    },
+    "FeedForward": {
+      "api": "paxml.layers.FeedForward",
+      "args": {
+        "activation": null,
+        "in_features": "input_dims",
+        "out_features": "output_dims"
+      },
+      "required_imports": []
+    },
+    "FileCheck": {
+      "required_imports": []
+    },
+    "Finfo": {
+      "api": "jax.numpy.finfo",
+      "required_imports": []
+    },
+    "Fix": {
+      "api": "jax.numpy.fix",
+      "required_imports": []
+    },
+    "Flatnonzero": {
+      "api": "jax.numpy.flatnonzero",
+      "required_imports": []
+    },
+    "Flatten": {
+      "api": "praxis.layers.Flatten",
+      "required_imports": []
+    },
+    "Flip": {
+      "api": "jax.numpy.flip",
+      "args": {
+        "dims": "axis"
+      },
+      "required_imports": []
+    },
+    "Fliplr": {
+      "api": "jax.numpy.fliplr",
+      "required_imports": []
+    },
+    "Flipud": {
+      "api": "jax.numpy.flipud",
+      "required_imports": []
+    },
+    "Float": {
+      "api": "jnp.float32",
+      "required_imports": []
+    },
+    "Float16": {
+      "api": "jnp.float16",
+      "required_imports": []
+    },
+    "Float32": {
+      "api": "jnp.float32",
+      "required_imports": []
+    },
+    "Float64": {
+      "api": "jnp.float64",
+      "required_imports": []
+    },
+    "FloatPower": {
+      "api": "jnp.float_power",
+      "required_imports": []
+    },
+    "FloatStorage": {
+      "required_imports": []
+    },
+    "FloatTensor": {
+      "api": "jnp.array",
+      "arg_values": {
+        "dtype": "jnp.float32"
+      },
+      "required_imports": []
+    },
+    "FloatType": {
+      "required_imports": []
+    },
+    "Floor": {
+      "api": "jax.numpy.floor",
+      "required_imports": []
+    },
+    "FloorDivide": {
+      "api": "jax.numpy.floor_divide",
+      "required_imports": []
+    },
+    "FloorMod": {
+      "api": "jax.numpy.remainder",
+      "required_imports": []
+    },
+    "Fmax": {
+      "api": "jax.numpy.fmax",
+      "required_imports": []
+    },
+    "Fmin": {
+      "api": "jnp.fmin",
+      "required_imports": []
+    },
+    "Fmod": {
+      "api": "jnp.fmod",
+      "required_imports": []
+    },
+    "ForiLoop": {
+      "api": "jax.lax.fori_loop",
+      "required_imports": []
+    },
+    "FormatFloatPositional": {
+      "api": "jax.numpy.format_float_positional",
+      "required_imports": []
+    },
+    "FormatFloatScientific": {
+      "api": "jax.numpy.format_float_scientific",
+      "required_imports": []
+    },
+    "Frac": {
+      "macro_template": "{input} - jnp.trunc({input})",
+      "required_imports": []
+    },
+    "Frac_": {
+      "macro_template": "{input} - jnp.trunc({input})",
+      "required_imports": []
+    },
+    "Frexp": {
+      "api": "jnp.frexp",
+      "required_imports": []
+    },
+    "FrobeniusNorm": {
+      "api": "jnp.linalg.norm",
+      "args": {
+        "dim": "axis",
+        "keepdim": "keepdims"
+      },
+      "inject_args": {
+        "ord": "'fro'"
+      },
+      "required_imports": []
+    },
+    "FromBuffer": {
+      "api": "jax.numpy.frombuffer",
+      "required_imports": []
+    },
+    "FromDlpack": {
+      "api": "jax.dlpack.from_dlpack",
+      "required_imports": []
+    },
+    "FromFile": {
+      "api": "jax.numpy.fromfile",
+      "required_imports": []
+    },
+    "FromFunction": {
+      "api": "jax.numpy.fromfunction",
+      "required_imports": []
+    },
+    "FromIter": {
+      "api": "jax.numpy.fromiter",
+      "required_imports": []
+    },
+    "FromNumpy": {
+      "api": "jnp.array",
+      "required_imports": []
+    },
+    "Frombuffer": {
+      "api": "jnp.frombuffer",
+      "required_imports": []
+    },
+    "Full": {
+      "api": "jnp.full",
+      "args": {
+        "size": "shape"
+      },
+      "required_imports": []
+    },
+    "FullLike": {
+      "api": "jnp.full_like",
+      "required_imports": []
+    },
+    "FullSoftmax": {
+      "api": "paxml.layers.FullSoftmax",
+      "args": {
+        "dim": null
+      },
+      "required_imports": []
+    },
+    "FunctionSchema": {
+      "required_imports": []
+    },
+    "Future": {
+      "required_imports": []
+    },
+    "FutureType": {
+      "required_imports": []
+    },
+    "GELU": {
+      "api": "paxml.layers.GELU",
+      "arg_values": {
+        "approximate": {
+          "none": "False",
+          "tanh": "True"
+        }
+      },
+      "args": {
+        "approximate": "approximate"
+      },
+      "required_imports": []
+    },
+    "GRU": {
+      "api": "praxis.layers.GRU",
+      "args": {
+        "hidden_size": "hidden_dims",
+        "input_size": "input_dims"
+      },
+      "required_imports": []
+    },
+    "GRUCell": {
+      "api": "praxis.layers.GRUCell",
+      "args": {
+        "bias": null,
+        "hidden_size": "hidden_dims",
+        "input_size": "input_dims"
+      },
+      "required_imports": []
+    },
+    "GShardSharedEmbeddingSoftmax": {
+      "api": "paxml.layers.GShardSharedEmbeddingSoftmax",
+      "args": {
+        "in_features": "input_dims",
+        "num_classes": "num_classes"
+      },
+      "required_imports": []
+    },
+    "Gather": {
+      "api": "jnp.take_along_axis",
+      "args": {
+        "dim": "axis",
+        "index": "indices",
+        "input": "arr"
+      },
+      "required_imports": [],
+      "requires_plugin": "gather_adapter"
+    },
+    "Gcd": {
+      "api": "jnp.gcd",
+      "required_imports": []
+    },
+    "Gcd_": {
+      "api": "jnp.gcd",
+      "required_imports": []
+    },
+    "Ge": {
+      "api": "jnp.greater_equal",
+      "operator": ">=",
+      "required_imports": [],
+      "transformation_type": "infix"
+    },
+    "Gelu": {
+      "api": "jax.nn.gelu",
+      "required_imports": []
+    },
+    "GeneralConv": {
+      "api": "jax.lax.conv_general_dilated",
+      "required_imports": [],
+      "requires_plugin": "jax_conv_general_adapter"
+    },
+    "Generator": {
+      "required_imports": []
+    },
+    "GeomSpace": {
+      "api": "jax.numpy.geomspace",
+      "required_imports": []
+    },
+    "Geomspace": {
+      "api": "jax.numpy.geomspace",
+      "required_imports": []
+    },
+    "Ger": {
+      "api": "jnp.outer",
+      "args": {
+        "input": "a",
+        "vec2": "b"
+      },
+      "required_imports": []
+    },
+    "GetBigramIds": {
+      "api": "praxis.layers.get_bigram_ids",
+      "required_imports": []
+    },
+    "GetDefaultDevice": {
+      "macro_template": "jax.default_backend()",
+      "required_imports": []
+    },
+    "GetDefaultDtype": {
+      "macro_template": "jnp.float32",
+      "required_imports": []
+    },
+    "GetDevice": {
+      "macro_template": "{input}.device()",
+      "required_imports": []
+    },
+    "GlobalPooling": {
+      "api": "paxml.layers.GlobalPooling",
+      "required_imports": []
+    },
+    "Glu": {
+      "api": "jax.nn.glu",
+      "required_imports": []
+    },
+    "Grad": {
+      "api": "jax.grad",
+      "required_imports": []
+    },
+    "GradScaler": {
+      "api": "praxis.optimizers.ShardedAdafactor",
+      "required_imports": []
+    },
+    "Gradient": {
+      "required_imports": []
+    },
+    "Graph": {
+      "required_imports": []
+    },
+    "GraphExecutorState": {
+      "required_imports": []
+    },
+    "Greater": {
+      "api": "jax.numpy.greater",
+      "required_imports": []
+    },
+    "GreaterEqual": {
+      "api": "jax.numpy.greater_equal",
+      "required_imports": []
+    },
+    "GroupNorm": {
+      "api": "paxml.layers.GroupNorm",
+      "args": {
+        "eps": "epsilon",
+        "num_channels": null,
+        "num_groups": "num_groups"
+      },
+      "required_imports": []
+    },
+    "GroupedQueryAttention": {
+      "api": "paxml.layers.GroupedQueryAttention",
+      "args": {
+        "embed_dim": "input_dim",
+        "num_heads": "num_heads",
+        "num_kv_heads": "num_kv_heads"
+      },
+      "required_imports": []
+    },
+    "HSplit": {
+      "api": "jax.numpy.hsplit",
+      "required_imports": []
+    },
+    "HStack": {
+      "api": "jax.numpy.hstack",
+      "required_imports": []
+    },
+    "HammingWindow": {
+      "api": "jax.numpy.hamming",
+      "required_imports": []
+    },
+    "HannWindow": {
+      "api": "jax.numpy.hanning",
+      "required_imports": []
+    },
+    "HardSigmoid": {
+      "api": "jax.nn.hard_sigmoid",
+      "required_imports": []
+    },
+    "HardSilu": {
+      "api": "jax.nn.hard_swish",
+      "required_imports": []
+    },
+    "HardSwish": {
+      "api": "jax.nn.hard_swish",
+      "required_imports": []
+    },
+    "Heaviside": {
+      "api": "jax.numpy.heaviside",
+      "required_imports": []
+    },
+    "HingeLoss": {
+      "api": "optax.hinge_loss",
+      "required_imports": []
+    },
+    "Histogram": {
+      "api": "jax.numpy.histogram",
+      "required_imports": []
+    },
+    "Histogram2d": {
+      "api": "jax.numpy.histogram2d",
+      "required_imports": []
+    },
+    "HistogramBinEdges": {
+      "api": "jax.numpy.histogram_bin_edges",
+      "required_imports": []
+    },
+    "HistogramDd": {
+      "api": "jax.numpy.histogramdd",
+      "required_imports": []
+    },
+    "HuberLoss": {
+      "api": "optax.huber_loss",
+      "required_imports": []
+    },
+    "Hypot": {
+      "api": "jax.numpy.hypot",
+      "required_imports": []
+    },
+    "I0": {
+      "api": "jax.numpy.i0",
+      "required_imports": []
+    },
+    "IInfo": {
+      "api": "jax.numpy.iinfo",
+      "required_imports": []
+    },
+    "Identity": {
+      "api": "jax.numpy.identity",
+      "required_imports": []
+    },
+    "IdentityNorm": {
+      "api": "paxml.layers.IdentityNorm",
+      "required_imports": []
+    },
+    "Igamma": {
+      "api": "jax.scipy.special.gammainc",
+      "required_imports": []
+    },
+    "Igammac": {
+      "api": "jax.scipy.special.gammaincc",
+      "required_imports": []
+    },
+    "Imag": {
+      "api": "jax.numpy.imag",
+      "required_imports": []
+    },
+    "InTopK": {
+      "required_imports": [],
+      "requires_plugin": "in_top_k_plugin"
+    },
+    "IndexExpression": {
+      "api": "jax.numpy.s_",
+      "required_imports": []
+    },
+    "Inf": {
+      "api": "jax.numpy.inf",
+      "required_imports": []
+    },
+    "Initializer": {
+      "api": "praxis.base_layer.Initializer",
+      "required_imports": []
+    },
+    "Inner": {
+      "api": "jax.numpy.inner",
+      "required_imports": []
+    },
+    "InstanceNorm": {
+      "api": "praxis.layers.InstanceNorm",
+      "args": {
+        "num_features": "dim"
+      },
+      "required_imports": []
+    },
+    "Int16": {
+      "api": "jax.numpy.int16",
+      "required_imports": []
+    },
+    "Int16Tensor": {
+      "macro_template": "jnp.array({data}, dtype=jnp.int16)",
+      "required_imports": [
+        "import jax.numpy as jnp"
+      ]
+    },
+    "Int32": {
+      "api": "jax.numpy.int32",
+      "required_imports": []
+    },
+    "Int4": {
+      "required_imports": []
+    },
+    "Int64": {
+      "api": "jax.numpy.int64",
+      "required_imports": []
+    },
+    "Int8": {
+      "api": "jax.numpy.int8",
+      "required_imports": []
+    },
+    "Int_": {
+      "api": "jax.numpy.int64",
+      "required_imports": []
+    },
+    "Inverse": {
+      "api": "jax.numpy.linalg.inv",
+      "args": {
+        "input": "a"
+      },
+      "required_imports": []
+    },
+    "InverseShortTimeFourierTransform": {
+      "api": "jax.scipy.signal.istft",
+      "args": {
+        "hop_length": "noverlap",
+        "input": "Zxx",
+        "n_fft": "nperseg",
+        "window": "window"
+      },
+      "required_imports": []
+    },
+    "InvertPermutation": {
+      "api": "jax.numpy.argsort",
+      "required_imports": []
+    },
+    "IsAnomalyCheckNanEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsAnomalyEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsAutocastCacheEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsAutocastCpuEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsAutocastEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsAutocastIpuEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsAutocastXlaEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsClose": {
+      "api": "jnp.isclose",
+      "args": {
+        "input": "a",
+        "other": "b"
+      },
+      "required_imports": []
+    },
+    "IsComplex": {
+      "api": "jax.numpy.iscomplexobj",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "IsComplexObj": {
+      "api": "jax.numpy.iscomplexobj",
+      "required_imports": []
+    },
+    "IsConj": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsDeterministicAlgorithmsWarnOnlyEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsDistributed": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsFinite": {
+      "api": "jnp.isfinite",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "IsFloatingPoint": {
+      "macro_template": "jax.numpy.issubdtype({input}.dtype, jax.numpy.floating)",
+      "required_imports": []
+    },
+    "IsGradEnabled": {
+      "macro_template": "True",
+      "required_imports": []
+    },
+    "IsIn": {
+      "api": "jnp.isin",
+      "args": {
+        "elements": "element",
+        "test_elements": "test_elements"
+      },
+      "required_imports": []
+    },
+    "IsInf": {
+      "api": "jnp.isinf",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "IsInference": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsInferenceModeEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsNaN": {
+      "api": "jnp.isnan",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "IsNan": {
+      "api": "jax.numpy.isnan",
+      "required_imports": []
+    },
+    "IsNeg": {
+      "api": "jax.numpy.signbit",
+      "required_imports": []
+    },
+    "IsNegInf": {
+      "api": "jnp.isneginf",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "IsNonDecreasing": {
+      "macro_template": "jnp.all({x}[1:] >= {x}[:-1])",
+      "required_imports": []
+    },
+    "IsNonZero": {
+      "macro_template": "{input}.size == 1 and {input}.item() != 0",
+      "required_imports": []
+    },
+    "IsPosInf": {
+      "api": "jnp.isposinf",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "IsReal": {
+      "api": "jnp.isreal",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "IsRealObj": {
+      "api": "jax.numpy.isrealobj",
+      "required_imports": []
+    },
+    "IsSameSize": {
+      "macro_template": "{input}.shape == {other}.shape",
+      "required_imports": []
+    },
+    "IsScalar": {
+      "api": "jax.numpy.isscalar",
+      "required_imports": []
+    },
+    "IsSigned": {
+      "macro_template": "jax.numpy.issubdtype({input}.dtype, jax.numpy.signedinteger) or jax.numpy.issubdtype({input}.dtype, jax.numpy.floating)",
+      "required_imports": []
+    },
+    "IsStorage": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsStrictlyIncreasing": {
+      "macro_template": "jnp.all({x}[1:] > {x}[:-1])",
+      "required_imports": []
+    },
+    "IsSubDtype": {
+      "api": "jax.numpy.issubdtype",
+      "required_imports": []
+    },
+    "IsTensor": {
+      "macro_template": "isinstance({obj}, (jax.Array, jax.numpy.ndarray))",
+      "required_imports": []
+    },
+    "IsVulkanAvailable": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "IsWarnAlwaysEnabled": {
+      "macro_template": "True",
+      "required_imports": []
+    },
+    "Iterable": {
+      "api": "jax.numpy.iterable",
+      "required_imports": []
+    },
+    "Ix_": {
+      "api": "jax.numpy.ix_",
+      "required_imports": []
+    },
+    "Jagged": {
+      "required_imports": []
+    },
+    "KLDivergence": {
+      "api": "optax.kl_divergence",
+      "required_imports": []
+    },
+    "Kaiser": {
+      "api": "jax.numpy.kaiser",
+      "required_imports": []
+    },
+    "KaiserWindow": {
+      "api": "jnp.kaiser",
+      "args": {
+        "beta": "beta",
+        "periodic": null,
+        "window_length": "M"
+      },
+      "required_imports": []
+    },
+    "KlDiv": {
+      "api": "optax.kl_divergence",
+      "required_imports": [],
+      "requires_plugin": "loss_reduction"
+    },
+    "Kron": {
+      "api": "jnp.kron",
+      "args": {
+        "input": "a",
+        "other": "b"
+      },
+      "required_imports": []
+    },
+    "KthValue": {
+      "macro_template": "jnp.sort({input}, axis={dim})[..., {k}-1]",
+      "required_imports": []
+    },
+    "L2Normalize": {
+      "macro_template": "{x} / jnp.sqrt(jnp.maximum(jnp.sum({x}**2, axis={axis}, keepdims=True), {epsilon}))",
+      "required_imports": []
+    },
+    "LBeta": {
+      "macro_template": "jax.scipy.special.gammaln({x}).sum(-1) - jax.scipy.special.gammaln({x}.sum(-1))",
+      "required_imports": []
+    },
+    "LSTM": {
+      "api": "praxis.layers.LSTM",
+      "required_imports": []
+    },
+    "LSTMCell": {
+      "api": "praxis.layers.LSTMCellSimple",
+      "args": {
+        "hidden_features": "num_units",
+        "in_features": null
+      },
+      "required_imports": []
+    },
+    "LanguageModel": {
+      "api": "paxml.layers.LanguageModel",
+      "required_imports": []
+    },
+    "LanguageModelContinuousBatching": {
+      "api": "paxml.layers.LanguageModelContinuousBatching",
+      "required_imports": []
+    },
+    "LanguageModelDPO": {
+      "api": "paxml.layers.LanguageModelDPO",
+      "required_imports": []
+    },
+    "LanguageModelType": {
+      "api": "paxml.layers.LanguageModelType",
+      "required_imports": []
+    },
+    "Layer": {
+      "api": "praxis.base_layer.BaseLayer",
+      "required_imports": []
+    },
+    "LayerNorm": {
+      "required_imports": []
+    },
+    "LayerNormalizedLstmCellSimple": {
+      "api": "paxml.layers.LayerNormalizedLstmCellSimple",
+      "args": {
+        "hidden_size": "num_hidden_nodes",
+        "input_size": "num_input_nodes"
+      },
+      "required_imports": []
+    },
+    "LayerwiseShardablePipelined": {
+      "api": "paxml.layers.LayerwiseShardablePipelined",
+      "required_imports": []
+    },
+    "Layout": {
+      "required_imports": []
+    },
+    "Lcm": {
+      "api": "jnp.lcm",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "Lcm_": {
+      "api": "jnp.lcm",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "LdExp": {
+      "api": "jax.numpy.ldexp",
+      "required_imports": []
+    },
+    "Ldexp": {
+      "api": "jnp.ldexp",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "Le": {
+      "api": "jnp.less_equal",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "LeakyReLU": {
+      "api": "paxml.layers.LeakyReLU",
+      "args": {
+        "negative_slope": "negative_slope"
+      },
+      "required_imports": []
+    },
+    "LeftShift": {
+      "api": "jax.numpy.left_shift",
+      "required_imports": []
+    },
+    "Lerp": {
+      "macro_template": "{input} + {weight} * ({end} - {input})",
+      "required_imports": []
+    },
+    "Less": {
+      "api": "jnp.less",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "LessEqual": {
+      "api": "jnp.less_equal",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "LexSort": {
+      "api": "jax.numpy.lexsort",
+      "required_imports": []
+    },
+    "Lgamma": {
+      "api": "jax.scipy.special.gammaln",
+      "args": {
+        "input": "a"
+      },
+      "required_imports": []
+    },
+    "LightConv1D": {
+      "api": "paxml.layers.LightConv1D",
+      "args": {
+        "in_channels": "input_dims",
+        "kernel_size": "kernel_size"
+      },
+      "required_imports": []
+    },
+    "LinSpace": {
+      "api": "jax.numpy.linspace",
+      "required_imports": []
+    },
+    "Linear": {
+      "api": "paxml.layers.Linear",
+      "args": {
+        "bias": "use_bias",
+        "in_features": "input_dims",
+        "out_features": "output_dims"
+      },
+      "required_imports": []
+    },
+    "LinearGeneral": {
+      "api": "praxis.layers.Linear",
+      "required_imports": []
+    },
+    "Linspace": {
+      "api": "jnp.linspace",
+      "args": {
+        "end": "stop",
+        "start": "start",
+        "steps": "num"
+      },
+      "required_imports": []
+    },
+    "LoRA": {
+      "required_imports": []
+    },
+    "LoRALinear": {
+      "required_imports": []
+    },
+    "LoRAParam": {
+      "required_imports": []
+    },
+    "Load": {
+      "required_imports": [],
+      "requires_plugin": "io_handler"
+    },
+    "LoadTxt": {
+      "api": "numpy.loadtxt",
+      "required_imports": []
+    },
+    "LobPCG": {
+      "api": "jax.scipy.sparse.linalg.lobpcg",
+      "required_imports": []
+    },
+    "LocalSelfAttention": {
+      "api": "paxml.layers.LocalSelfAttention",
+      "args": {
+        "dim": "input_dim",
+        "num_heads": "num_heads",
+        "window_size": "block_size"
+      },
+      "required_imports": []
+    },
+    "LocalSelfAttentionAlibi": {
+      "api": "paxml.layers.LocalSelfAttentionAlibi",
+      "required_imports": []
+    },
+    "LocalSelfAttentionRelativeBias": {
+      "api": "paxml.layers.LocalSelfAttentionRelativeBias",
+      "required_imports": []
+    },
+    "LocalSelfAttentionXL": {
+      "api": "paxml.layers.LocalSelfAttentionXL",
+      "required_imports": []
+    },
+    "Log": {
+      "api": "jax.numpy.log",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Log10": {
+      "api": "jax.numpy.log10",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Log10_": {
+      "api": "jax.numpy.log10",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Log1p": {
+      "api": "jax.numpy.log1p",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Log2": {
+      "api": "jax.numpy.log2",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "LogAddExp": {
+      "api": "jax.numpy.logaddexp",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "LogAddExp2": {
+      "api": "jax.numpy.logaddexp2",
+      "required_imports": []
+    },
+    "LogCoshLoss": {
+      "api": "optax.log_cosh",
+      "required_imports": []
+    },
+    "LogCumSumExp": {
+      "api": "jax.numpy.logaddexp.accumulate",
+      "required_imports": []
+    },
+    "LogDet": {
+      "macro_template": "jax.numpy.linalg.slogdet({input})[1]",
+      "required_imports": []
+    },
+    "LogSigmoid": {
+      "api": "jax.nn.log_sigmoid",
+      "required_imports": []
+    },
+    "LogSoftmax": {
+      "api": "jax.nn.log_softmax",
+      "args": {
+        "dim": "axis",
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "LogSpace": {
+      "api": "jax.numpy.logspace",
+      "required_imports": []
+    },
+    "LogSumExp": {
+      "api": "jax.scipy.special.logsumexp",
+      "required_imports": []
+    },
+    "Log_": {
+      "api": "jax.numpy.log",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "LogicalAnd": {
+      "api": "jax.numpy.logical_and",
+      "args": {
+        "input": "x1",
+        "other": "x2"
+      },
+      "required_imports": []
+    },
+    "LogicalNot": {
+      "api": "jnp.logical_not",
+      "required_imports": []
+    },
+    "LogicalOr": {
+      "api": "jnp.logical_or",
+      "required_imports": []
+    },
+    "LogicalXor": {
+      "api": "jnp.logical_xor",
+      "required_imports": []
+    },
+    "Logspace": {
+      "api": "jax.numpy.logspace",
+      "required_imports": []
+    },
+    "LongLong": {
+      "api": "jax.numpy.longlong",
+      "required_imports": []
+    },
+    "LstmCellSimple": {
+      "api": "paxml.layers.LstmCellSimple",
+      "args": {
+        "hidden_size": "num_hidden_nodes",
+        "input_size": "num_input_nodes"
+      },
+      "required_imports": []
+    },
+    "LstmFrnn": {
+      "api": "paxml.layers.LstmFrnn",
+      "required_imports": []
+    },
+    "MGrid": {
+      "api": "jax.numpy.mgrid",
+      "required_imports": []
+    },
+    "MLPBlock": {
+      "api": "paxml.layers.MLPBlock",
+      "args": {
+        "hidden_features": "hidden_dims"
+      },
+      "required_imports": []
+    },
+    "MaskIndices": {
+      "api": "jax.numpy.mask_indices",
+      "required_imports": []
+    },
+    "MaskedLmDataAugmenter": {
+      "api": "paxml.layers.MaskedLmDataAugmenter",
+      "args": {
+        "mask_prob": "mask_prob",
+        "vocab_size": "vocab_size"
+      },
+      "required_imports": []
+    },
+    "MatMul": {
+      "api": "jax.numpy.matmul",
+      "required_imports": []
+    },
+    "Matmul": {
+      "api": "jax.numpy.matmul",
+      "required_imports": []
+    },
+    "Matrix": {
+      "api": "jax.numpy.array",
+      "required_imports": []
+    },
+    "MatrixTranspose": {
+      "api": "jax.numpy.matrix_transpose",
+      "required_imports": []
+    },
+    "Matvec": {
+      "api": "jax.numpy.matvec",
+      "required_imports": []
+    },
+    "Max": {
+      "api": "jnp.max",
+      "required_imports": []
+    },
+    "MaxNumBoundingBoxes": {
+      "required_imports": []
+    },
+    "MaxPool1d": {
+      "api": "praxis.layers.MaxPool1d",
+      "required_imports": []
+    },
+    "MaxPool2d": {
+      "api": "praxis.layers.MaxPool2d",
+      "required_imports": []
+    },
+    "MaxPool3d": {
+      "api": "praxis.layers.MaxPool3d",
+      "required_imports": []
+    },
+    "MaxPooling1d": {
+      "api": "praxis.layers.MaxPool1d",
+      "required_imports": []
+    },
+    "MaxPooling2d": {
+      "api": "praxis.layers.MaxPool2d",
+      "required_imports": []
+    },
+    "MaxPooling3d": {
+      "api": "praxis.layers.MaxPool3d",
+      "required_imports": []
+    },
+    "Maximum": {
+      "api": "jnp.maximum",
+      "required_imports": []
+    },
+    "MayShareMemory": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "Mean": {
+      "api": "jnp.mean",
+      "required_imports": []
+    },
+    "MeanAbsoluteError": {
+      "api": "optax.l1_loss",
+      "required_imports": []
+    },
+    "MeanAbsolutePercentageError": {
+      "api": "optax.mape_loss",
+      "required_imports": []
+    },
+    "MeanSquaredError": {
+      "api": "optax.squared_error",
+      "required_imports": []
+    },
+    "MeanSquaredLogarithmicError": {
+      "macro_template": "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))",
+      "required_imports": []
+    },
+    "Median": {
+      "api": "jax.numpy.median",
+      "required_imports": []
+    },
+    "MelSpectrogram": {
+      "required_imports": []
+    },
+    "Memmap": {
+      "api": "jax.numpy.memmap",
+      "required_imports": []
+    },
+    "MergeContext": {
+      "required_imports": []
+    },
+    "Meshgrid": {
+      "api": "jax.numpy.meshgrid",
+      "required_imports": []
+    },
+    "Metric": {
+      "api": "praxis.metric_utils.Metric",
+      "required_imports": []
+    },
+    "Min": {
+      "api": "jax.numpy.min",
+      "required_imports": []
+    },
+    "MinScalarType": {
+      "api": "jax.numpy.min_scalar_type",
+      "required_imports": []
+    },
+    "MinTypeCode": {
+      "api": "jax.numpy.mintypecode",
+      "required_imports": []
+    },
+    "Minimum": {
+      "api": "jnp.minimum",
+      "required_imports": []
+    },
+    "MixUp": {
+      "required_imports": []
+    },
+    "Mod": {
+      "api": "jnp.mod",
+      "required_imports": []
+    },
+    "Model": {
+      "api": "praxis.base_layer.BaseLayer",
+      "required_imports": []
+    },
+    "ModelAndOptimizer": {
+      "required_imports": []
+    },
+    "Modf": {
+      "api": "jax.numpy.modf",
+      "required_imports": []
+    },
+    "Module": {
+      "api": "praxis.base_layer.BaseLayer",
+      "required_imports": []
+    },
+    "MoveAxis": {
+      "api": "jax.numpy.moveaxis",
+      "required_imports": []
+    },
+    "Moveaxis": {
+      "api": "jax.numpy.moveaxis",
+      "required_imports": []
+    },
+    "MultiHeadAttention": {
+      "api": "praxis.layers.MultiHeadAttention",
+      "required_imports": []
+    },
+    "MultiMetric": {
+      "required_imports": []
+    },
+    "MultiheadAttention": {
+      "api": "praxis.layers.DotProductAttention",
+      "args": {
+        "dropout": "atten_dropout_prob",
+        "embed_dim": "input_dim",
+        "num_heads": "num_heads"
+      },
+      "required_imports": []
+    },
+    "Multiply": {
+      "api": "jnp.multiply",
+      "required_imports": []
+    },
+    "MultiplyNoNan": {
+      "macro_template": "jnp.where({y} == 0, 0.0, {x} * {y})",
+      "required_imports": []
+    },
+    "MultitaskResidualAdapter": {
+      "api": "paxml.layers.MultitaskResidualAdapter",
+      "required_imports": []
+    },
+    "Nan": {
+      "api": "jax.numpy.nan",
+      "required_imports": []
+    },
+    "NanArgMax": {
+      "api": "jax.numpy.nanargmax",
+      "required_imports": []
+    },
+    "NanArgMin": {
+      "api": "jax.numpy.nanargmin",
+      "required_imports": []
+    },
+    "NanCumProd": {
+      "api": "jax.numpy.nancumprod",
+      "required_imports": []
+    },
+    "NanCumSum": {
+      "api": "jax.numpy.nancumsum",
+      "required_imports": []
+    },
+    "NanMax": {
+      "api": "jax.numpy.nanmax",
+      "required_imports": []
+    },
+    "NanMean": {
+      "api": "jax.numpy.nanmean",
+      "required_imports": []
+    },
+    "NanMedian": {
+      "api": "jax.numpy.nanmedian",
+      "required_imports": []
+    },
+    "NanMin": {
+      "api": "jax.numpy.nanmin",
+      "required_imports": []
+    },
+    "NanPercentile": {
+      "api": "jax.numpy.nanpercentile",
+      "required_imports": []
+    },
+    "NanProd": {
+      "api": "jax.numpy.nanprod",
+      "required_imports": []
+    },
+    "NanQuantile": {
+      "api": "jax.numpy.nanquantile",
+      "required_imports": []
+    },
+    "NanStd": {
+      "api": "jax.numpy.nanstd",
+      "required_imports": []
+    },
+    "NanSum": {
+      "api": "jax.numpy.nansum",
+      "required_imports": []
+    },
+    "NanToNum": {
+      "api": "jax.numpy.nan_to_num",
+      "required_imports": []
+    },
+    "NanVar": {
+      "api": "jax.numpy.nanvar",
+      "required_imports": []
+    },
+    "NativeNorm": {
+      "api": "jax.numpy.linalg.norm",
+      "required_imports": []
+    },
+    "Ndim": {
+      "api": "jax.numpy.ndim",
+      "required_imports": []
+    },
+    "Ndtri": {
+      "api": "jax.scipy.special.ndtri",
+      "required_imports": []
+    },
+    "Negative": {
+      "api": "jax.numpy.negative",
+      "required_imports": []
+    },
+    "NegativeAlias": {
+      "api": "jax.numpy.negative",
+      "required_imports": []
+    },
+    "NegativeAlias_": {
+      "api": "jax.numpy.negative",
+      "required_imports": []
+    },
+    "Negative_": {
+      "api": "jax.numpy.negative",
+      "required_imports": []
+    },
+    "NewAxis": {
+      "api": "jax.numpy.newaxis",
+      "required_imports": []
+    },
+    "NextAfter": {
+      "api": "jax.numpy.nextafter",
+      "required_imports": []
+    },
+    "Ngrammer": {
+      "api": "paxml.layers.Ngrammer",
+      "required_imports": []
+    },
+    "NoGrad": {
+      "required_imports": [],
+      "requires_plugin": "context_to_function_wrap"
+    },
+    "NodeStates": {
+      "required_imports": []
+    },
+    "NonZero": {
+      "api": "jax.numpy.argwhere",
+      "required_imports": []
+    },
+    "Norm": {
+      "api": "jax.numpy.linalg.norm",
+      "required_imports": []
+    },
+    "Normal": {
+      "api": "jax.random.normal",
+      "required_imports": []
+    },
+    "Normalization": {
+      "api": "praxis.layers.LayerNorm",
+      "required_imports": []
+    },
+    "Not": {
+      "required_imports": []
+    },
+    "NotEqual": {
+      "api": "jax.numpy.not_equal",
+      "required_imports": []
+    },
+    "NotEqualAlias": {
+      "api": "jax.numpy.not_equal",
+      "required_imports": []
+    },
+    "Nothing": {
+      "required_imports": []
+    },
+    "Numel": {
+      "api": "jax.numpy.size",
+      "required_imports": []
+    },
+    "Object": {
+      "api": "object",
+      "required_imports": []
+    },
+    "OfType": {
+      "required_imports": []
+    },
+    "Ones": {
+      "api": "jax.numpy.ones",
+      "required_imports": []
+    },
+    "OnesLike": {
+      "api": "jax.numpy.ones_like",
+      "required_imports": []
+    },
+    "OptArray": {
+      "required_imports": []
+    },
+    "OptState": {
+      "required_imports": []
+    },
+    "OptVariable": {
+      "required_imports": []
+    },
+    "OptimizedLSTMCell": {
+      "api": "praxis.layers.LSTMCell",
+      "required_imports": []
+    },
+    "Optimizer": {
+      "required_imports": []
+    },
+    "Outer": {
+      "api": "jax.numpy.outer",
+      "required_imports": []
+    },
+    "PReLU": {
+      "api": "praxis.layers.PReLU",
+      "required_imports": []
+    },
+    "PackBits": {
+      "api": "jax.numpy.packbits",
+      "required_imports": []
+    },
+    "Pad": {
+      "api": "jax.numpy.pad",
+      "required_imports": []
+    },
+    "Param": {
+      "api": "praxis.base_layer.WeightInit",
+      "required_imports": []
+    },
+    "Partition": {
+      "api": "jax.numpy.partition",
+      "required_imports": []
+    },
+    "PartitionName": {
+      "api": "str",
+      "required_imports": []
+    },
+    "PathContains": {
+      "required_imports": []
+    },
+    "PerChannelSymmetric": {
+      "required_imports": []
+    },
+    "PerDimScale": {
+      "api": "paxml.layers.PerDimScale",
+      "args": {
+        "dim": "dim"
+      },
+      "required_imports": []
+    },
+    "PerTensorAffine": {
+      "required_imports": []
+    },
+    "PerTensorSymmetric": {
+      "required_imports": []
+    },
+    "Percentile": {
+      "api": "jax.numpy.percentile",
+      "required_imports": []
+    },
+    "Permute": {
+      "api": "jax.numpy.transpose",
+      "args": {
+        "dims": "axes"
+      },
+      "required_imports": []
+    },
+    "PermuteCopy": {
+      "api": "jax.numpy.transpose",
+      "args": {
+        "dims": "axes"
+      },
+      "required_imports": []
+    },
+    "PermuteDims": {
+      "api": "jax.numpy.transpose",
+      "required_imports": []
+    },
+    "Perturbation": {
+      "required_imports": []
+    },
+    "Pi": {
+      "api": "jax.numpy.pi",
+      "required_imports": []
+    },
+    "Piecewise": {
+      "api": "jax.numpy.piecewise",
+      "required_imports": []
+    },
+    "Pinverse": {
+      "api": "jax.numpy.linalg.pinv",
+      "args": {
+        "input": "a"
+      },
+      "required_imports": []
+    },
+    "Pipeline": {
+      "api": "praxis.layers.Sequential",
+      "required_imports": []
+    },
+    "PipelinedTransformer": {
+      "api": "praxis.layers.PipelinedTransformer",
+      "required_imports": []
+    },
+    "PixelShuffle": {
+      "api": "jax.nn.pixel_shuffle",
+      "required_imports": []
+    },
+    "PixelUnshuffle": {
+      "api": "jax.nn.pixel_unshuffle",
+      "required_imports": []
+    },
+    "Place": {
+      "api": "jax.numpy.place",
+      "required_imports": []
+    },
+    "Poisson": {
+      "api": "jax.random.poisson",
+      "args": {
+        "input": "lam"
+      },
+      "required_imports": [],
+      "requires_plugin": "inject_prng"
+    },
+    "PoissonLoss": {
+      "api": "optax.poisson_loss",
+      "required_imports": []
+    },
+    "PoissonNllLoss": {
+      "api": "optax.poisson_nll_loss",
+      "required_imports": [],
+      "requires_plugin": "loss_reduction"
+    },
+    "Polar": {
+      "macro_template": "{abs} * jax.numpy.exp(1j * {angle})",
+      "required_imports": []
+    },
+    "Poly": {
+      "api": "jax.numpy.poly",
+      "required_imports": []
+    },
+    "Poly1d": {
+      "api": "jax.numpy.poly1d",
+      "required_imports": []
+    },
+    "PolyAdd": {
+      "api": "jax.numpy.polyadd",
+      "required_imports": []
+    },
+    "PolyDer": {
+      "api": "jax.numpy.polyder",
+      "required_imports": []
+    },
+    "PolyDiv": {
+      "api": "jax.numpy.polydiv",
+      "required_imports": []
+    },
+    "PolyFit": {
+      "api": "jax.numpy.polyfit",
+      "required_imports": []
+    },
+    "PolyInt": {
+      "api": "jax.numpy.polyint",
+      "required_imports": []
+    },
+    "PolyMul": {
+      "api": "jax.numpy.polymul",
+      "required_imports": []
+    },
+    "PolySub": {
+      "api": "jax.numpy.polysub",
+      "required_imports": []
+    },
+    "PolyVal": {
+      "api": "jax.numpy.polyval",
+      "required_imports": []
+    },
+    "Polygamma": {
+      "api": "jax.scipy.special.polygamma",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Polyval": {
+      "api": "jnp.polyval",
+      "args": {
+        "coeffs": "p"
+      },
+      "required_imports": []
+    },
+    "Pooling": {
+      "api": "praxis.layers.Pooling",
+      "required_imports": []
+    },
+    "Pooling1D": {
+      "api": "praxis.layers.Pooling1D",
+      "required_imports": []
+    },
+    "PositionalEmbedding": {
+      "api": "praxis.layers.PositionalEmbedding",
+      "required_imports": []
+    },
+    "PositionalEmbedding2D": {
+      "api": "praxis.layers.PositionalEmbedding2D",
+      "required_imports": []
+    },
+    "Positive": {
+      "api": "jax.numpy.positive",
+      "args": {
+        "input": "x"
+      },
+      "required_imports": []
+    },
+    "Pow": {
+      "api": "jax.numpy.power",
+      "args": {
+        "exponent": "x2",
+        "input": "x1"
+      },
+      "required_imports": []
+    },
+    "Power": {
+      "api": "jax.numpy.power",
+      "required_imports": []
+    },
+    "Prelu": {
+      "required_imports": []
+    },
+    "PrepareMultiprocessingEnvironment": {
+      "required_imports": []
+    },
+    "PreserveFormat": {
+      "required_imports": []
+    },
+    "PrintOptions": {
+      "api": "jax.numpy.printoptions",
+      "required_imports": []
+    },
+    "Prod": {
+      "api": "jax.numpy.prod",
+      "args": {
+        "dim": "axis",
+        "input": "a",
+        "keepdim": "keepdims"
+      },
+      "required_imports": []
+    },
+    "ProfilerAllowCudagraphCuptiLazyReinitCuda12": {
+      "required_imports": []
+    },
+    "ProjectLastDim": {
+      "api": "praxis.layers.project_last_dim",
+      "required_imports": []
+    },
+    "PromoteTypes": {
+      "api": "jax.numpy.promote_types",
+      "required_imports": []
+    },
+    "Ptp": {
+      "api": "jax.numpy.ptp",
+      "required_imports": []
+    },
+    "PureState": {
+      "api": "tuple",
+      "required_imports": []
+    },
+    "Put": {
+      "api": "jax.numpy.put",
+      "required_imports": []
+    },
+    "PutAlongAxis": {
+      "api": "jax.numpy.put_along_axis",
+      "required_imports": []
+    },
+    "PutMask": {
+      "api": "jax.numpy.putmask",
+      "required_imports": []
+    },
+    "Pytree": {
+      "required_imports": []
+    },
+    "QInt32": {
+      "api": "jax.numpy.int32",
+      "required_imports": []
+    },
+    "QInt8": {
+      "api": "jax.numpy.int8",
+      "required_imports": []
+    },
+    "QPerChannelAxis": {
+      "required_imports": []
+    },
+    "QPerChannelScales": {
+      "required_imports": []
+    },
+    "QPerChannelZeroPoints": {
+      "required_imports": []
+    },
+    "QScale": {
+      "required_imports": []
+    },
+    "QScheme": {
+      "required_imports": []
+    },
+    "QUInt2x4Storage": {
+      "required_imports": []
+    },
+    "QUInt4x2Storage": {
+      "required_imports": []
+    },
+    "QUInt8Storage": {
+      "required_imports": []
+    },
+    "QZeroPoint": {
+      "required_imports": []
+    },
+    "Qqmm": {
+      "required_imports": [],
+      "requires_plugin": "quantized_matmul"
+    },
+    "Qr": {
+      "api": "jax.numpy.linalg.qr",
+      "arg_values": {
+        "some": {
+          "false": "'complete'",
+          "true": "'reduced'"
+        }
+      },
+      "args": {
+        "input": "a"
+      },
+      "required_imports": []
+    },
+    "Quantile": {
+      "api": "jnp.quantile",
+      "required_imports": []
+    },
+    "Quantize": {
+      "required_imports": [],
+      "requires_plugin": "quantization"
+    },
+    "QuantizePerChannel": {
+      "required_imports": []
+    },
+    "QuantizePerTensor": {
+      "required_imports": []
+    },
+    "QuantizePerTensorDynamic": {
+      "required_imports": []
+    },
+    "QuantizeVector": {
+      "api": "praxis.layers.quantize_vector",
+      "required_imports": []
+    },
+    "QuantizedMatmul": {
+      "required_imports": [],
+      "requires_plugin": "quantized_matmul"
+    },
+    "RMSNorm": {
+      "api": "praxis.layers.RMSNorm",
+      "required_imports": []
+    },
+    "RMSNormalization": {
+      "api": "praxis.layers.RMSNorm",
+      "required_imports": []
+    },
+    "RNN": {
+      "api": "praxis.layers.RNN",
+      "required_imports": []
+    },
+    "RNNCellBase": {
+      "api": "praxis.layers.RNNCell",
+      "required_imports": []
+    },
+    "RRefType": {
+      "required_imports": []
+    },
+    "R_": {
+      "api": "jax.numpy.r_",
+      "required_imports": []
+    },
+    "Rad2Deg": {
+      "api": "jnp.degrees",
+      "required_imports": []
+    },
+    "Rad2Deg_": {
+      "api": "jnp.degrees",
+      "required_imports": []
+    },
+    "Radians": {
+      "api": "jax.numpy.radians",
+      "required_imports": []
+    },
+    "Rand": {
+      "api": "jax.random.uniform",
+      "pack_to_tuple": "shape",
+      "required_imports": [],
+      "requires_plugin": "inject_prng"
+    },
+    "RandAugment": {
+      "required_imports": []
+    },
+    "RandomBrightness": {
+      "required_imports": []
+    },
+    "RandomColorDegeneration": {
+      "required_imports": []
+    },
+    "RandomColorJitter": {
+      "required_imports": []
+    },
+    "RandomContrast": {
+      "required_imports": []
+    },
+    "RandomCrop": {
+      "required_imports": []
+    },
+    "RandomElasticTransform": {
+      "required_imports": []
+    },
+    "RandomErasing": {
+      "required_imports": []
+    },
+    "RandomFlip": {
+      "required_imports": []
+    },
+    "RandomGaussianBlur": {
+      "required_imports": []
+    },
+    "RandomGrayscale": {
+      "required_imports": []
+    },
+    "RandomVectorQuantizer": {
+      "api": "praxis.layers.RandomVectorQuantizer",
+      "required_imports": []
+    },
+    "Ravel": {
+      "api": "jnp.ravel",
+      "required_imports": []
+    },
+    "RavelMultiIndex": {
+      "api": "jax.numpy.ravel_multi_index",
+      "required_imports": []
+    },
+    "ReLU": {
+      "api": "praxis.layers.ReLU",
+      "required_imports": []
+    },
+    "ReLU6": {
+      "api": "praxis.layers.ReLU6",
+      "required_imports": []
+    },
+    "Real": {
+      "api": "jax.numpy.real",
+      "required_imports": []
+    },
+    "RealIfClose": {
+      "api": "jax.numpy.real_if_close",
+      "required_imports": []
+    },
+    "Reciprocal": {
+      "api": "jax.numpy.reciprocal",
+      "required_imports": []
+    },
+    "ReciprocalNoNan": {
+      "macro_template": "jnp.where({x} == 0, 0.0, 1.0 / {x})",
+      "required_imports": []
+    },
+    "ReduceMin": {
+      "api": "jnp.min",
+      "required_imports": []
+    },
+    "ReduceProd": {
+      "api": "jnp.prod",
+      "required_imports": []
+    },
+    "ReduceStd": {
+      "api": "jnp.std",
+      "required_imports": []
+    },
+    "ReduceSum": {
+      "api": "jnp.sum",
+      "required_imports": []
+    },
+    "ReduceVariance": {
+      "api": "jnp.var",
+      "required_imports": []
+    },
+    "RelativeBias": {
+      "api": "praxis.layers.RelativeBias",
+      "required_imports": []
+    },
+    "Relu": {
+      "api": "jax.nn.relu",
+      "required_imports": []
+    },
+    "Remainder": {
+      "api": "jax.numpy.remainder",
+      "required_imports": []
+    },
+    "Repeat": {
+      "api": "jax.numpy.repeat",
+      "required_imports": []
+    },
+    "RepeatInterleave": {
+      "api": "jax.numpy.repeat",
+      "args": {
+        "dim": "axis"
+      },
+      "required_imports": []
+    },
+    "ResNet": {
+      "api": "praxis.layers.ResNet",
+      "required_imports": []
+    },
+    "ResNetBlock": {
+      "api": "praxis.layers.ResNetBlock",
+      "required_imports": []
+    },
+    "ResetPeakMemory": {
+      "required_imports": []
+    },
+    "Reshape": {
+      "api": "jax.numpy.reshape",
+      "required_imports": []
+    },
+    "Resize": {
+      "api": "jax.numpy.resize",
+      "required_imports": []
+    },
+    "ResolveConj": {
+      "api": "jax.numpy.conj",
+      "required_imports": []
+    },
+    "ResolveNeg": {
+      "api": "jax.numpy.negative",
+      "required_imports": []
+    },
+    "ResultType": {
+      "api": "jax.numpy.result_type",
+      "required_imports": []
+    },
+    "RightShift": {
+      "api": "jax.numpy.right_shift",
+      "required_imports": []
+    },
+    "Rint": {
+      "api": "jnp.rint",
+      "required_imports": []
+    },
+    "RmsNorm": {
+      "api": "praxis.layers.RmsNorm",
+      "required_imports": []
+    },
+    "RmsNormNoScale": {
+      "api": "praxis.layers.RmsNormNoScale",
+      "required_imports": []
+    },
+    "Roll": {
+      "api": "jax.numpy.roll",
+      "args": {
+        "dims": "axis",
+        "shifts": "shift"
+      },
+      "required_imports": []
+    },
+    "RollAxis": {
+      "api": "jax.numpy.rollaxis",
+      "required_imports": []
+    },
+    "Roots": {
+      "api": "jax.numpy.roots",
+      "required_imports": []
+    },
+    "Rot90": {
+      "api": "jax.numpy.rot90",
+      "args": {
+        "dims": "axes"
+      },
+      "required_imports": []
+    },
+    "Round": {
+      "api": "jax.numpy.round",
+      "required_imports": []
+    },
+    "RowStack": {
+      "api": "jax.numpy.vstack",
+      "required_imports": []
+    },
+    "Rsqrt": {
+      "api": "jax.lax.rsqrt",
+      "required_imports": []
+    },
+    "Rsub": {
+      "macro_template": "{other} - ({input} * {alpha})",
+      "required_imports": []
+    },
+    "SSM": {
+      "api": "praxis.layers.SSM",
+      "required_imports": []
+    },
+    "SSMGated": {
+      "api": "praxis.layers.SSMGated",
+      "required_imports": []
+    },
+    "SSMTransformer": {
+      "api": "praxis.layers.SSMTransformer",
+      "required_imports": []
+    },
+    "Save": {
+      "api": "jax.numpy.save",
+      "required_imports": []
+    },
+    "SaveGguf": {
+      "required_imports": [],
+      "requires_plugin": "save_gguf_adapter"
+    },
+    "SaveSafetensors": {
+      "macro_template": "save_file({arrays}, {file}, metadata={metadata})",
+      "required_imports": [
+        "from safetensors.flax import save_file"
+      ]
+    },
+    "SaveTxt": {
+      "api": "jax.numpy.savetxt",
+      "required_imports": []
+    },
+    "SaveZ": {
+      "api": "jax.numpy.savez",
+      "required_imports": []
+    },
+    "SaveZCompressed": {
+      "api": "jax.numpy.savez_compressed",
+      "required_imports": []
+    },
+    "Savez": {
+      "api": "jax.numpy.savez",
+      "required_imports": []
+    },
+    "SavezCompressed": {
+      "api": "jax.numpy.savez_compressed",
+      "required_imports": []
+    },
+    "ScalarMul": {
+      "macro_template": "{x} * {scalar}",
+      "required_imports": []
+    },
+    "ScriptClass": {
+      "required_imports": []
+    },
+    "ScriptClassFunction": {
+      "required_imports": []
+    },
+    "ScriptDict": {
+      "required_imports": []
+    },
+    "ScriptDictIterator": {
+      "required_imports": []
+    },
+    "ScriptDictKeyIterator": {
+      "required_imports": []
+    },
+    "ScriptFunction": {
+      "required_imports": []
+    },
+    "ScriptList": {
+      "required_imports": []
+    },
+    "ScriptListIterator": {
+      "required_imports": []
+    },
+    "ScriptMethod": {
+      "required_imports": []
+    },
+    "ScriptModule": {
+      "required_imports": []
+    },
+    "ScriptModuleSerializer": {
+      "required_imports": []
+    },
+    "ScriptObject": {
+      "required_imports": []
+    },
+    "ScriptObjectProperty": {
+      "required_imports": []
+    },
+    "SearchSorted": {
+      "api": "jax.numpy.searchsorted",
+      "required_imports": []
+    },
+    "SegmentMask": {
+      "api": "praxis.layers.segment_mask",
+      "required_imports": []
+    },
+    "SegmentMax": {
+      "api": "jax.ops.segment_max",
+      "required_imports": []
+    },
+    "SegmentMean": {
+      "api": "jax.ops.segment_mean",
+      "required_imports": []
+    },
+    "SegmentMin": {
+      "api": "jax.ops.segment_min",
+      "required_imports": []
+    },
+    "SegmentProd": {
+      "api": "jax.ops.segment_prod",
+      "required_imports": []
+    },
+    "SegmentSum": {
+      "api": "jax.ops.segment_sum",
+      "required_imports": []
+    },
+    "SegmentedMm": {
+      "required_imports": [],
+      "requires_plugin": "segmented_ops"
+    },
+    "Select": {
+      "api": "jax.numpy.select",
+      "required_imports": []
+    },
+    "SelfAttentionWithNormAndResidual": {
+      "api": "praxis.layers.SelfAttentionWithNormAndResidual",
+      "required_imports": []
+    },
+    "Selu": {
+      "api": "jax.nn.selu",
+      "required_imports": []
+    },
+    "SequenceModel": {
+      "api": "praxis.layers.SequenceModel",
+      "required_imports": []
+    },
+    "Sequential": {
+      "api": "praxis.layers.Sequential",
+      "required_imports": []
+    },
+    "SerializationStorageContext": {
+      "required_imports": []
+    },
+    "SetCacheLimit": {
+      "required_imports": []
+    },
+    "SetDefaultDevice": {
+      "api": "jax.default_device",
+      "required_imports": []
+    },
+    "SetDefaultStream": {
+      "required_imports": []
+    },
+    "SetDiff1d": {
+      "api": "jax.numpy.setdiff1d",
+      "required_imports": []
+    },
+    "SetErr": {
+      "api": "jax.numpy.seterr",
+      "required_imports": []
+    },
+    "SetErrCall": {
+      "api": "jax.numpy.seterrcall",
+      "required_imports": []
+    },
+    "SetFlushDenormal": {
+      "required_imports": []
+    },
+    "SetGradEnabled": {
+      "required_imports": []
+    },
+    "SetMemoryLimit": {
+      "required_imports": []
+    },
+    "SetNumInteropThreads": {
+      "required_imports": []
+    },
+    "SetNumThreads": {
+      "required_imports": []
+    },
+    "SetPrintOptions": {
+      "api": "jax.numpy.set_printoptions",
+      "required_imports": []
+    },
+    "SetRngState": {
+      "required_imports": []
+    },
+    "SetVital": {
+      "required_imports": []
+    },
+    "SetWarnAlways": {
+      "required_imports": []
+    },
+    "SetWiredLimit": {
+      "required_imports": []
+    },
+    "SetXor1d": {
+      "api": "jax.numpy.setxor1d",
+      "required_imports": []
+    },
+    "Sgn": {
+      "api": "jax.numpy.sign",
+      "required_imports": []
+    },
+    "Shape": {
+      "macro_template": "tuple({iterable})",
+      "required_imports": []
+    },
+    "SharedEmbeddingSoftmax": {
+      "api": "praxis.layers.SharedEmbeddingSoftmax",
+      "required_imports": []
+    },
+    "Short": {
+      "api": "jax.numpy.astype",
+      "macro_template": "{input}.astype(jnp.int16)",
+      "required_imports": [],
+      "transformation_type": "macro"
+    },
+    "ShortStorage": {
+      "required_imports": []
+    },
+    "SiLU": {
+      "api": "praxis.layers.SiLU",
+      "required_imports": []
+    },
+    "Sigmoid": {
+      "api": "jax.nn.sigmoid",
+      "required_imports": []
+    },
+    "SigmoidCrossEntropy": {
+      "api": "praxis.layers.SigmoidCrossEntropy",
+      "required_imports": []
+    },
+    "Sigmoid_": {
+      "api": "jax.nn.sigmoid",
+      "macro_template": "{input} = jax.nn.sigmoid({input})",
+      "required_imports": [],
+      "transformation_type": "macro"
+    },
+    "Sign": {
+      "api": "jax.numpy.sign",
+      "required_imports": []
+    },
+    "Signbit": {
+      "api": "jax.numpy.signbit",
+      "required_imports": []
+    },
+    "SignedInteger": {
+      "api": "jax.numpy.signedinteger",
+      "required_imports": []
+    },
+    "Silu": {
+      "api": "jax.nn.silu",
+      "required_imports": []
+    },
+    "Sin": {
+      "api": "jax.numpy.sin",
+      "required_imports": []
+    },
+    "Sin_": {
+      "api": "jax.numpy.sin",
+      "macro_template": "{input} = jnp.sin({input})",
+      "required_imports": [],
+      "transformation_type": "macro"
+    },
+    "Sinc": {
+      "api": "jax.numpy.sinc",
+      "required_imports": []
+    },
+    "Sinc_": {
+      "api": "jax.numpy.sinc",
+      "macro_template": "{input} = jnp.sinc({input})",
+      "required_imports": [],
+      "transformation_type": "macro"
+    },
+    "Single": {
+      "api": "jax.numpy.float32",
+      "required_imports": []
+    },
+    "Sinh": {
+      "api": "jax.numpy.sinh",
+      "required_imports": []
+    },
+    "Sinh_": {
+      "api": "jax.numpy.sinh",
+      "macro_template": "{input} = jnp.sinh({input})",
+      "required_imports": [],
+      "transformation_type": "macro"
+    },
+    "Size": {
+      "api": "jax.numpy.size",
+      "required_imports": []
+    },
+    "SliceCopy": {
+      "required_imports": []
+    },
+    "SliceInverse": {
+      "required_imports": []
+    },
+    "SliceScatter": {
+      "api": "jax.lax.dynamic_update_slice",
+      "required_imports": [],
+      "requires_plugin": "slice_scatter_plugin"
+    },
+    "Slogdet": {
+      "api": "jax.numpy.linalg.slogdet",
+      "required_imports": []
+    },
+    "Smm": {
+      "required_imports": []
+    },
+    "SoftSign": {
+      "api": "jax.nn.soft_sign",
+      "required_imports": []
+    },
+    "Softmax": {
+      "api": "jax.nn.softmax",
+      "args": {
+        "dim": "axis"
+      },
+      "required_imports": []
+    },
+    "Softmin": {
+      "api": "jax.nn.softmin",
+      "required_imports": []
+    },
+    "Softplus": {
+      "api": "jax.nn.softplus",
+      "required_imports": []
+    },
+    "Softshrink": {
+      "macro_template": "jnp.sign({x}) * jnp.maximum(jnp.abs({x}) - {lambd}, 0)",
+      "required_imports": []
+    },
+    "Softsign": {
+      "api": "jax.nn.softsign",
+      "required_imports": []
+    },
+    "Solve": {
+      "api": "jax.numpy.linalg.solve",
+      "required_imports": [],
+      "requires_plugin": "solve_adapter"
+    },
+    "Sort": {
+      "api": "jax.numpy.sort",
+      "required_imports": [],
+      "requires_plugin": "sort_tuple_wrapper"
+    },
+    "SortComplex": {
+      "api": "jax.numpy.sort_complex",
+      "required_imports": []
+    },
+    "Spacing": {
+      "api": "jax.numpy.spacing",
+      "required_imports": []
+    },
+    "SparseBsc": {
+      "required_imports": []
+    },
+    "SparseBscTensor": {
+      "required_imports": []
+    },
+    "SparseCategoricalCrossentropy": {
+      "api": "optax.softmax_cross_entropy_with_integer_labels",
+      "required_imports": []
+    },
+    "SpectrumAugmenter": {
+      "api": "praxis.layers.SpectrumAugmenter",
+      "required_imports": []
+    },
+    "Split": {
+      "api": "jax.numpy.split",
+      "required_imports": []
+    },
+    "Sqrt": {
+      "api": "jnp.sqrt",
+      "required_imports": []
+    },
+    "Square": {
+      "api": "jnp.square",
+      "required_imports": []
+    },
+    "SquaredDifference": {
+      "macro_template": "jnp.square({x} - {y})",
+      "required_imports": []
+    },
+    "SquaredHingeLoss": {
+      "macro_template": "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)",
+      "required_imports": []
+    },
+    "SquaredReLU": {
+      "api": "praxis.layers.SquaredReLU",
+      "required_imports": []
+    },
+    "Squeeze": {
+      "api": "jax.numpy.squeeze",
+      "required_imports": []
+    },
+    "Stack": {
+      "api": "jax.numpy.stack",
+      "required_imports": []
+    },
+    "StackFrnn": {
+      "api": "praxis.layers.StackFrnn",
+      "required_imports": []
+    },
+    "StackedTransformer": {
+      "api": "praxis.layers.StackedTransformer",
+      "required_imports": []
+    },
+    "StackedTransformerRepeated": {
+      "api": "praxis.layers.StackedTransformerRepeated",
+      "required_imports": []
+    },
+    "StackingOverTime": {
+      "api": "praxis.layers.StackingOverTime",
+      "required_imports": []
+    },
+    "StaticModule": {
+      "required_imports": []
+    },
+    "Std": {
+      "api": "jax.numpy.std",
+      "required_imports": []
+    },
+    "StepActivation": {
+      "macro_template": "jnp.where({x} >= {threshold}, 1.0, 0.0)",
+      "required_imports": []
+    },
+    "StochasticResidual": {
+      "api": "praxis.layers.StochasticResidual",
+      "required_imports": []
+    },
+    "StopGradient": {
+      "api": "jax.lax.stop_gradient",
+      "required_imports": []
+    },
+    "Storage": {
+      "required_imports": []
+    },
+    "StorageBase": {
+      "required_imports": []
+    },
+    "Stream": {
+      "required_imports": []
+    },
+    "StreamObjType": {
+      "required_imports": []
+    },
+    "StringType": {
+      "required_imports": []
+    },
+    "Subtract": {
+      "api": "jnp.subtract",
+      "required_imports": []
+    },
+    "Sum": {
+      "api": "jax.numpy.sum",
+      "required_imports": []
+    },
+    "SwapAxes": {
+      "api": "jax.numpy.swapaxes",
+      "required_imports": []
+    },
+    "Swapaxes": {
+      "api": "jax.numpy.swapaxes",
+      "required_imports": []
+    },
+    "Swish": {
+      "api": "praxis.layers.Swish",
+      "required_imports": []
+    },
+    "SymBool": {
+      "required_imports": []
+    },
+    "SymBoolType": {
+      "required_imports": []
+    },
+    "SymFloat": {
+      "required_imports": []
+    },
+    "SymInt": {
+      "required_imports": []
+    },
+    "TYPE_CHECKING": {
+      "api": "typing.TYPE_CHECKING",
+      "required_imports": []
+    },
+    "Take": {
+      "api": "jax.numpy.take",
+      "required_imports": []
+    },
+    "TakeAlongAxis": {
+      "api": "jax.numpy.take_along_axis",
+      "required_imports": []
+    },
+    "Tan": {
+      "api": "jnp.tan",
+      "required_imports": []
+    },
+    "Tanh": {
+      "api": "jnp.tanh",
+      "required_imports": []
+    },
+    "TemporalShifting": {
+      "api": "praxis.layers.TemporalShifting",
+      "required_imports": []
+    },
+    "Tensor": {
+      "api": "jax.Array",
+      "required_imports": []
+    },
+    "Tensordot": {
+      "api": "jax.numpy.tensordot",
+      "required_imports": []
+    },
+    "Test": {
+      "required_imports": []
+    },
+    "Tile": {
+      "api": "jax.numpy.tile",
+      "required_imports": []
+    },
+    "Timedelta64": {
+      "api": "jax.numpy.timedelta64",
+      "required_imports": []
+    },
+    "TopK": {
+      "api": "jax.lax.top_k",
+      "args": {
+        "input": "operand"
+      },
+      "required_imports": []
+    },
+    "Trace": {
+      "api": "jax.numpy.trace",
+      "required_imports": []
+    },
+    "TrainablePositionalEmbedding": {
+      "api": "praxis.layers.TrainablePositionalEmbedding",
+      "required_imports": []
+    },
+    "Transformer": {
+      "api": "praxis.layers.Transformer",
+      "required_imports": []
+    },
+    "TransformerEncoderDecoder": {
+      "api": "praxis.layers.TransformerEncoderDecoder",
+      "required_imports": []
+    },
+    "TransformerFeedForward": {
+      "api": "praxis.layers.TransformerFeedForward",
+      "args": {
+        "dropout_prob": "relu_dropout_prob"
+      },
+      "required_imports": []
+    },
+    "TransformerFeedForwardMoe": {
+      "api": "praxis.layers.TransformerFeedForwardMoe",
+      "required_imports": []
+    },
+    "TransformerLm": {
+      "api": "praxis.layers.TransformerLm",
+      "required_imports": []
+    },
+    "Transpose": {
+      "api": "jax.numpy.transpose",
+      "required_imports": []
+    },
+    "Trapezoid": {
+      "api": "jax.numpy.trapezoid",
+      "required_imports": []
+    },
+    "Tri": {
+      "api": "jax.numpy.tri",
+      "required_imports": []
+    },
+    "Tril": {
+      "api": "jax.numpy.tril",
+      "required_imports": []
+    },
+    "TrilIndices": {
+      "api": "jax.numpy.tril_indices",
+      "required_imports": []
+    },
+    "TrilIndicesFrom": {
+      "api": "jax.numpy.tril_indices_from",
+      "required_imports": []
+    },
+    "TrimZeros": {
+      "api": "jax.numpy.trim_zeros",
+      "required_imports": []
+    },
+    "Triu": {
+      "api": "jax.numpy.triu",
+      "required_imports": []
+    },
+    "TriuIndices": {
+      "api": "jax.numpy.triu_indices",
+      "required_imports": []
+    },
+    "TriuIndicesFrom": {
+      "api": "jax.numpy.triu_indices_from",
+      "required_imports": []
+    },
+    "TrueDiv": {
+      "api": "jnp.divide",
+      "required_imports": []
+    },
+    "TrueDivide": {
+      "api": "jax.numpy.divide",
+      "required_imports": []
+    },
+    "Trunc": {
+      "api": "jax.numpy.trunc",
+      "required_imports": []
+    },
+    "TypeVarM": {
+      "api": "typing.TypeVar",
+      "required_imports": []
+    },
+    "Typecodes": {
+      "api": "jax.numpy.typecodes",
+      "required_imports": []
+    },
+    "Typename": {
+      "api": "jax.numpy.typename",
+      "required_imports": []
+    },
+    "UByte": {
+      "api": "jax.numpy.uint8",
+      "required_imports": []
+    },
+    "UFunc": {
+      "api": "jax.numpy.ufunc",
+      "required_imports": []
+    },
+    "UInt": {
+      "api": "jax.numpy.uint",
+      "required_imports": []
+    },
+    "UInt16": {
+      "api": "jax.numpy.uint16",
+      "required_imports": []
+    },
+    "UInt32": {
+      "api": "jax.numpy.uint32",
+      "required_imports": []
+    },
+    "UInt64": {
+      "api": "jax.numpy.uint64",
+      "required_imports": []
+    },
+    "UInt8": {
+      "api": "jax.numpy.uint8",
+      "required_imports": []
+    },
+    "UnfoldCopy": {
+      "required_imports": [],
+      "requires_plugin": "unfold_op"
+    },
+    "Unicode": {
+      "required_imports": []
+    },
+    "UnifyTypeList": {
+      "required_imports": []
+    },
+    "Unique": {
+      "api": "jax.numpy.unique",
+      "required_imports": []
+    },
+    "UniqueConsecutive": {
+      "required_imports": [],
+      "requires_plugin": "unique_consecutive_plugin"
+    },
+    "UnravelIndex": {
+      "api": "jax.numpy.unravel_index",
+      "required_imports": []
+    },
+    "UnsafeChunk": {
+      "api": "jax.numpy.array_split",
+      "required_imports": []
+    },
+    "UnsafeSplit": {
+      "api": "jax.numpy.split",
+      "required_imports": []
+    },
+    "UnsafeSplitWithSizes": {
+      "api": "jax.numpy.split",
+      "required_imports": []
+    },
+    "UnsortedSegmentMax": {
+      "api": "jax.ops.segment_max",
+      "required_imports": []
+    },
+    "UnsortedSegmentMin": {
+      "api": "jax.ops.segment_min",
+      "required_imports": []
+    },
+    "UnsortedSegmentProd": {
+      "api": "jax.ops.segment_prod",
+      "required_imports": []
+    },
+    "UnsortedSegmentSum": {
+      "api": "jax.ops.segment_sum",
+      "required_imports": []
+    },
+    "Unsqueeze": {
+      "api": "jax.numpy.expand_dims",
+      "required_imports": []
+    },
+    "UnsqueezeCopy": {
+      "api": "jax.numpy.expand_dims",
+      "required_imports": []
+    },
+    "UseDeterministicAlgorithms": {
+      "required_imports": []
+    },
+    "VQNgrammer": {
+      "api": "praxis.layers.VQNgrammer",
+      "required_imports": []
+    },
+    "ValueAndGrad": {
+      "required_imports": [],
+      "requires_plugin": "pax_grad_wrapper"
+    },
+    "ValuesCopy": {
+      "required_imports": []
+    },
+    "Vander": {
+      "api": "jax.numpy.vander",
+      "required_imports": []
+    },
+    "VanillaBlock": {
+      "api": "praxis.layers.VanillaBlock",
+      "required_imports": []
+    },
+    "VanillaNet": {
+      "api": "praxis.layers.VanillaNet",
+      "required_imports": []
+    },
+    "Var": {
+      "api": "jax.numpy.var",
+      "args": {
+        "correction": "ddof"
+      },
+      "required_imports": []
+    },
+    "VarMean": {
+      "macro_template": "(jax.numpy.var({x}, axis={axis}, ddof={correction}, keepdims={keepdims}), jax.numpy.mean({x}, axis={axis}, keepdims={keepdims}))",
+      "required_imports": []
+    },
+    "Variance": {
+      "api": "jax.numpy.var",
+      "required_imports": []
+    },
+    "Vdot": {
+      "api": "jax.numpy.vdot",
+      "required_imports": []
+    },
+    "VectorQuantization": {
+      "api": "praxis.layers.VectorQuantization",
+      "required_imports": []
+    },
+    "VectorQuantizer": {
+      "api": "praxis.layers.VectorQuantizer",
+      "required_imports": []
+    },
+    "ViewAsComplex": {
+      "macro_template": "jax.lax.complex({x}[..., 0], {x}[..., 1])",
+      "required_imports": []
+    },
+    "ViewAsComplexCopy": {
+      "macro_template": "jax.lax.complex({x}[..., 0], {x}[..., 1])",
+      "required_imports": []
+    },
+    "ViewAsReal": {
+      "macro_template": "jax.numpy.stack([jax.numpy.real({x}), jax.numpy.imag({x})], axis=-1)",
+      "required_imports": []
+    },
+    "ViewAsRealCopy": {
+      "macro_template": "jax.numpy.stack([jax.numpy.real({x}), jax.numpy.imag({x})], axis=-1)",
+      "required_imports": []
+    },
+    "ViewCopy": {
+      "api": "jax.numpy.reshape",
+      "pack_to_tuple": "shape",
+      "required_imports": []
+    },
+    "VisionTransformer": {
+      "api": "praxis.layers.VisionTransformer",
+      "required_imports": []
+    },
+    "VitEntryLayers": {
+      "api": "praxis.layers.VitEntryLayers",
+      "required_imports": []
+    },
+    "VitExitLayers": {
+      "api": "praxis.layers.VitExitLayers",
+      "required_imports": []
+    },
+    "VitalsEnabled": {
+      "macro_template": "False",
+      "required_imports": []
+    },
+    "Vmap": {
+      "api": "jax.vmap",
+      "required_imports": []
+    },
+    "Vsplit": {
+      "api": "jax.numpy.vsplit",
+      "required_imports": []
+    },
+    "Vstack": {
+      "api": "jax.numpy.vstack",
+      "required_imports": []
+    },
+    "Wait": {
+      "macro_template": "{future}.block_until_ready() if hasattr({future}, 'block_until_ready') else None",
+      "required_imports": []
+    },
+    "Where": {
+      "api": "jax.numpy.where",
+      "required_imports": []
+    },
+    "WhileLoop": {
+      "api": "jax.lax.while_loop",
+      "required_imports": []
+    },
+    "Xdivy": {
+      "api": "jax.scipy.special.xdivy",
+      "required_imports": []
+    },
+    "Xlog1py": {
+      "api": "jax.scipy.special.xlog1py",
+      "required_imports": []
+    },
+    "Xlogy": {
+      "api": "jax.scipy.special.xlogy",
+      "required_imports": []
+    },
+    "Xlogy_": {
+      "api": "jax.scipy.special.xlogy",
+      "required_imports": []
+    },
+    "ZeroFraction": {
+      "macro_template": "jnp.mean({value} == 0)",
+      "required_imports": []
+    },
+    "Zero_": {
+      "api": "jax.numpy.zeros_like",
+      "required_imports": []
+    },
+    "Zeros": {
+      "api": "jax.numpy.zeros",
+      "args": {
+        "device": null,
+        "requires_grad": null,
+        "size": null
+      },
+      "pack_to_tuple": "shape",
+      "required_imports": []
+    },
+    "ZerosLike": {
+      "api": "jax.numpy.zeros_like",
+      "args": {
+        "device": null,
+        "input": "a",
+        "layout": null,
+        "memory_format": null,
+        "requires_grad": null
+      },
+      "required_imports": []
+    },
+    "Zeta": {
+      "api": "jax.scipy.special.zeta",
+      "required_imports": []
+    },
+    "abs": {
+      "api": "jnp.abs"
+    },
+    "cosinesimilarityloss": {
+      "api": "optax.cosine_similarity",
+      "args": {
+        "y_pred": "predictions",
+        "y_true": "targets"
+      },
+      "macro_template": "-optax.cosine_similarity({y_pred}, {y_true})",
+      "required_imports": []
+    },
+    "ctcloss": {
+      "api": "optax.ctc_loss",
+      "required_imports": []
+    },
+    "data_ptr": {
+      "api": "data",
+      "requires_plugin": "method_to_property"
+    },
+    "diceloss": {
+      "macro_template": "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))",
+      "required_imports": []
+    },
+    "div_value": {
+      "api": "optax.tree.div",
+      "args": {},
+      "required_imports": []
+    },
+    "dropout": {
+      "api": "praxis.layers.Dropout",
+      "required_imports": []
+    },
+    "flatten": {
+      "required_imports": [],
+      "requires_plugin": "flatten_range"
+    },
+    "hingeloss": {
+      "api": "optax.hinge_loss",
+      "required_imports": []
+    },
+    "huberloss": {
+      "api": "optax.huber_loss",
+      "required_imports": []
+    },
+    "kldivergence": {
+      "api": "optax.kl_divergence",
+      "required_imports": []
+    },
+    "logcoshloss": {
+      "api": "optax.log_cosh",
+      "required_imports": []
+    },
+    "max_norm": {
+      "api": "optax.tree.max",
+      "args": {},
+      "required_imports": []
+    },
+    "max_pool1d": {
+      "api": "optax.tree.max",
+      "args": {},
+      "required_imports": []
+    },
+    "max_pool2d": {
+      "api": "optax.tree.max",
+      "args": {},
+      "required_imports": []
+    },
+    "max_pool3d": {
+      "api": "optax.tree.max",
+      "args": {},
+      "required_imports": []
+    },
+    "max_val": {
+      "api": "optax.tree.max",
+      "args": {},
+      "required_imports": []
+    },
+    "meanabsoluteerror": {
+      "api": "optax.l1_loss",
+      "required_imports": []
+    },
+    "meanabsolutepercentageerror": {
+      "api": "optax.mape_loss",
+      "required_imports": []
+    },
+    "meansquarederror": {
+      "api": "optax.squared_error",
+      "required_imports": []
+    },
+    "meansquaredlogarithmicerror": {
+      "macro_template": "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))",
+      "required_imports": []
+    },
+    "min_val": {
+      "api": "optax.tree.min",
+      "args": {},
+      "required_imports": []
+    },
+    "norm1": {
+      "api": "optax.tree.norm",
+      "args": {},
+      "required_imports": []
+    },
+    "norm2": {
+      "api": "optax.tree.norm",
+      "args": {},
+      "required_imports": []
+    },
+    "norm3": {
+      "api": "optax.tree.norm",
+      "args": {},
+      "required_imports": []
+    },
+    "norm_type": {
+      "api": "optax.tree.norm",
+      "args": {},
+      "required_imports": []
+    },
+    "permute_dims": {
+      "api": "jnp.transpose",
+      "pack_to_tuple": "axes"
+    },
+    "poissonloss": {
+      "api": "optax.poisson_loss",
+      "required_imports": []
+    },
+    "scale_grad_by_freq": {
+      "api": "optax.tree.scale",
+      "args": {},
+      "required_imports": []
+    },
+    "size": {
+      "api": "shape",
+      "requires_plugin": "method_to_property"
+    },
+    "sparsecategoricalcrossentropy": {
+      "api": "optax.softmax_cross_entropy_with_integer_labels",
+      "required_imports": []
+    },
+    "squaredhingeloss": {
+      "macro_template": "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)",
+      "required_imports": []
+    },
+    "step": {
+      "requires_plugin": "optimizer_step"
+    },
+    "zero_grad": {
+      "requires_plugin": "optimizer_zero_grad"
+    }
+  },
+  "templates": {
+    "convert_input": "jnp.array({np_var})",
+    "fori_loop": "val = jax.lax.fori_loop({start}, {stop}, lambda i, val: {body}, {init_val})",
+    "import": "import jax\nimport jax.numpy as jnp\ntry:\n    import chex\nexcept ImportError:\n    pass\nimport praxis.layers as pl",
+    "jit_template": "jax.jit({fn}, static_argnums={static_argnums})",
+    "scan": "carry, stacked = jax.lax.scan(lambda c, x: {body}, {init}, {xs})",
+    "to_numpy": "{res_var}"
+  }
+}

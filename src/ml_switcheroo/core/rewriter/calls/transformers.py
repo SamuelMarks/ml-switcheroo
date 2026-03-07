@@ -38,6 +38,16 @@ def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
 def rewrite_as_inline_lambda(lambda_str: str, args: list[cst.Arg]) -> cst.Call:
   """
   Wraps arguments in an Immediately Invoked Lambda Expression (IIFE).
+
+  Args:
+      lambda_str (str): The string representation of the lambda function.
+      args (list[cst.Arg]): The list of arguments to pass to the lambda.
+
+  Returns:
+      cst.Call: A CST call node representing the invoked lambda.
+
+  Raises:
+      ValueError: If the lambda string has invalid syntax.
   """
   try:
     parsed_expr = cst.parse_expression(lambda_str)
@@ -114,6 +124,18 @@ def rewrite_as_infix(
 ) -> Union[cst.BinaryOperation, cst.UnaryOperation]:
   """
   Transforms a functional call into an infix (binary) or prefix (unary) expression.
+
+  Args:
+      _original_node (cst.Call): The original call node.
+      args (List[cst.Arg]): The arguments for the operator.
+      op_symbol (str): The operator symbol (e.g., "+", "*").
+      std_args (List[str]): Standard argument names for arity checking.
+
+  Returns:
+      Union[cst.BinaryOperation, cst.UnaryOperation]: The new AST node for the operation.
+
+  Raises:
+      ValueError: If unsupported operators or wrong number of arguments are passed.
   """
   arity = len(std_args) if std_args else len(args)
 

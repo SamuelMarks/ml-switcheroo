@@ -1,4 +1,4 @@
-operation: "CosineSimilarityLoss"
+operation: "cosinesimilarityloss"
 description: "Computes the cosine similarity between labels and predictions. Note: Keras defaults to negative similarity (loss)."
 op_type: "function"
 std_args:
@@ -47,7 +47,7 @@ variants:
     macro_template: "mlx.nn.losses.cosine_similarity({y_pred}, {y_true}, axis={axis})"
 
 ---
-operation: "CTCLoss"
+operation: "ctcloss"
 description: "CTC (Connectionist Temporal Classification) loss."
 op_type: "function"
 std_args:
@@ -74,7 +74,7 @@ variants:
     api: "optax.ctc_loss"
 
 ---
-operation: "DeserializeLoss"
+operation: "deserializeloss"
 description: "Deserializes a serialized loss class/function instance."
 op_type: "function"
 std_args:
@@ -94,7 +94,7 @@ variants:
     api: null
 
 ---
-operation: "DiceLoss"
+operation: "diceloss"
 description: "Computes the Dice loss value between y_true and y_pred."
 op_type: "function"
 std_args:
@@ -120,7 +120,7 @@ variants:
     macro_template: "1 - (2 * ({y_true} * {y_pred}).sum(axis={axis})) / ({y_true}.sum(axis={axis}) + {y_pred}.sum(axis={axis}))"
 
 ---
-operation: "GetLoss"
+operation: "getloss"
 description: "Retrieves a Keras loss as a function/Loss class instance."
 op_type: "function"
 std_args:
@@ -137,7 +137,7 @@ variants:
     api: null
 
 ---
-operation: "HingeLoss"
+operation: "hingeloss"
 description: "Computes the hinge loss between y_true & y_pred."
 op_type: "function"
 std_args:
@@ -168,7 +168,7 @@ variants:
     api: "mlx.nn.losses.hinge_loss"
 
 ---
-operation: "HuberLoss"
+operation: "huberloss"
 description: "Computes Huber loss value."
 op_type: "function"
 std_args:
@@ -202,7 +202,7 @@ variants:
     api: "mlx.nn.losses.huber_loss"
 
 ---
-operation: "KLDivergence"
+operation: "kldivergence"
 description: "Computes Kullback-Leibler divergence loss between y_true & y_pred."
 op_type: "function"
 std_args:
@@ -232,7 +232,7 @@ variants:
     api: "mlx.nn.losses.kl_div_loss"
 
 ---
-operation: "LogCoshLoss"
+operation: "logcoshloss"
 description: "Logarithm of the hyperbolic cosine of the prediction error."
 op_type: "function"
 std_args:
@@ -260,7 +260,7 @@ variants:
     api: "mlx.nn.losses.log_cosh_loss"
 
 ---
-operation: "MeanAbsoluteError"
+operation: "meanabsoluteerror"
 description: "Computes the mean absolute error between labels and predictions."
 op_type: "function"
 std_args:
@@ -293,7 +293,7 @@ variants:
     api: "mlx.nn.losses.l1_loss"
 
 ---
-operation: "MeanAbsolutePercentageError"
+operation: "meanabsolutepercentageerror"
 description: "Computes the mean absolute percentage error between y_true & y_pred."
 op_type: "function"
 std_args:
@@ -319,7 +319,7 @@ variants:
     api: "optax.mape_loss"
 
 ---
-operation: "MeanSquaredError"
+operation: "meansquarederror"
 description: "Computes the mean squared error between labels and predictions."
 op_type: "function"
 std_args:
@@ -352,7 +352,7 @@ variants:
     api: "mlx.nn.losses.mse_loss"
 
 ---
-operation: "MeanSquaredLogarithmicError"
+operation: "meansquaredlogarithmicerror"
 description: "Computes the mean squared logarithmic error between y_true & y_pred."
 op_type: "function"
 std_args:
@@ -375,7 +375,7 @@ variants:
     macro_template: "optax.squared_error(jax.numpy.log1p({y_true}), jax.numpy.log1p({y_pred}))"
 
 ---
-operation: "PoissonLoss"
+operation: "poissonloss"
 description: "Computes the Poisson loss between y_true and y_pred."
 op_type: "function"
 std_args:
@@ -407,7 +407,7 @@ variants:
     api: "optax.poisson_loss"
 
 ---
-operation: "SerializeLoss"
+operation: "serializeloss"
 description: "Serializes loss function or Loss instance."
 op_type: "function"
 std_args:
@@ -424,7 +424,7 @@ variants:
     api: null
 
 ---
-operation: "SparseCategoricalCrossentropy"
+operation: "sparsecategoricalcrossentropy"
 description: "Computes the sparse categorical crossentropy loss."
 op_type: "function"
 std_args:
@@ -465,7 +465,7 @@ variants:
       y_true: "targets"
 
 ---
-operation: "SquaredHingeLoss"
+operation: "squaredhingeloss"
 description: "Computes the squared hinge loss between y_true & y_pred."
 op_type: "function"
 std_args:
@@ -488,7 +488,7 @@ variants:
     macro_template: "jax.numpy.mean(jax.numpy.square(jax.numpy.maximum(1 - {y_true} * {y_pred}, 0)), axis=-1)"
 
 ---
-operation: "TverskyLoss"
+operation: "tverskyloss"
 description: "Computes the Tversky loss value between y_true and y_pred."
 op_type: "function"
 std_args:

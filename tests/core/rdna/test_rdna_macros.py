@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import pytest
 from ml_switcheroo.compiler.backends.rdna.macros import expand_conv2d, expand_linear
 from ml_switcheroo.compiler.frontends.rdna.nodes import (
@@ -13,6 +15,7 @@ class MockAllocator:
   """Mock implementation of RegisterAllocatorProtocol."""
 
   def __init__(self) -> None:
+    """Function docstring."""
     self.v_counter = 0
     self.s_counter = 0
 
@@ -25,6 +28,7 @@ class MockAllocator:
     return VGPR(idx)
 
   def get_scalar_register(self, var_name: str) -> SGPR:
+    """Function docstring."""
     idx = self.s_counter
     self.s_counter += 1
     return SGPR(idx)

@@ -35,6 +35,7 @@ def test_framework_variant_inject_args_rich_types():
 
 
 def test_operation_def_structure():
+  """Function docstring."""
   data = {
     "operation": "TestOp",
     "description": "A test op",

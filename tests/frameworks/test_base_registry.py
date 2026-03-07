@@ -31,7 +31,10 @@ def test_registry_mechanics():
 
   @register_framework(key)
   class TestAdapter:
+    """Class docstring."""
+
     def __init__(self):
+      """Function docstring."""
       self.initialized = True
 
   assert key in _ADAPTER_REGISTRY

@@ -11,7 +11,10 @@ from ml_switcheroo.discovery.inspector import ApiInspector
 
 
 class MockVarargsInspector(ApiInspector):
+  """Class docstring."""
+
   def inspect(self, fw_name, **kwargs):
+    """Function docstring."""
     if fw_name == "source_fw":
       return {"source.add": {"name": "add", "params": ["x", "y"], "has_varargs": False}}
     if fw_name == "target_fw":
@@ -20,6 +23,7 @@ class MockVarargsInspector(ApiInspector):
 
 
 def test_scaffolder_skips_penalty_for_varargs(tmp_path):
+  """Function docstring."""
   clean_semantics = SemanticsManager()
   clean_semantics.data = {}
   # Important: Clear origins so we don't fuzzy-match against real loaded specs "Add" vs "add"

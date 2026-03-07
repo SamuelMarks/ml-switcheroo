@@ -11,6 +11,7 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 @pytest.fixture
 def runner():
+  """Function docstring."""
   r = EquivalenceRunner()
   # Mock fuzzer
   r.fuzzer = MagicMock()

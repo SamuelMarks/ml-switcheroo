@@ -819,7 +819,7 @@ variants:
   mlx:
     api: null
 ---
-operation: "Conv1D"
+operation: "Conv1d"
 description: "1D convolution layer (e.g. temporal convolution)."
 op_type: "class"
 std_args:
@@ -887,7 +887,7 @@ variants:
       groups: null
       use_bias: "bias"
 ---
-operation: "Conv1DTranspose"
+operation: "ConvTranspose1d"
 description: "1D transposed convolution layer."
 op_type: "class"
 std_args:
@@ -937,7 +937,7 @@ variants:
   mlx:
     api: null # MLX lacks ConvTranspose1d
 ---
-operation: "Conv2D"
+operation: "Conv2d"
 description: "2D convolution layer."
 op_type: "class"
 std_args:
@@ -1003,7 +1003,7 @@ variants:
       groups: null
       use_bias: "bias"
 ---
-operation: "Conv2DTranspose"
+operation: "ConvTranspose2d"
 description: "2D transposed convolution layer."
 op_type: "class"
 std_args:

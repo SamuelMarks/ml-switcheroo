@@ -10,6 +10,7 @@ from ml_switcheroo.tools.injector_plugin import PluginGenerator
 
 @pytest.fixture
 def plugin_dir(tmp_path):
+  """Function docstring."""
   d = tmp_path / "plugins"
   d.mkdir()
   return d

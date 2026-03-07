@@ -42,6 +42,7 @@ def ensure_io_plugin():
 
 @pytest.fixture(scope="module")
 def hydrated_semantics():
+  """Function docstring."""
   # Initialize manager
   mgr = SemanticsManager()
 
@@ -80,6 +81,7 @@ def hydrated_semantics():
 
 
 def test_io_to_jax(hydrated_semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)
   result = engine.run(SOURCE_CODE)
@@ -100,6 +102,7 @@ def test_io_to_jax(hydrated_semantics):
 
 
 def test_io_to_numpy(hydrated_semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="numpy", strict_mode=True)
   engine = ASTEngine(semantics=hydrated_semantics, config=config)
   result = engine.run(SOURCE_CODE)

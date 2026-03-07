@@ -13,11 +13,13 @@ class MockSyncer(FrameworkSyncer):
   """Subclass to expose protected method for direct testing."""
 
   def check(self, func, std_args):
+    """Function docstring."""
     return self._is_compatible(func, std_args)
 
 
 @pytest.fixture
 def syncer():
+  """Function docstring."""
   return MockSyncer()
 
 
@@ -25,6 +27,7 @@ def test_compat_exact_match(syncer):
   """Spec: [x, y], Func: (a, b) -> Compatible."""
 
   def candidate(_a, _b):
+    """Function docstring."""
     pass
 
   assert syncer.check(candidate, ["x", "y"]) is True
@@ -34,6 +37,7 @@ def test_compat_var_args(syncer):
   """Spec: [x, y, z], Func: (*args) -> Compatible."""
 
   def candidate(*_args):
+    """Function docstring."""
     pass
 
   assert syncer.check(candidate, ["x", "y", "z"]) is True
@@ -43,6 +47,7 @@ def test_compat_extra_defaults(syncer):
   """Spec: [x], Func: (a, b=1) -> Compatible (b is optional)."""
 
   def candidate(_a, _b=1):
+    """Function docstring."""
     pass
 
   assert syncer.check(candidate, ["x"]) is True
@@ -56,6 +61,7 @@ def test_incompatible_too_many_mandatory(syncer):
   """
 
   def candidate(_a, _b):
+    """Function docstring."""
     pass
 
   assert syncer.check(candidate, ["x"]) is False
@@ -69,6 +75,7 @@ def test_incompatible_capacity_too_low(syncer):
   """
 
   def candidate(_a):
+    """Function docstring."""
     pass
 
   assert syncer.check(candidate, ["x", "y"]) is False
@@ -82,6 +89,8 @@ def test_compat_builtins_fallback(syncer):
 
   # Create a mock that raises ValueError on inspect
   class TrickyBuiltin:
+    """Class docstring."""
+
     pass
 
   # We rely on inspect.signature(TrickyBuiltin) raising or failing.

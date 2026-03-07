@@ -24,6 +24,7 @@ def mock_validator_repair():
 
 @pytest.fixture
 def mock_semantics():
+  """Function docstring."""
   with patch("ml_switcheroo.cli.handlers.verify.SemanticsManager") as mock_cls:
     instance = MagicMock(spec=SemanticsManager)
     # Return a definition that can be relaxed

@@ -32,13 +32,17 @@ def _run_harness(path: Path) -> subprocess.CompletedProcess:
 
 
 class SafeJaxCoreAdapter(JaxCoreAdapter):
+  """Class docstring."""
+
   @property
   def harness_imports(self):
+    """Function docstring."""
     # Return empty imports. Tests using this ensure JAX isn't required to run generated harness.
     # The target file in test handles conditional imports itself.
     return []
 
   def get_harness_init_code(self):
+    """Function docstring."""
     # Override to return simple string "mock_jax_key" without needing jax
     return """
 def _make_jax_key(seed):
@@ -47,11 +51,15 @@ def _make_jax_key(seed):
 
 
 class SafeFlaxAdapter(FlaxNNXAdapter):
+  """Class docstring."""
+
   @property
   def harness_imports(self):
+    """Function docstring."""
     return []
 
   def get_harness_init_code(self):
+    """Function docstring."""
     return """
 def _make_flax_rngs(seed):
     return "mock_flax_rngs"

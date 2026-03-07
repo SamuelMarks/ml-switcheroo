@@ -1,3 +1,5 @@
+"""Module docstring."""
+
 import torch
 import torch.nn as nn
 
@@ -13,6 +15,7 @@ class SimpleMLP(nn.Module):
   """
 
   def __init__(self, input_size, hidden_size, num_classes):
+    """Function docstring."""
     super().__init__()
     # Standard Linear layer
     self.fc1 = nn.Linear(input_size, hidden_size)
@@ -22,6 +25,7 @@ class SimpleMLP(nn.Module):
     self.fc2 = nn.Linear(hidden_size, num_classes)
 
   def forward(self, x):
+    """Function docstring."""
     out = self.fc1(x)
     out = self.relu(out)
     out = self.fc2(out)

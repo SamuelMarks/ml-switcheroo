@@ -16,6 +16,7 @@ from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 @pytest.fixture
 def fuzzer():
+  """Function docstring."""
   return InputFuzzer()
 
 

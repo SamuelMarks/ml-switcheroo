@@ -35,23 +35,34 @@ class MockOptimizer:
 
 # Concrete Implementations
 class MSELoss(MockModule):
+  """Class docstring."""
+
   pass
 
 
 class CrossEntropyLoss(MockModule):
+  """Class docstring."""
+
   pass
 
 
 class Conv2d(MockModule):
+  """Class docstring."""
+
   pass
 
 
 class ReLU(MockModule):
+  """Class docstring."""
+
   pass
 
 
 class Adam(MockOptimizer):
+  """Class docstring."""
+
   def __init__(self, params, lr=1e-3, betas=(0.9, 0.999)):
+    """Function docstring."""
     pass
 
 
@@ -119,6 +130,7 @@ def test_collect_activations(mock_torch_hierarchy):
   activation_mod = mock_torch_hierarchy["torch.nn.modules.activation"]
 
   def mock_getmembers(obj):
+    """Function docstring."""
     # Check if object is the activation module mock
     if obj == activation_mod or getattr(obj, "__name__", "") == "torch.nn.modules.activation":
       return [("ReLU", ReLU)]
@@ -164,6 +176,7 @@ def test_ghost_mode_fallback():
     original_import = __import__
 
     def fail_torch_import(name, *args, **kwargs):
+      """Function docstring."""
       if name == "torch":
         raise ImportError("No Torch")
       return original_import(name, *args, **kwargs)

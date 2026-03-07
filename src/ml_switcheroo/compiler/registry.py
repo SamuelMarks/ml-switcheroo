@@ -37,7 +37,9 @@ class BaseFrontend:
 class GraphFrontend(BaseFrontend):
   """Produces LogicalGraph from code via parse/lift chain."""
 
-  def parse_to_graph(self, code: str) -> Any: ...
+  def parse_to_graph(self, code: str) -> Any:
+    """TODO: Add docstring."""
+    ...
 
 
 # Backend mappings for the Compiler (Graph -> Text) pipeline

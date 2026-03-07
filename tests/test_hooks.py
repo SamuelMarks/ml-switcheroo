@@ -22,6 +22,8 @@ from ml_switcheroo.semantics.schema import PluginTraits
 
 # Mock object implies we don't need the full logic
 class MockSemantics:
+  """Class docstring."""
+
   pass
 
 
@@ -88,6 +90,7 @@ def test_registration_flow():
 
   @register_hook(trigger_name)
   def my_transformer(node, _ctx):
+    """Function docstring."""
     return node
 
   assert trigger_name in _HOOKS
@@ -122,6 +125,7 @@ def test_hook_execution_signature():
   # 1. Register
   @register_hook(trigger_name)
   def return_new_node(node: cst.Call, _ctx: HookContext):
+    """Function docstring."""
     # Return a modified node to prove execution
     new_name = cst.Name("visited")
     return node.with_changes(func=new_name)
@@ -151,12 +155,14 @@ def test_overwrite_hook():
 
   @register_hook(trigger)
   def hook_a(_node, _ctx):
+    """Function docstring."""
     return "A"
 
   assert get_hook(trigger)(None, None) == "A"
 
   @register_hook(trigger)
   def hook_b(_node, _ctx):
+    """Function docstring."""
     return "B"
 
   assert get_hook(trigger)(None, None) == "B"
@@ -192,6 +198,8 @@ def test_config_validation_failure():
   bad_config = RuntimeConfig(plugin_settings={"epsilon": "im_not_a_float"}, strict_mode=False)
 
   class PluginSchema(BaseModel):
+    """Class docstring."""
+
     epsilon: float
 
   ctx = HookContext(MockSemantics(), bad_config)
@@ -207,6 +215,8 @@ def test_config_validation_success():
   good_config = RuntimeConfig(plugin_settings={"epsilon": 0.001, "ignored": "val"}, strict_mode=False)
 
   class PluginSchema(BaseModel):
+    """Class docstring."""
+
     epsilon: float = 1e-5  # Default
 
   ctx = HookContext(MockSemantics(), good_config)

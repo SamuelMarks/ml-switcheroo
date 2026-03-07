@@ -30,6 +30,7 @@ def rewrite_code(rewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter_factory():
+  """Function docstring."""
   # Register hook manually
   hooks._HOOKS["convert_dataloader"] = transform_dataloader
   hooks._PLUGINS_LOADED = True
@@ -55,9 +56,12 @@ def rewriter_factory():
   # --- FIX: Register dummy framework 'custom' ---
   @register_framework("custom")
   class CustomAdapter:
+    """Class docstring."""
+
     pass
 
   def create(target):
+    """Function docstring."""
     cfg = RuntimeConfig(source_framework="torch", target_framework=target)
     return PivotRewriter(mgr, cfg)
 

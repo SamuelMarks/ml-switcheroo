@@ -49,12 +49,14 @@ MOCK_HTML_CONTENT = """
 
 @pytest.fixture
 def spec_file(tmp_path):
+  """Function docstring."""
   f = tmp_path / "sass.html"
   f.write_text(MOCK_HTML_CONTENT, encoding="utf-8")
   return f
 
 
 def test_sass_reader_extraction(spec_file):
+  """Function docstring."""
   importer = SassSpecImporter()
   mappings = importer.parse_file(spec_file)
 
@@ -74,6 +76,7 @@ def test_sass_reader_extraction(spec_file):
 
 
 def test_sass_reader_ignores_headers(spec_file):
+  """Function docstring."""
   importer = SassSpecImporter()
   mappings = importer.parse_file(spec_file)
 

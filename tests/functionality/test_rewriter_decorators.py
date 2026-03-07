@@ -16,6 +16,7 @@ class MockDecoratorSemantics(SemanticsManager):
   """
 
   def __init__(self):
+    """Function docstring."""
     # Skip init to avoid file load
     self.data = {}
     self._reverse_index = {}
@@ -33,9 +34,11 @@ class MockDecoratorSemantics(SemanticsManager):
     self._inject("compile", "torch.compile", "jax.jit")
 
   def get_framework_config(self, framework: str):
+    """Function docstring."""
     return self.framework_configs.get(framework, {})
 
   def _inject(self, name, s_api, t_api):
+    """Function docstring."""
     variants = {"torch": {"api": s_api}}
     if t_api is None:
       variants["jax"] = None  # Explicit removal
@@ -52,12 +55,14 @@ class MockDecoratorSemantics(SemanticsManager):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   semantics = MockDecoratorSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   return TestRewriter(semantics, config)
 
 
 def rewrite(rewriter, code):
+  """Function docstring."""
   tree = cst.parse_module(code)
   try:
     new_tree = rewriter.convert(tree)
@@ -67,6 +72,7 @@ def rewrite(rewriter, code):
 
 
 def test_decorator_renaming(rewriter):
+  """Function docstring."""
   code = """
 @torch.jit.script
 def func(x):
@@ -78,6 +84,7 @@ def func(x):
 
 
 def test_decorator_removal(rewriter):
+  """Function docstring."""
   code = """
 @torch.inference_mode
 def func(x):
@@ -89,6 +96,7 @@ def func(x):
 
 
 def test_call_decorator_renaming(rewriter):
+  """Function docstring."""
   code = """
 @torch.compile(fullgraph=True)
 def func(x):
@@ -100,6 +108,7 @@ def func(x):
 
 
 def test_multiple_decorators_mixed(rewriter):
+  """Function docstring."""
   code = """
 @torch.jit.script
 @torch.inference_mode

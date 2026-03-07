@@ -155,10 +155,48 @@
     ]
   },
   "Dropout": {
-    "description": "Auto-discovered via Consensus (Score: 3.0)",
+    "op_type": "class",
+    "operation": "Dropout",
     "std_args": [
-      "lr"
-    ]
+      {
+        "name": "p",
+        "type": "float"
+      },
+      {
+        "default": null,
+        "name": "seed",
+        "type": "int"
+      }
+    ],
+    "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.Dropout",
+        "args": {
+          "p": "rate"
+        }
+      },
+      "keras": {
+        "api": "keras.layers.Dropout",
+        "args": {
+          "p": "rate"
+        }
+      },
+      "mlx": {
+        "api": "mlx.nn.Dropout",
+        "args": {
+          "p": "p"
+        }
+      },
+      "tensorflow": {
+        "api": "tf.keras.layers.Dropout",
+        "args": {
+          "p": "rate"
+        }
+      },
+      "torch": {
+        "api": "torch.nn.Dropout"
+      }
+    }
   },
   "Elu": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
@@ -171,8 +209,39 @@
     "std_args": []
   },
   "Flatten": {
-    "description": "Auto-discovered via Consensus (Score: 2.0)",
-    "std_args": []
+    "op_type": "class",
+    "operation": "Flatten",
+    "std_args": [
+      {
+        "default": 1,
+        "name": "start_dim",
+        "type": "int"
+      },
+      {
+        "default": -1,
+        "name": "end_dim",
+        "type": "int"
+      }
+    ],
+    "variants": {
+      "flax_nnx": {
+        "api": "flax.nnx.Flatten",
+        "missing_message": "Use reshape"
+      },
+      "keras": {
+        "api": "keras.layers.Flatten"
+      },
+      "mlx": {
+        "api": "mlx.nn.Flatten",
+        "missing_message": "Use reshape"
+      },
+      "tensorflow": {
+        "api": "tf.keras.layers.Flatten"
+      },
+      "torch": {
+        "api": "torch.nn.Flatten"
+      }
+    }
   },
   "Flax": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",

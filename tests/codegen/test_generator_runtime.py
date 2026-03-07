@@ -19,6 +19,7 @@ class MockRuntimeSemantics(SemanticsManager):
   """Mocks logic for runtime generation tests."""
 
   def __init__(self):
+    """Function docstring."""
     self.test_templates = {
       "torch": {"import": "import torch"},
     }
@@ -27,14 +28,17 @@ class MockRuntimeSemantics(SemanticsManager):
     self.data = {}
 
   def get_test_template(self, fw):
+    """Function docstring."""
     return self.test_templates.get(fw)
 
   def get_framework_config(self, fw):
+    """Function docstring."""
     return {}
 
 
 @pytest.fixture
 def generator(tmp_path):
+  """Function docstring."""
   mgr = MockRuntimeSemantics()
   return TestCaseGenerator(semantics_mgr=mgr)
 

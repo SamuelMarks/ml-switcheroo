@@ -28,6 +28,7 @@ def rewrite_code(rewriter, code: str) -> str:
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["io_handler"] = transform_io_calls
   hooks._PLUGINS_LOADED = True
   mgr = MagicMock()
@@ -88,6 +89,7 @@ def test_load_transform(rewriter):
 
 
 def test_ignored_if_wrong_target(rewriter):
+  """Function docstring."""
   # Reconfigure context
   rewriter.context.config.target_framework = "numpy"
   # Also update hook context explicitly if it was copied

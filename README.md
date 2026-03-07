@@ -6,6 +6,7 @@ ml-switcheroo 🔄🦘
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](https://opensource.org/license/apache-2-0)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![Test and release](https://github.com/SamuelMarks/ml-switcheroo/actions/workflows/test_and_release.yml/badge.svg)](https://github.com/SamuelMarks/ml-switcheroo/actions/workflows/test_and_release.yml)
+![Coverage: 100%](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)
 [![Code Style: Ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Interactive docs](https://img.shields.io/badge/interactive-docs-orange)](https://samuelmarks.github.io/ml-switcheroo/)
 
@@ -111,7 +112,7 @@ Convert model code between frameworks with semantic fidelity.
 ### 2. Architecture Visualization (Python → Visuals)
 Compile your Python code directly into diagramming languages.
 *   **Target: TikZ**: Generates professional LaTeX code for academic papers.
-*   **Target: HTML**: Generates interactive Grid CSS layouts for documentation.
+*   **Target: HTML**: Generates interactive Grid CSS layouts for documentation, including a **Time-Travel Interface** (via WASM) to interactively explore each compiler phase.
 
 ### 3. Assembly Decompilation (ASM → Python)
 Lift low-level hardware instructions into readable high-level logic.
@@ -121,7 +122,7 @@ Lift low-level hardware instructions into readable high-level logic.
 ### 4. Weight Migration (Checkpointing)
 Generate standalone scripts to convert model weights between formats.
 *   Reads source AST to determine layer mappings.
-*   Generates `orbax` / `torch.save` / `safetensors` migration logic.
+*   Generates `orbax` / `torch.save` / `safetensors` / `h5py` (`.keras`) migration logic.
 *   Automatically handles NCHW ↔ NHWC layout permutation.
 
 ---
@@ -177,7 +178,7 @@ graph TD
     HUB_HEAD --- ABS_NODE
 
     %% 4. REWRITING REWIRING
-    REWRITE("<b>Pivot Rewriter</b>"):::eng
+    REWRITE("<b>Rewriter Pipeline</b>"):::eng
     REWRITE:::title
     ABS_NODE --> REWRITE
 
@@ -265,7 +266,7 @@ ml_switcheroo ci --json-report verified_ops.json
 ```
 
 ### 4. Discovery & Autogen (`suggest`, `define`)
-"Teach" the compiler new operations using LLM assistance and ODL (Operation Definition Language).
+"Teach" the compiler new operations using LLM assistance and ODL (Operation Definition Language). You can also use the `suggest_gen_llm_loop.sh` script to automate iterative LLM feedback loops for bulk-mapping entire namespaces.
 
 ```bash
 # 1. Generate an LLM prompt with introspection data
@@ -306,6 +307,9 @@ ml_switcheroo matrix
 ### Functional Unwrapping
 Frameworks like **JAX** require pure functions. ml-switcheroo automatically detects stateful imperative patterns (like `drop_last=True` in loops or in-place lists) and warns via the **Purity Scanner**.
 When converting **Flax NNX** (functional) to **Torch** (OO), it unwraps `layer.apply(params, x)` calls into standard `layer(x)` calls using `Assign` restructuring.
+
+### Graph-Guided Rewriting (Loopback Bridge)
+The **Loopback Bridge** enables high-level architectural optimizations (like fusion) to be applied directly to the low-level source code preservation layer, bridging graph analysis with AST manipulation.
 
 ### State Injection (RNG Threading)
 When converting **PyTorch** (global RNG state) to **JAX** (explicit RNG keys), the engine:

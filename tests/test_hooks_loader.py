@@ -59,6 +59,7 @@ def test_load_plugins_default_location(monkeypatch):
   # but actual test is ensuring it *tries* to find it.
 
   def mock_exists(_self):
+    """Function docstring."""
     # For the test, we pretend the default dir is missing so it returns 0 safely
     # Testing logic path, not filesystem.
     return False

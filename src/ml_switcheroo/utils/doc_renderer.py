@@ -57,7 +57,7 @@ class OpPageRenderer:
       rst.append(indented_html)
       rst.append("")
     else:
-      rst.append("*No implementations mapped.*")
+      rst.append("*No implementations mapped.*")  # pragma: no cover
 
     return "\n".join(rst)
 

@@ -12,7 +12,10 @@ from ml_switcheroo.enums import SemanticTier
 
 
 class MockSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     # Define data explicitly
     self.data = {
       "abs": {"variants": {"torch": {"api": "torch.abs"}, "jax": {"api": "jax.numpy.abs"}}},
@@ -39,31 +42,38 @@ class MockSemantics(SemanticsManager):
 
   # FIX: Implement required method for PurityScanner
   def get_all_rng_methods(self) -> Set[str]:
+    """Function docstring."""
     return self._known_rng_methods
 
   def get_definition(self, name):
+    """Function docstring."""
     # STRICT lookup to avoid "abs" matching "torch.utils"
     return self._reverse_index.get(name)
 
   def resolve_variant(self, abstract_id, target_fw):
+    """Function docstring."""
     defn = self.data.get(abstract_id)
     if not defn:
       return None
     return defn["variants"].get(target_fw)
 
   def is_verified(self, _id):
+    """Function docstring."""
     return True
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
+    """Function docstring."""
     return {}
 
 
 @pytest.fixture
 def semantics_mgr():
+  """Function docstring."""
   return MockSemantics()
 
 
 def test_escape_hatch_tier_c_gap(semantics_mgr):
+  """Function docstring."""
   # Enable strict mode to force the rewriter to complain about the missing JAX variant
   engine = ASTEngine(semantics=semantics_mgr, source="torch", target="jax", strict_mode=True)
 
@@ -79,6 +89,7 @@ def test_escape_hatch_tier_c_gap(semantics_mgr):
 
 
 def test_strict_mode_unknown_source_api(semantics_mgr):
+  """Function docstring."""
   engine = ASTEngine(semantics=semantics_mgr, source="torch", target="jax", strict_mode=True)
   code = "y = torch.weird_custom_func(x)"
   result = engine.run(code)
@@ -88,6 +99,7 @@ def test_strict_mode_unknown_source_api(semantics_mgr):
 
 
 def test_strict_mode_ignores_standard_python(semantics_mgr):
+  """Function docstring."""
   # 'len' is not in reverse index, calls get_definition -> returns None -> Passthrough
   # Since it doesn't start with 'torch.', strict mode ignores it in base rewriter logic
   engine = ASTEngine(semantics=semantics_mgr, source="torch", target="jax", strict_mode=True)
@@ -100,6 +112,7 @@ def test_strict_mode_ignores_standard_python(semantics_mgr):
 
 
 def test_default_mode_passthrough(semantics_mgr):
+  """Function docstring."""
   engine = ASTEngine(semantics=semantics_mgr, source="torch", target="jax", strict_mode=False)
   code = "y = torch.weird_custom_func(x)"
   result = engine.run(code)

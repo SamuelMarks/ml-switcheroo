@@ -63,6 +63,7 @@ CASES = [
 
 @pytest.mark.parametrize("fw_key, api, pattern", CASES)
 def test_doc_url_generation(fw_key, api, pattern):
+  """Function docstring."""
   adapter = get_adapter(fw_key)
   assert adapter is not None, f"Adapter for {fw_key} missing"
 

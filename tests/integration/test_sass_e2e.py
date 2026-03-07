@@ -35,6 +35,7 @@ def semantics():
   # 3. Lookup Logic
   # Reverse Index Mock
   def get_def(name):
+    """Function docstring."""
     if "add" in name:
       return "Add", add_def
     if "mul" in name:
@@ -45,6 +46,7 @@ def semantics():
 
   # Resolver Logic
   def resolve_variant(aid, fw):
+    """Function docstring."""
     if aid == "Add" and fw == "sass":
       return {"api": "FADD"}
     if aid == "Mul" and fw == "sass":

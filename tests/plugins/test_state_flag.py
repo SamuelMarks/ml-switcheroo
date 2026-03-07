@@ -30,6 +30,7 @@ def rewrite(rewriter, code):
 
 @pytest.fixture
 def rewriter_factory():
+  """Function docstring."""
   hooks._HOOKS["inject_training_flag"] = inject_training_flag_call
   hooks._HOOKS["capture_eval_state"] = capture_eval_state
   hooks._PLUGINS_LOADED = True
@@ -39,6 +40,7 @@ def rewriter_factory():
   call_def = {"variants": {"jax": {"requires_plugin": "inject_training_flag"}}}
 
   def resolve(aid, fw):
+    """Function docstring."""
     if aid == "eval":
       return eval_def["variants"]["jax"]
     if aid == "call":
@@ -46,7 +48,7 @@ def rewriter_factory():
     return None
 
   mgr.resolve_variant.side_effect = resolve
-  mgr.get_definition.side_effect = lambda n: (("eval", eval_def) if "eval" in n or "train" in n else ("call", call_def))
+  mgr.get_definition.side_effect = lambda n: ("eval", eval_def) if "eval" in n or "train" in n else ("call", call_def)
   # Ensure verification logic passes
   mgr.is_verified.return_value = True
 
@@ -54,6 +56,7 @@ def rewriter_factory():
   mgr.get_framework_config.return_value = {}
 
   def create():
+    """Function docstring."""
     return PivotRewriter(mgr, RuntimeConfig(source_framework="torch", target_framework="jax"))
 
   return create

@@ -11,7 +11,10 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockInspector(ApiInspector):
+  """Class docstring."""
+
   def inspect(self, fw_name: str, **kwargs) -> dict:
+    """Function docstring."""
     if fw_name == "source_fw":
       return {
         "source.absolute": {"name": "absolute", "params": ["x"]},
@@ -28,6 +31,7 @@ class MockInspector(ApiInspector):
 
 @pytest.fixture
 def clean_semantics():
+  """Function docstring."""
   mgr = SemanticsManager()
   mgr._reverse_index = {}
   mgr.data = {}
@@ -36,6 +40,7 @@ def clean_semantics():
 
 
 def test_fuzzy_match_success(tmp_path, clean_semantics):
+  """Function docstring."""
   scaffolder = Scaffolder(semantics=clean_semantics, similarity_threshold=0.6)
   scaffolder.inspector = MockInspector()
 
@@ -59,6 +64,7 @@ def test_fuzzy_match_success(tmp_path, clean_semantics):
 
 
 def test_signature_analysis_rejection(tmp_path, clean_semantics):
+  """Function docstring."""
   scaffolder = Scaffolder(semantics=clean_semantics, similarity_threshold=0.8, arity_penalty=0.5)
   scaffolder.inspector = MockInspector()
 
@@ -77,10 +83,12 @@ def test_signature_analysis_rejection(tmp_path, clean_semantics):
 
 
 def test_exact_match_priority(tmp_path, clean_semantics):
+  """Function docstring."""
   scaffolder = Scaffolder(semantics=clean_semantics)
   scaffolder.inspector = MockInspector()
 
   def inspect_side(fw_name, **kwargs):
+    """Function docstring."""
     if fw_name == "source_fw":
       return {"source.add": {"name": "add", "params": ["x", "y"]}}
     else:

@@ -67,6 +67,7 @@ def test_define_scaffolds_plugin(scaffold_yaml, mock_env, tmp_path):
   with patch("inspect.getfile") as mock_file:
 
     def getfile(obj):
+      """Function docstring."""
       name = getattr(obj, "__name__", "")
       if "standards_internal" in name:
         return str(hub_file)

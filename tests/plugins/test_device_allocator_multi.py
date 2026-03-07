@@ -26,6 +26,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def base_semantics():
+  """Function docstring."""
   mgr = MagicMock()
   variants = {
     "jax": {"requires_plugin": "device_allocator"},
@@ -40,6 +41,7 @@ def base_semantics():
 
 # We use a factory to install the patch per-test invocation context
 def get_rewriter(mgr, target):
+  """Function docstring."""
   cfg = RuntimeConfig(source_framework="torch", target_framework=target)
   # Fix: Use positional arguments for initialization
   return PivotRewriter(mgr, cfg)
@@ -47,12 +49,14 @@ def get_rewriter(mgr, target):
 
 @pytest.fixture(autouse=True)
 def setup_hooks():
+  """Function docstring."""
   hooks._HOOKS["device_allocator"] = transform_device_allocator
   hooks._PLUGINS_LOADED = True
 
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_jax_output(mock_get, base_semantics):
+  """Function docstring."""
   mock_get.side_effect = lambda n: JaxCoreAdapter() if n == "jax" else None
 
   rw = get_rewriter(base_semantics, "jax")
@@ -62,6 +66,7 @@ def test_jax_output(mock_get, base_semantics):
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_mlx_output_gpu(mock_get, base_semantics):
+  """Function docstring."""
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
 
   rw = get_rewriter(base_semantics, "mlx")
@@ -71,6 +76,7 @@ def test_mlx_output_gpu(mock_get, base_semantics):
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_mlx_output_cpu(mock_get, base_semantics):
+  """Function docstring."""
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
 
   rw = get_rewriter(base_semantics, "mlx")
@@ -80,6 +86,7 @@ def test_mlx_output_cpu(mock_get, base_semantics):
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_mlx_output_index(mock_get, base_semantics):
+  """Function docstring."""
   mock_get.side_effect = lambda n: MLXAdapter() if n == "mlx" else None
 
   rw = get_rewriter(base_semantics, "mlx")
@@ -90,6 +97,7 @@ def test_mlx_output_index(mock_get, base_semantics):
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_tf_output_gpu(mock_get, base_semantics):
+  """Function docstring."""
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
 
   rw = get_rewriter(base_semantics, "tensorflow")
@@ -99,6 +107,7 @@ def test_tf_output_gpu(mock_get, base_semantics):
 
 @patch("ml_switcheroo.plugins.device_allocator.get_adapter")
 def test_tf_output_index(mock_get, base_semantics):
+  """Function docstring."""
   mock_get.side_effect = lambda n: TensorFlowAdapter() if n == "tensorflow" else None
 
   rw = get_rewriter(base_semantics, "tensorflow")

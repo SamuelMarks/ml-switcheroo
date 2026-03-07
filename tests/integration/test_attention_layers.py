@@ -28,6 +28,7 @@ class MyAttn(nn.Module):
 
 @pytest.fixture
 def attn_semantics():
+  """Function docstring."""
   # FIX: Register specific strategies
   _HOOKS["repack_attn_keras"] = repack_attn_keras
   _HOOKS["repack_attn_flax"] = repack_attn_flax
@@ -70,6 +71,7 @@ def attn_semantics():
 
 
 def test_torch_to_keras_attention(attn_semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="keras", strict_mode=False)
   engine = ASTEngine(semantics=attn_semantics, config=config)
   result = engine.run(SOURCE_TORCH)
@@ -87,6 +89,7 @@ def test_torch_to_keras_attention(attn_semantics):
 
 
 def test_torch_to_flax_attention(attn_semantics):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="flax_nnx", strict_mode=False)
   engine = ASTEngine(semantics=attn_semantics, config=config)
   result = engine.run(SOURCE_TORCH)

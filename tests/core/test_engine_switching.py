@@ -21,6 +21,7 @@ register_framework("mlir")(MlirAdapter)
 
 @pytest.fixture
 def base_engine():
+  """Function docstring."""
   semantics = MagicMock(spec=SemanticsManager)
   semantics.get_framework_config.return_value = {}
   semantics.get_import_map.return_value = {}
@@ -29,11 +30,13 @@ def base_engine():
   # IMPORTANT: Mock get_definition to return None for unmapped ops like 'util.noop'
   # to prevent PivotRewriter from iterating over a MagicMock iterator, which causes crash.
   def get_def_side_effect(name):
+    """Function docstring."""
     return None
 
   semantics.get_definition.side_effect = get_def_side_effect
 
   def create(source, target):
+    """Function docstring."""
     # Must disable ImportFixer for MLIR source/target to avoid scanner crashes on non-python trees
     config = RuntimeConfig(source_framework=source, target_framework=target, strict_mode=False, enable_import_fixer=False)
     # Manually ensure no validation report is loaded to prevent mock issues

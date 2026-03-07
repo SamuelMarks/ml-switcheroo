@@ -30,11 +30,13 @@ def mock_optax():
 
   # Create dummy functions that pass inspect.isfunction()
   def dummy_loss():
+    """Function docstring."""
     pass
 
   dummy_loss.__name__ = "l2_loss"
 
   def dummy_opt():
+    """Function docstring."""
     pass
 
   dummy_opt.__name__ = "adam"

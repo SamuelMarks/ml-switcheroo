@@ -38,6 +38,7 @@ def mock_adapters():
   jax_adapter.collect_api.return_value = [ref_b]
 
   def get_adapter_side_effect(name):
+    """Function docstring."""
     if name == "torch":
       return torch_adapter
     if name == "jax":
@@ -49,6 +50,7 @@ def mock_adapters():
 
 @pytest.fixture
 def mock_persister():
+  """Function docstring."""
   # FIX: Patch in discovery handler
   with patch("ml_switcheroo.cli.handlers.discovery.SemanticPersister") as mock:
     yield mock
@@ -64,6 +66,7 @@ def mock_consensus_engine():
 
     # Mock clustering to return a dummy candidate if inputs are provided
     def cluster_side_effect(framework_inputs):
+      """Function docstring."""
       if not framework_inputs:
         return []
         # Simply return a dummy candidate for 'Huber'

@@ -46,6 +46,7 @@ class ImportMixin(cst.CSTTransformer):
     return cst.ImportAlias(name=create_dotted_name(name_str), asname=asname_node)
 
   def leave_Import(self, original_node: cst.Import, updated_node: cst.Import) -> Union[cst.Import, cst.RemovalSentinel]:
+    """TODO: Add docstring."""
     new_aliases = []
     replacement_occurred = False
 
@@ -54,7 +55,7 @@ class ImportMixin(cst.CSTTransformer):
       root_pkg = full_name.split(".")[0]
 
       # 1. Check for Specific Mapping (e.g. import torch.nn)
-      if full_name in self.plan.mappings:
+      if full_name in self.plan.mappings and root_pkg in self.source_fws:
         req = self.plan.mappings[full_name]
 
         new_alias = self._make_alias_node(req)
@@ -93,8 +94,9 @@ class ImportMixin(cst.CSTTransformer):
   def leave_ImportFrom(
     self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
   ) -> Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel]:
+    """TODO: Add docstring."""  # pragma: no cover
     if not updated_node.module:
-      return updated_node
+      return updated_node  # pragma: no cover
 
     module_name = get_full_name(updated_node.module)
     root_pkg = module_name.split(".")[0]
@@ -104,7 +106,7 @@ class ImportMixin(cst.CSTTransformer):
       import_name = updated_node.names[0].name.value
       lookup_key = f"{module_name}.{import_name}"
 
-      if lookup_key in self.plan.mappings:
+      if lookup_key in self.plan.mappings and root_pkg in self.source_fws:
         req = self.plan.mappings[lookup_key]
 
         if req.subcomponent:

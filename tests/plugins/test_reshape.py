@@ -15,11 +15,13 @@ from ml_switcheroo.plugins.reshape import transform_view_semantics
 
 
 def rewrite_code(rewriter, code):
+  """Function docstring."""
   return rewriter.convert(cst.parse_module(code)).code
 
 
 @pytest.fixture
 def rewriter_factory():
+  """Function docstring."""
   hooks._HOOKS["view_semantics"] = transform_view_semantics
   hooks._PLUGINS_LOADED = True
 
@@ -35,6 +37,7 @@ def rewriter_factory():
   mgr.get_known_apis.return_value = {"View": def_map, "Reshape": def_map}
 
   def resolve(aid, fw):
+    """Function docstring."""
     if aid in ["Reshape", "View"] and fw == "jax":
       return def_map["variants"]["jax"]
     return None
@@ -46,6 +49,7 @@ def rewriter_factory():
   mgr.get_framework_config.return_value = {}
 
   def create(target):
+    """Function docstring."""
     cfg = RuntimeConfig(source_framework="torch", target_framework=target)
     return PivotRewriter(mgr, cfg)
 
@@ -53,6 +57,7 @@ def rewriter_factory():
 
 
 def test_view_basic_mapping_jax(rewriter_factory):
+  """Function docstring."""
   rw = rewriter_factory("jax")
   code = "y = x.view(a, b)"
   res = rewrite_code(rw, code)
@@ -61,6 +66,7 @@ def test_view_basic_mapping_jax(rewriter_factory):
 
 
 def test_view_passthrough_missing(rewriter_factory):
+  """Function docstring."""
   rw = rewriter_factory("numpy")
   code = "y = x.view(a, b)"
   res = rewrite_code(rw, code)

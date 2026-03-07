@@ -8,6 +8,7 @@ This script orchestrates the Sphinx documentation build process, including:
 3.  Building a pure-Python Wheel for the WASM demo.
 """
 
+import os
 import shutil
 import subprocess
 import sys
@@ -78,7 +79,7 @@ def build_wheel() -> None:
     shutil.rmtree(dist_dir)
 
   try:
-    cmd = [sys.executable, "-m", "build", ".", "--wheel"]
+    cmd = ["uv", "build", "--wheel"]
     subprocess.run(cmd, cwd=PROJECT_ROOT, check=True, capture_output=True)
     print("✅ Wheel built successfully in dist/")
   except subprocess.CalledProcessError as e:
@@ -87,7 +88,7 @@ def build_wheel() -> None:
     sys.exit(1)
 
 
-def build() -> int:
+def build(homepage_only: bool = False) -> int:
   """
   Executes the Sphinx build process.
   """
@@ -104,15 +105,27 @@ def build() -> int:
     str(BUILD_DIR / "html"),
   ]
 
-  result = subprocess.run(cmd)
+  env = None
+  if homepage_only:
+    cmd.append(str(DOCS_DIR / "index.md"))
+    env = os.environ.copy()
+    env["HOMEPAGE_ONLY"] = "1"
+
+  result = subprocess.run(cmd, env=env)
   return result.returncode
 
 
 def main() -> None:
+  import argparse
+
+  parser = argparse.ArgumentParser(description="Build ml-switcheroo documentation.")
+  parser.add_argument("--homepage-only", action="store_true", help="Only build the homepage and WASM wheel")
+  args = parser.parse_args()
+
   try:
     clean()
     copy_root_files()
-    ret = build()
+    ret = build(homepage_only=args.homepage_only)
 
     if ret == 0:
       index_path = BUILD_DIR / "html" / "index.html"

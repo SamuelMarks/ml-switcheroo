@@ -13,7 +13,10 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class MockSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     self.framework_configs = {
       "torch": {
@@ -39,12 +42,15 @@ class MockSemantics(SemanticsManager):
     self._reverse_index = {"torch.Tensor": ("Tensor", self.data["Tensor"])}
 
   def get_framework_config(self, fw):
+    """Function docstring."""
     return self.framework_configs.get(fw, {})
 
   def get_definition(self, name):
+    """Function docstring."""
     return self._reverse_index.get(name)
 
   def resolve_variant(self, aid, fw):
+    """Function docstring."""
     if aid in self.data and fw in self.data[aid].get("variants", {}):
       return self.data[aid]["variants"][fw]
     return None
@@ -52,6 +58,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def run_pass():
+  """Function docstring."""
   semantics = MockSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax")
   # Initialize context directly
@@ -63,6 +70,7 @@ def run_pass():
   context.alias_map["torch.nn"] = "torch.nn"
 
   def _transform(code):
+    """Function docstring."""
     module = cst.parse_module(code)
     struct_pass = StructuralPass()
     return struct_pass.transform(module, context).code

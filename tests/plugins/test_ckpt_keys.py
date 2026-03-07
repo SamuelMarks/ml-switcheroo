@@ -23,6 +23,7 @@ def rewrite_code(rewriter, code):
 
 @pytest.fixture
 def rewriter():
+  """Function docstring."""
   hooks._HOOKS["checkpoint_mapper"] = transform_checkpoint_keys
   hooks._PLUGINS_LOADED = True
 
@@ -39,7 +40,7 @@ def rewriter():
     }
   }
 
-  mgr.get_definition.side_effect = lambda n: (("LoadState", load_def) if "load_state_dict" in n else None)
+  mgr.get_definition.side_effect = lambda n: ("LoadState", load_def) if "load_state_dict" in n else None
   mgr.resolve_variant.side_effect = lambda aid, fw: load_def["variants"]["jax"]
   mgr.get_known_apis.return_value = {"LoadState": load_def}
   mgr.is_verified.return_value = True

@@ -17,6 +17,7 @@ from ml_switcheroo.testing.harness_generator import HarnessGenerator
 
 @pytest.fixture
 def generator():
+  """Function docstring."""
   return HarnessGenerator()
 
 
@@ -29,11 +30,13 @@ class MockAdapterWithMagic:
   harness_imports = ["import magic_lib"]
 
   def get_harness_init_code(self):
+    """Function docstring."""
     return "def _magic_helper(seed): return 'magic_val'"
 
     # Required stub
 
   def convert(self, x):
+    """Function docstring."""
     return x
 
 
@@ -44,9 +47,11 @@ class MockAdapterNoMagic:
   harness_imports = []
 
   def get_harness_init_code(self):
+    """Function docstring."""
     return ""
 
   def convert(self, x):
+    """Function docstring."""
     return x
 
 

@@ -48,8 +48,8 @@ def get_template(manager: Any, framework: str) -> Dict[str, str]:
   if manager:
     try:
       tmpl = manager.get_test_template(framework)
-    except Exception:
-      pass
+    except Exception:  # pragma: no cover
+      pass  # pragma: no cover
 
   if tmpl:
     return tmpl

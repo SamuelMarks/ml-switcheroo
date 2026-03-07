@@ -1,8 +1,11 @@
+"""Module docstring."""
+
 import torch
 import torch.utils.checkpoint as checkpoint
 
 
 def explicit_graph_step(x):
+  """Function docstring."""
   # This standard op SHOULD be converted to JAX
   val = torch.abs(x)
 

@@ -35,7 +35,10 @@ def activation(x):
 
 
 class MacroSemantics(SemanticsManager):
+  """Class docstring."""
+
   def __init__(self):
+    """Function docstring."""
     self.data = {}
     # New attributes
     self._providers = {}
@@ -55,12 +58,15 @@ class MacroSemantics(SemanticsManager):
     self._inject("Mish", ["x"], source="torch.mish", target_macro="{x} * jax.numpy.tanh(jax.nn.softplus({x}))")
 
   def get_all_rng_methods(self):
+    """Function docstring."""
     return set()
 
   def get_framework_config(self, framework):
+    """Function docstring."""
     return {}
 
   def _inject(self, name, args, source, target_macro):
+    """Function docstring."""
     variants = {
       "torch": {"api": source},
       "jax": {
@@ -74,6 +80,7 @@ class MacroSemantics(SemanticsManager):
 
 
 def test_macro_expansion():
+  """Function docstring."""
   semantics = MacroSemantics()
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=True)
   engine = ASTEngine(semantics=semantics, config=config)

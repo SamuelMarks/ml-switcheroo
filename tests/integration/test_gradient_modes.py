@@ -36,6 +36,7 @@ def evaluate(model, x):
 
 @pytest.fixture
 def manager():
+  """Function docstring."""
   mgr = SemanticsManager()
   # Manually configure if no_grad isn't picked up from file
   # Ensure JAX mapping uses nullcontext
@@ -64,6 +65,7 @@ def manager():
 
 
 def test_context_manager_rewrite(manager):
+  """Function docstring."""
   config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
   engine = ASTEngine(semantics=manager, config=config)
 

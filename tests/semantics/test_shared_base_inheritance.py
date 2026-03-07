@@ -12,12 +12,16 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MockAdapterWithParent:
+  """Class docstring."""
+
   def __init__(self, parent):
+    """Function docstring."""
     self.inherits_from = parent
 
 
 @pytest.fixture
 def manager():
+  """Function docstring."""
   # Initialize with clean state
   mgr = SemanticsManager()
   mgr._reverse_index = {}
@@ -68,6 +72,7 @@ def test_deep_inheritance_chain(manager):
 
   # Mock get_adapter to handle dynamic lookups
   def mock_get_adapter(name):
+    """Function docstring."""
     if name == "grandchild":
       return MockAdapterWithParent("child")
     if name == "child":
@@ -90,6 +95,7 @@ def test_circular_inheritance_safety(manager):
   manager.data["op"] = {"variants": {}}
 
   def mock_circular_adapter(name):
+    """Function docstring."""
     if name == "A":
       return MockAdapterWithParent("B")
     if name == "B":
@@ -132,6 +138,8 @@ def test_json_overrides_adapter_inheritance(manager):
 
   # 1. Setup Mock Adapter (Code: Claims A)
   class MockAdapterA:
+    """Class docstring."""
+
     inherits_from = "parent_A"
 
   # 2. Setup Config (JSON: Claims B)
