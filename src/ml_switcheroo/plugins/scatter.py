@@ -1,5 +1,4 @@
-"""
-Plugin for Scatter/Gather Syntax Transformation.
+"""Plugin for Scatter/Gather Syntax Transformation.
 
 Handles the fundamental semantic difference between:
 1. PyTorch (`x.scatter_(dim, index, src)`): Implicitly iterates `dim`.
@@ -21,8 +20,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 @register_hook("scatter_indexer")
 def transform_scatter(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Transforms scatter method calls into index-update syntax (JAX style).
+  """Hook: Transforms scatter method calls into index-update syntax (JAX style).
 
   Trigger: Operations mapped with `requires_plugin: "scatter_indexer"`.
 
@@ -41,6 +39,7 @@ def transform_scatter(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Returns:
       The transformed CST Call (at[].set()).
+
   """
   # We expect 3 arguments: dim, index, src
   # Or 4: dim, index, src, reduce

@@ -1,5 +1,4 @@
-"""
-String Parsing and Shape Utilities for the Fuzzer.
+"""String Parsing and Shape Utilities for the Fuzzer.
 
 This module provides helper functions for parsing complex type strings
 (e.g., handling nested brackets in generics) and resolving symbolic dimensions
@@ -11,8 +10,7 @@ import random
 
 
 def is_pipe_top_level(text: str) -> bool:
-  """
-  Checks if a pipe `|` exists outside of brackets `[]`.
+  """Checks if a pipe `|` exists outside of brackets `[]`.
 
   Used to detect Union types (A | B) in Python 3.10+ syntax without
   getting confused by nested types like `List[int | str]`.
@@ -22,6 +20,7 @@ def is_pipe_top_level(text: str) -> bool:
 
   Returns:
       bool: True if a top-level pipe is found.
+
   """
   depth = 0
   for char in text:
@@ -35,8 +34,7 @@ def is_pipe_top_level(text: str) -> bool:
 
 
 def split_outside_brackets(text: str) -> List[str]:
-  """
-  Splits a string by commas, respecting nested brackets.
+  """Splits a string by commas, respecting nested brackets.
 
   Used to parse generic arguments (e.g., `Tuple[int, List[int]]` -> `['int', 'List[int]']`).
 
@@ -45,6 +43,7 @@ def split_outside_brackets(text: str) -> List[str]:
 
   Returns:
       List[str]: Split parts.
+
   """
   parts = []
   current = []
@@ -67,8 +66,7 @@ def split_outside_brackets(text: str) -> List[str]:
 
 
 def resolve_symbolic_shape(dims_str: str, symbol_map: Dict[str, int]) -> Tuple[int, ...]:
-  """
-  Parses dimension strings like "'B', 32" or "N, M" into integer tuples.
+  """Parses dimension strings like "'B', 32" or "N, M" into integer tuples.
 
   Resolves symbolic names using the provided `symbol_map`. If a symbol
   is encountered for the first time, a random size is assigned and stored
@@ -80,6 +78,7 @@ def resolve_symbolic_shape(dims_str: str, symbol_map: Dict[str, int]) -> Tuple[i
 
   Returns:
       Tuple[int, ...]: The concrete shape tuple.
+
   """
   shape = []
   raw_dims = [d.strip() for d in dims_str.split(",")]
@@ -113,8 +112,7 @@ def resolve_symbolic_shape(dims_str: str, symbol_map: Dict[str, int]) -> Tuple[i
 
 
 def adjust_shape_rank(shape: Tuple[int, ...], required_rank: int) -> Tuple[int, ...]:
-  """
-  Adjusts a shape tuple to match a required rank by padding or truncation.
+  """Adjusts a shape tuple to match a required rank by padding or truncation.
 
   Args:
       shape (Tuple[int, ...]): The base shape.
@@ -122,6 +120,7 @@ def adjust_shape_rank(shape: Tuple[int, ...], required_rank: int) -> Tuple[int, 
 
   Returns:
       Tuple[int, ...]: The adjusted shape.
+
   """
   current_rank = len(shape)
   if current_rank == required_rank:

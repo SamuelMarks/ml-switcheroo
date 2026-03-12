@@ -1,5 +1,4 @@
-"""
-Weight Migration Script Generation.
+"""Weight Migration Script Generation.
 
 This module provides the `WeightScriptGenerator`, a utility that creates
 standalone Python scripts for migrating model checkpoints (weights) between
@@ -31,17 +30,15 @@ from ml_switcheroo.frameworks import get_adapter
 
 
 class WeightScriptGenerator:
-  """
-  Generates a Python script to migrate weights between frameworks.
-  """
+  """Generates a Python script to migrate weights between frameworks."""
 
   def __init__(self, semantics: SemanticsManager, config: RuntimeConfig):
-    """
-    Initializes the generator.
+    """Initializes the generator.
 
     Args:
         semantics: The loaded semantics manager.
         config: Runtime configuration defining source and target frameworks.
+
     """
     self.semantics = semantics
     self.source_fw = config.effective_source
@@ -50,8 +47,7 @@ class WeightScriptGenerator:
     self.target_adapter = get_adapter(self.target_fw)
 
   def generate(self, source_path: Path, output_script: Path) -> bool:
-    """
-    Main entry point to generate the migration script.
+    """Main entry point to generate the migration script.
 
     Args:
         source_path: Path to the Python file containing the source model definition.
@@ -59,6 +55,7 @@ class WeightScriptGenerator:
 
     Returns:
         bool: True if generation was successful.
+
     """
     if not self.source_adapter or not self.target_adapter:
       log_error(f"Adapters not found for {self.source_fw} or {self.target_fw}")
@@ -100,14 +97,14 @@ class WeightScriptGenerator:
       return False
 
   def _flatten_mapping_rules(self, layer_registry: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """
-    Constructs mapping rules for each layer found in the AST.
+    """Constructs mapping rules for each layer found in the AST.
 
     Arg:
         layer_registry: Dictionary of LogicalNodes extracted from source AST.
 
     Returns:
         List[Dict]: A list of rule dictionaries containing keys/permutations.
+
     """
     rules = []
     # Check source type for layout logic priority. Torch layout is NCHW. JAX/TF/MLX is often NHWC.
@@ -179,14 +176,14 @@ class WeightScriptGenerator:
     return rules
 
   def _generate_script(self, rules: List[Dict[str, Any]]) -> str:
-    """
-    Generates the migration script using Adapter primitives.
+    """Generates the migration script using Adapter primitives.
 
     Args:
         rules: The list of mapping rules to embed in the script.
 
     Returns:
         The generated Python script as a string.
+
     """
     src_imports = "\n".join(self.source_adapter.get_weight_conversion_imports())
     tgt_imports = "\n".join(self.target_adapter.get_weight_conversion_imports())

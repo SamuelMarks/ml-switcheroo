@@ -1,5 +1,4 @@
-"""
-Plugin for Native TensorFlow Data Pipeline Generation.
+"""Plugin for Native TensorFlow Data Pipeline Generation.
 
 This module converts generic `DataLoader` usage (typically from PyTorch) into
 native `tf.data.Dataset` pipelines. It performs significantly more structural
@@ -17,8 +16,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _get_arg_by_name(args: List[cst.Arg], name: str) -> Optional[cst.Arg]:
-  """
-  Retrieves an argument node by its keyword name.
+  """Retrieves an argument node by its keyword name.
 
   Args:
       args: List of call arguments.
@@ -26,6 +24,7 @@ def _get_arg_by_name(args: List[cst.Arg], name: str) -> Optional[cst.Arg]:
 
   Returns:
       The matched argument or None.
+
   """
   for arg in args:
     if arg.keyword and arg.keyword.value == name:
@@ -36,8 +35,7 @@ def _get_arg_by_name(args: List[cst.Arg], name: str) -> Optional[cst.Arg]:
 def _extract_tensor_dataset_inputs(
   node: cst.BaseExpression,
 ) -> Optional[List[cst.BaseExpression]]:
-  """
-  Heuristic to unwrap `TensorDataset(x, y)` calls.
+  """Heuristic to unwrap `TensorDataset(x, y)` calls.
 
   PyTorch wraps tensors in a dataset object. TensorFlow expects the
   tensors passed directly to `from_tensor_slices`.
@@ -47,6 +45,7 @@ def _extract_tensor_dataset_inputs(
 
   Returns:
       A list of tensor expression nodes if a wrapper was found, or None.
+
   """
   if isinstance(node, cst.Call):
     func_name = ""
@@ -63,8 +62,7 @@ def _extract_tensor_dataset_inputs(
 
 @register_hook("tf_data_loader")
 def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel]:
-  """
-  Plugin Hook: Rewrites DataLoader construction into a tf.data pipeline.
+  """Plugin Hook: Rewrites DataLoader construction into a tf.data pipeline.
 
   Logic:
   1.  Extracts the dataset argument (assumed to be position 0).
@@ -80,6 +78,7 @@ def transform_tf_dataloader(node: cst.Call, ctx: HookContext) -> Union[cst.Call,
 
   Returns:
       The transformed method chain representing the TF Dataset.
+
   """
   if not node.args:
     return node

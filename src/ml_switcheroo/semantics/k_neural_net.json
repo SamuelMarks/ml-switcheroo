@@ -278,44 +278,19 @@
   "Adagrad": {
     "description": "Auto-discovered via Consensus (Score: 4.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "eps",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "initial_accumulator_value",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "lr",
-        "type": "Any"
-      }
+      "eps",
+      "initial_accumulator_value",
+      "lr"
     ],
-    "variants": {}
+    "type": "function"
   },
   "Adam": {
     "description": "Auto-discovered via Consensus (Score: 4.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "eps",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "lr",
-        "type": "Any"
-      }
+      "eps",
+      "lr"
     ],
-    "variants": {}
+    "type": "function"
   },
   "AdamW": {
     "description": "Optimizer that implements the AdamW algorithm.",
@@ -369,26 +344,11 @@
   "Adamax": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "eps",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "lr",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "weight_decay",
-        "type": "Any"
-      }
+      "eps",
+      "lr",
+      "weight_decay"
     ],
-    "variants": {}
+    "type": "function"
   },
   "Adamw": {
     "description": "Auto-discovered via Consensus (Score: 4.0)",
@@ -531,7 +491,7 @@
   "AdaptiveGradClipState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "AdaptiveLogSoftmaxWithLoss": {
     "description": "Auto-generated mapping for AdaptiveLogSoftmaxWithLoss.",
@@ -647,12 +607,12 @@
         "type": "float"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "AddDecayedWeightsState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "AddLayer": {
     "description": "Layer that adds a list of inputs.",
@@ -675,7 +635,7 @@
   "AddNoiseState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Addbmm": {
     "description": "Performs batch matrix-matrix product of matrices with reduced add step.",
@@ -1085,7 +1045,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "AllToShardedLinear": {
     "description": "Distributed linear layer where result is sharded across the group.",
@@ -1156,7 +1116,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "AlphaDropout": {
     "description": "Applies Alpha Dropout to the input.",
@@ -1301,7 +1261,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "AnyType": {
     "description": "JIT Any Type.",
@@ -1365,7 +1325,7 @@
   "ApplyIfFiniteState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "ApplyOverAxes": {
     "description": "Apply a function repeatedly over multiple axes.",
@@ -1814,9 +1774,8 @@
   },
   "Argument": {
     "description": "JIT Argument specification.",
-    "op_type": "class",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "ArgumentSpec": {
     "description": "JIT Argument Specification.",
@@ -1838,7 +1797,6 @@
   },
   "Array": {
     "description": "Constructs a tensor from data.",
-    "op_type": "class",
     "std_args": [
       {
         "is_variadic": false,
@@ -1853,7 +1811,7 @@
         "type": "Dtype"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Array2String": {
     "description": "Return a string representation of an array.",
@@ -2405,7 +2363,7 @@
         "type": "dtype"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "AsyncEval": {
     "description": "Asynchronously evaluate an array or tree of arrays.",
@@ -2483,7 +2441,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Atan_": {
     "description": "In-place version of Atan.",
@@ -2652,7 +2610,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "AttentionLayer": {
     "description": "Dot-product attention layer, a.k.a. Luong-style attention.",
@@ -3054,7 +3012,7 @@
         "type": "str"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "AvgPool1D": {
     "description": "Alias for AveragePooling1D.",
@@ -3471,7 +3429,7 @@
         "type": "float"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "BatchNorm1d": {
     "description": "Auto-generated mapping for BatchNorm1d.",
@@ -4247,7 +4205,7 @@
         "type": "Dtype"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Bits16": {
     "description": "Internal bit casting.",
@@ -4468,9 +4426,8 @@
   },
   "Block": {
     "description": "JIT Block.",
-    "op_type": "class",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "BlockDiag": {
     "description": "Create a block diagonal matrix from provided tensors.",
@@ -4865,7 +4822,7 @@
   "C": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "CClass": {
     "description": "Auto-generated mapping for CClass.",
@@ -5028,7 +4985,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "CastBFloat16": {
     "description": "Casts input to bfloat16.",
@@ -5281,7 +5238,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "class"
   },
   "CausalSegmentMask": {
     "description": "Computes the masks which combines causal masking and segment masks.",
@@ -5517,7 +5474,7 @@
         "type": "Any"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Cholesky": {
     "description": "Computes the Cholesky decomposition of a symmetric positive-definite matrix.",
@@ -5869,12 +5826,12 @@
         "type": "float"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "ClipByGlobalNormState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "ClipGradNorm": {
     "description": "Auto-generated from jax_code_defs",
@@ -5884,7 +5841,7 @@
   "ClipState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Clip_": {
     "description": "In-place version of Clip.",
@@ -6229,7 +6186,7 @@
   "ComputeCv": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "ComputeMoments": {
     "description": "Computes mean and variance over the valid data points in inputs.",
@@ -6353,12 +6310,12 @@
   "ConditionallyMaskState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "ConditionallyTransformState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Conformer": {
     "description": "Conformer layer (CNN + Transformer).",
@@ -6413,7 +6370,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "ConjPhysical": {
     "description": "Computes the element-wise conjugate of the given input tensor.",
@@ -6504,7 +6461,7 @@
         "type": "List[str]"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "ConstantPad1d": {
     "description": "Auto-generated mapping for ConstantPad1d.",
@@ -6545,6 +6502,11 @@
       }
     ],
     "variants": {}
+  },
+  "Constraint": {
+    "description": "Auto-generated from torch_v2.10.0_map.json",
+    "std_args": [],
+    "type": "attribute"
   },
   "ConstructFloat16": {
     "description": "Constructor/Cast for Float16.",
@@ -6626,55 +6588,20 @@
   "ControlVariate": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Conv": {
     "description": "Auto-discovered via Consensus (Score: 3.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "dtype",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "groups",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "kernel_size",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "out_channels",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "padding",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "strides",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "use_bias",
-        "type": "Any"
-      }
+      "dtype",
+      "groups",
+      "kernel_size",
+      "out_channels",
+      "padding",
+      "strides",
+      "use_bias"
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Conv1D": {
     "description": "1D convolution layer (e.g. temporal convolution).",
@@ -6732,7 +6659,6 @@
   },
   "Conv1DTranspose": {
     "description": "1D transposed convolution layer.",
-    "op_type": "class",
     "std_args": [
       {
         "is_variadic": false,
@@ -6775,7 +6701,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Conv1d": {
     "description": "Applies a 1D convolution over an input signal.",
@@ -7193,7 +7119,6 @@
   },
   "ConvTranspose": {
     "description": "Transposed Convolutional layer.",
-    "op_type": "class",
     "std_args": [
       {
         "is_variadic": false,
@@ -7235,7 +7160,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "ConvTranspose1d": {
     "description": "Applies a 1D transposed convolution operator.",
@@ -7597,7 +7522,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "CopyTo": {
     "description": "Copies values from one array to another, broadcasting as necessary.",
@@ -7647,7 +7572,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Corrcoef": {
     "description": "Estimates the Pearson product-moment correlation coefficient matrix.",
@@ -7696,7 +7621,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Cos_": {
     "description": "In-place cosine operation.",
@@ -7951,7 +7876,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "CrossEntropyLoss": {
     "description": "Auto-generated from jax_code_defs",
@@ -8391,12 +8316,12 @@
   "CvExpectedValue": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "CvState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "DSplit": {
     "description": "Split array into multiple sub-arrays along the 3rd axis (depth).",
@@ -8439,7 +8364,7 @@
         "type": "Any"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "DataElem": {
     "description": "Auto-generated mapping for DataElem.",
@@ -8657,7 +8582,7 @@
   "Dense": {
     "description": "Auto-generated from keras_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "function"
   },
   "DepthwiseConv1D": {
     "description": "Auto-generated from keras_code_defs",
@@ -8840,7 +8765,6 @@
   },
   "Device": {
     "description": "Constructs a device object.",
-    "op_type": "class",
     "std_args": [
       {
         "is_variadic": false,
@@ -8855,7 +8779,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "DeviceCpu": {
     "description": "Returns the CPU device object.",
@@ -9013,7 +8937,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "DiagonalCopy": {
     "description": "Returns a fresh copy of the diagonal view.",
@@ -9317,7 +9241,7 @@
         "type": "str"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "DivMod": {
     "description": "Return element-wise quotient and remainder simultaneously.",
@@ -9551,7 +9475,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "DoubleStorage": {
     "description": "Storage class for float64 data.",
@@ -9567,22 +9491,18 @@
   },
   "Dropout": {
     "description": "Autogenerated definition for Dropout",
-    "op_type": "class",
     "std_args": [
       {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
         "name": "p",
         "type": "float"
       },
       {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
+        "default": null,
         "name": "seed",
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Dropout1d": {
     "description": "Auto-generated mapping for Dropout1d.",
@@ -9693,9 +9613,8 @@
   },
   "Dtype": {
     "description": "Data Type class.",
-    "op_type": "class",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "DtypeCategory": {
     "description": "Category of data types.",
@@ -9775,7 +9694,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "EigImplementation": {
     "description": "Auto-generated mapping for EigImplementation.",
@@ -9880,19 +9799,14 @@
   "Elu": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "alpha",
-        "type": "Any"
-      }
+      "alpha"
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "EmaState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Embed": {
     "description": "Auto-generated mapping for Embed.",
@@ -10041,7 +9955,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "EmptyLike": {
     "description": "Returns an uninitialized tensor with the same size as input.",
@@ -10233,7 +10147,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "ErfInv": {
     "description": "Compute inverse error function.",
@@ -10437,6 +10351,11 @@
     "std_args": [],
     "variants": {}
   },
+  "Exit": {
+    "description": "Auto-generated from sass_vunknown_map.json",
+    "std_args": [],
+    "type": "attribute"
+  },
   "Exp": {
     "description": "Computes the exponential of each element.",
     "std_args": [
@@ -10447,7 +10366,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Exp2": {
     "description": "Computes the base-2 exponential of each element.",
@@ -10459,7 +10378,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Exp2_": {
     "description": "In-place Exp2.",
@@ -10611,6 +10530,11 @@
     ],
     "variants": {}
   },
+  "Expr": {
+    "description": "Auto-generated from numpy_v2.4.2_map.json",
+    "std_args": [],
+    "type": "attribute"
+  },
   "Extract": {
     "description": "Return the elements of an array that satisfy some condition.",
     "std_args": [
@@ -10651,7 +10575,7 @@
         "type": "Dtype"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "FInfo": {
     "description": "Get information on floating-point types.",
@@ -11167,7 +11091,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Fix_": {
     "description": "In-place version of fix.",
@@ -11225,24 +11149,19 @@
   },
   "Flatten": {
     "description": "Autogenerated definition for Flatten",
-    "op_type": "class",
     "std_args": [
       {
         "default": 1,
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
         "name": "start_dim",
         "type": "int"
       },
       {
         "default": -1,
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
         "name": "end_dim",
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "FlaxLayer": {
     "description": "Keras Layer wrapping Flax.",
@@ -12597,20 +12516,10 @@
   "Gelu": {
     "description": "Auto-discovered via Consensus (Score: 4.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "approximate",
-        "type": "Any"
-      },
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
+      "approximate",
+      "x"
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "GeluApprox": {
     "description": "An approximation to Gaussian Error Linear Unit (Tanh based).",
@@ -12719,7 +12628,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Generator": {
     "description": "Pseudo-random number generator state.",
@@ -13391,7 +13300,6 @@
   },
   "Grad": {
     "description": "Returns a function which computes the gradient.",
-    "op_type": "decorator",
     "std_args": [
       {
         "is_variadic": false,
@@ -13407,7 +13315,7 @@
         "type": "Union[int, list[int]]"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "GradFn": {
     "description": "Auto-generated mapping for GradFn.",
@@ -14786,14 +14694,9 @@
   "Identity": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "kwargs",
-        "type": "Any"
-      }
+      "kwargs"
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "IdentityNorm": {
     "description": "Return the input as-is with BaseNormalization-compatible HParams.",
@@ -15206,7 +15109,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Inexact": {
     "description": "Abstract base class for inexact types (floating point).",
@@ -15299,12 +15202,12 @@
   "InjectHyperparamsState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "InjectStatefulHyperparamsState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Inner": {
     "description": "Computes the dot product for 1D tensors. For higher dimensions, sums product of elements along last dim.",
@@ -16937,7 +16840,6 @@
   },
   "LSTM": {
     "description": "Applies a multi-layer long short-term memory (LSTM) RNN.",
-    "op_type": "class",
     "std_args": [
       {
         "is_variadic": false,
@@ -16959,7 +16861,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "LSTMCell": {
     "description": "A long short-term memory (LSTM) cell.",
@@ -17227,7 +17129,7 @@
   "Layout": {
     "description": "Layout type constant.",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "LazyBatchNorm1d": {
     "description": "Auto-generated mapping for LazyBatchNorm1d.",
@@ -17443,7 +17345,7 @@
         "type": "float"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "LeftShift": {
     "description": "Shift the bits of an integer to the left.",
@@ -17990,7 +17892,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "LoadTxt": {
     "description": "Load data from a text file.",
@@ -18093,7 +17995,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Log10": {
     "description": "Computes the base-10 logarithm element-wise.",
@@ -18153,7 +18055,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Log2_": {
     "description": "Computes base-2 logarithm in-place.",
@@ -18276,7 +18178,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "LogSpace": {
     "description": "Creates a tensor with values spaced evenly on a logarithmic scale.",
@@ -18409,7 +18311,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "class"
   },
   "LogicalAxisRules": {
     "description": "Context manager for setting logical to mesh axis bindings.",
@@ -18452,7 +18354,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "class"
   },
   "LogicalXor": {
     "description": "Element-wise logical XOR.",
@@ -18724,7 +18626,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "LstmCellSimple": {
     "description": "A long short-term memory (LSTM) cell.",
@@ -18823,7 +18725,7 @@
   "M": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "MA": {
     "description": "Auto-generated from flax_nnx_code_defs",
@@ -19033,7 +18935,7 @@
   "MaskedNode": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "MaskedScatter": {
     "description": "Copies elements from source into self tensor at positions where the mask is True.",
@@ -19080,7 +18982,7 @@
   "MaskedState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Masking": {
     "description": "Masks a sequence by using a mask value to skip timesteps.",
@@ -19112,7 +19014,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Matmul": {
     "description": "Matrix product of two arrays.",
@@ -19130,7 +19032,7 @@
         "type": "Any"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Matrix": {
     "description": "Returns a matrix from an array-like object. (Deprecated in NumPy, maps to Array creation).",
@@ -19252,7 +19154,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "MaxNumBoundingBoxes": {
     "description": "Ensure the maximum number of bounding boxes.",
@@ -19303,7 +19205,7 @@
         "type": "str"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "MaxPool1d": {
     "description": "Applies a 1D max pooling over an input signal.",
@@ -19833,7 +19735,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "MinPool": {
     "description": "Pools the input by taking the minimum of a window slice.",
@@ -20268,7 +20170,7 @@
   "Module": {
     "description": "Base class for Neural Network modules.",
     "std_args": [],
-    "type": "class"
+    "type": "attribute"
   },
   "ModuleBase": {
     "description": "Auto-generated mapping for ModuleBase.",
@@ -20437,7 +20339,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "MultiHeadAttention": {
     "description": "Computes Multi-Head Attention.",
@@ -20489,17 +20391,17 @@
   "MultiSteps": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "MultiStepsState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "MultiTransformState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "MultiheadAttention": {
     "description": "Dot-product attention with multiple heads.",
@@ -21233,6 +21135,11 @@
     ],
     "variants": {}
   },
+  "Nanosleep": {
+    "description": "Auto-generated from sass_vunknown_map.json",
+    "std_args": [],
+    "type": "function"
+  },
   "Narrow": {
     "description": "Returns a new tensor that is a narrowed version of input tensor.",
     "std_args": [
@@ -21550,7 +21457,6 @@
   },
   "Ndim": {
     "description": "Return the number of dimensions of an array.",
-    "op_type": "attribute",
     "std_args": [
       {
         "is_variadic": false,
@@ -21559,7 +21465,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Ndtri": {
     "description": "Inverse error function / Quantile of Standard Normal.",
@@ -21784,7 +21690,7 @@
   "NonNegativeParamsState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "NonZero": {
     "description": "Returns a tensor containing the indices of all non-zero elements of input.",
@@ -21863,7 +21769,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "NormExceptDim": {
     "description": "Calculates norm over all dimensions except dim.",
@@ -22121,6 +22027,11 @@
     ],
     "variants": {}
   },
+  "Op": {
+    "description": "Auto-generated from numpy_v2.4.2_map.json",
+    "std_args": [],
+    "type": "attribute"
+  },
   "OperatorInfo": {
     "description": "Metadata for operators.",
     "op_type": "class",
@@ -22169,7 +22080,7 @@
   "OptaxTest": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "class"
   },
   "OptimizedLSTMCell": {
     "description": "LSTM Cell with optimized fused operations.",
@@ -22186,9 +22097,8 @@
   },
   "Optimizer": {
     "description": "Abstract optimizer base class.",
-    "op_type": "class",
     "std_args": [],
-    "variants": {}
+    "type": "function"
   },
   "Optional": {
     "description": "Constructs an optional-type value containing either an empty optional of a certain type specified by the attribute, or a non-empty value containing the input element.",
@@ -22278,7 +22188,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "PReLU": {
     "description": "Applies the element-wise Parametric ReLU.",
@@ -22515,7 +22425,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "PartitionName": {
     "description": "String conversion utility.",
@@ -22532,7 +22442,7 @@
   "PartitionState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "PathContains": {
     "description": "Path filter predicate.",
@@ -22782,6 +22692,11 @@
     "op_type": "attribute",
     "std_args": [],
     "variants": {}
+  },
+  "PickleModule": {
+    "description": "The class representing a Python module/class/instance attribute.",
+    "std_args": [],
+    "type": "attribute"
   },
   "Piecewise": {
     "description": "Evaluate a piecewise-defined function.",
@@ -23641,6 +23556,11 @@
     "description": "Internal private operations registry.",
     "std_args": [],
     "variants": {}
+  },
+  "Prmt": {
+    "description": "Auto-generated from sass_vunknown_map.json",
+    "std_args": [],
+    "type": "function"
   },
   "Prod": {
     "description": "Returns the product of all elements in the input tensor.",
@@ -25136,7 +25056,6 @@
   },
   "RMSprop": {
     "description": "Optimizer that implements the RMSprop algorithm.",
-    "op_type": "class",
     "std_args": [
       {
         "default": 0.001,
@@ -25180,7 +25099,7 @@
         "type": "float"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "RNN": {
     "description": "Elman recurrent layer.",
@@ -25434,7 +25353,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "RandnLike": {
     "description": "Returns a tensor with the same size as input that is filled with random numbers from a normal distribution.",
@@ -26067,7 +25986,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "RealIfClose": {
     "description": "If input is complex with all imaginary parts close to zero, return real parts.",
@@ -26151,7 +26070,6 @@
   },
   "Record": {
     "description": "A data-type scalar that allows field access as attribute lookup.",
-    "op_type": "class",
     "std_args": [
       {
         "is_variadic": false,
@@ -26166,7 +26084,7 @@
         "type": "Any"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "RecursiveMap": {
     "description": "Recursively applies a function to all nodes and leaves.",
@@ -26311,6 +26229,11 @@
     ],
     "variants": {}
   },
+  "Redux": {
+    "description": "Auto-generated from sass_vunknown_map.json",
+    "std_args": [],
+    "type": "function"
+  },
   "RefMap": {
     "description": "Auto-generated mapping for RefMap.",
     "std_args": [],
@@ -26377,7 +26300,7 @@
   "Relu": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Relu2": {
     "description": "Applies the ReLU\u00b2 activation function.",
@@ -26428,7 +26351,6 @@
   },
   "Remat": {
     "description": "Applies gradient checkpointing (rematerialization) to a function to save memory at the cost of compute.",
-    "op_type": "decorator",
     "std_args": [
       {
         "is_variadic": false,
@@ -26437,7 +26359,7 @@
         "type": "Callable"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Renorm": {
     "description": "Renormalizes sub-tensors along a dimension.",
@@ -26491,7 +26413,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "RepeatInterleave": {
     "description": "Repeat elements of a tensor.",
@@ -26693,7 +26615,7 @@
         "type": "Tuple[int]"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Resize": {
     "description": "Return a new array with the specified shape (may repeat data).",
@@ -27263,7 +27185,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Round_": {
     "description": "In-place version of Round.",
@@ -27368,7 +27290,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Rsqrt_": {
     "description": "In-place version of Rsqrt.",
@@ -27415,7 +27337,6 @@
   },
   "SGD": {
     "description": "Gradient descent (with momentum) optimizer.",
-    "op_type": "class",
     "std_args": [
       {
         "default": 0.01,
@@ -27445,7 +27366,7 @@
         "type": "float"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "SSM": {
     "description": "State Space Model layer.",
@@ -27631,7 +27552,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "SaveGguf": {
     "description": "Save arrays to GGUF format.",
@@ -27827,12 +27748,12 @@
   "ScaleByTrustRatioState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "ScaleState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Scan": {
     "description": "Functional loop operation carrying state across iterations.",
@@ -28317,7 +28238,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "SelectCopy": {
     "description": "Slices the tensor, returning a copy.",
@@ -28382,7 +28303,7 @@
   "Selu": {
     "description": "Auto-discovered via Consensus (Score: 3.0)",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "SeparableConv1D": {
     "description": "1D separable convolution layer.",
@@ -29177,7 +29098,7 @@
         "type": "Any"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "ShardMap": {
     "description": "Transformation for sharded parallel execution over a mesh.",
@@ -29292,7 +29213,7 @@
   "ShouldSkipUpdateFunction": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "ShowConfig": {
     "description": "Show libraries and system information.",
@@ -29321,14 +29242,9 @@
   "Sigmoid": {
     "description": "Auto-discovered via Consensus (Score: 3.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
+      "x"
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "SigmoidCrossEntropy": {
     "description": "Sigmoid cross-entropy loss layer.",
@@ -29491,7 +29407,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Sin_": {
     "description": "In-place sine.",
@@ -29606,7 +29522,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "SizeBytes": {
     "description": "Auto-generated mapping for SizeBytes.",
@@ -29641,7 +29557,7 @@
         "type": "Optional[List[int]]"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "SliceCopy": {
     "description": "Performs slicing, returning a copy.",
@@ -29789,7 +29705,7 @@
   "SnapshotState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "SobolSample": {
     "description": "Generates points from the Sobol sequence.",
@@ -29836,14 +29752,9 @@
   "Softmax": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "kwargs",
-        "type": "Any"
-      }
+      "kwargs"
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Softmax2d": {
     "description": "Auto-generated from mlx_code_defs",
@@ -29872,7 +29783,7 @@
   "Softplus": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Softshrink": {
     "description": "Auto-discovered via Consensus (Score: 2.0)",
@@ -30333,6 +30244,11 @@
       }
     ],
     "variants": {}
+  },
+  "Specs": {
+    "description": "Auto-generated from flax_nnx_v0.12.5_map.json",
+    "std_args": [],
+    "type": "attribute"
   },
   "SpectralNorm": {
     "description": "Spectral normalization.",
@@ -30836,7 +30752,7 @@
         "type": "Any"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "StateAxes": {
     "description": "Auto-generated mapping for StateAxes.",
@@ -30944,7 +30860,6 @@
   },
   "Step": {
     "description": "Applies the Step Activation Function (Heaviside).",
-    "op_type": "class",
     "std_args": [
       {
         "default": 0.0,
@@ -30954,7 +30869,7 @@
         "type": "float"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "StepActivation": {
     "description": "Applies the Step Activation Function.",
@@ -31278,7 +31193,7 @@
         "type": "float"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "SubArrayFormat": {
     "description": "Auto-generated mapping for SubArrayFormat.",
@@ -31345,7 +31260,7 @@
         "type": "Optional[Any]"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Svd": {
     "description": "Computes the singular value decomposition.",
@@ -31743,7 +31658,7 @@
   "T": {
     "description": "Auto-generated from flax_nnx_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "TCopy": {
     "description": "Performs transpose (2D) and returns a fresh copy.",
@@ -31818,9 +31733,8 @@
   },
   "Tag": {
     "description": "PyTorch internal tags for compiler/dispatcher.",
-    "op_type": "class",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Take": {
     "description": "Returns a new tensor with the elements of input at the given indices (flattened).",
@@ -31915,14 +31829,9 @@
   "Tanh": {
     "description": "Auto-discovered via Consensus (Score: 3.0)",
     "std_args": [
-      {
-        "is_variadic": false,
-        "kind": "positional_or_keyword",
-        "name": "x",
-        "type": "Any"
-      }
+      "x"
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Tanh_": {
     "description": "In-place version of Tanh.",
@@ -32029,7 +31938,7 @@
         "type": "Union[int, Tuple]"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Test": {
     "description": "Pytest test runner.",
@@ -32408,12 +32317,12 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "TraceState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Traced": {
     "description": "Auto-generated mapping for Traced.",
@@ -32636,7 +32545,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Transpose2D": {
     "description": "Transposes dimensions 0 and 1 of a tensor. Expects <= 2D input.",
@@ -33231,9 +33140,8 @@
   },
   "Type": {
     "description": "Top-level Type class.",
-    "op_type": "class",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "TypeApi": {
     "description": "Auto-generated mapping for TypeApi.",
@@ -34323,7 +34231,7 @@
   "UpdateCvState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "UpdateState": {
     "description": "Updates a graph node with a new state dictionary in-place.",
@@ -34522,9 +34430,8 @@
   },
   "Value": {
     "description": "Internal Value class for IR.",
-    "op_type": "class",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "ValueAndGrad": {
     "description": "Computes the value and gradient of a function.",
@@ -34715,7 +34622,7 @@
         "type": "Any"
       }
     ],
-    "variants": {}
+    "type": "class"
   },
   "VariableContext": {
     "description": "Auto-generated mapping for VariableContext.",
@@ -34836,7 +34743,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "Vecdot": {
     "description": "Vector dot product of two arrays.",
@@ -34860,7 +34767,7 @@
         "type": "int"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "Vecmat": {
     "description": "Vector-matrix dot product of two arrays.",
@@ -35209,7 +35116,12 @@
         "type": "Any"
       }
     ],
-    "variants": {}
+    "type": "function"
+  },
+  "Warpgroup": {
+    "description": "Auto-generated from sass_vunknown_map.json",
+    "std_args": [],
+    "type": "attribute"
   },
   "Weibull": {
     "description": "Samples from a two-parameter Weibull distribution.\n\nExample:\n\n    >>> # xdoctest: +IGNORE_WANT(\"non-deterministic\")\n    >>> m = Weibull(torch.tensor([1.0]), torch.tensor([1.0]))\n    >>> m.sample()  # sample from a Weibull distribution with scale=1, concentration=1\n    tensor([ 0.4784])\n\nArgs:\n    scale (float or Tensor): Scale parameter of distribution (lambda).\n    concentration (float or Tensor): Concentration parameter of distribution (k/shape).\n    validate_args (bool, optional): Whether to validate arguments. Default: None.",
@@ -35274,7 +35186,7 @@
         "type": "Tensor"
       }
     ],
-    "variants": {}
+    "type": "attribute"
   },
   "WhileLoop": {
     "description": "Constructs a loop that executes body_fn while cond_fn is true.",
@@ -35348,7 +35260,7 @@
   "WrappedSchedule": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "Wrapper": {
     "description": "Auto-generated from keras_code_defs",
@@ -35442,7 +35354,7 @@
   "ZeroNansState": {
     "description": "Auto-generated from jax_code_defs",
     "std_args": [],
-    "variants": {}
+    "type": "attribute"
   },
   "ZeroPad1d": {
     "description": "Auto-generated mapping for ZeroPad1d.",
@@ -35567,7 +35479,7 @@
         "type": "bool"
       }
     ],
-    "variants": {}
+    "type": "function"
   },
   "ZerosLike": {
     "description": "Returns a tensor filled with the scalar value 0, with the same size as input.",

@@ -1,5 +1,4 @@
-"""
-HTML Parser.
+"""HTML Parser.
 
 Parses the HTML DSL structure using standard library `html.parser`.
 Reconstructs a Python LibCST Module representing the logic described by the visual grid.
@@ -11,13 +10,12 @@ from typing import List, Tuple, Optional
 
 
 class GridParser(HTMLParser):
-  """
-  HTML Parser callback handler.
+  """HTML Parser callback handler.
   Extracts high-level model components (Name, Attributes, Operations) from the DOM stream.
   """
 
   def __init__(self) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     super().__init__()
     self.in_box = False
     self.current_class = ""
@@ -30,7 +28,7 @@ class GridParser(HTMLParser):
     self._buf_code = ""
 
   def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     attrs_dict = dict((k, v) for k, v in attrs if v is not None)
     cls = attrs_dict.get("class", "")
 
@@ -47,7 +45,7 @@ class GridParser(HTMLParser):
       self.in_code = True
 
   def handle_endtag(self, tag: str) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if tag == "div" and self.in_box:
       self.in_box = False
       self._process_box()
@@ -60,7 +58,7 @@ class GridParser(HTMLParser):
       self.in_code = False
 
   def handle_data(self, data: str) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if self.in_header_txt:
       self._buf_header += data
     if self.in_code:
@@ -71,7 +69,7 @@ class GridParser(HTMLParser):
         self.model_name = clean
 
   def _process_box(self) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     txt = self._buf_header.strip()
     code = self._buf_code.strip()
     classes = self.current_class.strip().split()
@@ -97,16 +95,14 @@ class GridParser(HTMLParser):
 
 
 class HtmlParser:
-  """
-  Facade for parsing HTML strings into LibCST modules.
-  """
+  """Facade for parsing HTML strings into LibCST modules."""
 
   def __init__(self, source: str) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     self.source = source
 
   def parse(self) -> cst.Module:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     p = GridParser()
     p.feed(self.source)
 
@@ -204,7 +200,7 @@ class HtmlParser:
     return cst.Module(body=[import_stmt, class_def])
 
   def _create_dotted(self, name):
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     parts = name.split(".")
     node = cst.Name(parts[0])
     for p in parts[1:]:
@@ -212,7 +208,7 @@ class HtmlParser:
     return node
 
   def _create_call(self, func_name, config_str=None):
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     args = []
     if config_str:
       args = self._parse_args_str(config_str)
@@ -240,7 +236,7 @@ class HtmlParser:
     return args
 
   def _safe_val(self, v):
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     try:
       return cst.parse_expression(v)
     except:

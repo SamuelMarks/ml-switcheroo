@@ -1,5 +1,4 @@
-"""
-Static Graph Extractor for TikZ Visualization.
+"""Static Graph Extractor for TikZ Visualization.
 
 This module implements the analysis logic to convert Python source code (AST)
 into a language-agnostic Logical Graph. It parses `__init__` methods to identify
@@ -20,8 +19,7 @@ from ml_switcheroo.core.graph import LogicalNode, LogicalEdge, LogicalGraph
 
 
 class GraphExtractor(cst.CSTVisitor):
-  """
-  LibCST Visitor that extracts a LogicalGraph from Python source code.
+  """LibCST Visitor that extracts a LogicalGraph from Python source code.
 
   Two-Pass Logic:
 
@@ -49,16 +47,13 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def leave_Module(self, original_node: cst.Module) -> None:
-    """
-    Finalize graph construction after visiting the whole module.
+    """Finalize graph construction after visiting the whole module.
     This ensures nodes are populated even if there is no forward pass.
     """
     self._finalize_graph()
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """
-    Detects entry into lifecycle methods (__init__, forward, etc).
-    """
+    """Detects entry into lifecycle methods (__init__, forward, etc)."""
     name = node.name.value
     if name in ["__init__", "setup"]:
       self._in_init = True
@@ -72,18 +67,14 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
-    """
-    Resets context flags upon exiting methods.
-    """
+    """Resets context flags upon exiting methods."""
     if self._in_init:
       self._in_init = False
     elif self._in_forward:
       self._in_forward = False
 
   def visit_Assign(self, node: cst.Assign) -> Optional[bool]:
-    """
-    Handles assignment logic for both layer definition and data flow.
-    """
+    """Handles assignment logic for both layer definition and data flow."""
     if self._in_init:
       self._analyze_layer_def(node)
     elif self._in_forward:
@@ -91,8 +82,7 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def visit_Return(self, node: cst.Return) -> Optional[bool]:
-    """
-    Handles return statements in forward pass to create Output nodes.
+    """Handles return statements in forward pass to create Output nodes.
     Also handles case where return contains a functional call directly.
     """
     if self._in_forward and node.value:
@@ -123,9 +113,7 @@ class GraphExtractor(cst.CSTVisitor):
     return False
 
   def _extract_input_args(self, node: cst.FunctionDef) -> None:
-    """
-    Registers function arguments as input sources.
-    """
+    """Registers function arguments as input sources."""
     # Always register the primary input node with ID "input"
     # This matches the expectation of visualizers and tests.
     input_id = "input"
@@ -139,9 +127,7 @@ class GraphExtractor(cst.CSTVisitor):
       self.provenance[arg_name] = input_id
 
   def _analyze_layer_def(self, node: cst.Assign) -> None:
-    """
-    Parses `self.conv = nn.Conv2d(...)` lines.
-    """
+    """Parses `self.conv = nn.Conv2d(...)` lines."""
     # 1. Identify Target (must be self.something)
     target = node.targets[0].target
     if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
@@ -172,9 +158,7 @@ class GraphExtractor(cst.CSTVisitor):
     self.layer_registry[attr_name] = LogicalNode(attr_name, op_type, metadata)
 
   def _analyze_data_flow(self, node: cst.Assign) -> None:
-    """
-    Parses `x = self.layer(x)` assignments.
-    """
+    """Parses `x = self.layer(x)` assignments."""
     # Support simple assignment: target = call
     if not isinstance(node.value, cst.Call):
       return
@@ -208,9 +192,7 @@ class GraphExtractor(cst.CSTVisitor):
     return None
 
   def _analyze_call_expression(self, call: cst.Call, output_vars: List[str]) -> None:
-    """
-    Common logic to trace edges from a Call usage.
-    """
+    """Common logic to trace edges from a Call usage."""
     layer_name = self._resolve_layer_or_func_name(call.func)
 
     if not layer_name:
@@ -234,8 +216,7 @@ class GraphExtractor(cst.CSTVisitor):
     return None
 
   def _node_to_string(self, node: cst.CSTNode) -> str:
-    """
-    Extracts source string representation of an AST Node.
+    """Extracts source string representation of an AST Node.
     Handles complex expressions by capturing exact source via utility.
     """
     return capture_node_source(node)

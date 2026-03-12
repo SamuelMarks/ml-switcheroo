@@ -1,5 +1,4 @@
-"""
-Sphinx Extension for ML-Switcheroo.
+"""Sphinx Extension for ML-Switcheroo.
 
 This package provides custom Sphinx directives and hooks to generate
 interactive documentation, including:
@@ -18,8 +17,7 @@ from ml_switcheroo.sphinx_ext.autogen_ops import generate_op_docs
 
 
 def setup(app: Any) -> Dict[str, Any]:
-  """
-  Sphinx Extension Setup Hook.
+  """Sphinx Extension Setup Hook.
 
   Registers directives, connects build events, and adds static assets.
   """

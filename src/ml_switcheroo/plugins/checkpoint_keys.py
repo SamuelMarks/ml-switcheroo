@@ -1,5 +1,4 @@
-"""
-Plugin for Checkpoint Key Remapping.
+"""Plugin for Checkpoint Key Remapping.
 
 Handles the runtime impedance mismatch between PyTorch state dictionaries and
 flattened parameter trees.

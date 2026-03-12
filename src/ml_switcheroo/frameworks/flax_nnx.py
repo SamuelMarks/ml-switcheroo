@@ -1,5 +1,4 @@
-"""
-Flax NNX Framework Adapter (Level 2).
+"""Flax NNX Framework Adapter (Level 2).
 
 Extends the JAX core adapter with Flax's Neural Network Extensions (nnx).
 
@@ -47,8 +46,7 @@ except ImportError:
 
 @register_framework("flax_nnx")
 class FlaxNNXAdapter(JAXStackMixin):
-  """
-  Adapter class for Flax NNX.
+  """Adapter class for Flax NNX.
 
   Inherits from JAXStackMixin for core math/optax behavior and adds:
   - Explicit neural network layers and activations.
@@ -61,8 +59,7 @@ class FlaxNNXAdapter(JAXStackMixin):
   ui_priority: int = 15
 
   def __init__(self) -> None:
-    """
-    Initializes the adapter.
+    """Initializes the adapter.
 
     - Chooses LIVE mode if `flax.nnx` can be imported.
     - Otherwise, falls back to GHOST mode and loads an API snapshot.
@@ -80,14 +77,14 @@ class FlaxNNXAdapter(JAXStackMixin):
         logging.warning("Flax NNX not installed and no snapshot found.")
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Collect API definitions for discovery.
+    """Collect API definitions for discovery.
 
     Args:
         category (StandardCategory): The API category (layer, activation, etc.)
 
     Returns:
         List[GhostRef]: List of found API references.
+
     """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
@@ -110,11 +107,11 @@ class FlaxNNXAdapter(JAXStackMixin):
     return results
 
   def _scan_nnx_layers(self) -> List[GhostRef]:
-    """
-    Scan `flax.nnx` module for classes inheriting from `nnx.Module`, excluding the base Module class.
+    """Scan `flax.nnx` module for classes inheriting from `nnx.Module`, excluding the base Module class.
 
     Returns:
         List[GhostRef]: Found references.
+
     """
     if not self._flax_available:
       return []
@@ -138,14 +135,14 @@ class FlaxNNXAdapter(JAXStackMixin):
     return found
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Hydrate API ghosts from snapshot data.
+    """Hydrate API ghosts from snapshot data.
 
     Args:
         category (StandardCategory): Category to filter.
 
     Returns:
         List[GhostRef]: Hydrated ghost references.
+
     """
     if not self._snapshot_data:
       return []
@@ -154,11 +151,11 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def search_modules(self) -> List[str]:
-    """
-    Modules to scan for discovery.
+    """Modules to scan for discovery.
 
     Returns:
         List[str]: Ordered list of module names.
+
     """
     if self._mode == InitMode.GHOST:
       return []
@@ -166,22 +163,22 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """
-    Returns the base package and alias to guide import injection.
+    """Returns the base package and alias to guide import injection.
     Used by ImportFixer to map `flax.nnx` root usage to `nnx` alias.
 
     Returns:
         Tuple[str, str]: (root_package, alias)
+
     """
     return ("flax.nnx", "nnx")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """
-    Declares self namespaces with tiers and recommended aliases.
+    """Declares self namespaces with tiers and recommended aliases.
 
     Returns:
         Dict[str, ImportConfig]: Mapping of package paths to configs.
+
     """
     return {
       "flax.linen": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="nn"),
@@ -190,21 +187,21 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """
-    Regex patterns for heuristic category assignment during scaffolding.
+    """Regex patterns for heuristic category assignment during scaffolding.
 
     Returns:
         Dict[str, List[str]]: Mapping of tiers to regex lists.
+
     """
     return {"neural": [r"\\.nnx\\.", r"\\.linen\\."], "extras": [r"random\\."]}
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """
-    Test code templates extended from JAX core.
+    """Test code templates extended from JAX core.
 
     Returns:
         Dict[str, str]: Test harness code snippets/templates.
+
     """
     conf = self.jax_test_config.copy()
     conf["import"] = conf["import"] + "\nimport flax.nnx as nnx"
@@ -232,11 +229,11 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """
-    Semantic tiers supported by this adapter.
+    """Semantic tiers supported by this adapter.
 
     Returns:
         List[SemanticTier]: Supported tiers.
+
     """
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
@@ -247,13 +244,13 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """
-    Structural rewriting traits guiding the pivot rewriter.
+    """Structural rewriting traits guiding the pivot rewriter.
     Explicitly defines `flax.nnx.Module` to ensure clean inheritance rewriting
     without internal submodule leakage.
 
     Returns:
         StructuralTraits: Configuration of base class, methods, and injections.
+
     """
     return StructuralTraits(
       module_base="flax.nnx.Module",
@@ -273,11 +270,11 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """
-    Plugin capabilities indicating required behaviors in the target framework.
+    """Plugin capabilities indicating required behaviors in the target framework.
 
     Returns:
         PluginTraits: Flags controlling plugin execution.
+
     """
     return PluginTraits(
       has_numpy_compatible_arrays=True,
@@ -290,12 +287,12 @@ class FlaxNNXAdapter(JAXStackMixin):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """
-    Static standard operation definitions specific to Flax NNX.
+    """Static standard operation definitions specific to Flax NNX.
     Loaded dynamically from `frameworks/definitions/flax_nnx.json`.
 
     Returns:
         Dict[str, StandardMap]: Mapping of standard op names to framework implementations.
+
     """
     defs = load_definitions("flax_nnx")
 
@@ -328,8 +325,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     return defs
 
   def convert(self, data: Any) -> Any:
-    """
-    Converts generic data to framework-specific Pytree/arrays.
+    """Converts generic data to framework-specific Pytree/arrays.
     Contains self-contained logic to ensure safe extraction by the Harness Generator which
     does not preserve external dependencies like 'JaxCoreAdapter' class references.
 
@@ -338,6 +334,7 @@ class FlaxNNXAdapter(JAXStackMixin):
 
     Returns:
         Converted data tailored to JAX/Flax ecosystem.
+
     """
     try:
       import jax.numpy as jnp
@@ -353,14 +350,14 @@ class FlaxNNXAdapter(JAXStackMixin):
     return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """
-    Applies manual wiring and modifies the snapshot to alias 'flax.nnx.' to 'nnx.'.
+    """Applies manual wiring and modifies the snapshot to alias 'flax.nnx.' to 'nnx.'.
 
     Adds plugin wiring for key interface methods ensuring correctness during
     Ghost Mode synchronization.
 
     Args:
         snapshot (Dict[str, Any]): The mapping snapshot dictionary to mutate.
+
     """
     self._apply_stack_wiring(snapshot)
     mappings = snapshot.setdefault("mappings", {})
@@ -385,11 +382,11 @@ class FlaxNNXAdapter(JAXStackMixin):
     mappings.setdefault("parameters", {"requires_plugin": "torch_parameters_to_nnx"})
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Provides tier-specific example usages for documentation and tests.
+    """Provides tier-specific example usages for documentation and tests.
 
     Returns:
         Dict[str, str]: Dictionary mapping tier names to code snippets.
+
     """
     return {
       "tier2_neural": """from flax import nnx
@@ -442,8 +439,7 @@ class Qwen3VLPatchEmbed(nnx.Module):
     }
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """
-    Returns the official Flax documentation URL for a given API string.
+    """Returns the official Flax documentation URL for a given API string.
     Defaults to ReadTheDocs search query for robustness with new NNX APIs.
 
     Args:
@@ -451,6 +447,7 @@ class Qwen3VLPatchEmbed(nnx.Module):
 
     Returns:
         Optional[str]: The URL to the documentation page.
+
     """
     # Flax NNX APIs change frequently, search is safest
     return f"https://flax.readthedocs.io/en/latest/search.html?q={api_name}"

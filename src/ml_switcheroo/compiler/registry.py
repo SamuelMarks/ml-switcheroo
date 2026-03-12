@@ -1,5 +1,4 @@
-"""
-Compiler Registry.
+"""Compiler Registry.
 
 Centralizes registration of Frontends (Source -> IR) and Backends (IR -> Target)
 for the compiler pipeline.
@@ -38,7 +37,7 @@ class GraphFrontend(BaseFrontend):
   """Produces LogicalGraph from code via parse/lift chain."""
 
   def parse_to_graph(self, code: str) -> Any:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     ...
 
 
@@ -82,21 +81,20 @@ _FRONTENDS: Dict[str, Any] = {
 
 
 def get_backend_class(target: str) -> Optional[Type[CompilerBackend]]:
-  """
-  Returns the backend class for the target (e.g. 'sass').
+  """Returns the backend class for the target (e.g. 'sass').
 
   Args:
       target: The target framework identifier.
 
   Returns:
       The backend class type or PythonBackend if not found, or None.
+
   """
   return _BACKENDS.get(target, _BACKENDS.get("python"))
 
 
 def is_isa_target(target: str) -> bool:
-  """
-  Determines if the target requires the Graph Compiler pipeline.
+  """Determines if the target requires the Graph Compiler pipeline.
 
   Only Low-Level Assembly targets handling Registers or Visualization
   backends that strictly consume Graphs are routed here.
@@ -109,13 +107,13 @@ def is_isa_target(target: str) -> bool:
 
   Returns:
       True if the target is an ISA or Graph-based format.
+
   """
   return target in ["sass", "rdna", "html", "tikz", "latex_dsl", "mlir", "stablehlo"]
 
 
 def is_isa_source(source: str) -> bool:
-  """
-  Determines if the source requires Lifting (ASM -> Graph -> AST).
+  """Determines if the source requires Lifting (ASM -> Graph -> AST).
   Only SASS and RDNA are treated as low-level source inputs.
 
   Args:
@@ -123,5 +121,6 @@ def is_isa_source(source: str) -> bool:
 
   Returns:
       True if the source is an ISA requiring lifting.
+
   """
   return source in ["sass", "rdna"]

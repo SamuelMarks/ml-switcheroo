@@ -1,5 +1,4 @@
-"""
-Graph Extraction Frontend.
+"""Graph Extraction Frontend.
 
 This module is responsible for analyzing Python Abstract Syntax Trees (ASTs) using LibCST
 and extracting a `LogicalGraph` Intermediate Representation via the `GraphExtractor`.
@@ -21,8 +20,7 @@ __all__ = ["LogicalNode", "LogicalEdge", "LogicalGraph", "topological_sort", "Gr
 
 
 class GraphExtractor(cst.CSTVisitor):
-  """
-    LibCST Visitor that extracts a LogicalGraph from Python source code.
+  """LibCST Visitor that extracts a LogicalGraph from Python source code.
 
     Two-Pass Logic:
 
@@ -32,11 +30,12 @@ class GraphExtractor(cst.CSTVisitor):
   **Forward Pass**: Scans ``forward`` or ``__call__`` to trace variable usage.
         Builds edges between registered nodes based on data flow.
 
-    Attributes:
+  Attributes:
         graph (LogicalGraph): The constructed intermediate representation.
         layer_registry (Dict[str, LogicalNode]): Mapping of node IDs to LogicalNodes.
         provenance (Dict[str, str]): Mapping of variable names to producer node IDs.
         node_map (Dict[str, cst.CSTNode]): Provenance registry mapping Node ID -> CST Node.
+
   """
 
   def __init__(self) -> None:
@@ -101,8 +100,7 @@ class GraphExtractor(cst.CSTVisitor):
     return True
 
   def visit_Expr(self, node: cst.Expr) -> Optional[bool]:
-    """
-    Handles standalone expression statements (e.g. `func(x)` without assignment).
+    """Handles standalone expression statements (e.g. `func(x)` without assignment).
     Used for 1:1 translations where top-level expressions are valid (e.g. MLIR roundtrips).
     """
     if self._scope_depth == 0 or self._in_forward:
@@ -281,7 +279,7 @@ class GraphExtractor(cst.CSTVisitor):
       self.provenance[out_var] = layer_name
 
   def _get_var_name(self, node: cst.BaseExpression) -> Optional[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if isinstance(node, cst.Name):
       return node.value
     return None

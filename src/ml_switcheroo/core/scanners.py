@@ -1,5 +1,4 @@
-"""
-AST Scanners for Symbol Usage Detection.
+"""AST Scanners for Symbol Usage Detection.
 
 This module provides LibCST visitors that analyze code to determine if specific
 names, frameworks, or aliases are actively referenced in the source body.
@@ -19,8 +18,7 @@ import libcst as cst
 
 
 def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
-  """
-  Recursively resolves a CST Name or Attribute chain to a dot-separated string.
+  """Recursively resolves a CST Name or Attribute chain to a dot-separated string.
 
   This helper flattens the AST representation of dotted names into strings
   comparable with import definitions.
@@ -32,6 +30,7 @@ def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
   Returns:
     str: The fully qualified string representation (e.g., "torch.nn.functional").
     Returns an empty string if the node structure is not a supported Name/Attribute chain.
+
   """
   if isinstance(node, cst.Name):
     return node.value
@@ -41,8 +40,7 @@ def get_full_name(node: Union[cst.Name, cst.Attribute]) -> str:
 
 
 class SimpleNameScanner(cst.CSTVisitor):
-  """
-  Scans for the usage of a specific identifier in the code body.
+  """Scans for the usage of a specific identifier in the code body.
 
   This visitor is designed to check for the presence of variables or aliases
   (like ``jnp``, ``tf``, ``mx``) *outside* of import statements. It is used to
@@ -50,19 +48,18 @@ class SimpleNameScanner(cst.CSTVisitor):
   """
 
   def __init__(self, target_name: str) -> None:
-    """
-    Initializes the scanner.
+    """Initializes the scanner.
 
     Args:
       target_name: The string alias to search for.
+
     """
     self.target_name = target_name
     self.found = False
     self._in_import = False
 
   def visit_Import(self, node: cst.Import) -> None:
-    """
-    Flags entry into an ``import ...`` statement.
+    """Flags entry into an ``import ...`` statement.
     Names appearing here are definitions, not usages.
     """
     self._in_import = True
@@ -72,9 +69,7 @@ class SimpleNameScanner(cst.CSTVisitor):
     self._in_import = False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """
-    Flags entry into a ``from ... import ...`` statement.
-    """
+    """Flags entry into a ``from ... import ...`` statement."""
     self._in_import = True
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
@@ -82,33 +77,32 @@ class SimpleNameScanner(cst.CSTVisitor):
     self._in_import = False
 
   def visit_Name(self, node: cst.Name) -> None:
-    """
-    Checks if the visited name matches the target.
+    """Checks if the visited name matches the target.
 
     If the name matches ``target_name`` and we are NOT currently inside an import
     definition, we mark ``found = True``.
 
     Args:
       node: The name node being visited.
+
     """
     if not self._in_import and not self.found:
       if node.value == self.target_name:
         self.found = True
 
   def should_traverse(self, _node: cst.CSTNode) -> bool:
-    """
-    Optimization hook to stop traversal once found.
+    """Optimization hook to stop traversal once found.
 
     Returns:
       bool: False if the target has already been found, effectively
       short-circuiting the rest of the AST traversal.
+
     """
     return not self.found
 
 
 class UsageScanner(cst.CSTVisitor):
-  """
-  Scans the AST for usages of a specific framework root or its local aliases.
+  """Scans the AST for usages of a specific framework root or its local aliases.
 
   This class implements a multi-pass logic during a single traversal:
 
@@ -123,11 +117,11 @@ class UsageScanner(cst.CSTVisitor):
   """
 
   def __init__(self, source_fw: str) -> None:
-    """
-    Initializes the UsageScanner.
+    """Initializes the UsageScanner.
 
     Args:
       source_fw: The framework string (e.g., 'torch').
+
     """
     self.source_fw = source_fw
     # A set of specific aliases that were visibly used.
@@ -138,17 +132,16 @@ class UsageScanner(cst.CSTVisitor):
     self._in_import = False
 
   def get_result(self) -> bool:
-    """
-    Returns the scan result.
+    """Returns the scan result.
 
     Returns:
       bool: True if any tracked alias was found used in the body.
+
     """
     return len(self.found_usages) > 0
 
   def visit_Import(self, node: cst.Import) -> None:
-    """
-    Catalogs names bound by ``import ...``.
+    """Catalogs names bound by ``import ...``.
 
     Logic:
       - ``import torch`` -> tracks 'torch'.
@@ -157,6 +150,7 @@ class UsageScanner(cst.CSTVisitor):
 
     Args:
       node: The import node.
+
     """
     self._in_import = True
     for alias in node.names:
@@ -179,8 +173,7 @@ class UsageScanner(cst.CSTVisitor):
     self._in_import = False
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """
-    Catalogs names bound by ``from ... import ...``.
+    """Catalogs names bound by ``from ... import ...``.
 
     Logic:
       - ``from torch import nn`` -> tracks 'nn'.
@@ -188,6 +181,7 @@ class UsageScanner(cst.CSTVisitor):
 
     Args:
       node: The import-from node.
+
     """
     self._in_import = True
     if not node.module:
@@ -210,13 +204,13 @@ class UsageScanner(cst.CSTVisitor):
     self._in_import = False
 
   def visit_Name(self, node: cst.Name) -> None:
-    """
-    Checks if a name in the body matches one of our tracked aliases.
+    """Checks if a name in the body matches one of our tracked aliases.
 
     If found, it is recorded in ``found_usages``.
 
     Args:
       node: The name node.
+
     """
     if not self._in_import:
       if node.value in self._tracked_aliases:

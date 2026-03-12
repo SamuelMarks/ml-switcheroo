@@ -1,5 +1,4 @@
-"""
-Core Discovery mechanism for Auto-Inference of APIs.
+"""Core Discovery mechanism for Auto-Inference of APIs.
 
 This module provides the ``SimulatedReflection`` engine, which enables the
 system to dynamically locate API endpoints in a target framework based on
@@ -19,8 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class SimulatedReflection:
-  """
-  Scans a target framework to infer the API path for a given operation name.
+  """Scans a target framework to infer the API path for a given operation name.
 
   It utilizes the ``FrameworkAdapter.search_modules`` to limit the search space
   and applies both exact normalization matching and fuzzy string matching to
@@ -28,11 +26,11 @@ class SimulatedReflection:
   """
 
   def __init__(self, framework: str):
-    """
-    Initializes the reflection engine.
+    """Initializes the reflection engine.
 
     Args:
         framework (str): The key of the framework to inspect (e.g. 'torch').
+
     """
     self.framework = framework
     self.adapter = get_adapter(framework)
@@ -44,8 +42,7 @@ class SimulatedReflection:
       self.search_modules = [framework]
 
   def discover(self, op_name: str) -> Optional[str]:
-    """
-    Attempts to locate the fully qualified API path for an operation.
+    """Attempts to locate the fully qualified API path for an operation.
 
     Strategy:
 
@@ -60,6 +57,7 @@ class SimulatedReflection:
     Returns:
         Optional[str]: The fully qualified API path (e.g. "torch.nn.functional.log_softmax")
         or None if no confident match is found.
+
     """
     normalized_target = self._normalize(op_name)
 
@@ -110,13 +108,13 @@ class SimulatedReflection:
     return None
 
   def _normalize(self, s: str) -> str:
-    """
-    Normalizes a string for comparison (lowercase, no underscores).
+    """Normalizes a string for comparison (lowercase, no underscores).
 
     Args:
         s (str): Input string.
 
     Returns:
         str: Normalized string.
+
     """
     return s.lower().replace("_", "")

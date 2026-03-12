@@ -1,5 +1,4 @@
-"""
-Batch Validation Runner.
+"""Batch Validation Runner.
 
 Iterates over all defined semantic operations and verifys their correctness.
 Prioritizes "Manual/Human" tests found on disk over "Auto/Robotic" fuzzing.
@@ -20,23 +19,20 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 
 class BatchValidator:
-  """
-  Orchestrates the validation of the entire knowledge base.
-  """
+  """Orchestrates the validation of the entire knowledge base."""
 
   def __init__(self, semantics: SemanticsManager):
-    """
-    Initializes the validator.
+    """Initializes the validator.
 
     Args:
         semantics: The loaded SemanticsManager containing API definitions.
+
     """
     self.semantics = semantics
     self.runner = EquivalenceRunner()
 
   def run_all(self, verbose: bool = False, manual_test_dir: Optional[Path] = None) -> Dict[str, bool]:
-    """
-    Runs verification for all known APIs.
+    """Runs verification for all known APIs.
 
     Validation Hierarchy:
 
@@ -53,6 +49,7 @@ class BatchValidator:
 
     Returns:
         Dict[op_name, bool]: Validation status (True=Pass, False=Fail).
+
     """
     results = {}
     known_apis = self.semantics.get_known_apis()
@@ -89,8 +86,7 @@ class BatchValidator:
     return results
 
   def _unpack_args(self, raw_args: List[Any]) -> Tuple[List[str], Dict[str, str], Dict[str, Dict]]:
-    """
-    Separates argument names from type hints and extracts semantic constraints.
+    """Separates argument names from type hints and extracts semantic constraints.
 
     Handles formats:
     1. Legacy strings: `["x", "axis"]`
@@ -102,6 +98,7 @@ class BatchValidator:
             - List of argument names [str].
             - Dictionary of type hints {name: type_str}.
             - Dictionary of constraints {name: {min: val, dtype: 'int64', shape_spec: '...', ...}}.
+
     """
     params = []
     hints = {}
@@ -142,8 +139,7 @@ class BatchValidator:
     return params, hints, constraints
 
   def _scan_manual_tests(self, root: Path) -> Set[str]:
-    """
-    Scans python files in root for test functions matching op names.
+    """Scans python files in root for test functions matching op names.
 
     Looks for: `def test_<op_name>():` in non-generated files.
 
@@ -152,6 +148,7 @@ class BatchValidator:
 
     Returns:
         Set of operation names found in manual tests.
+
     """
     found = set()
     if not root.exists():

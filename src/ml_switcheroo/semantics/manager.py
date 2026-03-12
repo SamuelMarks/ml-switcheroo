@@ -1,5 +1,4 @@
-"""
-SemanticsManager for Knowledge Base Loading and Updating.
+"""SemanticsManager for Knowledge Base Loading and Updating.
 
 This module acts as the central database and coordinator for the Semantic
 Knowledge Base. It delegates file loading and registry introspection to helper
@@ -29,8 +28,7 @@ from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 
 class SemanticsManager:
-  """
-  Central database for semantic mappings and configuration.
+  """Central database for semantic mappings and configuration.
 
   It aggregates data from sources:
   1.  **File System**: JSON Specs (`semantics/`) and Overlays (`snapshots/`).
@@ -70,8 +68,7 @@ class SemanticsManager:
     self._build_index()
 
   def _build_index(self) -> None:
-    """
-    Constructs the reverse index mapping from concrete API endpoints
+    """Constructs the reverse index mapping from concrete API endpoints
     back to their abstract definitions.
     """
     self._reverse_index.clear()
@@ -90,8 +87,7 @@ class SemanticsManager:
     alias_map["nn"] = "torch.nn"
 
     def get_priority(abs_id, details, tier):
-      """
-      Determines indexing priority when multiple abstract ops map to the same target API.
+      """Determines indexing priority when multiple abstract ops map to the same target API.
       This handles overlaps between generic ops like `cat` vs `concat`.
       """
       score = 0
@@ -144,8 +140,7 @@ class SemanticsManager:
         if api_name:
 
           def register_api(name):
-            """
-            Registers the target concrete API mapped back to its abstract concept.
+            """Registers the target concrete API mapped back to its abstract concept.
             Uses tie-breaker scores when overlaps are found.
             """
             if name in self._reverse_index:
@@ -165,14 +160,14 @@ class SemanticsManager:
             register_api(fqn)
 
   def get_import_map(self, target_fw: str) -> Dict[str, Tuple[str, Optional[str], Optional[str]]]:
-    """
-    Generates the import mapping for the ImportFixer based on Tier linking.
+    """Generates the import mapping for the ImportFixer based on Tier linking.
 
     Args:
         target_fw: The framework being targeted.
 
     Returns:
         Dict mapping source import paths to (root, sub, alias) tuples.
+
     """
     result = {}
     target_providers = self._providers.get(target_fw, {})

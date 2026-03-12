@@ -1,5 +1,4 @@
-"""
-Auxiliary Logic Pass.
+"""Auxiliary Logic Pass.
 
 This module consolidates transformations that are adjacent to the core API logic,
 specifically:
@@ -23,13 +22,10 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class AuxiliaryPass(RewriterPass):
-  """
-  Pass dealing with auxiliary syntax constructs: decorators and control flow.
-  """
+  """Pass dealing with auxiliary syntax constructs: decorators and control flow."""
 
   def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
-    """
-    Executes the auxiliary transformation logic.
+    """Executes the auxiliary transformation logic.
 
     Args:
         module: The source CST.
@@ -37,22 +33,21 @@ class AuxiliaryPass(RewriterPass):
 
     Returns:
         The transformed CST.
+
     """
     transformer = AuxiliaryTransformer(context)
     return module.visit(transformer)
 
 
 class AuxiliaryTransformer(cst.CSTTransformer):
-  """
-  LibCST Transformer for auxiliary constructs.
-  """
+  """LibCST Transformer for auxiliary constructs."""
 
   def __init__(self, context: RewriterContext) -> None:
-    """
-    Initialize.
+    """Initialize.
 
     Args:
         context: The execution context.
+
     """
     self.context = context
     self._cached_traits: Optional[StructuralTraits] = None
@@ -148,8 +143,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
   def leave_Decorator(
     self, original_node: cst.Decorator, updated_node: cst.Decorator
   ) -> Union[cst.Decorator, cst.RemovalSentinel]:
-    """
-        Rewrites decorators.
+    """Rewrites decorators.
 
         Logic:
 
@@ -204,9 +198,7 @@ class AuxiliaryTransformer(cst.CSTTransformer):
 
   # Fix: Ensure leave_For handles error bubbling since it isn't a SimpleStatementLine
   def leave_For(self, original_node: cst.For, updated_node: cst.For) -> Union[cst.For, cst.CSTNode, cst.FlattenSentinel]:
-    """
-    Processes 'for' loops for safety checks and unrolling.
-    """
+    """Processes 'for' loops for safety checks and unrolling."""
     # 1. Attempt Static Unroll (Optimization Hook)
     static_hook = get_hook("transform_for_loop_static")
     if static_hook:

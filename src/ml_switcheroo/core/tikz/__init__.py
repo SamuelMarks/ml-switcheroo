@@ -1,5 +1,4 @@
-"""
-TikZ Concrete Syntax Tree (CST) Data Structures.
+"""TikZ Concrete Syntax Tree (CST) Data Structures.
 
 This package provides a pure Python representation of TikZ/PGF code designed to
 represent neural network graphs with high fidelity. It supports:

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 API Logic Pass.
 
@@ -12,6 +10,8 @@ This module consolidates all API-level transformations, including:
 4.  **Symbol Resolution**: Resolving aliases to fully qualified names for lookup.
 5.  **Scoping**: Tracking stateful variables (layers) to inform call rewriting logic.
 """
+
+from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 import re
@@ -920,10 +920,7 @@ class ApiTransformer(cst.CSTTransformer):
             raw_key = extract_primitive_key(current_arg.value)
             if raw_key is not None and str(raw_key) in val_options:
               target_code = val_options[str(raw_key)]
-              try:
-                final_val_node = cst.parse_expression(target_code)
-              except cst.ParserSyntaxError:
-                pass
+              final_val_node = cst.parse_expression(target_code)
           # Otherwise it's a constant injection (literal override)
           # e.g. "False" string or boolean value
           else:
@@ -982,14 +979,8 @@ class ApiTransformer(cst.CSTTransformer):
     # Processing injections
     if injections:
       for arg_name, arg_val in injections.items():
-        if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):
-          continue
-
         if isinstance(arg_val, str):
-          try:
-            val_node = cst.parse_expression(arg_val)
-          except cst.ParserSyntaxError:
-            val_node = cst.SimpleString(f"'{arg_val}'")
+          val_node = cst.parse_expression(arg_val)
         else:
           val_node = convert_value_to_cst(arg_val)
 

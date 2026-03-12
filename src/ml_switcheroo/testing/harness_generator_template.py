@@ -1,5 +1,4 @@
-"""
-Template for the Verification Harness.
+"""Template for the Verification Harness.
 
 This template is populated by `HarnessGenerator`. It provides a completely generic
 skeleton for running `source_func(x) == target_func(x)` checks.

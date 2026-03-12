@@ -1,5 +1,4 @@
-"""
-Static Dependency Analysis for Transpilation Safety.
+"""Static Dependency Analysis for Transpilation Safety.
 
 This module provides the ``DependencyScanner``, a LibCST visitor that identifies
 third-party dependencies imported in the source code.
@@ -25,17 +24,15 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class DependencyScanner(cst.CSTVisitor):
-  """
-  Scans for 3rd-party imports not covered by the Semantic Knowledge Base.
-  """
+  """Scans for 3rd-party imports not covered by the Semantic Knowledge Base."""
 
   def __init__(self, semantics: SemanticsManager, source_fw: str):
-    """
-    Initializes the scanner.
+    """Initializes the scanner.
 
     Args:
         semantics: The semantics manager containing valid import maps.
         source_fw: The root name of the source framework to ignore (transpilation target).
+
     """
     self.semantics = semantics
     self.source_fw = source_fw
@@ -51,24 +48,24 @@ class DependencyScanner(cst.CSTVisitor):
         self._known_semantic_roots.add(root)
 
   def visit_Import(self, node: cst.Import) -> None:
-    """
-    Visits ``import x``, ``import x.y``.
+    """Visits ``import x``, ``import x.y``.
     Checks the root package name.
 
     Args:
         node: The import statement node.
+
     """
     for alias in node.names:
       root_pkg = self._get_root_package(alias.name)
       self._validate_package(root_pkg)
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """
-    Visits ``from x import y``.
+    """Visits ``from x import y``.
     Checks the module root package name.
 
     Args:
         node: The import-from statement node.
+
     """
     # Ignore relative imports (starting with dots like `from . import utils`)
     if node.relative:
@@ -79,8 +76,7 @@ class DependencyScanner(cst.CSTVisitor):
       self._validate_package(root_pkg)
 
   def _get_root_package(self, node: cst.BaseExpression) -> str:
-    """
-    Extracts the root package string from a CST node.
+    """Extracts the root package string from a CST node.
     e.g., ``Attribute(Name(os), Name(path))`` -> "os".
 
     Args:
@@ -88,6 +84,7 @@ class DependencyScanner(cst.CSTVisitor):
 
     Returns:
         The root identifier string (e.g. 'os') or empty string if not found.
+
     """
     # Unwrap Attribute chains to find the leftmost Name
     curr = node
@@ -100,12 +97,12 @@ class DependencyScanner(cst.CSTVisitor):
     return ""
 
   def _validate_package(self, pkg_name: str) -> None:
-    """
-    Filters and checks the package name.
+    """Filters and checks the package name.
     If it's external and unmapped, adds to unknown_imports.
 
     Args:
         pkg_name: The root package identifier.
+
     """
     if not pkg_name:
       return
@@ -126,8 +123,7 @@ class DependencyScanner(cst.CSTVisitor):
     self.unknown_imports.add(pkg_name)
 
   def _is_stdlib(self, name: str) -> bool:
-    """
-    Determines if a package is part of the Python Standard Library.
+    """Determines if a package is part of the Python Standard Library.
     Uses ``sys.stdlib_module_names`` on Python 3.10+, falls back to known list.
 
     Args:
@@ -135,6 +131,7 @@ class DependencyScanner(cst.CSTVisitor):
 
     Returns:
         True if the package is in the standard library.
+
     """
     # Python 3.10+
     if sys.version_info >= (3, 10):

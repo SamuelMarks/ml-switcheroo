@@ -1,5 +1,4 @@
-"""
-RDNA Synthesizer and Registry Backend.
+"""RDNA Synthesizer and Registry Backend.
 
 This module provides the "Middle-End" logic for the RDNA compiler pipeline.
 It bridges the gap between high-level Abstract Logic (LogicalGraphs)
@@ -46,8 +45,7 @@ MAX_SGPR = 106
 
 
 class RegisterAllocator:
-  """
-  Manages the mapping between symbolic variable names and physical registers.
+  """Manages the mapping between symbolic variable names and physical registers.
   Maintains separate accounting for Scalar (SGPR) and Vector (VGPR) files.
   """
 
@@ -59,9 +57,7 @@ class RegisterAllocator:
     self._next_sgpr = 0
 
   def get_vector_register(self, var_name: str) -> VGPR:
-    """
-    Retrieves or allocates a Vector register (VGPR) for a symbolic variable.
-    """
+    """Retrieves or allocates a Vector register (VGPR) for a symbolic variable."""
     if var_name in self._var_to_vgpr:
       return VGPR(self._var_to_vgpr[var_name])
 
@@ -74,9 +70,7 @@ class RegisterAllocator:
     return VGPR(idx)
 
   def get_scalar_register(self, var_name: str) -> SGPR:
-    """
-    Retrieves or allocates a Scalar register (SGPR) for a symbolic variable.
-    """
+    """Retrieves or allocates a Scalar register (SGPR) for a symbolic variable."""
     if var_name in self._var_to_sgpr:
       return SGPR(self._var_to_sgpr[var_name])
 
@@ -107,12 +101,10 @@ class RegisterAllocator:
 
 
 class RdnaSynthesizer:
-  """
-  Bidirectional transpiler component for RDNA ISA.
-  """
+  """Bidirectional transpiler component for RDNA ISA."""
 
   def __init__(self, semantics: "SemanticsManager") -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     self.semantics = semantics
     self.allocator = RegisterAllocator()
     self.macro_registry: Dict[str, Callable] = {
@@ -121,9 +113,7 @@ class RdnaSynthesizer:
     }
 
   def from_graph(self, graph: LogicalGraph) -> List[RdnaNode]:
-    """
-    Converts a LogicalGraph into a list of RDNA AST nodes.
-    """
+    """Converts a LogicalGraph into a list of RDNA AST nodes."""
     self.allocator.reset()
     output_nodes: List[RdnaNode] = []
 
@@ -190,9 +180,7 @@ class RdnaSynthesizer:
     return output_nodes
 
   def to_python(self, rdna_nodes: List[RdnaNode]) -> cst.Module:
-    """
-    Converts RDNA AST nodes into a Python source structure representation.
-    """
+    """Converts RDNA AST nodes into a Python source structure representation."""
     body_stmts = []
 
     for node in rdna_nodes:
@@ -211,7 +199,7 @@ class RdnaSynthesizer:
     return cst.Module(body=body_stmts)
 
   def _convert_instruction_to_py(self, inst: Instruction) -> cst.SimpleStatementLine:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if not inst.operands:
       call = self._make_call(inst.opcode, [])
       return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
@@ -247,7 +235,7 @@ class RdnaSynthesizer:
       return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
 
   def _convert_operand_to_py(self, op: Operand) -> cst.BaseExpression:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if isinstance(op, Immediate):
       if op.is_hex:
         return cst.Integer(hex(int(op.value)))
@@ -266,18 +254,17 @@ class RdnaSynthesizer:
     return cst.SimpleString(f"'{raw}'")
 
   def _make_call(self, opcode: str, args: List[cst.Arg]) -> cst.Call:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return cst.Call(func=cst.Attribute(value=cst.Name("rdna"), attr=cst.Name(opcode)), args=args)
 
 
 class RdnaBackend(CompilerBackend):
-  """
-  Compiler Backend implementation for AMD RDNA.
+  """Compiler Backend implementation for AMD RDNA.
   Orchestrates the synthesis (Graph -> AST) and emission (AST -> Text).
   """
 
   def __init__(self, semantics: Optional["SemanticsManager"] = None) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     # Lazy load if not provided, but typically passed from Registry/Engine
     if semantics is None:
       from ml_switcheroo.semantics.manager import SemanticsManager
@@ -290,14 +277,14 @@ class RdnaBackend(CompilerBackend):
     self.target_arch = "gfx1030"
 
   def compile(self, graph: LogicalGraph) -> str:
-    """
-    Compiles LogicalGraph to RDNA Assembly string.
+    """Compiles LogicalGraph to RDNA Assembly string.
 
     Args:
         graph: The intermediate representation.
 
     Returns:
         str: The RDNA code.
+
     """
     rdna_nodes = self.synthesizer.from_graph(graph)
     body = self.emitter.emit(rdna_nodes)

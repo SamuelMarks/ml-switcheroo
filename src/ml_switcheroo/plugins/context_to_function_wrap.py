@@ -1,5 +1,4 @@
-"""
-Plugin for handling Context Manager rewriting.
+"""Plugin for handling Context Manager rewriting.
 
 This module addresses the impedance mismatch between PyTorch's global state context managers
 (like `torch.no_grad()`) and JAX's functional, explicit gradient handling.
@@ -17,14 +16,14 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """
-  Creates a CST attribute chain from a string string.
+  """Creates a CST attribute chain from a string string.
 
   Args:
       name_str: The dotted path (e.g., 'contextlib.nullcontext').
 
   Returns:
       A LibCST Name or Attribute node.
+
   """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
@@ -35,8 +34,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("context_to_function_wrap")
 def transform_context_manager(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Plugin Hook: Transforms valid Source context managers into JAX-compatible shims.
+  """Plugin Hook: Transforms valid Source context managers into JAX-compatible shims.
 
   **Triggers**
 
@@ -49,6 +47,7 @@ def transform_context_manager(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       The transformed CST Call node pointing to the injected shim.
+
   """
   # 1. Inject Imports
   ctx.inject_preamble("import contextlib")

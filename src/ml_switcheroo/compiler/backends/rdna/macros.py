@@ -1,5 +1,4 @@
-"""
-RDNA Macro Expansion Logic.
+"""RDNA Macro Expansion Logic.
 
 Procedural generators for complex RDNA kernel logic (Conv2d, Linear).
 """

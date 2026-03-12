@@ -1,5 +1,4 @@
-"""
-Plugin for Dimension-Range Flattening.
+"""Plugin for Dimension-Range Flattening.
 
 PyTorch's `flatten(start_dim, end_dim)` collapses a range of dimensions.
 Mapping strategies:
@@ -23,9 +22,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("flatten_range")
 def transform_flatten(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Hook: Transforms `flatten(x, start, end)` into target-specific logic.
-  """
+  """Hook: Transforms `flatten(x, start, end)` into target-specific logic."""
   args = list(node.args)
   if not args:
     return node

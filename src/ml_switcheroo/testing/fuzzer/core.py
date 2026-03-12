@@ -1,5 +1,4 @@
-"""
-Core Engine of the Input Fuzzer (Hypothesis Integration).
+"""Core Engine of the Input Fuzzer (Hypothesis Integration).
 
 This module provides the `InputFuzzer` facade which now delegates generation logic
 to Hypothesis Strategies. It maintains backward compatibility for casual usage via `generate_inputs`.
@@ -13,9 +12,7 @@ from ml_switcheroo.testing.fuzzer.heuristics import guess_dtype_by_name
 
 
 class InputFuzzer:
-  """
-  Facade for creating Hypothesis strategies based on Semantic Spec.
-  """
+  """Facade for creating Hypothesis strategies based on Semantic Spec."""
 
   def build_strategies(
     self,
@@ -23,8 +20,7 @@ class InputFuzzer:
     hints: Optional[Dict[str, str]] = None,
     constraints: Optional[Dict[str, Dict]] = None,
   ) -> Dict[str, st.SearchStrategy]:
-    """
-    Constructs a dictionary of Hypothesis strategies for the given parameters.
+    """Constructs a dictionary of Hypothesis strategies for the given parameters.
     Automatically handles shared symbolic dimensions (e.g. Array['N']).
 
     Args:
@@ -34,6 +30,7 @@ class InputFuzzer:
 
     Returns:
         Dict[str, Strategy]: Strategies ready to be fed into @given.
+
     """
     hints = hints or {}
     constraints = constraints or {}
@@ -82,8 +79,7 @@ class InputFuzzer:
     return strategies
 
   def adapt_to_framework(self, kwargs: Dict[str, Any], framework: str) -> Dict[str, Any]:
-    """
-    Delegates to Framework Adapter to convert Numpy/Native inputs to Tensors.
+    """Delegates to Framework Adapter to convert Numpy/Native inputs to Tensors.
 
     Args:
         kwargs: Dictionary of input values.
@@ -91,6 +87,7 @@ class InputFuzzer:
 
     Returns:
         Dict with converted values.
+
     """
     adapter = get_adapter(framework)
     if not adapter:

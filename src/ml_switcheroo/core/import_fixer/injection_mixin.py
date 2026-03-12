@@ -1,5 +1,4 @@
-"""
-Import Injection Mixin.
+"""Import Injection Mixin.
 
 Handles the post-processing of the Module AST to inject necessary top-level imports
 determined by the `ResolutionPlan`.
@@ -18,14 +17,10 @@ from ml_switcheroo.core.import_fixer.utils import (
 
 
 class InjectionMixin(cst.CSTTransformer):
-  """
-  Mixin for injecting imports at the Module level.
-  """
+  """Mixin for injecting imports at the Module level."""
 
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-    """
-    Post-process module to inject imports from the plan.
-    """
+    """Post-process module to inject imports from the plan."""
     injections: List[cst.CSTNode] = []
 
     for req in self.plan.required_imports:
@@ -109,5 +104,5 @@ class InjectionMixin(cst.CSTTransformer):
     return updated_node.with_changes(body=clean_body)
 
   def _append_injection(self, injections_list: List[cst.CSTNode], node: cst.CSTNode) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     injections_list.append(node)

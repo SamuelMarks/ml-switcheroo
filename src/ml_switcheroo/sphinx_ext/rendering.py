@@ -1,6 +1,4 @@
-"""
-HTML Rendering logic for the WASM demo.
-"""
+"""HTML Rendering logic for the WASM demo."""
 
 import os
 from collections import defaultdict
@@ -44,9 +42,7 @@ GROUP_ORDER = [
 
 
 def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_json: str) -> str:
-  """
-  Constructs the full HTML block for the switcheroo demo.
-  """
+  """Constructs the full HTML block for the switcheroo demo."""
   root_dir = Path(__file__).parents[3]
   dist_dir = root_dir / "dist"
   wheel_name = "ml_switcheroo-latest-py3-none-any.whl"
@@ -234,8 +230,7 @@ class Model(nn.Module):
 
 
 def _render_primary_options(hierarchy: HierarchyMap) -> str:
-  """
-  Renders the top-level <option> elements for root frameworks.
+  """Renders the top-level <option> elements for root frameworks.
   Organizes frameworks into <optgroup> categories based on their semantic level.
   """
   # Organizes roots into buckets
@@ -270,9 +265,7 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
 
 
 def _render_flavour_dropdown(side: str, hierarchy: HierarchyMap, active_root: str) -> str:
-  """
-  Renders the secondary dropdown for Framework Flavours.
-  """
+  """Renders the secondary dropdown for Framework Flavours."""
   children = hierarchy.get(active_root, [])
 
   style = "display:inline-block;" if children else "display:none;"

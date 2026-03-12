@@ -1,5 +1,4 @@
-"""
-Shared Utilities for Plugins.
+"""Shared Utilities for Plugins.
 
 This module provides common helper functions for AST manipulation and
 framework detection, decoupling individual plugins from hardcoded lists of libraries.
@@ -13,8 +12,7 @@ from ml_switcheroo.core.hooks import HookContext
 
 
 def create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """
-  Creates a CST Attribute chain from a dotted string.
+  """Creates a CST Attribute chain from a dotted string.
 
   Example: "jax.numpy.add" -> Attribute(value=Attribute(value=Name("jax"), ...), ...)
 
@@ -23,6 +21,7 @@ def create_dotted_name(name_str: str) -> cst.BaseExpression:
 
   Returns:
       cst.BaseExpression: The constructed AST node.
+
   """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
@@ -32,8 +31,7 @@ def create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
-  """
-  Determines if a CST node represents a known framework namespace root.
+  """Determines if a CST node represents a known framework namespace root.
 
   This is used to distinguish function calls (e.g. `torch.add(x)`) from method calls
   (e.g. `x.add()`). If the receiver `x` is a variable, this returns False.
@@ -53,6 +51,7 @@ def is_framework_module_node(node: cst.CSTNode, ctx: HookContext) -> bool:
 
   Returns:
       bool: True if the node is a known framework identifier.
+
   """
   # Extract root name string
   name = _extract_root_name(node)

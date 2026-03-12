@@ -1,5 +1,4 @@
-"""
-Framework Definition Loader.
+"""Framework Definition Loader.
 
 This module provides utilities to load static operation definitions from JSON files
 located in `src/ml_switcheroo/frameworks/definitions/`. It utilizes caching to
@@ -20,8 +19,7 @@ DEFINITIONS_DIR = Path(__file__).parent / "definitions"
 
 @lru_cache(maxsize=None)
 def load_definitions(framework: str) -> Dict[str, StandardMap]:
-  """
-  Loads static definitions for a specific framework from its JSON file.
+  """Loads static definitions for a specific framework from its JSON file.
 
   Uses `functools.lru_cache` to ensure the file is read and parsed only once per execution.
   Converts raw JSON dictionaries into `StandardMap` Pydantic objects.
@@ -32,6 +30,7 @@ def load_definitions(framework: str) -> Dict[str, StandardMap]:
   Returns:
       Dict[str, StandardMap]: A dictionary mapping Operation Names to StandardDefs.
       Returns an empty dict if the definition file does not exist.
+
   """
   file_path = DEFINITIONS_DIR / f"{framework}.json"
 
@@ -51,21 +50,20 @@ def load_definitions(framework: str) -> Dict[str, StandardMap]:
 
 
 def clear_definition_cache() -> None:
-  """
-  Clears the LRU cache for definitions.
+  """Clears the LRU cache for definitions.
   Useful for tests or hot-reloading scenarios.
   """
   load_definitions.cache_clear()
 
 
 def get_definitions_path(framework: str) -> Path:
-  """
-  Returns the resolved path for a framework's definition JSON.
+  """Returns the resolved path for a framework's definition JSON.
 
   Args:
       framework (str): The framework key.
 
   Returns:
       Path: The absolute path to the intended JSON file.
+
   """
   return DEFINITIONS_DIR / f"{framework}.json"

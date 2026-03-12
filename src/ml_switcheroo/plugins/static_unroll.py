@@ -1,5 +1,4 @@
-"""
-Plugin for Statically Unrolling Loops.
+"""Plugin for Statically Unrolling Loops.
 
 JAX and XLA-based frameworks generally require functional loops (``scan``, ``fori_loop``)
 which are difficult to automatically generate from imperative Python ``for`` loops
@@ -29,25 +28,21 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 class LoopVarReplacer(cst.CSTTransformer):
-  """
-  Helper visitor to replace loop variable instances with a constant integer.
-  """
+  """Helper visitor to replace loop variable instances with a constant integer."""
 
   def __init__(self, var_name: str, value: int):
-    """
-    Initializes the replacer.
+    """Initializes the replacer.
 
     Args:
         var_name: The identifier string of the loop variable.
         value: The current iteration index.
+
     """
     self.var_name = var_name
     self.value = value
 
   def leave_Name(self, original_node: cst.Name, updated_node: cst.Name) -> cst.BaseExpression:
-    """
-    Replace occurences of variables matching `var_name` with `Integer(value)`.
-    """
+    """Replace occurences of variables matching `var_name` with `Integer(value)`."""
     if original_node.value == self.var_name:
       return cst.Integer(str(self.value))
     return updated_node
@@ -55,8 +50,7 @@ class LoopVarReplacer(cst.CSTTransformer):
 
 @register_hook("transform_for_loop_static")
 def unroll_static_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.FlattenSentinel]:
-  """
-  Hook: Unrolls loops with static ranges.
+  """Hook: Unrolls loops with static ranges.
 
   Triggers:
       Invoked by ``ControlFlowMixin`` via the ``transform_for_loop_static`` key.
@@ -77,6 +71,7 @@ def unroll_static_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.F
       Union[cst.For, cst.FlattenSentinel]:
           - ``FlattenSentinel`` containing unrolled statements if successful.
           - Original ``node`` if the loop is dynamic or too large.
+
   """
   # 1. Analyze Iterator: range(N)
   # Must be a Call to 'range' with 1 arg which is Integer literal.

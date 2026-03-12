@@ -1,5 +1,4 @@
-"""
-RDNA Frontend Package.
+"""RDNA Frontend Package.
 
 Contains the parser and lifter logic for converting AMD RDNA/GCN assembly
 text into Abstract Syntax Trees (AST) and then into the Logical Graph IR.

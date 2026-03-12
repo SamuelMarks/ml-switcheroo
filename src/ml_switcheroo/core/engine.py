@@ -1,5 +1,4 @@
-"""
-Orchestration Engine for AST Transformations.
+"""Orchestration Engine for AST Transformations.
 
 This module provides the ``ASTEngine``, generating code via:
 
@@ -62,8 +61,7 @@ class ASTEngine:
     plugin_config: Optional[Dict[str, Any]] = None,
     intermediate: Optional[str] = None,
   ) -> None:
-    """
-    Initializes the engine with semantics and configuration.
+    """Initializes the engine with semantics and configuration.
 
     Args:
         semantics: Valid SemanticsManager instance.
@@ -74,6 +72,7 @@ class ASTEngine:
         enable_graph_optimization: Whether to run fusion pass.
         plugin_config: Dictionary of settings for plugins.
         intermediate: Intermediate generation format.
+
     """
     self.semantics: SemanticsManager = semantics or SemanticsManager()
     if config:
@@ -211,7 +210,7 @@ class ASTEngine:
         graph = QKVFusionPass().apply(graph)
         graph = SwiGLUFusionPass().apply(graph)
         graph = VisionPatchEmbeddingFusionPass().apply(graph)
-      elif self.target in ["torch", "keras", "tensorflow", "mlx"]:
+      else:
         graph = ShardingInferencePass().apply(graph)
 
     backend_cls = get_backend_class(self.target)
@@ -280,13 +279,11 @@ class ASTEngine:
             optimized_graph = VisionPatchEmbeddingDefusionPass().apply(optimized_graph)
 
             # Forward translation: synthesize optimized blocks and metadata
+            optimized_graph = ShardingInferencePass().apply(optimized_graph)
             if self.target in ["jax", "flax", "flax_nnx", "paxml"]:
-              optimized_graph = ShardingInferencePass().apply(optimized_graph)
               optimized_graph = QKVFusionPass().apply(optimized_graph)
               optimized_graph = SwiGLUFusionPass().apply(optimized_graph)
               optimized_graph = VisionPatchEmbeddingFusionPass().apply(optimized_graph)
-            elif self.target == "torch":
-              optimized_graph = ShardingInferencePass().apply(optimized_graph)
               # Note: Torch keeps defused standard blocks, but gets sharding annotations
 
           # C. Differ
@@ -368,8 +365,6 @@ class ASTEngine:
     final_code = tree.code
 
     # Trace
-    if self.target == "mlir" or self.target == "stablehlo":
-      tracer.log_mutation("Final Emission", "(Python CST)", final_code)
 
     # 6. Checks
     errors = []

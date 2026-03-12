@@ -1,5 +1,4 @@
-"""
-HTML DSL Semantic Nodes.
+"""HTML DSL Semantic Nodes.
 
 Defines the structure for the visual elements used in the HTML/SVG DSL:
 - GridBox: Represents a layer (Red), operation (Blue), or data shape (Green).
@@ -14,28 +13,24 @@ from typing import List, Optional
 
 @dataclass
 class HtmlNode:
-  """
-  Abstract base class for all HTML DSL elements.
-  """
+  """Abstract base class for all HTML DSL elements."""
 
   def to_html(self) -> str:
-    """
-    Render the node and its children to an HTML string.
+    """Render the node and its children to an HTML string.
 
     Returns:
         str: The raw HTML content.
 
     Raises:
         NotImplementedError: If not implemented by subclass.
+
     """
     raise NotImplementedError
 
 
 @dataclass
 class SvgArrow(HtmlNode):
-  """
-  Represents an SVG connection line between grid cells.
-  """
+  """Represents an SVG connection line between grid cells."""
 
   x1: int
   y1: int
@@ -46,8 +41,7 @@ class SvgArrow(HtmlNode):
   parent_style: str
 
   def to_html(self) -> str:
-    """
-    Renders the arrow as an absolute SVG element.
+    """Renders the arrow as an absolute SVG element.
     Adds 'sw-arrow' class for scoped styling.
     """
     return f""" 
@@ -58,9 +52,7 @@ class SvgArrow(HtmlNode):
 
 @dataclass
 class GridBox(HtmlNode):
-  """
-  Represents a content box positioned within the CSS Grid.
-  """
+  """Represents a content box positioned within the CSS Grid."""
 
   row: int
   col: int
@@ -72,9 +64,7 @@ class GridBox(HtmlNode):
   z_index: Optional[int] = None
 
   def to_html(self) -> str:
-    """
-    Renders the grid cell div, its content, and attached arrows.
-    """
+    """Renders the grid cell div, its content, and attached arrows."""
     style = f"grid-row:{self.row}; grid-column:{self.col};"
     if self.z_index is not None:
       style += f" z-index:{self.z_index};"
@@ -106,9 +96,7 @@ class GridBox(HtmlNode):
 
 @dataclass
 class HtmlDocument(HtmlNode):
-  """
-  Root container for the generated HTML.
-  """
+  """Root container for the generated HTML."""
 
   model_name: str
   children: List[GridBox]
@@ -195,16 +183,15 @@ class HtmlDocument(HtmlNode):
 """
 
   def to_html(self) -> str:
-    """
-    Renders the complete HTML document.
+    """Renders the complete HTML document.
 
     Notes:
-
     - Removed 'visibility:hidden' from markers block to enable correct rendering in some browsers
       when injected via innerHTML. Use 0 sizes and pointer-events logic instead.
 
     Returns:
         The complete HTML string document.
+
     """
     # Determine strict grid height
     repeat_count = 0

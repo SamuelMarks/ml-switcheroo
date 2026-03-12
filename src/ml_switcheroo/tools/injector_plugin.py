@@ -1,5 +1,4 @@
-"""
-Plugin Scaffolder.
+"""Plugin Scaffolder.
 
 Generates valid Python source files for new hooks in the plugins directory.
 Used by the CLI to provide a starting point for complex logic implementations.
@@ -56,25 +55,23 @@ TEMPLATE_FUNC_DEF = '@register_hook("{name}")\ndef {name}(node: {node_type}, ctx
 
 
 class BodyExtractor(cst.CSTVisitor):
-  """
-  Extracts the body of a specific function definition.
+  """Extracts the body of a specific function definition.
   Used to preserve user implementation logic during scaffolding updates.
   """
 
   def __init__(self, func_name: str):
-    """
-    Initializes the extractor to look for a function by name.
+    """Initializes the extractor to look for a function by name.
 
     Args:
         func_name (str): The name of the function to extract.
+
     """
     self.func_name = func_name
     self.body_node: Optional[cst.BaseSuite] = None
     self.found = False
 
   def visit_FunctionDef(self, node: cst.FunctionDef) -> Optional[bool]:
-    """
-    Visits function definitions to find the target hook.
+    """Visits function definitions to find the target hook.
     If found, captures the body and stops recursion.
 
     Args:
@@ -82,6 +79,7 @@ class BodyExtractor(cst.CSTVisitor):
 
     Returns:
         Optional[bool]: False if found to stop recursion, True otherwise.
+
     """
     if node.name.value == self.func_name:
       self.body_node = node.body
@@ -91,29 +89,27 @@ class BodyExtractor(cst.CSTVisitor):
 
 
 class PluginGenerator:
-  """
-  Writes Python plugin files to disk based on scaffold definitions.
-  """
+  """Writes Python plugin files to disk based on scaffold definitions."""
 
   def __init__(self, plugins_dir: Path):
-    """
-    Initializes the generator.
+    """Initializes the generator.
 
     Args:
         plugins_dir: Target directory path.
+
     """
     self.plugins_dir = plugins_dir
 
   def _to_snake_case(self, name: str) -> str:
-    """
-    Converts PascalCase or camelCase to snake_case for filenames.
-    e.g. MyPlugin -> my_plugin, HTTPResponse -> http_response
+    """Converts PascalCase or camelCase to snake_case for filenames.
+    e.g. MyPlugin -> my_plugin, HTTPResponse -> http_response.
 
     Args:
         name (str): The input name.
 
     Returns:
         str: The snake_case version of the name.
+
     """
     # Handle simple lowercase existing
     if "_" in name and name.islower():
@@ -126,8 +122,7 @@ class PluginGenerator:
     return s2
 
   def generate(self, scaffold: PluginScaffoldDef) -> bool:
-    """
-    Creates or updates a plugin file.
+    """Creates or updates a plugin file.
 
     If the file exists, it attempts to preserve the existing function body logic
     while updating the wrapper (docstrings/decorators/imports).
@@ -137,6 +132,7 @@ class PluginGenerator:
 
     Returns:
         bool: True if file was written/updated.
+
     """
     clean_filename = self._to_snake_case(scaffold.name)
     filename = f"{clean_filename}.py"
@@ -165,14 +161,14 @@ class PluginGenerator:
     return True
 
   def _render_body_without_docstring(self, body_node: cst.BaseSuite) -> str:
-    """
-    Serializes a Body Node into source code string, stripping the docstring.
+    """Serializes a Body Node into source code string, stripping the docstring.
 
     Args:
         body_node: The function body (IndentedBlock or SimpleStatementSuite).
 
     Returns:
         str: The indented source code of the body logic.
+
     """
     stmts = []
     if isinstance(body_node, cst.IndentedBlock):
@@ -211,8 +207,7 @@ class PluginGenerator:
     return indented.rstrip()
 
   def _build_content(self, scaffold: PluginScaffoldDef, preserved_body: Optional[str] = None) -> str:
-    """
-    Constructs the full python source for the file.
+    """Constructs the full python source for the file.
 
     Args:
         scaffold: The plugin definition.
@@ -220,6 +215,7 @@ class PluginGenerator:
 
     Returns:
         str: The complete file source string.
+
     """
     parts = []
 
@@ -265,14 +261,14 @@ class PluginGenerator:
     return "".join(parts)
 
   def _generate_body_logic(self, rules: List[Rule]) -> str:
-    """
-    Compiles declarative rules into Python if statements.
+    """Compiles declarative rules into Python if statements.
 
     Args:
         rules: List of dispatch rules.
 
     Returns:
         str: Generated python code string for the logic body.
+
     """
     if not rules:
       return "    # TODO: Implement custom logic\n    return node\n"

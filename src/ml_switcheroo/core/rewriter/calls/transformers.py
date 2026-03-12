@@ -1,5 +1,4 @@
-"""
-AST Transformation Helpers.
+"""AST Transformation Helpers.
 
 Provides logic to reconstruct CST nodes for Infix operators, Inline Lambdas,
 and Structured Index Selection.
@@ -11,8 +10,7 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 
 
 def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
-  """
-  Wraps an expression node with a subscript access for a specific integer index.
+  """Wraps an expression node with a subscript access for a specific integer index.
   Safe, structured alternative to string output adapters for tuple destructuring.
 
   Transformation:
@@ -25,6 +23,7 @@ def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
 
   Returns:
       cst.Subscript: The wrapped node.
+
   """
   # Safe conversion to string for Integer node construction
   idx_node = cst.Integer(str(index))
@@ -36,8 +35,7 @@ def apply_index_select(inner_node: cst.CSTNode, index: int) -> cst.Subscript:
 
 
 def rewrite_as_inline_lambda(lambda_str: str, args: list[cst.Arg]) -> cst.Call:
-  """
-  Wraps arguments in an Immediately Invoked Lambda Expression (IIFE).
+  """Wraps arguments in an Immediately Invoked Lambda Expression (IIFE).
 
   Args:
       lambda_str (str): The string representation of the lambda function.
@@ -48,6 +46,7 @@ def rewrite_as_inline_lambda(lambda_str: str, args: list[cst.Arg]) -> cst.Call:
 
   Raises:
       ValueError: If the lambda string has invalid syntax.
+
   """
   try:
     parsed_expr = cst.parse_expression(lambda_str)
@@ -58,8 +57,7 @@ def rewrite_as_inline_lambda(lambda_str: str, args: list[cst.Arg]) -> cst.Call:
 
 
 def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: list[str]) -> cst.CSTNode:
-  """
-  Replaces an operation call with a python expression defined in the template.
+  """Replaces an operation call with a python expression defined in the template.
 
   Arguments are substituted into the template string using placeholders matching
   the standard argument names (e.g. `{x}`).
@@ -75,6 +73,7 @@ def rewrite_as_macro(template: str, args_list: list[cst.Arg], std_arg_names: lis
   Raises:
       ValueError: If arguments required by the template are missing.
       cst.ParserSyntaxError: If the resulting string is invalid Python.
+
   """
   # 1. Map args
   arg_map = {}
@@ -122,8 +121,7 @@ def rewrite_as_infix(
   op_symbol: str,
   std_args: List[str],
 ) -> Union[cst.BinaryOperation, cst.UnaryOperation]:
-  """
-  Transforms a functional call into an infix (binary) or prefix (unary) expression.
+  """Transforms a functional call into an infix (binary) or prefix (unary) expression.
 
   Args:
       _original_node (cst.Call): The original call node.
@@ -136,6 +134,7 @@ def rewrite_as_infix(
 
   Raises:
       ValueError: If unsupported operators or wrong number of arguments are passed.
+
   """
   arity = len(std_args) if std_args else len(args)
 

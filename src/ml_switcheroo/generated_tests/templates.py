@@ -1,5 +1,4 @@
-"""
-Test Generation Templates and configuration descriptors.
+"""Test Generation Templates and configuration descriptors.
 
 This module stores default code templates for supported frameworks and
 provides utilities to determine properties of test arguments (e.g., static JIT args).
@@ -29,8 +28,7 @@ DEFAULT_TEST_TEMPLATES = {
 
 
 def get_template(manager: Any, framework: str) -> Dict[str, str]:
-  """
-  Retrieves the code generation template for a specific framework.
+  """Retrieves the code generation template for a specific framework.
 
   Priority:
   1. SemanticsManager lookup (loaded from snapshots).
@@ -43,6 +41,7 @@ def get_template(manager: Any, framework: str) -> Dict[str, str]:
 
   Returns:
       Dict[str, str]: Template strings for imports, conversion, etc.
+
   """
   tmpl: Optional[Dict[str, str]] = None
   if manager:
@@ -58,8 +57,7 @@ def get_template(manager: Any, framework: str) -> Dict[str, str]:
 
 
 def is_static_arg(arg_info: Dict[str, Any]) -> bool:
-  """
-  Determines if an argument should be marked static for JIT compilation.
+  """Determines if an argument should be marked static for JIT compilation.
 
   Heuristic checks for primitive types (int, bool, str) or specific names
   common to axis/dimension arguments.
@@ -69,6 +67,7 @@ def is_static_arg(arg_info: Dict[str, Any]) -> bool:
 
   Returns:
       bool: True if the argument should be static.
+
   """
   t = arg_info.get("type", "")
   # Heuristic: primitives are usually static in JAX JIT context for shapes/axes

@@ -169,3 +169,23 @@ def test_parser_unexpected_token() -> None:
   parser = RdnaParser(code)
   with pytest.raises(SyntaxError):
     parser.parse()
+
+
+def test_rdna_directive_with_comma():
+  parser = RdnaParser(".amdgcn_target gfx90a, param2")
+  nodes = parser.parse()
+  assert len(nodes) == 1
+  assert isinstance(nodes[0], Directive)
+
+
+def test_rdna_directive_followed_by_directive():
+  parser = RdnaParser(".amdgcn_target gfx90a .another")
+  nodes = parser.parse()
+  assert len(nodes) == 2
+
+
+def test_rdna_instruction_with_comma():
+  parser = RdnaParser("v_add_f32 v0, v1, v2")
+  nodes = parser.parse()
+  assert len(nodes) == 1
+  assert isinstance(nodes[0], Instruction)

@@ -1,5 +1,4 @@
-"""
-JAX Stack Common Logic (Level 0 & Level 1).
+"""JAX Stack Common Logic (Level 0 & Level 1).
 
 This module provides the ``JAXStackMixin``, a reusable base for any Framework Adapter
 built on top of the JAX ecosystem (e.g., Flax, PaxML, Haiku).
@@ -23,8 +22,7 @@ from typing import Dict, Any, List, Optional
 
 
 class JAXStackMixin:
-  """
-  Mixin providing shared implementations for JAX ecosystem adapters.
+  """Mixin providing shared implementations for JAX ecosystem adapters.
 
   This ensures consistent translation for:
 
@@ -40,8 +38,7 @@ class JAXStackMixin:
 
   @property
   def jax_test_config(self) -> Dict[str, str]:
-    """
-    Returns standard JAX test generation templates using JIT wrapping.
+    """Returns standard JAX test generation templates using JIT wrapping.
 
     Defines:
     - `import`: Libraries to import (including opt-in Chex support).
@@ -57,8 +54,7 @@ class JAXStackMixin:
     }
 
   def get_to_numpy_code(self) -> str:
-    """
-    Returns logic to convert JAX arrays to NumPy.
+    """Returns logic to convert JAX arrays to NumPy.
     Checks for `__array__` protocol which JAX arrays implement.
     """
     return "if hasattr(obj, '__array__'): return np.array(obj)"
@@ -66,8 +62,7 @@ class JAXStackMixin:
   # --- Hardware Abstraction (Level 0) ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """
-    Returns JAX-compliant syntax for device specification.
+    """Returns JAX-compliant syntax for device specification.
 
     Maps 'cuda'/'gpu' to 'gpu' backend.
     Maps 'cpu' to 'cpu' backend.
@@ -78,6 +73,7 @@ class JAXStackMixin:
 
     Returns:
         Python code string constructing the device object: ``jax.devices('gpu')[0]``.
+
     """
     # Clean quotes if present to check value
     clean_type = device_type.strip("'\"").lower()
@@ -91,16 +87,14 @@ class JAXStackMixin:
     return f"jax.devices({type_code})[{idx_code}]"
 
   def get_device_check_syntax(self) -> str:
-    """
-    Returns JAX syntax for checking if GPUs are available.
-    Format: ``len(jax.devices('gpu')) > 0``
+    """Returns JAX syntax for checking if GPUs are available.
+    Format: ``len(jax.devices('gpu')) > 0``.
     """
     return "len(jax.devices('gpu')) > 0"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """
-    Returns JAX syntax for splitting a PRNG key.
-    Format: ``rng, key = jax.random.split(rng)``
+    """Returns JAX syntax for splitting a PRNG key.
+    Format: ``rng, key = jax.random.split(rng)``.
     """
     return f"{rng_var}, {key_var} = jax.random.split({rng_var})"
 
@@ -111,8 +105,7 @@ class JAXStackMixin:
     return ["import orbax.checkpoint"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """
-    Returns Orbax syntax for save/load operations.
+    """Returns Orbax syntax for save/load operations.
 
     Args:
         op: Operation name ('save' or 'load').
@@ -121,6 +114,7 @@ class JAXStackMixin:
 
     Returns:
         Python code string.
+
     """
     if op == "save" and object_arg:
       return f"orbax.checkpoint.PyTreeCheckpointer().save(directory={file_arg}, item={object_arg})"
@@ -139,8 +133,7 @@ class JAXStackMixin:
     ]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """
-    Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
+    """Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
     The `raw_state` is a flat dictionary where keys are dot-separated strings (e.g. 'layer.weight').
     """
     return textwrap.dedent(
@@ -161,14 +154,11 @@ class JAXStackMixin:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """
-    Returns a python expression string that converts `tensor_var` from JAX array to numpy array.
-    """
+    """Returns a python expression string that converts `tensor_var` from JAX array to numpy array."""
     return f"np.array({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """
-    Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays)
+    """Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays)
     to `path_var`. It unstricts flat keys back to PyTree structure using `unflatten_dict` and saves via Orbax.
     """
     return textwrap.dedent(
@@ -187,8 +177,7 @@ class JAXStackMixin:
   # --- Documentation Linking ---
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """
-    Generates a default documentation URL for standard JAX APIs.
+    """Generates a default documentation URL for standard JAX APIs.
     Maps to ReadTheDocs autosummary path.
     NOTE: Subclasses (Flax/Pax) should override this for their specific namespaces.
 
@@ -197,14 +186,14 @@ class JAXStackMixin:
 
     Returns:
         String URL or None.
+
     """
     return f"https://jax.readthedocs.io/en/latest/_autosummary/{api_name}.html"
 
   # --- Manual Wiring (Semantics Injection / Legacy Support) ---
 
   def _apply_stack_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """
-    Injects mappings common to all JAX frameworks (JNP, Optax, JIT).
+    """Injects mappings common to all JAX frameworks (JNP, Optax, JIT).
 
     This method populates the semantic snapshot with rules for translating
     Torch/NumPy concepts to the JAX ecosystem equivalents.
@@ -215,6 +204,7 @@ class JAXStackMixin:
     Args:
         snapshot: The semantic snapshot dictionary to mutate.
                   Expected structure: {'mappings': {}, 'templates': {}}
+
     """
     mappings = snapshot.setdefault("mappings", {})
     templates = snapshot.setdefault("templates", {})

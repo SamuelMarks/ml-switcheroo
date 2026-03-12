@@ -1,5 +1,4 @@
-"""
-Scaffolding Tool for Knowledge Base Discovery.
+"""Scaffolding Tool for Knowledge Base Discovery.
 
 This module provides the `Scaffolder` class, which automates the population of
 the Semantic Knowledge Base by scanning installed libraries (e.g., Torch, JAX).
@@ -29,8 +28,7 @@ from ml_switcheroo.frameworks import get_adapter
 
 
 class Scaffolder:
-  """
-  Automated discovery tool that aligns framework APIs.
+  """Automated discovery tool that aligns framework APIs.
 
   This class scans multiple frameworks, identifies common operations based
   on name similarity (e.g., 'torch.abs' == 'jax.numpy.abs'), and generates
@@ -43,13 +41,13 @@ class Scaffolder:
     similarity_threshold: float = 0.8,
     arity_penalty: float = 0.3,
   ):
-    """
-    Initializes the scaffolder.
+    """Initializes the scaffolder.
 
     Args:
         semantics: Existing knowledge base to check against (optional).
         similarity_threshold: Levenshtein distance threshold (0.0 - 1.0) for fuzzy matching.
         arity_penalty: Score penalty for operations with differing argument counts.
+
     """
     self.inspector = ApiInspector()
     self.console = console
@@ -70,11 +68,11 @@ class Scaffolder:
     self._catalog_indices: Dict[str, Dict[str, List[Tuple[str, Dict]]]] = {}
 
   def _lazy_load_heuristics(self) -> Dict[str, List[re.Pattern]]:
-    """
-    Loads regex heuristics from all registered framework adapters.
+    """Loads regex heuristics from all registered framework adapters.
 
     Returns:
         A dictionary mapping Sematic Tier names to lists of compiled regex patterns.
+
     """
     if self._cached_heuristics is not None:
       return self._cached_heuristics
@@ -102,12 +100,12 @@ class Scaffolder:
     return compiled
 
   def _build_catalog_index(self, fw: str, catalog: Dict[str, Any]):
-    """
-    Creates a fast lookup index for a framework catalog.
+    """Creates a fast lookup index for a framework catalog.
 
     Args:
         fw: Framework key.
         catalog: The raw catalog dictionary from the Inspector.
+
     """
     index = defaultdict(list)
     for path, details in catalog.items():
@@ -116,8 +114,7 @@ class Scaffolder:
     self._catalog_indices[fw] = index
 
   def scaffold(self, frameworks: List[str], root_dir: Optional[Path] = None):
-    """
-    Main entry point. Scans frameworks and builds/updates JSON mappings.
+    """Main entry point. Scans frameworks and builds/updates JSON mappings.
 
     1. Scans all requested frameworks using `ApiInspector`.
     2. Aligns APIs against known standards (Specs).
@@ -127,6 +124,7 @@ class Scaffolder:
     Args:
         frameworks: List of framework keys to scan (e.g. `['torch', 'jax']`).
         root_dir: Optional root directory path. Defaults to package paths.
+
     """
     if root_dir:
       semantics_path = root_dir / "semantics"
@@ -210,16 +208,6 @@ class Scaffolder:
         continue
 
       extras_match = self._match_spec_op(name, known_extras_ops)
-      if extras_match:
-        self._register_entry(
-          "k_framework_extras.json",
-          extras_match,
-          primary_fw,
-          api_path,
-          details,
-          catalogs,
-        )
-        continue
 
       # Strategy 2: Heuristic Fallback
       if self._is_structurally_neural(api_path, kind):
@@ -264,17 +252,13 @@ class Scaffolder:
         self._write_json(snapshots_path / f"{fw}_v{ver}_map.json", file_data, merge=True)
 
   def _get_ops_by_tier(self, tier: SemanticTier) -> Set[str]:
-    """
-    Retrieves known operations belonging to a specific semantic tier.
-    """
+    """Retrieves known operations belonging to a specific semantic tier."""
     if not hasattr(self.semantics, "_key_origins"):
       return set()
     return {k for k, v in self.semantics._key_origins.items() if v == tier.value}
 
   def _match_spec_op(self, api_name: str, spec_ops: Set[str]) -> Optional[str]:
-    """
-    Checks if an API name exists in a set of known spec operations using fuzzy matching.
-    """
+    """Checks if an API name exists in a set of known spec operations using fuzzy matching."""
     if api_name in spec_ops:
       return api_name
     lower_map = {k.lower(): k for k in spec_ops}
@@ -287,9 +271,7 @@ class Scaffolder:
     return None
 
   def _is_structurally_neural(self, api_path: str, kind: str) -> bool:
-    """
-    Determines if an API looks like a Neural Network layer/component via regex heuristics.
-    """
+    """Determines if an API looks like a Neural Network layer/component via regex heuristics."""
     heuristics = self._lazy_load_heuristics()
     patterns = heuristics.get("neural", [])
     for pat in patterns:
@@ -300,9 +282,7 @@ class Scaffolder:
     return False
 
   def _is_structurally_extra(self, api_path: str, name: str) -> bool:
-    """
-    Determines if an API looks like a Utility/Extra via regex heuristics.
-    """
+    """Determines if an API looks like a Utility/Extra via regex heuristics."""
     heuristics = self._lazy_load_heuristics()
     patterns = heuristics.get("extras", [])
     for pat in patterns:
@@ -322,8 +302,7 @@ class Scaffolder:
     details: Dict,
     catalogs: Dict[str, Dict],
   ):
-    """
-    Registers a found operation into the Staging Areas.
+    """Registers a found operation into the Staging Areas.
     Attempts to find matching variants in other frameworks.
     """
     existing_def = self.semantics.data.get(op_name, {})
@@ -369,8 +348,7 @@ class Scaffolder:
     reference_params: List[str],
     fw_key: str = None,
   ) -> Optional[Tuple[str, Dict]]:
-    """
-    Finds the closest matching API in a catalog to the target name.
+    """Finds the closest matching API in a catalog to the target name.
     Uses indexed lookup first, then fuzzy scoring with arity penalties.
     """
     target_lower = target_name.lower()
@@ -448,9 +426,7 @@ class Scaffolder:
     return None
 
   def _write_json(self, path: Path, new_data: Dict, merge: bool = False):
-    """
-    Persists JSON data to disk, merging with existing files if requested.
-    """
+    """Persists JSON data to disk, merging with existing files if requested."""
     if merge and path.exists():
       try:
         with open(path, "rt", encoding="utf-8") as f:

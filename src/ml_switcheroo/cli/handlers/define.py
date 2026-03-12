@@ -1,5 +1,4 @@
-"""
-Handler for the 'define' command.
+"""Handler for the 'define' command.
 
 This module orchestrates the "Code Injection" workflow.
 
@@ -30,8 +29,7 @@ import ml_switcheroo.plugins
 
 
 def handle_define(yaml_file: Path, dry_run: bool = False, no_test_gen: bool = False) -> int:
-  """
-  Main entry point for defining new operations.
+  """Main entry point for defining new operations.
 
   Args:
       yaml_file: Path to the input YAML definition.
@@ -40,6 +38,7 @@ def handle_define(yaml_file: Path, dry_run: bool = False, no_test_gen: bool = Fa
 
   Returns:
       int: Exit Code (0 for success, 1 for failure).
+
   """
   if yaml is None:
     log_error("PyYAML is not installed.")
@@ -97,11 +96,11 @@ def handle_define(yaml_file: Path, dry_run: bool = False, no_test_gen: bool = Fa
 
 
 def _resolve_inferred_apis(op_def: OperationDef) -> None:
-  """
-  Updates variant APIs in `op_def` if they are set to "infer".
+  """Updates variant APIs in `op_def` if they are set to "infer".
 
   Args:
       op_def: The definition object to mutate.
+
   """
   for fw_key, variant in op_def.variants.items():
     if variant and variant.api and variant.api.lower() == "infer":
@@ -115,8 +114,7 @@ def _resolve_inferred_apis(op_def: OperationDef) -> None:
 
 
 def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
-  """
-  Injects the definition into the Semantic Knowledge Base (JSON).
+  """Injects the definition into the Semantic Knowledge Base (JSON).
 
   Args:
       op_def: The operation definition.
@@ -124,6 +122,7 @@ def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
 
   Returns:
       bool: True on success.
+
   """
   try:
     injector = StandardsInjector(op_def)
@@ -134,12 +133,12 @@ def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
 
 
 def _inject_spokes(op_def: OperationDef, dry_run: bool = False) -> None:
-  """
-  Injects definitions into framework JSON files.
+  """Injects definitions into framework JSON files.
 
   Args:
       op_def: The operation definition.
       dry_run: Simulation mode flag.
+
   """
   for fw_key, variant in op_def.variants.items():
     if not variant or (variant.api and variant.api.lower() == "infer"):
@@ -160,12 +159,12 @@ def _inject_spokes(op_def: OperationDef, dry_run: bool = False) -> None:
 
 
 def _scaffold_plugins(op_def: OperationDef, dry_run: bool = False) -> None:
-  """
-  Scaffolds new plugin files defined in the ODL.
+  """Scaffolds new plugin files defined in the ODL.
 
   Args:
       op_def: The operation definition.
       dry_run: Simulation mode flag.
+
   """
   if not op_def.scaffold_plugins:
     return
@@ -189,13 +188,13 @@ def _scaffold_plugins(op_def: OperationDef, dry_run: bool = False) -> None:
 
 
 def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager, dry_run: bool = False) -> None:
-  """
-  Generates a physical test file for verification.
+  """Generates a physical test file for verification.
 
   Args:
       op_def: The operation definition.
       mgr: The Semantics Manager.
       dry_run: Simulation mode flag.
+
   """
   if dry_run:
     log_info(f"  [Dry Run] Would generate test file for {op_def.operation}")

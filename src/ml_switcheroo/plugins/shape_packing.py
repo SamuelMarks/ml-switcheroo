@@ -1,5 +1,4 @@
-"""
-Plugin for Packing Shape Arguments.
+"""Plugin for Packing Shape Arguments.
 
 This transformation converts variable-argument shape definitions into
 explicit tuple arguments required by certain frameworks.
@@ -12,6 +11,7 @@ Decoupling Logic:
     This plugin does NOT enforce a framework whitelist. It executes unconditionally
     if wired. However, it relies on looking up "Reshape" or "View" in the semantics.
     If those definitions are missing for the target framework, it aborts.
+
 """
 
 import libcst as cst
@@ -32,8 +32,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("pack_shape_args")
 def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Hook: Packs trailing positional arguments into a shape tuple.
+  """Hook: Packs trailing positional arguments into a shape tuple.
 
   Logic:
   1.  Resolve Target API via "Reshape" or "View". Abort if missing.
@@ -45,6 +44,7 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       cst.Call: The transformed call with packed shape arguments.
+
   """
   # 0. Resolve Target API (Strict)
   # Attempt to use specific OP ID set by Rewriter, or fallback

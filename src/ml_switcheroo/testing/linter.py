@@ -1,5 +1,4 @@
-"""
-Structural Validation Linter (The Anti-Pollution Check).
+"""Structural Validation Linter (The Anti-Pollution Check).
 
 This module provides the ``StructuralLinter``, a static analysis tool designed
 to verify that the output of a transpilation contains no artifacts from the
@@ -19,16 +18,14 @@ from ml_switcheroo.core.scanners import get_full_name
 
 
 class StructuralLinter(cst.CSTVisitor):
-  """
-  Scans CST for forbidden framework usage.
-  """
+  """Scans CST for forbidden framework usage."""
 
   def __init__(self, forbidden_roots: Set[str]):
-    """
-    Initializes the linter.
+    """Initializes the linter.
 
     Args:
         forbidden_roots: A set of string root packages to ban (e.g. {"torch"}).
+
     """
     self.forbidden_roots = forbidden_roots
     self.violations: List[str] = []
@@ -38,14 +35,14 @@ class StructuralLinter(cst.CSTVisitor):
     self._context_stack: List[str] = []
 
   def check(self, code: str) -> List[str]:
-    """
-    Runs the linter on a source string.
+    """Runs the linter on a source string.
 
     Args:
         code: The Python source code to validate.
 
     Returns:
         List[str]: A list of error messages. Empty if valid.
+
     """
     self.violations = []
     self._local_aliases = {}
@@ -60,14 +57,14 @@ class StructuralLinter(cst.CSTVisitor):
     return self.violations
 
   def visit_Import(self, node: cst.Import) -> None:
-    """
-    Checks `import x`, `import x as y`.
+    """Checks `import x`, `import x as y`.
 
     Logs violations if the root package is forbidden.
     Tracks aliases to detect usage later in the file.
 
     Args:
         node: The Import node.
+
     """
     self._context_stack.append("import")
     for alias in node.names:
@@ -83,22 +80,22 @@ class StructuralLinter(cst.CSTVisitor):
         self._local_aliases[local_name] = root
 
   def leave_Import(self, node: cst.Import) -> None:
-    """
-    Exits the import scope context.
+    """Exits the import scope context.
 
     Args:
         node: The Import node being exited.
+
     """
     self._context_stack.pop()
 
   def visit_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """
-    Checks `from x import y`.
+    """Checks `from x import y`.
 
     Logs violations if the module root matches forbidden set.
 
     Args:
         node: The ImportFrom node.
+
     """
     self._context_stack.append("import")
 
@@ -121,22 +118,22 @@ class StructuralLinter(cst.CSTVisitor):
               self._local_aliases[local_name] = root
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """
-    Exits the import-from scope context.
+    """Exits the import-from scope context.
 
     Args:
         node: The ImportFrom node being exited.
+
     """
     self._context_stack.pop()
 
   def visit_Name(self, node: cst.Name) -> None:
-    """
-    Checks usage of aliased forbidden variables (e.g. `t.abs()` where `t` is torch).
+    """Checks usage of aliased forbidden variables (e.g. `t.abs()` where `t` is torch).
 
     Ignores names inside import definition statements.
 
     Args:
         node: The Name node.
+
     """
     # Iterate check only if we are not defining the import itself
     if "import" in self._context_stack:
@@ -159,13 +156,13 @@ class StructuralLinter(cst.CSTVisitor):
           self.violations.append(msg)
 
   def visit_Attribute(self, node: cst.Attribute) -> None:
-    """
-    Checks attributes to provide more specific error messages (e.g. `torch.abs`).
+    """Checks attributes to provide more specific error messages (e.g. `torch.abs`).
 
     If the left side of the attribute matches a forbidden alias, logs an error.
 
     Args:
         node: The Attribute node.
+
     """
     # If the value (left side) of attribute is a forbidden alias
     if isinstance(node.value, cst.Name):
@@ -182,9 +179,7 @@ class StructuralLinter(cst.CSTVisitor):
           self.violations.append(msg)
 
   def _get_root_name(self, node: cst.BaseExpression) -> str:
-    """
-    Extracts root package from dotted path node (e.g. 'torch' from 'torch.nn').
-    """
+    """Extracts root package from dotted path node (e.g. 'torch' from 'torch.nn')."""
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute):
@@ -192,9 +187,7 @@ class StructuralLinter(cst.CSTVisitor):
     return ""
 
   def _get_full_name_from_node(self, node: cst.BaseExpression) -> str:
-    """
-    Recursively resolves CST node to dot-separated string.
-    """
+    """Recursively resolves CST node to dot-separated string."""
     if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute):
@@ -203,8 +196,7 @@ class StructuralLinter(cst.CSTVisitor):
 
 
 def validate_transpilation(code: str, source_fw: str) -> Tuple[bool, List[str]]:
-  """
-  Facade to lint generated code against a specific source framework.
+  """Facade to lint generated code against a specific source framework.
 
   It automatically expands the `source_fw` into a set of forbidden roots including:
   1. The framework itself (e.g. 'torch').
@@ -217,6 +209,7 @@ def validate_transpilation(code: str, source_fw: str) -> Tuple[bool, List[str]]:
 
   Returns:
       (is_valid, list_of_errors)
+
   """
   forbidden = {source_fw}
 

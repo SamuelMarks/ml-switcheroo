@@ -1,5 +1,4 @@
-"""
-Plugins Package.
+"""Plugins Package.
 
 Automatically discovers and registers all plugin modules within this package.
 This ensures that adding a new file (e.g., `my_new_op.py`) automatically

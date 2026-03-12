@@ -1,5 +1,4 @@
-"""
-Plugin for Loss Reduction Semantics.
+"""Plugin for Loss Reduction Semantics.
 
 Addresses the mismatch between:
 
@@ -36,8 +35,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("loss_reduction")
 def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Wraps loss functions to apply reduction.
+  """Hook: Wraps loss functions to apply reduction.
 
   Trigger: Operations mapped with `requires_plugin: "loss_reduction"`.
   Target: Frameworks requiring explicit reduction (JAX, Flax).
@@ -48,6 +46,7 @@ def transform_loss_reduction(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Returns:
       Transformed Call node (wrapped or unwrapped).
+
   """
   args = list(node.args)
 

@@ -1,5 +1,4 @@
-"""
-Symbol Table and Type Inference Analysis with Control Flow Support.
+"""Symbol Table and Type Inference Analysis with Control Flow Support.
 
 This module provides a static analysis pass to infer variable types and scopes
 before rewriting occurs. It builds a mapping of AST nodes to inferred type objects,
@@ -23,9 +22,7 @@ from ml_switcheroo.core.scanners import get_full_name
 
 @dataclass
 class SymbolType:
-  """
-  Base class for inferred types.
-  """
+  """Base class for inferred types."""
 
   name: str
   """A string representation of the type (e.g., 'Tensor')."""
@@ -35,7 +32,7 @@ class SymbolType:
     return self.name
 
   def __eq__(self, other: object) -> bool:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if not isinstance(other, SymbolType):
       return False
     return self.name == other.name
@@ -43,15 +40,13 @@ class SymbolType:
 
 @dataclass
 class TensorType(SymbolType):
-  """
-  Represents a Tensor object from a specific framework.
-  """
+  """Represents a Tensor object from a specific framework."""
 
   framework: str
   """The framework key (e.g. "torch" or "jax") responsible for this tensor."""
 
   def __eq__(self, other: object) -> bool:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if not isinstance(other, TensorType):
       return False
     return self.name == other.name and self.framework == other.framework
@@ -59,15 +54,13 @@ class TensorType(SymbolType):
 
 @dataclass
 class ModuleType(SymbolType):
-  """
-  Represents an imported module or sub-module.
-  """
+  """Represents an imported module or sub-module."""
 
   path: str
   """Fully qualified path string (e.g. "torch.nn")."""
 
   def __eq__(self, other: object) -> bool:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if not isinstance(other, ModuleType):
       return False
     return self.name == other.name and self.path == other.path
@@ -75,24 +68,22 @@ class ModuleType(SymbolType):
 
 @dataclass
 class UnionType(SymbolType):
-  """
-  Represents a union of potential types resulting from control flow divergence.
-  """
+  """Represents a union of potential types resulting from control flow divergence."""
 
   types: List[SymbolType]
 
   def __init__(self, types: List[SymbolType]):
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     super().__init__("Union")
     self.types = types
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     unique_names = sorted(list(set(str(t) for t in self.types)))
     return f"Union[{', '.join(unique_names)}]"
 
   def __eq__(self, other: object) -> bool:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if not isinstance(other, UnionType):
       return False
     # Set based comparison for equivalence ignoring order
@@ -100,41 +91,39 @@ class UnionType(SymbolType):
 
 
 class Scope:
-  """
-  Represents a variable scope (Global, Class, or Function).
-  """
+  """Represents a variable scope (Global, Class, or Function)."""
 
   def __init__(self, parent: Optional["Scope"] = None, name: str = "<root>"):
-    """
-    Initialize the scope.
+    """Initialize the scope.
 
     Args:
         parent: The enclosing scope (None for global).
         name: Debug name for the scope.
+
     """
     self.parent = parent
     self.name = name
     self.symbols: Dict[str, SymbolType] = {}
 
   def set(self, name: str, sym_type: SymbolType) -> None:
-    """
-    Register a symbol in the current scope.
+    """Register a symbol in the current scope.
 
     Args:
         name: Variable identifier.
         sym_type: Inferred Type object.
+
     """
     self.symbols[name] = sym_type
 
   def get(self, name: str) -> Optional[SymbolType]:
-    """
-    Resolve a symbol, traversing parent scopes.
+    """Resolve a symbol, traversing parent scopes.
 
     Args:
         name: Variable identifier to lookup.
 
     Returns:
         The SymbolType if found, else None.
+
     """
     if name in self.symbols:
       return self.symbols[name]
@@ -148,50 +137,47 @@ class Scope:
 
 
 class SymbolTable:
-  """
-  Container for analysis results. Maps CST Nodes (by identity) to inferred Types.
-  """
+  """Container for analysis results. Maps CST Nodes (by identity) to inferred Types."""
 
   def __init__(self):
     """Initializes an empty node map."""
     self._node_types: Dict[cst.CSTNode, SymbolType] = {}
 
   def record_type(self, node: cst.CSTNode, sym_type: SymbolType) -> None:
-    """
-    Associates a CST node with a type.
+    """Associates a CST node with a type.
 
     Args:
         node: The CST node.
         sym_type: The determined type.
+
     """
     self._node_types[node] = sym_type
 
   def get_type(self, node: cst.CSTNode) -> Optional[SymbolType]:
-    """
-    Retrieves the inferred type for a CST node.
+    """Retrieves the inferred type for a CST node.
 
     Args:
         node: The CST node to inspect.
 
     Returns:
         The stored SymbolType or None.
+
     """
     return self._node_types.get(node)
 
 
 class SymbolTableAnalyzer(cst.CSTVisitor):
-  """
-  Static Analysis pass to populate the SymbolTable.
+  """Static Analysis pass to populate the SymbolTable.
   Runs post-order traversal logic (via leave methods) to propagate types bottom-up.
   Implements shallow control flow inference for If/Else and Loops.
   """
 
   def __init__(self, semantics: SemanticsManager):
-    """
-    Initializes the analyzer.
+    """Initializes the analyzer.
 
     Args:
         semantics: Reference to semantic knowledge base for type inference rules.
+
     """
     self.semantics = semantics
     self.table = SymbolTable()
@@ -221,8 +207,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   # --- Control Flow Support ---
 
   def visit_If(self, node: cst.If) -> bool:
-    """
-    Handle branching logic.
+    """Handle branching logic.
     1. Snapshot state.
     2. Visit body -> State_Body.
     3. Revert to Snapshot.
@@ -255,8 +240,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     return False  # Manual traversal done
 
   def visit_For(self, node: cst.For) -> bool:
-    """
-    Handle loop logic.
+    """Handle loop logic.
     Loops may execute 0 times or N times, introducing potential ambiguity.
     We merge the state after loop body with the state before loop.
     """
@@ -290,9 +274,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     return False
 
   def leave_IfExp(self, node: cst.IfExp) -> None:
-    """
-    Infers type for ternary expression: `A if C else B`.
-    """
+    """Infers type for ternary expression: `A if C else B`."""
     t1 = self.table.get_type(node.body)
     t2 = self.table.get_type(node.orelse)
 
@@ -305,8 +287,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       self.table.record_type(node, t2)
 
   def _merge_states(self, state_a: Dict[str, SymbolType], state_b: Dict[str, SymbolType]) -> Dict[str, SymbolType]:
-    """
-    Merges two symbol dictionaries, creating Unions for conflicts.
+    """Merges two symbol dictionaries, creating Unions for conflicts.
     A missing key in one branch implies a potential Unbound state,
     but we optimistically retain the structured type found in the other branch.
     """
@@ -339,7 +320,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     types = []
 
     def collect(t):
-      """TODO: Add docstring."""
+      """Execute implementation detail."""
       if isinstance(t, UnionType):
         types.extend(t.types)
       else:
@@ -365,9 +346,8 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   # --- Definition Tracking ---
 
   def leave_Import(self, node: cst.Import) -> None:
-    """
-    Track imports.
-    e.g. `import torch` -> symbols['torch'] = ModuleType(name='Module', path='torch')
+    """Track imports.
+    e.g. `import torch` -> symbols['torch'] = ModuleType(name='Module', path='torch').
     """
     for alias in node.names:
       full_path = get_full_name(alias.name)
@@ -375,9 +355,8 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))
 
   def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
-    """
-    Track from-imports.
-    e.g. `from torch import nn` -> symbols['nn'] = ModuleType(name='Module', path='torch.nn')
+    """Track from-imports.
+    e.g. `from torch import nn` -> symbols['nn'] = ModuleType(name='Module', path='torch.nn').
     """
     if not node.module:
       return
@@ -391,8 +370,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
         self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))
 
   def leave_Assign(self, node: cst.Assign) -> None:
-    """
-    Propagate type from RHS to LHS.
+    """Propagate type from RHS to LHS.
     x = torch.randn() -> x is Tensor.
     """
     rhs_type = self.table.get_type(node.value)
@@ -412,16 +390,13 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
   # --- Usage Resolution ---
 
   def leave_Name(self, node: cst.Name) -> None:
-    """
-    Look up variable in scope.
-    """
+    """Look up variable in scope."""
     sym_type = self.current_scope.get(node.value)
     if sym_type:
       self.table.record_type(node, sym_type)
 
   def leave_Attribute(self, node: cst.Attribute) -> None:
-    """
-    Resolve attributes based on their receiver type.
+    """Resolve attributes based on their receiver type.
     If `x` is Module('torch'), `x.nn` is Module('torch.nn').
     If `x` is Tensor, `x.shape` might be recorded etc.
     """
@@ -431,8 +406,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       self.table.record_type(node, ModuleType(name="Module", path=new_path))
 
   def leave_Call(self, node: cst.Call) -> None:
-    """
-    Infer return type of a call.
+    """Infer return type of a call.
     1. Resolve function fully qualified name.
     2. Check SemanticsManager for return type.
     """

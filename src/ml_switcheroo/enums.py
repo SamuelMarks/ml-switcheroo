@@ -1,5 +1,4 @@
-"""
-Enumerations for ml-switcheroo.
+"""Enumerations for ml-switcheroo.
 
 This module defines standard enumerations used across the codebase for
 semantic categorization and framework identification.
@@ -9,8 +8,7 @@ from enum import Enum
 
 
 class SemanticTier(str, Enum):
-  """
-  Categorization of API operations to distinct knowledge base tiers.
+  """Categorization of API operations to distinct knowledge base tiers.
 
   Used to route definitions to specific JSON files in `src/ml_switcheroo/semantics/`.
   """
@@ -22,8 +20,7 @@ class SemanticTier(str, Enum):
 
 
 class LogicOp(str, Enum):
-  """
-  Supported operators for conditional logic rules in operations.
+  """Supported operators for conditional logic rules in operations.
   Used for Conditional API Dispatch.
   """
 

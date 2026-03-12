@@ -1,5 +1,4 @@
-"""
-LaTeX DSL Parser.
+"""LaTeX DSL Parser.
 
 Parses MIDL LaTeX macros into a LibCST Module representing a Python AST.
 """
@@ -17,9 +16,7 @@ from ml_switcheroo.core.latex.nodes import (
 
 
 class LatexParser:
-  """
-  Parses LaTeX source code containing MIDL macros into a Python CST.
-  """
+  """Parses LaTeX source code containing MIDL macros into a Python CST."""
 
   _START_ENV = re.compile(r"\\begin\{DefModel\}\{(?P<name>\w+)\}")
   _ATTR_RE = re.compile(r"\\Attribute\{(?P<id>[\w\d_]+)\}\{(?P<type>[\w\d_\.]+)\}\{(?P<config>.*?)\}")
@@ -33,11 +30,11 @@ class LatexParser:
     self.source = latex_source
 
   def parse(self) -> cst.Module:
-    """
-    Parses the internally stored LaTeX source string.
+    """Parses the internally stored LaTeX source string.
 
     Returns:
         cst.Module: A LibCST Module containing the synthesized Python class.
+
     """
     model_name = "GeneratedModel"
     memory_nodes = []
@@ -109,8 +106,7 @@ class LatexParser:
     return [a.strip() for a in s.split(",")]
 
   def _safe_value_node(self, val: str) -> cst.BaseExpression:
-    """
-    Safely converts a string value to a LibCST Expression Node.
+    """Safely converts a string value to a LibCST Expression Node.
 
     Handles:
     - Ellipsis (...)

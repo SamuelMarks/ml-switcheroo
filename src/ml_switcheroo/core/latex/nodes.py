@@ -1,5 +1,4 @@
-"""
-MIDL Semantic Nodes.
+r"""MIDL Semantic Nodes.
 
 This module defines the data structures representing the primitives of the
 LaTeX DSL. These nodes act as an intermediate representation between
@@ -21,27 +20,25 @@ from typing import List, Dict
 
 @dataclass
 class LatexNode(ABC):
-  """
-  Abstract base class for all MIDL nodes.
+  """Abstract base class for all MIDL nodes.
 
   Enforces a ``to_latex()`` method for serialization support.
   """
 
   @abstractmethod
   def to_latex(self) -> str:
-    """
-    Serializes the node object back into its LaTeX macro representation.
+    """Serializes the node object back into its LaTeX macro representation.
 
     Returns:
         str: Valid LaTeX code string.
+
     """
     pass
 
 
 @dataclass
 class MemoryNode(LatexNode):
-  """
-  Represents stateful memory allocation (e.g., Weights/Layers).
+  r"""Represents stateful memory allocation (e.g., Weights/Layers).
   Maps to the ``\\Attribute`` macro.
 
   Example::
@@ -59,7 +56,7 @@ class MemoryNode(LatexNode):
   """Configuration parameters for the layer."""
 
   def to_latex(self) -> str:
-    """Render to ``\\Attribute`` macro."""
+    r"""Render to ``\\Attribute`` macro."""
     # Convert config dict to string "k=v, k2=v2"
     config_str = ", ".join(f"{k}={v}" for k, v in self.config.items())
     return f"\\Attribute{{{self.node_id}}}{{{self.op_type}}}{{{config_str}}}"
@@ -67,8 +64,7 @@ class MemoryNode(LatexNode):
 
 @dataclass
 class InputNode(LatexNode):
-  """
-  Represents the model input definition.
+  r"""Represents the model input definition.
   Maps to the ``\\Input`` macro.
 
   Example::
@@ -83,14 +79,13 @@ class InputNode(LatexNode):
   """Shape descriptor string."""
 
   def to_latex(self) -> str:
-    """Render to ``\\Input`` macro."""
+    r"""Render to ``\\Input`` macro."""
     return f"\\Input{{{self.name}}}{{{self.shape}}}"
 
 
 @dataclass
 class ComputeNode(LatexNode):
-  """
-  Represents a stateless operation call.
+  r"""Represents a stateless operation call.
   Maps to the ``\\Op`` macro.
 
   Example::
@@ -111,15 +106,14 @@ class ComputeNode(LatexNode):
   """Resulting shape descriptor."""
 
   def to_latex(self) -> str:
-    """Render to ``\\Op`` macro."""
+    r"""Render to ``\\Op`` macro."""
     args_str = ", ".join(self.args)
     return f"\\Op{{{self.node_id}}}{{{self.op_type}}}{{{args_str}}}{{{self.shape}}}"
 
 
 @dataclass
 class StateOpNode(LatexNode):
-  """
-  Represents a call to a stateful layer defined in Memory.
+  r"""Represents a call to a stateful layer defined in Memory.
   Maps to the ``\\StateOp`` macro.
 
   Example::
@@ -140,15 +134,14 @@ class StateOpNode(LatexNode):
   """Resulting shape descriptor."""
 
   def to_latex(self) -> str:
-    """Render to ``\\StateOp`` macro."""
+    r"""Render to ``\\StateOp`` macro."""
     args_str = ", ".join(self.args)
     return f"\\StateOp{{{self.node_id}}}{{{self.attribute_id}}}{{{args_str}}}{{{self.shape}}}"
 
 
 @dataclass
 class ReturnNode(LatexNode):
-  """
-  Represents the output return statement.
+  r"""Represents the output return statement.
   Maps to the ``\\Return`` macro.
 
   Example::
@@ -160,14 +153,13 @@ class ReturnNode(LatexNode):
   """The variable ID to return."""
 
   def to_latex(self) -> str:
-    """Render to ``\\Return`` macro."""
+    r"""Render to ``\\Return`` macro."""
     return f"\\Return{{{self.target_id}}}"
 
 
 @dataclass
 class ModelContainer(LatexNode):
-  """
-  Root container representing the Model definition block.
+  """Root container representing the Model definition block.
   Maps to the ``DefModel`` environment.
   """
 
@@ -178,7 +170,7 @@ class ModelContainer(LatexNode):
   """List of body statements (Memory, Input, Ops, Return)."""
 
   def to_latex(self) -> str:
-    """Render the full ``\\begin{DefModel}...\\end{DefModel}`` block."""
+    r"""Render the full ``\\begin{DefModel}...\\end{DefModel}`` block."""
     lines = [f"\\begin{{DefModel}}{{{self.name}}}"]
 
     # Indent children

@@ -1,5 +1,4 @@
-"""
-Plugin for TopK Output Adaptation.
+"""Plugin for TopK Output Adaptation.
 
 Addresses semantic mismatch:
 1.  **PyTorch**: `values, indices = torch.topk(x, k)` (Returns named-tuple-like result).
@@ -19,14 +18,14 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """
-  Creates a CST node structure representing a dotted path.
+  """Creates a CST node structure representing a dotted path.
 
   Args:
       name_str: The dotted string (e.g. 'collections.namedtuple').
 
   Returns:
       A LibCST node (Name or nested Attribute).
+
   """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
@@ -37,8 +36,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("topk_adapter")
 def transform_topk(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Wraps target top_k call in a NamedTuple constructor.
+  """Hook: Wraps target top_k call in a NamedTuple constructor.
 
   Orchestrates the following:
 
@@ -54,6 +52,7 @@ def transform_topk(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Returns:
       cst.Call: The transformed call.
+
   """
   # 1. Resolve Target Function (Strict)
   target_api = ctx.lookup_api("TopK")

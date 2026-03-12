@@ -1,5 +1,4 @@
-"""
-Interface definition for Rewriter Passes.
+"""Interface definition for Rewriter Passes.
 
 This module defines the abstract base class that all transformation passes
 must implement to be compatible with the ``RewriterPipeline``.
@@ -11,8 +10,7 @@ from ml_switcheroo.core.rewriter.context import RewriterContext
 
 
 class RewriterPass(ABC):
-  """
-  Abstract contract for a transformation pass in the rewriting pipeline.
+  """Abstract contract for a transformation pass in the rewriting pipeline.
 
   Passes encapsulate discrete transformation logic (e.g. Structural Rewriting,
   API Remapping) and are executed sequentially by the pipeline.
@@ -20,8 +18,7 @@ class RewriterPass(ABC):
 
   @abstractmethod
   def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
-    """
-    Executes the transformation logic on the given CST module.
+    """Executes the transformation logic on the given CST module.
 
     Args:
         module: The input LibCST module.
@@ -29,5 +26,6 @@ class RewriterPass(ABC):
 
     Returns:
         The transformed LibCST module.
+
     """
     pass

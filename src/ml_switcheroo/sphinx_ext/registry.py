@@ -1,5 +1,4 @@
-"""
-Registry scanning logic for the WASM demo.
+"""Registry scanning logic for the WASM demo.
 
 This module is responsible for introspecting the installed Framework Adapters,
 determining hierarchical relationships (Parent/Child frameworks), and
@@ -16,14 +15,14 @@ from ml_switcheroo.sphinx_ext.types import HierarchyMap
 
 
 def scan_registry() -> Tuple[HierarchyMap, str, str]:
-  """
-  Scans registered adapters to build hierarchy, examples, and tier metadata.
+  """Scans registered adapters to build hierarchy, examples, and tier metadata.
 
   Returns:
       Tuple[HierarchyMap, str, str]:
           - The hierarchy dictionary mapping frameworks.
           - JSON string of preloaded examples.
           - JSON string of framework tier mapping.
+
   """
   fws = available_frameworks()
   priorities = get_framework_priority_order()

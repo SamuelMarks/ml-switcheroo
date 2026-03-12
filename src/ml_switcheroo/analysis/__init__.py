@@ -1,5 +1,4 @@
-"""
-Static Analysis Package.
+"""Static Analysis Package.
 
 This package contains visitors and utilities for inspecting Python ASTs (Abstract Syntax Trees)
 to extract metadata, ensuring safety, and building symbol tables prior to transformation.

@@ -1,5 +1,4 @@
-"""
-MLIR Emitter Logic.
+"""MLIR Emitter Logic.
 
 This module provides the `PythonToMlirEmitter`, a compiler front-end that
 transforms Python LibCST trees into the MLIR CST object model.
@@ -22,9 +21,7 @@ from ml_switcheroo.core.scanners import get_full_name
 
 
 class SSAContext:
-  """
-  Manages Single Static Assignment (SSA) variable scopes and ID allocation.
-  """
+  """Manages Single Static Assignment (SSA) variable scopes and ID allocation."""
 
   def __init__(self):
     """Initialize the context with a root scope."""
@@ -41,18 +38,17 @@ class SSAContext:
       self._scopes.pop()
 
   def declare(self, name: str, value: ValueNode) -> None:
-    """
-    Register a variable name in the current scope.
+    """Register a variable name in the current scope.
 
     Args:
         name: The Python variable identifier.
         value: The MLIR ValueNode (SSA value) associated with it.
+
     """
     self._scopes[-1][name] = value
 
   def lookup(self, name: str) -> Optional[ValueNode]:
-    """
-    Resolve a Python variable name to its current SSA value.
+    """Resolve a Python variable name to its current SSA value.
     Searches scopes from innermost to outermost.
 
     Args:
@@ -60,6 +56,7 @@ class SSAContext:
 
     Returns:
         The associated ValueNode or None if not found.
+
     """
     for scope in reversed(self._scopes):
       if name in scope:
@@ -67,14 +64,14 @@ class SSAContext:
     return None
 
   def allocate_ssa(self, prefix: str = "%") -> ValueNode:
-    """
-    Generates a new unique SSA value.
+    """Generates a new unique SSA value.
 
     Args:
         prefix: String prefix for the ID (default "%").
 
     Returns:
         A new ValueNode with a unique ID (e.g. "%0", "%1").
+
     """
     val = ValueNode(name=f"{prefix}{self._counter}")
     self._counter += 1
@@ -82,23 +79,21 @@ class SSAContext:
 
 
 class PythonToMlirEmitter:
-  """
-  Translates Python LibCST modules into MLIR structural nodes.
-  """
+  """Translates Python LibCST modules into MLIR structural nodes."""
 
   def __init__(self):
     """Initialize the emitter with a fresh SSA context."""
     self.ctx = SSAContext()
 
   def convert(self, node: cst.Module) -> ModuleNode:
-    """
-    Entry point: Converts a CST Module to an MLIR ModuleNode.
+    """Entry point: Converts a CST Module to an MLIR ModuleNode.
 
     Args:
         node: The Python LibCST Module.
 
     Returns:
         The resulting MLIR ModuleNode containing the translated operations.
+
     """
     body_block = self._emit_block(node.body)
 
@@ -120,14 +115,14 @@ class PythonToMlirEmitter:
     return ModuleNode(body=body_block)
 
   def _extract_trivia(self, node: cst.CSTNode) -> List[TriviaNode]:
-    """
-    Extracts comments and newlines from a CST node's leading lines.
+    """Extracts comments and newlines from a CST node's leading lines.
 
     Args:
         node: The CST node to inspect.
 
     Returns:
         A list of MLIR TriviaNodes (comments translated to `//` syntax).
+
     """
     trivia = []
     if hasattr(node, "leading_lines"):
@@ -144,8 +139,7 @@ class PythonToMlirEmitter:
     return trivia
 
   def _emit_block(self, body_enc: Union[cst.BaseSuite, Sequence[cst.CSTNode]], label: str = "") -> BlockNode:
-    """
-    Converts a sequence of statements (or a Suite) into an MLIR Block.
+    """Converts a sequence of statements (or a Suite) into an MLIR Block.
 
     Args:
         body_enc: A CST Suite (IndentedBlock) or list of statements.
@@ -153,6 +147,7 @@ class PythonToMlirEmitter:
 
     Returns:
         A populated BlockNode.
+
     """
     block = BlockNode(label=label)
     stmts = []
@@ -168,14 +163,14 @@ class PythonToMlirEmitter:
     return block
 
   def _emit_statement(self, stmt: cst.CSTNode) -> List[OperationNode]:
-    """
-    Dispatches statement nodes to specific handlers.
+    """Dispatches statement nodes to specific handlers.
 
     Args:
         stmt: The statement node (ClassDef, FunctionDef, Assign, etc.).
 
     Returns:
         A list of MLIR OperationNodes generated from the statement.
+
     """
     results = []
     if isinstance(stmt, cst.ClassDef):
@@ -195,14 +190,14 @@ class PythonToMlirEmitter:
     return results
 
   def _dispatch_small_stmt(self, node: cst.CSTNode) -> List[OperationNode]:
-    """
-    Handles small statements inside simple lines (Assign, Return, Expr).
+    """Handles small statements inside simple lines (Assign, Return, Expr).
 
     Args:
         node: The inner statement node.
 
     Returns:
         List of resulting operations.
+
     """
     if isinstance(node, cst.Assign):
       return self._emit_assign(node)
@@ -216,14 +211,14 @@ class PythonToMlirEmitter:
     return []
 
   def _emit_import(self, node: Union[cst.Import, cst.ImportFrom]) -> OperationNode:
-    """
-    Converts Import/ImportFrom to `sw.import`.
+    """Converts Import/ImportFrom to `sw.import`.
 
     Args:
         node: The Import or ImportFrom CST node.
 
     Returns:
         An OperationNode representing the `sw.import` operation.
+
     """
     names = []
     aliases = []
@@ -260,14 +255,14 @@ class PythonToMlirEmitter:
     return OperationNode(name="sw.import", attributes=attrs)
 
   def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
-    """
-    Converts a Python class definition to `sw.module`.
+    """Converts a Python class definition to `sw.module`.
 
     Args:
         node: The ClassDef node.
 
     Returns:
         An `sw.module` OperationNode containing the class body region.
+
     """
     self.ctx.enter_scope()
     name_obj = AttributeNode(name="sym_name", value=f'"{node.name.value}"')
@@ -291,14 +286,14 @@ class PythonToMlirEmitter:
     return op
 
   def _emit_func_def(self, node: cst.FunctionDef) -> OperationNode:
-    """
-    Converts a Python function definition to `sw.func`.
+    """Converts a Python function definition to `sw.func`.
 
     Args:
         node: The FunctionDef node.
 
     Returns:
         An `sw.func` OperationNode with arguments mapped to block arguments.
+
     """
     self.ctx.enter_scope()
     func_name = node.name.value
@@ -323,8 +318,7 @@ class PythonToMlirEmitter:
     return op
 
   def _emit_assign(self, node: cst.Assign) -> List[OperationNode]:
-    """
-    Converts an assignment statement.
+    """Converts an assignment statement.
 
     Emits expression operations and registers the result in the SSA context.
     Handles both variable assignment (`x = y`) and attribute assignment (`x.attr = y`)
@@ -335,6 +329,7 @@ class PythonToMlirEmitter:
 
     Returns:
         List of operations generated by the assignment expression.
+
     """
     val, ops = self._emit_expression(node.value)
 
@@ -372,14 +367,14 @@ class PythonToMlirEmitter:
     return ops
 
   def _emit_return(self, node: cst.Return) -> List[OperationNode]:
-    """
-    Converts a return statement to `sw.return`.
+    """Converts a return statement to `sw.return`.
 
     Args:
         node: The Return node.
 
     Returns:
         List containing expression evaluation ops and the return op.
+
     """
     ops = []
     operands = []
@@ -394,14 +389,14 @@ class PythonToMlirEmitter:
     return ops
 
   def _flatten_attr(self, node: cst.CSTNode) -> Optional[str]:
-    """
-    Helper to flatten a Name or Attribute chain into a string.
+    """Helper to flatten a Name or Attribute chain into a string.
 
     Args:
         node: CST node.
 
     Returns:
         Dotted string (e.g. "self.layer") or None.
+
     """
     if isinstance(node, cst.Name):
       return node.value
@@ -412,14 +407,14 @@ class PythonToMlirEmitter:
     return None
 
   def _get_binop_str(self, operator: cst.BaseBinaryOp) -> str:
-    """
-    Maps LibCST binary operator classes to string codes.
+    """Maps LibCST binary operator classes to string codes.
 
     Args:
         operator: The CST binary operator node.
 
     Returns:
         String identifier (e.g. "add", "mul", "matmul").
+
     """
     if isinstance(operator, cst.Add):
       return "add"
@@ -450,8 +445,7 @@ class PythonToMlirEmitter:
     return "unknown"
 
   def _emit_expression(self, expr: cst.BaseExpression) -> Tuple[ValueNode, List[OperationNode]]:
-    """
-    Recursively converts an expression into a value and a list of supporting operations.
+    """Recursively converts an expression into a value and a list of supporting operations.
 
     Handles:
     - Variables (Names)
@@ -464,6 +458,7 @@ class PythonToMlirEmitter:
 
     Returns:
         Tuple (ResultValue, List[Ops]).
+
     """
     ops = []
     if isinstance(expr, cst.Name):
@@ -573,9 +568,7 @@ class PythonToMlirEmitter:
     return ValueNode("%error"), []
 
   def _annotation_to_string(self, node: cst.CSTNode) -> str:
-    """
-    Flattens a type annotation node to a string representation.
-    """
+    """Flattens a type annotation node to a string representation."""
     if isinstance(node, cst.Name):
       return node.value
     elif isinstance(node, cst.Attribute):

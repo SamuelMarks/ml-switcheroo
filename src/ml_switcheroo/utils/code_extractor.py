@@ -1,5 +1,4 @@
-"""
-Utility to extract source code from live Python objects.
+"""Utility to extract source code from live Python objects.
 
 This module solves the "Split-Brain" issue between the core logic and generated harnesses.
 Instead of duplicating code manually into template strings, this utility uses the `inspect`
@@ -17,14 +16,11 @@ from typing import Any, List, Type
 
 
 class CodeExtractor:
-  """
-  Extracts self-contained source code for Python classes or functions.
-  """
+  """Extracts self-contained source code for Python classes or functions."""
 
   @staticmethod
   def extract_class(cls_obj: Type[Any]) -> str:
-    """
-    Reads the source code of a class and formats it for injection.
+    """Reads the source code of a class and formats it for injection.
 
     Args:
         cls_obj (Type[Any]): The class object to extract (e.g. `InputFuzzer`).
@@ -35,6 +31,7 @@ class CodeExtractor:
     Raises:
         OSError: If source code cannot be retrieved (e.g. purely compiled C modules).
         TypeError: If input is not a class.
+
     """
     if not inspect.isclass(cls_obj):
       raise TypeError(f"Expected a class, got {type(cls_obj)}")
@@ -49,8 +46,7 @@ class CodeExtractor:
 
   @staticmethod
   def normalize_harness_imports(source_code: str, required_modules: List[str]) -> str:
-    """
-    Prepends necessary imports to a code block to ensure it is standalone.
+    """Prepends necessary imports to a code block to ensure it is standalone.
 
     Since extracted code loses its module-level imports, we must reinject them.
 
@@ -60,6 +56,7 @@ class CodeExtractor:
 
     Returns:
         str: The source code with import statements prepended.
+
     """
     imports = []
     for mod in required_modules:

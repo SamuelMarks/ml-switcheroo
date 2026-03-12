@@ -1,5 +1,4 @@
-"""
-TikZ Concrete Syntax Tree (CST) Nodes.
+"""TikZ Concrete Syntax Tree (CST) Nodes.
 
 This module defines the data structures for representing TikZ source code.
 It follows a similar philosophy to LibCST, where nodes own their
@@ -18,20 +17,18 @@ class TikzBaseNode(ABC):
 
   @abstractmethod
   def to_text(self) -> str:
-    """
-    Render this node to its string representation.
+    """Render this node to its string representation.
 
     Returns:
         str: The TikZ/LaTeX source code for this construct.
+
     """
     pass
 
 
 @dataclass
 class TriviaNode(TikzBaseNode):
-  """
-  Represents non-semantic textual elements (whitespace, newlines).
-  """
+  """Represents non-semantic textual elements (whitespace, newlines)."""
 
   content: str
   """The raw whitespace content."""
@@ -43,8 +40,7 @@ class TriviaNode(TikzBaseNode):
 
 @dataclass
 class TikzComment(TikzBaseNode):
-  """
-  Represents a LaTeX comment (e.g. ``% My Comment``).
+  """Represents a LaTeX comment (e.g. ``% My Comment``).
   Includes the percent sign in the content or adds it during export.
   """
 
@@ -63,9 +59,7 @@ class TikzComment(TikzBaseNode):
 
 @dataclass
 class TikzOption(TikzBaseNode):
-  """
-  Represents a TikZ option like ``[draw=black]`` or ``[circle]``.
-  """
+  """Represents a TikZ option like ``[draw=black]`` or ``[circle]``."""
 
   key: str
   """Option key."""
@@ -82,17 +76,17 @@ class TikzOption(TikzBaseNode):
 
 @dataclass
 class TikzTable(TikzBaseNode):
-  """ 
-    Represents an HTML-like table structure used inside TikZ Node labels. 
-    Uses LaTeX tabular environment syntax. 
+  r""" 
+  Represents an HTML-like table structure used inside TikZ Node labels. 
+  Uses LaTeX tabular environment syntax. 
 
-    Example:: 
+  Example:: 
 
-        \\begin{tabular}{c} 
-            \\textbf{LayerName} \\\\ 
-            param: val
-        \\end{tabular} 
-    """
+      \\begin{tabular}{c} 
+          \\textbf{LayerName} \\\\ 
+          param: val
+      \\end{tabular} 
+  """
 
   rows: List[List[str]] = field(default_factory=list)
   """List of rows, where each row is a list of cell strings."""
@@ -114,8 +108,7 @@ class TikzTable(TikzBaseNode):
 
 @dataclass
 class TikzNode(TikzBaseNode):
-  """
-  Represents a ``\\node`` command.
+  r"""Represents a ``\\node`` command.
 
   Structure::
 
@@ -165,8 +158,7 @@ class TikzNode(TikzBaseNode):
 
 @dataclass
 class TikzEdge(TikzBaseNode):
-  """
-  Represents a ``\\draw`` command connecting two nodes.
+  r"""Represents a ``\\draw`` command connecting two nodes.
 
   Structure::
 
@@ -209,8 +201,7 @@ class TikzEdge(TikzBaseNode):
 
 @dataclass
 class TikzGraph(TikzBaseNode):
-  """
-  The root container representing the ``tikzpicture`` environment.
+  r"""The root container representing the ``tikzpicture`` environment.
 
   Structure::
 

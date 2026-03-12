@@ -1,5 +1,4 @@
-"""
-MLIR Concrete Syntax Tree Nodes.
+"""MLIR Concrete Syntax Tree Nodes.
 
 This module defines the data structures for representing MLIR source code.
 It ensures structural hierarchy (Module -> Operation -> Region -> Block)
@@ -18,7 +17,6 @@ class MlirNode(ABC):
   @abstractmethod
   def to_text(self) -> str:
     """Return the textual MLIR representation of this node."""
-    pass
 
 
 @dataclass
@@ -57,8 +55,7 @@ class TypeNode(MlirNode):
 
 @dataclass
 class AttributeNode(MlirNode):
-  """
-  Represents a named attribute.
+  """Represents a named attribute.
   Value can be a string literal or a list of string literals (e.g. for bases).
   """
 
@@ -176,9 +173,7 @@ class OperationNode(MlirNode):
     # 5. Attributes
     if self.attributes:
       # Canonical formatting: Force space before attributes
-      if (not self.operands) and (not self.name_trivia):
-        parts.append(" ")
-      elif self.operands and not self.name_trivia:
+      if not self.name_trivia:
         parts.append(" ")
 
       parts.append("{")
@@ -203,10 +198,7 @@ class OperationNode(MlirNode):
         parts.append(" : ")
       else:
         # Trivial check for trailing space in existing parts
-        if parts[-1].strip() != "":
-          parts.append(" : ")
-        else:
-          parts.append(": ")
+        parts.append(" : ")
 
       if len(self.result_types) == 1:
         parts.append(self.result_types[0].to_text())

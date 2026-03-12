@@ -1,5 +1,4 @@
-"""
-File Loading Logic for Semantic Knowledge Base.
+"""File Loading Logic for Semantic Knowledge Base.
 
 This module handles the discovery and deserialization of JSON specification files
 (The Hub) and Snapshot overlays (The Spokes). It delegates the actual data
@@ -26,22 +25,19 @@ DISCOVERED_FILENAMES = {"k_discovered.json"}
 
 
 class KnowledgeBaseLoader:
-  """
-  Handles the I/O operations for populating the SemanticsManager.
-  """
+  """Handles the I/O operations for populating the SemanticsManager."""
 
   def __init__(self, manager: Any):
-    """
-    Initialize the loader.
+    """Initialize the loader.
 
     Args:
         manager: The parent SemanticsManager instance to populate.
+
     """
     self.mgr = manager
 
   def load_knowledge_graph(self) -> None:
-    """
-    Scans the semantics directory for JSON specifications.
+    """Scans the semantics directory for JSON specifications.
 
     Loads files in priority order:
     1. Array API (Math) - Priority 10
@@ -83,9 +79,7 @@ class KnowledgeBaseLoader:
     self._load_overlays()
 
   def _load_overlays(self) -> None:
-    """
-    Scans the snapshots directory for framework mapping overlays.
-    """
+    """Scans the snapshots directory for framework mapping overlays."""
     snap_dir = resolve_snapshots_dir()
     if not snap_dir.exists():
       return
@@ -100,12 +94,12 @@ class KnowledgeBaseLoader:
         print(f"⚠️ Error loading overlay {fpath.name}: {e}")
 
   def _load_tier_content(self, content: Dict[str, Any], tier: SemanticTier) -> None:
-    """
-    Merges a specification dictionary into the manager.
+    """Merges a specification dictionary into the manager.
 
     Args:
         content: The JSON content.
         tier: The Semantic Tier classification.
+
     """
     merge_tier_data(
       data=self.mgr.data,
@@ -116,12 +110,12 @@ class KnowledgeBaseLoader:
     )
 
   def _load_overlay_content(self, content: Dict[str, Any], filename: str) -> None:
-    """
-    Merges a snapshot overlay into the manager.
+    """Merges a snapshot overlay into the manager.
 
     Args:
         content: The JSON content.
         filename: The source filename (used for metadata inference).
+
     """
     merge_overlay_data(
       data=self.mgr.data,

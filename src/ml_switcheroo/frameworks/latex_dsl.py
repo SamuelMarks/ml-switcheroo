@@ -1,5 +1,4 @@
-"""
-LaTeX Math DSL Adapter.
+"""LaTeX Math DSL Adapter.
 
 Provides metadata and hooks for the Machine Intelligence Definition Language (MIDL)
 LaTeX DSL.
@@ -33,7 +32,7 @@ class LatexDSLAdapter:
   _mode: InitMode = InitMode.GHOST
 
   def __init__(self) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     pass
 
   def create_parser(self, code: str) -> LatexParser:
@@ -42,32 +41,32 @@ class LatexDSLAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return []
 
   @property
   def unsafe_submodules(self) -> Set[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return ("midl", "midl")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return {"midl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="midl")}
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return {}
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return {
       "import": "% latex package imports",
       "convert_input": "% input {np_var}",
@@ -76,30 +75,30 @@ class LatexDSLAdapter:
 
   @property
   def harness_imports(self) -> List[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return []
 
   def get_harness_init_code(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return "return str(obj)"
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return [SemanticTier.NEURAL, SemanticTier.ARRAY_API]
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return []
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return StructuralTraits(
       module_base="midl.Module",
       forward_method="forward",
@@ -109,12 +108,12 @@ class LatexDSLAdapter:
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return PluginTraits()
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     defs = load_definitions("latex_dsl")
     if "Module" not in defs:
       defs["Module"] = StandardMap(api="midl.Module")
@@ -135,7 +134,7 @@ class LatexDSLAdapter:
 
   @property
   def specifications(self) -> Dict[str, OperationDef]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     from ml_switcheroo.core.dsl import ParameterDef
 
     # Populate implicit Hub definitions if files are missing
@@ -162,63 +161,63 @@ class LatexDSLAdapter:
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return []
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return []
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return ""
 
   def get_device_check_syntax(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return "True"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return ""
 
   def get_serialization_imports(self) -> List[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return []
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return []
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return "# Weights not supported in LaTeX mode"
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return tensor_var
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return "# Weights not supported in LaTeX mode"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     pass
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return None
 
   def convert(self, data: Any) -> Any:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return str(data)
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return {
       "tier1_math": "y = |x| + z",
       "tier2_neural": r"\begin{DefModel}{ConvNet} \Attribute{conv}{Conv2d}{} \end{DefModel}",

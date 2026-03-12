@@ -1,6 +1,4 @@
-"""
-Strict Mode Guards Injection.
-"""
+"""Strict Mode Guards Injection."""
 
 from typing import List, Dict, Any
 import libcst as cst
@@ -21,8 +19,7 @@ def apply_strict_guards(
   details: Dict[str, Any],
   target_impl: Dict[str, Any],
 ) -> List[cst.Arg]:
-  """
-  Wraps arguments with rank assertion helper calls if required by strict mode.
+  """Wraps arguments with rank assertion helper calls if required by strict mode.
 
   Args:
       rewriter (Any): The CST rewriter instance containing context.
@@ -32,6 +29,7 @@ def apply_strict_guards(
 
   Returns:
       List[cst.Arg]: A new list of arguments, potentially wrapped in assertion logic.
+
   """
   std_args = details.get("std_args", [])
   target_arg_map = target_impl.get("args", {})

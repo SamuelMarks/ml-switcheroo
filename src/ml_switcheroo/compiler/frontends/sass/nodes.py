@@ -1,5 +1,4 @@
-"""
-SASS AST Nodes.
+"""SASS AST Nodes.
 
 Defines the data structures for the NVIDIA SASS syntax tree.
 Each node corresponds to a syntactic element in SASS assembly and
@@ -29,13 +28,13 @@ class Operand(SassNode):
 
 @dataclass
 class Register(Operand):
-  """
-  Represents a general-purpose register (e.g., R0, RZ).
+  """Represents a general-purpose register (e.g., R0, RZ).
 
   Attributes:
       name (str): The register identifier (e.g., "R0", "RZ").
       negated: If True, prepends a negation sign (e.g., "-R0").
       absolute: If True, wraps in absolute value pipes (e.g., r``|R0|``).
+
   """
 
   name: str
@@ -43,7 +42,7 @@ class Register(Operand):
   absolute: bool = False
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     res = self.name
     if self.absolute:
       res = f"|{res}|"
@@ -54,8 +53,7 @@ class Register(Operand):
 
 @dataclass
 class Predicate(Operand):
-  """
-  Represents a predicate register (e.g., @P0, !P1).
+  """Represents a predicate register (e.g., @P0, !P1).
 
   Used both as instruction guards (preceding the opcode) and as operands
   in logical instructions (ISETP).
@@ -63,32 +61,33 @@ class Predicate(Operand):
   Attributes:
       name (str): The predicate identifier (e.g., "P0", "PT").
       negated (bool): If True, indicates logical NOT (e.g., "!P0").
+
   """
 
   name: str
   negated: bool = False
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     prefix = "!" if self.negated else ""
     return f"{prefix}{self.name}"
 
 
 @dataclass
 class Immediate(Operand):
-  """
-  Represents a literal constant value.
+  """Represents a literal constant value.
 
   Attributes:
       value (Union[int, float]): The numeric value.
       is_hex (bool): If True, renders as hex string (e.g., "0x1").
+
   """
 
   value: Union[int, float]
   is_hex: bool = False
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if self.is_hex:
       if isinstance(self.value, float):
         # Float hex representation requires struct packing usually,
@@ -101,8 +100,7 @@ class Immediate(Operand):
 
 @dataclass
 class Memory(Operand):
-  """
-  Represents a memory address operand.
+  """Represents a memory address operand.
 
   Supports Constant Bank access (e.g., `c[0x0][0x4]`) and Global/Local
   addressing (e.g., `[R1]`, `[R1 + 0x4]`).
@@ -110,13 +108,14 @@ class Memory(Operand):
   Attributes:
       base (Union[str, Register]): The base register (e.g., "R1") or constant bank string (e.g., "c[0x0]").
       offset (Optional[int]): Optional byte offset to add to the base.
+
   """
 
   base: Union[str, Register]
   offset: Optional[int] = None
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     base_str = str(self.base)
     # Constant Memory syntax: c[bank][offset]
     if isinstance(self.base, str) and self.base.startswith("c["):
@@ -132,8 +131,7 @@ class Memory(Operand):
 
 @dataclass
 class Instruction(SassNode):
-  """
-  Represents a single SASS operation line.
+  """Represents a single SASS operation line.
 
   Format: `@{predicate} {opcode} {operands};`
 
@@ -141,6 +139,7 @@ class Instruction(SassNode):
       opcode (str): The instruction mnemonic (e.g., "FADD", "MOV").
       operands (List[Operand]): List of operand nodes.
       predicate (Optional[Predicate]): Optional predicate guard executed before instruction.
+
   """
 
   opcode: str
@@ -148,7 +147,7 @@ class Instruction(SassNode):
   predicate: Optional[Predicate] = None
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     pred_str = f"@{str(self.predicate)} " if self.predicate else ""
     ops_str = ", ".join(str(op) for op in self.operands)
     return f"{pred_str}{self.opcode} {ops_str};"
@@ -156,39 +155,39 @@ class Instruction(SassNode):
 
 @dataclass
 class Label(SassNode):
-  """
-  Represents a jump target label.
+  """Represents a jump target label.
 
   Format: `{name}:`
 
   Attributes:
       name (str): The label identifier.
+
   """
 
   name: str
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return f"{self.name}:"
 
 
 @dataclass
 class Directive(SassNode):
-  """
-  Represents an assembler directive.
+  """Represents an assembler directive.
 
   Format: `.{name} {params}`
 
   Attributes:
       name (str): The directive name (e.g., "headerflags").
       params (List[str]): List of string parameters.
+
   """
 
   name: str
   params: List[str] = field(default_factory=list)
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     out = f".{self.name}"
     if self.params:
       out += " " + ", ".join(self.params)
@@ -197,17 +196,17 @@ class Directive(SassNode):
 
 @dataclass
 class Comment(SassNode):
-  """
-  Represents a line comment.
+  """Represents a line comment.
 
   Format: `// {text}`
 
   Attributes:
       text: The comment content.
+
   """
 
   text: str
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return f"// {self.text}"

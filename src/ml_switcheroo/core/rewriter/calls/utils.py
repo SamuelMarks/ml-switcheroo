@@ -1,5 +1,4 @@
-"""
-Utility functions for Call Rewriting.
+"""Utility functions for Call Rewriting.
 
 This module provides helper functions for inspecting and transforming LibCST Call nodes.
 It handles structural tasks such as:
@@ -24,8 +23,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def is_functional_apply(node: cst.Call, method_name: Optional[str] = "apply") -> bool:
-  """
-  Detects if a call node matches the functional execution pattern (e.g. `obj.apply`).
+  """Detects if a call node matches the functional execution pattern (e.g. `obj.apply`).
 
   Driven by the `functional_execution_method` trait of the source framework.
   This genericizes detection to support Flax (`apply`), Haiku (`apply`), or custom
@@ -38,6 +36,7 @@ def is_functional_apply(node: cst.Call, method_name: Optional[str] = "apply") ->
 
   Returns:
       bool: True if the call is a method matching the name.
+
   """
   if not method_name:
     return False
@@ -49,8 +48,7 @@ def is_functional_apply(node: cst.Call, method_name: Optional[str] = "apply") ->
 
 
 def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, config: Dict[str, str]) -> cst.Call:
-  """
-  Rewrites a call to a stateful object to match a functional pattern.
+  """Rewrites a call to a stateful object to match a functional pattern.
 
   Used when converting OOP frameworks to Functional ones where state must be passed explicitly.
   Can inject arguments (e.g. `variables`) and change method names (e.g. `__call__` -> `apply`).
@@ -63,6 +61,7 @@ def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, con
 
   Returns:
       cst.Call: The transformed call node.
+
   """
   new_args = list(node.args)
   target_arg_name = config.get("prepend_arg", "variables")
@@ -112,8 +111,7 @@ def rewrite_stateful_call(rewriter: Any, node: cst.Call, instance_name: str, con
 
 
 def inject_kwarg(node: cst.Call, arg_name: str, val_name: str) -> cst.Call:
-  """
-  Generic helper to inject a keyword argument into a call.
+  """Generic helper to inject a keyword argument into a call.
   Prevents duplication if the argument already exists.
 
   Format: `func(..., arg_name=val_name)`
@@ -125,6 +123,7 @@ def inject_kwarg(node: cst.Call, arg_name: str, val_name: str) -> cst.Call:
 
   Returns:
       cst.Call: The updated call node with the injected argument (if not present).
+
   """
   # Duplicate check
   for arg in node.args:
@@ -153,8 +152,7 @@ def inject_kwarg(node: cst.Call, arg_name: str, val_name: str) -> cst.Call:
 
 
 def strip_kwarg(node: cst.Call, kw_name: str) -> cst.Call:
-  """
-  Removes a specified keyword argument from a function call.
+  """Removes a specified keyword argument from a function call.
 
   Args:
       node (cst.Call): The call node.
@@ -162,6 +160,7 @@ def strip_kwarg(node: cst.Call, kw_name: str) -> cst.Call:
 
   Returns:
       cst.Call: The updated node with the argument removed.
+
   """
   filtered = []
   for arg in node.args:
@@ -178,14 +177,14 @@ def strip_kwarg(node: cst.Call, kw_name: str) -> cst.Call:
 
 
 def is_super_call(node: cst.Call) -> bool:
-  """
-  Detects if a call is `super()` or `super().method()`.
+  """Detects if a call is `super()` or `super().method()`.
 
   Args:
       node (cst.Call): The call node.
 
   Returns:
       bool: True if it is a super call.
+
   """
   if isinstance(node.func, cst.Attribute):
     # Case: super().method()
@@ -201,8 +200,7 @@ def is_super_call(node: cst.Call) -> bool:
 
 
 def is_builtin(name: str) -> bool:
-  """
-  Checks if a name corresponds to a standard Python builtin.
+  """Checks if a name corresponds to a standard Python builtin.
   Used to prevent excessive logging/tracing of standard language features.
 
   Args:
@@ -210,6 +208,7 @@ def is_builtin(name: str) -> bool:
 
   Returns:
       bool: True if builtin.
+
   """
   return name in {
     "print",
@@ -230,13 +229,13 @@ def is_builtin(name: str) -> bool:
 
 
 def log_diff(label: str, original: cst.CSTNode, modified: cst.CSTNode) -> None:
-  """
-  Helper to compute AST diffs and log them to the tracer if changes occurred.
+  """Helper to compute AST diffs and log them to the tracer if changes occurred.
 
   Args:
       label (str): Label for the log entry.
       original (cst.CSTNode): The node before transformation.
       modified (cst.CSTNode): The node after transformation.
+
   """
   src_before, src_after, is_changed = diff_nodes(original, modified)
   if is_changed:
@@ -244,8 +243,7 @@ def log_diff(label: str, original: cst.CSTNode, modified: cst.CSTNode) -> None:
 
 
 def compute_permutation(source_layout: str, target_layout: str) -> Optional[Tuple[int, ...]]:
-  """
-  Computes permutation indices to transform source layout string to target layout string.
+  """Computes permutation indices to transform source layout string to target layout string.
 
   Example:
       Source: "NCHW", Target: "NHWC"
@@ -259,6 +257,7 @@ def compute_permutation(source_layout: str, target_layout: str) -> Optional[Tupl
 
   Returns:
       tuple[int, ...]: Tuple of integer indices, or None if invalid.
+
   """
   if len(source_layout) != len(target_layout):
     return None
@@ -281,8 +280,7 @@ def inject_permute_call(
   semantics: SemanticsManager,
   target_fw: str,
 ) -> cst.CSTNode:
-  """
-  Wraps a CST node with a permutation call valid for the target framework.
+  """Wraps a CST node with a permutation call valid for the target framework.
 
   Decoupling Logic:
       It queries the SemanticsManager for the `permute_dims` definition in the target tier.
@@ -298,6 +296,7 @@ def inject_permute_call(
 
   Returns:
       cst.CSTNode: Node representing `permute(base_node, indices)` or original if unsupported.
+
   """
   # 1. Lookup 'permute_dims' definition logic
   variant = semantics.resolve_variant("permute_dims", target_fw)

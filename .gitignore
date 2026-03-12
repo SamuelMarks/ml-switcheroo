@@ -58,3 +58,36 @@ coverage.json
 .coverage
 htmlcov/
 
+
+# Custom temporary and debugging files
+test_*dbg*.py
+test_debug*.py
+tmp*.py
+tmp*/
+out.*
+find_hang*.py
+print_missing.py
+fix_*.sh
+append_*.py
+gen_all.py
+test_attention_packing_fix.py
+test_tok.py
+coverage.xml
+
+
+# Un-ignore intentionally tracked files
+!requirements.txt
+!test-requirements.txt
+!docs/requirements.txt
+!tests/integration/__snapshots__/*.txt
+!src/ml_switcheroo/utils/doc_*.py
+
+
+# Additional scratch files
+test_parse.py
+test_run.py
+patch*.js
+universal_mapping.json
+coverage_*.txt
+interrogate_*.txt
+

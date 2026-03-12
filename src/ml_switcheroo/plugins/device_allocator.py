@@ -1,5 +1,4 @@
-"""
-Plugin for translating Device Allocation logic.
+"""Plugin for translating Device Allocation logic.
 
 Delegates syntax generation to the target FrameworkAdapter to ensure logic
 remains decoupled from the core transpiler.
@@ -22,8 +21,7 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 
 @register_hook("device_allocator")
 def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpression:
-  """
-  Plugin Hook: Transforms device construction calls via Adapter delegation.
+  """Plugin Hook: Transforms device construction calls via Adapter delegation.
 
   Triggers:
       Operations marked with `requires_plugin: "device_allocator"` (e.g., `torch.device`).
@@ -34,6 +32,7 @@ def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpr
 
   Returns:
       A CST Expression representing the target device access.
+
   """
   # 1. Parse Arguments to extract Type and Index CST Nodes
   dev_type_node, dev_index_node = _parse_device_args(node)
@@ -66,8 +65,7 @@ def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpr
 
 
 def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Optional[cst.BaseExpression]]:
-  """
-  Extracts (device_type_node, index_node) from `torch.device` call arguments.
+  """Extracts (device_type_node, index_node) from `torch.device` call arguments.
 
   Handles:
   - `torch.device('cuda')`

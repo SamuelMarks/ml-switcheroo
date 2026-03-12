@@ -1,5 +1,4 @@
-"""
-CLI Command Handlers Facade.
+"""CLI Command Handlers Facade.
 
 This module primarily re-exports handlers from `ml_switcheroo.cli.handlers`
 to maintain backward compatibility with existing tests and imports. Must remain
@@ -56,8 +55,7 @@ from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapsho
 def handle_gen_weight_script(
   source_file: Path, out_script: Path, source_fw: Optional[str] = None, target_fw: Optional[str] = None
 ) -> int:
-  """
-  Handler for generating weight migration script.
+  """Handler for generating weight migration script.
 
   Delegates to the `WeightScriptGenerator` class.
 
@@ -69,6 +67,7 @@ def handle_gen_weight_script(
 
   Returns:
       int: Exit Code (0 for success, 1 for failure).
+
   """
   config = RuntimeConfig.load(source=source_fw, target=target_fw)
   semantics = SemanticsManager()

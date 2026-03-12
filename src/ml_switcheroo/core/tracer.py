@@ -1,5 +1,4 @@
-"""
-Transpilation Trace Logger.
+"""Transpilation Trace Logger.
 
 This module provides the infrastructure to record the step-by-step execution
 of the transpiler. It captures:
@@ -20,9 +19,7 @@ from typing import Any, Dict, List, Optional
 
 
 class TraceEventType(str, Enum):
-  """
-  Enumeration of supported trace event types.
-  """
+  """Enumeration of supported trace event types."""
 
   PHASE_START = "phase_start"
   PHASE_END = "phase_end"
@@ -36,9 +33,7 @@ class TraceEventType(str, Enum):
 
 @dataclass
 class TraceEvent:
-  """
-  A single unit of execution history.
-  """
+  """A single unit of execution history."""
 
   id: str
   type: TraceEventType
@@ -50,8 +45,7 @@ class TraceEvent:
 
 
 class TraceLogger:
-  """
-  Records transpilation events for visualization.
+  """Records transpilation events for visualization.
   Designed to be injected into the Engine and Rewriter.
 
   This class maintains a stack of active phases to establish parent-child
@@ -64,8 +58,7 @@ class TraceLogger:
     self._active_phases: List[str] = []  # Stack of phase IDs
 
   def start_phase(self, name: str, description: str = "") -> str:
-    """
-    Starts a nested phase (e.g., 'Rewriting Function X').
+    """Starts a nested phase (e.g., 'Rewriting Function X').
 
     Args:
         name (str): The name of the phase.
@@ -73,6 +66,7 @@ class TraceLogger:
 
     Returns:
         str: The generated Phase ID.
+
     """
     phase_id = str(uuid.uuid4())
 
@@ -92,8 +86,7 @@ class TraceLogger:
     return phase_id
 
   def end_phase(self) -> None:
-    """
-    Ends the current active phase.
+    """Ends the current active phase.
     Pops the phase ID from the stack and logs an end event.
     """
     if not self._active_phases:
@@ -116,14 +109,14 @@ class TraceLogger:
     abstract_op: str,
     lineno: Optional[int] = None,
   ) -> None:
-    """
-    Logs a Semantic Match event.
+    """Logs a Semantic Match event.
 
     Args:
         source_api: The source function name (e.g. `torch.abs`).
         target_api: The target implementation (e.g. `jax.numpy.abs`).
         abstract_op: The abstract standard key (e.g. `Abs`).
         lineno: Optional 1-based source line number.
+
     """
     self._log_simple(
       TraceEventType.MATCH_SEMANTICS,
@@ -133,14 +126,14 @@ class TraceLogger:
     )
 
   def log_mutation(self, node_type: str, before: str, after: str, lineno: Optional[int] = None) -> None:
-    """
-    Logs an AST transformation with code diffs.
+    """Logs an AST transformation with code diffs.
 
     Args:
         node_type: Description of node being changed (e.g. "Call").
         before: Source code snapshot before mutation.
         after: Source code snapshot after mutation.
         lineno: Optional 1-based source line number.
+
     """
     self._log_simple(
       TraceEventType.AST_MUTATION,
@@ -150,12 +143,12 @@ class TraceLogger:
     )
 
   def log_warning(self, message: str, lineno: Optional[int] = None) -> None:
-    """
-    Logs an analysis warning.
+    """Logs an analysis warning.
 
     Args:
         message: The warning text.
         lineno: Optional 1-based source line number.
+
     """
     self._log_simple(
       TraceEventType.ANALYSIS_WARNING,
@@ -165,13 +158,13 @@ class TraceLogger:
     )
 
   def log_inspection(self, node_str: str, outcome: str, detail: str = "") -> None:
-    """
-    Logs a decision point where no change occurred (for debugging).
+    """Logs a decision point where no change occurred (for debugging).
 
     Args:
         node_str: The code element being inspected.
         outcome: The result (e.g., "Skipped", "Ignored").
         detail: Reason for the outcome.
+
     """
     self._log_simple(
       TraceEventType.INSPECTION,
@@ -180,13 +173,13 @@ class TraceLogger:
     )
 
   def log_snapshot(self, description: str, mermaid_graph: str, code_snapshot: Optional[str] = None) -> None:
-    """
-    Logs a full AST snapshot for visualization.
+    """Logs a full AST snapshot for visualization.
 
     Args:
         description: Label for the snapshot (e.g. "Before Pivot").
         mermaid_graph: string containing Mermaid diagram definition.
         code_snapshot: Optional string containing source code state.
+
     """
     self._log_simple(
       TraceEventType.AST_SNAPSHOT,
@@ -216,11 +209,11 @@ class TraceLogger:
     )
 
   def export(self) -> List[Dict[str, Any]]:
-    """
-    Exports the event log as a list of dictionaries.
+    """Exports the event log as a list of dictionaries.
 
     Returns:
         List[Dict[str, Any]]: JSON-serializable event stream.
+
     """
     return [asdict(e) for e in self._events]
 
@@ -230,15 +223,11 @@ _GLOBAL_TRACER = TraceLogger()
 
 
 def get_tracer() -> TraceLogger:
-  """
-  Returns the global singleton TraceLogger instance.
-  """
+  """Returns the global singleton TraceLogger instance."""
   return _GLOBAL_TRACER
 
 
 def reset_tracer() -> None:
-  """
-  Resets the global tracer state. Useful between runs or tests.
-  """
+  """Resets the global tracer state. Useful between runs or tests."""
   global _GLOBAL_TRACER
   _GLOBAL_TRACER = TraceLogger()

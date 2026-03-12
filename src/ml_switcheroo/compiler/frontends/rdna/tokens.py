@@ -1,5 +1,4 @@
-"""
-RDNA Tokenizer Definition.
+"""RDNA Tokenizer Definition.
 
 Provides a Regex-based Lexer (`RdnaLexer`) that decomposes raw AMD RDNA assembly
 strings into a stream of typed `Token` objects. It handles specific assembly
@@ -38,14 +37,14 @@ class TokenType(Enum):
 
 @dataclass
 class Token:
-  """
-  Represents a lexical unit.
+  """Represents a lexical unit.
 
   Attributes:
       kind (TokenType): The type of token.
       value (str): The raw string value.
       line (int): Line number in source (1-based).
       column (int): Column number in source (1-based).
+
   """
 
   kind: TokenType
@@ -55,9 +54,7 @@ class Token:
 
 
 class RdnaLexer:
-  """
-  Regex-based Lexer for AMD RDNA / GCN assembly.
-  """
+  """Regex-based Lexer for AMD RDNA / GCN assembly."""
 
   # Compiled Regex Patterns (Order determines priority)
   # Note: RDNA uses ';' for comments
@@ -100,8 +97,7 @@ class RdnaLexer:
     self.regex_pairs = [(kind, re.compile(pattern)) for kind, pattern in self.PATTERNS]
 
   def tokenize(self, text: str) -> Generator[Token, None, None]:
-    """
-    Tokenizes the input string.
+    """Tokenizes the input string.
 
     Args:
         text (str): Raw RDNA source code.
@@ -111,6 +107,7 @@ class RdnaLexer:
 
     Raises:
         ValueError: If an unrecognized character sequence is encountered.
+
     """
     pos = 0
     line_num = 1

@@ -1,5 +1,4 @@
-"""
-Graph-Level Rewriter for Pattern Fusion.
+"""Graph-Level Rewriter for Pattern Fusion.
 
 This module implements the `GraphOptimizer`, which performs fusion on
 the `LogicalGraph` intermediate representation. It scans the graph for
@@ -29,28 +28,26 @@ from ml_switcheroo.core.dsl import PatternDef
 
 
 class GraphOptimizer:
-  """
-  Optimizes a LogicalGraph by fusing subgraphs based on defined patterns.
-  """
+  """Optimizes a LogicalGraph by fusing subgraphs based on defined patterns."""
 
   def __init__(self, patterns: List[PatternDef]):
-    """
-    Initialize with a list of fusion patterns.
+    """Initialize with a list of fusion patterns.
 
     Args:
         patterns: List of `PatternDef` objects defining the sequences to fuse.
+
     """
     self.patterns = patterns
 
   def optimize(self, graph: LogicalGraph) -> LogicalGraph:
-    """
-    Runs the fusion pass on the graph.
+    """Runs the fusion pass on the graph.
 
     Args:
         graph: The input `LogicalGraph`.
 
     Returns:
         A new `LogicalGraph` with fusion applied.
+
     """
     if not self.patterns:
       return graph
@@ -62,14 +59,14 @@ class GraphOptimizer:
     return fused
 
   def _apply_fusion_pass(self, graph: LogicalGraph) -> LogicalGraph:
-    """
-    Executes a single pass of greedy pattern matching.
+    """Executes a single pass of greedy pattern matching.
 
     Args:
         graph: The input graph.
 
     Returns:
         The optimized graph.
+
     """
     # 1. Build Adjacency and Lookup Maps
     # node_id -> Node
@@ -197,8 +194,7 @@ class GraphOptimizer:
     out_edges: Dict[str, List[str]],
     processed_ids: Set[str],
   ) -> Optional[List[str]]:
-    """
-    Checks if a sequence of Op Kinds exists starting from `start_node`.
+    """Checks if a sequence of Op Kinds exists starting from `start_node`.
     Enforces linear chain constraint (A->B->C).
 
     Args:
@@ -210,6 +206,7 @@ class GraphOptimizer:
 
     Returns:
         List of node IDs forming access sequence, or None.
+
     """
     if not sequence:
       return None

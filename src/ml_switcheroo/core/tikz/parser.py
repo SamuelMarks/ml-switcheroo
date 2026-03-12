@@ -1,5 +1,4 @@
-"""
-TikZ Parser (Lexer & Logical Reconstruction).
+"""TikZ Parser (Lexer & Logical Reconstruction).
 
 This module provides the `TikzParser` which consumes raw LaTeX/TikZ source code
 and reconstructs the `LogicalGraph` representation. It effectively reverses
@@ -53,8 +52,7 @@ class Token:
 
 
 class TikzLexer:
-  """
-  Regex-based tokenizer for TikZ source code.
+  """Regex-based tokenizer for TikZ source code.
 
   Splits raw LaTeX strings into a stream of typed Tokens, handling
   symbols, commands, strings, and whitespace.
@@ -88,12 +86,12 @@ class TikzLexer:
     self._tokens: List[Token] = []
 
   def tokenize(self) -> List[Token]:
-    """
-    Converts the full string into a list of Tokens.
+    """Converts the full string into a list of Tokens.
 
     Returns:
         List[Token]: Sequence of tokens, excluding comments and whitespace.
                      Ends with an EOF token.
+
     """
     while self.pos < len(self.text):
       match = None
@@ -128,8 +126,7 @@ class TikzLexer:
 
 
 class TikzParser:
-  """
-  Parses tokenized TikZ code into a LogicalGraph.
+  """Parses tokenized TikZ code into a LogicalGraph.
 
   This parser implements a recursive descent strategy tailored to the specific
   TikZ subset produced by the `TikzEmitter`. It is not a general-purpose
@@ -144,11 +141,11 @@ class TikzParser:
     self.graph = LogicalGraph()
 
   def parse(self) -> LogicalGraph:
-    """
-    Main entry point. Iterates top-level commands.
+    """Main entry point. Iterates top-level commands.
 
     Returns:
         LogicalGraph: The reconstructed graph extracted from the visual definition.
+
     """
     while not self._is_eof():
       token = self._peek()
@@ -195,9 +192,7 @@ class TikzParser:
     return self._peek().kind == kind
 
   def _expect(self, kind: TokenKind) -> Token:
-    """
-    Consume the current token if it matches kind, else raise error.
-    """
+    """Consume the current token if it matches kind, else raise error."""
     if not self._match(kind):
       cur = self._peek()
       raise SyntaxError(f"Expected {kind}, got {cur.kind} ('{cur.text}') at line {cur.line}")
@@ -208,11 +203,11 @@ class TikzParser:
     return self._peek().kind == TokenKind.EOF
 
   def _parse_braced_group(self) -> List[Token]:
-    """
-    Consumes tokens inside `{ ... }`, handling nesting.
+    """Consumes tokens inside `{ ... }`, handling nesting.
 
     Returns:
         List[Token]: The tokens inside the braces.
+
     """
     self._expect(TokenKind.LBRACE)
     content = []
@@ -229,11 +224,11 @@ class TikzParser:
     return content
 
   def _optional_bracket_group(self) -> List[Token]:
-    """
-    Consumes `[...]` group if present.
+    """Consumes `[...]` group if present.
 
     Returns:
         List[Token]: The tokens inside brackets, or empty list if brackets specific not found.
+
     """
     if self._match(TokenKind.LBRACKET):
       self._consume()
@@ -247,8 +242,7 @@ class TikzParser:
   # --- Feature Parsing ---
 
   def _parse_node(self) -> None:
-    """
-    Parses a `\\node` command and adds a LogicalNode to the graph.
+    r"""Parses a `\\node` command and adds a LogicalNode to the graph.
     Expects format: `\\node [options] (id) at (x,y) {content};`.
     """
     self._expect(TokenKind.COMMAND)  # \node
@@ -295,8 +289,7 @@ class TikzParser:
       self._consume()
 
   def _parse_edge(self) -> None:
-    """
-    Parses a `\\draw` command and adds a LogicalEdge to the graph.
+    r"""Parses a `\\draw` command and adds a LogicalEdge to the graph.
     Expects format: `\\draw [opts] (src) -- (tgt);`.
     """
     self._expect(TokenKind.COMMAND)  # \draw
@@ -335,8 +328,7 @@ class TikzParser:
       self._consume()
 
   def _extract_metadata(self, tokens: List[Token]) -> Tuple[str, Dict[str, str]]:
-    """
-    Parses the node label content to extract Op Kind and Config.
+    """Parses the node label content to extract Op Kind and Config.
 
     Expected structure is a LaTeX tabular:
         Kind (Row 1)
@@ -348,6 +340,7 @@ class TikzParser:
 
     Returns:
         Tuple of (Kind String, Metadata Dict).
+
     """
     # Linear scan for text tokens.
     # We ignore LaTeX formatting macros like \textbf, \textit, \begin, \end, &, \\

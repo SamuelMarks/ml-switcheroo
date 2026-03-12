@@ -1,5 +1,4 @@
-"""
-Plugin for Optimizer Step Translation.
+"""Plugin for Optimizer Step Translation.
 
 Handles the conversion of imperative optimization steps (e.g., PyTorch) to
 functional state updates (e.g., JAX/Optax).
@@ -43,8 +42,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("optimizer_constructor")
 def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Hook to rewrite Optimizer instantiation.
+  """Hook to rewrite Optimizer instantiation.
 
   Removes the first argument (parameters) to support factory-pattern initialization.
 
@@ -54,6 +52,7 @@ def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       Transformed CST call.
+
   """
   # Heuristic: Skip first arg if it's positional (params).
   # torch.optim.Adam(params, lr=...) -> optax.adam(lr=...)
@@ -72,8 +71,7 @@ def transform_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("optimizer_step")
 def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.FlattenSentinel]:
-  """
-  Hook to rewrite ``optimizer.step()``.
+  """Hook to rewrite ``optimizer.step()``.
 
   Since `step()` logic implies side-effects on the optimizer state and parameters,
   which doesn't translate 1:1 to functional updates without knowing variable names
@@ -85,6 +83,7 @@ def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call
 
   Returns:
       CST node wrapped with escape hatch comments.
+
   """
   # Pattern:
   # updates, opt_state = optimizer.update(grads, opt_state, params)
@@ -99,8 +98,7 @@ def transform_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.Call
 
 @register_hook("optimizer_zero_grad")
 def strip_zero_grad(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook for ``optimizer.zero_grad()``.
+  """Hook for ``optimizer.zero_grad()``.
 
   Removes the call (No-op), as gradient accumulation is generally explicit
   in functional frameworks.
@@ -111,6 +109,7 @@ def strip_zero_grad(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Returns:
       A CST Name('None') representing a no-op expression.
+
   """
   # Transform to `None` (Effective No-Op in statement context)
   return node.with_changes(func=cst.Name("None"), args=[])

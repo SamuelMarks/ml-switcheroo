@@ -1,5 +1,4 @@
-"""
-Plugin for normalizing Einsum calls.
+"""Plugin for normalizing Einsum calls.
 
 Standardizes `einsum` arguments so the equation string is always the first argument.
 JAX strictly enforces `einsum(equation, *operands)`, whereas other frameworks (like older
@@ -20,14 +19,14 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """
-  Creates a CST attribute chain from a dotted string string.
+  """Creates a CST attribute chain from a dotted string string.
 
   Args:
       name_str: Dotted path (e.g. 'jax.numpy.einsum').
 
   Returns:
       CST node (Name or Attribute).
+
   """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
@@ -43,8 +42,7 @@ def _is_string(node: cst.CSTNode) -> bool:
 
 @register_hook("einsum_normalizer")
 def normalize_einsum(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Plugin Hook: Rotates arguments to place the equation string first and renames function.
+  """Plugin Hook: Rotates arguments to place the equation string first and renames function.
 
   Triggers:
       Operations mapping to `Einsum` with `requires_plugin: "einsum_normalizer"`.
@@ -59,6 +57,7 @@ def normalize_einsum(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       The transformed CST Call node.
+
   """
   # 1. Determine Target API Name
   # We check standard casing 'Einsum' first, then lowercase 'einsum'

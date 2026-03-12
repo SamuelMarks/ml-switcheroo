@@ -1,5 +1,4 @@
-"""
-Plugin for Type Casting Methods.
+"""Plugin for Type Casting Methods.
 
 Addresses the syntax mismatch between:
 1. PyTorch Shorthands: `x.float()`, `x.long()`, `x.half()`, etc.
@@ -29,8 +28,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _supports_numpy_casting(ctx: HookContext) -> bool:
-  """
-  Checks if the target framework configuration supports numpy-style
+  """Checks if the target framework configuration supports numpy-style
   `.astype()` calling conventions via PluginTraits.
   """
   if not ctx.semantics:
@@ -58,8 +56,7 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
 
 @register_hook("type_methods")
 def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Hook: Converts shorthand casts to astype calls.
+  """Hook: Converts shorthand casts to astype calls.
 
   Logic:
       1. Verify target framework supports numpy array semantics (via Traits).
@@ -74,6 +71,7 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       cst.Call: The transformed node utilizing `.astype()`.
+
   """
   # 0. Capability Check (Decoupled from hardcoded strings)
   if not _supports_numpy_casting(ctx):

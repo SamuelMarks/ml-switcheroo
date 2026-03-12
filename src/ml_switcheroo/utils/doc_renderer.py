@@ -1,5 +1,4 @@
-"""
-Documentation Page Renderer.
+"""Documentation Page Renderer.
 
 This module converts the dictionary View Model (produced by `DocContextBuilder`)
 into final ReStructuredText (RST) content. It embeds custom HTML/CSS/JS logic to
@@ -11,19 +10,17 @@ from typing import Any, Dict
 
 
 class OpPageRenderer:
-  """
-  Renders RST/HTML for a single Operation documentation page.
-  """
+  """Renders RST/HTML for a single Operation documentation page."""
 
   def render_rst(self, context: Dict[str, Any]) -> str:
-    """
-    Generates the full .rst content for the operation.
+    """Generates the full .rst content for the operation.
 
     Args:
         context: View Model dict containing name, description, args, and variants.
 
     Returns:
         str: ReStructuredText source string.
+
     """
     op_name = context["name"]
     desc = context["description"]
@@ -62,8 +59,7 @@ class OpPageRenderer:
     return "\n".join(rst)
 
   def _render_html_tabs(self, variants: list) -> str:
-    """
-    Generates the HTML structure for the vertical tabs UI.
+    """Generates the HTML structure for the vertical tabs UI.
 
     Structure:
       <div class="op-tabs-container">
@@ -80,6 +76,7 @@ class OpPageRenderer:
 
     Returns:
         str: HTML block string.
+
     """
     nav_buttons = []
     panes = []

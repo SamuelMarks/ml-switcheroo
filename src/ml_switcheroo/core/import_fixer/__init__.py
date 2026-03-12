@@ -1,5 +1,4 @@
-"""
-Import Fixer Package.
+"""Import Fixer Package.
 
 This package provides the ``ImportFixer`` class, a LibCST transformer responsible for:
 1.  **Injection**: Adding required imports for the target framework.
@@ -17,8 +16,7 @@ from ml_switcheroo.core.import_fixer.resolution import ImportResolver, Resolutio
 
 
 class ImportFixer(AttributeMixin, ImportMixin, InjectionMixin, BaseImportFixer):
-  """
-  Composite Transformer for managing imports and namespacing.
+  """Composite Transformer for managing imports and namespacing.
 
   Inherits functionality from:
   - :class:`AttributeMixin`: simplifying dotted attribute access.

@@ -1,5 +1,4 @@
-"""
-Apple MLX Framework Adapter.
+"""Apple MLX Framework Adapter.
 
 This module provides the adapter for Apple's MLX array framework.
 It supports:
@@ -44,9 +43,7 @@ except ImportError:
 
 @register_framework("mlx")
 class MLXAdapter:
-  """
-  Adapter for Apple MLX (Silicon-optimized tensor framework).
-  """
+  """Adapter for Apple MLX (Silicon-optimized tensor framework)."""
 
   display_name: str = "Apple MLX"
   inherits_from: Optional[str] = None
@@ -54,11 +51,11 @@ class MLXAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    """
-    Returns list of MLX submodules to scan during discovery.
+    """Returns list of MLX submodules to scan during discovery.
 
     Returns:
         List[str]: Module list.
+
     """
     return [
       "mlx.core",
@@ -71,31 +68,31 @@ class MLXAdapter:
 
   @property
   def unsafe_submodules(self) -> Set[str]:
-    """
-    Submodules safe to avoid during recursion.
+    """Submodules safe to avoid during recursion.
 
     Returns:
         Set[str]: Default empty set.
+
     """
     return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """
-    Default alias for core array operations: ``import mlx.core as mx``.
+    """Default alias for core array operations: ``import mlx.core as mx``.
 
     Returns:
         Tuple[str, str]: ("mlx.core", "mx").
+
     """
     return ("mlx.core", "mx")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """
-    Self-declaration of namespaces.
+    """Self-declaration of namespaces.
 
     Returns:
         Dict[str, ImportConfig]: Namespace map.
+
     """
     return {
       "mlx.core": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="mx"),
@@ -105,11 +102,11 @@ class MLXAdapter:
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """
-    Regex patterns for categorizing discovered APIs into Tiers.
+    """Regex patterns for categorizing discovered APIs into Tiers.
 
     Returns:
         Dict[str, List[str]]: Heuristics map.
+
     """
     return {
       "neural": [r"\\.nn\\."],
@@ -119,11 +116,11 @@ class MLXAdapter:
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """
-    Templates for generating physical verification tests.
+    """Templates for generating physical verification tests.
 
     Returns:
         Dict[str, str]: Templates.
+
     """
     return {
       "import": "import mlx.core as mx\nimport numpy as np",
@@ -135,62 +132,62 @@ class MLXAdapter:
 
   @property
   def harness_imports(self) -> List[str]:
-    """
-    Imports for harness.
+    """Imports for harness.
 
     Returns:
         List[str]: Empty list.
+
     """
     return []
 
   def get_harness_init_code(self) -> str:
-    """
-    Initialization code.
+    """Initialization code.
 
     Returns:
         str: Empty string.
+
     """
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """
-    Returns code to convert MLX arrays (which have .tolist()) to NumPy.
+    """Returns code to convert MLX arrays (which have .tolist()) to NumPy.
 
     Returns:
         str: Python logic for conversion.
+
     """
     return "if hasattr(obj, 'tolist'): return np.array(obj.tolist())"
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """
-    Returns supported semantic tiers (Array, Neural, Extras).
+    """Returns supported semantic tiers (Array, Neural, Extras).
 
     Returns:
         List[SemanticTier]: Supported Tiers.
+
     """
     return [SemanticTier.ARRAY_API, SemanticTier.NEURAL, SemanticTier.EXTRAS]
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """
-    Implicit RNG arguments.
+    """Implicit RNG arguments.
 
     Returns:
         List[str]: Empty.
+
     """
     return []
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """
-    Defines structural rewriting rules (Classes, Methods, Init).
+    """Defines structural rewriting rules (Classes, Methods, Init).
 
     Updated to strip 'rngs' argument coming from Flax NNX, as MLX
     handles initialization statefully/eagerly.
 
     Returns:
         StructuralTraits: Config object.
+
     """
     return StructuralTraits(
       module_base="mlx.nn.Module",
@@ -201,11 +198,11 @@ class MLXAdapter:
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """
-    Plugin behavior configuration.
+    """Plugin behavior configuration.
 
     Returns:
         PluginTraits: Config object.
+
     """
     return PluginTraits(
       has_numpy_compatible_arrays=True,
@@ -216,34 +213,34 @@ class MLXAdapter:
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """
-    Static definitions for MLX mappings.
+    """Static definitions for MLX mappings.
     Loaded dynamically from `frameworks/definitions/mlx.json`.
 
     Returns:
         Dict[str, StandardMap]: Definitions map.
+
     """
     return load_definitions("mlx")
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """
-    Returns list of global seed setters.
+    """Returns list of global seed setters.
 
     Returns:
         List[str]: Method names.
+
     """
     return ["seed", "random.seed"]
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Performs runtime introspection to discover available MLX APIs.
+    """Performs runtime introspection to discover available MLX APIs.
 
     Args:
         category (StandardCategory): Category to scan.
 
     Returns:
         List[GhostRef]: Found items.
+
     """
     results = []
     try:
@@ -290,14 +287,14 @@ class MLXAdapter:
     return results
 
   def convert(self, data: Any) -> Any:
-    """
-    Converts input data (NumPy/List) to MLX Tensor for verification.
+    """Converts input data (NumPy/List) to MLX Tensor for verification.
 
     Args:
         data (Any): Input.
 
     Returns:
         Any: MLX Array or original.
+
     """
     try:
       import mlx.core as mx
@@ -309,11 +306,11 @@ class MLXAdapter:
     return data
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Returns MLX idiomatic examples used for validity testing.
+    """Returns MLX idiomatic examples used for validity testing.
 
     Returns:
         Dict[str, str]: Example maps.
+
     """
     return {
       "tier1_math": """import mlx.core as mx
@@ -405,8 +402,7 @@ class Qwen3VLPatchEmbed(nn.Module):
   # --- Syntax Generators ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """
-    Returns device constructor syntax.
+    """Returns device constructor syntax.
 
     Args:
         device_type: Device description.
@@ -414,6 +410,7 @@ class Qwen3VLPatchEmbed(nn.Module):
 
     Returns:
         str: Generated code.
+
     """
     clean_type = device_type.strip("'\"").lower()
     if clean_type in ("cuda", "gpu", "mps"):
@@ -426,37 +423,36 @@ class Qwen3VLPatchEmbed(nn.Module):
     return f"mx.Device({', '.join(args)})"
 
   def get_device_check_syntax(self) -> str:
-    """
-    Check if default device is GPU.
+    """Check if default device is GPU.
     Note: MLX Unified Memory doesn't have strict 'is_available' but we check backend.
 
     Returns:
         str: Code string.
+
     """
     return "mx.default_device() == mx.gpu"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """
-    MLX usually uses implicit state, but if explicit mode is requested,
+    """MLX usually uses implicit state, but if explicit mode is requested,
     return 'pass' as split logic differs significantly.
 
     Returns:
         str: "pass".
+
     """
     return "pass"
 
   def get_serialization_imports(self) -> List[str]:
-    """
-    Returns imports for serialization.
+    """Returns imports for serialization.
 
     Returns:
         List[str]: Imports.
+
     """
     return ["import mlx.core as mx"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """
-    Returns save/load syntax.
+    """Returns save/load syntax.
 
     Args:
         op: 'save' or 'load'.
@@ -465,6 +461,7 @@ class Qwen3VLPatchEmbed(nn.Module):
 
     Returns:
         str: Code string.
+
     """
     if op == "save" and object_arg:
       return f"mx.save({file_arg}, {object_arg})"
@@ -512,23 +509,23 @@ class Qwen3VLPatchEmbed(nn.Module):
     )
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """
-    Applies manual wiring for MLX.
+    """Applies manual wiring for MLX.
     Overrides/Patches snapshot items that cannot be statically defined.
 
     Args:
         snapshot: Snapshotdict.
+
     """
     pass
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """
-    Generates documentation URL for MLX APIs using autosummary pattern.
+    """Generates documentation URL for MLX APIs using autosummary pattern.
 
     Args:
         api_name: Fully qualified API string.
 
     Returns:
         Optional[str]: URL.
+
     """
     return f"https://ml-explore.github.io/mlx/build/html/python/_autosummary/{api_name}.html"

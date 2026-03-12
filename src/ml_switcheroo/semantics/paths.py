@@ -1,5 +1,4 @@
-"""
-Path Resolution Utilities for Semantics.
+"""Path Resolution Utilities for Semantics.
 
 Handles locating the 'semantics/' and 'snapshots/' directories
 within the package or source tree.
@@ -16,8 +15,7 @@ else:
 
 
 def resolve_semantics_dir() -> Path:
-  """
-  Locates the directory containing semantic JSON definitions.
+  """Locates the directory containing semantic JSON definitions.
 
   Prioritizes the local file system (relative to this file) to ensure
   tests and editable installs find the source of truth correctly.
@@ -25,6 +23,7 @@ def resolve_semantics_dir() -> Path:
 
   Returns:
       Path: The absolute path to the 'semantics' directory.
+
   """
   # 1. Local Source Priority (Dev/Test/Editable)
   local_path = Path(__file__).parent
@@ -46,11 +45,11 @@ def resolve_semantics_dir() -> Path:
 
 
 def resolve_snapshots_dir() -> Path:
-  """
-  Locates the directory containing framework snapshots and mapping overlays.
+  """Locates the directory containing framework snapshots and mapping overlays.
   Defaults to the sibling 'snapshots' directory relative to 'semantics'.
 
   Returns:
       Path: The absolute path to the 'snapshots' directory.
+
   """
   return resolve_semantics_dir().parent / "snapshots"

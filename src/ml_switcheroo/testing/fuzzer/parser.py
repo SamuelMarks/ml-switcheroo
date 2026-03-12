@@ -1,5 +1,4 @@
-"""
-Type Hint Parser and Recursive Generation Logic.
+"""Type Hint Parser and Recursive Generation Logic.
 
 This module processes string type hints (e.g. `List[Array['N']]`) and
 generates conforming data structures for runtime fuzzing.
@@ -31,8 +30,7 @@ from ml_switcheroo.testing.fuzzer.utils import (
 
 
 def get_fallback_base_value(type_str: str, base_shape: Tuple[int, ...]) -> Any:
-  """
-  Returns a minimal valid value to terminate recursion when depth limit is reached.
+  """Returns a minimal valid value to terminate recursion when depth limit is reached.
 
   Args:
       type_str: The target type hint.
@@ -40,6 +38,7 @@ def get_fallback_base_value(type_str: str, base_shape: Tuple[int, ...]) -> Any:
 
   Returns:
       Safe fallback value (0, empty list, etc).
+
   """
   if type_str == "bool":
     return False
@@ -73,8 +72,7 @@ def generate_from_hint(
   symbol_map: Dict[str, int],
   constraints: Optional[Dict[str, Any]] = None,
 ) -> Any:
-  """
-  Recursively parses a type string and generates conforming data.
+  """Recursively parses a type string and generates conforming data.
 
   If type hints are generic ("Any"), it attempts to infer the type logic
   from the `default` value provided in constraints.
@@ -89,6 +87,7 @@ def generate_from_hint(
 
   Returns:
       Generated data structure.
+
   """
   if depth > max_depth:
     return get_fallback_base_value(type_str, base_shape)

@@ -1,5 +1,4 @@
-"""
-Pre-processing Phase for Call Rewriting.
+"""Pre-processing Phase for Call Rewriting.
 
 Handles functional unwrapping, plugin claims, and lifecycle method stripping.
 Updated to remove dependencies on deleted legacy modules.
@@ -20,8 +19,7 @@ from ml_switcheroo.core.hooks import get_hook
 def handle_pre_checks(
   rewriter: Any, original: cst.Call, updated: cst.Call, func_name: Optional[str]
 ) -> Tuple[bool, cst.CSTNode]:
-  """
-  Executes pre-lookup checks and transformations.
+  """Executes pre-lookup checks and transformations.
 
   Args:
       rewriter: The calling transformer (duck typing: needs _get_source_traits,
@@ -32,6 +30,7 @@ def handle_pre_checks(
 
   Returns:
       Tuple(handled, result_node).
+
   """
   # 1. Functional 'apply' unwrapping (Dynamic Trait)
   # FIX: Check for property 'source_traits' OR method '_get_source_traits' to be robust
@@ -132,8 +131,7 @@ def handle_pre_checks(
 
 
 def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Optional[str]) -> Optional[str]:
-  """
-  Attempts to resolve method calls on objects to full API paths.
+  """Attempts to resolve method calls on objects to full API paths.
 
   Args:
       rewriter: The calling transformer object.
@@ -142,6 +140,7 @@ def resolve_implicit_method(rewriter: Any, original: cst.Call, func_name: Option
 
   Returns:
       The resolved full API path if found, otherwise None.
+
   """
   if isinstance(original.func, cst.Attribute) and isinstance(original.func.attr, cst.Name):
     receiver = original.func.value

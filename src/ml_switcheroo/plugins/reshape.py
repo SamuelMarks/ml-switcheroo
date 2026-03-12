@@ -1,5 +1,4 @@
-"""
-Plugin for "View" Semantics and Reshape strictness.
+"""Plugin for "View" Semantics and Reshape strictness.
 
 Addresses:
     PyTorch `tensor.view(*shape)` requires contiguous memory and shares data.
@@ -30,8 +29,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("view_semantics")
 def transform_view_semantics(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Hook: Maps `view` -> `reshape` with optional strictness injections.
+  """Hook: Maps `view` -> `reshape` with optional strictness injections.
 
   Transformation:
       Input: `x.view(a, b)`

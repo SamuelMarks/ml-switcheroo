@@ -1,5 +1,4 @@
-"""
-Optax Scanner Logic.
+"""Optax Scanner Logic.
 
 This module provides introspection for the Optax library to power the "Ghost Protocol"
 discovery. Optax uses a functional API where optimizers and losses are functions
@@ -23,14 +22,11 @@ from ml_switcheroo.core.ghost import GhostInspector, GhostRef
 
 
 class OptaxScanner:
-  """
-  Helper to inspect Optax APIs for the discovery system.
-  """
+  """Helper to inspect Optax APIs for the discovery system."""
 
   @staticmethod
   def scan_optimizers() -> List[GhostRef]:
-    """
-    Scans the Optax public API for optimizer functions.
+    """Scans the Optax public API for optimizer functions.
 
     Optax optimizers are typically factory functions (e.g., `adam`, `sgd`)
     that return a `GradientTransformation`.
@@ -84,9 +80,7 @@ class OptaxScanner:
 
   @staticmethod
   def scan_losses() -> List[GhostRef]:
-    """
-    Scans `optax.losses` for loss functions.
-    """
+    """Scans `optax.losses` for loss functions."""
     if not optax or not hasattr(optax, "losses"):
       return []
 

@@ -1,5 +1,4 @@
-"""
-Plugin for unrolling in-place tensor operations to functional assignments.
+"""Plugin for unrolling in-place tensor operations to functional assignments.
 
 PyTorch uses a trailing underscore convention (e.g., `x.add_(y)`) to denote in-place
 mutation. JAX and other functional frameworks require immutable operations, where
@@ -18,8 +17,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _get_receiver_name(node: cst.Call) -> Optional[cst.BaseExpression]:
-  """
-  Extracts the receiver object from a method call.
+  """Extracts the receiver object from a method call.
 
   Args:
       node (cst.Call): The function call node.
@@ -27,6 +25,7 @@ def _get_receiver_name(node: cst.Call) -> Optional[cst.BaseExpression]:
   Returns:
       Optional[cst.BaseExpression]: The object being called (e.g. `x` in `x.add_()`),
       or None if not a method call.
+
   """
   if isinstance(node.func, cst.Attribute):
     return node.func.value
@@ -34,14 +33,14 @@ def _get_receiver_name(node: cst.Call) -> Optional[cst.BaseExpression]:
 
 
 def _get_method_name(node: cst.Call) -> Optional[str]:
-  """
-  Extracts the method name string.
+  """Extracts the method name string.
 
   Args:
       node (cst.Call): The function call node.
 
   Returns:
       Optional[str]: The method name (e.g. "add_"), or None.
+
   """
   if isinstance(node.func, cst.Attribute):
     return node.func.attr.value
@@ -52,8 +51,7 @@ def _get_method_name(node: cst.Call) -> Optional[str]:
 def unroll_inplace_ops(
   node: Union[cst.Call, cst.Expr], ctx: HookContext
 ) -> Union[cst.Call, cst.Assign, cst.Expr, cst.BinaryOperation]:
-  """
-  Plugin Hook: Transforms in-place method calls to functional assignments.
+  """Plugin Hook: Transforms in-place method calls to functional assignments.
 
   **Scope**
 

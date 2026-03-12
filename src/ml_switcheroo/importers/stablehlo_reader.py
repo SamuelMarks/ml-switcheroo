@@ -1,5 +1,4 @@
-r"""
-Importer for StableHLO Specification (OpenXLA).
+r"""Importer for StableHLO Specification (OpenXLA).
 
 This module parses the official StableHLO Markdown specifications (spec.md),
 extracting operator names, descriptions, and argument signatures into the
@@ -19,9 +18,7 @@ from ml_switcheroo.utils.console import log_error, log_info
 
 
 class StableHloSpecImporter:
-  """
-  Parses StableHLO Markdown specification files.
-  """
+  """Parses StableHLO Markdown specification files."""
 
   # Regex to find headers like ### `abs`
   _HEADER_RE = re.compile(r"^### `(?P<name>[a-zA-Z0-9_]+)`$")
@@ -31,14 +28,14 @@ class StableHloSpecImporter:
   _SYNTAX_RE = re.compile(r"stablehlo\.[a-z_]+\s+(?P<args>.*?)\s+:")
 
   def parse_file(self, target_file: Path) -> Dict[str, Any]:
-    """
-    Parses `spec.md` from the StableHLO repository.
+    """Parses `spec.md` from the StableHLO repository.
 
     Args:
         target_file: Path to the markdown file.
 
     Returns:
         Dictionary mapping Operator IDs (e.g. 'Abs') to ODL definitions.
+
     """
     if not target_file.exists():
       log_error(f"File not found: {target_file}")
@@ -48,14 +45,14 @@ class StableHloSpecImporter:
     return self._parse_markdown(target_file)
 
   def _parse_markdown(self, fpath: Path) -> Dict[str, Any]:
-    """
-    Iterates usage of the markdown file line-by-line to build op definitions.
+    """Iterates usage of the markdown file line-by-line to build op definitions.
 
     Args:
         fpath: Path to the markdown file.
 
     Returns:
         Dictionary of semantic operation definitions.
+
     """
     content = fpath.read_text(encoding="utf-8")
     lines = content.splitlines()
@@ -109,13 +106,13 @@ class StableHloSpecImporter:
     return semantics
 
   def _finalize_op(self, semantics: Dict[str, Any], name: str, details: Dict[str, Any]) -> None:
-    """
-    Clean up and register the operation.
+    """Clean up and register the operation.
 
     Args:
         semantics: The accumulator dictionary to update.
         name: The operation name (Abstract ID).
         details: The raw extracted details (description list, syntax string).
+
     """
     # 1. Clean Description
     desc_list: List[str] = details.get("description", [])
@@ -168,8 +165,7 @@ class StableHloSpecImporter:
     }
 
   def _normalize_op_name(self, name: str) -> str:
-    """
-    Converts 'abs' -> 'Abs', 'log_plus_one' -> 'LogPlusOne'.
+    """Converts 'abs' -> 'Abs', 'log_plus_one' -> 'LogPlusOne'.
     StableHLO uses snake_case. ODL uses PascalCase for Abstract IDs.
 
     Args:
@@ -177,6 +173,7 @@ class StableHloSpecImporter:
 
     Returns:
         str: The PascalCase name (e.g. 'LogPlusOne').
+
     """
     # Manual overrides for consistency with existing Hub standards
     overrides = {

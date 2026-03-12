@@ -1,5 +1,4 @@
-"""
-RDNA Backend Package.
+"""RDNA Backend Package.
 
 Contains the backend implementation for synthesizing AMD RDNA assembly
 from the Logical Graph representation.

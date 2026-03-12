@@ -1,5 +1,4 @@
-"""
-Main Entry Point for ml-switcheroo CLI.
+"""Main Entry Point for ml-switcheroo CLI.
 
 This module handles argument parsing and dispatches to specific command
 handlers defined in `ml_switcheroo.cli.commands` and `ml_switcheroo.cli.handlers`.
@@ -22,8 +21,7 @@ from ml_switcheroo.frameworks import available_frameworks
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-  """
-  Main CLI entry point.
+  """Main CLI entry point.
 
   Parses arguments via argparse and calls the appropriate handler function.
 
@@ -32,6 +30,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   Returns:
       int: Exit code (0 for success, non-zero for failure).
+
   """
   parser = argparse.ArgumentParser(description="ml-switcheroo: Deterministic AST Transpiler")
   parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")

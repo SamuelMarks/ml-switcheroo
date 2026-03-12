@@ -1,5 +1,4 @@
-"""
-Semantic Autogen: The Distributed Persistence Layer.
+"""Semantic Autogen: The Distributed Persistence Layer.
 
 This module is responsible for finalizing "Candidate Standards" proposed by the
 Consensus Engine into the Distributed Knowledge Base.
@@ -38,18 +37,16 @@ def _arg_sort_key(arg: Union[str, Dict[str, Any]]) -> str:
 
 
 class SemanticPersister:
-  """
-  Handles serialization of Discovered Standards to disk using Hub-and-Spoke architecture.
-  """
+  """Handles serialization of Discovered Standards to disk using Hub-and-Spoke architecture."""
 
   def persist(self, candidates: List[CandidateStandard], target_spec_file: Path) -> None:
-    """
-    Splits and persists candidates into Specifications (Hub) and Snapshots (Spokes).
+    """Splits and persists candidates into Specifications (Hub) and Snapshots (Spokes).
 
     Args:
         candidates: List of aligned CandidateStandard objects.
         target_spec_file: Path to the JSON semantic spec file (Hub) to update/create.
                           (e.g., `semantics/k_framework_extras.json`)
+
     """
     snapshots_dir = resolve_snapshots_dir()
     if not snapshots_dir.exists():

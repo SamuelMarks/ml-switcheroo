@@ -1,5 +1,4 @@
-"""
-Plugin for Gather Semantics Adaptation.
+"""Plugin for Gather Semantics Adaptation.
 
 Addresses the signature mismatch between:
 1. PyTorch: `torch.gather(input, dim, index, *, sparse_grad=False, out=None)`
@@ -24,8 +23,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_
 
 @register_hook("gather_adapter")
 def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Hook: Adapts gather calls to take_along_axis semantics.
+  """Hook: Adapts gather calls to take_along_axis semantics.
 
   Target API Convention: `func(input, indices, axis)`.
   Source (Torch) Convention: `func(input, dim, index)`.
@@ -36,6 +34,7 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       Transformed Call node if API mapping exists, else original node.
+
   """
   # 0. API Resolution (Strict)
   target_api = ctx.lookup_api("Gather")

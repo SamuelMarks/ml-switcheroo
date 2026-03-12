@@ -1,5 +1,4 @@
-"""
-Intermediate Representation (IR).
+"""Intermediate Representation (IR).
 
 This module defines the language-agnostic graph data structures used to represent
 Deep Learning models after ingestion from source code (e.g. Python/LibCST) or
@@ -15,9 +14,7 @@ from collections import defaultdict, deque
 
 @dataclass
 class LogicalAxis:
-  """
-  Represents a named dimension for tensor sizes and sharding (e.g., 'batch', 'embed', 'heads').
-  """
+  """Represents a named dimension for tensor sizes and sharding (e.g., 'batch', 'embed', 'heads')."""
 
   name: str
   """Name of the logical axis."""
@@ -28,8 +25,7 @@ class LogicalAxis:
 
 @dataclass
 class PartitionSpec:
-  """
-  Describes how a tensor's dimensions are mapped to a logical mesh.
+  """Describes how a tensor's dimensions are mapped to a logical mesh.
 
   Each element in `axes` corresponds to a tensor dimension. An element can be:
   - A string representing the mesh axis name (e.g., 'data').
@@ -43,9 +39,7 @@ class PartitionSpec:
 
 @dataclass
 class LogicalMesh:
-  """
-  Represents a multi-dimensional grid of devices for distributed execution.
-  """
+  """Represents a multi-dimensional grid of devices for distributed execution."""
 
   shape: Dict[str, int]
   """Mapping of mesh axis names to their sizes (e.g., {'data': 4, 'model': 2})."""
@@ -53,9 +47,7 @@ class LogicalMesh:
 
 @dataclass
 class LogicalNode:
-  """
-  Represents a computation unit (Layer) in the graph.
-  """
+  """Represents a computation unit (Layer) in the graph."""
 
   id: str
   """Unique identifier (e.g. 'conv1')."""
@@ -72,9 +64,7 @@ class LogicalNode:
 
 @dataclass
 class LogicalEdge:
-  """
-  Represents data flow between two nodes.
-  """
+  """Represents data flow between two nodes."""
 
   source: str
   """Source node ID."""
@@ -85,9 +75,7 @@ class LogicalEdge:
 
 @dataclass
 class LogicalGraph:
-  """
-  Language-agnostic representation of the neural network structure.
-  """
+  """Language-agnostic representation of the neural network structure."""
 
   name: str = "Model"
   """Name of the graph model/class."""
@@ -103,8 +91,7 @@ class LogicalGraph:
 
 
 def topological_sort(graph: LogicalGraph) -> List[LogicalNode]:
-  """
-  Sorts graph nodes by dependency order.
+  """Sorts graph nodes by dependency order.
 
   Ensures that for every edge u -> v, u appears before v in the returned list.
   Handles disconnected components and cycles gracefully by appending
@@ -115,6 +102,7 @@ def topological_sort(graph: LogicalGraph) -> List[LogicalNode]:
 
   Returns:
       List of nodes in execution order.
+
   """
   adj = defaultdict(list)
   in_degree = defaultdict(int)

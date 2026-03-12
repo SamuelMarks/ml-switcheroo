@@ -144,7 +144,7 @@ def test_normalize_arguments_inject_args():
   original_node = cst.Call(func=cst.Name("func"), args=[])
   op_details = {"std_args": []}
 
-  api_mapping = {"arg_values": {"new_arg1": "a + b"}, "inject_args": {"new_arg2": 42, "new_arg3": "invalid syntax +++"}}
+  api_mapping = {"arg_values": {"new_arg1": "a + b"}, "inject_args": {"new_arg2": 42, "new_arg3": "invalid_syntax()"}}
   args = t._normalize_arguments(original_node, original_node, op_details, api_mapping)
   assert len(args) == 3
 

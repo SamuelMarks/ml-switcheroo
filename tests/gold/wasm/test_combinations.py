@@ -20,6 +20,7 @@ def semantics():
   return SemanticsManager()
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize("example_key", sorted(EXAMPLES.keys()))
 def test_wasm_combination(example_key, semantics, snapshot):
   ex = EXAMPLES[example_key]

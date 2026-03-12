@@ -1,5 +1,4 @@
-"""
-Consensus Engine: The Dynamic Standardization Brain.
+"""Consensus Engine: The Dynamic Standardization Brain.
 
 This module provides the logic to identify common operations across disjoint frameworks.
 It aligns variable naming conventions (e.g., 'dim' vs 'axis') and clusters API endpoints
@@ -15,9 +14,7 @@ from ml_switcheroo.core.ghost import GhostRef, GhostParam
 
 
 class CandidateStandard(BaseModel):
-  """
-  A proposed Abstract Standard discovered via consensus.
-  """
+  """A proposed Abstract Standard discovered via consensus."""
 
   name: str = Field(description="The abstract name (e.g., 'Conv2d').")
   variants: Dict[str, GhostRef] = Field(
@@ -32,21 +29,20 @@ class CandidateStandard(BaseModel):
   )
 
   def add_variant(self, framework: str, ref: GhostRef) -> None:
-    """
-    Registers a framework's implementation of this concept.
+    """Registers a framework's implementation of this concept.
     Updates the consensus score based on support count.
 
     Args:
         framework (str): The framework identifier (e.g. 'torch').
         ref (GhostRef): The API reference object found in that framework.
+
     """
     self.variants[framework] = ref
     self.score = float(len(self.variants))
 
 
 class ConsensusEngine:
-  """
-  Algorithms for aligning divergent API naming conventions.
+  """Algorithms for aligning divergent API naming conventions.
 
   Capabilities:
 
@@ -104,13 +100,11 @@ class ConsensusEngine:
 
   @classmethod
   def normalize_name(cls, name: str) -> str:
-    """
-    Reduces an API Name to its semantic core for comparison.
+    """Reduces an API Name to its semantic core for comparison.
 
     This removes casing, underscores, and common prefixes/suffixes.
 
     Examples:
-
     * 'HuberLoss' -> 'huber'
     * 'reduce_mean' -> 'mean'
     * 'conv2d' -> 'conv'
@@ -120,6 +114,7 @@ class ConsensusEngine:
 
     Returns:
         str: The normalized key (e.g. 'crossentropy').
+
     """
     normalized = name.lower().replace("_", "")
 
@@ -140,8 +135,7 @@ class ConsensusEngine:
 
   @classmethod
   def normalize_arg(cls, arg_name: str) -> str:
-    """
-    Canonicalizes an argument name using the alias map.
+    """Canonicalizes an argument name using the alias map.
 
     Example:
         'learning_rate' -> 'lr'
@@ -151,19 +145,20 @@ class ConsensusEngine:
 
     Returns:
         str: The canonical standard name.
+
     """
     lower = arg_name.lower()
     return cls.ARG_ALIASES.get(lower, lower)
 
   def cluster(self, framework_inputs: Dict[str, List[GhostRef]]) -> List[CandidateStandard]:
-    """
-    Groups API definitions from multiple frameworks into Candidates based on name similarity.
+    """Groups API definitions from multiple frameworks into Candidates based on name similarity.
 
     Args:
         framework_inputs: Dictionary mapping 'framework_name' -> List of discovered GhostRefs.
 
     Returns:
         List[CandidateStandard]: A list of potential standards, sorted by descending score.
+
     """
     clusters: Dict[str, CandidateStandard] = {}
 
@@ -188,8 +183,7 @@ class ConsensusEngine:
     return results
 
   def filter_common(self, candidates: List[CandidateStandard], min_support: int = 2) -> List[CandidateStandard]:
-    """
-    Filters candidates to keep only those present in a minimum number of frameworks.
+    """Filters candidates to keep only those present in a minimum number of frameworks.
 
     This ensures we only create standards for concepts that are truly shared across
     ecosystems, avoiding framework-specific noise.
@@ -200,12 +194,12 @@ class ConsensusEngine:
 
     Returns:
         List[CandidateStandard]: Filtered list of robust candidates.
+
     """
     return [c for c in candidates if len(c.variants) >= min_support]
 
   def align_signatures(self, candidates: List[CandidateStandard], consensus_threshold: float = 0.5) -> None:
-    """
-    Analyses the arguments of all variants in a candidate to determine Standard Arguments and Types.
+    """Analyses the arguments of all variants in a candidate to determine Standard Arguments and Types.
 
     It populates `std_args` on the candidate by voting:
 
@@ -219,6 +213,7 @@ class ConsensusEngine:
     Args:
         candidates (List[CandidateStandard]): List of CandidateStandards to process (in-place modification).
         consensus_threshold (float): Fraction of variants that must share an arg (0.0 - 1.0).
+
     """
     for cand in candidates:
       # Map: {canonical_arg: {fw_name: original_arg_name}}

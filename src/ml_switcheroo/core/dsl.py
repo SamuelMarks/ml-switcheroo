@@ -1,5 +1,4 @@
-"""
-Operation Definition Language (ODL) Schema.
+"""Operation Definition Language (ODL) Schema.
 
 This module defines the Pydantic models used to validate the input (e.g. YAML)
 for defining new operations. It represents the source of truth for generating
@@ -22,9 +21,7 @@ from ml_switcheroo.enums import LogicOp
 
 
 class OpType(str, Enum):
-  """
-  Classification of the operation's syntactic usage.
-  """
+  """Classification of the operation's syntactic usage."""
 
   FUNCTION = "function"
   CONTEXT = "context"
@@ -35,17 +32,14 @@ class OpType(str, Enum):
 
 
 class ContainerType(str, Enum):
-  """
-  Supported container types for argument packing.
-  """
+  """Supported container types for argument packing."""
 
   TUPLE = "Tuple"
   LIST = "List"
 
 
 class ParameterDef(BaseModel):
-  """
-  Definition of a single argument in an abstract operation signature.
+  """Definition of a single argument in an abstract operation signature.
 
   Updated to support semantic constraints (min, max, options), tensor properties
   (rank, dtype, shape), and function signature attributes (variadic, kind) to
@@ -97,8 +91,7 @@ class ParameterDef(BaseModel):
 
 
 class Rule(BaseModel):
-  """
-  Declarative rule for conditional logic within a variant or plugin.
+  """Declarative rule for conditional logic within a variant or plugin.
   Evaluated at runtime to dynamically switch APIs.
   """
 
@@ -115,17 +108,14 @@ class Rule(BaseModel):
 
 
 class ImportReq(BaseModel):
-  """
-  Structured definition for a required import, supporting aliasing.
-  """
+  """Structured definition for a required import, supporting aliasing."""
 
   module: str = Field(..., description="The name of the module to import (e.g. 'numpy').")
   alias: Optional[str] = Field(None, description="Optional alias (e.g. 'np').")
 
 
 class FrameworkVariant(BaseModel):
-  """
-  Configuration for how a specific framework implements an operation.
+  """Configuration for how a specific framework implements an operation.
 
   Defines the API endpoint, argument mappings, required imports, and versioning constraints.
   """
@@ -220,18 +210,14 @@ class FrameworkVariant(BaseModel):
 
 
 class PluginType(str, Enum):
-  """
-  Enumeration of supported plugin structures to generate.
-  """
+  """Enumeration of supported plugin structures to generate."""
 
   CALL = "call_transform"
   BLOCK = "block_transform"
 
 
 class PluginScaffoldDef(BaseModel):
-  """
-  Metadata for generating a new Python plugin file.
-  """
+  """Metadata for generating a new Python plugin file."""
 
   name: str = Field(..., description="Unique hook name (e.g. 'shard_map_rewriter').")
   type: PluginType = Field(PluginType.CALL, description="Type of AST node the plugin targets.")
@@ -249,9 +235,7 @@ class PluginScaffoldDef(BaseModel):
 
 
 class PatternDef(BaseModel):
-  """
-  Definition of a subgraph pattern for Graph Fusion.
-  """
+  """Definition of a subgraph pattern for Graph Fusion."""
 
   name: str = Field(..., description="Name of the pattern (e.g., 'ConvBNReLU').")
   sequence: List[str] = Field(..., description="Ordered list of Operation Kinds (e.g. ['Conv2d', 'BatchNorm', 'ReLU']).")
@@ -260,8 +244,7 @@ class PatternDef(BaseModel):
 
 
 class OperationDef(BaseModel):
-  """
-  Top-level definition of a new Abstract Operation.
+  """Top-level definition of a new Abstract Operation.
 
   Contains the semantic signature, documentation, framework implementations,
   and metadata for verification, fuzzing, and documentation generation.

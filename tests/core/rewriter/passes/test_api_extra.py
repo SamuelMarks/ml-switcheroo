@@ -410,3 +410,18 @@ def test_normalize_arguments_inject_and_kwargs_map():
   args2 = transformer._normalize_arguments(call2, call2, op_details, target_impl)
   # receiver should be added as first arg if it was mapped as an api
   # wait, this requires is_method_call tracking in _normalize_arguments.
+
+
+def test_api_convert_indented_block_no_op():
+  from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
+  from ml_switcheroo.core.rewriter.context import RewriterContext
+  import libcst as cst
+  from unittest.mock import MagicMock
+  from ml_switcheroo.config import RuntimeConfig
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  ctx = RewriterContext(SemanticsManager(), RuntimeConfig(), MagicMock())
+  t = ApiTransformer(ctx)
+  node = cst.parse_module("def foo():\n  pass\n").body[0]
+  res = t._convert_to_indented_block(node)
+  assert res is node

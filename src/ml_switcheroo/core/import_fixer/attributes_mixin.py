@@ -1,5 +1,4 @@
-"""
-Attribute Logic Mixin.
+"""Attribute Logic Mixin.
 
 Handles the transformation of `Attribute` nodes, specifically for collapsing
 fully qualified names into aliases (e.g. `jax.numpy.abs` -> `jnp.abs`) and
@@ -13,13 +12,10 @@ from ml_switcheroo.core.scanners import get_full_name
 
 
 class AttributeMixin(cst.CSTTransformer):
-  """
-  Mixin for processing Attribute nodes.
-  """
+  """Mixin for processing Attribute nodes."""
 
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
-    """
-    Handles path simplification and alias collapsing.
+    """Handles path simplification and alias collapsing.
 
     Args:
         original_node: The node before transformation.
@@ -27,6 +23,7 @@ class AttributeMixin(cst.CSTTransformer):
 
     Returns:
         The transformed expression node.
+
     """
     # 1. Deep Path Simplification (Re-export Cleanup)
     # Scenario: nnx.module.Module -> nnx.Module
@@ -61,8 +58,7 @@ class AttributeMixin(cst.CSTTransformer):
     return updated_node
 
   def _simplify_reexports(self, node: cst.Attribute) -> cst.BaseExpression:
-    """
-    Detects and strips redundant internal modules.
+    """Detects and strips redundant internal modules.
     E.g. ``nnx.module.Module`` becomes ``nnx.Module``.
 
     Args:
@@ -70,6 +66,7 @@ class AttributeMixin(cst.CSTTransformer):
 
     Returns:
         The simplified attribute expression or the original node.
+
     """
     if not isinstance(node.value, cst.Attribute):
       return node

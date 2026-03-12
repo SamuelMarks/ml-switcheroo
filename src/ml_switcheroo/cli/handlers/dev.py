@@ -1,5 +1,4 @@
-"""
-CLI handlers for dev module.
+"""CLI handlers for dev module.
 
 Provides handlers for development utilities: Matrix rendering, Doc generation,
 and Test generation.
@@ -15,12 +14,12 @@ from ml_switcheroo.utils.console import log_info, log_success
 
 
 def handle_matrix() -> int:
-  """
-  Handles 'matrix' command.
+  """Handles 'matrix' command.
   Prints the compatibility table to stdout.
 
   Returns:
       int: 0 on success.
+
   """
   semantics = SemanticsManager()
   matrix = CompatibilityMatrix(semantics)
@@ -29,8 +28,7 @@ def handle_matrix() -> int:
 
 
 def handle_docs(source: str, target: str, out_path: Path) -> int:
-  """
-  Handles 'gen-docs' command.
+  """Handles 'gen-docs' command.
   Generates a migration guide Markdown file.
 
   Args:
@@ -40,6 +38,7 @@ def handle_docs(source: str, target: str, out_path: Path) -> int:
 
   Returns:
       int: 0 on success.
+
   """
   semantics = SemanticsManager()
   log_info(f"Generating comparison: {source} -> {target} at {out_path}...")
@@ -52,8 +51,7 @@ def handle_docs(source: str, target: str, out_path: Path) -> int:
 
 
 def handle_gen_tests(out: Path) -> int:
-  """
-  Handles 'gen-tests' command.
+  """Handles 'gen-tests' command.
   Generates physical test files for known APIs.
 
   Args:
@@ -61,6 +59,7 @@ def handle_gen_tests(out: Path) -> int:
 
   Returns:
       int: 0 on success.
+
   """
   mgr = SemanticsManager()
   semantics = mgr.get_known_apis()

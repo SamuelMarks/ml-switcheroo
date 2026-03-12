@@ -1,5 +1,4 @@
-"""
-Plugin for Unrolling Loops (Functional Control Flow Enforcement).
+"""Plugin for Unrolling Loops (Functional Control Flow Enforcement).
 
 This module handles the structural transformation of Python control flow into
 functional primitives required by XLA-based frameworks. Unlike PyTorch/TensorFlow Eager,
@@ -22,14 +21,14 @@ from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Arg]]:
-  """
-  Determines if an expression is a call to `range(...)`.
+  """Determines if an expression is a call to `range(...)`.
 
   Args:
       node: The CST expression node of the iterator.
 
   Returns:
       Tuple (bool, args): True if it's a range call, plus the arguments passed.
+
   """
   if isinstance(node, cst.Call):
     if isinstance(node.func, cst.Name) and node.func.value == "range":
@@ -39,8 +38,7 @@ def _analyze_range_iterator(node: cst.BaseExpression) -> Tuple[bool, List[cst.Ar
 
 @register_hook("transform_for_loop")
 def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.FlattenSentinel]:
-  """
-  Plugin Hook: Transforms or Flags `for` loops for functional compliance.
+  """Plugin Hook: Transforms or Flags `for` loops for functional compliance.
 
   Triggered by the `ControlFlowMixin` when visiting `For` nodes.
 
@@ -60,6 +58,7 @@ def transform_loops(node: cst.For, ctx: HookContext) -> Union[cst.For, cst.Flatt
 
   Returns:
       The transformed node or an EscapeHatch sentinel.
+
   """
   # 1. Check Target Constraints (Decoupled check)
   # We rely on the Adapter's declared capabilities rather than the framework name.

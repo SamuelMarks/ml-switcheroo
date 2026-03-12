@@ -1,5 +1,4 @@
-"""
-Compatibility Matrix rendering logic.
+"""Compatibility Matrix rendering logic.
 
 This module generates the visual comparison table between supported frameworks.
 It retrieves operations from the `SemanticsManager` and intersects them with
@@ -20,38 +19,36 @@ from ml_switcheroo.config import get_framework_priority_order
 
 
 class CompatibilityMatrix:
-  """
-  Logic for generating the Framework Compatibility Matrix.
+  """Logic for generating the Framework Compatibility Matrix.
 
   It dynamically queries the Knowledge Base and Framework Registry to create
   a grid of [Operations x Frameworks].
   """
 
   def __init__(self, semantics: SemanticsManager):
-    """
-    Initializes the Matrix generator.
+    """Initializes the Matrix generator.
 
     Args:
         semantics (SemanticsManager): The loaded semantics manager.
+
     """
     self.semantics = semantics
     self.console = Console()
 
   def _get_sorted_engines(self) -> List[str]:
-    """
-    Returns list of frameworks sorted for UI consistency.
+    """Returns list of frameworks sorted for UI consistency.
 
     Delegates to ``ml_switcheroo.config.get_framework_priority_order`` which
     inspects ``ui_priority`` on registered adapters.
 
     Returns:
         List[str]: Identifiers like ['torch', 'jax', 'numpy'].
+
     """
     return get_framework_priority_order()
 
   def get_json(self) -> List[Dict[str, str]]:
-    """
-    Returns the compatibility matrix as properly structured data.
+    """Returns the compatibility matrix as properly structured data.
 
     Useful for downstream tools, web frontends, or CI parsers.
 
@@ -68,6 +65,7 @@ class CompatibilityMatrix:
                     "jax": "🧩"
                 }
             ]
+
     """
     rows = []
     engines = self._get_sorted_engines()
@@ -102,8 +100,7 @@ class CompatibilityMatrix:
     return rows
 
   def render(self) -> None:
-    """
-    Generates and prints the compatibility table to the standard output.
+    """Generates and prints the compatibility table to the standard output.
     Uses ``rich.Table`` for formatting.
     """
     table = Table(title="ml-switcheroo Compatibility Matrix")
@@ -132,8 +129,7 @@ class CompatibilityMatrix:
     self.console.print(table)
 
   def _get_status_icon(self, variant_info: Optional[Dict[str, Any]]) -> str:
-    """
-    Determines the visual status icon for a mapping entry.
+    """Determines the visual status icon for a mapping entry.
 
     Args:
         variant_info (Optional[Dict]): The dictionary describing the variant's implementation.
@@ -143,6 +139,7 @@ class CompatibilityMatrix:
              ✅ = Direct API mapping available.
              🧩 = Plugin or complex logic required.
              ❌ = Not mapped / Missing.
+
     """
     # If None, explicit failure. If missing, missing.
     if not variant_info:

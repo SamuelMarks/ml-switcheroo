@@ -1,5 +1,4 @@
-"""
-Importer for ONNX Markdown Specifications.
+"""Importer for ONNX Markdown Specifications.
 
 This module parses the official ONNX Operators documentation (Markdown files),
 extracting operator names, summaries, inputs, and attributes. It converts
@@ -21,8 +20,7 @@ from ml_switcheroo.utils.console import log_info, log_error
 
 
 class OnnxSpecImporter:
-  """
-  Parses ONNX Markdown specification files into semantic JSON structures.
+  """Parses ONNX Markdown specification files into semantic JSON structures.
 
   This class reads Markdown files (like `Operators.md`), identifies operator
   blocks, and parses their Inputs and Attributes sections to build a rich
@@ -30,8 +28,7 @@ class OnnxSpecImporter:
   """
 
   def parse_file(self, target_file: Path) -> Dict[str, Any]:
-    """
-    Parses a specific ONNX Markdown file (e.g. Operators.md).
+    """Parses a specific ONNX Markdown file (e.g. Operators.md).
 
     Args:
         target_file: Path to the .md file to parse.
@@ -39,6 +36,7 @@ class OnnxSpecImporter:
     Returns:
         Dictionary mapping Operator IDs (e.g., "Conv") to their semantic definition.
         The definition includes 'std_args' as a list of (name, type) tuples.
+
     """
     if not target_file.exists():
       log_error(f"File not found: {target_file}")
@@ -48,14 +46,14 @@ class OnnxSpecImporter:
     return self._parse_markdown(target_file)
 
   def _parse_markdown(self, fpath: Path) -> Dict[str, Any]:
-    """
-    Splits the markdown content by operator anchors and extracts metadata.
+    """Splits the markdown content by operator anchors and extracts metadata.
 
     Args:
         fpath: Path object to read.
 
     Returns:
         Serialized knowledge graph dictionary.
+
     """
     content = fpath.read_text(encoding="utf-8")
     semantics = {}
@@ -88,14 +86,14 @@ class OnnxSpecImporter:
     return semantics
 
   def _extract_summary(self, text: str) -> str:
-    """
-    Extracts the first paragraph describing the operator.
+    """Extracts the first paragraph describing the operator.
 
     Args:
         text: The full markdown body for a specific operator.
 
     Returns:
         A truncated string summary.
+
     """
     lines = text.strip().splitlines()
 
@@ -121,8 +119,7 @@ class OnnxSpecImporter:
     return (full_text[:max_len] + "...") if len(full_text) > max_len else full_text
 
   def _extract_section_keys(self, text: str, header_name: str) -> List[Tuple[str, str]]:
-    """
-    Parses definition lists under a specific markdown header including types.
+    """Parses definition lists under a specific markdown header including types.
 
     Used for both 'Inputs' and 'Attributes'.
     Structure matches standard HTML definition lists:
@@ -137,6 +134,7 @@ class OnnxSpecImporter:
 
     Returns:
         List of (name, type) tuples found in that section.
+
     """
     args = []
     header_marker = f"#### {header_name}"
@@ -193,8 +191,7 @@ class OnnxSpecImporter:
     return args
 
   def _map_onnx_type(self, raw_type: str) -> str:
-    """
-    Maps ONNX Markdown type strings to Python/Fuzzer compatible hints.
+    """Maps ONNX Markdown type strings to Python/Fuzzer compatible hints.
 
     Examples:
         'T' -> 'Tensor'
@@ -206,6 +203,7 @@ class OnnxSpecImporter:
 
     Returns:
         A normalized type string.
+
     """
     raw = raw_type.lower().strip()
 

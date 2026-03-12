@@ -1,5 +1,4 @@
-"""
-SASS Frontend (Parser & Lifter).
+"""SASS Frontend (Parser & Lifter).
 
 Handles the parsing of NVIDIA SASS assembly text into an Abstract Syntax Tree (AST)
 and the lifting of that AST into the high-level Logical Graph IR.

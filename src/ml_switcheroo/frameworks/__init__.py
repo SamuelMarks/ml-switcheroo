@@ -1,5 +1,4 @@
-"""
-Framework Adapters Package.
+"""Framework Adapters Package.
 
 Automatically discovers and registers framework adapters by scanning this
 directory for modules. This allows for "Zero-Edit" extensibility: simply drop
@@ -30,8 +29,7 @@ _EXCLUDED_MODULES = {"base", "__init__", "common", "optax_shim", "loader"}
 
 
 def _auto_register_adapters() -> None:
-  """
-  Scans the current package for modules and imports them.
+  """Scans the current package for modules and imports them.
 
   Importing the module triggers the @register_framework decorator defined
   within the adapter implementation, populating the global registry.

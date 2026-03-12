@@ -1,5 +1,4 @@
-"""
-Name-Based Heuristics for Input Generation.
+"""Name-Based Heuristics for Input Generation.
 
 This module provides fallback logic for generating inputs when explicit
 type hints are missing, generally based on argument naming conventions.
@@ -16,14 +15,14 @@ from ml_switcheroo.testing.fuzzer.generators import (
 
 
 def guess_dtype_by_name(name: str) -> str:
-  """
-  Guesses the logical type of an argument based on its name.
+  """Guesses the logical type of an argument based on its name.
 
   Args:
       name (str): The argument name.
 
   Returns:
       str: 'bool', 'int', or 'float'.
+
   """
   name_lower = name.lower()
   if any(x in name_lower for x in ["mask", "condition", "is_", "p_val"]):
@@ -34,8 +33,7 @@ def guess_dtype_by_name(name: str) -> str:
 
 
 def generate_by_heuristic(name: str, base_shape: Tuple[int, ...], constraints: Dict[str, Any] = None) -> Any:
-  """
-  Generates a value based on the argument name when no type hint is provided.
+  """Generates a value based on the argument name when no type hint is provided.
 
   Respects provided constraints if any.
 
@@ -46,6 +44,7 @@ def generate_by_heuristic(name: str, base_shape: Tuple[int, ...], constraints: D
 
   Returns:
       Any: Generated value.
+
   """
   constrs = constraints or {}
 

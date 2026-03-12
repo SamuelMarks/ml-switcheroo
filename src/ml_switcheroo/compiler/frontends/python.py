@@ -1,5 +1,4 @@
-"""
-Python Frontend.
+"""Python Frontend.
 
 Wraps the LibCST parser and GraphExtractor to provide a standard interface
 for ingesting Python code into the Logical Graph IR.
@@ -11,18 +10,14 @@ from ml_switcheroo.compiler.ir import LogicalGraph
 
 
 class PythonFrontend:
-  """
-  Ingests Python source code into a LogicalGraph.
-  """
+  """Ingests Python source code into a LogicalGraph."""
 
   def __init__(self, code: str) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     self.code = code
 
   def parse_to_graph(self) -> LogicalGraph:
-    """
-    Parses the code and extracts the computation graph.
-    """
+    """Parses the code and extracts the computation graph."""
     try:
       tree = cst.parse_module(self.code)
     except Exception:

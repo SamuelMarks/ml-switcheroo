@@ -1,5 +1,4 @@
-"""
-Plugin for transforming Data Loaders to Generic Shim.
+"""Plugin for transforming Data Loaders to Generic Shim.
 
 Handles the mapping of `torch.utils.data.DataLoader` (or similar iterators) to
 the `GenericDataLoader` shim.
@@ -25,8 +24,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def get_shim_code() -> str:
-  """
-  Returns the source code for the `GenericDataLoader` class.
+  """Returns the source code for the `GenericDataLoader` class.
 
   This code string is injected into the preamble of generated files by the
   `convert_dataloader` plugin when a target framework maps `DataLoader`
@@ -40,6 +38,7 @@ def get_shim_code() -> str:
 
   Returns:
       str: Python source code for the shim class.
+
   """
   return textwrap.dedent(""" 
     import random
@@ -123,7 +122,6 @@ def transform_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   - Rewrites function call to `GenericDataLoader(...)`
   - Filters arguments (Dataset as pos 0, preserves supported kwargs).
   """
-
   # 1. Inject Shim Class (One-time check per file via metadata)
   if not ctx.metadata.get("dataloader_shim_injected"):
     # get_shim_code returns the full python source for the shim class

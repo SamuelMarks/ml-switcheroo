@@ -1,5 +1,4 @@
-"""
-Merging Logic for Semantic Knowledge Base.
+"""Merging Logic for Semantic Knowledge Base.
 
 This module handles the aggregation of disparate knowledge sources (Specs, Snapshots)
 into the central SemanticsManager. It resolves conflicts based on Tier Precedence
@@ -34,14 +33,14 @@ TIER_PRECEDENCE = {
 
 
 def infer_tier_from_priority(priority: int) -> SemanticTier:
-  """
-  Maps a loading priority integer to a Semantic Tier.
+  """Maps a loading priority integer to a Semantic Tier.
 
   Args:
       priority (int): Loading order (10=Math, 20=Neural, etc).
 
   Returns:
       SemanticTier: The inferred tier enum.
+
   """
   if priority == 10:
     return SemanticTier.ARRAY_API
@@ -51,13 +50,13 @@ def infer_tier_from_priority(priority: int) -> SemanticTier:
 
 
 def merge_frameworks(master_configs: Dict[str, Dict], new_configs: Dict[str, Any]) -> None:
-  """
-  Merges new framework configurations (from __frameworks__ block) into the master.
+  """Merges new framework configurations (from __frameworks__ block) into the master.
   Updates in-place.
 
   Args:
       master_configs: The central framework definitions dictionary.
       new_configs: Dictionary of framework traits to merge.
+
   """
   for fw_name, traits in new_configs.items():
     if fw_name not in master_configs:
@@ -77,9 +76,7 @@ def merge_frameworks(master_configs: Dict[str, Dict], new_configs: Dict[str, Any
 
 
 def merge_patterns(master_patterns: List[PatternDef], new_patterns: List[Any]) -> None:
-  """
-  Append new patterns to the master list, avoiding duplicates by name.
-  """
+  """Append new patterns to the master list, avoiding duplicates by name."""
   existing_names = {p.name for p in master_patterns}
 
   for raw in new_patterns:
@@ -93,8 +90,7 @@ def merge_patterns(master_patterns: List[PatternDef], new_patterns: List[Any]) -
 
 
 def _normalize_args(args_list: List[Any]) -> List[str]:
-  """
-  Simplifies argument definitions to a list of names for relaxed comparison.
+  """Simplifies argument definitions to a list of names for relaxed comparison.
 
   Converts:
   - ["x", "y"] -> ["x", "y"]
@@ -105,6 +101,7 @@ def _normalize_args(args_list: List[Any]) -> List[str]:
 
   Returns:
       List of argument names.
+
   """
   names = []
   for arg in args_list:
@@ -128,8 +125,7 @@ def merge_tier_data(
   patterns: Optional[List[PatternDef]] = None,
   is_internal: bool = False,
 ) -> None:
-  """
-  Merges content from a Specification file (hub) into the manager state.
+  """Merges content from a Specification file (hub) into the manager state.
 
   Handles precedence logic: Neural definitions overwrite Array definitions silently
   for upgrades. Duplicate definitions at the same tier level with conflicting signatures
@@ -144,6 +140,7 @@ def merge_tier_data(
       tier: The Semantic Tier of the file being loaded.
       patterns: Master list of fusion patterns (optional).
       is_internal: If True, marks entries as internal defaults which can be silently overwritten.
+
   """
   # Safety check: Guard against malformed content (e.g. strings or lists)
   if not isinstance(new_content, dict):
@@ -279,8 +276,7 @@ def merge_overlay_data(
   content: Dict[str, Any],
   filename: str,
 ) -> None:
-  """
-  Merges a mapping overlay file (snapshot) into the main data.
+  """Merges a mapping overlay file (snapshot) into the main data.
 
   Snapshots contain framework-specific implementation overlays ("Spokes")
   that attach to the Abstract Operations ("Hub").
@@ -292,6 +288,7 @@ def merge_overlay_data(
       test_templates: Master dictionary of testing templates.
       content: The JSON content of the snapshot file.
       filename: Filename for metadata inference if needed.
+
   """
   target_fw = content.get("__framework__")
 

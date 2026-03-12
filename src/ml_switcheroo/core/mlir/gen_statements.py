@@ -1,5 +1,4 @@
-"""
-Statement Generation Mixin for MLIR->Python.
+"""Statement Generation Mixin for MLIR->Python.
 
 This module implements the transformation logic for structural MLIR operations
 (`sw.module`, `sw.func`, `sw.setattr`, `sw.return`) into Python LibCST statements.
@@ -17,9 +16,7 @@ from ml_switcheroo.core.mlir.naming import NamingContext
 
 
 class StatementGeneratorMixin(BaseGeneratorMixin):
-  """
-  Mixin class for generating LibCST Statements from MLIR Operations.
-  """
+  """Mixin class for generating LibCST Statements from MLIR Operations."""
 
   # Interface requirements from host class (MlirToPythonGenerator)
   ctx: NamingContext
@@ -34,6 +31,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
 
     Returns:
         The corresponding LibCST expression.
+
     """
     raise NotImplementedError
 
@@ -45,6 +43,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
 
     Returns:
         A list of LibCST statements.
+
     """
     raise NotImplementedError
 
@@ -53,13 +52,12 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
 
     Args:
         block: The MLIR block node.
+
     """
     raise NotImplementedError
 
   def _convert_setattr(self, op: OperationNode) -> cst.SimpleStatementLine:
-    """
-    Converts a `sw.setattr` operation to a Python assignment statement.
-    """
+    """Converts a `sw.setattr` operation to a Python assignment statement."""
     if len(op.operands) < 2:
       return cst.SimpleStatementLine(body=[cst.Pass()])
 
@@ -72,9 +70,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     return cst.SimpleStatementLine(body=[assign])
 
   def _convert_import(self, op: OperationNode) -> cst.SimpleStatementLine:
-    """
-    Converts `sw.import` back to Import/ImportFrom statement.
-    """
+    """Converts `sw.import` back to Import/ImportFrom statement."""
     module_attr = self._get_attr(op, "module")
     names_attr = self._get_attr(op, "names")
     aliases_attr = self._get_attr(op, "aliases")
@@ -118,18 +114,14 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
       return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])
 
   def _convert_return(self, op: OperationNode) -> cst.SimpleStatementLine:
-    """
-    Converts a `sw.return` operation to a Python return statement.
-    """
+    """Converts a `sw.return` operation to a Python return statement."""
     val_node = None
     if op.operands:
       val_node = self._resolve_operand(op.operands[0].name)
     return cst.SimpleStatementLine(body=[cst.Return(value=val_node)])
 
   def _convert_class_def(self, op: OperationNode) -> cst.ClassDef:
-    """
-    Converts a `sw.module` operation to a Python Class definition.
-    """
+    """Converts a `sw.module` operation to a Python Class definition."""
     name_attr = self._get_attr(op, "sym_name")
     class_name = name_attr.strip('"') if name_attr else "UnknownClass"
 
@@ -155,9 +147,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
     return cst.ClassDef(name=cst.Name(class_name), bases=base_nodes, body=cst.IndentedBlock(body=body_stmts))
 
   def _convert_func_def(self, op: OperationNode) -> cst.FunctionDef:
-    """
-    Converts a `sw.func` operation to a Python Function definition.
-    """
+    """Converts a `sw.func` operation to a Python Function definition."""
     name_attr = self._get_attr(op, "sym_name")
     func_name = name_attr.strip('"') if name_attr else "unknown_func"
 

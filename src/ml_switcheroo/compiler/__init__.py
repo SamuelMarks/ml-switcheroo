@@ -1,5 +1,4 @@
-"""
-Compiler Package.
+"""Compiler Package.
 
 This package defines the core Intermediate Representation (IR) and Backend interfaces
 for the ml-switcheroo compilation pipeline. It separates the logical definition

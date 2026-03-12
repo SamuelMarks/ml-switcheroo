@@ -1,5 +1,4 @@
-"""
-Convert Command Handler.
+"""Convert Command Handler.
 
 This module implements the logic for the `ml_switcheroo convert` command.
 It orchestrates:
@@ -43,8 +42,7 @@ def handle_convert(
   json_trace_path: Optional[Path] = None,
   enable_sharding: bool = False,
 ) -> int:
-  """
-  Handles the 'convert' command execution.
+  """Handles the 'convert' command execution.
 
   Orchestrates the loading of configuration, initialization of the semantic
   knowledge base, and the execution of the transpilation engine on files or directories.
@@ -62,6 +60,7 @@ def handle_convert(
 
   Returns:
       int: Exit code (0 for success, 1 for failure).
+
   """
   if not input_path.exists():
     log_error(f"Input not found: {input_path}")
@@ -134,8 +133,7 @@ def _convert_single_file(
   config: RuntimeConfig,
   json_trace_path: Optional[Path] = None,
 ) -> ConversionResult:
-  """
-  Helper to execute transpilation logic on a single file.
+  """Helper to execute transpilation logic on a single file.
 
   Args:
       input_path: Source file path.
@@ -147,6 +145,7 @@ def _convert_single_file(
 
   Returns:
       ConversionResult: Result object containing status and code.
+
   """
   try:
     with open(input_path, "rt", encoding="utf-8") as f:
@@ -206,11 +205,11 @@ def _convert_single_file(
 
 
 def _print_batch_summary(results: Dict[str, ConversionResult]) -> None:
-  """
-  Renders a summary table of conversion results to the console.
+  """Renders a summary table of conversion results to the console.
 
   Args:
       results: Dictionary mapping filenames to conversion results.
+
   """
   total = len(results)
   successes = sum(1 for r in results.values() if r.success and not r.has_errors)

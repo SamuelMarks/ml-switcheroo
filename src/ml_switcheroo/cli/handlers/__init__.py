@@ -1,5 +1,4 @@
-"""
-CLI handlers module.
+"""CLI handlers module.
 
 Exposes individual command handler functions aggregated by domain.
 """

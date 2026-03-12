@@ -1,5 +1,4 @@
-"""
-Sharding Extraction Pass (Reverse Translation).
+"""Sharding Extraction Pass (Reverse Translation).
 
 This module implements a pass to extract `with_sharding_constraint` operations
 from the `LogicalGraph` back into explicit `sharding` metadata on the source nodes.
@@ -13,9 +12,7 @@ from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, Pa
 
 
 class ShardingExtractionPass:
-  """
-  Extracts inline sharding constraints and updates node metadata.
-  """
+  """Extracts inline sharding constraints and updates node metadata."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
     """Mutates graph to extract sharding constraints."""

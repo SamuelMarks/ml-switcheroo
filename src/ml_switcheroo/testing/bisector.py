@@ -1,5 +1,4 @@
-"""
-Semantics Bisector: Automated Spec Repair.
+"""Semantics Bisector: Automated Spec Repair.
 
 This module implements a feedback loop ("Bisector") that attempts to fix failing
 verification tests by incrementally relaxing the constraints in the ODL specifications.
@@ -21,26 +20,24 @@ from ml_switcheroo.testing.runner import EquivalenceRunner
 
 
 class SemanticsBisector:
-  """
-  Automated tool to find working constraints for an operation.
+  """Automated tool to find working constraints for an operation.
 
   Iterates through progressively relaxed constraints (e.g., tolerances) to find
   a configuration where the operation passes verification across frameworks.
   """
 
   def __init__(self, runner: EquivalenceRunner) -> None:
-    """
-    Initialize the bisector.
+    """Initialize the bisector.
 
     Args:
         runner: The initialized EquivalenceRunner to execute verification.
+
     """
     self.runner = runner
     self.logger = logging.getLogger(__name__)
 
   def propose_fix(self, op_name: str, op_def: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """
-    Attempts to satisfy verification by mutating verification parameters.
+    """Attempts to satisfy verification by mutating verification parameters.
 
     Strategies:
     1. Increase tolerances (1e-3 -> 1e-2 -> 1e-1).
@@ -51,6 +48,7 @@ class SemanticsBisector:
 
     Returns:
         Dict: A patched version of op_def if a fix was found, else None.
+
     """
     # Standard Relaxation Ladder
     # (rtol, atol) tuples

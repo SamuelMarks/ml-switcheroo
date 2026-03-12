@@ -1,5 +1,4 @@
-"""
-Plugin for transforming Method calls to Property attributes.
+"""Plugin for transforming Method calls to Property attributes.
 
 This module handles cases where one framework uses a method calls (e.g. `x.size()`)
 while the target framework uses properties (e.g. `x.shape`).
@@ -17,8 +16,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 @register_hook("method_to_property")
 def transform_method_to_property(node: cst.Call, ctx: HookContext) -> Union[cst.Attribute, cst.Subscript, cst.Call]:
-  """
-  Plugin Hook: Transforms a method call into an attribute access or subscript.
+  """Plugin Hook: Transforms a method call into an attribute access or subscript.
 
   Triggers:
       Operations like `size` mapped with `requires_plugin: "method_to_property"`.
@@ -29,6 +27,7 @@ def transform_method_to_property(node: cst.Call, ctx: HookContext) -> Union[cst.
 
   Returns:
       cst.Attribute (x.shape), cst.Subscript (x.shape[0]), or original node.
+
   """
   # 1. Validation: Must be a method call (Attribute)
   if not isinstance(node.func, cst.Attribute):

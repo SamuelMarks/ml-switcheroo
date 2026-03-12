@@ -1,5 +1,4 @@
-"""
-Plugin for handling Stateful Container Logic.
+"""Plugin for handling Stateful Container Logic.
 
 Handles mapping of container management methods between frameworks, particularly
 impedance mismatches between imperative usage (PyTorch's `register_buffer`) and
@@ -42,8 +41,7 @@ def _get_receiver(node: cst.Call) -> Optional[cst.BaseExpression]:
 
 @register_hook("torch_register_buffer_to_nnx")
 def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Transforms `register_buffer`.
+  """Transforms `register_buffer`.
 
   Target: `setattr(self, 'name', Wrapper(tensor))`
 
@@ -83,8 +81,7 @@ def convert_register_buffer(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("torch_register_parameter_to_nnx")
 def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Transforms `register_parameter`.
+  """Transforms `register_parameter`.
 
   Target: `setattr(self, 'name', ParamWrapper(param))`
 
@@ -121,8 +118,7 @@ def convert_register_parameter(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("torch_state_dict_to_nnx")
 def convert_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Transforms `state_dict`.
+  """Transforms `state_dict`.
 
   Target: `StateFunc(model).to_pure_dict()`
 
@@ -147,8 +143,7 @@ def convert_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("torch_load_state_dict_to_nnx")
 def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Transforms `load_state_dict`.
+  """Transforms `load_state_dict`.
 
   Target: `UpdateFunc(model, state)`
 
@@ -180,8 +175,7 @@ def convert_load_state_dict(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("torch_parameters_to_nnx")
 def convert_parameters(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Transforms `parameters`.
+  """Transforms `parameters`.
 
   Target: `StateFunc(model, ParamType).values()`
 

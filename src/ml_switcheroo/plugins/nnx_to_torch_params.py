@@ -1,5 +1,4 @@
-"""
-Plugin for converting Flax NNX Variable definitions to PyTorch-style Parameters.
+"""Plugin for converting Flax NNX Variable definitions to PyTorch-style Parameters.
 
 This module provides AST transformations to handle the impedance mismatch between
 Flax NNX's explicit variable declarations (`nnx.Param`, `nnx.BatchStat`) and
@@ -24,9 +23,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """
-  Creates a CST attribute chain from a string string.
-  """
+  """Creates a CST attribute chain from a string string."""
   parts = name_str.split(".")
   node = cst.Name(parts[0])
   for part in parts[1:]:
@@ -35,9 +32,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _extract_leaf_name(node: cst.BaseExpression) -> Optional[str]:
-  """
-  Helper to extract the right-most name from a call signature.
-  """
+  """Helper to extract the right-most name from a call signature."""
   if isinstance(node, cst.Name):
     return node.value
   elif isinstance(node, cst.Attribute):
@@ -48,8 +43,7 @@ def _extract_leaf_name(node: cst.BaseExpression) -> Optional[str]:
 
 @register_hook("nnx_param_to_torch")
 def transform_nnx_param(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Plugin Hook: Transforms valid NNX Variable declarations into PyTorch-style Parameters.
+  """Plugin Hook: Transforms valid NNX Variable declarations into PyTorch-style Parameters.
 
   Triggers:
       Operations marked with `requires_plugin: "nnx_param_to_torch"`.
@@ -66,6 +60,7 @@ def transform_nnx_param(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       cst.Call: The transformed CST Call node or original if mapping missing.
+
   """
   # 1. Determine Source Type (Trainable vs Non-Trainable)
   # We infer this from the function name being replaced.

@@ -1,5 +1,4 @@
-"""
-SASS Backend Package.
+"""SASS Backend Package.
 
 Contains the backend implementation for synthesizing NVIDIA SASS assembly
 from the Logical Graph representation.

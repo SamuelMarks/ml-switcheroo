@@ -1,5 +1,4 @@
-"""
-Naming Context for MLIR Generator.
+"""Naming Context for MLIR Generator.
 
 This module provides the `NamingContext` class, which manages variable name
 resolution during MLIR-to-Python translation. It handles:
@@ -14,8 +13,7 @@ import re
 
 
 class NamingContext:
-  """
-  Tracks mapping between MLIR SSA IDs and Python variable names.
+  """Tracks mapping between MLIR SSA IDs and Python variable names.
   Ensures generated names are valid identifiers and do not collide.
   """
 
@@ -41,8 +39,7 @@ class NamingContext:
     }
 
   def register(self, ssa_name: str, hint: Optional[str] = None) -> str:
-    """
-    Assigns a valid Python name to an SSA value.
+    """Assigns a valid Python name to an SSA value.
 
     Naming Strategy:
 
@@ -57,6 +54,7 @@ class NamingContext:
 
     Returns:
         str: The resolved Python identifier string.
+
     """
     base = "v"
 
@@ -127,14 +125,14 @@ class NamingContext:
     return py_name
 
   def lookup(self, ssa_name: str) -> str:
-    """
-    Retrieves Python name for SSA ID.
+    """Retrieves Python name for SSA ID.
 
     Args:
         ssa_name: The MLIR variable name.
 
     Returns:
         The mapped Python name, or safe fallback if not registered.
+
     """
     if ssa_name in self._map:
       return self._map[ssa_name]

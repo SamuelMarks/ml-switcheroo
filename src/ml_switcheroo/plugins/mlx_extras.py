@@ -1,5 +1,4 @@
-"""
-Plugin for MLX Ecosystem Mapping.
+"""Plugin for MLX Ecosystem Mapping.
 
 Handles:
 1. Compilation: `@torch.compile` -> `@mx.compile`.
@@ -23,8 +22,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("mlx_compiler")
 def transform_compiler(node: Union[cst.Decorator, cst.Call], ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Maps JIT compilation decorators.
+  """Hook: Maps JIT compilation decorators.
 
   Triggers: Operations mapped with `requires_plugin: "mlx_compiler"`.
 
@@ -61,8 +59,7 @@ def transform_compiler(node: Union[cst.Decorator, cst.Call], ctx: HookContext) -
 
 @register_hook("mlx_synchronize")
 def transform_synchronize(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Maps barrier synchronization to a warning.
+  """Hook: Maps barrier synchronization to a warning.
 
   MLX is lazy, but `torch.cuda.synchronize()` implies a global device barrier.
   Equivalent `mx.eval()` requires arguments. Since we cannot infer state variables here,

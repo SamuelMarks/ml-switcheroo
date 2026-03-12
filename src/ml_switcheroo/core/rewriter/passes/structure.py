@@ -1,5 +1,4 @@
-"""
-Structural Rewriting Pass.
+"""Structural Rewriting Pass.
 
 This module consolidates all structural transformation logic, including:
 1.  **Class Inheritance Rewriting**: Swapping framework base classes (e.g., ``torch.nn.Module`` -> ``flax.nnx.Module``).
@@ -22,16 +21,14 @@ from ml_switcheroo.enums import SemanticTier
 
 
 class StructuralPass(RewriterPass):
-  """
-  Pass responsible for modifying the structural scaffolding of the code.
+  """Pass responsible for modifying the structural scaffolding of the code.
 
   It transforms class definitions, function signatures, and type hints
   to match the idioms of the target framework.
   """
 
   def transform(self, module: cst.Module, context: RewriterContext) -> cst.Module:
-    """
-    Executes the structural transformation.
+    """Executes the structural transformation.
 
     Args:
         module: The source CST.
@@ -39,25 +36,25 @@ class StructuralPass(RewriterPass):
 
     Returns:
         The transformed CST.
+
     """
     transformer = StructuralTransformer(context)
     return module.visit(transformer)
 
 
 class StructuralTransformer(cst.CSTTransformer):
-  """
-  LibCST Transformer encapsulating all structural logic.
+  """LibCST Transformer encapsulating all structural logic.
 
   Maintains internal state for scope depth, annotation context, and
   target framework traits.
   """
 
   def __init__(self, context: RewriterContext) -> None:
-    """
-    Initialize the transformer.
+    """Initialize the transformer.
 
     Args:
         context: The shared rewriter context.
+
     """
     self.context = context
     self._in_annotation = False
@@ -172,8 +169,7 @@ class StructuralTransformer(cst.CSTTransformer):
   # --- Visitor Logic: Module Preamble Injection ---
 
   def leave_Module(self, original_node: cst.Module, updated_node: cst.Module) -> cst.Module:
-    """
-    Injects accumulated module-level preamble statements (e.g. imports, shim classes)
+    """Injects accumulated module-level preamble statements (e.g. imports, shim classes)
     requested by plugins during the rewrite.
     Flushes and clears the buffer to prevent double injection in subsequent passes.
     """
@@ -222,8 +218,7 @@ class StructuralTransformer(cst.CSTTransformer):
     return updated_node
 
   def leave_Attribute(self, original_node: cst.Attribute, updated_node: cst.Attribute) -> cst.BaseExpression:
-    """
-    Rewrite dotted type attributes (e.g. torch.Tensor) if inside an annotation.
+    """Rewrite dotted type attributes (e.g. torch.Tensor) if inside an annotation.
     This fixes issue where complex types like torch.Tensor fail to rewrite because
     leave_Name only handles the leaves individually without context.
     """

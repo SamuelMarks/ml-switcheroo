@@ -1,6 +1,4 @@
-"""
-Type definitions for the Rewriter module.
-"""
+"""Type definitions for the Rewriter module."""
 
 from dataclasses import dataclass, field
 from typing import List, Optional, Set, Tuple
@@ -8,8 +6,7 @@ from typing import List, Optional, Set, Tuple
 
 @dataclass
 class SignatureContext:
-  """
-  Tracks the state of the current function scope being visited.
+  """Tracks the state of the current function scope being visited.
 
   Used by the StructureMixin to maintain context about arguments,
   injections, and initialization status during AST traversal.

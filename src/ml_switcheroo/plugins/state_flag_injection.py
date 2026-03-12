@@ -1,5 +1,4 @@
-"""
-Plugin for injecting state flags (e.g., training=True/False) based on context.
+"""Plugin for injecting state flags (e.g., training=True/False) based on context.
 
 This module handles the impedance mismatch between Object-Oriented state management
 (PyTorch's `model.eval()`, `model.train()`) and Functional statelessness (JAX, Keras functional).
@@ -24,14 +23,14 @@ _PLUGIN_KEY = "state_flag_injection"
 
 
 def _get_func_name(node: cst.BaseExpression) -> Optional[str]:
-  """
-  Refines a CST expression node into a string identifier.
+  """Refines a CST expression node into a string identifier.
 
   Args:
       node: CST node (Name or Attribute).
 
   Returns:
       String representation (e.g. "model" or "self.layer") or None.
+
   """
   if isinstance(node, cst.Name):
     return node.value
@@ -45,8 +44,7 @@ def _get_func_name(node: cst.BaseExpression) -> Optional[str]:
 
 @register_hook("inject_training_flag")
 def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Hook: Injects `training=True/False` kwargs into function calls.
+  """Hook: Injects `training=True/False` kwargs into function calls.
 
   This hook is triggered on function calls (like `model(x)` or `model.forward(x)`) if
   they map to an abstract operation configured with `requires_plugin="inject_training_flag"`.
@@ -65,6 +63,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       The modified Call node with injected arguments, or the original if no state found.
+
   """
   store = ctx.metadata.get(_PLUGIN_KEY, {})
   if not store:
@@ -120,8 +119,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("capture_eval_state")
 def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Intercepts `eval()`/`train()` calls to track state removal.
+  """Hook: Intercepts `eval()`/`train()` calls to track state removal.
 
   Action:
 
@@ -137,6 +135,7 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   Returns:
       cst.Name("None") effectively replacing the statement with a no-op `None`,
       which is valid Python expression statement (does nothing).
+
   """
   # 1. Validation: Must be an attribute call (obj.method())
   if not isinstance(node.func, cst.Attribute):

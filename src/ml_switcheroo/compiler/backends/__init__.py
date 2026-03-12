@@ -1,5 +1,4 @@
-"""
-Compiler Backends Package.
+"""Compiler Backends Package.
 
 Contains concrete implementations of the ``CompilerBackend`` interface
 for specific target languages/formats (e.g., Python, RDNA, SASS).

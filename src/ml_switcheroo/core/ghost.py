@@ -1,5 +1,4 @@
-"""
-Ghost Core: Introspection Abstraction Layer.
+"""Ghost Core: Introspection Abstraction Layer.
 
 This module provides the data structures and inspection logic required to
 decouple framework analysis from the live environment. It enables the system
@@ -18,9 +17,7 @@ from pydantic import BaseModel, Field
 
 
 class GhostParam(BaseModel):
-  """
-  Serializable representation of a function parameter.
-  """
+  """Serializable representation of a function parameter."""
 
   name: str = Field(description="Parameter name.")
   kind: str = Field(description="Kind of parameter (e.g. POSITIONAL_OR_KEYWORD).")
@@ -29,8 +26,7 @@ class GhostParam(BaseModel):
 
 
 class GhostRef(BaseModel):
-  """
-  Serializable snapshot of a Framework API component.
+  """Serializable snapshot of a Framework API component.
 
   Used by the Consensus Engine to align concepts (e.g. 'HuberLoss' vs 'Huber')
   without needing the framework installed at runtime.
@@ -44,21 +40,20 @@ class GhostRef(BaseModel):
   has_varargs: bool = Field(False, description="True if signature accepts *args.")
 
   def has_arg(self, arg_name: str) -> bool:
-    """
-    Checks if a specific argument exists in the signature.
+    """Checks if a specific argument exists in the signature.
 
     Args:
         arg_name: The argument name to find.
 
     Returns:
         True if found.
+
     """
     return any(p.name == arg_name for p in self.params)
 
 
 class GhostInspector:
-  """
-  Facade for API Inspection.
+  """Facade for API Inspection.
 
   Responsibility: Convert Live Objects -> JSON-serializable GhostDefs.
   Crucial for populating snapshots used by WASM/JS environments.
@@ -66,8 +61,7 @@ class GhostInspector:
 
   @staticmethod
   def inspect(obj: Union[Any, Callable], api_path: str) -> "GhostRef":
-    """
-    Creates a GhostRef from a live Python object.
+    """Creates a GhostRef from a live Python object.
     Gracefully handles C-Extensions and builtins that resist introspection.
 
     Args:
@@ -76,6 +70,7 @@ class GhostInspector:
 
     Returns:
         A populated GhostRef object.
+
     """
     name = getattr(obj, "__name__", api_path.split(".")[-1])
     kind = "class" if inspect.isclass(obj) else "function"
@@ -155,13 +150,13 @@ class GhostInspector:
 
   @staticmethod
   def hydrate(data: dict) -> "GhostRef":
-    """
-    Creates a GhostRef from a dictionary (JSON snapshot).
+    """Creates a GhostRef from a dictionary (JSON snapshot).
 
     Args:
         data: The dictionary data.
 
     Returns:
         The hydrated GhostRef object.
+
     """
     return GhostRef.model_validate(data)

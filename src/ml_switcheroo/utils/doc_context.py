@@ -1,5 +1,4 @@
-"""
-Documentation Context Builder.
+"""Documentation Context Builder.
 
 This module provides the logic to transform internal semantic definitions
 (from the ``SemanticsManager``) into a structured View Model suitable for
@@ -19,22 +18,19 @@ from ml_switcheroo.config import get_framework_priority_order
 
 
 class DocContextBuilder:
-  """
-  Prepares view data for operation documentation pages.
-  """
+  """Prepares view data for operation documentation pages."""
 
   def __init__(self, semantics: SemanticsManager):
-    """
-    Initialize the builder.
+    """Initialize the builder.
 
     Args:
         semantics: Valid SemanticsManager instance.
+
     """
     self.semantics = semantics
 
   def build(self, op_name: str, definition: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Constructs the documentation context for a single operation.
+    """Constructs the documentation context for a single operation.
 
     Args:
         op_name: The abstract operation ID (e.g. "Linear").
@@ -46,6 +42,7 @@ class DocContextBuilder:
             - description (str)
             - args (List[str]): Formatted signature strings.
             - variants (List[Dict]): Implementation details per framework.
+
     """
     args_list = self._format_args(definition.get("std_args", []))
     variants = self._resolve_variants(definition.get("variants", {}))
@@ -58,8 +55,7 @@ class DocContextBuilder:
     }
 
   def _format_args(self, std_args: List[Any]) -> List[str]:
-    """
-    Formats the standard arguments list into human-readable signature strings.
+    """Formats the standard arguments list into human-readable signature strings.
 
     Handles various ODL formats:
     - String: "x"
@@ -68,6 +64,7 @@ class DocContextBuilder:
 
     Returns:
         List of strings like ["x: Tensor", "dim: int = -1"].
+
     """
     formatted = []
     for arg in std_args:
@@ -98,8 +95,7 @@ class DocContextBuilder:
     return formatted
 
   def _resolve_variants(self, variants_map: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """
-    Processes the raw variants dictionary into display-ready objects.
+    """Processes the raw variants dictionary into display-ready objects.
 
     Sorts frameworks by UI priority, retrieves display names,
     classifies implementation types, and resolves doc URLs.
@@ -110,6 +106,7 @@ class DocContextBuilder:
 
     Returns:
         List of dicts representing supported variants.
+
     """
     results = []
     priority_order = get_framework_priority_order()
@@ -150,14 +147,14 @@ class DocContextBuilder:
     return results
 
   def _determine_impl_type(self, variant: Dict[str, Any]) -> str:
-    """
-    Classifies the implementation strategy.
+    """Classifies the implementation strategy.
 
     Args:
         variant: The variant definition dictionary.
 
     Returns:
         A readable string string (e.g. "Direct Mapping", "Plugin (...)").
+
     """
     if "requires_plugin" in variant:
       return f"Plugin ({variant['requires_plugin']})"

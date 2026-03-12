@@ -1,5 +1,4 @@
-"""
-Plugin for Learning Rate Scheduler Rewiring.
+"""Plugin for Learning Rate Scheduler Rewiring.
 
 Addresses the architectural difference between:
 
@@ -40,8 +39,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
-  """
-  Resolves the target keyword argument name.
+  """Resolves the target keyword argument name.
   Checks the Semantic Knowledge Base (Variant Args) first, falls back to default.
   """
   if ctx.current_variant and ctx.current_variant.args:
@@ -51,8 +49,7 @@ def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
 
 @register_hook("scheduler_rewire")
 def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Transforms Scheduler instantiation.
+  """Hook: Transforms Scheduler instantiation.
 
   Logic routes based on detected Operation ID in context (StepLR vs Cosine).
   Now fully decoupled: reads target API and argument names from `ctx`.
@@ -63,6 +60,7 @@ def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Returns:
       Transformed CST call.
+
   """
   op_id = ctx.current_op_id or ""
   target_api = ctx.lookup_api(op_id)
@@ -80,8 +78,7 @@ def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
 
 def _transform_step_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst.Call:
-  """
-  Transform StepLR.
+  """Transform StepLR.
 
   Source: StepLR(optim, step_size, gamma)
   Target: target_api(init_value=1.0, transition_steps=step_size, decay_rate=gamma, staircase=True)
@@ -163,8 +160,7 @@ def _transform_step_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst
 
 
 def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst.Call:
-  """
-  Transform CosineAnnealingLR.
+  """Transform CosineAnnealingLR.
 
   Source: CosineAnnealingLR(optim, T_max, eta_min)
   Target: target_api(init_value=1.0, decay_steps=T_max, alpha=eta_min/1.0)
@@ -233,8 +229,7 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
 
 @register_hook("scheduler_step_noop")
 def transform_scheduler_step(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Replaces ``scheduler.step()`` with a no-op value (None).
+  """Hook: Replaces ``scheduler.step()`` with a no-op value (None).
   Triggered if the scheduler step operation is wired to `scheduler_step_noop`.
   """
   # Return explicit None. In an expression statement, `None` does nothing.

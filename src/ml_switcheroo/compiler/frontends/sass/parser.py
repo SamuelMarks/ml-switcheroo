@@ -22,20 +22,18 @@ from ml_switcheroo.compiler.frontends.sass.nodes import (
 from ml_switcheroo.compiler.frontends.sass.tokens import SassLexer, Token, TokenType
 
 # Extended Operand Type for Label References in branches
-try:
-  from dataclasses import dataclass
+from dataclasses import dataclass
 
-  @dataclass
-  class LabelRef(Operand):
-    """TODO: Add docstring."""
 
-    name: str
+@dataclass
+class LabelRef(Operand):
+  """Execute implementation detail."""
 
-    def __str__(self) -> str:
-      """TODO: Add docstring."""
-      return self.name
-except ImportError:
-  pass
+  name: str
+
+  def __str__(self) -> str:
+    """Execute implementation detail."""
+    return self.name
 
 
 class SassParser:
@@ -140,8 +138,6 @@ class SassParser:
     params = []
     while not self._is_eof():
       next_t = self._peek()
-      if not next_t:
-        break
       if next_t.kind in (
         TokenType.LABEL_DEF,
         TokenType.DIRECTIVE,

@@ -1,5 +1,4 @@
-"""
-Semantic Harvester for extracting knowledge from manual tests.
+"""Semantic Harvester for extracting knowledge from manual tests.
 
 This module provides the ``SemanticHarvester``, which inspects Python test files
 written by developers (Human Override Workflow). It analyzes successful test
@@ -29,27 +28,25 @@ from ml_switcheroo.utils.console import log_info, log_success, log_warning
 
 
 class ImportScanner(ast.NodeVisitor):
-  """
-  Scans AST for imports relevant to the target framework to build an alias map.
-  """
+  """Scans AST for imports relevant to the target framework to build an alias map."""
 
   def __init__(self, root_fw: str):
-    """
-    Initialize the scanner.
+    """Initialize the scanner.
 
     Args:
         root_fw (str): The root package to track (e.g. 'jax').
+
     """
     self.root_fw = root_fw
     # Map of alias -> full_path (e.g. 'jnp' -> 'jax.numpy').
     self.aliases = {}
 
   def visit_Import(self, node: ast.Import) -> Any:
-    """
-    Visits ``import ...`` statements.
+    """Visits ``import ...`` statements.
 
     Args:
         node: The Import node.
+
     """
     for alias in node.names:
       if alias.name.startswith(self.root_fw):
@@ -58,11 +55,11 @@ class ImportScanner(ast.NodeVisitor):
     self.generic_visit(node)
 
   def visit_ImportFrom(self, node: ast.ImportFrom) -> Any:
-    """
-    Visits ``from ... import ...`` statements.
+    """Visits ``from ... import ...`` statements.
 
     Args:
         node: The ImportFrom node.
+
     """
     if node.module and node.module.startswith(self.root_fw):
       for alias in node.names:
@@ -73,24 +70,21 @@ class ImportScanner(ast.NodeVisitor):
 
 
 class SemanticHarvester:
-  """
-  Analyzes Python source code to extract valid API signatures from usage.
-  """
+  """Analyzes Python source code to extract valid API signatures from usage."""
 
   def __init__(self, semantics: SemanticsManager, target_fw: str = "jax"):
-    """
-    Initializes the harvester.
+    """Initializes the harvester.
 
     Args:
         semantics: Knowledge base manager.
         target_fw: The framework import root to look for (default: jax).
+
     """
     self.semantics = semantics
     self.target_fw = target_fw
 
   def harvest_file(self, file_path: Path, dry_run: bool = False) -> int:
-    """
-    Scans a file, extracts mappings, and updates the semantics JSONs.
+    """Scans a file, extracts mappings, and updates the semantics JSONs.
 
     Args:
         file_path: Path to the python test file.
@@ -98,6 +92,7 @@ class SemanticHarvester:
 
     Returns:
         int: Number of definitions updated.
+
     """
     if not file_path.exists():
       log_warning(f"File not found: {file_path}")
@@ -142,8 +137,7 @@ class SemanticHarvester:
     return count
 
   def _infer_op_name(self, test_func_name: str) -> Optional[str]:
-    """
-    Extracts abstract operation name from test function name.
+    """Extracts abstract operation name from test function name.
 
     Examples:
         'test_matmul' -> 'matmul'
@@ -154,6 +148,7 @@ class SemanticHarvester:
 
     Returns:
         Extracted operation name or None.
+
     """
     if test_func_name.startswith("test_gen_"):
       return test_func_name[9:]
@@ -164,8 +159,7 @@ class SemanticHarvester:
   def _analyze_test_body(
     self, func_node: ast.FunctionDef, op_name: str, aliases: Dict[str, str]
   ) -> Optional[Dict[str, str]]:
-    """
-    Inspects function body to find a call to the target API.
+    """Inspects function body to find a call to the target API.
 
     Args:
         func_node: The AST node of the test function.
@@ -174,6 +168,7 @@ class SemanticHarvester:
 
     Returns:
         A dictionary mapping {std_arg: target_arg} if found, else None.
+
     """
     defn = self.semantics.get_definition_by_id(op_name)
     if not defn:
@@ -193,8 +188,7 @@ class SemanticHarvester:
     return visitor.mappings
 
   def _apply_update(self, op_name: str, arg_map: Dict[str, str], dry_run: bool) -> bool:
-    """
-    Updates the SemanticsManager with the harvested mapping.
+    """Updates the SemanticsManager with the harvested mapping.
 
     Args:
         op_name: Abstract operation identifier.
@@ -203,6 +197,7 @@ class SemanticHarvester:
 
     Returns:
         bool: True if an update was staged/committed.
+
     """
     defn = self.semantics.get_definition_by_id(op_name)
     if not defn:
@@ -233,8 +228,7 @@ class SemanticHarvester:
 
 
 class TargetCallVisitor(ast.NodeVisitor):
-  """
-  Helper AST walker to find specific API calls and extract arguments.
+  """Helper AST walker to find specific API calls and extract arguments.
 
   Implements **Value-Based Inference** for Primitives and Containers:
 
@@ -249,13 +243,13 @@ class TargetCallVisitor(ast.NodeVisitor):
     aliases: Dict[str, str],
     std_args_info: List[Any],
   ):
-    """
-    Initializes the visitor.
+    """Initializes the visitor.
 
     Args:
         target_api: The full path of the function to find.
         aliases: Import aliases map.
         std_args_info: Standard argument definitions from Spec.
+
     """
     self.target_api = target_api
     self.aliases = aliases
@@ -264,14 +258,14 @@ class TargetCallVisitor(ast.NodeVisitor):
     self.mappings: Optional[Dict[str, str]] = None
 
   def _normalize_info(self, raw: List[Any]) -> List[Tuple[str, str]]:
-    """
-    Ensures consistent list of tuples structure for argument definitions.
+    """Ensures consistent list of tuples structure for argument definitions.
 
     Args:
         raw: List of arguments in varying formats (str, tuple, dict).
 
     Returns:
         List of (name, type) tuples.
+
     """
     out = []
     for item in raw:
@@ -288,11 +282,11 @@ class TargetCallVisitor(ast.NodeVisitor):
     return out
 
   def visit_Call(self, node: ast.Call) -> Any:
-    """
-    Inspects calls. Check if they match target_api and extract args.
+    """Inspects calls. Check if they match target_api and extract args.
 
     Args:
         node: The Call AST node.
+
     """
     if self.mappings is not None:
       return
@@ -343,14 +337,14 @@ class TargetCallVisitor(ast.NodeVisitor):
     self.generic_visit(node)
 
   def _resolve_call_name(self, node: ast.AST) -> str:
-    """
-    Resolves AST Attribute/Name to full dotted string using aliases.
+    """Resolves AST Attribute/Name to full dotted string using aliases.
 
     Args:
         node: The AST node representing the function being called.
 
     Returns:
         Dotted name string or empty string.
+
     """
     parts = []
     curr = node
@@ -367,42 +361,42 @@ class TargetCallVisitor(ast.NodeVisitor):
     return ""
 
   def _get_arg_val_name(self, node: ast.AST) -> Optional[str]:
-    """
-    Extracts variable name from AST node if it is a Name.
+    """Extracts variable name from AST node if it is a Name.
 
     Args:
         node: The value node.
 
     Returns:
         Variable name string or None.
+
     """
     if isinstance(node, ast.Name):
       return node.id
     return None
 
   def _clean_std_name(self, var_name: str) -> str:
-    """
-    Converts variable name to abstract standard name by stripping prefixes.
+    """Converts variable name to abstract standard name by stripping prefixes.
 
     Args:
         var_name: The local variable name (e.g. 'np_x').
 
     Returns:
         The abstract argument name (e.g. 'x').
+
     """
     if var_name.startswith("np_"):
       return var_name[3:]
     return var_name
 
   def _infer_literal_type(self, node: ast.AST) -> str:
-    """
-    Determines logical type of a literal node, including Containers.
+    """Determines logical type of a literal node, including Containers.
 
     Args:
         node: AST node.
 
     Returns:
         String hint: 'int', 'float', 'bool', 'str', 'List[...]`, 'Tuple[...]', or 'Any'.
+
     """
     # Primitives
     if isinstance(node, ast.Constant):
@@ -427,8 +421,7 @@ class TargetCallVisitor(ast.NodeVisitor):
     return "Any"
 
   def _infer_container_type(self, elements: List[ast.AST], container_name: str) -> str:
-    """
-    Helper to infer type of homogenous container elements.
+    """Helper to infer type of homogenous container elements.
 
     Args:
         elements: List of AST nodes inside container.
@@ -436,6 +429,7 @@ class TargetCallVisitor(ast.NodeVisitor):
 
     Returns:
         String type hint (e.g. "List[int]").
+
     """
     if not elements:
       # Empty container matches generic List/Tuple
@@ -457,8 +451,7 @@ class TargetCallVisitor(ast.NodeVisitor):
     return f"{container_name}[{inner_type}]"
 
   def _find_std_arg_by_type(self, val_type: str) -> Optional[str]:
-    """
-    Constraints Solver: Find unique std_arg that matches this type.
+    """Constraints Solver: Find unique std_arg that matches this type.
 
     If multiple args match (e.g. two ints), returns None (Ambiguous).
     Logic parses containment (e.g. 'Tuple[int]' matches 'Tuple[int, int]').
@@ -468,6 +461,7 @@ class TargetCallVisitor(ast.NodeVisitor):
 
     Returns:
         The name of the matching standard argument, or None.
+
     """
     candidates = []
     # Robustly clean whitespace for matching

@@ -1,5 +1,4 @@
-"""
-Interactive and Learning Command Handlers.
+"""Interactive and Learning Command Handlers.
 
 This module provides tools for:
 1.  **Wizard**: Interactive CLI to categorize unmapped APIs.
@@ -19,14 +18,14 @@ from ml_switcheroo.utils.console import (
 
 
 def handle_wizard(package: str) -> int:
-  """
-  Handles the 'wizard' command for interactive mapping discovery.
+  """Handles the 'wizard' command for interactive mapping discovery.
 
   Args:
       package: The name of the python package to inspect (e.g., 'torch').
 
   Returns:
       int: Exit code (0 for success).
+
   """
   semantics = SemanticsManager()
   wizard = MappingWizard(semantics)
@@ -35,8 +34,7 @@ def handle_wizard(package: str) -> int:
 
 
 def handle_harvest(path: Path, target: str, dry_run: bool) -> int:
-  """
-  Handles the 'harvest' command to learn mappings from manual tests.
+  """Handles the 'harvest' command to learn mappings from manual tests.
 
   Args:
       path: File or directory containing python test files.
@@ -45,6 +43,7 @@ def handle_harvest(path: Path, target: str, dry_run: bool) -> int:
 
   Returns:
       int: Exit code (0 for success, 1 for path errors).
+
   """
   semantics = SemanticsManager()
   harvester = SemanticHarvester(semantics, target_fw=target)

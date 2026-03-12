@@ -1,5 +1,4 @@
-"""
-ml-switcheroo Package.
+"""ml-switcheroo Package.
 
 A deterministic AST transpiler for converting Deep Learning models between
 frameworks (e.g., PyTorch -> JAX/Flax).
@@ -51,8 +50,7 @@ def convert(
   plugin_settings: Optional[Dict[str, Any]] = None,
   semantics: Optional[SemanticsManager] = None,
 ) -> str:
-  """
-  Transpiles a string of Python code from one framework to another.
+  """Transpiles a string of Python code from one framework to another.
 
   This is a high-level convenience wrapper around the `ASTEngine`. For file-based
   conversions or batch processing, consider using `ml_switcheroo.cli` or using
@@ -77,6 +75,7 @@ def convert(
 
   Raises:
       ValueError: If the conversion fails (e.g. syntax errors or strict mode violations).
+
   """
   # 1. Configure
   # RuntimeConfig.load handles dynamic resolution if source/target are None

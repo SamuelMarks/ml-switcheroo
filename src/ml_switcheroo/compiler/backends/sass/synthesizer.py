@@ -1,5 +1,4 @@
-"""
-SASS Synthesizer and Register Allocator.
+"""SASS Synthesizer and Register Allocator.
 
 This module provides the "Middle-End" logic for the SASS compiler pipeline.
 It bridges the gap between high-level Abstract Logic (LogicalGraph)
@@ -50,8 +49,7 @@ MAX_REGISTERS = 255
 
 
 class RegisterAllocator:
-  """
-  Manages the mapping between symbolic variable names and physical registers.
+  """Manages the mapping between symbolic variable names and physical registers.
 
   Implements a simple linear allocation strategy (bump pointer). A more complex
   implementation would handle liveness analysis and register spilling, but this
@@ -64,8 +62,7 @@ class RegisterAllocator:
     self._next_idx = 0
 
   def get_register(self, var_name: str) -> Register:
-    """
-    Retrieves or allocates a register for a symbolic variable.
+    """Retrieves or allocates a register for a symbolic variable.
 
     If the variable has been seen before, returns the existing register mapping.
     If new, allocates the next available physical register.
@@ -78,6 +75,7 @@ class RegisterAllocator:
 
     Raises:
         ValueError: If the allocator runs out of physical registers (>255).
+
     """
     if var_name in self._var_to_reg:
       return Register(self._var_to_reg[var_name])
@@ -91,13 +89,13 @@ class RegisterAllocator:
     return Register(reg_name)
 
   def allocate_temp(self) -> Register:
-    """
-    Allocates a temporary anonymous register.
+    """Allocates a temporary anonymous register.
 
     Useful for intermediate calculations or immediate loading.
 
     Returns:
         Register: A new physical register.
+
     """
     # Generate a unique temp name
     temp_name = f"__temp_{self._next_idx}__"
@@ -110,8 +108,7 @@ class RegisterAllocator:
 
 
 class SassSynthesizer:
-  """
-   Bidirectional transpiler component.
+  """Bidirectional transpiler component.
 
    Handles:
 
@@ -123,11 +120,11 @@ class SassSynthesizer:
   """
 
   def __init__(self, semantics: "SemanticsManager"):
-    """
-    Initializes the synthesizer.
+    """Initializes the synthesizer.
 
     Args:
         semantics (SemanticsManager): The knowledge base for Opcode lookups.
+
     """
     self.semantics = semantics
     self.allocator = RegisterAllocator()
@@ -140,8 +137,7 @@ class SassSynthesizer:
     }
 
   def from_graph(self, graph: LogicalGraph) -> List[SassNode]:
-    """
-       Converts a LogicalGraph into a list of SASS AST nodes.
+    """Converts a LogicalGraph into a list of SASS AST nodes.
 
        Process:
 
@@ -158,11 +154,12 @@ class SassSynthesizer:
 
     Handles `Input` nodes by pre-allocating registers (Contract: R0, R1...).
 
-       Args:
+    Args:
            graph (LogicalGraph): The input computation graph.
 
-       Returns:
+    Returns:
            List[SassNode]: A structured list of assembly nodes.
+
     """
     self.allocator.reset()
     output_nodes: List[SassNode] = []
@@ -249,8 +246,7 @@ class SassSynthesizer:
     return output_nodes
 
   def to_python(self, sass_nodes: List[SassNode]) -> cst.Module:
-    """
-    Converts SASS AST nodes into a Python source structure representation.
+    """Converts SASS AST nodes into a Python source structure representation.
 
     Used for analysis or round-trip verification. Registers are treated as
     variables. Instructions map to function calls `sass.OPCODE(args)`.
@@ -263,6 +259,7 @@ class SassSynthesizer:
 
     Returns:
         cst.Module: A LibCST module containing the Python representation.
+
     """
     body_stmts = []
 
@@ -289,8 +286,7 @@ class SassSynthesizer:
     return cst.Module(body=body_stmts)
 
   def _convert_instruction_to_py(self, inst: Instruction) -> cst.SimpleStatementLine:
-    """
-    Helper to convert a single instruction to Python CST.
+    """Helper to convert a single instruction to Python CST.
 
     Assumes SASS semantics: First literal Dest, rest Sources.
     `OP DST, SRC1, SRC2` -> `DST = sass.OP(SRC1, SRC2)`
@@ -300,6 +296,7 @@ class SassSynthesizer:
 
     Returns:
         cst.SimpleStatementLine: Python statement.
+
     """
     # SASS usually has DST as op 0.
     if not inst.operands:
@@ -359,14 +356,14 @@ class SassSynthesizer:
       return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
 
   def _convert_operand_to_py(self, op: Operand) -> cst.BaseExpression:
-    """
-    Helper to convert operands to Python Literals/Names.
+    """Helper to convert operands to Python Literals/Names.
 
     Args:
         op (Operand): The operand node.
 
     Returns:
         cst.BaseExpression: The corresponding Python AST node.
+
     """
     if isinstance(op, Immediate):
       if op.is_hex:
@@ -389,20 +386,17 @@ class SassSynthesizer:
     return cst.SimpleString(f"'{raw}'")
 
   def _make_call(self, opcode: str, args: List[cst.Arg]) -> cst.Call:
-    """
-    Constructs `sass.OPCODE(...)`.
-    """
+    """Constructs `sass.OPCODE(...)`."""
     return cst.Call(func=cst.Attribute(value=cst.Name("sass"), attr=cst.Name(opcode)), args=args)
 
 
 class SassBackend(CompilerBackend):
-  """
-  Compiler Backend implementation for NVIDIA SASS.
+  """Compiler Backend implementation for NVIDIA SASS.
   Orchestrates the synthesis (Graph -> AST) and emission (AST -> Text).
   """
 
   def __init__(self, semantics: Optional["SemanticsManager"] = None) -> None:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     # Lazy load if not provided, but typically passed from Registry/Engine
     if semantics is None:
       from ml_switcheroo.semantics.manager import SemanticsManager
@@ -413,14 +407,14 @@ class SassBackend(CompilerBackend):
     self.emitter = SassEmitter()
 
   def compile(self, graph: LogicalGraph) -> str:
-    """
-    Compiles LogicalGraph to SASS Assembly string.
+    """Compiles LogicalGraph to SASS Assembly string.
 
     Args:
         graph: The intermediate representation.
 
     Returns:
         str: The SASS code.
+
     """
     sass_nodes = self.synthesizer.from_graph(graph)
     return self.emitter.emit(sass_nodes)

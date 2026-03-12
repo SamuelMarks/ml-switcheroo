@@ -1,5 +1,4 @@
-"""
-Central Logging and Console Utilities.
+"""Central Logging and Console Utilities.
 
 This module unifies the application's output mechanism using the Python standard
 `logging` library, backed by `rich` for formatting.
@@ -53,8 +52,7 @@ _THEME = Theme(
 
 
 class _ConsoleProxy:
-  """
-  A Proxy wrapper around ``rich.console.Console``.
+  """A Proxy wrapper around ``rich.console.Console``.
 
   This class maintains a reference to a 'backend' Console instance.
   All printing operations are forwarded to this backend. This allows the
@@ -72,35 +70,32 @@ class _ConsoleProxy:
     self._configure_logging()
 
   def set_backend(self, new_console: Console) -> None:
-    """
-    Injects a new Console backend and updates logging handlers.
+    """Injects a new Console backend and updates logging handlers.
 
     Args:
         new_console (Console): The new Rich Console instance to use.
+
     """
     self._backend = new_console
     self._configure_logging()
 
   def reset(self) -> None:
-    """
-    Resets the proxy to use a fresh standard output console.
-    """
+    """Resets the proxy to use a fresh standard output console."""
     self._backend = Console(theme=_THEME)
     self._configure_logging()
 
   @property
   def backend(self) -> Console:
-    """
-    Access the raw backend console.
+    """Access the raw backend console.
 
     Returns:
         Console: The currently active implementation.
+
     """
     return self._backend
 
   def _configure_logging(self) -> None:
-    """
-    Configures or re-configures the standard python logging library
+    """Configures or re-configures the standard python logging library
     to direct output to the current backend console.
     """
     # Remove existing RichHandlers to prevent duplicate logs/wrong destinations
@@ -124,60 +119,60 @@ class _ConsoleProxy:
     root_logger.addHandler(rich_handler)
 
   def print(self, *args: Any, **kwargs: Any) -> None:
-    """
-    Forwards ``print`` calls to the active backend.
+    """Forwards ``print`` calls to the active backend.
 
     Args:
         *args: Positional arguments for Rich print.
         **kwargs: Keyword arguments for Rich print.
+
     """
     self._backend.print(*args, **kwargs)
 
   def get_style(self, name: str) -> Style:
-    """
-    Forwards ``get_style`` calls to the active backend.
+    """Forwards ``get_style`` calls to the active backend.
 
     Args:
         name (str): The name of the style to look up.
 
     Returns:
         Style: The resolved style object.
+
     """
     return self._backend.get_style(name)
 
   def export_text(self, **kwargs: Any) -> str:
-    """
-    Forwards ``export_text`` (useful for log capturing).
+    """Forwards ``export_text`` (useful for log capturing).
 
     Args:
         **kwargs: Options passed to console.export_text.
 
     Returns:
         str: The captured text output.
+
     """
     return self._backend.export_text(**kwargs)
 
   def export_html(self, **kwargs: Any) -> str:
-    """
-    Forwards ``export_html`` (useful for web rendering).
+    """Forwards ``export_html`` (useful for web rendering).
 
     Args:
         **kwargs: Options passed to console.export_html.
 
     Returns:
         str: The captured HTML output.
+
     """
     return self._backend.export_html(**kwargs)
 
   def __getattr__(self, name: str) -> Any:
-    """
-    Fallback to forward any other attributes/methods to the backend.
+    """Fallback to forward any other attributes/methods to the backend.
 
     Args:
         name (str): Attribute name.
 
     Returns:
         Any: The attribute from the backend console.
+
     """
     return getattr(self._backend, name)
 
@@ -189,8 +184,7 @@ console = _ConsoleProxy()
 
 
 def set_console(new_console: Console) -> None:
-  """
-  Global helper to inject a specific console instance.
+  """Global helper to inject a specific console instance.
 
   This updates both the ``console`` proxy object and the standard ``logging``
   handlers to write to the new instance. Use this in Web/WASM contexts to
@@ -198,62 +192,61 @@ def set_console(new_console: Console) -> None:
 
   Args:
       new_console (Console): The configured Rich console to use globally.
+
   """
   console.set_backend(new_console)
 
 
 def reset_console() -> None:
-  """
-  Global helper to reset logging and console to standard output.
-  """
+  """Global helper to reset logging and console to standard output."""
   console.reset()
 
 
 def get_console() -> Console:
-  """
-  Retrieves the currently active console backend.
+  """Retrieves the currently active console backend.
 
   Returns:
       Console: The active Rich Console.
+
   """
   return console.backend
 
 
 def log_info(msg: str) -> None:
-  """
-  Logs an informational message via standard logging.
+  """Logs an informational message via standard logging.
 
   Args:
       msg (str): The message content. Can include rich markup like [bold].
+
   """
   logging.info(f"ℹ️  {msg}", extra={"markup": True})
 
 
 def log_success(msg: str) -> None:
-  """
-  Logs a success message via standard logging.
+  """Logs a success message via standard logging.
 
   Args:
       msg (str): The message content.
+
   """
   logging.log(SUCCESS_LEVEL_NUM, f"✅ {msg}", extra={"markup": True})
 
 
 def log_warning(msg: str) -> None:
-  """
-  Logs a warning message via standard logging.
+  """Logs a warning message via standard logging.
 
   Args:
       msg (str): The message content.
+
   """
   logging.warning(f"⚠️  {msg}", extra={"markup": True})
 
 
 def log_error(msg: str) -> None:
-  """
-  Logs an error message via standard logging.
+  """Logs an error message via standard logging.
 
   Args:
       msg (str): The message content.
+
   """
   logging.error(f"❌ {msg}", extra={"markup": True})

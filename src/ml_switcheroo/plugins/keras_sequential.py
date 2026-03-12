@@ -1,5 +1,4 @@
-"""
-Plugin for Keras Sequential Container Translation.
+"""Plugin for Keras Sequential Container Translation.
 
 This plugin bridges the difference between PyTorch's `nn.Sequential(*layers)` (variadic args)
 and Keras's `keras.Sequential([layers])` (list input).
@@ -16,14 +15,14 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:
-  """
-  Helper function to create a CST node representing a dotted name (e.g., 'keras.Sequential').
+  """Helper function to create a CST node representing a dotted name (e.g., 'keras.Sequential').
 
   Args:
       name_str: The dot-separated string representation.
 
   Returns:
       A LibCST node (Name or nested Attribute).
+
   """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
@@ -34,8 +33,7 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 @register_hook("keras_sequential_pack")
 def transform_keras_sequential(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Plugin Hook: Transforms Sequential container initialization.
+  """Plugin Hook: Transforms Sequential container initialization.
 
   Transformation:
       Input: `Sequential(layer1, layer2, ...)`
@@ -51,6 +49,7 @@ def transform_keras_sequential(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       The transformed function call.
+
   """
   # 1. Rename Function (API Swap)
   # We resolve the name "Sequential" to the target API using the context if possible.

@@ -1,5 +1,4 @@
-"""
-Graph Patcher for AST Surgery.
+"""Graph Patcher for AST Surgery.
 
 This module implements the execution phase of the Graph-Guided Rewriting pipeline.
 It applies a set of topological mutations (Deletions, Replacements) generated
@@ -27,8 +26,7 @@ class PatchAction:
 
 @dataclass
 class DeleteAction(PatchAction):
-  """
-  Instruction to remove a node from the AST.
+  """Instruction to remove a node from the AST.
   Used for nodes that have been fused into others or pruned.
   """
 
@@ -37,8 +35,7 @@ class DeleteAction(PatchAction):
 
 @dataclass
 class ReplaceAction(PatchAction):
-  """
-  Instruction to replace an existing node with a new code snippet.
+  """Instruction to replace an existing node with a new code snippet.
 
   Commonly used for:
   1. Replacing a sequence anchor (e.g. Conv2d) with a Fused Block.
@@ -50,6 +47,7 @@ class ReplaceAction(PatchAction):
       output_var: The variable name to assign result to.
       is_init: If True, uses `emit_init` logic (assignments).
                If False, uses `emit_call` logic (executions).
+
   """
 
   new_node: LogicalNode
@@ -59,8 +57,7 @@ class ReplaceAction(PatchAction):
 
 
 class GraphPatcher(cst.CSTTransformer):
-  """
-  LibCST Transformer that applies graph optimizations to source code.
+  """LibCST Transformer that applies graph optimizations to source code.
 
   It builds a reverse-lookup map of the Provenance Registry to identify
   CST nodes by object identity, then checks against the Transformation Plan
@@ -73,13 +70,13 @@ class GraphPatcher(cst.CSTTransformer):
     provenance: Dict[str, cst.CSTNode],
     emitter: PythonSnippetEmitter,
   ) -> None:
-    """
-    Initialize the patcher.
+    """Initialize the patcher.
 
     Args:
         plan: Ordered list of actions to perform.
         provenance: Mapping of LogicalNode ID -> Original CST Node.
         emitter: Logic for synthesizing new Python code.
+
     """
     self.plan = plan
     self.provenance = provenance
@@ -120,8 +117,7 @@ class GraphPatcher(cst.CSTTransformer):
     self._build_action_index()
 
   def _build_action_index(self) -> None:
-    """
-    Correlates Plan IDs with CST Nodes via Provenance.
+    """Correlates Plan IDs with CST Nodes via Provenance.
     Populates `_action_map` keying by `id(node)`.
     """
     # Create map of node_id -> Action
@@ -139,40 +135,32 @@ class GraphPatcher(cst.CSTTransformer):
   def leave_Assign(
     self, original_node: cst.Assign, updated_node: cst.Assign
   ) -> Union[cst.Assign, cst.SimpleStatementLine, cst.RemovalSentinel]:
-    """
-    Intercepts Assignment statements (e.g. `self.conv = ...`, `y = func(x)`).
-    """
+    """Intercepts Assignment statements (e.g. `self.conv = ...`, `y = func(x)`)."""
     return self._handle_node(original_node, updated_node)
 
   def leave_Expr(
     self, original_node: cst.Expr, updated_node: cst.Expr
   ) -> Union[cst.Expr, cst.SimpleStatementLine, cst.RemovalSentinel]:
-    """
-    Intercepts Expression statements (e.g. `func(x)` without assignment).
-    """
+    """Intercepts Expression statements (e.g. `func(x)` without assignment)."""
     return self._handle_node(original_node, updated_node)
 
   def leave_Call(
     self, original_node: cst.Call, updated_node: cst.Call
   ) -> Union[cst.Call, cst.BaseExpression, cst.RemovalSentinel]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return self._handle_node(original_node, updated_node)
 
   def leave_SimpleStatementLine(
     self, original_node: cst.SimpleStatementLine, updated_node: cst.SimpleStatementLine
   ) -> Union[cst.SimpleStatementLine, cst.RemovalSentinel]:
-    """
-    Cleans up statements that became empty due to children deletion.
-    """
+    """Cleans up statements that became empty due to children deletion."""
     # If logic removed the inner assign/expr, `updated_node.body` is empty list
     if not updated_node.body:
       return cst.RemoveFromParent()
     return updated_node
 
   def _handle_node(self, original: cst.CSTNode, updated: cst.CSTNode) -> Any:
-    """
-    Core dispatch logic.
-    """
+    """Core dispatch logic."""
     oid = id(original)
     if oid not in self._action_map:
       return updated
@@ -206,8 +194,7 @@ class GraphPatcher(cst.CSTTransformer):
     return updated
 
   def _unwrap_stmt_if_nested(self, context_node: cst.CSTNode, new_stmt: cst.SimpleStatementLine) -> Any:
-    """
-    Helper: If we are replacing a node that is already inside a SimpleStatementLine body list
+    """Helper: If we are replacing a node that is already inside a SimpleStatementLine body list
     (like Assign or Expr), we should return the inner component to avoid double wrapping.
     """
     if isinstance(context_node, (cst.Assign, cst.Expr)):

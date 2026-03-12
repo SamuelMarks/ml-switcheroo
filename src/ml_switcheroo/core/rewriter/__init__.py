@@ -1,5 +1,4 @@
-"""
-Rewriter Package.
+"""Rewriter Package.
 
 This package provides the core AST transformation logic via a composable pipeline.
 

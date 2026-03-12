@@ -1,5 +1,4 @@
-"""
-Discovery Tool for linking Framework implementations to Standards.
+"""Discovery Tool for linking Framework implementations to Standards.
 
 This module scans installed libraries (e.g., Torch, JAX, TensorFlow, MLX) for
 functions that match the names defined in the Semantic Knowledge Base.
@@ -23,18 +22,14 @@ from ml_switcheroo.frameworks import get_adapter
 
 
 class FrameworkSyncer:
-  """
-  Links abstract operations to concrete framework implementations.
-  """
+  """Links abstract operations to concrete framework implementations."""
 
   def __init__(self):
     """Initializes the FrameworkSyncer."""
     self.console = console
 
   def sync(self, tier_data: Dict[str, Any], framework: str) -> None:
-    """
-    Updates the 'variants' dict in tier_data by hunting for ops in the target framework.
-    """
+    """Updates the 'variants' dict in tier_data by hunting for ops in the target framework."""
     log_info(f"Syncing [code]{framework}[/code] against Standard...")
 
     # 1. Resolve Search Paths via Registry
@@ -118,8 +113,7 @@ class FrameworkSyncer:
     return out
 
   def _is_compatible(self, obj: Any, std_args: List[str]) -> bool:
-    """
-    Verifies if the candidate signature can accept the standard arguments.
+    """Verifies if the candidate signature can accept the standard arguments.
     Robustly handles C-Extensions by assuming compatibility if inspection fails.
     """
     target_func = obj

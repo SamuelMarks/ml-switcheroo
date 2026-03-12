@@ -1,5 +1,4 @@
-"""
-MLIR to Python (LibCST) Generator.
+"""MLIR to Python (LibCST) Generator.
 
 This module provides the `MlirToPythonGenerator` class, which consumes the
 MLIR CST object model and reconstructs valid Python code via LibCST.
@@ -24,14 +23,12 @@ from ml_switcheroo.core.mlir.gen_statements import StatementGeneratorMixin
 
 
 class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, BaseGeneratorMixin):
-  """
-  Transpiler back-end: MLIR CST -> Python LibCST.
+  """Transpiler back-end: MLIR CST -> Python LibCST.
   Integrates expression and statement generation logic.
   """
 
   def __init__(self) -> None:
-    """
-    Initialize the generator.
+    """Initialize the generator.
 
     Sets up naming context and usage tracking containers.
     """
@@ -46,14 +43,14 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     self.deferred_exprs: Dict[str, cst.BaseExpression] = {}
 
   def generate(self, node: ModuleNode) -> cst.Module:
-    """
-    Main entry point. Converts MLIR Module to Python Module.
+    """Main entry point. Converts MLIR Module to Python Module.
 
     Args:
         node: The root MLIR ModuleNode.
 
     Returns:
         A LibCST Module object representing the Python code.
+
     """
     # Analyze usage for inlining optimization across the whole module
     self._analyze_module_usage(node)
@@ -65,8 +62,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     return cst.Module(body=stmt_body)
 
   def _analyze_module_usage(self, mod: ModuleNode) -> None:
-    """
-    Traverses the MLIR tree to count SSAs usage.
+    """Traverses the MLIR tree to count SSAs usage.
     Populates self.usage_counts.
     """
     self._scan_block_usage(mod.body)
@@ -86,8 +82,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
           self._scan_block_usage(b)
 
   def _convert_trivia(self, trivia: List[TriviaNode]) -> List[cst.EmptyLine]:
-    """
-    Converts MLIR comments (//) to Python comments (#).
+    """Converts MLIR comments (//) to Python comments (#).
     Ignores layout whitespace as LibCST handles indentation.
     """
     lines = []
@@ -101,8 +96,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     return lines
 
   def _convert_block(self, block: BlockNode) -> List[cst.BaseStatement]:
-    """
-    Converts operations in a block to a list of Python statements.
+    """Converts operations in a block to a list of Python statements.
     Applies expression folding where possible.
     """
     stmts: List[cst.BaseStatement] = []
@@ -137,8 +131,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     return stmts
 
   def _should_inline_expression(self, op: OperationNode, expr: cst.BaseExpression) -> bool:
-    """
-    Determines if the result of an operation should be folded/inlined.
+    """Determines if the result of an operation should be folded/inlined.
 
     Revised Logic:
     1.  **Atoms**: Always inline `sw.constant` and `sw.getattr` IF USED.
@@ -178,8 +171,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     return False
 
   def _resolve_operand(self, ssa_name: str) -> cst.BaseExpression:
-    """
-    Resolves an SSA value to a CST Expression.
+    """Resolves an SSA value to a CST Expression.
     If previously deferred, returns the AST node (folding).
     Else returns a Name or Attribute reference.
     """
@@ -198,8 +190,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     return cst.Name(py_name)
 
   def _create_expression_from_op(self, op: OperationNode) -> Optional[cst.BaseExpression]:
-    """
-    Attempts to map an Op to a Python Expression (e.g. Call, BinaryOp, Attribute).
+    """Attempts to map an Op to a Python Expression (e.g. Call, BinaryOp, Attribute).
     Delegates to ExpressionGeneratorMixin.
     """
     op_name = op.name.strip('"')
@@ -216,9 +207,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     return None
 
   def _convert_statement_op(self, op: OperationNode) -> Optional[cst.BaseStatement]:
-    """
-    Maps structural ops to Statements. Delegates to StatementGeneratorMixin.
-    """
+    """Maps structural ops to Statements. Delegates to StatementGeneratorMixin."""
     op_name = op.name.strip('"')
 
     if op_name == "sw.module":
@@ -235,8 +224,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     return None
 
   def _wrap_as_statement(self, op: OperationNode, expr: cst.BaseExpression) -> cst.BaseStatement:
-    """
-    Wraps an expression into a statement (Assign or Expr).
+    """Wraps an expression into a statement (Assign or Expr).
     Extracts semantic hints from 'type' attribute to produce readable variable names.
     """
     if op.results:
@@ -276,9 +264,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
       return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
 
   def _is_void_call(self, expr: cst.BaseExpression) -> bool:
-    """
-    Heuristic detection of calls that return None/Void (like super().__init__).
-    """
+    """Heuristic detection of calls that return None/Void (like super().__init__)."""
     if isinstance(expr, cst.Call):
       # Detect super().__init__()
       if isinstance(expr.func, cst.Attribute):

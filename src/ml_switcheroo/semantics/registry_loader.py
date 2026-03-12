@@ -1,5 +1,4 @@
-"""
-Registry Hydration Logic.
+"""Registry Hydration Logic.
 
 This module introspects the active Python environment to extract semantic definitions
 from registered Framework Adapters and Plugin Hooks. This enables "Code-First"
@@ -18,30 +17,24 @@ from ml_switcheroo.semantics.merging import merge_tier_data, merge_overlay_data
 
 
 class RegistryLoader:
-  """
-  Hydrates the SemanticsManager from python objects (Adapters/Plugins).
-  """
+  """Hydrates the SemanticsManager from python objects (Adapters/Plugins)."""
 
   def __init__(self, manager: Any):
-    """
-    Initialize the loader.
+    """Initialize the loader.
 
     Args:
         manager: The parent SemanticsManager instance.
+
     """
     self.mgr = manager
 
   def hydrate(self) -> None:
-    """
-    Main entry point. Scans adapters and plugins.
-    """
+    """Main entry point. Scans adapters and plugins."""
     self._hydrate_adapters()
     self._hydrate_plugins()
 
   def _hydrate_adapters(self) -> None:
-    """
-    Iterates over registered FrameworkAdapters to extract Traits and Mappings.
-    """
+    """Iterates over registered FrameworkAdapters to extract Traits and Mappings."""
     for fw_name in available_frameworks():
       adapter = get_adapter(fw_name)
       if not adapter:
@@ -198,9 +191,7 @@ class RegistryLoader:
         print(f"⚠️ Failed to apply wiring for {fw_name}: {e}")
 
   def _hydrate_plugins(self) -> None:
-    """
-    Loads definitions from plugins that utilize auto-wire metadata.
-    """
+    """Loads definitions from plugins that utilize auto-wire metadata."""
     plugin_metadata = hooks.get_all_hook_metadata()
     for _, spec in plugin_metadata.items():
       for op_name, op_details in spec.ops.items():

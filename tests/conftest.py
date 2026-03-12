@@ -132,6 +132,7 @@ def isolate_hook_registry():
   """
   from ml_switcheroo.core.hooks import _HOOKS, _HOOK_METADATA
   import ml_switcheroo.core.hooks as hooks_module
+
   original_hooks = _HOOKS.copy()
   original_metadata = _HOOK_METADATA.copy()
   original_loaded = getattr(hooks_module, "_PLUGINS_LOADED", False)

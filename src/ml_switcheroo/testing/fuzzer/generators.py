@@ -1,5 +1,4 @@
-"""
-Primitive Generation Logic for the Fuzzer.
+"""Primitive Generation Logic for the Fuzzer.
 
 This module contains functions to generate random scalars, NumPy arrays,
 and dummy callables respecting specified constraints (min, max, dtype).
@@ -13,14 +12,14 @@ import numpy as np
 
 
 def generate_scalar_int(constraints: Dict[str, Any]) -> int:
-  """
-  Generates a random integer within constrained bounds.
+  """Generates a random integer within constrained bounds.
 
   Args:
       constraints (Dict[str, Any]): Dictionary containing optional 'min' and 'max'.
 
   Returns:
       int: A random integer.
+
   """
   min_v = int(constraints.get("min", -5))
   max_v = int(constraints.get("max", 5))
@@ -29,14 +28,14 @@ def generate_scalar_int(constraints: Dict[str, Any]) -> int:
 
 
 def generate_scalar_float(constraints: Dict[str, Any]) -> float:
-  """
-  Generates a random float within constrained bounds.
+  """Generates a random float within constrained bounds.
 
   Args:
       constraints (Dict[str, Any]): Dictionary containing optional 'min' and 'max'.
 
   Returns:
       float: A random float.
+
   """
   if constraints.get("min") is not None and constraints.get("max") is not None:
     return random.uniform(constraints["min"], constraints["max"])
@@ -51,8 +50,7 @@ def generate_scalar_float(constraints: Dict[str, Any]) -> float:
 
 
 def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str, Any]) -> np.ndarray:
-  """
-  Generates a random NumPy array bounded by constraints.
+  """Generates a random NumPy array bounded by constraints.
 
   Args:
       type_lbl (str): General type category ('float', 'int', 'bool').
@@ -61,6 +59,7 @@ def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str,
 
   Returns:
       np.ndarray: The generated array.
+
   """
   # Resolve bounds
   min_val = constraints.get("min")
@@ -125,14 +124,14 @@ def generate_array(type_lbl: str, shape: Tuple[int, ...], constraints: Dict[str,
 
 
 def get_random_shape(seed_shape: Optional[Tuple[int, ...]] = None) -> Tuple[int, ...]:
-  """
-  Selects a random rank (1-4) and random dimensions (2-5).
+  """Selects a random rank (1-4) and random dimensions (2-5).
 
   Args:
       seed_shape (Optional[Tuple]): Optional fixed shape to return.
 
   Returns:
       Tuple[int, ...]: The random or seeded shape.
+
   """
   if seed_shape:
     return seed_shape
@@ -142,8 +141,7 @@ def get_random_shape(seed_shape: Optional[Tuple[int, ...]] = None) -> Tuple[int,
 
 
 def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tuple[int, ...]:
-  """
-  Derives a shape that is broadcast-compatible with the base_shape.
+  """Derives a shape that is broadcast-compatible with the base_shape.
 
   For each dimension, there is a probability it becomes 1 (broadcasting dimension).
   The 'salt' ensures arguments don't all degenerate to 1s in the same way, creating
@@ -155,6 +153,7 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
 
   Returns:
       A new shape tuple.
+
   """
   # Use local random instance to not affect global state
   # Seed with salt to be deterministic for this specific run context
@@ -178,7 +177,5 @@ def make_broadcastable_shape(base_shape: Tuple[int, ...], salt: int = 0) -> Tupl
 
 
 def generate_fake_callable(constraints: Dict[str, Any] = None) -> Any:
-  """
-  Generates a dummy function (identity) for functional ops.
-  """
+  """Generates a dummy function (identity) for functional ops."""
   return lambda x, *args, **kwargs: x

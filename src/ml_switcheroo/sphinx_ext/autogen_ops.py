@@ -1,5 +1,4 @@
-"""
-Sphinx Hook for Automatic Operation Documentation Generation.
+"""Sphinx Hook for Automatic Operation Documentation Generation.
 
 This module provides the logic to generate a dedicated documentation page (`.rst`)
 for every Abstract Operation defined in the Semantic Knowledge Base.
@@ -32,13 +31,12 @@ class IndentedDumper(yaml.SafeDumper):
   """Custom Dumper to ensure lists are indented."""
 
   def increase_indent(self, flow=False, indentless=False):
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return super(IndentedDumper, self).increase_indent(flow, False)
 
 
 def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any]:
-  """
-  Normalizes internal semantics data into clean ODL YAML structure.
+  """Normalizes internal semantics data into clean ODL YAML structure.
   Safe sanitization of description strings to prevent broken RST references.
   """
   # 1. Normalize Arguments
@@ -87,9 +85,7 @@ def _build_yaml_entry(op_name: str, definition: Dict[str, Any]) -> Dict[str, Any
 
 
 def _write_yaml_update(out_path: Path, new_entries: List[Dict[str, Any]]) -> None:
-  """
-  Merges accumulated operations into the existing YAML file (Upsert logic).
-  """
+  """Merges accumulated operations into the existing YAML file (Upsert logic)."""
   existing_map = {}
 
   if out_path.exists():
@@ -126,8 +122,7 @@ def _write_yaml_update(out_path: Path, new_entries: List[Dict[str, Any]]) -> Non
 
 
 def generate_op_docs(app: Sphinx) -> None:
-  """
-  Sphinx Event Hook: Generates RST files for all operations.
+  """Sphinx Event Hook: Generates RST files for all operations.
 
   1.  Initializes the `SemanticsManager`.
   2.  Creates the `docs/ops` directory (cleaning it if safe).
@@ -139,6 +134,7 @@ def generate_op_docs(app: Sphinx) -> None:
 
   Args:
       app: The Sphinx application instance.
+
   """
   # Determine output directory
   # app.srcdir usually points to 'docs/'
@@ -212,12 +208,12 @@ def generate_op_docs(app: Sphinx) -> None:
 
 
 def _write_index_file(out_dir: Path, files: list[str]) -> None:
-  """
-  Generates the `index.rst` file linking all generated operations.
+  """Generates the `index.rst` file linking all generated operations.
 
   Args:
       out_dir: The directory where the index file should be located.
       files: List of filenames (without extension) to include in the toctree.
+
   """
   index_path = out_dir / "index.rst"
   header = [

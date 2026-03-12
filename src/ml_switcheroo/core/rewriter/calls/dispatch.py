@@ -1,6 +1,4 @@
-"""
-Logic for Conditional API Dispatch.
-"""
+"""Logic for Conditional API Dispatch."""
 
 from typing import Any, List, Optional, Dict
 import libcst as cst
@@ -8,8 +6,7 @@ from ml_switcheroo.enums import LogicOp
 
 
 def evaluate_dispatch_rules(rewriter, node: cst.Call, rules: List[Any], details: Dict[str, Any]) -> Optional[str]:
-  """
-  Evaluates conditional dispatch rules against the current call arguments.
+  """Evaluates conditional dispatch rules against the current call arguments.
 
   Args:
       rewriter: The calling transformer object.
@@ -19,6 +16,7 @@ def evaluate_dispatch_rules(rewriter, node: cst.Call, rules: List[Any], details:
 
   Returns:
       The string identifier of the API to dispatch to if a rule matches, otherwise None.
+
   """
   source_variant = details["variants"].get(rewriter.source_fw, {})
   source_arg_map = source_variant.get("args", {})
@@ -55,8 +53,7 @@ def _extract_argument_node(
   std_name: str,
   std_order: List[str],
 ) -> Optional[cst.CSTNode]:
-  """
-  Extracts the argument node for a given parameter name.
+  """Extracts the argument node for a given parameter name.
 
   Args:
       rewriter: The calling transformer object.
@@ -67,6 +64,7 @@ def _extract_argument_node(
 
   Returns:
       The corresponding CSTNode if found, otherwise None.
+
   """
   for arg in node.args:
     if arg.keyword and arg.keyword.value == src_name:
@@ -94,14 +92,14 @@ def _extract_argument_node(
 
 
 def _node_to_literal(node: cst.CSTNode) -> Any:
-  """
-  Converts a CST node into a basic Python literal type if possible.
+  """Converts a CST node into a basic Python literal type if possible.
 
   Args:
       node: The CSTNode to attempt converting to a literal.
 
   Returns:
       The parsed Python literal value (int, float, str, bool, or None) if successfully converted, otherwise None.
+
   """
   if isinstance(node, cst.Integer):
     try:
@@ -126,8 +124,7 @@ def _node_to_literal(node: cst.CSTNode) -> Any:
 
 
 def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
-  """
-  Checks if a given CSTNode meets the condition specified by a rule.
+  """Checks if a given CSTNode meets the condition specified by a rule.
 
   Args:
       node: The CSTNode extracted from a call argument.
@@ -135,6 +132,7 @@ def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
 
   Returns:
       True if the condition is met, False otherwise.
+
   """
   op = rule.op
 

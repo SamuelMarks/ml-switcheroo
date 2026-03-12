@@ -1,5 +1,4 @@
-"""
-JAX Fallback Decomposition Plugin for ml-switcheroo.
+"""JAX Fallback Decomposition Plugin for ml-switcheroo.
 
 This plugin handles operations that have no direct mapping in the target framework.
 It routes the AST call to the equivalent JAX operation, invokes the generic transpiler
@@ -15,8 +14,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name
 
 @register_hook("jax_decompose")
 def decompose_via_jax(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.BaseExpression]:
-  """
-  Translates an unsupported API call by routing it through JAX AST semantics.
+  """Translates an unsupported API call by routing it through JAX AST semantics.
 
   This acts as a fallback for complex math ops (e.g. `Hardswish`) when migrating to
   frameworks that lack them. Since JAX acts as our universal mathematical IR, we
@@ -29,6 +27,7 @@ def decompose_via_jax(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.B
 
   Returns:
       A rewritten CST node pointing to the JAX equivalent, or a custom lowered graph.
+
   """
   # 1. Fetch the abstract operation name from context
   op_name = ctx.current_op_id if ctx.current_op_id else "UnknownOp"

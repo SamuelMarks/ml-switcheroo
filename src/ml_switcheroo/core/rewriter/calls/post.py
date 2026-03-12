@@ -1,5 +1,4 @@
-"""
-Post-processing Phase for Call Rewriting.
+"""Post-processing Phase for Call Rewriting.
 
 Handles output adaptation and state threading.
 Updated to prevent imports from legacy modules and removed deprecated output adapter hooks.
@@ -19,8 +18,7 @@ def handle_post_processing(
   mapping: Dict[str, Any],
   abstract_id: str,
 ) -> cst.CSTNode:
-  """
-  Applies post-rewrite modifications to the result node, such as type casting or state threading.
+  """Applies post-rewrite modifications to the result node, such as type casting or state threading.
 
   Args:
       rewriter (Any): The CST rewriter instance containing context.
@@ -30,6 +28,7 @@ def handle_post_processing(
 
   Returns:
       cst.CSTNode: The modified result node.
+
   """
   result_node = node
 

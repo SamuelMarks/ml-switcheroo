@@ -1,5 +1,4 @@
-"""
-Runtime helpers for generated verification tests.
+"""Runtime helpers for generated verification tests.
 
 This module contains the reference implementation of ``verify_results``,
 a robust recursive comparison utility for validating equivalence between
@@ -20,8 +19,7 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def ensure_determinism() -> None:
-  """
-  Auto-injects fixed seeds for reproducibility at the start of every test.
+  """Auto-injects fixed seeds for reproducibility at the start of every test.
 
   Covers:
   - Python `random`
@@ -69,8 +67,7 @@ def ensure_determinism() -> None:
 
 
 def verify_results(ref: Any, val: Any, rtol: float = 1e-3, atol: float = 1e-4, exact: bool = False) -> bool:
-  """
-  Cross-framework comparison helper.
+  """Cross-framework comparison helper.
 
   Recursively compares data structures (Lists, Dicts, Tuples, Arrays).
 
@@ -87,6 +84,7 @@ def verify_results(ref: Any, val: Any, rtol: float = 1e-3, atol: float = 1e-4, e
 
   Returns:
       bool: True if values are considered equivalent.
+
   """
   # 1. Null/None Check (Exact identity)
   if ref is None or val is None:

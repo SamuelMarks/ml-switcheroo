@@ -1,5 +1,4 @@
-"""
-Discovery Package.
+"""Discovery Package.
 
 This package implements the Knowledge Acquisition layer of ml-switcheroo.
 It is responsible for identifying operations in machine learning libraries,

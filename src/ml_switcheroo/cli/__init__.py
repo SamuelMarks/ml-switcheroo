@@ -1,5 +1,4 @@
-"""
-CLI Subpackage.
+"""CLI Subpackage.
 
 Contains the application entry-points and command handlers for the command-line interface.
 

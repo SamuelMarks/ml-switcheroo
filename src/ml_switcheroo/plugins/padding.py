@@ -1,5 +1,4 @@
-"""
-Plugin for normalizing Padding arguments.
+"""Plugin for normalizing Padding arguments.
 
 Addresses the semantic mismatch between:
 1. PyTorch (`pad(x, (left, right, top, bottom))`): Pads starting from the last dimension.
@@ -63,8 +62,7 @@ def _supports_numpy_padding(ctx: HookContext) -> bool:
 
 @register_hook("padding_converter")
 def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Hook: Transforms padding coordinate format from Torch style to NumPy style.
+  """Hook: Transforms padding coordinate format from Torch style to NumPy style.
 
   Trigger: Operations mapped to 'pad' with `requires_plugin: "padding_converter"`.
 
@@ -77,6 +75,7 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       The transformed CST Call node if mapping exists, else original.
+
   """
   # 0. Capability and API Check
   if not _supports_numpy_padding(ctx):

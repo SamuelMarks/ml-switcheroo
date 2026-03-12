@@ -1,6 +1,4 @@
-"""
-Core Transformation Strategies for Call Rewriting.
-"""
+"""Core Transformation Strategies for Call Rewriting."""
 
 from typing import Any, Dict
 import libcst as cst
@@ -27,8 +25,7 @@ def execute_strategy(
   details: Dict[str, Any],
   abstract_id: str,
 ) -> cst.CSTNode:
-  """
-  Applies the appropriate transformation strategy.
+  """Applies the appropriate transformation strategy.
 
   Args:
       rewriter (Any): The rewriter context.
@@ -40,6 +37,7 @@ def execute_strategy(
 
   Returns:
       cst.CSTNode: The transformed CST node.
+
   """
   if hasattr(rewriter.context, "hook_context"):
     rewriter.context.hook_context.current_op_id = abstract_id
@@ -145,8 +143,7 @@ def _apply_layout_permutation(
   details: Dict[str, Any],
   rewriter: Any,
 ) -> cst.Call:
-  """
-  Applies layout permutation to the arguments of a call based on the provided mapping.
+  """Applies layout permutation to the arguments of a call based on the provided mapping.
 
   Args:
       node (cst.Call): The call node.
@@ -156,6 +153,7 @@ def _apply_layout_permutation(
 
   Returns:
       cst.Call: The modified call node.
+
   """
   layout_map = mapping["layout_map"]
   std_args_raw = details.get("std_args", [])

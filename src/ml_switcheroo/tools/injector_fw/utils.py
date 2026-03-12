@@ -1,5 +1,4 @@
-"""
-Utilities for AST Node Construction and Inspection.
+"""Utilities for AST Node Construction and Inspection.
 
 This module provides helper functions to convert Python runtime objects (dictionaries,
 lists, primitives) into LibCST nodes, as well as utilities for inspecting import definitions.
@@ -11,14 +10,14 @@ import libcst as cst
 
 
 def get_import_root(node: Union[cst.Name, cst.Attribute]) -> str:
-  """
-  Recursively extracts the root package name from a CST node.
+  """Recursively extracts the root package name from a CST node.
 
   Args:
       node: The AST node representing the module name.
 
   Returns:
       str: The root package identifier (e.g. "scipy" from "scipy.special").
+
   """
   if isinstance(node, cst.Name):
     return node.value
@@ -28,8 +27,7 @@ def get_import_root(node: Union[cst.Name, cst.Attribute]) -> str:
 
 
 def is_docstring(node: cst.CSTNode, idx: int) -> bool:
-  """
-  Checks if a statement node represents a module docstring.
+  """Checks if a statement node represents a module docstring.
 
   Args:
       node: The statement node to check.
@@ -37,6 +35,7 @@ def is_docstring(node: cst.CSTNode, idx: int) -> bool:
 
   Returns:
       bool: True if it is a docstring (Expr containing String at index 0).
+
   """
   if idx != 0:
     return False
@@ -48,14 +47,14 @@ def is_docstring(node: cst.CSTNode, idx: int) -> bool:
 
 
 def is_future_import(node: cst.CSTNode) -> bool:
-  """
-  Checks if a statement is a `from __future__ import ...` directive.
+  """Checks if a statement is a `from __future__ import ...` directive.
 
   Args:
       node: The statement node to check.
 
   Returns:
       bool: True if it is a future import.
+
   """
   if isinstance(node, cst.SimpleStatementLine):
     for stmt in node.body:
@@ -66,8 +65,7 @@ def is_future_import(node: cst.CSTNode) -> bool:
 
 
 def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
-  """
-  Recursively converts a python primitive or container to a CST node.
+  """Recursively converts a python primitive or container to a CST node.
   Robustly handles strings using standard JSON encoding to prevent syntax errors
   and ensure double-quotes are used (matching test expectations).
 
@@ -76,6 +74,7 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
 
   Returns:
       cst.BaseExpression: The literal node.
+
   """
   # 1. Container Recursion (List/Tuple)
   if isinstance(val, (list, tuple)):

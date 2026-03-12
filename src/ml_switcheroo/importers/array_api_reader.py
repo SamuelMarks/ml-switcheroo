@@ -1,5 +1,4 @@
-"""
-Importer for Python Array API Standard Stubs.
+"""Importer for Python Array API Standard Stubs.
 
 This module parses .py stub files from the official Array API standard repo,
 extracting function signatures, type hints, and docstrings to build the
@@ -16,13 +15,10 @@ from ml_switcheroo.utils.console import log_info, log_warning
 
 
 class ArrayApiSpecImporter:
-  """
-  Parses Python stub files (``*.py``) using the built-in ``ast`` module.
-  """
+  """Parses Python stub files (``*.py``) using the built-in ``ast`` module."""
 
   def parse_folder(self, root_dir: Path) -> Dict[str, Any]:
-    """
-    Parses Array API Python Stubs (``*.py``) in the target directory.
+    """Parses Array API Python Stubs (``*.py``) in the target directory.
 
     Args:
         root_dir: Path to the folder containing .py stubs
@@ -30,6 +26,7 @@ class ArrayApiSpecImporter:
 
     Returns:
         Dict mapping function/constant names to their definitions.
+
     """
     py_files = list(root_dir.glob("*.py"))
 
@@ -41,8 +38,7 @@ class ArrayApiSpecImporter:
     return self._parse_stubs(py_files, root_dir)
 
   def _parse_stubs(self, files: List[Path], root: Path) -> Dict[str, Any]:
-    """
-    Iterates over files and extracts AST nodes.
+    """Iterates over files and extracts AST nodes.
 
     Processes both function definitions and constant assignments (e.g. math constants).
 
@@ -52,6 +48,7 @@ class ArrayApiSpecImporter:
 
     Returns:
         A dictionary of parsed semantic definitions.
+
     """
     semantics = {}
 
@@ -116,20 +113,20 @@ class ArrayApiSpecImporter:
     return semantics
 
   def _extract_args(self, args: ast.arguments) -> List[Tuple[str, str]]:
-    """
-    Combines Positional-Only, Standard, and Keyword-Only args alongside their type hints.
+    """Combines Positional-Only, Standard, and Keyword-Only args alongside their type hints.
 
     Args:
         args: The arguments node from a function definition.
 
     Returns:
         List of tuples: ``[("x", "Array"), ("axis", "int | None"), ...]``
+
     """
     out = []
 
     # Helper to process a specific arg group
     def process_group(group: List[ast.arg]):
-      """TODO: Add docstring."""
+      """Execute implementation detail."""
       for a in group:
         parsed_type = self._parse_annotation(a.annotation)
         out.append((a.arg, parsed_type))
@@ -144,16 +141,16 @@ class ArrayApiSpecImporter:
     return out
 
   def _parse_annotation(self, annotation: Optional[ast.AST]) -> str:
-    """
-    Recursively resolves AST type annotations to a readable string string.
+    """Recursively resolves AST type annotations to a readable string string.
     e.g. ``Name('int')`` -> 'int'
-         ``BinOp(Subscript('Optional'), 'int')`` -> 'Optional[int]'  (simplified)
+         ``BinOp(Subscript('Optional'), 'int')`` -> 'Optional[int]'  (simplified).
 
     Args:
         annotation: The AST node representing the type annotation.
 
     Returns:
         A string representation of the type.
+
     """
     if annotation is None:
       return "Any"
@@ -193,14 +190,14 @@ class ArrayApiSpecImporter:
     return "Any"  # Fallback for complex structures
 
   def _get_assignment_name(self, node: ast.AST) -> Optional[str]:
-    """
-    Extracts variable name from Assign (x=1) or AnnAssign (x:int=1).
+    """Extracts variable name from Assign (x=1) or AnnAssign (x:int=1).
 
     Args:
         node: The assignment node.
 
     Returns:
         The variable name or None.
+
     """
     if isinstance(node, ast.Assign):
       if node.targets and isinstance(node.targets[0], ast.Name):
@@ -211,14 +208,14 @@ class ArrayApiSpecImporter:
     return None
 
   def _clean_docstring(self, doc: Optional[str]) -> str:
-    """
-    Cleans up a docstring return just the first paragraph summary.
+    """Cleans up a docstring return just the first paragraph summary.
 
     Args:
         doc: The full docstring.
 
     Returns:
         A single-line summary string.
+
     """
     if not doc:
       return ""

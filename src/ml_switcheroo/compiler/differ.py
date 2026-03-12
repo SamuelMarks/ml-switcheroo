@@ -1,5 +1,4 @@
-"""
-Topological Diff Engine.
+"""Topological Diff Engine.
 
 Analyzes differences between two LogicalGraphs to produce a patch plan.
 It supports:
@@ -32,8 +31,7 @@ class DeleteAction(PatchAction):
 
 @dataclass
 class ReplaceAction(PatchAction):
-  """
-  Instruction to replace an anchor node with new logic.
+  """Instruction to replace an anchor node with new logic.
   For the Differ context, 'new_node' is the LogicalNode from the target graph.
   """
 
@@ -48,8 +46,7 @@ from ml_switcheroo.compiler.ir import LogicalNode as _LogicalNode  # noqa: F401
 
 
 class GraphDiffer:
-  """
-    Calculates transformation steps to migrate from Source Graph to Target Graph.
+  """Calculates transformation steps to migrate from Source Graph to Target Graph.
 
     Assumption:
 
@@ -61,8 +58,7 @@ class GraphDiffer:
   """
 
   def diff(self, source: LogicalGraph, target: LogicalGraph) -> List[PatchAction]:
-    """
-        Compare graphs and return list of actions.
+    """Compare graphs and return list of actions.
 
         Algorithm:
 

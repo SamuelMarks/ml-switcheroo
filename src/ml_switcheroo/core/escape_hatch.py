@@ -1,5 +1,4 @@
-"""
-Escape Hatch Mechanism for Untranslatable Code.
+"""Escape Hatch Mechanism for Untranslatable Code.
 
 This module provides the `EscapeHatch` class, responsible for wrapping code
 that cannot be deterministically transpiled with specific marker comments.
@@ -18,8 +17,7 @@ from typing import Union
 
 
 class EscapeHatch:
-  """
-  Handles the "Pass-Through" Protocol.
+  """Handles the "Pass-Through" Protocol.
   Wraps untranslatable nodes with standardized comment flags and valid Python syntax markers.
   """
 
@@ -28,8 +26,7 @@ class EscapeHatch:
 
   @staticmethod
   def mark_failure(node: cst.CSTNode, reason: str) -> Union[cst.CSTNode, cst.FlattenSentinel]:
-    """
-    Attaches warning comments to the node and appends an end marker.
+    """Attaches warning comments to the node and appends an end marker.
 
     Transformation:
         original_stmt()
@@ -48,6 +45,7 @@ class EscapeHatch:
     Returns:
         A FlattenSentinel containing the preserved node (with header)
         and a footer node (Ellipsis) containing the end marker.
+
     """
     # 1. Create Header Lines (Start Marker + Reason)
     header_lines = [

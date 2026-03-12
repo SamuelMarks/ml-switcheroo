@@ -1,5 +1,4 @@
-"""
-Runtime Configuration Store.
+"""Runtime Configuration Store.
 Supports Dynamic Defaults, TOML loading, and Framework Flavours.
 
 This module resolves default Source and Target frameworks by querying the
@@ -26,8 +25,7 @@ T = TypeVar("T", bound=BaseModel)
 
 
 def get_framework_priority_order() -> List[str]:
-  """
-  Returns a list of framework keys sorted by UI Priority.
+  """Returns a list of framework keys sorted by UI Priority.
 
   The sort order is determined by the ``ui_priority`` attribute of the
   registered FrameworkAdapter. Lower numbers appear first (Source default).
@@ -36,6 +34,7 @@ def get_framework_priority_order() -> List[str]:
 
   Returns:
       List[str]: Sorted list of framework identifiers (e.g. ['torch', 'jax']).
+
   """
   # Defer import to prevent circular dependency during initialization
   # config -> frameworks/__init__ -> sass -> hooks -> config
@@ -44,7 +43,7 @@ def get_framework_priority_order() -> List[str]:
   frameworks = available_frameworks()
 
   def sort_key(name: str) -> Tuple[int, str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     adapter = get_adapter(name)
     priority = 999
     is_child = False
@@ -72,24 +71,24 @@ def get_framework_priority_order() -> List[str]:
 
 
 def _resolve_default_source() -> str:
-  """
-  Resolves the default source framework.
+  """Resolves the default source framework.
 
   Returns:
       str: The highest priority framework key (Index 0 in sorted list),
       or "source_placeholder" if none are registered.
+
   """
   fws = get_framework_priority_order()
   return fws[0] if fws else "source_placeholder"
 
 
 def _resolve_default_target() -> str:
-  """
-  Resolves the default target framework.
+  """Resolves the default target framework.
 
   Returns:
       str: The second highest priority framework key (Index 1),
       or the first (Index 0) if only one exists, or "target_placeholder".
+
   """
   fws = get_framework_priority_order()
   if len(fws) >= 2:
@@ -98,9 +97,7 @@ def _resolve_default_target() -> str:
 
 
 class RuntimeConfig(BaseModel):
-  """
-  Global configuration container for the translation engine.
-  """
+  """Global configuration container for the translation engine."""
 
   source_framework: str = Field(
     default_factory=_resolve_default_source,
@@ -135,8 +132,7 @@ class RuntimeConfig(BaseModel):
   @field_validator("source_framework", "target_framework")
   @classmethod
   def validate_framework(cls, v: str) -> str:
-    """
-    Ensures the framework is registered in the system.
+    """Ensures the framework is registered in the system.
 
     Args:
         v (str): The framework key to validate.
@@ -146,6 +142,7 @@ class RuntimeConfig(BaseModel):
 
     Raises:
         ValueError: If the framework is not registered and not a placeholder.
+
     """
     # Defer import to prevent circular dependency
     from ml_switcheroo.frameworks.base import available_frameworks
@@ -160,31 +157,30 @@ class RuntimeConfig(BaseModel):
 
   @property
   def effective_source(self) -> str:
-    """
-    Returns the resolved source framework key.
+    """Returns the resolved source framework key.
 
     Prioritizes ``source_flavour`` if present, otherwise returns ``source_framework``.
 
     Returns:
         str: The active source framework key.
+
     """
     return self.source_flavour if self.source_flavour else self.source_framework
 
   @property
   def effective_target(self) -> str:
-    """
-    Returns the resolved target framework key.
+    """Returns the resolved target framework key.
 
     Prioritizes ``target_flavour`` if present, otherwise returns ``target_framework``.
 
     Returns:
         str: The active target framework key.
+
     """
     return self.target_flavour if self.target_flavour else self.target_framework
 
   def parse_plugin_settings(self, schema: Type[T]) -> T:
-    """
-    Validates plugin settings against a Pydantic model.
+    """Validates plugin settings against a Pydantic model.
 
     Args:
         schema (Type[T]): The Pydantic model class defining the settings schema.
@@ -194,6 +190,7 @@ class RuntimeConfig(BaseModel):
 
     Raises:
         ValueError: If validation against the schema fails.
+
     """
     try:
       return schema.model_validate(self.plugin_settings)
@@ -215,8 +212,7 @@ class RuntimeConfig(BaseModel):
     validation_report: Optional[Path] = None,
     search_path: Optional[Path] = None,
   ) -> "RuntimeConfig":
-    """
-    Loads configuration from ``pyproject.toml``, overriding with CLI arguments.
+    """Loads configuration from ``pyproject.toml``, overriding with CLI arguments.
     Defaults are calculated dynamically via factory methods if not found.
 
     Args:
@@ -233,6 +229,7 @@ class RuntimeConfig(BaseModel):
 
     Returns:
         RuntimeConfig: The fully resolved configuration object.
+
     """
     start_dir = search_path or Path.cwd()
     toml_config, toml_dir = _load_toml_settings(start_dir)
@@ -307,8 +304,7 @@ class RuntimeConfig(BaseModel):
 
 
 def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path]]:
-  """
-  Recursively searches parents for 'pyproject.toml' and extracts config.
+  """Recursively searches parents for 'pyproject.toml' and extracts config.
 
   Args:
       start_path (Path): Directory to begin the search from.
@@ -317,6 +313,7 @@ def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path
       Tuple[Dict[str, Any], Optional[Path]]:
           - A dictionary of configuration settings found in the TOML file.
           - The directory containing the TOML file, or None if not found.
+
   """
   if not tomllib:
     return {}, None
@@ -341,14 +338,14 @@ def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path
 
 
 def parse_cli_key_values(items: Optional[List[str]]) -> Dict[str, Any]:
-  """
-  Parses a list of 'key=value' strings into a dictionary with type inference.
+  """Parses a list of 'key=value' strings into a dictionary with type inference.
 
   Args:
       items (Optional[List[str]]): List of strings in "key=value" format.
 
   Returns:
       Dict[str, Any]: Dictionary with parsed values (bool, int, float, or str).
+
   """
   if not items:
     return {}

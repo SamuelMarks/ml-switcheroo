@@ -1,5 +1,4 @@
-"""
-SASS Instruction Analyzer.
+"""SASS Instruction Analyzer.
 
 This module implements heuristics to extract high-level semantic parameters
 (like Loop Bounds, Kernel Sizes, etc.) by analyzing the raw SASS instructions
@@ -12,14 +11,11 @@ from ml_switcheroo.compiler.frontends.sass.nodes import Immediate, Instruction
 
 
 class SassAnalyzer:
-  """
-  Analyzes sequences of SASS instructions to reverse-engineer high-level parameters.
-  """
+  """Analyzes sequences of SASS instructions to reverse-engineer high-level parameters."""
 
   @staticmethod
   def analyze_block(kind: str, instructions: List["Instruction"]) -> Dict[str, Any]:
-    """
-    Extracts metadata from a block of instructions based on the operation kind.
+    """Extracts metadata from a block of instructions based on the operation kind.
 
     Args:
         kind (str): The operation type (e.g. "Conv2d", "Linear").
@@ -27,6 +23,7 @@ class SassAnalyzer:
 
     Returns:
         Dict[str, Any]: Extracted parameters (e.g., {"kernel_size": 3}).
+
     """
     metadata = {}
 

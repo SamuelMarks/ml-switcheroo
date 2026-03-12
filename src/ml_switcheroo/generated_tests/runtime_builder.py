@@ -1,5 +1,4 @@
-"""
-Runtime Module Logic Generator.
+"""Runtime Module Logic Generator.
 
 This module contains the logic to creating the `runtime.py` file required by
 generated tests. It injects shared helpers, cross-framework comparison logic,
@@ -129,8 +128,7 @@ def ensure_runtime_module(
   frameworks: Optional[List[str]] = None,
   mgr: Any = None,
 ) -> None:
-  """
-  Creates or updates the `runtime.py` module in the output directory.
+  """Creates or updates the `runtime.py` module in the output directory.
 
   Injects:
   1. Safe import blocks for all used frameworks (try/except ImportError).
@@ -141,6 +139,7 @@ def ensure_runtime_module(
       out_dir: Directory where the generated tests and runtime.py reside.
       frameworks: List of frameworks to include imports for.
       mgr: SemanticsManager for retrieving custom import templates.
+
   """
   out_dir.mkdir(parents=True, exist_ok=True)
   runtime_path = out_dir / "runtime.py"

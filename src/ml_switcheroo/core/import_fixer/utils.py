@@ -1,5 +1,4 @@
-"""
-Utilities for the Import Fixer.
+"""Utilities for the Import Fixer.
 
 Contains static helper functions for analyzing AST nodes, extracting names,
 generating signatures for deduplication, and creating CST nodes.
@@ -17,14 +16,14 @@ REDUNDANT_SEGMENTS = {"module", "modules", "_src", "src"}
 
 
 def get_root_name(node: Union[cst.Name, cst.Attribute]) -> str:
-  """
-  Recursively extracts the root identifier from a Name or Attribute chain.
+  """Recursively extracts the root identifier from a Name or Attribute chain.
 
   Args:
       node: The CST node (e.g., `Attribute(value=Name('torch'), ...)`).
 
   Returns:
       str: The root name (e.g., "torch").
+
   """
   if isinstance(node, cst.Name):
     return node.value
@@ -34,14 +33,14 @@ def get_root_name(node: Union[cst.Name, cst.Attribute]) -> str:
 
 
 def create_dotted_name(name_str: str) -> Union[cst.Name, cst.Attribute]:
-  """
-  Creates a CST node structure for a dotted path string.
+  """Creates a CST node structure for a dotted path string.
 
   Args:
       name_str (str): Dot-separated path (e.g. "jax.numpy").
 
   Returns:
       Union[cst.Name, cst.Attribute]: The constructed AST node.
+
   """
   parts = name_str.split(".")
   node = cst.Name(parts[0])
@@ -51,8 +50,7 @@ def create_dotted_name(name_str: str) -> Union[cst.Name, cst.Attribute]:
 
 
 def get_signature(node: cst.CSTNode) -> str:
-  """
-  Computes a deduplication signature for an AST node (usually an Import statement).
+  """Computes a deduplication signature for an AST node (usually an Import statement).
 
   It normalizes the source code representation to ignore basic formatting differences,
   allowing detection of duplicate import injections.
@@ -62,6 +60,7 @@ def get_signature(node: cst.CSTNode) -> str:
 
   Returns:
       str: Normalized source code string.
+
   """
   target = node
   # Unwrap simple statement lines if necessary to get content
@@ -73,8 +72,7 @@ def get_signature(node: cst.CSTNode) -> str:
 
 
 def is_docstring(node: cst.CSTNode, idx: int) -> bool:
-  """
-  Determines if a statement node represents a module docstring.
+  """Determines if a statement node represents a module docstring.
 
   Args:
       node: The statement node from the module body.
@@ -82,6 +80,7 @@ def is_docstring(node: cst.CSTNode, idx: int) -> bool:
 
   Returns:
       bool: True if it is a docstring (string expression at index 0).
+
   """
   if idx != 0:
     return False
@@ -94,14 +93,14 @@ def is_docstring(node: cst.CSTNode, idx: int) -> bool:
 
 
 def is_future_import(node: cst.CSTNode) -> bool:
-  """
-  Determines if a statement is a `from __future__ import ...` directive.
+  """Determines if a statement is a `from __future__ import ...` directive.
 
   Args:
       node: The statement node.
 
   Returns:
       bool: True if it is a future import.
+
   """
   if isinstance(node, cst.SimpleStatementLine):
     for small_stmt in node.body:

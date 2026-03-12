@@ -1,5 +1,4 @@
-"""
-Core Logic for Framework Definition Injection (JSON).
+"""Core Logic for Framework Definition Injection (JSON).
 
 This module provides the `FrameworkInjector` class, which handles the insertion
 or updating of Semantic Operations in the JSON definition files located in
@@ -18,8 +17,7 @@ from ml_switcheroo.utils.console import log_info, log_success, log_warning
 
 
 class FrameworkInjector:
-  """
-  Injects a `FrameworkVariant` entry into the framework's JSON definitions.
+  """Injects a `FrameworkVariant` entry into the framework's JSON definitions.
 
   It handles:
   1. Loading the existing JSON mapping.
@@ -28,13 +26,13 @@ class FrameworkInjector:
   """
 
   def __init__(self, target_fw: str, op_name: str, variant: FrameworkVariant):
-    """
-    Initializes the injector.
+    """Initializes the injector.
 
     Args:
         target_fw: Key identifier for the framework (e.g., "torch").
         op_name: Abstract Name of the operation key to insert (e.g., "LogSoftmax").
         variant: The ODL Variant definition to serialize.
+
     """
     self.target_fw = target_fw
     self.op_name = op_name
@@ -43,14 +41,14 @@ class FrameworkInjector:
     self.found = False  # Track if update logic ran successfully
 
   def inject(self, dry_run: bool = False) -> bool:
-    """
-    Executes the injection process.
+    """Executes the injection process.
 
     Args:
         dry_run: If True, prints changes to console instead of writing file.
 
     Returns:
         bool: True if the operation was successful.
+
     """
     if not self.json_path.parent.exists():
       if not dry_run:
@@ -87,11 +85,11 @@ class FrameworkInjector:
     return True
 
   def _load_current(self) -> Dict[str, Any]:
-    """
-    Safely loads existing JSON data.
+    """Safely loads existing JSON data.
 
     Returns:
         Dict: The current definitions map. Returns empty dict if file missing or corrupt.
+
     """
     if not self.json_path.exists():
       return {}

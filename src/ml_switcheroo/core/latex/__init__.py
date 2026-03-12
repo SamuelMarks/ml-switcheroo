@@ -1,5 +1,4 @@
-"""
-LaTeX DSL Core Package.
+r"""LaTeX DSL Core Package.
 
 This package contains the semantic primitives for the Machine Intelligence Definition Language (MIDL).
 It defines the node structures mirroring the LaTeX macros (`\\Attribute`, `\\Op`, etc.) used

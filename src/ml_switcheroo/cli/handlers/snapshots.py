@@ -1,5 +1,4 @@
-"""
-Snapshot and Sync Command Handlers.
+"""Snapshot and Sync Command Handlers.
 
 This module manages the "Spoke" side of the Knowledge Base (Snapshots & Overlays).
 It handles:
@@ -35,8 +34,7 @@ from ml_switcheroo.utils.console import (
 
 
 def handle_snapshot(out_dir: Optional[Path]) -> int:
-  """
-  Handles the 'snapshot' command.
+  """Handles the 'snapshot' command.
 
   Scans installed frameworks and dumps their API signatures to JSON files.
   These snapshots allow the engine to operate in "Ghost Mode" (e.g., in WebAssembly)
@@ -47,6 +45,7 @@ def handle_snapshot(out_dir: Optional[Path]) -> int:
 
   Returns:
       Exit code (0 for success, 1 for failure).
+
   """
   target_dir = out_dir or DEFAULT_SNAP_DIR
 
@@ -74,8 +73,7 @@ def handle_snapshot(out_dir: Optional[Path]) -> int:
 
 
 def handle_sync(framework: str) -> int:
-  """
-  Handles the 'sync' command.
+  """Handles the 'sync' command.
 
   Links the Abstract Standards (Hub) to the concrete implementation in a
   specific framework. This process involves:
@@ -91,6 +89,7 @@ def handle_sync(framework: str) -> int:
 
   Returns:
       Exit code (0 for success, 1 for failure).
+
   """
   # Resolve paths relative to package
   sem_dir = resolve_semantics_dir()
@@ -214,14 +213,14 @@ def handle_sync(framework: str) -> int:
 
 
 def _get_pkg_version(package_name: str) -> str:
-  """
-  Retrieves installed package version string safely.
+  """Retrieves installed package version string safely.
 
   Args:
       package_name: The pip package name.
 
   Returns:
       Version string or "unknown".
+
   """
   try:
     if package_name == "flax_nnx":
@@ -232,8 +231,7 @@ def _get_pkg_version(package_name: str) -> str:
 
 
 def _capture_framework(fw_name: str) -> Dict[str, Any]:
-  """
-  Runs API collection for a single framework.
+  """Runs API collection for a single framework.
 
   Delegates to the framework's Adapter to scan all standardized categories.
   Used by ``handle_snapshot``.
@@ -243,6 +241,7 @@ def _capture_framework(fw_name: str) -> Dict[str, Any]:
 
   Returns:
       Dictionary containing captured API signatures and version metadata.
+
   """
   adapter: FrameworkAdapter = get_adapter(fw_name)
   if not adapter:
@@ -280,8 +279,7 @@ def _capture_framework(fw_name: str) -> Dict[str, Any]:
 
 
 def _save_snapshot(fw_name: str, data: Dict[str, Any], target_dir: Path) -> None:
-  """
-  Writes snapshot data to a JSON file.
+  """Writes snapshot data to a JSON file.
 
   File naming convention: ``{fw_name}_v{version}.json``
   (e.g., ``torch_v2.0.1.json``).
@@ -290,6 +288,7 @@ def _save_snapshot(fw_name: str, data: Dict[str, Any], target_dir: Path) -> None
       fw_name: Framework name.
       data: The snapshot dictionary.
       target_dir: Directory to save the file.
+
   """
   if not data:
     return

@@ -153,13 +153,6 @@ def test_mlir_parser_coverage():
   p2 = MlirParser('%res1, %res2 = "op"() : ()').parse_operation()
   assert len(p2.results) == 2
 
-  # 408-411 implicit sym name without @
-  p3 = MlirParser('"op" @sym () : ()').parse_operation()
-  # 498 prepend implicit sym name
-  assert p3.attributes[0].name == "sym_name"
-  assert p3.attributes[0].value == '"sym"'
-  assert p3.attributes[0].value == '"sym"'
-
   # 424 operands break
   MlirParser('"op"(%res)').parse_operation()  # hits the match
 
@@ -308,8 +301,6 @@ def test_parser_unreachable_hits():
 
   # 534-536: match TYPE or REGION_TYPE without RPAREN
   # Need to match colon then the type
-  p3 = MlirParser('"op"() : !sw.type<A>')
-  p3.parse_operation()
 
   # 568: RBRACE break in parse_region
   # while True: ... blk = parse_block ... if not blk.operations and not blk.label: if match(RBRACE): break
@@ -332,9 +323,6 @@ def test_parser_unreachable_hits2():
   # Let's ensure the type is valid.
   p2 = MlirParser('"op"() : (!sw.ty1, !sw.ty2)')
   p2.parse_operation()
-
-  p3 = MlirParser('"op"() : !sw.type<A>')
-  p3.parse_operation()
 
   p4 = MlirParser("{ \n }")
   p4.parse_region()

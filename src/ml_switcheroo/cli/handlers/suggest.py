@@ -1,5 +1,4 @@
-"""
-Suggest Command Handlers.
+"""Suggest Command Handlers.
 
 This module implements the `suggest` command, which generates a context-rich
 prompt for Large Language Models (LLMs). The prompt includes:
@@ -22,8 +21,7 @@ from ml_switcheroo.utils.console import log_error
 
 
 def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: int = 50) -> int:
-  """
-  Generates an LLM prompt for defining new operations.
+  """Generates an LLM prompt for defining new operations.
 
   Supports both single API paths (e.g. ``torch.nn.Linear``) and
   module wildcards (e.g. ``jax.numpy.*``).
@@ -43,6 +41,7 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
 
   Returns:
       int: Exit code (0 for success, 1 for failure).
+
   """
   # 1. Resolve Targets
   targets: List[Tuple[str, Dict[str, Any]]] = []
@@ -126,14 +125,14 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
 
 
 def _extract_metadata(obj: Any) -> Dict[str, Any]:
-  """
-  Extracts signature and docstring from a live object.
+  """Extracts signature and docstring from a live object.
 
   Args:
       obj: The Python object to inspect.
 
   Returns:
       Dict: Metadata containing 'signature', 'docstring', and 'kind'.
+
   """
   doc = inspect.getdoc(obj) or "No documentation available."
   kind = "class" if inspect.isclass(obj) else "function"
@@ -154,8 +153,7 @@ def _extract_metadata(obj: Any) -> Dict[str, Any]:
 
 
 def _inspect_live_object(api_path: str) -> Dict[str, Any]:
-  """
-  Locates and inspects a python object by path.
+  """Locates and inspects a python object by path.
 
   Args:
       api_path: Dotted string path (e.g. 'torch.nn.Linear').
@@ -166,6 +164,7 @@ def _inspect_live_object(api_path: str) -> Dict[str, Any]:
   Raises:
       ImportError: If module cannot be loaded or path format is invalid.
       AttributeError: If object not found in module.
+
   """
   if "." not in api_path:
     raise ImportError(f"Invalid path format: {api_path}")

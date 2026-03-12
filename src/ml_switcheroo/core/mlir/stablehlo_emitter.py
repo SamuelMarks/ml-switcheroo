@@ -1,5 +1,4 @@
-"""
-StableHLO Emitter Backend.
+"""StableHLO Emitter Backend.
 
 Translates Python CST to MLIR using the StableHLO dialect for math operations
 and the Func/Builtin dialects for structure. It relies on the SemanticsManager
@@ -24,29 +23,27 @@ if TYPE_CHECKING:
 
 
 class StableHloEmitter(PythonToMlirEmitter):
-  """
-  Specialized Emitter that produces StableHLO, Func, and Builtin dialect operations.
-  """
+  """Specialized Emitter that produces StableHLO, Func, and Builtin dialect operations."""
 
   def __init__(self, semantics: "SemanticsManager"):
-    """
-    Initialize the emitter with access to the Semantic Knowledge Base.
+    """Initialize the emitter with access to the Semantic Knowledge Base.
 
     Args:
         semantics: The manager instance to use for API resolution.
+
     """
     super().__init__()
     self.semantics = semantics
 
   def _emit_class_def(self, node: cst.ClassDef) -> OperationNode:
-    """
-    Maps Python Class to 'builtin.module'.
+    """Maps Python Class to 'builtin.module'.
 
     Args:
         node: LibCST ClassDef node.
 
     Returns:
         MLIR OperationNode representing a module.
+
     """
     self.ctx.enter_scope()
     # Standard MLIR uses @name syntax for symbols, but module ops usually
@@ -61,14 +58,14 @@ class StableHloEmitter(PythonToMlirEmitter):
     return op
 
   def _emit_func_def(self, node: cst.FunctionDef) -> OperationNode:
-    """
-    Maps Python Function to 'func.func'.
+    """Maps Python Function to 'func.func'.
 
     Args:
         node: LibCST FunctionDef node.
 
     Returns:
         MLIR OperationNode representing the function.
+
     """
     self.ctx.enter_scope()
     func_name = node.name.value
@@ -116,14 +113,14 @@ class StableHloEmitter(PythonToMlirEmitter):
     return op
 
   def _emit_return(self, node: cst.Return) -> List[OperationNode]:
-    """
-    Maps Python Return to 'func.return'.
+    """Maps Python Return to 'func.return'.
 
     Args:
         node: LibCST Return node.
 
     Returns:
         List of operations (expression evaluation + return).
+
     """
     ops = []
     operands = []
@@ -137,14 +134,14 @@ class StableHloEmitter(PythonToMlirEmitter):
     return ops
 
   def _emit_expression(self, expr: cst.BaseExpression) -> Tuple[ValueNode, List[OperationNode]]:
-    """
-    Overrides expression generation to intercept and resolve Semantic Operations.
+    """Overrides expression generation to intercept and resolve Semantic Operations.
 
     Args:
         expr: LibCST Expression node.
 
     Returns:
         Tuple of (Result Value, List of Ops).
+
     """
     # Delegate to base logic first
     val, ops = super()._emit_expression(expr)
@@ -159,12 +156,12 @@ class StableHloEmitter(PythonToMlirEmitter):
     return val, resolved_ops
 
   def _resolve_sw_op(self, op: OperationNode) -> None:
-    """
-    Mutates a 'sw.op' node into a 'stablehlo' node if a mapping exists.
+    """Mutates a 'sw.op' node into a 'stablehlo' node if a mapping exists.
     Removes the 'type' attribute upon successful resolution.
 
     Args:
         op: The operation node to mutate in-place.
+
     """
     # Find type attribute
     type_attr = next((a for a in op.attributes if a.name == "type"), None)
@@ -183,14 +180,14 @@ class StableHloEmitter(PythonToMlirEmitter):
         op.result_types = [TypeNode("tensor<*xf32>")]
 
   def _lookup_stablehlo_op(self, api_name: str) -> Optional[str]:
-    """
-    Queries the SemanticsManager for the StableHLO variant of the given API.
+    """Queries the SemanticsManager for the StableHLO variant of the given API.
 
     Args:
         api_name: Logic API string (e.g. 'torch.abs').
 
     Returns:
         StableHLO operation name (e.g. 'stablehlo.abs') or None.
+
     """
     # 1. Reverse lookup to get Abstract ID
     defn = self.semantics.get_definition(api_name)
@@ -207,14 +204,14 @@ class StableHloEmitter(PythonToMlirEmitter):
     return None
 
   def _map_py_type_to_mlir(self, type_str: str) -> str:
-    """
-    Maps Python type strings to MLIR types.
+    """Maps Python type strings to MLIR types.
 
     Args:
         type_str: Python Type Hint string.
 
     Returns:
         MLIR Type string (e.g. 'f32').
+
     """
     clean = type_str.lower().strip()
     if clean == "int":

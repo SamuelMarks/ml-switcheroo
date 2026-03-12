@@ -1,5 +1,4 @@
-"""
-AST Node Serialization for Visual Diffs.
+"""AST Node Serialization for Visual Diffs.
 
 This utility module provides mechanisms to convert arbitrary LibCST nodes
 textual source code representation "in vacuum". This is essential for
@@ -15,8 +14,7 @@ _RENDER_CTX = cst.parse_module("")
 
 
 def capture_node_source(node: cst.CSTNode) -> str:
-  """
-  Renders a LibCST node into its Python source code string representation.
+  """Renders a LibCST node into its Python source code string representation.
 
   This handles both original nodes (which might carry whitespace info)
   and constructed nodes (detached from the original tree).
@@ -26,6 +24,7 @@ def capture_node_source(node: cst.CSTNode) -> str:
 
   Returns:
       str: The Python code string.
+
   """
   try:
     # LibCST requires a module context to generate code for a node
@@ -36,8 +35,7 @@ def capture_node_source(node: cst.CSTNode) -> str:
 
 
 def diff_nodes(original: cst.CSTNode, modified: cst.CSTNode) -> tuple[str, str, bool]:
-  """
-  Compares two nodes and returns their source strings if they differ.
+  """Compares two nodes and returns their source strings if they differ.
 
   Args:
       original: The node before transformation.
@@ -45,6 +43,7 @@ def diff_nodes(original: cst.CSTNode, modified: cst.CSTNode) -> tuple[str, str, 
 
   Returns:
       tuple: (source_before, source_after, has_changed)
+
   """
   src_before = capture_node_source(original)
   src_after = capture_node_source(modified)

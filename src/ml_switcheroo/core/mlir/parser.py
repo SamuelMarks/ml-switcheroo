@@ -563,11 +563,6 @@ class MlirParser:
       blk = self.parse_block(is_top_level=False)
       blocks.append(blk)
 
-      if not blk.operations and not blk.label:
-        if self.match(Symbol.RBRACE):
-          break
-        self.consume()
-
       if self.match(Symbol.RBRACE):
         break
 

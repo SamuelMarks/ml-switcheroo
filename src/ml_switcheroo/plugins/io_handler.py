@@ -1,5 +1,4 @@
-"""
-Plugin for handling Input/Output (IO) Serialization.
+"""Plugin for handling Input/Output (IO) Serialization.
 
 Delegates serialization logic to the target FrameworkAdapter to ensure logic
 remains decoupled from the core transpiler.
@@ -44,8 +43,7 @@ def _get_arg(args: List[cst.Arg], index: int, name: str) -> Optional[cst.Arg]:
 
 @register_hook("io_handler")
 def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Hook to rewrite save/load calls using Adapter-specific logic.
+  """Hook to rewrite save/load calls using Adapter-specific logic.
 
   Triggers:
       `torch.save` and `torch.load`.

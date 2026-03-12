@@ -1,5 +1,4 @@
-"""
-Inspection Engine for Python Packages.
+"""Inspection Engine for Python Packages.
 
 This module provides the :class:`ApiInspector`, a hybrid static-dynamic analysis tool
 designed to extract API signatures (functions, classes, and attributes) from Python packages.
@@ -32,11 +31,11 @@ logging.getLogger("griffe").setLevel(logging.CRITICAL)
 
 
 class ApiInspector:
-  """
-  A robust inspector for discovering API surfaces of installed libraries.
+  """A robust inspector for discovering API surfaces of installed libraries.
 
   Attributes:
       _package_cache: Cache of statically parsed Griffe trees to avoid re-parsing large packages.
+
   """
 
   def __init__(self):
@@ -44,8 +43,7 @@ class ApiInspector:
     self._package_cache = {}
 
   def inspect(self, package_name: str, unsafe_modules: Optional[Set[str]] = None) -> Dict[str, Any]:
-    """
-    Scans a package and returns a flat catalog of its public API.
+    """Scans a package and returns a flat catalog of its public API.
 
     Attempts static analysis first, then falls back to runtime inspection.
 
@@ -57,6 +55,7 @@ class ApiInspector:
     Returns:
         Dict mapping 'fully.qualified.name' -> {metadata_dict}.
         Metadata dict contains 'name', 'type', 'params', etc.
+
     """
     catalog = {}
     ignore_set = unsafe_modules or set()
@@ -91,12 +90,12 @@ class ApiInspector:
     return catalog
 
   def _recurse_griffe(self, obj: griffe.Object, catalog: Dict[str, Any]):
-    """
-    Recursively walks a Griffe object tree to build the catalog.
+    """Recursively walks a Griffe object tree to build the catalog.
 
     Args:
         obj: The current Griffe object being visited.
         catalog: The accumulator dictionary.
+
     """
     for member_name, member in obj.members.items():
       if member_name.startswith("_"):
@@ -134,8 +133,7 @@ class ApiInspector:
     ignore_set: Set[str],
     depth: int = 0,
   ):
-    """
-    Recursively walks a live Python object to build the catalog.
+    """Recursively walks a live Python object to build the catalog.
 
     Args:
         obj: The object to inspect.
@@ -144,6 +142,7 @@ class ApiInspector:
         visited: Set of object IDs already processed.
         ignore_set: Set of names to skip during recursion.
         depth: Recursion depth tracker.
+
     """
     # Safety Checks
     if depth > 5:
@@ -214,8 +213,7 @@ class ApiInspector:
           }
 
   def _extract_griffe_sig(self, func: griffe.Object, kind: str) -> Dict[str, Any]:
-    """
-    Extracts signature metadata from a Griffe object.
+    """Extracts signature metadata from a Griffe object.
 
     Args:
         func: The Griffe function/class object.
@@ -223,6 +221,7 @@ class ApiInspector:
 
     Returns:
         Dict containing signature details.
+
     """
     params = []
     has_varargs = False
@@ -246,14 +245,14 @@ class ApiInspector:
     }
 
   def _extract_attribute_info(self, attr: griffe.Attribute) -> Dict[str, Any]:
-    """
-    Serializes a Griffe Attribute (Constant/Type).
+    """Serializes a Griffe Attribute (Constant/Type).
 
     Args:
         attr: The Griffe attribute object.
 
     Returns:
         Metadata dict.
+
     """
     return {
       "name": attr.name,
@@ -264,8 +263,7 @@ class ApiInspector:
     }
 
   def _extract_runtime_sig(self, obj: Any, name: str, kind: str) -> Dict[str, Any]:
-    """
-    Extracts signature metadata from a live runtime object using inspect.
+    """Extracts signature metadata from a live runtime object using inspect.
 
     Args:
         obj: The live object.
@@ -274,6 +272,7 @@ class ApiInspector:
 
     Returns:
         Metadata dict based on inspection.
+
     """
     params = []
     has_varargs = False
@@ -295,8 +294,7 @@ class ApiInspector:
     }
 
   def _get_doc_summary(self, obj: Any) -> str:
-    """
-    Helper to extract the first line of a docstring from either
+    """Helper to extract the first line of a docstring from either
     Griffe object or runtime object.
 
     Args:
@@ -304,6 +302,7 @@ class ApiInspector:
 
     Returns:
         The first line of the docstring.
+
     """
     doc = ""
     if hasattr(obj, "docstring") and obj.docstring:

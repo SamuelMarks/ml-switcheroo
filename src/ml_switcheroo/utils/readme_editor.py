@@ -1,5 +1,4 @@
-"""
-Utilities for updating the project README.
+"""Utilities for updating the project README.
 
 This module provides logic to inject automated verification reports (the Compatibility Matrix)
 directly into the `README.md` file, ensuring documentation stays valid with the code.
@@ -14,8 +13,7 @@ from ml_switcheroo.utils.console import log_error, log_success
 
 
 class ReadmeEditor:
-  """
-  Utility to programmatically update the README.md with verification results.
+  """Utility to programmatically update the README.md with verification results.
 
   It regenerates the "Compatibility Matrix" table based on the current state of
   the Knowledge Base and the results of the latest CI run, then splices it
@@ -23,19 +21,18 @@ class ReadmeEditor:
   """
 
   def __init__(self, semantics: SemanticsManager, readme_path: Path) -> None:
-    """
-    Initializes the editor.
+    """Initializes the editor.
 
     Args:
         semantics: The loaded semantics manager used to fetch API details.
         readme_path: File system path to the target markdown file.
+
     """
     self.semantics = semantics
     self.readme_path = readme_path
 
   def update_matrix(self, validation_results: Dict[str, bool]) -> bool:
-    """
-    Regenerates the Markdown table and injects it into the README.
+    """Regenerates the Markdown table and injects it into the README.
 
     It looks for the section starting with `## ✅ Compatibility Matrix` and
     replaces the content up to the next `## Header` or End of File.
@@ -45,6 +42,7 @@ class ReadmeEditor:
 
     Returns:
         bool: True if the update was successful, False otherwise.
+
     """
     if not self.readme_path.exists():
       log_error(f"README not found at {self.readme_path}")
@@ -98,8 +96,7 @@ class ReadmeEditor:
       return False
 
   def _generate_markdown_table(self, results: Dict[str, bool]) -> str:
-    """
-    Constructs the ASCII Markdown table from semantics data.
+    """Constructs the ASCII Markdown table from semantics data.
 
     Generates a table row for every operation known in the SemanticsManager.
 
@@ -114,6 +111,7 @@ class ReadmeEditor:
 
     Returns:
         str: The fully formatted markdown table string.
+
     """
     known_apis = self.semantics.get_known_apis()
     # Sort for deterministic output
@@ -166,8 +164,7 @@ class ReadmeEditor:
 
 
 def _guess_category(api_name: str, target_var: Optional[Dict]) -> str:
-  """
-  Heuristic helper to categorize op based on API string contents.
+  """Heuristic helper to categorize op based on API string contents.
 
   Args:
       api_name: The Torch/Source API path.
@@ -175,6 +172,7 @@ def _guess_category(api_name: str, target_var: Optional[Dict]) -> str:
 
   Returns:
       str: "Neural", "Special", or "Math".
+
   """
   if "nn" in api_name or "Linear" in api_name or "Conv" in api_name:
     return "Neural"

@@ -1,5 +1,4 @@
-"""
-Integration Test Harness Generator.
+"""Integration Test Harness Generator.
 
 Generates standalone verification scripts.
 Bundles fuzzer logic (including Hypothesis strategies).
@@ -26,14 +25,10 @@ import ml_switcheroo.testing.fuzzer.strategies
 
 
 class HarnessGenerator:
-  """
-  Generates standalone verification scripts tailored to the target framework.
-  """
+  """Generates standalone verification scripts tailored to the target framework."""
 
   def __init__(self) -> None:
-    """
-    Initializes the generator instance and its code extractor utility.
-    """
+    """Initializes the generator instance and its code extractor utility."""
     self.extractor = CodeExtractor()
 
   def generate(
@@ -91,8 +86,7 @@ class HarnessGenerator:
       f.write(script_content)
 
   def _bundle_fuzzer_dependencies(self) -> str:
-    """
-    Extracts all helper functions required by InputFuzzer.
+    """Extracts all helper functions required by InputFuzzer.
     Injects Hypothesis and typing imports globally for the bundle.
     """
     deps = []
@@ -106,7 +100,7 @@ class HarnessGenerator:
     deps.append("from typing import Any, Dict, List, Optional, Tuple, Callable")
 
     def extract_module_functions(module):
-      """TODO: Add docstring."""
+      """Execute implementation detail."""
       funcs = inspect.getmembers(module, inspect.isfunction)
       for name, func in funcs:
         if func.__module__ == module.__name__:
@@ -128,7 +122,7 @@ class HarnessGenerator:
     return "\n\n".join(deps + [fuzzer_class])
 
   def _build_dynamic_init(self, target_fw: str) -> tuple[str, str, str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     adapter = get_adapter(target_fw)
     if not adapter:
       return "", "", "pass"
@@ -159,7 +153,7 @@ class HarnessGenerator:
     return imports_str, init_code, final_logic
 
   def _build_result_normalization(self, source_fw: str, target_fw: str) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     blocks = []
     unique_fws = set([source_fw, target_fw])
     if "flax_nnx" in unique_fws:
@@ -180,7 +174,7 @@ class HarnessGenerator:
     return "\n    ".join(blocks)
 
   def _generate_adapter_shim(self) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     shim_lines = [
       "# Shim for missing get_adapter",
       "def get_adapter(framework):",

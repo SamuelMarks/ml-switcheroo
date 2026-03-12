@@ -1,5 +1,4 @@
-"""
-Fuzzer Package.
+"""Fuzzer Package.
 
 This package provides the input generation engine for verification tests.
 It exposes the main `InputFuzzer` class which orchestrates the generation

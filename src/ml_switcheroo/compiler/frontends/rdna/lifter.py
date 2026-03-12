@@ -1,5 +1,4 @@
-"""
-RDNA Lifter (Frontend).
+"""RDNA Lifter (Frontend).
 
 This module provides the logic to "lift" low-level RDNA AST nodes back into a
 high-level `LogicalGraph`. It relies on semantic comment markers (e.g. `; BEGIN`)
@@ -19,9 +18,7 @@ from ml_switcheroo.compiler.frontends.rdna.nodes import (
 
 
 class RdnaLifter:
-  """
-  Reconstructs a LogicalGraph from a sequence of RDNA AST nodes.
-  """
+  """Reconstructs a LogicalGraph from a sequence of RDNA AST nodes."""
 
   _RE_INPUT: Pattern = re.compile(r"Input\s+(\w+)\s+->")
   _RE_BEGIN: Pattern = re.compile(r"BEGIN\s+(\w+)\s+\((\w+)\)")
@@ -30,9 +27,7 @@ class RdnaLifter:
   _RE_RETURN: Pattern = re.compile(r"Return:")
 
   def lift(self, nodes: List[RdnaNode]) -> LogicalGraph:
-    """
-    Parses a list of RDNA nodes to build a LogicalGraph.
-    """
+    """Parses a list of RDNA nodes to build a LogicalGraph."""
     # Set default name to match expected Python Class Name in tests
     graph = LogicalGraph(name="DecompiledNet")
     previous_node_id: Optional[str] = None
@@ -46,7 +41,7 @@ class RdnaLifter:
     instruction_counter = 0
 
     def commit_node(node_id: str, kind: str, meta=None) -> None:
-      """TODO: Add docstring."""
+      """Execute implementation detail."""
       nonlocal previous_node_id
       if node_id in seen_ids:
         return

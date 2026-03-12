@@ -1,5 +1,4 @@
-"""
-Import Logic Mixin.
+"""Import Logic Mixin.
 
 Handles visiting, cleaning, and rewriting `Import` and `ImportFrom` nodes based
 on the centralized `ResolutionPlan`.
@@ -15,9 +14,7 @@ from ml_switcheroo.core.import_fixer.resolution import ImportReq
 
 
 class ImportMixin(cst.CSTTransformer):
-  """
-  Mixin for processing Import statements.
-  """
+  """Mixin for processing Import statements."""
 
   def _make_alias_node(self, req: ImportReq) -> cst.ImportAlias:
     """Helper to construct CST ImportAlias from Requirement."""
@@ -46,7 +43,7 @@ class ImportMixin(cst.CSTTransformer):
     return cst.ImportAlias(name=create_dotted_name(name_str), asname=asname_node)
 
   def leave_Import(self, original_node: cst.Import, updated_node: cst.Import) -> Union[cst.Import, cst.RemovalSentinel]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     new_aliases = []
     replacement_occurred = False
 
@@ -94,7 +91,7 @@ class ImportMixin(cst.CSTTransformer):
   def leave_ImportFrom(
     self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
   ) -> Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if not updated_node.module:
       return updated_node
 

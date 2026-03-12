@@ -1,5 +1,4 @@
-"""
-LibCST Transformer for Injecting Framework Mappings.
+"""LibCST Transformer for Injecting Framework Mappings.
 
 This package provides the logic to modify framework adapter files (e.g. `torch.py`)
 by locating the specific class registered for a framework and injecting a new

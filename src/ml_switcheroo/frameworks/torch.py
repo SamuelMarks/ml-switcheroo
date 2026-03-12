@@ -1,5 +1,4 @@
-"""
-PyTorch Framework Adapter.
+"""PyTorch Framework Adapter.
 
 This module implements the `FrameworkAdapter` protocol for PyTorch.
 It provides:
@@ -44,8 +43,7 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 @register_framework("torch")
 class TorchAdapter:
-  """
-  Adapter for PyTorch (Meta).
+  """Adapter for PyTorch (Meta).
 
   Handles Source and Target translation rules for PyTorch, including
   `torch.nn`, `torch.optim`, and `torch.func` (vmap/grad).
@@ -57,8 +55,7 @@ class TorchAdapter:
   ui_priority: int = 0
 
   def __init__(self) -> None:
-    """
-    Initializes the adapter.
+    """Initializes the adapter.
 
     Detects if PyTorch is installed. to switch between LIVE inspection
     and GHOST snapshot loading.
@@ -75,21 +72,21 @@ class TorchAdapter:
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """
-    Returns the primary root import alias ('torch', 'torch').
+    """Returns the primary root import alias ('torch', 'torch').
 
     Returns:
         The module name and default alias.
+
     """
     return ("torch", "torch")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """
-    Defines the semantic roles of PyTorch namespaces.
+    """Defines the semantic roles of PyTorch namespaces.
 
     Returns:
         Mapping of dot-path strings to configuration objects.
+
     """
     return {
       "torch": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="torch"),
@@ -104,11 +101,11 @@ class TorchAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    """
-    Modules to scan during `scaffold` or `sync` operations.
+    """Modules to scan during `scaffold` or `sync` operations.
 
     Returns:
         List of module names.
+
     """
     if self._mode == InitMode.GHOST:
       return []
@@ -123,11 +120,11 @@ class TorchAdapter:
 
   @property
   def unsafe_submodules(self) -> Set[str]:
-    """
-    Submodules that cause recursion depth errors or C-Extension crashes.
+    """Submodules that cause recursion depth errors or C-Extension crashes.
 
     Returns:
         Set of module names to exclude from recursive scanning.
+
     """
     return {
       "_C",
@@ -151,11 +148,11 @@ class TorchAdapter:
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """
-    Regex patterns to categorize discovered APIs.
+    """Regex patterns to categorize discovered APIs.
 
     Returns:
         Dictionary mapping category names to list of regex patterns.
+
     """
     return {
       "neural": [r"\.nn\.", r"\.modules\.", r"\.layers\.", r"Module$"],
@@ -174,21 +171,21 @@ class TorchAdapter:
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """
-    Returns the semantic tiers fully supported by this adapter.
+    """Returns the semantic tiers fully supported by this adapter.
 
     Returns:
         List of supported tiers.
+
     """
     return [SemanticTier.NEURAL, SemanticTier.ARRAY_API, SemanticTier.EXTRAS]
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """
-    Templates used by `gen-tests` to create physical verification files.
+    """Templates used by `gen-tests` to create physical verification files.
 
     Returns:
         Dictionary of code templates.
+
     """
     return {
       "import": "import torch",
@@ -198,39 +195,39 @@ class TorchAdapter:
 
   @property
   def harness_imports(self) -> List[str]:
-    """
-    Imports required for harness initialization.
+    """Imports required for harness initialization.
 
     Returns:
         List of import statements.
+
     """
     return []
 
   def get_harness_init_code(self) -> str:
-    """
-    Returns helper code for initializing the harness.
+    """Returns helper code for initializing the harness.
 
     Returns:
         Python source code string.
+
     """
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """
-    Returns code to convert Torch tensors to NumPy (detach/cpu check).
+    """Returns code to convert Torch tensors to NumPy (detach/cpu check).
 
     Returns:
         Python statement string.
+
     """
     return "if hasattr(obj, 'detach'): return obj.detach().cpu().numpy()"
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """
-    Defines how classes and functions are rewritten when targeting PyTorch.
+    """Defines how classes and functions are rewritten when targeting PyTorch.
 
     Returns:
         Configuration object for structural rewriting.
+
     """
     return StructuralTraits(
       module_base="torch.nn.Module",
@@ -263,11 +260,11 @@ class TorchAdapter:
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """
-    Capabilities flags. PyTorch uses imperative state and eager execution.
+    """Capabilities flags. PyTorch uses imperative state and eager execution.
 
     Returns:
         Configuration object for plugin logic.
+
     """
     return PluginTraits(
       has_numpy_compatible_arrays=False,  # Uses .to() not .astype()
@@ -278,22 +275,22 @@ class TorchAdapter:
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """
-    Global seed setting methods detected as impure side-effects.
+    """Global seed setting methods detected as impure side-effects.
 
     Returns:
         List of method names.
+
     """
     return ["manual_seed", "seed"]
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """
-    Returns list of framework-specific magic arguments.
+    """Returns list of framework-specific magic arguments.
     Torch emits no magic args; all state is implicit.
 
     Returns:
         Empty list.
+
     """
     return []
 
@@ -301,12 +298,12 @@ class TorchAdapter:
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """
-    The definitive mapping of Abstract Operations to PyTorch APIs.
+    """The definitive mapping of Abstract Operations to PyTorch APIs.
     Loaded dynamically from `frameworks/definitions/torch.json`.
 
     Returns:
         Dictionary mapping operation abstract IDs to implementation details.
+
     """
     defs = load_definitions("torch")
 
@@ -336,8 +333,7 @@ class TorchAdapter:
   # --- Syntax Generators ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """
-    Generates code for device creation.
+    """Generates code for device creation.
 
     Args:
         device_type: The device type string (e.g. 'cuda', 'cpu').
@@ -345,6 +341,7 @@ class TorchAdapter:
 
     Returns:
         Code string for device creation.
+
     """
     args = [str(device_type)]
     if device_index:
@@ -353,17 +350,16 @@ class TorchAdapter:
     return f"torch.device({arg_str})"
 
   def get_device_check_syntax(self) -> str:
-    """
-    Returns PyTorch syntax for checking CUDA availability.
+    """Returns PyTorch syntax for checking CUDA availability.
 
     Returns:
         Python expression string.
+
     """
     return "torch.cuda.is_available()"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """
-    Returns syntax for splitting RNG state.
+    """Returns syntax for splitting RNG state.
     PyTorch uses global state-based randomness, so explicit splitting is a no-op.
 
     Args:
@@ -372,21 +368,21 @@ class TorchAdapter:
 
     Returns:
         'pass' string (No-op).
+
     """
     return "pass"
 
   def get_serialization_imports(self) -> List[str]:
-    """
-    Returns imports required for IO operations.
+    """Returns imports required for IO operations.
 
     Returns:
         List of import statements.
+
     """
     return ["import torch"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """
-    Generates save/load syntax.
+    """Generates save/load syntax.
 
     Args:
         op: Operation name ('save' or 'load').
@@ -395,6 +391,7 @@ class TorchAdapter:
 
     Returns:
         Python code string for the operation.
+
     """
     if op == "save" and object_arg:
       return f"torch.save({object_arg}, {file_arg})"
@@ -405,17 +402,16 @@ class TorchAdapter:
   # --- Weight Handling Logic ---
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """
-    Returns imports required for the generated weight migration script logic.
+    """Returns imports required for the generated weight migration script logic.
 
     Returns:
         List of import strings.
+
     """
     return ["import torch"]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """
-    Returns Python code to load a .pth file into a raw state dictionary.
+    """Returns Python code to load a .pth file into a raw state dictionary.
     Handles both bare state dicts and Lightning-style checkpoints.
 
     Args:
@@ -423,6 +419,7 @@ class TorchAdapter:
 
     Returns:
         Block of python code setting 'raw_state'.
+
     """
     return textwrap.dedent(
       f""" 
@@ -441,8 +438,7 @@ class TorchAdapter:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """
-    Returns expression to convert a Torch tensor variable to a NumPy array.
+    """Returns expression to convert a Torch tensor variable to a NumPy array.
     Includes detach and cpu calls for safety.
 
     Args:
@@ -450,12 +446,12 @@ class TorchAdapter:
 
     Returns:
         Expression string.
+
     """
     return f"{tensor_var}.detach().cpu().numpy()"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
-    """
-    Returns Python code to save the converted state dictionary back to .pth format.
+    """Returns Python code to save the converted state dictionary back to .pth format.
     Converts NumPy arrays back to Torch tensors before saving.
 
     Args:
@@ -464,6 +460,7 @@ class TorchAdapter:
 
     Returns:
         Block of python code.
+
     """
     return textwrap.dedent(
       f""" 
@@ -474,14 +471,14 @@ class TorchAdapter:
     )
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """
-    Returns the official PyTorch documentation URL.
+    """Returns the official PyTorch documentation URL.
 
     Args:
         api_name: The fully qualified API name.
 
     Returns:
         URL string or None.
+
     """
     if "nn.init" in api_name:
       return f"https://pytorch.org/docs/stable/nn.init.html#{api_name}"
@@ -489,11 +486,11 @@ class TorchAdapter:
     return f"https://pytorch.org/docs/stable/generated/{api_name}.html"
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Provides code snippets for "Wizard" or "Demo" usage.
+    """Provides code snippets for "Wizard" or "Demo" usage.
 
     Returns:
         Dictionary mapping tier IDs to code snippets.
+
     """
     return {
       "tier1_math": """import torch\n\ndef math_ops(x, y):\n    # Tier 1: Core Tensor Operations\n    a = torch.abs(x)\n    b = torch.add(a, y)\n    \n    # Reduction\n    return torch.mean(b)\n""",
@@ -540,14 +537,14 @@ class Qwen3VLPatchEmbed(nn.Module):
     }
 
   def convert(self, data: Any) -> Any:
-    """
-    Converts input data (numpy, lists) into PyTorch Tensors for verification runners.
+    """Converts input data (numpy, lists) into PyTorch Tensors for verification runners.
 
     Args:
         data: Input data structure.
 
     Returns:
         Converted PyTorch Tensor or original data if conversion fails.
+
     """
     try:
       import torch
@@ -569,8 +566,7 @@ class Qwen3VLPatchEmbed(nn.Module):
     return data
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Implementation of the Ghost Protocol.
+    """Implementation of the Ghost Protocol.
     Scans the locally installed PyTorch library for API definitions corresponding
     to the requested category (Loss, Layer, etc.).
 
@@ -579,20 +575,21 @@ class Qwen3VLPatchEmbed(nn.Module):
 
     Returns:
         List of discovered API references.
+
     """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
     return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Loads definitions from JSON snapshot.
+    """Loads definitions from JSON snapshot.
 
     Args:
         category: The standard category to filter by.
 
     Returns:
         List of hydrated GhostRef objects.
+
     """
     if not self._snapshot_data:
       return []
@@ -600,14 +597,14 @@ class Qwen3VLPatchEmbed(nn.Module):
     return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Introspects live torch modules.
+    """Introspects live torch modules.
 
     Args:
         category: The standard category to filter by.
 
     Returns:
         List of discovered GhostRef objects.
+
     """
     results = []
     if category == StandardCategory.LOSS:
@@ -621,11 +618,11 @@ class Qwen3VLPatchEmbed(nn.Module):
     return results
 
   def _scan_losses(self) -> List[GhostRef]:
-    """
-    Scans `torch.nn` for Loss classes.
+    """Scans `torch.nn` for Loss classes.
 
     Returns:
         List of discovered loss classes.
+
     """
     if not nn:
       return []
@@ -637,11 +634,11 @@ class Qwen3VLPatchEmbed(nn.Module):
     return found
 
   def _scan_optimizers(self) -> List[GhostRef]:
-    """
-    Scans `torch.optim` for Optimizer classes.
+    """Scans `torch.optim` for Optimizer classes.
 
     Returns:
         List of discovered optimizer classes.
+
     """
     if not optim:
       return []
@@ -656,11 +653,11 @@ class Qwen3VLPatchEmbed(nn.Module):
     return found
 
   def _scan_activations(self) -> List[GhostRef]:
-    """
-    Scans `torch.nn.modules.activation` and `torch.nn.functional` for activation functions.
+    """Scans `torch.nn.modules.activation` and `torch.nn.functional` for activation functions.
 
     Returns:
         List of discovered activation functions.
+
     """
     found = []
     known_names = {
@@ -713,11 +710,11 @@ class Qwen3VLPatchEmbed(nn.Module):
     return found
 
   def _scan_layers(self) -> List[GhostRef]:
-    """
-    Scans `torch.nn` for Layer classes.
+    """Scans `torch.nn` for Layer classes.
 
     Returns:
         List of discovered layer classes, excluding Losses.
+
     """
     if not nn:
       return []
@@ -730,11 +727,11 @@ class Qwen3VLPatchEmbed(nn.Module):
     return found
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """
-    Apply manual patches to the standard mappings if necessary.
+    """Apply manual patches to the standard mappings if necessary.
     Used to inject complex behaviors not captured by simple API scanning.
 
     Args:
         snapshot: The snapshot dictionary to update in-place.
+
     """
     mappings = snapshot.setdefault("mappings", {})

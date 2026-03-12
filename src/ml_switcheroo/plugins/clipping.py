@@ -1,5 +1,4 @@
-"""
-Plugin for Gradient Clipping.
+"""Plugin for Gradient Clipping.
 
 Addresses the mismatch between:
 1. PyTorch: `torch.nn.utils.clip_grad_norm_(parameters, max_norm)` (In-place, returns norm).
@@ -15,8 +14,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 @register_hook("grad_clipper")
 def transform_grad_clipping(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Transforms imperative clipping to Optax functional clipping.
+  """Hook: Transforms imperative clipping to Optax functional clipping.
 
   Trigger: `clip_grad_norm_` operation.
   Target: Frameworks with `requires_functional_state=True` (e.g. JAX, Flax).
@@ -31,6 +29,7 @@ def transform_grad_clipping(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Returns:
       The transformed node or original if trait not met.
+
   """
   # 0. Capability Check
   if not ctx.plugin_traits.requires_functional_state:

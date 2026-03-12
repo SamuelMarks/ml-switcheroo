@@ -1,5 +1,4 @@
-"""
-Pydantic Schemas for Semantic Knowledge Base.
+"""Pydantic Schemas for Semantic Knowledge Base.
 
 This module defines the data structure of the JSON mapping files (`k_array_api.json`, etc.)
 and the Framework Configuration blocks.
@@ -30,9 +29,7 @@ from ml_switcheroo.core.dsl import (
 
 
 class PluginTraits(BaseModel):
-  """
-  Defines capability flags for a framework to guide plugin logic.
-  """
+  """Defines capability flags for a framework to guide plugin logic."""
 
   model_config = ConfigDict(extra="allow")
 
@@ -62,9 +59,7 @@ class PluginTraits(BaseModel):
 
 
 class StructuralTraits(BaseModel):
-  """
-  Defines structural patterns for a framework to guide generic rewriters.
-  """
+  """Defines structural patterns for a framework to guide generic rewriters."""
 
   model_config = ConfigDict(extra="allow")
 
@@ -113,9 +108,7 @@ class FrameworkAlias(BaseModel):
 
 
 class FrameworkTraits(BaseModel):
-  """
-  Configuration for a framework's structural behavior.
-  """
+  """Configuration for a framework's structural behavior."""
 
   model_config = ConfigDict(extra="allow")
 

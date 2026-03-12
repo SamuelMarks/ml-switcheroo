@@ -1,5 +1,4 @@
-"""
-Python Snippet Emitter.
+"""Python Snippet Emitter.
 
 This module provides the `PythonSnippetEmitter`, a specialized backend component
 designed to generate atomic Python statements (CST nodes) from LogicalNodes.
@@ -21,31 +20,30 @@ from ml_switcheroo.compiler.ir import LogicalNode
 
 
 class PythonSnippetEmitter:
-  """
-  Generates isolated Python statements from LogicalNodes.
+  """Generates isolated Python statements from LogicalNodes.
 
   Adapts generation logic based on the target framework to ensure
   idiomatic code (e.g., injecting `rngs` for Flax, `nn.` prefix for Torch).
   """
 
   def __init__(self, framework: str = "torch") -> None:
-    """
-    Initializes the snippet emitter.
+    """Initializes the snippet emitter.
 
     Args:
         framework: The target framework key (e.g., 'torch', 'jax', 'flax_nnx').
+
     """
     self.framework = framework
 
   def emit_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
-    """
-    Generates the initialization statement for a stateful layer.
+    """Generates the initialization statement for a stateful layer.
 
     Args:
         node: The logical node describing the layer.
 
     Returns:
         A LibCST statement node representing `self.id = Kind(...)`.
+
     """
     if not self._is_stateful_layer(node):
       return cst.SimpleStatementLine(body=[cst.Pass()])
@@ -67,8 +65,7 @@ class PythonSnippetEmitter:
     input_vars: List[str],
     output_var: str,
   ) -> cst.SimpleStatementLine:
-    """
-    Generates the execution call statement (Assignment).
+    """Generates the execution call statement (Assignment).
 
     Args:
         node: The logical node.
@@ -77,6 +74,7 @@ class PythonSnippetEmitter:
 
     Returns:
         A LibCST statement node (Assign).
+
     """
     if node.kind == "Input":
       if input_vars and input_vars[0] != output_var:
@@ -91,8 +89,7 @@ class PythonSnippetEmitter:
     )
 
   def emit_expression(self, node: LogicalNode, input_vars: List[str]) -> cst.BaseExpression:
-    """
-    Generates the function call expression (without assignment).
+    """Generates the function call expression (without assignment).
 
     Args:
         node: The logical node.
@@ -100,6 +97,7 @@ class PythonSnippetEmitter:
 
     Returns:
         A LibCST expression node.
+
     """
     if self._is_stateful_layer(node):
       func_name = f"self.{node.id}"
@@ -123,7 +121,7 @@ class PythonSnippetEmitter:
       return cst.Name("None")
 
   def _is_stateful_layer(self, node: LogicalNode) -> bool:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if node.kind in ["Input", "Output"]:
       return False
     if node.kind.startswith("func_") or "functional" in node.kind or "ops" in node.kind:
@@ -134,7 +132,7 @@ class PythonSnippetEmitter:
     return False
 
   def _resolve_api_name(self, kind: str) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if "." in kind:
       return kind
 
@@ -160,7 +158,7 @@ class PythonSnippetEmitter:
     return clean_kind
 
   def _format_args_from_metadata(self, metadata: Dict[str, Any]) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if not metadata:
       return ""
     args_list = []

@@ -1,5 +1,4 @@
-"""
-Base Import Fixer Logic.
+"""Base Import Fixer Logic.
 
 Defines the base class for the ImportFixer, handling initialization, state tracking,
 and configuration management via the ResolutionPlan.
@@ -14,8 +13,7 @@ from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
 
 
 class BaseImportFixer(cst.CSTTransformer):
-  """
-  Base class for import manipulation.
+  """Base class for import manipulation.
 
   Manages configuration for source removal and target injection via `ResolutionPlan`.
   """
@@ -26,13 +24,13 @@ class BaseImportFixer(cst.CSTTransformer):
     source_fws: Optional[Union[str, Set[str]]] = None,
     preserve_source: bool = False,
   ):
-    """
-    Initializes the fixer state.
+    """Initializes the fixer state.
 
     Args:
         plan: The pre-calculated ResolutionPlan describing required imports and mappings.
         source_fws: Framework(s) to strip imports for (e.g. 'torch').
         preserve_source: If True, do not delete imports even if matched.
+
     """
     self.plan = plan
     self.preserve_source = preserve_source
@@ -55,14 +53,14 @@ class BaseImportFixer(cst.CSTTransformer):
     self._path_to_alias = self.plan.path_to_alias
 
   def _track_definition(self, alias_node: cst.ImportAlias) -> None:
-    """
-    Records a name being defined by an import statement.
+    """Records a name being defined by an import statement.
 
     If `import torch.nn as nn`, records 'nn'.
     If `import torch`, records 'torch'.
 
     Args:
         alias_node: The CST ImportAlias node.
+
     """
     if alias_node.asname:
       target = alias_node.asname.name

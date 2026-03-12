@@ -1,5 +1,4 @@
-"""
-Core Package.
+"""Core Package.
 
 Contains the backend transpilation logic:
 - AST Engine

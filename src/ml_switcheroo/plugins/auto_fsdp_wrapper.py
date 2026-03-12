@@ -1,5 +1,4 @@
-"""
-Automatic Fully Sharded Data Parallel (FSDP) and PJIT Wrapper Plugin.
+"""Automatic Fully Sharded Data Parallel (FSDP) and PJIT Wrapper Plugin.
 
 This plugin automatically handles the injection of distributed sharding primitives
 like PyTorch's FSDP or JAX's `pjit`/`shard_map` into the translated AST. It relies
@@ -15,8 +14,7 @@ from ml_switcheroo.plugins.utils import create_dotted_name
 
 @register_hook("auto_fsdp_wrapper")
 def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.BaseExpression]:
-  """
-  Wraps module instantiations in distributed sharding primitives based on target framework.
+  """Wraps module instantiations in distributed sharding primitives based on target framework.
 
   If the target is PyTorch, it wraps the layer instantiation in FSDP.
   If the target is JAX/Flax, it uses pjit mappings.
@@ -30,6 +28,7 @@ def wrap_with_sharding(node: cst.Call, ctx: HookContext) -> Union[cst.Call, cst.
 
   Returns:
       A wrapped CST Call node. For example, `FSDP(nn.Linear(...), mesh=mesh)`.
+
   """
   # 1. Ensure the operation supports sharding conceptually
   op_def = None

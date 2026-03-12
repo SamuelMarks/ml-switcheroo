@@ -1,5 +1,4 @@
-"""
-Rewriter Context Module.
+"""Rewriter Context Module.
 
 This module provides the `RewriterContext` container, which holds the shared state
 for the transpilation pipeline. It decouples state management (Symbol Tables,
@@ -17,8 +16,7 @@ from ml_switcheroo.core.rewriter.types import SignatureContext
 
 
 class RewriterContext:
-  """
-  Shared state container for the rewriting pipeline.
+  """Shared state container for the rewriting pipeline.
 
   Encapsulates all mutable state required during the AST traversal, allowing
   multiple `RewriterStage` passes to operate on a consistent context.
@@ -32,8 +30,7 @@ class RewriterContext:
     arg_injector: Optional[Callable[[str, Optional[str]], None]] = None,
     preamble_injector: Optional[Callable[[str], None]] = None,
   ):
-    """
-    Initializes the context.
+    """Initializes the context.
 
     Args:
         semantics: The Semantic Knowledge Base manager.
@@ -41,6 +38,7 @@ class RewriterContext:
         symbol_table: Pre-computed symbol table for type resolution.
         arg_injector: Callback to inject arguments into the current function scope.
         preamble_injector: Callback to inject code blocks into the current scope.
+
     """
     self.semantics = semantics
     self.config = config

@@ -1,5 +1,4 @@
-"""
-SASS Macro Expansion Logic.
+"""SASS Macro Expansion Logic.
 
 This module defines procedural generators for complex SASS instruction kernels.
 Unlike 1:1 mappings (e.g. ``Add`` -> ``FADD``), these macros generate entire
@@ -27,23 +26,23 @@ class RegisterAllocatorProtocol(Protocol):
   """Protocol for the Register Allocator used during expansion."""
 
   def get_register(self, var_name: str) -> Register:
-    """
-    Gets or allocates a register for a symbolic variable.
+    """Gets or allocates a register for a symbolic variable.
 
     Args:
        var_name (str): The logical identifier.
 
     Returns:
        Register: The physical register.
+
     """
     ...
 
   def allocate_temp(self) -> Register:
-    """
-    Allocates an anonymous temporary register.
+    """Allocates an anonymous temporary register.
 
     Returns:
        Register: The physical register.
+
     """
     ...
 
@@ -53,8 +52,7 @@ def expand_conv2d(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """
-  Generates the SASS assembly kernel for a 2D Convolution loop.
+  """Generates the SASS assembly kernel for a 2D Convolution loop.
 
   Logic flow:
   1.  Initialize Accumulator (R_ACC).
@@ -73,6 +71,7 @@ def expand_conv2d(
 
   Returns:
       List[SassNode]: Sequence of labels and instructions.
+
   """
   nodes: List[SassNode] = []
 
@@ -147,8 +146,7 @@ def expand_linear(
   node_id: str,
   metadata: Dict[str, Any],
 ) -> List[SassNode]:
-  """
-  Generates the SASS assembly kernel for a Linear Layer (Matrix Multiply).
+  """Generates the SASS assembly kernel for a Linear Layer (Matrix Multiply).
 
   Structure:
   1. Initialize Accumulator.
@@ -165,6 +163,7 @@ def expand_linear(
 
   Returns:
       List[SassNode]: Sequence of instructions.
+
   """
   nodes: List[SassNode] = []
 

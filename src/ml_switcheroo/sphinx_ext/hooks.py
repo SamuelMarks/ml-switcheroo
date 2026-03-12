@@ -1,5 +1,4 @@
-"""
-Sphinx Build Hooks.
+"""Sphinx Build Hooks.
 
 Provides lifecycle hooks to:
 1. Register static asset paths (CSS/JS).
@@ -13,8 +12,7 @@ from typing import Any, Optional
 
 
 def add_static_path(app: Any) -> None:
-  """
-  Adds the extension's static directory to HTML build configuration.
+  """Adds the extension's static directory to HTML build configuration.
 
   Connected to 'builder-inited' event.
   """
@@ -24,8 +22,7 @@ def add_static_path(app: Any) -> None:
 
 
 def copy_wheel_and_reqs(app: Any, exception: Optional[Exception]) -> None:
-  """
-  Post-build hook to copy the latest .whl file into _static for WASM usage.
+  """Post-build hook to copy the latest .whl file into _static for WASM usage.
 
   Connected to 'build-finished' event.
   """

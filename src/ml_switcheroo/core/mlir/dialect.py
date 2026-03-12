@@ -1,5 +1,4 @@
-"""
-Switcheroo Dialect Definition ('sw').
+"""Switcheroo Dialect Definition ('sw').
 
 This module formally defines the MLIR operations for the 'sw' high-level dialect.
 It acts as the schema validation layer for the custom IR, ensuring that
@@ -26,9 +25,7 @@ from ml_switcheroo.core.mlir.nodes import OperationNode, AttributeNode
 
 @dataclass
 class OpSchema:
-  """
-  Validation schema for a MLIR operation.
-  """
+  """Validation schema for a MLIR operation."""
 
   name: str
   num_regions: int = 0
@@ -36,9 +33,7 @@ class OpSchema:
   has_results: bool = False
 
   def validate(self, node: OperationNode) -> bool:
-    """
-    Checks if the CST node conforms to the dialect schema.
-    """
+    """Checks if the CST node conforms to the dialect schema."""
     if node.name != self.name:
       return False
 
@@ -98,9 +93,7 @@ SW_IMPORT = OpSchema(name="sw.import", required_attributes=["names"], has_result
 
 
 class DialectRegistry:
-  """
-  Central registry for dialect validation.
-  """
+  """Central registry for dialect validation."""
 
   _OPS = {
     "sw.module": SW_MODULE,
@@ -116,8 +109,7 @@ class DialectRegistry:
 
   @classmethod
   def validate_op(cls, node: OperationNode) -> bool:
-    """
-    Validates a single operation node against the schema.
+    """Validates a single operation node against the schema.
     Returns False if op is unknown or invalid.
     """
     schema = cls._OPS.get(node.name)
@@ -132,8 +124,7 @@ class DialectRegistry:
 
   @classmethod
   def get_abstract_op(cls, op_name: str) -> str:
-    """
-    Maps a high-level framework op string (e.g. 'Linear') to the canonical dialect op.
+    """Maps a high-level framework op string (e.g. 'Linear') to the canonical dialect op.
     Currently they all map to 'sw.op' with type attributes, but this allows future expansion.
     """
     return "sw.op"

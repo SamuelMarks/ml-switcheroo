@@ -1,5 +1,4 @@
-"""
-Importer for NVIDIA SASS Documentation (HTML).
+"""Importer for NVIDIA SASS Documentation (HTML).
 
 This module parses the official NVIDIA CUDA Binary Utilities documentation
 (HTML format) to extract instruction set definitions. It targets tables
@@ -18,12 +17,10 @@ from ml_switcheroo.utils.console import log_info, log_error, log_success
 
 
 class SassHtmlParser(HTMLParser):
-  """
-  State-machine based HTML parser for extracting SASS Instruction tables.
-  """
+  """State-machine based HTML parser for extracting SASS Instruction tables."""
 
   def __init__(self):
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     super().__init__()
     self.in_table = False
     self.in_tbody = False
@@ -34,7 +31,7 @@ class SassHtmlParser(HTMLParser):
     self.cell_buffer = ""
 
   def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]):
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if tag == "table":
       # Heuristic: Check if table has a summary or class indicating instruction set
       # The provided HTML uses generic classes like 'table-no-stripes', so we grab all
@@ -50,7 +47,7 @@ class SassHtmlParser(HTMLParser):
       self.cell_buffer = ""
 
   def handle_endtag(self, tag: str):
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if tag == "td" and self.in_cell:
       self.in_cell = False
       # Clean up content (remove newlines, extra spaces)
@@ -75,15 +72,13 @@ class SassHtmlParser(HTMLParser):
       self.in_table = False
 
   def handle_data(self, data: str):
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     if self.in_cell:
       self.cell_buffer += data
 
 
 class SassSpecImporter:
-  """
-  Facade for importing SASS specifications.
-  """
+  """Facade for importing SASS specifications."""
 
   # Mapping logic: Regex pattern in Description -> Abstract Op Name
   _DESCRIPTION_MAP = [
@@ -102,14 +97,14 @@ class SassSpecImporter:
   ]
 
   def parse_file(self, html_path: Path) -> Dict[str, Any]:
-    """
-    Parses an HTML file containing SASS documentation.
+    """Parses an HTML file containing SASS documentation.
 
     Args:
         html_path: Path to the .html file.
 
     Returns:
         Dictionary mapping Abstract Operations to SASS implementations.
+
     """
     if not html_path.exists():
       log_error(f"File not found: {html_path}")
@@ -160,9 +155,7 @@ class SassSpecImporter:
     return final_map
 
   def _infer_abstract_op(self, opcode: str, desc: str) -> Optional[str]:
-    """
-    Derives the Abstract Operation ID (e.g. 'Add') from the SASS text.
-    """
+    """Derives the Abstract Operation ID (e.g. 'Add') from the SASS text."""
     # 1. Check Mnemonics directly
     if opcode == "FADD":
       return "Add"

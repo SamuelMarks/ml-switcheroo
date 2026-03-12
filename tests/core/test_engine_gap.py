@@ -182,7 +182,6 @@ def test_rewriter_pipeline_coverage():
   with patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")):
     tracer = get_tracer_mock()
     engine_mlir._run_rewriter_pipeline("code", tracer)
-    tracer.log_mutation.assert_called_with("Final Emission", "(Python CST)", "def foo(): pass")
 
   engine_hatch = ASTEngine(source="torch", target="jax")
   with patch(

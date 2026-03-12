@@ -1,5 +1,4 @@
-"""
-Graph Optimization Passes for specific architectures (e.g. MaxText vs HF).
+"""Graph Optimization Passes for specific architectures (e.g. MaxText vs HF).
 
 Provides passes to:
 1. Fuse Q, K, V projections into a single QKV projection.
@@ -11,9 +10,7 @@ from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, Pa
 
 
 class QKVFusionPass:
-  """
-  Fuses separate q_proj, k_proj, v_proj nodes into a single qkv_proj node.
-  """
+  """Fuses separate q_proj, k_proj, v_proj nodes into a single qkv_proj node."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
     """Mutates graph to fuse QKV."""
@@ -72,9 +69,7 @@ class QKVFusionPass:
 
 
 class QKVDefusionPass:
-  """
-  Splits a qkv_proj node into separate q_proj, k_proj, and v_proj nodes.
-  """
+  """Splits a qkv_proj node into separate q_proj, k_proj, and v_proj nodes."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
     """Mutates graph to de-fuse QKV."""

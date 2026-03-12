@@ -1,5 +1,4 @@
-"""
-Static Purity Analysis for JAX Compliance.
+"""Static Purity Analysis for JAX Compliance.
 
 This module provides the `PurityScanner`, a LibCST transformer that detects
 operations unsafe for functional frameworks (like JAX). JAX transformation
@@ -24,8 +23,7 @@ from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class PurityScanner(cst.CSTTransformer):
-  """
-  Scans CST for impurities and wraps violations in EscapeHatch markers.
+  """Scans CST for impurities and wraps violations in EscapeHatch markers.
 
   Attributes:
       _current_violations (List[str]): Accumulator of errors for the current statement.
@@ -33,6 +31,7 @@ class PurityScanner(cst.CSTTransformer):
       _MUTATION_METHODS (Set[str]): Standard Python container mutation methods.
       _dynamic_impurity_methods (Set[str]): Methods loaded from framework configs (e.g. `add_`).
       _global_rng_methods (Set[str]): Methods loaded from framework configs (e.g. `manual_seed`).
+
   """
 
   # Standard Python Language Impurities (Constant across frameworks)
@@ -53,13 +52,13 @@ class PurityScanner(cst.CSTTransformer):
   _DEFAULT_RNG_METHODS: Set[str] = {"seed"}
 
   def __init__(self, semantics: Any = None, source_fw: Optional[str] = None):
-    """
-    Initializes the PurityScanner.
+    """Initializes the PurityScanner.
 
     Args:
         semantics: SemanticsManager instance to load dynamic configs.
         source_fw: The framework being analyzed (to load specific impure methods).
                    If None, framework-specific impurity checks are skipped.
+
     """
     self._current_violations: List[str] = []
     self.source_fw = source_fw
@@ -82,14 +81,14 @@ class PurityScanner(cst.CSTTransformer):
           self._dynamic_impurity_methods.update(traits.impurity_methods)
 
   def visit_SimpleStatementLine(self, node: cst.SimpleStatementLine) -> Optional[bool]:
-    """
-    Enters a statement line. Resets violation tracking.
+    """Enters a statement line. Resets violation tracking.
 
     Args:
         node: The statement line node.
 
     Returns:
         Always True to visit children.
+
     """
     self._current_violations = []
     return True
@@ -99,8 +98,7 @@ class PurityScanner(cst.CSTTransformer):
     original_node: cst.SimpleStatementLine,
     updated_node: cst.SimpleStatementLine,
   ) -> Union[cst.SimpleStatementLine, cst.FlattenSentinel]:
-    """
-    Exits a statement line.
+    """Exits a statement line.
     If violations were found within this statement, wraps it in the EscapeHatch.
 
     Args:
@@ -109,6 +107,7 @@ class PurityScanner(cst.CSTTransformer):
 
     Returns:
         The wrapped node if unsafe, otherwise the updated node.
+
     """
     if self._current_violations:
       # Deduplicate reasons
@@ -121,42 +120,42 @@ class PurityScanner(cst.CSTTransformer):
     return updated_node
 
   def visit_Global(self, node: cst.Global) -> Optional[bool]:
-    """
-    Detects usage of the 'global' keyword.
+    """Detects usage of the 'global' keyword.
 
     Args:
         node: The global statement node.
 
     Returns:
         False to stop recursion (impure).
+
     """
     names = [n.name.value for n in node.names]
     self._current_violations.append(f"Global mutation ({', '.join(names)})")
     return False
 
   def visit_Nonlocal(self, node: cst.Nonlocal) -> Optional[bool]:
-    """
-    Detects usage of the 'nonlocal' keyword.
+    """Detects usage of the 'nonlocal' keyword.
 
     Args:
         node: The nonlocal statement node.
 
     Returns:
         False to stop recursion (impure).
+
     """
     names = [n.name.value for n in node.names]
     self._current_violations.append(f"Nonlocal mutation ({', '.join(names)})")
     return False
 
   def visit_Call(self, node: cst.Call) -> Optional[bool]:
-    """
-    Inspects calls for I/O functions, list mutations, or global RNG seeding.
+    """Inspects calls for I/O functions, list mutations, or global RNG seeding.
 
     Args:
         node: The call expression node.
 
     Returns:
         True to continue traversal.
+
     """
     # 1. Check Function Name (e.g., print())
     if isinstance(node.func, cst.Name):

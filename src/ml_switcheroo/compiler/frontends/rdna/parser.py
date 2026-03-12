@@ -1,5 +1,4 @@
-"""
-RDNA Parser Implementation.
+"""RDNA Parser Implementation.
 
 Parses a stream of `Token`s from the Lexer into `RdnaNode` ASTs.
 """
@@ -24,25 +23,21 @@ from ml_switcheroo.compiler.frontends.rdna.tokens import RdnaLexer, Token, Token
 
 
 class RdnaParser:
-  """
-  Recursive descent parser for AMD RDNA / GCN assembly.
-  """
+  """Recursive descent parser for AMD RDNA / GCN assembly."""
 
   def __init__(self, code: str) -> None:
-    """
-    Initialize the parser.
+    """Initialize the parser.
 
     Args:
         code (str): The raw RDNA source string.
+
     """
     self.lexer = RdnaLexer()
     self.tokens = list(self.lexer.tokenize(code))
     self.pos = 0
 
   def parse(self) -> List[RdnaNode]:
-    """
-    Parses the entire code block.
-    """
+    """Parses the entire code block."""
     nodes: List[RdnaNode] = []
     while not self._is_eof():
       node = self._parse_line()
@@ -71,7 +66,7 @@ class RdnaParser:
     return token
 
   def _is_eof(self) -> bool:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return self.pos >= len(self.tokens)
 
   def _match(self, kind: TokenType) -> bool:
@@ -112,8 +107,6 @@ class RdnaParser:
     params: List[str] = []
     while not self._is_eof():
       next_t = self._peek()
-      if not next_t:
-        break
 
       # Stop at start of next statement
       if next_t.kind in (
@@ -135,9 +128,8 @@ class RdnaParser:
     return Directive(name=name, params=params)
 
   def _parse_instruction(self) -> Instruction:
-    """
-    Parses an RDNA instruction.
-    Format: Opcode [Operands...]
+    """Parses an RDNA instruction.
+    Format: Opcode [Operands...].
     """
     op_tok = self._consume(TokenType.IDENTIFIER)
     opcode = op_tok.value

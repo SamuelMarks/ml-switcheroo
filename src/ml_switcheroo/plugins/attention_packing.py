@@ -1,5 +1,4 @@
-"""
-Plugin for MultiHead Attention Strategy Selection.
+"""Plugin for MultiHead Attention Strategy Selection.
 
 This module provides modular hooks for transforming MultiHeadAttention API calls
 between frameworks. Logic is split into discrete argument-mapping strategies
@@ -28,11 +27,11 @@ def _create_dotted_name(name_str: str) -> cst.BaseExpression:
 
 
 def _resolve_target_class(ctx: HookContext) -> Optional[cst.BaseExpression]:
-  """
-  Look up 'MultiheadAttention' implementation from the Knowledge Base.
+  """Look up 'MultiheadAttention' implementation from the Knowledge Base.
 
   Returns:
       CST Node for the target class, or None if mapping is missing.
+
   """
   api = ctx.lookup_api("MultiheadAttention")
   if not api:
@@ -59,8 +58,7 @@ def _is_constructor_signature(args: list) -> bool:
 
 @register_hook("repack_attn_keras")
 def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Strategy: Keras Attention Packing.
+  """Strategy: Keras Attention Packing.
 
   **Constructor:**
   - Requires 'MultiheadAttention' mapping in Semantics.
@@ -75,6 +73,7 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       Transformed Call node, or original if dependencies missing.
+
   """
   args = list(node.args)
 
@@ -147,8 +146,7 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("repack_attn_flax")
 def repack_attn_flax(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Strategy: Flax/JAX Attention Packing.
+  """Strategy: Flax/JAX Attention Packing.
 
   **Constructor:**
   - Requires 'MultiheadAttention' mapping in Semantics.
@@ -162,6 +160,7 @@ def repack_attn_flax(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   Returns:
       Transformed Call node, or original if dependencies missing.
+
   """
   args = list(node.args)
 
@@ -195,8 +194,7 @@ def repack_attn_flax(node: cst.Call, ctx: HookContext) -> cst.Call:
 
 @register_hook("repack_attn_torch")
 def repack_attn_torch(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Strategy: PyTorch Attention Packing.
+  """Strategy: PyTorch Attention Packing.
 
   **Constructor:**
   - Requires 'MultiheadAttention' mapping in Semantics.

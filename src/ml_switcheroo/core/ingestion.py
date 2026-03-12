@@ -1,5 +1,4 @@
-"""
-Ingestion logic for parsing source code into an Abstract Syntax Tree (AST).
+"""Ingestion logic for parsing source code into an Abstract Syntax Tree (AST).
 
 This module handles the complexity of accepting different input formats (Python,
 MLIR, TikZ, Custom DSLs) and normalizing them into a LibCST Module to be processed
@@ -27,8 +26,7 @@ def ingest_code(
   source_adapter: Optional[FrameworkAdapter],
   tracer: Any,
 ) -> cst.Module:
-  """
-  Parses input code handles non-python sources via adapters.
+  """Parses input code handles non-python sources via adapters.
 
   Supports:
   1. Adapter-specific parsers (e.g. LaTeX).
@@ -48,6 +46,7 @@ def ingest_code(
 
   Raises:
       Exception: If parsing fails for any reason (syntax errors, etc.).
+
   """
   # 1. Adapter Hook (e.g. LatexParser)
   if source_adapter and hasattr(source_adapter, "create_parser"):

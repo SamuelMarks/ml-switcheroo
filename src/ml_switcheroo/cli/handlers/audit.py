@@ -1,5 +1,4 @@
-"""
-Audit Command Handler.
+"""Audit Command Handler.
 
 Performs static analysis on source files to identify unsupported operations
 and generate coverage reports.
@@ -18,8 +17,7 @@ from ml_switcheroo.frameworks import get_adapter
 
 
 def resolve_roots(framework_keys: List[str]) -> Set[str]:
-  """
-  Expands framework keys (e.g. 'flax_nnx') to python module roots (e.g. 'flax', 'jax').
+  """Expands framework keys (e.g. 'flax_nnx') to python module roots (e.g. 'flax', 'jax').
 
   This ensures that querying for 'flax_nnx' correctly finds 'import flax'.
   It consults the Adapter metadata for import aliases and search modules.
@@ -29,6 +27,7 @@ def resolve_roots(framework_keys: List[str]) -> Set[str]:
 
   Returns:
       A set of root module names (e.g. {'torch', 'jax', 'flax'}).
+
   """
   roots = set(framework_keys)
 
@@ -53,8 +52,7 @@ def resolve_roots(framework_keys: List[str]) -> Set[str]:
 
 
 def handle_audit(path: Path, source_frameworks: List[str], json_mode: bool = False) -> int:
-  """
-  Scans a directory/file to determine coverage against the Knowledge Base.
+  """Scans a directory/file to determine coverage against the Knowledge Base.
 
   Args:
       path: Input source file or directory.
@@ -64,6 +62,7 @@ def handle_audit(path: Path, source_frameworks: List[str], json_mode: bool = Fal
   Returns:
       int: Exit code (0 if audit reveals full coverage, 1 if missing ops).
            Note: In audit mode, missing ops might be considered a 'failure'.
+
   """
   if not path.exists():
     # Errors go to logs (stderr usually) but we want to fail cleanly.

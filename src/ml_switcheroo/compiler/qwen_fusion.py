@@ -1,5 +1,4 @@
-"""
-Graph Optimization Passes for Qwen3 and Qwen3-VL architectures.
+"""Graph Optimization Passes for Qwen3 and Qwen3-VL architectures.
 
 Provides passes to:
 1. Fuse separate gate and up projections into a single SwiGLU operation.
@@ -11,8 +10,7 @@ from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, Pa
 
 
 class SwiGLUFusionPass:
-  """
-  Fuses separate gate_proj and up_proj nodes into a single SwiGLU node.
+  """Fuses separate gate_proj and up_proj nodes into a single SwiGLU node.
   Matches standard JAX/Flax Bonsai idioms.
   """
 
@@ -64,9 +62,7 @@ class SwiGLUFusionPass:
 
 
 class SwiGLUDefusionPass:
-  """
-  Splits a SwiGLU node into separate gate_proj and up_proj nodes.
-  """
+  """Splits a SwiGLU node into separate gate_proj and up_proj nodes."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
     """Mutates graph to de-fuse SwiGLU."""
@@ -100,9 +96,7 @@ class SwiGLUDefusionPass:
 
 
 class VisionPatchEmbeddingFusionPass:
-  """
-  Elevates Conv2d patch layers to native VisionPatchEmbedding multi-modal ops.
-  """
+  """Elevates Conv2d patch layers to native VisionPatchEmbedding multi-modal ops."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
     """Mutates graph to elevate VisionPatchEmbedding."""
@@ -137,9 +131,7 @@ class VisionPatchEmbeddingFusionPass:
 
 
 class VisionPatchEmbeddingDefusionPass:
-  """
-  Lowers VisionPatchEmbedding back to structural Conv2d equivalents.
-  """
+  """Lowers VisionPatchEmbedding back to structural Conv2d equivalents."""
 
   def apply(self, graph: LogicalGraph) -> LogicalGraph:
     """Mutates graph to defuse VisionPatchEmbedding."""

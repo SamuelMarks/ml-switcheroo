@@ -1,5 +1,4 @@
-"""
-Input Value Code Generation.
+"""Input Value Code Generation.
 
 This module handles the logic for generating Python *source code strings* that
 instantiate test data explicitly in the generated verification scripts.
@@ -19,8 +18,7 @@ from typing import Union, Dict, Any
 
 
 def parse_arg_def(arg: Union[str, tuple, dict]) -> Dict[str, Any]:
-  """
-  Normalizes a heterogeneous argument definition into a standard dictionary.
+  """Normalizes a heterogeneous argument definition into a standard dictionary.
 
   Extracts `default`, `min`, `max` to help downstream inference.
   Defaults un-typed arguments to 'Array' to ensure gradient checks in
@@ -32,6 +30,7 @@ def parse_arg_def(arg: Union[str, tuple, dict]) -> Dict[str, Any]:
 
   Returns:
       Normalized dict with keys 'name', 'type', 'default', and constraints.
+
   """
   if isinstance(arg, str):
     # Default string args to Array (Tensor)
@@ -63,14 +62,14 @@ def parse_arg_def(arg: Union[str, tuple, dict]) -> Dict[str, Any]:
 
 
 def _infer_type_from_default(default_val: Any) -> str:
-  """
-  Guesses the ODL type string based on a python default value.
+  """Guesses the ODL type string based on a python default value.
 
   Args:
       default_val: The default value found in the spec.
 
   Returns:
       A type string ("int", "float", "bool", "Array") or "Any".
+
   """
   if isinstance(default_val, bool):
     return "bool"
@@ -87,8 +86,7 @@ def _infer_type_from_default(default_val: Any) -> str:
 
 
 def generate_input_value_code(name: str, arg_def: Union[str, Dict[str, Any]]) -> str:
-  """
-  Generates Python code string to instantiate inputs based on type/constraints.
+  """Generates Python code string to instantiate inputs based on type/constraints.
 
   Prioritizes:
 
@@ -104,6 +102,7 @@ def generate_input_value_code(name: str, arg_def: Union[str, Dict[str, Any]]) ->
 
   Returns:
       Valid Python source code expression (e.g., "random.randint(0, 5)").
+
   """
   # Normalize arg_def if simple string
   if isinstance(arg_def, str):
@@ -180,14 +179,14 @@ def generate_input_value_code(name: str, arg_def: Union[str, Dict[str, Any]]) ->
 
 
 def _generate_dim_heuristic(name: str) -> str:
-  """
-  Helper for dimension argument heuristics strings.
+  """Helper for dimension argument heuristics strings.
 
   Args:
       name: Name of the argument (e.g. 'axis').
 
   Returns:
       Python code string.
+
   """
   if name in ["axis", "dim"]:
     return "1"
@@ -197,14 +196,14 @@ def _generate_dim_heuristic(name: str) -> str:
 
 
 def _generate_array_code(arg_def: Dict[str, Any]) -> str:
-  """
-  Helper for array code generation logic.
+  """Helper for array code generation logic.
 
   Args:
       arg_def: Argument definition dict with constraints.
 
   Returns:
       Python code string for numpy logic.
+
   """
   mn = arg_def.get("min")
   mx = arg_def.get("max")

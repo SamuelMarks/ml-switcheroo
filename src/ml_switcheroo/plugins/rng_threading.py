@@ -1,5 +1,4 @@
-"""
-Plugin for RNG State Threading (The "JAX Pointer" Pattern).
+"""Plugin for RNG State Threading (The "JAX Pointer" Pattern).
 
 PyTorch handles randomness via global state (`torch.manual_seed` and `generator` objects),
 whereas JAX requires explicit passing and splitting of PRNG keys.
@@ -28,8 +27,7 @@ from ml_switcheroo.frameworks.base import get_adapter
 
 
 def _remove_generator_arg(args: List[cst.Arg]) -> List[cst.Arg]:
-  """
-  Filters out the 'generator' keyword argument commonly used in PyTorch.
+  """Filters out the 'generator' keyword argument commonly used in PyTorch.
   JAX uses the 'key' semantics instead.
   """
   clean_args = []
@@ -42,8 +40,7 @@ def _remove_generator_arg(args: List[cst.Arg]) -> List[cst.Arg]:
 
 @register_hook("inject_prng")
 def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
-  """
-  Plugin Hook: Thread PRNG keys for stochastic operations.
+  """Plugin Hook: Thread PRNG keys for stochastic operations.
 
   Triggers:
       Operations marked with `requires_plugin: "inject_prng"` in the Semantic Knowledge Base.
@@ -61,6 +58,7 @@ def inject_prng_threading(node: cst.Call, ctx: HookContext) -> cst.Call:
   Returns:
       The transformed CST Call node with the 'key' keyword argument appended
       and 'generator' arguments removed.
+
   """
   # 0. Capability Check (Decoupled from Framework strings)
   if not ctx.plugin_traits.requires_explicit_rng:

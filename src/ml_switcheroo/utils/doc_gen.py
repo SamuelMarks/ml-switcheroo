@@ -1,5 +1,4 @@
-"""
-Migration Guide Generator.
+"""Migration Guide Generator.
 
 This module provides the logic to generate human-readable Markdown documentation
 comparing two frameworks (Source vs Target). It iterates through the
@@ -14,22 +13,19 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 class MigrationGuideGenerator:
-  """
-  Generates a Markdown Migration Guide by diffing semantic specifications.
-  """
+  """Generates a Markdown Migration Guide by diffing semantic specifications."""
 
   def __init__(self, semantics: SemanticsManager):
-    """
-    Initializes the generator.
+    """Initializes the generator.
 
     Args:
         semantics: The knowledge base manager.
+
     """
     self.semantics = semantics
 
   def generate(self, source_fw: str, target_fw: str) -> str:
-    """
-    Produces the Markdown content for the migration guide.
+    """Produces the Markdown content for the migration guide.
 
     It groups operations by their Semantic Tier (Math, Neural, Extras),
     sorts them alphabetically, and generates a comparison table for each tier.
@@ -40,6 +36,7 @@ class MigrationGuideGenerator:
 
     Returns:
         A string containing the rendered Markdown.
+
     """
     # 1. Group Operations by Tier
     # Structure: {"array": [op_name, ...], "neural": [...]}
@@ -104,8 +101,7 @@ class MigrationGuideGenerator:
     return f"| {s_title} API | {t_title} API | Argument Changes |\n| :--- | :--- | :--- |"
 
   def _generate_op_row(self, op_name: str, source: str, target: str) -> str:
-    """
-    Calculates the diff row for a single operation.
+    """Calculates the diff row for a single operation.
 
     Args:
         op_name: Abstract operation ID.
@@ -114,6 +110,7 @@ class MigrationGuideGenerator:
 
     Returns:
         A Markdown table row string.
+
     """
     details = self.semantics.get_definition_by_id(op_name) or {}
     variants = details.get("variants", {})

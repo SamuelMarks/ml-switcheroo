@@ -1,5 +1,4 @@
-"""
-Discovery & Standards Command Handlers.
+"""Discovery & Standards Command Handlers.
 
 This module implements the logic for populating the Semantic Knowledge Base via
 Automated Discovery and Specification Imports.
@@ -43,8 +42,7 @@ from ml_switcheroo.utils.console import (
 
 
 def handle_scaffold(frameworks: list[str], out_dir: Path) -> int:
-  """
-  Handles the 'scaffold' command.
+  """Handles the 'scaffold' command.
 
   -   Iterates through provided frameworks.
   -   Uses `FrameworkAdapter.discovery_heuristics` regexes to fuzzy match framework
@@ -58,6 +56,7 @@ def handle_scaffold(frameworks: list[str], out_dir: Path) -> int:
 
   Returns:
       int: Exit code.
+
   """
   semantics = SemanticsManager()
   scaffolder = Scaffolder(semantics=semantics)
@@ -66,8 +65,7 @@ def handle_scaffold(frameworks: list[str], out_dir: Path) -> int:
 
 
 def handle_import_spec(target: Path) -> int:
-  """
-  Handles the 'import-spec' command.
+  """Handles the 'import-spec' command.
 
   Parses upstream standards documentation or stubs and merges the definitions
   into the local semantics Hub.
@@ -77,6 +75,7 @@ def handle_import_spec(target: Path) -> int:
 
   Returns:
       int: Exit code.
+
   """
   out_dir = resolve_semantics_dir()
   out_dir.mkdir(parents=True, exist_ok=True)
@@ -130,13 +129,13 @@ def handle_import_spec(target: Path) -> int:
 
 
 def _save_spec(out_dir: Path, filename: str, data: Dict[str, Any]) -> None:
-  """
-  Helper to persist JSON spec data.
+  """Helper to persist JSON spec data.
 
   Args:
       out_dir: Target directory path.
       filename: JSON filename.
       data: Dictionary content to save.
+
   """
   out_p = out_dir / filename
   final_data = data
@@ -160,8 +159,7 @@ def _save_spec(out_dir: Path, filename: str, data: Dict[str, Any]) -> None:
 
 
 def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]], dry_run: bool) -> int:
-  """
-  Handles 'sync-standards' command.
+  """Handles 'sync-standards' command.
 
   Invokes the Consensus Engine to automatically discover new Abstract Operations
   by finding commonalities across multiple framework API surfaces. Writes the
@@ -175,6 +173,7 @@ def handle_sync_standards(categories: List[str], frameworks: Optional[List[str]]
 
   Returns:
       int: Exit code.
+
   """
   console.print("[bold blue]Starting Consensus Engine...[/bold blue]")
 

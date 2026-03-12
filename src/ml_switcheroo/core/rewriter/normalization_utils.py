@@ -1,5 +1,4 @@
-"""
-Normalization Utilities.
+"""Normalization Utilities.
 
 This module provides helper functions for converting between Python runtime values
 and LibCST Abstract Syntax Tree nodes. It supports primitive types (int, float,
@@ -13,8 +12,7 @@ import libcst as cst
 
 
 def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
-  """
-  Extracts a string representation of a primitive AST node for Enum key lookup.
+  """Extracts a string representation of a primitive AST node for Enum key lookup.
 
   Handles simple strings strings, integers, and simple names (identifiers).
 
@@ -24,6 +22,7 @@ def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
   Returns:
       The string value (if literal) or variable name. Returns None
       if the node type is complex or unsupported.
+
   """
   if isinstance(node, cst.SimpleString):
     return node.value.strip("'").strip('"')
@@ -35,8 +34,7 @@ def extract_primitive_key(node: cst.BaseExpression) -> Optional[str]:
 
 
 def convert_value_to_cst(val: Any) -> cst.BaseExpression:
-  """
-  Recursively converts a python value (primitive/container) to a CST literal expression node.
+  """Recursively converts a python value (primitive/container) to a CST literal expression node.
 
   Supported types:
   - Primitives: bool, int, float, str, None
@@ -47,6 +45,7 @@ def convert_value_to_cst(val: Any) -> cst.BaseExpression:
 
   Returns:
       The corresponding LibCST node.
+
   """
   # 1. Container Recursion (List/Tuple)
   if isinstance(val, (list, tuple)):

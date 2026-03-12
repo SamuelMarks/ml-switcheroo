@@ -1,5 +1,4 @@
-"""
-MLIR Token Definitions.
+"""MLIR Token Definitions.
 
 Defines the enumerations for Token Kinds and Symbols used by the Lexer and Parser.
 """

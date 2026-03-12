@@ -1,5 +1,4 @@
-"""
-Plugin Binding Infrastructure.
+"""Plugin Binding Infrastructure.
 
 This module provides the infrastructure for extending ml-switcheroo via plugins.
 It enables developers to intercept and modify the Abstract Syntax Tree (AST)
@@ -35,8 +34,7 @@ PreambleInjectorType = Callable[[str], None]
 
 
 class AutoWireSpec(BaseModel):
-  """
-  Schema for plugin self-registration metadata.
+  """Schema for plugin self-registration metadata.
   Allows a plugin to define the Semantic Operation it satisfies.
   """
 
@@ -50,8 +48,7 @@ class AutoWireSpec(BaseModel):
 
 # Updated Type alias to allow arbitrary CSTNodes (e.g. For, Call)
 class HookContext:
-  """
-  Context object passed to every plugin hook during transcoding.
+  """Context object passed to every plugin hook during transcoding.
 
   Provides read-only access to global state and write access
   to specific injection points (signature args, function body preambles).
@@ -66,8 +63,7 @@ class HookContext:
     preamble_injector: Optional[PreambleInjectorType] = None,
     symbol_table: Optional[SymbolTableType] = None,
   ):
-    """
-    Initializes the hook context.
+    """Initializes the hook context.
 
     Args:
         semantics: Reference to the SemanticsManager.
@@ -75,6 +71,7 @@ class HookContext:
         arg_injector: Callback to inject arguments into function signature.
         preamble_injector: Callback to inject code at top of function.
         symbol_table: Pre-calculated Symbol Table for type resolution.
+
     """
     self.semantics = semantics
     self._runtime_config = config
@@ -90,14 +87,14 @@ class HookContext:
     self.current_op_id: Optional[str] = None
 
   def resolve_type(self, node: Any) -> Optional[str]:
-    """
-    Queries the Symbol Table for the inferred type of a node.
+    """Queries the Symbol Table for the inferred type of a node.
 
     Args:
         node: The LibCST node to inspect.
 
     Returns:
         str: "Tensor" if it's a tensor, "Module" if module, or None.
+
     """
     if not self._symbol_table:
       return None
@@ -115,13 +112,13 @@ class HookContext:
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """
-    Returns the capabilities of the current Target Framework.
+    """Returns the capabilities of the current Target Framework.
     This allows plugins to check functionality (e.g. has_numpy_compatible_arrays)
     rather than checking the framework name string.
 
     Returns:
         PluginTraits: The capability flags for the target framework.
+
     """
     if not self.semantics:
       return PluginTraits()
@@ -144,12 +141,12 @@ class HookContext:
 
   @property
   def current_variant(self) -> Optional[FrameworkVariant]:
-    """
-    Returns the Variant definition for the current operation/target.
+    """Returns the Variant definition for the current operation/target.
     Allows plugins to read extra metadata defined in the JSON (e.g. pack_to_tuple).
 
     Returns:
         Optional[FrameworkVariant]: The variant definition if resolved, else None.
+
     """
     if not self.semantics or not self.current_op_id:
       return None
@@ -163,29 +160,28 @@ class HookContext:
     return FrameworkVariant.model_validate(data)
 
   def inject_signature_arg(self, name: str, annotation: Optional[str] = None) -> None:
-    """
-    Requests injection of argument into the current function signature.
+    """Requests injection of argument into the current function signature.
 
     Args:
         name (str): The name of the argument to inject.
         annotation (Optional[str]): Type hint string for the argument.
+
     """
     if self._arg_injector:
       self._arg_injector(name, annotation)
 
   def inject_preamble(self, code_str: str) -> None:
-    """
-    Requests injection of a statement at the beginning of the function body.
+    """Requests injection of a statement at the beginning of the function body.
 
     Args:
         code_str (str): Python source code string to inject.
+
     """
     if self._preamble_injector:
       self._preamble_injector(code_str)
 
   def raw_config(self, key: str, default: Any = None) -> Any:
-    """
-    Retrieve a raw value from the unstructured plugin settings dict.
+    """Retrieve a raw value from the unstructured plugin settings dict.
 
     Args:
         key (str): Configuration key.
@@ -193,32 +189,33 @@ class HookContext:
 
     Returns:
         Any: The configuration value.
+
     """
     return self._runtime_config.plugin_settings.get(key, default)
 
   def validate_settings(self, model: Type[T]) -> T:
-    """
-    Validates global config against a Plugin-specific Pydantic schema.
+    """Validates global config against a Plugin-specific Pydantic schema.
 
     Args:
         model (Type[T]): Pydantic model definition.
 
     Returns:
         T: Validated configuration object.
+
     """
     relevant = model.model_fields.keys()
     subset = {k: v for k, v in self._runtime_config.plugin_settings.items() if k in relevant}
     return model.model_validate(subset)
 
   def lookup_api(self, op_name: str) -> Optional[str]:
-    """
-    Resolves target framework's API string for a given standard operation.
+    """Resolves target framework's API string for a given standard operation.
 
     Args:
         op_name (str): Standard operation ID.
 
     Returns:
         Optional[str]: The target API string, or None if not found.
+
     """
     if not self.semantics:
       return None
@@ -233,14 +230,14 @@ class HookContext:
     return target_variant.get("api")
 
   def lookup_signature(self, op_name: str) -> List[str]:
-    """
-    Retrieves standard argument list for a given operation.
+    """Retrieves standard argument list for a given operation.
 
     Args:
         op_name (str): Standard operation ID.
 
     Returns:
         List[str]: List of argument names.
+
     """
     if not self.semantics:
       return []
@@ -272,8 +269,7 @@ _PLUGINS_LOADED = False
 
 
 def register_hook(trigger: str, auto_wire: Optional[Dict[str, Any]] = None) -> Callable[[HookFunction], HookFunction]:
-  """
-  Decorator to register a function as a plugin hook.
+  """Decorator to register a function as a plugin hook.
 
   Args:
       trigger: The unique identifier. Can be an operation ID or a
@@ -285,10 +281,11 @@ def register_hook(trigger: str, auto_wire: Optional[Dict[str, Any]] = None) -> C
 
   Returns:
       Callable: The decorator wrapper.
+
   """
 
   def decorator(func: HookFunction) -> HookFunction:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     _HOOKS[trigger] = func
     if auto_wire:
       try:
@@ -302,8 +299,7 @@ def register_hook(trigger: str, auto_wire: Optional[Dict[str, Any]] = None) -> C
 
 
 def get_hook(trigger: str) -> Optional[HookFunction]:
-  """
-  Retrieves a registered hook function by its trigger name.
+  """Retrieves a registered hook function by its trigger name.
   Lazily loads plugins from the default directory if registry is empty.
 
   Args:
@@ -311,6 +307,7 @@ def get_hook(trigger: str) -> Optional[HookFunction]:
 
   Returns:
       Optional[HookFunction]: The registered function or None.
+
   """
   if not _PLUGINS_LOADED:
     load_plugins()
@@ -318,12 +315,12 @@ def get_hook(trigger: str) -> Optional[HookFunction]:
 
 
 def get_all_hook_metadata() -> Dict[str, AutoWireSpec]:
-  """
-  Returns the metadata for all registered hooks.
+  """Returns the metadata for all registered hooks.
   Used by SemanticsManager to hydrate the Knowledge Base.
 
   Returns:
       Dict[str, AutoWireSpec]: Metadata for autowired plugins.
+
   """
   if not _PLUGINS_LOADED:
     load_plugins()
@@ -339,8 +336,7 @@ def clear_hooks() -> None:
 
 
 def load_plugins(plugins_dir: Optional[Path] = None, extra_dirs: Optional[List[Path]] = None) -> int:
-  """
-  Dynamically imports plugins.
+  """Dynamically imports plugins.
 
   Args:
       plugins_dir: Overrides default package directory.
@@ -350,6 +346,7 @@ def load_plugins(plugins_dir: Optional[Path] = None, extra_dirs: Optional[List[P
 
   Returns:
       int: Number of modules loaded.
+
   """
   global _PLUGINS_LOADED
   total_loaded = 0
@@ -380,8 +377,7 @@ def load_plugins(plugins_dir: Optional[Path] = None, extra_dirs: Optional[List[P
 
 
 def _import_from_dir(directory: Path, base_package: Optional[str] = None) -> int:
-  """
-  Helper to iterate and import python files from a directory.
+  """Helper to iterate and import python files from a directory.
 
   Args:
       directory (Path): The directory to scan.
@@ -389,6 +385,7 @@ def _import_from_dir(directory: Path, base_package: Optional[str] = None) -> int
 
   Returns:
       int: Count of successfully imported modules.
+
   """
   count = 0
   for item in directory.glob("*.py"):

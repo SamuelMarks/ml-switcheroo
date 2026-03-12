@@ -1,5 +1,4 @@
-"""
-SASS Tokenizer Definition.
+"""SASS Tokenizer Definition.
 
 Provides a Regex-based Lexer (`SassLexer`) that decomposes raw NVIDIA SASS assembly
 strings into a stream of typed `Token` objects.
@@ -33,14 +32,14 @@ class TokenType(Enum):
 
 @dataclass
 class Token:
-  """
-  Represents a lexical unit.
+  """Represents a lexical unit.
 
   Attributes:
       kind (TokenType): The type of token.
       value (str): The raw string content.
       line (int): Line number in source (1-based).
       column (int): Column number in source (1-based).
+
   """
 
   kind: TokenType
@@ -50,9 +49,7 @@ class Token:
 
 
 class SassLexer:
-  """
-  Regex-based Lexer for NVIDIA SASS assembly.
-  """
+  """Regex-based Lexer for NVIDIA SASS assembly."""
 
   # Compiled Regex Patterns (Order matters for priority)
   PATTERNS: List[Tuple[TokenType, str]] = [
@@ -79,8 +76,7 @@ class SassLexer:
     self.regex_pairs = [(kind, re.compile(pattern)) for kind, pattern in self.PATTERNS]
 
   def tokenize(self, text: str) -> Generator[Token, None, None]:
-    """
-    Tokenizes the input string.
+    """Tokenizes the input string.
 
     Args:
         text (str): Raw SASS source code.
@@ -90,6 +86,7 @@ class SassLexer:
 
     Raises:
         ValueError: If an unrecognized character sequence is encountered.
+
     """
     pos = 0
     line_num = 1

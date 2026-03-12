@@ -1,5 +1,4 @@
-"""
-Numpy Framework Adapter.
+"""Numpy Framework Adapter.
 
 This module provides the implementation definitions for the NumPy API.
 It maps abstract operations for Math and Extras to ``numpy.*`` functions
@@ -29,8 +28,7 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 @register_framework("numpy")
 class NumpyAdapter:
-  """
-  Adapter for generic NumPy.
+  """Adapter for generic NumPy.
 
   Provides support for:
   1.  **Math Tiers**: Basic array operations (abs, mean, sum).
@@ -44,61 +42,61 @@ class NumpyAdapter:
 
   @property
   def search_modules(self) -> List[str]:
-    """
-    Returns list of numpy submodules to scan.
+    """Returns list of numpy submodules to scan.
 
     Returns:
         List[str]: Modules.
+
     """
     return ["numpy", "numpy.linalg", "numpy.fft"]
 
   @property
   def unsafe_submodules(self) -> Set[str]:
-    """
-    Returns unsafe modules.
+    """Returns unsafe modules.
 
     Returns:
         Set[str]: Empty.
+
     """
     return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
-    """
-    Returns import tuple.
+    """Returns import tuple.
 
     Returns:
         Tuple[str, str]: ("numpy", "np").
+
     """
     return ("numpy", "np")
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """
-    Remaps imports to 'np' alias.
+    """Remaps imports to 'np' alias.
 
     Returns:
         Dict[str, ImportConfig]: Mappings.
+
     """
     return {"numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="np")}
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """
-    Regex patterns for IO and Randomness.
+    """Regex patterns for IO and Randomness.
 
     Returns:
         Dict[str, List[str]]: Patterns.
+
     """
     return {"extras": [r"\\.random\\\\.", r"save", r"load"]}
 
   @property
   def test_config(self) -> Dict[str, str]:
-    """
-    Test templates for NumPy.
+    """Test templates for NumPy.
 
     Returns:
         Dict[str, str]: Templates.
+
     """
     return {
       "import": "import numpy as np",
@@ -110,60 +108,60 @@ class NumpyAdapter:
 
   @property
   def harness_imports(self) -> List[str]:
-    """
-    Imports for harness.
+    """Imports for harness.
 
     Returns:
         List[str]: Empty.
+
     """
     return []
 
   def get_harness_init_code(self) -> str:
-    """
-    Init code.
+    """Init code.
 
     Returns:
         str: Empty.
+
     """
     return ""
 
   def get_to_numpy_code(self) -> str:
-    """
-    Returns identity code for NumPy arrays.
+    """Returns identity code for NumPy arrays.
 
     Returns:
         str: Code string.
+
     """
     return "if isinstance(obj, np.ndarray): return obj"
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
-    """
-    NumPy supports Arrays (Math) and Extras (IO).
+    """NumPy supports Arrays (Math) and Extras (IO).
     It does NOT support Neural layers structurally.
 
     Returns:
         List[SemanticTier]: Supported tiers.
+
     """
     return [SemanticTier.ARRAY_API, SemanticTier.EXTRAS, SemanticTier.NEURAL]
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """
-    Returns list of magic args.
+    """Returns list of magic args.
 
     Returns:
         List[str]: Empty.
+
     """
     return []
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """
-    Returns default structural traits (no class rewriting).
+    """Returns default structural traits (no class rewriting).
 
     Returns:
         StructuralTraits: Traits.
+
     """
     return StructuralTraits(
       auto_strip_magic_args=True  # NumPy doesn't support random keys or context args
@@ -171,11 +169,11 @@ class NumpyAdapter:
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """
-    Plugin capabilities.
+    """Plugin capabilities.
 
     Returns:
         PluginTraits: Capabilities.
+
     """
     return PluginTraits(
       has_numpy_compatible_arrays=True,
@@ -186,42 +184,41 @@ class NumpyAdapter:
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """
-    Static definitions for NumPy mappings.
+    """Static definitions for NumPy mappings.
     Loaded dynamically from `frameworks/definitions/numpy.json`.
 
     Returns:
         Dict[str, StandardMap]: Definitions.
+
     """
     return load_definitions("numpy")
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """
-    Returns seed methods.
+    """Returns seed methods.
 
     Returns:
         List[str]: Methods list.
+
     """
     return ["seed"]
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    NumPy doesn't implement Layers/Losses structurally.
+    """NumPy doesn't implement Layers/Losses structurally.
 
     Args:
         category: Category.
 
     Returns:
         List[GhostRef]: Empty list.
+
     """
     return []
 
   # --- Syntax Generation ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """
-    Returns CPU syntax ignoring device requests (NumPy is CPU-only).
+    """Returns CPU syntax ignoring device requests (NumPy is CPU-only).
 
     Args:
         device_type: Device.
@@ -229,21 +226,21 @@ class NumpyAdapter:
 
     Returns:
         str: "'cpu'".
+
     """
     return "'cpu'"
 
   def get_device_check_syntax(self) -> str:
-    """
-    NumPy does not support GPUs.
+    """NumPy does not support GPUs.
 
     Returns:
         str: "False".
+
     """
     return "False"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
-    """
-    No-op for NumPy.
+    """No-op for NumPy.
 
     Args:
         rng_var: RNG variable.
@@ -251,21 +248,21 @@ class NumpyAdapter:
 
     Returns:
         str: "pass".
+
     """
     return "pass"
 
   def get_serialization_imports(self) -> List[str]:
-    """
-    Returns imports for IO.
+    """Returns imports for IO.
 
     Returns:
         List[str]: Imports.
+
     """
     return ["import numpy as np"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """
-    Returns np.save/load syntax.
+    """Returns np.save/load syntax.
 
     Args:
         op: 'save' or 'load'.
@@ -274,6 +271,7 @@ class NumpyAdapter:
 
     Returns:
         str: Code.
+
     """
     if op == "save" and object_arg:
       return f"np.save(file={file_arg}, arr={object_arg})"
@@ -284,7 +282,7 @@ class NumpyAdapter:
   # --- Weight Handling ---
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return ["import numpy as np"]
 
   def get_weight_load_code(self, path_var: str) -> str:
@@ -304,7 +302,7 @@ class NumpyAdapter:
     )
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
-    """TODO: Add docstring."""
+    """Execute implementation detail."""
     return f"{tensor_var}"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
@@ -316,28 +314,28 @@ class NumpyAdapter:
     pass
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """
-    Generates NumPy documentation URL.
+    """Generates NumPy documentation URL.
 
     Args:
         api_name: API Path.
 
     Returns:
         Optional[str]: URL.
+
     """
     return f"https://numpy.org/doc/stable/reference/generated/{api_name}.html"
 
   # --- Verification ---
 
   def convert(self, data: Any) -> Any:
-    """
-    Attempts to convert input data to a NumPy array.
+    """Attempts to convert input data to a NumPy array.
 
     Args:
         data (Any): Input.
 
     Returns:
         Any: Numpy array or original.
+
     """
     if isinstance(data, (list, tuple)):
       return type(data)(self.convert(x) for x in data)
@@ -362,11 +360,11 @@ class NumpyAdapter:
     return data
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Returns NumPy idiomatic examples.
+    """Returns NumPy idiomatic examples.
 
     Returns:
         Dict[str, str]: Examples.
+
     """
     return {
       "tier1_math": """import numpy as np

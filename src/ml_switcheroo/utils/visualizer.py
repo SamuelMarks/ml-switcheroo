@@ -1,5 +1,4 @@
-"""
-AST Visualization Utility.
+"""AST Visualization Utility.
 
 This module provides the `MermaidGenerator`, a LibCST visitor that traverses
 an Abstract Syntax Tree and converts it into a Mermaid.js Graph diagram.
@@ -17,8 +16,7 @@ import libcst as cst
 
 
 class MermaidGenerator(cst.CSTVisitor):
-  """
-  Generates a Mermaid Graph TD string from a CST Node tree.
+  """Generates a Mermaid Graph TD string from a CST Node tree.
 
   It traverses the tree and emits nodes and edges formatted with specific
   branding colors.
@@ -61,14 +59,14 @@ class MermaidGenerator(cst.CSTVisitor):
     self._renderer = cst.Module([])
 
   def generate(self, tree: cst.CSTNode) -> str:
-    """
-    Converts a CST Node into a Mermaid graph definition string.
+    """Converts a CST Node into a Mermaid graph definition string.
 
     Args:
         tree (cst.CSTNode): The root node of the tree to visualize.
 
     Returns:
         str: A complete Mermaid.js graph definition including styles.
+
     """
     self.nodes = []
     self.edges = []
@@ -80,8 +78,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return f"graph TD\n{self.STYLES}\n" + "\n".join(self.nodes + self.edges)
 
   def _add_node(self, label: str, style_class: str = "default") -> str:
-    """
-    Helper to register a node in the graph and link it to its parent.
+    """Helper to register a node in the graph and link it to its parent.
 
     Args:
         label (str): Text display for the node.
@@ -89,6 +86,7 @@ class MermaidGenerator(cst.CSTVisitor):
 
     Returns:
         str: The unique ID generated for this node.
+
     """
     node_id = f"n{uuid.uuid4().hex[:8]}"
     # Clean label for mermaid compliance (escape quotes)
@@ -108,8 +106,7 @@ class MermaidGenerator(cst.CSTVisitor):
     return node_id
 
   def _node_to_str(self, node: cst.CSTNode) -> str:
-    """
-    Robustly extracts a string representation of a Name, Attribute, or complex expression.
+    """Robustly extracts a string representation of a Name, Attribute, or complex expression.
     Avoids LibCST code generation for simple cases to prevent crashes on detached nodes.
 
     Args:
@@ -117,6 +114,7 @@ class MermaidGenerator(cst.CSTVisitor):
 
     Returns:
         str: The code string.
+
     """
     if isinstance(node, cst.Name):
       return node.value

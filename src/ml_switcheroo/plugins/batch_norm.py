@@ -1,5 +1,4 @@
-"""
-Plugin for Functionalizing Batch Normalization (State Unwrapping).
+"""Plugin for Functionalizing Batch Normalization (State Unwrapping).
 
 Addresses the semantic mismatch between:
 1.  **PyTorch (In-Place)**: `y = bn(x)`. Updates `running_mean`/`var` attributes on `bn` silently.
@@ -19,8 +18,7 @@ from ml_switcheroo.core.hooks import register_hook, HookContext
 
 @register_hook("batch_norm_unwrap")
 def transform_batch_norm(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
-  """
-  Hook: Wraps BatchNorm calls to handle functional state returns.
+  """Hook: Wraps BatchNorm calls to handle functional state returns.
 
   Transformation:
       Input:  `self.bn1(x)`
@@ -39,6 +37,7 @@ def transform_batch_norm(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   Returns:
       A CST Subscript node representing the tensor output of the BN call.
+
   """
   # 0. Capability Check
   if not ctx.plugin_traits.requires_functional_state:

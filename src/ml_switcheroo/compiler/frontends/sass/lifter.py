@@ -1,5 +1,4 @@
-"""
-SASS Lifter (Frontend).
+"""SASS Lifter (Frontend).
 
 This module provides the logic to "lift" low-level SASS AST nodes back into a
 high-level `LogicalGraph`. It relies on semantic comment markers (e.g. `; BEGIN`)
@@ -26,9 +25,7 @@ from ml_switcheroo.compiler.frontends.sass.analysis import SassAnalyzer
 
 
 class SassLifter:
-  """
-  Reconstructs a LogicalGraph from a sequence of SASS AST nodes.
-  """
+  """Reconstructs a LogicalGraph from a sequence of SASS AST nodes."""
 
   _RE_INPUT: Pattern = re.compile(r"Input\s+(\w+)\s+->")
   _RE_BEGIN: Pattern = re.compile(r"BEGIN\s+(\w+)\s+\((\w+)\)")
@@ -37,8 +34,7 @@ class SassLifter:
   _RE_RETURN: Pattern = re.compile(r"Return:")
 
   def lift(self, nodes: List[SassNode]) -> LogicalGraph:
-    """
-    Parses a list of SASS nodes to build a LogicalGraph.
+    """Parses a list of SASS nodes to build a LogicalGraph.
 
     Captures instructions within BEGIN/END blocks to feed into the Analyzer.
     Captures orphan instructions into individual functional nodes (1:1 mapping).
@@ -54,7 +50,7 @@ class SassLifter:
     current_instructions: List[Instruction] = []
 
     def commit_node(node_id: str, kind: str, meta=None) -> None:
-      """TODO: Add docstring."""
+      """Execute implementation detail."""
       nonlocal previous_node_id
       if node_id in seen_ids:
         return

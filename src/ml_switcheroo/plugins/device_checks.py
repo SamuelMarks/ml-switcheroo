@@ -1,5 +1,4 @@
-"""
-Plugin for translating Device Availability Checks.
+"""Plugin for translating Device Availability Checks.
 
 This module maps framework-specific availability checks (e.g., ``torch.cuda.is_available()``)
 to the target framework's equivalent by querying the active ``FrameworkAdapter``.
@@ -19,8 +18,7 @@ from ml_switcheroo.frameworks.base import get_adapter
 
 @register_hook("cuda_is_available")
 def transform_cuda_check(node: cst.Call, ctx: HookContext) -> cst.BaseExpression:
-  """
-  Plugin Hook: Transforms CUDA availability check.
+  """Plugin Hook: Transforms CUDA availability check.
 
   Triggers:
       ``torch.cuda.is_available()`` via 'cuda_is_available' plugin key.
@@ -37,6 +35,7 @@ def transform_cuda_check(node: cst.Call, ctx: HookContext) -> cst.BaseExpression
 
   Returns:
       A CST Expression representing the boolean check.
+
   """
   # 1. Retrieve Target Adapter
   target_fw = ctx.target_fw

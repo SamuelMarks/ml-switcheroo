@@ -1,5 +1,4 @@
-"""
-Generator backend for creating physical Python test files.
+"""Generator backend for creating physical Python test files.
 
 It orchestrates the generation of PyTest-compatible files that verify
 operations across multiple frameworks by using the semantic definitions.
@@ -15,8 +14,7 @@ from ml_switcheroo.generated_tests.runtime_builder import ensure_runtime_module
 
 
 class TestCaseGenerator:
-  """
-  Generates PyTest files for ML operators across frameworks (Torch, JAX, etc.).
+  """Generates PyTest files for ML operators across frameworks (Torch, JAX, etc.).
 
   Handles argument constraints, type checking, gradient verification, and
   runtime environment setup via helper modules.
@@ -26,11 +24,11 @@ class TestCaseGenerator:
   __test__ = False
 
   def __init__(self, semantics_mgr: Any = None) -> None:
-    """
-    Initialize the TestCaseGenerator.
+    """Initialize the TestCaseGenerator.
 
     Args:
         semantics_mgr: Manager for semantics and templates.
+
     """
     self.semantics_mgr = semantics_mgr
 
@@ -39,12 +37,12 @@ class TestCaseGenerator:
     ensure_runtime_module(out_dir, frameworks, self.semantics_mgr)
 
   def generate(self, semantics: Dict[str, Any], out_file: pathlib.Path) -> None:
-    """
-    Generate a test file based on the provided semantics.
+    """Generate a test file based on the provided semantics.
 
     Args:
         semantics: Dictionary mapping operator names to their definitions.
         out_file: Path to write the generated Python file.
+
     """
     if not semantics:
       return

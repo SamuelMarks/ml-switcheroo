@@ -1,5 +1,4 @@
-"""
-JSON Injector for Semantic Specifications.
+"""JSON Injector for Semantic Specifications.
 
 This module provides the `StandardsInjector`, a utility to update the Semantic
 Knowledge Base JSON files (The Hub) with new operation definitions.
@@ -19,36 +18,35 @@ from ml_switcheroo.utils.console import log_info, log_success, log_warning
 
 
 class StandardsInjector:
-  """
-  Injects a new operation definition into the Semantic Knowledge Base (JSON).
+  """Injects a new operation definition into the Semantic Knowledge Base (JSON).
 
   It determines the correct JSON file based on naming heuristics or provided tier,
   serializes the `OperationDef` to JSON-compatible dict, and updates the file.
   """
 
   def __init__(self, op_def: OperationDef, tier: SemanticTier = SemanticTier.EXTRAS):
-    """
-    Initializes the injector.
+    """Initializes the injector.
 
     Args:
         op_def: The definition model containing metadata and signatures.
         tier: The target semantic tier (default: EXTRAS).
               Heuristics in `inject()` may override this if the name suggests
               a Neural operation.
+
     """
     self.op_def = op_def
     self.tier = tier
     self.found = False
 
   def inject(self, dry_run: bool = False) -> bool:
-    """
-    Executes the injection.
+    """Executes the injection.
 
     Args:
         dry_run: If True, prints intended changes without writing to disk.
 
     Returns:
         bool: True on success.
+
     """
     # 1. Determine Tier / Filename
     # Heuristic: Start with uppercase (PascalCase) usually implies Neural/Class
@@ -106,9 +104,7 @@ class StandardsInjector:
     return True
 
   def _serialize_op(self, op: OperationDef) -> Dict[str, Any]:
-    """
-    Converts the OperationDef to a JSON-dict optimized for storage.
-    """
+    """Converts the OperationDef to a JSON-dict optimized for storage."""
     # Basic fields
     out = {
       "description": op.description,
@@ -129,9 +125,7 @@ class StandardsInjector:
     return out
 
   def _serialize_args(self, args: List[Union[str, Tuple, Dict, Any]]) -> List[Any]:
-    """
-    Normalizes argument list to clean dictionaries or strings.
-    """
+    """Normalizes argument list to clean dictionaries or strings."""
     result = []
     for arg in args:
       if isinstance(arg, (ParameterDef, dict)):

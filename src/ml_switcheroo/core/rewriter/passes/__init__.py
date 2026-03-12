@@ -1,6 +1,4 @@
-"""
-Transformation Passes Package.
-"""
+"""Transformation Passes Package."""
 
 from ml_switcheroo.core.rewriter.passes.structure import StructuralPass, StructuralTransformer
 from ml_switcheroo.core.rewriter.passes.api import ApiPass, ApiTransformer

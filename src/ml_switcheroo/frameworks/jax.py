@@ -1,5 +1,4 @@
-"""
-JAX Core Framework Adapter (Level 0 & Level 1).
+"""JAX Core Framework Adapter (Level 0 & Level 1).
 
 This adapter provides support for the functional JAX ecosystem *without* binding
 to a high-level neural network library like Flax or Haiku. It maps:
@@ -41,8 +40,7 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 @register_framework("jax")
 class JaxCoreAdapter(JAXStackMixin):
-  """
-  Adapter for Core JAX (jax + optax + orbax) without a Neural Framework.
+  """Adapter for Core JAX (jax + optax + orbax) without a Neural Framework.
 
   Handles translations for:
   -   **Math**: `jnp.abs`, `jnp.sum`, etc.
@@ -57,8 +55,7 @@ class JaxCoreAdapter(JAXStackMixin):
   ui_priority: int = 10
 
   def __init__(self) -> None:
-    """
-    Initializes the JAX adapter.
+    """Initializes the JAX adapter.
     Detects installation status to toggle between LIVE and GHOST modes.
     """
     self._mode = InitMode.LIVE
@@ -74,11 +71,11 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def search_modules(self) -> List[str]:
-    """
-    Scans only core math and optimization libraries (no neural layers).
+    """Scans only core math and optimization libraries (no neural layers).
 
     Returns:
         List[str]: List of module names.
+
     """
     if self._mode == InitMode.GHOST:
       return []
@@ -86,11 +83,11 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def unsafe_submodules(self) -> Set[str]:
-    """
-    Returns a set of submodule names to exclude from recursive introspection.
+    """Returns a set of submodule names to exclude from recursive introspection.
 
     Returns:
         Set[str]: Explicitly empty set (safe to scan default paths).
+
     """
     return set()
 
@@ -101,11 +98,11 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """
-    Self-declared namespace roles.
+    """Self-declared namespace roles.
 
     Returns:
         Dict[str, ImportConfig]: Map of paths to configuration.
+
     """
     return {
       # "jax": ImportConfig(tier=SemanticTier.EXTRAS, recommended_alias="jax"),
@@ -117,11 +114,11 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """
-    Regex patterns for identifying API categories.
+    """Regex patterns for identifying API categories.
 
     Returns:
         Dict[str, List[str]]: Tier to regex patterns mapping.
+
     """
     return {
       "array": [r"jax\\.numpy\\.", r"jnp\\."],
@@ -141,9 +138,7 @@ class JaxCoreAdapter(JAXStackMixin):
     return ["import jax", "import jax.random"]
 
   def get_harness_init_code(self) -> str:
-    """
-    Returns logic to create JAX PRNG Keys.
-    """
+    """Returns logic to create JAX PRNG Keys."""
     return textwrap.dedent(""" 
             def _make_jax_key(seed): 
                 "Attempts to create a JAX PRNGKey." 
@@ -160,12 +155,12 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def structural_traits(self) -> StructuralTraits:
-    """
-    Defines JAX structural behavior (Transformation rules).
+    """Defines JAX structural behavior (Transformation rules).
     Specifies JIT static arguments for compilation safety.
 
     Returns:
         StructuralTraits: Configuration object.
+
     """
     return StructuralTraits(
       module_base=None,
@@ -189,14 +184,14 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def plugin_traits(self) -> PluginTraits:
-    """
-    Defines logic capabilities for plugins.
+    """Defines logic capabilities for plugins.
     Enables NumPy compatibility and explicit RNG threading.
 
     IMPORTANT: Enforces Purity Analysis to catch side-effects unsafe for functional trace.
 
     Returns:
         PluginTraits: Configuration flags.
+
     """
     return PluginTraits(
       has_numpy_compatible_arrays=True,
@@ -215,20 +210,19 @@ class JaxCoreAdapter(JAXStackMixin):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """
-    Static Definitions for JAX Core, Optax, Orbax, and Types.
+    """Static Definitions for JAX Core, Optax, Orbax, and Types.
     Loaded dynamically from `frameworks/definitions/jax.json`.
 
     Returns:
         Dict[str, StandardMap]: Mapping of definitions.
+
     """
     return load_definitions("jax")
 
   # --- Discovery ---
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """
-    Collects API signatures for discovering new Standards.
+    """Collects API signatures for discovering new Standards.
     Supports both Live introspection and Ghost Mode snapshots.
 
     Args:
@@ -236,6 +230,7 @@ class JaxCoreAdapter(JAXStackMixin):
 
     Returns:
         List[GhostRef]: Found API references.
+
     """
     if self._mode == InitMode.GHOST:
       return self._collect_ghost(category)
@@ -265,11 +260,11 @@ class JaxCoreAdapter(JAXStackMixin):
     return results
 
   def _scan_jax_activations(self) -> List[GhostRef]:
-    """
-    Dynamically scans jax.nn for activation-like functions.
+    """Dynamically scans jax.nn for activation-like functions.
 
     Returns:
         List[GhostRef]: Found activation functions.
+
     """
     if jax is None:
       return []
@@ -295,14 +290,14 @@ class JaxCoreAdapter(JAXStackMixin):
   # --- Verification ---
 
   def convert(self, data: Any) -> Any:
-    """
-    Converts input data to a JAX array for verification.
+    """Converts input data to a JAX array for verification.
 
     Args:
         data (Any): Input data.
 
     Returns:
         Any: JAX Array.
+
     """
     try:
       import jax.numpy as jnp
@@ -314,23 +309,23 @@ class JaxCoreAdapter(JAXStackMixin):
     return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
-    """
-    Applies Level 0/1 Stack wiring.
+    """Applies Level 0/1 Stack wiring.
     Populates the JSON snapshot with manually wired logic.
 
     Args:
         snapshot (Dict[str, Any]): The snapshot to modify.
+
     """
     self._apply_stack_wiring(snapshot)
 
   # --- Examples ---
 
   def get_tiered_examples(self) -> Dict[str, str]:
-    """
-    Provides default tiered examples for the base adapter.
+    """Provides default tiered examples for the base adapter.
 
     Returns:
         Dict[str, str]: Mapping of tier name to source code.
+
     """
     return {
       "tier1_math": """import jax.numpy as jnp\nfrom jax import grad, jit\n\ndef predict(params, x):\n  return jnp.dot(x, params['w']) + params['b']""",
@@ -358,13 +353,13 @@ class VisionFrontEnd:
     }
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
-    """
-    Generates JAX core documentation URL.
+    """Generates JAX core documentation URL.
 
     Args:
         api_name (str): API path.
 
     Returns:
         Optional[str]: URL string.
+
     """
     return super().get_doc_url(api_name)

@@ -1,5 +1,4 @@
-"""
-Hypothesis Strategies for ODL Types.
+"""Hypothesis Strategies for ODL Types.
 
 This module maps Operation Definition Language (ODL) type strings (e.g., ``Array['N']``,
 ``List[int]``) into executable Hypothesis search strategies. It handles:
@@ -19,8 +18,7 @@ from typing import Any, Dict, Optional
 
 
 def _get_dtype_strategy(dtype_str: Optional[str]) -> Any:
-  """
-  Resolves a string dtype representation to a Numpy dtype or type class.
+  """Resolves a string dtype representation to a Numpy dtype or type class.
 
   Args:
       dtype_str: The type string (e.g. 'float32', 'int').
@@ -28,6 +26,7 @@ def _get_dtype_strategy(dtype_str: Optional[str]) -> Any:
   Returns:
       The corresponding numpy dtype object or type class.
       Defaults to ``np.float32`` if unknown or None.
+
   """
   if not dtype_str:
     return np.float32
@@ -53,8 +52,7 @@ def strategies_from_spec(
   constraints: Dict[str, Any],
   shared_dims: Optional[Dict[str, Any]] = None,
 ) -> st.SearchStrategy:
-  """
-  Constructs a Hypothesis strategy from a type string and constraints.
+  """Constructs a Hypothesis strategy from a type string and constraints.
 
   Recursively parses complex types (e.g., ``List[int]``) and delegates
   array creation to `_array_strategy`.
@@ -66,6 +64,7 @@ def strategies_from_spec(
 
   Returns:
       A valid Hypothesis SearchStrategy.
+
   """
   constraints = constraints or {}
 
@@ -184,8 +183,7 @@ def strategies_from_spec(
 
 
 def _array_strategy(type_str: str, constraints: Dict, shared_dims: Optional[Dict]) -> st.SearchStrategy:
-  """
-  Constructs a numpy array strategy based on rank, symbolic shape, and element constraints.
+  """Constructs a numpy array strategy based on rank, symbolic shape, and element constraints.
 
   Args:
       type_str: Type string (e.g. "Array['N']").
@@ -194,6 +192,7 @@ def _array_strategy(type_str: str, constraints: Dict, shared_dims: Optional[Dict
 
   Returns:
       A strategy generating np.ndarray.
+
   """
   dtype = _get_dtype_strategy(constraints.get("dtype"))
 
