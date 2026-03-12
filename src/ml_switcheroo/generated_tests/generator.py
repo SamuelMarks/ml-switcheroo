@@ -47,7 +47,7 @@ class TestCaseGenerator:
         out_file: Path to write the generated Python file.
     """
     if not semantics:
-      return  # pragma: no cover
+      return
 
     # 1. Provide Determinism / Runtime
     all_variants = set()

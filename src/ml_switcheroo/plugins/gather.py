@@ -41,7 +41,7 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
   target_api = ctx.lookup_api("Gather")
   if not target_api:
     # Fail safe if target framework has no mapping for 'Gather'
-    return node  # pragma: no cover
+    return node
 
   # 1. Identify Input Wrapper
   # If called as method `x.gather(...)`, input is implicit `x` (Attributes).
@@ -75,11 +75,11 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
   # Search for keywords first
   for arg in args:
     if arg.keyword:
-      kw = arg.keyword.value  # pragma: no cover
-      if kw == "dim":  # pragma: no cover
-        dim_arg = arg  # pragma: no cover
-      elif kw == "index":  # pragma: no cover
-        index_arg = arg  # pragma: no cover
+      kw = arg.keyword.value
+      if kw == "dim":
+        dim_arg = arg
+      elif kw == "index":
+        index_arg = arg
 
   # Fill gaps with remaining positionals
   remaining_pos = [a for a in args[current_idx:] if not a.keyword]
@@ -94,7 +94,7 @@ def transform_gather(node: cst.Call, ctx: HookContext) -> cst.Call:
   # 3. Construct New Argument List for take_along_axis(arr, indices, axis)
   if not input_arg or not index_arg:
     # Cannot safely transform without critical args, fail-open (return original)
-    return node  # pragma: no cover
+    return node
 
   new_args = []
 

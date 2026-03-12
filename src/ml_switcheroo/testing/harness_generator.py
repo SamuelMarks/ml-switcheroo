@@ -112,8 +112,8 @@ class HarnessGenerator:
         if func.__module__ == module.__name__:
           try:
             source = inspect.getsource(func)
-            deps.append(textwrap.dedent(source))  # pragma: no cover
-          except OSError:  # pragma: no cover
+            deps.append(textwrap.dedent(source))
+          except OSError:
             pass
 
     # Order matters slightly for resolution order of helpers
@@ -129,9 +129,9 @@ class HarnessGenerator:
 
   def _build_dynamic_init(self, target_fw: str) -> tuple[str, str, str]:
     """TODO: Add docstring."""
-    adapter = get_adapter(target_fw)  # pragma: no cover
+    adapter = get_adapter(target_fw)
     if not adapter:
-      return "", "", "pass"  # pragma: no cover
+      return "", "", "pass"
 
     imports = getattr(adapter, "harness_imports", [])
     imports_str = "\n".join(imports)
@@ -168,8 +168,8 @@ class HarnessGenerator:
     for fw in unique_fws:
       adapter = get_adapter(fw)
       code = None
-      if adapter and hasattr(adapter, "get_to_numpy_code"):  # pragma: no cover
-        try:  # pragma: no cover
+      if adapter and hasattr(adapter, "get_to_numpy_code"):
+        try:
           code = adapter.get_to_numpy_code()
         except Exception:
           pass
@@ -199,12 +199,12 @@ class HarnessGenerator:
     for fw_name in frameworks:
       adapter_cls = _ADAPTER_REGISTRY[fw_name]
       if not hasattr(adapter_cls, "convert"):
-        continue  # pragma: no cover
-      # pragma: no cover
+        continue
+
       try:
         method_source = inspect.getsource(adapter_cls.convert)
-      except OSError:  # pragma: no cover
-        continue  # pragma: no cover
+      except OSError:
+        continue
 
       clean_block = textwrap.dedent(method_source)
       lines = clean_block.splitlines()

@@ -31,6 +31,7 @@ class OpType(str, Enum):
   DECORATOR = "decorator"
   ATTRIBUTE = "attribute"
   CLASS = "class"
+  MACRO_GRAPH = "macro_graph"
 
 
 class ContainerType(str, Enum):
@@ -213,6 +214,9 @@ class FrameworkVariant(BaseModel):
   missing_message: Optional[str] = Field(
     None, description="Custom error message to display if this mapping fails or is missing."
   )
+  replace_with_graph: Optional[List[Dict[str, Any]]] = Field(
+    None, description="List of nodes defining a subgraph replacement for macro_graph operations."
+  )
 
 
 class PluginType(str, Enum):
@@ -310,3 +314,6 @@ class OperationDef(BaseModel):
 
   # --- Feature: Cost Complexity (Limitation 19) ---
   complexity: Optional[str] = Field(None, description="Time complexity string (e.g. 'O(N^2)').")
+  sharding_supported: bool = Field(
+    False, description="If True, the operation natively supports distributed sharding or can be wrapped."
+  )

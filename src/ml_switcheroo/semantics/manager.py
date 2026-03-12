@@ -205,13 +205,13 @@ class SemanticsManager:
     adapter = get_adapter(fw)
     if adapter and hasattr(adapter, "inherits_from"):
       return adapter.inherits_from
-    return None  # pragma: no cover
+    return None
 
   def resolve_variant(self, abstract_id: str, target_fw: str) -> Optional[Dict[str, Any]]:
     """Resolves the implementation of an abstract operation."""
     defn = self.data.get(abstract_id)
     if not defn:
-      return None  # pragma: no cover
+      return None
     variants = defn.get("variants", {})
     if target_fw in variants:
       return variants[target_fw]
@@ -274,7 +274,7 @@ class SemanticsManager:
 
   def get_all_rng_methods(self) -> Set[str]:
     """Returns aggregate list of random seeding methods."""
-    return self._known_rng_methods  # pragma: no cover
+    return self._known_rng_methods
 
   def get_patterns(self) -> List[PatternDef]:
     """Returns the list of loaded fusion patterns."""
@@ -283,16 +283,16 @@ class SemanticsManager:
   def load_validation_report(self, report_path: Path) -> None:
     """Loads a CI verification report to gate unavailable operations."""
     if not report_path.exists():
-      print(f"⚠️ Validation report not found at {report_path}. Skipping gating.")  # pragma: no cover
-      return  # pragma: no cover
+      print(f"⚠️ Validation report not found at {report_path}. Skipping gating.")
+      return
     try:
       with open(report_path, "r", encoding="utf-8") as f:
         report = json.load(f)
         if isinstance(report, dict):
           self._validation_status.update(report)
           print(f"🔒 Loaded {len(report)} verification statuses.")
-    except Exception as e:  # pragma: no cover
-      print(f"❌ Error loading validation report: {e}")  # pragma: no cover
+    except Exception as e:
+      print(f"❌ Error loading validation report: {e}")
 
   def update_definition(self, abstract_id: str, new_data: Dict[str, Any]) -> None:
     """Updates an operation definition in memory and persists to disk."""
@@ -303,7 +303,7 @@ class SemanticsManager:
     if "operation" not in details_to_validate:
       details_to_validate["operation"] = abstract_id
     if "variants" not in details_to_validate:
-      details_to_validate["variants"] = {}  # pragma: no cover
+      details_to_validate["variants"] = {}
     if "description" not in details_to_validate:
       details_to_validate["description"] = f"Definition for {abstract_id}"
     if "std_args" not in details_to_validate:
@@ -312,9 +312,9 @@ class SemanticsManager:
     try:
       validated = OperationDef.model_validate(details_to_validate)
       final_data = validated.model_dump(by_alias=True, exclude_unset=True)
-    except ValidationError as e:  # pragma: no cover
-      print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")  # pragma: no cover
-      return  # pragma: no cover
+    except ValidationError as e:
+      print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")
+      return
 
     self.data[abstract_id] = final_data
     variants = final_data.get("variants", {})
@@ -327,21 +327,21 @@ class SemanticsManager:
     if tier_str == SemanticTier.NEURAL.value:
       filename = "k_neural_net.json"
     elif tier_str == SemanticTier.EXTRAS.value:
-      filename = "k_framework_extras.json"  # pragma: no cover
+      filename = "k_framework_extras.json"
 
     file_path = resolve_semantics_dir() / filename
     if file_path.exists():
       try:
         with open(file_path, "r", encoding="utf-8") as f:
           file_content = json.load(f)
-      except Exception:  # pragma: no cover
-        file_content = {}  # pragma: no cover
+      except Exception:
+        file_content = {}
     else:
-      file_content = {}  # pragma: no cover
+      file_content = {}
 
     file_content[abstract_id] = final_data
     try:
       with open(file_path, "w", encoding="utf-8") as f:
         json.dump(file_content, f, indent=2, sort_keys=True)
-    except Exception as e:  # pragma: no cover
-      print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")  # pragma: no cover
+    except Exception as e:
+      print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")

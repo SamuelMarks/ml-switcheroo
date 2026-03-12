@@ -65,7 +65,7 @@ class FrameworkInjector:
       if data[self.op_name] == new_entry:
         log_info(f"  {self.target_fw}: Operation '{self.op_name}' already up to date.")
         return True
-      log_info(f"  {self.target_fw}: Updating exist definition for '{self.op_name}'.")  # pragma: no cover
+      log_info(f"  {self.target_fw}: Updating exist definition for '{self.op_name}'.")
     else:
       log_info(f"  {self.target_fw}: Adding new definition for '{self.op_name}'.")
 
@@ -80,9 +80,9 @@ class FrameworkInjector:
         with open(self.json_path, "w", encoding="utf-8") as f:
           json.dump(data, f, indent=2, sort_keys=True)
         log_success(f"  Updated {self.json_path.name}")
-      except OSError as e:  # pragma: no cover
-        log_warning(f"Failed to write to {self.json_path}: {e}")  # pragma: no cover
-        return False  # pragma: no cover
+      except OSError as e:
+        log_warning(f"Failed to write to {self.json_path}: {e}")
+        return False
 
     return True
 
@@ -99,6 +99,6 @@ class FrameworkInjector:
     try:
       with open(self.json_path, "r", encoding="utf-8") as f:
         return json.load(f)
-    except json.JSONDecodeError:  # pragma: no cover
-      log_warning(f"Corrupt JSON at {self.json_path}. Overwriting with new data.")  # pragma: no cover
-      return {}  # pragma: no cover
+    except json.JSONDecodeError:
+      log_warning(f"Corrupt JSON at {self.json_path}. Overwriting with new data.")
+      return {}

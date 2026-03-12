@@ -161,12 +161,12 @@ class GraphExtractor(cst.CSTVisitor):
     """Parses self.layer = ... lines."""
     target = node.targets[0].target
     if not (m.matches(target, m.Attribute()) and m.matches(target.value, m.Name("self"))):
-      return  # pragma: no cover
+      return
 
     attr_name = target.attr.value
     call = node.value
     if not isinstance(call, cst.Call):
-      return  # pragma: no cover
+      return
 
     op_type = get_full_name(call.func)
     if "." in op_type:
@@ -199,7 +199,7 @@ class GraphExtractor(cst.CSTVisitor):
       return
 
     if not isinstance(node.value, cst.Call):
-      return  # pragma: no cover
+      return
 
     targets = []
     for target in node.targets:
@@ -248,7 +248,7 @@ class GraphExtractor(cst.CSTVisitor):
           self.node_map[layer_name] = context_node
       return layer_name
 
-    return None  # pragma: no cover
+    return None
 
   def _analyze_call_expression(
     self, call: cst.Call, output_vars: List[str], context_node: Optional[cst.CSTNode] = None
@@ -259,7 +259,7 @@ class GraphExtractor(cst.CSTVisitor):
     layer_name = self._resolve_layer_or_func_name(call.func, context_node=ctx)
 
     if not layer_name:
-      return  # pragma: no cover
+      return
 
     for arg in call.args:
       var_name = self._get_var_name(arg.value)

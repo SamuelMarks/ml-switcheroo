@@ -81,8 +81,8 @@ class StandardsInjector:
       try:
         with open(target_path, "r", encoding="utf-8") as f:
           current_data = json.load(f)
-      except json.JSONDecodeError:  # pragma: no cover
-        log_warning(f"Corrupt JSON at {target_path}. Proceeding with empty dict.")  # pragma: no cover
+      except json.JSONDecodeError:
+        log_warning(f"Corrupt JSON at {target_path}. Proceeding with empty dict.")
 
     # 4. Update
     if op_name in current_data:
@@ -98,7 +98,7 @@ class StandardsInjector:
       print(f"[Dry Run] Writing to {filename}:\n{json.dumps({op_name: data_entry}, indent=2)}")
     else:
       if not target_path.parent.exists():
-        target_path.parent.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+        target_path.parent.mkdir(parents=True, exist_ok=True)
       with open(target_path, "w", encoding="utf-8") as f:
         json.dump(current_data, f, indent=2, sort_keys=True)
       log_success(f"  Updated Hub: {filename}")
@@ -118,13 +118,13 @@ class StandardsInjector:
 
     # Optional fields (only add if not default)
     if op.op_type != "function":
-      out["op_type"] = op.op_type  # pragma: no cover
+      out["op_type"] = op.op_type
     if op.return_type != "Any":
-      out["return_type"] = op.return_type  # pragma: no cover
+      out["return_type"] = op.return_type
     if op.is_inplace:
-      out["is_inplace"] = True  # pragma: no cover
+      out["is_inplace"] = True
     if op.output_shape_calc:
-      out["output_shape_calc"] = op.output_shape_calc  # pragma: no cover
+      out["output_shape_calc"] = op.output_shape_calc
 
     return out
 
@@ -139,9 +139,9 @@ class StandardsInjector:
         if isinstance(arg, ParameterDef):
           d = arg.model_dump(exclude_none=True)
         else:
-          d = arg.copy()  # pragma: no cover
+          d = arg.copy()
           # Filter None values manually if it was a raw dict
-          d = {k: v for k, v in d.items() if v is not None}  # pragma: no cover
+          d = {k: v for k, v in d.items() if v is not None}
 
         # Simplify: if it only has name and type='Any', store as string?
         # No, stick to dicts for consistency if provided as such.
@@ -149,10 +149,10 @@ class StandardsInjector:
 
       elif isinstance(arg, (list, tuple)):
         # Legacy tuple ["x", "type"]
-        entry = {"name": arg[0]}  # pragma: no cover
-        if len(arg) > 1:  # pragma: no cover
-          entry["type"] = arg[1]  # pragma: no cover
-        result.append(entry)  # pragma: no cover
+        entry = {"name": arg[0]}
+        if len(arg) > 1:
+          entry["type"] = arg[1]
+        result.append(entry)
 
       elif isinstance(arg, str):
         result.append(arg)

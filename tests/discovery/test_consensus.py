@@ -180,3 +180,46 @@ def test_signature_alignment_with_types(engine):
   assert isinstance(arg_def, dict)
   assert arg_def["name"] == "x"
   assert arg_def["type"] == "int"
+
+
+def test_normalize_strip_prefixes(engine):
+  """Verify prefixes are stripped correctly."""
+  assert engine.normalize_name("reduce_mean") == "mean"
+  assert engine.normalize_name("math_add") == "add"
+  assert engine.normalize_name("nn_conv2d") == "conv"
+  assert engine.normalize_name("ops_sub") == "sub"
+  assert engine.normalize_name("special_erf") == "erf"
+  assert engine.normalize_name("functional_relu") == "relu"
+
+
+def test_cluster_empty_key(engine):
+  """Verify fallback when normalized key is empty."""
+  inputs = {
+    "torch": [GhostRef(name="_", api_path="torch._", kind="function")],
+  }
+  results = engine.cluster(inputs)
+  assert len(results) == 1
+  assert results[0].name == "_"
+
+
+def test_align_signatures_empty_variants(engine):
+  """Verify alignment skips candidates with no variants."""
+  cand = CandidateStandard(name="Empty", variants={})
+  engine.align_signatures([cand])
+  assert cand.std_args == []
+
+
+def test_signature_alignment_ignores_self_cls(engine):
+  """Verify 'self' and 'cls' are ignored during alignment."""
+  p_self = GhostParam(name="self", kind="p")
+  p_cls = GhostParam(name="cls", kind="p")
+  p_x = GhostParam(name="x", kind="p")
+
+  ref_a = GhostRef(name="Op", api_path="A", kind="f", params=[p_self, p_cls, p_x])
+  cand = CandidateStandard(name="Op", variants={"a": ref_a})
+
+  engine.align_signatures([cand], consensus_threshold=0.0)
+
+  assert "x" in cand.std_args
+  assert "self" not in cand.std_args
+  assert "cls" not in cand.std_args

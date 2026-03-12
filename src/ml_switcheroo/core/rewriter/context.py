@@ -135,6 +135,6 @@ class RewriterContext:
         name = alias_info.get("name")
         if name:
           self.alias_map[name] = name
-    except Exception:  # pragma: no cover
+    except Exception:
       # Ignore startup hydration errors if config is partial
-      pass  # pragma: no cover
+      pass

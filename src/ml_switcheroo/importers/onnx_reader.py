@@ -74,7 +74,7 @@ class OnnxSpecImporter:
       # If an op appears multiple times (versions), keep the first occurrence
       # (assuming top-down document order prioritizes latest or canonical info).
       if op_name in semantics:
-        continue  # pragma: no cover
+        continue
 
       summary = self._extract_summary(body_text)
 
@@ -215,11 +215,11 @@ class OnnxSpecImporter:
     if "list" in raw and ("float" in raw or "floats" in raw):
       return "List[float]"
     if "list" in raw and ("string" in raw or "strings" in raw):
-      return "List[str]"  # pragma: no cover
+      return "List[str]"
     if "ints" in raw:  # Common shorthand
       return "List[int]"
     if "floats" in raw:
-      return "List[float]"  # pragma: no cover
+      return "List[float]"
 
     # Primitives
     if "string" in raw or "str" in raw:

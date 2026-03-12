@@ -35,10 +35,10 @@ class SymbolType:
     return self.name
 
   def __eq__(self, other: object) -> bool:
-    """TODO: Add docstring."""  # pragma: no cover
-    if not isinstance(other, SymbolType):  # pragma: no cover
-      return False  # pragma: no cover
-    return self.name == other.name  # pragma: no cover
+    """TODO: Add docstring."""
+    if not isinstance(other, SymbolType):
+      return False
+    return self.name == other.name
 
 
 @dataclass
@@ -52,9 +52,9 @@ class TensorType(SymbolType):
 
   def __eq__(self, other: object) -> bool:
     """TODO: Add docstring."""
-    if not isinstance(other, TensorType):  # pragma: no cover
+    if not isinstance(other, TensorType):
       return False
-    return self.name == other.name and self.framework == other.framework  # pragma: no cover
+    return self.name == other.name and self.framework == other.framework
 
 
 @dataclass
@@ -83,21 +83,20 @@ class UnionType(SymbolType):
 
   def __init__(self, types: List[SymbolType]):
     """TODO: Add docstring."""
-    super().__init__("Union")  # pragma: no cover
-    self.types = types  # pragma: no cover
+    super().__init__("Union")
+    self.types = types
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""  # pragma: no cover
-    unique_names = sorted(list(set(str(t) for t in self.types)))  # pragma: no cover
-    return f"Union[{', '.join(unique_names)}]"  # pragma: no cover
+    """TODO: Add docstring."""
+    unique_names = sorted(list(set(str(t) for t in self.types)))
+    return f"Union[{', '.join(unique_names)}]"
 
-  # pragma: no cover
   def __eq__(self, other: object) -> bool:
     """TODO: Add docstring."""
-    if not isinstance(other, UnionType):  # pragma: no cover
-      return False  # pragma: no cover
+    if not isinstance(other, UnionType):
+      return False
     # Set based comparison for equivalence ignoring order
-    return set(str(t) for t in self.types) == set(str(t) for t in other.types)  # pragma: no cover
+    return set(str(t) for t in self.types) == set(str(t) for t in other.types)
 
 
 class Scope:
@@ -134,13 +133,13 @@ class Scope:
     Args:
         name: Variable identifier to lookup.
 
-    Returns:  # pragma: no cover
+    Returns:
         The SymbolType if found, else None.
     """
     if name in self.symbols:
       return self.symbols[name]
     if self.parent:
-      return self.parent.get(name)  # pragma: no cover
+      return self.parent.get(name)
     return None
 
   def snapshot(self) -> Dict[str, SymbolType]:
@@ -197,27 +196,27 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     self.semantics = semantics
     self.table = SymbolTable()
     self.root_scope = Scope(name="global")
-    self.current_scope = self.root_scope  # pragma: no cover
+    self.current_scope = self.root_scope
 
   # --- Scoping ---
 
-  def visit_ClassDef(self, node: cst.ClassDef) -> None:  # pragma: no cover
-    """Enters class scope."""  # pragma: no cover
+  def visit_ClassDef(self, node: cst.ClassDef) -> None:
+    """Enters class scope."""
     self.current_scope = Scope(parent=self.current_scope, name=f"class_{node.name.value}")
 
   def leave_ClassDef(self, node: cst.ClassDef) -> None:
-    """Exits class scope."""  # pragma: no cover
-    if self.current_scope.parent:  # pragma: no cover
-      self.current_scope = self.current_scope.parent  # pragma: no cover
+    """Exits class scope."""
+    if self.current_scope.parent:
+      self.current_scope = self.current_scope.parent
 
-  def visit_FunctionDef(self, node: cst.FunctionDef) -> None:  # pragma: no cover
-    """Enters function scope."""  # pragma: no cover
+  def visit_FunctionDef(self, node: cst.FunctionDef) -> None:
+    """Enters function scope."""
     self.current_scope = Scope(parent=self.current_scope, name=f"func_{node.name.value}")
 
   def leave_FunctionDef(self, node: cst.FunctionDef) -> None:
     """Exits function scope."""
-    if self.current_scope.parent:  # pragma: no cover
-      self.current_scope = self.current_scope.parent  # pragma: no cover
+    if self.current_scope.parent:
+      self.current_scope = self.current_scope.parent
 
   # --- Control Flow Support ---
 
@@ -265,25 +264,24 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     node.iter.visit(self)
     node.target.visit(self)
 
-    start_state = self.current_scope.snapshot()  # pragma: no cover
+    start_state = self.current_scope.snapshot()
 
     # Visit Body
     node.body.visit(self)
 
     if node.orelse:
-      node.orelse.visit(self)  # pragma: no cover
+      node.orelse.visit(self)
 
     end_state = self.current_scope.snapshot()
 
-    # Merge start (0 iterations case) with end (N iterations case)  # pragma: no cover
-    self.current_scope.symbols = self._merge_states(start_state, end_state)  # pragma: no cover
-    return False  # pragma: no cover
+    # Merge start (0 iterations case) with end (N iterations case)
+    self.current_scope.symbols = self._merge_states(start_state, end_state)
+    return False
 
-  # pragma: no cover
-  def visit_While(self, node: cst.While) -> bool:  # pragma: no cover
-    """Handle while loop logic."""  # pragma: no cover
-    node.test.visit(self)  # pragma: no cover
-    start_state = self.current_scope.snapshot()  # pragma: no cover
+  def visit_While(self, node: cst.While) -> bool:
+    """Handle while loop logic."""
+    node.test.visit(self)
+    start_state = self.current_scope.snapshot()
     node.body.visit(self)
     if node.orelse:
       node.orelse.visit(self)
@@ -295,16 +293,16 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     """
     Infers type for ternary expression: `A if C else B`.
     """
-    t1 = self.table.get_type(node.body)  # pragma: no cover
-    t2 = self.table.get_type(node.orelse)  # pragma: no cover
-    # pragma: no cover
-    if t1 and t2:  # pragma: no cover
+    t1 = self.table.get_type(node.body)
+    t2 = self.table.get_type(node.orelse)
+
+    if t1 and t2:
       merged = self._make_union(t1, t2)
       self.table.record_type(node, merged)
-    elif t1:  # pragma: no cover
-      self.table.record_type(node, t1)  # pragma: no cover
-    elif t2:  # pragma: no cover
-      self.table.record_type(node, t2)  # pragma: no cover
+    elif t1:
+      self.table.record_type(node, t1)
+    elif t2:
+      self.table.record_type(node, t2)
 
   def _merge_states(self, state_a: Dict[str, SymbolType], state_b: Dict[str, SymbolType]) -> Dict[str, SymbolType]:
     """
@@ -322,28 +320,28 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
       if in_a and in_b:
         val_a = state_a[k]
         val_b = state_b[k]
-        if val_a == val_b:  # pragma: no cover
-          merged[k] = val_a  # pragma: no cover
+        if val_a == val_b:
+          merged[k] = val_a
         else:
           merged[k] = self._make_union(val_a, val_b)
       elif in_a:
         merged[k] = state_a[k]
-      elif in_b:  # pragma: no cover
-        merged[k] = state_b[k]  # pragma: no cover
-    # pragma: no cover
+      elif in_b:
+        merged[k] = state_b[k]
+
     return merged
 
   def _make_union(self, t1: SymbolType, t2: SymbolType) -> SymbolType:
     """Creates a deduplicated UnionType from two types."""
     if t1 == t2:
-      return t1  # pragma: no cover
+      return t1
 
     types = []
 
     def collect(t):
       """TODO: Add docstring."""
       if isinstance(t, UnionType):
-        types.extend(t.types)  # pragma: no cover
+        types.extend(t.types)
       else:
         types.append(t)
 
@@ -353,14 +351,14 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     # Deduplicate by string representation (simplistic equality)
     unique = []
     seen = set()
-    for t in types:  # pragma: no cover
+    for t in types:
       s = str(t)
       if s not in seen:
         unique.append(t)
         seen.add(s)
 
     if len(unique) == 1:
-      return unique[0]  # pragma: no cover
+      return unique[0]
 
     return UnionType(unique)
 
@@ -374,17 +372,16 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     for alias in node.names:
       full_path = get_full_name(alias.name)
       bind_name = alias.asname.name.value if alias.asname else full_path.split(".")[0]
-      self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))  # pragma: no cover
+      self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))
 
-  # pragma: no cover
-  def leave_ImportFrom(self, node: cst.ImportFrom) -> None:  # pragma: no cover
+  def leave_ImportFrom(self, node: cst.ImportFrom) -> None:
     """
-    Track from-imports.  # pragma: no cover
-    e.g. `from torch import nn` -> symbols['nn'] = ModuleType(name='Module', path='torch.nn')  # pragma: no cover
-    """  # pragma: no cover
-    if not node.module:  # pragma: no cover
-      return  # pragma: no cover
-    base_mod = get_full_name(node.module)  # pragma: no cover
+    Track from-imports.
+    e.g. `from torch import nn` -> symbols['nn'] = ModuleType(name='Module', path='torch.nn')
+    """
+    if not node.module:
+      return
+    base_mod = get_full_name(node.module)
 
     for alias in node.names:
       if isinstance(alias, cst.ImportAlias):
@@ -393,7 +390,7 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
         full_path = f"{base_mod}.{import_name}"
         self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))
 
-  def leave_Assign(self, node: cst.Assign) -> None:  # pragma: no cover
+  def leave_Assign(self, node: cst.Assign) -> None:
     """
     Propagate type from RHS to LHS.
     x = torch.randn() -> x is Tensor.
@@ -402,8 +399,8 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
     if not rhs_type:
       return
 
-    for target in node.targets:  # pragma: no cover
-      # Handle simple name assignment: x = ...  # pragma: no cover
+    for target in node.targets:
+      # Handle simple name assignment: x = ...
       if isinstance(target.target, cst.Name):
         name = target.target.value
         self.current_scope.set(name, rhs_type)
@@ -443,16 +440,16 @@ class SymbolTableAnalyzer(cst.CSTVisitor):
 
     # Case A: Called on a Module (e.g. torch.randn)
     func_type = self.table.get_type(node.func)
-    if isinstance(func_type, ModuleType):  # pragma: no cover
-      api_path = func_type.path  # pragma: no cover
-    # pragma: no cover
+    if isinstance(func_type, ModuleType):
+      api_path = func_type.path
+
     # Case B: Called on a Tensor (e.g. x.view()) -> Implicit API 'torch.Tensor.view'
     elif isinstance(node.func, cst.Attribute):
       receiver_type = self.table.get_type(node.func.value)
       if isinstance(receiver_type, TensorType):
-        method = node.func.attr.value  # pragma: no cover
-        if hasattr(receiver_type, "framework"):  # pragma: no cover
-          api_path = f"{receiver_type.framework}.Tensor.{method}"  # pragma: no cover
+        method = node.func.attr.value
+        if hasattr(receiver_type, "framework"):
+          api_path = f"{receiver_type.framework}.Tensor.{method}"
       # Handle Unions where ALL branches are Tensors
       elif isinstance(receiver_type, UnionType):
         # Heuristic: If ANY option in the union is a Tensor, we treat it as a potential Tensor call.

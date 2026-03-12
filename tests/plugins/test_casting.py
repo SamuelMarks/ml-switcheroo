@@ -170,3 +170,119 @@ def test_type_resolution_failure(rewriter):
   res_node = transform_casting(call_node, rewriter.ctx)
 
   assert res_node == call_node
+
+
+# --- Extra Coverage Tests ---
+from ml_switcheroo.core.hooks import HookContext
+
+
+def test_missing_semantics():
+  ctx = MagicMock()
+  ctx.semantics = None
+  # No semantics attached
+  node = cst.parse_expression("x.float()")
+  res = transform_casting(node, ctx)
+  assert res is node
+
+
+def test_missing_conf(rewriter):
+  rewriter.ctx.semantics.get_framework_config.return_value = None
+  node = cst.parse_expression("x.float()")
+  res = transform_casting(node, rewriter.ctx)
+  assert res is node
+
+
+def test_missing_traits(rewriter):
+  rewriter.ctx.semantics.get_framework_config.return_value = {}
+  node = cst.parse_expression("x.float()")
+  res = transform_casting(node, rewriter.ctx)
+  assert res is node
+
+
+class MockTraits:
+  def __init__(self, val):
+    self.has_numpy_compatible_arrays = val
+
+
+def test_object_traits(rewriter):
+  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(True)}
+  rewriter.ctx.current_op_id = "CastFloat"
+  node = cst.parse_expression("x.float()")
+  res = transform_casting(node, rewriter.ctx)
+  assert "astype" in cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res)])]).code
+
+
+def test_object_traits_false(rewriter):
+  rewriter.ctx.semantics.get_framework_config.return_value = {"plugin_traits": MockTraits(False)}
+  rewriter.ctx.current_op_id = "CastFloat"
+  node = cst.parse_expression("x.float()")
+  res = transform_casting(node, rewriter.ctx)
+  assert res is node
+
+
+def test_non_attribute_call(rewriter):
+  # node.func is not an attribute
+  rewriter.ctx.current_op_id = "CastFloat"
+  node = cst.parse_expression("float(x)")
+  res = transform_casting(node, rewriter.ctx)
+  assert res is node
+
+
+def test_missing_op_id(rewriter):
+  rewriter.ctx.current_op_id = None
+  node = cst.parse_expression("x.float()")
+  res = transform_casting(node, rewriter.ctx)
+  assert res is node
+
+
+def test_missing_defn(rewriter):
+  rewriter.ctx.current_op_id = "UnknownOp"
+  rewriter.ctx.semantics.get_definition_by_id.return_value = None
+  node = cst.parse_expression("x.float()")
+  res = transform_casting(node, rewriter.ctx)
+  assert res is node
+
+
+def test_fallback_infer_type(rewriter):
+  # Fallback: Infer type from Op ID if metadata missing
+  # Op ID: CastHalf -> Float16
+  cast_half_def = {"variants": {}}
+
+  def get_def_by_id(op_id):
+    if op_id == "CastHalf":
+      return cast_half_def
+    return None
+
+  rewriter.ctx.semantics.get_definition_by_id.side_effect = get_def_by_id
+
+  # Resolve Float16 -> 'jax.numpy.float16'
+  def resolve(aid, fw):
+    if aid == "Float16" and fw == "jax":
+      return {"api": "jax.numpy.float16"}
+    return None
+
+  rewriter.ctx.semantics.resolve_variant.side_effect = resolve
+
+  rewriter.ctx.current_op_id = "CastHalf"
+  node = cst.parse_expression("x.half()")
+  res = transform_casting(node, rewriter.ctx)
+  res_code = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res)])]).code
+  assert "astype" in res_code
+  assert "jax.numpy.float16" in res_code
+
+
+def test_fallback_infer_type_unmapped(rewriter):
+  # Op ID: CastUnknown -> Unknown
+  cast_unknown_def = {"variants": {}}
+
+  def get_def_by_id(op_id):
+    if op_id == "CastUnknown":
+      return cast_unknown_def
+    return None
+
+  rewriter.ctx.semantics.get_definition_by_id.side_effect = get_def_by_id
+
+  rewriter.ctx.current_op_id = "CastUnknown"
+  node = cst.parse_expression("x.unknown()")
+  res = transform_casting(node, rewriter.ctx)
+  assert res is node

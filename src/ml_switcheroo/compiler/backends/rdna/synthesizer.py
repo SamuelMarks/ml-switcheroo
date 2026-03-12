@@ -78,7 +78,7 @@ class RegisterAllocator:
     Retrieves or allocates a Scalar register (SGPR) for a symbolic variable.
     """
     if var_name in self._var_to_sgpr:
-      return SGPR(self._var_to_sgpr[var_name])  # pragma: no cover
+      return SGPR(self._var_to_sgpr[var_name])
 
     if self._next_sgpr >= MAX_SGPR:
       raise ValueError(f"SGPR overflow! Exceeded {MAX_SGPR} registers.")
@@ -211,8 +211,8 @@ class RdnaSynthesizer:
     return cst.Module(body=body_stmts)
 
   def _convert_instruction_to_py(self, inst: Instruction) -> cst.SimpleStatementLine:
-    """TODO: Add docstring."""  # pragma: no cover
-    if not inst.operands:  # pragma: no cover
+    """TODO: Add docstring."""
+    if not inst.operands:
       call = self._make_call(inst.opcode, [])
       return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
 
@@ -222,9 +222,9 @@ class RdnaSynthesizer:
 
     dest: Optional[Operand] = None
     srcs: List[Operand] = []
-    # pragma: no cover
+
     if is_store or is_branch:
-      srcs = inst.operands  # pragma: no cover
+      srcs = inst.operands
     else:
       # Standard ALU ops
       dest = inst.operands[0]
@@ -242,15 +242,15 @@ class RdnaSynthesizer:
       # Sanitize brackets for variable names
       clean_target = target_name.replace("[", "_").replace("]", "").replace(":", "_")
       assign = cst.Assign(targets=[cst.AssignTarget(target=cst.Name(clean_target))], value=call)
-      return cst.SimpleStatementLine(body=[assign])  # pragma: no cover
+      return cst.SimpleStatementLine(body=[assign])
     else:
-      return cst.SimpleStatementLine(body=[cst.Expr(value=call)])  # pragma: no cover
+      return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
 
-  def _convert_operand_to_py(self, op: Operand) -> cst.BaseExpression:  # pragma: no cover
-    """TODO: Add docstring."""  # pragma: no cover
-    if isinstance(op, Immediate):  # pragma: no cover
-      if op.is_hex:  # pragma: no cover
-        return cst.Integer(hex(int(op.value)))  # pragma: no cover
+  def _convert_operand_to_py(self, op: Operand) -> cst.BaseExpression:
+    """TODO: Add docstring."""
+    if isinstance(op, Immediate):
+      if op.is_hex:
+        return cst.Integer(hex(int(op.value)))
       if isinstance(op.value, float):
         return cst.Float(str(op.value))
       return cst.Integer(str(int(op.value)))
@@ -260,7 +260,7 @@ class RdnaSynthesizer:
       clean = raw.replace("[", "_").replace("]", "").replace(":", "_")
       return cst.Name(clean)
 
-    if raw.isalnum() or "_" in raw:  # pragma: no cover
+    if raw.isalnum() or "_" in raw:
       return cst.Name(raw)
 
     return cst.SimpleString(f"'{raw}'")
@@ -276,14 +276,13 @@ class RdnaBackend(CompilerBackend):
   Orchestrates the synthesis (Graph -> AST) and emission (AST -> Text).
   """
 
-  # pragma: no cover
   def __init__(self, semantics: Optional["SemanticsManager"] = None) -> None:
-    """TODO: Add docstring."""  # pragma: no cover
+    """TODO: Add docstring."""
     # Lazy load if not provided, but typically passed from Registry/Engine
     if semantics is None:
-      from ml_switcheroo.semantics.manager import SemanticsManager  # pragma: no cover
+      from ml_switcheroo.semantics.manager import SemanticsManager
 
-      semantics = SemanticsManager()  # pragma: no cover
+      semantics = SemanticsManager()
 
     self.synthesizer = RdnaSynthesizer(semantics)
     self.emitter = RdnaEmitter()

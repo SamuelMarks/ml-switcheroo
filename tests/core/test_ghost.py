@@ -134,3 +134,77 @@ def test_ghost_ref_helper_methods():
 
   assert ref.has_arg("x") is True
   assert ref.has_arg("non_existent") is False
+
+
+import inspect
+
+
+def test_ghost_varargs():
+  def func_with_args(*args):
+    pass
+
+  ref = GhostInspector.inspect(func_with_args, "func_with_args")
+  assert ref.has_varargs is True
+
+
+def test_ghost_callable_default():
+  def some_callable():
+    pass
+
+  def func_with_callable(cb=some_callable):
+    pass
+
+  ref = GhostInspector.inspect(func_with_callable, "func_with_callable")
+  assert ref.params[0].default is None
+
+
+def test_ghost_unrepresentable_default():
+  class BadRepr:
+    def __repr__(self):
+      return "GoodRepr"
+
+    def __str__(self):
+      return "BadStr at 0x123"
+
+  class ExplodingStr:
+    def __repr__(self):
+      return "SafeRepr"
+
+    def __str__(self):
+      raise Exception("Boom")
+
+  def func_with_bad_str(x=BadRepr(), y=ExplodingStr()):
+    pass
+
+  ref = GhostInspector.inspect(func_with_bad_str, "func_with_bad_str")
+  assert ref.params[0].default is None
+  assert ref.params[1].default == "<unrepresentable>"
+
+
+def test_ghost_annotation_without_name():
+  class NoNameAnnotation:
+    def __str__(self):
+      return "NoName"
+
+  def func_with_anno(x: NoNameAnnotation()):
+    pass
+
+  ref = GhostInspector.inspect(func_with_anno, "func_with_anno")
+  assert ref.params[0].annotation == "NoName"
+
+
+def test_ghost_function_c_extension_fallback(monkeypatch):
+  def mock_sig(obj):
+    raise ValueError("no signature found")
+
+  monkeypatch.setattr("inspect.signature", mock_sig)
+
+  def dummy_func():
+    pass
+
+  ref = GhostInspector.inspect(dummy_func, "dummy_func")
+  assert ref.name == "dummy_func"
+  assert ref.has_varargs is True
+  assert len(ref.params) == 2
+  assert ref.params[0].name == "args"
+  assert ref.params[1].name == "kwargs"

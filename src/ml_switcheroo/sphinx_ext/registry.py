@@ -25,110 +25,106 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
           - JSON string of preloaded examples.
           - JSON string of framework tier mapping.
   """
-  fws = available_frameworks()  # pragma: no cover
-  priorities = get_framework_priority_order()  # pragma: no cover
+  fws = available_frameworks()
+  priorities = get_framework_priority_order()
 
   # 1. Build Node Map
-  hierarchy: HierarchyMap = defaultdict(list)  # pragma: no cover
-  tier_metadata: Dict[str, List[str]] = {}  # pragma: no cover
+  hierarchy: HierarchyMap = defaultdict(list)
+  tier_metadata: Dict[str, List[str]] = {}
 
   # Track roots explicitly
-  roots = set()  # pragma: no cover
+  roots = set()
 
-  for key in fws:  # pragma: no cover
-    adapter = get_adapter(key)  # pragma: no cover
-    if not adapter:  # pragma: no cover
-      continue  # pragma: no cover
+  for key in fws:
+    adapter = get_adapter(key)
+    if not adapter:
+      continue
 
-    label = getattr(adapter, "display_name", key.capitalize())  # pragma: no cover
-    parent = getattr(adapter, "inherits_from", None)  # pragma: no cover
+    label = getattr(adapter, "display_name", key.capitalize())
+    parent = getattr(adapter, "inherits_from", None)
 
     # Extract Tiers
-    tiers = []  # pragma: no cover
-    if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:  # pragma: no cover
-      tiers = [t.value for t in adapter.supported_tiers]  # pragma: no cover
+    tiers = []
+    if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:
+      tiers = [t.value for t in adapter.supported_tiers]
     else:
-      tiers = ["array", "neural", "extras"]  # pragma: no cover
-    tier_metadata[key] = tiers  # pragma: no cover
+      tiers = ["array", "neural", "extras"]
+    tier_metadata[key] = tiers
 
-    if parent:  # pragma: no cover
+    if parent:
       # This is a child node (e.g. flax_nnx -> jax)
-      hierarchy[parent].append({"key": key, "label": label})  # pragma: no cover
+      hierarchy[parent].append({"key": key, "label": label})
     else:
       # This is a root node (e.g. torch, jax, sass, rdna)
-      roots.add(key)  # pragma: no cover
+      roots.add(key)
 
   # 2. Convert to Render-Ready structures & Gather Examples
-  examples = {}  # pragma: no cover
+  examples = {}
 
   # Ensure we iterate roots sorted by priority provided by config
-  sorted_roots = sorted(  # pragma: no cover
+  sorted_roots = sorted(
     list(roots),
     key=lambda x: priorities.index(x) if x in priorities else 999,
   )
 
   # FIX: Iterate over sorted_roots to ensure keys exist in final_hierarchy
-  final_hierarchy = {
-    root: sorted(hierarchy.get(root, []), key=lambda x: x["label"]) for root in sorted_roots
-  }  # pragma: no cover
+  final_hierarchy = {root: sorted(hierarchy.get(root, []), key=lambda x: x["label"]) for root in sorted_roots}
 
   # Collect Examples from Adapters
-  for key in fws:  # pragma: no cover
-    adapter = get_adapter(key)  # pragma: no cover
-    if hasattr(adapter, "get_tiered_examples"):  # pragma: no cover
-      tiers = adapter.get_tiered_examples()  # pragma: no cover
-      parent_key = getattr(adapter, "inherits_from", None)  # pragma: no cover
+  for key in fws:
+    adapter = get_adapter(key)
+    if hasattr(adapter, "get_tiered_examples"):
+      tiers = adapter.get_tiered_examples()
+      parent_key = getattr(adapter, "inherits_from", None)
 
-      for tier_name, code in tiers.items():  # pragma: no cover
-        uid = f"{key}_{tier_name}"  # pragma: no cover
+      for tier_name, code in tiers.items():
+        uid = f"{key}_{tier_name}"
 
-        if parent_key:  # pragma: no cover
-          src_fw = parent_key  # pragma: no cover
-          src_flavour = key  # pragma: no cover
+        if parent_key:
+          src_fw = parent_key
+          src_flavour = key
         else:
-          src_fw = key  # pragma: no cover
-          src_flavour = None  # pragma: no cover
+          src_fw = key
+          src_flavour = None
 
-        req_tier = "extras"  # pragma: no cover
-        if "math" in tier_name:  # pragma: no cover
-          req_tier = "array"  # pragma: no cover
-        elif "neural" in tier_name:  # pragma: no cover
-          req_tier = "neural"  # pragma: no cover
+        req_tier = "extras"
+        if "math" in tier_name:
+          req_tier = "array"
+        elif "neural" in tier_name:
+          req_tier = "neural"
 
-        clean_tier_name = tier_name.replace("tier", "")  # pragma: no cover
-        clean_label = (  # pragma: no cover
+        clean_tier_name = tier_name.replace("tier", "")
+        clean_label = (
           clean_tier_name.split("_")[-1].capitalize() if "_" in clean_tier_name else clean_tier_name.capitalize()
         )
 
-        display_fw = getattr(adapter, "display_name", key.title())  # pragma: no cover
-        label = f"{display_fw}: {clean_label}"  # pragma: no cover
+        display_fw = getattr(adapter, "display_name", key.title())
+        label = f"{display_fw}: {clean_label}"
 
         # Dynamic Target Heuristic
-        tgt_fw = None  # pragma: no cover
-        tgt_flavour = None  # pragma: no cover
+        tgt_fw = None
+        tgt_flavour = None
 
-        candidates = [
-          fw for fw in priorities if fw != src_fw and fw != parent_key and fw != src_flavour
-        ]  # pragma: no cover
+        candidates = [fw for fw in priorities if fw != src_fw and fw != parent_key and fw != src_flavour]
 
-        if candidates:  # pragma: no cover
-          try:  # pragma: no cover
-            curr_idx = priorities.index(src_fw)  # pragma: no cover
-            rotated = priorities[curr_idx + 1 :] + priorities[:curr_idx]  # pragma: no cover
-            for c in rotated:  # pragma: no cover
-              if c in candidates:  # pragma: no cover
-                tgt_fw = c  # pragma: no cover
-                break  # pragma: no cover
-          except ValueError:  # pragma: no cover
-            tgt_fw = candidates[0]  # pragma: no cover
+        if candidates:
+          try:
+            curr_idx = priorities.index(src_fw)
+            rotated = priorities[curr_idx + 1 :] + priorities[:curr_idx]
+            for c in rotated:
+              if c in candidates:
+                tgt_fw = c
+                break
+          except ValueError:
+            tgt_fw = candidates[0]
 
-        if not tgt_fw:  # pragma: no cover
-          tgt_fw = "target_placeholder"  # pragma: no cover
+        if not tgt_fw:
+          tgt_fw = "target_placeholder"
 
-        if tgt_fw in final_hierarchy and final_hierarchy[tgt_fw]:  # pragma: no cover
-          tgt_flavour = final_hierarchy[tgt_fw][0]["key"]  # pragma: no cover
+        if tgt_fw in final_hierarchy and final_hierarchy[tgt_fw]:
+          tgt_flavour = final_hierarchy[tgt_fw][0]["key"]
 
-        examples[uid] = {  # pragma: no cover
+        examples[uid] = {
           "label": label,
           "srcFw": src_fw,
           "srcFlavour": src_flavour,
@@ -138,4 +134,4 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
           "requiredTier": req_tier,
         }
 
-  return final_hierarchy, json.dumps(examples), json.dumps(tier_metadata)  # pragma: no cover
+  return final_hierarchy, json.dumps(examples), json.dumps(tier_metadata)

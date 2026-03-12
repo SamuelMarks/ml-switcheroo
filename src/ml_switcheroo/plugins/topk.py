@@ -58,7 +58,7 @@ def transform_topk(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   # 1. Resolve Target Function (Strict)
   target_api = ctx.lookup_api("TopK")
   if not target_api:
-    return node  # pragma: no cover
+    return node
 
   inner_func = _create_dotted_name(target_api)
 

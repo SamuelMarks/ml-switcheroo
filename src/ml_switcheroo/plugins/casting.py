@@ -34,26 +34,26 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
   `.astype()` calling conventions via PluginTraits.
   """
   if not ctx.semantics:
-    return False  # pragma: no cover
+    return False
 
   # Retrieve dict configuration for the active target framework
   conf: Dict[str, Any] = ctx.semantics.get_framework_config(ctx.target_fw)
   if not conf:
-    return False  # pragma: no cover
+    return False
 
   # Navigate: config -> plugin_traits -> has_numpy_compatible_arrays
   # We handle both dict access (from JSON) and object access (if hydrated objects are used)
   traits = conf.get("plugin_traits")
   if not traits:
-    return False  # pragma: no cover
+    return False
 
   if isinstance(traits, dict):
     return traits.get("has_numpy_compatible_arrays", False)
 
-  if hasattr(traits, "has_numpy_compatible_arrays"):  # pragma: no cover
-    return traits.has_numpy_compatible_arrays  # pragma: no cover
+  if hasattr(traits, "has_numpy_compatible_arrays"):
+    return traits.has_numpy_compatible_arrays
 
-  return False  # pragma: no cover
+  return False
 
 
 @register_hook("type_methods")
@@ -77,23 +77,23 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   # 0. Capability Check (Decoupled from hardcoded strings)
   if not _supports_numpy_casting(ctx):
-    return node  # pragma: no cover
+    return node
 
   # We expect a method call: x.float()
   if not isinstance(node.func, cst.Attribute):
-    return node  # pragma: no cover
+    return node
 
   # 1. Identify Target Abstract Type
   # The PivotRewriter has identified the operation (e.g. 'CastFloat') and set it in context
   op_id = ctx.current_op_id
   if not op_id:
-    return node  # pragma: no cover
+    return node
 
   # Retrieve definition from Semantics Manager
   # This dictionary comes from standards_internal.py (or overrides)
   defn = ctx.semantics.get_definition_by_id(op_id)
   if not defn:
-    return node  # pragma: no cover
+    return node
 
   # Extract Metadata: "metadata": {"target_type": "Float32"}
   target_type_id = defn.get("metadata", {}).get("target_type")
@@ -114,11 +114,11 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
         "Byte": "UInt8",
       }
       if target_type_id in suffix_map:
-        target_type_id = suffix_map[target_type_id]  # pragma: no cover
+        target_type_id = suffix_map[target_type_id]
 
   if not target_type_id:
     # If metadata is missing/resolvable, we cannot safely transform.
-    return node  # pragma: no cover
+    return node
 
   # 2. Resolve Target Dtype API
   # Ask the semantics manager: "How does target_fw implement 'Float32'?"

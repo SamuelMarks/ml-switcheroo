@@ -2193,14 +2193,7 @@
   },
   "Diag": {
     "api": "tf.linalg.diag",
-    "dispatch_rules": [
-      {
-        "if_arg": "input",
-        "is_val": "Tensor",
-        "op": "is_type",
-        "use_api": "tf.linalg.diag_part"
-      }
-    ],
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -3045,6 +3038,12 @@
   },
   "FullSoftmax": {
     "api": "tf.keras.layers.Softmax",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Function": {
+    "api": "tf.function",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6776,7 +6775,7 @@
   "Sequential": {
     "api": "tf.keras.Sequential",
     "dispatch_rules": [],
-    "pack_as": "List",
+    "pack_as": "Tuple",
     "pack_to_tuple": "layers",
     "required_imports": []
   },
@@ -6909,6 +6908,7 @@
     "required_imports": []
   },
   "Shape": {
+    "api": "tf.shape",
     "dispatch_rules": [],
     "macro_template": "tuple({iterable})",
     "pack_as": "Tuple",
@@ -7617,7 +7617,6 @@
   "TopKValues": {
     "api": "tf.math.top_k",
     "dispatch_rules": [],
-    "output_select_index": 0,
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -9417,6 +9416,12 @@
   },
   "reshape": {
     "api": "tf.reshape",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "reverse": {
+    "api": "tf.reverse",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

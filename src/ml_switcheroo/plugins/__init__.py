@@ -20,6 +20,6 @@ for _, module_name, _ in pkgutil.iter_modules([str(_pkg_dir)]):
 
   try:
     importlib.import_module(f".{module_name}", package=__name__)
-  except Exception as e:  # pragma: no cover
+  except Exception as e:
     # We log but continue, ensuring one bad plugin doesn't break the engine
-    print(f"⚠️  Failed to auto-load plugin '{module_name}': {e}")  # pragma: no cover
+    print(f"⚠️  Failed to auto-load plugin '{module_name}': {e}")

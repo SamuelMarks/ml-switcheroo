@@ -42,23 +42,23 @@ def _create_dim_pad(before: cst.BaseExpression, after: cst.BaseExpression) -> cs
 def _supports_numpy_padding(ctx: HookContext) -> bool:
   """Checks if target supports tuple-of-tuples padding via PluginTraits."""
   if not ctx.semantics:
-    return False  # pragma: no cover
+    return False
 
   conf: Dict[str, Any] = ctx.semantics.get_framework_config(ctx.target_fw)
   if not conf:
-    return False  # pragma: no cover
+    return False
 
   traits = conf.get("plugin_traits")
   if not traits:
-    return False  # pragma: no cover
+    return False
 
   if isinstance(traits, dict):
-    return traits.get("has_numpy_compatible_arrays", False)  # pragma: no cover
+    return traits.get("has_numpy_compatible_arrays", False)
 
   if hasattr(traits, "has_numpy_compatible_arrays"):
     return getattr(traits, "has_numpy_compatible_arrays", False)
 
-  return False  # pragma: no cover
+  return False
 
 
 @register_hook("padding_converter")
@@ -80,22 +80,22 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
   """
   # 0. Capability and API Check
   if not _supports_numpy_padding(ctx):
-    return node  # pragma: no cover
+    return node
 
   target_api = ctx.lookup_api("Pad")
   if not target_api:
-    return node  # pragma: no cover
+    return node
 
   args = list(node.args)
   if len(args) < 2:
-    return node  # pragma: no cover
+    return node
 
   input_arg = args[0]
   pad_arg = args[1]
 
   # We can only perform structural rewrites if the padding is a Tuple literal.
   if not isinstance(pad_arg.value, cst.Tuple):
-    return node  # pragma: no cover
+    return node
 
   elements = pad_arg.value.elements
 
@@ -118,7 +118,7 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
 
     # Update argument list
     if input_arg.comma == cst.MaybeSentinel.DEFAULT:
-      args[0] = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+      args[0] = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
 
     args[1] = pad_arg.with_changes(value=new_pad_tuple)
 
@@ -130,4 +130,4 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
 
     return node.with_changes(func=new_func, args=args)
 
-  return node  # pragma: no cover
+  return node

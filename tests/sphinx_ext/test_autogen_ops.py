@@ -1,118 +1,261 @@
-"""
-Tests for the Autogen Ops Sphinx Hook.
-
-Verifies:
-1.  Recursion of SemanticsManager logic inside the hook.
-2.  File creation in the `docs/ops` directory.
-3.  Structure of the `index.rst` table of contents.
-4.  Filtering of Orphaned operations (implemented by < 2 frameworks).
-"""
+import yaml
+import shutil
+from pathlib import Path
+from unittest import mock
 
 import pytest
-from unittest.mock import MagicMock, patch
-from pathlib import Path
-
-from ml_switcheroo.sphinx_ext.autogen_ops import generate_op_docs
-
-
-@pytest.fixture
-def mock_app(tmp_path):
-  """
-  Mocks the Sphinx Application object, providing a `srcdir` that
-  points to a temporary directory.
-  """
-  app = MagicMock()
-  # Setup srcdir to simulate docs/ folder
-  docs_dir = tmp_path / "docs"
-  docs_dir.mkdir()
-  app.srcdir = str(docs_dir)
-  return app
+from ml_switcheroo.sphinx_ext.autogen_ops import (
+  IndentedDumper,
+  _build_yaml_entry,
+  _write_yaml_update,
+  generate_op_docs,
+  _write_index_file,
+)
 
 
-def test_autogen_creates_files_for_valid_ops(mock_app):
-  """
-  Scenario: Semantics contain 1 Op implemented by 2 frameworks.
-  Expectation: 'ops/ValidOp.rst' and 'ops/index.rst' are created.
-  """
-  # Mock Semantics
-  mock_apis = {
-    "ValidOp": {
-      "description": "A valid op.",
-      "std_args": ["x"],
-      "variants": {"torch": {"api": "torch.foo"}, "jax": {"api": "jnp.foo"}},
-    }
+class MockEnum:
+  def __init__(self, value):
+    self.value = value
+
+
+def test_indented_dumper():
+  dumper = IndentedDumper(None)
+  result = dumper.increase_indent(flow=False, indentless=True)
+  assert result is None
+
+
+def test_build_yaml_entry():
+  definition = {
+    "std_args": [
+      "arg_str",
+      ["arg_tuple_name", "arg_tuple_type"],
+      {"name": "arg_dict_name", "type": "arg_dict_type", "optional": None},
+      {"name": "arg_dict_2", "type": "arg_dict_type_2"},
+    ],
+    "op_type": MockEnum("test_enum_val"),
+    "variants": {"jax": {"b": 2, "a": 1}, "torch": None, "numpy": {"c": 3}},
+    "description": " Test desc `with` backticks ",
   }
 
-  with patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager") as MockMgr:
-    mgr = MockMgr.return_value
-    mgr.get_known_apis.return_value = mock_apis
+  entry = _build_yaml_entry("test_op", definition)
 
-    # Run Hook
-    generate_op_docs(mock_app)
+  assert entry["operation"] == "test_op"
+  assert entry["description"] == "Test desc `with` backticks"
+  assert entry["op_type"] == "test_enum_val"
 
-  # Verify Output Directory
-  ops_dir = Path(mock_app.srcdir) / "ops"
-  assert ops_dir.exists()
+  assert len(entry["std_args"]) == 4
+  assert entry["std_args"][0] == {"name": "arg_str", "type": "Any"}
+  assert entry["std_args"][1] == {"name": "arg_tuple_name", "type": "arg_tuple_type"}
+  assert entry["std_args"][2] == {"name": "arg_dict_name", "type": "arg_dict_type"}
+  assert entry["std_args"][3] == {"name": "arg_dict_2", "type": "arg_dict_type_2"}
 
-  # Verify Op File Created
-  op_file = ops_dir / "ValidOp.rst"
-  assert op_file.exists()
-  content = op_file.read_text("utf-8")
-  assert "ValidOp" in content
-
-  # Verify Index File Created and Linked
-  index_file = ops_dir / "index.rst"
-  assert index_file.exists()
-  index_content = index_file.read_text("utf-8")
-  assert "ValidOp" in index_content
+  assert "jax" in entry["variants"]
+  assert list(entry["variants"]["jax"].keys()) == ["a", "b"]  # sorted
+  assert "torch" not in entry["variants"]
+  assert "numpy" in entry["variants"]
 
 
-def test_autogen_skips_orphan_ops(mock_app, caplog):
-  """
-  Scenario: Semantics contain 1 Op implemented by ONLY 1 framework (Orphan).
-  Expectation: Directory created, but NO operation file created.
-  """
-  mock_apis = {
-    "OrphanOp": {
-      "description": "A lonely op.",
-      "std_args": ["x"],
-      "variants": {
-        "torch": {"api": "torch.foo"},
-        "jax": None,  # Explicitly disabled
-      },
-    }
+def test_build_yaml_entry_minimal():
+  entry = _build_yaml_entry("test_op", {})
+  assert entry["operation"] == "test_op"
+  assert entry["description"] == ""
+  assert entry["op_type"] == "function"
+  assert entry["std_args"] == []
+  assert entry["variants"] == {}
+
+  entry = _build_yaml_entry("test_op", {"std_args": [123]})
+  assert entry["std_args"] == []
+
+  entry = _build_yaml_entry("test_op", {"std_args": [["short"]]})
+  assert entry["std_args"] == []
+
+
+def test_write_yaml_update(tmp_path):
+  out_path = tmp_path / "operations.yaml"
+
+  new_entries = [
+    {"operation": "OpB", "val": 2},
+    {"operation": "OpA", "val": 1},
+  ]
+
+  _write_yaml_update(out_path, new_entries)
+
+  assert out_path.exists()
+  content = out_path.read_text()
+  assert "OpA" in content
+  assert "OpB" in content
+
+  new_entries_2 = [{"operation": "OpA", "val": 99}, {"operation": "OpC", "val": 3}]
+  _write_yaml_update(out_path, new_entries_2)
+
+  loaded = yaml.safe_load(out_path.read_text())
+  assert len(loaded) == 3
+  assert loaded[0]["operation"] == "OpA"
+  assert loaded[0]["val"] == 99
+  assert loaded[1]["operation"] == "OpB"
+  assert loaded[2]["operation"] == "OpC"
+
+
+def test_write_yaml_update_corrupt_existing(tmp_path):
+  out_path = tmp_path / "operations.yaml"
+  out_path.write_text("invalid: yaml: [")
+
+  new_entries = [{"operation": "OpA", "val": 1}]
+
+  _write_yaml_update(out_path, new_entries)
+
+  loaded = yaml.safe_load(out_path.read_text())
+  assert len(loaded) == 1
+  assert loaded[0]["operation"] == "OpA"
+
+
+def test_write_yaml_update_existing_not_list(tmp_path):
+  out_path = tmp_path / "operations.yaml"
+  out_path.write_text("not_a_list: true")
+
+  new_entries = [{"operation": "OpA", "val": 1}]
+
+  _write_yaml_update(out_path, new_entries)
+
+  loaded = yaml.safe_load(out_path.read_text())
+  assert len(loaded) == 1
+  assert loaded[0]["operation"] == "OpA"
+
+
+def test_write_yaml_update_ioerror(tmp_path):
+  out_path = tmp_path / "not_exist_dir" / "operations.yaml"
+
+  new_entries = [{"operation": "OpA", "val": 1}]
+
+  _write_yaml_update(out_path, new_entries)
+  assert not out_path.exists()
+
+
+def test_write_index_file(tmp_path):
+  out_dir = tmp_path / "out"
+  out_dir.mkdir()
+
+  _write_index_file(out_dir, ["op1", "op2"])
+
+  index_path = out_dir / "index.rst"
+  assert index_path.exists()
+  content = index_path.read_text()
+  assert "Operation Reference" in content
+  assert ".. toctree::" in content
+  assert "   op1" in content
+  assert "   op2" in content
+
+
+class MockApp:
+  def __init__(self, srcdir):
+    self.srcdir = srcdir
+
+
+@mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager")
+@mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.DocContextBuilder")
+@mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.OpPageRenderer")
+def test_generate_op_docs(mock_renderer_cls, mock_builder_cls, mock_manager_cls, tmp_path):
+  mock_manager = mock.Mock()
+  mock_manager_cls.return_value = mock_manager
+
+  mock_manager.get_known_apis.return_value = {
+    "ValidOp": {"variants": {"jax": {}, "torch": {}}},
+    "SkipMeOp": {"variants": {"jax": {}}},
+    "validop": {"variants": {"jax": {}, "torch": {}}},  # collision with ValidOp
+    "INDEX": {"variants": {"jax": {}, "torch": {}}},
+    "Op/With!Special": {"variants": {"jax": {}, "torch": {}}},
   }
 
-  with patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager") as MockMgr:
-    mgr = MockMgr.return_value
-    mgr.get_known_apis.return_value = mock_apis
-    generate_op_docs(mock_app)
+  mock_builder = mock.Mock()
+  mock_builder_cls.return_value = mock_builder
+  mock_builder.build.return_value = "mock_context"
 
-  ops_dir = Path(mock_app.srcdir) / "ops"
+  mock_renderer = mock.Mock()
+  mock_renderer_cls.return_value = mock_renderer
+  mock_renderer.render_rst.return_value = "mock_rst_content"
 
-  # File should NOT exist
-  op_file = ops_dir / "OrphanOp.rst"
-  assert not op_file.exists()
+  srcdir = tmp_path / "docs"
+  srcdir.mkdir()
 
-  # Index should NOT link it
-  index_file = ops_dir / "index.rst"
-  index_content = index_file.read_text("utf-8")
-  assert "OrphanOp" not in index_content
+  out_dir = srcdir / "ops"
+  out_dir.mkdir()
+  (out_dir / "stale.rst").write_text("stale")
+
+  app = MockApp(str(srcdir))
+
+  generate_op_docs(app)
+
+  assert not (out_dir / "stale.rst").exists()
+  assert (out_dir / "ValidOp.rst").exists()
+
+  # Check that SkipMeOp was skipped and not written
+  # We use a completely unique name to avoid MacOS case-insensitivity tricking the assert
+  assert not (out_dir / "SkipMeOp.rst").exists()
+
+  # validop is skipped because of case-insensitive collision with ValidOp
+  # Actually, on MacOS, validop.rst and ValidOp.rst are the same file, so we can't test existence.
+  # But the file list generated shouldn't have duplicate or skipped entries.
+  index_content = (out_dir / "index.rst").read_text()
+  assert "   ValidOp" in index_content
+  assert "   validop" not in index_content
+
+  assert (out_dir / "index_op.rst").exists()
+  assert (out_dir / "OpWithSpecial.rst").exists()
+
+  assert (srcdir / "operations.yaml").exists()
 
 
-def test_autogen_handles_empty_semantics(mock_app, caplog):
-  """
-  Scenario: Semantics are completely empty.
-  Expectation: Warning logged, no crashes.
-  """
-  with patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager") as MockMgr:
-    mgr = MockMgr.return_value
-    mgr.get_known_apis.return_value = {}
+@mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager")
+@mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.DocContextBuilder")
+@mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.OpPageRenderer")
+def test_generate_op_docs_ioerror(mock_renderer_cls, mock_builder_cls, mock_manager_cls, tmp_path):
+  mock_manager = mock.Mock()
+  mock_manager_cls.return_value = mock_manager
+  mock_manager.get_known_apis.return_value = {
+    "ValidOp": {"variants": {"jax": {}, "torch": {}}},
+  }
 
-    generate_op_docs(mock_app)
+  mock_builder = mock.Mock()
+  mock_builder_cls.return_value = mock_builder
 
-  ops_dir = Path(mock_app.srcdir) / "ops"
-  assert ops_dir.exists()
+  mock_renderer = mock.Mock()
+  mock_renderer_cls.return_value = mock_renderer
 
-  # Check warning log
-  assert "No operations found" in caplog.text
+  srcdir = tmp_path / "docs"
+  srcdir.mkdir()
+
+  app = MockApp(str(srcdir))
+
+  # Only raise IOError when writing the RST file inside the ops dir
+  original_open = open
+
+  def mock_open(path, *args, **kwargs):
+    if "ValidOp.rst" in str(path):
+      raise IOError("mock error")
+    return original_open(path, *args, **kwargs)
+
+  with mock.patch("builtins.open", mock_open):
+    generate_op_docs(app)
+
+  # generate_op_docs handles IOError gracefully for individual RST files
+  out_dir = srcdir / "ops"
+  assert not (out_dir / "ValidOp.rst").exists()
+
+
+@mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.SemanticsManager")
+@mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.DocContextBuilder")
+@mock.patch("ml_switcheroo.sphinx_ext.autogen_ops.OpPageRenderer")
+def test_generate_op_docs_empty(mock_renderer_cls, mock_builder_cls, mock_manager_cls, tmp_path):
+  mock_manager = mock.Mock()
+  mock_manager_cls.return_value = mock_manager
+  mock_manager.get_known_apis.return_value = {}
+
+  srcdir = tmp_path / "docs"
+  srcdir.mkdir()
+
+  app = MockApp(str(srcdir))
+
+  generate_op_docs(app)
+
+  out_dir = srcdir / "ops"
+  assert (out_dir / "index.rst").exists()

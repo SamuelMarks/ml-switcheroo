@@ -22,10 +22,10 @@ def handle_matrix() -> int:
   Returns:
       int: 0 on success.
   """
-  semantics = SemanticsManager()  # pragma: no cover
-  matrix = CompatibilityMatrix(semantics)  # pragma: no cover
-  matrix.render()  # pragma: no cover
-  return 0  # pragma: no cover
+  semantics = SemanticsManager()
+  matrix = CompatibilityMatrix(semantics)
+  matrix.render()
+  return 0
 
 
 def handle_docs(source: str, target: str, out_path: Path) -> int:
@@ -41,14 +41,14 @@ def handle_docs(source: str, target: str, out_path: Path) -> int:
   Returns:
       int: 0 on success.
   """
-  semantics = SemanticsManager()  # pragma: no cover
-  log_info(f"Generating comparison: {source} -> {target} at {out_path}...")  # pragma: no cover
-  generator = MigrationGuideGenerator(semantics)  # pragma: no cover
-  markdown = generator.generate(source, target)  # pragma: no cover
-  with open(out_path, "w", encoding="utf-8") as f:  # pragma: no cover
-    f.write(markdown)  # pragma: no cover
-  log_success(f"Documentation saved to [path]{out_path}[/path]")  # pragma: no cover
-  return 0  # pragma: no cover
+  semantics = SemanticsManager()
+  log_info(f"Generating comparison: {source} -> {target} at {out_path}...")
+  generator = MigrationGuideGenerator(semantics)
+  markdown = generator.generate(source, target)
+  with open(out_path, "w", encoding="utf-8") as f:
+    f.write(markdown)
+  log_success(f"Documentation saved to [path]{out_path}[/path]")
+  return 0
 
 
 def handle_gen_tests(out: Path) -> int:
@@ -62,9 +62,9 @@ def handle_gen_tests(out: Path) -> int:
   Returns:
       int: 0 on success.
   """
-  mgr = SemanticsManager()  # pragma: no cover
-  semantics = mgr.get_known_apis()  # pragma: no cover
-  out.parent.mkdir(parents=True, exist_ok=True)  # pragma: no cover
-  gen = TestCaseGenerator(semantics_mgr=mgr)  # pragma: no cover
-  gen.generate(semantics, out)  # pragma: no cover
-  return 0  # pragma: no cover
+  mgr = SemanticsManager()
+  semantics = mgr.get_known_apis()
+  out.parent.mkdir(parents=True, exist_ok=True)
+  gen = TestCaseGenerator(semantics_mgr=mgr)
+  gen.generate(semantics, out)
+  return 0

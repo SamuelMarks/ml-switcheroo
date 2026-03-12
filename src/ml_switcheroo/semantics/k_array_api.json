@@ -1,4 +1,10 @@
 {
+  "DummyOpNonExistent": {
+    "description": "Definition for DummyOpNonExistent",
+    "operation": "DummyOpNonExistent",
+    "std_args": [],
+    "variants": {}
+  },
   "permute_dims": {
     "description": "Definition for permute_dims",
     "operation": "permute_dims",

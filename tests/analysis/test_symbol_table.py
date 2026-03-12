@@ -11,13 +11,13 @@ from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer, ModuleType,
 
 @pytest.fixture
 def analyzer():
-  """Function docstring."""
+  """Test case for analyzer."""
   # Mock Semantics
   semantics = MagicMock()
 
   # Mock definition that returns a Tensor return type
   def get_def(name):
-    """Function docstring."""
+    """Test case for get_def."""
     if "randn" in name or "add" in name or "abs" in name:
       return ("op", {"return_type": "Tensor"})
     return None
@@ -27,7 +27,7 @@ def analyzer():
 
 
 def analyze(code, analyzer):
-  """Function docstring."""
+  """Test case for analyze."""
   tree = cst.parse_module(code)
   # Run visitor
   tree.visit(analyzer)
@@ -35,7 +35,7 @@ def analyze(code, analyzer):
 
 
 def test_import_tracking(analyzer):
-  """Function docstring."""
+  """Test case for test_import_tracking."""
   code = "import torch.nn as nn"
   analyze(code, analyzer)
   sym = analyzer.current_scope.get("nn")
@@ -44,7 +44,7 @@ def test_import_tracking(analyzer):
 
 
 def test_assignment_tracking(analyzer):
-  """Function docstring."""
+  """Test case for test_assignment_tracking."""
   code = """ 
 import torch
 x = torch.randn(1) 
@@ -181,3 +181,231 @@ def test_implicit_tensor_method_on_union(analyzer):
 
   res_type = analyzer.table.get_type(call_node)
   assert isinstance(res_type, TensorType)
+
+
+from ml_switcheroo.analysis.symbol_table import SymbolType, TensorType, ModuleType, UnionType, Scope
+
+
+def test_symbol_type_equality():
+  """Test SymbolType equality."""
+  s1 = SymbolType("Test")
+  s2 = SymbolType("Test")
+  s3 = SymbolType("Other")
+  assert s1 == s2
+  assert s1 != s3
+  assert s1 != "Test"
+
+
+def test_tensor_type_equality():
+  """Test TensorType equality."""
+  t1 = TensorType("Tensor", "torch")
+  t2 = TensorType("Tensor", "torch")
+  t3 = TensorType("Tensor", "jax")
+  assert t1 == t2
+  assert t1 != t3
+  assert t1 != "Tensor"
+
+
+def test_module_type_equality():
+  """Test ModuleType equality."""
+  m1 = ModuleType("Module", "torch.nn")
+  m2 = ModuleType("Module", "torch.nn")
+  m3 = ModuleType("Module", "jax.nn")
+  assert m1 == m2
+  assert m1 != m3
+  assert m1 != "Module"
+
+
+def test_union_type_equality_and_str():
+  """Test UnionType equality and string representation."""
+  u1 = UnionType([TensorType("Tensor", "torch"), ModuleType("Module", "torch.nn")])
+  u2 = UnionType([ModuleType("Module", "torch.nn"), TensorType("Tensor", "torch")])
+  u3 = UnionType([TensorType("Tensor", "jax")])
+  assert u1 == u2
+  assert u1 != u3
+  assert u1 != "Union"
+  assert str(u1) == "Union[Module, Tensor]"
+
+
+def test_scope_resolution_parent():
+  """Test Scope resolution with a parent scope."""
+  parent = Scope(name="parent")
+  parent.set("x", SymbolType("ParentType"))
+  child = Scope(parent=parent, name="child")
+  child.set("y", SymbolType("ChildType"))
+
+  assert child.get("y").name == "ChildType"
+  assert child.get("x").name == "ParentType"
+  assert child.get("z") is None
+
+
+def test_class_and_function_scope(analyzer):
+  """Test traversing class and function definitions creates and drops scopes."""
+  code = """
+class MyClass:
+    a = torch.randn(1)
+    def my_func(self):
+        b = torch.randn(1)
+"""
+  analyze(code, analyzer)
+  assert analyzer.current_scope.name == "global"
+
+
+def test_for_else(analyzer):
+  """Test For loop with an else branch."""
+  code = """
+import torch
+x = torch.nn
+for i in range(10):
+    pass
+else:
+    x = torch.randn(1)
+"""
+  analyze(code, analyzer)
+  sym = analyzer.current_scope.get("x")
+  assert isinstance(sym, UnionType)
+
+
+def test_while_loop(analyzer):
+  """Test While loop execution."""
+  code = """
+import torch
+x = torch.nn
+while True:
+    x = torch.randn(1)
+"""
+  analyze(code, analyzer)
+  sym = analyzer.current_scope.get("x")
+  assert isinstance(sym, UnionType)
+
+
+def test_while_loop_else(analyzer):
+  """Test While loop with else branch."""
+  code = """
+import torch
+x = torch.nn
+while True:
+    pass
+else:
+    x = torch.randn(1)
+"""
+  analyze(code, analyzer)
+  sym = analyzer.current_scope.get("x")
+  assert isinstance(sym, UnionType)
+
+
+def test_ifexp_partial(analyzer):
+  """Test ternary expression (IfExp) when only one side has a recognized type."""
+  code = """
+import torch
+x = torch.randn(1) if True else untyped_func()
+y = untyped_func() if True else torch.randn(1)
+"""
+  analyze(code, analyzer)
+  assert isinstance(analyzer.current_scope.get("x"), TensorType)
+  assert isinstance(analyzer.current_scope.get("y"), TensorType)
+
+
+def test_merge_states_b_only(analyzer):
+  """Test merging states when a key is present only in the second state."""
+  code = """
+import torch
+if True:
+    pass
+else:
+    z = torch.randn(1)
+"""
+  analyze(code, analyzer)
+  sym = analyzer.current_scope.get("z")
+  assert isinstance(sym, TensorType)
+
+
+def test_make_union_same(analyzer):
+  """Test _make_union with two identical types."""
+  t1 = TensorType("Tensor", "torch")
+  res = analyzer._make_union(t1, t1)
+  assert res == t1
+
+
+def test_make_union_nested(analyzer):
+  """Test _make_union flattening nested UnionTypes."""
+  t1 = TensorType("Tensor", "torch")
+  m1 = ModuleType("Module", "torch.nn")
+  u1 = UnionType([t1, m1])
+  res = analyzer._make_union(u1, t1)
+  assert isinstance(res, UnionType)
+  assert len(res.types) == 2
+
+
+def test_make_union_dedup_single(analyzer):
+  """Test _make_union deduplicating to a single type."""
+  t1 = TensorType("Tensor", "torch")
+  t2 = TensorType("Tensor", "torch")
+  u1 = UnionType([t1])
+  res = analyzer._make_union(u1, t2)
+  assert isinstance(res, TensorType)
+
+
+def test_import_from(analyzer):
+  """Test tracking ImportFrom statements including without a module."""
+  code = """
+from torch import nn, optim as opt
+from . import local_module
+"""
+  analyze(code, analyzer)
+  assert isinstance(analyzer.current_scope.get("nn"), ModuleType)
+  assert isinstance(analyzer.current_scope.get("opt"), ModuleType)
+  assert analyzer.current_scope.get("local_module") is None
+
+
+def test_assign_untyped(analyzer):
+  """Test Assign when the right hand side is an unknown type."""
+  code = """
+untyped_var = untyped_func()
+"""
+  analyze(code, analyzer)
+  assert analyzer.current_scope.get("untyped_var") is None
+
+
+def test_assign_attribute(analyzer):
+  """Test Assign to an attribute records the type."""
+  code = """
+import torch
+class A:
+    def __init__(self):
+        self.x = torch.randn(1)
+"""
+  tree = analyze(code, analyzer)
+
+  class AttrVisitor(cst.CSTVisitor):
+    """Visitor to find Attribute nodes."""
+
+    def __init__(self):
+      """Initializes the visitor with an empty list of nodes."""
+      self.nodes = []
+
+    def visit_Attribute(self, node):
+      """Records Attribute nodes matching 'x'."""
+      if node.attr.value == "x":
+        self.nodes.append(node)
+
+  v = AttrVisitor()
+  tree.visit(v)
+  assert len(v.nodes) > 0
+  assert isinstance(analyzer.table.get_type(v.nodes[0]), TensorType)
+
+
+def test_call_on_tensor(analyzer):
+  """Test resolving a method call on a Tensor receiver."""
+  code = """
+import torch
+x = torch.randn(1)
+y = x.view()
+"""
+  analyzer.semantics.get_definition.side_effect = lambda n: (
+    ("op", {"return_type": "Tensor"}) if "view" in n or "randn" in n else None
+  )
+
+  analyze(code, analyzer)
+  sym = analyzer.current_scope.get("y")
+  assert isinstance(sym, TensorType)

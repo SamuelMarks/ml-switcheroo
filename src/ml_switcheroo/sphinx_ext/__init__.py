@@ -24,56 +24,50 @@ def setup(app: Any) -> Dict[str, Any]:
   Registers directives, connects build events, and adds static assets.
   """
   # --- Directives ---
-  app.add_directive("switcheroo_demo", SwitcherooDemo)  # pragma: no cover
+  app.add_directive("switcheroo_demo", SwitcherooDemo)
 
   # --- CodeMirror Assets (Editor) ---
   # Base
-  app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")  # pragma: no cover
-  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")  # pragma: no cover
+  app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")
 
   # Modes
-  app.add_js_file(
-    "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"
-  )  # pragma: no cover
-  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js")  # pragma: no cover
-  app.add_js_file(
-    "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"
-  )  # pragma: no cover
-  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js")  # pragma: no cover
-  app.add_js_file(
-    "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"
-  )  # pragma: no cover
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js")
+  app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js")
 
   # --- Mermaid JS (AST Visualizer) ---
-  app.add_js_file("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js")  # pragma: no cover
+  app.add_js_file("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js")
 
   # --- TikZJax (Graph Renderer) ---
   # Use CDN for fonts to fix relative path issues
-  app.add_css_file("https://tikzjax.com/v1/fonts.css")  # pragma: no cover
-  app.add_js_file(None, body="window.TIKZJAX_URL = '_static/tikzjax/tikzjax.js';")  # pragma: no cover
+  app.add_css_file("https://tikzjax.com/v1/fonts.css")
+  app.add_js_file(None, body="window.TIKZJAX_URL = '_static/tikzjax/tikzjax.js';")
 
   # --- Local Extension Assets ---
-  app.add_css_file("switcheroo_demo.css")  # pragma: no cover
-  app.add_css_file("trace_graph.css")  # pragma: no cover
-  app.add_js_file("trace_render.js")  # pragma: no cover
-  app.add_js_file("switcheroo_demo.js")  # pragma: no cover
+  app.add_css_file("switcheroo_demo.css")
+  app.add_css_file("trace_graph.css")
+  app.add_js_file("trace_render.js")
+  app.add_js_file("switcheroo_demo.js")
 
   # --- Docs UI Assets (Feature 3) ---
-  app.add_css_file("op_tabs.css")  # pragma: no cover
-  app.add_js_file("op_tabs.js")  # pragma: no cover
+  app.add_css_file("op_tabs.css")
+  app.add_js_file("op_tabs.js")
 
-  import os  # pragma: no cover
+  import os
 
   # --- Build Hooks ---
   # 1. Register static path
-  app.connect("builder-inited", add_static_path)  # pragma: no cover
+  app.connect("builder-inited", add_static_path)
   # 2. Copy WASM Wheel
-  app.connect("build-finished", copy_wheel_and_reqs)  # pragma: no cover
+  app.connect("build-finished", copy_wheel_and_reqs)
   # 3. Generate Operation Docs (Feature 4)
-  if os.environ.get("HOMEPAGE_ONLY") != "1":  # pragma: no cover
-    app.connect("builder-inited", generate_op_docs)  # pragma: no cover
+  if os.environ.get("HOMEPAGE_ONLY") != "1":
+    app.connect("builder-inited", generate_op_docs)
 
-  return {  # pragma: no cover
+  return {
     "version": __version__,
     "parallel_read_safe": True,
     "parallel_write_safe": True,

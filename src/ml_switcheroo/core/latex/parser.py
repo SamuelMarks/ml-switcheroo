@@ -105,7 +105,7 @@ class LatexParser:
   def _parse_arg_list(self, s: str) -> List[str]:
     """Parses comma-separated arguments logic."""
     if not s.strip():
-      return []  # pragma: no cover
+      return []
     return [a.strip() for a in s.split(",")]
 
   def _safe_value_node(self, val: str) -> cst.BaseExpression:
@@ -121,16 +121,16 @@ class LatexParser:
 
     # 1. Ellipsis Fallback
     if clean_val == "...":
-      return cst.Ellipsis()  # pragma: no cover
+      return cst.Ellipsis()
 
     # 2. Attempt Expression Parsing
     try:
       return cst.parse_expression(clean_val)
-    except cst.ParserSyntaxError:  # pragma: no cover
-      pass  # pragma: no cover
+    except cst.ParserSyntaxError:
+      pass
 
     # 3. Fallback to Identifier (Name)
-    return cst.Name(clean_val)  # pragma: no cover
+    return cst.Name(clean_val)
 
   def _create_call(self, func_name: str, config: Dict = None, args_list: List = None) -> cst.Call:
     """Constructs a CST Call node from config and arguments."""
@@ -140,7 +140,7 @@ class LatexParser:
       for x in p[1:]:
         fn = cst.Attribute(value=fn, attr=cst.Name(x))
     else:
-      fn = cst.Name(func_name)  # pragma: no cover
+      fn = cst.Name(func_name)
 
     # AssignEqual with empty whitespace around '='
     # to match tests expecting "key=val" instead of "key = val"
@@ -214,7 +214,7 @@ class LatexParser:
         rhs = self._create_call(fname, args_list=op.args)
       else:
         # Fallback, though should not be reachable given loop source
-        rhs = cst.Name("None")  # pragma: no cover
+        rhs = cst.Name("None")
 
       fwd_body.append(cst.SimpleStatementLine([cst.Assign(targets=[lhs], value=rhs)]))
 

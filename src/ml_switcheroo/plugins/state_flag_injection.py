@@ -40,7 +40,7 @@ def _get_func_name(node: cst.BaseExpression) -> Optional[str]:
     base = _get_func_name(node.value)
     if base:
       return f"{base}.{node.attr.value}"
-  return None  # pragma: no cover
+  return None
 
 
 @register_hook("inject_training_flag")
@@ -93,7 +93,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
       break
 
   if not flags:
-    return node  # pragma: no cover
+    return node
 
   # 3. Inject Arguments
   new_args = list(node.args)
@@ -101,7 +101,7 @@ def inject_training_flag_call(node: cst.Call, ctx: HookContext) -> cst.Call:
   for arg_name, val_node in flags.items():
     # Avoid duplication if user manually passed the argument
     if any(a.keyword and a.keyword.value == arg_name for a in new_args):
-      continue  # pragma: no cover
+      continue
 
     # Prepare formatting: Ensure previous arg has a comma
     if new_args and new_args[-1].comma == cst.MaybeSentinel.DEFAULT:
@@ -140,14 +140,14 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
   # 1. Validation: Must be an attribute call (obj.method())
   if not isinstance(node.func, cst.Attribute):
-    return node  # pragma: no cover
+    return node
 
   method_name = node.func.attr.value
   receiver_node = node.func.value
   obj_name = _get_func_name(receiver_node)
 
   if not obj_name:
-    return node  # pragma: no cover
+    return node
 
   # 2. Determine State Value
   state_updates: Dict[str, Any] = {}
@@ -162,7 +162,7 @@ def capture_eval_state(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
       # Simple heuristic: grab first arg.
       # If it's a literal 'False' or 'True', we use it.
       # For variables, we just passthrough the variable name node.
-      val = node.args[0].value  # pragma: no cover
+      val = node.args[0].value
     state_updates["training"] = val
 
   # 3. persist State in Context

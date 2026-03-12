@@ -17,7 +17,7 @@ class RdnaNode(abc.ABC):
   @abc.abstractmethod
   def __str__(self) -> str:
     """Returns the valid RDNA string representation of the node."""
-    pass  # pragma: no cover
+    pass
 
 
 @dataclass
@@ -25,8 +25,8 @@ class Operand(RdnaNode):
   """Base class for instruction operands (Registers, Immediates, etc.)."""
 
   def __str__(self) -> str:
-    """TODO: Add docstring."""  # pragma: no cover
-    return ""  # pragma: no cover
+    """TODO: Add docstring."""
+    return ""
 
 
 @dataclass
@@ -86,19 +86,16 @@ class VGPR(Operand):
       return f"v[{self.index}:{end}]"
     return f"v{self.index}"
 
-  # pragma: no cover
-
 
 # Helper aliases for creating registers
 def c_SGPR(idx: int) -> SGPR:
   """Helper to create a single SGPR."""
-  return SGPR(idx)  # pragma: no cover
-  # pragma: no cover
+  return SGPR(idx)
 
 
 def c_VGPR(idx: int) -> VGPR:
   """Helper to create a single VGPR."""
-  return VGPR(idx)  # pragma: no cover
+  return VGPR(idx)
 
 
 @dataclass
@@ -177,7 +174,7 @@ class Instruction(RdnaNode):
   Attributes:
       opcode (str): The instruction mnemonic (e.g., "v_add_f32", "s_mov_b32").
       operands (List[Operand]): List of operand nodes.
-  """  # pragma: no cover
+  """
 
   opcode: str
   operands: List[Operand] = field(default_factory=list)
@@ -185,7 +182,7 @@ class Instruction(RdnaNode):
   def __str__(self) -> str:
     """TODO: Add docstring."""
     if not self.operands:
-      return self.opcode  # pragma: no cover
+      return self.opcode
     # Modifiers often appear without commas in some diassemblies, but standard
     # assembly usually comma-separates or space-separates depending on the specific assembler version.
     # We default to comma-separated for standard operands.

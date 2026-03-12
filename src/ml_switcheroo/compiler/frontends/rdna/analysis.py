@@ -40,7 +40,7 @@ class RdnaAnalyzer:
             loop_limits.append(op.value)
 
     if not loop_limits:
-      return metadata  # pragma: no cover
+      return metadata
 
     if kind == "Conv2d":
       k_size = max(loop_limits)

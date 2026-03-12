@@ -44,10 +44,10 @@ def load_definitions(framework: str) -> Dict[str, StandardMap]:
 
     # Convert dictionary entries to Pydantic models
     return {op_name: StandardMap.model_validate(op_def) for op_name, op_def in raw_data.items()}
-  except (json.JSONDecodeError, OSError) as e:  # pragma: no cover
+  except (json.JSONDecodeError, OSError) as e:
     # Log via print/logging system in real app; here we return empty safely
-    print(f"Failed to load definitions for {framework}: {e}")  # pragma: no cover
-    return {}  # pragma: no cover
+    print(f"Failed to load definitions for {framework}: {e}")
+    return {}
 
 
 def clear_definition_cache() -> None:
@@ -55,7 +55,7 @@ def clear_definition_cache() -> None:
   Clears the LRU cache for definitions.
   Useful for tests or hot-reloading scenarios.
   """
-  load_definitions.cache_clear()  # pragma: no cover
+  load_definitions.cache_clear()
 
 
 def get_definitions_path(framework: str) -> Path:

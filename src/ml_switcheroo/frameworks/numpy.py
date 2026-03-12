@@ -50,7 +50,7 @@ class NumpyAdapter:
     Returns:
         List[str]: Modules.
     """
-    return ["numpy", "numpy.linalg", "numpy.fft"]  # pragma: no cover
+    return ["numpy", "numpy.linalg", "numpy.fft"]
 
   @property
   def unsafe_submodules(self) -> Set[str]:
@@ -60,7 +60,7 @@ class NumpyAdapter:
     Returns:
         Set[str]: Empty.
     """
-    return set()  # pragma: no cover
+    return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -177,7 +177,7 @@ class NumpyAdapter:
     Returns:
         PluginTraits: Capabilities.
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=False,
       requires_functional_state=False,
@@ -215,7 +215,7 @@ class NumpyAdapter:
     Returns:
         List[GhostRef]: Empty list.
     """
-    return []  # pragma: no cover
+    return []
 
   # --- Syntax Generation ---
 
@@ -239,7 +239,7 @@ class NumpyAdapter:
     Returns:
         str: "False".
     """
-    return "False"  # pragma: no cover
+    return "False"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """
@@ -252,7 +252,7 @@ class NumpyAdapter:
     Returns:
         str: "pass".
     """
-    return "pass"  # pragma: no cover
+    return "pass"
 
   def get_serialization_imports(self) -> List[str]:
     """
@@ -279,17 +279,17 @@ class NumpyAdapter:
       return f"np.save(file={file_arg}, arr={object_arg})"
     elif op == "load":
       return f"np.load(file={file_arg})"
-    return ""  # pragma: no cover
+    return ""
 
   # --- Weight Handling ---
 
   def get_weight_conversion_imports(self) -> List[str]:
-    """TODO: Add docstring."""  # pragma: no cover
-    return ["import numpy as np"]  # pragma: no cover
+    """TODO: Add docstring."""
+    return ["import numpy as np"]
 
   def get_weight_load_code(self, path_var: str) -> str:
-    """Loads .npz files into a dictionary."""  # pragma: no cover
-    return textwrap.dedent(  # pragma: no cover
+    """Loads .npz files into a dictionary."""
+    return textwrap.dedent(
       f""" 
             loaded = np.load({path_var}, allow_pickle=True) 
             # If NpzFile wrapper, convert to dict
@@ -303,11 +303,11 @@ class NumpyAdapter:
             """
     )
 
-  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:  # pragma: no cover
+  def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
     """TODO: Add docstring."""
     return f"{tensor_var}"
 
-  def get_weight_save_code(self, state_var: str, path_var: str) -> str:  # pragma: no cover
+  def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Saves dictionary to compressed .npz."""
     return f"np.savez_compressed({path_var}, **{state_var})"
 
@@ -345,21 +345,21 @@ class NumpyAdapter:
       return {k: self.convert(v) for k, v in data.items()}
 
     if hasattr(data, "detach"):
-      try:  # pragma: no cover
-        return data.detach().cpu().numpy()  # pragma: no cover
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
-    if hasattr(data, "numpy"):  # pragma: no cover
-      try:  # pragma: no cover
-        return data.numpy()  # pragma: no cover
+      try:
+        return data.detach().cpu().numpy()
+      except Exception:
+        pass
+    if hasattr(data, "numpy"):
+      try:
+        return data.numpy()
       except Exception:
         pass
     if hasattr(data, "__array__"):
-      try:  # pragma: no cover
-        return np.array(data)  # pragma: no cover
-      except Exception:  # pragma: no cover
+      try:
+        return np.array(data)
+      except Exception:
         pass
-    return data  # pragma: no cover
+    return data
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """

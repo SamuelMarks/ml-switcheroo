@@ -77,10 +77,8 @@ class WeightScriptGenerator:
       tree.visit(extractor)
 
       if not extractor.layer_registry:
-        log_error(
-          "No layers detected in source file. Ensure it contains a class with layers in __init__."
-        )  # pragma: no cover
-        return False  # pragma: no cover
+        log_error("No layers detected in source file. Ensure it contains a class with layers in __init__.")
+        return False
 
     except Exception as e:
       log_error(f"Failed to parse source AST: {e}")
@@ -97,9 +95,9 @@ class WeightScriptGenerator:
       output_script.write_text(script_content, encoding="utf-8")
       log_success(f"Generated weight migration script at [path]{output_script}[/path]")
       return True
-    except Exception as e:  # pragma: no cover
-      log_error(f"Failed to write output script: {e}")  # pragma: no cover
-      return False  # pragma: no cover
+    except Exception as e:
+      log_error(f"Failed to write output script: {e}")
+      return False
 
   def _flatten_mapping_rules(self, layer_registry: Dict[str, Any]) -> List[Dict[str, Any]]:
     """
@@ -164,7 +162,7 @@ class WeightScriptGenerator:
               perm = compute_permutation(fmt_in.strip(), fmt_out.strip())
             else:
               # Going HWIO -> OIHW
-              perm = compute_permutation(fmt_out.strip(), fmt_in.strip())  # pragma: no cover
+              perm = compute_permutation(fmt_out.strip(), fmt_in.strip())
 
         rules.append(
           {

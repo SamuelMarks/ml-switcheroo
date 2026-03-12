@@ -48,8 +48,8 @@ def get_template(manager: Any, framework: str) -> Dict[str, str]:
   if manager:
     try:
       tmpl = manager.get_test_template(framework)
-    except Exception:  # pragma: no cover
-      pass  # pragma: no cover
+    except Exception:
+      pass
 
   if tmpl:
     return tmpl
@@ -72,7 +72,7 @@ def is_static_arg(arg_info: Dict[str, Any]) -> bool:
   """
   t = arg_info.get("type", "")
   # Heuristic: primitives are usually static in JAX JIT context for shapes/axes
-  if t.lower() in ("int", "bool", "str", "List[int]", "Tuple[int]"):
+  if t.lower() in ("int", "bool", "str", "list[int]", "tuple[int]"):
     return True
   elif arg_info.get("name") in ("axis", "dim", "keepdims"):
     return True

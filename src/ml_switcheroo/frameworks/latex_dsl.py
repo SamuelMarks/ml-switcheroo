@@ -45,7 +45,7 @@ class LatexDSLAdapter:
     """TODO: Add docstring."""
     return []
 
-  @property  # pragma: no cover
+  @property
   def unsafe_submodules(self) -> Set[str]:
     """TODO: Add docstring."""
     return set()
@@ -97,42 +97,39 @@ class LatexDSLAdapter:
     """TODO: Add docstring."""
     return []
 
-  # pragma: no cover
   @property
   def structural_traits(self) -> StructuralTraits:
     """TODO: Add docstring."""
     return StructuralTraits(
       module_base="midl.Module",
-      forward_method="forward",  # pragma: no cover
+      forward_method="forward",
       init_method_name="__init__",
       requires_super_init=True,
     )
 
-  @property  # pragma: no cover
+  @property
   def plugin_traits(self) -> PluginTraits:
     """TODO: Add docstring."""
     return PluginTraits()
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """TODO: Add docstring."""  # pragma: no cover
+    """TODO: Add docstring."""
     defs = load_definitions("latex_dsl")
     if "Module" not in defs:
-      defs["Module"] = StandardMap(api="midl.Module")  # pragma: no cover
+      defs["Module"] = StandardMap(api="midl.Module")
 
     # Updated mappings to preserve 'kernel_size' for legibility in generated LaTeX
     # instead of mapping to generic arg_2
     if "Conv2d" not in defs:
-      defs["Conv2d"] = StandardMap(  # pragma: no cover
+      defs["Conv2d"] = StandardMap(
         api="midl.Conv2d",
         args={"in_channels": "arg_0", "out_channels": "arg_1", "kernel_size": "kernel_size"},
       )
 
     # Add Linear fallback for tests
     if "Linear" not in defs:
-      defs["Linear"] = StandardMap(
-        api="midl.Linear", args={"in_features": "arg_0", "out_features": "arg_1"}
-      )  # pragma: no cover
+      defs["Linear"] = StandardMap(api="midl.Linear", args={"in_features": "arg_0", "out_features": "arg_1"})
 
     return defs
 
@@ -158,56 +155,55 @@ class LatexDSLAdapter:
         operation="Linear",
         description="Linear Layer",
         std_args=[ParameterDef(name="in_features"), ParameterDef(name="out_features")],
-        variants={},  # pragma: no cover
+        variants={},
       )
 
     return specs
 
   @property
-  def rng_seed_methods(self) -> List[str]:  # pragma: no cover
+  def rng_seed_methods(self) -> List[str]:
     """TODO: Add docstring."""
     return []
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """TODO: Add docstring."""  # pragma: no cover
+    """TODO: Add docstring."""
     return ""
 
-  def get_device_check_syntax(self) -> str:  # pragma: no cover
+  def get_device_check_syntax(self) -> str:
     """TODO: Add docstring."""
     return "True"
 
-  # pragma: no cover
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """TODO: Add docstring."""
     return ""
 
   def get_serialization_imports(self) -> List[str]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
-  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:  # pragma: no cover
+  def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """TODO: Add docstring."""
     return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
   def get_weight_load_code(self, path_var: str) -> str:
     """TODO: Add docstring."""
-    return "# Weights not supported in LaTeX mode"  # pragma: no cover
+    return "# Weights not supported in LaTeX mode"
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
     """TODO: Add docstring."""
-    return tensor_var  # pragma: no cover
+    return tensor_var
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """TODO: Add docstring."""
-    return "# Weights not supported in LaTeX mode"  # pragma: no cover
+    return "# Weights not supported in LaTeX mode"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """TODO: Add docstring."""
@@ -219,7 +215,7 @@ class LatexDSLAdapter:
 
   def convert(self, data: Any) -> Any:
     """TODO: Add docstring."""
-    return str(data)  # pragma: no cover
+    return str(data)
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """TODO: Add docstring."""

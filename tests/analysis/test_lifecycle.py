@@ -7,7 +7,7 @@ from ml_switcheroo.analysis.lifecycle import InitializationTracker
 
 
 def scan_code(code: str) -> list[str]:
-  """Function docstring."""
+  """Test case for scan_code."""
   wrapper = cst.parse_module(code)
   tracker = InitializationTracker()
   wrapper.visit(tracker)
@@ -15,7 +15,7 @@ def scan_code(code: str) -> list[str]:
 
 
 def test_valid_init_usage():
-  """Function docstring."""
+  """Test case for test_valid_init_usage."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -28,7 +28,7 @@ class Model:
 
 
 def test_missing_init():
-  """Function docstring."""
+  """Test case for test_missing_init."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -43,7 +43,7 @@ class Model:
 
 
 def test_call_alias():
-  """Function docstring."""
+  """Test case for test_call_alias."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -57,7 +57,7 @@ class Model:
 
 
 def test_multiple_missing():
-  """Function docstring."""
+  """Test case for test_multiple_missing."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -72,7 +72,7 @@ class Model:
 
 
 def test_annotated_assignment():
-  """Function docstring."""
+  """Test case for test_annotated_assignment."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -85,7 +85,7 @@ class Model:
 
 
 def test_tuple_unpacking_assignment():
-  """Function docstring."""
+  """Test case for test_tuple_unpacking_assignment."""
   code = """ 
 class Model: 
     def __init__(self): 
@@ -98,7 +98,7 @@ class Model:
 
 
 def test_nested_classes():
-  """Function docstring."""
+  """Test case for test_nested_classes."""
   code = """ 
 class Outer: 
     def __init__(self): 
@@ -140,3 +140,29 @@ class Model:
   # self.dynamic is used, but not found in __init__. Should warn.
   assert len(warnings) == 1
   assert "dynamic" in warnings[0]
+
+
+def test_module_level_constructs():
+  """
+  Scenario: Functions, assignments, and attributes exist outside a class.
+  Expectation: Scope stack is empty. Lifecycle analysis safely ignores them.
+  """
+  code = """
+def my_func():
+    pass
+
+def __init__():
+    pass
+
+self.x = 1
+self.y: int = 2
+
+z = self.x
+"""
+  issues = scan_code(code)
+  assert len(issues) == 0
+
+
+def test_defensive_leave_classdef():
+  tracker = InitializationTracker()
+  tracker.leave_ClassDef(None)

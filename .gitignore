@@ -1,3 +1,5 @@
+*,cover
+onnx9000
 tmp
 *.log
 .hypothesis

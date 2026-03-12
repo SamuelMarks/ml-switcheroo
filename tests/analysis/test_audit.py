@@ -244,3 +244,34 @@ def test_handle_audit_missing_report(tmp_path, capsys):
   # Check Row Content
   assert "torch" in captured.out
   assert "torch.secret_op" in captured.out
+
+
+def test_scanner_import_from_no_module(semantics):
+  """
+  Scenario: `from . import foo` where module is None in CST.
+  Expectation: Gracefully ignores and doesn't crash.
+  """
+  code = "from . import foo\nfoo.bar()"
+  results = scan_code(code, semantics, roots=["foo"])
+  assert len(results) == 1
+  assert results["foo.bar"][0] is False
+
+
+def test_scanner_call_no_fqn(semantics):
+  """
+  Scenario: Call to a complex expression that has no FQN.
+  Expectation: Ignored.
+  """
+  code = "x[0]()"
+  results = scan_code(code, semantics, roots=["x"])
+  assert len(results) == 0
+
+
+def test_scanner_attribute_no_raw_name(semantics):
+  """
+  Scenario: Attribute access on a complex expression that has no FQN.
+  Expectation: Ignored.
+  """
+  code = "x[0].y"
+  results = scan_code(code, semantics, roots=["x"])
+  assert len(results) == 0

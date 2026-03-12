@@ -1,160 +1,204 @@
-"""
-Tests for Scheduler Rewiring Plugin.
-"""
-
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-
-# Fix: Import TestRewriter shim from conftest
-from tests.conftest import TestRewriter as PivotRewriter
-
-from ml_switcheroo.config import RuntimeConfig
-import ml_switcheroo.core.hooks as hooks
-from ml_switcheroo.plugins.schedulers import transform_scheduler_init, transform_scheduler_step
-
-
-def rewrite_code(rewriter, code):
-  """Executes the rewriter pipeline."""
-  tree = cst.parse_module(code)
-  # Use .convert() instead of .visit() for the pipeline shim
-  return rewriter.convert(tree).code
+from ml_switcheroo.plugins.schedulers import (
+  _create_dotted_name,
+  _get_target_arg_name,
+  transform_scheduler_init,
+  _transform_step_lr,
+  _transform_cosine_lr,
+  transform_scheduler_step,
+)
 
 
-@pytest.fixture
-def rewriter():
-  """Function docstring."""
-  hooks._HOOKS["scheduler_rewire"] = transform_scheduler_init
-  hooks._HOOKS["scheduler_step_noop"] = transform_scheduler_step
-  hooks._PLUGINS_LOADED = True
-
-  mgr = MagicMock()
-
-  # Define "StepLR" with JAX mapping
-  step_def = {
-    "variants": {
-      "torch": {"api": "torch.optim.lr_scheduler.StepLR"},
-      "jax": {
-        "api": "optax.custom_decay",  # Changed from default to verify dynamic lookup
-        "requires_plugin": "scheduler_rewire",
-        "args": {"step_size": "steps"},  # Verify custom arg mapping works
-      },
-      "keras": {
-        "api": "keras.optimizers.schedules.ExponentialDecay",
-        "requires_plugin": "scheduler_rewire",
-        "args": {
-          "step_size": "decay_steps",
-          "initial_learning_rate": "initial_learning_rate",
-        },
-      },
-    }
-  }
-
-  # Helper for definition lookup
-  def get_def(name):
-    """Function docstring."""
-    if "StepLR" in name:
-      return "StepLR", step_def
-    return None
-
-  mgr.get_definition.side_effect = get_def
-  mgr.get_definition_by_id.side_effect = lambda aid: step_def if aid == "StepLR" else None
-
-  # Helper for variant resolution
-  def resolve(aid, fw):
-    """Function docstring."""
-    if aid == "StepLR" and fw in step_def["variants"]:
-      return step_def["variants"][fw]
-    return None
-
-  mgr.resolve_variant.side_effect = resolve
-
-  mgr.get_known_apis.return_value = {"StepLR": step_def}
-  mgr.is_verified.return_value = True
-  # Safe defaults
-  mgr.get_framework_config.return_value = {}
-
-  # Default to JAX
-  cfg = RuntimeConfig(source_framework="torch", target_framework="jax")
-  return PivotRewriter(mgr, cfg)
+class DummyVariant:
+  def __init__(self, args=None):
+    self.args = args
 
 
-def test_step_lr_rewire_jax(rewriter):
-  """
-  Input: StepLR(optimizer, step_size=30, gamma=0.1)
-  Output: optax.custom_decay(init_value=1.0, steps=30, decay_rate=0.1, staircase=True)
+class DummyContext:
+  def __init__(self, op_id, api, variant_args=None):
+    self.current_op_id = op_id
+    self._api = api
+    self.current_variant = DummyVariant(variant_args) if variant_args is not None else DummyVariant({})
 
-  Verifies:
-  1. API string 'optax.custom_decay' loaded from mock (not hardcoded).
-  2. Arg rename 'step_size' -> 'steps' loaded from mock.
-  """
-  # Context state usually set by ApiPass logic
-  rewriter.ctx.current_op_id = "StepLR"
-
-  code = "sched = StepLR(optimizer, step_size=30, gamma=0.1)"
-
-  # Manual hook check is complex because hooks need node args context.
-  # We verify hook logic via direct invocation here or full pipeline.
-  # The 'rewrite_code' helper runs full pipeline.
-  # BUT, full pipeline needs ApiPass to detect 'StepLR' call.
-  # Since 'StepLR' is just a name here, we rely on test fixture mocking get_definition.
-
-  # Fix: Pipeline won't detect 'StepLR' if we don't have imports or full qual name
-  # unless we use lax detection. PyTorch source usually is torch.optim.lr_scheduler.StepLR.
-  # Let's adjust helper or rely on mocked get_definition accepting "StepLR".
-
-  # The helper rewrite_code(rewriter, code) runs the pipeline using the mocked semantics.
-  # Mock semantics returns "StepLR" definition for "StepLR".
-  res = rewrite_code(rewriter, code)
-
-  assert "optax.custom_decay" in res
-  assert "init_value=1.0" in res
-  assert "steps=30" in res  # Mapped via args dict
-  assert "decay_rate=0.1" in res  # Default fallback
-  assert "staircase=True" in res
+  def lookup_api(self, op_id):
+    return self._api
 
 
-def test_step_lr_retarget_keras(rewriter):
-  """
-  Scenario: Wire StepLR to Keras logic via Config change.
+def test_create_dotted_name():
+  node = _create_dotted_name("a")
+  assert isinstance(node, cst.Name)
+  assert node.value == "a"
 
-  Input: StepLR(optimizer, step_size=50)
-  Output: keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=1.0, decay_steps=50, staircase=True)
-
-  Verifies argument remapping handled dynamically based on framework variant.
-  """
-  # Update Context Config directly
-  rewriter.context.config.target_framework = "keras"
-  rewriter.context.hook_context.target_fw = "keras"
-  rewriter.context.hook_context.current_op_id = "StepLR"
-
-  code = "sched = StepLR(optimizer, step_size=50)"
-
-  # Direct hook transform test since full pipeline might reset context
-  tree = cst.parse_module(code)
-  call_node = tree.body[0].body[0].value
-
-  res_node = transform_scheduler_init(call_node, rewriter.ctx)
-  res = cst.Module(body=[cst.SimpleStatementLine([cst.Expr(res_node)])]).code
-
-  assert "keras.optimizers.schedules.ExponentialDecay" in res
-  assert "initial_learning_rate=1.0" in res
-  assert "decay_steps=50" in res  # Mapped via args dict
+  node = _create_dotted_name("a.b.c")
+  assert isinstance(node, cst.Attribute)
+  assert node.attr.value == "c"
+  assert node.value.attr.value == "b"
+  assert node.value.value.value == "a"
 
 
-def test_step_noop(rewriter):
-  """
-  Input: scheduler.step()
-  Output: None
-  """
-  code = "scheduler.step()"
-  # Manual hook
-  ctx = MagicMock()
-  ctx.target_fw = "jax"
-  ctx.current_op_id = "step"
+def test_get_target_arg_name():
+  # No variant
+  ctx1 = DummyContext("op", "api")
+  ctx1.current_variant = None
+  assert _get_target_arg_name(ctx1, "std_name", "default") == "default"
 
-  node = cst.parse_expression(code)
-  res = transform_scheduler_step(node, ctx)
+  # Variant with None args
+  ctx2 = DummyContext("op", "api", variant_args=None)
+  ctx2.current_variant.args = None
+  assert _get_target_arg_name(ctx2, "std_name", "default") == "default"
 
-  assert isinstance(res, cst.Name)
-  assert res.value == "None"
+  # Variant with empty args dict
+  ctx3 = DummyContext("op", "api", variant_args={})
+  assert _get_target_arg_name(ctx3, "std_name", "default") == "default"
+
+  # Variant with matched args dict
+  ctx4 = DummyContext("op", "api", variant_args={"std_name": "target_name"})
+  assert _get_target_arg_name(ctx4, "std_name", "default") == "target_name"
+
+
+def test_transform_scheduler_init_no_api():
+  ctx = DummyContext("StepLR", None)
+  call_node = cst.Call(func=cst.Name("StepLR"))
+  result = transform_scheduler_init(call_node, ctx)
+  assert result is call_node
+
+
+def test_transform_scheduler_init_unknown_op():
+  ctx = DummyContext("UnknownLR", "target.api")
+  call_node = cst.Call(func=cst.Name("UnknownLR"))
+  result = transform_scheduler_init(call_node, ctx)
+  assert result is call_node
+
+
+def test_transform_scheduler_init_none_op_id():
+  ctx = DummyContext(None, "target.api")
+  call_node = cst.Call(func=cst.Name("UnknownLR"))
+  result = transform_scheduler_init(call_node, ctx)
+  assert result is call_node
+
+
+def test_transform_scheduler_init_step_lr():
+  ctx = DummyContext("StepLR", "target.api")
+  call_node = cst.parse_expression("StepLR(optimizer, step_size=30, gamma=0.1)")
+  result = transform_scheduler_init(call_node, ctx)
+  assert isinstance(result, cst.Call)
+  assert result.func.value.value == "target"
+  assert result.func.attr.value == "api"
+
+
+def test_transform_scheduler_init_cosine_lr():
+  ctx = DummyContext("CosineAnnealingLR", "target.api")
+  call_node = cst.parse_expression("CosineAnnealingLR(optimizer, T_max=10, eta_min=0)")
+  result = transform_scheduler_init(call_node, ctx)
+  assert isinstance(result, cst.Call)
+
+
+def test_transform_step_lr_detailed():
+  ctx = DummyContext("StepLR", "target.api")
+
+  # 1. No args
+  call_node = cst.parse_expression("StepLR()")
+  result = _transform_step_lr(call_node, ctx, "target.api")
+  assert len(result.args) == 2  # init_value, staircase
+
+  # 2. Positional args
+  call_node = cst.parse_expression("StepLR(optim, 30, 0.1)")
+  result = _transform_step_lr(call_node, ctx, "target.api")
+  assert len(result.args) == 4
+  # Check that positional mapped to keyword
+  kw1 = result.args[1].keyword.value
+  kw2 = result.args[2].keyword.value
+  assert kw1 == "transition_steps"
+  assert kw2 == "decay_rate"
+
+  # 3. Keyword args out of order
+  call_node = cst.parse_expression("StepLR(optim, gamma=0.1, step_size=30)")
+  result = _transform_step_lr(call_node, ctx, "target.api")
+  args_kws = [arg.keyword.value for arg in result.args if arg.keyword]
+  assert "transition_steps" in args_kws
+  assert "decay_rate" in args_kws
+
+  # 4. Partial positional args (only step_size)
+  call_node = cst.parse_expression("StepLR(optim, 30)")
+  result = _transform_step_lr(call_node, ctx, "target.api")
+  args_kws = [arg.keyword.value for arg in result.args if arg.keyword]
+  assert "transition_steps" in args_kws
+  assert "decay_rate" not in args_kws
+
+  # 5. Mix with variants overriding arg names
+  ctx_variant = DummyContext(
+    "StepLR",
+    "target.api",
+    {
+      "initial_learning_rate": "custom_init",
+      "step_size": "custom_step",
+      "gamma": "custom_gamma",
+      "staircase": "custom_stair",
+    },
+  )
+  call_node = cst.parse_expression("StepLR(optim, step_size=30, gamma=0.1)")
+  result = _transform_step_lr(call_node, ctx_variant, "target.api")
+  args_kws = [arg.keyword.value for arg in result.args if arg.keyword]
+  assert "custom_init" in args_kws
+  assert "custom_step" in args_kws
+  assert "custom_gamma" in args_kws
+  assert "custom_stair" in args_kws
+
+
+def test_transform_cosine_lr_detailed():
+  ctx = DummyContext("CosineAnnealingLR", "target.api")
+
+  # 1. No args
+  call_node = cst.parse_expression("CosineAnnealingLR()")
+  result = _transform_cosine_lr(call_node, ctx, "target.api")
+  assert len(result.args) == 1  # init_value
+
+  # 2. Positional args
+  call_node = cst.parse_expression("CosineAnnealingLR(optim, 10, 0)")
+  result = _transform_cosine_lr(call_node, ctx, "target.api")
+  assert len(result.args) == 3
+  kw1 = result.args[1].keyword.value
+  kw2 = result.args[2].keyword.value
+  assert kw1 == "decay_steps"
+  assert kw2 == "alpha"
+
+  # 3. Keyword args out of order
+  call_node = cst.parse_expression("CosineAnnealingLR(optim, eta_min=0, T_max=10)")
+  result = _transform_cosine_lr(call_node, ctx, "target.api")
+  args_kws = [arg.keyword.value for arg in result.args if arg.keyword]
+  assert "decay_steps" in args_kws
+  assert "alpha" in args_kws
+
+  # 4. Single extra positional
+  call_node = cst.parse_expression("CosineAnnealingLR(optim, 10)")
+  result = _transform_cosine_lr(call_node, ctx, "target.api")
+  assert len(result.args) == 2
+  assert result.args[1].keyword.value == "decay_steps"
+
+  # 5. Missing T_max but with eta_min
+  call_node = cst.parse_expression("CosineAnnealingLR(optim, eta_min=0)")
+  result = _transform_cosine_lr(call_node, ctx, "target.api")
+  assert len(result.args) == 2
+  assert result.args[1].keyword.value == "alpha"
+
+  # 6. With variants
+  ctx_variant = DummyContext(
+    "CosineAnnealingLR",
+    "target.api",
+    {"initial_learning_rate": "custom_init", "T_max": "custom_T", "eta_min": "custom_eta"},
+  )
+  call_node = cst.parse_expression("CosineAnnealingLR(optim, T_max=10, eta_min=0)")
+  result = _transform_cosine_lr(call_node, ctx_variant, "target.api")
+  args_kws = [arg.keyword.value for arg in result.args if arg.keyword]
+  assert "custom_init" in args_kws
+  assert "custom_T" in args_kws
+  assert "custom_eta" in args_kws
+
+
+def test_transform_scheduler_step():
+  ctx = DummyContext("noop", "api")
+  call_node = cst.parse_expression("scheduler.step()")
+  result = transform_scheduler_step(call_node, ctx)
+  assert isinstance(result, cst.Name)
+  assert result.value == "None"

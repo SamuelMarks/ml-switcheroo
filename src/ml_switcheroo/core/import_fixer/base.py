@@ -39,9 +39,9 @@ class BaseImportFixer(cst.CSTTransformer):
 
     # Normalize source frameworks set
     if source_fws is None:
-      self.source_fws = set()  # pragma: no cover
+      self.source_fws = set()
     elif isinstance(source_fws, str):
-      self.source_fws = {source_fws}  # pragma: no cover
+      self.source_fws = {source_fws}
     else:
       self.source_fws = set(source_fws)
 
@@ -66,8 +66,6 @@ class BaseImportFixer(cst.CSTTransformer):
     """
     if alias_node.asname:
       target = alias_node.asname.name
-      if isinstance(target, cst.AssignTarget):
-        target = target.target  # pragma: no cover
       if isinstance(target, cst.Name):
         self._defined_names.add(target.value)
     else:

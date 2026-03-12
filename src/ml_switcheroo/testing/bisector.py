@@ -74,23 +74,23 @@ class SemanticsBisector:
 
     for arg in std_args_raw:
       if isinstance(arg, dict):
-        name = arg.get("name", "unknown")  # pragma: no cover
-        params.append(name)  # pragma: no cover
-        if "type" in arg:  # pragma: no cover
-          hints[name] = str(arg["type"])  # pragma: no cover
+        name = arg.get("name", "unknown")
+        params.append(name)
+        if "type" in arg:
+          hints[name] = str(arg["type"])
         # Collect constraints
-        cons = {}  # pragma: no cover
-        for k in ["min", "max", "options", "rank", "dtype", "shape_spec"]:  # pragma: no cover
-          if k in arg and arg[k] is not None:  # pragma: no cover
-            cons[k] = arg[k]  # pragma: no cover
-        if cons:  # pragma: no cover
-          constraints[name] = cons  # pragma: no cover
+        cons = {}
+        for k in ["min", "max", "options", "rank", "dtype", "shape_spec"]:
+          if k in arg and arg[k] is not None:
+            cons[k] = arg[k]
+        if cons:
+          constraints[name] = cons
 
       elif isinstance(arg, (list, tuple)) and len(arg) >= 1:
-        name = str(arg[0])  # pragma: no cover
-        params.append(name)  # pragma: no cover
-        if len(arg) > 1:  # pragma: no cover
-          hints[name] = str(arg[1])  # pragma: no cover
+        name = str(arg[0])
+        params.append(name)
+        if len(arg) > 1:
+          hints[name] = str(arg[1])
 
       elif isinstance(arg, str):
         params.append(arg)
@@ -123,9 +123,9 @@ class SemanticsBisector:
 
           # If it passed with settings matching current config (or standard default),
           # then no fix needed (false alarm or flaky test).
-          return None  # pragma: no cover
+          return None
 
-      except Exception:  # pragma: no cover
-        continue  # pragma: no cover
+      except Exception:
+        continue
 
     return None

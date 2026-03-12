@@ -67,7 +67,7 @@ class InitializationTracker(cst.CSTVisitor):
         node: The class definition node.
     """
     if not self._scope_stack:
-      return  # pragma: no cover
+      return
 
     ctx = self._scope_stack.pop()
 
@@ -92,7 +92,7 @@ class InitializationTracker(cst.CSTVisitor):
         node: The function definition node.
     """
     if not self._scope_stack:
-      return  # pragma: no cover
+      return
 
     ctx = self._scope_stack[-1]
     func_name = node.name.value
@@ -111,7 +111,7 @@ class InitializationTracker(cst.CSTVisitor):
         node: The function definition node.
     """
     if not self._scope_stack:
-      return  # pragma: no cover
+      return
 
     ctx = self._scope_stack[-1]
     func_name = node.name.value
@@ -129,7 +129,7 @@ class InitializationTracker(cst.CSTVisitor):
         node: The assignment node.
     """
     if not self._scope_stack:
-      return  # pragma: no cover
+      return
 
     ctx = self._scope_stack[-1]
     if ctx.in_init:
@@ -145,7 +145,7 @@ class InitializationTracker(cst.CSTVisitor):
         node: The annotated assignment node.
     """
     if not self._scope_stack:
-      return  # pragma: no cover
+      return
 
     ctx = self._scope_stack[-1]
     if ctx.in_init:
@@ -159,7 +159,7 @@ class InitializationTracker(cst.CSTVisitor):
         node: The attribute access node.
     """
     if not self._scope_stack:
-      return  # pragma: no cover
+      return
 
     ctx = self._scope_stack[-1]
 

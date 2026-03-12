@@ -19,7 +19,7 @@ class MockSemantics(SemanticsManager):
   """Mock semantics with predefined import mappings."""
 
   def __init__(self):
-    """Function docstring."""
+    """Test case for __init__."""
     self.import_data = {
       # Known mappings
       "numpy": {},  # Basic root
@@ -30,7 +30,7 @@ class MockSemantics(SemanticsManager):
 
 @pytest.fixture
 def scanner():
-  """Function docstring."""
+  """Test case for scanner."""
   semantics = MockSemantics()
   # Source framework is "torch", targeting something else
   return DependencyScanner(semantics, source_fw="torch")
@@ -133,3 +133,27 @@ def test_ignore_relative_imports(scanner):
   code2 = "from .sub import y"
   unknowns2 = scan_code(scanner, code2)
   assert len(unknowns2) == 0
+
+
+import sys
+from unittest.mock import patch
+
+
+def test_get_root_package_non_name(scanner):
+  res = scanner._get_root_package(cst.Integer("1"))
+  assert res == ""
+
+
+def test_validate_package_empty(scanner):
+  scanner._validate_package("")
+  assert len(scanner.unknown_imports) == 0
+
+
+def test_is_stdlib_fallback(scanner):
+  with patch.object(sys, "version_info", (3, 9)):
+    assert scanner._is_stdlib("os") is True
+    assert scanner._is_stdlib("unknown_lib") is False
+
+    # Check builtin modules list fallback
+    with patch.object(sys, "builtin_module_names", ["fake_builtin"]):
+      assert scanner._is_stdlib("fake_builtin") is True

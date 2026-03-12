@@ -33,6 +33,6 @@ class SwitcherooDemo(Directive):
     Returns:
         List[nodes.raw]: A list containing the raw HTML node.
     """
-    hierarchy, examples_json, tier_metadata_json = scan_registry()  # pragma: no cover
-    html = render_demo_html(hierarchy, examples_json, tier_metadata_json)  # pragma: no cover
-    return [nodes.raw("", html, format="html")]  # pragma: no cover
+    hierarchy, examples_json, tier_metadata_json = scan_registry()
+    html = render_demo_html(hierarchy, examples_json, tier_metadata_json)
+    return [nodes.raw("", html, format="html")]

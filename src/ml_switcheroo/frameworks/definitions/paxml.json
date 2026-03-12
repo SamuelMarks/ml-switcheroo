@@ -12,7 +12,7 @@
     "required_imports": []
   },
   "Abs": {
-    "api": "jax.numpy.abs",
+    "api": "jnp.abs",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1831,7 +1831,7 @@
     "required_imports": []
   },
   "Einsum": {
-    "api": "jax.numpy.einsum",
+    "api": "jnp.einsum",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
@@ -3286,7 +3286,7 @@
   "Linear": {
     "api": "paxml.layers.Linear",
     "args": {
-      "bias": null,
+      "bias": "use_bias",
       "in_features": "input_dims",
       "out_features": "output_dims"
     },
@@ -5194,7 +5194,7 @@
   "Sequential": {
     "api": "praxis.layers.Sequential",
     "dispatch_rules": [],
-    "pack_as": "List",
+    "pack_as": "Tuple",
     "required_imports": []
   },
   "SerializationStorageContext": {

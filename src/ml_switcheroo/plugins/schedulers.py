@@ -46,7 +46,7 @@ def _get_target_arg_name(ctx: HookContext, std_name: str, default: str) -> str:
   """
   if ctx.current_variant and ctx.current_variant.args:
     return ctx.current_variant.args.get(std_name, default)
-  return default  # pragma: no cover
+  return default
 
 
 @register_hook("scheduler_rewire")
@@ -69,14 +69,14 @@ def transform_scheduler_init(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
 
   # Safety: If API mapping is missing, we cannot rewrite.
   if not target_api:
-    return node  # pragma: no cover
+    return node
 
   if "StepLR" in op_id:
     return _transform_step_lr(node, ctx, target_api)
-  elif "CosineAnnealingLR" in op_id:  # pragma: no cover
-    return _transform_cosine_lr(node, ctx, target_api)  # pragma: no cover
+  elif "CosineAnnealingLR" in op_id:
+    return _transform_cosine_lr(node, ctx, target_api)
 
-  return node  # pragma: no cover
+  return node
 
 
 def _transform_step_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst.Call:
@@ -118,12 +118,12 @@ def _transform_step_lr(node: cst.Call, ctx: HookContext, target_api: str) -> cst
       step_size_arg = arg
     elif kw == "gamma":
       gamma_arg = arg
-    elif not kw:  # pragma: no cover
+    elif not kw:
       # Positional mapping assumes step_size is 1st remaining, gamma is 2nd
-      if step_size_arg is None:  # pragma: no cover
-        step_size_arg = arg  # pragma: no cover
-      elif gamma_arg is None:  # pragma: no cover
-        gamma_arg = arg  # pragma: no cover
+      if step_size_arg is None:
+        step_size_arg = arg
+      elif gamma_arg is None:
+        gamma_arg = arg
 
   if step_size_arg:
     # Optax defaults to 'transition_steps'. Keras uses 'decay_steps'.
@@ -169,14 +169,14 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
   Source: CosineAnnealingLR(optim, T_max, eta_min)
   Target: target_api(init_value=1.0, decay_steps=T_max, alpha=eta_min/1.0)
   """
-  args = list(node.args)  # pragma: no cover
-  if args:  # pragma: no cover
-    args.pop(0)  # Remove optimizer  # pragma: no cover
+  args = list(node.args)
+  if args:
+    args.pop(0)  # Remove optimizer
 
-  new_args = []  # pragma: no cover
+  new_args = []
   # 1. init_value
-  init_val_kw = _get_target_arg_name(ctx, "initial_learning_rate", "init_value")  # pragma: no cover
-  new_args.append(  # pragma: no cover
+  init_val_kw = _get_target_arg_name(ctx, "initial_learning_rate", "init_value")
+  new_args.append(
     cst.Arg(
       value=cst.Float("1.0"),
       keyword=cst.Name(init_val_kw),
@@ -186,32 +186,30 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
   )
 
   # 2. decay_steps (was T_max)
-  t_max_arg = None  # pragma: no cover
-  eta_min_arg = None  # pragma: no cover
+  t_max_arg = None
+  eta_min_arg = None
 
-  for arg in args:  # pragma: no cover
-    kw = arg.keyword.value if arg.keyword else None  # pragma: no cover
-    if kw == "T_max":  # pragma: no cover
-      t_max_arg = arg  # pragma: no cover
-    elif kw == "eta_min":  # pragma: no cover
-      eta_min_arg = arg  # pragma: no cover
-    elif not kw:  # pragma: no cover
-      if t_max_arg is None:  # pragma: no cover
-        t_max_arg = arg  # pragma: no cover
-      elif eta_min_arg is None:  # pragma: no cover
-        eta_min_arg = arg  # pragma: no cover
+  for arg in args:
+    kw = arg.keyword.value if arg.keyword else None
+    if kw == "T_max":
+      t_max_arg = arg
+    elif kw == "eta_min":
+      eta_min_arg = arg
+    elif not kw:
+      if t_max_arg is None:
+        t_max_arg = arg
+      elif eta_min_arg is None:
+        eta_min_arg = arg
 
-  if t_max_arg:  # pragma: no cover
+  if t_max_arg:
     # Optax: 'decay_steps'
     # Map from standard 'T_max'
-    target_kw = _get_target_arg_name(ctx, "T_max", "decay_steps")  # pragma: no cover
+    target_kw = _get_target_arg_name(ctx, "T_max", "decay_steps")
 
     # Ensure trailing comma consistency
-    comma_val = (
-      cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")) if eta_min_arg else cst.MaybeSentinel.DEFAULT
-    )  # pragma: no cover
+    comma_val = cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")) if eta_min_arg else cst.MaybeSentinel.DEFAULT
 
-    new_args.append(  # pragma: no cover
+    new_args.append(
       t_max_arg.with_changes(
         keyword=cst.Name(target_kw),
         equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
@@ -219,10 +217,10 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
       )
     )
 
-  if eta_min_arg:  # pragma: no cover
+  if eta_min_arg:
     # Optax: 'alpha' (end learning rate ratio)
-    target_kw = _get_target_arg_name(ctx, "eta_min", "alpha")  # pragma: no cover
-    new_args.append(  # pragma: no cover
+    target_kw = _get_target_arg_name(ctx, "eta_min", "alpha")
+    new_args.append(
       eta_min_arg.with_changes(
         keyword=cst.Name(target_kw),
         equal=cst.AssignEqual(whitespace_before=cst.SimpleWhitespace(""), whitespace_after=cst.SimpleWhitespace("")),
@@ -230,7 +228,7 @@ def _transform_cosine_lr(node: cst.Call, ctx: HookContext, target_api: str) -> c
       )
     )
 
-  return node.with_changes(func=_create_dotted_name(target_api), args=new_args)  # pragma: no cover
+  return node.with_changes(func=_create_dotted_name(target_api), args=new_args)
 
 
 @register_hook("scheduler_step_noop")

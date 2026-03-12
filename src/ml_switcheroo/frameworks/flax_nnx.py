@@ -33,16 +33,16 @@ from ml_switcheroo.frameworks.loader import load_definitions
 # Safe Import Handling for Ghost Mode (WASM/Docs)
 try:
   import jax
-except ImportError:  # pragma: no cover
-  jax = None  # pragma: no cover
+except ImportError:
+  jax = None
 
 try:
   import flax.nnx
 
   # Explicitly bind the variable name so it is defined in success case
-  flax_nnx = flax.nnx  # pragma: no cover
-except ImportError:  # pragma: no cover
-  flax_nnx = None  # pragma: no cover
+  flax_nnx = flax.nnx
+except ImportError:
+  flax_nnx = None
 
 
 @register_framework("flax_nnx")
@@ -71,13 +71,13 @@ class FlaxNNXAdapter(JAXStackMixin):
     self._snapshot_data: Dict[str, Any] = {}
 
     if flax_nnx is not None:
-      self._flax_available = True  # pragma: no cover
+      self._flax_available = True
     else:
-      self._flax_available = False  # pragma: no cover
-      self._mode = InitMode.GHOST  # pragma: no cover
-      self._snapshot_data = load_snapshot_for_adapter("flax_nnx")  # pragma: no cover
-      if not self._snapshot_data:  # pragma: no cover
-        logging.warning("Flax NNX not installed and no snapshot found.")  # pragma: no cover
+      self._flax_available = False
+      self._mode = InitMode.GHOST
+      self._snapshot_data = load_snapshot_for_adapter("flax_nnx")
+      if not self._snapshot_data:
+        logging.warning("Flax NNX not installed and no snapshot found.")
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """
@@ -90,7 +90,7 @@ class FlaxNNXAdapter(JAXStackMixin):
         List[GhostRef]: List of found API references.
     """
     if self._mode == InitMode.GHOST:
-      return self._collect_ghost(category)  # pragma: no cover
+      return self._collect_ghost(category)
 
     results: List[GhostRef] = []
     core = JaxCoreAdapter()
@@ -116,26 +116,26 @@ class FlaxNNXAdapter(JAXStackMixin):
     Returns:
         List[GhostRef]: Found references.
     """
-    if not self._flax_available:  # pragma: no cover
-      return []  # pragma: no cover
+    if not self._flax_available:
+      return []
 
-    found: List[GhostRef] = []  # pragma: no cover
-    try:  # pragma: no cover
-      from flax import nnx  # pragma: no cover
-      import inspect  # pragma: no cover
+    found: List[GhostRef] = []
+    try:
+      from flax import nnx
+      import inspect
 
-      for name, obj in inspect.getmembers(nnx):  # pragma: no cover
-        if name.startswith("_"):  # pragma: no cover
-          continue  # pragma: no cover
-        try:  # pragma: no cover
-          if inspect.isclass(obj) and issubclass(obj, nnx.Module) and name != "Module":  # pragma: no cover
-            found.append(GhostInspector.inspect(obj, f"flax.nnx.{name}"))  # pragma: no cover
-        except Exception:  # pragma: no cover
-          continue  # pragma: no cover
-    except Exception as e:  # pragma: no cover
-      logging.debug(f"Error scanning flax.nnx: {e}")  # pragma: no cover
+      for name, obj in inspect.getmembers(nnx):
+        if name.startswith("_"):
+          continue
+        try:
+          if inspect.isclass(obj) and issubclass(obj, nnx.Module) and name != "Module":
+            found.append(GhostInspector.inspect(obj, f"flax.nnx.{name}"))
+        except Exception:
+          continue
+    except Exception as e:
+      logging.debug(f"Error scanning flax.nnx: {e}")
 
-    return found  # pragma: no cover
+    return found
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
     """
@@ -147,10 +147,10 @@ class FlaxNNXAdapter(JAXStackMixin):
     Returns:
         List[GhostRef]: Hydrated ghost references.
     """
-    if not self._snapshot_data:  # pragma: no cover
-      return []  # pragma: no cover
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
-    return [GhostInspector.hydrate(item) for item in raw_list]  # pragma: no cover
+    if not self._snapshot_data:
+      return []
+    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    return [GhostInspector.hydrate(item) for item in raw_list]
 
   @property
   def search_modules(self) -> List[str]:
@@ -161,7 +161,7 @@ class FlaxNNXAdapter(JAXStackMixin):
         List[str]: Ordered list of module names.
     """
     if self._mode == InitMode.GHOST:
-      return []  # pragma: no cover
+      return []
     return ["jax.numpy", "flax.nnx", "optax"]
 
   @property
@@ -279,7 +279,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     Returns:
         PluginTraits: Flags controlling plugin execution.
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=True,
       requires_functional_state=True,
@@ -305,16 +305,16 @@ class FlaxNNXAdapter(JAXStackMixin):
 
     # Ensure ReLU (Class Layer) is present for architectural transforms (Torch -> Flax)
     if "ReLU" not in defs:
-      defs["ReLU"] = StandardMap(api="flax.nnx.relu")  # pragma: no cover
+      defs["ReLU"] = StandardMap(api="flax.nnx.relu")
 
     # Ensure definitions for core layers are present to satisfy tests on fresh environments
     if "Linear" not in defs:
-      defs["Linear"] = StandardMap(  # pragma: no cover
+      defs["Linear"] = StandardMap(
         api="flax.nnx.Linear", args={"in_features": "in_features", "out_features": "out_features"}
       )
 
     if "Conv2d" not in defs:
-      defs["Conv2d"] = StandardMap(  # pragma: no cover
+      defs["Conv2d"] = StandardMap(
         api="flax.nnx.Conv",
         args={"in_channels": "in_features", "out_channels": "out_features", "kernel_size": "kernel_size"},
       )
@@ -339,18 +339,18 @@ class FlaxNNXAdapter(JAXStackMixin):
     Returns:
         Converted data tailored to JAX/Flax ecosystem.
     """
-    try:  # pragma: no cover
-      import jax.numpy as jnp  # pragma: no cover
+    try:
+      import jax.numpy as jnp
       # Use NumPy check if jnp fails, but jnp is preferred
-    except ImportError:  # pragma: no cover
-      return data  # pragma: no cover
+    except ImportError:
+      return data
 
-    if hasattr(data, "__array__") or isinstance(data, (list, tuple)):  # pragma: no cover
-      try:  # pragma: no cover
-        return jnp.array(data)  # pragma: no cover
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
-    return data  # pragma: no cover
+    if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
+      try:
+        return jnp.array(data)
+      except Exception:
+        pass
+    return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """
@@ -370,7 +370,7 @@ class FlaxNNXAdapter(JAXStackMixin):
       if variant and "api" in variant:
         api = variant["api"]
         if api.startswith("flax.nnx."):
-          mappings[key]["api"] = api.replace("flax.nnx.", "nnx.")  # pragma: no cover
+          mappings[key]["api"] = api.replace("flax.nnx.", "nnx.")
 
     # Ensure forwarding methods have proper plugin wiring for training flag injection
     for op in ["forward", "__call__", "call"]:
@@ -391,7 +391,7 @@ class FlaxNNXAdapter(JAXStackMixin):
     Returns:
         Dict[str, str]: Dictionary mapping tier names to code snippets.
     """
-    return {  # pragma: no cover
+    return {
       "tier2_neural": """from flax import nnx
 import jax.numpy as jnp
 
@@ -404,6 +404,41 @@ class Net(nnx.Module):
         return nnx.relu(x) 
 """,
       "tier3_extras": "# Flax NNX State Management\n# See repo for details on nnx.Variable interactions.",
+      "tier4_qwen3-vl": """import jax.numpy as jnp
+from flax import nnx
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(nnx.Module):
+    '''3D Convolutional patch embedding for vision input using nnx.Conv.'''
+    def __init__(self, config: Qwen3VLVisionConfig, *, rngs: nnx.Rngs):
+        self.config = config
+        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
+        self.proj = nnx.Conv(
+            in_features=config.in_channels,
+            out_features=config.hidden_size,
+            kernel_size=kernel,
+            strides=kernel,
+            padding="VALID",
+            use_bias=True,
+            rngs=rngs,
+        )
+
+    def __call__(self, hidden_states: jnp.ndarray) -> jnp.ndarray:
+        cfg = self.config
+        seq_len = hidden_states.shape[0]
+
+        hidden_states = hidden_states.reshape(
+            seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size
+        )
+        hidden_states = hidden_states.transpose(0, 2, 3, 4, 1)
+        
+        return self.proj(hidden_states).reshape(seq_len, cfg.hidden_size)
+""",
     }
 
   def get_doc_url(self, api_name: str) -> Optional[str]:

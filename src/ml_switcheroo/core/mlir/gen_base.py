@@ -28,7 +28,7 @@ class BaseGeneratorMixin:
     for attr in op.attributes:
       if attr.name == key:
         if isinstance(attr.value, list):
-          return f"[{', '.join(attr.value)}]"  # pragma: no cover
+          return f"[{', '.join(attr.value)}]"
         return attr.value
     return None
 
@@ -42,9 +42,9 @@ class BaseGeneratorMixin:
     Returns:
         A CST expression node representing the name.
     """
+    if not path:
+      return cst.Name("unknown")
     parts = path.split(".")
-    if not parts:
-      return cst.Name("unknown")  # pragma: no cover
     node: cst.BaseExpression = cst.Name(parts[0])
     for p in parts[1:]:
       node = cst.Attribute(value=node, attr=cst.Name(p))

@@ -39,11 +39,11 @@ def _extract_leaf_name(node: cst.BaseExpression) -> Optional[str]:
   Helper to extract the right-most name from a call signature.
   """
   if isinstance(node, cst.Name):
-    return node.value  # pragma: no cover
+    return node.value
   elif isinstance(node, cst.Attribute):
     return node.attr.value
   else:
-    return None  # pragma: no cover
+    return None
 
 
 @register_hook("nnx_param_to_torch")

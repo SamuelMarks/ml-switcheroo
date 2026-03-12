@@ -35,6 +35,9 @@ def rewriter_factory():
   """
   Sets up a PivotRewriter where we can control the Semantic Traits regarding loops.
   """
+  # Clear existing hooks to prevent interference
+  hooks._HOOKS.clear()
+  hooks._HOOK_METADATA.clear()
   # Register hooks manually
   hooks._HOOKS["transform_for_loop"] = transform_loops
   hooks._PLUGINS_LOADED = True

@@ -39,11 +39,11 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return HtmlParser(code)
 
   @property
-  def search_modules(self) -> List[str]:  # pragma: no cover
+  def search_modules(self) -> List[str]:
     """TODO: Add docstring."""
     return []
 
-  @property  # pragma: no cover
+  @property
   def unsafe_submodules(self) -> Set[str]:
     """TODO: Add docstring."""
     return set()
@@ -72,7 +72,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
   def structural_traits(self) -> StructuralTraits:
     """TODO: Add docstring."""
     return StructuralTraits(
-      module_base="html_dsl.Module",  # pragma: no cover
+      module_base="html_dsl.Module",
       forward_method="forward",
       init_method_name="__init__",
       requires_super_init=True,
@@ -81,7 +81,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
   @property
   def plugin_traits(self) -> PluginTraits:
     """TODO: Add docstring."""
-    return PluginTraits()  # pragma: no cover
+    return PluginTraits()
 
   @property
   def test_config(self) -> Dict[str, str]:
@@ -113,68 +113,65 @@ class HtmlDSLAdapter(FrameworkAdapter):
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
-    """TODO: Add docstring."""  # pragma: no cover
+    """TODO: Add docstring."""
     defs = load_definitions("html_dsl")
     if "Module" not in defs:
-      defs["Module"] = StandardMap(api="html_dsl.Module")  # pragma: no cover
+      defs["Module"] = StandardMap(api="html_dsl.Module")
     if "Conv2d" not in defs:
       defs["Conv2d"] = StandardMap(
-        api="html_dsl.Conv2d",  # pragma: no cover
+        api="html_dsl.Conv2d",
         args={"in_channels": "i", "out_channels": "o", "kernel_size": "k"},
       )
-    return defs  # pragma: no cover
+    return defs
 
   @property
-  def specifications(self) -> Dict[str, OperationDef]:  # pragma: no cover
+  def specifications(self) -> Dict[str, OperationDef]:
     """TODO: Add docstring."""
     return {}
 
-  # pragma: no cover
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
   def convert(self, data: Any) -> Any:
-    """TODO: Add docstring."""  # pragma: no cover
-    return str(data)  # pragma: no cover
+    """TODO: Add docstring."""
+    return str(data)
 
-  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:  # pragma: no cover
+  def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """TODO: Add docstring."""
     return ""
 
-  # pragma: no cover
   def get_device_check_syntax(self) -> str:
     """TODO: Add docstring."""
-    return "False"  # pragma: no cover
+    return "False"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """TODO: Add docstring."""
-    return ""  # pragma: no cover
+    return ""
 
   def get_serialization_imports(self) -> List[str]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
-  # pragma: no cover
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """TODO: Add docstring."""
-    return ""  # pragma: no cover
+    return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
   def get_weight_load_code(self, path_var: str) -> str:
     """TODO: Add docstring."""
-    return "# Weights not supported in HTML mode"  # pragma: no cover
+    return "# Weights not supported in HTML mode"
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
     """TODO: Add docstring."""
-    return tensor_var  # pragma: no cover
+    return tensor_var
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """TODO: Add docstring."""
-    return "# Weights not supported in HTML mode"  # pragma: no cover
+    return "# Weights not supported in HTML mode"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """TODO: Add docstring."""
@@ -186,7 +183,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """TODO: Add docstring."""
-    return {  # pragma: no cover
+    return {
       "tier2_neural": """ 
 <div class="grid">
   <div class="box r">

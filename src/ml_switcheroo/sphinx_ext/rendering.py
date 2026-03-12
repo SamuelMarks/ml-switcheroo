@@ -63,13 +63,13 @@ def render_demo_html(hierarchy: HierarchyMap, examples_json: str, tier_metadata_
   if "torch" in available_roots:
     def_source = "torch"
   else:
-    def_source = priority_order[0] if priority_order else "source_placeholder"  # pragma: no cover
+    def_source = priority_order[0] if priority_order else "source_placeholder"
 
   if "jax" in available_roots and def_source != "jax":
     def_target = "jax"
   else:
-    candidates = [fw for fw in priority_order if fw != def_source]  # pragma: no cover
-    def_target = candidates[0] if candidates else def_source  # pragma: no cover
+    candidates = [fw for fw in priority_order if fw != def_source]
+    def_target = candidates[0] if candidates else def_source
 
   # 3. Generate HTML Blocks
   primary_opts = _render_primary_options(hierarchy)
@@ -257,7 +257,7 @@ def _render_primary_options(hierarchy: HierarchyMap) -> str:
 
     members = grouped[group_name]
     if not members:
-      continue  # pragma: no cover
+      continue
 
     html_parts.append(f'<optgroup label="{group_name}">')
     for root in members:

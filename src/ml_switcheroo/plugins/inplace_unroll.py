@@ -30,7 +30,7 @@ def _get_receiver_name(node: cst.Call) -> Optional[cst.BaseExpression]:
   """
   if isinstance(node.func, cst.Attribute):
     return node.func.value
-  return None  # pragma: no cover
+  return None
 
 
 def _get_method_name(node: cst.Call) -> Optional[str]:
@@ -45,7 +45,7 @@ def _get_method_name(node: cst.Call) -> Optional[str]:
   """
   if isinstance(node.func, cst.Attribute):
     return node.func.attr.value
-  return None  # pragma: no cover
+  return None
 
 
 @register_hook("unroll_inplace_ops")
@@ -89,7 +89,7 @@ def unroll_inplace_ops(
   receiver = _get_receiver_name(node)
 
   if not method_name or not receiver:
-    return node  # pragma: no cover
+    return node
 
   # 2. Check for In-Place Suffix convention
   # Must end in "_" but not be internal "__"

@@ -16,10 +16,10 @@ from typing import List, Tuple, Dict, Any, Optional, Set
 
 try:
   import jax
-  import jax.numpy as jnp  # pragma: no cover
-except ImportError:  # pragma: no cover
-  jax = None  # pragma: no cover
-  jnp = None  # pragma: no cover
+  import jax.numpy as jnp
+except ImportError:
+  jax = None
+  jnp = None
 
 from ml_switcheroo.frameworks.base import (
   register_framework,
@@ -51,7 +51,7 @@ class JaxCoreAdapter(JAXStackMixin):
   -   **Optimization**: `optax.adam`, `optax.sgd`.
   """
 
-  display_name: str = "JAX (Core)"
+  display_name: str = "JAX (no framework)"
   inherits_from: Optional[str] = None
   # Set to 10 to ensure it is sorted after Torch (0) but before Numpy (20)
   ui_priority: int = 10
@@ -65,10 +65,10 @@ class JaxCoreAdapter(JAXStackMixin):
     self._snapshot_data: Dict[str, Any] = {}
 
     if jax is None:
-      self._mode = InitMode.GHOST  # pragma: no cover
-      self._snapshot_data = load_snapshot_for_adapter("jax")  # pragma: no cover
-      if not self._snapshot_data:  # pragma: no cover
-        logging.warning("JAX not installed and no snapshot found. Scanning unavailable.")  # pragma: no cover
+      self._mode = InitMode.GHOST
+      self._snapshot_data = load_snapshot_for_adapter("jax")
+      if not self._snapshot_data:
+        logging.warning("JAX not installed and no snapshot found. Scanning unavailable.")
 
   # --- Metadata & Imports ---
 
@@ -81,7 +81,7 @@ class JaxCoreAdapter(JAXStackMixin):
         List[str]: List of module names.
     """
     if self._mode == InitMode.GHOST:
-      return []  # pragma: no cover
+      return []
     return ["jax.numpy", "jax.numpy.linalg", "jax.numpy.fft", "optax"]
 
   @property
@@ -92,7 +92,7 @@ class JaxCoreAdapter(JAXStackMixin):
     Returns:
         Set[str]: Explicitly empty set (safe to scan default paths).
     """
-    return set()  # pragma: no cover
+    return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -198,7 +198,7 @@ class JaxCoreAdapter(JAXStackMixin):
     Returns:
         PluginTraits: Configuration flags.
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=True,
       requires_functional_control_flow=True,
@@ -237,32 +237,32 @@ class JaxCoreAdapter(JAXStackMixin):
     Returns:
         List[GhostRef]: Found API references.
     """
-    if self._mode == InitMode.GHOST:  # pragma: no cover
-      return self._collect_ghost(category)  # pragma: no cover
-    return self._collect_live(category)  # pragma: no cover
+    if self._mode == InitMode.GHOST:
+      return self._collect_ghost(category)
+    return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
     """Loads from snapshot."""
-    if not self._snapshot_data:  # pragma: no cover
-      return []  # pragma: no cover
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
-    return [GhostInspector.hydrate(item) for item in raw_list]  # pragma: no cover
+    if not self._snapshot_data:
+      return []
+    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
     """Scans installed JAX/Optax modules."""
-    results = []  # pragma: no cover
+    results = []
 
     # Level 1: Optax is core to the JAX ecosystem for optimization/loss
-    if category == StandardCategory.LOSS:  # pragma: no cover
-      results.extend(OptaxScanner.scan_losses())  # pragma: no cover
-    elif category == StandardCategory.OPTIMIZER:  # pragma: no cover
-      results.extend(OptaxScanner.scan_optimizers())  # pragma: no cover
+    if category == StandardCategory.LOSS:
+      results.extend(OptaxScanner.scan_losses())
+    elif category == StandardCategory.OPTIMIZER:
+      results.extend(OptaxScanner.scan_optimizers())
 
     # Level 0: JAX Activation functions
-    elif category == StandardCategory.ACTIVATION:  # pragma: no cover
-      results.extend(self._scan_jax_activations())  # pragma: no cover
+    elif category == StandardCategory.ACTIVATION:
+      results.extend(self._scan_jax_activations())
 
-    return results  # pragma: no cover
+    return results
 
   def _scan_jax_activations(self) -> List[GhostRef]:
     """
@@ -271,26 +271,26 @@ class JaxCoreAdapter(JAXStackMixin):
     Returns:
         List[GhostRef]: Found activation functions.
     """
-    if jax is None:  # pragma: no cover
-      return []  # pragma: no cover
-    found = []  # pragma: no cover
-    try:  # pragma: no cover
-      import jax.nn as jax_nn  # pragma: no cover
-      import inspect  # pragma: no cover
+    if jax is None:
+      return []
+    found = []
+    try:
+      import jax.nn as jax_nn
+      import inspect
 
       # Iterate everything in jax.nn
-      for name, obj in inspect.getmembers(jax_nn):  # pragma: no cover
-        if name.startswith("_"):  # pragma: no cover
-          continue  # pragma: no cover
+      for name, obj in inspect.getmembers(jax_nn):
+        if name.startswith("_"):
+          continue
 
-        if inspect.isfunction(obj):  # pragma: no cover
+        if inspect.isfunction(obj):
           # Heuristic: Does it look like an activation?
           # Most JAX activations are in jax.nn and are lowercase.
-          found.append(GhostInspector.inspect(obj, f"jax.nn.{name}"))  # pragma: no cover
+          found.append(GhostInspector.inspect(obj, f"jax.nn.{name}"))
 
-    except ImportError:  # pragma: no cover
-      pass  # pragma: no cover
-    return found  # pragma: no cover
+    except ImportError:
+      pass
+    return found
 
   # --- Verification ---
 
@@ -306,12 +306,12 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     try:
       import jax.numpy as jnp
-    except ImportError:  # pragma: no cover
-      return data  # pragma: no cover
+    except ImportError:
+      return data
 
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):
       return jnp.array(data)
-    return data  # pragma: no cover
+    return data
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """
@@ -335,6 +335,25 @@ class JaxCoreAdapter(JAXStackMixin):
     return {
       "tier1_math": """import jax.numpy as jnp\nfrom jax import grad, jit\n\ndef predict(params, x):\n  return jnp.dot(x, params['w']) + params['b']""",
       "tier2_neural": "# JAX (Core) does not include a neural network layer library.\n# Use Flax or Haiku for layer abstractions.",
+      "tier4_qwen3-vl": """import jax
+import jax.numpy as jnp
+import jax.lax as lax
+
+# Pure JAX representation of VisionFrontEnd
+class VisionFrontEnd:
+    def __init__(self, kernel):
+        self.patch_conv_w = kernel
+        
+    def __call__(self, x):
+        # Vision Patch Embedding Extraction
+        return lax.conv_general_dilated(
+            lhs=x, 
+            rhs=self.patch_conv_w, 
+            window_strides=(2, 14, 14), 
+            padding='VALID',
+            dimension_numbers=('NCDHW', 'OIDHW', 'NCDHW')
+        )
+""",
       "tier3_extras": "# Use Optax for optimization:\nimport optax\noptimizer = optax.adam(learning_rate=0.01)",
     }
 

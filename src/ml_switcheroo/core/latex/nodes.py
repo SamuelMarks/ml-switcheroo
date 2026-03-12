@@ -35,7 +35,7 @@ class LatexNode(ABC):
     Returns:
         str: Valid LaTeX code string.
     """
-    pass  # pragma: no cover
+    pass
 
 
 @dataclass

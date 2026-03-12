@@ -48,7 +48,7 @@ def apply_strict_guards(
     return norm_args
 
   new_args = []
-  guards_applied = False  # pragma: no cover
+  guards_applied = False
 
   for arg in norm_args:
     arg_key = arg.keyword.value if arg.keyword else None

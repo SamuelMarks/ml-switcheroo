@@ -18,11 +18,11 @@ def evaluate_dispatch_rules(rewriter, node: cst.Call, rules: List[Any], details:
       details: A dictionary containing details for rule evaluation, including variants.
 
   Returns:
-      The string identifier of the API to dispatch to if a rule matches, otherwise None.  # pragma: no cover
+      The string identifier of the API to dispatch to if a rule matches, otherwise None.
   """
-  source_variant = details["variants"].get(rewriter.source_fw, {})  # pragma: no cover
-  source_arg_map = source_variant.get("args", {})  # pragma: no cover
-  # pragma: no cover
+  source_variant = details["variants"].get(rewriter.source_fw, {})
+  source_arg_map = source_variant.get("args", {})
+
   std_args_raw = details.get("std_args", [])
   std_args_order = []
   for item in std_args_raw:
@@ -31,7 +31,7 @@ def evaluate_dispatch_rules(rewriter, node: cst.Call, rules: List[Any], details:
     elif isinstance(item, dict):
       name = item.get("name")
       if name:
-        std_args_order.append(name)  # pragma: no cover
+        std_args_order.append(name)
     else:
       std_args_order.append(item)
 
@@ -65,35 +65,32 @@ def _extract_argument_node(
       std_name: The standard argument name to find by positional order.
       std_order: The list of standard arguments defining their positional order.
 
-  Returns:  # pragma: no cover
-      The corresponding CSTNode if found, otherwise None.  # pragma: no cover
+  Returns:
+      The corresponding CSTNode if found, otherwise None.
   """
-  for arg in node.args:  # pragma: no cover
+  for arg in node.args:
     if arg.keyword and arg.keyword.value == src_name:
       return arg.value
 
   try:
     idx = std_order.index(std_name)
     is_module = False
-    if hasattr(rewriter, "_is_module_alias"):  # pragma: no cover
-      is_module = (
-        rewriter._is_module_alias(node.func.value) if isinstance(node.func, cst.Attribute) else False
-      )  # pragma: no cover
+    if hasattr(rewriter, "_is_module_alias"):
+      is_module = rewriter._is_module_alias(node.func.value) if isinstance(node.func, cst.Attribute) else False
 
-    is_method = isinstance(node.func, cst.Attribute) and not is_module  # pragma: no cover
-    call_idx = idx  # pragma: no cover
-    if is_method and std_order and std_order[0] == "x":  # pragma: no cover
-      call_idx = idx - 1  # pragma: no cover
+    is_method = isinstance(node.func, cst.Attribute) and not is_module
+    call_idx = idx
+    if is_method and std_order and std_order[0] == "x":
+      call_idx = idx - 1
 
     if call_idx >= 0 and call_idx < len(node.args):
-      arg = node.args[call_idx]  # pragma: no cover
-      if not arg.keyword:  # pragma: no cover
-        return arg.value  # pragma: no cover
-  except ValueError:  # pragma: no cover
-    pass  # pragma: no cover
-  # pragma: no cover
-  return None  # pragma: no cover
-  # pragma: no cover
+      arg = node.args[call_idx]
+      if not arg.keyword:
+        return arg.value
+  except ValueError:
+    pass
+
+  return None
 
 
 def _node_to_literal(node: cst.CSTNode) -> Any:
@@ -105,41 +102,41 @@ def _node_to_literal(node: cst.CSTNode) -> Any:
 
   Returns:
       The parsed Python literal value (int, float, str, bool, or None) if successfully converted, otherwise None.
-  """  # pragma: no cover
+  """
   if isinstance(node, cst.Integer):
-    try:  # pragma: no cover
+    try:
       return int(node.value)
     except ValueError:
       return None
-  if isinstance(node, cst.Float):  # pragma: no cover
+  if isinstance(node, cst.Float):
     try:
-      return float(node.value)  # pragma: no cover
+      return float(node.value)
     except ValueError:
       return None
   if isinstance(node, cst.SimpleString):
     return node.value.strip("'").strip('"')
-  if isinstance(node, cst.Name):  # pragma: no cover
+  if isinstance(node, cst.Name):
     if node.value == "True":
       return True
     if node.value == "False":
       return False
     if node.value == "None":
       return None
-  return None  # pragma: no cover
+  return None
 
 
 def _check_rule_condition(node: cst.CSTNode, rule: Any) -> bool:
-  """# pragma: no cover
+  """
   Checks if a given CSTNode meets the condition specified by a rule.
-  # pragma: no cover
+
   Args:
-      node: The CSTNode extracted from a call argument.  # pragma: no cover
+      node: The CSTNode extracted from a call argument.
       rule: The rule object containing the logical operation and target value.
 
-  Returns:  # pragma: no cover
-      True if the condition is met, False otherwise.  # pragma: no cover
+  Returns:
+      True if the condition is met, False otherwise.
   """
-  op = rule.op  # pragma: no cover
+  op = rule.op
 
   if op == LogicOp.IS_TYPE:
     expected_type = str(rule.is_val).lower()

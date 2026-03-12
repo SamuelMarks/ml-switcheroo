@@ -157,3 +157,160 @@ def test_define_inference_flow(infer_yaml_file, mock_fs_env):
   spoke_content = json.loads(spoke_file.read_text())
   assert "InferredOp" in spoke_content
   assert spoke_content["InferredOp"]["api"] == "mock_fw.discovered_api"
+
+
+def test_define_no_yaml():
+  import sys
+  from ml_switcheroo.cli.handlers import define
+
+  with patch.object(define, "yaml", None):
+    assert define.handle_define(Path("f.yaml"), False, False) == 1
+
+
+def test_define_stdin():
+  from ml_switcheroo.cli.handlers.define import handle_define
+
+  with patch("sys.stdin.read", return_value="operation: 'Test'\ndescription: 't'\nvariants: {}"):
+    with patch("ml_switcheroo.cli.handlers.define._inject_hub"):
+      with patch("ml_switcheroo.cli.handlers.define._inject_spokes"):
+        assert handle_define(Path("-"), False, False) == 0
+
+
+def test_define_yaml_list():
+  from ml_switcheroo.cli.handlers.define import handle_define
+
+  with patch(
+    "pathlib.Path.read_text",
+    return_value="- operation: 'Test1'\n  description: 't'\n  variants: {}\n- operation: 'Test2'\n  description: 't'\n  variants: {}",
+  ):
+    with patch("pathlib.Path.exists", return_value=True):
+      with patch("ml_switcheroo.cli.handlers.define._inject_hub"):
+        with patch("ml_switcheroo.cli.handlers.define._inject_spokes"):
+          assert handle_define(Path("test.yaml"), False, False) == 0
+
+
+def test_define_yaml_error():
+  from ml_switcheroo.cli.handlers.define import handle_define
+
+  with patch("pathlib.Path.read_text", return_value="invalid: ["):
+    with patch("pathlib.Path.exists", return_value=True):
+      assert handle_define(Path("test.yaml"), False, False) == 1
+
+
+def test_inject_hub_exception():
+  from ml_switcheroo.cli.handlers.define import _inject_hub
+  from ml_switcheroo.core.dsl import OperationDef
+
+  op = OperationDef(operation="Test", description="t", variants={})
+  with patch("ml_switcheroo.cli.handlers.define.StandardsInjector", side_effect=Exception("err")):
+    assert _inject_hub(op, False) == False
+
+
+def test_inject_spokes_no_adapter():
+  from ml_switcheroo.cli.handlers.define import _inject_spokes
+  from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
+
+  op = OperationDef(operation="Test", description="t", variants={"unknown_fw": FrameworkVariant(api="foo")})
+  # Should skip
+  with patch("ml_switcheroo.cli.handlers.define.get_adapter", return_value=None):
+    _inject_spokes(op, False)
+
+
+def test_scaffold_plugins_exception():
+  from ml_switcheroo.cli.handlers.define import _scaffold_plugins
+  from ml_switcheroo.core.dsl import OperationDef, PluginScaffoldDef
+
+  op = OperationDef(operation="Test", description="t", variants={}, scaffold_plugins=[PluginScaffoldDef(name="my_plug")])
+  with patch("ml_switcheroo.cli.handlers.define.PluginGenerator", side_effect=Exception("err")):
+    _scaffold_plugins(op, False)
+
+
+def test_scaffold_plugins_dry_run():
+  from ml_switcheroo.cli.handlers.define import _scaffold_plugins
+  from ml_switcheroo.core.dsl import OperationDef, PluginScaffoldDef
+
+  op = OperationDef(operation="Test", description="t", variants={}, scaffold_plugins=[PluginScaffoldDef(name="my_plug")])
+  with patch("ml_switcheroo.cli.handlers.define.PluginGenerator"):
+    _scaffold_plugins(op, True)
+
+
+def test_generate_test_file_exception():
+  from ml_switcheroo.cli.handlers.define import _generate_test_file
+  from ml_switcheroo.core.dsl import OperationDef
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  op = OperationDef(operation="Test", description="t", variants={})
+  with patch("ml_switcheroo.cli.handlers.define.TestCaseGenerator", side_effect=Exception("err")):
+    _generate_test_file(op, SemanticsManager(), False)
+
+
+def test_generate_test_file_dry_run():
+  from ml_switcheroo.cli.handlers.define import _generate_test_file
+  from ml_switcheroo.core.dsl import OperationDef
+  from ml_switcheroo.semantics.manager import SemanticsManager
+
+  op = OperationDef(operation="Test", description="t", variants={})
+  _generate_test_file(op, SemanticsManager(), True)
+
+
+def test_define_yaml_file_not_found():
+  from ml_switcheroo.cli.handlers.define import handle_define
+
+  with patch("pathlib.Path.exists", return_value=False):
+    assert handle_define(Path("f.yaml")) == 1
+
+
+def test_define_empty_doc():
+  from ml_switcheroo.cli.handlers.define import handle_define
+
+  with patch("pathlib.Path.read_text", return_value="---\n---"):
+    with patch("pathlib.Path.exists", return_value=True):
+      # empty doc continue (line 63)
+      assert handle_define(Path("test.yaml")) == 0
+
+
+def test_process_frameworks_infer_api():
+  from ml_switcheroo.cli.handlers.define import _inject_spokes
+  from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
+
+  op = OperationDef(operation="Test", description="t", variants={"fw": FrameworkVariant(api="infer")})
+  # line 146
+  _inject_spokes(op)
+
+
+def test_process_frameworks_exception():
+  from ml_switcheroo.cli.handlers.define import _inject_spokes
+  from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
+
+  op = OperationDef(operation="Test", description="t", variants={"fw": FrameworkVariant(api="api")})
+  with patch("ml_switcheroo.cli.handlers.define.get_adapter", return_value=True):
+    with patch("ml_switcheroo.cli.handlers.define.FrameworkInjector.inject", side_effect=Exception("error")):
+      _inject_spokes(op)
+
+
+def test_scaffold_plugins_fallback_dir():
+  from ml_switcheroo.cli.handlers.define import _scaffold_plugins
+  from ml_switcheroo.core.dsl import OperationDef, PluginScaffoldDef
+
+  op = OperationDef(operation="Test", description="t", variants={}, scaffold_plugins=[PluginScaffoldDef(name="my_plug")])
+  with patch("ml_switcheroo.cli.handlers.define.PluginGenerator"):
+    with patch("ml_switcheroo.cli.handlers.define.ml_switcheroo.plugins.__file__", None):
+      _scaffold_plugins(op)
+
+
+def test_define_inject_hub_fail():
+  from ml_switcheroo.cli.handlers.define import handle_define
+
+  with patch("pathlib.Path.read_text", return_value="operation: 'Test'\ndescription: 't'\nvariants: {}"):
+    with patch("pathlib.Path.exists", return_value=True):
+      with patch("ml_switcheroo.cli.handlers.define._inject_hub", return_value=False):
+        assert handle_define(Path("test.yaml")) == 1
+
+
+def test_resolve_inferred_apis_fail():
+  from ml_switcheroo.cli.handlers.define import _resolve_inferred_apis
+  from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
+
+  op = OperationDef(operation="Test", description="t", variants={"fw": FrameworkVariant(api="infer")})
+  with patch("ml_switcheroo.cli.handlers.define.SimulatedReflection.discover", return_value=None):
+    _resolve_inferred_apis(op)

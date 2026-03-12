@@ -47,42 +47,42 @@ def generate_by_heuristic(name: str, base_shape: Tuple[int, ...], constraints: D
   Returns:
       Any: Generated value.
   """
-  constrs = constraints or {}  # pragma: no cover
+  constrs = constraints or {}
 
-  if "options" in constrs:  # pragma: no cover
-    return random.choice(constrs["options"])  # pragma: no cover
+  if "options" in constrs:
+    return random.choice(constrs["options"])
 
-  name_lower = name.lower()  # pragma: no cover
+  name_lower = name.lower()
 
-  if name_lower in ["axis", "dim"]:  # pragma: no cover
+  if name_lower in ["axis", "dim"]:
     # Ensure index is within rank of base_shape
-    rank = len(base_shape)  # pragma: no cover
-    return random.randint(0, max(0, rank - 1))  # pragma: no cover
+    rank = len(base_shape)
+    return random.randint(0, max(0, rank - 1))
 
-  if name_lower in ["keepdim", "keepdims"]:  # pragma: no cover
-    return random.choice([True, False])  # pragma: no cover
+  if name_lower in ["keepdim", "keepdims"]:
+    return random.choice([True, False])
 
-  if name_lower in ["shape", "size"]:  # pragma: no cover
-    return base_shape  # pragma: no cover
+  if name_lower in ["shape", "size"]:
+    return base_shape
 
   # Apply Explicit Dtype Requests if present in constraint without type hint
-  if constrs.get("dtype"):  # pragma: no cover
-    if "int" in constrs["dtype"]:  # pragma: no cover
-      return generate_array("int", base_shape, constrs)  # pragma: no cover
-    if "bool" in constrs["dtype"]:  # pragma: no cover
-      return generate_array("bool", base_shape, constrs)  # pragma: no cover
+  if constrs.get("dtype"):
+    if "int" in constrs["dtype"]:
+      return generate_array("int", base_shape, constrs)
+    if "bool" in constrs["dtype"]:
+      return generate_array("bool", base_shape, constrs)
 
-  heuristic_type = guess_dtype_by_name(name)  # pragma: no cover
-  if heuristic_type == "bool":  # pragma: no cover
-    return generate_array("bool", base_shape, constrs)  # pragma: no cover
-  if heuristic_type == "int":  # pragma: no cover
+  heuristic_type = guess_dtype_by_name(name)
+  if heuristic_type == "bool":
+    return generate_array("bool", base_shape, constrs)
+  if heuristic_type == "int":
     # Scalars check e.g. alpha
-    if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):  # pragma: no cover
-      return generate_scalar_int(constrs)  # pragma: no cover
-    return generate_array("int", base_shape, constrs)  # pragma: no cover
+    if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):
+      return generate_scalar_int(constrs)
+    return generate_array("int", base_shape, constrs)
 
   # Floats
-  if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):  # pragma: no cover
-    return generate_scalar_float(constrs)  # pragma: no cover
+  if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):
+    return generate_scalar_float(constrs)
 
-  return generate_array("float", base_shape, constrs)  # pragma: no cover
+  return generate_array("float", base_shape, constrs)

@@ -31,8 +31,8 @@ logging.addLevelName(SUCCESS_LEVEL_NUM, "SUCCESS")
 
 def _success(self, message, *args, **kwargs):
   """Method injected into Logger to support logger.success()."""
-  if self.isEnabledFor(SUCCESS_LEVEL_NUM):  # pragma: no cover
-    self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)  # pragma: no cover
+  if self.isEnabledFor(SUCCESS_LEVEL_NUM):
+    self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)
 
 
 # Patch basic Logger class
@@ -143,7 +143,7 @@ class _ConsoleProxy:
     Returns:
         Style: The resolved style object.
     """
-    return self._backend.get_style(name)  # pragma: no cover
+    return self._backend.get_style(name)
 
   def export_text(self, **kwargs: Any) -> str:
     """
@@ -155,7 +155,7 @@ class _ConsoleProxy:
     Returns:
         str: The captured text output.
     """
-    return self._backend.export_text(**kwargs)  # pragma: no cover
+    return self._backend.export_text(**kwargs)
 
   def export_html(self, **kwargs: Any) -> str:
     """
@@ -167,7 +167,7 @@ class _ConsoleProxy:
     Returns:
         str: The captured HTML output.
     """
-    return self._backend.export_html(**kwargs)  # pragma: no cover
+    return self._backend.export_html(**kwargs)
 
   def __getattr__(self, name: str) -> Any:
     """

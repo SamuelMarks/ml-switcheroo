@@ -110,8 +110,8 @@ class PythonToMlirEmitter:
           text = line.comment.value.replace("#", "//", 1)
           header_trivia.append(TriviaNode(text, kind="comment"))
           header_trivia.append(TriviaNode("\n", kind="newline"))
-        elif line.newline:  # pragma: no cover
-          header_trivia.append(TriviaNode("\n", kind="newline"))  # pragma: no cover
+        elif line.newline:
+          header_trivia.append(TriviaNode("\n", kind="newline"))
 
       # Attach to first op
       if header_trivia and body_block.operations:
@@ -132,14 +132,14 @@ class PythonToMlirEmitter:
     trivia = []
     if hasattr(node, "leading_lines"):
       for line in node.leading_lines:
-        if line.comment:  # pragma: no cover
-          text = line.comment.value.replace("#", "//", 1)  # pragma: no cover
-          trivia.append(TriviaNode(text, kind="comment"))  # pragma: no cover
-          trivia.append(TriviaNode("\n", kind="newline"))  # pragma: no cover
-        elif line.newline:  # pragma: no cover
+        if line.comment:
+          text = line.comment.value.replace("#", "//", 1)
+          trivia.append(TriviaNode(text, kind="comment"))
+          trivia.append(TriviaNode("\n", kind="newline"))
+        elif line.newline:
           # Persist empty lines for formatting niceness
-          if line.newline.value:  # pragma: no cover
-            trivia.append(TriviaNode("\n", kind="newline"))  # pragma: no cover
+          if line.newline.value:
+            trivia.append(TriviaNode("\n", kind="newline"))
 
     return trivia
 
@@ -190,7 +190,7 @@ class PythonToMlirEmitter:
     if results:
       extracted = self._extract_trivia(stmt)
       if extracted:
-        results[0].leading_trivia = extracted + results[0].leading_trivia  # pragma: no cover
+        results[0].leading_trivia = extracted + results[0].leading_trivia
 
     return results
 
@@ -209,49 +209,49 @@ class PythonToMlirEmitter:
     elif isinstance(node, cst.Return):
       return self._emit_return(node)
     elif isinstance(node, cst.Expr):
-      _, ops = self._emit_expression(node.value)  # pragma: no cover
-      return ops  # pragma: no cover
+      _, ops = self._emit_expression(node.value)
+      return ops
     elif isinstance(node, (cst.Import, cst.ImportFrom)):
-      return [self._emit_import(node)]  # pragma: no cover
+      return [self._emit_import(node)]
     return []
 
   def _emit_import(self, node: Union[cst.Import, cst.ImportFrom]) -> OperationNode:
     """
-      Converts Import/ImportFrom to `sw.import`.
+    Converts Import/ImportFrom to `sw.import`.
 
-      Args:  # pragma: no cover
-          node: The Import or ImportFrom CST node.  # pragma: no cover
-    # pragma: no cover
-      Returns:
-          An OperationNode representing the `sw.import` operation.  # pragma: no cover
-    """  # pragma: no cover
+    Args:
+        node: The Import or ImportFrom CST node.
+
+    Returns:
+        An OperationNode representing the `sw.import` operation.
+    """
     names = []
     aliases = []
     module_val = ""
 
-    if isinstance(node, cst.ImportFrom) and node.module:  # pragma: no cover
-      module_val = get_full_name(node.module)  # pragma: no cover
-    # pragma: no cover
+    if isinstance(node, cst.ImportFrom) and node.module:
+      module_val = get_full_name(node.module)
+
     # Extract names and aliases
-    # For ImportFrom, name.name is the object imported.  # pragma: no cover
-    # For Import, name.name is the module being imported.  # pragma: no cover
-    if isinstance(node.names, cst.ImportStar):  # pragma: no cover
-      names.append("*")  # pragma: no cover
+    # For ImportFrom, name.name is the object imported.
+    # For Import, name.name is the module being imported.
+    if isinstance(node.names, cst.ImportStar):
+      names.append("*")
       aliases.append("")
-    else:  # pragma: no cover
+    else:
       for alias in node.names:
-        names.append(get_full_name(alias.name))  # pragma: no cover
-        if alias.asname:  # pragma: no cover
-          aliases.append(alias.asname.name.value)  # pragma: no cover
+        names.append(get_full_name(alias.name))
+        if alias.asname:
+          aliases.append(alias.asname.name.value)
         else:
           aliases.append("")
-    # pragma: no cover
-    attrs = []  # pragma: no cover
+
+    attrs = []
     if module_val:
-      attrs.append(AttributeNode(name="module", value=f'"{module_val}"'))  # pragma: no cover
-    # pragma: no cover
+      attrs.append(AttributeNode(name="module", value=f'"{module_val}"'))
+
     # Format list strings properly for MLIR array attribute
-    quoted_names = [f'"{n}"' for n in names]  # pragma: no cover
+    quoted_names = [f'"{n}"' for n in names]
     quoted_aliases = [f'"{a}"' for a in aliases]
 
     attrs.append(AttributeNode(name="names", value=quoted_names))
@@ -270,14 +270,14 @@ class PythonToMlirEmitter:
         An `sw.module` OperationNode containing the class body region.
     """
     self.ctx.enter_scope()
-    name_obj = AttributeNode(name="sym_name", value=f'"{node.name.value}"')  # pragma: no cover
-    # pragma: no cover
-    attributes = [name_obj]  # pragma: no cover
-    # pragma: no cover
-    # Capture Bases (Inheritance)  # pragma: no cover
+    name_obj = AttributeNode(name="sym_name", value=f'"{node.name.value}"')
+
+    attributes = [name_obj]
+
+    # Capture Bases (Inheritance)
     if node.bases:
-      base_names = []  # pragma: no cover
-      for b in node.bases:  # pragma: no cover
+      base_names = []
+      for b in node.bases:
         flat_name = self._flatten_attr(b.value)
         if flat_name:
           base_names.append(f'"{flat_name}"')
@@ -340,28 +340,28 @@ class PythonToMlirEmitter:
 
     for target in node.targets:
       t = target.target
-      # pragma: no cover
+
       # Variable Assignment: x = ...
-      if isinstance(t, cst.Name):  # pragma: no cover
-        self.ctx.declare(t.value, val)  # pragma: no cover
-      # pragma: no cover
+      if isinstance(t, cst.Name):
+        self.ctx.declare(t.value, val)
+
       # Attribute Assignment: self.x = ...
       elif isinstance(t, cst.Attribute):
         # Check if base is known (e.g. self)
-        base_name = self._flatten_attr(t.value)  # pragma: no cover
-        if base_name:  # pragma: no cover
-          base_val = self.ctx.lookup(base_name)  # pragma: no cover
+        base_name = self._flatten_attr(t.value)
+        if base_name:
+          base_val = self.ctx.lookup(base_name)
           # Support emitting setattr for object attributes
           # sw.setattr %self "layer" %val
-          # pragma: no cover
+
           if base_val:
             attr_name = t.attr.value
             set_op = OperationNode(
               name="sw.setattr", operands=[base_val, val], attributes=[AttributeNode("name", f'"{attr_name}"')]
-            )  # pragma: no cover
+            )
             ops.append(set_op)
 
-            # Feature: Register the Attribute name in context for future lookup  # pragma: no cover
+            # Feature: Register the Attribute name in context for future lookup
             # This allows subsequent `self.layer` access to map back to this val if needed
             # But SSA logic handles lookup by name. self.layer is complex.
             pass
@@ -403,7 +403,7 @@ class PythonToMlirEmitter:
     Returns:
         Dotted string (e.g. "self.layer") or None.
     """
-    if isinstance(node, cst.Name):  # pragma: no cover
+    if isinstance(node, cst.Name):
       return node.value
     if isinstance(node, cst.Attribute):
       base = self._flatten_attr(node.value)
@@ -418,30 +418,30 @@ class PythonToMlirEmitter:
     Args:
         operator: The CST binary operator node.
 
-    Returns:  # pragma: no cover
+    Returns:
         String identifier (e.g. "add", "mul", "matmul").
     """
     if isinstance(operator, cst.Add):
       return "add"
-    if isinstance(operator, cst.Subtract):  # pragma: no cover
-      return "sub"  # pragma: no cover
-    if isinstance(operator, cst.Multiply):  # pragma: no cover
-      return "mul"  # pragma: no cover
-    if isinstance(operator, cst.Divide):  # pragma: no cover
-      return "div"  # pragma: no cover
-    if isinstance(operator, cst.FloorDivide):  # pragma: no cover
-      return "floordiv"  # pragma: no cover
-    if isinstance(operator, cst.Modulo):  # pragma: no cover
-      return "mod"  # pragma: no cover
-    if isinstance(operator, cst.Power):  # pragma: no cover
-      return "pow"  # pragma: no cover
-    if isinstance(operator, cst.MatrixMultiply):  # pragma: no cover
-      return "matmul"  # pragma: no cover
-    if isinstance(operator, cst.LeftShift):  # pragma: no cover
-      return "lshift"  # pragma: no cover
-    if isinstance(operator, cst.RightShift):  # pragma: no cover
-      return "rshift"  # pragma: no cover
-    if isinstance(operator, cst.BitAnd):  # pragma: no cover
+    if isinstance(operator, cst.Subtract):
+      return "sub"
+    if isinstance(operator, cst.Multiply):
+      return "mul"
+    if isinstance(operator, cst.Divide):
+      return "div"
+    if isinstance(operator, cst.FloorDivide):
+      return "floordiv"
+    if isinstance(operator, cst.Modulo):
+      return "mod"
+    if isinstance(operator, cst.Power):
+      return "pow"
+    if isinstance(operator, cst.MatrixMultiply):
+      return "matmul"
+    if isinstance(operator, cst.LeftShift):
+      return "lshift"
+    if isinstance(operator, cst.RightShift):
+      return "rshift"
+    if isinstance(operator, cst.BitAnd):
       return "and"
     if isinstance(operator, cst.BitOr):
       return "or"
@@ -478,7 +478,7 @@ class PythonToMlirEmitter:
       # Process arguments
       for arg in expr.args:
         v, o = self._emit_expression(arg.value)
-        ops.extend(o)  # pragma: no cover
+        ops.extend(o)
         operands.append(v)
 
         # Capture keyword if present
@@ -494,8 +494,8 @@ class PythonToMlirEmitter:
         is_static_op = True
 
       common_attrs = []
-      # Pack keywords into attribute if any are non-empty  # pragma: no cover
-      if any(arg_keywords):  # pragma: no cover
+      # Pack keywords into attribute if any are non-empty
+      if any(arg_keywords):
         # AttributeNode needs a list of strings formatted for the printer
         # e.g. ["k=val", ""] -> we just need to store the keys.
         # "arg_keywords" = ["a", "", "b"]
@@ -528,16 +528,16 @@ class PythonToMlirEmitter:
         ops.append(get_op)
         res_val = self.ctx.allocate_ssa()
         # Attach keywords
-        call_op = OperationNode(  # pragma: no cover
+        call_op = OperationNode(
           name="sw.call",
           results=[res_val],
           operands=[attr_val] + operands,
-          attributes=common_attrs,  # pragma: no cover
-        )  # pragma: no cover
-        ops.append(call_op)  # pragma: no cover
-        return res_val, ops  # pragma: no cover
-      # pragma: no cover
-      if isinstance(expr.func, cst.Name):  # pragma: no cover
+          attributes=common_attrs,
+        )
+        ops.append(call_op)
+        return res_val, ops
+
+      if isinstance(expr.func, cst.Name):
         func_val, f_ops = self._emit_expression(expr.func)
         ops.extend(f_ops)
         result = self.ctx.allocate_ssa()
@@ -564,7 +564,7 @@ class PythonToMlirEmitter:
 
     elif isinstance(expr, (cst.Integer, cst.Float)):
       val = self.ctx.allocate_ssa(prefix="%cst")
-      op = OperationNode(  # pragma: no cover
+      op = OperationNode(
         name="sw.constant", results=[val], attributes=[AttributeNode("value", getattr(expr, "value", "0"))]
       )
       ops.append(op)
@@ -572,10 +572,10 @@ class PythonToMlirEmitter:
 
     return ValueNode("%error"), []
 
-  def _annotation_to_string(self, node: cst.CSTNode) -> str:  # pragma: no cover
-    """# pragma: no cover
+  def _annotation_to_string(self, node: cst.CSTNode) -> str:
+    """
     Flattens a type annotation node to a string representation.
-    """  # pragma: no cover
+    """
     if isinstance(node, cst.Name):
       return node.value
     elif isinstance(node, cst.Attribute):

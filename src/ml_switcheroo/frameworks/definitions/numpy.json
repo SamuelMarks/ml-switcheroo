@@ -158,6 +158,13 @@
   },
   "AllClose": {
     "api": "numpy.allclose",
+    "args": {
+      "a": "a",
+      "atol": "atol",
+      "b": "b",
+      "masked_equal": "masked_equal",
+      "rtol": "rtol"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -212,6 +219,11 @@
   },
   "Append": {
     "api": "numpy.append",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "b": "b"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -321,6 +333,11 @@
   },
   "ArgMax": {
     "api": "numpy.argmax",
+    "args": {
+      "axis": "axis",
+      "out": "out",
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -333,12 +350,26 @@
   },
   "ArgPartition": {
     "api": "numpy.argpartition",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ArgSort": {
     "api": "numpy.argsort",
+    "args": {
+      "axis": "axis",
+      "endwith": "endwith",
+      "fill_value": "fill_value",
+      "kind": "kind",
+      "order": "order",
+      "self": "self",
+      "stable": "stable"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -389,6 +420,19 @@
   },
   "Array": {
     "api": "numpy.array",
+    "args": {
+      "aligned": "aligned",
+      "byteorder": "byteorder",
+      "copy": "copy",
+      "dtype": "dtype",
+      "formats": "formats",
+      "names": "names",
+      "obj": "obj",
+      "offset": "offset",
+      "shape": "shape",
+      "strides": "strides",
+      "titles": "titles"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -407,6 +451,16 @@
   },
   "ArrayEquiv": {
     "api": "numpy.array_equiv",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ArrayIterator": {
+    "api": "numpy.lib.Arrayterator",
+    "args": {
+      "buf_size": "buf_size",
+      "var": "var"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -437,6 +491,14 @@
   },
   "AsAnyArray": {
     "api": "numpy.asanyarray",
+    "args": {
+      "a": "a",
+      "copy": "copy",
+      "device": "device",
+      "dtype": "dtype",
+      "like": "like",
+      "order": "order"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -461,18 +523,32 @@
   },
   "AsContiguousArray": {
     "api": "numpy.ascontiguousarray",
+    "args": {
+      "a": "a",
+      "dtype": "dtype",
+      "like": "like"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AsFortranArray": {
     "api": "numpy.asfortranarray",
+    "args": {
+      "a": "a",
+      "dtype": "dtype",
+      "like": "like"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "AsMatrix": {
     "api": "numpy.asmatrix",
+    "args": {
+      "data": "data",
+      "dtype": "dtype"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -566,21 +642,21 @@
   "Atleast1d": {
     "api": "numpy.atleast_1d",
     "dispatch_rules": [],
-    "pack_as": "List",
+    "pack_as": "Tuple",
     "pack_to_tuple": "arys",
     "required_imports": []
   },
   "Atleast2d": {
     "api": "numpy.atleast_2d",
     "dispatch_rules": [],
-    "pack_as": "List",
+    "pack_as": "Tuple",
     "pack_to_tuple": "arys",
     "required_imports": []
   },
   "Atleast3d": {
     "api": "numpy.atleast_3d",
     "dispatch_rules": [],
-    "pack_as": "List",
+    "pack_as": "Tuple",
     "pack_to_tuple": "arys",
     "required_imports": []
   },
@@ -593,6 +669,13 @@
   },
   "Average": {
     "api": "numpy.average",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "keepdims": "keepdims",
+      "returned": "returned",
+      "weights": "weights"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -614,6 +697,9 @@
   },
   "Bartlett": {
     "api": "numpy.bartlett",
+    "args": {
+      "M": "M"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -884,6 +970,9 @@
   },
   "Blackman": {
     "api": "numpy.blackman",
+    "args": {
+      "M": "M"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -926,6 +1015,15 @@
   },
   "Bool": {
     "api": "numpy.bool_",
+    "args": {
+      "value": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BoolFormat": {
+    "api": "arrayprint.BoolFormat",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -938,6 +1036,12 @@
   },
   "BoolType": {
     "api": "numpy.bool_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "BoolValuesApi": {
+    "api": "genapi.BoolValuesApi",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1002,6 +1106,10 @@
   },
   "BusDayCalendar": {
     "api": "numpy.busdaycalendar",
+    "args": {
+      "holidays": "holidays",
+      "weekmask": "weekmask"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1058,6 +1166,17 @@
     "api": "numpy.meshgrid",
     "dispatch_rules": [],
     "macro_template": "np.stack(np.meshgrid(*{tensors}, indexing='ij'), -1).reshape(-1, len({tensors}))",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Cast": {
+    "api": "numpy.polynomial.chebyshev.ABCPolyBase.cast",
+    "args": {
+      "domain": "domain",
+      "series": "series",
+      "window": "window"
+    },
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -1173,6 +1292,12 @@
   },
   "Choose": {
     "api": "numpy.choose",
+    "args": {
+      "choices": "choices",
+      "indices": "indices",
+      "mode": "mode",
+      "out": "out"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1262,10 +1387,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "CommaDecimalPointLocale": {
+    "api": "_locales.CommaDecimalPointLocale",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "CommonType": {
     "api": "numpy.common_type",
     "dispatch_rules": [],
-    "pack_as": "List",
+    "pack_as": "Tuple",
     "pack_to_tuple": "arrays",
     "required_imports": []
   },
@@ -1286,12 +1417,20 @@
   },
   "Complex128": {
     "api": "np.complex128",
+    "args": {
+      "imag": "imag",
+      "real": "real"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Complex64": {
     "api": "np.complex64",
+    "args": {
+      "imag": "imag",
+      "real": "real"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1304,6 +1443,13 @@
   },
   "ComplexFloating": {
     "api": "numpy.complexfloating",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ComplexFloatingFormat": {
+    "api": "arrayprint.ComplexFloatingFormat",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1323,6 +1469,12 @@
   },
   "Compress": {
     "api": "numpy.compress",
+    "args": {
+      "axis": "axis",
+      "condition": "condition",
+      "out": "out",
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1339,6 +1491,10 @@
   },
   "Concatenate": {
     "api": "numpy.concatenate",
+    "args": {
+      "arrays": "arrays",
+      "axis": "axis"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1426,18 +1582,28 @@
   },
   "Convolve": {
     "api": "numpy.convolve",
+    "args": {
+      "a": "a",
+      "mode": "mode",
+      "propagate_mask": "propagate_mask",
+      "v": "v"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Copy": {
     "api": "numpy.copy",
+    "args": {
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "CopyTo": {
     "api": "numpy.copyto",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1463,6 +1629,12 @@
   },
   "Correlate": {
     "api": "numpy.correlate",
+    "args": {
+      "a": "a",
+      "mode": "mode",
+      "propagate_mask": "propagate_mask",
+      "v": "v"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1528,6 +1700,10 @@
   },
   "Csingle": {
     "api": "numpy.csingle",
+    "args": {
+      "imag": "imag",
+      "real": "real"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1643,6 +1819,12 @@
   },
   "DatetimeData": {
     "api": "numpy.datetime_data",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "DatetimeFormat": {
+    "api": "arrayprint.DatetimeFormat",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -1891,6 +2073,10 @@
     "required_imports": []
   },
   "Double": {
+    "api": "numpy.ma.core.ntypes.double",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
@@ -1931,18 +2117,30 @@
   },
   "Dtype": {
     "api": "numpy.dtype",
+    "args": {
+      "align": "align",
+      "copy": "copy",
+      "dtype": "dtype",
+      "kwargs": "kwargs"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "E": {
     "api": "numpy.e",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Ediff1d": {
     "api": "numpy.ediff1d",
+    "args": {
+      "arr": "arr",
+      "to_begin": "to_begin",
+      "to_end": "to_end"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2197,6 +2395,9 @@
   },
   "FInfo": {
     "api": "numpy.finfo",
+    "args": {
+      "dtype": "dtype"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2297,6 +2498,7 @@
   },
   "Flexible": {
     "api": "numpy.flexible",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2330,12 +2532,18 @@
   },
   "Float16": {
     "api": "np.float16",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Float32": {
     "api": "np.float32",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2347,6 +2555,9 @@
   },
   "Float64": {
     "api": "np.float64",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2409,6 +2620,13 @@
   },
   "Floating": {
     "api": "numpy.floating",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FloatingFormat": {
+    "api": "arrayprint.FloatingFormat",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2506,18 +2724,42 @@
   },
   "FromFile": {
     "api": "np.memmap",
+    "args": {
+      "aligned": "aligned",
+      "byteorder": "byteorder",
+      "dtype": "dtype",
+      "fd": "fd",
+      "formats": "formats",
+      "names": "names",
+      "offset": "offset",
+      "shape": "shape",
+      "titles": "titles"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "FromFunction": {
     "api": "numpy.fromfunction",
+    "args": {
+      "dtype": "dtype",
+      "function": "function",
+      "kwargs": "kwargs",
+      "like": "like",
+      "shape": "shape"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "FromIter": {
     "api": "numpy.fromiter",
+    "args": {
+      "count": "count",
+      "dtype": "dtype",
+      "iter": "iter",
+      "like": "like"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2530,6 +2772,12 @@
   },
   "FromPyFunc": {
     "api": "numpy.frompyfunc",
+    "args": {
+      "func": "func",
+      "kwargs": "kwargs",
+      "nin": "nin",
+      "nout": "nout"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2542,12 +2790,30 @@
   },
   "FromString": {
     "api": "numpy.fromstring",
+    "args": {
+      "aligned": "aligned",
+      "byteorder": "byteorder",
+      "datastring": "datastring",
+      "dtype": "dtype",
+      "formats": "formats",
+      "names": "names",
+      "offset": "offset",
+      "shape": "shape",
+      "titles": "titles"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Frombuffer": {
     "api": "np.frombuffer",
+    "args": {
+      "buffer": "buffer",
+      "count": "count",
+      "dtype": "dtype",
+      "like": "like",
+      "offset": "offset"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2563,6 +2829,30 @@
   },
   "FullLike": {
     "api": "np.full_like",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FullTypeDescr": {
+    "api": "generate_umath.FullTypeDescr",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FuncNameSuffix": {
+    "api": "generate_umath.FuncNameSuffix",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Function": {
+    "api": "genapi.Function",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "FunctionApi": {
+    "api": "genapi.FunctionApi",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2616,18 +2906,49 @@
   },
   "GenFromTxt": {
     "api": "numpy.genfromtxt",
+    "args": {
+      "autostrip": "autostrip",
+      "case_sensitive": "case_sensitive",
+      "comments": "comments",
+      "converters": "converters",
+      "defaultfmt": "defaultfmt",
+      "deletechars": "deletechars",
+      "delimiter": "delimiter",
+      "dtype": "dtype",
+      "encoding": "encoding",
+      "excludelist": "excludelist",
+      "filling_values": "filling_values",
+      "fname": "fname",
+      "invalid_raise": "invalid_raise",
+      "like": "like",
+      "loose": "loose",
+      "max_rows": "max_rows",
+      "missing_values": "missing_values",
+      "names": "names",
+      "ndmin": "ndmin",
+      "replace_space": "replace_space",
+      "skip_footer": "skip_footer",
+      "skip_header": "skip_header",
+      "unpack": "unpack",
+      "usecols": "usecols",
+      "usemask": "usemask"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Generator": {
     "api": "np.random.Generator",
+    "args": {
+      "bit_generator": "bit_generator"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Generic": {
     "api": "numpy.generic",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2656,6 +2977,7 @@
   },
   "GetBufSize": {
     "api": "numpy.getbufsize",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2668,12 +2990,14 @@
   },
   "GetErr": {
     "api": "numpy.geterr",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "GetErrCall": {
     "api": "numpy.geterrcall",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2718,6 +3042,12 @@
   },
   "GetRngState": {
     "api": "numpy.random.get_state",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "GlobalVarApi": {
+    "api": "genapi.GlobalVarApi",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2781,6 +3111,10 @@
   },
   "HSplit": {
     "api": "numpy.hsplit",
+    "args": {
+      "ary": "ary",
+      "indices_or_sections": "indices_or_sections"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2793,6 +3127,9 @@
   },
   "Half": {
     "api": "numpy.astype",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "macro_template": "{input}.astype(numpy.float16)",
     "pack_as": "Tuple",
@@ -2800,6 +3137,9 @@
   },
   "Hamming": {
     "api": "numpy.hamming",
+    "args": {
+      "M": "M"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2828,6 +3168,9 @@
   },
   "Hanning": {
     "api": "numpy.hanning",
+    "args": {
+      "M": "M"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2969,6 +3312,11 @@
   },
   "Identity": {
     "api": "numpy.identity",
+    "args": {
+      "domain": "domain",
+      "symbol": "symbol",
+      "window": "window"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -2999,6 +3347,9 @@
   },
   "Iinfo": {
     "api": "numpy.iinfo",
+    "args": {
+      "int_type": "int_type"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3042,18 +3393,27 @@
   },
   "Indices": {
     "api": "numpy.indices",
+    "args": {
+      "dimensions": "dimensions",
+      "dtype": "dtype",
+      "fill_value": "fill_value",
+      "hardmask": "hardmask",
+      "sparse": "sparse"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Inexact": {
     "api": "numpy.inexact",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Inf": {
     "api": "numpy.inf",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3073,6 +3433,12 @@
   },
   "Info": {
     "api": "numpy.info",
+    "args": {
+      "maxwidth": "maxwidth",
+      "object": "object",
+      "output": "output",
+      "toplevel": "toplevel"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3111,6 +3477,9 @@
   },
   "Int16": {
     "api": "numpy.int16",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3125,6 +3494,9 @@
   },
   "Int32": {
     "api": "numpy.int32",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3136,24 +3508,36 @@
   },
   "Int64": {
     "api": "numpy.int64",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Int8": {
     "api": "numpy.int8",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Int_": {
     "api": "numpy.int64",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Intc": {
     "api": "numpy.intc",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3164,20 +3548,35 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "IntegerFormat": {
+    "api": "arrayprint.IntegerFormat",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Interp": {
     "api": "numpy.interp",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Intersect1d": {
     "api": "numpy.intersect1d",
+    "args": {
+      "ar1": "ar1",
+      "ar2": "ar2",
+      "assume_unique": "assume_unique"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Intp": {
     "api": "numpy.intp",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3310,6 +3709,10 @@
   },
   "IsDtype": {
     "api": "numpy.isdtype",
+    "args": {
+      "dtype": "dtype",
+      "kind": "kind"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3331,6 +3734,9 @@
   },
   "IsFortran": {
     "api": "numpy.isfortran",
+    "args": {
+      "a": "a"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3447,6 +3853,9 @@
   },
   "IsScalar": {
     "api": "numpy.isscalar",
+    "args": {
+      "element": "element"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3465,6 +3874,10 @@
   },
   "IsSubDtype": {
     "api": "numpy.issubdtype",
+    "args": {
+      "arg1": "arg1",
+      "arg2": "arg2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3503,6 +3916,9 @@
   },
   "Iterable": {
     "api": "numpy.iterable",
+    "args": {
+      "y": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3520,6 +3936,10 @@
   },
   "Kaiser": {
     "api": "numpy.kaiser",
+    "args": {
+      "M": "M",
+      "beta": "beta"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3681,6 +4101,7 @@
   },
   "Lexsort": {
     "api": "numpy.lexsort",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3693,8 +4114,20 @@
       "import scipy.special"
     ]
   },
+  "LinAlgError": {
+    "api": "numpy.linalg.LinAlgError",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "LinSpace": {
     "api": "numpy.linspace",
+    "args": {
+      "domain": "domain",
+      "n": "n",
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3743,6 +4176,21 @@
   },
   "LoadTxt": {
     "api": "numpy.loadtxt",
+    "args": {
+      "comments": "comments",
+      "converters": "converters",
+      "delimiter": "delimiter",
+      "dtype": "dtype",
+      "encoding": "encoding",
+      "fname": "fname",
+      "like": "like",
+      "max_rows": "max_rows",
+      "ndmin": "ndmin",
+      "quotechar": "quotechar",
+      "skiprows": "skiprows",
+      "unpack": "unpack",
+      "usecols": "usecols"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -3973,6 +4421,9 @@
   },
   "LongLong": {
     "api": "numpy.longlong",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4060,6 +4511,11 @@
   },
   "Matrix": {
     "api": "numpy.matrix",
+    "args": {
+      "copy": "copy",
+      "data": "data",
+      "dtype": "dtype"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4105,6 +4561,13 @@
   },
   "Max": {
     "api": "numpy.max",
+    "args": {
+      "axis": "axis",
+      "fill_value": "fill_value",
+      "keepdims": "keepdims",
+      "obj": "obj",
+      "out": "out"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4147,6 +4610,14 @@
   },
   "Memmap": {
     "api": "numpy.memmap",
+    "args": {
+      "dtype": "dtype",
+      "filename": "filename",
+      "mode": "mode",
+      "offset": "offset",
+      "order": "order",
+      "shape": "shape"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4181,6 +4652,17 @@
   },
   "MinTypeCode": {
     "api": "numpy.mintypecode",
+    "args": {
+      "default": "default",
+      "typechars": "typechars",
+      "typeset": "typeset"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MinVersion": {
+    "api": "genapi.MinVersion",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4191,6 +4673,12 @@
       "input": "x1",
       "other": "x2"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "MismatchCAPIError": {
+    "api": "verify_c_api_version.MismatchCAPIError",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4272,6 +4760,10 @@
   },
   "Multiply": {
     "api": "numpy.multiply",
+    "args": {
+      "a": "a",
+      "i": "i"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4299,6 +4791,12 @@
       "import scipy.special"
     ]
   },
+  "NAType": {
+    "api": "_natype.NAType",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "NONE": {
     "api": "numpy.f2py.symbolic.Precedence.NONE",
     "args": {},
@@ -4315,6 +4813,7 @@
   },
   "Nan": {
     "api": "numpy.nan",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4447,30 +4946,58 @@
   },
   "NdArray": {
     "api": "numpy.ndarray",
+    "args": {
+      "buffer": "buffer",
+      "dtype": "dtype",
+      "offset": "offset",
+      "order": "order",
+      "shape": "shape",
+      "strides": "strides"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "NdEnumerate": {
     "api": "numpy.ndenumerate",
+    "args": {
+      "arr": "arr"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "NdIndex": {
     "api": "numpy.ndindex",
+    "args": {
+      "shape": "shape"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "NdIter": {
     "api": "numpy.nditer",
+    "args": {
+      "buffersize": "buffersize",
+      "casting": "casting",
+      "flags": "flags",
+      "itershape": "itershape",
+      "op": "op",
+      "op_axes": "op_axes",
+      "op_dtypes": "op_dtypes",
+      "op_flags": "op_flags",
+      "order": "order"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Ndim": {
     "api": "numpy.ndim",
+    "args": {
+      "obj": "obj"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4529,6 +5056,9 @@
   },
   "NonZero": {
     "api": "numpy.argwhere",
+    "args": {
+      "a": "a"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4584,6 +5114,7 @@
   },
   "Number": {
     "api": "numpy.number",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4608,12 +5139,22 @@
   },
   "Object_": {
     "api": "numpy.object_",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Ones": {
     "api": "numpy.ones",
+    "args": {
+      "device": "device",
+      "dtype": "dtype",
+      "like": "like",
+      "order": "order",
+      "shape": "shape"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "pack_to_tuple": "shape",
@@ -4639,12 +5180,17 @@
   },
   "Outer": {
     "api": "numpy.outer",
+    "args": {
+      "a": "a",
+      "b": "b"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "PackBits": {
     "api": "numpy.packbits",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4662,8 +5208,19 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "ParseError": {
+    "api": "genapi.ParseError",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Partition": {
     "api": "numpy.partition",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs",
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4715,6 +5272,7 @@
   },
   "Pi": {
     "api": "numpy.pi",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4778,30 +5336,57 @@
   },
   "Poly1d": {
     "api": "numpy.poly1d",
+    "args": {
+      "c_or_r": "c_or_r",
+      "r": "r",
+      "variable": "variable"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "PolyAdd": {
     "api": "numpy.polyadd",
+    "args": {
+      "c1": "c1",
+      "c2": "c2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "PolyDer": {
     "api": "numpy.polyder",
+    "args": {
+      "axis": "axis",
+      "c": "c",
+      "m": "m",
+      "scl": "scl"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "PolyDiv": {
     "api": "numpy.polydiv",
+    "args": {
+      "c1": "c1",
+      "c2": "c2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "PolyFit": {
     "api": "numpy.polyfit",
+    "args": {
+      "deg": "deg",
+      "full": "full",
+      "rcond": "rcond",
+      "w": "w",
+      "x": "x",
+      "y": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4820,12 +5405,21 @@
   },
   "PolySub": {
     "api": "numpy.polysub",
+    "args": {
+      "c1": "c1",
+      "c2": "c2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "PolyVal": {
     "api": "numpy.polyval",
+    "args": {
+      "c": "c",
+      "tensor": "tensor",
+      "x": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4843,12 +5437,24 @@
   },
   "Polyint": {
     "api": "numpy.polyint",
+    "args": {
+      "axis": "axis",
+      "c": "c",
+      "k": "k",
+      "lbnd": "lbnd",
+      "m": "m",
+      "scl": "scl"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Polymul": {
     "api": "numpy.polymul",
+    "args": {
+      "c1": "c1",
+      "c2": "c2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4896,6 +5502,10 @@
   },
   "Power": {
     "api": "numpy.power",
+    "args": {
+      "a": "a",
+      "size": "size"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4924,6 +5534,10 @@
   },
   "Printoptions": {
     "api": "numpy.printoptions",
+    "args": {
+      "args": "args",
+      "kwargs": "kwargs"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4952,6 +5566,13 @@
   },
   "Ptp": {
     "api": "numpy.ptp",
+    "args": {
+      "axis": "axis",
+      "fill_value": "fill_value",
+      "keepdims": "keepdims",
+      "obj": "obj",
+      "out": "out"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -4975,6 +5596,11 @@
   },
   "PutMask": {
     "api": "numpy.putmask",
+    "args": {
+      "a": "a",
+      "mask": "mask",
+      "values": "values"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5115,6 +5741,9 @@
   },
   "Rand": {
     "api": "np.random.rand",
+    "args": {
+      "args": "args"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5151,6 +5780,9 @@
   },
   "Randn": {
     "api": "np.random.randn",
+    "args": {
+      "args": "args"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5171,6 +5803,10 @@
   },
   "Ravel": {
     "api": "np.ravel",
+    "args": {
+      "a": "a",
+      "order": "order"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5218,6 +5854,12 @@
   },
   "Record": {
     "api": "numpy.record",
+    "args": {
+      "category": "category",
+      "message": "message",
+      "module": "module",
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5266,6 +5908,11 @@
   },
   "Repeat": {
     "api": "numpy.repeat",
+    "args": {
+      "a": "a",
+      "args": "args",
+      "params": "params"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5302,6 +5949,10 @@
   },
   "Resize": {
     "api": "numpy.resize",
+    "args": {
+      "new_shape": "new_shape",
+      "x": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5360,6 +6011,9 @@
   },
   "Roots": {
     "api": "numpy.roots",
+    "args": {
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5375,6 +6029,11 @@
   },
   "Round": {
     "api": "numpy.round",
+    "args": {
+      "a": "a",
+      "decimals": "decimals",
+      "out": "out"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5602,18 +6261,33 @@
   },
   "SetDiff1d": {
     "api": "numpy.setdiff1d",
+    "args": {
+      "ar1": "ar1",
+      "ar2": "ar2",
+      "assume_unique": "assume_unique"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SetErr": {
     "api": "numpy.seterr",
+    "args": {
+      "all": "all",
+      "divide": "divide",
+      "invalid": "invalid",
+      "over": "over",
+      "under": "under"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "SetErrCall": {
     "api": "numpy.seterrcall",
+    "args": {
+      "func": "func"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5676,6 +6350,11 @@
   },
   "SetXor1d": {
     "api": "numpy.setxor1d",
+    "args": {
+      "ar1": "ar1",
+      "ar2": "ar2",
+      "assume_unique": "assume_unique"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5687,6 +6366,10 @@
     "required_imports": []
   },
   "Shape": {
+    "api": "numpy.ma.shape",
+    "args": {
+      "obj": "obj"
+    },
     "dispatch_rules": [],
     "macro_template": "tuple({iterable})",
     "pack_as": "Tuple",
@@ -5700,6 +6383,9 @@
   },
   "Short": {
     "api": "numpy.astype",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "macro_template": "{input}.astype(np.int16)",
     "pack_as": "Tuple",
@@ -5769,6 +6455,7 @@
   },
   "SignedInteger": {
     "api": "numpy.signedinteger",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5803,6 +6490,9 @@
   },
   "Single": {
     "api": "numpy.float32",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -5825,6 +6515,18 @@
     "api": "numpy.size",
     "args": {
       "x": "a"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "Slice": {
+    "api": "numpy.strings.slice",
+    "args": {
+      "a": "a",
+      "start": "start",
+      "step": "step",
+      "stop": "stop"
     },
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -5890,6 +6592,15 @@
   },
   "Sort": {
     "api": "numpy.sort",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "endwith": "endwith",
+      "fill_value": "fill_value",
+      "kind": "kind",
+      "order": "order",
+      "stable": "stable"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
@@ -5918,6 +6629,12 @@
     "required_imports": []
   },
   "Split": {
+    "api": "numpy.char.chararray.split",
+    "args": {
+      "maxsplit": "maxsplit",
+      "self": "self",
+      "sep": "sep"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": [],
@@ -5991,6 +6708,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "StealRef": {
+    "api": "genapi.StealRef",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "StepActivation": {
     "dispatch_rules": [],
     "macro_template": "({x} >= {threshold}).astype(float)",
@@ -6030,6 +6753,17 @@
     "required_imports": []
   },
   "StringType": {
+    "api": "numpy.ma.core.mu.StringDType",
+    "args": {
+      "coerce": "coerce",
+      "kwargs": "kwargs"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "StructuredVoidFormat": {
+    "api": "arrayprint.StructuredVoidFormat",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6037,6 +6771,12 @@
   "Sub": {
     "dispatch_rules": [],
     "macro_template": "numpy.subtract({input}, {other} * {alpha})",
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "SubArrayFormat": {
+    "api": "arrayprint.SubArrayFormat",
+    "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
@@ -6088,6 +6828,11 @@
   },
   "Swapaxes": {
     "api": "numpy.swapaxes",
+    "args": {
+      "a": "a",
+      "args": "args",
+      "params": "params"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6199,6 +6944,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "TD": {
+    "api": "generate_umath.TD",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "TUPLE": {
     "api": "numpy.f2py.symbolic.Precedence.TUPLE",
     "args": {},
@@ -6214,6 +6965,13 @@
   },
   "Take": {
     "api": "numpy.take",
+    "args": {
+      "a": "a",
+      "axis": "axis",
+      "indices": "indices",
+      "mode": "mode",
+      "out": "out"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6316,6 +7074,16 @@
   },
   "Timedelta64": {
     "api": "numpy.timedelta64",
+    "args": {
+      "args": "args",
+      "value": "value"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TimedeltaFormat": {
+    "api": "arrayprint.TimedeltaFormat",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6343,6 +7111,14 @@
   },
   "Trace": {
     "api": "np.trace",
+    "args": {
+      "a": "a",
+      "axis1": "axis1",
+      "axis2": "axis2",
+      "dtype": "dtype",
+      "offset": "offset",
+      "out": "out"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6394,6 +7170,13 @@
   },
   "Tri": {
     "api": "numpy.tri",
+    "args": {
+      "M": "M",
+      "N": "N",
+      "dtype": "dtype",
+      "k": "k",
+      "like": "like"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6493,6 +7276,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "TypeApi": {
+    "api": "genapi.TypeApi",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "TypeDescription": {
+    "api": "generate_umath.TypeDescription",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Typecodes": {
     "api": "numpy.typecodes",
     "dispatch_rules": [],
@@ -6500,6 +7295,10 @@
     "required_imports": []
   },
   "Typename": {
+    "api": "numpy.typename",
+    "args": {
+      "char": "char"
+    },
     "dispatch_rules": [],
     "macro_template": "str(type({obj}))",
     "pack_as": "Tuple",
@@ -6507,12 +7306,22 @@
   },
   "UByte": {
     "api": "numpy.ubyte",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "UFunc": {
     "api": "numpy.ufunc",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "UFuncTypeError": {
+    "api": "_exceptions.UFuncTypeError",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6531,6 +7340,9 @@
   },
   "UInt32": {
     "api": "numpy.uint32",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6543,36 +7355,54 @@
   },
   "UInt8": {
     "api": "numpy.uint8",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "UIntC": {
     "api": "numpy.uintc",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "UIntP": {
     "api": "numpy.uintp",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ULong": {
     "api": "numpy.ulong",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "ULongLong": {
     "api": "numpy.ulonglong",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "UShort": {
     "api": "numpy.ushort",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6585,6 +7415,9 @@
   },
   "Uint": {
     "api": "numpy.uint64",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6597,6 +7430,9 @@
   },
   "Uint16": {
     "api": "np.uint16",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6609,6 +7445,9 @@
   },
   "Uint64": {
     "api": "np.uint64",
+    "args": {
+      "value": "value"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6639,12 +7478,21 @@
   },
   "Union1d": {
     "api": "numpy.union1d",
+    "args": {
+      "ar1": "ar1",
+      "ar2": "ar2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
   },
   "Unique": {
     "api": "numpy.unique",
+    "args": {
+      "ar1": "ar1",
+      "return_index": "return_index",
+      "return_inverse": "return_inverse"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6681,6 +7529,7 @@
   },
   "UnpackBits": {
     "api": "numpy.unpackbits",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6711,6 +7560,7 @@
   },
   "UnsignedInteger": {
     "api": "numpy.unsignedinteger",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6760,6 +7610,10 @@
   },
   "Vander": {
     "api": "numpy.vander",
+    "args": {
+      "n": "n",
+      "x": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6810,6 +7664,14 @@
   },
   "Vectorize": {
     "api": "numpy.vectorize",
+    "args": {
+      "cache": "cache",
+      "doc": "doc",
+      "excluded": "excluded",
+      "otypes": "otypes",
+      "pyfunc": "pyfunc",
+      "signature": "signature"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -6874,6 +7736,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "VonMises": {
+    "api": "numpy.random.vonmises",
+    "args": {
+      "kappa": "kappa",
+      "mu": "mu",
+      "size": "size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Vsplit": {
     "api": "numpy.vsplit",
     "args": {
@@ -6898,8 +7771,23 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "Weibull": {
+    "api": "numpy.random.weibull",
+    "args": {
+      "a": "a",
+      "size": "size"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "Where": {
     "api": "numpy.where",
+    "args": {
+      "condition": "condition",
+      "x": "x",
+      "y": "y"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7016,6 +7904,18 @@
   },
   "add": {
     "api": "numpy.add",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "add_newdoc": {
+    "api": "function_base.add_newdoc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "add_newdoc_for_scalar_type": {
+    "api": "_add_newdocs_scalars.add_newdoc_for_scalar_type",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7222,6 +8122,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "array2string": {
+    "api": "arrayprint.array2string",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "array_equal": {
     "api": "numpy.array_equal",
     "dispatch_rules": [],
@@ -7234,8 +8140,57 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "array_function_dispatch": {
+    "api": "overrides.array_function_dispatch",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "array_function_errmsg_formatter": {
+    "api": "_internal.array_function_errmsg_formatter",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "array_function_from_dispatcher": {
+    "api": "overrides.array_function_from_dispatcher",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "array_repr": {
+    "api": "arrayprint.array_repr",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "array_split": {
     "api": "numpy.array_split",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "array_str": {
+    "api": "arrayprint.array_str",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "array_ufunc_errmsg_formatter": {
+    "api": "_internal.array_ufunc_errmsg_formatter",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "as_strided": {
+    "api": "numpy.lib.stride_tricks.as_strided",
+    "args": {
+      "shape": "shape",
+      "strides": "strides",
+      "subok": "subok",
+      "writeable": "writeable",
+      "x": "x"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7368,9 +8323,21 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "base_repr": {
+    "api": "numeric.base_repr",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "beta": {
     "api": "numpy.random.mtrand.beta",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "binary_repr": {
+    "api": "numeric.binary_repr",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7433,6 +8400,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "bmm_einsum": {
+    "api": "einsumfunc.bmm_einsum",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "bool_": {
     "api": "numpy.bool_",
     "args": {},
@@ -7455,6 +8428,9 @@
   },
   "broadcast_shapes": {
     "api": "numpy.broadcast_shapes",
+    "args": {
+      "args": "args"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7472,6 +8448,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "build_func_data": {
+    "api": "generate_umath.build_func_data",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "busday_count": {
+    "api": "multiarray.busday_count",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "busday_offset": {
+    "api": "multiarray.busday_offset",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "byte": {
     "api": "numpy.byte",
     "args": {},
@@ -7479,8 +8473,21 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "c_void_p": {
+    "api": "_internal.c_void_p",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "can_cast": {
     "api": "numpy.can_cast",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "capitalize": {
+    "api": "strings.capitalize",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7505,6 +8512,17 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "center": {
+    "api": "numpy.char.chararray.center",
+    "args": {
+      "fillchar": "fillchar",
+      "self": "self",
+      "width": "width"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "char": {
     "api": "numpy.dtype.char",
     "args": {},
@@ -7515,6 +8533,30 @@
   "character": {
     "api": "numpy.character",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "chararray": {
+    "api": "defchararray.chararray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "check_api_dict": {
+    "api": "genapi.check_api_dict",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "check_api_version": {
+    "api": "verify_c_api_version.check_api_version",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "check_td_order": {
+    "api": "generate_umath.check_td_order",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7636,6 +8678,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "copyto": {
+    "api": "multiarray.copyto",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "corrcoef": {
     "api": "numpy.ma.extras.corrcoef",
     "args": {
@@ -7674,6 +8722,13 @@
   },
   "count": {
     "api": "numpy.ma.core.count",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "count_nonzero": {
+    "api": "numpy.ma.core.mu.count_nonzero",
     "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
@@ -7727,6 +8782,23 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "datetime_as_string": {
+    "api": "multiarray.datetime_as_string",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "decode": {
+    "api": "numpy.char.chararray.decode",
+    "args": {
+      "encoding": "encoding",
+      "errors": "errors",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "deg2rad": {
     "api": "numpy.deg2rad",
     "args": {},
@@ -7766,6 +8838,10 @@
   },
   "diag_indices": {
     "api": "numpy.diag_indices",
+    "args": {
+      "n": "n",
+      "ndim": "ndim"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7837,6 +8913,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "do_generate_api": {
+    "api": "generate_numpy_api.do_generate_api",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "docstrings": {
+    "api": "generate_umath.docstrings",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "dot": {
     "api": "numpy.ma.core.dot",
     "args": {
@@ -7872,6 +8960,30 @@
   "dtype": {
     "api": "numpy.random.tests.test_direct.Base.dtype",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dtype_from_ctypes_type": {
+    "api": "_dtype_ctypes.dtype_from_ctypes_type",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dtype_is_implied": {
+    "api": "arrayprint.dtype_is_implied",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dtype_short_repr": {
+    "api": "arrayprint.dtype_short_repr",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "dummy_ctype": {
+    "api": "_internal.dummy_ctype",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7919,8 +9031,44 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "encode": {
+    "api": "strings.encode",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "endswith": {
+    "api": "strings.endswith",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "english_capitalize": {
+    "api": "_string_helpers.english_capitalize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "english_lower": {
+    "api": "_string_helpers.english_lower",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "english_upper": {
+    "api": "_string_helpers.english_upper",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "equal": {
     "api": "numpy.equal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "errstate": {
+    "api": "_ufunc_config.errstate",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -7951,6 +9099,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "expandtabs": {
+    "api": "strings.expandtabs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "expm1": {
     "api": "numpy.expm1",
     "args": {},
@@ -7961,6 +9115,12 @@
   "exponential": {
     "api": "numpy.random.mtrand.exponential",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "extend_all": {
+    "api": "numeric.extend_all",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8021,6 +9181,48 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "file_in_this_dir": {
+    "api": "genapi.file_in_this_dir",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "filter": {
+    "api": "numpy.testing.suppress_warnings.filter",
+    "args": {
+      "category": "category",
+      "message": "message",
+      "module": "module",
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "finalize_array_function_like": {
+    "api": "overrides.finalize_array_function_like",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "find": {
+    "api": "strings.find",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "find_comma_decimal_point_locale": {
+    "api": "_locales.find_comma_decimal_point_locale",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "find_duplicate": {
+    "api": "records.find_duplicate",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "find_duplicates": {
     "api": "numpy.lib.recfunctions.find_duplicates",
     "args": {
@@ -8029,6 +9231,12 @@
       "key": "key",
       "return_index": "return_index"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "find_functions": {
+    "api": "genapi.find_functions",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8091,6 +9299,24 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "format_float_positional": {
+    "api": "arrayprint.format_float_positional",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "format_float_scientific": {
+    "api": "arrayprint.format_float_scientific",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "format_parser": {
+    "api": "records.format_parser",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "from_dlpack": {
     "api": "numpy.from_dlpack",
     "args": {
@@ -8098,6 +9324,12 @@
       "device": "device",
       "x": "x"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "fromarrays": {
+    "api": "records.fromarrays",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8140,6 +9372,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "fromrecords": {
+    "api": "records.fromrecords",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "fromstring": {
     "api": "numpy.f2py.symbolic.fromstring",
     "args": {
@@ -8162,6 +9400,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "fullapi_hash": {
+    "api": "genapi.fullapi_hash",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "gamma": {
     "api": "numpy.random.mtrand.gamma",
     "args": {},
@@ -8172,6 +9416,12 @@
   "gcd": {
     "api": "numpy.gcd",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "generate_api": {
+    "api": "generate_numpy_api.generate_api",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8207,6 +9457,30 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "get_annotations": {
+    "api": "numpy_api.get_annotations",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "get_api_functions": {
+    "api": "genapi.get_api_functions",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "get_api_versions": {
+    "api": "verify_c_api_version.get_api_versions",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "get_array_function_like_doc": {
+    "api": "overrides.get_array_function_like_doc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "get_parameter": {
     "api": "numpy.f2py.crackfortran.get_parameters",
     "args": {
@@ -8219,6 +9493,43 @@
   },
   "get_printoptions": {
     "api": "numpy.get_printoptions",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "get_processor": {
+    "api": "genapi.get_processor",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "get_remaining_size": {
+    "api": "records.get_remaining_size",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "get_versions_hash": {
+    "api": "genapi.get_versions_hash",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "getbufsize": {
+    "api": "_ufunc_config.getbufsize",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "geterr": {
+    "api": "_ufunc_config.geterr",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "geterrcall": {
+    "api": "_ufunc_config.geterrcall",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8368,6 +9679,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "indent": {
+    "api": "generate_umath.indent",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "index": {
     "api": "numpy.nditer.index",
     "args": {},
@@ -8474,6 +9791,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "is_busday": {
+    "api": "multiarray.is_busday",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "isclose": {
     "api": "numpy.isclose",
     "dispatch_rules": [],
@@ -8504,6 +9827,12 @@
   "isfinite": {
     "api": "numpy.isfinite",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "isfortran": {
+    "api": "numeric.isfortran",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8568,8 +9897,35 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "issctype": {
+    "api": "numerictypes.issctype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "issubclass_": {
+    "api": "numerictypes.issubclass_",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "issubdtype": {
     "api": "numpy.issubdtype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "issubsctype": {
+    "api": "numerictypes.issubsctype",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "items": {
+    "api": "numpy.lib.npyio.NpzFile.items",
+    "args": {
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8587,6 +9943,16 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "join": {
+    "api": "numpy.char.chararray.join",
+    "args": {
+      "self": "self",
+      "seq": "seq"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "k": {
     "api": "numpy.f2py.rules.k",
     "args": {},
@@ -8596,6 +9962,15 @@
   },
   "kaiser": {
     "api": "numpy.kaiser",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "keys": {
+    "api": "numpy.lib.npyio.NpzFile.keys",
+    "args": {
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8652,6 +10027,12 @@
   },
   "linspace": {
     "api": "numpy.linspace",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "ljust": {
+    "api": "strings.ljust",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8752,9 +10133,66 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "lower": {
+    "api": "numpy.char.chararray.lower",
+    "args": {
+      "self": "self"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "lstrip": {
+    "api": "strings.lstrip",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "main": {
+    "api": "genapi.main",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "make_arrays": {
+    "api": "generate_umath.make_arrays",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "make_code": {
+    "api": "generate_umath.make_code",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "make_ufuncs": {
+    "api": "generate_umath.make_ufuncs",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "maketrans": {
+    "api": "numpy.dtypes.StrDType.type.maketrans",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "mask": {
     "api": "numpy.ma.tests.test_mrecords.TestMRecords.mask",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "mask_indices": {
+    "api": "numpy.mask_indices",
+    "args": {
+      "k": "k",
+      "mask_func": "mask_func",
+      "n": "n"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8803,6 +10241,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "may_share_memory": {
+    "api": "multiarray.may_share_memory",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "mean": {
     "api": "numpy.mean",
     "dispatch_rules": [],
@@ -8822,6 +10266,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "memmap": {
+    "api": "memmap.memmap",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "merge_api_dicts": {
+    "api": "genapi.merge_api_dicts",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "meshgrid": {
     "api": "numpy.meshgrid",
     "dispatch_rules": [],
@@ -8837,6 +10293,12 @@
   },
   "min": {
     "api": "np.min",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "min_scalar_type": {
+    "api": "multiarray.min_scalar_type",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8945,6 +10407,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "normalize_axis_tuple": {
+    "api": "numeric.normalize_axis_tuple",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "normalize_doc": {
+    "api": "generate_umath_doc.normalize_doc",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "not_equal": {
     "api": "numpy.ma.core.not_equal",
     "args": {},
@@ -8952,9 +10426,27 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "npy_ctypes_check": {
+    "api": "_internal.npy_ctypes_check",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "number": {
     "api": "numpy.number",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "numeric_type_aliases": {
+    "api": "_add_newdocs_scalars.numeric_type_aliases",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "obj2sctype": {
+    "api": "numerictypes.obj2sctype",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -8975,6 +10467,12 @@
   "ones_like": {
     "api": "numpy.ma.core.ones_like",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "order_dict": {
+    "api": "genapi.order_dict",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9119,6 +10617,10 @@
   },
   "promote_types": {
     "api": "numpy.promote_types",
+    "args": {
+      "type1": "type1",
+      "type2": "type2"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9142,6 +10644,12 @@
       "mode": "mode",
       "values": "values"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "putmask": {
+    "api": "multiarray.putmask",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9184,6 +10692,7 @@
   },
   "ravel_multi_index": {
     "api": "numpy.ravel_multi_index",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9202,8 +10711,20 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "recarray": {
+    "api": "records.recarray",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "reciprocal": {
     "api": "numpy.reciprocal",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "record": {
+    "api": "records.record",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9221,6 +10742,12 @@
       "i": "i",
       "self": "self"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "remove_whitespace": {
+    "api": "genapi.remove_whitespace",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9243,6 +10770,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "repr_format": {
+    "api": "arrayprint.repr_format",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "require": {
+    "api": "_asarray.require",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "reset": {
     "api": "numpy.nditer.reset",
     "args": {
@@ -9260,6 +10799,7 @@
   },
   "result_type": {
     "api": "numpy.result_type",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9287,12 +10827,30 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "rfind": {
+    "api": "strings.rfind",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "right_shift": {
     "api": "numpy.ma.core.right_shift",
     "args": {
       "a": "a",
       "n": "n"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rindex": {
+    "api": "strings.rindex",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rjust": {
+    "api": "strings.rjust",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9315,6 +10873,29 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "row_stack": {
+    "api": "numpy.row_stack",
+    "args": {
+      "casting": "casting",
+      "dtype": "dtype",
+      "tup": "tup"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rpartition": {
+    "api": "defchararray.rpartition",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "rstrip": {
+    "api": "strings.rstrip",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "savez": {
     "api": "numpy.savez",
     "dispatch_rules": [],
@@ -9323,6 +10904,19 @@
   },
   "savez_compressed": {
     "api": "numpy.savez_compressed",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "scalar": {
+    "api": "numpy.ma.core.mu.scalar",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "sctype2char": {
+    "api": "numerictypes.sctype2char",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9354,6 +10948,26 @@
   },
   "set_printoptions": {
     "api": "numpy.set_printoptions",
+    "args": {
+      "edgeitems": "edgeitems",
+      "floatmode": "floatmode",
+      "formatter": "formatter",
+      "infstr": "infstr",
+      "legacy": "legacy",
+      "linewidth": "linewidth",
+      "nanstr": "nanstr",
+      "override_repr": "override_repr",
+      "precision": "precision",
+      "sign": "sign",
+      "suppress": "suppress",
+      "threshold": "threshold"
+    },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "setbufsize": {
+    "api": "_ufunc_config.setbufsize",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9369,6 +10983,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "seterr": {
+    "api": "_ufunc_config.seterr",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "seterrcall": {
+    "api": "_ufunc_config.seterrcall",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "setxor1d": {
     "api": "numpy.ma.extras.setxor1d",
     "args": {
@@ -9376,6 +11002,19 @@
       "ar2": "ar2",
       "assume_unique": "assume_unique"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "share_memory": {
+    "api": "numpy.lib.mixins.um.shares_memory",
+    "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "shares_memory": {
+    "api": "multiarray.shares_memory",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9433,6 +11072,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "skip_brackets": {
+    "api": "genapi.skip_brackets",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "slogdet": {
     "api": "numpy.linalg.slogdet",
     "dispatch_rules": [],
@@ -9456,6 +11101,12 @@
       "order": "order",
       "stable": "stable"
     },
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "split_arguments": {
+    "api": "genapi.split_arguments",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9486,6 +11137,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "startswith": {
+    "api": "strings.startswith",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "state": {
     "api": "numpy.random.bit_generator.SeedSequence.state",
     "args": {},
@@ -9506,9 +11163,21 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "str_format": {
+    "api": "arrayprint.str_format",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "strides": {
     "api": "numpy.ndarray.strides",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "strip": {
+    "api": "strings.strip",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9541,6 +11210,12 @@
   "swapaxes": {
     "api": "numpy.ma.core.swapaxes",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "swapcase": {
+    "api": "strings.swapcase",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9598,6 +11273,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "title": {
+    "api": "strings.title",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "tolist": {
     "api": "numpy.matrixlib.defmatrix.matrix.tolist",
     "args": {
@@ -9610,6 +11291,17 @@
   "trace": {
     "api": "numpy.ma.core.trace",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "translate": {
+    "api": "numpy.char.chararray.translate",
+    "args": {
+      "deletechars": "deletechars",
+      "self": "self",
+      "table": "table"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9641,6 +11333,11 @@
   },
   "tril_indices": {
     "api": "numpy.tril_indices",
+    "args": {
+      "k": "k",
+      "m": "m",
+      "n": "n"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9665,6 +11362,11 @@
   },
   "triu_indices": {
     "api": "numpy.triu_indices",
+    "args": {
+      "k": "k",
+      "m": "m",
+      "n": "n"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9774,6 +11476,7 @@
   },
   "unravel_index": {
     "api": "numpy.unravel_index",
+    "args": {},
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9781,6 +11484,15 @@
   "unsignedinteger": {
     "api": "numpy.unsignedinteger",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "upper": {
+    "api": "numpy.char.chararray.upper",
+    "args": {
+      "self": "self"
+    },
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []
@@ -9846,6 +11558,12 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "verify_matching_signatures": {
+    "api": "overrides.verify_matching_signatures",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "vsplit": {
     "api": "numpy.vsplit",
     "dispatch_rules": [],
@@ -9872,6 +11590,18 @@
     "pack_as": "Tuple",
     "required_imports": []
   },
+  "write_code": {
+    "api": "generate_umath_doc.write_code",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "write_file": {
+    "api": "genapi.write_file",
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
   "zeros": {
     "api": "numpy.zeros",
     "dispatch_rules": [],
@@ -9881,6 +11611,12 @@
   "zeros_like": {
     "api": "numpy.ma.core.zeros_like",
     "args": {},
+    "dispatch_rules": [],
+    "pack_as": "Tuple",
+    "required_imports": []
+  },
+  "zfill": {
+    "api": "strings.zfill",
     "dispatch_rules": [],
     "pack_as": "Tuple",
     "required_imports": []

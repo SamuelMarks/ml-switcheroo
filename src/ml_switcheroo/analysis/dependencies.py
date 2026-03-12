@@ -97,7 +97,7 @@ class DependencyScanner(cst.CSTVisitor):
     if isinstance(curr, cst.Name):
       return curr.value
 
-    return ""  # pragma: no cover
+    return ""
 
   def _validate_package(self, pkg_name: str) -> None:
     """
@@ -108,7 +108,7 @@ class DependencyScanner(cst.CSTVisitor):
         pkg_name: The root package identifier.
     """
     if not pkg_name:
-      return  # pragma: no cover
+      return
 
     # 1. Ignore Source Framework (Handled by Rewriter)
     if pkg_name == self.source_fw:
@@ -142,7 +142,7 @@ class DependencyScanner(cst.CSTVisitor):
 
     # Fallback for Python 3.9 (common subset)
     # This list serves as a heuristic for older envs supported by the classifier.
-    common_stdlib = frozenset(  # pragma: no cover
+    common_stdlib = frozenset(
       (
         "os",
         "sys",
@@ -203,7 +203,7 @@ class DependencyScanner(cst.CSTVisitor):
     )
 
     # Check builtins (available in sys even in old python)
-    if name in sys.builtin_module_names:  # pragma: no cover
-      return True  # pragma: no cover
+    if name in sys.builtin_module_names:
+      return True
 
-    return name in common_stdlib  # pragma: no cover
+    return name in common_stdlib

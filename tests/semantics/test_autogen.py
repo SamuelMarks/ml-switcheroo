@@ -166,3 +166,53 @@ def test_corrupt_file_handling(mock_ver, persister, sample_candidate, mock_fs):
   assert target_spec.exists()
   data = json.loads(target_spec.read_text())
   assert "Huber" in data
+
+
+def test_arg_sort_key_string():
+  from ml_switcheroo.semantics.autogen import _arg_sort_key
+
+  assert _arg_sort_key("foo") == "foo"
+  assert _arg_sort_key({"name": "bar"}) == "bar"
+  assert _arg_sort_key({"other": "baz"}) == ""
+
+
+def test_mkdir_snapshots(persister, sample_candidate, mock_fs):
+  sem_dir, snap_dir = mock_fs
+  target_spec = sem_dir / "k_generated.json"
+  import shutil
+
+  shutil.rmtree(snap_dir)  # Remove so it has to recreate
+  with patch("ml_switcheroo.semantics.autogen.resolve_snapshots_dir", return_value=snap_dir):
+    persister.persist([sample_candidate], target_spec)
+  assert snap_dir.exists()
+
+
+def test_get_version_exception(persister):
+  with patch("ml_switcheroo.semantics.autogen.importlib.metadata.version", side_effect=Exception("foo")):
+    assert persister._get_version("torch") == "unknown"
+
+
+def test_save_json_mkdir(persister, mock_fs):
+  sem_dir, _ = mock_fs
+  new_file = sem_dir / "new_dir" / "test.json"
+  persister._save_json(new_file, {"a": 1})
+  assert new_file.exists()
+
+
+def test_load_json_corrupt_log(persister, mock_fs):
+  sem_dir, _ = mock_fs
+  corrupt_file = sem_dir / "corrupt2.json"
+  corrupt_file.write_text("{bad")
+  with patch("ml_switcheroo.semantics.autogen.log_warning") as mock_log:
+    res = persister._load_json(corrupt_file)
+    assert res == {}
+    mock_log.assert_called_once()
+
+
+def test_persist_no_updates(persister, mock_fs):
+  sem_dir, snap_dir = mock_fs
+  target_spec = sem_dir / "empty.json"
+  with patch("ml_switcheroo.semantics.autogen.resolve_snapshots_dir", return_value=snap_dir):
+    with patch("ml_switcheroo.semantics.autogen.log_info") as mock_log:
+      persister.persist([], target_spec)
+      mock_log.assert_called_once_with("No new non-conflicting standards found to persist.")

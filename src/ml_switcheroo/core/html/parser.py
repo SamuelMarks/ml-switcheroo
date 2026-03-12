@@ -77,12 +77,12 @@ class GridParser(HTMLParser):
     classes = self.current_class.strip().split()
 
     if "r" in classes:
-      # Red boxes are attributes (Layers)  # pragma: no cover
+      # Red boxes are attributes (Layers)
       if ":" in txt:
         name, kind = txt.split(":", 1)
         self.attrs.append((name.strip(), kind.strip(), code))
       else:
-        self.attrs.append((txt, "Unknown", code))  # pragma: no cover
+        self.attrs.append((txt, "Unknown", code))
 
     elif "b" in classes:
       # Blue boxes are Call operations
@@ -117,31 +117,31 @@ class HtmlParser:
 
     # 2. Build __init__
     init_stmts = []
-    if p.attrs:  # pragma: no cover
+    if p.attrs:
       init_stmts.append(cst.SimpleStatementLine([cst.Expr(cst.parse_expression("super().__init__()"))]))
 
     for name, kind, cfg in p.attrs:
       # Clean formatting logic: args like "args: x" means empty config for attribute
       config_str = cfg
       if cfg.startswith("args:"):
-        config_str = ""  # pragma: no cover
+        config_str = ""
 
       target_api_class = f"dsl.{kind}"
 
       # Safely construct the RHS expression
       if not config_str:
         # Fallback for empty config
-        rhs = cst.Call(func=self._create_dotted(target_api_class), args=[])  # pragma: no cover
+        rhs = cst.Call(func=self._create_dotted(target_api_class), args=[])
       else:
         # Use robustness helper
-        rhs = self._create_call(target_api_class, config_str=config_str)  # pragma: no cover
+        rhs = self._create_call(target_api_class, config_str=config_str)
 
       target = cst.Attribute(value=cst.Name("self"), attr=cst.Name(name))
       init_stmts.append(cst.SimpleStatementLine([cst.Assign(targets=[cst.AssignTarget(target)], value=rhs)]))
 
     if not init_stmts:
       # Pass if empty
-      init_stmts.append(cst.SimpleStatementLine([cst.Pass()]))  # pragma: no cover
+      init_stmts.append(cst.SimpleStatementLine([cst.Pass()]))
 
     # 3. Build forward
     fwd_stmts = []
@@ -212,7 +212,7 @@ class HtmlParser:
     return node
 
   def _create_call(self, func_name, config_str=None):
-    """TODO: Add docstring."""  # pragma: no cover
+    """TODO: Add docstring."""
     args = []
     if config_str:
       args = self._parse_args_str(config_str)
@@ -221,27 +221,27 @@ class HtmlParser:
   def _parse_args_str(self, s: str) -> List[cst.Arg]:
     """Parses key=val, key2=val2 string into CST Args."""
     if not s:
-      return []  # pragma: no cover
+      return []
     args = []
     parts = s.split(",")
     for p in parts:
       if "=" in p:
         k, v = p.split("=", 1)
-        val_node = self._safe_val(v.strip())  # pragma: no cover
+        val_node = self._safe_val(v.strip())
         args.append(
           cst.Arg(
             keyword=cst.Name(k.strip()),
             value=val_node,
             equal=cst.AssignEqual(cst.SimpleWhitespace(""), cst.SimpleWhitespace("")),
-          )  # pragma: no cover
-        )  # pragma: no cover
+          )
+        )
       else:
-        args.append(cst.Arg(self._safe_val(p.strip())))  # pragma: no cover
+        args.append(cst.Arg(self._safe_val(p.strip())))
     return args
 
   def _safe_val(self, v):
     """TODO: Add docstring."""
     try:
       return cst.parse_expression(v)
-    except:  # pragma: no cover
-      return cst.SimpleString(f"'{v}'")  # pragma: no cover
+    except:
+      return cst.SimpleString(f"'{v}'")

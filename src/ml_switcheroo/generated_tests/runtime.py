@@ -30,42 +30,42 @@ def ensure_determinism() -> None:
   - TensorFlow `tf.random.set_seed`
   - MLX `mlx.core.random.seed`
   """
-  seed = 42  # pragma: no cover
+  seed = 42
 
   # Core Python & NumPy
-  random.seed(seed)  # pragma: no cover
-  np.random.seed(seed)  # pragma: no cover
+  random.seed(seed)
+  np.random.seed(seed)
 
   # PyTorch
-  if "torch" in sys.modules:  # pragma: no cover
-    try:  # pragma: no cover
-      sys.modules["torch"].manual_seed(seed)  # pragma: no cover
-      if sys.modules["torch"].cuda.is_available():  # pragma: no cover
-        sys.modules["torch"].cuda.manual_seed_all(seed)  # pragma: no cover
-    except Exception:  # pragma: no cover
-      pass  # pragma: no cover
+  if "torch" in sys.modules:
+    try:
+      sys.modules["torch"].manual_seed(seed)
+      if sys.modules["torch"].cuda.is_available():
+        sys.modules["torch"].cuda.manual_seed_all(seed)
+    except Exception:
+      pass
 
   # TensorFlow
-  if "tensorflow" in sys.modules:  # pragma: no cover
-    try:  # pragma: no cover
-      tf = sys.modules["tensorflow"]  # pragma: no cover
+  if "tensorflow" in sys.modules:
+    try:
+      tf = sys.modules["tensorflow"]
       # TF 2.x
-      if hasattr(tf, "random") and hasattr(tf.random, "set_seed"):  # pragma: no cover
-        tf.random.set_seed(seed)  # pragma: no cover
-    except Exception:  # pragma: no cover
-      pass  # pragma: no cover
+      if hasattr(tf, "random") and hasattr(tf.random, "set_seed"):
+        tf.random.set_seed(seed)
+    except Exception:
+      pass
 
   # MLX
-  if "mlx.core" in sys.modules:  # pragma: no cover
-    try:  # pragma: no cover
-      sys.modules["mlx.core"].random.seed(seed)  # pragma: no cover
-    except Exception:  # pragma: no cover
-      pass  # pragma: no cover
-  elif "mlx" in sys.modules and hasattr(sys.modules["mlx"], "core"):  # pragma: no cover
-    try:  # pragma: no cover
-      sys.modules["mlx"].core.random.seed(seed)  # pragma: no cover
-    except Exception:  # pragma: no cover
-      pass  # pragma: no cover
+  if "mlx.core" in sys.modules:
+    try:
+      sys.modules["mlx.core"].random.seed(seed)
+    except Exception:
+      pass
+  elif "mlx" in sys.modules and hasattr(sys.modules["mlx"], "core"):
+    try:
+      sys.modules["mlx"].core.random.seed(seed)
+    except Exception:
+      pass
 
 
 def verify_results(ref: Any, val: Any, rtol: float = 1e-3, atol: float = 1e-4, exact: bool = False) -> bool:
@@ -94,17 +94,17 @@ def verify_results(ref: Any, val: Any, rtol: float = 1e-3, atol: float = 1e-4, e
 
   # 2. Try Chex (Structural comparison for JAX PyTrees)
   if "chex" in globals():
-    try:  # pragma: no cover
-      chex_mod = globals()["chex"]  # pragma: no cover
+    try:
+      chex_mod = globals()["chex"]
       # Chex assert functions raise errors on mismatch
-      if exact:  # pragma: no cover
-        chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)  # pragma: no cover
+      if exact:
+        chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)
       else:
-        chex_mod.assert_trees_all_close(ref, val, rtol=rtol, atol=atol)  # pragma: no cover
-      return True  # pragma: no cover
-    except (AssertionError, Exception):  # pragma: no cover
+        chex_mod.assert_trees_all_close(ref, val, rtol=rtol, atol=atol)
+      return True
+    except (AssertionError, Exception):
       # Fallback to manual recursive comparison if Chex/Tree utils fail
-      pass  # pragma: no cover
+      pass
 
   # 3. Recursive Container Handling
   if isinstance(ref, dict) and isinstance(val, dict):
@@ -146,9 +146,9 @@ def verify_results(ref: Any, val: Any, rtol: float = 1e-3, atol: float = 1e-4, e
     # Integer/Bool/String -> Exact Match
     return np.array_equal(np_ref, np_val)
 
-  except Exception:  # pragma: no cover
+  except Exception:
     # Fallback for types that fail numpy conversion (e.g. custom objects)
-    try:  # pragma: no cover
-      return ref == val  # pragma: no cover
-    except Exception:  # pragma: no cover
-      return False  # pragma: no cover
+    try:
+      return ref == val
+    except Exception:
+      return False

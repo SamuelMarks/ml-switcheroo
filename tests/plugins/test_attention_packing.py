@@ -243,3 +243,51 @@ def test_torch_constructor_fallback(mock_ctx):
   res = repack_attn_torch(call_node, mock_ctx)
   res_code = to_code(res).replace(" ", "")
   assert "torch.nn.MultiheadAttention(256,8,batch_first=True)" in res_code
+
+
+def test_keras_strategy_constructor_positional(mock_ctx):
+  mock_ctx.lookup_api.return_value = "keras.layers.MultiHeadAttention"
+  code = "m = torch.nn.MultiheadAttention(256, num_heads=8)"
+  call_node = parse_call_node(code)
+  res = repack_attn_keras(call_node, mock_ctx)
+  res_code = to_code(res)
+  assert "256" in res_code
+
+
+def test_keras_strategy_forward_positional_after_kwargs(mock_ctx):
+  code = "y = self.attn(q, k, v, 10)"
+  call_node = parse_call_node(code)
+  with pytest.raises(cst.CSTValidationError) as excinfo:
+    repack_attn_keras(call_node, mock_ctx)
+  assert "Cannot have positional argument after keyword argument" in str(excinfo.value)
+
+
+def test_keras_strategy_forward_too_few_args(mock_ctx):
+  code = "y = self.attn(q, k)"
+  call_node = parse_call_node(code)
+  res = repack_attn_keras(call_node, mock_ctx)
+  assert res is call_node
+
+
+def test_flax_strategy_forward_too_few_args(mock_ctx):
+  code = "y = self.attn(q, k)"
+  call_node = parse_call_node(code)
+  res = repack_attn_flax(call_node, mock_ctx)
+  assert res is call_node
+
+
+def test_flax_strategy_forward_other_args(mock_ctx):
+  code = "y = self.attn(q, k, v, 10, other_arg=2)"
+  call_node = parse_call_node(code)
+  res = repack_attn_flax(call_node, mock_ctx)
+  res_code = to_code(res)
+  assert "10" in res_code
+  assert "other_arg=2" in res_code
+
+
+def test_keras_strategy_forward_other_kwargs(mock_ctx):
+  code = "y = self.attn(q, k, v, other_arg=2)"
+  call_node = parse_call_node(code)
+  res = repack_attn_keras(call_node, mock_ctx)
+  res_code = to_code(res)
+  assert "other_arg=2" in res_code

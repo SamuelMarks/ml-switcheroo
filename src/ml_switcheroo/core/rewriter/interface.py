@@ -30,4 +30,4 @@ class RewriterPass(ABC):
     Returns:
         The transformed LibCST module.
     """
-    pass  # pragma: no cover
+    pass

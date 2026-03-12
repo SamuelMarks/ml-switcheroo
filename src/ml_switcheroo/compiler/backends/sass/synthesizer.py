@@ -270,15 +270,15 @@ class SassSynthesizer:
       stmt = None
       if isinstance(node, Instruction):
         stmt = self._convert_instruction_to_py(node)
-      elif isinstance(node, Comment):  # pragma: no cover
+      elif isinstance(node, Comment):
         # LibCST comments attach to statements, not standalone easily in body list
         # We emit a "pass" with comment or just ignore for logic graph
-        pass  # pragma: no cover
-      elif isinstance(node, Label):  # pragma: no cover
+        pass
+      elif isinstance(node, Label):
         # Labels usually denote blocks. Python doesn't have labels.
         # We emit a comment marker for clarity in decompilation.
         # To attach comment, we need a node.
-        stmt = cst.SimpleStatementLine(  # pragma: no cover
+        stmt = cst.SimpleStatementLine(
           body=[cst.Pass()],
           trailing_whitespace=cst.TrailingWhitespace(comment=cst.Comment(f"# Label: {node.name}")),
         )
@@ -305,8 +305,8 @@ class SassSynthesizer:
     if not inst.operands:
       # Side-effect op (e.g. BRA, EXIT, NOP)
       # plain call: sass.OP()
-      call = self._make_call(inst.opcode, [])  # pragma: no cover
-      return cst.SimpleStatementLine(body=[cst.Expr(value=call)])  # pragma: no cover
+      call = self._make_call(inst.opcode, [])
+      return cst.SimpleStatementLine(body=[cst.Expr(value=call)])
 
     # Determine Dest vs Src
     # Heuristic: If >1 operand, first is Dest.
@@ -338,9 +338,7 @@ class SassSynthesizer:
 
     # Add Predicate as arg if present
     if inst.predicate:
-      arg_nodes.append(
-        cst.Arg(keyword=cst.Name("predicate"), value=cst.SimpleString(f"'{inst.predicate}'"))
-      )  # pragma: no cover
+      arg_nodes.append(cst.Arg(keyword=cst.Name("predicate"), value=cst.SimpleString(f"'{inst.predicate}'")))
 
     call = self._make_call(inst.opcode, arg_nodes)
 
@@ -373,9 +371,9 @@ class SassSynthesizer:
     if isinstance(op, Immediate):
       if op.is_hex:
         return cst.Integer(hex(int(op.value)))
-      if isinstance(op.value, float):  # pragma: no cover
-        return cst.Float(str(op.value))  # pragma: no cover
-      return cst.Integer(str(int(op.value)))  # pragma: no cover
+      if isinstance(op.value, float):
+        return cst.Float(str(op.value))
+      return cst.Integer(str(int(op.value)))
 
     # Registers, Memory, Predicates -> String Representation -> Name
     # e.g. R0, c[0x0], @P0
@@ -406,10 +404,9 @@ class SassBackend(CompilerBackend):
   def __init__(self, semantics: Optional["SemanticsManager"] = None) -> None:
     """TODO: Add docstring."""
     # Lazy load if not provided, but typically passed from Registry/Engine
-    if semantics is None:  # pragma: no cover
+    if semantics is None:
       from ml_switcheroo.semantics.manager import SemanticsManager
 
-      # pragma: no cover
       semantics = SemanticsManager()
 
     self.synthesizer = SassSynthesizer(semantics)

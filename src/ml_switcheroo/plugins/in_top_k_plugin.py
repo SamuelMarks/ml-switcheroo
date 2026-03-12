@@ -13,4 +13,4 @@ def in_top_k_plugin(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
 
   # TODO: Implement custom logic
-  return node  # pragma: no cover
+  return node

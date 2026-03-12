@@ -37,7 +37,7 @@ class ShardingExtractionPass:
           break
 
       if not source_id:
-        continue  # pragma: no cover
+        continue
 
       # Find the source node object
       source_node = None
@@ -47,7 +47,7 @@ class ShardingExtractionPass:
           break
 
       if not source_node:
-        continue  # pragma: no cover
+        continue
 
       # Parse PartitionSpec from metadata
       arg1 = snode.metadata.get("arg_1", "")

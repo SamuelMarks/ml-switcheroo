@@ -124,7 +124,7 @@ class DocContextBuilder:
       variant_def = variants_map[fw_key]
       # Skip explicitly null variants (unsupported)
       if not variant_def:
-        continue  # pragma: no cover
+        continue
 
       adapter = get_adapter(fw_key)
       display_name = getattr(adapter, "display_name", fw_key) if adapter else fw_key
@@ -170,9 +170,9 @@ class DocContextBuilder:
       return f"Infix ({op})"
 
     if variant.get("transformation_type") == "inline_lambda":
-      return "Inline Lambda"  # pragma: no cover
+      return "Inline Lambda"
 
     if variant.get("api"):
       return "Direct Mapping"
 
-    return "Custom / Partial"  # pragma: no cover
+    return "Custom / Partial"

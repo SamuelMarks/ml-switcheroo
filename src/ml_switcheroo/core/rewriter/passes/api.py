@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 API Logic Pass.
 
@@ -130,7 +132,7 @@ class ApiTransformer(cst.CSTTransformer):
     if config_dict and "traits" in config_dict:
       self._cached_target_traits = StructuralTraits.model_validate(config_dict["traits"])
     else:
-      self._cached_target_traits = StructuralTraits()  # pragma: no cover
+      self._cached_target_traits = StructuralTraits()
 
     return self._cached_target_traits
 
@@ -160,7 +162,7 @@ class ApiTransformer(cst.CSTTransformer):
         return f"{base}.{node.attr.value}"
     elif isinstance(node, cst.BinaryOperation):
       # Fallback for operators if visited (shouldn't happen often in this path)
-      return type(node.operator).__name__  # pragma: no cover
+      return type(node.operator).__name__
     return None
 
   def _get_qualified_name(self, node: cst.BaseExpression) -> Optional[str]:
@@ -238,15 +240,15 @@ class ApiTransformer(cst.CSTTransformer):
         if clean.startswith("import") or clean.startswith("from"):
           stmt = clean
         else:
-          stmt = f"import {clean}"  # pragma: no cover
-      elif isinstance(r, dict):  # pragma: no cover
-        mod = r.get("module")  # pragma: no cover
-        alias = r.get("alias")  # pragma: no cover
-        if mod:  # pragma: no cover
-          if alias:  # pragma: no cover
-            stmt = f"import {mod} as {alias}"  # pragma: no cover
+          stmt = f"import {clean}"
+      elif isinstance(r, dict):
+        mod = r.get("module")
+        alias = r.get("alias")
+        if mod:
+          if alias:
+            stmt = f"import {mod} as {alias}"
           else:
-            stmt = f"import {mod}"  # pragma: no cover
+            stmt = f"import {mod}"
 
       if stmt:
         self.context.hook_context.inject_preamble(stmt)
@@ -262,18 +264,18 @@ class ApiTransformer(cst.CSTTransformer):
     if fw_conf and "version" in fw_conf:
       current = fw_conf["version"]
     else:
-      import importlib.metadata  # pragma: no cover
+      import importlib.metadata
 
-      pkg = self.target_fw  # pragma: no cover
-      if pkg == "flax_nnx":  # pragma: no cover
-        pkg = "flax"  # pragma: no cover
-      try:  # pragma: no cover
-        current = importlib.metadata.version(pkg)  # pragma: no cover
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
+      pkg = self.target_fw
+      if pkg == "flax_nnx":
+        pkg = "flax"
+      try:
+        current = importlib.metadata.version(pkg)
+      except Exception:
+        pass
 
     if not current:
-      return None  # pragma: no cover
+      return None
 
     def parse_v(v_str):
       """Parses a version string into a tuple of integers."""
@@ -290,16 +292,16 @@ class ApiTransformer(cst.CSTTransformer):
     if min_v:
       if curr_tuple < parse_v(min_v):
         return f"Target {self.target_fw}@{current} is older than required {min_v}"
-    # pragma: no cover
-    if max_v:  # pragma: no cover
-      if curr_tuple >= parse_v(max_v):  # pragma: no cover
+
+    if max_v:
+      if curr_tuple >= parse_v(max_v):
         return f"Target {self.target_fw}@{current} exceeds max supported {max_v}"
-    # pragma: no cover
+
     return None
 
   def _is_framework_base(self, name: str) -> bool:
     """Checks if a class name corresponds to any known framework Module base. Copied from Structural to support detection here."""
-    if not name:  # pragma: no cover
+    if not name:
       return False
 
     if self._known_module_bases is None:
@@ -311,7 +313,7 @@ class ApiTransformer(cst.CSTTransformer):
           # Handle both dict and object access safely
           if isinstance(traits, dict):
             base = traits.get("module_base")
-          else:  # pragma: no cover
+          else:
             base = getattr(traits, "module_base", None)
 
           if base:
@@ -320,11 +322,11 @@ class ApiTransformer(cst.CSTTransformer):
     if name in self._known_module_bases:
       return True
 
-    # Suffix Check (e.g. 'nn.Module' matches 'torch.nn.Module')  # pragma: no cover
-    for known in self._known_module_bases:  # pragma: no cover
-      if known.endswith(f".{name}"):  # pragma: no cover
+    # Suffix Check (e.g. 'nn.Module' matches 'torch.nn.Module')
+    for known in self._known_module_bases:
+      if known.endswith(f".{name}"):
         return True
-    # pragma: no cover
+
     return False
 
   # --- Preamble Output ---
@@ -341,19 +343,19 @@ class ApiTransformer(cst.CSTTransformer):
     new_stmts = []
     seen = set()
     for code in self.context.module_preamble:
-      if code in seen:  # pragma: no cover
+      if code in seen:
         continue
       seen.add(code)
       try:
         mod = cst.parse_module(code)
-        new_stmts.extend(mod.body)  # pragma: no cover
-      except Exception:  # pragma: no cover
+        new_stmts.extend(mod.body)
+      except Exception:
         pass
 
     # Clear buffer to prevent re-injection
     self.context.module_preamble.clear()
 
-    if not new_stmts:  # pragma: no cover
+    if not new_stmts:
       return updated_node
 
     return updated_node.with_changes(body=new_stmts + list(updated_node.body))
@@ -387,10 +389,10 @@ class ApiTransformer(cst.CSTTransformer):
 
     # Fallback raw check
     if not is_module:
-      for base in node.bases:  # pragma: no cover
-        raw_name = self._cst_to_string(base.value)  # pragma: no cover
-        if raw_name and self._is_framework_base(raw_name):  # pragma: no cover
-          is_module = True  # pragma: no cover
+      for base in node.bases:
+        raw_name = self._cst_to_string(base.value)
+        if raw_name and self._is_framework_base(raw_name):
+          is_module = True
           break
 
     if is_module:
@@ -457,13 +459,13 @@ class ApiTransformer(cst.CSTTransformer):
       insert_idx = 1
 
     # Avoid duplicate if already present
-    if any(p.name.value == arg_name for p in params):  # pragma: no cover
+    if any(p.name.value == arg_name for p in params):
       return node
 
     anno_node = cst.Annotation(annotation=self._create_dotted_name(annotation)) if annotation else None
 
     # Ensure comma on previous arg
-    if insert_idx > 0 and params[insert_idx - 1].comma == cst.MaybeSentinel.DEFAULT:  # pragma: no cover
+    if insert_idx > 0 and params[insert_idx - 1].comma == cst.MaybeSentinel.DEFAULT:
       params[insert_idx - 1] = params[insert_idx - 1].with_changes(
         comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
       )
@@ -514,7 +516,7 @@ class ApiTransformer(cst.CSTTransformer):
     """Track import aliases."""
     for alias in node.names:
       full_name = self._cst_to_string(alias.name)
-      if not full_name:  # pragma: no cover
+      if not full_name:
         continue
 
       if alias.asname:
@@ -531,14 +533,14 @@ class ApiTransformer(cst.CSTTransformer):
       return False
 
     module_name = self._cst_to_string(node.module) if node.module else ""
-    if not module_name:  # pragma: no cover
+    if not module_name:
       return False
 
-    if isinstance(node.names, cst.ImportStar):  # pragma: no cover
+    if isinstance(node.names, cst.ImportStar):
       return False
 
     for alias in node.names:
-      if not isinstance(alias, cst.ImportAlias):  # pragma: no cover
+      if not isinstance(alias, cst.ImportAlias):
         continue
       imported_name = alias.name.value
       canonical_source = f"{module_name}.{imported_name}"
@@ -579,7 +581,7 @@ class ApiTransformer(cst.CSTTransformer):
       # Fix: Check property existence before access
       if hasattr(self, "source_traits"):
         traits = self.source_traits
-      else:  # pragma: no cover
+      else:
         traits = StructuralTraits()
 
       unwrap_method = traits.functional_execution_method
@@ -640,8 +642,8 @@ class ApiTransformer(cst.CSTTransformer):
           from ml_switcheroo.core.rewriter.calls.transformers import rewrite_as_macro
 
           # Constants have no args, pass empty lists
-          return rewrite_as_macro(target_impl["macro_template"], [], [])  # pragma: no cover
-        except Exception:  # pragma: no cover
+          return rewrite_as_macro(target_impl["macro_template"], [], [])
+        except Exception:
           pass
 
     return updated_node
@@ -694,14 +696,14 @@ class ApiTransformer(cst.CSTTransformer):
       self._report_warning(v_warn)
 
     lookup = self.semantics.get_definition(func_name)
-    if not lookup:  # pragma: no cover
+    if not lookup:
       return updated_node
 
     abstract_id, details = lookup
 
     if details.get("deprecated", False):
       msg = f"Usage of deprecated operation '{abstract_id}'."
-      if details.get("replaced_by"):  # pragma: no cover
+      if details.get("replaced_by"):
         msg += f" Consider using '{details['replaced_by']}' instead."
       self._report_warning(msg)
 
@@ -729,7 +731,7 @@ class ApiTransformer(cst.CSTTransformer):
     if self.config:
       known_roots.add(self.config.source_framework)
       known_roots.add(self.config.target_framework)
-      if self.config.source_flavour:  # pragma: no cover
+      if self.config.source_flavour:
         known_roots.add(self.config.source_flavour.split(".")[0])
 
     if self.semantics:
@@ -807,8 +809,8 @@ class ApiTransformer(cst.CSTTransformer):
           if arg.keyword:
             k_name = arg.keyword.value
             mapped = lib_to_std.get(k_name) or (k_name if k_name == first_std_arg else None)
-            if mapped == first_std_arg:  # pragma: no cover
-              arg_provided = True  # pragma: no cover
+            if mapped == first_std_arg:
+              arg_provided = True
               break
 
         if not arg_provided:
@@ -861,7 +863,7 @@ class ApiTransformer(cst.CSTTransformer):
       is_list = pack_as_type == "List"
       if elements:
         trailing_comma = cst.MaybeSentinel.DEFAULT
-        if not is_list and len(elements) == 1:  # pragma: no cover
+        if not is_list and len(elements) == 1:
           trailing_comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))
         elements[-1] = elements[-1].with_changes(comma=trailing_comma)
 
@@ -891,8 +893,8 @@ class ApiTransformer(cst.CSTTransformer):
               whitespace_before=cst.SimpleWhitespace(""),
               whitespace_after=cst.SimpleWhitespace(""),
             ),
-          )  # pragma: no cover
-        except Exception:  # pragma: no cover
+          )
+        except Exception:
           pass
 
       if std_name in found_args:
@@ -919,21 +921,21 @@ class ApiTransformer(cst.CSTTransformer):
             if raw_key is not None and str(raw_key) in val_options:
               target_code = val_options[str(raw_key)]
               try:
-                final_val_node = cst.parse_expression(target_code)  # pragma: no cover
-              except cst.ParserSyntaxError:  # pragma: no cover
+                final_val_node = cst.parse_expression(target_code)
+              except cst.ParserSyntaxError:
                 pass
           # Otherwise it's a constant injection (literal override)
           # e.g. "False" string or boolean value
-          else:  # pragma: no cover
-            target_code = val_options  # pragma: no cover
-            if isinstance(target_code, str):  # pragma: no cover
-              try:  # pragma: no cover
-                final_val_node = cst.parse_expression(target_code)  # pragma: no cover
+          else:
+            target_code = val_options
+            if isinstance(target_code, str):
+              try:
+                final_val_node = cst.parse_expression(target_code)
               except cst.ParserSyntaxError:
                 # Fallback if string isn't an expression but a literal name is invalid
-                # Or treat as simple string  # pragma: no cover
+                # Or treat as simple string
                 final_val_node = cst.SimpleString(f"'{target_code}'")
-            else:  # pragma: no cover
+            else:
               final_val_node = convert_value_to_cst(target_code)
 
         should_use_keyword = current_arg.keyword is not None
@@ -949,8 +951,8 @@ class ApiTransformer(cst.CSTTransformer):
           )
           new_args_list.append(new_arg)
         else:
-          if final_val_node is not current_arg.value:  # pragma: no cover
-            new_arg = current_arg.with_changes(value=final_val_node)  # pragma: no cover
+          if final_val_node is not current_arg.value:
+            new_arg = current_arg.with_changes(value=final_val_node)
             new_args_list.append(new_arg)
           else:
             new_args_list.append(current_arg)
@@ -958,12 +960,12 @@ class ApiTransformer(cst.CSTTransformer):
     # Append extras
     # Feature: Filtering based on kwargs_map
     # If a keyword is explicitly set to null in kwargs_map, it should be dropped from extra_args
-    if kwargs_map:  # pragma: no cover
-      filtered_extras = []  # pragma: no cover
-      for arg in extra_args:  # pragma: no cover
-        if arg.keyword and arg.keyword.value in kwargs_map and kwargs_map[arg.keyword.value] is None:  # pragma: no cover
-          continue  # pragma: no cover
-        filtered_extras.append(arg)  # pragma: no cover
+    if kwargs_map:
+      filtered_extras = []
+      for arg in extra_args:
+        if arg.keyword and arg.keyword.value in kwargs_map and kwargs_map[arg.keyword.value] is None:
+          continue
+        filtered_extras.append(arg)
       extra_args = filtered_extras
 
     new_args_list.extend(extra_args)
@@ -974,19 +976,19 @@ class ApiTransformer(cst.CSTTransformer):
     injections = target_inject_map.copy()
     if target_val_map:
       for k, v in target_val_map.items():
-        if not isinstance(v, dict) and k not in std_args_order:  # pragma: no cover
+        if not isinstance(v, dict) and k not in std_args_order:
           injections[k] = v
 
     # Processing injections
     if injections:
       for arg_name, arg_val in injections.items():
-        if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):  # pragma: no cover
+        if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):
           continue
 
-        if isinstance(arg_val, str):  # pragma: no cover
-          try:  # pragma: no cover
-            val_node = cst.parse_expression(arg_val)  # pragma: no cover
-          except cst.ParserSyntaxError:  # pragma: no cover
+        if isinstance(arg_val, str):
+          try:
+            val_node = cst.parse_expression(arg_val)
+          except cst.ParserSyntaxError:
             val_node = cst.SimpleString(f"'{arg_val}'")
         else:
           val_node = convert_value_to_cst(arg_val)
@@ -1016,7 +1018,7 @@ class ApiTransformer(cst.CSTTransformer):
   # --- Hook Accessors (Proxy) ---
   @property
   def ctx(self) -> Any:
-    """Expose hook context for strategy invocation."""  # pragma: no cover
+    """Expose hook context for strategy invocation."""
     return self.context.hook_context
 
   # --- Preamble and Signature Logic ---
@@ -1029,8 +1031,8 @@ class ApiTransformer(cst.CSTTransformer):
     for code in stmts_code:
       try:
         mod = cst.parse_module(code)
-        new_stmts.extend(mod.body)  # pragma: no cover
-      except Exception:  # pragma: no cover
+        new_stmts.extend(mod.body)
+      except Exception:
         pass
 
     return self._inject_stmts_to_body(node, new_stmts)
@@ -1045,9 +1047,7 @@ class ApiTransformer(cst.CSTTransformer):
     # Skip docstring if exists
     if existing and isinstance(existing[0], cst.SimpleStatementLine) and len(existing[0].body) == 1:
       expr = existing[0].body[0]
-      if isinstance(expr, cst.Expr) and isinstance(
-        expr.value, (cst.SimpleString, cst.ConcatenatedString)
-      ):  # pragma: no cover
+      if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
         idx = 1
 
     final_body = existing[:idx] + new_stmts + existing[idx:]
@@ -1057,5 +1057,5 @@ class ApiTransformer(cst.CSTTransformer):
     """Unwraps simple one-liners to indented blocks for injection."""
     if isinstance(node.body, cst.SimpleStatementSuite):
       new_stmts = [cst.SimpleStatementLine(body=[s]) for s in node.body.body]
-      return node.with_changes(body=cst.IndentedBlock(body=new_stmts))  # pragma: no cover
-    return node  # pragma: no cover
+      return node.with_changes(body=cst.IndentedBlock(body=new_stmts))
+    return node

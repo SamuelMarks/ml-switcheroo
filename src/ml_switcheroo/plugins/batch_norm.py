@@ -42,7 +42,7 @@ def transform_batch_norm(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   """
   # 0. Capability Check
   if not ctx.plugin_traits.requires_functional_state:
-    return node  # pragma: no cover
+    return node
 
   # 1. Prepare Arguments
   new_args = list(node.args)

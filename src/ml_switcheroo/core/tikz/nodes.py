@@ -24,7 +24,7 @@ class TikzBaseNode(ABC):
     Returns:
         str: The TikZ/LaTeX source code for this construct.
     """
-    pass  # pragma: no cover
+    pass
 
 
 @dataclass
@@ -144,7 +144,7 @@ class TikzNode(TikzBaseNode):
     """Constructs the full node command string."""
     parts = []
     for t in self.leading_trivia:
-      parts.append(t.to_text())  # pragma: no cover
+      parts.append(t.to_text())
 
     parts.append(r"\node")
 
@@ -234,7 +234,7 @@ class TikzGraph(TikzBaseNode):
       opts_str = ", ".join([o.to_text() for o in self.options])
       lines.append(f"\\begin{{tikzpicture}}[{opts_str}]")
     else:
-      lines.append(r"\begin{tikzpicture}")  # pragma: no cover
+      lines.append(r"\begin{tikzpicture}")
 
     # Add children (indenting them)
     for child in self.children:

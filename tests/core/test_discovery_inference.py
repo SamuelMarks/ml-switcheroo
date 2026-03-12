@@ -164,3 +164,44 @@ def test_import_error_handled_gracefully():
       result = reflector.discover("Target")
 
   assert result == "good_mod.Target"
+
+
+def test_fuzzy_match_import_error():
+  """
+  Scenario: No exact match found, proceeding to fuzzy match. One module raises ImportError.
+  Expect: The ImportError is caught and ignored during fuzzy match collection.
+  """
+  adapter = get_mock_adapter(modules=["bad_mod", "good_mod"])
+  mod_good = mock_module_with_members("good_mod", ["Target_v2"])
+
+  def side_effect(name):
+    if name == "bad_mod":
+      raise ImportError("Broken")
+    if name == "good_mod":
+      return mod_good
+    return None
+
+  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
+    with patch("importlib.import_module", side_effect=side_effect):
+      reflector = SimulatedReflection("test_fw")
+      result = reflector.discover("Target")
+
+  assert result == "good_mod.Target_v2"
+
+
+def test_fuzzy_match_no_candidates():
+  """
+  Scenario: No exact match, and no candidates found for fuzzy matching.
+  Expect: Returns None.
+  """
+  adapter = get_mock_adapter(modules=["bad_mod"])
+
+  def side_effect(name):
+    raise ImportError("Broken")
+
+  with patch("ml_switcheroo.core.discovery.get_adapter", return_value=adapter):
+    with patch("importlib.import_module", side_effect=side_effect):
+      reflector = SimulatedReflection("test_fw")
+      result = reflector.discover("Target")
+
+  assert result is None

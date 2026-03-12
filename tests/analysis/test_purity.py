@@ -20,11 +20,11 @@ class MockSemantics:
   """Class docstring."""
 
   def get_all_rng_methods(self):
-    """Function docstring."""
+    """Test case for get_all_rng_methods."""
     return {"custom_seed"}
 
   def get_framework_config(self, framework):
-    """Function docstring."""
+    """Test case for get_framework_config."""
     if framework == "torch":
       return {"traits": {"impurity_methods": ["add_", "copy_"]}}
     return {}
@@ -43,7 +43,7 @@ def analyze(code: str, use_semantics: bool = False) -> str:
 
 
 def test_io_detection_print():
-  """Function docstring."""
+  """Test case for test_io_detection_print."""
   code = "print(x)"
   result = analyze(code)
   assert EscapeHatch.START_MARKER in result
@@ -51,7 +51,7 @@ def test_io_detection_print():
 
 
 def test_mutation_detection_list_append():
-  """Function docstring."""
+  """Test case for test_mutation_detection_list_append."""
   code = "my_list.append(item)"
   result = analyze(code)
   assert EscapeHatch.START_MARKER in result
@@ -59,7 +59,7 @@ def test_mutation_detection_list_append():
 
 
 def test_global_keyword_detection():
-  """Function docstring."""
+  """Test case for test_global_keyword_detection."""
   # Use multiline string to ensure SimpleStatementLine wrapping occurs
   code = """
 def f():
@@ -72,7 +72,7 @@ def f():
 
 
 def test_nonlocal_keyword_detection():
-  """Function docstring."""
+  """Test case for test_nonlocal_keyword_detection."""
   code = """
 def outer():
     x = 0
@@ -108,7 +108,7 @@ def test_framework_specific_impurity():
 
 
 def test_pure_code_passes_clean():
-  """Function docstring."""
+  """Test case for test_pure_code_passes_clean."""
   code = "def add(x, y): return x + y"
   result = analyze(code)
   assert EscapeHatch.START_MARKER not in result
@@ -116,7 +116,7 @@ def test_pure_code_passes_clean():
 
 
 def test_file_write_detection():
-  """Function docstring."""
+  """Test case for test_file_write_detection."""
   code = "f.write('data')"
   result = analyze(code)
   assert EscapeHatch.START_MARKER in result

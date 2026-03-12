@@ -23,7 +23,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     Abstract placeholder.
     Must be implemented by the main Generator class to resolve variables.
 
-    Args:  # pragma: no cover
+    Args:
         ssa_name: The SSA name to resolve.
 
     Returns:
@@ -33,20 +33,20 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
   def _parse_keywords(self, op: OperationNode) -> List[Optional[str]]:
     """
-      Extracts arg_keywords attribute from operation.  # pragma: no cover
-      Returns a list of strings (keyword names or empty strings).  # pragma: no cover
+    Extracts arg_keywords attribute from operation.
+    Returns a list of strings (keyword names or empty strings).
 
-      Args:
-          op: The operation node to parse.
-    # pragma: no cover
-      Returns:  # pragma: no cover
-          A list of keyword strings or None for positional arguments.
-    """  # pragma: no cover
-    for attr in op.attributes:  # pragma: no cover
+    Args:
+        op: The operation node to parse.
+
+    Returns:
+        A list of keyword strings or None for positional arguments.
+    """
+    for attr in op.attributes:
       if attr.name == "arg_keywords":
-        # Case 1: Already list (from in-memory object)  # pragma: no cover
-        if isinstance(attr.value, list):  # pragma: no cover
-          return [v.strip('"') for v in attr.value]  # pragma: no cover
+        # Case 1: Already list (from in-memory object)
+        if isinstance(attr.value, list):
+          return [v.strip('"') for v in attr.value]
 
         # Case 2: String representation (from parser)
         # e.g. '["", "rngs"]'
@@ -55,14 +55,13 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
             # Safe evaluation of list literal
             val = ast.literal_eval(attr.value)
             if isinstance(val, list):
-              # Ensure strings are clean  # pragma: no cover
-              return [str(v).strip('"').strip("'") for v in val]  # pragma: no cover
+              # Ensure strings are clean
+              return [str(v).strip('"').strip("'") for v in val]
           except (ValueError, SyntaxError):
             pass
 
     return []
 
-  # pragma: no cover
   def _expr_sw_constant(self, op: OperationNode) -> cst.BaseExpression:
     """Generates constant literal expression.
 
@@ -71,7 +70,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
     Returns:
         A LibCST expression representing the constant value.
-    """  # pragma: no cover
+    """
     val_str = self._get_attr(op, "value") or "0"
     try:
       return cst.parse_expression(val_str)
@@ -84,7 +83,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     Args:
         op: The operation node for getattr.
 
-    Returns:  # pragma: no cover
+    Returns:
         A LibCST attribute access expression.
     """
     if not op.operands:
@@ -105,7 +104,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     # Operands: [func, arg0, arg1...]
     if not op.operands:
       return cst.Call(func=cst.Name("unknown"))
-    # pragma: no cover
+
     func_expr = self._resolve_operand(op.operands[0].name)
     keywords = self._parse_keywords(op)
 
@@ -117,7 +116,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
       kw_node = None
       if i < len(keywords) and keywords[i]:
-        kw_node = cst.Name(keywords[i])  # pragma: no cover
+        kw_node = cst.Name(keywords[i])
 
       args.append(
         cst.Arg(
@@ -133,14 +132,14 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
 
   def _expr_sw_op(self, op: OperationNode) -> cst.BaseExpression:
     """
-      Generates generic operation call (e.g. torch.add).  # pragma: no cover
-      Handles specialized binary operation mapping via `binop.` types.  # pragma: no cover
-    # pragma: no cover
-      Args:
-          op: The operation node to generate an expression for.  # pragma: no cover
-    # pragma: no cover
-      Returns:
-          A LibCST expression representing the operation.  # pragma: no cover
+    Generates generic operation call (e.g. torch.add).
+    Handles specialized binary operation mapping via `binop.` types.
+
+    Args:
+        op: The operation node to generate an expression for.
+
+    Returns:
+        A LibCST expression representing the operation.
     """
     type_name = self._get_attr(op, "type") or '"unknown"'
     if "binop." in type_name:
@@ -155,7 +154,7 @@ class ExpressionGeneratorMixin(BaseGeneratorMixin):
     for i, op_val in enumerate(op.operands):
       arg_expr = self._resolve_operand(op_val.name)
       kw_node = None
-      if i < len(keywords) and keywords[i]:  # pragma: no cover
+      if i < len(keywords) and keywords[i]:
         kw_node = cst.Name(keywords[i])
 
       args.append(

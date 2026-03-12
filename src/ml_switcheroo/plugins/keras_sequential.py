@@ -58,25 +58,25 @@ def transform_keras_sequential(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   # Safety Check: If lookup returns non-string (e.g. Mock in bad test setup) or None
   if not isinstance(op_api, str):
-    op_api = "keras.Sequential"  # pragma: no cover
+    op_api = "keras.Sequential"
 
   new_func = _create_dotted_name(op_api)
 
   # If args are already empty or it looks like a list is passed (e.g. Sequential([...])),
   # just rename and return to avoid double-packing.
   if not node.args:
-    return node.with_changes(func=new_func)  # pragma: no cover
+    return node.with_changes(func=new_func)
 
   first_val = node.args[0].value
   if isinstance(first_val, (cst.List, cst.Tuple)):
-    return node.with_changes(func=new_func)  # pragma: no cover
+    return node.with_changes(func=new_func)
 
   # 2. Pack Arguments
   elements = []
   for arg in node.args:
     # Ignore keyword args if any (Keras Sequential doesn't typically use kwargs for layers)
     if arg.keyword:
-      continue  # pragma: no cover
+      continue
     val = arg.value
     elements.append(cst.Element(value=val))
 

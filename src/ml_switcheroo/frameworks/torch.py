@@ -69,7 +69,7 @@ class TorchAdapter:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("torch")
       if not self._snapshot_data:
-        logging.warning("PyTorch not installed and no snapshot found. Scanning unavailable.")  # pragma: no cover
+        logging.warning("PyTorch not installed and no snapshot found. Scanning unavailable.")
 
   # --- Import Abstraction (Self-Declaration) ---
 
@@ -111,7 +111,7 @@ class TorchAdapter:
         List of module names.
     """
     if self._mode == InitMode.GHOST:
-      return []  # pragma: no cover
+      return []
     return [
       "torch.nn",
       "torch.linalg",
@@ -269,7 +269,7 @@ class TorchAdapter:
     Returns:
         Configuration object for plugin logic.
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=False,  # Uses .to() not .astype()
       requires_explicit_rng=False,
       requires_functional_state=False,
@@ -312,21 +312,21 @@ class TorchAdapter:
 
     # Ensure class-based ReLU is present for architecture translation
     if "ReLU" not in defs:
-      defs["ReLU"] = StandardMap(api="torch.nn.ReLU")  # pragma: no cover
+      defs["ReLU"] = StandardMap(api="torch.nn.ReLU")
 
     # Ensure functional relu is present for expression translation
     # This fixes the issue where nnx.relu (functional) incorrectly mapped to nn.ReLU (class)
     # or was missing entirely.
     if "relu" not in defs:
-      defs["relu"] = StandardMap(api="torch.nn.functional.relu")  # pragma: no cover
+      defs["relu"] = StandardMap(api="torch.nn.functional.relu")
 
     if "Linear" not in defs:
-      defs["Linear"] = StandardMap(  # pragma: no cover
+      defs["Linear"] = StandardMap(
         api="torch.nn.Linear", args={"in_features": "in_features", "out_features": "out_features"}
       )
 
     if "Conv2d" not in defs:
-      defs["Conv2d"] = StandardMap(  # pragma: no cover
+      defs["Conv2d"] = StandardMap(
         api="torch.nn.Conv2d",
         args={"in_channels": "in_channels", "out_channels": "out_channels", "kernel_size": "kernel_size"},
       )
@@ -346,11 +346,11 @@ class TorchAdapter:
     Returns:
         Code string for device creation.
     """
-    args = [str(device_type)]  # pragma: no cover
-    if device_index:  # pragma: no cover
-      args.append(str(device_index))  # pragma: no cover
-    arg_str = ", ".join(args)  # pragma: no cover
-    return f"torch.device({arg_str})"  # pragma: no cover
+    args = [str(device_type)]
+    if device_index:
+      args.append(str(device_index))
+    arg_str = ", ".join(args)
+    return f"torch.device({arg_str})"
 
   def get_device_check_syntax(self) -> str:
     """
@@ -359,7 +359,7 @@ class TorchAdapter:
     Returns:
         Python expression string.
     """
-    return "torch.cuda.is_available()"  # pragma: no cover
+    return "torch.cuda.is_available()"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """
@@ -373,7 +373,7 @@ class TorchAdapter:
     Returns:
         'pass' string (No-op).
     """
-    return "pass"  # pragma: no cover
+    return "pass"
 
   def get_serialization_imports(self) -> List[str]:
     """
@@ -382,7 +382,7 @@ class TorchAdapter:
     Returns:
         List of import statements.
     """
-    return ["import torch"]  # pragma: no cover
+    return ["import torch"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """
@@ -396,11 +396,11 @@ class TorchAdapter:
     Returns:
         Python code string for the operation.
     """
-    if op == "save" and object_arg:  # pragma: no cover
-      return f"torch.save({object_arg}, {file_arg})"  # pragma: no cover
-    elif op == "load":  # pragma: no cover
-      return f"torch.load({file_arg})"  # pragma: no cover
-    return ""  # pragma: no cover
+    if op == "save" and object_arg:
+      return f"torch.save({object_arg}, {file_arg})"
+    elif op == "load":
+      return f"torch.load({file_arg})"
+    return ""
 
   # --- Weight Handling Logic ---
 
@@ -465,7 +465,7 @@ class TorchAdapter:
     Returns:
         Block of python code.
     """
-    return textwrap.dedent(  # pragma: no cover
+    return textwrap.dedent(
       f""" 
             # Convert NumPy arrays back to Torch Tensors
             torch_state = {{k: torch.from_numpy(v) for k, v in {state_var}.items()}} 
@@ -501,7 +501,42 @@ class TorchAdapter:
       "tier2_neural_cnn": """import torch\nimport torch.nn as nn\n\nclass ConvNet(nn.Module):\n    def __init__(self):\n        super().__init__()\n        self.conv = nn.Conv2d(1, 32, 3)\n        self.fc = nn.Linear(32 * 26 * 26, 10)\n\n    def forward(self, x):\n        x = self.conv(x)\n        x = torch.flatten(x, 1)\n        return self.fc(x)\n""",
       "tier3_extras_dataloader": """import torch\nfrom torch.utils.data import DataLoader, TensorDataset\n\ndef create_loader(data, targets):\n    # Tier 3: Data Loader\n    ds = TensorDataset(data, targets)\n    return DataLoader(ds, batch_size=32, num_workers=4)\n""",
       "tier4_qwen3": """import torch\nimport torch.nn as nn\n\nclass QwenBlock(nn.Module):\n    def __init__(self):\n        super().__init__()\n        # Standard HF-style separate projections\n        self.q_proj = nn.Linear(1024, 1024)\n        self.k_proj = nn.Linear(1024, 1024)\n        self.v_proj = nn.Linear(1024, 1024)\n        \n        self.gate_proj = nn.Linear(1024, 4096)\n        self.up_proj = nn.Linear(1024, 4096)\n        self.down_proj = nn.Linear(4096, 1024)\n        \n    def forward(self, x):\n        # Attention\n        q = self.q_proj(x)\n        k = self.k_proj(x)\n        v = self.v_proj(x)\n        \n        # SwiGLU MLP\n        gate = self.gate_proj(x)\n        up = self.up_proj(x)\n        # Note: switcheroo handles the fusion with SwiGLU\n        mlp_out = self.down_proj(gate * up) \n        \n        return q, mlp_out\n""",
-      "tier4_qwen3-vl": """import torch\nimport torch.nn as nn\n\nclass VisionFrontEnd(nn.Module):\n    def __init__(self):\n        super().__init__()\n        # 3D Patch Convolution\n        self.patch_conv = nn.Conv3d(\n            in_channels=3,\n            out_channels=1280,\n            kernel_size=(2, 14, 14),\n            stride=(2, 14, 14),\n            bias=False\n        )\n        \n    def forward(self, x):\n        # Vision Patch Embedding Extraction\n        return self.patch_conv(x)\n""",
+      "tier4_qwen3-vl": """import torch
+import torch.nn as nn
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(nn.Module):
+    '''3D Convolutional patch embedding for vision input.'''
+    def __init__(self, config: Qwen3VLVisionConfig):
+        super().__init__()
+        self.config = config
+        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
+        self.proj = nn.Conv3d(
+            in_channels=config.in_channels,
+            out_channels=config.hidden_size,
+            kernel_size=kernel,
+            stride=kernel,
+            padding=0,
+            bias=True,
+        )
+
+    def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
+        cfg = self.config
+        seq_len = hidden_states.shape[0]
+
+        hidden_states = hidden_states.reshape(
+            seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size
+        )
+        
+        out = self.proj(hidden_states)
+        
+        return out.reshape(seq_len, cfg.hidden_size)
+""",
     }
 
   def convert(self, data: Any) -> Any:
@@ -517,20 +552,20 @@ class TorchAdapter:
     try:
       import torch
       import numpy as np
-    except ImportError:  # pragma: no cover
-      return data  # pragma: no cover
+    except ImportError:
+      return data
 
     if isinstance(data, (np.ndarray, np.generic)):
       try:
         return torch.from_numpy(data)
-      except Exception:  # pragma: no cover
-        return torch.tensor(data)  # pragma: no cover
+      except Exception:
+        return torch.tensor(data)
 
     if isinstance(data, (list, tuple)):
       try:
         return torch.tensor(data)
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
+      except Exception:
+        pass
     return data
 
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
@@ -560,7 +595,7 @@ class TorchAdapter:
         List of hydrated GhostRef objects.
     """
     if not self._snapshot_data:
-      return []  # pragma: no cover
+      return []
     raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
     return [GhostInspector.hydrate(item) for item in raw_list]
 
@@ -581,8 +616,8 @@ class TorchAdapter:
       results.extend(self._scan_optimizers())
     elif category == StandardCategory.ACTIVATION:
       results.extend(self._scan_activations())
-    elif category == StandardCategory.LAYER:  # pragma: no cover
-      results.extend(self._scan_layers())  # pragma: no cover
+    elif category == StandardCategory.LAYER:
+      results.extend(self._scan_layers())
     return results
 
   def _scan_losses(self) -> List[GhostRef]:
@@ -593,7 +628,7 @@ class TorchAdapter:
         List of discovered loss classes.
     """
     if not nn:
-      return []  # pragma: no cover
+      return []
     found = []
     for name, obj in inspect.getmembers(nn):
       if inspect.isclass(obj) and name.endswith("Loss") and name != "_Loss":
@@ -609,15 +644,15 @@ class TorchAdapter:
         List of discovered optimizer classes.
     """
     if not optim:
-      return []  # pragma: no cover
+      return []
     found = []
     for name, obj in inspect.getmembers(optim):
       if inspect.isclass(obj) and name != "Optimizer":
         try:
           if issubclass(obj, optim.Optimizer):
             found.append(GhostInspector.inspect(obj, f"torch.optim.{name}"))
-        except TypeError:  # pragma: no cover
-          pass  # pragma: no cover
+        except TypeError:
+          pass
     return found
 
   def _scan_activations(self) -> List[GhostRef]:
@@ -660,21 +695,21 @@ class TorchAdapter:
         if inspect.isclass(obj) and issubclass(obj, nn.Module):
           if name in known_names:
             found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
-    except ImportError:  # pragma: no cover
-      if nn:  # pragma: no cover
-        for name, obj in inspect.getmembers(nn):  # pragma: no cover
-          if name in known_names and inspect.isclass(obj):  # pragma: no cover
-            found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))  # pragma: no cover
+    except ImportError:
+      if nn:
+        for name, obj in inspect.getmembers(nn):
+          if name in known_names and inspect.isclass(obj):
+            found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
     try:
       import torch.nn.functional as F
 
-      for name, obj in inspect.getmembers(F):  # pragma: no cover
-        if name.startswith("_") or not inspect.isfunction(obj):  # pragma: no cover
-          continue  # pragma: no cover
-        if name.lower() in [k.lower() for k in known_names]:  # pragma: no cover
-          found.append(GhostInspector.inspect(obj, f"torch.nn.functional.{name}"))  # pragma: no cover
-    except ImportError:  # pragma: no cover
-      pass  # pragma: no cover
+      for name, obj in inspect.getmembers(F):
+        if name.startswith("_") or not inspect.isfunction(obj):
+          continue
+        if name.lower() in [k.lower() for k in known_names]:
+          found.append(GhostInspector.inspect(obj, f"torch.nn.functional.{name}"))
+    except ImportError:
+      pass
     return found
 
   def _scan_layers(self) -> List[GhostRef]:
@@ -684,15 +719,15 @@ class TorchAdapter:
     Returns:
         List of discovered layer classes, excluding Losses.
     """
-    if not nn:  # pragma: no cover
-      return []  # pragma: no cover
-    found = []  # pragma: no cover
-    for name, obj in inspect.getmembers(nn):  # pragma: no cover
-      if inspect.isclass(obj) and issubclass(obj, nn.Module):  # pragma: no cover
-        if name.endswith("Loss") or name.startswith("_"):  # pragma: no cover
-          continue  # pragma: no cover
-        found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))  # pragma: no cover
-    return found  # pragma: no cover
+    if not nn:
+      return []
+    found = []
+    for name, obj in inspect.getmembers(nn):
+      if inspect.isclass(obj) and issubclass(obj, nn.Module):
+        if name.endswith("Loss") or name.startswith("_"):
+          continue
+        found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
+    return found
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """

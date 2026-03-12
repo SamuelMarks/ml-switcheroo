@@ -169,3 +169,49 @@ def test_handle_suggest_wildcard_file_batching(mock_module, tmp_path):
   # Ensure filenames are ordered
   assert files[0].name == "suggest_test_pkg_001.md"
   assert files[1].name == "suggest_test_pkg_002.md"
+
+
+def test_suggest_import_error():
+  from ml_switcheroo.cli.handlers.suggest import handle_suggest
+
+  # Line 67-69
+  assert handle_suggest("invalid_module.*") == 1
+
+
+def test_suggest_skip_module_no_targets():
+  from ml_switcheroo.cli.handlers.suggest import handle_suggest
+  import types
+
+  with patch("ml_switcheroo.cli.handlers.suggest.importlib.import_module") as mock_imp:
+    mock_mod = type("MockMod", (), {"submod": types.ModuleType("submod")})()
+    mock_imp.return_value = mock_mod
+    # Line 62 (skip module), Line 80-81 (no targets)
+    assert handle_suggest("foo.*") == 1
+
+
+def test_suggest_inspect_exception():
+  from ml_switcheroo.cli.handlers.suggest import handle_suggest
+
+  with patch("ml_switcheroo.cli.handlers.suggest.importlib.import_module") as mock_imp:
+    mock_mod = type("MockMod", (), {"sub": type("MockObj", (), {})()})()
+    mock_imp.return_value = mock_mod
+  with (
+    patch("ml_switcheroo.cli.handlers.suggest._extract_metadata", side_effect=Exception("error")),
+    patch("ml_switcheroo.cli.handlers.suggest.importlib.import_module", return_value=mock_mod),
+  ):
+    assert handle_suggest("foo.*") == 1
+
+
+def test_suggest_fallback_signature():
+  from ml_switcheroo.cli.handlers.suggest import _extract_metadata
+
+  # Line 145-147 (C-extension fallback)
+  assert _extract_metadata(str)["signature"] == "Unknown Signature"
+
+
+def test_inspect_live_object_invalid_path():
+  from ml_switcheroo.cli.handlers.suggest import _inspect_live_object
+  import pytest
+
+  with pytest.raises(ImportError):
+    _inspect_live_object("sys")

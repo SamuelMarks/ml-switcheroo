@@ -24,10 +24,10 @@ from ml_switcheroo.utils.node_diff import capture_node_source
 def _get_func_name(node: cst.Call) -> Optional[str]:
   """Helper to get function name from Call node (Attribute or Name)."""
   if isinstance(node.func, cst.Name):
-    return node.func.value  # pragma: no cover
+    return node.func.value
   if isinstance(node.func, cst.Attribute):
     return node.func.attr.value
-  return None  # pragma: no cover
+  return None
 
 
 def _get_arg(args: List[cst.Arg], index: int, name: str) -> Optional[cst.Arg]:
@@ -39,7 +39,7 @@ def _get_arg(args: List[cst.Arg], index: int, name: str) -> Optional[cst.Arg]:
     candidate = args[index]
     if candidate.keyword is None:
       return candidate
-  return None  # pragma: no cover
+  return None
 
 
 @register_hook("io_handler")
@@ -55,16 +55,16 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   # Safety: If no adapter logic is available, return original
   if not adapter:
-    return node  # pragma: no cover
+    return node
 
   func_name = _get_func_name(node)
   if not func_name:
-    return node  # pragma: no cover
+    return node
 
   # Determine Operation Type
   op = "save" if "save" in func_name else ("load" if "load" in func_name else None)
   if not op:
-    return node  # pragma: no cover
+    return node
 
   # Extract Arguments based on 'torch' convention (source)
   # save(obj, f) / load(f)
@@ -78,12 +78,12 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
 
     # Must have both
     if not obj_arg or not file_arg:
-      return node  # pragma: no cover
+      return node
 
   elif op == "load":
     file_arg = _get_arg(args, 0, "f")  # Arg 0: f
     if not file_arg:
-      return node  # pragma: no cover
+      return node
 
   # Serialize args to Python strings for the adapter
   f_str = capture_node_source(file_arg.value)
@@ -98,9 +98,9 @@ def transform_io_calls(node: cst.Call, ctx: HookContext) -> cst.Call:
   try:
     new_code = adapter.get_serialization_syntax(op, f_str, obj_str)
     if not new_code:
-      return node  # pragma: no cover
+      return node
 
     # 3. Parse back to CST
     return cst.parse_expression(new_code)
-  except Exception:  # pragma: no cover
-    return node  # pragma: no cover
+  except Exception:
+    return node

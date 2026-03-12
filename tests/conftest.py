@@ -125,6 +125,25 @@ def snapshot(request):
 
 
 @pytest.fixture(autouse=True)
+def isolate_hook_registry():
+  """
+  Ensures that modifications to the plugin hook registry
+  do not leak between tests.
+  """
+  from ml_switcheroo.core.hooks import _HOOKS, _HOOK_METADATA
+  import ml_switcheroo.core.hooks as hooks_module
+  original_hooks = _HOOKS.copy()
+  original_metadata = _HOOK_METADATA.copy()
+  original_loaded = getattr(hooks_module, "_PLUGINS_LOADED", False)
+  yield
+  _HOOKS.clear()
+  _HOOKS.update(original_hooks)
+  _HOOK_METADATA.clear()
+  _HOOK_METADATA.update(original_metadata)
+  hooks_module._PLUGINS_LOADED = original_loaded
+
+
+@pytest.fixture(autouse=True)
 def isolate_framework_registry():
   """
   Ensures that modifications to the framework adapter registry

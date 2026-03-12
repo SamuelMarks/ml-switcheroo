@@ -20,11 +20,11 @@ def get_import_root(node: Union[cst.Name, cst.Attribute]) -> str:
   Returns:
       str: The root package identifier (e.g. "scipy" from "scipy.special").
   """
-  if isinstance(node, cst.Name):  # pragma: no cover
-    return node.value  # pragma: no cover
-  if isinstance(node, cst.Attribute):  # pragma: no cover
-    return get_import_root(node.value)  # pragma: no cover
-  return ""  # pragma: no cover
+  if isinstance(node, cst.Name):
+    return node.value
+  if isinstance(node, cst.Attribute):
+    return get_import_root(node.value)
+  return ""
 
 
 def is_docstring(node: cst.CSTNode, idx: int) -> bool:
@@ -38,15 +38,13 @@ def is_docstring(node: cst.CSTNode, idx: int) -> bool:
   Returns:
       bool: True if it is a docstring (Expr containing String at index 0).
   """
-  if idx != 0:  # pragma: no cover
-    return False  # pragma: no cover
-  if isinstance(node, cst.SimpleStatementLine) and len(node.body) == 1:  # pragma: no cover
-    expr = node.body[0]  # pragma: no cover
-    if isinstance(expr, cst.Expr) and isinstance(
-      expr.value, (cst.SimpleString, cst.ConcatenatedString)
-    ):  # pragma: no cover
-      return True  # pragma: no cover
-  return False  # pragma: no cover
+  if idx != 0:
+    return False
+  if isinstance(node, cst.SimpleStatementLine) and len(node.body) == 1:
+    expr = node.body[0]
+    if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
+      return True
+  return False
 
 
 def is_future_import(node: cst.CSTNode) -> bool:
@@ -59,12 +57,12 @@ def is_future_import(node: cst.CSTNode) -> bool:
   Returns:
       bool: True if it is a future import.
   """
-  if isinstance(node, cst.SimpleStatementLine):  # pragma: no cover
-    for stmt in node.body:  # pragma: no cover
-      if isinstance(stmt, cst.ImportFrom):  # pragma: no cover
-        if stmt.module and isinstance(stmt.module, cst.Name) and stmt.module.value == "__future__":  # pragma: no cover
-          return True  # pragma: no cover
-  return False  # pragma: no cover
+  if isinstance(node, cst.SimpleStatementLine):
+    for stmt in node.body:
+      if isinstance(stmt, cst.ImportFrom):
+        if stmt.module and isinstance(stmt.module, cst.Name) and stmt.module.value == "__future__":
+          return True
+  return False
 
 
 def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
@@ -121,12 +119,12 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
     return cst.Name("True") if val else cst.Name("False")
   elif isinstance(val, int):
     if val < 0:
-      return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer(str(abs(val))))  # pragma: no cover
+      return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer(str(abs(val))))
     return cst.Integer(str(val))
   elif isinstance(val, float):
     # repr ensures high precision float string
     if val < 0:
-      return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Float(repr(abs(val))))  # pragma: no cover
+      return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Float(repr(abs(val))))
     return cst.Float(repr(val))
   elif isinstance(val, str):
     # Use json.dumps to force double quotes for string literals,
@@ -136,4 +134,4 @@ def convert_to_cst_literal(val: Any) -> cst.BaseExpression:
     return cst.Name("None")
   else:
     # Final Fallback
-    return cst.SimpleString(repr(str(val)))  # pragma: no cover
+    return cst.SimpleString(repr(str(val)))

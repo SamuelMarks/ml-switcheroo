@@ -51,8 +51,8 @@ def _is_constructor_signature(args: list) -> bool:
   # Constructor usually takes ints
   if len(args) == 2 and not any(a.keyword for a in args):
     # Check if values are Integers
-    if isinstance(args[0].value, cst.Integer):  # pragma: no cover
-      return True  # pragma: no cover
+    if isinstance(args[0].value, cst.Integer):
+      return True
 
   return False
 
@@ -95,7 +95,7 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
           new_args.append(arg)
       else:
         # Blind positional preservation (usually safe here)
-        new_args.append(arg)  # pragma: no cover
+        new_args.append(arg)
     return node.with_changes(func=new_func, args=new_args)
 
   # --- Call Detection ---
@@ -136,13 +136,13 @@ def repack_attn_keras(node: cst.Call, ctx: HookContext) -> cst.Call:
           new_arg = arg.with_changes(keyword=cst.Name("attention_mask"), value=val)
           new_args.append(new_arg)
         else:
-          new_args.append(arg)  # pragma: no cover
+          new_args.append(arg)
       else:
-        new_args.append(arg)  # pragma: no cover
+        new_args.append(arg)
 
     return node.with_changes(args=new_args)
 
-  return node  # pragma: no cover
+  return node
 
 
 @register_hook("repack_attn_flax")
@@ -186,11 +186,11 @@ def repack_attn_flax(node: cst.Call, ctx: HookContext) -> cst.Call:
       if arg.keyword and arg.keyword.value in ["attn_mask", "key_padding_mask"]:
         new_args.append(arg.with_changes(keyword=cst.Name("mask")))
       else:
-        new_args.append(arg)  # pragma: no cover
+        new_args.append(arg)
 
     return node.with_changes(args=new_args)
 
-  return node  # pragma: no cover
+  return node
 
 
 @register_hook("repack_attn_torch")

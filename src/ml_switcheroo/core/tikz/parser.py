@@ -171,7 +171,7 @@ class TikzParser:
           self._parse_edge()
           continue
 
-      self._consume()  # pragma: no cover
+      self._consume()
 
     return self.graph
 
@@ -181,7 +181,7 @@ class TikzParser:
     """Look ahead at a token without consumption."""
     idx = self.pos + offset
     if idx >= len(self.tokens):
-      return self.tokens[-1]  # pragma: no cover
+      return self.tokens[-1]
     return self.tokens[idx]
 
   def _consume(self) -> Token:
@@ -199,8 +199,8 @@ class TikzParser:
     Consume the current token if it matches kind, else raise error.
     """
     if not self._match(kind):
-      cur = self._peek()  # pragma: no cover
-      raise SyntaxError(f"Expected {kind}, got {cur.kind} ('{cur.text}') at line {cur.line}")  # pragma: no cover
+      cur = self._peek()
+      raise SyntaxError(f"Expected {kind}, got {cur.kind} ('{cur.text}') at line {cur.line}")
     return self._consume()
 
   def _is_eof(self) -> bool:
@@ -264,8 +264,8 @@ class TikzParser:
       node_id = node_id_tk.text
     else:
       # Nodes without IDs are usually aux/labels. We skip them to avoid noise.
-      self._scan_until_semicolon()  # pragma: no cover
-      return  # pragma: no cover
+      self._scan_until_semicolon()
+      return
 
     # Options can also appear after the ID
     self._optional_bracket_group()
@@ -312,8 +312,8 @@ class TikzParser:
       self._consume()
     else:
       # Unexpected edge format, skip
-      self._scan_until_semicolon()  # pragma: no cover
-      return  # pragma: no cover
+      self._scan_until_semicolon()
+      return
 
     # Target
     self._expect(TokenKind.LPAREN)
@@ -329,10 +329,10 @@ class TikzParser:
 
   def _scan_until_semicolon(self) -> None:
     """Helper to consume tokens until a semicolon is found (Error Recovery)."""
-    while not self._match(TokenKind.SEMICOLON) and not self._is_eof():  # pragma: no cover
-      self._consume()  # pragma: no cover
-    if self._match(TokenKind.SEMICOLON):  # pragma: no cover
-      self._consume()  # pragma: no cover
+    while not self._match(TokenKind.SEMICOLON) and not self._is_eof():
+      self._consume()
+    if self._match(TokenKind.SEMICOLON):
+      self._consume()
 
   def _extract_metadata(self, tokens: List[Token]) -> Tuple[str, Dict[str, str]]:
     """
@@ -365,7 +365,7 @@ class TikzParser:
     content = [w for w in words if w not in ["tabular", "c", "l", "r"]]
 
     if not content:
-      return ("Unknown", {})  # pragma: no cover
+      return ("Unknown", {})
 
     kind = content[0]
     metadata = {}

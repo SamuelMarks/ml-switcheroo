@@ -31,8 +31,8 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 try:
   import tensorflow as tf
-except ImportError:  # pragma: no cover
-  tf = None  # pragma: no cover
+except ImportError:
+  tf = None
 
 
 @register_framework("tensorflow")
@@ -63,10 +63,10 @@ class TensorFlowAdapter:
     self._snapshot_data: Dict[str, Any] = {}
 
     if tf is None:
-      self._mode = InitMode.GHOST  # pragma: no cover
-      self._snapshot_data = load_snapshot_for_adapter("tensorflow")  # pragma: no cover
-      if not self._snapshot_data:  # pragma: no cover
-        logging.debug("TensorFlow not installed and no snapshot found.")  # pragma: no cover
+      self._mode = InitMode.GHOST
+      self._snapshot_data = load_snapshot_for_adapter("tensorflow")
+      if not self._snapshot_data:
+        logging.debug("TensorFlow not installed and no snapshot found.")
 
   # --- Metadata ---
 
@@ -82,7 +82,7 @@ class TensorFlowAdapter:
     Returns:
         Set[str]: Blacklisted submodule names.
     """
-    return {  # pragma: no cover
+    return {
       "pywrap_tensorflow",
       "python",
       "core",
@@ -104,9 +104,9 @@ class TensorFlowAdapter:
     Returns:
         List[str]: Module names (e.g. ``['tensorflow', 'keras.layers']``).
     """
-    if self._mode == InitMode.GHOST:  # pragma: no cover
-      return []  # pragma: no cover
-    return [  # pragma: no cover
+    if self._mode == InitMode.GHOST:
+      return []
+    return [
       "tensorflow",
       "tensorflow.math",
       "tensorflow.linalg",
@@ -246,7 +246,7 @@ class TensorFlowAdapter:
     Returns:
         PluginTraits: The capability flags.
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,  # Supports .astype via TF/Keras ops
       requires_explicit_rng=False,  # TF handles RNG statefully (usually)
       requires_functional_state=False,
@@ -298,9 +298,9 @@ class TensorFlowAdapter:
     Returns:
         List[GhostRef]: A list of discovered API signatures.
     """
-    if self._mode == InitMode.GHOST:  # pragma: no cover
-      return self._collect_ghost(category)  # pragma: no cover
-    return self._collect_live(category)  # pragma: no cover
+    if self._mode == InitMode.GHOST:
+      return self._collect_ghost(category)
+    return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
     """
@@ -312,10 +312,10 @@ class TensorFlowAdapter:
     Returns:
         List[GhostRef]: Hydrated references from JSON data.
     """
-    if not self._snapshot_data:  # pragma: no cover
-      return []  # pragma: no cover
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
-    return [GhostInspector.hydrate(item) for item in raw_list]  # pragma: no cover
+    if not self._snapshot_data:
+      return []
+    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
     """
@@ -329,12 +329,12 @@ class TensorFlowAdapter:
     Returns:
         List[GhostRef]: References extracted from live objects.
     """
-    results = []  # pragma: no cover
-    try:  # pragma: no cover
-      import tensorflow as tf  # pragma: no cover
+    results = []
+    try:
+      import tensorflow as tf
 
-      if category == StandardCategory.ACTIVATION:  # pragma: no cover
-        target_names = {  # pragma: no cover
+      if category == StandardCategory.ACTIVATION:
+        target_names = {
           "relu",
           "sigmoid",
           "tanh",
@@ -343,23 +343,23 @@ class TensorFlowAdapter:
           "elu",
           "selu",
         }
-        for name in target_names:  # pragma: no cover
-          if hasattr(tf.nn, name):  # pragma: no cover
-            results.append(GhostInspector.inspect(getattr(tf.nn, name), f"tf.nn.{name}"))  # pragma: no cover
+        for name in target_names:
+          if hasattr(tf.nn, name):
+            results.append(GhostInspector.inspect(getattr(tf.nn, name), f"tf.nn.{name}"))
 
-      elif category == StandardCategory.LAYER:  # pragma: no cover
+      elif category == StandardCategory.LAYER:
         # Basic keras layer scanning if available
-        is_keras_available = hasattr(tf, "keras") and hasattr(tf.keras, "layers")  # pragma: no cover
-        if is_keras_available:  # pragma: no cover
-          import inspect  # pragma: no cover
+        is_keras_available = hasattr(tf, "keras") and hasattr(tf.keras, "layers")
+        if is_keras_available:
+          import inspect
 
-          for name, obj in inspect.getmembers(tf.keras.layers):  # pragma: no cover
-            if inspect.isclass(obj) and "Layer" in name and not name.startswith("_"):  # pragma: no cover
-              results.append(GhostInspector.inspect(obj, f"tf.keras.layers.{name}"))  # pragma: no cover
+          for name, obj in inspect.getmembers(tf.keras.layers):
+            if inspect.isclass(obj) and "Layer" in name and not name.startswith("_"):
+              results.append(GhostInspector.inspect(obj, f"tf.keras.layers.{name}"))
 
-    except ImportError:  # pragma: no cover
-      pass  # pragma: no cover
-    return results  # pragma: no cover
+    except ImportError:
+      pass
+    return results
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """
@@ -373,16 +373,16 @@ class TensorFlowAdapter:
       return
 
     # Normalize 'tensorflow.' -> 'tf.' in API paths
-    for _, entry in snapshot["mappings"].items():  # pragma: no cover
-      if not entry or "api" not in entry:  # pragma: no cover
-        continue  # pragma: no cover
+    for _, entry in snapshot["mappings"].items():
+      if not entry or "api" not in entry:
+        continue
 
-      api = entry["api"]  # pragma: no cover
-      if api.startswith("tensorflow."):  # pragma: no cover
+      api = entry["api"]
+      if api.startswith("tensorflow."):
         # Reconstruct path using 'tf' alias
         # e.g. tensorflow.math.add -> tf.math.add
-        new_api = "tf." + api[11:]  # pragma: no cover
-        entry["api"] = new_api  # pragma: no cover
+        new_api = "tf." + api[11:]
+        entry["api"] = new_api
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """
@@ -422,6 +422,41 @@ def data_pipeline(tensors, batch_size=32):
   loader = dataset.shuffle(1024).batch(batch_size) 
   return loader
 """,
+      "tier4_qwen3-vl": """import tensorflow as tf
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(tf.keras.layers.Layer):
+    '''3D Convolutional patch embedding for vision input.'''
+    def __init__(self, config: Qwen3VLVisionConfig):
+        super().__init__()
+        self.config = config
+        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
+        self.proj = tf.keras.layers.Conv3D(
+            filters=config.hidden_size,
+            kernel_size=kernel,
+            strides=kernel,
+            padding="valid",
+            use_bias=True,
+        )
+
+    def call(self, hidden_states):
+        cfg = self.config
+        seq_len = tf.shape(hidden_states)[0]
+
+        hidden_states = tf.reshape(
+            hidden_states, 
+            [seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size]
+        )
+        hidden_states = tf.transpose(hidden_states, perm=[0, 2, 3, 4, 1])
+        
+        out = self.proj(hidden_states)
+        return tf.reshape(out, [seq_len, cfg.hidden_size])
+""",
     }
 
   # --- Syntax Generators ---
@@ -449,7 +484,7 @@ def data_pipeline(tensors, batch_size=32):
       if device_index.isdigit():
         idx_str = device_index
       else:
-        return f"tf.device(f'{tf_type}:{{str({device_index})}}')"  # pragma: no cover
+        return f"tf.device(f'{tf_type}:{{str({device_index})}}')"
 
     return f"tf.device('{tf_type}:{idx_str}')"
 
@@ -460,7 +495,7 @@ def data_pipeline(tensors, batch_size=32):
     Returns:
         str: ``len(tf.config.list_physical_devices('GPU')) > 0``
     """
-    return "len(tf.config.list_physical_devices('GPU')) > 0"  # pragma: no cover
+    return "len(tf.config.list_physical_devices('GPU')) > 0"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """
@@ -474,7 +509,7 @@ def data_pipeline(tensors, batch_size=32):
     Returns:
         str: "pass"
     """
-    return "pass"  # pragma: no cover
+    return "pass"
 
   def get_serialization_imports(self) -> List[str]:
     """
@@ -501,7 +536,7 @@ def data_pipeline(tensors, batch_size=32):
       return f"tf.io.write_file({file_arg}, {object_arg})"
     elif op == "load":
       return f"tf.io.read_file({file_arg})"
-    return ""  # pragma: no cover
+    return ""
 
   # --- Weight Handling Logic ---
 
@@ -512,7 +547,7 @@ def data_pipeline(tensors, batch_size=32):
     Returns:
         List[str]: List of import statements.
     """
-    return ["import tensorflow as tf", "import numpy as np"]  # pragma: no cover
+    return ["import tensorflow as tf", "import numpy as np"]
 
   def get_weight_load_code(self, path_var: str) -> str:
     """
@@ -525,7 +560,7 @@ def data_pipeline(tensors, batch_size=32):
     Returns:
         Block of python code setting 'raw_state'.
     """
-    return textwrap.dedent(  # pragma: no cover
+    return textwrap.dedent(
       f""" 
             try: 
                 reader = tf.train.load_checkpoint({path_var}) 
@@ -547,7 +582,7 @@ def data_pipeline(tensors, batch_size=32):
     Returns:
         Conversion expression string.
     """
-    return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"  # pragma: no cover
+    return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """
@@ -562,7 +597,7 @@ def data_pipeline(tensors, batch_size=32):
     Returns:
         Warning print code.
     """
-    return textwrap.dedent(  # pragma: no cover
+    return textwrap.dedent(
       """ 
             print("WARNING: Saving raw dictionary to TensorFlow checkpoint is not directly supported without model structure.") 
             print("To save weights for TensorFlow, instantiate the Keras/TF model and use `model.set_weights()` or `root.save_weights()`.") 
@@ -581,12 +616,12 @@ def data_pipeline(tensors, batch_size=32):
     Returns:
         Any: ``tf.Tensor`` or original data if conversion fails.
     """
-    try:  # pragma: no cover
-      import tensorflow as tf  # pragma: no cover
+    try:
+      import tensorflow as tf
 
-      return tf.convert_to_tensor(data)  # pragma: no cover
-    except (ImportError, ValueError, TypeError, Exception):  # pragma: no cover
-      return data  # pragma: no cover
+      return tf.convert_to_tensor(data)
+    except (ImportError, ValueError, TypeError, Exception):
+      return data
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """

@@ -48,7 +48,7 @@ class RdnaLifter:
     def commit_node(node_id: str, kind: str, meta=None) -> None:
       """TODO: Add docstring."""
       nonlocal previous_node_id
-      if node_id in seen_ids:  # pragma: no cover
+      if node_id in seen_ids:
         return
 
       node = LogicalNode(id=node_id, kind=kind, metadata=meta or {})

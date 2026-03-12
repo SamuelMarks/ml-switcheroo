@@ -35,7 +35,7 @@ def resolve_roots(framework_keys: List[str]) -> Set[str]:
   for key in framework_keys:
     adapter = get_adapter(key)
     if not adapter:
-      continue  # pragma: no cover
+      continue
 
     # 1. Import Alias (Primary Root)
     if hasattr(adapter, "import_alias") and adapter.import_alias:
@@ -93,9 +93,9 @@ def handle_audit(path: Path, source_frameworks: List[str], json_mode: bool = Fal
       # Merge
       global_results.update(scanner.results)
 
-    except Exception as e:  # pragma: no cover
+    except Exception as e:
       # We log parse errors even in JSON mode to stderr as they are critical warnings
-      log_error(f"Failed to parse {f.name}: {e}")  # pragma: no cover
+      log_error(f"Failed to parse {f.name}: {e}")
 
   # Partition results
   missing_ops = {k: v for k, v in global_results.items() if not v[0]}

@@ -90,7 +90,7 @@ class StructuralTransformer(cst.CSTTransformer):
     """Resolves a CST node to a dotted string using context aliases."""
     full_str = self._cst_to_string(node)
     if not full_str:
-      return None  # pragma: no cover
+      return None
 
     parts = full_str.split(".")
     root = parts[0]
@@ -111,7 +111,7 @@ class StructuralTransformer(cst.CSTTransformer):
       base = self._cst_to_string(node.value)
       if base:
         return f"{base}.{node.attr.value}"
-    return None  # pragma: no cover
+    return None
 
   def _create_dotted_name(self, name_str: str) -> cst.BaseExpression:
     """Constructs a CST node sequence from a dotted string."""
@@ -124,7 +124,7 @@ class StructuralTransformer(cst.CSTTransformer):
   def _is_framework_base(self, name: str) -> bool:
     """Checks if a class name corresponds to any known framework Module base."""
     if not name:
-      return False  # pragma: no cover
+      return False
 
     if self._known_module_bases is None:
       self._known_module_bases = set()
@@ -136,7 +136,7 @@ class StructuralTransformer(cst.CSTTransformer):
           if isinstance(traits, dict):
             base = traits.get("module_base")
           else:
-            base = getattr(traits, "module_base", None)  # pragma: no cover
+            base = getattr(traits, "module_base", None)
 
           if base:
             self._known_module_bases.add(base)
@@ -180,24 +180,24 @@ class StructuralTransformer(cst.CSTTransformer):
     if not self.context.module_preamble:
       return updated_node
 
-    new_stmts = []  # pragma: no cover
+    new_stmts = []
     # Deduplication now handled at insertion time in Context, so order is preserved.
-    for code in self.context.module_preamble:  # pragma: no cover
-      try:  # pragma: no cover
-        mod = cst.parse_module(code)  # pragma: no cover
-        new_stmts.extend(mod.body)  # pragma: no cover
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
+    for code in self.context.module_preamble:
+      try:
+        mod = cst.parse_module(code)
+        new_stmts.extend(mod.body)
+      except Exception:
+        pass
 
     # Clear buffer to prevent re-injection
-    self.context.module_preamble.clear()  # pragma: no cover
+    self.context.module_preamble.clear()
 
-    if not new_stmts:  # pragma: no cover
-      return updated_node  # pragma: no cover
+    if not new_stmts:
+      return updated_node
 
     # Prepends to body (naive injection).
     # ImportFixer will tidy up imports later in the pipeline.
-    return updated_node.with_changes(body=new_stmts + list(updated_node.body))  # pragma: no cover
+    return updated_node.with_changes(body=new_stmts + list(updated_node.body))
 
   # --- Visitor Logic: Types ---
 
@@ -242,7 +242,7 @@ class StructuralTransformer(cst.CSTTransformer):
       # If using multiple inheritance shim (PivotRewriter)
       return super().leave_Attribute(original_node, updated_node)  # type: ignore
 
-    return updated_node  # pragma: no cover
+    return updated_node
 
   # --- Visitor Logic: Classes ---
 
@@ -263,15 +263,15 @@ class StructuralTransformer(cst.CSTTransformer):
       for base in node.bases:
         raw_name = self._cst_to_string(base.value)
         if raw_name and self._is_framework_base(raw_name):
-          is_module = True  # pragma: no cover
-          break  # pragma: no cover
+          is_module = True
+          break
 
     if is_module:
       self.context.in_module_class = True
       # Verify target support
       supported_tiers = self._get_target_tiers()
       if SemanticTier.NEURAL.value not in supported_tiers and "neural" not in supported_tiers:
-        self.context.current_stmt_errors.append(  # pragma: no cover
+        self.context.current_stmt_errors.append(
           f"Target framework '{self.context.target_fw}' does not support Neural Network classes."
         )
 
@@ -286,9 +286,9 @@ class StructuralTransformer(cst.CSTTransformer):
 
       # Check for errors bubbled up
       if self.context.current_stmt_errors:
-        msg = "; ".join(self.context.current_stmt_errors)  # pragma: no cover
-        self.context.current_stmt_errors.clear()  # pragma: no cover
-        return EscapeHatch.mark_failure(original_node, msg)  # pragma: no cover
+        msg = "; ".join(self.context.current_stmt_errors)
+        self.context.current_stmt_errors.clear()
+        return EscapeHatch.mark_failure(original_node, msg)
 
       target_base = self.target_traits.module_base
       new_bases = []
@@ -330,7 +330,7 @@ class StructuralTransformer(cst.CSTTransformer):
     """Apply signature, name, and body writes to functions."""
     self.context.scope_stack.pop()
     if not self.context.signature_stack:
-      return updated_node  # pragma: no cover
+      return updated_node
 
     sig_ctx = self.context.signature_stack.pop()
     traits = self.target_traits
@@ -379,7 +379,7 @@ class StructuralTransformer(cst.CSTTransformer):
 
     # Preamble Statements
     if sig_ctx.preamble_stmts:
-      updated_node = self._apply_preamble(updated_node, sig_ctx.preamble_stmts)  # pragma: no cover
+      updated_node = self._apply_preamble(updated_node, sig_ctx.preamble_stmts)
 
     # Docstrings
     if sig_ctx.injected_args:
@@ -426,15 +426,15 @@ class StructuralTransformer(cst.CSTTransformer):
 
   def _apply_preamble(self, node: cst.FunctionDef, stmts_code: List[str]) -> cst.FunctionDef:
     """Injects source code statements at the start of the function body."""
-    new_stmts = []  # pragma: no cover
-    for code in stmts_code:  # pragma: no cover
-      try:  # pragma: no cover
-        mod = cst.parse_module(code)  # pragma: no cover
-        new_stmts.extend(mod.body)  # pragma: no cover
-      except Exception:  # pragma: no cover
-        pass  # pragma: no cover
+    new_stmts = []
+    for code in stmts_code:
+      try:
+        mod = cst.parse_module(code)
+        new_stmts.extend(mod.body)
+      except Exception:
+        pass
 
-    return self._inject_stmts_to_body(node, new_stmts)  # pragma: no cover
+    return self._inject_stmts_to_body(node, new_stmts)
 
   def _inject_stmts_to_body(self, node: cst.FunctionDef, new_stmts: List[cst.BaseStatement]) -> cst.FunctionDef:
     """Helper to insert statements respecting docstrings."""
@@ -447,7 +447,7 @@ class StructuralTransformer(cst.CSTTransformer):
     if existing and isinstance(existing[0], cst.SimpleStatementLine) and len(existing[0].body) == 1:
       expr = existing[0].body[0]
       if isinstance(expr, cst.Expr) and isinstance(expr.value, (cst.SimpleString, cst.ConcatenatedString)):
-        idx = 1  # pragma: no cover
+        idx = 1
 
     final_body = existing[:idx] + new_stmts + existing[idx:]
     return node.with_changes(body=node.body.with_changes(body=final_body))
@@ -457,7 +457,7 @@ class StructuralTransformer(cst.CSTTransformer):
     if isinstance(node.body, cst.SimpleStatementSuite):
       new_stmts = [cst.SimpleStatementLine(body=[s]) for s in node.body.body]
       return node.with_changes(body=cst.IndentedBlock(body=new_stmts))
-    return node  # pragma: no cover
+    return node
 
   def _ensure_super_init(self, node: cst.FunctionDef) -> cst.FunctionDef:
     """Injects super().__init__() call."""
@@ -475,7 +475,7 @@ class StructuralTransformer(cst.CSTTransformer):
     if isinstance(node.body, cst.SimpleStatementSuite):
       return node
     if not hasattr(node.body, "body"):
-      return node  # pragma: no cover
+      return node
 
     new_body = [s for s in node.body.body if not self._is_super_init_call(s)]
     return node.with_changes(body=node.body.with_changes(body=new_body))
@@ -502,7 +502,7 @@ class StructuralTransformer(cst.CSTTransformer):
   def _update_docstring(self, node: cst.FunctionDef, args: List[Tuple[str, Optional[str]]]) -> cst.FunctionDef:
     """Appends argument descriptions to the docstring."""
     if not hasattr(node.body, "body") or not node.body.body:
-      return node  # pragma: no cover
+      return node
     stmt = node.body.body[0]
     if not isinstance(stmt, cst.SimpleStatementLine) or len(stmt.body) != 1:
       return node
@@ -510,16 +510,14 @@ class StructuralTransformer(cst.CSTTransformer):
     if not isinstance(expr, cst.Expr) or not isinstance(expr.value, cst.SimpleString):
       return node
 
-    val = expr.value.value  # pragma: no cover
+    val = expr.value.value
     # Simple string manipulation to append args
-    if '"""' in val:  # pragma: no cover
-      content = val.replace('"""', "")  # pragma: no cover
-      injection = "\n" + "\n".join([f"    {n}: Injected." for n, _ in args])  # pragma: no cover
-      new_val = f'"""{content}{injection}\n    """'  # pragma: no cover
-      new_expr = expr.with_changes(value=cst.SimpleString(new_val))  # pragma: no cover
-      new_stmt = stmt.with_changes(body=[expr.with_changes(value=new_expr)])  # pragma: no cover
-      return node.with_changes(
-        body=node.body.with_changes(body=[new_stmt] + list(node.body.body[1:]))
-      )  # pragma: no cover
+    if '"""' in val:
+      content = val.replace('"""', "")
+      injection = "\n" + "\n".join([f"    {n}: Injected." for n, _ in args])
+      new_val = f'"""{content}{injection}\n    """'
+      new_expr = expr.with_changes(value=cst.SimpleString(new_val))
+      new_stmt = stmt.with_changes(body=[expr.with_changes(value=new_expr)])
+      return node.with_changes(body=node.body.with_changes(body=[new_stmt] + list(node.body.body[1:])))
 
-    return node  # pragma: no cover
+    return node

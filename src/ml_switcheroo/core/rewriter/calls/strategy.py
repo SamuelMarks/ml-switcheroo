@@ -62,12 +62,12 @@ def execute_strategy(
     try:
       norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
       return rewrite_as_infix(
-        original,  # pragma: no cover
-        norm_args,  # pragma: no cover
-        mapping.get("operator"),  # pragma: no cover
-        details.get("std_args", []),  # pragma: no cover
-      )  # pragma: no cover
-    except (ValueError, IndexError) as e:  # pragma: no cover
+        original,
+        norm_args,
+        mapping.get("operator"),
+        details.get("std_args", []),
+      )
+    except (ValueError, IndexError) as e:
       rewriter._report_failure(f"Infix/Prefix transformation failed: {e}")
       return updated
 
@@ -86,15 +86,15 @@ def execute_strategy(
     hook = get_hook(plugin_name)
     if hook:
       return hook(updated, rewriter.context.hook_context)
-    else:  # pragma: no cover
+    else:
       rewriter._report_failure(f"Missing required plugin: '{plugin_name}'")
       return updated
 
   # 5. Macro
   elif mapping.get("macro_template"):
-    try:  # pragma: no cover
-      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)  # pragma: no cover
-      std_arg_names = []  # pragma: no cover
+    try:
+      norm_args = rewriter._normalize_arguments(original, updated, details, mapping)
+      std_arg_names = []
       for item in details.get("std_args", []):
         if isinstance(item, (list, tuple)):
           std_arg_names.append(item[0])
@@ -123,9 +123,9 @@ def execute_strategy(
 
       # Apply Strict Guards (Rank Checking)
       if rewriter.strict_mode:
-        norm_args = apply_strict_guards(rewriter, norm_args, details, mapping)  # pragma: no cover
-      # pragma: no cover
-      new_func = rewriter._create_name_node(target_api)  # pragma: no cover
+        norm_args = apply_strict_guards(rewriter, norm_args, details, mapping)
+
+      new_func = rewriter._create_name_node(target_api)
       result_node = updated.with_changes(func=new_func, args=norm_args)
 
       # Layout Permutation Logic

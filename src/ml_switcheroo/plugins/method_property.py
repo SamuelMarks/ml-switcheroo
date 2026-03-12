@@ -32,7 +32,7 @@ def transform_method_to_property(node: cst.Call, ctx: HookContext) -> Union[cst.
   """
   # 1. Validation: Must be a method call (Attribute)
   if not isinstance(node.func, cst.Attribute):
-    return node  # pragma: no cover
+    return node
 
   method_name = node.func.attr.value
   receiver = node.func.value
@@ -52,21 +52,21 @@ def transform_method_to_property(node: cst.Call, ctx: HookContext) -> Union[cst.
   # If using dynamic mappings, we might not know the source method name -> op_id mapping here.
   # But plugins are usually specific.
   if not op_id:
-    return node  # pragma: no cover
+    return node
 
   # Optional Safety: Check if receiver is a Tensor
   obj_type = ctx.resolve_type(node.func.value)
   if obj_type and obj_type != "Tensor":
     # If we know for sure it's NOT a tensor (e.g. it's a Module or List), assume false positive
     # Unless it's "Unknown", we proceed conservatively
-    return node  # pragma: no cover
+    return node
 
   # 3. Lookup Target Property
   target_prop = ctx.lookup_api(op_id)
 
   # Fail gracefully if no mapping exists (Data-Driven Strictness)
   if not target_prop:
-    return node  # pragma: no cover
+    return node
 
   # 4. Construct Property Access Node
   # x.size() -> x.shape
@@ -83,6 +83,6 @@ def transform_method_to_property(node: cst.Call, ctx: HookContext) -> Union[cst.
       )
     else:
       # If multiple args (unlikely for simple prop mapping), preserve call or fail safe
-      return node  # pragma: no cover
+      return node
 
   return prop_node

@@ -92,7 +92,7 @@ class MigrationGuideGenerator:
     """Checks if an operation has definitions for at least the source framework."""
     details = self.semantics.get_definition_by_id(op_name)
     if not details:
-      return False  # pragma: no cover
+      return False
     variants = details.get("variants", {})
     # We list it if Source exists. Target might be missing (which is useful info).
     return source in variants
@@ -124,7 +124,7 @@ class MigrationGuideGenerator:
     clean_std_args = []
     for item in std_args:
       if isinstance(item, (list, tuple)):
-        clean_std_args.append(item[0])  # pragma: no cover
+        clean_std_args.append(item[0])
       else:
         clean_std_args.append(item)
 

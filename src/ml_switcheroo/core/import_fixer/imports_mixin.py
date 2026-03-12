@@ -94,12 +94,17 @@ class ImportMixin(cst.CSTTransformer):
   def leave_ImportFrom(
     self, original_node: cst.ImportFrom, updated_node: cst.ImportFrom
   ) -> Union[cst.ImportFrom, cst.Import, cst.RemovalSentinel]:
-    """TODO: Add docstring."""  # pragma: no cover
+    """TODO: Add docstring."""
     if not updated_node.module:
-      return updated_node  # pragma: no cover
+      return updated_node
 
     module_name = get_full_name(updated_node.module)
     root_pkg = module_name.split(".")[0]
+
+    if isinstance(updated_node.names, cst.ImportStar):
+      if root_pkg in self.source_fws and not getattr(self, "preserve_source", False):
+        return cst.RemoveFromParent()
+      return updated_node
 
     # Check if this statement matches a mapping key (e.g. "torch.nn")
     if len(updated_node.names) == 1 and isinstance(updated_node.names[0], cst.ImportAlias):

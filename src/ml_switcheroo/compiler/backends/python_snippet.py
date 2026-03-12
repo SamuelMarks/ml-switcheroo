@@ -79,9 +79,9 @@ class PythonSnippetEmitter:
         A LibCST statement node (Assign).
     """
     if node.kind == "Input":
-      if input_vars and input_vars[0] != output_var:  # pragma: no cover
-        return cst.parse_statement(f"{output_var} = {input_vars[0]}")  # pragma: no cover
-      return cst.SimpleStatementLine(body=[cst.Pass()])  # pragma: no cover
+      if input_vars and input_vars[0] != output_var:
+        return cst.parse_statement(f"{output_var} = {input_vars[0]}")
+      return cst.SimpleStatementLine(body=[cst.Pass()])
 
     call_expr = self.emit_expression(node, input_vars)
 
@@ -119,19 +119,19 @@ class PythonSnippetEmitter:
 
     try:
       return cst.parse_expression(code)
-    except cst.ParserSyntaxError:  # pragma: no cover
-      return cst.Name("None")  # pragma: no cover
+    except cst.ParserSyntaxError:
+      return cst.Name("None")
 
   def _is_stateful_layer(self, node: LogicalNode) -> bool:
     """TODO: Add docstring."""
-    if node.kind in ["Input", "Output"]:  # pragma: no cover
+    if node.kind in ["Input", "Output"]:
       return False
     if node.kind.startswith("func_") or "functional" in node.kind or "ops" in node.kind:
       return False
     leaf = node.kind.split(".")[-1]
     if leaf and leaf[0].isupper():
-      return True  # pragma: no cover
-    return False  # pragma: no cover
+      return True
+    return False
 
   def _resolve_api_name(self, kind: str) -> str:
     """TODO: Add docstring."""
@@ -150,16 +150,16 @@ class PythonSnippetEmitter:
     elif self.framework in ["jax", "flax", "flax_nnx"]:
       if clean_kind[0].isupper():
         return f"nnx.{clean_kind}"
-      return f"jnp.{clean_kind}"  # pragma: no cover
-    # pragma: no cover
-    elif self.framework == "keras":  # pragma: no cover
-      if clean_kind[0].isupper():  # pragma: no cover
+      return f"jnp.{clean_kind}"
+
+    elif self.framework == "keras":
+      if clean_kind[0].isupper():
         return f"keras.layers.{clean_kind}"
-      return f"keras.ops.{clean_kind}"  # pragma: no cover
+      return f"keras.ops.{clean_kind}"
 
-    return clean_kind  # pragma: no cover
+    return clean_kind
 
-  def _format_args_from_metadata(self, metadata: Dict[str, Any]) -> str:  # pragma: no cover
+  def _format_args_from_metadata(self, metadata: Dict[str, Any]) -> str:
     """TODO: Add docstring."""
     if not metadata:
       return ""

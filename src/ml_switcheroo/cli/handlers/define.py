@@ -14,8 +14,8 @@ from typing import Optional
 
 try:
   import yaml
-except ImportError:  # pragma: no cover
-  yaml = None  # pragma: no cover
+except ImportError:
+  yaml = None
 
 from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.core.discovery import SimulatedReflection
@@ -42,34 +42,34 @@ def handle_define(yaml_file: Path, dry_run: bool = False, no_test_gen: bool = Fa
       int: Exit Code (0 for success, 1 for failure).
   """
   if yaml is None:
-    log_error("PyYAML is not installed.")  # pragma: no cover
-    return 1  # pragma: no cover
+    log_error("PyYAML is not installed.")
+    return 1
 
   if not yaml_file.exists() and not str(yaml_file) == "-":
-    log_error(f"File not found: {yaml_file}")  # pragma: no cover
-    return 1  # pragma: no cover
+    log_error(f"File not found: {yaml_file}")
+    return 1
 
   try:
     if str(yaml_file) == "-":
-      import sys  # pragma: no cover
+      import sys
 
-      content = sys.stdin.read()  # pragma: no cover
+      content = sys.stdin.read()
     else:
       content = yaml_file.read_text(encoding="utf-8")
 
     ops = []
     for doc in yaml.safe_load_all(content):
       if not doc:
-        continue  # pragma: no cover
+        continue
 
       if isinstance(doc, list):
-        ops.extend([OperationDef(**d) for d in doc])  # pragma: no cover
+        ops.extend([OperationDef(**d) for d in doc])
       else:
         ops.append(OperationDef(**doc))
 
-  except Exception as e:  # pragma: no cover
-    log_error(f"Failed to validate ODL YAML: {e}")  # pragma: no cover
-    return 1  # pragma: no cover
+  except Exception as e:
+    log_error(f"Failed to validate ODL YAML: {e}")
+    return 1
 
   semantics_mgr = SemanticsManager()
 
@@ -81,7 +81,7 @@ def handle_define(yaml_file: Path, dry_run: bool = False, no_test_gen: bool = Fa
 
     # 2. Hub Injection (JSON)
     if not _inject_hub(op_def, dry_run=dry_run):
-      return 1  # pragma: no cover
+      return 1
 
     # 3. Spoke Injection (JSON)
     _inject_spokes(op_def, dry_run=dry_run)
@@ -111,7 +111,7 @@ def _resolve_inferred_apis(op_def: OperationDef) -> None:
         variant.api = discovered
         log_success(f"  Inferred {fw_key}: {discovered}")
       else:
-        log_warning(f"  Could not infer API for {op_def.operation} in {fw_key}")  # pragma: no cover
+        log_warning(f"  Could not infer API for {op_def.operation} in {fw_key}")
 
 
 def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
@@ -128,9 +128,9 @@ def _inject_hub(op_def: OperationDef, dry_run: bool = False) -> bool:
   try:
     injector = StandardsInjector(op_def)
     return injector.inject(dry_run=dry_run)
-  except Exception as e:  # pragma: no cover
-    log_error(f"Hub Injection failed for operation '{op_def.operation}': {e}")  # pragma: no cover
-    return False  # pragma: no cover
+  except Exception as e:
+    log_error(f"Hub Injection failed for operation '{op_def.operation}': {e}")
+    return False
 
 
 def _inject_spokes(op_def: OperationDef, dry_run: bool = False) -> None:
@@ -143,20 +143,20 @@ def _inject_spokes(op_def: OperationDef, dry_run: bool = False) -> None:
   """
   for fw_key, variant in op_def.variants.items():
     if not variant or (variant.api and variant.api.lower() == "infer"):
-      continue  # pragma: no cover
+      continue
 
     # Check if framework is valid
     adapter = get_adapter(fw_key)
     if not adapter:
-      log_warning(f"  Skipping {fw_key}: No adapter registered.")  # pragma: no cover
-      continue  # pragma: no cover
+      log_warning(f"  Skipping {fw_key}: No adapter registered.")
+      continue
 
     try:
       injector = FrameworkInjector(target_fw=fw_key, op_name=op_def.operation, variant=variant)
       injector.inject(dry_run=dry_run)
 
-    except Exception as e:  # pragma: no cover
-      log_warning(f"  Failed to update {fw_key}: {e}")  # pragma: no cover
+    except Exception as e:
+      log_warning(f"  Failed to update {fw_key}: {e}")
 
 
 def _scaffold_plugins(op_def: OperationDef, dry_run: bool = False) -> None:
@@ -175,17 +175,17 @@ def _scaffold_plugins(op_def: OperationDef, dry_run: bool = False) -> None:
       plugins_pkg_dir = Path(ml_switcheroo.plugins.__file__).parent
     else:
       # Fallback relative calculation
-      plugins_pkg_dir = Path(__file__).resolve().parents[2] / "plugins"  # pragma: no cover
+      plugins_pkg_dir = Path(__file__).resolve().parents[2] / "plugins"
 
     generator = PluginGenerator(plugins_pkg_dir)
     for plug_def in op_def.scaffold_plugins:
       if dry_run:
-        log_info(f"  [Dry Run] Would generate plugin file: {plug_def.name}")  # pragma: no cover
+        log_info(f"  [Dry Run] Would generate plugin file: {plug_def.name}")
       else:
         generator.generate(plug_def)
         log_success(f"  Generated Plugin: {plug_def.name}")
-  except Exception as e:  # pragma: no cover
-    log_error(f"Plugin scaffolding error: {e}")  # pragma: no cover
+  except Exception as e:
+    log_error(f"Plugin scaffolding error: {e}")
 
 
 def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager, dry_run: bool = False) -> None:
@@ -198,8 +198,8 @@ def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager, dry_run: bo
       dry_run: Simulation mode flag.
   """
   if dry_run:
-    log_info(f"  [Dry Run] Would generate test file for {op_def.operation}")  # pragma: no cover
-    return  # pragma: no cover
+    log_info(f"  [Dry Run] Would generate test file for {op_def.operation}")
+    return
 
   try:
     root_dir = Path.cwd()
@@ -211,5 +211,5 @@ def _generate_test_file(op_def: OperationDef, mgr: SemanticsManager, dry_run: bo
     gen.generate({op_def.operation: op_def.model_dump(exclude_unset=True)}, test_file)
     # We don't log success here as TestCaseGenerator manages file IO quietly usually,
     # but it's good feedback
-  except Exception as e:  # pragma: no cover
-    log_warning(f"Test generation failed: {e}")  # pragma: no cover
+  except Exception as e:
+    log_warning(f"Test generation failed: {e}")

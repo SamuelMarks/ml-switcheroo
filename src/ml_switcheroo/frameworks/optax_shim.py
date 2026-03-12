@@ -16,8 +16,8 @@ from typing import List
 
 try:
   import optax
-except ImportError:  # pragma: no cover
-  optax = None  # pragma: no cover
+except ImportError:
+  optax = None
 
 from ml_switcheroo.core.ghost import GhostInspector, GhostRef
 
@@ -36,7 +36,7 @@ class OptaxScanner:
     that return a `GradientTransformation`.
     """
     if not optax:
-      return []  # pragma: no cover
+      return []
 
     results = []
 
@@ -59,7 +59,7 @@ class OptaxScanner:
     for name, obj in inspect.getmembers(optax):
       # Skip internals and private members
       if name.startswith("_"):
-        continue  # pragma: no cover
+        continue
 
       # Heuristic: Must be a function (factories) or class (some aliases)
       if inspect.isfunction(obj) or inspect.isclass(obj):
@@ -77,8 +77,8 @@ class OptaxScanner:
             # Capture signature (e.g. adam(learning_rate, b1, ...))
             ref = GhostInspector.inspect(obj, f"optax.{name}")
             results.append(ref)
-          except Exception:  # pragma: no cover
-            pass  # pragma: no cover
+          except Exception:
+            pass
 
     return results
 
@@ -88,13 +88,13 @@ class OptaxScanner:
     Scans `optax.losses` for loss functions.
     """
     if not optax or not hasattr(optax, "losses"):
-      return []  # pragma: no cover
+      return []
 
     results = []
 
     for name, obj in inspect.getmembers(optax.losses):
       if name.startswith("_"):
-        continue  # pragma: no cover
+        continue
 
       # Optax losses are pure functions returning arrays/scalars
       if inspect.isfunction(obj):
@@ -104,7 +104,7 @@ class OptaxScanner:
           try:
             ref = GhostInspector.inspect(obj, f"optax.losses.{name}")
             results.append(ref)
-          except Exception:  # pragma: no cover
-            pass  # pragma: no cover
+          except Exception:
+            pass
 
     return results

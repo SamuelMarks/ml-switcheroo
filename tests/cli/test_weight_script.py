@@ -217,3 +217,81 @@ def test_fwd_script_content(fwd_generator: WeightScriptGenerator, tmp_path):
   assert "orbax.checkpoint.PyTreeCheckpointer()" in code
   assert "checkpointer.save(" in code
   assert "unflatten_dict" in code
+
+
+def test_convert_weights_errors():
+  from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
+  from pathlib import Path
+
+  # 80-83: no layers
+  with patch("pathlib.Path.read_text", return_value="def foo(): pass"):
+    from ml_switcheroo.semantics.manager import SemanticsManager
+    from ml_switcheroo.config import RuntimeConfig
+
+    gen = WeightScriptGenerator(SemanticsManager(), RuntimeConfig())
+    gen.source_fw = "torch"
+    gen.target_fw = "jax"
+    assert gen.generate(Path("src.py"), Path("out.py")) == False
+
+  # 100-102: write error
+  with (
+    patch(
+      "pathlib.Path.read_text", return_value="class MyModule:\n  def __init__(self):\n    self.l = torch.nn.Linear()"
+    ),
+    patch("pathlib.Path.write_text", side_effect=Exception("write error")),
+  ):
+    from ml_switcheroo.semantics.manager import SemanticsManager
+    from ml_switcheroo.config import RuntimeConfig
+
+    gen = WeightScriptGenerator(SemanticsManager(), RuntimeConfig())
+    gen.source_fw = "torch"
+    gen.target_fw = "jax"
+    # generate should return False
+    assert gen.generate(Path("src.py"), Path("out.py")) == False
+
+
+def test_flatten_mapping_rules_non_torch_src():
+  from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
+  from pathlib import Path
+  from ml_switcheroo.semantics.manager import SemanticsManager
+  from ml_switcheroo.config import RuntimeConfig
+
+  gen = WeightScriptGenerator(SemanticsManager(), RuntimeConfig())
+  gen.source_fw = "jax"
+  gen.target_fw = "torch"
+
+  layer_registry = {"my_layer": type("Node", (), {"kind": "Conv", "api_name": "jax.numpy.Conv", "args": []})()}
+
+  # Mock SemanticsManager inside generator
+  with patch.object(gen.semantics, "get_definition") as mock_def:
+    mock_def.return_value = ("id", {"variants": {"torch": {"layout_map": {"weight": "OIHW->HWIO"}}}})
+    rules = gen._flatten_mapping_rules(layer_registry)
+    # Check permutations logic for 167
+    assert len(rules) > 0
+    assert rules[0]["perm"] is not None
+
+
+import pytest
+from pathlib import Path
+from unittest.mock import patch
+from ml_switcheroo.cli.commands import handle_gen_weight_script
+
+
+@patch("ml_switcheroo.cli.commands.WeightScriptGenerator")
+@patch("ml_switcheroo.cli.commands.SemanticsManager")
+@patch("ml_switcheroo.cli.commands.RuntimeConfig")
+def test_handle_gen_weight_script_success(mock_config, mock_sm, mock_gen):
+  mock_instance = mock_gen.return_value
+  mock_instance.generate.return_value = True
+  assert handle_gen_weight_script(Path("src.py"), Path("out.py")) == 0
+  mock_instance.generate.assert_called_once_with(Path("src.py"), Path("out.py"))
+
+
+@patch("ml_switcheroo.cli.commands.WeightScriptGenerator")
+@patch("ml_switcheroo.cli.commands.SemanticsManager")
+@patch("ml_switcheroo.cli.commands.RuntimeConfig")
+def test_handle_gen_weight_script_failure(mock_config, mock_sm, mock_gen):
+  mock_instance = mock_gen.return_value
+  mock_instance.generate.return_value = False
+  assert handle_gen_weight_script(Path("src.py"), Path("out.py")) == 1
+  mock_instance.generate.assert_called_once_with(Path("src.py"), Path("out.py"))

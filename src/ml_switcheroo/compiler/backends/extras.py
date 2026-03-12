@@ -83,26 +83,26 @@ class HtmlBackend(CompilerBackend):
       if k.startswith("arg_"):
         parts.append(str(v))
       else:
-        parts.append(f"{k}={v}")  # pragma: no cover
+        parts.append(f"{k}={v}")
     return ", ".join(parts)
 
   def _is_stateful(self, node: LogicalNode) -> bool:
     """Determine if a node represents state (Red box) vs Op (Blue box)."""
     if node.kind in ["Input", "Output"]:
-      return False  # pragma: no cover
+      return False
     if node.id.startswith("func_"):
       return False
     if node.kind.startswith("func_"):
-      return False  # pragma: no cover
+      return False
     # Heuristic: Upper case kinds are layers/stateful
     if node.kind and node.kind[0].isupper():
       return True
-    return False  # pragma: no cover
+    return False
 
   def _clean_kind(self, kind: str) -> str:
     """Clean operation kind string."""
     if kind.startswith("func_"):
-      kind = kind[5:]  # pragma: no cover
+      kind = kind[5:]
     if "." in kind:
       kind = kind.split(".")[-1]
     return kind.capitalize()
@@ -151,7 +151,7 @@ class HtmlBackend(CompilerBackend):
         parent_style="top:80px; left:50%;",
       )
 
-    return SvgArrow(0, 0, 0, 0, "", "", "")  # pragma: no cover
+    return SvgArrow(0, 0, 0, 0, "", "", "")
 
   def _layout_graph(self, graph: LogicalGraph) -> List[GridBox]:
     """Calculates grid positions for nodes."""
@@ -164,7 +164,7 @@ class HtmlBackend(CompilerBackend):
 
     if not flow_nodes:
       # Render empty? Or input only?
-      return []  # pragma: no cover
+      return []
 
     current_z = 1000
 
@@ -322,7 +322,7 @@ class TikzBackend(CompilerBackend):
   def _calculate_layout(self, graph: LogicalGraph) -> Dict[str, Tuple[float, float]]:
     """Determine X,Y coordinates for nodes based on topological rank."""
     if not graph.nodes:
-      return {}  # pragma: no cover
+      return {}
 
     adj = defaultdict(list)
     in_degree = defaultdict(int)
@@ -338,9 +338,9 @@ class TikzBackend(CompilerBackend):
     processed = set()
 
     if not queue and graph.nodes:
-      first = graph.nodes[0].id  # pragma: no cover
-      queue.append(first)  # pragma: no cover
-      ranks[first] = 0  # pragma: no cover
+      first = graph.nodes[0].id
+      queue.append(first)
+      ranks[first] = 0
     else:
       for root_id in queue:
         ranks[root_id] = 0
@@ -349,7 +349,7 @@ class TikzBackend(CompilerBackend):
     while queue:
       curr = queue.popleft()
       if curr in processed:
-        continue  # pragma: no cover
+        continue
       processed.add(curr)
       curr_rank = ranks.get(curr, 0)
       max_rank = max(max_rank, curr_rank)
@@ -361,8 +361,8 @@ class TikzBackend(CompilerBackend):
 
     for n in graph.nodes:
       if n.id not in ranks:
-        max_rank += 1  # pragma: no cover
-        ranks[n.id] = max_rank  # pragma: no cover
+        max_rank += 1
+        ranks[n.id] = max_rank
 
     rank_groups = defaultdict(list)
     for node_id, r in ranks.items():
@@ -486,7 +486,7 @@ class LatexBackend(CompilerBackend):
     id_map = {}
     if input_node:
       id_map[input_node.id] = input_name
-    else:  # pragma: no cover
+    else:
       id_map["input"] = input_name
 
     output_node = next((n for n in graph.nodes if n.kind == "Output"), None)
@@ -497,7 +497,7 @@ class LatexBackend(CompilerBackend):
       source_id = edge.source
       if target_id == "output" or (output_node and target_id == output_node.id):
         continue
-      if target_id in visited_ops:  # pragma: no cover
+      if target_id in visited_ops:
         continue
 
       is_stateful = (target_id in state_registry) and not target_id.startswith("func_")
@@ -513,14 +513,14 @@ class LatexBackend(CompilerBackend):
       else:
         meta_args = []
         if node_data:
-          for k, v in node_data.metadata.items():  # pragma: no cover
-            if k.startswith("arg"):  # pragma: no cover
+          for k, v in node_data.metadata.items():
+            if k.startswith("arg"):
               meta_args.append(v)
-            else:  # pragma: no cover
+            else:
               meta_args.append(f"{k}={v}")
         final_args = args + meta_args
         clean_type = op_type
-        if clean_type.startswith("func_"):  # pragma: no cover
+        if clean_type.startswith("func_"):
           clean_type = clean_type[5:]
         elif "." in clean_type:
           clean_type = clean_type.split(".")[-1]
@@ -535,7 +535,7 @@ class LatexBackend(CompilerBackend):
         final_src = sources_to_output[0]
         final_ref = id_map.get(final_src, f"op_{final_src}")
         children.append(ReturnNode(target_id=final_ref))
-      else:  # pragma: no cover
+      else:
         children.append(ReturnNode(target_id="last_step"))
 
     return ModelContainer(name, children)
@@ -579,8 +579,8 @@ class MlirBackend(CompilerBackend):
         if str(val).isdigit():
           lines.append(f'    %{node.id} = "sw.constant"() {{value = {val}}} : () -> i32')
         else:
-          # Treat input as argument or placeholder constant  # pragma: no cover
-          lines.append(f'    %{node.id} = "sw.op"() {{type = "Input"}} : () -> !sw.unknown')  # pragma: no cover
+          # Treat input as argument or placeholder constant
+          lines.append(f'    %{node.id} = "sw.op"() {{type = "Input"}} : () -> !sw.unknown')
       elif node.kind == "Output":
         # Sink node, often no output or uses return logic
         # Find source

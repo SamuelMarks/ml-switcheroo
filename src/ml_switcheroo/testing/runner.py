@@ -53,10 +53,10 @@ class EquivalenceRunner:
         pass
 
       results = {}
-      # Execution Loop  # pragma: no cover
+      # Execution Loop
       for fw, details in variants.items():
         if not isinstance(details, dict) or "api" not in details:
-          continue  # pragma: no cover
+          continue
 
         try:
           # Pivot Arguments
@@ -91,13 +91,11 @@ class EquivalenceRunner:
             for r in results.values():
               if hasattr(r, "shape"):
                 s = tuple(r.shape) if hasattr(r.shape, "__iter__") else (r.shape,)
-                e = (
-                  tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)
-                )  # pragma: no cover
-                if s != e:  # pragma: no cover
+                e = tuple(expected_shape) if hasattr(expected_shape, "__iter__") else (expected_shape,)
+                if s != e:
                   failure_msg.append(f"Shape Mismatch: {s} != {e}")
-        except Exception as e:  # pragma: no cover
-          failure_msg.append(f"Shape Calculation Error: {e}")  # pragma: no cover
+        except Exception as e:
+          failure_msg.append(f"Shape Calculation Error: {e}")
 
       # Comparison
       self._compare_results(results, rtol, atol, failure_msg)
@@ -105,19 +103,19 @@ class EquivalenceRunner:
     try:
       run_check()
       if failure_msg:
-        # Return the LAST failure (often most relevant)  # pragma: no cover
+        # Return the LAST failure (often most relevant)
         return False, f"Failures Detected: {failure_msg[-1]}"
-      return True, "✅ Verified"  # pragma: no cover
-    except Exception as e:  # pragma: no cover
+      return True, "✅ Verified"
+    except Exception as e:
       # Hypothesis raises explicit errors when assertions fail
-      return False, f"Verification Failed: {e}"  # pragma: no cover
+      return False, f"Verification Failed: {e}"
 
   def _execute_api(self, api, kwargs):
     """
-    Dynamically imports and calls the API.  # pragma: no cover
+    Dynamically imports and calls the API.
     """
     if "." not in api:
-      return None  # pragma: no cover
+      return None
     m, f = api.rsplit(".", 1)
     mod = importlib.import_module(m)
     return getattr(mod, f)(**kwargs)
@@ -133,30 +131,30 @@ class EquivalenceRunner:
     vals = list(results.values())
     ref = vals[0]
     fw_keys = list(results.keys())
-    ref_fw = fw_keys[0]  # pragma: no cover
-    # pragma: no cover
-    for i, v in enumerate(vals[1:], 1):  # pragma: no cover
+    ref_fw = fw_keys[0]
+
+    for i, v in enumerate(vals[1:], 1):
       current_fw = fw_keys[i]
       if not self._deep_compare(ref, v, rtol, atol):
         m = f"Mismatch: {ref_fw}({ref}) vs {current_fw}({v})"
-        err_box.append(m)  # pragma: no cover
+        err_box.append(m)
         raise AssertionError(m)
 
   def _deep_compare(self, a, b, rtol=1e-3, atol=1e-4):
     """TODO: Add docstring."""
     if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
-      return len(a) == len(b) and all(self._deep_compare(x, y, rtol, atol) for x, y in zip(a, b))  # pragma: no cover
+      return len(a) == len(b) and all(self._deep_compare(x, y, rtol, atol) for x, y in zip(a, b))
 
     if isinstance(a, (int, float, np.ndarray, np.generic)):
       try:
         a_arr = np.asanyarray(a)
         b_arr = np.asanyarray(b)
-        if a_arr.shape != b_arr.shape:  # pragma: no cover
-          return False  # pragma: no cover
-        # Handle string/object types safely  # pragma: no cover
+        if a_arr.shape != b_arr.shape:
+          return False
+        # Handle string/object types safely
         if a_arr.dtype.kind in ["U", "S", "O"]:
           return np.array_equal(a_arr, b_arr)
         return np.allclose(a_arr, b_arr, rtol=rtol, atol=atol, equal_nan=True)
-      except:  # pragma: no cover
-        return False  # pragma: no cover
-    return a == b  # pragma: no cover
+      except:
+        return False
+    return a == b

@@ -62,18 +62,18 @@ class _QualNameScanner(cst.CSTVisitor):
     if self.found:
       return
     try:
-      name = get_full_name(node)  # pragma: no cover
-      if name == self.target_path or name.startswith(f"{self.target_path}."):  # pragma: no cover
+      name = get_full_name(node)
+      if name == self.target_path or name.startswith(f"{self.target_path}."):
         self.found = True
-    except:  # pragma: no cover
-      pass  # pragma: no cover
+    except:
+      pass
 
   def visit_Name(self, node: cst.Name) -> None:
-    """TODO: Add docstring."""  # pragma: no cover
+    """TODO: Add docstring."""
     if self.found:
       return
     if node.value == self.target_path:
-      self.found = True  # pragma: no cover
+      self.found = True
 
 
 class ImportResolver:

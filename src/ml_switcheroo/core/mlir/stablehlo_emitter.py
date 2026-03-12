@@ -169,7 +169,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     # Find type attribute
     type_attr = next((a for a in op.attributes if a.name == "type"), None)
     if not type_attr:
-      return  # pragma: no cover
+      return
 
     api_name = str(type_attr.value).strip('"').strip("'")
     mapped_name = self._lookup_stablehlo_op(api_name)
@@ -204,7 +204,7 @@ class StableHloEmitter(PythonToMlirEmitter):
     if "stablehlo" in variants and variants["stablehlo"]:
       return variants["stablehlo"].get("api")
 
-    return None  # pragma: no cover
+    return None
 
   def _map_py_type_to_mlir(self, type_str: str) -> str:
     """
@@ -222,8 +222,8 @@ class StableHloEmitter(PythonToMlirEmitter):
     if clean == "float":
       return "f32"
     if clean == "bool":
-      return "i1"  # pragma: no cover
+      return "i1"
     if "tensor" in clean or "array" in clean:
       # Unranked tensor of floats as generous default
       return "tensor<*xf32>"
-    return "!sw.unknown"  # pragma: no cover
+    return "!sw.unknown"

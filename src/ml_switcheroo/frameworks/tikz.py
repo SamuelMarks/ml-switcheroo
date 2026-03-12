@@ -39,7 +39,7 @@ class TikzAdapter(FrameworkAdapter):
     """TODO: Add docstring."""
     return []
 
-  @property  # pragma: no cover
+  @property
   def unsafe_submodules(self) -> Set[str]:
     """TODO: Add docstring."""
     return set()
@@ -86,7 +86,6 @@ class TikzAdapter(FrameworkAdapter):
     """TODO: Add docstring."""
     return [SemanticTier.NEURAL]
 
-  # pragma: no cover
   @property
   def declared_magic_args(self) -> List[str]:
     """TODO: Add docstring."""
@@ -100,64 +99,62 @@ class TikzAdapter(FrameworkAdapter):
   @property
   def plugin_traits(self) -> PluginTraits:
     """TODO: Add docstring."""
-    return PluginTraits()  # pragma: no cover
+    return PluginTraits()
 
   @property
   def definitions(self) -> Dict[str, StandardMap]:
     """TODO: Add docstring."""
     return load_definitions("tikz")
 
-  @property  # pragma: no cover
+  @property
   def specifications(self) -> Dict[str, OperationDef]:
     """TODO: Add docstring."""
     return {}
 
   @property
-  def rng_seed_methods(self) -> List[str]:  # pragma: no cover
+  def rng_seed_methods(self) -> List[str]:
     """TODO: Add docstring."""
     return []
 
-  # pragma: no cover
   def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
-    """TODO: Add docstring."""  # pragma: no cover
+    """TODO: Add docstring."""
     return ""
 
-  def get_device_check_syntax(self) -> str:  # pragma: no cover
+  def get_device_check_syntax(self) -> str:
     """TODO: Add docstring."""
     return "True"
 
-  # pragma: no cover
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """TODO: Add docstring."""
     return ""
 
   def get_serialization_imports(self) -> List[str]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """TODO: Add docstring."""
-    return ""  # pragma: no cover
+    return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
   def get_weight_load_code(self, path_var: str) -> str:
     """TODO: Add docstring."""
-    return "# Weights not supported in TikZ mode"  # pragma: no cover
+    return "# Weights not supported in TikZ mode"
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
     """TODO: Add docstring."""
-    return tensor_var  # pragma: no cover
+    return tensor_var
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """TODO: Add docstring."""
-    return "# Weights not supported in TikZ mode"  # pragma: no cover
+    return "# Weights not supported in TikZ mode"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """TODO: Add docstring."""

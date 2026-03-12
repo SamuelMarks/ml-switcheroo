@@ -51,12 +51,12 @@ def transform_mlx_optimizer_init(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   if not target_api:
     # Fallback: Construct 'mlx.optimizers.<Name>' if source was 'optim.<Name>'
-    old_name = ""  # pragma: no cover
-    if isinstance(node.func, cst.Name):  # pragma: no cover
-      old_name = node.func.value  # pragma: no cover
-    elif isinstance(node.func, cst.Attribute):  # pragma: no cover
-      old_name = node.func.attr.value  # pragma: no cover
-    target_api = f"mlx.optimizers.{old_name}"  # pragma: no cover
+    old_name = ""
+    if isinstance(node.func, cst.Name):
+      old_name = node.func.value
+    elif isinstance(node.func, cst.Attribute):
+      old_name = node.func.attr.value
+    target_api = f"mlx.optimizers.{old_name}"
 
   new_func = _create_dotted_name(target_api)
 
@@ -97,7 +97,7 @@ def transform_mlx_optimizer_step(node: cst.Call, ctx: HookContext) -> Union[cst.
   if isinstance(node.func, cst.Attribute):
     optimizer_var = node.func.value
   else:
-    optimizer_var = cst.Name("optimizer")  # pragma: no cover
+    optimizer_var = cst.Name("optimizer")
 
   new_func = cst.Attribute(value=optimizer_var, attr=cst.Name("update"))
   args = [

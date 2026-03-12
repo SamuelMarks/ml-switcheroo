@@ -21,12 +21,12 @@ try:
   import keras
   import keras.activations
   import keras.layers
-  import keras.losses  # pragma: no cover
-  import keras.ops  # pragma: no cover
-  import keras.optimizers  # pragma: no cover
-  import keras.random  # pragma: no cover
-except ImportError:  # pragma: no cover
-  keras = None  # pragma: no cover
+  import keras.losses
+  import keras.ops
+  import keras.optimizers
+  import keras.random
+except ImportError:
+  keras = None
 
 from ml_switcheroo.core.ghost import GhostInspector, GhostRef
 from ml_switcheroo.enums import SemanticTier
@@ -65,11 +65,11 @@ class KerasAdapter:
     self._snapshot_data: Dict[str, Any] = {}
 
     if keras is None:
-      self._mode = InitMode.GHOST  # pragma: no cover
-      self._snapshot_data = load_snapshot_for_adapter("keras")  # pragma: no cover
-      if not self._snapshot_data:  # pragma: no cover
+      self._mode = InitMode.GHOST
+      self._snapshot_data = load_snapshot_for_adapter("keras")
+      if not self._snapshot_data:
         # Downgraded from WARNING to DEBUG to prevent CLI spam on bootstrap
-        logging.debug("Keras not installed and no snapshot found. Adapter disabled.")  # pragma: no cover
+        logging.debug("Keras not installed and no snapshot found. Adapter disabled.")
 
   @property
   def search_modules(self) -> List[str]:
@@ -82,9 +82,9 @@ class KerasAdapter:
     Returns:
         List[str]: Module names.
     """
-    if self._mode == InitMode.GHOST:  # pragma: no cover
-      return []  # pragma: no cover
-    return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]  # pragma: no cover
+    if self._mode == InitMode.GHOST:
+      return []
+    return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]
 
   @property
   def unsafe_submodules(self) -> Set[str]:
@@ -94,7 +94,7 @@ class KerasAdapter:
     Returns:
         Set[str]: Empty set for Keras properly scoped imports.
     """
-    return set()  # pragma: no cover
+    return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -224,9 +224,9 @@ class KerasAdapter:
     Returns:
         PluginTraits: Object defining capabilities.
     """
-    from ml_switcheroo.semantics.schema import PluginTraits  # pragma: no cover
+    from ml_switcheroo.semantics.schema import PluginTraits
 
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=False,
       requires_functional_state=False,
@@ -244,7 +244,7 @@ class KerasAdapter:
     """
     defs = load_definitions("keras")
     if "ReLU" not in defs:
-      defs["ReLU"] = StandardMap(api="keras.layers.ReLU")  # pragma: no cover
+      defs["ReLU"] = StandardMap(api="keras.layers.ReLU")
     return defs
 
   @property
@@ -268,7 +268,7 @@ class KerasAdapter:
         List[GhostRef]: Found items.
     """
     if self._mode == InitMode.GHOST:
-      return self._collect_ghost(category)  # pragma: no cover
+      return self._collect_ghost(category)
     return self._collect_live(category)
 
   def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
@@ -281,11 +281,11 @@ class KerasAdapter:
     Returns:
         List[GhostRef]: Hydrated references.
     """
-    if not self._snapshot_data:  # pragma: no cover
-      return []  # pragma: no cover
+    if not self._snapshot_data:
+      return []
 
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
-    return [GhostInspector.hydrate(item) for item in raw_list]  # pragma: no cover
+    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
+    return [GhostInspector.hydrate(item) for item in raw_list]
 
   def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
     """
@@ -309,12 +309,10 @@ class KerasAdapter:
           block_list={"Optimizer", "TFOptimizer"},
         )
       )
-    elif category == StandardCategory.ACTIVATION:  # pragma: no cover
-      results.extend(self._scan_module(keras.activations, "keras.activations", kind="function"))  # pragma: no cover
-    elif category == StandardCategory.LAYER:  # pragma: no cover
-      results.extend(
-        self._scan_module(keras.layers, "keras.layers", kind="class", block_list={"Layer"})
-      )  # pragma: no cover
+    elif category == StandardCategory.ACTIVATION:
+      results.extend(self._scan_module(keras.activations, "keras.activations", kind="function"))
+    elif category == StandardCategory.LAYER:
+      results.extend(self._scan_module(keras.layers, "keras.layers", kind="class", block_list={"Layer"}))
 
     return results
 
@@ -334,14 +332,14 @@ class KerasAdapter:
         List[GhostRef]: Found items.
     """
     if not module:
-      return []  # pragma: no cover
+      return []
     block_list = block_list or set()
     found = []
 
     try:
       for name, obj in inspect.getmembers(module):
         if name.startswith("_"):
-          continue  # pragma: no cover
+          continue
         if name in block_list:
           continue
 
@@ -352,10 +350,10 @@ class KerasAdapter:
             found.append(ref)
 
         elif kind == "function" and inspect.isfunction(obj):
-          ref = GhostInspector.inspect(obj, f"{prefix}.{name}")  # pragma: no cover
-          found.append(ref)  # pragma: no cover
-    except Exception:  # pragma: no cover
-      pass  # pragma: no cover
+          ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
+          found.append(ref)
+    except Exception:
+      pass
 
     return found
 
@@ -369,12 +367,12 @@ class KerasAdapter:
     Returns:
         Any: Keras Tensor or original data.
     """
-    try:  # pragma: no cover
-      import keras  # pragma: no cover
+    try:
+      import keras
 
-      return keras.ops.convert_to_tensor(data)  # pragma: no cover
-    except (ImportError, AttributeError):  # pragma: no cover
-      return data  # pragma: no cover
+      return keras.ops.convert_to_tensor(data)
+    except (ImportError, AttributeError):
+      return data
 
   def get_serialization_imports(self) -> List[str]:
     """
@@ -383,7 +381,7 @@ class KerasAdapter:
     Returns:
         List[str]: Imports.
     """
-    return ["import keras"]  # pragma: no cover
+    return ["import keras"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """
@@ -397,11 +395,11 @@ class KerasAdapter:
     Returns:
         str: Generated python code.
     """
-    if op == "save" and object_arg:  # pragma: no cover
-      return f"{object_arg}.save({file_arg})"  # pragma: no cover
-    elif op == "load":  # pragma: no cover
-      return f"keras.saving.load_model({file_arg})"  # pragma: no cover
-    return ""  # pragma: no cover
+    if op == "save" and object_arg:
+      return f"{object_arg}.save({file_arg})"
+    elif op == "load":
+      return f"keras.saving.load_model({file_arg})"
+    return ""
 
   # --- Weight Handling Logic ---
 
@@ -419,7 +417,7 @@ class KerasAdapter:
     Returns python code to load a checkpoint.
     Stub implemented as Keras models contain structure + weights, making raw dict handling tricky.
     """
-    return textwrap.dedent(  # pragma: no cover
+    return textwrap.dedent(
       f""" 
             try: 
                 # Keras weights are usually saved with .weights.h5 or as full model
@@ -447,7 +445,7 @@ class KerasAdapter:
     """
     Returns python expression string that converts `tensor_var` from Keras tensor to numpy array.
     """
-    return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"  # pragma: no cover
+    return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """
@@ -486,8 +484,8 @@ class KerasAdapter:
     Returns:
         str: Generated code.
     """
-    d_type = "gpu" if "cuda" in device_type.lower() else "cpu"  # pragma: no cover
-    return f"keras.name_scope('{d_type}')"  # pragma: no cover
+    d_type = "gpu" if "cuda" in device_type.lower() else "cpu"
+    return f"keras.name_scope('{d_type}')"
 
   def get_device_check_syntax(self) -> str:
     """
@@ -496,7 +494,7 @@ class KerasAdapter:
     Returns:
         str: Logic expression.
     """
-    return "len(keras.config.list_logical_devices('GPU')) > 0"  # pragma: no cover
+    return "len(keras.config.list_logical_devices('GPU')) > 0"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """
@@ -505,7 +503,7 @@ class KerasAdapter:
     Returns:
         str: "pass".
     """
-    return "pass"  # pragma: no cover
+    return "pass"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """
@@ -539,4 +537,41 @@ class KerasAdapter:
       "tier1_math": """import keras\nfrom keras import ops\n\ndef math_ops(x, y):\n  # Tier 1: Using keras.ops for backend-agnostic math\n  a = ops.abs(x)\n  b = ops.add(a, y)\n  return ops.mean(b)\n""",
       "tier2_neural": 'import keras\nfrom keras import layers\n\ndef build_model(input_shape):\n  inputs = keras.Input(shape=input_shape)\n  x = layers.Conv2D(32, 3, activation="relu")(inputs)\n  x = layers.Flatten()(x)\n  outputs = layers.Dense(10)(x)\n  return keras.Model(inputs, outputs)\n',
       "tier3_extras": "import keras\nfrom keras import random\n\ndef generate_noise(shape):\n  seed_gen = random.SeedGenerator(42)\n  return random.normal(shape, seed=seed_gen)\n",
+      "tier4_qwen3-vl": """import keras
+from keras import layers
+import keras.ops as ops
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(keras.Layer):
+    '''3D Convolutional patch embedding for vision input.'''
+    def __init__(self, config: Qwen3VLVisionConfig):
+        super().__init__()
+        self.config = config
+        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
+        self.proj = layers.Conv3D(
+            filters=config.hidden_size,
+            kernel_size=kernel,
+            strides=kernel,
+            padding="valid",
+            use_bias=True,
+        )
+
+    def call(self, hidden_states):
+        cfg = self.config
+        seq_len = ops.shape(hidden_states)[0]
+
+        hidden_states = ops.reshape(
+            hidden_states, 
+            (seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size)
+        )
+        hidden_states = ops.transpose(hidden_states, (0, 2, 3, 4, 1))
+        
+        out = self.proj(hidden_states)
+        return ops.reshape(out, (seq_len, cfg.hidden_size))
+""",
     }

@@ -212,7 +212,7 @@ class GraphOptimizer:
         List of node IDs forming access sequence, or None.
     """
     if not sequence:
-      return None  # pragma: no cover
+      return None
 
     # Check first node type
     if start_node.kind != sequence[0]:
@@ -230,7 +230,7 @@ class GraphOptimizer:
       candidate_id = None
       for tgt in targets:
         if tgt in processed_ids:
-          continue  # pragma: no cover
+          continue
         tgt_node = node_map.get(tgt)
         if tgt_node and tgt_node.kind == kind:
           candidate_id = tgt

@@ -33,7 +33,7 @@ from ml_switcheroo.semantics.paths import resolve_snapshots_dir
 def _arg_sort_key(arg: Union[str, Dict[str, Any]]) -> str:
   """Helper key for sorting arguments that might be strings or dicts."""
   if isinstance(arg, dict):
-    return arg.get("name", "")  # pragma: no cover
+    return arg.get("name", "")
   return str(arg)
 
 
@@ -53,7 +53,7 @@ class SemanticPersister:
     """
     snapshots_dir = resolve_snapshots_dir()
     if not snapshots_dir.exists():
-      snapshots_dir.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+      snapshots_dir.mkdir(parents=True, exist_ok=True)
 
     # Buffer for the Hub (Spec File) - OpName -> Definition
     spec_updates: Dict[str, Any] = {}
@@ -133,7 +133,7 @@ class SemanticPersister:
         f"  Spokes (Maps): {stats['snapshot_writes']} added across {len(snapshot_updates)} snapshots ({stats['snapshot_skips']} skipped)"
       )
     else:
-      log_info("No new non-conflicting standards found to persist.")  # pragma: no cover
+      log_info("No new non-conflicting standards found to persist.")
 
   def _get_version(self, fw_name: str) -> str:
     """Helper to get package version or fallback to 'unknown'."""
@@ -141,8 +141,8 @@ class SemanticPersister:
       # Handle special package names
       pkg = "flax" if fw_name == "flax_nnx" else fw_name
       return importlib.metadata.version(pkg)
-    except Exception:  # pragma: no cover
-      return "unknown"  # pragma: no cover
+    except Exception:
+      return "unknown"
 
   def _load_json(self, path: Path) -> Dict[str, Any]:
     """Safely loads JSON from disk, returning empty dict if missing or corrupt."""
@@ -159,7 +159,7 @@ class SemanticPersister:
   def _save_json(self, path: Path, data: Dict[str, Any]) -> None:
     """Atomic write to JSON file."""
     if not path.parent.exists():
-      path.parent.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+      path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(path, "w", encoding="utf-8") as f:
       json.dump(data, f, indent=2, sort_keys=True)

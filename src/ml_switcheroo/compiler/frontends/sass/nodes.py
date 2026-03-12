@@ -17,7 +17,7 @@ class SassNode(abc.ABC):
   @abc.abstractmethod
   def __str__(self) -> str:
     """Returns the valid SASS string representation of the node."""
-    pass  # pragma: no cover
+    pass
 
 
 @dataclass
@@ -91,10 +91,10 @@ class Immediate(Operand):
     """TODO: Add docstring."""
     if self.is_hex:
       if isinstance(self.value, float):
-        # Float hex representation requires struct packing usually,  # pragma: no cover
+        # Float hex representation requires struct packing usually,
         # but SASS often takes raw hex bytes for float encoding.
         # Here we assume user passes int representation of float bits if hex desired.
-        return hex(int(self.value))  # pragma: no cover
+        return hex(int(self.value))
       return hex(int(self.value))
     return str(self.value)
 
@@ -118,11 +118,11 @@ class Memory(Operand):
   def __str__(self) -> str:
     """TODO: Add docstring."""
     base_str = str(self.base)
-    # Constant Memory syntax: c[bank][offset]  # pragma: no cover
+    # Constant Memory syntax: c[bank][offset]
     if isinstance(self.base, str) and self.base.startswith("c["):
       if self.offset is not None:
         return f"{base_str}[{hex(self.offset)}]"
-      return f"{base_str}[0x0]"  # pragma: no cover
+      return f"{base_str}[0x0]"
 
     # Register Memory syntax: [base] or [base + offset]
     if self.offset:

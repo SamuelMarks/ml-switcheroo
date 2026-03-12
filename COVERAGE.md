@@ -1,0 +1,3417 @@
+- [x] `src/ml_switcheroo/tools/injector_plugin.py:90` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_plugin.py:180` - elif isinstance(body_node, cst.SimpleStatementSuite):  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_plugin.py:181` - stmts = list(body_node.body)  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_plugin.py:199` - return "    return node"  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/benchmark.py:63` - return mx.metal.get_active_memory() / (1024 * 1024)  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/benchmark.py:84` - mx.eval()  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/core.py:68` - log_info(f"  {self.target_fw}: Updating exist definition for '{self.op_name}'.")  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/core.py:83` - except OSError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/core.py:84` - log_warning(f"Failed to write to {self.json_path}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/core.py:85` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/core.py:102` - except json.JSONDecodeError:  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/core.py:103` - log_warning(f"Corrupt JSON at {self.json_path}. Overwriting with new data.")  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/core.py:104` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:23` - if isinstance(node, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:24` - return node.value  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:25` - if isinstance(node, cst.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:26` - return get_import_root(node.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:27` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:41` - if idx != 0:  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:42` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:43` - if isinstance(node, cst.SimpleStatementLine) and len(node.body) == 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:44` - expr = node.body[0]  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:47` - ):  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:48` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:49` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:62` - if isinstance(node, cst.SimpleStatementLine):  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:63` - for stmt in node.body:  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:64` - if isinstance(stmt, cst.ImportFrom):  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:65` - if stmt.module and isinstance(stmt.module, cst.Name) and stmt.module.value == "__future__":  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:66` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:67` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:124` - return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Integer(str(abs(val))))  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:129` - return cst.UnaryOperation(operator=cst.Minus(), expression=cst.Float(repr(abs(val))))  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_fw/utils.py:139` - return cst.SimpleString(repr(str(val)))  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:84` - except json.JSONDecodeError:  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:85` - log_warning(f"Corrupt JSON at {target_path}. Proceeding with empty dict.")  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:101` - target_path.parent.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:121` - out["op_type"] = op.op_type  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:123` - out["return_type"] = op.return_type  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:125` - out["is_inplace"] = True  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:127` - out["output_shape_calc"] = op.output_shape_calc  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:142` - d = arg.copy()  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:144` - d = {k: v for k, v in d.items() if v is not None}  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:152` - entry = {"name": arg[0]}  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:153` - if len(arg) > 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:154` - entry["type"] = arg[1]  # pragma: no cover
+- [x] `src/ml_switcheroo/tools/injector_spec.py:155` - result.append(entry)  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:20` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:21` - import tomli as tomllib  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:22` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:23` - tomllib = None  # type: ignore  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:60` - priority = int(adapter.ui_priority)  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:61` - except (ValueError, TypeError):  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:96` - return fws[1]  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:97` - return fws[0] if fws else "target_placeholder"  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:157` - if known and v_clean not in known and v_clean not in ["source_placeholder", "target_placeholder"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:197` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:198` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:199` - return schema.model_validate(self.plugin_settings)  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:200` - except ValidationError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:280` - if not final_report and "validation_report" in toml_config:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:321` - if not tomllib:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:355` - # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:356` - config = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:357` - for item in items:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:358` - if "=" not in item:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:359` - print(f"⚠️  Ignoring invalid config format: '{item}'. Expected 'key=value'.")  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:361` - # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:362` - key, val_str = item.split("=", 1)  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:363` - key = key.strip()  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:365` - # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:368` - # Basic type inference  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:369` - lower_val = val_str.lower()  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:370` - if lower_val == "true":  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:371` - final_val = True  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:372` - elif lower_val == "false":  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:374` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:375` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:376` - if "." in val_str or "e" in lower_val:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:378` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:379` - final_val = int(val_str)  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:380` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:382` - # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:384` - # pragma: no cover
+- [x] `src/ml_switcheroo/config.py:385` - return config  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/post.py:33` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/post.py:34` - result_node = node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/post.py:35` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/post.py:36` - # 1. Output Adaptation (Tuple selection / formatting)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/post.py:46` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/post.py:47` - # 2. Output Casting  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/guards.py:51` - guards_applied = False  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:21` - The string identifier of the API to dispatch to if a rule matches, otherwise None.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:23` - source_variant = details["variants"].get(rewriter.source_fw, {})  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:24` - source_arg_map = source_variant.get("args", {})  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:25` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:34` - std_args_order.append(name)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:68` - Returns:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:69` - The corresponding CSTNode if found, otherwise None.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:71` - for arg in node.args:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:78` - if hasattr(rewriter, "_is_module_alias"):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:81` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:83` - is_method = isinstance(node.func, cst.Attribute) and not is_module  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:84` - call_idx = idx  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:85` - if is_method and std_order and std_order[0] == "x":  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:86` - call_idx = idx - 1  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:89` - arg = node.args[call_idx]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:90` - if not arg.keyword:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:91` - return arg.value  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:92` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:93` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:94` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:95` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:96` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:108` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:110` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:114` - if isinstance(node, cst.Float):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:116` - return float(node.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:121` - if isinstance(node, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:128` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:132` - """# pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:134` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:136` - node: The CSTNode extracted from a call argument.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:139` - Returns:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:140` - True if the condition is met, False otherwise.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/dispatch.py:142` - op = rule.op  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:65` - original,  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:66` - norm_args,  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:67` - mapping.get("operator"),  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:68` - details.get("std_args", []),  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:69` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:70` - except (ValueError, IndexError) as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:89` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:95` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:96` - norm_args = rewriter._normalize_arguments(original, updated, details, mapping)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:97` - std_arg_names = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:126` - norm_args = apply_strict_guards(rewriter, norm_args, details, mapping)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:127` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/strategy.py:128` - new_func = rewriter._create_name_node(target_api)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:44` - source_traits = rewriter._get_source_traits()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:57` - new_args = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:64` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:153` - # Check if module alias (requires rewriter alias checker)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:154` - is_module = False  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:156` - is_module = rewriter._is_module_alias(receiver)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:158` - if not is_self and not is_module:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:159` - # --- 1. Symbol Table Inference ---  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:161` - sym_type = rewriter.context.symbol_table.get_type(receiver)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:162` - if sym_type:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:163` - # Construct API path based on inferred type  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:164` - candidate_api = f"{sym_type.name}.{leaf_method}"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:173` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:174` - # --- 2. Legacy Heuristic Fallback ---  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/pre.py:176` - # Note: Implicit roots usually belong to SOURCE traits  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:78` - elif hasattr(rewriter, "_signature_stack"):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:79` - sig_stack = rewriter._signature_stack  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:102` - base = cst.Name(instance_name)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:109` - new_func = node.func  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:132` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:264` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:272` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:308` - return base_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:357` - for i, idx_val in enumerate(indices):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:358` - comma = cst.Comma(whitespace_after=cst.SimpleWhitespace(" "))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:359` - if i == len(indices) - 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:360` - comma = cst.MaybeSentinel.DEFAULT  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/calls/utils.py:362` - call_args.append(  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/interface.py:33` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:133` - self._cached_target_traits = StructuralTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:163` - return type(node.operator).__name__  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:241` - stmt = f"import {clean}"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:242` - elif isinstance(r, dict):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:243` - mod = r.get("module")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:244` - alias = r.get("alias")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:245` - if mod:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:246` - if alias:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:247` - stmt = f"import {mod} as {alias}"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:249` - stmt = f"import {mod}"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:265` - import importlib.metadata  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:267` - pkg = self.target_fw  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:268` - if pkg == "flax_nnx":  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:269` - pkg = "flax"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:270` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:271` - current = importlib.metadata.version(pkg)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:272` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:273` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:276` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:293` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:294` - if max_v:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:295` - if curr_tuple >= parse_v(max_v):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:297` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:302` - if not name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:314` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:323` - # Suffix Check (e.g. 'nn.Module' matches 'torch.nn.Module')  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:324` - for known in self._known_module_bases:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:325` - if known.endswith(f".{name}"):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:327` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:344` - if code in seen:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:349` - new_stmts.extend(mod.body)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:350` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:356` - if not new_stmts:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:390` - for base in node.bases:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:391` - raw_name = self._cst_to_string(base.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:392` - if raw_name and self._is_framework_base(raw_name):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:393` - is_module = True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:460` - if any(p.name.value == arg_name for p in params):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:466` - if insert_idx > 0 and params[insert_idx - 1].comma == cst.MaybeSentinel.DEFAULT:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:517` - if not full_name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:534` - if not module_name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:537` - if isinstance(node.names, cst.ImportStar):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:541` - if not isinstance(alias, cst.ImportAlias):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:582` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:643` - return rewrite_as_macro(target_impl["macro_template"], [], [])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:644` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:697` - if not lookup:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:704` - if details.get("replaced_by"):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:732` - if self.config.source_flavour:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:812` - if mapped == first_std_arg:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:813` - arg_provided = True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:866` - if not is_list and len(elements) == 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:896` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:897` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:924` - final_val_node = cst.parse_expression(target_code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:925` - except cst.ParserSyntaxError:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:929` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:930` - target_code = val_options  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:931` - if isinstance(target_code, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:932` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:933` - final_val_node = cst.parse_expression(target_code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:936` - # Or treat as simple string  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:938` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:954` - if final_val_node is not current_arg.value:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:955` - new_arg = current_arg.with_changes(value=final_val_node)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:963` - if kwargs_map:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:964` - filtered_extras = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:965` - for arg in extra_args:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:966` - if arg.keyword and arg.keyword.value in kwargs_map and kwargs_map[arg.keyword.value] is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:967` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:968` - filtered_extras.append(arg)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:979` - if not isinstance(v, dict) and k not in std_args_order:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:985` - if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:988` - if isinstance(arg_val, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:989` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:990` - val_node = cst.parse_expression(arg_val)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:991` - except cst.ParserSyntaxError:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:1021` - """Expose hook context for strategy invocation."""  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:1034` - new_stmts.extend(mod.body)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:1035` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:1052` - ):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:1062` - return node.with_changes(body=cst.IndentedBlock(body=new_stmts))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py.orig:1063` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:133` - self._cached_target_traits = StructuralTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:163` - return type(node.operator).__name__  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:241` - stmt = f"import {clean}"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:242` - elif isinstance(r, dict):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:243` - mod = r.get("module")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:244` - alias = r.get("alias")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:245` - if mod:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:246` - if alias:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:247` - stmt = f"import {mod} as {alias}"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:249` - stmt = f"import {mod}"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:265` - import importlib.metadata  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:267` - pkg = self.target_fw  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:268` - if pkg == "flax_nnx":  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:269` - pkg = "flax"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:270` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:271` - current = importlib.metadata.version(pkg)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:272` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:273` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:276` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:293` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:294` - if max_v:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:295` - if curr_tuple >= parse_v(max_v):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:297` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:302` - if not name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:314` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:323` - # Suffix Check (e.g. 'nn.Module' matches 'torch.nn.Module')  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:324` - for known in self._known_module_bases:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:325` - if known.endswith(f".{name}"):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:327` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:344` - if code in seen:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:349` - new_stmts.extend(mod.body)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:350` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:356` - if not new_stmts:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:390` - for base in node.bases:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:391` - raw_name = self._cst_to_string(base.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:392` - if raw_name and self._is_framework_base(raw_name):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:393` - is_module = True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:460` - if any(p.name.value == arg_name for p in params):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:466` - if insert_idx > 0 and params[insert_idx - 1].comma == cst.MaybeSentinel.DEFAULT:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:517` - if not full_name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:534` - if not module_name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:537` - if isinstance(node.names, cst.ImportStar):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:541` - if not isinstance(alias, cst.ImportAlias):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:582` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:643` - return rewrite_as_macro(target_impl["macro_template"], [], [])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:644` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:697` - if not lookup:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:704` - if details.get("replaced_by"):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:732` - if self.config.source_flavour:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:810` - if mapped == first_std_arg:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:811` - arg_provided = True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:864` - if not is_list and len(elements) == 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:894` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:895` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:922` - final_val_node = cst.parse_expression(target_code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:923` - except cst.ParserSyntaxError:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:927` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:928` - target_code = val_options  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:929` - if isinstance(target_code, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:930` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:931` - final_val_node = cst.parse_expression(target_code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:934` - # Or treat as simple string  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:936` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:952` - if final_val_node is not current_arg.value:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:953` - new_arg = current_arg.with_changes(value=final_val_node)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:961` - if kwargs_map:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:962` - filtered_extras = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:963` - for arg in extra_args:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:964` - if arg.keyword and arg.keyword.value in kwargs_map and kwargs_map[arg.keyword.value] is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:965` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:966` - filtered_extras.append(arg)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:977` - if not isinstance(v, dict) and k not in std_args_order:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:983` - if any(a.keyword and a.keyword.value == arg_name for a in new_args_list):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:986` - if isinstance(arg_val, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:987` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:988` - val_node = cst.parse_expression(arg_val)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:989` - except cst.ParserSyntaxError:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:1019` - """Expose hook context for strategy invocation."""  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:1032` - new_stmts.extend(mod.body)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:1033` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:1050` - ):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:1060` - return node.with_changes(body=cst.IndentedBlock(body=new_stmts))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/api.py:1061` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:93` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:114` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:127` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:139` - base = getattr(traits, "module_base", None)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:183` - new_stmts = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:185` - for code in self.context.module_preamble:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:186` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:187` - mod = cst.parse_module(code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:188` - new_stmts.extend(mod.body)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:189` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:190` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:193` - self.context.module_preamble.clear()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:195` - if not new_stmts:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:196` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:200` - return updated_node.with_changes(body=new_stmts + list(updated_node.body))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:245` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:266` - is_module = True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:267` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:274` - self.context.current_stmt_errors.append(  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:289` - msg = "; ".join(self.context.current_stmt_errors)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:290` - self.context.current_stmt_errors.clear()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:291` - return EscapeHatch.mark_failure(original_node, msg)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:333` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:382` - updated_node = self._apply_preamble(updated_node, sig_ctx.preamble_stmts)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:429` - new_stmts = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:430` - for code in stmts_code:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:431` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:432` - mod = cst.parse_module(code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:433` - new_stmts.extend(mod.body)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:434` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:435` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:437` - return self._inject_stmts_to_body(node, new_stmts)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:450` - idx = 1  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:460` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:478` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:505` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:513` - val = expr.value.value  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:515` - if '"""' in val:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:516` - content = val.replace('"""', "")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:517` - injection = "\n" + "\n".join([f"    {n}: Injected." for n, _ in args])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:518` - new_val = f'"""{content}{injection}\n    """'  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:519` - new_expr = expr.with_changes(value=cst.SimpleString(new_val))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:520` - new_stmt = stmt.with_changes(body=[expr.with_changes(value=new_expr)])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:523` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/structure.py:525` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:64` - if self._cached_traits:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:65` - return self._cached_traits  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:67` - conf = self.context.semantics.get_framework_config(self.context.target_fw)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:68` - if conf and "traits" in conf:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:69` - self._cached_traits = StructuralTraits.model_validate(conf["traits"])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:71` - self._cached_traits = StructuralTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:73` - return self._cached_traits  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:79` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:85` - canonical_root = self.context.alias_map[root]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:86` - if len(parts) > 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:87` - return f"{canonical_root}.{'.'.join(parts[1:])}"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:88` - return canonical_root  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:100` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:118` - self.context.current_stmt_warnings.append(reason)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:134` - unique = list(dict.fromkeys(self.context.current_stmt_warnings))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:135` - msg = "; ".join(unique)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:136` - return EscapeHatch.mark_failure(updated_node, msg)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:140` - unique = list(dict.fromkeys(self.context.current_stmt_errors))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:141` - msg = "; ".join(unique)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:142` - return EscapeHatch.mark_failure(original_node, msg)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:170` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:180` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:201` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:217` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/passes/auxiliary.py:218` - import traceback  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:30` - elif isinstance(node, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:31` - return node.value  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:32` - elif isinstance(node, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:33` - return node.value  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:34` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:53` - elements = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:54` - for item in val:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:55` - node = convert_value_to_cst(item)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:57` - elements.append(  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:66` - if elements:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:67` - last = elements[-1]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:68` - elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:70` - if isinstance(val, list):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:71` - return cst.List(elements=elements)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:73` - return cst.Tuple(elements=elements)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:77` - elements = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:78` - for k, v in val.items():  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:79` - k_node = convert_value_to_cst(k)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:80` - v_node = convert_value_to_cst(v)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:81` - elements.append(  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:89` - if elements:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:90` - last = elements[-1]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:91` - elements[-1] = last.with_changes(comma=cst.MaybeSentinel.DEFAULT)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:93` - return cst.Dict(elements=elements)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:103` - elif isinstance(val, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:105` - return cst.SimpleString(json.dumps(val))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:106` - elif val is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:107` - return cst.Name("None")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/normalization_utils.py:110` - return cst.SimpleString(repr(str(val)))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/context.py:138` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/context.py:140` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/patcher.py:205` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/patcher.py:206` - return updated  # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/patcher.py:221` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/rewriter/patcher.py:222` - return new_stmt  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:61` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:62` - tracer.end_phase()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:63` - raise e  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:76` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:77` - tracer.end_phase()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:78` - raise e  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:82` - tracer.start_phase("TikZ Ingest", "TikZ Text -> Logical Graph -> Python CST")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:83` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:84` - parser = TikzParser(code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:85` - graph = parser.parse()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:87` - synth_target = "jax" if target_fw in ["jax", "flax", "flax_nnx"] else "torch"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:88` - synthesizer = PythonBackend(framework=synth_target)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:89` - py_code = synthesizer.generate(graph, class_name="SwitcherooNet")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:91` - tree = cst.parse_module(py_code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:92` - tracer.log_mutation("Ingestion", "(TikZ Source)", f"(Python CST)\n{py_code}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:93` - tracer.end_phase()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:94` - return tree  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:95` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:96` - tracer.end_phase()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:97` - raise e  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:106` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:107` - tracer.end_phase()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ingestion.py:108` - raise e  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:105` - sym = self._symbol_table.get_type(node)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:106` - if not sym:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:107` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:110` - if "Tensor" in sym.name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:111` - return "Tensor"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:112` - if "Module" in sym.name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:113` - return "Module"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:114` - return sym.name  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:143` - return PluginTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:155` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:224` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:246` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:258` - name = item.get("name")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:259` - if name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:260` - cleaned_args.append(name)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:296` - _HOOK_METADATA[trigger] = spec  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:297` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:364` - total_loaded += len(_HOOKS)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:365` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:400` - if base_package:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:401` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:402` - importlib.import_module(f"{base_package}.{module_name}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:403` - count += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:404` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:405` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:416` - count += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/core/hooks.py:417` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/discovery.py:91` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/discovery.py:92` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/core/discovery.py:95` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/latex/parser.py:108` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/latex/parser.py:124` - return cst.Ellipsis()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/latex/parser.py:129` - except cst.ParserSyntaxError:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/latex/parser.py:130` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/latex/parser.py:133` - return cst.Name(clean_val)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/latex/parser.py:143` - fn = cst.Name(func_name)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/latex/parser.py:217` - rhs = cst.Name("None")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/latex/nodes.py:38` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py:164` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py:169` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py:202` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py:251` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py:262` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:80` - # Red boxes are attributes (Layers)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:85` - self.attrs.append((txt, "Unknown", code))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:120` - if p.attrs:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:127` - config_str = ""  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:134` - rhs = cst.Call(func=self._create_dotted(target_api_class), args=[])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:137` - rhs = self._create_call(target_api_class, config_str=config_str)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:144` - init_stmts.append(cst.SimpleStatementLine([cst.Pass()]))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:215` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:224` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:230` - val_node = self._safe_val(v.strip())  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:236` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:237` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:239` - args.append(cst.Arg(self._safe_val(p.strip())))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:246` - except:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/parser.py:247` - return cst.SimpleString(f"'{v}'")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/html/nodes.py:31` - raise NotImplementedError  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:30` - """Resolves an SSA value name to its Python expression.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:33` - ssa_name: The name of the SSA value.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:36` - The corresponding LibCST expression.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:43` - Args:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:57` - raise NotImplementedError  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:59` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:60` - def _convert_setattr(self, op: OperationNode) -> cst.SimpleStatementLine:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:63` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:64` - if len(op.operands) < 2:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:65` - return cst.SimpleStatementLine(body=[cst.Pass()])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:66` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:67` - obj_expr = self._resolve_operand(op.operands[0].name)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:68` - val_expr = self._resolve_operand(op.operands[1].name)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:69` - attr_name = (self._get_attr(op, "name") or "unknown").strip('"')  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:70` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:71` - target = cst.Attribute(value=obj_expr, attr=cst.Name(attr_name))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:73` - return cst.SimpleStatementLine(body=[assign])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:75` - def _convert_import(self, op: OperationNode) -> cst.SimpleStatementLine:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:76` - """# pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:78` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:79` - module_attr = self._get_attr(op, "module")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:81` - aliases_attr = self._get_attr(op, "aliases")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:83` - # Parse list strings using ast.literal_eval for safety  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:87` - if names_attr:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:88` - names = ast.literal_eval(names_attr)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:89` - if aliases_attr:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:91` - except:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:93` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:94` - module_val = module_attr.strip('"') if module_attr else None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:98` - # Clean quotes  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:119` - return cst.SimpleStatementLine(body=[cst.Import(names=import_aliases)])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:121` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:122` - def _convert_return(self, op: OperationNode) -> cst.SimpleStatementLine:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:123` - """# pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:124` - Converts a `sw.return` operation to a Python return statement.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:125` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:126` - val_node = None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:131` - def _convert_class_def(self, op: OperationNode) -> cst.ClassDef:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:171` - prev_usage_counts = self.usage_counts  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:172` - self.usage_counts = defaultdict(int)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:173` - # Also reset consumers map  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_statements.py:179` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/naming.py:71` - candidate = match.group(1)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/naming.py:73` - if candidate not in self._used_names and candidate not in self._reserved:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/naming.py:74` - base = candidate  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/naming.py:76` - base = clean  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/naming.py:100` - attempt = f"_{py_name}"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/naming.py:119` - count += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/naming.py:123` - py_name = attempt  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/dialect.py:43` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:92` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:93` - kind = kind_str  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:100` - raise ValueError(f"Unexpected character {value!r} on line {line_num}:{col}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:138` - return self.tokens[-1]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:184` - cur = self.peek()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:185` - raise SyntaxError(f"Expected {kind}, got {cur.kind} ('{cur.text}')")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:287` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:296` - if tk.kind == TokenKind.EOF or tk.text == Symbol.RBRACE or tk.kind == TokenKind.BLOCK_LABEL:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:297` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:298` - raise SyntaxError(f"Unexpected token {tk.kind} ('{tk.text}') where Op expected")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:324` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:326` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:342` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:371` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:379` - elif self.match(Symbol.COMMA):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:380` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:385` - if self.pos == start_pos:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:386` - raise SyntaxError(f"Stuck parsing results at {self.peek().text}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:397` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:398` - if self.match(TokenKind.IDENTIFIER):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:399` - op_name += "." + self.consume().text  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:401` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:424` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:437` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:439` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:460` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:467` - depth += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:469` - depth -= 1  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:472` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:478` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:479` - self._absorb_trivia()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:480` - if self.match(TokenKind.TYPE):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:481` - tp = self.consume().text  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:507` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:508` - while not self.match(Symbol.RPAREN):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:509` - self._absorb_trivia()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:510` - if self.match(TokenKind.TYPE) or self.match(TokenKind.REGION_TYPE):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:511` - self._flush_trivia()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:512` - res_types.append(TypeNode(self.consume().text))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:513` - if self.match(Symbol.COMMA):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:514` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:515` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:522` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:523` - self._absorb_trivia()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:532` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:559` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:561` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:567` - if self.match(Symbol.RBRACE):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:568` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/parser.py:569` - self.consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/generator.py:126` - stmt_node = stmt_node.with_changes(leading_lines=leading)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/generator.py:233` - return self._convert_import(op)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/generator.py:251` - return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/generator.py:264` - raw_n = self._get_attr(op, "name")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/generator.py:265` - if raw_n:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/generator.py:266` - hint = raw_n.strip('"')  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/generator.py:270` - hint = "cst"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:26` - Args:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:36` - Extracts arg_keywords attribute from operation.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:37` - Returns a list of strings (keyword names or empty strings).  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:41` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:42` - Returns:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:44` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:45` - for attr in op.attributes:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:47` - # Case 1: Already list (from in-memory object)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:48` - if isinstance(attr.value, list):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:49` - return [v.strip('"') for v in attr.value]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:58` - # Ensure strings are clean  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:59` - return [str(v).strip('"').strip("'") for v in val]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:65` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:74` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:87` - Returns:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:108` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:120` - kw_node = cst.Name(keywords[i])  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:136` - Generates generic operation call (e.g. torch.add).  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:137` - Handles specialized binary operation mapping via `binop.` types.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:138` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:140` - op: The operation node to generate an expression for.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:141` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:143` - A LibCST expression representing the operation.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_expressions.py:158` - if i < len(keywords) and keywords[i]:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/nodes.py:21` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/nodes.py:75` - val_str = f"[{', '.join(self.value)}]"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/stablehlo_emitter.py:172` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/stablehlo_emitter.py:207` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/stablehlo_emitter.py:225` - return "i1"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/stablehlo_emitter.py:229` - return "!sw.unknown"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_base.py:31` - return f"[{', '.join(attr.value)}]"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/gen_base.py:47` - return cst.Name("unknown")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:113` - elif line.newline:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:114` - header_trivia.append(TriviaNode("\n", kind="newline"))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:135` - if line.comment:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:136` - text = line.comment.value.replace("#", "//", 1)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:137` - trivia.append(TriviaNode(text, kind="comment"))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:138` - trivia.append(TriviaNode("\n", kind="newline"))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:139` - elif line.newline:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:141` - if line.newline.value:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:142` - trivia.append(TriviaNode("\n", kind="newline"))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:193` - results[0].leading_trivia = extracted + results[0].leading_trivia  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:212` - _, ops = self._emit_expression(node.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:213` - return ops  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:215` - return [self._emit_import(node)]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:222` - Args:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:223` - node: The Import or ImportFrom CST node.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:224` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:226` - An OperationNode representing the `sw.import` operation.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:227` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:232` - if isinstance(node, cst.ImportFrom) and node.module:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:233` - module_val = get_full_name(node.module)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:234` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:236` - # For ImportFrom, name.name is the object imported.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:237` - # For Import, name.name is the module being imported.  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:238` - if isinstance(node.names, cst.ImportStar):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:239` - names.append("*")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:241` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:243` - names.append(get_full_name(alias.name))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:244` - if alias.asname:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:245` - aliases.append(alias.asname.name.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:248` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:249` - attrs = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:251` - attrs.append(AttributeNode(name="module", value=f'"{module_val}"'))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:252` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:254` - quoted_names = [f'"{n}"' for n in names]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:273` - name_obj = AttributeNode(name="sym_name", value=f'"{node.name.value}"')  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:274` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:275` - attributes = [name_obj]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:276` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:277` - # Capture Bases (Inheritance)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:279` - base_names = []  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:280` - for b in node.bases:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:343` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:345` - if isinstance(t, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:346` - self.ctx.declare(t.value, val)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:347` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:351` - base_name = self._flatten_attr(t.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:352` - if base_name:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:353` - base_val = self.ctx.lookup(base_name)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:356` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:361` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:364` - # Feature: Register the Attribute name in context for future lookup  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:406` - if isinstance(node, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:421` - Returns:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:426` - if isinstance(operator, cst.Subtract):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:427` - return "sub"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:428` - if isinstance(operator, cst.Multiply):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:429` - return "mul"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:430` - if isinstance(operator, cst.Divide):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:431` - return "div"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:432` - if isinstance(operator, cst.FloorDivide):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:433` - return "floordiv"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:434` - if isinstance(operator, cst.Modulo):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:435` - return "mod"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:436` - if isinstance(operator, cst.Power):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:437` - return "pow"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:438` - if isinstance(operator, cst.MatrixMultiply):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:439` - return "matmul"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:440` - if isinstance(operator, cst.LeftShift):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:441` - return "lshift"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:442` - if isinstance(operator, cst.RightShift):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:443` - return "rshift"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:444` - if isinstance(operator, cst.BitAnd):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:481` - ops.extend(o)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:497` - # Pack keywords into attribute if any are non-empty  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:498` - if any(arg_keywords):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:531` - call_op = OperationNode(  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:535` - attributes=common_attrs,  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:536` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:537` - ops.append(call_op)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:538` - return res_val, ops  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:539` - # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:540` - if isinstance(expr.func, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:567` - op = OperationNode(  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:575` - def _annotation_to_string(self, node: cst.CSTNode) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:576` - """# pragma: no cover
+- [x] `src/ml_switcheroo/core/mlir/emitter.py:578` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:123` - return cst.parse_module(code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:158` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:160` - frontend = PythonFrontend(code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:161` - graph = frontend.parse_to_graph()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:176` - raise NotImplementedError(f"No frontend for {self.source}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:179` - from ml_switcheroo.core.graph_optimizer import GraphOptimizer  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:181` - tracer.start_phase("Optimization", "Fusion")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:182` - patterns = self.semantics.get_patterns()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:183` - optimizer = GraphOptimizer(patterns)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:184` - graph = optimizer.optimize(graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:185` - tracer.log_mutation("Graph Optimization", "(Graph)", "(Optimized Graph)")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:186` - tracer.log_snapshot("After Optimization", "graph TD; A-->B;", "...")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:187` - tracer.end_phase()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:219` - raise ValueError(f"No backend found for {self.target}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:263` - if self.config.enable_sharding:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:264` - from ml_switcheroo.compiler.sharding import ShardingInferencePass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:265` - from ml_switcheroo.compiler.sharding_extractor import ShardingExtractionPass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:266` - from ml_switcheroo.compiler.fusion import QKVFusionPass, QKVDefusionPass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:267` - from ml_switcheroo.compiler.qwen_fusion import (  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:269` - SwiGLUDefusionPass,  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:271` - VisionPatchEmbeddingDefusionPass,  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:275` - optimized_graph = ShardingExtractionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:278` - optimized_graph = QKVDefusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:279` - optimized_graph = SwiGLUDefusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:280` - optimized_graph = VisionPatchEmbeddingDefusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:283` - if self.target in ["jax", "flax", "flax_nnx", "paxml"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:284` - optimized_graph = ShardingInferencePass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:285` - optimized_graph = QKVFusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:286` - optimized_graph = SwiGLUFusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:287` - optimized_graph = VisionPatchEmbeddingFusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:288` - elif self.target == "torch":  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:289` - optimized_graph = ShardingInferencePass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:311` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:312` - tracer.log_warning(f"Graph Optimization failed, proceeding with raw CST: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py:372` - tracer.log_mutation("Final Emission", "(Python CST)", final_code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:174` - self._consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:184` - return self.tokens[-1]  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:202` - cur = self._peek()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:203` - raise SyntaxError(f"Expected {kind}, got {cur.kind} ('{cur.text}') at line {cur.line}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:267` - self._scan_until_semicolon()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:268` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:315` - self._scan_until_semicolon()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:316` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:332` - while not self._match(TokenKind.SEMICOLON) and not self._is_eof():  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:333` - self._consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:334` - if self._match(TokenKind.SEMICOLON):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:335` - self._consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/parser.py:368` - return ("Unknown", {})  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/nodes.py:27` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/nodes.py:147` - parts.append(t.to_text())  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/nodes.py:237` - lines.append(r"\begin{tikzpicture}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/analyser.py:148` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/analyser.py:155` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/analyser.py:180` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/analyser.py:208` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tikz/analyser.py:217` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py.bak:162` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py.bak:167` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py.bak:200` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py.bak:249` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph.py.bak:260` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:120` - return cst.parse_module(code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:155` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:157` - frontend = PythonFrontend(code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:158` - graph = frontend.parse_to_graph()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:173` - raise NotImplementedError(f"No frontend for {self.source}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:176` - from ml_switcheroo.core.graph_optimizer import GraphOptimizer  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:178` - tracer.start_phase("Optimization", "Fusion")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:179` - patterns = self.semantics.get_patterns()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:180` - optimizer = GraphOptimizer(patterns)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:181` - graph = optimizer.optimize(graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:182` - tracer.log_mutation("Graph Optimization", "(Graph)", "(Optimized Graph)")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:183` - tracer.log_snapshot("After Optimization", "graph TD; A-->B;", "...")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:184` - tracer.end_phase()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:216` - raise ValueError(f"No backend found for {self.target}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:260` - if self.config.enable_sharding:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:261` - from ml_switcheroo.compiler.sharding import ShardingInferencePass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:262` - from ml_switcheroo.compiler.sharding_extractor import ShardingExtractionPass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:263` - from ml_switcheroo.compiler.fusion import QKVFusionPass, QKVDefusionPass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:264` - from ml_switcheroo.compiler.qwen_fusion import (  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:266` - SwiGLUDefusionPass,  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:268` - VisionPatchEmbeddingDefusionPass,  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:272` - optimized_graph = ShardingExtractionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:275` - optimized_graph = QKVDefusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:276` - optimized_graph = SwiGLUDefusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:277` - optimized_graph = VisionPatchEmbeddingDefusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:280` - if self.target in ["jax", "flax", "flax_nnx", "paxml"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:281` - optimized_graph = ShardingInferencePass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:282` - optimized_graph = QKVFusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:283` - optimized_graph = SwiGLUFusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:284` - optimized_graph = VisionPatchEmbeddingFusionPass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:285` - elif self.target == "torch":  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:286` - optimized_graph = ShardingInferencePass().apply(optimized_graph)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:308` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:309` - tracer.log_warning(f"Graph Optimization failed, proceeding with raw CST: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/core/engine.py.bak:356` - tracer.log_mutation("Final Emission", "(Python CST)", final_code)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost.py:113` - default_val = None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost.py:119` - default_val = None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost.py:120` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost.py:121` - default_val = "<unrepresentable>"  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost.py:130` - anno_val = str(param.annotation)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost.py:150` - has_varargs = True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost.py:151` - params.append(GhostParam(name="args", kind="VAR_POSITIONAL"))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost.py:152` - params.append(GhostParam(name="kwargs", kind="VAR_KEYWORD"))  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/imports_mixin.py:97` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/imports_mixin.py:99` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/injection_mixin.py:37` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/injection_mixin.py:78` - insert_idx = i + 1  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/injection_mixin.py:79` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/injection_mixin.py:103` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:35` - return simplified  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:40` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:44` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:64` - return new_node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:87` - root_name = get_root_name(node)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:90` - safe_roots = set()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:91` - if hasattr(self, "_defined_names"):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:92` - safe_roots.update(self._defined_names)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:93` - if hasattr(self, "_path_to_alias"):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:94` - safe_roots.update(self._path_to_alias.values())  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:95` - if hasattr(self, "target_fw"):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:96` - safe_roots.add(self.target_fw)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:98` - if root_name not in safe_roots:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:99` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:102` - new_base = node.value.value  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/attributes_mixin.py:103` - return node.with_changes(value=new_base)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/utils.py:29` - if isinstance(node, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/utils.py:30` - return node.value  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/utils.py:31` - if isinstance(node, cst.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/utils.py:32` - return get_root_name(node.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/utils.py:33` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/utils.py:87` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/utils.py:92` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/utils.py:111` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/resolution.py:65` - name = get_full_name(node)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/resolution.py:66` - if name == self.target_path or name.startswith(f"{self.target_path}."):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/resolution.py:68` - except:  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/resolution.py:69` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/resolution.py:72` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/resolution.py:76` - self.found = True  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/base.py:42` - self.source_fws = set()  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/base.py:44` - self.source_fws = {source_fws}  # pragma: no cover
+- [x] `src/ml_switcheroo/core/import_fixer/base.py:70` - target = target.target  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph_optimizer.py:215` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/core/graph_optimizer.py:233` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost_ast.py:100` - elif isinstance(el.value.func, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/core/ghost_ast.py:101` - sub_modules.append(el.value.func.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/core/tracer.py:100` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/scanners.py:106` - return not self.found  # pragma: no cover
+- [x] `src/ml_switcheroo/core/scanners.py:194` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/core/scanners.py:203` - bound_name = alias.asname.name.value  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/audit.py:67` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/audit.py:107` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/audit.py:150` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:38` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:39` - if not isinstance(other, SymbolType):  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:40` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:41` - return self.name == other.name  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:55` - if not isinstance(other, TensorType):  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:57` - return self.name == other.name and self.framework == other.framework  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:86` - super().__init__("Union")  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:87` - self.types = types  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:90` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:91` - unique_names = sorted(list(set(str(t) for t in self.types)))  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:92` - return f"Union[{', '.join(unique_names)}]"  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:94` - # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:97` - if not isinstance(other, UnionType):  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:98` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:100` - return set(str(t) for t in self.types) == set(str(t) for t in other.types)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:137` - Returns:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:143` - return self.parent.get(name)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:200` - self.current_scope = self.root_scope  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:204` - def visit_ClassDef(self, node: cst.ClassDef) -> None:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:205` - """Enters class scope."""  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:209` - """Exits class scope."""  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:210` - if self.current_scope.parent:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:211` - self.current_scope = self.current_scope.parent  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:213` - def visit_FunctionDef(self, node: cst.FunctionDef) -> None:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:214` - """Enters function scope."""  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:219` - if self.current_scope.parent:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:220` - self.current_scope = self.current_scope.parent  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:268` - start_state = self.current_scope.snapshot()  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:274` - node.orelse.visit(self)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:278` - # Merge start (0 iterations case) with end (N iterations case)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:279` - self.current_scope.symbols = self._merge_states(start_state, end_state)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:280` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:282` - # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:283` - def visit_While(self, node: cst.While) -> bool:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:284` - """Handle while loop logic."""  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:285` - node.test.visit(self)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:286` - start_state = self.current_scope.snapshot()  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:298` - t1 = self.table.get_type(node.body)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:299` - t2 = self.table.get_type(node.orelse)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:300` - # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:301` - if t1 and t2:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:304` - elif t1:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:305` - self.table.record_type(node, t1)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:306` - elif t2:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:307` - self.table.record_type(node, t2)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:325` - if val_a == val_b:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:326` - merged[k] = val_a  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:331` - elif in_b:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:332` - merged[k] = state_b[k]  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:333` - # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:339` - return t1  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:346` - types.extend(t.types)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:356` - for t in types:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:363` - return unique[0]  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:377` - self.current_scope.set(bind_name, ModuleType(name="Module", path=full_path))  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:379` - # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:380` - def leave_ImportFrom(self, node: cst.ImportFrom) -> None:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:382` - Track from-imports.  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:383` - e.g. `from torch import nn` -> symbols['nn'] = ModuleType(name='Module', path='torch.nn')  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:384` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:385` - if not node.module:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:386` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:387` - base_mod = get_full_name(node.module)  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:396` - def leave_Assign(self, node: cst.Assign) -> None:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:405` - for target in node.targets:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:406` - # Handle simple name assignment: x = ...  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:446` - if isinstance(func_type, ModuleType):  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:447` - api_path = func_type.path  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:448` - # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:453` - method = node.func.attr.value  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:454` - if hasattr(receiver_type, "framework"):  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/symbol_table.py:455` - api_path = f"{receiver_type.framework}.Tensor.{method}"  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/lifecycle.py:70` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/lifecycle.py:95` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/lifecycle.py:114` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/lifecycle.py:132` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/lifecycle.py:148` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/lifecycle.py:162` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/dependencies.py:100` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/dependencies.py:111` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/dependencies.py:145` - common_stdlib = frozenset(  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/dependencies.py:206` - if name in sys.builtin_module_names:  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/dependencies.py:207` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/analysis/dependencies.py:209` - return name in common_stdlib  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/ast_normalizer.py:53` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:174` - elif hasattr(node.value, "value"):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:175` - eps = node.value.value  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:181` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:182` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:209` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:210` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:241` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:242` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:272` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:273` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:300` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:301` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:324` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/qwen3_parser.py:325` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:47` - from ml_switcheroo.core.trivia_utils import extract_trivia  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:48` - self._current_trivia = extract_trivia(node)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:199` - kind = "Unknown"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:200` - if isinstance(node.operator, cst.Add):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:201` - kind = "Add"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:202` - elif isinstance(node.operator, cst.Subtract):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:203` - kind = "Sub"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:204` - elif isinstance(node.operator, cst.Multiply):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:205` - kind = "Mul"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:206` - elif isinstance(node.operator, cst.Divide):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:207` - kind = "Div"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:209` - lnode = LogicalNode(id=f"binop_{kind}_{self._node_counter}", kind=kind)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:210` - self._apply_trivia(lnode)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:211` - self.nodes.append(lnode)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:212` - self._node_counter += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:213` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:271` - hatch = EscapeHatchNode(id=node.name.value, kind="ClassDef", raw_source=self.module.code_for_node(node))  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:272` - hatch.trivia = extract_trivia(node)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/pytorch_bonsai_parser.py:273` - graph.escape_hatches.append(hatch)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/nnx_bonsai_parser.py:30` - from ml_switcheroo.core.trivia_utils import extract_trivia  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/nnx_bonsai_parser.py:31` - self._current_trivia = extract_trivia(node)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/nnx_bonsai_parser.py:78` - graph.trivia = class_trivia  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/stablehlo_reader.py:154` - stablehlo_api_suffix = "subtract"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/stablehlo_reader.py:156` - stablehlo_api_suffix = "multiply"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/stablehlo_reader.py:158` - stablehlo_api_suffix = "divide"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/stablehlo_reader.py:160` - stablehlo_api_suffix = "power"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/onnx_reader.py:77` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/onnx_reader.py:218` - return "List[str]"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/onnx_reader.py:222` - return "List[float]"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:34` - py_files = list(root_dir.glob("*.py"))  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:36` - if not py_files:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:37` - log_warning("No .py files found. Please point to the Python stubs directory (e.g. _2024_12).")  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:38` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:40` - log_info(f"Parsing {len(py_files)} stub files...")  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:41` - return self._parse_stubs(py_files, root_dir)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:61` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:67` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:68` - rel_path = fpath.name  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:72` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:73` - log_warning(f"Failed to parse {fpath.name}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:74` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:81` - continue  # Skip private helpers  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:96` - elif isinstance(node, (ast.Assign, ast.AnnAssign)):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:97` - name = self._get_assignment_name(node)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:98` - if not name or name.startswith("_"):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:99` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:102` - summary = f"Constant: {name}"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:103` - if i + 1 < len(tree.body):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:104` - next_node = tree.body[i + 1]  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:105` - if isinstance(next_node, ast.Expr) and isinstance(next_node.value, ast.Constant):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:106` - if isinstance(next_node.value.value, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:107` - summary = self._clean_docstring(next_node.value.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:109` - semantics[name] = {  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:164` - elif isinstance(annotation, ast.Constant):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:179` - return f"{val}[{inner}]"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:180` - return val  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:188` - # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:189` - elif isinstance(annotation, ast.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:190` - # e.g. types.NoneType  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:191` - return f"{self._parse_annotation(annotation.value)}.{annotation.attr}"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:192` - # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:193` - return "Any"  # Fallback for complex structures  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:204` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:205` - if isinstance(node, ast.Assign):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:206` - if node.targets and isinstance(node.targets[0], ast.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:207` - return node.targets[0].id  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:208` - elif isinstance(node, ast.AnnAssign):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:209` - if isinstance(node.target, ast.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:210` - return node.target.id  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:211` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:225` - # Take just the first paragraph (up to empty line)  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:226` - summary = doc.strip().split("\n\n")[0]  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:227` - # Flatten newlines within that paragraph  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/array_api_reader.py:228` - return summary.replace("\n", " ").strip()  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:111` - Returns:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:112` - Dictionary mapping Abstract Operations to SASS implementations.  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:115` - log_error(f"File not found: {html_path}")  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:116` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:118` - log_info(f"Parsing SASS Spec: {html_path.name}...")  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:120` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:122` - except UnicodeDecodeError:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:124` - content = html_path.read_text(encoding="latin-1")  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:143` - }  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:144` - # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:145` - # Conflict resolution: Prefer FP32 versions for generic math ops if collisions occur  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:147` - prev_desc = mappings[key]["_description"]  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:148` - if "FP32" in desc and "FP32" not in prev_desc:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:149` - mappings[key] = entry  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:168` - return "Add"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:172` - return "Add3"  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:176` - # 2. Check Description Patterns  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:179` - # Ambiguity handling  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:180` - if abstract_name in ["Min", "Max"] and "Minimum/Maximum" in desc:  # pragma: no cover
+- [x] `src/ml_switcheroo/importers/sass_reader.py:184` - return abstract_name  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:31` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:45` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:46` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:49` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:50` - if isinstance(args[2].value, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:51` - end_dim = int(args[2].value.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:52` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:53` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:58` - if arg.keyword.value == "start_dim" and isinstance(arg.value, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:59` - start_dim = int(arg.value.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:60` - if arg.keyword.value == "end_dim" and isinstance(arg.value, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:61` - end_dim = int(arg.value.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:73` - target_api = ctx.lookup_api("flatten_range") or ctx.lookup_api("flatten_full")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:76` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:82` - new_func = _create_dotted_name(target_api)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:85` - arg0 = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:88` - arg1_val = cst.Integer(str(start_dim))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:89` - arg1 = cst.Arg(value=arg1_val, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:94` - if end_dim == -1:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:96` - arg2_val = cst.Attribute(value=input_val, attr=cst.Name("ndim"))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:99` - arg2_val = cst.Integer(str(end_dim + 1))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:101` - arg2 = cst.Arg(value=arg2_val)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:103` - return node.with_changes(func=new_func, args=[arg0, arg1, arg2])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:108` - if "ravel" in target_api or "flatten" in target_api:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:109` - new_func = _create_dotted_name(target_api)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:110` - return node.with_changes(func=new_func, args=[input_arg])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:130` - input_arg = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py.bak:135` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/strip_module_list.py:25` - if len(node.args) == 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/strip_module_list.py:26` - return node.args[0].value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/strip_module_list.py:27` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/inplace_unroll.py:33` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/inplace_unroll.py:48` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/inplace_unroll.py:92` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/nnx_to_torch_params.py:42` - return node.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/nnx_to_torch_params.py:46` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/gather.py:44` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/gather.py:78` - kw = arg.keyword.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/gather.py:79` - if kw == "dim":  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/gather.py:80` - dim_arg = arg  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/gather.py:81` - elif kw == "index":  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/gather.py:82` - index_arg = arg  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/gather.py:97` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_checks.py:47` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_checks.py:52` - except NotImplementedError:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_checks.py:53` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_checks.py:54` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_checks.py:56` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_checks.py:59` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_checks.py:65` - except cst.ParserSyntaxError:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_checks.py:66` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:31` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:45` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:46` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:49` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:50` - if isinstance(args[2].value, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:51` - end_dim = int(args[2].value.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:52` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:53` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:58` - if arg.keyword.value == "start_dim" and isinstance(arg.value, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:59` - start_dim = int(arg.value.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:60` - if arg.keyword.value == "end_dim" and isinstance(arg.value, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:61` - end_dim = int(arg.value.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:69` - target_api = ctx.lookup_api("flatten") or ctx.lookup_api("Flatten")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:73` - target_api = ctx.lookup_api("flatten_range") or ctx.lookup_api("flatten_full")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:76` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:82` - new_func = _create_dotted_name(target_api)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:85` - arg0 = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:88` - arg1_val = cst.Integer(str(start_dim))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:89` - arg1 = cst.Arg(value=arg1_val, comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:94` - if end_dim == -1:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:96` - arg2_val = cst.Attribute(value=input_val, attr=cst.Name("ndim"))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:99` - arg2_val = cst.Integer(str(end_dim + 1))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:101` - arg2 = cst.Arg(value=arg2_val)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:103` - return node.with_changes(func=new_func, args=[arg0, arg1, arg2])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:108` - if "ravel" in target_api or "flatten" in target_api:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:109` - new_func = _create_dotted_name(target_api)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:110` - return node.with_changes(func=new_func, args=[input_arg])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:130` - input_arg = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/flatten.py:135` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/tf_data_loader.py:55` - elif isinstance(node.func, cst.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/tf_data_loader.py:56` - func_name = node.func.attr.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/tf_data_loader.py:85` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/attention_packing.py:54` - if isinstance(args[0].value, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/attention_packing.py:55` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/attention_packing.py:98` - new_args.append(arg)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/attention_packing.py:139` - new_args.append(arg)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/attention_packing.py:141` - new_args.append(arg)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/attention_packing.py:145` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/attention_packing.py:189` - new_args.append(arg)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/attention_packing.py:193` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/mlx_extras.py:59` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_flag_injection.py:43` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_flag_injection.py:96` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_flag_injection.py:104` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_flag_injection.py:143` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_flag_injection.py:150` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_flag_injection.py:165` - val = node.args[0].value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:27` - return node.func.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:30` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:42` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:58` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:62` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:67` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:81` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:86` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:101` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:105` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/io_handler.py:106` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/einsum.py:74` - return node.with_changes(func=new_func)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/data_loader.py:143` - remaining_args = list(node.args)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:49` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:61` - if not node.args:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:62` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:63` - input_tensor = node.args[0].value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:64` - orig_args = list(node.args[1:])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:70` - elif len(orig_args) == 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:71` - val = orig_args[0].value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:72` - if isinstance(val, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:73` - needs_tuple = True  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:86` - if isinstance(node.func, cst.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:90` - ]  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:91` - if orig_args:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:92` - new_args.append(orig_args[0])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:94` - new_args = list(node.args)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:105` - trait_method = ctx.plugin_traits.strict_materialization_method  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:106` - if trait_method:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:109` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/reshape.py:110` - return strict_call  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/strip_to.py:13` - if isinstance(node.func, cst.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/strip_to.py:14` - return node.func.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/strip_to.py:15` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/loss_wrapper.py:66` - elif isinstance(arg.value, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/loss_wrapper.py:69` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/loss_wrapper.py:84` - loss_op_id = "CrossEntropyLoss"  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/loss_wrapper.py:91` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/loss_wrapper.py:121` - return inner_call  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/__init__.py:23` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/__init__.py:25` - print(f"⚠️  Failed to auto-load plugin '{module_name}': {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/checkpoint_keys.py:96` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/method_property.py:35` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/method_property.py:55` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/method_property.py:62` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/method_property.py:69` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/method_property.py:86` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/keras_sequential.py:61` - op_api = "keras.Sequential"  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/keras_sequential.py:68` - return node.with_changes(func=new_func)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/keras_sequential.py:72` - return node.with_changes(func=new_func)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/keras_sequential.py:79` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/mlx_optimizers.py:54` - old_name = ""  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/mlx_optimizers.py:55` - if isinstance(node.func, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/mlx_optimizers.py:56` - old_name = node.func.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/mlx_optimizers.py:57` - elif isinstance(node.func, cst.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/mlx_optimizers.py:58` - old_name = node.func.attr.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/mlx_optimizers.py:59` - target_api = f"mlx.optimizers.{old_name}"  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/mlx_optimizers.py:100` - optimizer_var = cst.Name("optimizer")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/clipping.py:41` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:37` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:42` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:48` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:53` - if hasattr(traits, "has_numpy_compatible_arrays"):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:54` - return traits.has_numpy_compatible_arrays  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:56` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:80` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:84` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:90` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:96` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:117` - target_type_id = suffix_map[target_type_id]  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/casting.py:121` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/utils.py:60` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/utils.py:88` - alias_info = getattr(conf, "alias", None)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/utils.py:89` - if alias_info and hasattr(alias_info, "model_dump"):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/utils.py:90` - alias_info = alias_info.model_dump()  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/utils.py:100` - known_root = mod_path.split(".")[0]  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/utils.py:101` - if name == known_root:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/utils.py:102` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/utils.py:113` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/scatter.py:49` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/scatter.py:53` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/in_top_k_plugin.py:16` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:26` - parts = name_str.split(".")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:27` - node = cst.Name(parts[0])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:28` - for part in parts[1:]:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:29` - node = cst.Attribute(value=node, attr=cst.Name(part))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:30` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:56` - target_api = ctx.lookup_api("View")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:59` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:68` - is_method = False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:76` - if not node.args:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:77` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:78` - input_tensor = node.args[0].value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:79` - shape_args = list(node.args[1:])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:88` - elif len(shape_args) == 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:89` - val = shape_args[0].value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:90` - if isinstance(val, cst.Integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:91` - packed_shape_val = cst.Tuple(  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:95` - packed_shape_val = val  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/shape_packing.py:97` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/static_unroll.py:96` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/static_unroll.py:97` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/static_unroll.py:106` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/static_unroll.py:116` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/topk.py:61` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/batch_norm.py:45` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_allocator.py:52` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_allocator.py:57` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_allocator.py:59` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_allocator.py:64` - except cst.ParserSyntaxError:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_allocator.py:65` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_allocator.py:78` - return None, None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_allocator.py:104` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/device_allocator.py:105` - pass  # Not a simple int index, keep original string  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:12` - parts = name_str.split(".")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:13` - node = cst.Name(parts[0])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:14` - for part in parts[1:]:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:15` - node = cst.Attribute(value=node, attr=cst.Name(part))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:16` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:20` - if isinstance(node, cst.Name):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:21` - return node.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:22` - elif isinstance(node, cst.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:23` - return node.attr.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:24` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:31` - target_api = ctx.lookup_api(ctx.current_op_id or "Param")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:32` - if not target_api:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:34` - target_api = "nnx.Param"  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:36` - new_func = _create_dotted_name(target_api)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:39` - new_args = []  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:40` - for arg in node.args:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:41` - if arg.keyword and arg.keyword.value == "requires_grad":  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:42` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:43` - new_args.append(arg)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:45` - return node.with_changes(func=new_func, args=new_args)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:53` - target_api = ctx.lookup_api(ctx.current_op_id or "PartitionSpec")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:54` - if not target_api:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:55` - target_api = "PartitionSpec"  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:56` - new_func = _create_dotted_name(target_api)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/torch_to_nnx_params.py:57` - return node.with_changes(func=new_func)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:45` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:49` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:53` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:56` - return traits.get("has_numpy_compatible_arrays", False)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:61` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:83` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:87` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:91` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:98` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:121` - args[0] = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/padding.py:133` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:37` - parts = name_str.split(".")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:38` - node = cst.Name(parts[0])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:39` - for part in parts[1:]:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:40` - node = cst.Attribute(value=node, attr=cst.Name(part))  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:41` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:61` - new_args = []  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:62` - start_index = 0  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:64` - if len(node.args) > 0 and node.args[0].keyword is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:65` - start_index = 1  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:67` - for i in range(start_index, len(node.args)):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:68` - new_args.append(node.args[i])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:70` - return node.with_changes(args=new_args)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:93` - reason = (  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:97` - return EscapeHatch.mark_failure(node, reason)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:116` - return node.with_changes(func=cst.Name("None"), args=[])  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:121` - if isinstance(node.func, cst.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:122` - return node.func.attr.value  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/optimizer_step.py:123` - return "step"  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:31` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:33` - return cst.Name(code)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:40` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:54` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:61` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:94` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:101` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:133` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:159` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:162` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/state_container.py:192` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:49` - return default  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:72` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:76` - elif "CosineAnnealingLR" in op_id:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:77` - return _transform_cosine_lr(node, ctx, target_api)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:79` - return node  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:121` - elif not kw:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:123` - if step_size_arg is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:124` - step_size_arg = arg  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:125` - elif gamma_arg is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:126` - gamma_arg = arg  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:172` - args = list(node.args)  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:173` - if args:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:174` - args.pop(0)  # Remove optimizer  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:176` - new_args = []  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:178` - init_val_kw = _get_target_arg_name(ctx, "initial_learning_rate", "init_value")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:179` - new_args.append(  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:189` - t_max_arg = None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:190` - eta_min_arg = None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:192` - for arg in args:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:193` - kw = arg.keyword.value if arg.keyword else None  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:194` - if kw == "T_max":  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:195` - t_max_arg = arg  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:196` - elif kw == "eta_min":  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:197` - eta_min_arg = arg  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:198` - elif not kw:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:199` - if t_max_arg is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:200` - t_max_arg = arg  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:201` - elif eta_min_arg is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:202` - eta_min_arg = arg  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:204` - if t_max_arg:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:207` - target_kw = _get_target_arg_name(ctx, "T_max", "decay_steps")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:212` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:214` - new_args.append(  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:222` - if eta_min_arg:  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:224` - target_kw = _get_target_arg_name(ctx, "eta_min", "alpha")  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:225` - new_args.append(  # pragma: no cover
+- [x] `src/ml_switcheroo/plugins/schedulers.py:233` - return node.with_changes(func=_create_dotted_name(target_api), args=new_args)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:51` - entry = {"name": arg, "type": "Any"}  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:52` - elif isinstance(arg, (list, tuple)) and len(arg) >= 2:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:53` - entry = {"name": arg[0], "type": arg[1]}  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:54` - elif isinstance(arg, dict):  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:62` - if hasattr(op_type, "value"):  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:95` - if out_path.exists():  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:96` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:97` - with open(out_path, "r", encoding="utf-8") as f:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:98` - loaded = yaml.safe_load(f)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:99` - if isinstance(loaded, list):  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:100` - for item in loaded:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:101` - if "operation" in item:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:102` - existing_map[item["operation"]] = item  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:103` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:123` - logger.info(f"[ml-switcheroo] Updated semantic YAML at {out_path}")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:124` - except IOError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:150` - if out_dir.exists():  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:190` - safe_name = "index_op"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:194` - if safe_name.lower() in seen_safe_names:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:195` - logger.info(f"[ml-switcheroo] Skipping {op_name} (File collision with {safe_name.lower()})")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:203` - generated_files.append(safe_name)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py:204` - except IOError:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:21` - static_path = Path(__file__).parent / "static"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:22` - if static_path.exists() and hasattr(app, "config"):  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:23` - app.config.html_static_path.append(str(static_path.resolve()))  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:32` - if exception or not hasattr(app, "builder"):  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:33` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:37` - here = Path(__file__).parent  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:38` - root_dir = here.parents[2]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:39` - dist_dir = root_dir / "dist"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:41` - static_dst = Path(app.builder.outdir) / "_static"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:42` - static_dst.mkdir(exist_ok=True, parents=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:44` - reqs_file = root_dir / "requirements.txt"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:45` - if reqs_file.exists():  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:46` - shutil.copy2(reqs_file, static_dst / "requirements.txt")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:48` - if dist_dir.exists():  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:49` - wheels = list(dist_dir.glob("*.whl"))  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:50` - if wheels:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:51` - latest = sorted(wheels, key=os.path.getmtime)[-1]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:52` - target_file = static_dst / latest.name  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:54` - if not target_file.exists() or target_file.stat().st_mtime < latest.stat().st_mtime:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/hooks.py:55` - shutil.copy2(latest, target_file)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering.py:66` - def_source = priority_order[0] if priority_order else "source_placeholder"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering.py:71` - candidates = [fw for fw in priority_order if fw != def_source]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering.py:72` - def_target = candidates[0] if candidates else def_source  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering.py:260` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/directive_v2.py:36` - hierarchy, examples_json, tier_metadata_json = scan_registry()  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/directive_v2.py:37` - html = render_demo_html_v2(hierarchy, examples_json, tier_metadata_json)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/directive_v2.py:38` - return [nodes.raw("", html, format="html")]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:28` - fws = available_frameworks()  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:29` - priorities = get_framework_priority_order()  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:32` - hierarchy: HierarchyMap = defaultdict(list)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:33` - tier_metadata: Dict[str, List[str]] = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:36` - roots = set()  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:38` - for key in fws:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:39` - adapter = get_adapter(key)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:40` - if not adapter:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:41` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:43` - label = getattr(adapter, "display_name", key.capitalize())  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:44` - parent = getattr(adapter, "inherits_from", None)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:47` - tiers = []  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:48` - if hasattr(adapter, "supported_tiers") and adapter.supported_tiers:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:49` - tiers = [t.value for t in adapter.supported_tiers]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:51` - tiers = ["array", "neural", "extras"]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:52` - tier_metadata[key] = tiers  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:54` - if parent:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:56` - hierarchy[parent].append({"key": key, "label": label})  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:59` - roots.add(key)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:62` - examples = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:65` - sorted_roots = sorted(  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:73` - }  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:76` - for key in fws:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:77` - adapter = get_adapter(key)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:78` - if hasattr(adapter, "get_tiered_examples"):  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:79` - tiers = adapter.get_tiered_examples()  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:80` - parent_key = getattr(adapter, "inherits_from", None)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:82` - for tier_name, code in tiers.items():  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:83` - uid = f"{key}_{tier_name}"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:85` - if parent_key:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:86` - src_fw = parent_key  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:87` - src_flavour = key  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:89` - src_fw = key  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:90` - src_flavour = None  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:92` - req_tier = "extras"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:93` - if "math" in tier_name:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:94` - req_tier = "array"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:95` - elif "neural" in tier_name:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:96` - req_tier = "neural"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:98` - clean_tier_name = tier_name.replace("tier", "")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:99` - clean_label = (  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:103` - display_fw = getattr(adapter, "display_name", key.title())  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:104` - label = f"{display_fw}: {clean_label}"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:107` - tgt_fw = None  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:108` - tgt_flavour = None  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:112` - ]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:114` - if candidates:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:115` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:116` - curr_idx = priorities.index(src_fw)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:117` - rotated = priorities[curr_idx + 1 :] + priorities[:curr_idx]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:118` - for c in rotated:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:119` - if c in candidates:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:120` - tgt_fw = c  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:121` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:122` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:123` - tgt_fw = candidates[0]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:125` - if not tgt_fw:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:126` - tgt_fw = "target_placeholder"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:128` - if tgt_fw in final_hierarchy and final_hierarchy[tgt_fw]:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:129` - tgt_flavour = final_hierarchy[tgt_fw][0]["key"]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:131` - examples[uid] = {  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/registry.py:141` - return final_hierarchy, json.dumps(examples), json.dumps(tier_metadata)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:28` - app.add_directive("switcheroo_demo", SwitcherooDemo)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:29` - app.add_directive("switcheroo_demo_v2", SwitcherooDemoV2)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:33` - app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:34` - app.add_css_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/darcula.min.css")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:35` - app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:40` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:41` - app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:44` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:45` - app.add_js_file("https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:48` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:51` - app.add_js_file("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:54` - app.add_js_file("https://d3js.org/d3.v7.min.js")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:58` - app.add_css_file("https://tikzjax.com/v1/fonts.css")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:59` - app.add_js_file(None, body="window.TIKZJAX_URL = '_static/tikzjax/tikzjax.js';")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:62` - app.add_css_file("switcheroo_demo.css")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:63` - app.add_css_file("trace_graph.css")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:64` - app.add_js_file("trace_render.js")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:65` - app.add_js_file("switcheroo_demo.js")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:68` - app.add_css_file("switcheroo_demo_v2.css")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:69` - app.add_js_file("switcheroo_demo_v2.js")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:72` - app.add_css_file("op_tabs.css")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:73` - app.add_js_file("op_tabs.js")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:75` - import os  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:79` - app.connect("builder-inited", add_static_path)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:81` - app.connect("build-finished", copy_wheel_and_reqs)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:83` - if os.environ.get("HOMEPAGE_ONLY") != "1":  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:84` - app.connect("builder-inited", generate_op_docs)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/__init__.py:86` - return {  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/directive.py:36` - hierarchy, examples_json, tier_metadata_json = scan_registry()  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/directive.py:37` - html = render_demo_html(hierarchy, examples_json, tier_metadata_json)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/directive.py:38` - return [nodes.raw("", html, format="html")]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:11` - root_dir = Path(__file__).parents[3]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:12` - dist_dir = root_dir / "dist"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:13` - wheel_name = "ml_switcheroo-latest-py3-none-any.whl"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:15` - if dist_dir.exists():  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:16` - wheels = list(dist_dir.glob("*.whl"))  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:17` - if wheels:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:18` - latest = sorted(wheels, key=os.path.getmtime)[-1]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:19` - wheel_name = latest.name  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:21` - priority_order = get_framework_priority_order()  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:22` - available_roots = set(hierarchy.keys())  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:24` - def_source = "torch" if "torch" in available_roots else (priority_order[0] if priority_order else "source_placeholder")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:26` - if "flax" in available_roots and def_source != "flax":  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:27` - def_target = "flax"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:28` - elif "jax" in available_roots and def_source != "jax":  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:29` - def_target = "jax"  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:31` - candidates = [fw for fw in priority_order if fw != def_source]  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:32` - def_target = candidates[0] if candidates else def_source  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:34` - primary_opts = _render_primary_options(hierarchy)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:35` - opts_src = primary_opts.replace(f'value="{def_source}"', f'value="{def_source}" selected')  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:36` - opts_tgt = primary_opts.replace(f'value="{def_target}"', f'value="{def_target}" selected')  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/rendering_v2.py:38` - return f"""  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:51` - entry = {"name": arg, "type": "Any"}  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:52` - elif isinstance(arg, (list, tuple)) and len(arg) >= 2:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:53` - entry = {"name": arg[0], "type": arg[1]}  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:54` - elif isinstance(arg, dict):  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:62` - if hasattr(op_type, "value"):  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:95` - if out_path.exists():  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:96` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:97` - with open(out_path, "r", encoding="utf-8") as f:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:98` - loaded = yaml.safe_load(f)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:99` - if isinstance(loaded, list):  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:100` - for item in loaded:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:101` - if "operation" in item:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:102` - existing_map[item["operation"]] = item  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:103` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:123` - logger.info(f"[ml-switcheroo] Updated semantic YAML at {out_path}")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:124` - except IOError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:150` - if out_dir.exists():  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:192` - if safe_name.lower() in seen_safe_names:  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:193` - logger.info(f"[ml-switcheroo] Skipping {op_name} (File collision with {safe_name.lower()})")  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:201` - generated_files.append(safe_name)  # pragma: no cover
+- [x] `src/ml_switcheroo/sphinx_ext/autogen_ops.py.bak:202` - except IOError:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:86` - candidate_name = member_name  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:87` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:103` - details["variants"] = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:115` - out.append(item[0])  # Name is index 0  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:132` - for method_name in ["__call__", "forward", "call"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:133` - if hasattr(obj, method_name):  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:134` - target_func = getattr(obj, method_name)  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:135` - found_method = True  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:136` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:151` - if params[0].name in ["self", "cls"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/syncer.py:152` - params = params[1:]  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:67` - root = self._package_cache[package_name]  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:86` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:87` - print(f"⚠️  Could not load package '{package_name}'. Is it installed?")  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:88` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:89` - print(f"⚠️  Error analyzing '{package_name}': {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:122` - elif member.is_module:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:123` - self._recurse_griffe(member, catalog)  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:125` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:126` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:150` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:155` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:160` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:161` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:165` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:175` - if id(member) in visited:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:176` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:180` - ):  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:181` - self._recurse_runtime(member, new_path, catalog, visited, ignore_set, depth + 1)  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:184` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:185` - if hasattr(member, "__module__") and member.__module__:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:186` - root_pkg = path.split(".")[0]  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:188` - if not member.__module__.startswith(root_pkg):  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:189` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:191` - cat_type = "class" if inspect.isclass(member) else "function"  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:192` - catalog[new_path] = self._extract_runtime_sig(member, name, cat_type)  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:194` - if inspect.isclass(member):  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:196` - self._recurse_runtime(member, new_path, catalog, visited, ignore_set, depth + 1)  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:197` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:199` - catalog[new_path] = {  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:210` - catalog[new_path] = {  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:239` - except AttributeError:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:240` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:280` - params = []  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:281` - has_varargs = False  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:282` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:283` - sig = inspect.signature(obj)  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:284` - for p in sig.parameters.values():  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:285` - if p.kind == inspect.Parameter.VAR_POSITIONAL:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:286` - has_varargs = True  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:287` - params.append(p.name)  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:288` - except (ValueError, TypeError):  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:289` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/inspector.py:291` - return {  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/consensus.py:129` - normalized = normalized[len(prefix) :]  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/consensus.py:176` - key = ref.name.lower()  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/consensus.py:232` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/consensus.py:244` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:98` - except re.error as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:99` - print(f"⚠️ Invalid regex pattern in {fw_name} adapter: '{pat}' - {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:135` - semantics_path = resolve_semantics_dir()  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:136` - snapshots_path = resolve_snapshots_dir()  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:168` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:169` - log_info(f"Skipping module {module_name}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:214` - self._register_entry(  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:222` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:258` - ver_name = "flax"  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:271` - return set()  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:286` - return matches[0]  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:297` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:299` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:350` - self._register_mapping(op_name, other_fw, primary_path, other_cat[primary_path])  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:351` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:391` - source_names = [d["name"].lower() for d in catalog.values()]  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:400` - for path, details in catalog.items():  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:401` - if details["name"].lower() in matches:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:402` - candidates.append((path, details))  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:405` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:433` - final_penalty = self.arity_penalty * 0.5  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:459` - existing["mappings"].update(new_data["mappings"])  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:460` - existing.update({k: v for k, v in new_data.items() if k != "mappings"})  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:461` - final_data = existing  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:465` - except json.JSONDecodeError:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/scaffolder.py:466` - final_data = new_data  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:67` - if node.module and node.module.startswith(self.root_fw):  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:68` - for alias in node.names:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:69` - full_name = f"{node.module}.{alias.name}"  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:70` - store_as = alias.asname if alias.asname else alias.name  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:71` - self.aliases[store_as] = full_name  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:72` - self.generic_visit(node)  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:103` - log_warning(f"File not found: {file_path}")  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:104` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:109` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:110` - log_warning(f"Failed to parse {file_path}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:111` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:126` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:159` - return test_func_name[9:]  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:162` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:180` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:185` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:209` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:215` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:219` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:224` - return False  # No change required  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:280` - elif isinstance(item, dict):  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:282` - name = item.get("name")  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:283` - typ = item.get("type", "Any")  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:284` - if name:  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:285` - out.append((name, typ))  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:286` - elif isinstance(item, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:287` - out.append((item, "Any"))  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:298` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:302` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:316` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:367` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:395` - return var_name  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:427` - return "Any"  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:455` - return container_name  # pragma: no cover
+- [x] `src/ml_switcheroo/discovery/harvester.py:509` - return p  # pragma: no cover
+- [x] `src/ml_switcheroo/__init__.py:83` - config = RuntimeConfig.load(  # pragma: no cover
+- [x] `src/ml_switcheroo/__init__.py:92` - manager = semantics or SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/__init__.py:93` - engine = ASTEngine(semantics=manager, config=config)  # pragma: no cover
+- [x] `src/ml_switcheroo/__init__.py:96` - result = engine.run(code)  # pragma: no cover
+- [x] `src/ml_switcheroo/__init__.py:99` - if not result.success:  # pragma: no cover
+- [x] `src/ml_switcheroo/__init__.py:100` - error_msg = "\n".join(result.errors)  # pragma: no cover
+- [x] `src/ml_switcheroo/__init__.py:101` - raise ValueError(f"Transpilation failed:\n{error_msg}")  # pragma: no cover
+- [x] `src/ml_switcheroo/__init__.py:103` - return result.code  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/console.py:34` - if self.isEnabledFor(SUCCESS_LEVEL_NUM):  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/console.py:35` - self._log(SUCCESS_LEVEL_NUM, message, args, **kwargs)  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/console.py:146` - return self._backend.get_style(name)  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/console.py:158` - return self._backend.export_text(**kwargs)  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/console.py:170` - return self._backend.export_html(**kwargs)  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/doc_context.py:127` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/doc_context.py:173` - return "Inline Lambda"  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/doc_context.py:178` - return "Custom / Partial"  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/code_extractor.py:44` - except OSError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/code_extractor.py:45` - raise OSError(f"Could not get source for {cls_obj.__name__}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/code_extractor.py:70` - imports.append(f"import {mod}")  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/doc_renderer.py:60` - rst.append("*No implementations mapped.*")  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/doc_gen.py:95` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/doc_gen.py:127` - clean_std_args.append(item[0])  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/readme_editor.py:55` - except OSError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/readme_editor.py:56` - log_error(f"Could not read README: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/readme_editor.py:57` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/readme_editor.py:96` - except OSError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/readme_editor.py:97` - log_error(f"Failed to write to README: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/readme_editor.py:98` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/readme_editor.py:182` - return "Special"  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/visualizer.py:137` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/visualizer.py:138` - return f"<{type(node).__name__}>"  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/visualizer.py:184` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/visualizer.py:185` - name = "Call"  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/visualizer.py:217` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/visualizer.py:218` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/visualizer.py:247` - names.append("*")  # pragma: no cover
+- [x] `src/ml_switcheroo/utils/visualizer.py:255` - display_names += "..."  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/registry_loader.py:48` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/registry_loader.py:89` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/registry_loader.py:90` - print(f"⚠️ Failed to load structural traits for {fw_name}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/registry_loader.py:197` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/registry_loader.py:198` - print(f"⚠️ Failed to apply wiring for {fw_name}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/paths.py:15` - files = None  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/paths.py:36` - if sys.version_info >= (3, 9) and files:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/paths.py:37` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/paths.py:40` - return Path(str(files("ml_switcheroo.semantics")))  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/paths.py:41` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/paths.py:42` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/paths.py:45` - return local_path  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/autogen.py:36` - return arg.get("name", "")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/autogen.py:56` - snapshots_dir.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/autogen.py:136` - log_info("No new non-conflicting standards found to persist.")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/autogen.py:144` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/autogen.py:145` - return "unknown"  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/autogen.py:162` - path.parent.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/file_loader.py:67` - priority = 20  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/file_loader.py:79` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/file_loader.py:80` - print(f"⚠️ Error loading {fpath.name}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/file_loader.py:99` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/file_loader.py:100` - print(f"⚠️ Error loading overlay {fpath.name}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:72` - elif "traits" in traits:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:74` - current["traits"] = traits["traits"]  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:76` - current.update(traits)  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:83` - existing_names = {p.name for p in master_patterns}  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:85` - for raw in new_patterns:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:86` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:87` - pat = PatternDef.model_validate(raw)  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:88` - if pat.name not in existing_names:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:89` - master_patterns.append(pat)  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:90` - existing_names.add(pat.name)  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:91` - except ValidationError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:92` - print(f"⚠️ Invalid pattern definition: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:117` - elif isinstance(arg, (list, tuple)) and len(arg) > 0:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:118` - names.append(arg[0])  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:150` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:158` - merge_patterns(patterns, data_copy.pop("__patterns__"))  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:196` - stored_dict["_is_internal"] = True  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:269` - except ValidationError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:270` - print(f"⚠️  Skipping invalid definition '{op_name}' in {tier.value}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:271` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:304` - return  # Cannot determine target framework, skip  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:312` - if target_fw not in framework_configs:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:313` - framework_configs[target_fw] = content["framework"]  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:315` - framework_configs[target_fw].update(content["framework"])  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:338` - data[op_name]["variants"] = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:350` - current_variant = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/merging.py:351` - data[op_name]["variants"][target_fw] = current_variant  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:208` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:214` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:277` - return self._known_rng_methods  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:286` - print(f"⚠️ Validation report not found at {report_path}. Skipping gating.")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:287` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:294` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:295` - print(f"❌ Error loading validation report: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:306` - details_to_validate["variants"] = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:315` - except ValidationError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:316` - print(f"❌ Cannot update invalid definition for '{abstract_id}': {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:317` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:330` - filename = "k_framework_extras.json"  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:337` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:338` - file_content = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:340` - file_content = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:346` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/semantics/manager.py:347` - print(f"❌ Failed to write update for {abstract_id} to {filename}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:55` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:56` - self.default_target = "jax"  # Fallback  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:128` - except KeyboardInterrupt:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:129` - self.console.print("\n[yellow]Wizard interrupted by user.[/yellow]")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:167` - doc = "No documentation available."  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:211` - return [], {}  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:217` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:338` - v_data.pop("args", None)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:360` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:361` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:364` - current[key].update(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:388` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:389` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/wizard.py:392` - current["mappings"] = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/commands.py:73` - config = RuntimeConfig.load(source=source_fw, target=target_fw)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/commands.py:74` - semantics = SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/commands.py:76` - generator = WeightScriptGenerator(semantics, config)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/commands.py:77` - success = generator.generate(source_file, out_script)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/commands.py:79` - return 0 if success else 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:243` - return commands.handle_gen_weight_script(args.source_file, args.out, args.source, args.target)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:246` - return handle_define(args.yaml_file, dry_run=args.dry_run, no_test_gen=args.no_test_gen)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:249` - return commands.handle_matrix()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:255` - return handle_suggest(args.api, out_dir=args.out_dir, batch_size=args.batch_size)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:258` - return commands.handle_wizard(args.package)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:261` - return commands.handle_harvest(args.path, args.target, args.dry_run)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:266` - elif args.command == "snapshot":  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:267` - return commands.handle_snapshot(args.out_dir)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:269` - elif args.command == "scaffold":  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:270` - return commands.handle_scaffold(args.frameworks, args.out_dir)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:272` - elif args.command == "gen-docs":  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:273` - return commands.handle_docs(args.source, args.target, args.out)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:275` - elif args.command == "import-spec":  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:276` - return commands.handle_import_spec(args.target)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:278` - elif args.command == "sync":  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:279` - return commands.handle_sync(args.framework)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:281` - elif args.command == "sync-standards":  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:282` - return commands.handle_sync_standards(args.categories, args.frameworks, args.dry_run)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:284` - elif args.command == "gen-tests":  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:285` - return commands.handle_gen_tests(args.out)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:287` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/__main__.py:291` - sys.exit(main())  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:69` - log_warning("No snapshots were generated. Are Torch/Keras/JAX installed?")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:70` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:110` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:111` - log_warning(f"Could not read existing snapshot at {snap_path}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:143` - details["variants"] = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:162` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:163` - log_warning(f"Error processing {filename}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:195` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:196` - log_warning(f"Wiring failed for {framework}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:201` - snap_dir.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:228` - package_name = "flax"  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:249` - log_warning(f"Skipping {fw_name}: No adapter found.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:250` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:273` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:274` - log_error(f"  FAILED collecting {category.value}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:277` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/snapshots.py:295` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/audit.py:38` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/audit.py:96` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/audit.py:98` - log_error(f"Failed to parse {f.name}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:17` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:18` - yaml = None  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:45` - log_error("PyYAML is not installed.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:46` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:49` - log_error(f"File not found: {yaml_file}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:50` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:54` - import sys  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:56` - content = sys.stdin.read()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:63` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:66` - ops.extend([OperationDef(**d) for d in doc])  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:70` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:71` - log_error(f"Failed to validate ODL YAML: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:72` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:84` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:114` - log_warning(f"  Could not infer API for {op_def.operation} in {fw_key}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:131` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:132` - log_error(f"Hub Injection failed for operation '{op_def.operation}': {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:133` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:146` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:151` - log_warning(f"  Skipping {fw_key}: No adapter registered.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:152` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:158` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:159` - log_warning(f"  Failed to update {fw_key}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:178` - plugins_pkg_dir = Path(__file__).resolve().parents[2] / "plugins"  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:183` - log_info(f"  [Dry Run] Would generate plugin file: {plug_def.name}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:187` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:188` - log_error(f"Plugin scaffolding error: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:201` - log_info(f"  [Dry Run] Would generate test file for {op_def.operation}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:202` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:214` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/define.py:215` - log_warning(f"Test generation failed: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:62` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:65` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:66` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:67` - except ImportError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:68` - log_error(f"Could not import module '{module_name}': {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:69` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:80` - log_error(f"No valid API targets found for '{api_path}'.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:81` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:145` - except (ValueError, TypeError):  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:147` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/suggest.py:171` - raise ImportError(f"Invalid path format: {api_path}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:62` - semantics = SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:63` - scaffolder = Scaffolder(semantics=semantics)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:64` - scaffolder.scaffold(frameworks, root_dir=out_dir)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:65` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:81` - out_dir = resolve_semantics_dir()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:82` - out_dir.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:85` - if target.is_file() and target.suffix == ".md":  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:87` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:88` - content_header = target.read_text(encoding="utf-8", errors="ignore")[:300]  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:89` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:90` - log_error(f"Failed to read file header: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:91` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:93` - if "StableHLO" in content_header or "stablehlo" in content_header.lower():  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:94` - log_info(f"Detected StableHLO Spec: {target.name}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:95` - importer = StableHloSpecImporter()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:96` - data = importer.parse_file(target)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:97` - _save_spec(out_dir, "k_stablehlo.json", data)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:98` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:100` - log_info(f"Detected ONNX Markdown Spec: {target.name}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:101` - importer = OnnxSpecImporter()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:102` - data = importer.parse_file(target)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:103` - _save_spec(out_dir, "k_neural_net.json", data)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:104` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:107` - elif target.is_file() and target.suffix == ".html":  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:108` - log_info(f"Detected SASS HTML Spec: {target.name}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:109` - importer = SassSpecImporter()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:110` - data = importer.parse_file(target)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:113` - sass_def_path = get_definitions_path("sass")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:116` - _save_spec(sass_def_path.parent, sass_def_path.name, data)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:117` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:120` - elif target.is_dir():  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:121` - log_info("Detected Array API Stubs Directory")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:122` - importer = ArrayApiSpecImporter()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:123` - data = importer.parse_folder(target)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:124` - _save_spec(out_dir, "k_array_api.json", data)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:125` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:130` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:131` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:143` - out_p = out_dir / filename  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:144` - final_data = data  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:146` - if out_p.exists():  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:147` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:148` - with open(out_p, "rt", encoding="utf-8") as f:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:149` - existing = json.load(f)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:150` - log_info(f"Merging {filename} with existing {len(existing)} entries...")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:151` - existing.update(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:152` - final_data = existing  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:153` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:154` - log_warning(f"Could not load existing {filename}: {e}. Overwriting.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:156` - if not out_dir.exists():  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:157` - out_dir.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:159` - with open(out_p, "wt", encoding="utf-8") as f:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:160` - json.dump(final_data, f, indent=2, sort_keys=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:161` - log_success(f"Saved {len(final_data)} entries to [path]{out_p}[/path]")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:223` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:230` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:231` - log_warning(f"Failed to collect {cat} from {fw}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:248` - skipped_count += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:254` - console.print(f"  [dim]Skipped {skipped_count} candidates already defined in Specs.[/dim]")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:257` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:266` - for c in new_candidates:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/discovery.py:267` - console.print(f"    [Dry] {c.name} (std_args={c.std_args})")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:67` - log_error(f"Input not found: {input_path}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:68` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:84` - loaded_count = load_plugins(extra_dirs=config.plugin_paths)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:85` - if loaded_count > 0:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:86` - log_info(f"Loaded {loaded_count} external plugins from configuration.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:96` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:119` - if output_path:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:120` - batch_trace = (output_path / rel_path).with_suffix(".trace.json")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:163` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:164` - log_error(f"Failed to write trace: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:167` - return result  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:172` - effective_out = input_path.with_name(f"{input_path.stem}_converted.py")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:181` - print(result.code)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:184` - log_info(f"Verifying {effective_out.name}...")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:185` - harness_gen = HarnessGenerator()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:186` - harness_path = effective_out.parent / f"verify_{effective_out.stem}.py"  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:187` - harness_gen.generate(  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:194` - proc = subprocess.run([sys.executable, str(harness_path)], capture_output=True, text=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:195` - if proc.returncode == 0:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:196` - print("   ✨ Verification Passed")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:198` - print(f"   ❌ Verification Failed (See {harness_path})")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:200` - result.errors.append("Verification Harness Failed")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:203` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:204` - log_error(f"Failed to convert {input_path}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:205` - return ConversionResult(success=False, errors=[str(e)])  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert.py:230` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert_weights.py:82` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert_weights.py:83` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert_weights.py:100` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert_weights.py:101` - log_error(f"Failed to write output script: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert_weights.py:102` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/convert_weights.py:167` - perm = compute_permutation(fmt_out.strip(), fmt_in.strip())  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:25` - semantics = SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:26` - matrix = CompatibilityMatrix(semantics)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:27` - matrix.render()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:28` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:44` - semantics = SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:45` - log_info(f"Generating comparison: {source} -> {target} at {out_path}...")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:46` - generator = MigrationGuideGenerator(semantics)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:47` - markdown = generator.generate(source, target)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:48` - with open(out_path, "w", encoding="utf-8") as f:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:49` - f.write(markdown)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:50` - log_success(f"Documentation saved to [path]{out_path}[/path]")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:51` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:65` - mgr = SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:66` - semantics = mgr.get_known_apis()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:67` - out.parent.mkdir(parents=True, exist_ok=True)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:68` - gen = TestCaseGenerator(semantics_mgr=mgr)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:69` - gen.generate(semantics, out)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/dev.py:70` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:31` - semantics = SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:32` - wizard = MappingWizard(semantics)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:33` - wizard.start(package)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:34` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:49` - semantics = SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:50` - harvester = SemanticHarvester(semantics, target_fw=target)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:51` - files = []  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:52` - if path.is_file():  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:53` - files.append(path)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:54` - elif path.is_dir():  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:55` - files.extend(list(path.rglob("test_*.py")))  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:57` - log_error(f"Invalid path: {path}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:58` - return 1  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:60` - total_updated = 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:61` - for f in files:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:62` - total_updated += harvester.harvest_file(f, dry_run=dry_run)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:64` - if total_updated > 0 and not dry_run:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:65` - log_success(f"Harvest complete. Updated {total_updated} definitions.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:66` - elif total_updated == 0:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:67` - log_info("No new manual fixes found to harvest.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/learning.py:68` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/verify.py:36` - loaded = load_plugins(extra_dirs=config.plugin_paths)  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/verify.py:37` - if loaded > 0:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/verify.py:38` - log_info(f"Loaded {loaded} external extensions for CI environment.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/verify.py:39` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/verify.py:40` - log_warning(f"Could not load project config: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/verify.py:48` - manual_tests_dir = None  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/verify.py:63` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/verify.py:72` - log_warning(f"Could not repair '{op_name}'.")  # pragma: no cover
+- [x] `src/ml_switcheroo/cli/handlers/verify.py:77` - log_info("Auto-Repair yielded no fixes.")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:68` - iterator = track(op_names, description="🧪 Verifying Semantics...")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:113` - name = item.get("name")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:114` - if not name:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:115` - continue  # Malformed  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:116` - params.append(name)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:118` - if "type" in item:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:119` - hints[name] = item["type"]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:122` - constrs = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:124` - for k in ["min", "max", "options", "rank", "dtype", "shape_spec", "default"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:125` - if k in item and item[k] is not None:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:126` - constrs[k] = item[k]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:128` - if constrs:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:129` - constraints[name] = constrs  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:158` - return found  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:175` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/batch_runner.py:177` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:56` - # Execution Loop  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:59` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:96` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:97` - if s != e:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:99` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:100` - failure_msg.append(f"Shape Calculation Error: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:108` - # Return the LAST failure (often most relevant)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:110` - return True, "✅ Verified"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:111` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:113` - return False, f"Verification Failed: {e}"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:117` - Dynamically imports and calls the API.  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:120` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:136` - ref_fw = fw_keys[0]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:137` - # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:138` - for i, v in enumerate(vals[1:], 1):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:142` - err_box.append(m)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:148` - return len(a) == len(b) and all(self._deep_compare(x, y, rtol, atol) for x, y in zip(a, b))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:154` - if a_arr.shape != b_arr.shape:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:155` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:156` - # Handle string/object types safely  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:160` - except:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:161` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/runner.py:162` - return a == b  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:41` - return np.float64  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:46` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:47` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:48` - return np.float32  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:73` - return st.sampled_from(constraints["options"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:87` - depth += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:88` - current.append(char)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:90` - depth -= 1  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:91` - current.append(char)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:120` - return st.booleans()  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:133` - inner = match_opt.group(1)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:134` - return st.one_of(st.none(), strategies_from_spec(inner, constraints, shared_dims))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:148` - subs = [s.strip() for s in match_tup_fixed.group(1).split(",")]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:149` - sub_strats = [strategies_from_spec(s, constraints, shared_dims) for s in subs]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:150` - return st.tuples(*sub_strats)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:179` - if "default" in constraints:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:180` - return st.just(constraints["default"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:183` - return _array_strategy("Array", constraints, shared_dims)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/strategies.py:219` - dims.append(st.integers(min_value=1, max_value=8))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:50` - constrs = constraints or {}  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:52` - if "options" in constrs:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:53` - return random.choice(constrs["options"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:55` - name_lower = name.lower()  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:57` - if name_lower in ["axis", "dim"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:59` - rank = len(base_shape)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:60` - return random.randint(0, max(0, rank - 1))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:62` - if name_lower in ["keepdim", "keepdims"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:63` - return random.choice([True, False])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:65` - if name_lower in ["shape", "size"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:66` - return base_shape  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:69` - if constrs.get("dtype"):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:70` - if "int" in constrs["dtype"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:71` - return generate_array("int", base_shape, constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:72` - if "bool" in constrs["dtype"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:73` - return generate_array("bool", base_shape, constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:75` - heuristic_type = guess_dtype_by_name(name)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:76` - if heuristic_type == "bool":  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:77` - return generate_array("bool", base_shape, constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:78` - if heuristic_type == "int":  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:80` - if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:81` - return generate_scalar_int(constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:82` - return generate_array("int", base_shape, constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:85` - if any(prefix in name_lower for prefix in ["alpha", "eps", "scalar", "val"]):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:86` - return generate_scalar_float(constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/heuristics.py:88` - return generate_array("float", base_shape, constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/core.py:62` - hint = "Tuple[int, ...]"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/core.py:103` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/core.py:104` - converted[k] = v  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:25` - min_v = int(constraints.get("min", -5))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:26` - max_v = int(constraints.get("max", 5))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:28` - return random.randint(min_v, max_v)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:41` - if constraints.get("min") is not None and constraints.get("max") is not None:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:42` - return random.uniform(constraints["min"], constraints["max"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:44` - val = random.random()  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:46` - if constraints.get("min") is not None:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:47` - val = max(val, constraints["min"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:48` - if constraints.get("max") is not None:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:49` - val = min(val, constraints["max"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:50` - return val  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:66` - min_val = constraints.get("min")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:67` - max_val = constraints.get("max")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:70` - dtype_req = constraints.get("dtype")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:71` - explicit_dtype = None  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:72` - if dtype_req:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:73` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:74` - explicit_dtype = np.dtype(dtype_req)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:75` - except TypeError:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:76` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:79` - if explicit_dtype:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:80` - if np.issubdtype(explicit_dtype, np.integer):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:81` - type_lbl = "int"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:82` - elif explicit_dtype.kind == "b":  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:83` - type_lbl = "bool"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:85` - type_lbl = "float"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:87` - if type_lbl == "bool":  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:88` - return np.random.randint(0, 2, size=shape).astype(bool)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:90` - if type_lbl == "int":  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:92` - low = int(min_val) if min_val is not None else -10  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:94` - high_bound = int(max_val) if max_val is not None else 10  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:95` - high = high_bound + 1  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:97` - arr = np.random.randint(low, high, size=shape)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:98` - if explicit_dtype:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:99` - return arr.astype(explicit_dtype)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:100` - return arr.astype(np.int32)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:103` - arr = np.random.randn(*shape)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:106` - if min_val is not None or max_val is not None:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:107` - if min_val is not None and max_val is not None:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:109` - arr = np.random.uniform(min_val, max_val, size=shape)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:112` - safe_min = float(min_val) if min_val is not None else -np.inf  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:113` - safe_max = float(max_val) if max_val is not None else np.inf  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:116` - if min_val is not None and min_val >= 0:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:117` - arr = np.abs(arr) + min_val  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:119` - arr = np.clip(arr, safe_min, safe_max)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:121` - if explicit_dtype:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:122` - return arr.astype(explicit_dtype)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:124` - return arr.astype(np.float32)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:137` - if seed_shape:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:138` - return seed_shape  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:140` - rank = random.randint(1, 4)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:141` - return tuple(random.randint(2, 5) for _ in range(rank))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:161` - rng = random.Random(sum(base_shape) + salt)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:163` - new_shape = []  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:168` - for dim in base_shape:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:172` - if rng.random() < 0.3:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:173` - new_shape.append(1)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:175` - new_shape.append(dim)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/generators.py:177` - return tuple(new_shape)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:45` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:47` - return 0  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:49` - return 0.0  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:51` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:53` - return np.zeros(base_shape, dtype=np.float32)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:55` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:57` - return ()  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:59` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:65` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:93` - if depth > max_depth:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:94` - return get_fallback_base_value(type_str, base_shape)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:96` - constrs = constraints or {}  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:99` - if "options" in constrs and constrs["options"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:100` - return random.choice(constrs["options"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:102` - type_str = type_str.strip()  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:106` - if type_str in ["Any", "None", ""] and "default" in constrs:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:107` - default_val = constrs["default"]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:109` - if random.random() < 0.2:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:110` - return default_val  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:113` - if isinstance(default_val, bool):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:114` - type_str = "bool"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:115` - elif isinstance(default_val, int):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:116` - type_str = "int"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:117` - elif isinstance(default_val, float):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:118` - type_str = "float"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:119` - elif isinstance(default_val, list):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:121` - if default_val and isinstance(default_val[0], int):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:122` - type_str = "List[int]"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:124` - type_str = "List[Any]"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:127` - if "|" in type_str and is_pipe_top_level(type_str):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:128` - options = [o.strip() for o in type_str.split("|")]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:129` - chosen = random.choice(options)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:130` - return generate_from_hint(chosen, base_shape, depth + 1, max_depth, symbol_map, constraints)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:133` - match_opt = re.match(r"^Optional\[(.*)\]$", type_str)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:134` - if match_opt:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:135` - if random.random() < 0.2:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:136` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:139` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:142` - match_tup = re.match(r"^Tuple\[(.*)\]$", type_str)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:143` - if match_tup:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:144` - inner = match_tup.group(1)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:145` - if "..." in inner:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:147` - elem_type = inner.split(",")[0].strip()  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:148` - length = random.randint(1, 3)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:149` - return tuple(  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:154` - sub_types = split_outside_brackets(inner)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:157` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:160` - match_list = re.match(r"^(List|Sequence)\[(.*)\]$", type_str)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:161` - if match_list:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:162` - inner = match_list.group(2)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:163` - length = random.randint(2, 3)  # ensure at least 2 for concat/stack cases  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:166` - is_tensor = inner.startswith(("Array", "Tensor", "np.ndarray"))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:169` - first_elem = generate_from_hint(inner, base_shape, depth + 1, max_depth, symbol_map, constraints)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:171` - if is_tensor and isinstance(first_elem, np.ndarray):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:173` - uniform_shape = first_elem.shape  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:174` - list_data = [first_elem]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:175` - for _ in range(length - 1):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:177` - elem = generate_from_hint(inner, uniform_shape, depth + 1, max_depth, symbol_map, constraints)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:179` - if isinstance(elem, np.ndarray) and elem.shape != uniform_shape:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:180` - elem = generate_array("float", uniform_shape, constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:181` - list_data.append(elem)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:182` - return list_data  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:184` - list_data = [first_elem]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:185` - for _ in range(length - 1):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:188` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:189` - return list_data  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:192` - match_dict = re.match(r"^(Dict|Mapping)\[(.*)\]$", type_str)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:193` - if match_dict:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:194` - inner = match_dict.group(2)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:195` - parts = split_outside_brackets(inner)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:196` - if len(parts) == 2:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:197` - key_type, val_type = parts  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:198` - length = random.randint(1, 3)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:199` - data = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:200` - for _ in range(length):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:201` - k = generate_from_hint(key_type, base_shape, depth + 1, max_depth, symbol_map)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:202` - v = generate_from_hint(val_type, base_shape, depth + 1, max_depth, symbol_map, constraints)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:204` - if isinstance(k, (list, dict, np.ndarray, np.generic)):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:205` - k = str(k)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:206` - data[k] = v  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:207` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:208` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:211` - if type_str in ["None", "NoneType"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:212` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:215` - match_sym = re.match(r"^(Array|Tensor|np\.ndarray)\[(.*)\]$", type_str)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:216` - if match_sym:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:217` - dims_str = match_sym.group(2)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:218` - shape = resolve_symbolic_shape(dims_str, symbol_map)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:220` - if constrs.get("rank"):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:221` - shape = adjust_shape_rank(shape, constrs["rank"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:222` - return generate_array("float", shape, constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:225` - if type_str in ["Array", "Tensor", "np.ndarray"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:226` - shape = base_shape  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:227` - if constrs.get("rank"):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:228` - shape = adjust_shape_rank(shape, constrs["rank"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:229` - return generate_array("float", shape, constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:232` - if type_str.startswith("Callable") or type_str in ["func", "function"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:233` - return generate_fake_callable(constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:236` - if type_str in ["int", "integer"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:237` - return generate_scalar_int(constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:238` - if type_str in ["float", "number"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:239` - return generate_scalar_float(constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:240` - if type_str in ["bool", "boolean"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:241` - return bool(random.getrandbits(1))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:242` - if type_str in ["str", "string"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:243` - return "val_" + str(random.randint(0, 100))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:246` - if "dtype" in type_str.lower():  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:248` - return random.choice([np.float32, np.int32, np.float64, np.bool_])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/parser.py:251` - return generate_array("float", base_shape, constrs)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:26` - depth = 0  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:27` - for char in text:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:28` - if char == "[":  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:29` - depth += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:30` - elif char == "]":  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:31` - depth -= 1  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:32` - elif char == "|" and depth == 0:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:33` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:34` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:49` - parts = []  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:50` - current = []  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:51` - depth = 0  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:52` - for char in text:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:53` - if char == "[":  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:54` - depth += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:55` - current.append(char)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:56` - elif char == "]":  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:57` - depth -= 1  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:58` - current.append(char)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:59` - elif char == "," and depth == 0:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:60` - parts.append("".join(current).strip())  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:61` - current = []  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:63` - current.append(char)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:64` - if current:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:65` - parts.append("".join(current).strip())  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:66` - return parts  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:84` - shape = []  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:85` - raw_dims = [d.strip() for d in dims_str.split(",")]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:87` - for dim in raw_dims:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:89` - clean = dim.replace("'", "").replace('"', "")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:90` - if not clean:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:91` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:94` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:95` - val = int(clean)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:96` - shape.append(val)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:97` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:98` - except ValueError:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:99` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:102` - if not clean.isidentifier() and not clean.replace("_", "").isalnum():  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:104` - shape.append(random.randint(2, 6))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:105` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:108` - if clean not in symbol_map:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:109` - symbol_map[clean] = random.randint(2, 6)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:110` - shape.append(symbol_map[clean])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:112` - return tuple(shape)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:126` - current_rank = len(shape)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:127` - if current_rank == required_rank:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:128` - return shape  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:129` - elif current_rank < required_rank:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:131` - extra = tuple(random.randint(2, 5) for _ in range(required_rank - current_rank))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:132` - return shape + extra  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/fuzzer/utils.py:135` - return shape[:required_rank]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:115` - deps.append(textwrap.dedent(source))  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:116` - except OSError:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:132` - adapter = get_adapter(target_fw)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:134` - return "", "", "pass"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:171` - if adapter and hasattr(adapter, "get_to_numpy_code"):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:172` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:202` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:203` - # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:206` - except OSError:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/harness_generator.py:207` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:77` - name = arg.get("name", "unknown")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:78` - params.append(name)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:79` - if "type" in arg:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:80` - hints[name] = str(arg["type"])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:82` - cons = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:83` - for k in ["min", "max", "options", "rank", "dtype", "shape_spec"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:84` - if k in arg and arg[k] is not None:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:85` - cons[k] = arg[k]  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:86` - if cons:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:87` - constraints[name] = cons  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:90` - name = str(arg[0])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:91` - params.append(name)  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:92` - if len(arg) > 1:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:93` - hints[name] = str(arg[1])  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:126` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:128` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/bisector.py:129` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/linter.py:116` - self.violations.append(f"Forbidden Wildcard Import from '{root}'")  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/linter.py:192` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/linter.py:200` - if isinstance(node, cst.Attribute):  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/linter.py:201` - return f"{self._get_full_name_from_node(node.value)}.{node.attr.value}"  # pragma: no cover
+- [x] `src/ml_switcheroo/testing/linter.py:202` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:33` - seed = 42  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:36` - random.seed(seed)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:37` - np.random.seed(seed)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:40` - if "torch" in sys.modules:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:41` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:42` - sys.modules["torch"].manual_seed(seed)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:43` - if sys.modules["torch"].cuda.is_available():  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:44` - sys.modules["torch"].cuda.manual_seed_all(seed)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:45` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:46` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:49` - if "tensorflow" in sys.modules:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:50` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:51` - tf = sys.modules["tensorflow"]  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:53` - if hasattr(tf, "random") and hasattr(tf.random, "set_seed"):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:54` - tf.random.set_seed(seed)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:55` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:56` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:59` - if "mlx.core" in sys.modules:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:60` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:61` - sys.modules["mlx.core"].random.seed(seed)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:62` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:63` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:64` - elif "mlx" in sys.modules and hasattr(sys.modules["mlx"], "core"):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:65` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:66` - sys.modules["mlx"].core.random.seed(seed)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:67` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:68` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:97` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:98` - chex_mod = globals()["chex"]  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:100` - if exact:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:101` - chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:103` - chex_mod.assert_trees_all_close(ref, val, rtol=rtol, atol=atol)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:104` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:105` - except (AssertionError, Exception):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:107` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:149` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:151` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:152` - return ref == val  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:153` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/runtime.py:154` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/templates.py:51` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/templates.py:52` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/generator.py:50` - return  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:49` - default_val = normalized.get("default")  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:50` - if default_val is not None:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:51` - if isinstance(default_val, bool):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:52` - normalized["type"] = "bool"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:53` - elif isinstance(default_val, int):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:54` - normalized["type"] = "int"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:55` - elif isinstance(default_val, float):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:56` - normalized["type"] = "float"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:58` - normalized["type"] = "Array"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:60` - normalized["type"] = "Array"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:62` - return {"name": "unknown", "type": "Array"}  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:75` - if isinstance(default_val, bool):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:76` - return "bool"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:77` - if isinstance(default_val, int):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:78` - return "int"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:79` - if isinstance(default_val, float):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:80` - return "float"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:81` - if isinstance(default_val, (list, tuple)):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:83` - if default_val and isinstance(default_val[0], int):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:84` - return "List[int]"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:85` - return "List[Any]"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:86` - return "Any"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:122` - arg_type = _infer_type_from_default(default_val)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:128` - mn = arg_def.get("min")  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:129` - mx = arg_def.get("max")  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:130` - if isinstance(mn, float) or isinstance(mx, float):  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:131` - arg_type = "float"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:133` - arg_type = "int"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:150` - mx = int(mn) + 5  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:152` - mn = int(mx) - 5  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:168` - return repr(default_val)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:172` - return repr(default_val)  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:179` - return "None"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:194` - if name in ["keepdims", "keepdim"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:195` - return "bool(random.getrandbits(1))"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:196` - return "1"  # pragma: no cover
+- [x] `src/ml_switcheroo/generated_tests/inputs.py:215` - cast_str = f".astype(np.{dtype})"  # pragma: no cover
+- [x] `src/ml_switcheroo/examples/qwen3_vl/reference.py:15` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/qwix.py:42` - elif node.kind == "Linear":  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/qwix.py:43` - lines.append(f"        self.{node.id} = nnx.Linear(features, features)")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/qwix.py:60` - lines.append(f"        x = self.{node.id}(x)")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:60` - def unsafe_submodules(self) -> Set[str]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:106` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:119` - return PluginTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:121` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:127` - def specifications(self) -> Dict[str, OperationDef]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:133` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:136` - def collect_api(self, category: StandardCategory) -> List[GhostRef]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:140` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:143` - return f"; Target Device: {device_type}"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:146` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:147` - return "True"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:149` - def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:155` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:158` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:159` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:163` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:167` - return "; Weights loading not supported in RDNA adapter"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:171` - return tensor_var  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:175` - return "; Weights saving not supported in RDNA adapter"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:183` - return f"https://gpuopen.com/learn/rdna-performance-guide/?q={api_name}"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/rdna.py:187` - return str(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:36` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:37` - jax = None  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:43` - flax_nnx = flax.nnx  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:44` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:45` - flax_nnx = None  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:74` - self._flax_available = True  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:76` - self._flax_available = False  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:77` - self._mode = InitMode.GHOST  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:78` - self._snapshot_data = load_snapshot_for_adapter("flax_nnx")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:79` - if not self._snapshot_data:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:80` - logging.warning("Flax NNX not installed and no snapshot found.")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:93` - return self._collect_ghost(category)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:119` - if not self._flax_available:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:120` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:122` - found: List[GhostRef] = []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:123` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:124` - from flax import nnx  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:125` - import inspect  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:127` - for name, obj in inspect.getmembers(nnx):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:128` - if name.startswith("_"):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:129` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:130` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:131` - if inspect.isclass(obj) and issubclass(obj, nnx.Module) and name != "Module":  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:132` - found.append(GhostInspector.inspect(obj, f"flax.nnx.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:133` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:134` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:135` - except Exception as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:136` - logging.debug(f"Error scanning flax.nnx: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:138` - return found  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:150` - if not self._snapshot_data:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:151` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:152` - raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:153` - return [GhostInspector.hydrate(item) for item in raw_list]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:164` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:282` - return PluginTraits(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:308` - defs["ReLU"] = StandardMap(api="flax.nnx.relu")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:312` - defs["Linear"] = StandardMap(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:317` - defs["Conv2d"] = StandardMap(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:342` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:343` - import jax.numpy as jnp  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:345` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:346` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:348` - if hasattr(data, "__array__") or isinstance(data, (list, tuple)):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:349` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:350` - return jnp.array(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:351` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:352` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:353` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:373` - mappings[key]["api"] = api.replace("flax.nnx.", "nnx.")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/flax_nnx.py:394` - return {  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:24` - import keras.losses  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:25` - import keras.ops  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:26` - import keras.optimizers  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:27` - import keras.random  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:28` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:29` - keras = None  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:68` - self._mode = InitMode.GHOST  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:69` - self._snapshot_data = load_snapshot_for_adapter("keras")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:70` - if not self._snapshot_data:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:72` - logging.debug("Keras not installed and no snapshot found. Adapter disabled.")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:85` - if self._mode == InitMode.GHOST:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:86` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:87` - return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:97` - return set()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:227` - from ml_switcheroo.semantics.schema import PluginTraits  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:229` - return PluginTraits(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:247` - defs["ReLU"] = StandardMap(api="keras.layers.ReLU")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:271` - return self._collect_ghost(category)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:284` - if not self._snapshot_data:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:285` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:287` - raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:288` - return [GhostInspector.hydrate(item) for item in raw_list]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:312` - elif category == StandardCategory.ACTIVATION:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:313` - results.extend(self._scan_module(keras.activations, "keras.activations", kind="function"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:314` - elif category == StandardCategory.LAYER:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:317` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:337` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:344` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:355` - ref = GhostInspector.inspect(obj, f"{prefix}.{name}")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:356` - found.append(ref)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:357` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:358` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:372` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:373` - import keras  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:375` - return keras.ops.convert_to_tensor(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:376` - except (ImportError, AttributeError):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:377` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:386` - return ["import keras"]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:400` - if op == "save" and object_arg:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:401` - return f"{object_arg}.save({file_arg})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:402` - elif op == "load":  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:403` - return f"keras.saving.load_model({file_arg})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:404` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:422` - return textwrap.dedent(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:450` - return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:489` - d_type = "gpu" if "cuda" in device_type.lower() else "cpu"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:490` - return f"keras.name_scope('{d_type}')"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:499` - return "len(keras.config.list_logical_devices('GPU')) > 0"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/keras.py:508` - return "pass"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:42` - def search_modules(self) -> List[str]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:46` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:75` - module_base="html_dsl.Module",  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:84` - return PluginTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:116` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:119` - defs["Module"] = StandardMap(api="html_dsl.Module")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:122` - api="html_dsl.Conv2d",  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:125` - return defs  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:128` - def specifications(self) -> Dict[str, OperationDef]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:132` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:135` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:138` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:139` - return str(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:141` - def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:145` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:148` - return "False"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:152` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:156` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:158` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:161` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:165` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:169` - return "# Weights not supported in HTML mode"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:173` - return tensor_var  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:177` - return "# Weights not supported in HTML mode"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/html_dsl.py:189` - return {  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:52` - def unsafe_submodules(self) -> Set[str]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:98` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:111` - return PluginTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:120` - defs["Mul"] = StandardMap(api="FMUL")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:123` - return defs  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:126` - def specifications(self) -> Dict[str, OperationDef]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:130` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:133` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:136` - def collect_api(self, category: StandardCategory) -> List[GhostRef]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:140` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:143` - return f"// Target Device: {device_type}"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:146` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:147` - return "True"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:149` - def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:155` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:158` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:159` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:163` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:167` - return "// Weights loading not supported in SASS adapter"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:171` - return tensor_var  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:175` - return "// Weights saving not supported in SASS adapter"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:183` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/sass.py:187` - return str(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:53` - return ["numpy", "numpy.linalg", "numpy.fft"]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:63` - return set()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:180` - return PluginTraits(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:218` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:242` - return "False"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:255` - return "pass"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:282` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:287` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:288` - return ["import numpy as np"]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:291` - """Loads .npz files into a dictionary."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:292` - return textwrap.dedent(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:306` - def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:310` - def get_weight_save_code(self, state_var: str, path_var: str) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:348` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:349` - return data.detach().cpu().numpy()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:350` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:351` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:352` - if hasattr(data, "numpy"):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:353` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:354` - return data.numpy()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:358` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:359` - return np.array(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:360` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/numpy.py:362` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:34` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:35` - tf = None  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:66` - self._mode = InitMode.GHOST  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:67` - self._snapshot_data = load_snapshot_for_adapter("tensorflow")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:68` - if not self._snapshot_data:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:69` - logging.debug("TensorFlow not installed and no snapshot found.")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:85` - return {  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:107` - if self._mode == InitMode.GHOST:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:108` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:109` - return [  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:249` - return PluginTraits(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:301` - if self._mode == InitMode.GHOST:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:302` - return self._collect_ghost(category)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:303` - return self._collect_live(category)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:315` - if not self._snapshot_data:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:316` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:317` - raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:318` - return [GhostInspector.hydrate(item) for item in raw_list]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:332` - results = []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:333` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:334` - import tensorflow as tf  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:336` - if category == StandardCategory.ACTIVATION:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:337` - target_names = {  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:346` - for name in target_names:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:347` - if hasattr(tf.nn, name):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:348` - results.append(GhostInspector.inspect(getattr(tf.nn, name), f"tf.nn.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:350` - elif category == StandardCategory.LAYER:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:352` - is_keras_available = hasattr(tf, "keras") and hasattr(tf.keras, "layers")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:353` - if is_keras_available:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:354` - import inspect  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:356` - for name, obj in inspect.getmembers(tf.keras.layers):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:357` - if inspect.isclass(obj) and "Layer" in name and not name.startswith("_"):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:358` - results.append(GhostInspector.inspect(obj, f"tf.keras.layers.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:360` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:361` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:362` - return results  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:376` - for _, entry in snapshot["mappings"].items():  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:377` - if not entry or "api" not in entry:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:378` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:380` - api = entry["api"]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:381` - if api.startswith("tensorflow."):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:384` - new_api = "tf." + api[11:]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:385` - entry["api"] = new_api  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:452` - return f"tf.device(f'{tf_type}:{{str({device_index})}}')"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:463` - return "len(tf.config.list_physical_devices('GPU')) > 0"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:477` - return "pass"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:504` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:515` - return ["import tensorflow as tf", "import numpy as np"]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:528` - return textwrap.dedent(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:550` - return f"{tensor_var}.numpy() if hasattr({tensor_var}, 'numpy') else np.array({tensor_var})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:565` - return textwrap.dedent(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:584` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:585` - import tensorflow as tf  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:587` - return tf.convert_to_tensor(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:588` - except (ImportError, ValueError, TypeError, Exception):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tensorflow.py:589` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:19` - import jax.numpy as jnp  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:20` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:21` - jax = None  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:22` - jnp = None  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:68` - self._mode = InitMode.GHOST  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:69` - self._snapshot_data = load_snapshot_for_adapter("jax")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:70` - if not self._snapshot_data:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:71` - logging.warning("JAX not installed and no snapshot found. Scanning unavailable.")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:84` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:95` - return set()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:201` - return PluginTraits(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:240` - if self._mode == InitMode.GHOST:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:241` - return self._collect_ghost(category)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:242` - return self._collect_live(category)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:246` - if not self._snapshot_data:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:247` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:248` - raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:249` - return [GhostInspector.hydrate(item) for item in raw_list]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:253` - results = []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:256` - if category == StandardCategory.LOSS:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:257` - results.extend(OptaxScanner.scan_losses())  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:258` - elif category == StandardCategory.OPTIMIZER:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:259` - results.extend(OptaxScanner.scan_optimizers())  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:262` - elif category == StandardCategory.ACTIVATION:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:263` - results.extend(self._scan_jax_activations())  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:265` - return results  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:274` - if jax is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:275` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:276` - found = []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:277` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:278` - import jax.nn as jax_nn  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:279` - import inspect  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:282` - for name, obj in inspect.getmembers(jax_nn):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:283` - if name.startswith("_"):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:284` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:286` - if inspect.isfunction(obj):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:289` - found.append(GhostInspector.inspect(obj, f"jax.nn.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:291` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:292` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:293` - return found  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:309` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:310` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/jax.py:314` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:48` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:100` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:106` - forward_method="forward",  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:111` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:118` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:121` - defs["Module"] = StandardMap(api="midl.Module")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:126` - defs["Conv2d"] = StandardMap(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:135` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:161` - variants={},  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:167` - def rng_seed_methods(self) -> List[str]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:173` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:176` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:179` - def get_device_check_syntax(self) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:183` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:190` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:192` - def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:198` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:202` - return "# Weights not supported in LaTeX mode"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:206` - return tensor_var  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:210` - return "# Weights not supported in LaTeX mode"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/latex_dsl.py:222` - return str(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/common/jax_stack.py:129` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/common/jax_stack.py:146` - return textwrap.dedent(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/common/jax_stack.py:167` - return f"np.array({tensor_var})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/loader.py:47` - except (json.JSONDecodeError, OSError) as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/loader.py:49` - print(f"Failed to load definitions for {framework}: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/loader.py:50` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/loader.py:58` - load_definitions.cache_clear()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/aqt.py:45` - elif node.kind == "Linear":  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/aqt.py:46` - lines.append(f"        self.{node.id} = nnx.Linear(in_features, out_features)")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/aqt.py:73` - return "aqt_config.config_v3(fwd_bits=4, dl_bits=4, use_fp4=True) # Custom experimental FP4"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/aqt.py:75` - return "aqt_config.config_v3(fwd_bits=4, dl_bits=4, use_nf4=True) # Custom experimental NF4"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:42` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:89` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:103` - return PluginTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:110` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:116` - def rng_seed_methods(self) -> List[str]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:120` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:123` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:126` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:129` - def get_device_check_syntax(self) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:133` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:140` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:144` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:148` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:152` - return "# Weights not supported in TikZ mode"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:156` - return tensor_var  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/tikz.py:160` - return "# Weights not supported in TikZ mode"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:72` - logging.warning("PyTorch not installed and no snapshot found. Scanning unavailable.")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:114` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:272` - return PluginTraits(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:315` - defs["ReLU"] = StandardMap(api="torch.nn.ReLU")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:321` - defs["relu"] = StandardMap(api="torch.nn.functional.relu")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:324` - defs["Linear"] = StandardMap(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:329` - defs["Conv2d"] = StandardMap(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:349` - args = [str(device_type)]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:350` - if device_index:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:351` - args.append(str(device_index))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:352` - arg_str = ", ".join(args)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:353` - return f"torch.device({arg_str})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:362` - return "torch.cuda.is_available()"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:376` - return "pass"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:385` - return ["import torch"]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:399` - if op == "save" and object_arg:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:400` - return f"torch.save({object_arg}, {file_arg})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:401` - elif op == "load":  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:402` - return f"torch.load({file_arg})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:403` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:468` - return textwrap.dedent(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:520` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:521` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:526` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:527` - return torch.tensor(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:532` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:533` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:563` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:584` - elif category == StandardCategory.LAYER:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:585` - results.extend(self._scan_layers())  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:596` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:612` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:619` - except TypeError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:620` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:663` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:664` - if nn:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:665` - for name, obj in inspect.getmembers(nn):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:666` - if name in known_names and inspect.isclass(obj):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:667` - found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:671` - for name, obj in inspect.getmembers(F):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:672` - if name.startswith("_") or not inspect.isfunction(obj):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:673` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:674` - if name.lower() in [k.lower() for k in known_names]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:675` - found.append(GhostInspector.inspect(obj, f"torch.nn.functional.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:676` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:677` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:687` - if not nn:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:688` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:689` - found = []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:690` - for name, obj in inspect.getmembers(nn):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:691` - if inspect.isclass(obj) and issubclass(obj, nn.Module):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:692` - if name.endswith("Loss") or name.startswith("_"):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:693` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:694` - found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/torch.py:695` - return found  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:89` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:103` - return PluginTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:105` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:108` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:111` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:114` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:117` - def rng_seed_methods(self) -> List[str]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:121` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:122` - def collect_api(self, category: StandardCategory) -> List[GhostRef]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:123` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:126` - def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:130` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:133` - return "True"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:136` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:137` - return f"// Split RNG: {rng_var} -> {key_var}"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:141` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:145` - if op == "save":  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:146` - return f"// Save {object_arg} to {file_arg}"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:147` - return f"// Load from {file_arg}"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:151` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:155` - return f"# Weights loading not supported in MLIR adapter"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:159` - return tensor_var  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlir.py:163` - return f"# Weights saving not supported in MLIR adapter"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:19` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:20` - optax = None  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:39` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:62` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:80` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:81` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:91` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:97` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:107` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/optax_shim.py:108` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:39` - def search_modules(self) -> List[str]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:43` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:90` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:104` - return PluginTraits()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:106` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:109` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:112` - @property  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:115` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:118` - def rng_seed_methods(self) -> List[str]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:122` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:125` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:128` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:129` - return f"// Target: {device_type}"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:131` - def get_device_check_syntax(self) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:135` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:138` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:141` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:142` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:144` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:145` - def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:149` - # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:152` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:156` - return "# Weights not supported in StableHLO mode"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:160` - return tensor_var  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:164` - return "# Weights not supported in StableHLO mode"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:172` - if api_name.startswith("stablehlo."):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:173` - op_code = api_name.split(".")[-1]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:174` - return f"https://github.com/openxla/stablehlo/blob/main/docs/spec.md#{op_code}"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:175` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/stablehlo.py:179` - return str(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:18` - import praxis.layers  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:19` - import praxis.base_layer  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:20` - import praxis.layers.activations  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:21` - import praxis.layers.normalizations  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:72` - logging.debug("PaxML (Praxis) not installed and no snapshot found.")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:90` - return self._collect_ghost(category)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:99` - results.extend(self._scan_praxis_layers())  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:112` - if not self._snapshot_data:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:113` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:114` - raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:115` - return list(map(GhostInspector.hydrate, raw_list))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:127` - if praxis is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:128` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:130` - found = []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:131` - import inspect  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:133` - targets = [praxis.layers]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:134` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:135` - targets.extend([praxis.layers.activations, praxis.layers.normalizations])  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:136` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:137` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:139` - for module in targets:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:140` - for name, obj in inspect.getmembers(module):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:141` - if name.startswith("_"):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:142` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:143` - if inspect.isclass(obj):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:144` - is_layer = False  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:146` - if hasattr(praxis.base_layer, "BaseLayer") and issubclass(obj, praxis.base_layer.BaseLayer):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:147` - is_layer = True  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:149` - elif "Layer" in name or name in ["Linear", "Bias", "StochasticDepth", "Embedding"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:150` - is_layer = True  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:152` - if is_layer:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:153` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:154` - api_path = f"{module.__name__}.{name}"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:155` - ref = GhostInspector.inspect(obj, api_path)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:156` - found.append(ref)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:157` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:158` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:159` - return found  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:172` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:188` - return set()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:317` - return PluginTraits(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:337` - defs["Linear"] = StandardMap(api="praxis.layers.Linear", args={})  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:341` - defs["Linear"].args = {}  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:347` - defs["Sequential"] = StandardMap(api="praxis.layers.Sequential")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/paxml.py:351` - defs["ReLU"] = StandardMap(api="praxis.layers.ReLU")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:38` - import mlx.nn  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:39` - import mlx.optimizers  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:40` - import mlx.utils  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:41` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:42` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:63` - return [  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:80` - return set()  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:210` - return PluginTraits(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:248` - results = []  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:249` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:250` - import mlx.core  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:251` - import mlx.nn  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:252` - import mlx.optimizers  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:253` - import inspect  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:255` - if category == StandardCategory.LAYER:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:256` - for name, obj in inspect.getmembers(mlx.nn):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:257` - if not name.startswith("_") and inspect.isclass(obj) and name[0].isupper():  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:258` - results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:260` - if category == StandardCategory.ACTIVATION:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:261` - target_names = {  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:270` - for name, obj in inspect.getmembers(mlx.nn):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:271` - if name.lower() in target_names:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:272` - results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:274` - if category == StandardCategory.LOSS:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:275` - if hasattr(mlx.nn, "losses"):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:276` - for name, obj in inspect.getmembers(mlx.nn.losses):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:277` - if inspect.isfunction(obj) or inspect.isclass(obj):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:278` - if "loss" in name.lower():  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:279` - results.append(GhostInspector.inspect(obj, f"mlx.nn.losses.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:281` - if category == StandardCategory.OPTIMIZER:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:282` - for name, obj in inspect.getmembers(mlx.optimizers):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:283` - if inspect.isclass(obj) and not name.startswith("_"):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:284` - results.append(GhostInspector.inspect(obj, f"mlx.optimizers.{name}"))  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:286` - except ImportError as e:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:287` - logging.debug(f"Could not inspect MLX: {e}")  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:288` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:290` - return results  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:302` - try:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:303` - import mlx.core as mx  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:305` - if isinstance(data, (np.ndarray, list, tuple, np.generic)):  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:306` - return mx.array(data)  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:307` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:308` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:309` - return data  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:399` - return "mx.default_device() == mx.gpu"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:409` - return "pass"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:418` - return ["import mlx.core as mx"]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:432` - if op == "save" and object_arg:  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:433` - return f"mx.save({file_arg}, {object_arg})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:434` - elif op == "load":  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:435` - return f"mx.load({file_arg})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:436` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:442` - return ["import mlx.core as mx"]  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:446` - return textwrap.dedent(  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:465` - return f"np.array({tensor_var})"  # pragma: no cover
+- [x] `src/ml_switcheroo/frameworks/mlx.py:469` - return textwrap.dedent(  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/sharding.py:192` - if not best_mesh: # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/sharding_extractor.py:40` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/sharding_extractor.py:50` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/automated_kernel_binding.py:28` - return discovered  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/wasm_safety_checker.py:38` - raise ValueError(f"Node {node.id} exceeds maximum WASM memory pages: {bounds.max_memory_pages}")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backend.py:29` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/analysis.py.bak:43` - return metadata  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/lifter.py:51` - if node_id in seen_ids:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/analysis.py:43` - return metadata  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/tokens.py:147` - snippet = text[pos : min(pos + 10, length)]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/tokens.py:150` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:65` - raise SyntaxError("Unexpected End of File.")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:68` - raise SyntaxError(f"Expected {kind}, got {token.kind} ('{token.value}') at line {token.line}")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:85` - if not token:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:103` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:104` - bad_token = self._consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:105` - raise SyntaxError(f"Unexpected token at line {bad_token.line}: {bad_token.value}")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:115` - if not next_t:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:126` - if next_t.line > tok.line:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:132` - if self._match(TokenType.COMMA):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:150` - if peek.kind in (TokenType.LABEL_DEF, TokenType.DIRECTIVE):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:163` - if not token:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:193` - if token.kind == TokenType.SPECIAL_REG:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/parser.py:194` - tok = self._consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/nodes.py:20` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/nodes.py:28` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/nodes.py:29` - return ""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/nodes.py:89` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/nodes.py:95` - return SGPR(idx)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/nodes.py:96` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/nodes.py:101` - return VGPR(idx)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/nodes.py:180` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/rdna/nodes.py:188` - return self.opcode  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/python.py:27` - tree = cst.parse_module(self.code)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/python.py:28` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/python.py:29` - # Fallback (e.g. empty code) -> Empty Graph  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/python.py:30` - return LogicalGraph()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/tokens.py:130` - if not any(c.isdigit() for c in clean) and clean not in [  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/tokens.py:134` - kind = TokenType.IDENTIFIER  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/tokens.py:143` - snippet = text[pos : min(pos + 10, length)]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/tokens.py:146` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:35` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:36` - return self.name  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:37` - except ImportError:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:38` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:75` - if self.pos + offset < len(self.tokens):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:77` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:81` - token = self._peek()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:83` - raise SyntaxError("Unexpected End of File.")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:84` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:86` - raise SyntaxError(f"Expected {kind}, got {token.kind} ('{token.value}') at line {token.line}")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:103` - """  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:106` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:107` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:109` - self._consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:110` - return None  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:129` - if token.kind == TokenType.PREDICATE or token.kind == TokenType.IDENTIFIER:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:130` - return self._parse_instruction()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:132` - bad_token = self._consume()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:133` - raise SyntaxError(f"Unexpected token at line {bad_token.line}: {bad_token.value}")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:141` - while not self._is_eof():  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:150` - ):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:156` - params.append(param_tok.value)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:187` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:190` - break  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:202` - """Parses a single operand."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:205` - raise SyntaxError("Unexpected EOF expecting operand")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:220` - return Immediate(value=val, is_hex=is_hex)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:221` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:222` - if token.kind == TokenType.PREDICATE:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:245` - def _parse_memory_str(self, raw: str) -> Memory:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:246` - """Parses memory string c[...] or [...]."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:248` - inner = raw[1:]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:249` - import re  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:251` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:252` - matches = re.findall(r"\[(.*?)\]", inner)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:253` - if len(matches) == 2:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:254` - bank, offset_str = matches  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:256` - offset = int(offset_str, 16)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:257` - return Memory(base=base_str, offset=offset)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:261` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:262` - inner = raw.strip("[]")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:263` - if "+" in inner:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:264` - parts = inner.split("+")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/parser.py:265` - base_reg = parts[0].strip()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py.bak:20` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py.bak:94` - # Float hex representation requires struct packing usually,  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py.bak:97` - return hex(int(self.value))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py.bak:121` - # Constant Memory syntax: c[bank][offset]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py.bak:125` - return f"{base_str}[0x0]"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py:20` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py:94` - # Float hex representation requires struct packing usually,  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py:97` - return hex(int(self.value))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py:121` - # Constant Memory syntax: c[bank][offset]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/frontends/sass/nodes.py:125` - return f"{base_str}[0x0]"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:86` - parts.append(f"{k}={v}")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:92` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:96` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:100` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:105` - kind = kind[5:]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:154` - return SvgArrow(0, 0, 0, 0, "", "", "")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:167` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:325` - return {}  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:341` - first = graph.nodes[0].id  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:342` - queue.append(first)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:343` - ranks[first] = 0  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:352` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:364` - max_rank += 1  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:365` - ranks[n.id] = max_rank  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:489` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:500` - if target_id in visited_ops:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:516` - for k, v in node_data.metadata.items():  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:517` - if k.startswith("arg"):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:519` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:523` - if clean_type.startswith("func_"):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:538` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:582` - # Treat input as argument or placeholder constant  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/extras.py:583` - lines.append(f'    %{node.id} = "sw.op"() {{type = "Input"}} : () -> !sw.unknown')  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:79` - return SGPR(self._var_to_sgpr[var_name])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:212` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:213` - if not inst.operands:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:223` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:225` - srcs = inst.operands  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:243` - return cst.SimpleStatementLine(body=[assign])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:245` - return cst.SimpleStatementLine(body=[cst.Expr(value=call)])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:247` - def _convert_operand_to_py(self, op: Operand) -> cst.BaseExpression:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:248` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:249` - if isinstance(op, Immediate):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:250` - if op.is_hex:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:251` - return cst.Integer(hex(int(op.value)))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:261` - if raw.isalnum() or "_" in raw:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:277` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:279` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:282` - from ml_switcheroo.semantics.manager import SemanticsManager  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py.bak:284` - semantics = SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:81` - return SGPR(self._var_to_sgpr[var_name])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:214` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:215` - if not inst.operands:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:225` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:227` - srcs = inst.operands  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:245` - return cst.SimpleStatementLine(body=[assign])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:247` - return cst.SimpleStatementLine(body=[cst.Expr(value=call)])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:249` - def _convert_operand_to_py(self, op: Operand) -> cst.BaseExpression:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:250` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:251` - if isinstance(op, Immediate):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:252` - if op.is_hex:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:253` - return cst.Integer(hex(int(op.value)))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:263` - if raw.isalnum() or "_" in raw:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:279` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:281` - """TODO: Add docstring."""  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:284` - from ml_switcheroo.semantics.manager import SemanticsManager  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/rdna/synthesizer.py:286` - semantics = SemanticsManager()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:82` - if input_vars and input_vars[0] != output_var:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:83` - return cst.parse_statement(f"{output_var} = {input_vars[0]}")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:84` - return cst.SimpleStatementLine(body=[cst.Pass()])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:122` - except cst.ParserSyntaxError:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:123` - return cst.Name("None")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:127` - if node.kind in ["Input", "Output"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:133` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:134` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:153` - return f"jnp.{clean_kind}"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:154` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:155` - elif self.framework == "keras":  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:156` - if clean_kind[0].isupper():  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:158` - return f"keras.ops.{clean_kind}"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:160` - return clean_kind  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python_snippet.py:162` - def _format_args_from_metadata(self, metadata: Dict[str, Any]) -> str:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:50` - elif isinstance(current_body, cst.IndentedBlock):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:51` - stmts_list = list(current_body.body)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:65` - fname = stmt.name.value  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:66` - if fname in replacements:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:67` - # Only inject replacement once per function key  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:68` - if fname not in injected:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:69` - new_body_stmts.append(replacements[fname])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:70` - injected.add(fname)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:71` - # Skip original dict items  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:72` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:73` - new_body_stmts.append(stmt)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:89` - return updated_node  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:126` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:131` - base_class = "keras.Model"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:161` - ]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:178` - return []  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:216` - stmts.append(cst.parse_statement("pass"))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:247` - func_api = node.kind  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:248` - args_str = current_var  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:249` - if node.metadata:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:250` - extra_args = self._format_args_from_metadata(node.metadata)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:251` - if extra_args:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:252` - args_str += f", {extra_args}"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:253` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:254` - # Hardware specific SDPA  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:255` - if func_api == "ScaledDotProductAttention":  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:256` - q, k, v = args_str.split(", ")[:3] # Simplified assumption  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:257` - if self.framework == "torch":  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:258` - line = f"{current_var} = torch.nn.functional.scaled_dot_product_attention({q}, {k}, {v})"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:259` - elif self.framework in ["jax", "flax", "flax_nnx"]:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:260` - line = f"{current_var} = jax.nn.dot_product_attention({q}, {k}, {v})"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:261` - elif self.framework == "mlx":  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:262` - line = f"{current_var} = mx.fast.scaled_dot_product_attention({q}, {k}, {v})"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:263` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:264` - line = f"{current_var} = keras.ops.dot_product_attention({q}, {k}, {v})"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:265` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:266` - line = f"{current_var} = {func_api}({args_str})"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:267` - stmts.append(cst.parse_statement(line))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:297` - func_name = "__call__" if self.framework != "keras" else "call"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:333` - return False  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:334` - return True  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:336` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:345` - elif self.framework == "keras":  # pragma: no cover  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:346` - kind = f"keras.layers.{kind}"  # pragma: no cover  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:365` - if self.framework == "torch":  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:366` - # PyTorch F.scaled_dot_product_attention is functional, not a module.  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:367` - # But if represented as a module, we could wrap it.  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:368` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:372` - if self.framework == "mlx" and "Linear" in kind:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:373` - kind = "nn.QuantizedLinear"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:374` - elif self.framework == "torch" and "Linear" in kind:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:375` - # Proxy for a quantized linear layer in torch  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:376` - kind = "QuantizedInt8Linear"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:381` - kind = "LoraLinear"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:388` - if kind == "LoraLinear" and "r" not in node.metadata:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:389` - args_str += ", r=16, alpha=32.0"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:390` - if kind == "nn.QuantizedLinear" and "group_size" not in node.metadata:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:391` - args_str += ", group_size=64, bits=8"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:409` - args_list.append(val)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:416` - axes = []  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:417` - for axis in sharding.axes:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:418` - if axis is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:419` - axes.append("None")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:420` - elif isinstance(axis, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:421` - axes.append(f"'{axis}'")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:422` - elif isinstance(axis, tuple):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:423` - t_str = ", ".join(f"'{a}'" for a in axis)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:424` - axes.append(f"({t_str})")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:425` - return f"jax.sharding.PartitionSpec({', '.join(axes)})"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:429` - placements = []  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:430` - for axis in sharding.axes:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:431` - if axis is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:432` - placements.append("None")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:433` - elif isinstance(axis, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:434` - placements.append(f"'{axis}'")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:436` - placements.append("'*'")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:437` - return f"[{', '.join(placements)}]"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:441` - if not graph_mesh or not hasattr(graph_mesh, 'axis_names') or not graph_mesh.axis_names:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:443` - placements = []  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:444` - for axis in sharding.axes:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:445` - if axis is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:446` - placements.append("Replicate()")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:447` - elif isinstance(axis, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:448` - placements.append(f"Shard(0)")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:450` - placements.append(f"Shard(0)")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:451` - return ", ".join(placements)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:454` - placements = ["Replicate()"] * len(graph_mesh.axis_names)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:455` - for tensor_dim, mesh_axes in enumerate(sharding.axes):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:456` - if mesh_axes is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:457` - continue  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:459` - axes_list = [mesh_axes] if isinstance(mesh_axes, str) else mesh_axes  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:460` - for axis_name in axes_list:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:461` - if axis_name in graph_mesh.axis_names:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:462` - mesh_dim = graph_mesh.axis_names.index(axis_name)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:463` - placements[mesh_dim] = f"Shard({tensor_dim})"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:465` - return ", ".join(placements)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:469` - axes = []  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:470` - for axis in sharding.axes:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:471` - if axis is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:472` - axes.append("None")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:473` - elif isinstance(axis, str):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:474` - axes.append(f"'{axis}'")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:475` - else:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/python.py:477` - return f"({', '.join(axes)})"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:262` - elif isinstance(node, Comment):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:265` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:266` - elif isinstance(node, Label):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:270` - stmt = cst.SimpleStatementLine(  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:297` - call = self._make_call(inst.opcode, [])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:298` - return cst.SimpleStatementLine(body=[cst.Expr(value=call)])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:332` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:365` - if isinstance(op.value, float):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:366` - return cst.Float(str(op.value))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:367` - return cst.Integer(str(int(op.value)))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:398` - if semantics is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py.bak:401` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:273` - elif isinstance(node, Comment):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:276` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:277` - elif isinstance(node, Label):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:281` - stmt = cst.SimpleStatementLine(  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:308` - call = self._make_call(inst.opcode, [])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:309` - return cst.SimpleStatementLine(body=[cst.Expr(value=call)])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:343` - )  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:376` - if isinstance(op.value, float):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:377` - return cst.Float(str(op.value))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:378` - return cst.Integer(str(int(op.value)))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:409` - if semantics is None:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/backends/sass/synthesizer.py:412` - # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx_generator.py:51` - parsed_hatch = parsed_hatch.with_changes(trailing_whitespace=inject_trailing_comment(hatch.trivia.trailing_comments))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:36` - new_body.append(stmt)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:65` - new_body.append(stmt)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:79` - if isinstance(orig.operator, cst.MatrixMultiply) and isinstance(orig.right, cst.Attribute) and orig.right.attr.value.endswith("_w"):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:80` - proj_name = orig.right.attr.value.replace("_w", "")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:81` - return cst.Call(func=cst.Attribute(value=cst.Name("self"), attr=cst.Name(proj_name)), args=[cst.Arg(value=upd.left)])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:82` - if isinstance(orig.operator, cst.Add) and isinstance(orig.left, cst.BinOp) and isinstance(orig.left.operator, cst.MatrixMultiply) and isinstance(orig.right, cst.Attribute) and orig.right.attr.value.endswith("_b"):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:83` - proj_name = orig.right.attr.value.replace("_b", "")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:84` - return cst.Call(func=cst.Attribute(value=cst.Name("self"), attr=cst.Name(proj_name)), args=[cst.Arg(value=upd.left.left)])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:85` - return upd  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:93` - new_body.append(stmt)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:107` - if isinstance(orig.operator, cst.MatrixMultiply) and isinstance(orig.right, cst.Attribute) and orig.right.attr.value.endswith("_w"):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:108` - proj_name = orig.right.attr.value.replace("_w", "")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:109` - return cst.Call(func=cst.Attribute(value=cst.Name("self"), attr=cst.Name(proj_name)), args=[cst.Arg(value=upd.left)])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:110` - return upd  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:118` - new_body.append(stmt)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:132` - if isinstance(orig.operator, cst.MatrixMultiply) and isinstance(orig.right, cst.Attribute) and orig.right.attr.value == "attn_w":  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:133` - return cst.Call(func=cst.Attribute(value=cst.Name("self"), attr=cst.Name("self_attn")), args=[cst.Arg(value=cst.Call(func=cst.Attribute(value=cst.Name("self"), attr=cst.Name("input_layernorm")), args=[cst.Arg(value=upd.left)]))])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:134` - if isinstance(orig.operator, cst.MatrixMultiply) and isinstance(orig.right, cst.Attribute) and orig.right.attr.value == "mlp_w":  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:135` - return cst.Call(func=cst.Attribute(value=cst.Name("self"), attr=cst.Name("mlp")), args=[cst.Arg(value=cst.Call(func=cst.Attribute(value=cst.Name("self"), attr=cst.Name("post_attention_layernorm")), args=[cst.Arg(value=upd.left)]))])  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:136` - return upd  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/flax_nnx/qwen3_rewrite.py:154` - new_body.append(stmt)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/passes/pure_jax_generator.py:45` - parsed_hatch = parsed_hatch.with_changes(trailing_whitespace=inject_trailing_comment(hatch.trivia.trailing_comments))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:99` - actions: List[PatchAction] = []  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:101` - src_ids = {n.id for n in source.nodes}  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:102` - tgt_ids = {n.id for n in target.nodes}  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:106` - deleted_ids = src_ids - tgt_ids  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:109` - new_nodes = [n for n in target.nodes if n.id not in src_ids]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:118` - matched_anchors = set()  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:120` - for new_node in new_nodes:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:121` - anchor = None  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:124` - if "anchor" in new_node.metadata:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:125` - anchor = new_node.metadata["anchor"]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:127` - elif new_node.id.startswith("fused_"):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:128` - candidate = new_node.id.replace("fused_", "")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:129` - if candidate in deleted_ids:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:130` - anchor = candidate  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:132` - if anchor and anchor in deleted_ids:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:135` - in_edges = [e for e in target.edges if e.target == new_node.id]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:136` - input_vars = [e.source for e in in_edges]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:139` - out_var = new_node.id  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:147` - if _is_likely_stateful(new_node):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:148` - actions.append(  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:164` - actions.append(  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:168` - matched_anchors.add(anchor)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:171` - for did in deleted_ids:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:172` - if did not in matched_anchors:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:173` - actions.append(DeleteAction(node_id=did))  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:175` - return actions  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/differ.py:180` - return node.kind and node.kind[0].isupper() or "Fused" in node.kind  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/tunix_exporter.py:72` - return f"%{out_str} = stablehlo.multiply({inputs}) : tensor<...>"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/tunix_exporter.py:75` - return f"%{out_str} = stablehlo.custom_call @{op}({inputs}) : tensor<...>"  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/triton_autotuner.py:23` - return {"BLOCK_M": 128, "BLOCK_N": 256, "BLOCK_K": 64, "num_stages": 4, "num_warps": 8}  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/triton_autotuner.py:31` - return {"BLOCK_M": 64, "BLOCK_N": 64, "num_stages": 3, "num_warps": 4}  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:25` - stages: Dict[int, List[LogicalNode]] = defaultdict(list)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:26` - for n in graph.nodes:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:27` - stage = n.pipeline_stage if n.pipeline_stage is not None else 0  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:28` - stages[stage].append(n)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:35` - stage_map = {n.id: (n.pipeline_stage or 0) for n in graph.nodes}  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:36` - for edge in graph.edges:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:37` - src_stage = stage_map[edge.source]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:38` - tgt_stage = stage_map[edge.target]  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:39` - if tgt_stage < src_stage:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:40` - raise ValueError(f"Invalid pipeline boundary: Edge {edge.source} -> {edge.target} flows backwards from stage {src_stage} to {tgt_stage}.")  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:42` - return graph  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:57` - ring_n = LogicalNode(  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:63` - new_nodes.append(ring_n)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_pass.py:67` - new_nodes.append(n)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/topology_discovery.py:41` - except Exception:  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/topology_discovery.py:42` - pass  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/continuous_sharding_benchmark.py:37` - shapes.append({"fsdp": 2, "pipeline": 2, "tensor": 2})  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_parallel.py:25` - nodes_per_stage = max(1, len(ir_graph.nodes) // self.num_stages)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_parallel.py:27` - for i, node in enumerate(ir_graph.nodes):  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_parallel.py:28` - stage_id = min(i // nodes_per_stage, self.num_stages - 1)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_parallel.py:29` - node.metadata["pipeline_stage"] = str(stage_id)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_parallel.py:31` - ir_graph.metadata["micro_batches"] = str(self.micro_batches)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_parallel.py:32` - ir_graph.metadata["pipeline_stages"] = str(self.num_stages)  # pragma: no cover
+- [x] `src/ml_switcheroo/compiler/pipeline_parallel.py:33` - return ir_graph  # pragma: no cover
+- [x] `src/ml_switcheroo/__main__.py:7` - import sys  # pragma: no cover
+- [x] `src/ml_switcheroo/__main__.py:8` - from ml_switcheroo.cli.__main__ import main  # pragma: no cover
+- [x] `src/ml_switcheroo/__main__.py:10` - if __name__ == "__main__":  # pragma: no cover
+- [x] `src/ml_switcheroo/__main__.py:11` - sys.exit(main())  # pragma: no cover

@@ -24,10 +24,10 @@ class PythonFrontend:
     Parses the code and extracts the computation graph.
     """
     try:
-      tree = cst.parse_module(self.code)  # pragma: no cover
-    except Exception:  # pragma: no cover
-      # Fallback (e.g. empty code) -> Empty Graph  # pragma: no cover
-      return LogicalGraph()  # pragma: no cover
+      tree = cst.parse_module(self.code)
+    except Exception:
+      # Fallback (e.g. empty code) -> Empty Graph
+      return LogicalGraph()
 
     extractor = GraphExtractor()
     tree.visit(extractor)

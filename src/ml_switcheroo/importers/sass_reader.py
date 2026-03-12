@@ -108,20 +108,20 @@ class SassSpecImporter:
     Args:
         html_path: Path to the .html file.
 
-    Returns:  # pragma: no cover
-        Dictionary mapping Abstract Operations to SASS implementations.  # pragma: no cover
+    Returns:
+        Dictionary mapping Abstract Operations to SASS implementations.
     """
     if not html_path.exists():
-      log_error(f"File not found: {html_path}")  # pragma: no cover
-      return {}  # pragma: no cover
+      log_error(f"File not found: {html_path}")
+      return {}
 
-    log_info(f"Parsing SASS Spec: {html_path.name}...")  # pragma: no cover
+    log_info(f"Parsing SASS Spec: {html_path.name}...")
 
-    try:  # pragma: no cover
+    try:
       content = html_path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:  # pragma: no cover
+    except UnicodeDecodeError:
       # Fallback for some windows encodings
-      content = html_path.read_text(encoding="latin-1")  # pragma: no cover
+      content = html_path.read_text(encoding="latin-1")
 
     parser = SassHtmlParser()
     parser.feed(content)
@@ -140,13 +140,13 @@ class SassSpecImporter:
       entry = {
         "api": opcode,
         "_description": desc,  # Store raw desc for context
-      }  # pragma: no cover
-      # pragma: no cover
-      # Conflict resolution: Prefer FP32 versions for generic math ops if collisions occur  # pragma: no cover
+      }
+
+      # Conflict resolution: Prefer FP32 versions for generic math ops if collisions occur
       if key in mappings:
-        prev_desc = mappings[key]["_description"]  # pragma: no cover
-        if "FP32" in desc and "FP32" not in prev_desc:  # pragma: no cover
-          mappings[key] = entry  # pragma: no cover
+        prev_desc = mappings[key]["_description"]
+        if "FP32" in desc and "FP32" not in prev_desc:
+          mappings[key] = entry
       else:
         mappings[key] = entry
 
@@ -165,22 +165,22 @@ class SassSpecImporter:
     """
     # 1. Check Mnemonics directly
     if opcode == "FADD":
-      return "Add"  # pragma: no cover
+      return "Add"
     if opcode == "FMUL":
       return "Mul"
     if opcode == "IADD3":
-      return "Add3"  # pragma: no cover
+      return "Add3"
     if opcode == "IABS":
       return "Abs"
 
-    # 2. Check Description Patterns  # pragma: no cover
+    # 2. Check Description Patterns
     for pattern, abstract_name in self._DESCRIPTION_MAP:
       if re.search(pattern, desc, re.IGNORECASE):
-        # Ambiguity handling  # pragma: no cover
-        if abstract_name in ["Min", "Max"] and "Minimum/Maximum" in desc:  # pragma: no cover
+        # Ambiguity handling
+        if abstract_name in ["Min", "Max"] and "Minimum/Maximum" in desc:
           # MNMX instructions handle both based on predicates/modifiers.
           # We map to a generic "MinMax" or ignore specific alignment for now.
           return "MinMax"
-        return abstract_name  # pragma: no cover
+        return abstract_name
 
     return None

@@ -35,11 +35,11 @@ from ml_switcheroo.frameworks.loader import load_definitions
 # Conditional import to allow loading in environments without MLX
 try:
   import mlx.core
-  import mlx.nn  # pragma: no cover
-  import mlx.optimizers  # pragma: no cover
-  import mlx.utils  # pragma: no cover
-except ImportError:  # pragma: no cover
-  pass  # pragma: no cover
+  import mlx.nn
+  import mlx.optimizers
+  import mlx.utils
+except ImportError:
+  pass
 
 
 @register_framework("mlx")
@@ -60,7 +60,7 @@ class MLXAdapter:
     Returns:
         List[str]: Module list.
     """
-    return [  # pragma: no cover
+    return [
       "mlx.core",
       "mlx.nn",
       "mlx.optimizers",
@@ -77,7 +77,7 @@ class MLXAdapter:
     Returns:
         Set[str]: Default empty set.
     """
-    return set()  # pragma: no cover
+    return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -207,7 +207,7 @@ class MLXAdapter:
     Returns:
         PluginTraits: Config object.
     """
-    return PluginTraits(  # pragma: no cover
+    return PluginTraits(
       has_numpy_compatible_arrays=True,
       requires_explicit_rng=False,  # MLX uses implicit RNG in mlx.core.random usually
       requires_functional_state=False,
@@ -245,20 +245,20 @@ class MLXAdapter:
     Returns:
         List[GhostRef]: Found items.
     """
-    results = []  # pragma: no cover
-    try:  # pragma: no cover
-      import mlx.core  # pragma: no cover
-      import mlx.nn  # pragma: no cover
-      import mlx.optimizers  # pragma: no cover
-      import inspect  # pragma: no cover
+    results = []
+    try:
+      import mlx.core
+      import mlx.nn
+      import mlx.optimizers
+      import inspect
 
-      if category == StandardCategory.LAYER:  # pragma: no cover
-        for name, obj in inspect.getmembers(mlx.nn):  # pragma: no cover
-          if not name.startswith("_") and inspect.isclass(obj) and name[0].isupper():  # pragma: no cover
-            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))  # pragma: no cover
+      if category == StandardCategory.LAYER:
+        for name, obj in inspect.getmembers(mlx.nn):
+          if not name.startswith("_") and inspect.isclass(obj) and name[0].isupper():
+            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))
 
-      if category == StandardCategory.ACTIVATION:  # pragma: no cover
-        target_names = {  # pragma: no cover
+      if category == StandardCategory.ACTIVATION:
+        target_names = {
           "relu",
           "gelu",
           "silu",
@@ -267,27 +267,27 @@ class MLXAdapter:
           "softmax",
           "elu",
         }
-        for name, obj in inspect.getmembers(mlx.nn):  # pragma: no cover
-          if name.lower() in target_names:  # pragma: no cover
-            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))  # pragma: no cover
+        for name, obj in inspect.getmembers(mlx.nn):
+          if name.lower() in target_names:
+            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))
 
-      if category == StandardCategory.LOSS:  # pragma: no cover
-        if hasattr(mlx.nn, "losses"):  # pragma: no cover
-          for name, obj in inspect.getmembers(mlx.nn.losses):  # pragma: no cover
-            if inspect.isfunction(obj) or inspect.isclass(obj):  # pragma: no cover
-              if "loss" in name.lower():  # pragma: no cover
-                results.append(GhostInspector.inspect(obj, f"mlx.nn.losses.{name}"))  # pragma: no cover
+      if category == StandardCategory.LOSS:
+        if hasattr(mlx.nn, "losses"):
+          for name, obj in inspect.getmembers(mlx.nn.losses):
+            if inspect.isfunction(obj) or inspect.isclass(obj):
+              if "loss" in name.lower():
+                results.append(GhostInspector.inspect(obj, f"mlx.nn.losses.{name}"))
 
-      if category == StandardCategory.OPTIMIZER:  # pragma: no cover
-        for name, obj in inspect.getmembers(mlx.optimizers):  # pragma: no cover
-          if inspect.isclass(obj) and not name.startswith("_"):  # pragma: no cover
-            results.append(GhostInspector.inspect(obj, f"mlx.optimizers.{name}"))  # pragma: no cover
+      if category == StandardCategory.OPTIMIZER:
+        for name, obj in inspect.getmembers(mlx.optimizers):
+          if inspect.isclass(obj) and not name.startswith("_"):
+            results.append(GhostInspector.inspect(obj, f"mlx.optimizers.{name}"))
 
-    except ImportError as e:  # pragma: no cover
-      logging.debug(f"Could not inspect MLX: {e}")  # pragma: no cover
-      pass  # pragma: no cover
+    except ImportError as e:
+      logging.debug(f"Could not inspect MLX: {e}")
+      pass
 
-    return results  # pragma: no cover
+    return results
 
   def convert(self, data: Any) -> Any:
     """
@@ -299,14 +299,14 @@ class MLXAdapter:
     Returns:
         Any: MLX Array or original.
     """
-    try:  # pragma: no cover
-      import mlx.core as mx  # pragma: no cover
+    try:
+      import mlx.core as mx
 
-      if isinstance(data, (np.ndarray, list, tuple, np.generic)):  # pragma: no cover
-        return mx.array(data)  # pragma: no cover
-    except ImportError:  # pragma: no cover
-      pass  # pragma: no cover
-    return data  # pragma: no cover
+      if isinstance(data, (np.ndarray, list, tuple, np.generic)):
+        return mx.array(data)
+    except ImportError:
+      pass
+    return data
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """
@@ -363,6 +363,43 @@ def compute_on_gpu(x):
         mx.eval(y) 
         return y
 """,
+      "tier4_qwen3-vl": """import mlx.core as mx
+import mlx.nn as nn
+
+class Qwen3VLVisionConfig:
+    in_channels: int = 3
+    hidden_size: int = 1280
+    temporal_patch_size: int = 2
+    patch_size: int = 14
+
+class Qwen3VLPatchEmbed(nn.Module):
+    '''3D Convolutional patch embedding for vision input.'''
+    def __init__(self, config: Qwen3VLVisionConfig):
+        super().__init__()
+        self.config = config
+        kernel = (config.temporal_patch_size, config.patch_size, config.patch_size)
+        self.proj = nn.Conv3d(
+            in_channels=config.in_channels,
+            out_channels=config.hidden_size,
+            kernel_size=kernel,
+            stride=kernel,
+            padding=0,
+            bias=True,
+        )
+
+    def __call__(self, hidden_states: mx.array) -> mx.array:
+        cfg = self.config
+        seq_len = hidden_states.shape[0]
+
+        hidden_states = mx.reshape(
+            hidden_states, 
+            [seq_len, cfg.in_channels, cfg.temporal_patch_size, cfg.patch_size, cfg.patch_size]
+        )
+        hidden_states = mx.transpose(hidden_states, (0, 2, 3, 4, 1))
+        
+        out = self.proj(hidden_states)
+        return mx.reshape(out, [seq_len, cfg.hidden_size])
+""",
     }
 
   # --- Syntax Generators ---
@@ -396,7 +433,7 @@ def compute_on_gpu(x):
     Returns:
         str: Code string.
     """
-    return "mx.default_device() == mx.gpu"  # pragma: no cover
+    return "mx.default_device() == mx.gpu"
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """
@@ -406,7 +443,7 @@ def compute_on_gpu(x):
     Returns:
         str: "pass".
     """
-    return "pass"  # pragma: no cover
+    return "pass"
 
   def get_serialization_imports(self) -> List[str]:
     """
@@ -415,7 +452,7 @@ def compute_on_gpu(x):
     Returns:
         List[str]: Imports.
     """
-    return ["import mlx.core as mx"]  # pragma: no cover
+    return ["import mlx.core as mx"]
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """
@@ -429,21 +466,21 @@ def compute_on_gpu(x):
     Returns:
         str: Code string.
     """
-    if op == "save" and object_arg:  # pragma: no cover
-      return f"mx.save({file_arg}, {object_arg})"  # pragma: no cover
-    elif op == "load":  # pragma: no cover
-      return f"mx.load({file_arg})"  # pragma: no cover
-    return ""  # pragma: no cover
+    if op == "save" and object_arg:
+      return f"mx.save({file_arg}, {object_arg})"
+    elif op == "load":
+      return f"mx.load({file_arg})"
+    return ""
 
   # --- Weight Migrations ---
 
   def get_weight_conversion_imports(self) -> List[str]:
     """Returns imports needed for weight scripts."""
-    return ["import mlx.core as mx"]  # pragma: no cover
+    return ["import mlx.core as mx"]
 
   def get_weight_load_code(self, path_var: str) -> str:
     """Loads weights using mx.load (npz/safetensors) into a raw dictionary."""
-    return textwrap.dedent(  # pragma: no cover
+    return textwrap.dedent(
       f""" 
             if str({path_var}).endswith(".npz"): 
                 loaded = mx.load({path_var}) 
@@ -462,11 +499,11 @@ def compute_on_gpu(x):
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
     """Converts MLX array to numpy."""
-    return f"np.array({tensor_var})"  # pragma: no cover
+    return f"np.array({tensor_var})"
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Saves dictionary of arrays to .npz or .safetensors."""
-    return textwrap.dedent(  # pragma: no cover
+    return textwrap.dedent(
       f""" 
             # Convert to MLX arrays if numpy
             mlx_state = {{k: mx.array(v) for k, v in {state_var}.items()}} 

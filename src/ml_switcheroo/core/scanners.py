@@ -103,7 +103,7 @@ class SimpleNameScanner(cst.CSTVisitor):
       bool: False if the target has already been found, effectively
       short-circuiting the rest of the AST traversal.
     """
-    return not self.found  # pragma: no cover
+    return not self.found
 
 
 class UsageScanner(cst.CSTVisitor):
@@ -191,7 +191,7 @@ class UsageScanner(cst.CSTVisitor):
     """
     self._in_import = True
     if not node.module:
-      return  # pragma: no cover
+      return
 
     module_name = get_full_name(node.module)
 
@@ -200,7 +200,7 @@ class UsageScanner(cst.CSTVisitor):
       for alias in node.names:
         if isinstance(alias, cst.ImportAlias):
           if alias.asname:
-            bound_name = alias.asname.name.value  # pragma: no cover
+            bound_name = alias.asname.name.value
           else:
             bound_name = alias.name.value
           self._tracked_aliases.add(bound_name)

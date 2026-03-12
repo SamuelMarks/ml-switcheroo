@@ -88,11 +88,11 @@ class SimulatedReflection:
         candidates.extend(
           [(name, f"{mod_name}.{name}") for name, _ in inspect.getmembers(mod) if not name.startswith("_")]
         )
-      except ImportError:  # pragma: no cover
-        continue  # pragma: no cover
+      except ImportError:
+        continue
 
     if not candidates:
-      return None  # pragma: no cover
+      return None
 
     # Extract just names for diffing
     candidate_names = [c[0] for c in candidates]

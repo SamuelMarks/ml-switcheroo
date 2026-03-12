@@ -80,7 +80,7 @@ def convert(
   """
   # 1. Configure
   # RuntimeConfig.load handles dynamic resolution if source/target are None
-  config = RuntimeConfig.load(  # pragma: no cover
+  config = RuntimeConfig.load(
     source=source,
     target=target,
     strict_mode=strict,
@@ -89,18 +89,18 @@ def convert(
 
   # 2. Initialize Engine
   # Note: SemanticsManager loads the knowledge base from JSONs on init.
-  manager = semantics or SemanticsManager()  # pragma: no cover
-  engine = ASTEngine(semantics=manager, config=config)  # pragma: no cover
+  manager = semantics or SemanticsManager()
+  engine = ASTEngine(semantics=manager, config=config)
 
   # 3. Execute
-  result = engine.run(code)  # pragma: no cover
+  result = engine.run(code)
 
   # 4. Handle Result
-  if not result.success:  # pragma: no cover
-    error_msg = "\n".join(result.errors)  # pragma: no cover
-    raise ValueError(f"Transpilation failed:\n{error_msg}")  # pragma: no cover
+  if not result.success:
+    error_msg = "\n".join(result.errors)
+    raise ValueError(f"Transpilation failed:\n{error_msg}")
 
-  return result.code  # pragma: no cover
+  return result.code
 
 
 __all__ = [

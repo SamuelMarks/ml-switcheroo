@@ -120,7 +120,7 @@ class ASTEngine:
 
   def parse(self, code: str) -> cst.Module:
     """Parses python string to CST Module."""
-    return cst.parse_module(code)  # pragma: no cover
+    return cst.parse_module(code)
 
   def to_source(self, tree: cst.Module) -> str:
     """Converts CST Module back to string."""
@@ -155,10 +155,10 @@ class ASTEngine:
         code_for_graph = self.to_source(cst_tree)
         frontend = PythonFrontend(code_for_graph)
         graph = frontend.parse_to_graph()
-      except Exception:  # pragma: no cover
+      except Exception:
         # Fallback: Maybe it's valid python code already
-        frontend = PythonFrontend(code)  # pragma: no cover
-        graph = frontend.parse_to_graph()  # pragma: no cover
+        frontend = PythonFrontend(code)
+        graph = frontend.parse_to_graph()
 
     else:
       # ISA Source (SASS/RDNA) logic
@@ -173,18 +173,18 @@ class ASTEngine:
         lifter = RdnaLifter()
         graph = lifter.lift(nodes)
       else:
-        raise NotImplementedError(f"No frontend for {self.source}")  # pragma: no cover
+        raise NotImplementedError(f"No frontend for {self.source}")
 
     if self.config.enable_graph_optimization:
-      from ml_switcheroo.core.graph_optimizer import GraphOptimizer  # pragma: no cover
+      from ml_switcheroo.core.graph_optimizer import GraphOptimizer
 
-      tracer.start_phase("Optimization", "Fusion")  # pragma: no cover
-      patterns = self.semantics.get_patterns()  # pragma: no cover
-      optimizer = GraphOptimizer(patterns)  # pragma: no cover
-      graph = optimizer.optimize(graph)  # pragma: no cover
-      tracer.log_mutation("Graph Optimization", "(Graph)", "(Optimized Graph)")  # pragma: no cover
-      tracer.log_snapshot("After Optimization", "graph TD; A-->B;", "...")  # pragma: no cover
-      tracer.end_phase()  # pragma: no cover
+      tracer.start_phase("Optimization", "Fusion")
+      patterns = self.semantics.get_patterns()
+      optimizer = GraphOptimizer(patterns)
+      graph = optimizer.optimize(graph)
+      tracer.log_mutation("Graph Optimization", "(Graph)", "(Optimized Graph)")
+      tracer.log_snapshot("After Optimization", "graph TD; A-->B;", "...")
+      tracer.end_phase()
 
     if getattr(self.config, "enable_sharding", False):
       from ml_switcheroo.compiler.sharding import ShardingInferencePass
@@ -216,7 +216,7 @@ class ASTEngine:
 
     backend_cls = get_backend_class(self.target)
     if not backend_cls:
-      raise ValueError(f"No backend found for {self.target}")  # pragma: no cover
+      raise ValueError(f"No backend found for {self.target}")
 
     if backend_cls.__name__ == "PythonBackend":
       backend = backend_cls(framework=self.target)  # type: ignore
@@ -260,33 +260,33 @@ class ASTEngine:
           optimizer = GraphOptimizer(patterns)
           optimized_graph = optimizer.optimize(original_graph)
 
-          if self.config.enable_sharding:  # pragma: no cover
-            from ml_switcheroo.compiler.sharding import ShardingInferencePass  # pragma: no cover
-            from ml_switcheroo.compiler.sharding_extractor import ShardingExtractionPass  # pragma: no cover
-            from ml_switcheroo.compiler.fusion import QKVFusionPass, QKVDefusionPass  # pragma: no cover
-            from ml_switcheroo.compiler.qwen_fusion import (  # pragma: no cover
+          if self.config.enable_sharding:
+            from ml_switcheroo.compiler.sharding import ShardingInferencePass
+            from ml_switcheroo.compiler.sharding_extractor import ShardingExtractionPass
+            from ml_switcheroo.compiler.fusion import QKVFusionPass, QKVDefusionPass
+            from ml_switcheroo.compiler.qwen_fusion import (
               SwiGLUFusionPass,
-              SwiGLUDefusionPass,  # pragma: no cover
+              SwiGLUDefusionPass,
               VisionPatchEmbeddingFusionPass,
-              VisionPatchEmbeddingDefusionPass,  # pragma: no cover
+              VisionPatchEmbeddingDefusionPass,
             )
 
             # Reverse translation: lift inline sharding out of AST into metadata
-            optimized_graph = ShardingExtractionPass().apply(optimized_graph)  # pragma: no cover
+            optimized_graph = ShardingExtractionPass().apply(optimized_graph)
 
             # Normalize structure
-            optimized_graph = QKVDefusionPass().apply(optimized_graph)  # pragma: no cover
-            optimized_graph = SwiGLUDefusionPass().apply(optimized_graph)  # pragma: no cover
-            optimized_graph = VisionPatchEmbeddingDefusionPass().apply(optimized_graph)  # pragma: no cover
+            optimized_graph = QKVDefusionPass().apply(optimized_graph)
+            optimized_graph = SwiGLUDefusionPass().apply(optimized_graph)
+            optimized_graph = VisionPatchEmbeddingDefusionPass().apply(optimized_graph)
 
             # Forward translation: synthesize optimized blocks and metadata
-            if self.target in ["jax", "flax", "flax_nnx", "paxml"]:  # pragma: no cover
-              optimized_graph = ShardingInferencePass().apply(optimized_graph)  # pragma: no cover
-              optimized_graph = QKVFusionPass().apply(optimized_graph)  # pragma: no cover
-              optimized_graph = SwiGLUFusionPass().apply(optimized_graph)  # pragma: no cover
-              optimized_graph = VisionPatchEmbeddingFusionPass().apply(optimized_graph)  # pragma: no cover
-            elif self.target == "torch":  # pragma: no cover
-              optimized_graph = ShardingInferencePass().apply(optimized_graph)  # pragma: no cover
+            if self.target in ["jax", "flax", "flax_nnx", "paxml"]:
+              optimized_graph = ShardingInferencePass().apply(optimized_graph)
+              optimized_graph = QKVFusionPass().apply(optimized_graph)
+              optimized_graph = SwiGLUFusionPass().apply(optimized_graph)
+              optimized_graph = VisionPatchEmbeddingFusionPass().apply(optimized_graph)
+            elif self.target == "torch":
+              optimized_graph = ShardingInferencePass().apply(optimized_graph)
               # Note: Torch keeps defused standard blocks, but gets sharding annotations
 
           # C. Differ
@@ -308,8 +308,8 @@ class ASTEngine:
               self._graph_to_mermaid(tree),
               self.to_source(tree),
             )
-      except Exception as e:  # pragma: no cover
-        tracer.log_warning(f"Graph Optimization failed, proceeding with raw CST: {e}")  # pragma: no cover
+      except Exception as e:
+        tracer.log_warning(f"Graph Optimization failed, proceeding with raw CST: {e}")
       tracer.end_phase()
 
     # - Analysis
@@ -369,7 +369,7 @@ class ASTEngine:
 
     # Trace
     if self.target == "mlir" or self.target == "stablehlo":
-      tracer.log_mutation("Final Emission", "(Python CST)", final_code)  # pragma: no cover
+      tracer.log_mutation("Final Emission", "(Python CST)", final_code)
 
     # 6. Checks
     errors = []

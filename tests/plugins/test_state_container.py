@@ -1,22 +1,8 @@
-"""
-Tests for State Container Plugin.
-
-Verifies:
-1. Strict Decoupling: Ensuring transformations abort if semantics are missing.
-2. Structure Logic: Ensuring wrappers are constructed accurately when mapped.
-3. Component Coverage: Register Buffer, Parameter, State Dict, Load State, Parameters.
-"""
-
-import pytest
 import libcst as cst
-from unittest.mock import MagicMock
-
-# Fix: Import TestRewriter shim from conftest
-from tests.conftest import TestRewriter as PivotRewriter
-
-from ml_switcheroo.config import RuntimeConfig
-import ml_switcheroo.core.hooks as hooks
+from unittest.mock import MagicMock, patch
 from ml_switcheroo.plugins.state_container import (
+  _create_node,
+  _get_receiver,
   convert_register_buffer,
   convert_register_parameter,
   convert_state_dict,
@@ -25,188 +11,160 @@ from ml_switcheroo.plugins.state_container import (
 )
 
 
-def rewrite_code(rewriter, code: str) -> str:
-  """Executes the rewriter pipeline."""
-  tree = cst.parse_module(code)
-  try:
-    new_tree = rewriter.convert(tree)
-    return new_tree.code
-  except Exception as e:
-    pytest.fail(f"Rewrite failed: {e}")
+class DummyContext:
+  def __init__(self, api_map=None):
+    self.api_map = api_map or {}
+
+  def lookup_api(self, op_id):
+    return self.api_map.get(op_id)
 
 
-@pytest.fixture
-def rewriter():
-  """Function docstring."""
-  # Explicitly register hooks to bypass dynamic loading issues in test env
-  hooks._HOOKS["torch_register_buffer_to_nnx"] = convert_register_buffer
-  hooks._HOOKS["torch_register_parameter_to_nnx"] = convert_register_parameter
-  hooks._HOOKS["torch_state_dict_to_nnx"] = convert_state_dict
-  hooks._HOOKS["torch_load_state_dict_to_nnx"] = convert_load_state_dict
-  hooks._HOOKS["torch_parameters_to_nnx"] = convert_parameters
-  hooks._PLUGINS_LOADED = True
+def test_create_node():
+  # Valid expression
+  node = _create_node("a.b.c")
+  assert isinstance(node, cst.Attribute)
 
-  mgr = MagicMock()
-
-  # Define mock responses for get_definition
-  # This allows the Rewriter to find the Hook trigger
-  def get_definition_side_effect(name):
-    """Function docstring."""
-    # Precise matching logic to prevent greedy substring overlaps
-    # e.g. "load_state_dict" would match "state_dict" in a naive lookup
-
-    plugin_name = None
-    key = None
-
-    if "register_buffer" in name:
-      plugin_name = "torch_register_buffer_to_nnx"
-      key = "register_buffer"
-    elif "register_parameter" in name:
-      plugin_name = "torch_register_parameter_to_nnx"
-      key = "register_parameter"
-    elif "load_state_dict" in name:
-      plugin_name = "torch_load_state_dict_to_nnx"
-      key = "load_state_dict"
-    elif "state_dict" in name:
-      plugin_name = "torch_state_dict_to_nnx"
-      key = "state_dict"
-    elif "parameters" in name:
-      plugin_name = "torch_parameters_to_nnx"
-      key = "parameters"
-
-    if plugin_name:
-      return (
-        key,
-        {"variants": {"jax": {"requires_plugin": plugin_name}}},
-      )
-    return None
-
-  mgr.get_definition.side_effect = get_definition_side_effect
-
-  # Define mock responses for resolve_variant
-  # This allows the Rewriter API confirmation logic to pass
-  def resolve_variant_side_effect(aid, fw):
-    """Function docstring."""
-    if fw != "jax":
-      return None
-    # Return generic match
-    return {"requires_plugin": f"torch_{aid}_to_nnx"}
-
-  mgr.resolve_variant.side_effect = resolve_variant_side_effect
-  mgr.is_verified.return_value = True
-
-  config = RuntimeConfig(source_framework="torch", target_framework="jax", strict_mode=False)
-  # Ensure get_framework_config doesn't crash attributes logic
-  mgr.get_framework_config.return_value = {}
-
-  return PivotRewriter(mgr, config)
+  # Invalid expression, fallback to Name
+  with patch("libcst.parse_expression", side_effect=Exception("Failed")):
+    node = _create_node("fallback_name")
+  assert isinstance(node, cst.Name)
+  assert node.value == "fallback_name"
 
 
-# --- Lookup Helpers for Tests ---
-# We inject these behaviors into the HookContext mock lookup_api per test case
+def test_get_receiver():
+  # Call with Attribute
+  node = cst.parse_expression("self.register_buffer('name', tensor)")
+  receiver = _get_receiver(node)
+  assert isinstance(receiver, cst.Name)
+  assert receiver.value == "self"
+
+  # Call with Name
+  node = cst.parse_expression("register_buffer('name', tensor)")
+  receiver = _get_receiver(node)
+  assert receiver is None
 
 
-def configure_context(rewriter, mapping):
-  """Updates the rewriter context lookup behavior."""
+def test_convert_register_buffer():
+  # Missing args
+  node = cst.parse_expression("self.register_buffer('name')")
+  ctx = DummyContext({"BatchStat": "flax.nnx.BatchStat"})
+  assert convert_register_buffer(node, ctx) is node
 
-  def lookup(name):
-    """Function docstring."""
-    return mapping.get(name)
+  # No receiver
+  node = cst.parse_expression("register_buffer('name', t)")
+  assert convert_register_buffer(node, ctx) is node
 
-  rewriter.ctx.lookup_api = MagicMock(side_effect=lookup)
+  # No lookup
+  node = cst.parse_expression("self.register_buffer('name', t)")
+  ctx_empty = DummyContext()
+  assert convert_register_buffer(node, ctx_empty) is node
 
-
-# --- 1. Successful Transformations (Mappings Exist) ---
-
-
-def test_register_buffer_success(rewriter):
-  """Function docstring."""
-  configure_context(rewriter, {"BatchStat": "flax.nnx.BatchStat"})
-  code = "self.register_buffer('running_mean', torch.zeros(10))"
-  res = rewrite_code(rewriter, code)
-  assert "setattr(self, 'running_mean', flax.nnx.BatchStat(torch.zeros(10)))" in res
-
-
-def test_register_parameter_success(rewriter):
-  """Function docstring."""
-  configure_context(rewriter, {"Param": "custom.Parameter"})
-  code = "self.register_parameter('weight', w)"
-  res = rewrite_code(rewriter, code)
-  assert "setattr(self, 'weight', custom.Parameter(w))" in res
-
-
-def test_state_dict_success(rewriter):
-  """Function docstring."""
-  configure_context(rewriter, {"ModuleState": "flax.nnx.state"})
-  code = "sd = model.state_dict()"
-  res = rewrite_code(rewriter, code)
-  assert "flax.nnx.state(model).to_pure_dict()" in res
+  # Valid
+  node = cst.parse_expression("self.register_buffer('name', t)")
+  ctx = DummyContext({"BatchStat": "flax.nnx.BatchStat"})
+  result = convert_register_buffer(node, ctx)
+  assert isinstance(result, cst.Call)
+  assert result.func.value == "setattr"
+  assert len(result.args) == 3
+  # Check wrapper call
+  wrapper_call = result.args[2].value
+  assert isinstance(wrapper_call, cst.Call)
+  assert wrapper_call.func.attr.value == "BatchStat"
+  assert wrapper_call.func.value.attr.value == "nnx"
 
 
-def test_load_state_dict_success(rewriter):
-  """Function docstring."""
-  configure_context(rewriter, {"UpdateState": "flax.nnx.update"})
-  code = "model.load_state_dict(sd)"
-  res = rewrite_code(rewriter, code)
-  assert "flax.nnx.update(model, sd)" in res
+def test_convert_register_parameter():
+  # Missing args
+  node = cst.parse_expression("self.register_parameter('name')")
+  ctx = DummyContext({"Param": "flax.nnx.Param"})
+  assert convert_register_parameter(node, ctx) is node
+
+  # No receiver
+  node = cst.parse_expression("register_parameter('name', p)")
+  assert convert_register_parameter(node, ctx) is node
+
+  # No lookup
+  node = cst.parse_expression("self.register_parameter('name', p)")
+  ctx_empty = DummyContext()
+  assert convert_register_parameter(node, ctx_empty) is node
+
+  # Valid
+  node = cst.parse_expression("self.register_parameter('name', p)")
+  ctx = DummyContext({"Param": "flax.nnx.Param"})
+  result = convert_register_parameter(node, ctx)
+  assert isinstance(result, cst.Call)
+  assert result.func.value == "setattr"
+  assert len(result.args) == 3
 
 
-def test_parameters_success(rewriter):
-  """Function docstring."""
-  configure_context(rewriter, {"ModuleState": "state", "Param": "Param"})
-  code = "p = model.parameters()"
-  res = rewrite_code(rewriter, code)
-  assert "state(model, Param).values()" in res
+def test_convert_state_dict():
+  # No receiver
+  node = cst.parse_expression("state_dict()")
+  ctx = DummyContext({"ModuleState": "flax.nnx.state"})
+  assert convert_state_dict(node, ctx) is node
+
+  # No lookup
+  node = cst.parse_expression("self.state_dict()")
+  ctx_empty = DummyContext()
+  assert convert_state_dict(node, ctx_empty) is node
+
+  # Valid
+  node = cst.parse_expression("model.state_dict()")
+  ctx = DummyContext({"ModuleState": "flax.nnx.state"})
+  result = convert_state_dict(node, ctx)
+  assert isinstance(result, cst.Call)
+  assert result.func.attr.value == "to_pure_dict"
+  inner_call = result.func.value
+  assert isinstance(inner_call, cst.Call)
+  assert inner_call.func.attr.value == "state"
 
 
-# --- 2. Fallback / Failure Modes (Missing Mappings) ---
+def test_convert_load_state_dict():
+  # No receiver
+  node = cst.parse_expression("load_state_dict(sd)")
+  ctx = DummyContext({"UpdateState": "flax.nnx.update"})
+  assert convert_load_state_dict(node, ctx) is node
+
+  # No args
+  node = cst.parse_expression("self.load_state_dict()")
+  assert convert_load_state_dict(node, ctx) is node
+
+  # No lookup
+  node = cst.parse_expression("self.load_state_dict(sd)")
+  ctx_empty = DummyContext()
+  assert convert_load_state_dict(node, ctx_empty) is node
+
+  # Valid
+  node = cst.parse_expression("model.load_state_dict(sd)")
+  ctx = DummyContext({"UpdateState": "flax.nnx.update"})
+  result = convert_load_state_dict(node, ctx)
+  assert isinstance(result, cst.Call)
+  assert result.func.attr.value == "update"
+  assert len(result.args) == 2
 
 
-def test_register_buffer_missing_mapping(rewriter):
-  """Verify abort if BatchStat not defined."""
-  configure_context(rewriter, {})  # Empty map
-  code = "self.register_buffer('n', t)"
-  res = rewrite_code(rewriter, code)
-  # Should contain original
-  assert "self.register_buffer('n', t)" in res
-  assert "setattr" not in res
+def test_convert_parameters():
+  # No receiver
+  node = cst.parse_expression("parameters()")
+  ctx = DummyContext({"ModuleState": "flax.nnx.state", "Param": "flax.nnx.Param"})
+  assert convert_parameters(node, ctx) is node
 
+  # No lookup ModuleState
+  node = cst.parse_expression("model.parameters()")
+  ctx_missing_state = DummyContext({"Param": "flax.nnx.Param"})
+  assert convert_parameters(node, ctx_missing_state) is node
 
-def test_register_parameter_missing_mapping(rewriter):
-  """Verify abort if Param not defined."""
-  configure_context(rewriter, {})
-  code = "self.register_parameter('n', p)"
-  res = rewrite_code(rewriter, code)
-  assert "self.register_parameter" in res
+  # No lookup Param
+  ctx_missing_param = DummyContext({"ModuleState": "flax.nnx.state"})
+  assert convert_parameters(node, ctx_missing_param) is node
 
-
-def test_state_dict_missing_mapping(rewriter):
-  """Verify abort if ModuleState not defined."""
-  configure_context(rewriter, {})
-  code = "model.state_dict()"
-  res = rewrite_code(rewriter, code)
-  assert "model.state_dict()" in res
-
-
-def test_load_state_dict_missing_mapping(rewriter):
-  """Verify abort if UpdateState not defined."""
-  configure_context(rewriter, {})
-  code = "model.load_state_dict(state)"
-  res = rewrite_code(rewriter, code)
-  assert "model.load_state_dict" in res
-
-
-def test_parameters_missing_mapping(rewriter):
-  """Verify abort if either Param or ModuleState is missing."""
-  # Case 1: Both missing
-  configure_context(rewriter, {})
-  code = "model.parameters()"
-  assert "model.parameters()" in rewrite_code(rewriter, code)
-
-  # Case 2: Only Param missing
-  configure_context(rewriter, {"ModuleState": "state"})
-  assert "model.parameters()" in rewrite_code(rewriter, code)
-
-  # Case 3: Only State missing
-  configure_context(rewriter, {"Param": "Param"})
-  assert "model.parameters()" in rewrite_code(rewriter, code)
+  # Valid
+  node = cst.parse_expression("model.parameters()")
+  ctx = DummyContext({"ModuleState": "flax.nnx.state", "Param": "flax.nnx.Param"})
+  result = convert_parameters(node, ctx)
+  assert isinstance(result, cst.Call)
+  assert result.func.attr.value == "values"
+  state_call = result.func.value
+  assert isinstance(state_call, cst.Call)
+  assert state_call.func.attr.value == "state"
+  assert len(state_call.args) == 2

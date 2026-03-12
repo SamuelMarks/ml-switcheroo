@@ -117,3 +117,50 @@ def test_structural_traits_for_source():
 
   assert traits.module_base == "midl.Module"
   assert traits.forward_method == "forward"
+
+
+def test_latex_dsl_all_methods():
+  adapter = LatexDSLAdapter()
+  assert adapter.search_modules == []
+  assert adapter.unsafe_submodules == set()
+  assert adapter.import_alias == ("midl", "midl")
+  assert adapter.discovery_heuristics == {}
+  assert "import" in adapter.test_config
+  assert adapter.harness_imports == []
+  assert adapter.get_harness_init_code() == ""
+  assert adapter.get_to_numpy_code() == "return str(obj)"
+  assert SemanticTier.ARRAY_API in adapter.supported_tiers
+  assert adapter.declared_magic_args == []
+  assert adapter.rng_seed_methods == []
+  assert adapter.get_device_check_syntax() == "True"
+  assert adapter.get_serialization_imports() == []
+  assert adapter.get_weight_conversion_imports() == []
+  assert adapter.get_weight_load_code("path") == "# Weights not supported in LaTeX mode"
+  assert adapter.get_tensor_to_numpy_expr("tensor") == "tensor"
+  assert adapter.get_weight_save_code("state", "path") == "# Weights not supported in LaTeX mode"
+  assert adapter.get_doc_url("any") is None
+  assert adapter.convert(123) == "123"
+  assert adapter.plugin_traits is not None
+
+
+def test_latex_dsl_specifications():
+  adapter = LatexDSLAdapter()
+  specs = adapter.specifications
+  assert "Conv2d" in specs
+  assert "Linear" in specs
+
+
+from unittest.mock import patch
+
+
+def test_latex_dsl_definitions_fallback():
+  with patch("ml_switcheroo.frameworks.latex_dsl.load_definitions") as mock_load:
+    mock_load.return_value = {}
+    adapter = LatexDSLAdapter()
+    defs = adapter.definitions
+    assert "Module" in defs
+    assert defs["Module"].api == "midl.Module"
+    assert "Conv2d" in defs
+    assert defs["Conv2d"].api == "midl.Conv2d"
+    assert "Linear" in defs
+    assert defs["Linear"].api == "midl.Linear"

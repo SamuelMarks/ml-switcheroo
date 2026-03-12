@@ -56,7 +56,7 @@ def transform_compiler(node: Union[cst.Decorator, cst.Call], ctx: HookContext) -
       new_args.append(node.args[0])
     return node.with_changes(func=new_func, args=new_args)
 
-  return node  # pragma: no cover
+  return node
 
 
 @register_hook("mlx_synchronize")

@@ -17,10 +17,10 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 if sys.version_info >= (3, 11):
   import tomllib
 else:
-  try:  # pragma: no cover
-    import tomli as tomllib  # pragma: no cover
-  except ImportError:  # pragma: no cover
-    tomllib = None  # type: ignore  # pragma: no cover
+  try:
+    import tomli as tomllib
+  except ImportError:
+    tomllib = None  # type: ignore
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -57,8 +57,8 @@ def get_framework_priority_order() -> List[str]:
       # Extract priority
       if hasattr(adapter, "ui_priority"):
         try:
-          priority = int(adapter.ui_priority)  # pragma: no cover
-        except (ValueError, TypeError):  # pragma: no cover
+          priority = int(adapter.ui_priority)
+        except (ValueError, TypeError):
           pass
 
     # Move children (flavours) to the very end for UI clarity
@@ -93,8 +93,8 @@ def _resolve_default_target() -> str:
   """
   fws = get_framework_priority_order()
   if len(fws) >= 2:
-    return fws[1]  # pragma: no cover
-  return fws[0] if fws else "target_placeholder"  # pragma: no cover
+    return fws[1]
+  return fws[0] if fws else "target_placeholder"
 
 
 class RuntimeConfig(BaseModel):
@@ -154,7 +154,7 @@ class RuntimeConfig(BaseModel):
     known = available_frameworks()
     # Allow unregistered checks if registry is empty (bootstrap/test mode)
     # or if using the placeholders generated when empty.
-    if known and v_clean not in known and v_clean not in ["source_placeholder", "target_placeholder"]:  # pragma: no cover
+    if known and v_clean not in known and v_clean not in ["source_placeholder", "target_placeholder"]:
       raise ValueError(f"Unknown framework: '{v_clean}'. Supported frameworks: {known}")
     return v_clean
 
@@ -194,10 +194,10 @@ class RuntimeConfig(BaseModel):
 
     Raises:
         ValueError: If validation against the schema fails.
-    """  # pragma: no cover
-    try:  # pragma: no cover
-      return schema.model_validate(self.plugin_settings)  # pragma: no cover
-    except ValidationError as e:  # pragma: no cover
+    """
+    try:
+      return schema.model_validate(self.plugin_settings)
+    except ValidationError as e:
       raise ValueError(f"Plugin configuration validation failed: {e}")
 
   @classmethod
@@ -277,7 +277,7 @@ class RuntimeConfig(BaseModel):
 
     # 4. Validation Report
     final_report = validation_report
-    if not final_report and "validation_report" in toml_config:  # pragma: no cover
+    if not final_report and "validation_report" in toml_config:
       final_report = Path(toml_config["validation_report"])
 
     # 5. External Plugins
@@ -318,7 +318,7 @@ def _load_toml_settings(start_path: Path) -> Tuple[Dict[str, Any], Optional[Path
           - A dictionary of configuration settings found in the TOML file.
           - The directory containing the TOML file, or None if not found.
   """
-  if not tomllib:  # pragma: no cover
+  if not tomllib:
     return {}, None
 
   current = start_path.resolve()
@@ -352,34 +352,34 @@ def parse_cli_key_values(items: Optional[List[str]]) -> Dict[str, Any]:
   """
   if not items:
     return {}
-  # pragma: no cover
-  config = {}  # pragma: no cover
-  for item in items:  # pragma: no cover
-    if "=" not in item:  # pragma: no cover
-      print(f"⚠️  Ignoring invalid config format: '{item}'. Expected 'key=value'.")  # pragma: no cover
+
+  config = {}
+  for item in items:
+    if "=" not in item:
+      print(f"⚠️  Ignoring invalid config format: '{item}'. Expected 'key=value'.")
       continue
-    # pragma: no cover
-    key, val_str = item.split("=", 1)  # pragma: no cover
-    key = key.strip()  # pragma: no cover
+
+    key, val_str = item.split("=", 1)
+    key = key.strip()
     val_str = val_str.strip()
-    # pragma: no cover
+
     final_val: Any = val_str
 
-    # Basic type inference  # pragma: no cover
-    lower_val = val_str.lower()  # pragma: no cover
-    if lower_val == "true":  # pragma: no cover
-      final_val = True  # pragma: no cover
-    elif lower_val == "false":  # pragma: no cover
+    # Basic type inference
+    lower_val = val_str.lower()
+    if lower_val == "true":
+      final_val = True
+    elif lower_val == "false":
       final_val = False
-    else:  # pragma: no cover
-      try:  # pragma: no cover
-        if "." in val_str or "e" in lower_val:  # pragma: no cover
+    else:
+      try:
+        if "." in val_str or "e" in lower_val:
           final_val = float(val_str)
-        else:  # pragma: no cover
-          final_val = int(val_str)  # pragma: no cover
-      except ValueError:  # pragma: no cover
+        else:
+          final_val = int(val_str)
+      except ValueError:
         pass
-    # pragma: no cover
+
     config[key] = final_val
-  # pragma: no cover
-  return config  # pragma: no cover
+
+  return config

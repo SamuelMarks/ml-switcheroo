@@ -124,12 +124,12 @@ class PythonBackend(CompilerBackend):
 
     body: List[cst.CSTNode] = []
     body.extend(self._generate_imports())
-    # pragma: no cover
+
     base_class = "nn.Module"
     if self.framework in ["jax", "flax", "flax_nnx"]:
       base_class = "nnx.Module"
     elif self.framework == "keras":
-      base_class = "keras.Model"  # pragma: no cover
+      base_class = "keras.Model"
 
     # To add spacing without appending invalid EmptyLine tokens to the body list,
     # we attach leading_lines to the class definition.
@@ -158,7 +158,7 @@ class PythonBackend(CompilerBackend):
       return [
         cst.parse_statement("import torch"),
         cst.parse_statement("import torch.nn as nn"),
-      ]  # pragma: no cover
+      ]
     elif self.framework in ["jax", "flax", "flax_nnx"]:
       return [
         cst.parse_statement("from flax import nnx"),
@@ -174,7 +174,7 @@ class PythonBackend(CompilerBackend):
         cst.parse_statement("import keras"),
         cst.parse_statement("import tensorflow as tf"),
       ]
-    return []  # pragma: no cover
+    return []
 
   def _build_init(self, nodes: List[LogicalNode]) -> cst.FunctionDef:
     """TODO: Add docstring."""
@@ -287,9 +287,8 @@ class PythonBackend(CompilerBackend):
       return False
     if "." in node.kind and not node.kind.startswith("nn."):
       return False
-    return True  # pragma: no cover
+    return True
 
-  # pragma: no cover
   def _generate_layer_init(self, node: LogicalNode) -> cst.SimpleStatementLine:
     """TODO: Add docstring."""
     kind = node.kind
@@ -298,8 +297,8 @@ class PythonBackend(CompilerBackend):
         kind = f"nn.{kind}"
       elif self.framework in ["jax", "flax", "flax_nnx"]:
         kind = f"nnx.{kind}"
-      elif self.framework == "keras":  # pragma: no cover
-        kind = f"keras.layers.{kind}"  # pragma: no cover
+      elif self.framework == "keras":
+        kind = f"keras.layers.{kind}"
       elif self.framework == "mlx":
         kind = f"nn.{kind}"
 

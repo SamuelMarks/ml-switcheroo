@@ -46,20 +46,20 @@ def parse_arg_def(arg: Union[str, tuple, dict]) -> Dict[str, Any]:
       # If default is provided, we might infer type later, but for the
       # generator's differentiable check, we default to Array unless
       # scalar Default implies otherwise.
-      default_val = normalized.get("default")  # pragma: no cover
-      if default_val is not None:  # pragma: no cover
-        if isinstance(default_val, bool):  # pragma: no cover
-          normalized["type"] = "bool"  # pragma: no cover
-        elif isinstance(default_val, int):  # pragma: no cover
-          normalized["type"] = "int"  # pragma: no cover
-        elif isinstance(default_val, float):  # pragma: no cover
-          normalized["type"] = "float"  # pragma: no cover
+      default_val = normalized.get("default")
+      if default_val is not None:
+        if isinstance(default_val, bool):
+          normalized["type"] = "bool"
+        elif isinstance(default_val, int):
+          normalized["type"] = "int"
+        elif isinstance(default_val, float):
+          normalized["type"] = "float"
         else:
-          normalized["type"] = "Array"  # pragma: no cover
+          normalized["type"] = "Array"
       else:
-        normalized["type"] = "Array"  # pragma: no cover
+        normalized["type"] = "Array"
     return normalized
-  return {"name": "unknown", "type": "Array"}  # pragma: no cover
+  return {"name": "unknown", "type": "Array"}
 
 
 def _infer_type_from_default(default_val: Any) -> str:
@@ -72,18 +72,18 @@ def _infer_type_from_default(default_val: Any) -> str:
   Returns:
       A type string ("int", "float", "bool", "Array") or "Any".
   """
-  if isinstance(default_val, bool):  # pragma: no cover
-    return "bool"  # pragma: no cover
-  if isinstance(default_val, int):  # pragma: no cover
-    return "int"  # pragma: no cover
-  if isinstance(default_val, float):  # pragma: no cover
-    return "float"  # pragma: no cover
-  if isinstance(default_val, (list, tuple)):  # pragma: no cover
+  if isinstance(default_val, bool):
+    return "bool"
+  if isinstance(default_val, int):
+    return "int"
+  if isinstance(default_val, float):
+    return "float"
+  if isinstance(default_val, (list, tuple)):
     # Heuristic: verify contents
-    if default_val and isinstance(default_val[0], int):  # pragma: no cover
-      return "List[int]"  # pragma: no cover
-    return "List[Any]"  # pragma: no cover
-  return "Any"  # pragma: no cover
+    if default_val and isinstance(default_val[0], int):
+      return "List[int]"
+    return "List[Any]"
+  return "Any"
 
 
 def generate_input_value_code(name: str, arg_def: Union[str, Dict[str, Any]]) -> str:
@@ -119,18 +119,18 @@ def generate_input_value_code(name: str, arg_def: Union[str, Dict[str, Any]]) ->
 
   # 2. Refine "Any" types using Default Value
   if arg_type in [None, "Any"] and default_val is not None:
-    arg_type = _infer_type_from_default(default_val)  # pragma: no cover
+    arg_type = _infer_type_from_default(default_val)
 
   # 3. Refine "Any" types using Min/Max constraints
   if arg_type in [None, "Any"]:
     if "min" in arg_def or "max" in arg_def:
       # If explicit bounds provided without type, assume int if bounds are int
-      mn = arg_def.get("min")  # pragma: no cover
-      mx = arg_def.get("max")  # pragma: no cover
-      if isinstance(mn, float) or isinstance(mx, float):  # pragma: no cover
-        arg_type = "float"  # pragma: no cover
+      mn = arg_def.get("min")
+      mx = arg_def.get("max")
+      if isinstance(mn, float) or isinstance(mx, float):
+        arg_type = "float"
       else:
-        arg_type = "int"  # pragma: no cover
+        arg_type = "int"
 
   # 4. Fallback Heuristics for Unknown Types
   if arg_type in [None, "Any"]:
@@ -147,9 +147,9 @@ def generate_input_value_code(name: str, arg_def: Union[str, Dict[str, Any]]) ->
     mx = arg_def.get("max", 5)
     # Handle case where user provided only one bound
     if "min" in arg_def and "max" not in arg_def:
-      mx = int(mn) + 5  # pragma: no cover
+      mx = int(mn) + 5
     if "max" in arg_def and "min" not in arg_def:
-      mn = int(mx) - 5  # pragma: no cover
+      mn = int(mx) - 5
     return f"random.randint({mn}, {mx})"
 
   # B. Bool Generation
@@ -165,18 +165,18 @@ def generate_input_value_code(name: str, arg_def: Union[str, Dict[str, Any]]) ->
   # D. Complex Containers
   if arg_type == "List[int]":
     if default_val is not None and isinstance(default_val, list):
-      return repr(default_val)  # pragma: no cover
+      return repr(default_val)
     return "[1, 2]"
   if "Tuple" in arg_type:
     if default_val is not None and isinstance(default_val, tuple):
-      return repr(default_val)  # pragma: no cover
+      return repr(default_val)
     return "(1, 2)"
 
   # E. Array/Tensor Generation
   if arg_type in ["Array", "Tensor", "np.ndarray"]:
     return _generate_array_code(arg_def)
 
-  return "None"  # pragma: no cover
+  return "None"
 
 
 def _generate_dim_heuristic(name: str) -> str:
@@ -191,9 +191,9 @@ def _generate_dim_heuristic(name: str) -> str:
   """
   if name in ["axis", "dim"]:
     return "1"
-  if name in ["keepdims", "keepdim"]:  # pragma: no cover
-    return "bool(random.getrandbits(1))"  # pragma: no cover
-  return "1"  # pragma: no cover
+  if name in ["keepdims", "keepdim"]:
+    return "bool(random.getrandbits(1))"
+  return "1"
 
 
 def _generate_array_code(arg_def: Dict[str, Any]) -> str:
@@ -212,7 +212,7 @@ def _generate_array_code(arg_def: Dict[str, Any]) -> str:
 
   cast_str = ""
   if dtype:
-    cast_str = f".astype(np.{dtype})"  # pragma: no cover
+    cast_str = f".astype(np.{dtype})"
   else:
     cast_str = ".astype(np.float32)"
 

@@ -126,7 +126,7 @@ class ConsensusEngine:
     # Common functional prefixes to strip
     for prefix in ["reduce", "math", "ops", "nn", "special", "functional"]:
       if normalized.startswith(prefix) and len(normalized) > len(prefix):
-        normalized = normalized[len(prefix) :]  # pragma: no cover
+        normalized = normalized[len(prefix) :]
 
     clean = False
     while not clean:
@@ -173,7 +173,7 @@ class ConsensusEngine:
         key = self.normalize_name(ref.name)
 
         if not key:
-          key = ref.name.lower()  # pragma: no cover
+          key = ref.name.lower()
 
         if key not in clusters:
           # Use a capitalized version of the normalized key as the Abstract Name
@@ -229,7 +229,7 @@ class ConsensusEngine:
       total_variants = len(cand.variants)
 
       if total_variants == 0:
-        continue  # pragma: no cover
+        continue
 
       # 1. Harvest all args from all variants
       for fw_name, ref in cand.variants.items():
@@ -241,7 +241,7 @@ class ConsensusEngine:
 
           # Ignore common object-oriented instance arguments
           if p_str in ["self", "cls"]:
-            continue  # pragma: no cover
+            continue
 
           # Use normalized name for consensus tracking
           canonical = self.normalize_arg(p_str)

@@ -59,7 +59,7 @@ class InputFuzzer:
           cons.setdefault("max", 3)
         elif p in ["shape", "size"]:
           # Shape is Tuple[int, ...], but we can use list strategy here
-          hint = "Tuple[int, ...]"  # pragma: no cover
+          hint = "Tuple[int, ...]"
         elif inferred_type == "bool":
           # Default to boolean Array if name implies mask, or scalar logic?
           # Legacy behavior was Array('bool').
@@ -100,6 +100,6 @@ class InputFuzzer:
     for k, v in kwargs.items():
       try:
         converted[k] = adapter.convert(v)
-      except Exception:  # pragma: no cover
-        converted[k] = v  # pragma: no cover
+      except Exception:
+        converted[k] = v
     return converted

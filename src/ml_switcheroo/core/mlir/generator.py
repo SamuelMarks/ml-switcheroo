@@ -123,7 +123,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
           # Wrap as statement (Assignment or Expression Stmt)
           stmt_node = self._wrap_as_statement(op, expr_node)
           if hasattr(stmt_node, "with_changes") and leading:
-            stmt_node = stmt_node.with_changes(leading_lines=leading)  # pragma: no cover
+            stmt_node = stmt_node.with_changes(leading_lines=leading)
           stmts.append(stmt_node)
       else:
         # Handle statements that are never expressions (Control Flow, Class Defs, Defs, Imports)
@@ -230,7 +230,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
     elif op_name == "sw.setattr":
       return self._convert_setattr(op)
     elif op_name == "sw.import":
-      return self._convert_import(op)  # pragma: no cover
+      return self._convert_import(op)
 
     return None
 
@@ -248,7 +248,7 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
       # Rule 2: Void Pattern Detection
       if self._is_void_call(expr):
-        return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])  # pragma: no cover
+        return cst.SimpleStatementLine(body=[cst.Expr(value=expr)])
 
       # Semantic Hint Extraction
       hint: Optional[str] = None
@@ -261,13 +261,13 @@ class MlirToPythonGenerator(ExpressionGeneratorMixin, StatementGeneratorMixin, B
 
       # 2. Check for 'name' attribute
       elif op.name.strip('"') == "sw.getattr":
-        raw_n = self._get_attr(op, "name")  # pragma: no cover
-        if raw_n:  # pragma: no cover
-          hint = raw_n.strip('"')  # pragma: no cover
+        raw_n = self._get_attr(op, "name")
+        if raw_n:
+          hint = raw_n.strip('"')
 
       # 3. Fallback for constants: cst
       elif op.name.strip('"') == "sw.constant":
-        hint = "cst"  # pragma: no cover
+        hint = "cst"
 
       py_target = self.ctx.register(res_ssa, hint=hint)
       target_node = cst.AssignTarget(target=cst.Name(py_target))

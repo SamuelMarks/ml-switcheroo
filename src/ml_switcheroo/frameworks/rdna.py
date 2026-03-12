@@ -57,7 +57,7 @@ class RdnaAdapter(FrameworkAdapter):
     return []
 
   @property
-  def unsafe_submodules(self) -> Set[str]:  # pragma: no cover
+  def unsafe_submodules(self) -> Set[str]:
     """TODO: Add docstring."""
     return set()
 
@@ -103,7 +103,7 @@ class RdnaAdapter(FrameworkAdapter):
     """TODO: Add docstring."""
     return [SemanticTier.ARRAY_API]
 
-  @property  # pragma: no cover
+  @property
   def declared_magic_args(self) -> List[str]:
     """TODO: Add docstring."""
     return []
@@ -116,63 +116,62 @@ class RdnaAdapter(FrameworkAdapter):
   @property
   def plugin_traits(self) -> PluginTraits:
     """TODO: Add docstring."""
-    return PluginTraits()  # pragma: no cover
+    return PluginTraits()
 
-  @property  # pragma: no cover
+  @property
   def definitions(self) -> Dict[str, StandardMap]:
     """TODO: Add docstring."""
     return load_definitions("rdna")
 
   @property
-  def specifications(self) -> Dict[str, OperationDef]:  # pragma: no cover
+  def specifications(self) -> Dict[str, OperationDef]:
     """TODO: Add docstring."""
     return {}
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """TODO: Add docstring."""  # pragma: no cover
-    return []
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:  # pragma: no cover
     """TODO: Add docstring."""
     return []
 
-  # pragma: no cover
+  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
+    """TODO: Add docstring."""
+    return []
+
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """TODO: Add docstring."""
-    return f"; Target Device: {device_type}"  # pragma: no cover
+    return f"; Target Device: {device_type}"
 
   def get_device_check_syntax(self) -> str:
-    """TODO: Add docstring."""  # pragma: no cover
-    return "True"  # pragma: no cover
+    """TODO: Add docstring."""
+    return "True"
 
-  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:  # pragma: no cover
+  def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """TODO: Add docstring."""
     return ""
 
   def get_serialization_imports(self) -> List[str]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
-    """TODO: Add docstring."""  # pragma: no cover
-    return ""  # pragma: no cover
+    """TODO: Add docstring."""
+    return ""
 
   def get_weight_conversion_imports(self) -> List[str]:
     """TODO: Add docstring."""
-    return []  # pragma: no cover
+    return []
 
   def get_weight_load_code(self, path_var: str) -> str:
     """TODO: Add docstring."""
-    return "; Weights loading not supported in RDNA adapter"  # pragma: no cover
+    return "; Weights loading not supported in RDNA adapter"
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
     """TODO: Add docstring."""
-    return tensor_var  # pragma: no cover
+    return tensor_var
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """TODO: Add docstring."""
-    return "; Weights saving not supported in RDNA adapter"  # pragma: no cover
+    return "; Weights saving not supported in RDNA adapter"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """TODO: Add docstring."""
@@ -180,11 +179,11 @@ class RdnaAdapter(FrameworkAdapter):
 
   def get_doc_url(self, api_name: str) -> Optional[str]:
     """TODO: Add docstring."""
-    return f"https://gpuopen.com/learn/rdna-performance-guide/?q={api_name}"  # pragma: no cover
+    return f"https://gpuopen.com/learn/rdna-performance-guide/?q={api_name}"
 
   def convert(self, data: Any) -> Any:
     """TODO: Add docstring."""
-    return str(data)  # pragma: no cover
+    return str(data)
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """TODO: Add docstring."""

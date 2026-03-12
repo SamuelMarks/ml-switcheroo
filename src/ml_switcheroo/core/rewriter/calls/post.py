@@ -30,10 +30,10 @@ def handle_post_processing(
 
   Returns:
       cst.CSTNode: The modified result node.
-  """  # pragma: no cover
-  result_node = node  # pragma: no cover
-  # pragma: no cover
-  # 1. Output Adaptation (Tuple selection / formatting)  # pragma: no cover
+  """
+  result_node = node
+
+  # 1. Output Adaptation (Tuple selection / formatting)
   # Note: Legacy 'output_adapter' string logic has been deprecated and removed.
   # We only support structured 'output_select_index' for tuple destructuring.
   if "output_select_index" in mapping and mapping["output_select_index"] is not None:
@@ -43,8 +43,8 @@ def handle_post_processing(
       if hasattr(rewriter, "_report_failure"):
         rewriter._report_failure(f"Output indexing failed: {e}")
       return result_node
-  # pragma: no cover
-  # 2. Output Casting  # pragma: no cover
+
+  # 2. Output Casting
   if "output_cast" in mapping and mapping["output_cast"]:
     try:
       type_node = rewriter._create_dotted_name(mapping["output_cast"])

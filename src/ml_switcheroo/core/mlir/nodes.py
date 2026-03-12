@@ -18,7 +18,7 @@ class MlirNode(ABC):
   @abstractmethod
   def to_text(self) -> str:
     """Return the textual MLIR representation of this node."""
-    pass  # pragma: no cover
+    pass
 
 
 @dataclass
@@ -72,7 +72,7 @@ class AttributeNode(MlirNode):
 
     if isinstance(self.value, list):
       # Format as MLIR array: ["val1", "val2"]
-      val_str = f"[{', '.join(self.value)}]"  # pragma: no cover
+      val_str = f"[{', '.join(self.value)}]"
     else:
       val_str = self.value
 

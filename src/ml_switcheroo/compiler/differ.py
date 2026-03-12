@@ -96,17 +96,17 @@ class GraphDiffer:
 
     Better: If Optimizer produced FusedNode `fused_c1`, and `c1` is deleted, `c1` is anchor?
     """
-    actions: List[PatchAction] = []  # pragma: no cover
+    actions: List[PatchAction] = []
 
-    src_ids = {n.id for n in source.nodes}  # pragma: no cover
-    tgt_ids = {n.id for n in target.nodes}  # pragma: no cover
+    src_ids = {n.id for n in source.nodes}
+    tgt_ids = {n.id for n in target.nodes}
 
     # 1. Deletions
     # All nodes present in Source but not Target are candidates for Deletion
-    deleted_ids = src_ids - tgt_ids  # pragma: no cover
+    deleted_ids = src_ids - tgt_ids
 
     # 2. Additions (Replacements)
-    new_nodes = [n for n in target.nodes if n.id not in src_ids]  # pragma: no cover
+    new_nodes = [n for n in target.nodes if n.id not in src_ids]
 
     # We need to map New Nodes to an Anchor (one of the deleted nodes).
     # We use a greedy mapping strategy based on graph position or name heuristic.
@@ -115,28 +115,28 @@ class GraphDiffer:
     # AND we need to insert the new nodes. We insert them by replacing one of the deletes.
 
     # Heuristic: Map new node 'fused_X' to 'X'.
-    matched_anchors = set()  # pragma: no cover
+    matched_anchors = set()
 
-    for new_node in new_nodes:  # pragma: no cover
-      anchor = None  # pragma: no cover
+    for new_node in new_nodes:
+      anchor = None
 
       # Metadata hint (Populated by GraphOptimizer in ideal implementation)
-      if "anchor" in new_node.metadata:  # pragma: no cover
-        anchor = new_node.metadata["anchor"]  # pragma: no cover
+      if "anchor" in new_node.metadata:
+        anchor = new_node.metadata["anchor"]
       # Naming heuristic (fused_c1 -> c1)
-      elif new_node.id.startswith("fused_"):  # pragma: no cover
-        candidate = new_node.id.replace("fused_", "")  # pragma: no cover
-        if candidate in deleted_ids:  # pragma: no cover
-          anchor = candidate  # pragma: no cover
+      elif new_node.id.startswith("fused_"):
+        candidate = new_node.id.replace("fused_", "")
+        if candidate in deleted_ids:
+          anchor = candidate
 
-      if anchor and anchor in deleted_ids:  # pragma: no cover
+      if anchor and anchor in deleted_ids:
         # Determine inputs/outputs for the replacement snippet
         # Inputs: edges pointing to new_node in Target Graph
-        in_edges = [e for e in target.edges if e.target == new_node.id]  # pragma: no cover
-        input_vars = [e.source for e in in_edges]  # pragma: no cover
+        in_edges = [e for e in target.edges if e.target == new_node.id]
+        input_vars = [e.source for e in in_edges]
 
         # Output: new_node.id usually unless mapped
-        out_var = new_node.id  # pragma: no cover
+        out_var = new_node.id
 
         # Create Replacement Action
         # Check execution context (Init vs Call).
@@ -144,8 +144,8 @@ class GraphDiffer:
         # We generate TWO actions: One for Init, One for Call.
 
         # 1. Init Replacement (If stateful)
-        if _is_likely_stateful(new_node):  # pragma: no cover
-          actions.append(  # pragma: no cover
+        if _is_likely_stateful(new_node):
+          actions.append(
             ReplaceAction(
               node_id=anchor,
               new_node=new_node,
@@ -161,20 +161,20 @@ class GraphDiffer:
         # We mark the anchor as REPLACED.
         # Since we issued a replacement on the ID 'anchor', the Patcher will
         # handle both Init and Call sites for that ID index.
-        actions.append(  # pragma: no cover
+        actions.append(
           ReplaceAction(node_id=anchor, new_node=new_node, input_vars=input_vars, output_var=out_var, is_init=False)
         )
 
-        matched_anchors.add(anchor)  # pragma: no cover
+        matched_anchors.add(anchor)
 
     # Mark remaining deleted nodes as pure Delete
-    for did in deleted_ids:  # pragma: no cover
-      if did not in matched_anchors:  # pragma: no cover
-        actions.append(DeleteAction(node_id=did))  # pragma: no cover
+    for did in deleted_ids:
+      if did not in matched_anchors:
+        actions.append(DeleteAction(node_id=did))
 
-    return actions  # pragma: no cover
+    return actions
 
 
 def _is_likely_stateful(node: Any) -> bool:
   """Heuristic for statefulness based on kind (naming convention)."""
-  return node.kind and node.kind[0].isupper() or "Fused" in node.kind  # pragma: no cover
+  return node.kind and node.kind[0].isupper() or "Fused" in node.kind

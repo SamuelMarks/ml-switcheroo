@@ -32,16 +32,14 @@ class AttributeMixin(cst.CSTTransformer):
     # Scenario: nnx.module.Module -> nnx.Module
     simplified = self._simplify_reexports(updated_node)
     if simplified is not updated_node:
-      return simplified  # pragma: no cover
+      return simplified
 
     # 2. Alias Collapsing (Fully Qualified -> Alias)
     full_name = get_full_name(original_node)
-    if not full_name:
-      return updated_node  # pragma: no cover
 
     # Assuming self._path_to_alias is populated by BaseImportFixer
-    if not hasattr(self, "_path_to_alias"):
-      return updated_node  # pragma: no cover
+    if getattr(self, "_path_to_alias", None) is None:
+      return updated_node
 
     parts = full_name.split(".")
     # Try matching prefixes from longest to shortest
@@ -58,10 +56,7 @@ class AttributeMixin(cst.CSTTransformer):
           new_node = cst.Attribute(value=new_node, attr=cst.Name(part))
 
         # Apply deep simplification again on the collapsed result just in case
-        if isinstance(new_node, cst.Attribute):
-          return self._simplify_reexports(new_node)
-
-        return new_node  # pragma: no cover
+        return self._simplify_reexports(new_node)
 
     return updated_node
 
@@ -84,20 +79,20 @@ class AttributeMixin(cst.CSTTransformer):
       return node
 
     # Safety Check: The root of this chain must be a known framework alias or import
-    root_name = get_root_name(node)  # pragma: no cover
+    root_name = get_root_name(node)
 
     # Build list of safe roots (imported aliases or target frameworks)
-    safe_roots = set()  # pragma: no cover
-    if hasattr(self, "_defined_names"):  # pragma: no cover
-      safe_roots.update(self._defined_names)  # pragma: no cover
-    if hasattr(self, "_path_to_alias"):  # pragma: no cover
-      safe_roots.update(self._path_to_alias.values())  # pragma: no cover
-    if hasattr(self, "target_fw"):  # pragma: no cover
-      safe_roots.add(self.target_fw)  # pragma: no cover
+    safe_roots = set()
+    if hasattr(self, "_defined_names"):
+      safe_roots.update(self._defined_names)
+    if hasattr(self, "_path_to_alias"):
+      safe_roots.update(self._path_to_alias.values())
+    if hasattr(self, "target_fw"):
+      safe_roots.add(self.target_fw)
 
-    if root_name not in safe_roots:  # pragma: no cover
-      return node  # pragma: no cover
+    if root_name not in safe_roots:
+      return node
 
     # Collapse: Remove the middle attribute
-    new_base = node.value.value  # pragma: no cover
-    return node.with_changes(value=new_base)  # pragma: no cover
+    new_base = node.value.value
+    return node.with_changes(value=new_base)

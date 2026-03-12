@@ -59,14 +59,14 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
         try:
           # We skip modules/builtins that might clutter unless they look like ops
           if inspect.ismodule(obj):
-            continue  # pragma: no cover
+            continue
           info = _extract_metadata(obj)
           targets.append((full_path, info))
-        except Exception:  # pragma: no cover
-          continue  # pragma: no cover
-    except ImportError as e:  # pragma: no cover
-      log_error(f"Could not import module '{module_name}': {e}")  # pragma: no cover
-      return 1  # pragma: no cover
+        except Exception:
+          continue
+    except ImportError as e:
+      log_error(f"Could not import module '{module_name}': {e}")
+      return 1
   else:
     # Single mode
     try:
@@ -77,8 +77,8 @@ def handle_suggest(api_path: str, out_dir: Optional[Path] = None, batch_size: in
       return 1
 
   if not targets:
-    log_error(f"No valid API targets found for '{api_path}'.")  # pragma: no cover
-    return 1  # pragma: no cover
+    log_error(f"No valid API targets found for '{api_path}'.")
+    return 1
 
   # Sort deterministically
   targets.sort(key=lambda x: x[0])
@@ -142,9 +142,9 @@ def _extract_metadata(obj: Any) -> Dict[str, Any]:
   try:
     # signature() returns the parameter list e.g. "(x, y=1)"
     sig = str(inspect.signature(obj))
-  except (ValueError, TypeError):  # pragma: no cover
+  except (ValueError, TypeError):
     # Fallback for C-extensions
-    pass  # pragma: no cover
+    pass
 
   return {
     "signature": sig,
@@ -168,7 +168,7 @@ def _inspect_live_object(api_path: str) -> Dict[str, Any]:
       AttributeError: If object not found in module.
   """
   if "." not in api_path:
-    raise ImportError(f"Invalid path format: {api_path}")  # pragma: no cover
+    raise ImportError(f"Invalid path format: {api_path}")
 
   module_name, obj_name = api_path.rsplit(".", 1)
   module = importlib.import_module(module_name)
