@@ -193,15 +193,3 @@ y = t.abs(x)
 """
   result = rewrite(rewriter, code)
   assert "jax.numpy.abs(x)" in result
-
-
-@pytest.mark.skip
-def test_api_pass_value_map_parse_error():
-  # To hit 913-914, val_options gives target_code that is syntactically invalid
-  from ml_switcheroo.core.rewriter.passes.api import ApiPass
-  import libcst as cst
-  from ml_switcheroo.compiler.ir import RewriterContext, ResolutionPlan, TargetConfig
-  from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
-
-  plan = ResolutionPlan()
-  # Let's write a targeted test instead of full pipeline

@@ -1,3 +1,4 @@
+*.bak
 *,cover
 onnx9000
 tmp
@@ -91,3 +92,5 @@ universal_mapping.json
 coverage_*.txt
 interrogate_*.txt
 
+test_script*.py
+test_env*/

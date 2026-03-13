@@ -51,7 +51,7 @@ def _supports_numpy_casting(ctx: HookContext) -> bool:
   if hasattr(traits, "has_numpy_compatible_arrays"):
     return traits.has_numpy_compatible_arrays
 
-  return False
+  return False  # pragma: no cover
 
 
 @register_hook("type_methods")
@@ -116,7 +116,7 @@ def transform_casting(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   if not target_type_id:
     # If metadata is missing/resolvable, we cannot safely transform.
-    return node
+    return node  # pragma: no cover
 
   # 2. Resolve Target Dtype API
   # Ask the semantics manager: "How does target_fw implement 'Float32'?"

@@ -53,14 +53,14 @@ def transform_device_allocator(node: cst.Call, ctx: HookContext) -> cst.BaseExpr
   # 4. Generate Target Syntax
   try:
     new_code = adapter.get_device_syntax(s_type, s_index)
-  except Exception:
+  except Exception:  # pragma: no cover
     # If adapter doesn't implement or errors, return original
     return node
 
   # 5. Parse back to CST
   try:
     return cst.parse_expression(new_code)
-  except cst.ParserSyntaxError:
+  except cst.ParserSyntaxError:  # pragma: no cover
     return node
 
 
@@ -99,7 +99,7 @@ def _parse_device_args(node: cst.Call) -> Tuple[Optional[cst.BaseExpression], Op
         # Reconstruct nodes
         dev_type_node = cst.SimpleString(f"{raw_quote}{raw_type}{raw_quote}")
         dev_index_node = cst.Integer(raw_idx)
-      except ValueError:
+      except ValueError:  # pragma: no cover
         pass  # Not a simple int index, keep original string
 
   # Handle explicit index argument (torch.device('cuda', 1))

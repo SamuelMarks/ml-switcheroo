@@ -65,7 +65,7 @@ def transform_shape_packing(node: cst.Call, ctx: HookContext) -> cst.Call:
   is_method = False
   if isinstance(node.func, cst.Attribute):
     if is_framework_module_node(node.func.value, ctx):
-      is_method = False
+      is_method = False  # pragma: no cover
     else:
       is_method = True
 

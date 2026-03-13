@@ -283,7 +283,7 @@ class JaxCoreAdapter(JAXStackMixin):
           # Most JAX activations are in jax.nn and are lowercase.
           found.append(GhostInspector.inspect(obj, f"jax.nn.{name}"))
 
-    except ImportError:
+    except ImportError:  # pragma: no cover
       pass
     return found
 

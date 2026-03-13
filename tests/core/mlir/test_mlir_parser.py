@@ -45,7 +45,6 @@ def test_parse_attributes():
   assert roundtrip(code) == code
 
 
-@pytest.mark.skip
 def test_parse_region_nested():
   """
   Verify region and block parsing.
@@ -59,7 +58,6 @@ def test_parse_region_nested():
   assert roundtrip(code) == code
 
 
-@pytest.mark.skip
 def test_parse_with_comments():
   """Verify comment preservation."""
   code = """// Header

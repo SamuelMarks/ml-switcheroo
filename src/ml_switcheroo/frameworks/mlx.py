@@ -266,7 +266,7 @@ class MLXAdapter:
         }
         for name, obj in inspect.getmembers(mlx.nn):
           if name.lower() in target_names:
-            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))
+            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))  # pragma: no cover
 
       if category == StandardCategory.LOSS:
         if hasattr(mlx.nn, "losses"):

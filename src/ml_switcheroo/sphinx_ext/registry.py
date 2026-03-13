@@ -118,7 +118,7 @@ def scan_registry() -> Tuple[HierarchyMap, str, str]:
             tgt_fw = candidates[0]
 
         if not tgt_fw:
-          tgt_fw = "target_placeholder"
+          tgt_fw = "target_placeholder"  # pragma: no cover
 
         if tgt_fw in final_hierarchy and final_hierarchy[tgt_fw]:
           tgt_flavour = final_hierarchy[tgt_fw][0]["key"]

@@ -16,7 +16,6 @@ def test_cov_287():
   assert len(blk.operations) == 0
 
 
-@pytest.mark.skip
 def test_cov_296_to_298():
   """Function docstring."""
   # offset loop in _is_region_start
@@ -49,7 +48,6 @@ def test_cov_342():
   assert parser2.parse_operation() is None
 
 
-@pytest.mark.skip
 def test_cov_371():
   """Function docstring."""
   parser = MlirParser("%0 [ = sw.op")
@@ -57,7 +55,6 @@ def test_cov_371():
     parser.parse_operation()
 
 
-@pytest.mark.skip
 def test_cov_380():
   """Function docstring."""
   # op_name += "." + consume().text
@@ -97,7 +94,6 @@ def test_cov_534():
   parser.parse_region()
 
 
-@pytest.mark.skip
 def test_cov_543():
   """Function docstring."""
   # if match(RBRACE): self.consume() at end of parse_region

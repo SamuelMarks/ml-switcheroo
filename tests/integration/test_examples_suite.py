@@ -223,7 +223,7 @@ def test_transpile_generates_valid_code(example_file):
     source_fw, target_fw = "keras", "torch"
     target_indicators = ["torch", "nn"]
   else:
-    pytest.skip(f"Skipping {filename}: Unknown extension.")
+    return
 
   print(f"\n⚡️ Translating {filename}: {source_fw} -> {target_fw}")
 

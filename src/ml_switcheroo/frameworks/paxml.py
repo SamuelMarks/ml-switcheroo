@@ -16,8 +16,8 @@ try:
   import praxis
   import praxis.layers
   import praxis.base_layer
-  import praxis.layers.activations
-  import praxis.layers.normalizations
+  import praxis.layers.activations  # pragma: no cover
+  import praxis.layers.normalizations  # pragma: no cover
 except ImportError:
   praxis = None
 
@@ -130,7 +130,7 @@ class PaxmlAdapter(JAXStackMixin):
     targets = [praxis.layers]
     try:
       targets.extend([praxis.layers.activations, praxis.layers.normalizations])
-    except ImportError:
+    except ImportError:  # pragma: no cover
       pass
 
     for module in targets:

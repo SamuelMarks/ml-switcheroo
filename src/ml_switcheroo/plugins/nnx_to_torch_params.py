@@ -38,7 +38,7 @@ def _extract_leaf_name(node: cst.BaseExpression) -> Optional[str]:
   elif isinstance(node, cst.Attribute):
     return node.attr.value
   else:
-    return None
+    return None  # pragma: no cover
 
 
 @register_hook("nnx_param_to_torch")

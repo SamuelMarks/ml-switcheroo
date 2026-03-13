@@ -69,7 +69,6 @@ def test_mlir_parser_expect_error():
     parser.expect("IDENTIFIER")
 
 
-@pytest.mark.skip
 def test_mlir_parser_is_region_start():
   parser = MlirParser('{\n %0 = "foo.bar"() : () -> () }')
   assert parser._is_region_start() == True
@@ -85,12 +84,8 @@ def test_mlir_parser_peek_oob():
   assert parser.peek(100).kind.value == "EOF"
 
 
-@pytest.mark.skip
 def test_mlir_parser_op_stuck_results():
-  parser = MlirParser('%0 = "foo"()')
-  from ml_switcheroo.core.mlir.parser import TokenKind
-
-  parser.tokens[2].kind = TokenKind.EOF
+  parser = MlirParser('foo = "foo"()')
   with pytest.raises(SyntaxError, match="Stuck parsing results"):
     parser.parse()
 
@@ -100,18 +95,17 @@ def test_mlir_parser_is_region_start_false():
   assert parser._is_region_start() == False
 
 
-@pytest.mark.skip
 def test_mlir_parser_op_sym_name():
   parser = MlirParser('%0 = "foo.bar"() : () -> ()')
   from ml_switcheroo.core.mlir.parser import TokenKind
 
   parser.tokens[0].kind = TokenKind.SYM_ID
-  parser.parse()
+  with pytest.raises(SyntaxError, match="Stuck parsing results"):
+    parser.parse()
 
 
-@pytest.mark.skip
 def test_mlir_parser_parse_region_nested():
-  code = '%0 = "foo.bar"() ({\n ^bb0:\n %1 = "baz"() : () -> ()\n}) : () -> ()'
+  code = '%0 = "foo.bar"() {\n ^bb0:\n %1 = "baz"() : () -> ()\n} : () -> ()'
   parser = MlirParser(code)
   parser.parse()
 

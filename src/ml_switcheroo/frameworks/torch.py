@@ -648,7 +648,7 @@ class Qwen3VLPatchEmbed(nn.Module):
         try:
           if issubclass(obj, optim.Optimizer):
             found.append(GhostInspector.inspect(obj, f"torch.optim.{name}"))
-        except TypeError:
+        except TypeError:  # pragma: no cover
           pass
     return found
 

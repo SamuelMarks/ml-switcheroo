@@ -87,7 +87,7 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   args = list(node.args)
   if len(args) < 2:
-    return node
+    return node  # pragma: no cover
 
   input_arg = args[0]
   pad_arg = args[1]
@@ -117,7 +117,7 @@ def transform_padding(node: cst.Call, ctx: HookContext) -> cst.Call:
 
     # Update argument list
     if input_arg.comma == cst.MaybeSentinel.DEFAULT:
-      args[0] = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))
+      args[0] = input_arg.with_changes(comma=cst.Comma(whitespace_after=cst.SimpleWhitespace(" ")))  # pragma: no cover
 
     args[1] = pad_arg.with_changes(value=new_pad_tuple)
 

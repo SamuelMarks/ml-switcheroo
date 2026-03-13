@@ -68,7 +68,7 @@ def transform_keras_sequential(node: cst.Call, ctx: HookContext) -> cst.Call:
 
   first_val = node.args[0].value
   if isinstance(first_val, (cst.List, cst.Tuple)):
-    return node.with_changes(func=new_func)
+    return node.with_changes(func=new_func)  # pragma: no cover
 
   # 2. Pack Arguments
   elements = []

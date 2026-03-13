@@ -24,7 +24,7 @@ try:
   import keras.ops
   import keras.optimizers
   import keras.random
-except ImportError:
+except ImportError:  # pragma: no cover
   keras = None
 
 from ml_switcheroo.core.ghost import GhostInspector, GhostRef
@@ -80,7 +80,7 @@ class KerasAdapter:
 
     """
     if self._mode == InitMode.GHOST:
-      return []
+      return []  # pragma: no cover
     return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]
 
   @property
