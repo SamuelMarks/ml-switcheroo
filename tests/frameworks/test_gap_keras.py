@@ -65,19 +65,17 @@ def test_keras_adapter():
   with patch("ml_switcheroo.frameworks.keras.keras", mock_keras):
     # To make it scan something
     with patch("ml_switcheroo.frameworks.keras.inspect.getmembers", return_value=[("relu", lambda x: x)]):
-      with patch("ml_switcheroo.frameworks.keras.inspect.isfunction", return_value=True):
-        with patch("ml_switcheroo.frameworks.keras.inspect.isclass", return_value=True):
-          refs = adapter.collect_api(StandardCategory.ACTIVATION)
-          assert isinstance(refs, list)
+      refs = adapter.collect_api(StandardCategory.ACTIVATION)
+      assert isinstance(refs, list)
 
-          refs = adapter.collect_api(StandardCategory.LAYER)
-          assert isinstance(refs, list)
+      refs = adapter.collect_api(StandardCategory.LAYER)
+      assert isinstance(refs, list)
 
-          refs = adapter.collect_api(StandardCategory.LOSS)
-          assert isinstance(refs, list)
+      refs = adapter.collect_api(StandardCategory.LOSS)
+      assert isinstance(refs, list)
 
-          refs = adapter.collect_api(StandardCategory.OPTIMIZER)
-          assert isinstance(refs, list)
+      refs = adapter.collect_api(StandardCategory.OPTIMIZER)
+      assert isinstance(refs, list)
 
   # Test convert
   mock_keras.ops.convert_to_tensor = MagicMock(return_value="tensor")

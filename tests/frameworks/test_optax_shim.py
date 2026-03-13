@@ -53,7 +53,6 @@ def test_optax_shim_optimizers():
   with (
     patch("ml_switcheroo.frameworks.optax_shim.optax", mock_optax),
     patch("inspect.getmembers", return_value=members),
-    patch("inspect.isfunction", return_value=True),
     patch("ml_switcheroo.core.ghost.GhostInspector.inspect") as mock_inspect,
   ):
     # sgd will raise an exception
@@ -98,7 +97,6 @@ def test_optax_shim_losses():
   with (
     patch("ml_switcheroo.frameworks.optax_shim.optax", mock_optax),
     patch("inspect.getmembers", return_value=members),
-    patch("inspect.isfunction", return_value=True),
     patch("ml_switcheroo.core.ghost.GhostInspector.inspect") as mock_inspect,
   ):
 

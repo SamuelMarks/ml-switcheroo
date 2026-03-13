@@ -23,14 +23,10 @@ def test_define_inject_hub_failure(MockHub, tmp_path):
 
 
 def test_define_yaml_is_none(tmp_path):
-  import sys
+  from ml_switcheroo.cli.handlers.define import handle_define
 
-  with patch.dict(sys.modules, {"yaml": None}):
-    if "ml_switcheroo.cli.handlers.define" in sys.modules:
-      del sys.modules["ml_switcheroo.cli.handlers.define"]
-    import ml_switcheroo.cli.handlers.define
-
-    assert ml_switcheroo.cli.handlers.define.handle_define(tmp_path / "test.yaml") == 1
+  with patch("ml_switcheroo.cli.handlers.define.yaml", None):
+    assert handle_define(tmp_path / "test.yaml") == 1
 
 
 def test_define_list_with_empty_doc(tmp_path):
