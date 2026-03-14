@@ -15,7 +15,7 @@ from typing import List
 
 try:
   import optax
-except ImportError:
+except Exception:
   optax = None
 
 from ml_switcheroo.core.ghost import GhostInspector, GhostRef

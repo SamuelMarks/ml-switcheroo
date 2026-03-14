@@ -37,7 +37,7 @@ try:
   import mlx.nn
   import mlx.optimizers
   import mlx.utils
-except ImportError:
+except Exception:
   pass
 
 
@@ -280,7 +280,7 @@ class MLXAdapter:
           if inspect.isclass(obj) and not name.startswith("_"):
             results.append(GhostInspector.inspect(obj, f"mlx.optimizers.{name}"))
 
-    except ImportError as e:
+    except Exception as e:
       logging.debug(f"Could not inspect MLX: {e}")
       pass
 
@@ -301,7 +301,7 @@ class MLXAdapter:
 
       if isinstance(data, (np.ndarray, list, tuple, np.generic)):
         return mx.array(data)
-    except ImportError:
+    except Exception:
       pass
     return data
 

@@ -1,0 +1,158 @@
+{
+  "Abs": {
+    "macro_template": "helper.make_node('Abs', inputs=[{x}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Add": {
+    "macro_template": "helper.make_node('Add', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "add": {
+    "macro_template": "helper.make_node('Add', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Sub": {
+    "macro_template": "helper.make_node('Sub', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "subtract": {
+    "macro_template": "helper.make_node('Sub', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Mul": {
+    "macro_template": "helper.make_node('Mul', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "multiply": {
+    "macro_template": "helper.make_node('Mul', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Div": {
+    "macro_template": "helper.make_node('Div', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "divide": {
+    "macro_template": "helper.make_node('Div', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "MatMul": {
+    "macro_template": "helper.make_node('MatMul', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "matmul": {
+    "macro_template": "helper.make_node('MatMul', inputs=[{x1}, {x2}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Relu": {
+    "macro_template": "helper.make_node('Relu', inputs=[{x}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "relu": {
+    "macro_template": "helper.make_node('Relu', inputs=[{x}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Sigmoid": {
+    "macro_template": "helper.make_node('Sigmoid', inputs=[{x}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "sigmoid": {
+    "macro_template": "helper.make_node('Sigmoid', inputs=[{x}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Tanh": {
+    "macro_template": "helper.make_node('Tanh', inputs=[{x}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "tanh": {
+    "macro_template": "helper.make_node('Tanh', inputs=[{x}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Conv2d": {
+    "macro_template": "helper.make_node('Conv', inputs=[{input}, {weight}], kernel_shape={kernel_size}, strides={stride}, pads={padding}, dilations={dilation}, group={groups})",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Conv1d": {
+    "macro_template": "helper.make_node('Conv', inputs=[{input}, {weight}], kernel_shape={kernel_size}, strides={stride}, pads={padding}, dilations={dilation}, group={groups})",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "MaxPool2d": {
+    "macro_template": "helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size}, strides={stride})",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Reshape": {
+    "macro_template": "helper.make_node('Reshape', inputs=[{input}, {shape}], outputs=[])",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Conv": {
+    "macro_template": "helper.make_node('Conv', inputs=[{input}, {weight}], kernel_shape={kernel_size}, strides={stride}, pads={padding}, dilations={dilation}, group={groups})",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "Conv3d": {
+    "macro_template": "helper.make_node('Conv', inputs=[{input}, {weight}], kernel_shape={kernel_size}, strides={stride}, pads={padding}, dilations={dilation}, group={groups})",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "MaxPool": {
+    "macro_template": "helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size}, strides={stride})",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "MaxPool1d": {
+    "macro_template": "helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size}, strides={stride})",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  },
+  "MaxPool3d": {
+    "macro_template": "helper.make_node('MaxPool', inputs=[{input}], outputs=[], kernel_shape={kernel_size}, strides={stride})",
+    "required_imports": [
+      "from onnx import helper"
+    ]
+  }
+}

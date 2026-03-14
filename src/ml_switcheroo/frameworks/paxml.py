@@ -18,7 +18,7 @@ try:
   import praxis.base_layer
   import praxis.layers.activations  # pragma: no cover
   import praxis.layers.normalizations  # pragma: no cover
-except ImportError:
+except Exception:
   praxis = None
 
 from ml_switcheroo.frameworks.base import (
@@ -130,7 +130,7 @@ class PaxmlAdapter(JAXStackMixin):
     targets = [praxis.layers]
     try:
       targets.extend([praxis.layers.activations, praxis.layers.normalizations])
-    except ImportError:  # pragma: no cover
+    except Exception:  # pragma: no cover
       pass
 
     for module in targets:
@@ -254,7 +254,7 @@ class PaxmlAdapter(JAXStackMixin):
                 try: 
                     import jax
                     return jax.random.PRNGKey(seed) 
-                except ImportError: 
+                except Exception: 
                     return "mock_jax_key" 
         """).strip()
 

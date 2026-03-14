@@ -16,7 +16,7 @@ from typing import List, Tuple, Dict, Any, Optional, Set
 try:
   import jax
   import jax.numpy as jnp
-except ImportError:
+except Exception:
   jax = None
   jnp = None
 
@@ -283,7 +283,7 @@ class JaxCoreAdapter(JAXStackMixin):
           # Most JAX activations are in jax.nn and are lowercase.
           found.append(GhostInspector.inspect(obj, f"jax.nn.{name}"))
 
-    except ImportError:  # pragma: no cover
+    except Exception:  # pragma: no cover
       pass
     return found
 
@@ -301,7 +301,7 @@ class JaxCoreAdapter(JAXStackMixin):
     """
     try:
       import jax.numpy as jnp
-    except ImportError:
+    except Exception:
       return data
 
     if hasattr(data, "__array__") or isinstance(data, (list, tuple)):

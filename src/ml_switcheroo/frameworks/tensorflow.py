@@ -30,7 +30,7 @@ from ml_switcheroo.frameworks.loader import load_definitions
 
 try:
   import tensorflow as tf
-except ImportError:
+except Exception:
   tf = None
 
 
@@ -354,7 +354,7 @@ class TensorFlowAdapter:
             if inspect.isclass(obj) and "Layer" in name and not name.startswith("_"):
               results.append(GhostInspector.inspect(obj, f"tf.keras.layers.{name}"))
 
-    except ImportError:  # pragma: no cover
+    except Exception:  # pragma: no cover
       pass
     return results
 

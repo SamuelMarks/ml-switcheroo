@@ -20,7 +20,7 @@ try:
   import torch
   import torch.nn as nn
   import torch.optim as optim
-except ImportError:
+except Exception:
   torch = None
   nn = None
   optim = None
@@ -549,7 +549,7 @@ class Qwen3VLPatchEmbed(nn.Module):
     try:
       import torch
       import numpy as np
-    except ImportError:
+    except Exception:
       return data
 
     if isinstance(data, (np.ndarray, np.generic)):
@@ -692,7 +692,7 @@ class Qwen3VLPatchEmbed(nn.Module):
         if inspect.isclass(obj) and issubclass(obj, nn.Module):
           if name in known_names:
             found.append(GhostInspector.inspect(obj, f"torch.nn.{name}"))
-    except ImportError:
+    except Exception:
       if nn:
         for name, obj in inspect.getmembers(nn):
           if name in known_names and inspect.isclass(obj):
@@ -705,7 +705,7 @@ class Qwen3VLPatchEmbed(nn.Module):
           continue
         if name.lower() in [k.lower() for k in known_names]:
           found.append(GhostInspector.inspect(obj, f"torch.nn.functional.{name}"))
-    except ImportError:
+    except Exception:
       pass
     return found
 

@@ -32,7 +32,7 @@ from ml_switcheroo.frameworks.loader import load_definitions
 # Safe Import Handling for Ghost Mode (WASM/Docs)
 try:
   import jax
-except ImportError:
+except Exception:
   jax = None
 
 try:
@@ -40,7 +40,7 @@ try:
 
   # Explicitly bind the variable name so it is defined in success case
   flax_nnx = flax.nnx
-except ImportError:
+except Exception:
   flax_nnx = None
 
 

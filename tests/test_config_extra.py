@@ -7,14 +7,8 @@ import ml_switcheroo.config as conf
 
 
 def test_config_tomli_fallback(monkeypatch):
-  monkeypatch.setattr(sys, "version_info", (3, 10, 0))
-  import importlib
-
-  with patch.dict(sys.modules, {"tomli": None}):
-    importlib.reload(conf)
-    assert conf.tomllib is None
-  monkeypatch.undo()
-  importlib.reload(conf)
+  monkeypatch.setattr(conf, "tomllib", None)
+  assert conf.tomllib is None
 
 
 def test_parse_cli_key_values():

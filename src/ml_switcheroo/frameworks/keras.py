@@ -24,7 +24,7 @@ try:
   import keras.ops
   import keras.optimizers
   import keras.random
-except ImportError:  # pragma: no cover
+except Exception:  # pragma: no cover
   keras = None
 
 from ml_switcheroo.core.ghost import GhostInspector, GhostRef
@@ -431,7 +431,7 @@ class KerasAdapter:
                         if isinstance(node, h5py.Dataset): 
                             raw_state[name] = node[()] 
                     f.visititems(visit_func) 
-                except ImportError: 
+                except Exception: 
                     print("h5py not installed, cannot load raw weights.") 
                     raw_state = {{}} 
             """
