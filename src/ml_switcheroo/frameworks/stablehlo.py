@@ -18,7 +18,8 @@ from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
-from ml_switcheroo.semantics.schema import OperationDef, PluginTraits, StructuralTraits
+from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
+from ml_switcheroo.core.dsl import OperationDef
 
 
 @register_framework("stablehlo")

@@ -9,6 +9,9 @@ description = "Deterministic AST Transpiler for PyTorch <-> JAX"
 requires-python = ">=3.10"
 dynamic = ["dependencies", "optional-dependencies"]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.metadata.hooks.requirements_txt]
 files = ["requirements.txt"]
 
@@ -77,8 +80,5 @@ line-ending = "auto"
 docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
-[tool.uv.workspace]
-members = ["onnx9000/packages/python/onnx9000-core"]
-
 [tool.uv.sources]
-onnx9000-core = { workspace = true }
+onnx9000-core = { git = "https://github.com/SamuelMarks/onnx9000.git", subdirectory = "packages/python/onnx9000-core" }

@@ -18,7 +18,7 @@ from typing import Dict, Any, List, Optional
 from pydantic import ValidationError
 
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.schema import OperationDef, PatternDef
+from ml_switcheroo.core.dsl import OperationDef, PatternDef
 
 # Hierarchy of tier importance for overwriting checks
 # Higher numbers mean higher importance (harder to overwrite the Tier Origin)

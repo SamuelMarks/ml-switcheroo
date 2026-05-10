@@ -1,24 +1,15 @@
 """Shared runtime flags for generated tests (Auto-Generated)."""
-
 import sys
 import pytest
 import random
 import numpy as np
-
 import importlib.util
 
 # --- jax ---
-if importlib.util.find_spec("jax") and importlib.util.find_spec("jax.numpy"):
-  JAX_AVAILABLE = True
-else:
-  JAX_AVAILABLE = False
+JAX_AVAILABLE = importlib.util.find_spec("jax") is not None
 
 # --- torch ---
-if importlib.util.find_spec("torch"):
-  TORCH_AVAILABLE = True
-else:
-  TORCH_AVAILABLE = False
-
+TORCH_AVAILABLE = importlib.util.find_spec("torch") is not None
 
 # --- Determinism ---
 @pytest.fixture(autouse=True)
@@ -62,7 +53,6 @@ def ensure_determinism():
     except Exception:
       pass
 
-
 # --- Verification Logic ---
 def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
   """
@@ -77,9 +67,9 @@ def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
     return ref is val
 
   # 2. Try Chex (Structural comparison for JAX PyTrees)
-  if "chex" in globals():
+  if importlib.util.find_spec("chex") is not None:
     try:
-      chex_mod = globals()["chex"]
+      import chex as chex_mod
       if exact:
         chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)
       else:

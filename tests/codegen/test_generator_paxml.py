@@ -63,8 +63,8 @@ def test_paxml_code_generation(tmp_path):
   assert runtime_file.exists()
   runtime_content = runtime_file.read_text(encoding="utf-8")
 
-  assert "import praxis" in runtime_content
-  assert "import jax.numpy as jnp" in runtime_content
+  assert "find_spec(\"praxis\")" in runtime_content
+  assert "find_spec(\"jax\")" in runtime_content
 
   # Check specific test function body in generated test file
   pax_block_start = content.find("Framework: paxml")

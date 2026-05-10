@@ -155,14 +155,8 @@ def test_get_all_hook_metadata_lazy_load():
 
 def test_load_plugins_exception_default(capsys):
   clear_hooks()
-  orig_import = __import__
 
-  def mock_import(name, *args, **kwargs):
-    if name == "ml_switcheroo.plugins":
-      raise ImportError("Mocked error")
-    return orig_import(name, *args, **kwargs)
-
-  with patch("builtins.__import__", side_effect=mock_import):
+  with patch("importlib.import_module", side_effect=ImportError("Mocked error")):
     load_plugins()
 
   # Should not crash, just print error

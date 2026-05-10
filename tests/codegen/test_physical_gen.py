@@ -89,9 +89,9 @@ def test_generator_writes_file_and_runtime(generator, sample_spec, tmp_path):
   assert runtime_file.exists()
   runtime_content = runtime_file.read_text()
 
-  assert "import torch" in runtime_content
+  assert "find_spec(\"torch\")" in runtime_content
   assert "TORCH_AVAILABLE" in runtime_content
-  assert "import jax" in runtime_content
+  assert "find_spec(\"jax\")" in runtime_content
   # Updated check for substring logic rather than full match
   assert "chex_mod.assert_trees_all_close" in runtime_content
   assert "isinstance(ref, dict)" in runtime_content

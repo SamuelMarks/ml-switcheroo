@@ -16,7 +16,7 @@ from typing import Dict, Optional, Tuple, Any, Set, List
 from pydantic import ValidationError
 
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.schema import OperationDef, PatternDef
+from ml_switcheroo.core.dsl import OperationDef, PatternDef
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 
 # Use base directly to avoid cycle

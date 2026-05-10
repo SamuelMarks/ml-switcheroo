@@ -11,4 +11,4 @@ pygments==2.19.1;platform_system=='Emscripten'
 rich>=13.0
 hypothesis
 
-onnx9000-core
+onnx9000-core @ git+https://github.com/SamuelMarks/onnx9000.git#subdirectory=packages/python/onnx9000-core

@@ -6,8 +6,26 @@ and determinism fixtures.
 """
 
 import pathlib
+import ast
 from typing import List, Optional, Any
 from ml_switcheroo.generated_tests.templates import get_template
+
+def get_required_packages(imp_str: str) -> List[str]:
+  try:
+    tree = ast.parse(imp_str)
+  except SyntaxError:
+    return []
+  
+  packages = []
+  for node in tree.body:
+    if isinstance(node, ast.Import):
+      for alias in node.names:
+        packages.append(alias.name.split(".")[0])
+    elif isinstance(node, ast.ImportFrom):
+      if node.module:
+        packages.append(node.module.split(".")[0])
+  
+  return list(dict.fromkeys(packages))
 
 # The static part of the runtime helper that does not depend on available frameworks.
 _SHARED_RUNTIME_LOGIC = r'''
@@ -67,9 +85,9 @@ def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
     return ref is val
 
   # 2. Try Chex (Structural comparison for JAX PyTrees)
-  if "chex" in globals():
+  if importlib.util.find_spec("chex") is not None:
     try:
-      chex_mod = globals()["chex"]
+      import chex as chex_mod
       if exact:
         chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)
       else:
@@ -165,12 +183,12 @@ def ensure_runtime_module(
     # e.g., TORCH_AVAILABLE = True
     var_name = f"{fw.upper()}_AVAILABLE"
     imports_block.append(f"# --- {fw} ---")
-    imports_block.append("try:")
-    for line in imp.split("\n"):
-      imports_block.append(f"    {line}")
-    imports_block.append(f"    {var_name} = True")
-    imports_block.append("except ImportError:")
-    imports_block.append(f"    {var_name} = False")
+    req_pkgs = get_required_packages(imp)
+    if not req_pkgs:
+      imports_block.append(f"{var_name} = True")
+    else:
+      checks = " and ".join(f'importlib.util.find_spec("{p}") is not None' for p in req_pkgs)
+      imports_block.append(f"{var_name} = {checks}")
     imports_block.append("")
 
     if fw == "tensorflow":
@@ -184,7 +202,7 @@ def ensure_runtime_module(
 
   # Combine parts
   code = '"""Shared runtime flags for generated tests (Auto-Generated)."""\n'
-  code += "import sys\nimport pytest\nimport random\nimport numpy as np\n\n"
+  code += "import sys\nimport pytest\nimport random\nimport numpy as np\nimport importlib.util\n\n"
   code += imports_str
   code += _SHARED_RUNTIME_LOGIC
 

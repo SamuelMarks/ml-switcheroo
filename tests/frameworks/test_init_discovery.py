@@ -24,11 +24,11 @@ def test_available_frameworks_reflects_registry():
   # Mock the registry directly
   mock_registry = {"mock_fw_1": MagicMock(), "mock_fw_2": MagicMock()}
 
-  with patch.dict(frameworks_pkg._ADAPTER_REGISTRY, mock_registry, clear=True):
+  with patch("ml_switcheroo.frameworks.base._ADAPTER_REGISTRY", mock_registry):
     fws = frameworks_pkg.available_frameworks()
-    assert "mock_fw_1" in fws
-    assert "mock_fw_2" in fws
-    assert len(fws) == 2
+  assert "mock_fw_1" in fws
+  assert "mock_fw_2" in fws
+  assert len(fws) == 2
 
 
 def test_auto_discovery_logic():

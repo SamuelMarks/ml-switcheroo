@@ -14,7 +14,8 @@ from ml_switcheroo.frameworks.base import (
   ImportConfig,
   InitMode,
 )
-from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits, OperationDef
+from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
+from ml_switcheroo.core.dsl import OperationDef
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.core.html.parser import HtmlParser

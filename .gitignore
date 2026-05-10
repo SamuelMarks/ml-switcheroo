@@ -1,3 +1,4 @@
+doc_cov.json
 ruff_errors.json
 *.bak
 *,cover

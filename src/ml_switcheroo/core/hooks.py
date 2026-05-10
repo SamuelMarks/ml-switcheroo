@@ -20,7 +20,8 @@ from pydantic import BaseModel, Field, ConfigDict
 
 # We import RuntimeConfig for type hinting
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.schema import PluginTraits, FrameworkVariant
+from ml_switcheroo.core.dsl import FrameworkVariant
+from ml_switcheroo.semantics.schema import PluginTraits
 
 # Lazy import to avoid circular dependency
 # TYPE_CHECKING block logic or Any is sufficient for runtime
