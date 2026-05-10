@@ -20,6 +20,7 @@ jobs:
       # Configure uv to use the system Python if we wanted,
       # but here we will create a dedicated venv for isolation.
       UV_SYSTEM_PYTHON: 0
+      PYO3_USE_ABI3_FORWARD_COMPATIBILITY: "1"
 
     steps:
       - name: Checkout source code

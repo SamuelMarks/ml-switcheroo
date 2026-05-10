@@ -13,7 +13,10 @@ def test_jax_import_success():
 
 
 def test_jax_convert_fallback():
-  adapter = JaxCoreAdapter()
-  # It attempts to convert __array__ or list. If it isn't either, it returns data.
-  res = adapter.convert("not an array")
-  assert res == "not an array"
+  mock_jax = mock.MagicMock()
+  mock_jnp = mock.MagicMock()
+  with mock.patch.dict("sys.modules", {"jax": mock_jax, "jax.numpy": mock_jnp}):
+    adapter = JaxCoreAdapter()
+    # It attempts to convert __array__ or list. If it isn't either, it returns data.
+    res = adapter.convert("not an array")
+    assert res == "not an array"

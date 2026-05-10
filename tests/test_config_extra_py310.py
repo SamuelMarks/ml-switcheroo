@@ -1,24 +1,14 @@
 from unittest import mock
-import importlib
 
 
 def test_config_tomli_import():
-  # Save the original module to restore it
-  import ml_switcheroo.config as orig_config
+  from ml_switcheroo.config import _import_tomllib
 
-  with mock.patch("sys.version_info", (3, 10)):
+  with mock.patch("sys.version_info", (3, 10, 0, "final", 0)):
     with mock.patch.dict("sys.modules", {"tomli": None, "tomllib": None}):
-      import ml_switcheroo.config
+      assert _import_tomllib() is None
 
-      importlib.reload(ml_switcheroo.config)
-      assert ml_switcheroo.config.tomllib is None
-
-  with mock.patch("sys.version_info", (3, 10)):
-    with mock.patch.dict("sys.modules", {"tomli": mock.MagicMock(), "tomllib": None}):
-      import ml_switcheroo.config
-
-      importlib.reload(ml_switcheroo.config)
-      assert ml_switcheroo.config.tomllib is not None
-
-  # Restore it!
-  importlib.reload(orig_config)
+  with mock.patch("sys.version_info", (3, 10, 0, "final", 0)):
+    mock_tomli = mock.MagicMock()
+    with mock.patch.dict("sys.modules", {"tomli": mock_tomli, "tomllib": None}):
+      assert _import_tomllib() is mock_tomli

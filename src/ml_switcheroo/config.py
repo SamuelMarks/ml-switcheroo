@@ -12,14 +12,24 @@ from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar
 
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
+
 # Optional TOML support
-if sys.version_info >= (3, 11):
-  import tomllib
-else:
-  try:
-    import tomli as tomllib
-  except ImportError:
-    tomllib = None  # type: ignore
+def _import_tomllib():
+  """Imports tomllib or tomli depending on python version."""
+  if sys.version_info >= (3, 11):
+    import tomllib
+
+    return tomllib
+  else:
+    try:
+      import tomli as tomllib
+
+      return tomllib
+    except ImportError:
+      return None
+
+
+tomllib = _import_tomllib()
 
 T = TypeVar("T", bound=BaseModel)
 

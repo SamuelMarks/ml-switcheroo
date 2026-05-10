@@ -277,4 +277,4 @@ def test_runtime_generation_includes_jit_modules(tmp_path):
 
   runtime = out_file.parent / "runtime.py"
   assert runtime.exists()
-  assert "find_spec(\"jax\")" in runtime.read_text()
+  assert 'find_spec("jax")' in runtime.read_text()

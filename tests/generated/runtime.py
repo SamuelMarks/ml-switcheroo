@@ -1,4 +1,5 @@
 """Shared runtime flags for generated tests (Auto-Generated)."""
+
 import sys
 import pytest
 import random
@@ -10,6 +11,7 @@ JAX_AVAILABLE = importlib.util.find_spec("jax") is not None
 
 # --- torch ---
 TORCH_AVAILABLE = importlib.util.find_spec("torch") is not None
+
 
 # --- Determinism ---
 @pytest.fixture(autouse=True)
@@ -53,6 +55,7 @@ def ensure_determinism():
     except Exception:
       pass
 
+
 # --- Verification Logic ---
 def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
   """
@@ -70,6 +73,7 @@ def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
   if importlib.util.find_spec("chex") is not None:
     try:
       import chex as chex_mod
+
       if exact:
         chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)
       else:

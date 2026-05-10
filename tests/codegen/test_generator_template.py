@@ -71,8 +71,8 @@ def test_default_template_fallback(tmp_path, semantics_data):
   runtime_content = (out_file.parent / "runtime.py").read_text()
 
   # Check imports in runtime module
-  assert "find_spec(\"torch\")" in runtime_content
-  assert "find_spec(\"jax\")" in runtime_content
+  assert 'find_spec("torch")' in runtime_content
+  assert 'find_spec("jax")' in runtime_content
 
   # Should skip tinygrad because no template exists for it in defaults
   assert "Framework: tinygrad" not in content
@@ -109,7 +109,7 @@ def test_custom_backend_template(tmp_path, semantics_data):
   assert "Framework: tinygrad" in content
 
   # check imports in runtime
-  assert "find_spec(\"tinygrad\")" in runtime_content
+  assert 'find_spec("tinygrad")' in runtime_content
 
   # check usage
   assert "Tensor(np_x)" in content

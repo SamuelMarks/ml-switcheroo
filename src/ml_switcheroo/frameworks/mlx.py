@@ -30,11 +30,7 @@ from ml_switcheroo.frameworks.base import (
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 
-# Conditional import to allow loading in environments without MLX
-try:
-  pass
-except Exception:
-  pass
+# Definitions are loaded from `frameworks/definitions/mlx.json`.
 
 
 @register_framework("mlx")

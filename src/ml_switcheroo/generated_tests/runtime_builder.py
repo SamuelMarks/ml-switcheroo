@@ -10,12 +10,21 @@ import ast
 from typing import List, Optional, Any
 from ml_switcheroo.generated_tests.templates import get_template
 
+
 def get_required_packages(imp_str: str) -> List[str]:
+  """Parse an import string and return a list of required top-level packages.
+
+  Args:
+    imp_str: The import string to parse.
+
+  Returns:
+    A list of top-level package names.
+  """
   try:
     tree = ast.parse(imp_str)
   except SyntaxError:
     return []
-  
+
   packages = []
   for node in tree.body:
     if isinstance(node, ast.Import):
@@ -24,8 +33,9 @@ def get_required_packages(imp_str: str) -> List[str]:
     elif isinstance(node, ast.ImportFrom):
       if node.module:
         packages.append(node.module.split(".")[0])
-  
+
   return list(dict.fromkeys(packages))
+
 
 # The static part of the runtime helper that does not depend on available frameworks.
 _SHARED_RUNTIME_LOGIC = r'''
