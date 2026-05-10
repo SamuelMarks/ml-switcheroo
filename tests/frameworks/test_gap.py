@@ -1,4 +1,3 @@
-import pytest
 from ml_switcheroo.frameworks.mlir import MlirAdapter
 from ml_switcheroo.frameworks.rdna import RdnaAdapter
 from ml_switcheroo.frameworks.sass import SassAdapter

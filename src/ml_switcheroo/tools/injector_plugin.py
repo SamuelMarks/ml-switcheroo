@@ -10,13 +10,11 @@ Feature 086: Auto-Wire Dictionary injection.
 
 import re
 import textwrap
-import json
 from pathlib import Path
 from typing import List, Optional
 import libcst as cst
 
 from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule, LogicOp
-from ml_switcheroo.tools.injector_fw.utils import convert_to_cst_literal
 
 # Helper logic injected into plugins generated with rules
 HELPER_LOGIC = """
@@ -179,7 +177,6 @@ class PluginGenerator:
     # Strip Docstring (First stmt is expression string)
     if stmts:
       first = stmts[0]
-      idx = 0
       is_doc = False
       if isinstance(first, cst.SimpleStatementLine) and len(first.body) == 1:
         expr = first.body[0]
@@ -301,7 +298,7 @@ class PluginGenerator:
         lines.append(f"    {keyword} val_{i} {py_op} {val_repr}:")
 
       lines.append(f'        new_func = _create_dotted_name("{rule.use_api}")')
-      lines.append(f"        return node.with_changes(func=new_func)")
+      lines.append("        return node.with_changes(func=new_func)")
 
     lines.append("    ")
     lines.append("    return node\n")

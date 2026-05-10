@@ -8,12 +8,9 @@ Verifies:
 4.  Rewrite injects permutation calls on outputs (Result wrapping).
 """
 
-import pytest
-import libcst as cst
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.enums import SemanticTier
 
 SOURCE_LAYOUT = """
 import torch

@@ -3,9 +3,7 @@ Integration test for the MLIR Bridge Pipeline.
 """
 
 import pytest
-import re
-import libcst as cst
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager

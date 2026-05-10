@@ -105,4 +105,8 @@ def convert(
 __all__ = [
   "convert",
   "__version__",
+  "RuntimeConfig",
+  "ASTEngine",
+  "ConversionResult",
+  "SemanticsManager",
 ]

@@ -8,7 +8,7 @@ round-trip transformations.
 
 import re
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Generator
+from typing import List, Optional, Generator
 
 from ml_switcheroo.core.mlir.nodes import (
   ModuleNode,

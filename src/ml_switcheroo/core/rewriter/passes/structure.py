@@ -8,7 +8,6 @@ This module consolidates all structural transformation logic, including:
 5.  **Type Annotation Rewriting**: Mapping framework-specific types (e.g., ``torch.Tensor`` -> ``jax.Array``).
 """
 
-import re
 import libcst as cst
 from typing import Optional, Set, List, Tuple, Dict, Any, Union
 

@@ -23,10 +23,8 @@ Addresses the architectural difference between:
 """
 
 import libcst as cst
-from typing import Union
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
-from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 
 def _create_dotted_name(name_str: str) -> cst.BaseExpression:

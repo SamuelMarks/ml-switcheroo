@@ -5,7 +5,6 @@ Maps ODL definitions to Strategies and executes cross-framework comparison.
 """
 
 import importlib
-import traceback
 from typing import Dict, Any, Tuple, Optional, List
 import numpy as np
 
@@ -150,6 +149,6 @@ class EquivalenceRunner:
         if a_arr.dtype.kind in ["U", "S", "O"]:
           return np.array_equal(a_arr, b_arr)
         return np.allclose(a_arr, b_arr, rtol=rtol, atol=atol, equal_nan=True)
-      except:
+      except Exception:
         return False
     return a == b

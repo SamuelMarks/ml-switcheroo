@@ -1,9 +1,6 @@
 import yaml
-import shutil
-from pathlib import Path
 from unittest import mock
 
-import pytest
 from ml_switcheroo.sphinx_ext.autogen_ops import (
   IndentedDumper,
   _build_yaml_entry,

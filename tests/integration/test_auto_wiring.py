@@ -9,13 +9,12 @@ Verifies that:
 
 import pytest
 import libcst as cst
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from ml_switcheroo.core.hooks import register_hook, clear_hooks, HookContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
-import ml_switcheroo.semantics.paths
 
 
 @pytest.fixture(autouse=True)
@@ -56,9 +55,7 @@ def test_auto_wired_plugin_flow(tmp_path):
     # Valid CST construction for dotted name string 'jax.numpy.magic_swapped'
     # We use a helper function pattern usually, but manual here for verification
 
-    attr_chain = cst.Attribute(
-      value=cst.Attribute(value=cst.Name("jax"), attr=cst.Name("numpy")), attr=cst.Name("magic_swapped")
-    )
+    cst.Attribute(value=cst.Attribute(value=cst.Name("jax"), attr=cst.Name("numpy")), attr=cst.Name("magic_swapped"))
 
     # Just swap the function name for simple verification
     # Must use simple Name if passing to func=...

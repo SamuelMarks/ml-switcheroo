@@ -5,7 +5,6 @@ Source: PyTorch
 Targets: JAX, TensorFlow, NumPy, MLX, Keras
 """
 
-import ast
 import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig

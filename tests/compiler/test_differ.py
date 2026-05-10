@@ -1,4 +1,3 @@
-import pytest
 from ml_switcheroo.compiler.differ import GraphDiffer, _is_likely_stateful
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
 

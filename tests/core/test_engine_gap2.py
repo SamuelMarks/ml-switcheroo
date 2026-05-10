@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
@@ -35,7 +34,7 @@ def test_rewriter_loopback():
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
     patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
-    patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher") as mock_patcher,
+    patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
     patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
@@ -56,7 +55,7 @@ def test_rewriter_loopback_sharding_jax():
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
     patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
-    patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher") as mock_patcher,
+    patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
     patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])
@@ -77,7 +76,7 @@ def test_rewriter_loopback_sharding_torch():
     patch("ml_switcheroo.core.engine.ingest_code", return_value=cst.parse_module("def foo(): pass")),
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
     patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
-    patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher") as mock_patcher,
+    patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
     patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     real_graph = LogicalGraph(nodes=[LogicalNode("a", "b")], edges=[])

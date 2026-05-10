@@ -40,8 +40,6 @@ def test_optax_shim_optimizers():
   mock_fail.__name__ = "sgd"
   mock_optax.sgd = mock_fail
 
-  import inspect
-
   # We need to mock getmembers to return our specific functions
   members = [
     ("adam", mock_adam),

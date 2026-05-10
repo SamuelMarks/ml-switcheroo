@@ -9,7 +9,7 @@ import inspect
 import textwrap
 import re
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 from ml_switcheroo.testing.harness_generator_template import HARNESS_TEMPLATE
 from ml_switcheroo.testing.fuzzer.core import InputFuzzer
@@ -138,11 +138,11 @@ class HarnessGenerator:
     if magic_args and helper_name:
       quoted_args = [f'"{a}"' for a in magic_args]
       list_str = "[" + ", ".join(quoted_args) + "]"
-      injection_lines.append(f"val = None")
+      injection_lines.append("val = None")
       injection_lines.append(f"if tp in {list_str}:")
       injection_lines.append(f"    val = {helper_name}(seed=42)")
-      injection_lines.append(f"if val is not None:")
-      injection_lines.append(f"    tgt_inputs[tp] = val")
+      injection_lines.append("if val is not None:")
+      injection_lines.append("    tgt_inputs[tp] = val")
     else:
       injection_lines.append("pass")
 

@@ -1,5 +1,4 @@
 from ml_switcheroo.cli.handlers.define import handle_define
-import pytest
 
 
 def test_define_dry_run(tmp_path):

@@ -1,6 +1,5 @@
 """Module docstring."""
 
-import torch
 import torch.nn as nn
 
 

@@ -27,7 +27,7 @@ def test_sass_parser_parse_line_eof():
 
 
 def test_sass_parser_operand_eof():
-  parser = SassParser("MOV R0, ")
+  SassParser("MOV R0, ")
 
 
 def test_sass_parser_operand_unknown():

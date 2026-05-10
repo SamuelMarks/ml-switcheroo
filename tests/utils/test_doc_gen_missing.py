@@ -1,6 +1,5 @@
 def test_doc_gen_missing():
   from ml_switcheroo.utils.doc_gen import MigrationGuideGenerator
-  from ml_switcheroo.semantics.manager import SemanticsManager
 
   class DummySM:
     def get_definition_by_id(self, op_name):

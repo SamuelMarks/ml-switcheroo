@@ -12,7 +12,7 @@ Verifies that:
 import pytest
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.cli import commands
-from ml_switcheroo.frameworks.base import StandardCategory, GhostRef
+from ml_switcheroo.frameworks.base import GhostRef
 from ml_switcheroo.discovery.consensus import CandidateStandard
 
 

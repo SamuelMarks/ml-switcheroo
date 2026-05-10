@@ -1,4 +1,3 @@
-import pytest
 import libcst as cst
 import inspect
 from unittest.mock import MagicMock
@@ -29,7 +28,7 @@ def test_all_plugin_fallbacks():
       if inspect.isclass(obj) and hasattr(obj, "transform") and "Plugin" in name:
         try:
           plugins.append(obj())
-        except:
+        except Exception:
           pass
 
   ctx = MagicMock()

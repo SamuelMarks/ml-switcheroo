@@ -15,7 +15,7 @@ import importlib
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Callable, Dict, Optional, Any, Type, TypeVar, List, Union
+from typing import Callable, Dict, Optional, Any, Type, TypeVar, List
 from pydantic import BaseModel, Field, ConfigDict
 
 # We import RuntimeConfig for type hinting
@@ -354,7 +354,7 @@ def load_plugins(plugins_dir: Optional[Path] = None, extra_dirs: Optional[List[P
   # 1. Load Defaults (Internal Package) if no specific override
   if not _PLUGINS_LOADED and not plugins_dir:
     try:
-      import ml_switcheroo.plugins  # noqa: F401
+      importlib.import_module("ml_switcheroo.plugins")
 
       _PLUGINS_LOADED = True
       # We just count existing hooks as a proxy for "loaded"

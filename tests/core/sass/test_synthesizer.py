@@ -1,14 +1,12 @@
 """Module docstring."""
 
 import pytest
-import libcst as cst
 from unittest.mock import MagicMock
 
 from ml_switcheroo.compiler.backends.sass.synthesizer import RegisterAllocator, SassSynthesizer, MAX_REGISTERS
 from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
 from ml_switcheroo.compiler.frontends.sass.nodes import Instruction, Register, Immediate, Comment, Label
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.compiler.backends.sass.macros import expand_conv2d, expand_linear
 
 
 def test_allocator_sequential():
@@ -133,7 +131,7 @@ def test_graph_to_sass_macro_expansion(mock_semantics):
   comments = [n.text for n in nodes if isinstance(n, Comment)]
   assert "BEGIN Conv2d (conv1)" in comments
   labels = [n.name for n in nodes if isinstance(n, Label)]
-  assert any("L_KY" in l for l in labels)
+  assert any("L_KY" in label for label in labels)
   opcodes = [n.opcode for n in nodes if isinstance(n, Instruction)]
   assert "IMAD" in opcodes
   assert "FFMA" in opcodes

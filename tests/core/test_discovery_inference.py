@@ -9,7 +9,6 @@ Verifies:
 """
 
 import types
-import pytest
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.core.discovery import SimulatedReflection

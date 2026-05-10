@@ -4,7 +4,7 @@ import pytest
 import libcst as cst
 from collections import defaultdict
 
-from ml_switcheroo.core.mlir.nodes import OperationNode, BlockNode, RegionNode, AttributeNode, ValueNode, TypeNode
+from ml_switcheroo.core.mlir.nodes import OperationNode, BlockNode, RegionNode, AttributeNode, ValueNode
 from ml_switcheroo.core.mlir.gen_expressions import ExpressionGeneratorMixin
 from ml_switcheroo.core.mlir.gen_statements import StatementGeneratorMixin
 from ml_switcheroo.core.mlir.naming import NamingContext

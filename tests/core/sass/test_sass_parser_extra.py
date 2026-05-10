@@ -1,4 +1,3 @@
-import pytest
 from ml_switcheroo.compiler.frontends.sass.parser import SassParser, LabelRef
 
 
@@ -7,7 +6,7 @@ def test_sass_parser_missing():
   r = LabelRef("test")
   assert str(r) == "test"
 
-  ast = parser.parse()
+  parser.parse()
 
   parser = SassParser("MOV R0, R1\n.text")
-  ast = parser.parse()
+  parser.parse()

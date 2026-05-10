@@ -5,7 +5,6 @@ Verifies that the GraphExtractor correctly maps Logical Nodes back to their
 original LibCST source nodes via the `node_map` registry.
 """
 
-import pytest
 import libcst as cst
 from ml_switcheroo.core.graph import GraphExtractor
 

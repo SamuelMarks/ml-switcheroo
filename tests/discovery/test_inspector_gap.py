@@ -1,7 +1,5 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.discovery.inspector import ApiInspector
-import inspect
 
 
 def test_inspector_cache():
@@ -114,7 +112,7 @@ def test_inspector_runtime_recursion(mock_griffe):
 
     mock_import.return_value = mock_module
 
-    res = inspector.inspect("dummy")
+    inspector.inspect("dummy")
 
 
 @patch("ml_switcheroo.discovery.inspector.griffe.load", side_effect=Exception("Griffe Fail"))
@@ -151,7 +149,7 @@ def test_inspector_runtime_functions(mock_griffe):
     res = inspector.inspect("dummy")
 
     assert "dummy.f1" in res
-    assert res["dummy.f1"]["has_varargs"] == True
+    assert res["dummy.f1"]["has_varargs"]
     assert res["dummy.f1"]["params"] == ["a", "args"]
 
     assert "dummy.f2" not in res

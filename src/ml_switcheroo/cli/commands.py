@@ -42,12 +42,6 @@ from typing import Optional
 from pathlib import Path
 
 # Re-export dependent classes to satisfy test patches that target this module
-from ml_switcheroo.discovery.syncer import FrameworkSyncer
-from ml_switcheroo.frameworks import available_frameworks, get_adapter
-from ml_switcheroo.semantics.autogen import SemanticPersister
-from ml_switcheroo.discovery.consensus import ConsensusEngine
-from ml_switcheroo.testing.batch_runner import BatchValidator
-from ml_switcheroo.utils.readme_editor import ReadmeEditor
 from ml_switcheroo.semantics.paths import resolve_semantics_dir, resolve_snapshots_dir
 
 

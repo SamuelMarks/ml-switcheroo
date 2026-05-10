@@ -1,6 +1,4 @@
 from ml_switcheroo.cli.handlers.define import (
-  _resolve_inferred_apis,
-  _inject_hub,
   _inject_spokes,
   _scaffold_plugins,
   _generate_test_file,
@@ -8,7 +6,6 @@ from ml_switcheroo.cli.handlers.define import (
 )
 from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant, PluginScaffoldDef
 from unittest.mock import patch, MagicMock
-from pathlib import Path
 
 
 @patch("ml_switcheroo.cli.handlers.define._inject_hub")
@@ -111,7 +108,7 @@ def test_inject_spokes_valid_adapter():
     tier="MATH",
     std_args=["x"],
   )
-  with patch("ml_switcheroo.cli.handlers.define.FrameworkInjector") as MockGen:
+  with patch("ml_switcheroo.cli.handlers.define.FrameworkInjector"):
     _inject_spokes(op)
 
 

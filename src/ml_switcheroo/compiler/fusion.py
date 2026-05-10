@@ -5,7 +5,6 @@ Provides passes to:
 2. De-fuse a QKV projection back into separate Q, K, V projections.
 """
 
-from typing import Dict, List, Optional
 from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, PartitionSpec
 
 
@@ -31,8 +30,8 @@ class QKVFusionPass:
       v_id = prefix + "v_proj"
 
       if k_id in k_nodes and v_id in v_nodes:
-        k_node = k_nodes[k_id]
-        v_node = v_nodes[v_id]
+        k_nodes[k_id]
+        v_nodes[v_id]
 
         # Create fused node
         fused_id = prefix + "qkv_proj"

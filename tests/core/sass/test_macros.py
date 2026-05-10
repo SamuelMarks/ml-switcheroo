@@ -1,10 +1,7 @@
 """Module docstring."""
 
-import pytest
-from unittest.mock import MagicMock
-
 from ml_switcheroo.compiler.backends.sass.macros import expand_conv2d, expand_linear
-from ml_switcheroo.compiler.frontends.sass.nodes import Instruction, Label, Register, Comment, Predicate
+from ml_switcheroo.compiler.frontends.sass.nodes import Instruction, Label, Register, Comment
 
 
 class MockAllocator:

@@ -7,7 +7,6 @@ Verifies that:
 3. Scaffolder passes adapter blacklist to Inspector.
 """
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.discovery.inspector import ApiInspector

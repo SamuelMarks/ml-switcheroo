@@ -207,7 +207,7 @@ class Scaffolder:
         )
         continue
 
-      extras_match = self._match_spec_op(name, known_extras_ops)
+      self._match_spec_op(name, known_extras_ops)
 
       # Strategy 2: Heuristic Fallback
       if self._is_structurally_neural(api_path, kind):

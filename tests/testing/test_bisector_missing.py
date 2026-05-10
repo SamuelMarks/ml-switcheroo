@@ -1,6 +1,5 @@
 def test_bisector_extract_params():
   from ml_switcheroo.testing.bisector import SemanticsBisector
-  import logging
 
   bisector = SemanticsBisector(None)
 
@@ -9,9 +8,6 @@ def test_bisector_extract_params():
   with __import__("unittest.mock").mock.patch(
     "ml_switcheroo.testing.bisector.EquivalenceRunner.verify", return_value=(True, "OK")
   ):
-    import ml_switcheroo.testing.bisector
-
-    old_runner = ml_switcheroo.testing.bisector.EquivalenceRunner
 
     class MockRunner:
       def verify(self, *args, **kwargs):
@@ -23,7 +19,6 @@ def test_bisector_extract_params():
 
 def test_bisector_fix_found():
   from ml_switcheroo.testing.bisector import SemanticsBisector
-  import logging
 
   bisector = SemanticsBisector(None)
 
@@ -46,7 +41,6 @@ def test_bisector_fix_found():
 
 def test_bisector_exception():
   from ml_switcheroo.testing.bisector import SemanticsBisector
-  import logging
 
   bisector = SemanticsBisector(None)
 

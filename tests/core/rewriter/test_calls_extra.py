@@ -2,7 +2,6 @@
 
 import pytest
 import libcst as cst
-from typing import Any, Dict
 
 from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
@@ -142,7 +141,7 @@ def test_handle_post_processing():
   mapping = {"output_select_index": "invalid"}  # will raise in apply_index_select maybe? or not
   # apply_index_select safely uses str(index) though. Wait, if we pass something that raises...
   # cst.Subscript requires valid node. If inner_node is a Statement, it raises.
-  res2 = handle_post_processing(rewriter, cst.Pass(), mapping, "abs_1")
+  handle_post_processing(rewriter, cst.Pass(), mapping, "abs_1")
   assert len(rewriter.failures) > 0
 
   # 2. Output Casting

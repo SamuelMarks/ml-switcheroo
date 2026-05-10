@@ -5,7 +5,7 @@ Verifies that SemanticsManager correctly walks the framework hierarchy
 defined by adapters to find operation mappings.
 """
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import pytest
 
 from ml_switcheroo.semantics.manager import SemanticsManager

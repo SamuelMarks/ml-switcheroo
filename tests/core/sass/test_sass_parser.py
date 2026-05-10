@@ -10,8 +10,6 @@ from ml_switcheroo.compiler.frontends.sass.nodes import (
   Comment,
   Register,
   Immediate,
-  Memory,
-  Predicate,
 )
 
 

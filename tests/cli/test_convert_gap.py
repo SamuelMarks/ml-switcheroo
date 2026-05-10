@@ -1,5 +1,3 @@
-import pytest
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 from ml_switcheroo.cli.handlers.convert import handle_convert, _convert_single_file, _print_batch_summary
@@ -170,7 +168,7 @@ def test_convert_single_file_verify_success(tmp_path):
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as mock_engine,
-    patch("ml_switcheroo.cli.handlers.convert.HarnessGenerator") as mock_harness,
+    patch("ml_switcheroo.cli.handlers.convert.HarnessGenerator"),
     patch("ml_switcheroo.cli.handlers.convert.subprocess.run") as mock_run,
   ):
     mock_instance = MagicMock()
@@ -192,7 +190,7 @@ def test_convert_single_file_verify_fails(tmp_path):
 
   with (
     patch("ml_switcheroo.cli.handlers.convert.ASTEngine") as mock_engine,
-    patch("ml_switcheroo.cli.handlers.convert.HarnessGenerator") as mock_harness,
+    patch("ml_switcheroo.cli.handlers.convert.HarnessGenerator"),
     patch("ml_switcheroo.cli.handlers.convert.subprocess.run") as mock_run,
   ):
     mock_instance = MagicMock()

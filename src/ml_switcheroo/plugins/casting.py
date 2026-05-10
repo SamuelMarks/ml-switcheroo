@@ -13,7 +13,7 @@ Transformation:
 """
 
 import libcst as cst
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 

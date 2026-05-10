@@ -1,4 +1,3 @@
-import pytest
 from ml_switcheroo.frameworks.html_dsl import HtmlDSLAdapter
 from ml_switcheroo.enums import SemanticTier
 

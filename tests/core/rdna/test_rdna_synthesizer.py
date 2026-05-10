@@ -2,7 +2,6 @@
 
 import pytest
 from unittest.mock import MagicMock
-import libcst as cst
 
 from ml_switcheroo.compiler.backends.rdna.synthesizer import (
   RegisterAllocator,

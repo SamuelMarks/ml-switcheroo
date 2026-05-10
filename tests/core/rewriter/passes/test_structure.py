@@ -4,12 +4,10 @@ Tests for the Structural Transformation Pass.
 
 import pytest
 import libcst as cst
-from unittest.mock import MagicMock
 from ml_switcheroo.core.rewriter.passes.structure import StructuralPass
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.semantics.schema import StructuralTraits
 
 
 class MockSemantics(SemanticsManager):

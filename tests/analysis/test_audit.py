@@ -14,7 +14,6 @@ It covers:
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
-from pathlib import Path
 from typing import Optional, Dict
 
 from ml_switcheroo.analysis.audit import CoverageScanner

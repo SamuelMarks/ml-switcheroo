@@ -5,25 +5,18 @@ import pytest
 import random
 import numpy as np
 
-# --- jax ---
-try:
-  import jax
-  import jax.numpy as jnp
+import importlib.util
 
-  try:
-    import chex
-  except ImportError:
-    pass
+# --- jax ---
+if importlib.util.find_spec("jax") and importlib.util.find_spec("jax.numpy"):
   JAX_AVAILABLE = True
-except ImportError:
+else:
   JAX_AVAILABLE = False
 
 # --- torch ---
-try:
-  import torch
-
+if importlib.util.find_spec("torch"):
   TORCH_AVAILABLE = True
-except ImportError:
+else:
   TORCH_AVAILABLE = False
 
 

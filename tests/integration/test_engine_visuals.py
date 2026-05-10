@@ -5,7 +5,6 @@ Verifies that the ASTEngine populates the trace event with a valid
 Mermaid graph string using the MermaidGenerator.
 """
 
-import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.tracer import TraceEventType

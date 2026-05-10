@@ -1,6 +1,6 @@
 import sys
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from ml_switcheroo.cli.__main__ import main
 
 

@@ -44,7 +44,6 @@ def wizard(tmp_path):
 def test_wizard_save_logic(wizard, tmp_path):
   """Function docstring."""
   api_path = "pkg.new_math_op"
-  details = {"doc_summary": "Docs", "detected_sig": ["a"]}
 
   wizard._save_complex_entry(
     filename="k_array_api.json",

@@ -5,10 +5,9 @@ Verifies that the engine produces trace events with populated
 'before' and 'after' code snapshots.
 """
 
-import pytest
 from typing import Set, Dict, Any, Tuple, Optional
 from ml_switcheroo.core.engine import ASTEngine
-from ml_switcheroo.core.tracer import TraceEventType, TraceLogger
+from ml_switcheroo.core.tracer import TraceEventType
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 

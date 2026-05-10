@@ -269,7 +269,7 @@ class MermaidGenerator(cst.CSTVisitor):
   def visit_SimpleString(self, node: cst.SimpleString) -> Optional[bool]:
     """Visits Strings to allow visualizing constant values directly in the graph."""
     val = self._node_to_str(node)
-    uid = self._add_node(val, "valNode")
+    self._add_node(val, "valNode")
     # Leaf node - don't stack
     # wait, add_node adds edge. If we don't push stack, children of THIS node (if any) won't link.
     # Strings don't have children.

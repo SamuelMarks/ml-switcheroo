@@ -13,7 +13,7 @@ The `SymbolTableAnalyzer` visitor populates a `SymbolTable` by tracking:
 """
 
 import libcst as cst
-from typing import Dict, Optional, List, Set, Union as PyUnion
+from typing import Dict, Optional, List
 from dataclasses import dataclass
 
 from ml_switcheroo.semantics.manager import SemanticsManager

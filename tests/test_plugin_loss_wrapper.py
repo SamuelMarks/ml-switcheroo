@@ -1,4 +1,3 @@
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.loss_wrapper import transform_loss_reduction

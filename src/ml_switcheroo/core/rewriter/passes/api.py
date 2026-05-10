@@ -20,8 +20,6 @@ from libcst import Attribute, CSTNode, Name
 
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.escape_hatch import EscapeHatch
-from ml_switcheroo.core.hooks import get_hook
-from ml_switcheroo.core.rewriter.calls.guards import apply_strict_guards
 from ml_switcheroo.core.rewriter.calls.post import handle_post_processing
 from ml_switcheroo.core.rewriter.calls.pre import handle_pre_checks, resolve_implicit_method
 from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy

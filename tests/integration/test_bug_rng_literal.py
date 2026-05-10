@@ -6,7 +6,6 @@ Verifies that:
 2. This logic relies on `StructuralTraits` injection rather than `inject_args` map.
 """
 
-import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager

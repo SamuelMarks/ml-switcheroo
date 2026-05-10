@@ -115,7 +115,7 @@ def test_sass_nodes():
   label = SassLabel("L1")
   assert str(label) == "L1:"
 
-  dir1 = SassDirective("text")
+  SassDirective("text")
   dir2 = SassDirective("headerflags")
   assert str(dir2) == ".headerflags"
   dir3 = SassDirective("section", ["0x1"])

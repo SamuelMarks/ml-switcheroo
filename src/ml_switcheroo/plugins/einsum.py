@@ -13,7 +13,7 @@ This plugin handles:
 """
 
 import libcst as cst
-from typing import List, Optional
+from typing import List
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 

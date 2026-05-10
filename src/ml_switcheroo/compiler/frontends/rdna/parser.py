@@ -12,7 +12,6 @@ from ml_switcheroo.compiler.frontends.rdna.nodes import (
   Instruction,
   Label,
   LabelRef,
-  Memory,
   Modifier,
   Operand,
   RdnaNode,

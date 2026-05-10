@@ -18,7 +18,6 @@ from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.inplace_unroll import unroll_inplace_ops
-from ml_switcheroo.core.rewriter.calls.pre import handle_pre_checks
 
 
 def rewrite_code(rewriter: PivotRewriter, code: str) -> str:

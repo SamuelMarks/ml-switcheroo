@@ -173,7 +173,6 @@ def test_type_resolution_failure(rewriter):
 
 
 # --- Extra Coverage Tests ---
-from ml_switcheroo.core.hooks import HookContext
 
 
 def test_missing_semantics():

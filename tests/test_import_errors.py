@@ -1,5 +1,3 @@
-import sys
-import pytest
 from unittest.mock import patch
 import importlib
 
@@ -56,11 +54,11 @@ def test_import_errors_frameworks():
     a1.convert([1, 2, 3])
     try:
       a1.collect_api(SemanticTier.NEURAL)
-    except:
+    except Exception:
       pass
     try:
       a1.collect_api(SemanticTier.NEURAL_OPS)
-    except:
+    except Exception:
       pass
 
     import ml_switcheroo.frameworks.torch
@@ -69,7 +67,7 @@ def test_import_errors_frameworks():
     a2.convert([1, 2, 3])
     try:
       a2.collect_api(SemanticTier.NEURAL)
-    except:
+    except Exception:
       pass
 
     import ml_switcheroo.frameworks.tensorflow
@@ -78,15 +76,15 @@ def test_import_errors_frameworks():
     a3.convert([1, 2, 3])
     try:
       a3.collect_api(SemanticTier.NEURAL)
-    except:
+    except Exception:
       pass
     try:
       a3.collect_api(SemanticTier.NEURAL_OPS)
-    except:
+    except Exception:
       pass
     try:
       a3.get_weight_load_code("a")
-    except:
+    except Exception:
       pass
 
     import ml_switcheroo.frameworks.mlx
@@ -95,11 +93,11 @@ def test_import_errors_frameworks():
     a4.convert([1, 2, 3])
     try:
       a4.collect_api(SemanticTier.NEURAL)
-    except:
+    except Exception:
       pass
     try:
       a4.collect_api(SemanticTier.NEURAL_OPS)
-    except:
+    except Exception:
       pass
 
     import ml_switcheroo.frameworks.paxml
@@ -108,5 +106,5 @@ def test_import_errors_frameworks():
     a5.convert([1, 2, 3])
     try:
       a5.collect_api(SemanticTier.NEURAL)
-    except:
+    except Exception:
       pass

@@ -1,8 +1,5 @@
 """Module docstring."""
 
-from praxis import base_layer
-from praxis import pytypes
-
 
 def train_step(task, x, y):
   """Function docstring."""

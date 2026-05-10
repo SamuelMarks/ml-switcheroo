@@ -1,6 +1,5 @@
 """Module docstring."""
 
-import pytest
 import libcst as cst
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 

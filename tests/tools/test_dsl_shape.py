@@ -7,7 +7,6 @@ Verifies:
 3. Integration with other constraints (rank/dtype).
 """
 
-import pytest
 from ml_switcheroo.core.dsl import ParameterDef
 
 

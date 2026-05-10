@@ -1,9 +1,6 @@
-import pytest
-
-
 def test_convert_error():
   import ml_switcheroo
-  from unittest.mock import patch, MagicMock
+  from unittest.mock import patch
   from ml_switcheroo.core.conversion_result import ConversionResult
 
   with patch("ml_switcheroo.ASTEngine") as MockEngine:

@@ -4,13 +4,13 @@ Tests for the Auxiliary Pass logic.
 
 import pytest
 import libcst as cst
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryPass
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.core.hooks import _HOOKS, clear_hooks
+from ml_switcheroo.core.hooks import clear_hooks
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 

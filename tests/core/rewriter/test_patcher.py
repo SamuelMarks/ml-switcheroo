@@ -4,7 +4,6 @@ Tests for GraphPatcher CST Logic.
 
 import pytest
 import libcst as cst
-from unittest.mock import MagicMock
 
 from ml_switcheroo.core.rewriter.patcher import (
   GraphPatcher,

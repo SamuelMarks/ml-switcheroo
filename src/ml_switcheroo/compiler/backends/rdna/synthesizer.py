@@ -17,7 +17,7 @@ It contains:
 3.  **RdnaBackend**: The CompilerBackend adapter for the Registry, including header generation.
 """
 
-from typing import Dict, List, Optional, Union, Callable, TYPE_CHECKING
+from typing import Dict, List, Optional, Callable, TYPE_CHECKING
 import libcst as cst
 
 # Direct Import from Frontend to avoid circular dependency via core shims

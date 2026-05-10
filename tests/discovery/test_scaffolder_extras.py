@@ -52,7 +52,7 @@ def test_extras_scaffolding_dynamic(tmp_path):
       scaffolder.scaffold(["torch"], root_dir=tmp_path)
 
   extras_file = tmp_path / "semantics" / "k_framework_extras.json"
-  math_file = tmp_path / "semantics" / "k_array_api.json"
+  tmp_path / "semantics" / "k_array_api.json"
 
   assert extras_file.exists()
 

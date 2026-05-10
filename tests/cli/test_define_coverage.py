@@ -5,7 +5,7 @@ from ml_switcheroo.cli.handlers.define import (
   _scaffold_plugins,
   _generate_test_file,
 )
-from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant, PluginScaffoldDef
+from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
 from unittest.mock import patch, MagicMock
 
 

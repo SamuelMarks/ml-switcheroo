@@ -1,4 +1,3 @@
-import pytest
 import libcst as cst
 from ml_switcheroo.core.import_fixer import ImportFixer
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan
@@ -69,13 +68,6 @@ def test_imports_mixin_alias():
   node_star = cst.ImportFrom(module=cst.Name("foo"), names=cst.ImportStar())
   res_star = fixer.leave_ImportFrom(node_star, node_star)
   assert isinstance(res_star, type(cst.RemoveFromParent()))
-
-
-def test_base_import_fixer():
-  from ml_switcheroo.core.import_fixer.base import BaseImportFixer
-
-  # base has lines 44, 70
-  pass
 
 
 def test_imports_mixin_107():

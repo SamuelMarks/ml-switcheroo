@@ -1,7 +1,6 @@
 """Module docstring."""
 
 import optax
-from flax import nnx
 
 
 def get_clipped_optimizer(learning_rate: float, max_norm: float = 1.0):

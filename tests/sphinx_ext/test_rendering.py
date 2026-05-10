@@ -10,9 +10,8 @@ Verifies that:
 """
 
 import re
-from typing import Dict, List
 import pytest
-from ml_switcheroo.sphinx_ext.rendering import render_demo_html, _render_primary_options
+from ml_switcheroo.sphinx_ext.rendering import render_demo_html
 
 
 @pytest.fixture

@@ -1,15 +1,12 @@
 """Module docstring."""
 
-import pytest
 import libcst as cst
-from typing import Dict, Any
 
-from ml_switcheroo.core.rewriter.passes.structure import StructuralPass, StructuralTransformer
+from ml_switcheroo.core.rewriter.passes.structure import StructuralTransformer
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.semantics.schema import StructuralTraits
 
 

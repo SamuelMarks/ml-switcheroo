@@ -8,12 +8,10 @@ Validates that:
 4. `import jax.numpy as jnp` is injected.
 """
 
-import ast
 import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from tests.utils.ast_utils import cmp_ast
 
 # Source: Keras
 SOURCE_KERAS = """ 

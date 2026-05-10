@@ -1,9 +1,6 @@
 import os
-from pathlib import Path
 from unittest import mock
-import shutil
 
-import pytest
 from ml_switcheroo.sphinx_ext.hooks import add_static_path, copy_wheel_and_reqs
 import ml_switcheroo.sphinx_ext.hooks
 

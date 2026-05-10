@@ -8,8 +8,7 @@ It replaces the legacy LibCST-based injector that modified Python source code.
 """
 
 import json
-from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.frameworks.loader import get_definitions_path

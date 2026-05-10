@@ -1,5 +1,8 @@
 import pytest
 import libcst as cst
+from ml_switcheroo.core.graph_optimizer import GraphOptimizer
+from ml_switcheroo.compiler.ir import LogicalNode
+from ml_switcheroo.core.import_fixer.resolution import _QualNameScanner
 
 
 def test_conversion_result_has_errors():
@@ -56,8 +59,8 @@ def test_graph_optimizer_processed_ids():
   opt = GraphOptimizer([])
   n1 = LogicalNode("n1", "A")
   n2 = LogicalNode("n2", "B")
-  g = LogicalGraph(nodes=[n1, n2], edges=[LogicalEdge("n1", "n2"), LogicalEdge("n1", "n2")])
-  res = opt._match_sequence(n1, ["A", "B"], {"n1": n1, "n2": n2}, {"n1": ["n2"]}, set())
+  LogicalGraph(nodes=[n1, n2], edges=[LogicalEdge("n1", "n2"), LogicalEdge("n1", "n2")])
+  opt._match_sequence(n1, ["A", "B"], {"n1": n1, "n2": n2}, {"n1": ["n2"]}, set())
 
 
 def test_html_node_not_implemented():
@@ -362,12 +365,6 @@ def test_graph_optimizer_lines():
   assert opt._match_sequence(n1, ["A", "B"], nmap, edges, proc) is None
 
 
-from ml_switcheroo.core.graph_optimizer import GraphOptimizer
-from ml_switcheroo.compiler.ir import LogicalNode
-import libcst as cst
-from ml_switcheroo.core.import_fixer.resolution import _QualNameScanner
-
-
 def test_graph_opt():
   opt = GraphOptimizer([])
   n1 = LogicalNode("n1", "A")
@@ -405,7 +402,7 @@ def test_usage_visitor():
 
 def test_mlir_generator_gaps():
   from ml_switcheroo.core.mlir.generator import MlirToPythonGenerator
-  from ml_switcheroo.core.mlir.nodes import OperationNode, ValueNode, AttributeNode, RegionNode, BlockNode
+  from ml_switcheroo.core.mlir.nodes import OperationNode, ValueNode, AttributeNode, BlockNode
   import libcst as cst
 
   # Fake module structure
@@ -496,8 +493,6 @@ def test_stablehlo_emitter_gaps():
 def test_structure_pass_coverage_245():
   from ml_switcheroo.core.rewriter.passes.structure import StructuralTransformer
   import libcst as cst
-  from ml_switcheroo.core.rewriter.context import RewriterContext
-  from ml_switcheroo.semantics.manager import SemanticsManager
 
   class MockSuper:
     pass

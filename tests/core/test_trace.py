@@ -2,9 +2,7 @@
 Tests for the Tracing System.
 """
 
-import pytest
 from ml_switcheroo.core.tracer import TraceLogger, TraceEventType
-import libcst as cst
 
 
 def test_phase_nesting():
@@ -12,7 +10,7 @@ def test_phase_nesting():
   logger = TraceLogger()
 
   p1 = logger.start_phase("Parent")
-  p2 = logger.start_phase("Child")
+  logger.start_phase("Child")
   logger.end_phase()  # End Child
   logger.end_phase()  # End Parent
 

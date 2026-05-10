@@ -1,6 +1,5 @@
-import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import patch, mock_open
 
 from ml_switcheroo.cli.handlers.verify import handle_ci
 
@@ -9,7 +8,7 @@ def test_handle_ci():
   with (
     patch("ml_switcheroo.cli.handlers.verify.RuntimeConfig") as MockConfig,
     patch("ml_switcheroo.cli.handlers.verify.load_plugins", return_value=1),
-    patch("ml_switcheroo.cli.handlers.verify.SemanticsManager") as MockSemantics,
+    patch("ml_switcheroo.cli.handlers.verify.SemanticsManager"),
     patch("ml_switcheroo.cli.handlers.verify.BatchValidator") as MockValidator,
     patch("pathlib.Path.exists", return_value=False),
     patch("ml_switcheroo.cli.handlers.verify.ReadmeEditor") as MockEditor,

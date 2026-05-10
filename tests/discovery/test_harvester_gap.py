@@ -1,7 +1,6 @@
-import pytest
 import ast
 from pathlib import Path
-from unittest.mock import patch, mock_open
+from unittest.mock import patch
 from ml_switcheroo.discovery.harvester import ImportScanner, SemanticHarvester
 from ml_switcheroo.semantics.manager import SemanticsManager
 

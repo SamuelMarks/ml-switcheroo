@@ -26,7 +26,7 @@ from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 
 if TYPE_CHECKING:
-  from ml_switcheroo.semantics.manager import SemanticsManager
+  pass
 
 
 @register_framework("rdna")

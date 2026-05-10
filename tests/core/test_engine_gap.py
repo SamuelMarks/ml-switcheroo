@@ -16,7 +16,7 @@ def test_engine_init_coverage():
   cfg2 = RuntimeConfig(strict_mode=False)
   cfg2.validation_report = Path("/tmp/report.json")
   with patch.object(SemanticsManager, "load_validation_report") as mock_load:
-    engine2 = ASTEngine(config=cfg2)
+    ASTEngine(config=cfg2)
     mock_load.assert_called_once_with(Path("/tmp/report.json"))
 
 
@@ -132,7 +132,7 @@ def test_rewriter_pipeline_coverage():
     patch("ml_switcheroo.core.engine.GraphExtractor") as mock_extractor,
     patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer"),
     patch("ml_switcheroo.compiler.differ.GraphDiffer") as mock_differ,
-    patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher") as mock_patcher,
+    patch("ml_switcheroo.core.rewriter.patcher.GraphPatcher"),
     patch("ml_switcheroo.compiler.backends.python_snippet.PythonSnippetEmitter"),
   ):
     mock_extractor.return_value.graph.nodes = [1]

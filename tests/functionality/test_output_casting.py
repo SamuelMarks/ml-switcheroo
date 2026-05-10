@@ -7,7 +7,6 @@ is defined in the semantics mapping.
 
 import pytest
 import libcst as cst
-from unittest.mock import MagicMock
 
 # Fix: Import TestRewriter shim
 from tests.conftest import TestRewriter as PivotRewriter

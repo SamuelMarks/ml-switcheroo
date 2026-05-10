@@ -9,7 +9,6 @@ It imports YAML, validates schema, and uses:
 """
 
 from pathlib import Path
-from typing import Optional
 
 try:
   import yaml

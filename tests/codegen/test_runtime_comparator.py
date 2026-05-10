@@ -9,7 +9,6 @@ Ensures the runtime helper handles:
 5. Shape mismatches.
 """
 
-import pytest
 import numpy as np
 from ml_switcheroo.generated_tests.runtime import verify_results
 

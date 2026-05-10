@@ -1,6 +1,5 @@
 def test_compiler_backend_base():
   from ml_switcheroo.compiler.backend import CompilerBackend
-  from ml_switcheroo.semantics.manager import SemanticsManager
 
   class DummyBackend(CompilerBackend):
     def compile(self, graph):

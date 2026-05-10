@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.frameworks.mlx import MLXAdapter
 from ml_switcheroo.frameworks.base import StandardCategory

@@ -3,8 +3,7 @@ Integration Visual Tests for CLI Output.
 Ensures that the Rich table formatting and JSON reports remain stable.
 """
 
-import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from ml_switcheroo.cli.matrix import CompatibilityMatrix
 from ml_switcheroo.semantics.manager import SemanticsManager
 from rich.console import Console

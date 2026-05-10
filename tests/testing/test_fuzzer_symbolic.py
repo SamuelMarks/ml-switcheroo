@@ -14,10 +14,9 @@ import numpy as np
 import random
 import hypothesis.strategies as st
 from hypothesis import given, settings, HealthCheck
-from typing import List, Dict
 
 from ml_switcheroo.testing.fuzzer import InputFuzzer
-from ml_switcheroo.frameworks import register_framework, get_adapter
+from ml_switcheroo.frameworks import register_framework
 
 
 @pytest.fixture

@@ -9,7 +9,6 @@ Verifies that:
 
 import pytest
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.semantics.schema import SemanticsFile
 
 
 @pytest.fixture

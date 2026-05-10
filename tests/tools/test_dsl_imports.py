@@ -7,9 +7,7 @@ declarative import requirements, enabling plugins to access non-standard depende
 Updated for Feature 13: Structured Import Aliasing.
 """
 
-import pytest
 from ml_switcheroo.core.dsl import FrameworkVariant, ImportReq
-from pydantic import ValidationError
 
 
 def test_variant_imports_strings():

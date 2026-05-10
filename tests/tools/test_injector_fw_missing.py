@@ -5,8 +5,6 @@ def test_injector_fw_missing():
   variant = FrameworkVariant(api="foo")
   injector = FrameworkInjector("jax", "bar", variant)
 
-  import json
-
   # Force idempotency match
   with __import__("unittest.mock").mock.patch.object(
     injector, "_load_current", return_value={"bar": variant.model_dump(exclude_none=True)}

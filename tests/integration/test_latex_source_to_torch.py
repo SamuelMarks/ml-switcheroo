@@ -14,17 +14,14 @@ Key Verification Points:
 """
 
 import pytest
-import textwrap
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 from ml_switcheroo.core.escape_hatch import EscapeHatch
-from ml_switcheroo.semantics.schema import StructuralTraits
 
 # Ensure the adapter is registered in the global scope
-import ml_switcheroo.frameworks.latex_dsl
 
 # --- Test Constants ---
 

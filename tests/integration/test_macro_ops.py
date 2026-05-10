@@ -8,8 +8,6 @@ Verifies:
 4.  **Complex Expressions**: Correct handling of operator precedence and nested calls.
 """
 
-import pytest
-import ast
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager

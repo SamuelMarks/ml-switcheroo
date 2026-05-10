@@ -76,3 +76,9 @@ line-ending = "auto"
 
 docstring-code-format = false
 docstring-code-line-length = "dynamic"
+
+[tool.uv.workspace]
+members = ["onnx9000/packages/python/onnx9000-core"]
+
+[tool.uv.sources]
+onnx9000-core = { workspace = true }

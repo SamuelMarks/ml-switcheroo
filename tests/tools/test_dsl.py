@@ -2,8 +2,6 @@
 Tests for ODL DSL Schema.
 """
 
-import pytest
-from pydantic import ValidationError
 from ml_switcheroo.core.dsl import (
   OperationDef,
   ParameterDef,

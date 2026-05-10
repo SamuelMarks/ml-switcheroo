@@ -4,7 +4,7 @@ Tests for ODL Schema Extension: Verification Mode.
 
 import pytest
 from pydantic import ValidationError
-from ml_switcheroo.core.dsl import OperationDef, FrameworkVariant
+from ml_switcheroo.core.dsl import OperationDef
 
 
 def test_verification_mode_default():

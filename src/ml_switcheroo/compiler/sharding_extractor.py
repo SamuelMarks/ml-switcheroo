@@ -4,11 +4,10 @@ This module implements a pass to extract `with_sharding_constraint` operations
 from the `LogicalGraph` back into explicit `sharding` metadata on the source nodes.
 """
 
-from typing import Dict, List, Optional
+from typing import Optional
 import ast
-import re
 
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge, PartitionSpec
+from ml_switcheroo.compiler.ir import LogicalGraph, LogicalEdge, PartitionSpec
 
 
 class ShardingExtractionPass:

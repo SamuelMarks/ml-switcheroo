@@ -11,7 +11,6 @@ Verifies Feature 051 & Global/Nonlocal Detection:
 """
 
 import libcst as cst
-from unittest.mock import MagicMock
 from ml_switcheroo.analysis.purity import PurityScanner
 from ml_switcheroo.core.escape_hatch import EscapeHatch
 

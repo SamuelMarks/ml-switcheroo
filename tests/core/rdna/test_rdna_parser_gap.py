@@ -34,16 +34,16 @@ def test_rdna_parser_directive_eof():
 
 def test_rdna_parser_instruction_eof():
   parser = RdnaParser("v_add_f32")
-  ast = parser.parse()
+  parser.parse()
 
 
 def test_rdna_parser_operand_eof():
-  parser = RdnaParser("v_add_f32 ")
+  RdnaParser("v_add_f32 ")
 
 
 def test_rdna_parser_special_reg():
   parser = RdnaParser("v_add_f32 exec")
-  ast = parser.parse()
+  parser.parse()
 
 
 def test_rdna_parser_coverage_remaining():
@@ -65,7 +65,6 @@ def test_rdna_parser_directive_eof2():
   parser = RdnaParser(".directive")
   # if we force `next_t` to evaluate to False inside the while loop
   # We can patch `_peek` to return None specifically inside _parse_directive
-  from unittest.mock import patch
 
   # `_parse_directive` calls `_consume` then loops
   # token list: [DIRECTIVE(.directive)]

@@ -1,9 +1,7 @@
 from ml_switcheroo.cli.handlers.define import handle_define
-import pytest
 
 
 def test_define_cmd_stdin(capsys):
-  import sys
   from unittest.mock import patch
   import io
 

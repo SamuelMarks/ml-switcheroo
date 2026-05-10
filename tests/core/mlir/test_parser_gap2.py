@@ -22,7 +22,7 @@ def test_mlir_parser_attributes_unclosed_brace2():
 def test_mlir_parser_region_block_break():
   parser = MlirParser("^bb0:\n")
   # Because there are no operations, it might fail syntax? The parser requires operations?
-  ast = parser.parse()
+  parser.parse()
 
 
 def test_mlir_parser_type_region():
@@ -30,7 +30,7 @@ def test_mlir_parser_type_region():
   # Let's mock the token to force it
   parser = MlirParser('%0 = "foo.bar"() : () -> !foo.bar')
   # Actually just standard parsing
-  ast = parser.parse()
+  parser.parse()
   # It seems to miss lines inside the loop
   parser = MlirParser('%0 = "foo.bar"() : (!foo.bar) -> !foo.bar')
   parser.parse()
@@ -71,7 +71,7 @@ def test_mlir_parser_expect_error():
 
 def test_mlir_parser_is_region_start():
   parser = MlirParser('{\n %0 = "foo.bar"() : () -> () }')
-  assert parser._is_region_start() == True
+  assert parser._is_region_start()
 
 
 def test_mlir_parser_tokenizer_mismatch():
@@ -92,7 +92,7 @@ def test_mlir_parser_op_stuck_results():
 
 def test_mlir_parser_is_region_start_false():
   parser = MlirParser('{\n @SYM = "foo.bar"() : () -> () }')
-  assert parser._is_region_start() == False
+  assert not parser._is_region_start()
 
 
 def test_mlir_parser_op_sym_name():

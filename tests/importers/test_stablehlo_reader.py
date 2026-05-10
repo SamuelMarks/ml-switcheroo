@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 
 from ml_switcheroo.importers.stablehlo_reader import StableHloSpecImporter
 

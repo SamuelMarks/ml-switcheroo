@@ -14,8 +14,7 @@ Fixes:
 
 import json
 import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.enums import SemanticTier

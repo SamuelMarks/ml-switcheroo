@@ -8,7 +8,6 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.core.escape_hatch import EscapeHatch
 
 EXAMPLES_DIR = Path(__file__).parent.parent / "examples"
 

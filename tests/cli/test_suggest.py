@@ -14,7 +14,6 @@ Verifies:
 
 import pytest
 import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.cli.handlers.suggest import handle_suggest, _inspect_live_object, _extract_metadata
 

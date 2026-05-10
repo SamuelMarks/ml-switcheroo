@@ -7,9 +7,8 @@ Verifies that:
 """
 
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-import pytest
 from ml_switcheroo.cli.__main__ import main
 from ml_switcheroo.semantics.manager import SemanticsManager
 

@@ -9,6 +9,7 @@ Verifies:
 """
 
 from ml_switcheroo.frameworks.latex_dsl import LatexDSLAdapter
+from unittest.mock import patch
 from ml_switcheroo.frameworks.base import (
   _ADAPTER_REGISTRY,
   get_adapter,
@@ -17,7 +18,6 @@ from ml_switcheroo.frameworks.base import (
 )
 from ml_switcheroo.core.latex.parser import LatexParser
 from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.compiler.registry import get_backend_class, is_isa_target
 
 
@@ -148,9 +148,6 @@ def test_latex_dsl_specifications():
   specs = adapter.specifications
   assert "Conv2d" in specs
   assert "Linear" in specs
-
-
-from unittest.mock import patch
 
 
 def test_latex_dsl_definitions_fallback():

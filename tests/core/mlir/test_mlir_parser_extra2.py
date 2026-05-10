@@ -1,10 +1,8 @@
 """Module docstring."""
 
 import pytest
-from ml_switcheroo.core.mlir.parser import MlirParser, Tokenizer, Token
-from ml_switcheroo.core.mlir.nodes import BlockNode
-from ml_switcheroo.core.mlir.tokens import TokenKind, Symbol
-import re
+from ml_switcheroo.core.mlir.parser import MlirParser, Token
+from ml_switcheroo.core.mlir.tokens import TokenKind
 
 
 def test_cov_287():
@@ -22,12 +20,12 @@ def test_cov_296_to_298():
   # need { followed by whitespace/comments, then something else.
   parser = MlirParser("{ \n // comment \n a = 1 }")
   # it needs to be triggered from inside parse_operation!
-  op = parser.parse_operation()
+  parser.parse_operation()
   # "{" a = 1 "}" is parsed as region? No, "a" has no = after identifier scan.
   # Actually just call _is_region_start directly:
   parser2 = MlirParser("{ \n // comment \n ^bb0: }")
   parser2.consume()  # consume {
-  assert parser2._is_region_start() == True
+  assert parser2._is_region_start()
 
 
 def test_cov_324():
@@ -35,7 +33,7 @@ def test_cov_324():
   # in _is_region_start, identifier followed by = -> dictionary
   parser = MlirParser("{ a = 1 }")
   parser.consume()
-  assert parser._is_region_start() == False
+  assert not parser._is_region_start()
 
 
 def test_cov_342():

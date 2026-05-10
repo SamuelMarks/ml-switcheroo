@@ -9,8 +9,7 @@ Verifies:
 
 import json
 import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from ml_switcheroo.semantics.autogen import SemanticPersister
 from ml_switcheroo.discovery.consensus import CandidateStandard

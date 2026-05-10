@@ -3,7 +3,7 @@ def test_fuzzer_core_coverage():
 
   ig = InputFuzzer()
 
-  strat = ig.build_strategies(["shape", "axis", "mask", "indices", "alpha", "inputs"])
+  ig.build_strategies(["shape", "axis", "mask", "indices", "alpha", "inputs"])
 
   # 103-104: conversion failure
   class FailingAdapter:

@@ -2,17 +2,8 @@
 Tests for Configuration, Path Resolution, and Defaults Logic.
 """
 
-import sys
-import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
-from pydantic import ValidationError
-
 from ml_switcheroo.config import (
   RuntimeConfig,
-  parse_cli_key_values,
-  _resolve_default_source,
-  _resolve_default_target,
 )
 
 # ... (Previous default sorting tests retained) ...

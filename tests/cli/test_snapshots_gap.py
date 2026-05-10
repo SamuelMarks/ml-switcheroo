@@ -1,4 +1,3 @@
-import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.cli.handlers.snapshots import (

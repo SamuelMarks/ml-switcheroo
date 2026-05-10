@@ -15,9 +15,9 @@ Logic:
 
 import importlib
 import inspect
-from typing import Dict, Any, List, Tuple, Union, Optional
+from typing import Dict, Any, List, Tuple, Union
 
-from ml_switcheroo.utils.console import console, log_info, log_success, log_warning
+from ml_switcheroo.utils.console import console, log_info, log_success
 from ml_switcheroo.frameworks import get_adapter
 
 

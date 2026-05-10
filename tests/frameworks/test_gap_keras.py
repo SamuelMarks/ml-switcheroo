@@ -1,9 +1,8 @@
 import sys
-import pytest
+from unittest.mock import patch
 from ml_switcheroo.frameworks.keras import KerasAdapter
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import StandardCategory
-from ml_switcheroo.core.ghost import GhostRef
 
 
 def test_keras_adapter():
@@ -116,7 +115,6 @@ def test_keras_adapter():
   assert refs == []
 
   # Test convert exception handling if import fails
-  import sys
 
   old_keras = sys.modules.get("keras")
   sys.modules["keras"] = None
@@ -146,9 +144,6 @@ def test_keras_ghost_mode_discovery():
   adapter._snapshot_data = None
   refs = adapter.collect_api(StandardCategory.ACTIVATION)
   assert len(refs) == 0
-
-
-from unittest.mock import patch
 
 
 def test_keras_scan_edge_cases():
@@ -188,7 +183,6 @@ def test_keras_scan_edge_cases():
 
 
 def test_keras_module_reimport():
-  import sys
   import types
   import importlib
 

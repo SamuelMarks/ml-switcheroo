@@ -10,9 +10,6 @@ Verifies:
 """
 
 import pytest
-import sys
-from pathlib import Path
-from unittest.mock import MagicMock
 
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager

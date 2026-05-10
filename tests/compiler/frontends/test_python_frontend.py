@@ -1,4 +1,3 @@
-import pytest
 from ml_switcheroo.compiler.frontends.python import PythonFrontend
 
 

@@ -11,7 +11,6 @@ Verifies:
 """
 
 import pytest
-from pathlib import Path
 from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule
 from ml_switcheroo.tools.injector_plugin import PluginGenerator
 

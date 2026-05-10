@@ -244,7 +244,7 @@ class TestCaseGenerator:
           file_lines.append("        g_ref = g_vals[0]")
           file_lines.append("        for g_val in g_vals[1:]:")
           # Using assert_allclose as requested by test expectations
-          file_lines.append(f"            np.testing.assert_allclose(g_ref, g_val, rtol=0.01, atol=0.001)")
+          file_lines.append("            np.testing.assert_allclose(g_ref, g_val, rtol=0.01, atol=0.001)")
 
       file_lines.append("")
 

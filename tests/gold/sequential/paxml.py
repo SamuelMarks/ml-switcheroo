@@ -1,11 +1,5 @@
 """Module docstring."""
 
-from praxis import base_layer
-from praxis.layers import linears
-from praxis.layers import activations
-from praxis.layers import models
-import jax.numpy as jnp
-
 
 def create_sequential(in_features: int, hidden: int, out_features: int):
   """Function docstring."""

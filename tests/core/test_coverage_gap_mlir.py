@@ -36,7 +36,7 @@ def test_mlir_parser_coverage():
     print("Error", e)
 
   # 408-411, 498: implicit sym_name
-  op3 = MlirParser('"op" @sym () : ()').parse_operation()
+  MlirParser('"op" @sym () : ()').parse_operation()
 
   # 567-569: RBRACE empty block consume
   try:

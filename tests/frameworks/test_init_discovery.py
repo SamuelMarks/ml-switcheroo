@@ -8,8 +8,6 @@ Verifies:
 4. Import errors in plugins are handled gracefully (no crash).
 """
 
-import sys
-import importlib
 import pytest
 from unittest.mock import MagicMock, patch
 

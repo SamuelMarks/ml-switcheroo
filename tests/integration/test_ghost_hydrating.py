@@ -12,12 +12,10 @@ import json
 import pytest
 import sys
 from unittest.mock import MagicMock, patch
-from pathlib import Path
 
 from ml_switcheroo.frameworks.base import (
   StandardCategory,
   GhostRef,
-  _ADAPTER_REGISTRY,
   InitMode,
   load_snapshot_for_adapter,
 )

@@ -1,7 +1,6 @@
-import pytest
 import types
 import inspect
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from ml_switcheroo.discovery.inspector import ApiInspector
 
 
@@ -77,7 +76,7 @@ def test_inspector_runtime_c_ext_fallback(mock_griffe):
     class MockFunc:
       __module__ = "dummy"
 
-    mock_func = MockFunc()
+    MockFunc()
 
     # Mock func needs to be something inspect.isfunction() or isclass() etc.
     # Let's use a real function

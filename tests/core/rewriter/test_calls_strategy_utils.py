@@ -1,10 +1,9 @@
 """Module docstring."""
 
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy, _apply_layout_permutation
+from ml_switcheroo.core.rewriter.calls.strategy import execute_strategy
 from ml_switcheroo.core.rewriter.calls.utils import (
   rewrite_stateful_call,
   inject_kwarg,
@@ -14,6 +13,7 @@ from ml_switcheroo.core.rewriter.calls.utils import (
   log_diff,
   compute_permutation,
   inject_permute_call,
+  is_functional_apply,
 )
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -217,7 +217,7 @@ def test_rewrite_stateful_call():
 
   # Test existing injected arg (no warning)
   rewriter.context.signature_stack[0].injected_args.append(("vars", None))
-  res2 = rewrite_stateful_call(rewriter, orig, "my_inst", {"prepend_arg": "vars"})
+  rewrite_stateful_call(rewriter, orig, "my_inst", {"prepend_arg": "vars"})
   assert len(rewriter.warnings) == 1  # unchanged
 
   # Legacy Context
@@ -277,9 +277,6 @@ def test_inject_permute_call():
   res_pos = inject_permute_call(base, (1, 0), semantics, "fw")
   assert isinstance(res_pos, cst.Call)
   assert len(res_pos.args) == 3  # base, 1, 0
-
-
-from ml_switcheroo.core.rewriter.calls.utils import is_functional_apply
 
 
 def test_is_functional_apply():

@@ -2,7 +2,6 @@
 Tests for Recursive CST Literal Generation in FrameworkInjector.
 """
 
-import pytest
 import libcst as cst
 from ml_switcheroo.tools.injector_fw import convert_to_cst_literal
 

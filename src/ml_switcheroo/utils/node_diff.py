@@ -7,7 +7,6 @@ full file serialization.
 """
 
 import libcst as cst
-from typing import Union
 
 # A dummy module used as a context to render detached nodes.
 _RENDER_CTX = cst.parse_module("")

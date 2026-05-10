@@ -12,7 +12,7 @@ import sys
 import subprocess
 import os
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from ml_switcheroo.testing.harness_generator import HarnessGenerator
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter

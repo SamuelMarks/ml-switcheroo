@@ -13,7 +13,6 @@ Plugin Logic:
 """
 
 import libcst as cst
-from typing import List, Union
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 

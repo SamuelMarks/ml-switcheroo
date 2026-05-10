@@ -1,5 +1,5 @@
 from ml_switcheroo.core.mlir.parser import MlirParser, Token
-from ml_switcheroo.core.mlir.tokens import TokenKind, Symbol
+from ml_switcheroo.core.mlir.tokens import TokenKind
 
 
 def test_parser_gap3():

@@ -1,6 +1,5 @@
 import sys
 from unittest.mock import patch
-import importlib
 
 
 def test_define_yaml_import_error():

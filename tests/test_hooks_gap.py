@@ -1,8 +1,4 @@
-import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
-import sys
-import importlib
 
 from ml_switcheroo.core.hooks import (
   HookContext,

@@ -10,21 +10,12 @@ Updated to support:
 - **PatternDef**: Graph fusion patterns.
 """
 
-from typing import Dict, List, Optional, Union, Tuple, Any, Set, Literal
+from typing import Dict, List, Optional, Tuple, Any, Set
 from pydantic import BaseModel, Field, ConfigDict
 
-from ml_switcheroo.enums import SemanticTier, LogicOp
+from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.dsl import (
-  ImportReq,
-  OpType,
-  ContainerType,
-  ParameterDef,
-  Rule,
-  FrameworkVariant,
-  PluginType,
-  PluginScaffoldDef,
   PatternDef,
-  OperationDef,
 )
 
 

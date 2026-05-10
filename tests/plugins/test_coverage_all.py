@@ -1,10 +1,7 @@
-import pytest
 import libcst as cst
-from unittest.mock import MagicMock
 from ml_switcheroo.core.hooks import HookContext, _HOOKS
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.semantics.schema import FrameworkVariant
 
 _sem = SemanticsManager()
 
@@ -61,7 +58,6 @@ def get_ast_nodes():
 
 
 def test_plugin_coverage_fuzz():
-  import ml_switcheroo.plugins
 
   # Fuzz all hooks with lots of configurations and variants
   nodes = get_ast_nodes()

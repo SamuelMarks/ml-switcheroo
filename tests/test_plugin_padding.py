@@ -1,8 +1,6 @@
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.padding import _supports_numpy_padding, transform_padding
-from ml_switcheroo.core.hooks import HookContext
 
 
 def test_padding_coverage():

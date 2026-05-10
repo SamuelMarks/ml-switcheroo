@@ -7,7 +7,6 @@ Verifies:
 3. Whitespace/Comment preservation (Byte-Identity).
 """
 
-import pytest
 from ml_switcheroo.core.mlir.parser import MlirParser, Tokenizer
 
 

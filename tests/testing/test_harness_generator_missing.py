@@ -36,7 +36,6 @@ def test_harness_adapter_shim_exceptions():
 
 def test_harness_extractor_oserror():
   from ml_switcheroo.testing.harness_generator import HarnessGenerator
-  import inspect
 
   hg = HarnessGenerator()
 
@@ -44,7 +43,7 @@ def test_harness_extractor_oserror():
     "ml_switcheroo.utils.code_extractor.CodeExtractor.extract_class", side_effect=OSError("fail")
   ):
     try:
-      res = hg._bundle_fuzzer_dependencies()
+      hg._bundle_fuzzer_dependencies()
     except OSError:
       pass
 

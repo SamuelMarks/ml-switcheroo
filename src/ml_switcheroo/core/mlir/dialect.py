@@ -16,11 +16,11 @@ Operations:
 - `sw.import`: Represents import statements.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import List
 from dataclasses import dataclass, field
 
 # We reuse the CST nodes but wrap them in semantic validators
-from ml_switcheroo.core.mlir.nodes import OperationNode, AttributeNode
+from ml_switcheroo.core.mlir.nodes import OperationNode
 
 
 @dataclass

@@ -18,7 +18,6 @@ from typing import Any, Dict, List, Optional
 from ml_switcheroo.core.ghost import GhostRef
 from ml_switcheroo.discovery.consensus import ConsensusEngine
 from ml_switcheroo.discovery.scaffolder import Scaffolder
-from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks import available_frameworks
 from ml_switcheroo.frameworks.base import (
   StandardCategory,

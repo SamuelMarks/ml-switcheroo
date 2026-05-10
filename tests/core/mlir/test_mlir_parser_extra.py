@@ -1,10 +1,7 @@
 """Module docstring."""
 
 import pytest
-from ml_switcheroo.core.mlir.parser import MlirParser, Tokenizer, Token
-from ml_switcheroo.core.mlir.nodes import BlockNode
-from ml_switcheroo.core.mlir.tokens import TokenKind, Symbol
-import re
+from ml_switcheroo.core.mlir.parser import MlirParser
 
 
 def test_tokenizer_invalid_kind_fallback(*args, **kwargs):
@@ -158,7 +155,7 @@ def test_parse_region_empty(*args, **kwargs):
 
 def test_parse_region_defensive_consume():
   """Function docstring."""
-  parser = MlirParser("{ a = 1 }")
+  MlirParser("{ a = 1 }")
   # a = 1 will make it not a region, but we call parse_region explicitly.
   # The inner block will parse 'a' as an operation name? No, wait!
   # "a" is an IDENTIFIER. So op_name = "a".

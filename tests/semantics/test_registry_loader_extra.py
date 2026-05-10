@@ -1,5 +1,4 @@
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 import ml_switcheroo.semantics.registry_loader as registry_loader
 

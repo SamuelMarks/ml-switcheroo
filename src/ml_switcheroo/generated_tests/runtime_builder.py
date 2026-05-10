@@ -6,7 +6,7 @@ and determinism fixtures.
 """
 
 import pathlib
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Any
 from ml_switcheroo.generated_tests.templates import get_template
 
 # The static part of the runtime helper that does not depend on available frameworks.
@@ -183,7 +183,7 @@ def ensure_runtime_module(
   imports_str = "\n".join(imports_block)
 
   # Combine parts
-  code = f'"""Shared runtime flags for generated tests (Auto-Generated)."""\n'
+  code = '"""Shared runtime flags for generated tests (Auto-Generated)."""\n'
   code += "import sys\nimport pytest\nimport random\nimport numpy as np\n\n"
   code += imports_str
   code += _SHARED_RUNTIME_LOGIC

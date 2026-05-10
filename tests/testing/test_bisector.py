@@ -2,7 +2,6 @@
 Tests for Semantics Bisector.
 """
 
-import pytest
 from unittest.mock import MagicMock
 from ml_switcheroo.testing.bisector import SemanticsBisector
 from ml_switcheroo.testing.runner import EquivalenceRunner

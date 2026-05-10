@@ -10,7 +10,7 @@ It handles:
 - resolving documentation URLs via Framework Adapters.
 """
 
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List
 
 from ml_switcheroo.frameworks import get_adapter
 from ml_switcheroo.semantics.manager import SemanticsManager

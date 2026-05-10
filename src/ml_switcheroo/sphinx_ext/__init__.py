@@ -62,7 +62,7 @@ def setup(app: Any) -> Dict[str, Any]:
   # 2. Copy WASM Wheel
   app.connect("build-finished", copy_wheel_and_reqs)
   # 3. Generate Operation Docs (Feature 4)
-  if os.environ.get("HOMEPAGE_ONLY") != "1":
+  if os.environ.get("BUILD_ALL_DOCS") == "1":
     app.connect("builder-inited", generate_op_docs)
 
   return {

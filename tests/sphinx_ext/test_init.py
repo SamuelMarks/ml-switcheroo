@@ -1,7 +1,6 @@
 import os
 from unittest import mock
 
-import pytest
 from ml_switcheroo.sphinx_ext import setup
 
 
@@ -25,11 +24,9 @@ class MockApp:
     self.events.append((event, callback))
 
 
-def test_setup_default():
+@mock.patch.dict(os.environ, {"BUILD_ALL_DOCS": "1"})
+def test_setup_build_all():
   app = MockApp()
-
-  if "HOMEPAGE_ONLY" in os.environ:
-    del os.environ["HOMEPAGE_ONLY"]
 
   result = setup(app)
 
@@ -57,8 +54,8 @@ def test_setup_default():
   assert "generate_op_docs" in connected_funcs
 
 
-@mock.patch.dict(os.environ, {"HOMEPAGE_ONLY": "1"})
-def test_setup_homepage_only():
+@mock.patch.dict(os.environ, clear=True)
+def test_setup_default_no_docs():
   app = MockApp()
   setup(app)
 

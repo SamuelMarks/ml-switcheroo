@@ -1,6 +1,4 @@
 from ml_switcheroo.cli.handlers.define import handle_define
-import pytest
-from pathlib import Path
 
 
 def test_define_file_not_found(tmp_path):

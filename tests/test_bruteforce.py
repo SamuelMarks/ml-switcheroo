@@ -1,8 +1,6 @@
 import sys
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 import inspect
-import importlib
 import libcst as cst
 
 sys.modules["mlx"] = MagicMock()
@@ -85,32 +83,32 @@ def test_bruteforce_frameworks():
   a1 = PaxmlAdapter()
   try:
     a1.convert([1])
-  except:
+  except Exception:
     pass
 
   a2 = TensorFlowAdapter()
   try:
     a2.convert([1])
-  except:
+  except Exception:
     pass
   try:
     a2.get_serialization_syntax("save", "f")
-  except:
+  except Exception:
     pass
   try:
     a2.get_serialization_syntax("load", "f")
-  except:
+  except Exception:
     pass
   try:
     a2.get_serialization_syntax("unknown", "f")
-  except:
+  except Exception:
     pass
 
 
 def test_bruteforce_scaffolder():
   from ml_switcheroo.discovery.scaffolder import Scaffolder
 
-  s = Scaffolder()
+  Scaffolder()
 
 
 def test_sphinx_directive():

@@ -2,7 +2,6 @@
 
 from flax import nnx
 import jax.numpy as jnp
-import jax
 
 
 def train_step(model: nnx.Module, optimizer: nnx.Optimizer, x: jnp.ndarray, y: jnp.ndarray, loss_fn) -> jnp.ndarray:

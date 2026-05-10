@@ -3,13 +3,9 @@ End-to-End Integration Test for Distributed Semantics.
 """
 
 import json
-from unittest.mock import patch
 
 import pytest
 
-from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.engine import ASTEngine
-from ml_switcheroo.config import RuntimeConfig
 
 LEGACY_MATH_JSON = {
   "Abs": {

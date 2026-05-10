@@ -1,6 +1,5 @@
 """Module docstring."""
 
-import pytest
 from ml_switcheroo.compiler.backends.rdna.macros import expand_conv2d, expand_linear
 from ml_switcheroo.compiler.frontends.rdna.nodes import (
   Instruction,

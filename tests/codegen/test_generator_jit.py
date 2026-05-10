@@ -11,7 +11,6 @@ Verifies:
 
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
-from unittest.mock import MagicMock
 
 
 class MockTraitSemantics(SemanticsManager):

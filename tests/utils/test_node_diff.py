@@ -2,7 +2,6 @@
 Tests for Node Diff Utility.
 """
 
-import pytest
 import libcst as cst
 from ml_switcheroo.utils.node_diff import capture_node_source, diff_nodes
 

@@ -7,7 +7,6 @@ Verifies:
 3. Rewriter behavior change based on flavour context.
 """
 
-import pytest
 from unittest.mock import MagicMock
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine

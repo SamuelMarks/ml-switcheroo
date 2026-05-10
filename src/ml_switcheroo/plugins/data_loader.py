@@ -18,7 +18,7 @@ Implementation Details:
 
 import libcst as cst
 import textwrap
-from typing import List, Optional
+from typing import List
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
@@ -143,20 +143,6 @@ def transform_dataloader(node: cst.Call, ctx: HookContext) -> cst.CSTNode:
   # 2b. Pass through Keywords
   # The Shim supports these standard keywords explicitly or via **kwargs.
   # We filter to ensure high-fidelity mapping without crashing on duplicates.
-  supported_keywords = {
-    "batch_size",
-    "shuffle",
-    "drop_last",
-    "num_workers",
-    "pin_memory",
-    "collate_fn",
-    "persistent_workers",
-    "dataset",
-    "sampler",
-    "batch_sampler",
-    "timeout",
-    "worker_init_fn",
-  }
 
   for arg in remaining_args:
     if not arg.keyword:

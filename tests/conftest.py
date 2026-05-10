@@ -5,6 +5,16 @@ import pytest
 import warnings
 from pathlib import Path
 from typing import Callable, Optional
+import importlib
+
+# Import Rewriter components for TestRewriter helper
+from ml_switcheroo.core.rewriter import (
+  RewriterContext,
+  RewriterPipeline,
+  StructuralPass,
+  ApiPass,
+  AuxiliaryPass,
+)
 
 # --- FIX: Global Warning Suppression for Collection Phase ---
 # Suppress the Keras/NumPy 'np.object' FutureWarning that crashes collection
@@ -19,19 +29,10 @@ sys.path.insert(0, str(src_path))
 
 # Force load of default adapters so they provide the "clean state" baseline
 try:
-  import ml_switcheroo.frameworks
+  importlib.import_module("ml_switcheroo.frameworks")
   from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY
 except ImportError:
   _ADAPTER_REGISTRY = {}
-
-# Import Rewriter components for TestRewriter helper
-from ml_switcheroo.core.rewriter import (
-  RewriterContext,
-  RewriterPipeline,
-  StructuralPass,
-  ApiPass,
-  AuxiliaryPass,
-)
 
 
 class TestRewriter:

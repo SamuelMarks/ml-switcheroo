@@ -9,7 +9,6 @@ are correctly applied to generate valid executable test code including:
 3. Output normalization syntax (np.array).
 """
 
-import pytest
 from unittest.mock import MagicMock
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager

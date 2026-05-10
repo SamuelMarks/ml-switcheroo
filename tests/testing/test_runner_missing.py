@@ -1,6 +1,5 @@
 def test_runner_run_exceptions():
   from ml_switcheroo.testing.runner import EquivalenceRunner
-  import hypothesis
 
   sr = EquivalenceRunner()
 
@@ -25,7 +24,6 @@ def test_runner_run_exceptions():
 
 def test_runner_execute_api():
   from ml_switcheroo.testing.runner import EquivalenceRunner
-  import logging
 
   sr = EquivalenceRunner()
   assert sr._execute_api("no_dot", {}) is None
@@ -33,7 +31,6 @@ def test_runner_execute_api():
 
 def test_runner_compare():
   from ml_switcheroo.testing.runner import EquivalenceRunner
-  import logging
 
   sr = EquivalenceRunner()
 
@@ -50,7 +47,6 @@ def test_runner_compare():
 
 def test_runner_deep_compare_exceptions():
   from ml_switcheroo.testing.runner import EquivalenceRunner
-  import logging
 
   sr = EquivalenceRunner()
 

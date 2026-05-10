@@ -9,9 +9,7 @@ Verifies:
 5.  **Round-Trip Viability**: Ensures Output of Emitter can be parsed back to LogicalGraph.
 """
 
-import pytest
 from ml_switcheroo.core.tikz.parser import TikzParser, TikzLexer, TokenKind
-from ml_switcheroo.core.tikz.analyser import LogicalGraph
 
 # Sample Input that matches Emitter output format
 SAMPLE_TIKZ = r"""

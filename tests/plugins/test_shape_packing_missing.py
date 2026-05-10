@@ -1,4 +1,3 @@
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.shape_packing import _create_dotted_name, transform_shape_packing
@@ -34,11 +33,11 @@ def test_transform_shape_packing_misses():
 
   # Function with 1 shape arg that is an integer (line 88-93)
   node_func_int = cst.Call(func=cst.Name("reshape"), args=[cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Integer("1"))])
-  res_int = transform_shape_packing(node_func_int, ctx)
+  transform_shape_packing(node_func_int, ctx)
 
   # Function with 1 shape arg that is not integer (line 94-95)
   node_func_var = cst.Call(func=cst.Name("reshape"), args=[cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Tuple([]))])
-  res_var = transform_shape_packing(node_func_var, ctx)
+  transform_shape_packing(node_func_var, ctx)
 
   # Function with NO shape arg (len == 0) -> line 97
   node_func_0 = cst.Call(func=cst.Name("reshape"), args=[cst.Arg(value=cst.Name("x"))])

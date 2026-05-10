@@ -4,7 +4,6 @@ Tests for Model Lifecycle Translation, Version Enforcement, and Deprecation Warn
 
 import pytest
 import libcst as cst
-from unittest.mock import MagicMock, patch
 from tests.conftest import TestRewriter
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig

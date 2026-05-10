@@ -19,13 +19,10 @@ from ml_switcheroo.frameworks import (
   register_framework,
   get_adapter,
 )
-from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY, InitMode
+from ml_switcheroo.frameworks.base import _ADAPTER_REGISTRY
 
 # Concrete imports for type checking (Directly from submodules)
-from ml_switcheroo.frameworks.tensorflow import TensorFlowAdapter
-from ml_switcheroo.frameworks.mlx import MLXAdapter
 from ml_switcheroo.frameworks.paxml import PaxmlAdapter
-from ml_switcheroo.frameworks.numpy import NumpyAdapter
 from ml_switcheroo.frameworks.torch import TorchAdapter
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 

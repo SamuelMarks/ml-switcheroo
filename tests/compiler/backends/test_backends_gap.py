@@ -22,7 +22,7 @@ def test_python_backend_class_body_replacer():
   )
 
   replacer = ClassBodyReplacer("A", init_func, forward_func)
-  new_tree = tree.visit(replacer)
+  tree.visit(replacer)
   assert replacer.found
 
   # Test ClassBodyReplacer for not found class
@@ -197,7 +197,6 @@ def test_python_snippet_emitter_gap():
 
 def test_python_backend_unknown_fw_import():
   from ml_switcheroo.compiler.backends.python import PythonBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
   backend = PythonBackend(framework="unknown_fw")
   assert backend._generate_imports() == []
@@ -205,7 +204,7 @@ def test_python_backend_unknown_fw_import():
 
 def test_python_backend_keras_layer_kind():
   from ml_switcheroo.compiler.backends.python import PythonBackend
-  from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
+  from ml_switcheroo.core.graph import LogicalNode
 
   backend = PythonBackend(framework="keras")
   node = LogicalNode("test", "Dense")
@@ -255,22 +254,20 @@ def test_rdna_macros_linear():
 
 def test_rdna_synthesizer_gaps():
   from ml_switcheroo.compiler.backends.rdna.synthesizer import RegisterAllocator, RdnaSynthesizer
-  from ml_switcheroo.compiler.frontends.rdna.nodes import VGPR, SGPR, Instruction, Label
   from ml_switcheroo.core.graph import LogicalGraph, LogicalNode
 
   # RegisterAllocator fallbacks
   alloc = RegisterAllocator()
   for _ in range(256):
     alloc.allocate_vector_temp()
-  import pytest
 
   with pytest.raises(ValueError):
-    v = alloc.allocate_vector_temp()
+    alloc.allocate_vector_temp()
 
   for _ in range(106):
     alloc.allocate_scalar_temp()
   with pytest.raises(ValueError):
-    s = alloc.allocate_scalar_temp()
+    alloc.allocate_scalar_temp()
 
   # 84: release scalar
   pass
@@ -394,7 +391,6 @@ def test_sass_synthesizer_gaps():
   alloc = RegisterAllocator()
   for _ in range(256):
     alloc.allocate_temp()
-  import pytest
 
   with pytest.raises(ValueError):
     alloc.allocate_temp()

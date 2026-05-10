@@ -7,12 +7,9 @@ Verifies that:
 """
 
 import json
-import sys
-from unittest.mock import patch, MagicMock
-from pathlib import Path
+from unittest.mock import patch
 
-from ml_switcheroo.cli.commands import handle_import_spec
-from ml_switcheroo.semantics.manager import SemanticsManager, resolve_semantics_dir
+from ml_switcheroo.semantics.manager import SemanticsManager
 
 
 def test_generation_and_execution_flow(tmp_path):
@@ -46,7 +43,7 @@ def test_generation_and_execution_flow(tmp_path):
   with patch("ml_switcheroo.semantics.file_loader.resolve_semantics_dir", return_value=sem_dir):
     with patch("ml_switcheroo.semantics.file_loader.resolve_snapshots_dir", return_value=snap_dir):
       # Trigger loading naturally
-      mgr = SemanticsManager()
+      SemanticsManager()
 
   # 4. Verify Abstract Spec Creation verification
   # The file we manually created exists

@@ -1,9 +1,6 @@
-import pytest
 import sys
-from unittest.mock import MagicMock, patch
 from ml_switcheroo.frameworks.mlx import MLXAdapter
 from ml_switcheroo.frameworks.base import StandardCategory
-import ml_switcheroo.frameworks.mlx as mlx_mod
 
 
 def test_mlx_convert_no_import(monkeypatch):
@@ -12,7 +9,7 @@ def test_mlx_convert_no_import(monkeypatch):
   adapter = MLXAdapter()
 
   # 302-309
-  res = adapter.convert([1, 2, 3])
+  adapter.convert([1, 2, 3])
   # if mlx isn't installed it skips or raises
 
   # 257-284, 287-290: discover without mx

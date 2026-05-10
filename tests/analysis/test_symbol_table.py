@@ -6,7 +6,7 @@ Updated to include Control Flow Inference tests.
 import pytest
 import libcst as cst
 from unittest.mock import MagicMock
-from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer, ModuleType, TensorType, UnionType
+from ml_switcheroo.analysis.symbol_table import SymbolTableAnalyzer, ModuleType, TensorType, UnionType, SymbolType, Scope
 
 
 @pytest.fixture
@@ -181,9 +181,6 @@ def test_implicit_tensor_method_on_union(analyzer):
 
   res_type = analyzer.table.get_type(call_node)
   assert isinstance(res_type, TensorType)
-
-
-from ml_switcheroo.analysis.symbol_table import SymbolType, TensorType, ModuleType, UnionType, Scope
 
 
 def test_symbol_type_equality():

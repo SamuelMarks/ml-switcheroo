@@ -1,4 +1,3 @@
-import pytest
 from ml_switcheroo.compiler.backends.extras import (
   HtmlBackend,
   TikzBackend,
@@ -227,7 +226,7 @@ def test_latex_backend_visited_ops():
     nodes=[LogicalNode("i1", "Input"), LogicalNode("i2", "Input"), LogicalNode("op", "add")],
     edges=[LogicalEdge("i1", "op"), LogicalEdge("i2", "op")],
   )
-  code = backend.compile(graph)
+  backend.compile(graph)
 
   graph2 = LogicalGraph(
     nodes=[

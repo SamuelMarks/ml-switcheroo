@@ -3,7 +3,6 @@ Integration Tests for TensorFlow Native Data Pipeline.
 """
 
 import pytest
-import ast
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager

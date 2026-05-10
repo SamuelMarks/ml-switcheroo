@@ -4,7 +4,7 @@ Tests for Fuzzy Matching (Updated for Distributed Semantics).
 
 import json
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 from ml_switcheroo.discovery.scaffolder import Scaffolder
 from ml_switcheroo.discovery.inspector import ApiInspector
 from ml_switcheroo.semantics.manager import SemanticsManager

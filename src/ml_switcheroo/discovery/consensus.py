@@ -6,11 +6,11 @@ It aligns variable naming conventions (e.g., 'dim' vs 'axis') and clusters API e
 the Semantic Knowledge Base.
 """
 
-from typing import Dict, List, Set, Any, Union
+from typing import Dict, List, Any, Union
 from collections import Counter as CollectionCounter
 from pydantic import BaseModel, Field
 
-from ml_switcheroo.core.ghost import GhostRef, GhostParam
+from ml_switcheroo.core.ghost import GhostRef
 
 
 class CandidateStandard(BaseModel):

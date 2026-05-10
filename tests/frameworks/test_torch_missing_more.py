@@ -14,7 +14,7 @@ def test_torch_adapter_coverage():
     class optim:
       pass
 
-  sys.modules["torch"] = MockTF = MockTorch()
+  sys.modules["torch"] = MockTorch()
   sys.modules["torch.nn"] = MockTorch.nn
   sys.modules["torch.nn.functional"] = MockTorch.nn.functional
   sys.modules["torch.optim"] = MockTorch.optim
@@ -128,7 +128,8 @@ def test_torch_convert_more():
 
 
 def test_torch_import_error():
-  import sys, importlib
+  import sys
+  import importlib
 
   sys.modules["torch"] = None
   try:
@@ -140,7 +141,8 @@ def test_torch_import_error():
 
 
 def test_torch_init_no_torch():
-  import sys, importlib
+  import sys
+  import importlib
 
   sys.modules["torch"] = None
   try:

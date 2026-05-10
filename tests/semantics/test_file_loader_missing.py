@@ -1,6 +1,4 @@
-import pytest
-from pathlib import Path
-from unittest.mock import patch, mock_open
+from unittest.mock import patch
 
 from ml_switcheroo.semantics.file_loader import KnowledgeBaseLoader
 

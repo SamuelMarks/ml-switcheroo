@@ -1,11 +1,9 @@
-import pytest
 import sys
 from unittest.mock import patch, MagicMock
 
 # Import necessary modules
-from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter, flax_nnx
+from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
 from ml_switcheroo.frameworks.base import StandardCategory, InitMode
-from ml_switcheroo.core.ghost import GhostRef
 
 
 def test_flax_nnx_import_properties():
@@ -114,7 +112,9 @@ def test_flax_nnx_convert_list_with_jax_numpy_present():
 
   # Try success
   try:
-    import jax.numpy as jnp
+    import importlib
+
+    importlib.import_module("jax.numpy")
 
     res = adapter.convert([1, 2, 3])
     assert hasattr(res, "__array__")

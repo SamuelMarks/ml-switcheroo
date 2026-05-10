@@ -1,6 +1,5 @@
 def test_console_missing_export():
   from ml_switcheroo.utils.console import _ConsoleProxy
-  from rich.console import Console
   import unittest.mock
 
   p = _ConsoleProxy()

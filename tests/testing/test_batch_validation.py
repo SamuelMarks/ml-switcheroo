@@ -10,7 +10,6 @@ Verifies:
 """
 
 import pytest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.testing.batch_runner import BatchValidator

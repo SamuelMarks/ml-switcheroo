@@ -10,7 +10,6 @@ from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.core.ghost import GhostRef
 from ml_switcheroo.frameworks.base import (
   register_framework,
-  FrameworkAdapter,
   StandardMap,
   StandardCategory,
   ImportConfig,

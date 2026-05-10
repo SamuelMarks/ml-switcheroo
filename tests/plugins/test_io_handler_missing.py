@@ -1,4 +1,3 @@
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.plugins.io_handler import _get_func_name, _get_arg, transform_io_calls

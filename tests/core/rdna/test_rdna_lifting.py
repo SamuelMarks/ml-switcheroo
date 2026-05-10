@@ -2,7 +2,6 @@
 
 from typing import List
 
-from ml_switcheroo.compiler.ir import LogicalGraph
 from ml_switcheroo.compiler.frontends.rdna.analysis import RdnaAnalyzer
 from ml_switcheroo.compiler.frontends.rdna.lifter import RdnaLifter
 from ml_switcheroo.compiler.frontends.rdna.nodes import (

@@ -9,7 +9,6 @@ Verifies:
 5.  Binary Operations (math expressions).
 """
 
-import pytest
 import libcst as cst
 from ml_switcheroo.core.mlir.emitter import PythonToMlirEmitter
 

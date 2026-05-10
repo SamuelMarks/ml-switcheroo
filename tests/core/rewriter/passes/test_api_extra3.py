@@ -1,10 +1,8 @@
 """Module docstring."""
 
-import pytest
 import libcst as cst
-from unittest.mock import MagicMock, patch, PropertyMock
 from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
-from ml_switcheroo.core.rewriter.context import RewriterContext, SignatureContext
+from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 
@@ -114,16 +112,16 @@ def test_normalize_arguments_reconstruct_val_map():
   op_details = {"std_args": ["input"], "variants": {"torch": {"args": {"input": "x"}}}}
 
   api_mapping1 = {"arg_values": {"input": {"a": "b"}}}
-  args1 = t._normalize_arguments(original_node, original_node, op_details, api_mapping1)
+  t._normalize_arguments(original_node, original_node, op_details, api_mapping1)
 
   api_mapping2 = {"arg_values": {"input": "c + d"}}
-  args2 = t._normalize_arguments(original_node, original_node, op_details, api_mapping2)
+  t._normalize_arguments(original_node, original_node, op_details, api_mapping2)
 
   api_mapping3 = {"arg_values": {"input": "invalid syntax +++"}}
-  args3 = t._normalize_arguments(original_node, original_node, op_details, api_mapping3)
+  t._normalize_arguments(original_node, original_node, op_details, api_mapping3)
 
   api_mapping4 = {"arg_values": {"input": 42}}
-  args4 = t._normalize_arguments(original_node, original_node, op_details, api_mapping4)
+  t._normalize_arguments(original_node, original_node, op_details, api_mapping4)
 
 
 def test_normalize_arguments_reconstruct_different_val():

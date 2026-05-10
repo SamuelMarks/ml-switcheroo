@@ -1,15 +1,12 @@
 """Module docstring."""
 
-import pytest
 import libcst as cst
-from typing import Dict, Any
 
 from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.enums import SemanticTier
-from tests.conftest import TestRewriter
 
 
 class DummySemantics(SemanticsManager):
@@ -166,7 +163,7 @@ def test_check_version_constraints():
   transformer.context.config.target_framework = "flax_nnx"  # covers package renaming
   try:
     transformer.check_version_constraints("0.0.1", None)
-  except:
+  except Exception:
     pass
 
 
@@ -407,7 +404,7 @@ def test_normalize_arguments_inject_and_kwargs_map():
   # Test method receiver
   # Lines 765-771
   call2 = cst.parse_expression("x.add(y)")
-  args2 = transformer._normalize_arguments(call2, call2, op_details, target_impl)
+  transformer._normalize_arguments(call2, call2, op_details, target_impl)
   # receiver should be added as first arg if it was mapped as an api
   # wait, this requires is_method_call tracking in _normalize_arguments.
 

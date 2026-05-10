@@ -1,7 +1,5 @@
-import pytest
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.discovery.scaffolder import Scaffolder
-from ml_switcheroo.enums import SemanticTier
 
 
 def test_scaffolder_all_gaps():

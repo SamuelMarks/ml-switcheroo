@@ -7,7 +7,7 @@ It performs Provenance Tracking, mapping logical nodes back to their source CST 
 enabling surgical patching later in the pipeline.
 """
 
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional
 import libcst as cst
 from libcst import matchers as m
 

@@ -10,7 +10,7 @@ Supported:
 """
 
 import libcst as cst
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 

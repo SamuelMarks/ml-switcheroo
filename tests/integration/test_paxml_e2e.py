@@ -6,7 +6,6 @@ verifying 3-Tier Layer setup, `setup` method renaming, and functional forward pa
 
 import pytest
 from pathlib import Path
-import libcst as cst
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager

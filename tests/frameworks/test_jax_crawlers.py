@@ -8,13 +8,10 @@ Verifies that:
 """
 
 import sys
-import importlib
 import pytest
 from unittest.mock import MagicMock, patch
 
-from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter
-from ml_switcheroo.frameworks import optax_shim
 from ml_switcheroo.frameworks.optax_shim import OptaxScanner
 from ml_switcheroo.frameworks.base import StandardCategory
 from ml_switcheroo.core.ghost import GhostRef

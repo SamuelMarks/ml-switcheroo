@@ -27,16 +27,12 @@ from ml_switcheroo.frameworks.base import (
   StandardCategory,
   StandardMap,
   ImportConfig,
-  InitMode,
 )
 from ml_switcheroo.frameworks.loader import load_definitions
 
 # Conditional import to allow loading in environments without MLX
 try:
-  import mlx.core
-  import mlx.nn
-  import mlx.optimizers
-  import mlx.utils
+  pass
 except Exception:
   pass
 

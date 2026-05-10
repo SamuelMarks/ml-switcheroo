@@ -15,7 +15,6 @@ Decoupling Logic:
 """
 
 import libcst as cst
-from typing import List
 
 from ml_switcheroo.core.hooks import register_hook, HookContext
 from ml_switcheroo.plugins.utils import create_dotted_name, is_framework_module_node

@@ -1,5 +1,5 @@
 import libcst as cst
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from ml_switcheroo.plugins.state_container import (
   _create_node,
   _get_receiver,

@@ -11,7 +11,6 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
-import ml_switcheroo.frameworks.html_dsl  # Ensure adapter registration works
 
 # Sample Python source (PyTorch style)
 # Updated to include functional calls (flatten, relu) to test classification logic

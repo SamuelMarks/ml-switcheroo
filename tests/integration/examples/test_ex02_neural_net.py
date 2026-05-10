@@ -5,13 +5,11 @@ This module validates the end-to-end translation of a Neural Network definition
 (stateful class) from PyTorch to various target frameworks.
 """
 
-import ast
 import pytest
 import textwrap
 
 from ml_switcheroo import RuntimeConfig, ASTEngine, SemanticsManager
 from ml_switcheroo.enums import SemanticTier
-from tests.utils.ast_utils import cmp_ast
 
 # --- Source Code (PyTorch) ---
 SOURCE_TORCH = textwrap.dedent(""" 

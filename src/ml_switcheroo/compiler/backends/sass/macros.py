@@ -18,7 +18,6 @@ from ml_switcheroo.compiler.frontends.sass.nodes import (
   Predicate,
   Comment,
   SassNode,
-  Operand,
 )
 
 

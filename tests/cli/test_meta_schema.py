@@ -10,7 +10,6 @@ Verifies that:
 import json
 import pytest
 from ml_switcheroo.cli.__main__ import main
-from ml_switcheroo.core.dsl import OperationDef
 
 
 def test_schema_command_integration(capsys):

@@ -11,8 +11,7 @@ import pytest
 import numpy as np
 import hypothesis.strategies as st
 from hypothesis import given, settings, HealthCheck
-from pydantic import ValidationError
-from ml_switcheroo.core.dsl import ParameterDef, OperationDef, FrameworkVariant
+from ml_switcheroo.core.dsl import ParameterDef
 from ml_switcheroo.testing.fuzzer import InputFuzzer
 
 # --- Part 1: Schema Validation Tests ---

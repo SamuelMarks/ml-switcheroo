@@ -1,4 +1,3 @@
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.state_flag_injection import _get_func_name, inject_training_flag_call, capture_eval_state
@@ -21,7 +20,7 @@ def test_inject_training_flag_call():
   ctx.lookup_api.return_value = "Dropout"
   # 104: arg has no keyword
   node_pos = cst.Call(func=cst.Name("dropout"), args=[cst.Arg(value=cst.Name("x")), cst.Arg(value=cst.Name("training"))])
-  res = inject_training_flag_call(node_pos, ctx)
+  inject_training_flag_call(node_pos, ctx)
 
 
 def test_capture_eval_state():
@@ -40,4 +39,4 @@ def test_capture_eval_state():
   node_train_pos = cst.Call(
     func=cst.Attribute(value=cst.Name("model"), attr=cst.Name("train")), args=[cst.Arg(value=cst.Name("False"))]
   )
-  res = capture_eval_state(node_train_pos, ctx)
+  capture_eval_state(node_train_pos, ctx)

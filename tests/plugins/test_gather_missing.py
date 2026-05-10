@@ -1,4 +1,3 @@
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock
 from ml_switcheroo.plugins.gather import transform_gather
@@ -25,7 +24,7 @@ def test_gather_kwargs():
       cst.Arg(value=cst.Name("idx"), keyword=cst.Name("index")),
     ],
   )
-  res = transform_gather(node, ctx)
+  transform_gather(node, ctx)
 
 
 def test_gather_missing_args():

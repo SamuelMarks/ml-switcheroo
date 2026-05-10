@@ -3,7 +3,6 @@ Tests for Plugin Logic Injection with Advanced Operators.
 """
 
 import pytest
-from pathlib import Path
 from ml_switcheroo.core.dsl import PluginScaffoldDef, PluginType, Rule, LogicOp
 from ml_switcheroo.tools.injector_plugin import PluginGenerator
 

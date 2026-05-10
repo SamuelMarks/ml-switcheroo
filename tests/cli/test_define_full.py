@@ -1,7 +1,5 @@
 from ml_switcheroo.cli.handlers.define import handle_define
-import pytest
-import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 
 @patch("ml_switcheroo.cli.handlers.define._inject_hub")

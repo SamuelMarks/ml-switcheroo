@@ -12,7 +12,6 @@ import pytest
 import numpy as np
 import hypothesis.strategies as st
 from hypothesis import given, settings, HealthCheck
-from typing import Callable
 
 from ml_switcheroo.testing.fuzzer.core import InputFuzzer
 

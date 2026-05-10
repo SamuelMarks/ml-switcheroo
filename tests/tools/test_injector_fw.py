@@ -10,8 +10,7 @@ Verifies that:
 
 import json
 import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from ml_switcheroo.core.dsl import FrameworkVariant
 from ml_switcheroo.tools.injector_fw import FrameworkInjector
@@ -83,7 +82,7 @@ def test_injector_dry_run(target_json, sample_variant, capsys):
   """
   Scenario: Dry Run enabled. File should NOT change.
   """
-  original_mtime = target_json.stat().st_mtime
+  target_json.stat().st_mtime
 
   with patch("ml_switcheroo.tools.injector_fw.core.get_definitions_path", return_value=target_json):
     injector = FrameworkInjector("torch", "LogSoftmax", sample_variant)

@@ -576,7 +576,7 @@ class MlirBackend(CompilerBackend):
         # Sink node, often no output or uses return logic
         # Find source
         # Graph edges handling is simplistic here: just list nodes
-        lines.append(f'    "sw.return"() : () -> ()')
+        lines.append('    "sw.return"() : () -> ()')
       else:
         # Generic Op
         # Construct args string from metadata

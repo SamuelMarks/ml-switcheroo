@@ -1,6 +1,4 @@
-import pytest
 from unittest.mock import patch, MagicMock
-from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import StandardCategory
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
 
@@ -70,9 +68,8 @@ def test_jax_adapter_convert():
     def __array__(self):
       return []
 
-  with patch.dict("sys.modules", {"jax": MagicMock()}) as mock_sys:
+  with patch.dict("sys.modules", {"jax": MagicMock()}):
     adapter.convert([1, 2, 3])
-    import sys
 
     pass
 

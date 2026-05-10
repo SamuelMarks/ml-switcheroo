@@ -1,7 +1,5 @@
 import pytest
-import sys
-from unittest.mock import patch, MagicMock
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 from ml_switcheroo.config import parse_cli_key_values, RuntimeConfig, get_framework_priority_order
 import ml_switcheroo.config as conf
 
@@ -70,7 +68,6 @@ def test_runtime_config_default_fallback(monkeypatch):
 
 def test_from_toml_path():
   import tempfile
-  import json
   from pathlib import Path
 
   with tempfile.TemporaryDirectory() as d:
@@ -86,4 +83,4 @@ def test_from_toml_path():
     # 336-338: Malformed TOML
     with open(p, "w") as f:
       f.write("malformed [")
-    cfg2 = RuntimeConfig.load(search_path=Path(d))
+    RuntimeConfig.load(search_path=Path(d))

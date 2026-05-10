@@ -3,12 +3,11 @@ Tests for Escape Hatch Wiring in AST Translation.
 """
 
 import pytest
-from typing import Set, Dict, Any, Tuple, Optional
+from typing import Set, Dict, Tuple, Optional
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.escape_hatch import EscapeHatch
-from ml_switcheroo.enums import SemanticTier
 
 
 class MockSemantics(SemanticsManager):

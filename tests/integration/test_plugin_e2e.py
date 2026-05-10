@@ -14,7 +14,7 @@ from typing import Set
 
 from ml_switcheroo.cli.__main__ import main
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.hooks import _HOOKS, register_hook, HookContext, clear_hooks
+from ml_switcheroo.core.hooks import register_hook, HookContext, clear_hooks
 
 # --- Mock Knowledge Base for E2E ---
 

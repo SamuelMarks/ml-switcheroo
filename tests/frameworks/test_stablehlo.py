@@ -8,16 +8,11 @@ Verifies:
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import StandardCategory
 from ml_switcheroo.frameworks.stablehlo import StableHloAdapter
-from ml_switcheroo.frameworks.base import (
-  _ADAPTER_REGISTRY,
-  get_adapter,
-  InitMode,
-)
 from ml_switcheroo.compiler.registry import get_backend_class, is_isa_target
 
 

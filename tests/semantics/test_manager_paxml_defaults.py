@@ -3,7 +3,6 @@ Tests for PaxML Default Alias Configuration via Adapter.
 """
 
 import libcst as cst
-from unittest.mock import MagicMock
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.import_fixer import ImportFixer, ImportResolver
 

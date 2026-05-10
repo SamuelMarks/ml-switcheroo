@@ -33,7 +33,7 @@ extensions = [
   "ml_switcheroo.sphinx_ext",
 ]
 
-if os.environ.get("HOMEPAGE_ONLY") != "1":
+if os.environ.get("BUILD_ALL_DOCS") == "1":
   extensions.append("autoapi.extension")
 
 # -- Warning Suppression -----------------------------------------------------

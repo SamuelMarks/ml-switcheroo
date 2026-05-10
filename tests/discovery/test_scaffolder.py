@@ -1,7 +1,7 @@
 """Module docstring."""
 
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from ml_switcheroo.discovery.scaffolder import Scaffolder
 from ml_switcheroo.semantics.manager import SemanticsManager
 

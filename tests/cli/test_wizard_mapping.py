@@ -16,7 +16,6 @@ from unittest.mock import patch, MagicMock
 
 from ml_switcheroo.cli.wizard import MappingWizard
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.config import RuntimeConfig
 
 # --- Mocks ---
 

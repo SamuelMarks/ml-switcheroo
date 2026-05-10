@@ -8,8 +8,6 @@ Verifies:
 4.  Trivia: Comments restored.
 """
 
-import pytest
-import libcst as cst
 from ml_switcheroo.core.mlir.nodes import (
   ModuleNode,
   OperationNode,

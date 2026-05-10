@@ -1,8 +1,6 @@
-import pytest
 from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import StandardCategory
-from ml_switcheroo.core.ghost import GhostRef
 
 
 def test_paxml_adapter():
@@ -42,13 +40,15 @@ def test_paxml_adapter():
   assert "Sequential" in defs
   assert "ReLU" in defs
 
-  from ml_switcheroo.frameworks.base import StandardCategory, InitMode
+  from ml_switcheroo.frameworks.base import InitMode
 
   ...
   # Discovery
   adapter._mode = InitMode.LIVE
   try:
-    import praxis
+    import importlib
+
+    importlib.import_module("praxis")
 
     praxis_installed = True
   except ImportError:
@@ -153,7 +153,6 @@ def test_paxml_collect_api():
   sys.modules["praxis.layers"] = mock_praxis.layers
 
   from ml_switcheroo.frameworks.paxml import PaxmlAdapter
-  from ml_switcheroo.frameworks.base import StandardCategory
 
   adapter = PaxmlAdapter()
   adapter._mode = __import__("ml_switcheroo.frameworks.base").frameworks.base.InitMode.LIVE

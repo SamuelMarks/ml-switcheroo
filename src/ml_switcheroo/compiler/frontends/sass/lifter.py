@@ -12,7 +12,7 @@ Updates:
 """
 
 import re
-from typing import List, Optional, Pattern, Set
+from typing import List, Optional, Pattern
 
 from ml_switcheroo.compiler.ir import LogicalEdge, LogicalGraph, LogicalNode
 from ml_switcheroo.compiler.frontends.sass.nodes import (

@@ -8,7 +8,6 @@ Verifies:
 4. Robustness against detached nodes.
 """
 
-import pytest
 import libcst as cst
 from ml_switcheroo.utils.visualizer import MermaidGenerator
 

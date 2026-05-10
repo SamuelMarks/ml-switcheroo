@@ -10,7 +10,7 @@ Identifying replacements (new fused nodes).
 Mapping new nodes to anchors in the original graph for placement.
 """
 
-from typing import List, Dict, Set, Any
+from typing import List, Any
 from dataclasses import dataclass
 from ml_switcheroo.compiler.ir import LogicalGraph
 
@@ -39,10 +39,6 @@ class ReplaceAction(PatchAction):
   input_vars: List[str]
   output_var: str
   is_init: bool = False
-
-
-# Type hint workaround for circular ref
-from ml_switcheroo.compiler.ir import LogicalNode as _LogicalNode  # noqa: F401
 
 
 class GraphDiffer:

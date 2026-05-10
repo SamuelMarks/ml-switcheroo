@@ -1,6 +1,5 @@
 """Module docstring."""
 
-import pytest
 from ml_switcheroo.core.mlir.parser import MlirParser
 
 

@@ -11,6 +11,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
+from ml_switcheroo.cli.commands import handle_gen_weight_script
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.frameworks.torch import TorchAdapter
@@ -231,7 +232,7 @@ def test_convert_weights_errors():
     gen = WeightScriptGenerator(SemanticsManager(), RuntimeConfig())
     gen.source_fw = "torch"
     gen.target_fw = "jax"
-    assert gen.generate(Path("src.py"), Path("out.py")) == False
+    assert not gen.generate(Path("src.py"), Path("out.py"))
 
   # 100-102: write error
   with (
@@ -247,12 +248,11 @@ def test_convert_weights_errors():
     gen.source_fw = "torch"
     gen.target_fw = "jax"
     # generate should return False
-    assert gen.generate(Path("src.py"), Path("out.py")) == False
+    assert not gen.generate(Path("src.py"), Path("out.py"))
 
 
 def test_flatten_mapping_rules_non_torch_src():
   from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
-  from pathlib import Path
   from ml_switcheroo.semantics.manager import SemanticsManager
   from ml_switcheroo.config import RuntimeConfig
 
@@ -269,12 +269,6 @@ def test_flatten_mapping_rules_non_torch_src():
     # Check permutations logic for 167
     assert len(rules) > 0
     assert rules[0]["perm"] is not None
-
-
-import pytest
-from pathlib import Path
-from unittest.mock import patch
-from ml_switcheroo.cli.commands import handle_gen_weight_script
 
 
 @patch("ml_switcheroo.cli.commands.WeightScriptGenerator")

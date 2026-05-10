@@ -11,7 +11,7 @@ def test_sass_parser_missing():
   except ImportError:
     pass
 
-  ast = parser.parse()
+  parser.parse()
 
   parser = SassParser("MOV R0, R1\n.text")
-  ast = parser.parse()
+  parser.parse()

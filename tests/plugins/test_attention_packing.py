@@ -13,7 +13,7 @@ import libcst as cst
 from unittest.mock import MagicMock
 
 from ml_switcheroo.core.hooks import HookContext
-from ml_switcheroo.plugins.attention_packing import repack_attn_keras, repack_attn_flax
+from ml_switcheroo.plugins.attention_packing import repack_attn_keras, repack_attn_flax, repack_attn_torch
 
 
 @pytest.fixture
@@ -157,7 +157,6 @@ def test_flax_strategy_forward(mock_ctx):
 
 
 # --- Torch Strategy Tests ---
-from ml_switcheroo.plugins.attention_packing import repack_attn_torch
 
 
 def test_torch_strategy_constructor_happy_path(mock_ctx):

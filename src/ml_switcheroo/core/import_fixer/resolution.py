@@ -5,7 +5,7 @@ codebase to be analyzed *before* transformation commits to determine imports.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Dict, List, Optional
 
 import libcst as cst
 
@@ -63,7 +63,7 @@ class _QualNameScanner(cst.CSTVisitor):
       name = get_full_name(node)
       if name == self.target_path or name.startswith(f"{self.target_path}."):
         self.found = True
-    except:
+    except Exception:
       pass
 
   def visit_Name(self, node: cst.Name) -> None:

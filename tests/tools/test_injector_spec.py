@@ -6,7 +6,7 @@ JSON specification files in the Semantics Knowledge Base.
 """
 
 import json
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import patch, mock_open
 from pathlib import Path
 
 import pytest

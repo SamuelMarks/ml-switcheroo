@@ -35,7 +35,7 @@ def test_parse_stubs_skip_private(importer, tmp_path):
 
 
 def test_parse_stubs_relative_path_error(importer, tmp_path):
-  file1 = Path("/some/outside/path.py")
+  Path("/some/outside/path.py")
 
   # Mocking the read_text to avoid FileNotFoundError
   file1_mock = MagicMock(spec=Path)

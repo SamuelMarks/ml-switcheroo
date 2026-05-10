@@ -20,7 +20,6 @@ from ml_switcheroo.discovery.syncer import FrameworkSyncer
 from ml_switcheroo.frameworks.base import (
   StandardCategory,
   get_adapter,
-  GhostRef,
   FrameworkAdapter,
   SNAPSHOT_DIR as DEFAULT_SNAP_DIR,
 )

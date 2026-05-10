@@ -3,7 +3,6 @@ Tests for Varargs Support (Updated).
 """
 
 import json
-import pytest
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.discovery.scaffolder import Scaffolder
 from ml_switcheroo.semantics.manager import SemanticsManager

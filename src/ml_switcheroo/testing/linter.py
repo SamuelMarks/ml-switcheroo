@@ -11,10 +11,9 @@ Detection Scope:
 """
 
 import libcst as cst
-from typing import List, Set, Dict, Tuple, Optional
+from typing import List, Set, Dict, Tuple
 
 from ml_switcheroo.frameworks import get_adapter
-from ml_switcheroo.core.scanners import get_full_name
 
 
 class StructuralLinter(cst.CSTVisitor):

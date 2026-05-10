@@ -8,9 +8,8 @@ Verifies that:
 4. Edge cases (defaults, annotations, missing signatures) are handled.
 """
 
-import pytest
 from typing import Optional
-from ml_switcheroo.core.ghost import GhostInspector, GhostRef
+from ml_switcheroo.core.ghost import GhostInspector
 
 
 # --- Mock Objects for Inspection ---
@@ -134,9 +133,6 @@ def test_ghost_ref_helper_methods():
 
   assert ref.has_arg("x") is True
   assert ref.has_arg("non_existent") is False
-
-
-import inspect
 
 
 def test_ghost_varargs():

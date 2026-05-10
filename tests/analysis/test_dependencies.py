@@ -9,6 +9,8 @@ Verifies that:
 """
 
 import pytest
+import sys
+from unittest.mock import patch
 import libcst as cst
 
 from ml_switcheroo.analysis.dependencies import DependencyScanner
@@ -133,10 +135,6 @@ def test_ignore_relative_imports(scanner):
   code2 = "from .sub import y"
   unknowns2 = scan_code(scanner, code2)
   assert len(unknowns2) == 0
-
-
-import sys
-from unittest.mock import patch
 
 
 def test_get_root_package_non_name(scanner):

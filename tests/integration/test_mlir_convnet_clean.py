@@ -2,8 +2,6 @@
 Integration Test for Clean MLIR Code Generation (ConvNet).
 """
 
-import pytest
-import textwrap
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
@@ -125,8 +123,6 @@ def test_clean_mlir_generation():
 
   # 'self.fc(' should exist
   # but the argument inside should be a variable, not a function call
-  fc_call_pattern = r"self\.fc\([a-zA-Z_0-9]+\)"
-  flatten_call_pattern = r"flax\.nnx\.Flatten\("
 
   # Ensure flatten call is NOT inside fc call
   # Simple check: line containing self.fc should not contain Flatten

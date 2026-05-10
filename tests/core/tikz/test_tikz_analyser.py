@@ -8,12 +8,12 @@ Verifies:
 4.  Functional Tracing: Handling F.relu() calls.
 """
 
-import pytest
 import libcst as cst
-from ml_switcheroo.core.tikz.analyser import GraphExtractor, LogicalNode, LogicalEdge
+from ml_switcheroo.core.tikz.analyser import GraphExtractor
+from ml_switcheroo.compiler.ir import LogicalGraph
 
 
-def parse_and_extract(code: str) -> "LogicalGraph":
+def parse_and_extract(code: str) -> LogicalGraph:
   """Function docstring."""
   module = cst.parse_module(code)
   extractor = GraphExtractor()

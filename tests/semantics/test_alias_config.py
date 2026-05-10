@@ -3,7 +3,7 @@ Tests for Data-Driven Framework Alias Configuration.
 """
 
 import libcst as cst
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.merging import merge_tier_data

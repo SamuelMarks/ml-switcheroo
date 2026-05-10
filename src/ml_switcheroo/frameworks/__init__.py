@@ -13,11 +13,9 @@ internal `_ADAPTER_REGISTRY`.
 import importlib
 import pkgutil
 import logging
-from typing import List, Optional
 
 from ml_switcheroo.frameworks.base import (
   FrameworkAdapter,
-  _ADAPTER_REGISTRY,
   register_framework,
   get_adapter,
   available_frameworks,

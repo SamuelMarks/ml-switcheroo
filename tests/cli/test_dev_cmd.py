@@ -1,6 +1,5 @@
-import pytest
 from pathlib import Path
-from unittest.mock import patch, mock_open, MagicMock
+from unittest.mock import patch, mock_open
 
 from ml_switcheroo.cli.handlers.dev import handle_matrix, handle_docs, handle_gen_tests
 

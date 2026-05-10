@@ -11,7 +11,6 @@ def test_manager_loads_files():
   """Verify manager attempts to load JSONs from semantics dir."""
 
   # Mock data
-  mock_math = {"Abs": {"description": "Absolute value", "std_args": ["x"]}}
 
   # We patch the KnowledgeBaseLoader internal logic or the open calls
   # Simpler to patch KnowledgeBaseLoader._load_tier_content to see if it receives data
@@ -19,7 +18,7 @@ def test_manager_loads_files():
   with patch("ml_switcheroo.semantics.manager.KnowledgeBaseLoader.load_knowledge_graph") as mock_load:
     # Mock registry loader to avoid side effects
     with patch("ml_switcheroo.semantics.manager.RegistryLoader.hydrate"):
-      mgr = SemanticsManager()
+      SemanticsManager()
 
       # Should call loading sequence
       mock_load.assert_called_once()

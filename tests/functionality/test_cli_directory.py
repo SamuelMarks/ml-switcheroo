@@ -9,8 +9,6 @@ Verifies that:
 
 from ml_switcheroo.cli.__main__ import main
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.config import RuntimeConfig
-import pytest
 
 
 class MockSemantics(SemanticsManager):

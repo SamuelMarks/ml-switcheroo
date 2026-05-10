@@ -33,8 +33,6 @@ def test_injector_spec_missing():
   assert args[3] == "d"
 
   # 84-85: file exists but invalid JSON, 101: dry run
-  from pathlib import Path
-  import json
 
   with __import__("unittest.mock").mock.patch("pathlib.Path.exists", return_value=True):
     with __import__("unittest.mock").mock.patch(
@@ -56,7 +54,6 @@ def test_injector_spec_missing_more():
 
   with __import__("unittest.mock").mock.patch("builtins.open", side_effect=OSError("fail")):
     import ml_switcheroo.tools.injector_spec
-    from pathlib import Path
 
     ml_switcheroo.tools.injector_spec.Path = type("MockPath", (), {"exists": lambda self: True})
     # This will fail at write but maybe not at open if exists?
@@ -71,7 +68,6 @@ def test_injector_spec_write_parent_not_exist():
   injector = StandardsInjector(op_def)
 
   # 101: if not target_path.parent.exists()
-  import pathlib
 
   class MockPath:
     def __init__(self, *args, **kwargs):

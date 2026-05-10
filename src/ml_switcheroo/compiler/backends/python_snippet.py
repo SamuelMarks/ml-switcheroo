@@ -13,7 +13,7 @@ This is used by the ``GraphPatcher`` to surgically insert new code for
 nodes created during Graph Optimization (e.g. Fused Operations).
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 import libcst as cst
 
 from ml_switcheroo.compiler.ir import LogicalNode

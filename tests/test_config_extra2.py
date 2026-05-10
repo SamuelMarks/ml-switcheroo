@@ -1,4 +1,3 @@
-import pytest
 from pathlib import Path
 from unittest.mock import patch
 
@@ -13,8 +12,6 @@ def test_config_plugin_paths_no_toml_dir():
 
 
 def test_config_tomllib_none():
-  import sys
-  import ml_switcheroo.config
 
   with patch("ml_switcheroo.config.tomllib", None):
     from ml_switcheroo.config import _load_toml_settings

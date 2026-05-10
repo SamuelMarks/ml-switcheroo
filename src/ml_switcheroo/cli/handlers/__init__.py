@@ -25,9 +25,12 @@ from .dev import handle_matrix, handle_docs, handle_gen_tests
 
 __all__ = [
   "_capture_framework",
+  "_convert_single_file",
   "_get_pkg_version",
+  "_print_batch_summary",
   "_save_snapshot",
   "handle_ci",
+  "handle_convert",
   "handle_docs",
   "handle_gen_tests",
   "handle_harvest",

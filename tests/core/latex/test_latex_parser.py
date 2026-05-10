@@ -9,7 +9,6 @@ Verifies:
 """
 
 import pytest
-import libcst as cst
 from ml_switcheroo.core.latex.parser import LatexParser
 
 
@@ -92,8 +91,8 @@ def test_multiple_attributes(basic_latex):
   code = parser.parse().code
 
   lines = code.splitlines()
-  c1_idx = next(i for i, l in enumerate(lines) if "self.c1" in l)
-  c2_idx = next(i for i, l in enumerate(lines) if "self.c2" in l)
+  c1_idx = next(i for i, line in enumerate(lines) if "self.c1" in line)
+  c2_idx = next(i for i, line in enumerate(lines) if "self.c2" in line)
 
   assert c1_idx < c2_idx
   # Check namespacing

@@ -13,7 +13,7 @@ from typing import Any, Protocol, Type, Dict, List, Tuple, Optional, Union, Set
 from pydantic import BaseModel, Field
 
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits, OperationDef
-from ml_switcheroo.core.ghost import GhostRef, GhostInspector
+from ml_switcheroo.core.ghost import GhostRef
 from ml_switcheroo.enums import SemanticTier
 
 SNAPSHOT_DIR = Path(__file__).resolve().parent.parent / "snapshots"

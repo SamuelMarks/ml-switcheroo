@@ -1,6 +1,5 @@
 """Module docstring."""
 
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch
 

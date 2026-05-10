@@ -5,7 +5,7 @@ This module implements a compiler pass that analyzes an unannotated `LogicalGrap
 (e.g., for MaxText/NNX targets) based on standard tensor-parallel and FSDP heuristics.
 """
 
-from typing import Dict, Optional
+from typing import Optional
 
 from ml_switcheroo.compiler.ir import LogicalGraph, LogicalMesh, PartitionSpec
 

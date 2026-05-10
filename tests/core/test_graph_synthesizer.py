@@ -13,7 +13,7 @@ Covers:
 import ast
 import pytest
 import libcst as cst
-from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode, LogicalEdge
+from ml_switcheroo.compiler.ir import LogicalGraph, LogicalNode
 from ml_switcheroo.compiler.backends.python import PythonBackend
 
 

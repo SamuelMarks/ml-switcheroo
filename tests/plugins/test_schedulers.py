@@ -1,5 +1,4 @@
 import libcst as cst
-from unittest.mock import MagicMock
 from ml_switcheroo.plugins.schedulers import (
   _create_dotted_name,
   _get_target_arg_name,

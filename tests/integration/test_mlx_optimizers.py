@@ -9,7 +9,6 @@ from unittest.mock import MagicMock
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.core.escape_hatch import EscapeHatch
 from ml_switcheroo.core.hooks import _HOOKS
 from ml_switcheroo.frameworks.base import register_framework
 from ml_switcheroo.plugins.mlx_optimizers import (
@@ -67,7 +66,7 @@ def mlx_semantics(functional_framework_setup):
       "variants": {
         "torch": {"api": "torch.optim.Adam"},
         fw_key: {
-          "api": f"functional.optim.Adam",
+          "api": "functional.optim.Adam",
           "args": {"lr": "learning_rate"},
           "requires_plugin": "mlx_optimizer_init",
         },

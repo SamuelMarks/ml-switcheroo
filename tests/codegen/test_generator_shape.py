@@ -8,7 +8,6 @@ guard injection feature, satisfying the requirement to test "Strict Shape Guards
 
 import pytest
 import libcst as cst
-from unittest.mock import MagicMock
 from tests.conftest import TestRewriter as PivotRewriter
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager

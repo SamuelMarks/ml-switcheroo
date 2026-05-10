@@ -18,7 +18,6 @@ from ml_switcheroo.config import RuntimeConfig
 import ml_switcheroo.core.hooks as hooks
 from ml_switcheroo.plugins.io_handler import transform_io_calls
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
-from ml_switcheroo.frameworks.numpy import NumpyAdapter
 
 
 def rewrite_code(rewriter, code: str) -> str:

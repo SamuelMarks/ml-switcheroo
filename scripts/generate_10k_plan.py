@@ -1,4 +1,3 @@
-import os
 import subprocess
 import ast
 import json
@@ -81,7 +80,7 @@ def extract_api_surface(repo_name: str, focus_dirs: list[str]) -> list[str]:
             # Only top-level or significant functions (like in functional.py)
             if not node.name.startswith("_") and node.col_offset == 0:
               api_nodes.append(f"{py_file.stem}.{node.name}")
-      except Exception as e:
+      except Exception:
         # Catch parse errors on weird syntax
         pass
 

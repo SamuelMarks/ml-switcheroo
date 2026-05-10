@@ -88,7 +88,7 @@ def build_wheel() -> None:
     sys.exit(1)
 
 
-def build(homepage_only: bool = False) -> int:
+def build(build_all: bool = False) -> int:
   """
   Executes the Sphinx build process.
   """
@@ -105,11 +105,14 @@ def build(homepage_only: bool = False) -> int:
     str(BUILD_DIR / "html"),
   ]
 
-  env = None
-  if homepage_only:
+  env = os.environ.copy()
+  is_full_build = build_all and env.get("BUILD_ALL_DOCS") == "1"
+
+  if not is_full_build:
     cmd.append(str(DOCS_DIR / "index.md"))
-    env = os.environ.copy()
-    env["HOMEPAGE_ONLY"] = "1"
+    # Setting an environment variable so Sphinx extensions know it's not a full build
+    # We still use an env var to pass state to conf.py and sphinx_ext
+    env["BUILD_ALL_DOCS"] = "0"
 
   result = subprocess.run(cmd, env=env)
   return result.returncode
@@ -119,13 +122,15 @@ def main() -> None:
   import argparse
 
   parser = argparse.ArgumentParser(description="Build ml-switcheroo documentation.")
-  parser.add_argument("--homepage-only", action="store_true", help="Only build the homepage and WASM wheel")
+  parser.add_argument(
+    "--build-all", action="store_true", help="Build all documentation. Requires BUILD_ALL_DOCS=1 env var."
+  )
   args = parser.parse_args()
 
   try:
     clean()
     copy_root_files()
-    ret = build(homepage_only=args.homepage_only)
+    ret = build(build_all=args.build_all)
 
     if ret == 0:
       index_path = BUILD_DIR / "html" / "index.html"

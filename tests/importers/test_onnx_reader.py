@@ -1,6 +1,4 @@
 import pytest
-from pathlib import Path
-from unittest.mock import MagicMock
 
 from ml_switcheroo.importers.onnx_reader import OnnxSpecImporter
 

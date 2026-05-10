@@ -109,8 +109,8 @@ def _write_yaml_update(out_path: Path, new_entries: List[Dict[str, Any]]) -> Non
   try:
     with open(out_path, "w", encoding="utf-8") as f:
       f.write(f"# {'=' * 78}\n")
-      f.write(f"# ML-Switcheroo Operation Definitions (Auto-Generated)\n")
-      f.write(f"# Filtered: Implemented by at least 2 frameworks\n")
+      f.write("# ML-Switcheroo Operation Definitions (Auto-Generated)\n")
+      f.write("# Filtered: Implemented by at least 2 frameworks\n")
       f.write(f"# {'=' * 78}\n\n")
 
       yaml.dump(

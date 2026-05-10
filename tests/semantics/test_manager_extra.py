@@ -1,8 +1,7 @@
-import pytest
 import tempfile
 import json
 from pathlib import Path
-from unittest.mock import patch, mock_open
+from unittest.mock import patch
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.enums import SemanticTier
 

@@ -18,14 +18,14 @@ Unsupported combinations degrade gracefully by returning False.
 import textwrap
 import pprint
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple, Set
+from typing import Dict, Any, List
 
 import libcst as cst
 from ml_switcheroo.core.graph import GraphExtractor
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.rewriter.calls.utils import compute_permutation
-from ml_switcheroo.utils.console import log_error, log_success, log_warning
+from ml_switcheroo.utils.console import log_error, log_success
 from ml_switcheroo.frameworks import get_adapter
 
 

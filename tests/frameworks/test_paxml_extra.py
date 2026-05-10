@@ -1,5 +1,3 @@
-import pytest
-import sys
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.frameworks.paxml import PaxmlAdapter
 from ml_switcheroo.frameworks.base import StandardMap, StandardCategory
@@ -68,11 +66,11 @@ def test_paxml_scan_praxis_layers(monkeypatch):
   monkeypatch.setattr(paxml_module, "GhostInspector", DummyInspector)
 
   adapter = PaxmlAdapter()
-  res = adapter._scan_praxis_layers()
+  adapter._scan_praxis_layers()
 
   # to hit 136-137: exception when accessing activations
   type(praxis_mock.layers).__getattr__ = MagicMock(side_effect=AttributeError)
-  res2 = adapter._scan_praxis_layers()
+  adapter._scan_praxis_layers()
 
 
 def test_paxml_definitions_missing():

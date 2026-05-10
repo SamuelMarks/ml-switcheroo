@@ -1,10 +1,9 @@
 """Module docstring."""
 
-import pytest
 import libcst as cst
 from unittest.mock import MagicMock, patch, PropertyMock
 from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
-from ml_switcheroo.core.rewriter.context import RewriterContext, SignatureContext
+from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import StructuralTraits
@@ -325,7 +324,6 @@ def test_is_module_alias():
 def test_normalize_arguments_types():
   """Function docstring."""
   # Lines 772, 774
-  from unittest.mock import PropertyMock
 
   t, _, _ = get_transformer()
   op_details = {"std_args": [{"name": "a", "default": 1}, ("b", 2)]}

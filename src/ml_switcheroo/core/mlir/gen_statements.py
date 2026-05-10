@@ -7,7 +7,7 @@ It operates as a mixin to be combined with expression generation logic in the ma
 
 import libcst as cst
 from collections import defaultdict
-from typing import Optional, List
+from typing import List
 import ast
 
 from ml_switcheroo.core.mlir.nodes import OperationNode, BlockNode
@@ -83,7 +83,7 @@ class StatementGeneratorMixin(BaseGeneratorMixin):
         names = ast.literal_eval(names_attr)
       if aliases_attr:
         aliases = ast.literal_eval(aliases_attr)
-    except:
+    except Exception:
       pass
 
     module_val = module_attr.strip('"') if module_attr else None

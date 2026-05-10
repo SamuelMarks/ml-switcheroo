@@ -239,5 +239,5 @@ class HtmlParser:
     """Execute implementation detail."""
     try:
       return cst.parse_expression(v)
-    except:
+    except Exception:
       return cst.SimpleString(f"'{v}'")

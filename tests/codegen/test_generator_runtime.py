@@ -8,9 +8,7 @@ Verifies that:
 4. Generated test code imports from `.runtime`.
 """
 
-import sys
 import pytest
-from unittest.mock import MagicMock
 from ml_switcheroo.generated_tests.generator import TestCaseGenerator
 from ml_switcheroo.semantics.manager import SemanticsManager
 

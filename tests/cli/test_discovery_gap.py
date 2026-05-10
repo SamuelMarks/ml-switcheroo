@@ -1,4 +1,3 @@
-import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from ml_switcheroo.cli.handlers.discovery import handle_scaffold, handle_import_spec, _save_spec, handle_sync_standards
@@ -243,7 +242,7 @@ def test_handle_sync_standards_no_new_candidates(tmp_path):
 def test_handle_sync_standards_collect_fail(tmp_path):
   with (
     patch("ml_switcheroo.cli.handlers.discovery.get_adapter") as mock_get_adapter,
-    patch("ml_switcheroo.cli.handlers.discovery.SemanticsManager") as mock_mgr,
+    patch("ml_switcheroo.cli.handlers.discovery.SemanticsManager"),
     patch("ml_switcheroo.cli.handlers.discovery.resolve_semantics_dir") as mock_resolve,
   ):
     mock_adapter_torch = MagicMock()
@@ -265,7 +264,7 @@ def test_handle_sync_standards_collect_fail(tmp_path):
 def test_handle_sync_standards_no_adapter(tmp_path):
   with (
     patch("ml_switcheroo.cli.handlers.discovery.get_adapter") as mock_get_adapter,
-    patch("ml_switcheroo.cli.handlers.discovery.SemanticsManager") as mock_mgr,
+    patch("ml_switcheroo.cli.handlers.discovery.SemanticsManager"),
     patch("ml_switcheroo.cli.handlers.discovery.resolve_semantics_dir") as mock_resolve,
   ):
     mock_get_adapter.return_value = None

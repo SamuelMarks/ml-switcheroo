@@ -1,4 +1,5 @@
-import pytest
+import runpy
+from types import SimpleNamespace
 from unittest.mock import patch
 from ml_switcheroo.cli.__main__ import main
 
@@ -127,11 +128,6 @@ def test_main_execution(mock_main, mock_sys):
   mock_sys.exit.assert_called_once()
 
 
-import runpy
-from types import SimpleNamespace
-from unittest.mock import patch
-
-
 @patch("argparse.ArgumentParser.parse_args")
 def test_main_unknown_command(mock_parse):
   mock_parse.return_value = SimpleNamespace(command="unknown_command_not_in_list")
@@ -143,10 +139,9 @@ def test_main_unknown_command(mock_parse):
 @patch("sys.exit")
 @patch("sys.argv", ["dummy_prog", "matrix"])
 def test_main_name_main(mock_exit):
-  import runpy
   from ml_switcheroo.cli import __main__
 
-  with patch.object(__main__, "main", return_value=0) as mock_main:
+  with patch.object(__main__, "main", return_value=0):
     runpy.run_module("ml_switcheroo.cli.__main__", run_name="__main__")
     mock_exit.assert_called_once_with(0)
 
@@ -164,8 +159,6 @@ def test_main_audit_no_roots():
 
 
 def test_module_main():
-  import runpy
-  import sys
 
   # Actually just import the module to hit lines 7-8
-  import ml_switcheroo.__main__
+  pass

@@ -19,7 +19,7 @@ Decoupling:
 """
 
 import libcst as cst
-from typing import Optional, List
+from typing import Optional
 from ml_switcheroo.core.hooks import register_hook, HookContext
 
 

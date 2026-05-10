@@ -1,8 +1,6 @@
-import pytest
 from ml_switcheroo.frameworks.numpy import NumpyAdapter
 from ml_switcheroo.enums import SemanticTier
 from ml_switcheroo.frameworks.base import StandardCategory
-from ml_switcheroo.core.ghost import GhostRef
 import numpy as np
 
 

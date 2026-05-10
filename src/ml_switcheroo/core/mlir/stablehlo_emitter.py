@@ -15,7 +15,6 @@ from ml_switcheroo.core.mlir.nodes import (
   RegionNode,
   TypeNode,
   ValueNode,
-  BlockNode,
 )
 
 if TYPE_CHECKING:

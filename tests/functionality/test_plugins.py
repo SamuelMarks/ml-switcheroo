@@ -9,13 +9,11 @@ Verifies:
 
 import libcst as cst
 import pytest
-from unittest.mock import MagicMock
 from typing import Set, Dict, Tuple, Optional
 
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.core.hooks import register_hook, _HOOKS, clear_hooks
-from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.frameworks.base import register_framework, get_adapter
 
 

@@ -147,7 +147,7 @@ class MlirAdapter(FrameworkAdapter):
 
   def get_weight_load_code(self, path_var: str) -> str:
     """Execute implementation detail."""
-    return f"# Weights loading not supported in MLIR adapter"
+    return "# Weights loading not supported in MLIR adapter"
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
     """Execute implementation detail."""
@@ -155,7 +155,7 @@ class MlirAdapter(FrameworkAdapter):
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Execute implementation detail."""
-    return f"# Weights saving not supported in MLIR adapter"
+    return "# Weights saving not supported in MLIR adapter"
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Execute implementation detail."""

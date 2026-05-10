@@ -7,7 +7,6 @@ Verifies that:
 3. Wiring logic handles the separation correctly.
 """
 
-import pytest
 import sys
 from unittest.mock import MagicMock, patch
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter

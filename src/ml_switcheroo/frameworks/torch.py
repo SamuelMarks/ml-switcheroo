@@ -734,4 +734,4 @@ class Qwen3VLPatchEmbed(nn.Module):
         snapshot: The snapshot dictionary to update in-place.
 
     """
-    mappings = snapshot.setdefault("mappings", {})
+    snapshot.setdefault("mappings", {})

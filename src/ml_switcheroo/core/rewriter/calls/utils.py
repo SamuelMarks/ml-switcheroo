@@ -14,7 +14,7 @@ Decoupling Logic:
     Functional unwrapping detection is driven by `StructuralTraits`.
 """
 
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple
 import libcst as cst
 
 from ml_switcheroo.utils.node_diff import diff_nodes

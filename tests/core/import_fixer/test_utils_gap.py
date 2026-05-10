@@ -1,4 +1,3 @@
-import pytest
 import libcst as cst
 from ml_switcheroo.core.import_fixer.utils import (
   get_root_name,

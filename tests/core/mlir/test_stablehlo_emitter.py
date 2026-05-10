@@ -8,9 +8,7 @@ Verifies:
 4.  Fallback: Unknown ops remain `sw.op`.
 """
 
-import pytest
 import libcst as cst
-from unittest.mock import MagicMock
 from ml_switcheroo.core.mlir.stablehlo_emitter import StableHloEmitter
 from ml_switcheroo.semantics.manager import SemanticsManager
 

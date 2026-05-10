@@ -9,7 +9,6 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.registry_loader import RegistryLoader
 
 # Force load adapter
-import ml_switcheroo.frameworks.latex_dsl
 
 # Updated source: Use keyword arg for kernel_size to ensure metadata capture
 SOURCE_TORCH = """ 

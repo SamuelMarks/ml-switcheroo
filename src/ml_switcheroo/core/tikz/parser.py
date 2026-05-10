@@ -17,7 +17,7 @@ Capabilities:
 import re
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Generator, List, Optional, Tuple, Dict
+from typing import List, Tuple, Dict
 
 from ml_switcheroo.core.tikz.analyser import LogicalGraph, LogicalNode, LogicalEdge
 

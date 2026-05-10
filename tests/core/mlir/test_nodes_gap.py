@@ -1,5 +1,12 @@
-import pytest
-from ml_switcheroo.core.mlir.nodes import BlockNode, TriviaNode
+from ml_switcheroo.core.mlir.nodes import (
+  BlockNode,
+  TriviaNode,
+  AttributeNode,
+  OperationNode,
+  ValueNode,
+  TypeNode,
+  RegionNode,
+)
 from ml_switcheroo.core.mlir.tokens import TokenKind
 
 
@@ -7,9 +14,6 @@ def test_block_node_leading_trivia():
   blk = BlockNode(label="^bb0", leading_trivia=[TriviaNode(TokenKind.NEWLINE, "\n")])
   txt = blk.to_text()
   assert "\n" in txt
-
-
-from ml_switcheroo.core.mlir.nodes import AttributeNode, OperationNode, ValueNode
 
 
 def test_nodes_attribute_list():
@@ -21,9 +25,6 @@ def test_nodes_operation_space():
   op = OperationNode(name="sw.op", operands=[ValueNode("%0")], attributes=[AttributeNode("a", "1")], name_trivia=[])
   txt = op.to_text()
   assert "sw.op (%0) {a = 1}" in txt
-
-
-from ml_switcheroo.core.mlir.nodes import TypeNode, RegionNode
 
 
 def test_block_node_with_args():

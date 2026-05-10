@@ -44,7 +44,6 @@ def test_api_normalize_args_coverage():
   assert res[0].value.value == "1"
 
   # Cover 984 (skip injected args if already present)
-  target_val_map_2 = {"bar": "2"}
   args2 = [cst.Arg(value=cst.parse_expression("3"), keyword=cst.Name("bar"))]
   res2 = t._normalize_arguments(
     cst.Call(cst.Name("f"), args2),
@@ -133,7 +132,6 @@ def test_auxiliary_transformer_coverage():
 
 
 def test_mlir_parser_coverage():
-  from ml_switcheroo.core.mlir.parser import MlirParser
 
   # 298 Unexpected token where Op expected
   with pytest.raises(SyntaxError, match="Unexpected token .* where Op expected"):
@@ -181,7 +179,6 @@ def test_mlir_parser_coverage():
 
 def test_api_pass_gap_lines():
   from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
-  from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.semantics.manager import SemanticsManager
   import libcst as cst
 
@@ -220,7 +217,6 @@ def test_api_pass_gap_lines():
 
 def test_auxiliary_pass_gap_lines():
   from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryTransformer
-  from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.semantics.manager import SemanticsManager
   import libcst as cst
 
@@ -251,7 +247,6 @@ def test_auxiliary_pass_gap_lines():
 
 
 def test_mlir_parser_remaining():
-  from ml_switcheroo.core.mlir.parser import MlirParser
 
   # 371: break after 20 tokens in lookahead without EQUAL
   p = MlirParser("a b c d e f g h i j k l m n o p q r s t u v w x y z")
@@ -285,7 +280,6 @@ def test_mlir_parser_remaining():
 
 
 def test_parser_unreachable_hits():
-  from ml_switcheroo.core.mlir.parser import MlirParser
 
   # 439: hit the inner RBRACE match by making absorb_trivia advance past a comment to an RBRACE
   p = MlirParser('"op"() { // comment\n}')
@@ -310,7 +304,6 @@ def test_parser_unreachable_hits():
 
 
 def test_parser_unreachable_hits2():
-  from ml_switcheroo.core.mlir.parser import MlirParser
 
   # 439: we can't easily hit this unless `match` advances token in an unexpected way? No, it's just dead code because of `while not self.match(RBRACE)`. If it enters the loop, it's because it's not RBRACE. Then it checks if it's EOF, if so breaks. Then checks if it's RBRACE and breaks. It could only be RBRACE if absorb_trivia() consumed tokens up to an RBRACE.
   # So `"{ // comment\n }"` might hit it.
@@ -330,7 +323,6 @@ def test_parser_unreachable_hits2():
 
 def test_api_unreachable_hits():
   from ml_switcheroo.core.rewriter.passes.api import ApiTransformer
-  from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.semantics.manager import SemanticsManager
   import libcst as cst
 
@@ -375,7 +367,6 @@ def test_api_unreachable_hits():
 
 def test_auxiliary_201():
   from ml_switcheroo.core.rewriter.passes.auxiliary import AuxiliaryTransformer
-  from ml_switcheroo.core.rewriter.context import RewriterContext
   from ml_switcheroo.semantics.manager import SemanticsManager
   import libcst as cst
 

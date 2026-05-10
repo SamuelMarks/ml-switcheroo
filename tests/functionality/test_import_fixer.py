@@ -5,7 +5,6 @@ Updated for Centralized Resolution Logic.
 
 from ml_switcheroo.core.import_fixer import ImportFixer
 from ml_switcheroo.core.import_fixer.resolution import ResolutionPlan, ImportReq
-from ml_switcheroo.core.scanners import UsageScanner
 import libcst as cst
 
 

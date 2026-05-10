@@ -4,7 +4,7 @@ Tests for Tier C Loading and Integration.
 
 import json
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import libcst as cst
 from ml_switcheroo.semantics.manager import SemanticsManager
 from tests.conftest import TestRewriter as PivotRewriter

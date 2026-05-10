@@ -8,7 +8,6 @@ Verifies:
 4. Unknown dialect ops fail if in 'sw' namespace.
 """
 
-import pytest
 from ml_switcheroo.core.mlir.nodes import OperationNode, AttributeNode, RegionNode, ValueNode
 from ml_switcheroo.core.mlir.dialect import DialectRegistry
 

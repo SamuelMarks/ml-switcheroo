@@ -19,8 +19,8 @@ Algorithm:
     5.  Reconstruct graph with fused nodes and updated edges.
 """
 
-from typing import List, Dict, Set, Optional, Tuple
-from collections import defaultdict, deque
+from typing import List, Dict, Set, Optional
+from collections import defaultdict
 import copy
 
 from ml_switcheroo.core.graph import LogicalGraph, LogicalNode, LogicalEdge
@@ -160,7 +160,6 @@ class GraphOptimizer:
 
       final_src = None
       final_tgt = None
-      should_add = False
 
       # Resolve Source
       if not src_fused:

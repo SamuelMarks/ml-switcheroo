@@ -9,10 +9,8 @@ Verifies:
 """
 
 import json
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
-import pytest
 from ml_switcheroo.cli.handlers.audit import handle_audit
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.cli.__main__ import main
@@ -59,7 +57,7 @@ z = torch.mystery(y)
   with patch("ml_switcheroo.cli.handlers.audit.SemanticsManager", return_value=mock_mgr):
     # Mock log_info to verify it's NOT called
     with patch("ml_switcheroo.cli.handlers.audit.log_info") as mock_log:
-      ret = handle_audit(f, ["torch"], json_mode=True)
+      handle_audit(f, ["torch"], json_mode=True)
 
       # Verify logs suppressed
       mock_log.assert_not_called()

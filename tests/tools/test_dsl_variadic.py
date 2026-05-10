@@ -8,7 +8,6 @@ Verifies:
 3. Integration within `OperationDef` for defining concepts like `max(*args)`.
 """
 
-import pytest
 from ml_switcheroo.core.dsl import ParameterDef, OperationDef, FrameworkVariant
 
 

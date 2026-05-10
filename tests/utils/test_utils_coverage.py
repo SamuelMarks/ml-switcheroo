@@ -1,7 +1,6 @@
 def test_code_extractor_error():
   from ml_switcheroo.utils.code_extractor import CodeExtractor
   import pytest
-  import inspect
 
   ce = CodeExtractor()
   with __import__("unittest.mock").mock.patch("inspect.getsource", side_effect=OSError("fail")):

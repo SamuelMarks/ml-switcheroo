@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from unittest.mock import patch
 from ml_switcheroo.frameworks.loader import (
   load_definitions,

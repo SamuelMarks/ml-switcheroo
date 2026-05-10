@@ -1,7 +1,5 @@
 """Module docstring."""
 
-import numpy as np
-
 
 def setup_adam(model, lr: float = 0.001):
   """Function docstring."""

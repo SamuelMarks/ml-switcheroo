@@ -1,4 +1,3 @@
-import pytest
 from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from unittest.mock import patch, MagicMock
@@ -17,7 +16,7 @@ def test_engine_strict_mode_linter_errors():
 
       with patch("ml_switcheroo.core.engine.RewriterPipeline") as MockPipeCls:
         MockPipeCls.return_value.run.return_value = mock_tree
-        with patch("ml_switcheroo.core.engine.ImportFixer") as MockFixerCls:
+        with patch("ml_switcheroo.core.engine.ImportFixer"):
           mock_fixer_visit = MagicMock()
           mock_fixer_visit.code = "import jax"
           mock_tree.visit.return_value = mock_fixer_visit
@@ -41,7 +40,7 @@ def test_engine_escape_hatches_detected():
 
     with patch("ml_switcheroo.core.engine.RewriterPipeline") as MockPipeCls:
       MockPipeCls.return_value.run.return_value = mock_tree
-      with patch("ml_switcheroo.core.engine.ImportFixer") as MockFixerCls:
+      with patch("ml_switcheroo.core.engine.ImportFixer"):
         mock_fixer_visit = MagicMock()
         mock_fixer_visit.code = mock_tree.code
         mock_tree.visit.return_value = mock_fixer_visit
@@ -58,7 +57,7 @@ def test_engine_target_torch_sharding_compiler():
   code = "import jax.numpy as jnp\nx = jnp.array([1, 2])\n"
 
   with patch("ml_switcheroo.compiler.sharding.ShardingInferencePass.apply") as MockSharding:
-    with patch("ml_switcheroo.compiler.sharding_extractor.ShardingExtractionPass.apply") as MockExtPass:
+    with patch("ml_switcheroo.compiler.sharding_extractor.ShardingExtractionPass.apply"):
       with patch("ml_switcheroo.core.graph_optimizer.GraphOptimizer") as MockOptCls:
         MockOptCls.return_value.optimize.return_value = MagicMock(nodes=["n1"])
         with patch("ml_switcheroo.core.engine.get_backend_class") as MockGetBackend:
