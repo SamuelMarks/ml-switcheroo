@@ -81,4 +81,3 @@ docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
 [tool.uv.sources]
-onnx9000-core = { git = "https://github.com/SamuelMarks/onnx9000.git", subdirectory = "packages/python/onnx9000-core" }

@@ -172,7 +172,6 @@
     onnx:
       macro_template: Node('Abs', inputs=[{x}], outputs=[])
       required_imports:
-      - from onnx9000.core.ir import Node
 - operation: Abs_
   description: Computes the absolute value element-wise (In-place).
   op_type: function
@@ -1334,7 +1333,6 @@
     onnx:
       macro_template: Node('Add', inputs=[{x1}, {x2}], outputs=[])
       required_imports:
-      - from onnx9000.core.ir import Node
 - operation: AddDecayedWeightsState
   description: Auto-generated from jax_code_defs
   op_type: function
@@ -36307,7 +36305,6 @@
     onnx:
       macro_template: Node('MatMul', inputs=[{x1}, {x2}], outputs=[])
       required_imports:
-      - from onnx9000.core.ir import Node
 - operation: Matmul
   description: Matrix product of two arrays.
   op_type: function
@@ -38889,7 +38886,6 @@
     onnx:
       macro_template: Node('Mul', inputs=[{x1}, {x2}], outputs=[])
       required_imports:
-      - from onnx9000.core.ir import Node
 - operation: MultiHeadAttention
   description: Computes Multi-Head Attention.
   op_type: class
@@ -49228,7 +49224,6 @@
     onnx:
       macro_template: Node('Relu', inputs=[{x}], outputs=[])
       required_imports:
-      - from onnx9000.core.ir import Node
 - operation: Relu2
   description: "Applies the ReLU\xB2 activation function."
   op_type: function
@@ -53757,7 +53752,6 @@
     onnx:
       macro_template: Node('Sigmoid', inputs=[{x}], outputs=[])
       required_imports:
-      - from onnx9000.core.ir import Node
 - operation: SigmoidCrossEntropy
   description: Sigmoid cross-entropy loss layer.
   op_type: class
@@ -57318,7 +57312,6 @@
     onnx:
       macro_template: Node('Sub', inputs=[{x1}, {x2}], outputs=[])
       required_imports:
-      - from onnx9000.core.ir import Node
 - operation: SubArrayFormat
   description: Auto-generated mapping for SubArrayFormat.
   op_type: function
@@ -58608,7 +58601,6 @@
     onnx:
       macro_template: Node('Tanh', inputs=[{x}], outputs=[])
       required_imports:
-      - from onnx9000.core.ir import Node
 - operation: Tanh_
   description: In-place version of Tanh.
   op_type: function

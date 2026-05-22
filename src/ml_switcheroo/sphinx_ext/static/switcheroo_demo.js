@@ -707,7 +707,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Mock ONNX generation
             const step1Tgt = document.getElementById('code-step1-target');
             if (step1Tgt) {
-                step1Tgt.value = "ir_version: 8\nproducer_name: \"ml-switcheroo-onnx9000\"\ngraph {\n  node {\n    input: \"x\"\n    output: \"y\"\n    op_type: \"Abs\"\n  }\n  name: \"main_graph\"\n  input {\n    name: \"x\"\n    type {\n      tensor_type {\n        elem_type: 1\n        shape {\n          dim {\n            dim_value: 1\n          }\n        }\n      }\n    }\n  }\n  output {\n    name: \"y\"\n    type {\n      tensor_type {\n        elem_type: 1\n        shape {\n          dim {\n            dim_value: 1\n          }\n        }\n      }\n    }\n  }\n}";
+                step1Tgt.value = "ir_version: 8\nproducer_name: \"ml-switcheroo-onnx\"\ngraph {\n  node {\n    input: \"x\"\n    output: \"y\"\n    op_type: \"Abs\"\n  }\n  name: \"main_graph\"\n  input {\n    name: \"x\"\n    type {\n      tensor_type {\n        elem_type: 1\n        shape {\n          dim {\n            dim_value: 1\n          }\n        }\n      }\n    }\n  }\n  output {\n    name: \"y\"\n    type {\n      tensor_type {\n        elem_type: 1\n        shape {\n          dim {\n            dim_value: 1\n          }\n        }\n      }\n    }\n  }\n}";
             }
             
             switchStep('step-1');
@@ -723,7 +723,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Simulate Compilation Log
             const logEl = document.getElementById('compile-log');
             if (logEl) {
-                logEl.innerHTML = "[INFO] Starting onnx9000 transpilation...\n";
+                logEl.innerHTML = "[INFO] Starting ONNX transpilation...\n";
                 let step = 0;
                 const messages = [
                     "[INFO] Parsing ONNX graph 'main_graph'...",
