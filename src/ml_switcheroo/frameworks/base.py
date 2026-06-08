@@ -9,24 +9,13 @@ import json
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Any, Protocol, Type, Dict, List, Tuple, Optional, Union, Set
+from typing import Any, Protocol, Type, Dict, List, Tuple, Optional, Union
 from pydantic import BaseModel, Field
-
+from ml_switcheroo_ir.schema.ghost import SemanticTier, StandardMap, GhostRef
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.core.dsl import OperationDef
-from ml_switcheroo.core.ghost import GhostRef
-from ml_switcheroo.enums import SemanticTier
 
 SNAPSHOT_DIR = Path(__file__).resolve().parent.parent / "snapshots"
-
-
-class StandardCategory(str, Enum):
-  """Enumeration of API categories for discovery."""
-
-  LOSS = "loss"
-  OPTIMIZER = "optimizer"
-  LAYER = "layer"
-  ACTIVATION = "activation"
 
 
 class InitMode(str, Enum):
@@ -41,27 +30,6 @@ class ImportConfig(BaseModel):
 
   tier: SemanticTier = Field(description="The semantic category of this namespace.")
   recommended_alias: Optional[str] = Field(default=None, description="Preferred alias (e.g., 'nn').")
-
-
-class StandardMap(BaseModel):
-  """Defines how a Framework implements a Middle Layer standard."""
-
-  api: Optional[str] = Field(default=None)
-  args: Optional[Dict[str, Optional[Union[str, float, int]]]] = Field(default=None)
-  inject_args: Optional[Dict[str, Any]] = Field(default=None)
-  requires_plugin: Optional[str] = Field(default=None)
-  transformation_type: Optional[str] = Field(default=None)
-  operator: Optional[str] = Field(default=None)
-  pack_to_tuple: Optional[str] = Field(default=None)
-  macro_template: Optional[str] = Field(default=None)
-  output_cast: Optional[str] = Field(default=None)
-  arg_values: Optional[Dict[str, Union[Dict[str, Any], Any]]] = Field(default=None)
-  kwargs_map: Optional[Dict[str, Optional[str]]] = Field(
-    default=None, description="Mapping for specific keys within a **kwargs expansion. Values can be null to drop the key."
-  )
-  required_imports: List[Union[str, Any]] = Field(default_factory=list)
-  missing_message: Optional[str] = Field(default=None)
-  layout_map: Optional[Dict[str, str]] = Field(default=None)
 
 
 class FrameworkAdapter(Protocol):
@@ -97,22 +65,12 @@ class FrameworkAdapter(Protocol):
     ...
 
   @property
-  def search_modules(self) -> List[str]:
-    """Execute implementation detail."""
-    ...
-
-  @property
   def display_name(self) -> str:
     """Execute implementation detail."""
     ...
 
   @property
   def ui_priority(self) -> int:
-    """Execute implementation detail."""
-    ...
-
-  @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
     """Execute implementation detail."""
     ...
 
@@ -148,11 +106,6 @@ class FrameworkAdapter(Protocol):
 
   @property
   def declared_magic_args(self) -> List[str]:
-    """Execute implementation detail."""
-    ...
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
     """Execute implementation detail."""
     ...
 
@@ -215,10 +168,6 @@ class FrameworkAdapter(Protocol):
     """Execute implementation detail."""
     ...
 
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Execute implementation detail."""
-    ...
-
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Execute implementation detail."""
     ...
@@ -265,3 +214,5 @@ def get_adapter(name: str) -> Optional[FrameworkAdapter]:
   if cls:
     return cls()
   return None
+
+__all__ = ["SemanticTier", "StandardMap", "GhostRef", "FrameworkAdapter", "PluginTraits", "StructuralTraits"]

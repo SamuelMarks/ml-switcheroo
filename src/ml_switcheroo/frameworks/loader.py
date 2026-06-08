@@ -9,11 +9,8 @@ import json
 from functools import lru_cache
 from pathlib import Path
 from typing import Dict
+from ml_switcheroo_ir.schema.ghost import StandardMap
 
-from ml_switcheroo.frameworks.base import StandardMap
-
-# Locate the definitions directory relative to this file
-# .../src/ml_switcheroo/frameworks/definitions
 DEFINITIONS_DIR = Path(__file__).parent / "definitions"
 
 
@@ -33,18 +30,13 @@ def load_definitions(framework: str) -> Dict[str, StandardMap]:
 
   """
   file_path = DEFINITIONS_DIR / f"{framework}.json"
-
   if not file_path.exists():
     return {}
-
   try:
     with open(file_path, "r", encoding="utf-8") as f:
       raw_data = json.load(f)
-
-    # Convert dictionary entries to Pydantic models
     return {op_name: StandardMap.model_validate(op_def) for op_name, op_def in raw_data.items()}
   except (json.JSONDecodeError, OSError) as e:
-    # Log via print/logging system in real app; here we return empty safely
     print(f"Failed to load definitions for {framework}: {e}")
     return {}
 

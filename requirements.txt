@@ -1,4 +1,3 @@
-griffe>=0.48
 libcst>=1.8.6;platform_system!='Emscripten'
 libcst==1.6.0;platform_system=='Emscripten'
 numpy;platform_system!='Emscripten'
@@ -11,3 +10,4 @@ pygments==2.19.1;platform_system=='Emscripten'
 rich>=13.0
 hypothesis
 
+ml-switcheroo-ir @ file:///Users/samuel/repos/ml-switcheroo-ir

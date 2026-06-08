@@ -13,7 +13,6 @@ from ml_switcheroo.config import parse_cli_key_values
 from ml_switcheroo.cli import commands
 
 # Import direct handler for new 'define' command
-from ml_switcheroo.cli.handlers.define import handle_define
 from ml_switcheroo.cli.handlers.meta import handle_schema
 from ml_switcheroo.cli.handlers.suggest import handle_suggest
 from ml_switcheroo import __version__
@@ -38,21 +37,6 @@ def main(argv: Optional[List[str]] = None) -> int:
   subparsers = parser.add_subparsers(dest="command", required=True)
 
   # --- Command: AUDIT ---
-  cmd_audit = subparsers.add_parser("audit", help="Check source code for unsupported operations")
-  cmd_audit.add_argument("path", type=Path, help="Input source file or directory")
-  cmd_audit.add_argument(
-    "--roots",
-    nargs="+",
-    default=None,
-    help="Framework roots to scan for (default: all installed/registered frameworks)",
-  )
-  cmd_audit.add_argument(
-    "--json",
-    action="store_true",
-    help="Output results as JSON for programmatic parsing.",
-  )
-
-  # --- Command: CONVERT ---
   cmd_conv = subparsers.add_parser("convert", help="Transpile a Python file or directory")
   cmd_conv.add_argument("path", type=Path, help="Input source file or directory")
   cmd_conv.add_argument("--source", default=None, help="Source framework (default: from toml)")
@@ -68,6 +52,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     action="store_true",
     help="Enable distributed sharding semantics (e.g. QKV fusions, JAX sharding constraints)",
   )
+  cmd_conv.add_argument("--custom-snapshot", type=Path, help="Path to custom snapshot schema override")
   cmd_conv.add_argument(
     "--strict",
     action="store_true",
@@ -90,20 +75,6 @@ def main(argv: Optional[List[str]] = None) -> int:
   )
 
   # --- Command: DEFINE ---
-  cmd_def = subparsers.add_parser("define", help="Inject new operation definitions from YAML.")
-  cmd_def.add_argument("yaml_file", type=Path, help="Path to the ODL definition YAML file.")
-  cmd_def.add_argument(
-    "--dry-run",
-    action="store_true",
-    help="Print diffs to console instead of modifying files.",
-  )
-  cmd_def.add_argument(
-    "--no-test-gen",
-    action="store_true",
-    help="Skip automatic generation of verification tests.",
-  )
-
-  # --- Command: GEN WEIGHT SCRIPT (NEW) ---
   cmd_wgt = subparsers.add_parser("gen-weight-script", help="Generate a checkpoint migration script.")
   cmd_wgt.add_argument("source_file", type=Path, help="Path to the model source code file.")
   cmd_wgt.add_argument("--out", type=Path, required=True, help="Output path for the generated script.")
@@ -117,32 +88,6 @@ def main(argv: Optional[List[str]] = None) -> int:
   subparsers.add_parser("schema", help="Export ODL JSON Schema for LLM prompts/validation.")
 
   # --- Command: SUGGEST ---
-  cmd_sug = subparsers.add_parser("suggest", help="Generate an LLM prompt for defining a new operation.")
-  cmd_sug.add_argument("api", help="The source API to inspect (e.g. 'torch.nn.Linear' or 'jax.numpy.*').")
-  cmd_sug.add_argument(
-    "--out-dir", type=Path, default=None, help="Directory to write batched prompt files to (avoids huge stdout)."
-  )
-  cmd_sug.add_argument("--batch-size", type=int, default=50, help="Number of operations per file (default: 50).")
-
-  # --- Command: WIZARD (Interactive Discovery) ---
-  cmd_wiz = subparsers.add_parser("wizard", help="Interactively categorize missing mappings")
-  cmd_wiz.add_argument("package", help="Package to scan (e.g. torch)")
-
-  # --- Command: HARVEST (Automatic Learning) ---
-  cmd_harv = subparsers.add_parser("harvest", help="Extract valid mappings from Manual Tests")
-  cmd_harv.add_argument("path", type=Path, help="Path to manual test file(s) or directory")
-  cmd_harv.add_argument(
-    "--target",
-    default="jax",
-    help="Target framework found in tests (default: jax)",
-  )
-  cmd_harv.add_argument(
-    "--dry-run",
-    action="store_true",
-    help="Print updates without writing to disk",
-  )
-
-  # --- Command: CI (Validation & Readme & Lockfile & Repair) ---
   cmd_ci = subparsers.add_parser("ci", help="Run validation suite")
   cmd_ci.add_argument("--update-readme", action="store_true", help="Rewrite README.md with results")
   cmd_ci.add_argument("--readme-path", type=Path, default=Path("README.md"))
@@ -159,25 +104,6 @@ def main(argv: Optional[List[str]] = None) -> int:
   )
 
   # --- Command: SNAPSHOT (Ghost Protocol) ---
-  cmd_snap = subparsers.add_parser("snapshot", help="Capture API surfaces for Ghost Mode support")
-  cmd_snap.add_argument(
-    "--out-dir",
-    type=Path,
-    default=None,
-    help="Output directory (Defaults to src/ml_switcheroo/snapshots)",
-  )
-
-  # --- Command: Scaffold ---
-  cmd_scaf = subparsers.add_parser("scaffold", help="Auto-generate mappings for frameworks")
-  cmd_scaf.add_argument("--frameworks", nargs="+", default=["torch", "jax"], help="List of frameworks")
-  cmd_scaf.add_argument(
-    "--out-dir",
-    type=Path,
-    default=None,
-    help="Root directory for Knowledge Base. Must contain/create 'semantics' and 'snapshots' subdirs. Default: Package source.",
-  )
-
-  # --- Command: GEN DOCS (Migration Guide) ---
   cmd_docs = subparsers.add_parser("gen-docs", help="Generate Migration Guide Markdown")
   cmd_docs.add_argument("--source", default="torch", help="Source framework (default: torch)")
   cmd_docs.add_argument("--target", default="jax", help="Target framework (default: jax)")
@@ -189,29 +115,6 @@ def main(argv: Optional[List[str]] = None) -> int:
   )
 
   # --- Command: IMPORT SPEC ---
-  cmd_imp = subparsers.add_parser("import-spec", help="Parse Array API RST/Stubs into JSON")
-  cmd_imp.add_argument("target", type=Path, help="File or Folder to parse")
-
-  # --- Command: SYNC ---
-  cmd_sync = subparsers.add_parser("sync", help="Link a framework to the Spec")
-  cmd_sync.add_argument("framework", help="Framework to sync (e.g. torch, jax, keras)")
-
-  # --- Command: SYNC-STANDARDS (Generic Consensus) ---
-  cmd_cons = subparsers.add_parser("sync-standards", help="Discovers and amends Abstract Standards via Consensus")
-  cmd_cons.add_argument("--frameworks", nargs="+", help="Frameworks to scan (default: all installed)")
-  cmd_cons.add_argument(
-    "--categories",
-    nargs="+",
-    default=["loss", "optimizer", "layer", "activation"],
-    help="API Categories to scan (enum values)",
-  )
-  cmd_cons.add_argument(
-    "--dry-run",
-    action="store_true",
-    help="Print candidates without writing to disk",
-  )
-
-  # --- Command: GEN TESTS ---
   cmd_gen = subparsers.add_parser("gen-tests", help="Generate physical Python test files")
   cmd_gen.add_argument("--out", type=Path, default=Path("tests", "generated", "test_tier_a_math.py"))
 
@@ -241,9 +144,6 @@ def main(argv: Optional[List[str]] = None) -> int:
   elif args.command == "gen-weight-script":
     return commands.handle_gen_weight_script(args.source_file, args.out, args.source, args.target)
 
-  elif args.command == "define":
-    return handle_define(args.yaml_file, dry_run=args.dry_run, no_test_gen=args.no_test_gen)
-
   elif args.command == "matrix":
     return commands.handle_matrix()
 
@@ -253,32 +153,11 @@ def main(argv: Optional[List[str]] = None) -> int:
   elif args.command == "suggest":
     return handle_suggest(args.api, out_dir=args.out_dir, batch_size=args.batch_size)
 
-  elif args.command == "wizard":
-    return commands.handle_wizard(args.package)
-
-  elif args.command == "harvest":
-    return commands.handle_harvest(args.path, args.target, args.dry_run)
-
   elif args.command == "ci":
     return commands.handle_ci(args.update_readme, args.readme_path, args.json_report, args.repair)
 
-  elif args.command == "snapshot":
-    return commands.handle_snapshot(args.out_dir)
-
-  elif args.command == "scaffold":
-    return commands.handle_scaffold(args.frameworks, args.out_dir)
-
   elif args.command == "gen-docs":
     return commands.handle_docs(args.source, args.target, args.out)
-
-  elif args.command == "import-spec":
-    return commands.handle_import_spec(args.target)
-
-  elif args.command == "sync":
-    return commands.handle_sync(args.framework)
-
-  elif args.command == "sync-standards":
-    return commands.handle_sync_standards(args.categories, args.frameworks, args.dry_run)
 
   elif args.command == "gen-tests":
     return commands.handle_gen_tests(args.out)

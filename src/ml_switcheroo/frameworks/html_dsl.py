@@ -3,20 +3,11 @@
 Simplified to only provide Metadata.
 """
 
-from typing import Dict, List, Tuple, Any, Set, Optional
-
-from ml_switcheroo.frameworks.base import (
-  register_framework,
-  FrameworkAdapter,
-  StandardMap,
-  StandardCategory,
-  GhostRef,
-  ImportConfig,
-  InitMode,
-)
+from typing import Dict, List, Tuple, Any, Optional
+from ml_switcheroo.frameworks.base import register_framework, FrameworkAdapter, StandardMap, ImportConfig, InitMode
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.core.dsl import OperationDef
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.core.html.parser import HtmlParser
 
@@ -39,29 +30,14 @@ class HtmlDSLAdapter(FrameworkAdapter):
     return HtmlParser(code)
 
   @property
-  def search_modules(self) -> List[str]:
-    """Execute implementation detail."""
-    return []
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Execute implementation detail."""
-    return set()
-
-  @property
   def import_alias(self) -> Tuple[str, str]:
     """Execute implementation detail."""
-    return ("html_dsl", "dsl")
+    return "html_dsl", "dsl"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
     """Execute implementation detail."""
     return {"html_dsl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="dsl")}
-
-  @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Execute implementation detail."""
-    return {}
 
   @property
   def supported_tiers(self) -> List[SemanticTier]:
@@ -72,10 +48,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
   def structural_traits(self) -> StructuralTraits:
     """Execute implementation detail."""
     return StructuralTraits(
-      module_base="html_dsl.Module",
-      forward_method="forward",
-      init_method_name="__init__",
-      requires_super_init=True,
+      module_base="html_dsl.Module", forward_method="forward", init_method_name="__init__", requires_super_init=True
     )
 
   @property
@@ -119,8 +92,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
       defs["Module"] = StandardMap(api="html_dsl.Module")
     if "Conv2d" not in defs:
       defs["Conv2d"] = StandardMap(
-        api="html_dsl.Conv2d",
-        args={"in_channels": "i", "out_channels": "o", "kernel_size": "k"},
+        api="html_dsl.Conv2d", args={"in_channels": "i", "out_channels": "o", "kernel_size": "k"}
       )
     return defs
 
@@ -128,10 +100,6 @@ class HtmlDSLAdapter(FrameworkAdapter):
   def specifications(self) -> Dict[str, OperationDef]:
     """Execute implementation detail."""
     return {}
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Execute implementation detail."""
-    return []
 
   def convert(self, data: Any) -> Any:
     """Execute implementation detail."""

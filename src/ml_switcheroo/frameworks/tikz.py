@@ -3,15 +3,12 @@
 Simplified to only provide Metadata.
 """
 
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.core.ghost import GhostRef
+from typing import Any, Dict, List, Optional, Tuple
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
   FrameworkAdapter,
   StandardMap,
-  StandardCategory,
   ImportConfig,
   InitMode,
   OperationDef,
@@ -34,27 +31,12 @@ class TikzAdapter(FrameworkAdapter):
     pass
 
   @property
-  def search_modules(self) -> List[str]:
-    """Execute implementation detail."""
-    return []
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Execute implementation detail."""
-    return set()
-
-  @property
   def import_alias(self) -> Tuple[str, str]:
     """Execute implementation detail."""
-    return ("tikz", "tikz")
+    return "tikz", "tikz"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """Execute implementation detail."""
-    return {}
-
-  @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
     """Execute implementation detail."""
     return {}
 
@@ -115,10 +97,6 @@ class TikzAdapter(FrameworkAdapter):
     """Execute implementation detail."""
     return []
 
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Execute implementation detail."""
-    return []
-
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Execute implementation detail."""
     return ""
@@ -171,6 +149,6 @@ class TikzAdapter(FrameworkAdapter):
     """Execute implementation detail."""
     return {
       "tier1_math": "% Math ops not visualized directly",
-      "tier2_neural": r"\begin{tikzpicture}\node (input) {Input}; \node (layer) [right of=input] {Layer}; \draw[->] (input) -- (layer);\end{tikzpicture}",
+      "tier2_neural": "\\begin{tikzpicture}\\node (input) {Input}; \\node (layer) [right of=input] {Layer}; \\draw[->] (input) -- (layer);\\end{tikzpicture}",
       "tier3_extras": "% Extras ignored",
     }

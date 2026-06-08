@@ -8,7 +8,7 @@ Verifies that:
 """
 
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 class MockSemantics(SemanticsManager):

@@ -29,7 +29,7 @@ from ml_switcheroo.core.rewriter.interface import RewriterPass
 from ml_switcheroo.core.rewriter.normalization_utils import convert_value_to_cst, extract_primitive_key
 from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.core.tracer import get_tracer
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.utils.node_diff import capture_node_source

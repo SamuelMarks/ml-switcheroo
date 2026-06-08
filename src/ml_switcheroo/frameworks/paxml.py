@@ -10,32 +10,29 @@ such as the ``setup()`` lifecycle method for layer definition.
 
 import logging
 import textwrap
-from typing import List, Tuple, Dict, Any, Optional, Set
+from typing import List, Tuple, Dict, Any, Optional
 
 try:
   import praxis
   import praxis.layers
   import praxis.base_layer
-  import praxis.layers.activations  # pragma: no cover
-  import praxis.layers.normalizations  # pragma: no cover
+  import praxis.layers.activations
+  import praxis.layers.normalizations
 except Exception:
   praxis = None
-
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
   PluginTraits,
   InitMode,
-  StandardCategory,
   StandardMap,
   ImportConfig,
   GhostRef,
   load_snapshot_for_adapter,
 )
-from ml_switcheroo.core.ghost import GhostInspector
 from ml_switcheroo.frameworks.common.jax_stack import JAXStackMixin
 from ml_switcheroo.frameworks.jax import JaxCoreAdapter
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.loader import load_definitions
 
 
@@ -61,46 +58,17 @@ class PaxmlAdapter(JAXStackMixin):
     """
     self._mode = InitMode.LIVE
     self._snapshot_data: Dict[str, Any] = {}
-
     if praxis is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("paxml")
       if not self._snapshot_data:
         logging.debug("PaxML (Praxis) not installed and no snapshot found.")
 
-  # --- Discovery ---
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Collects API definitions for the given category.
-
-    Delegates to ``JaxCoreAdapter`` for Math, Loss, and Optimizer categories,
-    while handling Layer discovery specifically for Praxis.
-
-    Args:
-        category (StandardCategory): The API category to scan.
-
-    Returns:
-        List[GhostRef]: Found API signatures.
-
-    """
-    if self._mode == InitMode.GHOST:
-      return self._collect_ghost(category)
-
-    results = []
-    core = JaxCoreAdapter()
-    # Reuse Core JAX discovery for non-layer components
-    if category in [StandardCategory.LOSS, StandardCategory.OPTIMIZER, StandardCategory.ACTIVATION]:
-      results.extend(core.collect_api(category))
-
-    if category == StandardCategory.LAYER:
-      results.extend(self._scan_praxis_layers())
-    return results
-
-  def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
+  def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
     """Loads API signatures from the JSON snapshot in Ghost Mode.
 
     Args:
-        category (StandardCategory): The category to retrieve.
+        category (SemanticTier): The category to retrieve.
 
     Returns:
         List[GhostRef]: Hydrated API references.
@@ -109,80 +77,7 @@ class PaxmlAdapter(JAXStackMixin):
     if not self._snapshot_data:
       return []
     raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
-    return list(map(GhostInspector.hydrate, raw_list))
-
-  def _scan_praxis_layers(self) -> List[GhostRef]:
-    """Introspects the live ``praxis.layers`` module.
-
-    Scans ``praxis.layers``, ``activations``, and ``normalizations`` for classes
-    inheriting from ``BaseLayer`` or matching naming conventions.
-
-    Returns:
-        List[GhostRef]: Discovered layer signatures.
-
-    """
-    if praxis is None:
-      return []
-
-    found = []
-    import inspect
-
-    targets = [praxis.layers]
-    try:
-      targets.extend([praxis.layers.activations, praxis.layers.normalizations])
-    except Exception:  # pragma: no cover
-      pass
-
-    for module in targets:
-      for name, obj in inspect.getmembers(module):
-        if name.startswith("_"):
-          continue
-        if inspect.isclass(obj):
-          is_layer = False
-          # Check inheritance from BaseLayer if available
-          if hasattr(praxis.base_layer, "BaseLayer") and issubclass(obj, praxis.base_layer.BaseLayer):
-            is_layer = True
-          # Fallback naming heuristic
-          elif "Layer" in name or name in ["Linear", "Bias", "StochasticDepth", "Embedding"]:
-            is_layer = True
-
-          if is_layer:
-            try:
-              api_path = f"{module.__name__}.{name}"
-              ref = GhostInspector.inspect(obj, api_path)
-              found.append(ref)
-            except Exception:
-              pass
-    return found
-
-  # --- Metadata ---
-
-  @property
-  def search_modules(self) -> List[str]:
-    """Returns list of modules to scan during manual scaffolding.
-
-    Returns:
-        List[str]: Module names including ``praxis.layers`` and ``praxis.base_layer``.
-
-    """
-    if self._mode == InitMode.GHOST:
-      return []
-    return [
-      "praxis.layers",
-      "praxis.base_layer",
-      "praxis.layers.activations",
-      "optax",
-    ]
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Safe defaults.
-
-    Returns:
-        Set[str]: Empty set.
-
-    """
-    return set()
+    return list(map(GhostRef.model_validate, raw_list))
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -192,7 +87,7 @@ class PaxmlAdapter(JAXStackMixin):
         Tuple[str, str]: ``("praxis.layers", "pl")``.
 
     """
-    return ("praxis.layers", "pl")
+    return "praxis.layers", "pl"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
@@ -208,16 +103,6 @@ class PaxmlAdapter(JAXStackMixin):
     }
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Returns regex patterns for heuristic categorization.
-
-    Returns:
-        Dict[str, List[str]]: Patterns identifying neural components in Praxis.
-
-    """
-    return {"neural": [r"\\.praxis\\.", r"\\.layers\\."], "extras": []}
-
-  @property
   def test_config(self) -> Dict[str, str]:
     """Returns templates for generating physical test files.
     Extends the JAX base config with Praxis imports.
@@ -229,8 +114,6 @@ class PaxmlAdapter(JAXStackMixin):
     conf = self.jax_test_config.copy()
     conf["import"] = conf["import"] + "\nimport praxis.layers as pl"
     return conf
-
-  # --- Harness Protocol ---
 
   @property
   def harness_imports(self) -> List[str]:
@@ -249,14 +132,16 @@ class PaxmlAdapter(JAXStackMixin):
         str: Source code for ``_make_jax_key``.
 
     """
-    return textwrap.dedent(""" 
+    return textwrap.dedent(
+      """ 
             def _make_jax_key(seed): 
                 try: 
                     import jax
                     return jax.random.PRNGKey(seed) 
                 except Exception: 
                     return "mock_jax_key" 
-        """).strip()
+        """
+    ).strip()
 
   @property
   def supported_tiers(self) -> List[Any]:
@@ -328,25 +213,15 @@ class PaxmlAdapter(JAXStackMixin):
 
     """
     defs = load_definitions("paxml")
-
-    # Ensure Linear exists
     if "Linear" not in defs:
       defs["Linear"] = StandardMap(api="praxis.layers.Linear", args={})
-
-    # Patch args for test compliance
     if defs["Linear"].args is None:
       defs["Linear"].args = {}
-
     defs["Linear"].args.update({"in_features": "input_dims", "out_features": "output_dims", "bias": "use_bias"})
-
-    # Ensure Sequential
     if "Sequential" not in defs:
       defs["Sequential"] = StandardMap(api="praxis.layers.Sequential")
-
-    # Ensure ReLU
     if "ReLU" not in defs:
       defs["ReLU"] = StandardMap(api="praxis.layers.ReLU")
-
     return defs
 
   @property

@@ -46,7 +46,7 @@ def test_import_errors_frameworks():
 
     importlib.reload(ml_switcheroo.frameworks.torch)
 
-    from ml_switcheroo.enums import SemanticTier
+    from ml_switcheroo_ir.schema.ghost import SemanticTier
 
     import ml_switcheroo.frameworks.jax
 

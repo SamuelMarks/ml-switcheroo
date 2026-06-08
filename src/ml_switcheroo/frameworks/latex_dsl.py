@@ -4,18 +4,9 @@ Provides metadata and hooks for the Machine Intelligence Definition Language (MI
 LaTeX DSL.
 """
 
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.core.ghost import GhostRef
-from ml_switcheroo.frameworks.base import (
-  register_framework,
-  StandardMap,
-  StandardCategory,
-  ImportConfig,
-  InitMode,
-  OperationDef,
-)
+from typing import Any, Dict, List, Optional, Tuple
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+from ml_switcheroo.frameworks.base import register_framework, StandardMap, ImportConfig, InitMode, OperationDef
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.core.latex.parser import LatexParser
@@ -39,19 +30,9 @@ class LatexDSLAdapter:
     return LatexParser(code)
 
   @property
-  def search_modules(self) -> List[str]:
-    """Execute implementation detail."""
-    return []
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Execute implementation detail."""
-    return set()
-
-  @property
   def import_alias(self) -> Tuple[str, str]:
     """Execute implementation detail."""
-    return ("midl", "midl")
+    return "midl", "midl"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
@@ -59,18 +40,9 @@ class LatexDSLAdapter:
     return {"midl": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="midl")}
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Execute implementation detail."""
-    return {}
-
-  @property
   def test_config(self) -> Dict[str, str]:
     """Execute implementation detail."""
-    return {
-      "import": "% latex package imports",
-      "convert_input": "% input {np_var}",
-      "to_numpy": "% output {res_var}",
-    }
+    return {"import": "% latex package imports", "convert_input": "% input {np_var}", "to_numpy": "% output {res_var}"}
 
   @property
   def harness_imports(self) -> List[str]:
@@ -99,10 +71,7 @@ class LatexDSLAdapter:
   def structural_traits(self) -> StructuralTraits:
     """Execute implementation detail."""
     return StructuralTraits(
-      module_base="midl.Module",
-      forward_method="forward",
-      init_method_name="__init__",
-      requires_super_init=True,
+      module_base="midl.Module", forward_method="forward", init_method_name="__init__", requires_super_init=True
     )
 
   @property
@@ -116,19 +85,12 @@ class LatexDSLAdapter:
     defs = load_definitions("latex_dsl")
     if "Module" not in defs:
       defs["Module"] = StandardMap(api="midl.Module")
-
-    # Updated mappings to preserve 'kernel_size' for legibility in generated LaTeX
-    # instead of mapping to generic arg_2
     if "Conv2d" not in defs:
       defs["Conv2d"] = StandardMap(
-        api="midl.Conv2d",
-        args={"in_channels": "arg_0", "out_channels": "arg_1", "kernel_size": "kernel_size"},
+        api="midl.Conv2d", args={"in_channels": "arg_0", "out_channels": "arg_1", "kernel_size": "kernel_size"}
       )
-
-    # Add Linear fallback for tests
     if "Linear" not in defs:
       defs["Linear"] = StandardMap(api="midl.Linear", args={"in_features": "arg_0", "out_features": "arg_1"})
-
     return defs
 
   @property
@@ -136,10 +98,7 @@ class LatexDSLAdapter:
     """Execute implementation detail."""
     from ml_switcheroo.core.dsl import ParameterDef
 
-    # Populate implicit Hub definitions if files are missing
-    # This repairs 'test_standards_content.py'
     specs = {}
-
     if "Conv2d" not in specs:
       specs["Conv2d"] = OperationDef(
         operation="Conv2d",
@@ -147,7 +106,6 @@ class LatexDSLAdapter:
         std_args=[ParameterDef(name="in_channels"), ParameterDef(name="out_channels"), ParameterDef(name="kernel_size")],
         variants={},
       )
-
     if "Linear" not in specs:
       specs["Linear"] = OperationDef(
         operation="Linear",
@@ -155,15 +113,10 @@ class LatexDSLAdapter:
         std_args=[ParameterDef(name="in_features"), ParameterDef(name="out_features")],
         variants={},
       )
-
     return specs
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Execute implementation detail."""
-    return []
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """Execute implementation detail."""
     return []
 
@@ -219,6 +172,6 @@ class LatexDSLAdapter:
     """Execute implementation detail."""
     return {
       "tier1_math": "y = |x| + z",
-      "tier2_neural": r"\begin{DefModel}{ConvNet} \Attribute{conv}{Conv2d}{} \end{DefModel}",
+      "tier2_neural": "\\begin{DefModel}{ConvNet} \\Attribute{conv}{Conv2d}{} \\end{DefModel}",
       "tier3_extras": "% Extras ignored",
     }

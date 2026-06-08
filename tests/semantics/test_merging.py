@@ -1,6 +1,6 @@
 import pytest
 import warnings
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.semantics.schema import PatternDef
 from ml_switcheroo.semantics.merging import (
   infer_tier_from_priority,

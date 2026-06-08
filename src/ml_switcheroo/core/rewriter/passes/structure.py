@@ -16,7 +16,7 @@ from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.core.rewriter.types import SignatureContext
 from ml_switcheroo.semantics.schema import StructuralTraits
 from ml_switcheroo.core.escape_hatch import EscapeHatch
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 class StructuralPass(RewriterPass):

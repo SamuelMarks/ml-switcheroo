@@ -12,7 +12,7 @@ Updates:
 import json
 from pathlib import Path
 from typing import Dict, Any, List, Tuple
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.semantics.merging import (
   merge_tier_data,
   merge_overlay_data,

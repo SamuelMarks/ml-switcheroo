@@ -12,17 +12,9 @@ Capabilities:
 
 import numpy as np
 import textwrap
-from typing import List, Tuple, Optional, Dict, Any, Set
-from ml_switcheroo.core.ghost import GhostRef
-from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.frameworks.base import (
-  register_framework,
-  StructuralTraits,
-  PluginTraits,
-  StandardCategory,
-  StandardMap,
-  ImportConfig,
-)
+from typing import List, Tuple, Optional, Dict, Any
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
 
 
@@ -41,26 +33,6 @@ class NumpyAdapter:
   ui_priority: int = 20
 
   @property
-  def search_modules(self) -> List[str]:
-    """Returns list of numpy submodules to scan.
-
-    Returns:
-        List[str]: Modules.
-
-    """
-    return ["numpy", "numpy.linalg", "numpy.fft"]
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Returns unsafe modules.
-
-    Returns:
-        Set[str]: Empty.
-
-    """
-    return set()
-
-  @property
   def import_alias(self) -> Tuple[str, str]:
     """Returns import tuple.
 
@@ -68,7 +40,7 @@ class NumpyAdapter:
         Tuple[str, str]: ("numpy", "np").
 
     """
-    return ("numpy", "np")
+    return "numpy", "np"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
@@ -81,16 +53,6 @@ class NumpyAdapter:
     return {"numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="np")}
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Regex patterns for IO and Randomness.
-
-    Returns:
-        Dict[str, List[str]]: Patterns.
-
-    """
-    return {"extras": [r"\\.random\\\\.", r"save", r"load"]}
-
-  @property
   def test_config(self) -> Dict[str, str]:
     """Test templates for NumPy.
 
@@ -98,13 +60,7 @@ class NumpyAdapter:
         Dict[str, str]: Templates.
 
     """
-    return {
-      "import": "import numpy as np",
-      "convert_input": "{np_var}",  # Identity (NumPy is default)
-      "to_numpy": "{res_var}",  # Identity
-    }
-
-  # --- Harness Protocol ---
+    return {"import": "import numpy as np", "convert_input": "{np_var}", "to_numpy": "{res_var}"}
 
   @property
   def harness_imports(self) -> List[str]:
@@ -163,9 +119,7 @@ class NumpyAdapter:
         StructuralTraits: Traits.
 
     """
-    return StructuralTraits(
-      auto_strip_magic_args=True  # NumPy doesn't support random keys or context args
-    )
+    return StructuralTraits(auto_strip_magic_args=True)
 
   @property
   def plugin_traits(self) -> PluginTraits:
@@ -202,20 +156,6 @@ class NumpyAdapter:
 
     """
     return ["seed"]
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """NumPy doesn't implement Layers/Losses structurally.
-
-    Args:
-        category: Category.
-
-    Returns:
-        List[GhostRef]: Empty list.
-
-    """
-    return []
-
-  # --- Syntax Generation ---
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Returns CPU syntax ignoring device requests (NumPy is CPU-only).
@@ -279,8 +219,6 @@ class NumpyAdapter:
       return f"np.load(file={file_arg})"
     return ""
 
-  # --- Weight Handling ---
-
   def get_weight_conversion_imports(self) -> List[str]:
     """Execute implementation detail."""
     return ["import numpy as np"]
@@ -325,8 +263,6 @@ class NumpyAdapter:
     """
     return f"https://numpy.org/doc/stable/reference/generated/{api_name}.html"
 
-  # --- Verification ---
-
   def convert(self, data: Any) -> Any:
     """Attempts to convert input data to a NumPy array.
 
@@ -341,7 +277,6 @@ class NumpyAdapter:
       return type(data)(self.convert(x) for x in data)
     if isinstance(data, dict):
       return {k: self.convert(v) for k, v in data.items()}
-
     if hasattr(data, "detach"):
       try:
         return data.detach().cpu().numpy()

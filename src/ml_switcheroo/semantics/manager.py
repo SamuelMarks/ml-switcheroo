@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple, Any, Set, List
 from pydantic import ValidationError
 
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.core.dsl import OperationDef, PatternDef
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 

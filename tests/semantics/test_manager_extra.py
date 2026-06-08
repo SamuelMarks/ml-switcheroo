@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 from ml_switcheroo.semantics.manager import SemanticsManager
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 def test_load_validation_report_not_found(capsys):

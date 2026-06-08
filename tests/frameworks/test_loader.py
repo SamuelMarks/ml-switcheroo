@@ -6,7 +6,7 @@ from ml_switcheroo.frameworks.loader import (
   get_definitions_path,
   DEFINITIONS_DIR,
 )
-from ml_switcheroo.frameworks.base import StandardMap
+from ml_switcheroo_ir.schema.ghost import StandardMap
 
 
 def test_load_definitions_file_not_found():

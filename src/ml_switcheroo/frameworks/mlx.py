@@ -12,25 +12,12 @@ It supports:
 Definitions are loaded from `frameworks/definitions/mlx.json`.
 """
 
-import logging
 import textwrap
-from typing import List, Tuple, Optional, Dict, Any, Set
-
+from typing import List, Tuple, Optional, Dict, Any
 import numpy as np
-
-from ml_switcheroo.core.ghost import GhostRef, GhostInspector
-from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.frameworks.base import (
-  register_framework,
-  StructuralTraits,
-  PluginTraits,
-  StandardCategory,
-  StandardMap,
-  ImportConfig,
-)
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+from ml_switcheroo.frameworks.base import register_framework, StructuralTraits, PluginTraits, StandardMap, ImportConfig
 from ml_switcheroo.frameworks.loader import load_definitions
-
-# Definitions are loaded from `frameworks/definitions/mlx.json`.
 
 
 @register_framework("mlx")
@@ -42,33 +29,6 @@ class MLXAdapter:
   ui_priority: int = 50
 
   @property
-  def search_modules(self) -> List[str]:
-    """Returns list of MLX submodules to scan during discovery.
-
-    Returns:
-        List[str]: Module list.
-
-    """
-    return [
-      "mlx.core",
-      "mlx.nn",
-      "mlx.optimizers",
-      "mlx.core.fft",
-      "mlx.core.linalg",
-      "mlx.core.random",
-    ]
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Submodules safe to avoid during recursion.
-
-    Returns:
-        Set[str]: Default empty set.
-
-    """
-    return set()
-
-  @property
   def import_alias(self) -> Tuple[str, str]:
     """Default alias for core array operations: ``import mlx.core as mx``.
 
@@ -76,7 +36,7 @@ class MLXAdapter:
         Tuple[str, str]: ("mlx.core", "mx").
 
     """
-    return ("mlx.core", "mx")
+    return "mlx.core", "mx"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
@@ -93,20 +53,6 @@ class MLXAdapter:
     }
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Regex patterns for categorizing discovered APIs into Tiers.
-
-    Returns:
-        Dict[str, List[str]]: Heuristics map.
-
-    """
-    return {
-      "neural": [r"\\.nn\\."],
-      "extras": [r"random\\."],
-      "optimizer": [r"\\.optimizers\\."],
-    }
-
-  @property
   def test_config(self) -> Dict[str, str]:
     """Templates for generating physical verification tests.
 
@@ -119,8 +65,6 @@ class MLXAdapter:
       "convert_input": "mx.array({np_var})",
       "to_numpy": "np.array({res_var})",
     }
-
-  # --- Harness Protocol ---
 
   @property
   def harness_imports(self) -> List[str]:
@@ -182,10 +126,7 @@ class MLXAdapter:
 
     """
     return StructuralTraits(
-      module_base="mlx.nn.Module",
-      forward_method="__call__",
-      requires_super_init=True,
-      auto_strip_magic_args=True,  # Decoupled
+      module_base="mlx.nn.Module", forward_method="__call__", requires_super_init=True, auto_strip_magic_args=True
     )
 
   @property
@@ -198,7 +139,7 @@ class MLXAdapter:
     """
     return PluginTraits(
       has_numpy_compatible_arrays=True,
-      requires_explicit_rng=False,  # MLX uses implicit RNG in mlx.core.random usually
+      requires_explicit_rng=False,
       requires_functional_state=False,
       requires_functional_control_flow=False,
     )
@@ -223,60 +164,6 @@ class MLXAdapter:
 
     """
     return ["seed", "random.seed"]
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Performs runtime introspection to discover available MLX APIs.
-
-    Args:
-        category (StandardCategory): Category to scan.
-
-    Returns:
-        List[GhostRef]: Found items.
-
-    """
-    results = []
-    try:
-      import mlx.core
-      import mlx.nn
-      import mlx.optimizers
-      import inspect
-
-      if category == StandardCategory.LAYER:
-        for name, obj in inspect.getmembers(mlx.nn):
-          if not name.startswith("_") and inspect.isclass(obj) and name[0].isupper():
-            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))
-
-      if category == StandardCategory.ACTIVATION:
-        target_names = {
-          "relu",
-          "gelu",
-          "silu",
-          "sigmoid",
-          "tanh",
-          "softmax",
-          "elu",
-        }
-        for name, obj in inspect.getmembers(mlx.nn):
-          if name.lower() in target_names:
-            results.append(GhostInspector.inspect(obj, f"mlx.nn.{name}"))  # pragma: no cover
-
-      if category == StandardCategory.LOSS:
-        if hasattr(mlx.nn, "losses"):
-          for name, obj in inspect.getmembers(mlx.nn.losses):
-            if inspect.isfunction(obj) or inspect.isclass(obj):
-              if "loss" in name.lower():
-                results.append(GhostInspector.inspect(obj, f"mlx.nn.losses.{name}"))
-
-      if category == StandardCategory.OPTIMIZER:
-        for name, obj in inspect.getmembers(mlx.optimizers):
-          if inspect.isclass(obj) and not name.startswith("_"):
-            results.append(GhostInspector.inspect(obj, f"mlx.optimizers.{name}"))
-
-    except Exception as e:
-      logging.debug(f"Could not inspect MLX: {e}")
-      pass
-
-    return results
 
   def convert(self, data: Any) -> Any:
     """Converts input data (NumPy/List) to MLX Tensor for verification.
@@ -391,8 +278,6 @@ class Qwen3VLPatchEmbed(nn.Module):
 """,
     }
 
-  # --- Syntax Generators ---
-
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Returns device constructor syntax.
 
@@ -460,8 +345,6 @@ class Qwen3VLPatchEmbed(nn.Module):
     elif op == "load":
       return f"mx.load({file_arg})"
     return ""
-
-  # --- Weight Migrations ---
 
   def get_weight_conversion_imports(self) -> List[str]:
     """Returns imports needed for weight scripts."""

@@ -10,7 +10,7 @@ import json
 from typing import Any, Dict, List, Union, Tuple
 
 from ml_switcheroo.core.dsl import OperationDef, ParameterDef
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.semantics.paths import resolve_semantics_dir
 from ml_switcheroo.utils.console import log_info, log_success, log_warning
 

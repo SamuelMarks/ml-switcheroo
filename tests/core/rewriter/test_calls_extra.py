@@ -11,7 +11,7 @@ from ml_switcheroo.core.rewriter.calls.transformers import (
   rewrite_as_macro,
   rewrite_as_infix,
 )
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 # --- Mocks ---

@@ -3,7 +3,7 @@ Tests for Package integrity and enumerations.
 Renamed from test_structure.py to avoid collision with core pass tests.
 """
 
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 def test_semantic_tier_enum():

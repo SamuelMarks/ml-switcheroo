@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 from ml_switcheroo.core.dsl import OperationDef, OpType
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.tools.injector_spec import StandardsInjector
 
 

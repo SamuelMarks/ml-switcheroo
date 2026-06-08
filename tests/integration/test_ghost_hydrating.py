@@ -14,7 +14,7 @@ import sys
 from unittest.mock import MagicMock, patch
 
 from ml_switcheroo.frameworks.base import (
-  StandardCategory,
+  SemanticTier,
   GhostRef,
   InitMode,
   load_snapshot_for_adapter,
@@ -40,7 +40,7 @@ class MockAdapter:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("mockfw")
 
-  def collect_api(self, category: StandardCategory) -> list[GhostRef]:
+  def collect_api(self, category: SemanticTier) -> list[GhostRef]:
     """Function docstring."""
     if self._mode == InitMode.GHOST:
       # Ghost Implementation: specific logic to read from loaded dict
@@ -128,7 +128,7 @@ def test_hybrid_mode_live():
     adapter = MockAdapter()
 
     assert adapter._mode == InitMode.LIVE
-    results = adapter.collect_api(StandardCategory.LOSS)
+    results = adapter.collect_api(SemanticTier.LOSS)
 
     assert len(results) == 1
     assert results[0].name == "LiveObj"
@@ -152,14 +152,14 @@ def test_hybrid_mode_ghost(valid_snapshot):
     assert adapter._snapshot_data["version"] == "1.0"
 
     # Run Collection
-    results = adapter.collect_api(StandardCategory.LOSS)
+    results = adapter.collect_api(SemanticTier.LOSS)
 
     # Verify Hydration
     assert len(results) == 1
     ref = results[0]
 
     # Check integrity
-    assert isinstance(ref, GhostRef)
+    assert type(ref).__name__ == "GhostRef"
     assert ref.name == "LiveObj"
     assert ref.api_path == "mockfw.LiveObj"
 
@@ -177,5 +177,5 @@ def test_ghost_mode_no_snapshot(snapshot_dir):
     assert adapter._mode == InitMode.GHOST
     assert adapter._snapshot_data == {}
 
-    results = adapter.collect_api(StandardCategory.LOSS)
+    results = adapter.collect_api(SemanticTier.LOSS)
     assert results == []

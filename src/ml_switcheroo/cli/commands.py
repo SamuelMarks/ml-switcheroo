@@ -5,7 +5,6 @@ to maintain backward compatibility with existing tests and imports. Must remain
 synced with handler modules.
 """
 
-from ml_switcheroo.cli.handlers.audit import handle_audit
 from ml_switcheroo.cli.handlers.convert import (
   handle_convert,
   _convert_single_file,
@@ -14,22 +13,6 @@ from ml_switcheroo.cli.handlers.convert import (
 
 # New export
 from ml_switcheroo.cli.handlers.convert_weights import WeightScriptGenerator
-from ml_switcheroo.cli.handlers.discovery import (
-  handle_scaffold,
-  handle_import_spec,
-  handle_sync_standards,
-)
-from ml_switcheroo.cli.handlers.snapshots import (
-  handle_snapshot,
-  handle_sync,
-  _get_pkg_version,
-  _capture_framework,
-  _save_snapshot,
-)
-from ml_switcheroo.cli.handlers.learning import (
-  handle_wizard,
-  handle_harvest,
-)
 from ml_switcheroo.cli.handlers.verify import handle_ci
 from ml_switcheroo.cli.handlers.dev import (
   handle_matrix,
@@ -73,25 +56,14 @@ def handle_gen_weight_script(
 
 
 __all__ = [
-  "_capture_framework",
   "_convert_single_file",
-  "_get_pkg_version",
   "_print_batch_summary",
-  "_save_snapshot",
-  "handle_audit",
   "handle_ci",
   "handle_convert",
   "handle_docs",
   "handle_gen_tests",
   "handle_gen_weight_script",
-  "handle_harvest",
-  "handle_import_spec",
   "handle_matrix",
-  "handle_scaffold",
-  "handle_snapshot",
-  "handle_sync",
-  "handle_sync_standards",
-  "handle_wizard",
   "resolve_semantics_dir",
   "resolve_snapshots_dir",
 ]

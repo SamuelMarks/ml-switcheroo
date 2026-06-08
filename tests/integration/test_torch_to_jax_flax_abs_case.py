@@ -12,7 +12,7 @@ from ml_switcheroo.core.engine import ASTEngine
 from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.semantics.merging import merge_overlay_data
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 # Fix: Import specific adapter for Neural traits
 from ml_switcheroo.frameworks.flax_nnx import FlaxNNXAdapter

@@ -3,15 +3,12 @@
 Simplified to only provide Metadata.
 """
 
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.core.ghost import GhostRef
+from typing import Any, Dict, List, Optional, Tuple
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
   FrameworkAdapter,
   StandardMap,
-  StandardCategory,
   ImportConfig,
   InitMode,
   OperationDef,
@@ -34,27 +31,12 @@ class MlirAdapter(FrameworkAdapter):
     pass
 
   @property
-  def search_modules(self) -> List[str]:
-    """Execute implementation detail."""
-    return []
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Execute implementation detail."""
-    return set()
-
-  @property
   def import_alias(self) -> Tuple[str, str]:
     """Execute implementation detail."""
-    return ("mlir", "sw")
+    return "mlir", "sw"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """Execute implementation detail."""
-    return {}
-
-  @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
     """Execute implementation detail."""
     return {}
 
@@ -115,10 +97,6 @@ class MlirAdapter(FrameworkAdapter):
     """Execute implementation detail."""
     return []
 
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Execute implementation detail."""
-    return []
-
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Execute implementation detail."""
     return f"// Target: {device_type}"
@@ -172,8 +150,13 @@ class MlirAdapter(FrameworkAdapter):
   @classmethod
   def get_example_code(cls) -> str:
     """Execute implementation detail."""
-    # Use sw.func to match test expectation
-    return '// Example MLIR\nsw.module {\n^entry:\n    sw.func {sym_name = "main"} {\n        %0 = sw.op {type = "torch.abs"} (%x)\n    }\n}'
+    return """// Example MLIR
+sw.module {
+^entry:
+    sw.func {sym_name = "main"} {
+        %0 = sw.op {type = "torch.abs"} (%x)
+    }
+}"""
 
   def get_tiered_examples(self) -> Dict[str, str]:
     """Execute implementation detail."""

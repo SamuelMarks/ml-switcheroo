@@ -9,7 +9,7 @@ import libcst as cst
 
 from ml_switcheroo.core.rewriter.calls.transformers import apply_index_select
 from ml_switcheroo.core.rewriter.calls.utils import inject_kwarg, strip_kwarg
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 
 def handle_post_processing(

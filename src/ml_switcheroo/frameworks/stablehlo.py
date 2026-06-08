@@ -5,18 +5,9 @@ This adapter acts as a metadata container for the Compiler Registry,
 identifying StableHLO as a target language and providing static definitions.
 """
 
-from typing import Any, Dict, List, Optional, Set, Tuple
-
-from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.core.ghost import GhostRef
-from ml_switcheroo.frameworks.base import (
-  ImportConfig,
-  InitMode,
-  StandardCategory,
-  StandardMap,
-  register_framework,
-  FrameworkAdapter,
-)
+from typing import Any, Dict, List, Optional, Tuple
+from ml_switcheroo_ir.schema.ghost import SemanticTier
+from ml_switcheroo.frameworks.base import ImportConfig, InitMode, StandardMap, register_framework, FrameworkAdapter
 from ml_switcheroo.frameworks.loader import load_definitions
 from ml_switcheroo.semantics.schema import StructuralTraits, PluginTraits
 from ml_switcheroo.core.dsl import OperationDef
@@ -36,27 +27,12 @@ class StableHloAdapter(FrameworkAdapter):
     pass
 
   @property
-  def search_modules(self) -> List[str]:
-    """Execute implementation detail."""
-    return []
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Execute implementation detail."""
-    return set()
-
-  @property
   def import_alias(self) -> Tuple[str, str]:
     """Execute implementation detail."""
-    return ("stablehlo", "stablehlo")
+    return "stablehlo", "stablehlo"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
-    """Execute implementation detail."""
-    return {}
-
-  @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
     """Execute implementation detail."""
     return {}
 
@@ -114,10 +90,6 @@ class StableHloAdapter(FrameworkAdapter):
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Execute implementation detail."""
-    return []
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """Execute implementation detail."""
     return []
 

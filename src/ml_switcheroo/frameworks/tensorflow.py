@@ -13,14 +13,12 @@ It supports:
 
 import logging
 import textwrap
-from typing import List, Tuple, Optional, Dict, Any, Set
-from ml_switcheroo.core.ghost import GhostRef, GhostInspector
-from ml_switcheroo.enums import SemanticTier
+from typing import List, Tuple, Optional, Dict, Any
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
   StructuralTraits,
   PluginTraits,
-  StandardCategory,
   StandardMap,
   ImportConfig,
   InitMode,
@@ -58,59 +56,11 @@ class TensorFlowAdapter:
     """
     self._mode = InitMode.LIVE
     self._snapshot_data: Dict[str, Any] = {}
-
     if tf is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("tensorflow")
       if not self._snapshot_data:
-        logging.debug("TensorFlow not installed and no snapshot found.")  # pragma: no cover
-
-  # --- Metadata ---
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Returns a set of submodule names to exclude from recursion.
-
-    These modules often contain C-Extensions, deprecated logic, or
-    heavy dependencies that crash the ``GhostInspector`` or cause
-    infinite recursion during discovery.
-
-    Returns:
-        Set[str]: Blacklisted submodule names.
-
-    """
-    return {
-      "pywrap_tensorflow",
-      "python",
-      "core",
-      "compiler",
-      "contrib",
-      "examples",
-      "tools",
-      "xla",
-      "lite",
-    }
-
-  @property
-  def search_modules(self) -> List[str]:
-    """Returns the list of top-level modules to scan during discovery.
-
-    If in GHOST mode, returns an empty list to prevent import errors.
-
-    Returns:
-        List[str]: Module names (e.g. ``['tensorflow', 'keras.layers']``).
-
-    """
-    if self._mode == InitMode.GHOST:
-      return []  # pragma: no cover
-    return [
-      "tensorflow",
-      "tensorflow.math",
-      "tensorflow.linalg",
-      "tensorflow.signal",
-      "keras.layers",
-      "keras.ops",
-    ]
+        logging.debug("TensorFlow not installed and no snapshot found.")
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -120,7 +70,7 @@ class TensorFlowAdapter:
         Tuple[str, str]: The module name and its standard alias (e.g. ``('tensorflow', 'tf')``).
 
     """
-    return ("tensorflow", "tf")
+    return "tensorflow", "tf"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
@@ -139,22 +89,6 @@ class TensorFlowAdapter:
     }
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Returns regex patterns used to categorize discovered APIs.
-
-    Used by the ``Scaffolder`` to blindly sort discovered functions into
-    Math, Neural, or Extras tiers based on their path.
-
-    Returns:
-        Dict[str, List[str]]: Mapping of Tier names to regex patterns.
-
-    """
-    return {
-      "neural": [r"\\.keras\\.", r"Layer$"],
-      "extras": [r"\\.io\\.", r"\\.data\\."],
-    }
-
-  @property
   def test_config(self) -> Dict[str, str]:
     """Returns templates for generating physical verification tests.
 
@@ -170,8 +104,6 @@ class TensorFlowAdapter:
       "convert_input": "tf.convert_to_tensor({np_var})",
       "to_numpy": "{res_var}.numpy()",
     }
-
-  # --- Harness Protocol ---
 
   @property
   def harness_imports(self) -> List[str]:
@@ -226,10 +158,7 @@ class TensorFlowAdapter:
 
     """
     return StructuralTraits(
-      module_base="keras.Layer",
-      forward_method="call",
-      requires_super_init=True,
-      auto_strip_magic_args=True,  # Decoupled
+      module_base="keras.Layer", forward_method="call", requires_super_init=True, auto_strip_magic_args=True
     )
 
   @property
@@ -244,8 +173,8 @@ class TensorFlowAdapter:
 
     """
     return PluginTraits(
-      has_numpy_compatible_arrays=True,  # Supports .astype via TF/Keras ops
-      requires_explicit_rng=False,  # TF handles RNG statefully (usually)
+      has_numpy_compatible_arrays=True,
+      requires_explicit_rng=False,
       requires_functional_state=False,
       requires_functional_control_flow=False,
     )
@@ -282,82 +211,6 @@ class TensorFlowAdapter:
     """
     return ["set_seed", "random.set_seed"]
 
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Collects API definitions for the discovery process.
-
-    Delegates to ``_collect_ghost`` if in Ghost Mode, otherwise runs
-    ``_collect_live`` to inspect the installed library.
-
-    Args:
-        category (StandardCategory): The category of operations to scan (e.g. LOSS, LAYER).
-
-    Returns:
-        List[GhostRef]: A list of discovered API signatures.
-
-    """
-    if self._mode == InitMode.GHOST:
-      return self._collect_ghost(category)
-    return self._collect_live(category)
-
-  def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
-    """Loads API definitions from the cached JSON snapshot.
-
-    Args:
-        category (StandardCategory): The category to retrieve.
-
-    Returns:
-        List[GhostRef]: Hydrated references from JSON data.
-
-    """
-    if not self._snapshot_data:
-      return []
-    raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
-    return [GhostInspector.hydrate(item) for item in raw_list]
-
-  def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
-    """Introspects the live ``tensorflow`` module to find operations matching the category.
-
-    Scans ``tf.nn`` for activations and ``tf.keras.layers`` for layers.
-
-    Args:
-        category (StandardCategory): The category to scan for.
-
-    Returns:
-        List[GhostRef]: References extracted from live objects.
-
-    """
-    results = []
-    try:
-      import tensorflow as tf
-
-      if category == StandardCategory.ACTIVATION:
-        target_names = {
-          "relu",
-          "sigmoid",
-          "tanh",
-          "softmax",
-          "leaky_relu",
-          "elu",
-          "selu",
-        }
-        for name in target_names:
-          if hasattr(tf.nn, name):
-            results.append(GhostInspector.inspect(getattr(tf.nn, name), f"tf.nn.{name}"))
-
-      elif category == StandardCategory.LAYER:
-        # Basic keras layer scanning if available
-        is_keras_available = hasattr(tf, "keras") and hasattr(tf.keras, "layers")
-        if is_keras_available:
-          import inspect
-
-          for name, obj in inspect.getmembers(tf.keras.layers):
-            if inspect.isclass(obj) and "Layer" in name and not name.startswith("_"):
-              results.append(GhostInspector.inspect(obj, f"tf.keras.layers.{name}"))
-
-    except Exception:  # pragma: no cover
-      pass
-    return results
-
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Applies manual wiring patches to the generated snapshot.
     Updates `tensorflow.` API prefixes to `tf.` to match standard aliases.
@@ -368,16 +221,11 @@ class TensorFlowAdapter:
     """
     if "mappings" not in snapshot:
       return
-
-    # Normalize 'tensorflow.' -> 'tf.' in API paths
     for _, entry in snapshot["mappings"].items():
       if not entry or "api" not in entry:
-        continue  # pragma: no cover
-
+        continue
       api = entry["api"]
       if api.startswith("tensorflow."):
-        # Reconstruct path using 'tf' alias
-        # e.g. tensorflow.math.add -> tf.math.add
         new_api = "tf." + api[11:]
         entry["api"] = new_api
 
@@ -456,8 +304,6 @@ class Qwen3VLPatchEmbed(tf.keras.layers.Layer):
 """,
     }
 
-  # --- Syntax Generators ---
-
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Generates Python code for defining a device context in TensorFlow.
 
@@ -475,14 +321,12 @@ class Qwen3VLPatchEmbed(tf.keras.layers.Layer):
     tf_type = "CPU"
     if clean_type in ("cuda", "gpu", "mps"):
       tf_type = "GPU"
-
     idx_str = "0"
     if device_index:
       if device_index.isdigit():
         idx_str = device_index
       else:
         return f"tf.device(f'{tf_type}:{{str({device_index})}}')"
-
     return f"tf.device('{tf_type}:{idx_str}')"
 
   def get_device_check_syntax(self) -> str:
@@ -534,8 +378,6 @@ class Qwen3VLPatchEmbed(tf.keras.layers.Layer):
     elif op == "load":
       return f"tf.io.read_file({file_arg})"
     return ""
-
-  # --- Weight Handling Logic ---
 
   def get_weight_conversion_imports(self) -> List[str]:
     """Returns imports required for the generated weight migration script.
@@ -616,7 +458,7 @@ class Qwen3VLPatchEmbed(tf.keras.layers.Layer):
     try:
       import tensorflow as tf
 
-      return tf.convert_to_tensor(data)  # pragma: no cover
+      return tf.convert_to_tensor(data)
     except (ImportError, ValueError, TypeError, Exception):
       return data
 

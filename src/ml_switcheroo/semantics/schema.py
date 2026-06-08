@@ -13,7 +13,7 @@ Updated to support:
 from typing import Dict, List, Optional, Tuple, Any, Set
 from pydantic import BaseModel, Field, ConfigDict
 
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.core.dsl import (
   PatternDef,
 )

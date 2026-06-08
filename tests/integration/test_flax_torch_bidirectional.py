@@ -19,7 +19,7 @@ from ml_switcheroo.semantics.manager import SemanticsManager
 # FIX: Import merge logic directly
 from ml_switcheroo.semantics.merging import merge_overlay_data
 from ml_switcheroo.core.escape_hatch import EscapeHatch
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from tests.utils.ast_utils import cmp_ast
 
 # Fix: Import specific adapter for Neural traits

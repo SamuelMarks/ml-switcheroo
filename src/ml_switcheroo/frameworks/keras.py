@@ -11,10 +11,9 @@ It handles:
 5.  **Weight Migration**: Loading/saving .h5 or .keras files via h5py.
 """
 
-import inspect
 import logging
 import textwrap
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
   import keras
@@ -24,15 +23,13 @@ try:
   import keras.ops
   import keras.optimizers
   import keras.random
-except Exception:  # pragma: no cover
+except Exception:
   keras = None
-
-from ml_switcheroo.core.ghost import GhostInspector, GhostRef
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import GhostRef
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   ImportConfig,
   InitMode,
-  StandardCategory,
   StandardMap,
   StructuralTraits,
   load_snapshot_for_adapter,
@@ -60,38 +57,11 @@ class KerasAdapter:
     """
     self._mode = InitMode.LIVE
     self._snapshot_data: Dict[str, Any] = {}
-
     if keras is None:
       self._mode = InitMode.GHOST
       self._snapshot_data = load_snapshot_for_adapter("keras")
       if not self._snapshot_data:
-        # Downgraded from WARNING to DEBUG to prevent CLI spam on bootstrap
         logging.debug("Keras not installed and no snapshot found. Adapter disabled.")
-
-  @property
-  def search_modules(self) -> List[str]:
-    """Returns list of search modules.
-
-    If in Ghost Mode, returns empty list to prevent Scaffolder
-    from attempting to import missing modules.
-
-    Returns:
-        List[str]: Module names.
-
-    """
-    if self._mode == InitMode.GHOST:
-      return []  # pragma: no cover
-    return ["keras.ops", "keras.layers", "keras.activations", "keras.random"]
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Submodules to exclude from recursive scans.
-
-    Returns:
-        Set[str]: Empty set for Keras properly scoped imports.
-
-    """
-    return set()
 
   @property
   def import_alias(self) -> Tuple[str, str]:
@@ -101,7 +71,7 @@ class KerasAdapter:
         Tuple[str, str]: ("keras", "keras").
 
     """
-    return ("keras", "keras")
+    return "keras", "keras"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
@@ -116,20 +86,6 @@ class KerasAdapter:
       "keras.ops": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="ops"),
       "keras.layers": ImportConfig(tier=SemanticTier.NEURAL, recommended_alias="layers"),
       "numpy": ImportConfig(tier=SemanticTier.ARRAY_API, recommended_alias="np"),
-    }
-
-  @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Regex patterns for scaffold categorization.
-
-    Returns:
-        Dict[str, List[str]]: Patterns mapping tiers to paths.
-
-    """
-    return {
-      "neural": [r"\\.layers\\.", r"Layer$", r"Model$"],
-      "array": [r"\\.ops\\.", r"\\.math\\."],
-      "extras": [r"\\.callbacks\\.", r"\\.saving\\."],
     }
 
   @property
@@ -254,25 +210,11 @@ class KerasAdapter:
     """
     return ["utils.set_random_seed"]
 
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
-    """Collects API definitions via introspection or snapshot.
-
-    Args:
-        category (StandardCategory): Category to scan.
-
-    Returns:
-        List[GhostRef]: Found items.
-
-    """
-    if self._mode == InitMode.GHOST:
-      return self._collect_ghost(category)
-    return self._collect_live(category)
-
-  def _collect_ghost(self, category: StandardCategory) -> List[GhostRef]:
+  def _collect_ghost(self, category: SemanticTier) -> List[GhostRef]:
     """Loads from snapshot data.
 
     Args:
-        category (StandardCategory): Category to retrieve.
+        category (SemanticTier): Category to retrieve.
 
     Returns:
         List[GhostRef]: Hydrated references.
@@ -280,79 +222,31 @@ class KerasAdapter:
     """
     if not self._snapshot_data:
       return []
-
     raw_list = self._snapshot_data.get("categories", {}).get(category.value, [])
-    return [GhostInspector.hydrate(item) for item in raw_list]
+    return [GhostRef.model_validate(item) for item in raw_list]
 
-  def _collect_live(self, category: StandardCategory) -> List[GhostRef]:
+  def _collect_live(self, category: SemanticTier) -> List[GhostRef]:
     """Scans live modules.
 
     Args:
-        category (StandardCategory): Category to scan.
+        category (SemanticTier): Category to scan.
 
     Returns:
         List[GhostRef]: Found items.
 
     """
     results = []
-    if category == StandardCategory.LOSS:
+    if category == SemanticTier.LOSS:
       results.extend(self._scan_module(keras.losses, "keras.losses", kind="class", block_list={"Loss", "Container"}))
-    elif category == StandardCategory.OPTIMIZER:
+    elif category == SemanticTier.OPTIMIZER:
       results.extend(
-        self._scan_module(
-          keras.optimizers,
-          "keras.optimizers",
-          kind="class",
-          block_list={"Optimizer", "TFOptimizer"},
-        )
+        self._scan_module(keras.optimizers, "keras.optimizers", kind="class", block_list={"Optimizer", "TFOptimizer"})
       )
-    elif category == StandardCategory.ACTIVATION:
+    elif category == SemanticTier.ACTIVATION:
       results.extend(self._scan_module(keras.activations, "keras.activations", kind="function"))
-    elif category == StandardCategory.LAYER:
+    elif category == SemanticTier.LAYER:
       results.extend(self._scan_module(keras.layers, "keras.layers", kind="class", block_list={"Layer"}))
-
     return results
-
-  def _scan_module(
-    self, module: Any, prefix: str, kind: str = "class", block_list: Optional[Set[str]] = None
-  ) -> List[GhostRef]:
-    """Reflectively scans a Keras module.
-
-    Args:
-        module (Any): The module object.
-        prefix (str): Prefix for API path.
-        kind (str): Expected kind ("class" or "function").
-        block_list (Optional[Set[str]]): Names to exclude.
-
-    Returns:
-        List[GhostRef]: Found items.
-
-    """
-    if not module:
-      return []
-    block_list = block_list or set()
-    found = []
-
-    try:
-      for name, obj in inspect.getmembers(module):
-        if name.startswith("_"):
-          continue
-        if name in block_list:
-          continue
-
-        if kind == "class" and inspect.isclass(obj):
-          is_keras_object = hasattr(obj, "get_config") or hasattr(obj, "from_config")
-          if is_keras_object:
-            ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
-            found.append(ref)
-
-        elif kind == "function" and inspect.isfunction(obj):
-          ref = GhostInspector.inspect(obj, f"{prefix}.{name}")
-          found.append(ref)
-    except Exception:
-      pass
-
-    return found
 
   def convert(self, data: Any) -> Any:
     """Converts input data to Keras Tensor.
@@ -397,8 +291,6 @@ class KerasAdapter:
     elif op == "load":
       return f"keras.saving.load_model({file_arg})"
     return ""
-
-  # --- Weight Handling Logic ---
 
   def get_weight_conversion_imports(self) -> List[str]:
     """Returns imports required for the generated weight migration script.
@@ -528,9 +420,32 @@ class KerasAdapter:
 
     """
     return {
-      "tier1_math": """import keras\nfrom keras import ops\n\ndef math_ops(x, y):\n  # Tier 1: Using keras.ops for backend-agnostic math\n  a = ops.abs(x)\n  b = ops.add(a, y)\n  return ops.mean(b)\n""",
-      "tier2_neural": 'import keras\nfrom keras import layers\n\ndef build_model(input_shape):\n  inputs = keras.Input(shape=input_shape)\n  x = layers.Conv2D(32, 3, activation="relu")(inputs)\n  x = layers.Flatten()(x)\n  outputs = layers.Dense(10)(x)\n  return keras.Model(inputs, outputs)\n',
-      "tier3_extras": "import keras\nfrom keras import random\n\ndef generate_noise(shape):\n  seed_gen = random.SeedGenerator(42)\n  return random.normal(shape, seed=seed_gen)\n",
+      "tier1_math": """import keras
+from keras import ops
+
+def math_ops(x, y):
+  # Tier 1: Using keras.ops for backend-agnostic math
+  a = ops.abs(x)
+  b = ops.add(a, y)
+  return ops.mean(b)
+""",
+      "tier2_neural": """import keras
+from keras import layers
+
+def build_model(input_shape):
+  inputs = keras.Input(shape=input_shape)
+  x = layers.Conv2D(32, 3, activation="relu")(inputs)
+  x = layers.Flatten()(x)
+  outputs = layers.Dense(10)(x)
+  return keras.Model(inputs, outputs)
+""",
+      "tier3_extras": """import keras
+from keras import random
+
+def generate_noise(shape):
+  seed_gen = random.SeedGenerator(42)
+  return random.normal(shape, seed=seed_gen)
+""",
       "tier4_qwen3-vl": """import keras
 from keras import layers
 import keras.ops as ops

@@ -9,15 +9,12 @@ Migration Note:
     Compilation logic is now handled by `ml_switcheroo.compiler.backends.sass.SassBackend`.
 """
 
-from typing import Dict, List, Optional, Set, Tuple, Any, TYPE_CHECKING
-
-from ml_switcheroo.enums import SemanticTier
-from ml_switcheroo.core.ghost import GhostRef
+from typing import Dict, List, Optional, Tuple, Any, TYPE_CHECKING
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.frameworks.base import (
   register_framework,
   FrameworkAdapter,
   StandardMap,
-  StandardCategory,
   ImportConfig,
   InitMode,
   OperationDef,
@@ -38,22 +35,10 @@ class SassAdapter(FrameworkAdapter):
   ui_priority: int = 150
   _mode: InitMode = InitMode.GHOST
 
-  # --- Standard Protocol Implementation ---
-
-  @property
-  def search_modules(self) -> List[str]:
-    """Execute implementation detail."""
-    return []
-
-  @property
-  def unsafe_submodules(self) -> Set[str]:
-    """Execute implementation detail."""
-    return set()
-
   @property
   def import_alias(self) -> Tuple[str, str]:
     """Execute implementation detail."""
-    return ("sass", "asm")
+    return "sass", "asm"
 
   @property
   def import_namespaces(self) -> Dict[str, ImportConfig]:
@@ -61,18 +46,9 @@ class SassAdapter(FrameworkAdapter):
     return {}
 
   @property
-  def discovery_heuristics(self) -> Dict[str, List[str]]:
-    """Execute implementation detail."""
-    return {}
-
-  @property
   def test_config(self) -> Dict[str, str]:
     """Execute implementation detail."""
-    return {
-      "import": "// SASS Header",
-      "convert_input": "// Input {np_var}",
-      "to_numpy": "// Output {res_var}",
-    }
+    return {"import": "// SASS Header", "convert_input": "// Input {np_var}", "to_numpy": "// Output {res_var}"}
 
   @property
   def harness_imports(self) -> List[str]:
@@ -126,10 +102,6 @@ class SassAdapter(FrameworkAdapter):
 
   @property
   def rng_seed_methods(self) -> List[str]:
-    """Execute implementation detail."""
-    return []
-
-  def collect_api(self, category: StandardCategory) -> List[GhostRef]:
     """Execute implementation detail."""
     return []
 

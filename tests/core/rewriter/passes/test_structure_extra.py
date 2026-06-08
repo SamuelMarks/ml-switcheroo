@@ -6,7 +6,7 @@ from ml_switcheroo.core.rewriter.passes.structure import StructuralTransformer
 from ml_switcheroo.core.rewriter.context import RewriterContext
 from ml_switcheroo.semantics.manager import SemanticsManager
 from ml_switcheroo.config import RuntimeConfig
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 from ml_switcheroo.semantics.schema import StructuralTraits
 
 

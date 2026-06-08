@@ -9,7 +9,7 @@ import pytest
 import textwrap
 
 from ml_switcheroo import RuntimeConfig, ASTEngine, SemanticsManager
-from ml_switcheroo.enums import SemanticTier
+from ml_switcheroo_ir.schema.ghost import SemanticTier
 
 # --- Source Code (PyTorch) ---
 SOURCE_TORCH = textwrap.dedent(""" 
