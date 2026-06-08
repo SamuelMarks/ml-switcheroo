@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -e
+
+echo "==================================="
+echo "Running Pre-commit Hooks"
+echo "==================================="
+
+# 1. Format
+echo "=> [1/6] Auto-formatting code (ruff format)..."
+uv run ruff format .
+
+echo "=> [2/6] Linting code & auto-fixing (ruff check)..."
+uv run ruff check --fix .
+
+echo "=> [3/6] Verifying formatting (ruff format --check)..."
+uv run ruff format --check .
+
+echo "=> [4/6] Verifying linting (ruff check)..."
+uv run ruff check .
+
+# 2. Build
+echo "=> [5/6] Building package..."
+uv build
+
+# 3. Test & Coverage
+echo "=> [6/6] Running tests and updating coverage shields..."
+
+# We capture the status of the tests so we can fail the hook if they fail
+uv run pytest --cov=src/ml_switcheroo --cov-report=term > coverage_output.tmp || {
+    echo "Tests failed! See pytest output below:"
+    cat coverage_output.tmp
+    rm coverage_output.tmp
+    exit 1
+}
+
+TEST_COV=$(grep TOTAL coverage_output.tmp | awk '{print $NF}' | tr -d '%')
+rm coverage_output.tmp
+
+DOC_COV=$(uv run interrogate src/ml_switcheroo | grep "actual:" | sed -n 's/.*actual: \([0-9.]*%\).*/\1/p' | tr -d '%')
+
+get_color() {
+    local cov=$(echo "$1" | awk '{print int($1)}')
+    if [ "$cov" -ge 90 ]; then echo "brightgreen"
+    elif [ "$cov" -ge 80 ]; then echo "green"
+    elif [ "$cov" -ge 70 ]; then echo "yellowgreen"
+    elif [ "$cov" -ge 60 ]; then echo "yellow"
+    elif [ "$cov" -ge 50 ]; then echo "orange"
+    else echo "red"
+    fi
+}
+
+TEST_COLOR=$(get_color "$TEST_COV")
+DOC_COLOR=$(get_color "$DOC_COV")
+
+TEST_COV_ROUNDED=$(printf "%.0f" "$TEST_COV")
+DOC_COV_ROUNDED=$(printf "%.0f" "$DOC_COV")
+
+sed -i.bak -E "s/\\!\\[Coverage: [0-9]+%?\\]\\(https:\\/\\/img.shields.io\\/badge\\/coverage-[0-9]+%25-[a-z]+\\.svg\\)/![Coverage: ${TEST_COV_ROUNDED}%](https:\\/\\/img.shields.io\\/badge\\/coverage-${TEST_COV_ROUNDED}%25-${TEST_COLOR}.svg)/" README.md
+
+sed -i.bak -E "s/\\!\\[Doc Coverage: [0-9.]+%?\\]\\(https:\\/\\/img.shields.io\\/badge\\/doc%20coverage-[0-9.]+%25-[a-z]+\\.svg\\)/![Doc Coverage: ${DOC_COV_ROUNDED}%](https:\\/\\/img.shields.io\\/badge\\/doc%20coverage-${DOC_COV_ROUNDED}%25-${DOC_COLOR}.svg)/" README.md
+
+rm README.md.bak
+
+echo "=> Coverage Shields: Test ${TEST_COV_ROUNDED}%, Doc ${DOC_COV_ROUNDED}%"
+
+# Add the modified files to staging automatically if they were modified
+git add README.md
+
+# To avoid auto-adding unstaged user modifications to tracked files,
+# we only update the index for files that are already partially staged 
+# or if ruff changed them, we just notify the user.
+# Actually, since it's a pre-commit hook, if ruff changed things, it's safer to just fail.
+if ! git diff --quiet; then
+    echo "================================================================"
+    echo "Files were modified by auto-formatting or lint fixes."
+    echo "README.md has been automatically staged."
+    echo "For other files modified by ruff, please review and stage them."
+    echo "Aborting commit so you can include the formatting changes."
+    echo "================================================================"
+    exit 1
+fi
+
+echo "==================================="
+echo "Pre-commit Checks Passed!"
+echo "==================================="
