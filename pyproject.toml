@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ml_switcheroo"
-version = "0.0.1"
+version = "0.0.2"
 description = "Deterministic AST Transpiler for PyTorch <-> JAX"
 requires-python = ">=3.10"
 dynamic = ["dependencies", "optional-dependencies"]

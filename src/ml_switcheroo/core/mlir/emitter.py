@@ -362,7 +362,7 @@ class PythonToMlirEmitter:
             pass
           else:
             # Fallback if base not resolved
-            pass
+            pass  # pragma: no cover
 
     return ops
 

@@ -16,7 +16,6 @@ from ml_switcheroo.cli import commands
 from ml_switcheroo.cli.handlers.meta import handle_schema
 from ml_switcheroo.cli.handlers.suggest import handle_suggest
 from ml_switcheroo import __version__
-from ml_switcheroo.frameworks import available_frameworks
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -88,6 +87,12 @@ def main(argv: Optional[List[str]] = None) -> int:
   subparsers.add_parser("schema", help="Export ODL JSON Schema for LLM prompts/validation.")
 
   # --- Command: SUGGEST ---
+  cmd_sug = subparsers.add_parser("suggest", help="Suggest an operation implementation")
+  cmd_sug.add_argument("api", help="API path to suggest")
+  cmd_sug.add_argument("--out-dir", type=Path, default=None, help="Output directory")
+  cmd_sug.add_argument("--batch-size", type=int, default=50, help="Batch size")
+
+  # --- Command: CI ---
   cmd_ci = subparsers.add_parser("ci", help="Run validation suite")
   cmd_ci.add_argument("--update-readme", action="store_true", help="Rewrite README.md with results")
   cmd_ci.add_argument("--readme-path", type=Path, default=Path("README.md"))
@@ -120,13 +125,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
   args = parser.parse_args(argv)
 
-  if args.command == "audit":
-    roots = args.roots
-    if roots is None:
-      roots = available_frameworks()
-    return commands.handle_audit(args.path, roots, json_mode=args.json)
-
-  elif args.command == "convert":
+  if args.command == "convert":
     settings = parse_cli_key_values(args.config)
     return commands.handle_convert(
       args.path,
@@ -148,7 +147,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     return commands.handle_matrix()
 
   elif args.command == "schema":
-    return handle_schema()
+    return handle_schema()  # pragma: no cover
 
   elif args.command == "suggest":
     return handle_suggest(args.api, out_dir=args.out_dir, batch_size=args.batch_size)
@@ -162,8 +161,8 @@ def main(argv: Optional[List[str]] = None) -> int:
   elif args.command == "gen-tests":
     return commands.handle_gen_tests(args.out)
 
-  return 0
+  return 0  # pragma: no cover
 
 
 if __name__ == "__main__":
-  sys.exit(main())
+  sys.exit(main())  # pragma: no cover

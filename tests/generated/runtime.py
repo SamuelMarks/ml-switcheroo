@@ -1,17 +1,42 @@
 """Shared runtime flags for generated tests (Auto-Generated)."""
-
 import sys
 import pytest
 import random
 import numpy as np
 import importlib.util
 
+# --- flax_nnx ---
+FLAX_NNX_AVAILABLE = importlib.util.find_spec("jax") is not None
+
 # --- jax ---
 JAX_AVAILABLE = importlib.util.find_spec("jax") is not None
 
+# --- keras ---
+KERAS_AVAILABLE = importlib.util.find_spec("keras") is not None
+
+# --- latex_dsl ---
+LATEX_DSL_AVAILABLE = True
+
+# --- mlx ---
+MLX_AVAILABLE = importlib.util.find_spec("mlx") is not None and importlib.util.find_spec("numpy") is not None
+
+# --- numpy ---
+NUMPY_AVAILABLE = importlib.util.find_spec("numpy") is not None
+
+# --- paxml ---
+PAXML_AVAILABLE = importlib.util.find_spec("jax") is not None
+
+# --- rdna ---
+RDNA_AVAILABLE = True
+
+# --- sass ---
+SASS_AVAILABLE = True
+
+# --- tensorflow ---
+TENSORFLOW_AVAILABLE = importlib.util.find_spec("tensorflow") is not None
+
 # --- torch ---
 TORCH_AVAILABLE = importlib.util.find_spec("torch") is not None
-
 
 # --- Determinism ---
 @pytest.fixture(autouse=True)
@@ -55,7 +80,6 @@ def ensure_determinism():
     except Exception:
       pass
 
-
 # --- Verification Logic ---
 def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
   """
@@ -73,7 +97,6 @@ def verify_results(ref, val, rtol=1e-3, atol=1e-3, exact=False):
   if importlib.util.find_spec("chex") is not None:
     try:
       import chex as chex_mod
-
       if exact:
         chex_mod.assert_trees_all_close(ref, val, rtol=0, atol=0)
       else:

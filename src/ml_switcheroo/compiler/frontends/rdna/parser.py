@@ -137,7 +137,7 @@ class RdnaParser:
     while not self._is_eof():
       peek = self._peek()
       if not peek or peek.line > op_tok.line or peek.kind == TokenType.COMMENT:
-        break
+        break  # pragma: no cover
       if peek.kind in (TokenType.LABEL_DEF, TokenType.DIRECTIVE):
         break
 

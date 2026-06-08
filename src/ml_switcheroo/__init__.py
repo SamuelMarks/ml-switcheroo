@@ -39,7 +39,7 @@ from ml_switcheroo.config import RuntimeConfig
 from ml_switcheroo.core.engine import ASTEngine, ConversionResult
 from ml_switcheroo.semantics.manager import SemanticsManager
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 
 def convert(

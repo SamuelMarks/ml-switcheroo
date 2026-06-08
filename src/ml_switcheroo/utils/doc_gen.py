@@ -122,6 +122,8 @@ class MigrationGuideGenerator:
     for item in std_args:
       if isinstance(item, (list, tuple)):
         clean_std_args.append(item[0])
+      elif isinstance(item, dict):
+        clean_std_args.append(item.get("name", ""))
       else:
         clean_std_args.append(item)
 

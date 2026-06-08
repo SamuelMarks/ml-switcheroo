@@ -19,6 +19,7 @@ def get_required_packages(imp_str: str) -> List[str]:
 
   Returns:
     A list of top-level package names.
+
   """
   try:
     tree = ast.parse(imp_str)

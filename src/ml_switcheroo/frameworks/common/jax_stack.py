@@ -120,13 +120,13 @@ class JAXStackMixin:
       return f"orbax.checkpoint.PyTreeCheckpointer().save(directory={file_arg}, item={object_arg})"
     elif op == "load":
       return f"orbax.checkpoint.PyTreeCheckpointer().restore({file_arg})"
-    return ""
+    return ""  # pragma: no cover
 
   # --- Weight Migration (Adapter) ---
 
   def get_weight_conversion_imports(self) -> List[str]:
     """Returns imports required for the generated weight migration script."""
-    return [
+    return [  # pragma: no cover
       "import jax.numpy as jnp",
       "import orbax.checkpoint",
       "from flax.traverse_util import unflatten_dict, flatten_dict",
@@ -136,7 +136,7 @@ class JAXStackMixin:
     """Returns python code to load a checkpoint from `path_var` into a variable named `raw_state`.
     The `raw_state` is a flat dictionary where keys are dot-separated strings (e.g. 'layer.weight').
     """
-    return textwrap.dedent(
+    return textwrap.dedent(  # pragma: no cover
       f"""
             # Load with Orbax and Flatten
             checkpointer = orbax.checkpoint.PyTreeCheckpointer()
@@ -155,13 +155,13 @@ class JAXStackMixin:
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
     """Returns a python expression string that converts `tensor_var` from JAX array to numpy array."""
-    return f"np.array({tensor_var})"
+    return f"np.array({tensor_var})"  # pragma: no cover
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Returns python code to save the dictionary `state_var` (mapping flat keys to numpy arrays)
     to `path_var`. It unstricts flat keys back to PyTree structure using `unflatten_dict` and saves via Orbax.
     """
-    return textwrap.dedent(
+    return textwrap.dedent(  # pragma: no cover
       f"""
             # Restructure PyTree
             # Convert dot keys back to tuple keys

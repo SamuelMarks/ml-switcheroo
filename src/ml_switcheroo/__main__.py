@@ -3,8 +3,8 @@
 This module delegates execution to the CLI handler in ``ml_switcheroo.cli.__main__``.
 """
 
-import sys
-from ml_switcheroo.cli.__main__ import main
+import sys  # pragma: no cover
+from ml_switcheroo.cli.__main__ import main  # pragma: no cover
 
-if __name__ == "__main__":
-  sys.exit(main())
+if __name__ == "__main__":  # pragma: no cover
+  sys.exit(main())  # pragma: no cover

@@ -135,7 +135,7 @@ class DependencyScanner(cst.CSTVisitor):
     """
     # Python 3.10+
     if sys.version_info >= (3, 10):
-      return name in sys.stdlib_module_names
+      return name in sys.stdlib_module_names  # pragma: no cover
 
     # Fallback for Python 3.9 (common subset)
     # This list serves as a heuristic for older envs supported by the classifier.

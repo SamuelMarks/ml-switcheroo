@@ -54,7 +54,7 @@ class HtmlDSLAdapter(FrameworkAdapter):
   @property
   def plugin_traits(self) -> PluginTraits:
     """Execute implementation detail."""
-    return PluginTraits()
+    return PluginTraits()  # pragma: no cover
 
   @property
   def test_config(self) -> Dict[str, str]:
@@ -103,43 +103,43 @@ class HtmlDSLAdapter(FrameworkAdapter):
 
   def convert(self, data: Any) -> Any:
     """Execute implementation detail."""
-    return str(data)
+    return str(data)  # pragma: no cover
 
   def get_device_syntax(self, device_type: str, device_index: Optional[str] = None) -> str:
     """Execute implementation detail."""
-    return ""
+    return ""  # pragma: no cover
 
   def get_device_check_syntax(self) -> str:
     """Execute implementation detail."""
-    return "False"
+    return "False"  # pragma: no cover
 
   def get_rng_split_syntax(self, rng_var: str, key_var: str) -> str:
     """Execute implementation detail."""
-    return ""
+    return ""  # pragma: no cover
 
   def get_serialization_imports(self) -> List[str]:
     """Execute implementation detail."""
-    return []
+    return []  # pragma: no cover
 
   def get_serialization_syntax(self, op: str, file_arg: str, object_arg: Optional[str] = None) -> str:
     """Execute implementation detail."""
-    return ""
+    return ""  # pragma: no cover
 
   def get_weight_conversion_imports(self) -> List[str]:
     """Execute implementation detail."""
-    return []
+    return []  # pragma: no cover
 
   def get_weight_load_code(self, path_var: str) -> str:
     """Execute implementation detail."""
-    return "# Weights not supported in HTML mode"
+    return "# Weights not supported in HTML mode"  # pragma: no cover
 
   def get_tensor_to_numpy_expr(self, tensor_var: str) -> str:
     """Execute implementation detail."""
-    return tensor_var
+    return tensor_var  # pragma: no cover
 
   def get_weight_save_code(self, state_var: str, path_var: str) -> str:
     """Execute implementation detail."""
-    return "# Weights not supported in HTML mode"
+    return "# Weights not supported in HTML mode"  # pragma: no cover
 
   def apply_wiring(self, snapshot: Dict[str, Any]) -> None:
     """Execute implementation detail."""

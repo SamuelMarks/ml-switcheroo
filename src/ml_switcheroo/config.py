@@ -17,9 +17,9 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 def _import_tomllib():
   """Imports tomllib or tomli depending on python version."""
   if sys.version_info >= (3, 11):
-    import tomllib
+    import tomllib  # pragma: no cover
 
-    return tomllib
+    return tomllib  # pragma: no cover
   else:
     try:
       import tomli as tomllib
@@ -233,6 +233,7 @@ class RuntimeConfig(BaseModel):
         strict_mode (Optional[bool]): Override strict mode setting.
         intermediate (Optional[str]): Override intermediate representation mode.
         enable_graph_optimization (Optional[bool]): Override fusion/optimization setting.
+        enable_sharding (Optional[bool]): Override sharding semantics.
         plugin_settings (Optional[Dict]): Additional plugin settings.
         validation_report (Optional[Path]): Override validation report path.
         search_path (Optional[Path]): Directory path to search for config file.

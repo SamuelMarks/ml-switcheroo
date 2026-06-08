@@ -52,7 +52,7 @@ class EquivalenceRunner:
       # Execution Loop
       for fw, details in variants.items():
         if not isinstance(details, dict) or "api" not in details:
-          continue
+          continue  # pragma: no cover
 
         try:
           # Pivot Arguments

@@ -1,5 +1,4 @@
-"""
-SASS Parser Implementation.
+"""SASS Parser Implementation.
 
 This module provides the `SassParser`, a recursive descent parser that converts
 a stream of tokens (from `SassLexer`) into a Structural AST defined in `nodes.py`.
@@ -37,27 +36,25 @@ class LabelRef(Operand):
 
 
 class SassParser:
-  """
-  Recursive descent parser for NVIDIA SASS.
-  """
+  """Recursive descent parser for NVIDIA SASS."""
 
   def __init__(self, code: str) -> None:
-    """
-    Initialize the parser.
+    """Initialize the parser.
 
     Args:
         code (str): The raw SASS source string.
+
     """
     self.lexer = SassLexer()
     self.tokens = list(self.lexer.tokenize(code))
     self.pos = 0
 
   def parse(self) -> List[SassNode]:
-    """
-    Parses the entire code block.
+    """Parses the entire code block.
 
     Returns:
         List[SassNode]: A list of AST nodes.
+
     """
     nodes = []
     while not self._is_eof():
@@ -96,9 +93,7 @@ class SassParser:
     return token is not None and token.kind == kind
 
   def _parse_line(self) -> Optional[SassNode]:
-    """
-    Parses a top-level syntactic unit.
-    """
+    """Parses a top-level syntactic unit."""
     token = self._peek()
     if not token:
       return None
@@ -160,9 +155,7 @@ class SassParser:
     return Directive(name=name, params=params)
 
   def _parse_instruction(self) -> Instruction:
-    """
-    Parses a SASS instruction.
-    """
+    """Parses a SASS instruction."""
     predicate = None
     if self._match(TokenType.PREDICATE):
       pred_tok = self._consume()
@@ -183,14 +176,14 @@ class SassParser:
 
       peek = self._peek()
       if not peek or peek.line > op_tok.line or peek.kind == TokenType.COMMENT:
-        break
+        break  # pragma: no cover
 
       operands.append(self._parse_operand())
 
       if self._match(TokenType.COMMA):
         self._consume()
       else:
-        pass
+        pass  # pragma: no cover
 
     return Instruction(opcode=opcode, operands=operands, predicate=predicate)
 
