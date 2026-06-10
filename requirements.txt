@@ -10,4 +10,4 @@ pygments==2.19.1;platform_system=='Emscripten'
 rich>=13.0
 hypothesis
 
-ml-switcheroo-ir @ git+https://github.com/SamuelMarks/ml-switcheroo-ir.git@master
+

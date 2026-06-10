@@ -873,7 +873,6 @@ dependencies = [
     { name = "hypothesis" },
     { name = "libcst", version = "1.6.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'emscripten'" },
     { name = "libcst", version = "1.8.6", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'emscripten'" },
-    { name = "ml-switcheroo-ir" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11' and sys_platform != 'emscripten'" },
     { name = "numpy", version = "2.4.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11' and sys_platform != 'emscripten'" },
     { name = "pydantic", version = "2.10.6", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform == 'emscripten'" },
@@ -938,7 +937,6 @@ requires-dist = [
     { name = "libcst", marker = "sys_platform == 'emscripten'", specifier = "==1.6.0" },
     { name = "libcst", marker = "sys_platform == 'emscripten' and extra == 'docs'", specifier = "==1.6.0" },
     { name = "linkify-it-py", marker = "extra == 'docs'", specifier = ">=2" },
-    { name = "ml-switcheroo-ir", git = "https://github.com/SamuelMarks/ml-switcheroo-ir.git?rev=master" },
     { name = "myst-parser", marker = "extra == 'docs'", specifier = ">=4" },
     { name = "numpy", marker = "sys_platform != 'emscripten'" },
     { name = "numpy", marker = "sys_platform != 'emscripten' and extra == 'docs'" },
@@ -962,14 +960,6 @@ requires-dist = [
     { name = "sphinxcontrib-mermaid", marker = "extra == 'docs'", specifier = ">=1.2" },
 ]
 provides-extras = ["docs", "test"]
-
-[[package]]
-name = "ml-switcheroo-ir"
-version = "0.1.0"
-source = { git = "https://github.com/SamuelMarks/ml-switcheroo-ir.git?rev=master#abc502fabe00835ce17a37fd7a153f9288ee1947" }
-dependencies = [
-    { name = "tabulate" },
-]
 
 [[package]]
 name = "myst-parser"
